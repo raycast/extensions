@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.0] - 2024-12-19
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 - Initial release of Norwegian Business Register extension

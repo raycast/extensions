@@ -3,26 +3,19 @@ import { Company, SearchResult } from "./types";
 
 const BASE_URL = "https://data.brreg.no/enhetsregisteret/api";
 
-export async function searchCompanies(
-  query: string,
-  limit = 20,
-): Promise<SearchResult> {
+export async function searchCompanies(query: string, limit = 20): Promise<SearchResult> {
   try {
     // Check if query looks like an organization number (9 digits, possibly with spaces)
-    const isOrgNumber = /^\d{9}$|^\d{3}\s?\d{3}\s?\d{3}$/.test(
-      query.replace(/\s/g, ""),
-    );
+    const isOrgNumber = /^\d{9}$|^\d{3}\s?\d{3}\s?\d{3}$/.test(query.replace(/\s/g, ""));
 
     let searchUrl: string;
     if (isOrgNumber) {
       // Search by organization number
       const cleanOrgNumber = query.replace(/\s/g, "");
       searchUrl = `${BASE_URL}/enheter/${cleanOrgNumber}`;
-  
     } else {
       // Search by name
       searchUrl = `${BASE_URL}/enheter?navn=${encodeURIComponent(query)}&size=${limit}`;
-  
     }
 
     const response = await axios.get(searchUrl, {
@@ -31,8 +24,6 @@ export async function searchCompanies(
         "User-Agent": "Raycast-Brreg-Extension/1.0.0",
       },
     });
-
-
 
     const companies: Company[] = [];
 
@@ -44,11 +35,7 @@ export async function searchCompanies(
       }
     } else {
       // Multiple companies response from name search
-      if (
-        response.data &&
-        response.data._embedded &&
-        response.data._embedded.enheter
-      ) {
+      if (response.data && response.data._embedded && response.data._embedded.enheter) {
         response.data._embedded.enheter.forEach((entity: BrregEntity) => {
           const company = createCompanyFromBrregEntity(entity);
           companies.push(company);
@@ -56,14 +43,11 @@ export async function searchCompanies(
       }
     }
 
-
-
     return {
       companies,
       hasMore:
         !isOrgNumber && response.data.page
-          ? response.data.page.totalElements >
-            (response.data.page.number + 1) * response.data.page.size
+          ? response.data.page.totalElements > (response.data.page.number + 1) * response.data.page.size
           : false,
     };
   } catch (error) {
@@ -122,22 +106,22 @@ function createCompanyFromBrregEntity(entity: BrregEntity): Company {
   const phone = entity.telefon || "";
   const email = entity.epost || "";
   let website = entity.hjemmeside || "";
-  
+
   // Ensure website URL has proper protocol and is valid
   if (website) {
     // Clean up common issues
     website = website.trim();
-    // Remove any leading/trailing whitespace or invalid characters  
-    website = website.replace(/^[^\w]+|[^\w./-]+$/g, '');
+    // Remove any leading/trailing whitespace or invalid characters
+    website = website.replace(/^[^\w]+|[^\w./-]+$/g, "");
     // Add protocol if missing
     if (!website.startsWith("http://") && !website.startsWith("https://")) {
       website = `https://${website}`;
     }
-    
+
     // Validate URL format
     try {
       new URL(website);
-    } catch (error) {
+    } catch {
       website = "";
     }
   }
@@ -164,12 +148,9 @@ function createCompanyFromBrregEntity(entity: BrregEntity): Company {
   };
 }
 
-export async function getCompanyDetails(
-  organizationNumber: string,
-): Promise<Company | null> {
+export async function getCompanyDetails(organizationNumber: string): Promise<Company | null> {
   try {
     const detailUrl = `${BASE_URL}/enheter/${organizationNumber}`;
-
 
     const response = await axios.get(detailUrl, {
       headers: {
@@ -177,8 +158,6 @@ export async function getCompanyDetails(
         "User-Agent": "Raycast-Norwegian-Companies/1.0.0",
       },
     });
-
-
 
     const entity = response.data;
 
@@ -206,7 +185,8 @@ export async function getCompanyDetails(
         company.isAudited = financialData.isAudited;
       }
     } catch (error) {
-      throw new Error(`Failed to fetch annual accounts: ${error.message}`);
+      // Log error but don't throw, return null to handle gracefully
+      console.error("Failed to fetch annual accounts:", error);
     }
 
     return company;
@@ -231,15 +211,12 @@ export async function getAnnualAccounts(organizationNumber: string): Promise<{
   try {
     const accountsUrl = `https://data.brreg.no/regnskapsregisteret/regnskap/${organizationNumber}`;
 
-
     const response = await axios.get(accountsUrl, {
       headers: {
         Accept: "application/xml",
         "User-Agent": "Raycast-Brreg/1.0.0",
       },
     });
-
-
 
     const xmlData = response.data;
 
@@ -279,24 +256,18 @@ export async function getAnnualAccounts(organizationNumber: string): Promise<{
       extractValue("driftsresultatForAvskrivninger") ||
       extractValue("driftsresultatFoerAvskrivningOgNedskrivning") ||
       extractValue("driftsresultatForAvskrivningOgNedskrivning");
-    const depreciation =
-      extractValue("avskrivninger") ||
-      extractValue("avskrivningOgNedskrivning");
+    const depreciation = extractValue("avskrivninger") || extractValue("avskrivningOgNedskrivning");
 
     return {
       revenue: revenue ? formatCurrency(revenue) : undefined,
-      operatingResult: operatingResult
-        ? formatCurrency(operatingResult)
-        : undefined,
+      operatingResult: operatingResult ? formatCurrency(operatingResult) : undefined,
       result: result ? formatCurrency(result) : undefined,
       equity: equity ? formatCurrency(equity) : undefined,
       totalAssets: totalAssets ? formatCurrency(totalAssets) : undefined,
       totalDebt: totalDebt ? formatCurrency(totalDebt) : undefined,
       ebitda: ebitda ? formatCurrency(ebitda) : undefined,
       depreciation: depreciation ? formatCurrency(depreciation) : undefined,
-      accountingYear: fromDate
-        ? new Date(fromDate).getFullYear().toString()
-        : undefined,
+      accountingYear: fromDate ? new Date(fromDate).getFullYear().toString() : undefined,
       isAudited: isNotAudited !== "true",
     };
   } catch (error) {

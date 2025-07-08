@@ -1,13 +1,5 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  Detail,
-  showToast,
-  Toast,
-  LocalStorage,
-  Icon,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Detail, showToast, Toast, LocalStorage, Icon } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import React, { useState, useEffect } from "react";
 import { Company } from "./types";
 import { searchCompanies, getCompanyDetails } from "./brreg-api";
@@ -34,8 +26,8 @@ export default function SearchCompanies() {
       if (storedFavorites) {
         setFavorites(JSON.parse(storedFavorites));
       }
-    } catch (error) {
-      throw new Error("Failed to load favorites from local storage");
+    } catch {
+      await showFailureToast(error, { title: "Failed to load favorites" });
     } finally {
       setIsLoadingFavorites(false);
     }
@@ -53,9 +45,7 @@ export default function SearchCompanies() {
   };
 
   const removeFromFavorites = async (company: Company) => {
-    const newFavorites = favorites.filter(
-      (fav) => fav.organizationNumber !== company.organizationNumber,
-    );
+    const newFavorites = favorites.filter((fav) => fav.organizationNumber !== company.organizationNumber);
     setFavorites(newFavorites);
     await LocalStorage.setItem(FAVORITES_KEY, JSON.stringify(newFavorites));
     await showToast({
@@ -66,9 +56,7 @@ export default function SearchCompanies() {
   };
 
   const isFavorite = (company: Company) => {
-    return favorites.some(
-      (fav) => fav.organizationNumber === company.organizationNumber,
-    );
+    return favorites.some((fav) => fav.organizationNumber === company.organizationNumber);
   };
 
   useEffect(() => {
@@ -86,9 +74,8 @@ export default function SearchCompanies() {
       try {
         const results = await searchCompanies(searchText.trim());
         setCompanies(results.companies);
-      } catch (error) {
-        await showToast({
-          style: Toast.Style.Failure,
+      } catch {
+        await showFailureToast(error, {
           title: "Search Failed",
           message: "Could not search for companies. Please try again.",
         });
@@ -115,12 +102,8 @@ export default function SearchCompanies() {
         } else {
           setDetailedCompany(company);
         }
-      } catch (error) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to Load Details",
-          message: "Could not load company details.",
-        });
+      } catch {
+        await showFailureToast(error, { title: "Failed to Load Details", message: "Could not load company details." });
         // Show basic data as fallback
         setDetailedCompany(company);
       }
@@ -139,12 +122,8 @@ export default function SearchCompanies() {
           setDetailedCompany(null);
         }}
         isFavorite={isFavorite(detailedCompany || selectedCompany)}
-        onAddToFavorites={() =>
-          addToFavorites(detailedCompany || selectedCompany)
-        }
-        onRemoveFromFavorites={() =>
-          removeFromFavorites(detailedCompany || selectedCompany)
-        }
+        onAddToFavorites={() => addToFavorites(detailedCompany || selectedCompany)}
+        onRemoveFromFavorites={() => removeFromFavorites(detailedCompany || selectedCompany)}
       />
     );
   }
@@ -165,15 +144,9 @@ export default function SearchCompanies() {
           icon={Icon.Document}
         />
       )}
-      {!showFavorites &&
-        companies.length === 0 &&
-        searchText.trim().length > 0 &&
-        !isLoading && (
-          <List.EmptyView
-            title="No companies found"
-            description="Try searching with a different term"
-          />
-        )}
+      {!showFavorites && companies.length === 0 && searchText.trim().length > 0 && !isLoading && (
+        <List.EmptyView title="No companies found" description="Try searching with a different term" />
+      )}
       {showFavorites && favorites.length > 0 && (
         <List.Section title="Favorites">
           {favorites.map((company) => (
@@ -185,17 +158,12 @@ export default function SearchCompanies() {
               accessories={[
                 { text: company.city },
                 {
-                  text: company.organizationNumber
-                    ? `Org: ${company.organizationNumber}`
-                    : undefined,
+                  text: company.organizationNumber ? `Org: ${company.organizationNumber}` : undefined,
                 },
               ].filter(Boolean)}
               actions={
                 <ActionPanel>
-                  <Action
-                    title="View Details"
-                    onAction={() => handleCompanySelection(company)}
-                  />
+                  <Action title="View Details" onAction={() => handleCompanySelection(company)} />
                   <Action.OpenInBrowser
                     title="Open in Brreg"
                     url={company.bregUrl}
@@ -209,7 +177,7 @@ export default function SearchCompanies() {
                       onOpen={(url) => {
                         try {
                           new URL(url);
-                        } catch (error) {
+                        } catch {
                           showToast({
                             style: Toast.Style.Failure,
                             title: "Invalid Website URL",
@@ -251,17 +219,12 @@ export default function SearchCompanies() {
             accessories={[
               { text: company.city },
               {
-                text: company.organizationNumber
-                  ? `Org: ${company.organizationNumber}`
-                  : undefined,
+                text: company.organizationNumber ? `Org: ${company.organizationNumber}` : undefined,
               },
             ].filter(Boolean)}
             actions={
               <ActionPanel>
-                <Action
-                  title="View Details"
-                  onAction={() => handleCompanySelection(company)}
-                />
+                <Action title="View Details" onAction={() => handleCompanySelection(company)} />
                 <Action.OpenInBrowser
                   title="Open in Brreg"
                   url={company.bregUrl}
@@ -275,7 +238,7 @@ export default function SearchCompanies() {
                     onOpen={(url) => {
                       try {
                         new URL(url);
-                      } catch (error) {
+                      } catch {
                         showToast({
                           style: Toast.Style.Failure,
                           title: "Invalid Website URL",
@@ -368,10 +331,7 @@ function CompanyDetailsView({
 ${company.description ? `${company.description}\n\n` : ""}
 
 ${
-  !company.organizationNumber &&
-  !formatAddress() &&
-  !hasFinancialData() &&
-  !company.description
+  !company.organizationNumber && !formatAddress() && !hasFinancialData() && !company.description
     ? `*Loading detailed information...*`
     : ""
 }
@@ -386,119 +346,57 @@ ${
       metadata={
         <Detail.Metadata>
           {company.organizationNumber && (
-            <Detail.Metadata.Label
-              title="Organization Number"
-              text={company.organizationNumber}
-            />
+            <Detail.Metadata.Label title="Organization Number" text={company.organizationNumber} />
           )}
 
-          {formatAddress() && (
-            <Detail.Metadata.Label title="Address" text={formatAddress()} />
-          )}
+          {formatAddress() && <Detail.Metadata.Label title="Address" text={formatAddress()} />}
 
           {/* Business Information */}
-          {company.industry && (
-            <Detail.Metadata.Label title="Industry" text={company.industry} />
-          )}
+          {company.industry && <Detail.Metadata.Label title="Industry" text={company.industry} />}
 
-          {company.founded && (
-            <Detail.Metadata.Label title="Founded" text={company.founded} />
-          )}
+          {company.founded && <Detail.Metadata.Label title="Founded" text={company.founded} />}
 
-          {company.employees && (
-            <Detail.Metadata.Label title="Employees" text={company.employees} />
-          )}
-          
+          {company.employees && <Detail.Metadata.Label title="Employees" text={company.employees} />}
 
           {/* Contact Information */}
-          {(company.phone || company.email || company.website) && (
-            <Detail.Metadata.Separator />
-          )}
+          {(company.phone || company.email || company.website) && <Detail.Metadata.Separator />}
 
-          {company.phone && (
-            <Detail.Metadata.Label title="Phone" text={company.phone} />
-          )}
+          {company.phone && <Detail.Metadata.Label title="Phone" text={company.phone} />}
 
-          {company.email && (
-            <Detail.Metadata.Label title="Email" text={company.email} />
-          )}
+          {company.email && <Detail.Metadata.Label title="Email" text={company.email} />}
 
-          {company.website && (
-            <Detail.Metadata.Link
-              title="Website"
-              target={company.website}
-              text={company.website}
-            />
-          )}
+          {company.website && <Detail.Metadata.Link title="Website" target={company.website} text={company.website} />}
 
           {/* Financial Information */}
           {hasFinancialData() && (
             <>
               <Detail.Metadata.Separator />
-              <Detail.Metadata.Label
-                title="Annual Accounts"
-                text="Årsregnskap"
-              />
+              <Detail.Metadata.Label title="Annual Accounts" text="Årsregnskap" />
 
               {company.accountingYear && (
-                <Detail.Metadata.Label
-                  title="Accounting Year"
-                  text={company.accountingYear}
-                />
+                <Detail.Metadata.Label title="Accounting Year" text={company.accountingYear} />
               )}
 
-              {company.revenue && (
-                <Detail.Metadata.Label title="Revenue" text={company.revenue} />
-              )}
+              {company.revenue && <Detail.Metadata.Label title="Revenue" text={company.revenue} />}
 
-              {company.ebitda && (
-                <Detail.Metadata.Label title="EBITDA" text={company.ebitda} />
-              )}
+              {company.ebitda && <Detail.Metadata.Label title="EBITDA" text={company.ebitda} />}
 
               {company.operatingResult && (
-                <Detail.Metadata.Label
-                  title="Operating Result"
-                  text={company.operatingResult}
-                />
+                <Detail.Metadata.Label title="Operating Result" text={company.operatingResult} />
               )}
 
-              {company.result && (
-                <Detail.Metadata.Label
-                  title="Net Result"
-                  text={company.result}
-                />
-              )}
+              {company.result && <Detail.Metadata.Label title="Net Result" text={company.result} />}
 
-              {company.totalAssets && (
-                <Detail.Metadata.Label
-                  title="Total Assets"
-                  text={company.totalAssets}
-                />
-              )}
+              {company.totalAssets && <Detail.Metadata.Label title="Total Assets" text={company.totalAssets} />}
 
-              {company.equity && (
-                <Detail.Metadata.Label title="Equity" text={company.equity} />
-              )}
+              {company.equity && <Detail.Metadata.Label title="Equity" text={company.equity} />}
 
-              {company.totalDebt && (
-                <Detail.Metadata.Label
-                  title="Total Debt"
-                  text={company.totalDebt}
-                />
-              )}
+              {company.totalDebt && <Detail.Metadata.Label title="Total Debt" text={company.totalDebt} />}
 
-              {company.depreciation && (
-                <Detail.Metadata.Label
-                  title="Depreciation"
-                  text={company.depreciation}
-                />
-              )}
+              {company.depreciation && <Detail.Metadata.Label title="Depreciation" text={company.depreciation} />}
 
               {company.isAudited !== undefined && (
-                <Detail.Metadata.Label
-                  title="Audited"
-                  text={company.isAudited ? "Yes" : "No"}
-                />
+                <Detail.Metadata.Label title="Audited" text={company.isAudited ? "Yes" : "No"} />
               )}
             </>
           )}
@@ -509,33 +407,47 @@ ${
           <Action.OpenInBrowser
             title="Open in Brreg"
             url={company.bregUrl || "https://www.brreg.no"}
+            onOpen={(url) => {
+              try {
+                new URL(url);
+                return true;
+              } catch {
+                showToast({
+                  style: Toast.Style.Failure,
+                  title: "Invalid URL",
+                  message: "Could not open company page.",
+                });
+                return false;
+              }
+            }}
           />
-          {company.website && (() => {
-            try {
-              new URL(company.website);
-              return (
-                <Action.OpenInBrowser
-                  title="Open Company Website"
-                  url={company.website}
-                  shortcut={{ modifiers: ["cmd"], key: "l" }}
-                />
-              );
-            } catch (error) {
-              return (
-                <Action
-                  title="Website URL Invalid"
-                  icon={Icon.Warning}
-                  onAction={() => {
-                    showToast({
-                      style: Toast.Style.Failure,
-                      title: "Invalid Website URL",
-                      message: `The website URL "${company.website}" is not valid.`,
-                    });
-                  }}
-                />
-              );
-            }
-          })()}
+          {company.website &&
+            (() => {
+              try {
+                new URL(company.website);
+                return (
+                  <Action.OpenInBrowser
+                    title="Open Company Website"
+                    url={company.website}
+                    shortcut={{ modifiers: ["cmd"], key: "l" }}
+                  />
+                );
+              } catch {
+                return (
+                  <Action
+                    title="Website URL Invalid"
+                    icon={Icon.Warning}
+                    onAction={() => {
+                      showToast({
+                        style: Toast.Style.Failure,
+                        title: "Invalid Website URL",
+                        message: `The website URL "${company.website}" is not valid.`,
+                      });
+                    }}
+                  />
+                );
+              }
+            })()}
           {isFavorite ? (
             <Action
               title="Remove from Favorites"
@@ -561,11 +473,7 @@ ${
             content={company.name}
             shortcut={{ modifiers: ["cmd"], key: "n" }}
           />
-          <Action
-            title="Go Back"
-            onAction={onBack}
-            shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
-          />
+          <Action title="Go Back" onAction={onBack} shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }} />
         </ActionPanel>
       }
     />
