@@ -123,6 +123,9 @@ function CreateLimitOrder() {
 
   const handleCreateLimitOrder = useCallback(
     async (values: LimitOrderRequest) => {
+      if (isLoading) {
+        return;
+      }
       try {
         setIsLoading(true);
 
