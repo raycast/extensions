@@ -1,5 +1,10 @@
 # NotePlan 3 Changelog
 
+
+## [Fix] - {PR_MERGE_DATE}
+
+- Fix Daily plan display
+
 ## [New Addition] - 2025-04-04
 
 - Added Save as Quicklink action to notes
