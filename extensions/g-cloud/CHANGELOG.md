@@ -1,6 +1,6 @@
 # G-Cloud Changelog
 
-## [0.1.32] - {PR_MERGE_DATE}
+## [0.1.32] - 2025-07-08
 - Add Secret Manager command for managing Google Cloud secrets
 - Add secure secret value viewing with confirmation dialogs
 - Add version management for secrets (create, enable, disable, destroy)
