@@ -1,6 +1,6 @@
 # Messages Changelog
 
-## [Support for Hyphenated OTP Codes] - {PR_MERGE_DATE}
+## [Support for Hyphenated OTP Codes] - 2025-07-09
 
 Added detection for OTP codes formatted with hyphens (e.g. 123-456), requiring at least 3 digits on both sides.
 
