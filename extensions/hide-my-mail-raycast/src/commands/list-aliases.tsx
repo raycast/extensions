@@ -78,13 +78,15 @@ export default function ListAliases() {
     return colors[Math.abs(hash) % colors.length];
   };
 
-  if (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to Load Aliases",
-      message: error.message,
-    });
-  }
+  useEffect(() => {
+    if (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to Load Aliases",
+        message: error.message,
+      });
+    }
+  }, [error]);
 
   const filteredAliases = (aliases || []).filter((alias) => {
     const searchLower = searchText.toLowerCase();
