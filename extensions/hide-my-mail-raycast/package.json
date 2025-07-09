@@ -14,7 +14,7 @@
     {
       "name": "list-aliases",
       "title": "List Email Aliases",
-      "subtitle": "View and manage your email aliases",
+      "subtitle": "Hide My Mail: Cloudflare Email Aliases",
       "description": "List all your Cloudflare email aliases with search and management actions.",
       "mode": "view"
     },
