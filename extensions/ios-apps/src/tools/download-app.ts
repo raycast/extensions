@@ -138,7 +138,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
     // Check if the match might not be exact
     const queryLower = input.query.toLowerCase();
     const appNameLower = appName.toLowerCase();
-    const isExactMatch = appNameLower === queryLower || appNameLower.includes(queryLower);
+    const isExactMatch = appNameLower === queryLower;  // Only consider exact matches
 
     let message = `Download "${appName}"?`;
     if (!isExactMatch) {
