@@ -44,16 +44,7 @@ export interface ApiConfig {
   preAllocatePool: boolean;
 }
 
-export interface EmailRoutingSettings {
-  id: string;
-  tag: string;
-  name: string;
-  enabled: boolean;
-  skip_wizard: boolean;
-  synced: boolean;
-  admin_locked: boolean;
-  status: string;
-}
+export type EmailRoutingSettings = CloudflareEmailRoutingSettings;
 
 export interface CreateAliasFormData {
   label: string;
