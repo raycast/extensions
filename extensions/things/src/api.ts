@@ -97,7 +97,7 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
   const things = Application('${preferences.thingsAppIdentifier}');
   const todos = things.lists.byId('${commandListNameToListIdMapping[commandListName]}').toDos();
 
-  return JSON.stringify(todos.map(todo => ({
+  return todos.map(todo => ({
     id: todo.id(),
     name: todo.name(),
     status: todo.status(),
@@ -121,7 +121,7 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
       name: todo.area().name(),
       tags: todo.area().tagNames(),
     },
-  })));
+  }));
 `);
 };
 
@@ -149,7 +149,7 @@ export const getTodo = (todoId: string) =>
     if (foundTodo) break;
   }
 
-  return JSON.stringify(foundTodo);
+  return foundTodo;
 `);
 
 export const setTodoProperty = (todoId: string, key: string, value: string) =>
@@ -167,7 +167,7 @@ export const deleteTodo = (todoId: string) =>
 export const getTags = (): Promise<string[]> =>
   executeJxa(`
   const things = Application('${preferences.thingsAppIdentifier}');
-  return JSON.stringify(things.tags().map(tag => tag.name()));
+  return things.tags().map(tag => tag.name());
 `);
 
 export type Project = {
@@ -181,13 +181,13 @@ export const getProjects = async (): Promise<Project[]> => {
     const things = Application('${preferences.thingsAppIdentifier}');
     const projects = things.projects();
 
-    return JSON.stringify(projects.map(project => ({
+    return projects.map(project => ({
       id: project.id(),
       name: project.name(),
       area: project.area() && {
         id: project.area().id(),
       },
-    })));
+    }));
   `);
 };
 
@@ -201,10 +201,10 @@ export const getAreas = async (): Promise<Area[]> => {
     const things = Application('${preferences.thingsAppIdentifier}');
     const areas = things.areas();
 
-    return JSON.stringify(areas.map(area => ({
+    return areas.map(area => ({
       id: area.id(),
       name: area.name(),
-    })));
+    }));
   `);
 };
 
