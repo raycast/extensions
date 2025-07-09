@@ -22,6 +22,9 @@ function SellToken(props: LaunchProps<{ arguments: SellTokenProps }>) {
 
   const { handleSubmit, itemProps, reset, setValue, ...formProps } = useForm<SellTokenFormValues>({
     async onSubmit(values) {
+      if (isLoading) {
+        return;
+      }
       try {
         setIsLoading(true);
         const inputAmount = parseFloat(values.inputAmount);
