@@ -94,9 +94,7 @@ export async function setPinnedResources(
 }
 
 // Pin/Unpin Package Functions
-export async function pinPackage(
-  packageData: PinnedPackage,
-): Promise<void> {
+export async function pinPackage(packageData: PinnedPackage): Promise<void> {
   // Prevent core packages from being pinned
   if (isCorePackage(packageData.id)) {
     throw new Error("Cannot pin core packages");
@@ -138,9 +136,7 @@ export async function isPackagePinned(packageId: string): Promise<boolean> {
 }
 
 // Pin/Unpin Resource Functions
-export async function pinResource(
-  resourceData: PinnedResource,
-): Promise<void> {
+export async function pinResource(resourceData: PinnedResource): Promise<void> {
   const resources = await getPinnedResources();
 
   // Check if resource already pinned

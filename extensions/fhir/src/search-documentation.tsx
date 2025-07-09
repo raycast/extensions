@@ -8,7 +8,12 @@ import {
   Toast,
   Icon,
 } from "@raycast/api";
-import { usePromise, useFetch, useCachedState } from "@raycast/utils";
+import {
+  usePromise,
+  useFetch,
+  useCachedState,
+  showFailureToast,
+} from "@raycast/utils";
 import { useState, useEffect } from "react";
 import Fuse from "fuse.js";
 import {
@@ -117,10 +122,8 @@ export default function SearchDocumentation() {
         message: `${resource.title} has been pinned`,
       });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(error, {
         title: "Failed to pin resource",
-        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   };
@@ -136,10 +139,8 @@ export default function SearchDocumentation() {
         message: "Resource has been unpinned",
       });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(error, {
         title: "Failed to unpin resource",
-        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   };
@@ -415,10 +416,8 @@ function ResourceDetail({ resource }: { resource: FHIRPackageContent }) {
   } = useFetch(resource.url, {
     ...getResourceDetailOptions(),
     onError: async (error) => {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(error, {
         title: "Failed to load resource details",
-        message: error.message,
       });
     },
   });

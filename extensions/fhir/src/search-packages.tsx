@@ -7,7 +7,7 @@ import {
   Color,
   Icon,
 } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { useFetch, showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import {
   getSearchPackagesUrl,
@@ -61,11 +61,6 @@ export default function SearchPackages() {
 
   const handlePinPackage = async (pkg: FHIRPackage | PinnedPackage) => {
     try {
-      await showToast({
-        style: Toast.Style.Animated,
-        title: "Pinning package...",
-      });
-
       await pinPackage({
         id: pkg.id,
         name: pkg.name,
@@ -87,21 +82,14 @@ export default function SearchPackages() {
         message: `${pkg.name} has been pinned`,
       });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(error, {
         title: "Failed to pin package",
-        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   };
 
   const handleUnpinPackage = async (pkg: FHIRPackage | PinnedPackage) => {
     try {
-      await showToast({
-        style: Toast.Style.Animated,
-        title: "Unpinning package...",
-      });
-
       await unpinPackage(pkg.id);
       await loadPinnedPackages(); // Refresh pinned packages
 
@@ -111,10 +99,8 @@ export default function SearchPackages() {
         message: `${pkg.name} has been unpinned`,
       });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(error, {
         title: "Failed to unpin package",
-        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   };
