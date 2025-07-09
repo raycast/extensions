@@ -1,7 +1,8 @@
 import { downloadIPA, searchApps } from "../ipatool";
 import path from "path";
 import { logger } from "../utils/logger";
-import { showToast, Toast, Tool } from "@raycast/api";
+import { Tool } from "@raycast/api";
+import { handleAppSearchError, handleDownloadError } from "../utils/error-handler";
 
 // Constants
 const SEARCH_RESULT_LIMIT = 1;
@@ -32,11 +33,12 @@ export default async function downloadIosApp(input: Input) {
     const searchResults = await searchApps(input.query, SEARCH_RESULT_LIMIT);
 
     if (searchResults.length === 0) {
-      logger.error(`[download-app tool] No apps found matching "${input.query}"`);
-      await showToast(Toast.Style.Failure, "No Apps Found", `Could not find any apps matching "${input.query}"`);
-      throw new Error(
-        `No apps found matching "${input.query}". Please try a different search term or check the exact app name.`,
+      await handleAppSearchError(
+        new Error(`No apps found matching "${input.query}". Please try a different search term or check the exact app name.`),
+        input.query,
+        "download-app"
       );
+      return { success: false, message: "No apps found" };
     }
 
     // Use the first result as the best match
@@ -56,9 +58,12 @@ export default async function downloadIosApp(input: Input) {
 
     // Download the app
     if (!bundleId) {
-      logger.error(`[download-app tool] Could not determine bundle ID for "${input.query}"`);
-      await showToast(Toast.Style.Failure, "Download Failed", `Could not determine bundle ID for "${input.query}"`);
-      throw new Error(`Could not determine bundle ID for "${input.query}"`);
+      await handleAppSearchError(
+        new Error(`Could not determine bundle ID for "${input.query}"`),
+        input.query,
+        "download-app"
+      );
+      return { success: false, message: "Could not determine bundle ID" };
     }
 
     logger.log(`[download-app tool] Starting download for ${appName} (${bundleId})`);
@@ -67,15 +72,12 @@ export default async function downloadIosApp(input: Input) {
       const filePath = await downloadIPA(bundleId, appName, appVersion, price);
 
       if (!filePath) {
-        logger.error(`[download-app tool] Download returned null for "${appName}"`);
-        await showToast(
-          Toast.Style.Failure,
-          "Download Failed",
-          `The app "${appName}" could not be downloaded. It may not be available in your region or may have been removed from the App Store.`,
+        await handleDownloadError(
+          new Error(`The app "${appName}" could not be downloaded. It may not be available in your region or may have been removed from the App Store.`),
+          appName,
+          "download-app"
         );
-        throw new Error(
-          `The app "${appName}" could not be downloaded. It may not be available in your region or may have been removed from the App Store.`,
-        );
+        return { success: false, message: "Download failed" };
       }
 
       logger.log(`[download-app tool] Successfully downloaded app to: ${filePath}`);
@@ -94,13 +96,19 @@ export default async function downloadIosApp(input: Input) {
       const errorMessage = downloadError instanceof Error ? downloadError.message : String(downloadError);
 
       if (errorMessage.includes("not found") || errorMessage.includes("no app")) {
-        const friendlyMessage = `The app "${input.query}" was not found in the App Store. It may not be available in your region or may have been removed.`;
-        await showToast(Toast.Style.Failure, "App Not Found", friendlyMessage);
-        throw new Error(friendlyMessage);
+        await handleAppSearchError(
+          new Error(`The app "${input.query}" was not found in the App Store. It may not be available in your region or may have been removed.`),
+          input.query,
+          "download-app"
+        );
+        return { success: false, message: "App not found" };
       } else if (errorMessage.includes("authentication") || errorMessage.includes("login")) {
-        const friendlyMessage = `Authentication failed. Please check your Apple ID credentials in the extension preferences.`;
-        await showToast(Toast.Style.Failure, "Authentication Failed", friendlyMessage);
-        throw new Error(friendlyMessage);
+        await handleDownloadError(
+          new Error(`Authentication failed. Please check your Apple ID credentials in the extension preferences.`),
+          appName,
+          "download-app"
+        );
+        return { success: false, message: "Authentication failed" };
       } else {
         // Re-throw the original error for other cases
         throw downloadError;
@@ -138,7 +146,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
     // Check if the match might not be exact
     const queryLower = input.query.toLowerCase();
     const appNameLower = appName.toLowerCase();
-    const isExactMatch = appNameLower === queryLower || appNameLower.includes(queryLower);
+    const isExactMatch = appNameLower === queryLower;  // Only consider exact matches
 
     let message = `Download "${appName}"?`;
     if (!isExactMatch) {

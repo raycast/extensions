@@ -12,7 +12,8 @@
 
 ## 📁 Project Structure & Documentation
 
-- **Documentation First:** Always review `README.md`, `docs/architecture.md`, `docs/technical.md`, and `tasks/tasks.md` before starting.
+- **Documentation First:** Always review `README.md` for extension setup, features, and requirements before starting work.  
+
 - **Respect Architecture:** Follow module boundaries, data flow, and component relationships.
 - **Pattern Awareness:** Use existing patterns and technologies before introducing new ones.
 - **Directory Structure:** Organize code into `components/`, `hooks/`, `types/`, `utils/`, and `tools/` using lowercase-dash naming.
@@ -42,11 +43,11 @@
 - **Review AI Output:** Always verify logic and assumptions in AI-generated code.
 - **Incremental Steps:** Break down complex tasks and confirm each step before proceeding.
 - **Use AI Strategically:** Leverage AI for boilerplate, refactoring, and test generation—not for architectural decisions.
-- **Tool Confirmations:** Use proper Raycast `Tool.Confirmation<Input>` pattern for disambiguation:
-  - Export confirmation function that runs before main tool execution
-  - Show confirmation dialog for ambiguous queries (multiple reasonable matches)
-  - Format options clearly (e.g., "App Name by Developer")
-  - Keep confirmation logic separate from main tool function
+- **Tool Confirmations:** Use Raycast's native confirmations for user actions:  
+  - Import { confirmAlert } from '@raycast/api'  
+  - Use for destructive or ambiguous actions  
+  - Keep messages clear and action-focused  
+  - Include both confirmation and cancel options
 
 ---
 
@@ -102,9 +103,10 @@
 
 ## 🔐 Security Practices
 
-- **Server-Side Logic:** Keep sensitive operations on the backend.
-- **Input Validation:** Sanitize all user input server-side.
-- **Secrets Management:** Use environment variables—never hardcode credentials.
+- **Security:** Protect sensitive data with secure storage:  
+  - Use Raycast's preferences API for user credentials  
+  - Validate all inputs client-side before processing  
+- **Secrets Management:** Use Raycast preferences API—never hardcode credentials.
 - **Dependency Awareness:** Evaluate security implications of new packages.
 
 ---
@@ -121,5 +123,5 @@
 
 ## 📄 Documentation Maintenance
 
-- **Keep Docs Updated:** Reflect changes in `README.md`, `docs/`, and `tasks/`.
+- **Keep Docs Updated:** Reflect changes in `README.md`, `TODO.md`, and `docs/tasks.md`.
 - **Evolve the Rules:** Periodically review and refine this guide as the project grows.

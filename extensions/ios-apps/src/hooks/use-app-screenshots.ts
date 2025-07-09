@@ -38,7 +38,7 @@ export function useAppScreenshots() {
 
     try {
       // Use the downloadScreenshots function from itunes-api.ts
-      const downloadPath = await downloadScreenshots(app.bundleId, app.name, app.version, app.price);
+      const downloadPath = await downloadScreenshots(app.bundleId, app.name, app.version);
 
       if (downloadPath) {
         setState({

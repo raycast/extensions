@@ -1,6 +1,7 @@
 // Screenshot downloader utility functions
 import fs from "fs";
 import path from "path";
+import fetch from "node-fetch";
 import { promisify } from "util";
 import pLimit from "p-limit";
 import { showFailureToast } from "@raycast/utils";
@@ -364,11 +365,11 @@ export async function downloadAppScreenshots(
     const sampleScreenshots = screenshots.slice(0, 2);
     logger.log(`[Screenshot Downloader] Sample screenshots: ${JSON.stringify(sampleScreenshots)}`);
 
-    // Create a sanitized folder name
-    const sanitizedAppName = app.name
+    // Create a sanitized folder name (prevent directory traversal)
+    const sanitizedAppName = path.basename(app.name
       .split(":")[0]
       .trim()
-      .replace(/[/?%*:|"<>]/g, "-");
+      .replace(/[/?%*:|"<>]/g, "-"));
     const folderName = `${sanitizedAppName} Screenshots`;
     const screenshotsDir = path.join(downloadsDir, folderName);
 
@@ -557,12 +558,7 @@ export async function downloadAppScreenshots(
  * @param price App price
  * @returns Path to the screenshots directory
  */
-export async function downloadScreenshots(
-  bundleId: string,
-  appName = "",
-  appVersion = "",
-  price = "",
-): Promise<string | null> {
+export async function downloadScreenshots(bundleId: string, appName = "", appVersion = ""): Promise<string | null> {
   try {
     // Log platform preferences for debugging
     logPlatformPreferences();
@@ -572,7 +568,8 @@ export async function downloadScreenshots(
       bundleId,
       name: appName || bundleId,
       version: appVersion || "",
-      price: price || "",
+      price: "0",
+      currency: "USD", // Default currency
       // Add required fields with default values
       artistName: "",
       artworkUrl60: "",

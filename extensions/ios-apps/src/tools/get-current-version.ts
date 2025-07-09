@@ -1,7 +1,9 @@
 import { searchITunesApps } from "../utils/itunes-api";
 import { logger } from "../utils/logger";
-import { showToast, Toast, Tool } from "@raycast/api";
+import { Tool } from "@raycast/api";
 import type { ITunesResult } from "../types";
+import { filterAndSortApps, isExactMatch, isSignificantlyMorePopular } from "../utils/app-search";
+import { handleAppSearchError, handleToolError } from "../utils/error-handler";
 
 // Constants
 const SEARCH_RESULT_LIMIT = 10;
@@ -37,38 +39,17 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
       return undefined; // No results, let the main function handle the error
     }
 
-    // Filter for relevant matches using basic name matching
-    const query = input.query.toLowerCase();
-    const relevantApps = searchResults.filter((app: ITunesResult) => {
-      const name = (app.trackName || "").toLowerCase();
-      const developer = (app.artistName || "").toLowerCase();
-
-      // Include apps that match the query in name or developer
-      return name.includes(query) || developer.includes(query) || name.startsWith(query) || query.includes(name);
-    });
+    // Filter and sort for relevant matches using shared utility function
+    const sortedApps = filterAndSortApps(searchResults, input.query);
 
     logger.log(
-      `[get-current-version confirmation] Found ${relevantApps.length} relevant apps out of ${searchResults.length} total`,
+      `[get-current-version confirmation] Found ${sortedApps.length} relevant apps out of ${searchResults.length} total`,
     );
 
-    if (relevantApps.length <= 1) {
+    if (sortedApps.length <= 1) {
       // No disambiguation needed if only one relevant result
       return undefined;
     }
-
-    // Sort by rating count (popularity) - iTunes API already has this data!
-    const sortedApps = relevantApps.sort((a: ITunesResult, b: ITunesResult) => {
-      // Primary sort: rating count (higher = more popular)
-      if (b.userRatingCount !== a.userRatingCount) {
-        return b.userRatingCount - a.userRatingCount;
-      }
-      // Secondary sort: average rating
-      if (b.averageUserRating !== a.averageUserRating) {
-        return b.averageUserRating - a.averageUserRating;
-      }
-      // Tertiary sort: name length (shorter = more likely to be main app)
-      return a.trackName.length - b.trackName.length;
-    });
 
     // Log all results sorted by popularity
     logger.log(`[get-current-version confirmation] Apps ranked by popularity for "${input.query}":`);
@@ -80,14 +61,13 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
 
     // Check if the top app is significantly more popular (10x more ratings or exact name match)
     const topApp = sortedApps[0];
-    const secondApp = sortedApps[1];
-    const topAppName = topApp.trackName.toLowerCase();
-    const isExactMatch = topAppName === query;
-    const isSignificantlyMorePopular = topApp.userRatingCount > secondApp.userRatingCount * 10;
+    const secondApp = sortedApps[1]; // Could be undefined if only 1 app
+    const exactMatch = isExactMatch(topApp.trackName, input.query);
+    const significantlyMorePopular = secondApp ? isSignificantlyMorePopular(topApp, secondApp) : true;
 
-    if (isExactMatch || isSignificantlyMorePopular) {
+    if (exactMatch || significantlyMorePopular) {
       logger.log(
-        `[get-current-version confirmation] Clear winner found: ${topApp.trackName} (exact: ${isExactMatch}, popular: ${isSignificantlyMorePopular})`,
+        `[get-current-version confirmation] Clear winner found: ${topApp.trackName} (exact: ${exactMatch}, popular: ${significantlyMorePopular})`,
       );
       return undefined; // No disambiguation needed
     }
@@ -102,7 +82,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
       message: `Found multiple apps matching "${input.query}". Proceed with "${bestMatch.trackName}" (most popular)?`,
       info: topMatches.map((app: ITunesResult, index: number) => ({
         name: `Option ${index + 1}`,
-        value: `${app.trackName} by ${app.artistName} (${app.userRatingCount.toLocaleString()} ratings)`,
+        value: `${app.trackName} by ${app.artistName} (${app.userRatingCount.toLocaleString()} ratings, ${input.query.toLowerCase().includes(app.trackName.toLowerCase()) ? "match" : "related"})`,
       })),
     };
   } catch (error) {
@@ -129,8 +109,11 @@ export default async function getCurrentVersion(input: Input) {
 
       if (searchResults.length === 0) {
         logger.log(`[get-current-version tool] No app found for bundle ID: ${input.bundleId}`);
-        await showToast(Toast.Style.Failure, "App not found", `No app found with bundle ID: ${input.bundleId}`);
-        throw new Error(`No app found with bundle ID: ${input.bundleId}`);
+        await handleAppSearchError(
+          new Error(`No app found with bundle ID: ${input.bundleId}`),
+          input.bundleId,
+          "get-current-version"
+        );
       }
 
       appData = searchResults[0];
@@ -142,42 +125,26 @@ export default async function getCurrentVersion(input: Input) {
 
       if (searchResults.length === 0) {
         logger.log(`[get-current-version tool] No apps found for query: "${input.query}"`);
-        await showToast(Toast.Style.Failure, "No apps found", `No apps found matching "${input.query}"`);
-        throw new Error(`No apps found matching "${input.query}"`);
-      }
-
-      // Filter and sort by popularity (same logic as confirmation)
-      const query = input.query.toLowerCase();
-      const relevantApps = searchResults.filter((app: ITunesResult) => {
-        const name = (app.trackName || "").toLowerCase();
-        const developer = (app.artistName || "").toLowerCase();
-
-        return name.includes(query) || developer.includes(query) || name.startsWith(query) || query.includes(name);
-      });
-
-      if (relevantApps.length === 0) {
-        logger.log(`[get-current-version tool] No relevant apps found for query: "${input.query}"`);
-        await showToast(
-          Toast.Style.Failure,
-          "No relevant apps found",
-          `No relevant apps found matching "${input.query}"`,
+        await handleAppSearchError(
+          new Error(`No apps found matching "${input.query}"`),
+          input.query,
+          "get-current-version"
         );
-        throw new Error(`No relevant apps found matching "${input.query}"`);
+        return { version: "Unknown", appName: "Unknown", bundleId: "" };
       }
 
-      // Sort by popularity (rating count)
-      const sortedApps = relevantApps.sort((a: ITunesResult, b: ITunesResult) => {
-        // Primary sort: rating count (higher = more popular)
-        if (b.userRatingCount !== a.userRatingCount) {
-          return b.userRatingCount - a.userRatingCount;
-        }
-        // Secondary sort: average rating
-        if (b.averageUserRating !== a.averageUserRating) {
-          return b.averageUserRating - a.averageUserRating;
-        }
-        // Tertiary sort: name length (shorter = more likely to be main app)
-        return a.trackName.length - b.trackName.length;
-      });
+      // Filter and sort by popularity using shared utility function
+      const sortedApps = filterAndSortApps(searchResults, input.query);
+
+      if (sortedApps.length === 0) {
+        logger.log(`[get-current-version tool] No relevant apps found for query: "${input.query}"`);
+        await handleAppSearchError(
+          new Error(`No relevant apps found matching "${input.query}"`),
+          input.query,
+          "get-current-version"
+        );
+        return { version: "Unknown", appName: "Unknown", bundleId: "" };
+      }
 
       // Use the most popular/relevant app
       appData = sortedApps[0];
@@ -194,15 +161,12 @@ export default async function getCurrentVersion(input: Input) {
       bundleId: appData.bundleId,
     };
   } catch (error) {
-    logger.error(`[get-current-version tool] Error getting app version: ${error}`);
-
-    // Show user-friendly error message
-    if (error instanceof Error) {
-      await showToast(Toast.Style.Failure, "Error", error.message);
-    } else {
-      await showToast(Toast.Style.Failure, "Error", "Failed to get app version");
-    }
-
-    throw error;
+    await handleToolError(
+      error,
+      "get-current-version tool",
+      "Failed to get app version",
+      false // Don't throw, return error state instead
+    );
+    return { version: "Error", appName: "Error", bundleId: "" };
   }
 }

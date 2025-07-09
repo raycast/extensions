@@ -1,5 +1,6 @@
-import { ActionPanel, Action, Icon, Clipboard, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Icon, Toast, showToast } from "@raycast/api";
 import { AppDetails } from "../types";
+import { getAppStoreUrl } from "../utils/constants";
 
 interface CopyActionsProps {
   app: AppDetails;
@@ -20,7 +21,7 @@ export function CopyActions({ app }: CopyActionsProps) {
   }
 
   // Create a fallback App Store URL if trackViewUrl is not available
-  const appStoreUrl = app.trackViewUrl || `https://apps.apple.com/app/id${app.id}`;
+  const appStoreUrl = app.trackViewUrl || getAppStoreUrl(app.id);
 
   return (
     <ActionPanel.Section title="Copy">

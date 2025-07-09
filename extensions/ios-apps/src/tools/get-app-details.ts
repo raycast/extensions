@@ -1,8 +1,9 @@
 import { getAppDetails, searchApps } from "../ipatool";
+import { logger } from "../utils/logger";
 import { formatPrice } from "../utils/paths";
 import { formatDate } from "../utils/common";
-import { logger } from "../utils/logger";
-import { showToast, Toast } from "@raycast/api";
+import { handleAppSearchError } from "../utils/error-handler";
+import { getAppStoreUrl } from "../utils/constants";
 
 // Constants
 const SEARCH_RESULT_LIMIT = 10;
@@ -35,9 +36,12 @@ export default async function getIosAppDetails(input: Input) {
       const searchResults = await searchApps(input.query, SEARCH_RESULT_LIMIT);
 
       if (searchResults.length === 0) {
-        logger.error(`[get-app-details tool] No apps found matching "${input.query}"`);
-        await showToast(Toast.Style.Failure, "No Apps Found", `Could not find any apps matching "${input.query}"`);
-        throw new Error(`No apps found matching "${input.query}"`);
+        await handleAppSearchError(
+          new Error(`No apps found matching "${input.query}"`),
+          input.query,
+          "get-app-details"
+        );
+        return { app: null };
       }
 
       // Log all search results for debugging
@@ -98,18 +102,22 @@ export default async function getIosAppDetails(input: Input) {
 
     // Get app details using ipatool
     if (!bundleId) {
-      logger.error(
-        `[get-app-details tool] Could not determine bundle ID for "${input.query}". Search returned incomplete results.`,
+      await handleAppSearchError(
+        new Error(`Could not determine bundle ID for "${input.query}". Search returned incomplete results.`),
+        input.query,
+        "get-app-details"
       );
-      await showToast(Toast.Style.Failure, "App Details Error", `Could not determine bundle ID for "${input.query}"`);
       return { app: null };
     }
     const appDetails = await getAppDetails(bundleId);
 
     if (!appDetails) {
-      logger.error(`[get-app-details tool] Could not find app details for ${bundleId}`);
-      await showToast(Toast.Style.Failure, "App Details Error", `Could not find app details for ${bundleId}`);
-      throw new Error(`Could not find app details for ${bundleId}`);
+      await handleAppSearchError(
+        new Error(`Could not find app details for ${bundleId}`),
+        input.query,
+        "get-app-details"
+      );
+      return { app: null };
     }
 
     logger.log(`[get-app-details tool] Successfully retrieved details for ${appDetails.name || "unknown app"}`);
@@ -121,7 +129,7 @@ export default async function getIosAppDetails(input: Input) {
       name: appDetails.name,
       version: appDetails.version,
       developer: appDetails.sellerName,
-      price: formatPrice(appDetails.price),
+      price: formatPrice(appDetails.price, appDetails.currency),
       description: appDetails.description,
       icon: appDetails.artworkUrl512 || appDetails.artworkUrl60 || appDetails.iconUrl,
       rating: appDetails.averageUserRating,
@@ -131,15 +139,13 @@ export default async function getIosAppDetails(input: Input) {
       releaseDate: appDetails.releaseDate ? formatDate(appDetails.releaseDate) : undefined,
       lastUpdated: appDetails.currentVersionReleaseDate ? formatDate(appDetails.currentVersionReleaseDate) : undefined,
       genres: appDetails.genres,
-      appStoreUrl: appDetails.trackViewUrl || `https://apps.apple.com/app/id${appDetails.id}`,
+      appStoreUrl: appDetails.trackViewUrl || getAppStoreUrl(appDetails.id),
       developerUrl: appDetails.artistViewUrl,
       screenshots: appDetails.screenshotUrls,
     };
 
     return { app: formattedDetails };
   } catch (error) {
-    logger.error(`[get-app-details tool] Error: ${error}`);
-    await showToast(Toast.Style.Failure, "App Details Error", `Failed to get app details: ${error}`);
-    throw new Error(`Failed to get app details: ${error}`);
+    await handleAppSearchError(error, input.query, "get-app-details");
   }
 }

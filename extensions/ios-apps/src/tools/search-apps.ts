@@ -3,6 +3,7 @@ import { enrichAppDetails } from "../utils/itunes-api";
 import { AppDetails } from "../types";
 import { logger } from "../utils/logger";
 import { showToast, Toast } from "@raycast/api";
+import { handleAppSearchError } from "../utils/error-handler";
 
 // No initial confirmation - search will execute immediately
 
@@ -49,7 +50,8 @@ export default async function searchIosApps(input: Input) {
         bundleId: app.bundleId || app.bundleID || "",
         name: app.name,
         version: app.version,
-        price: String(app.price),
+        price: app.price.toString(),
+        currency: "USD", // Default currency for ipatool results
         // Default values for required fields from AppDetails interface
         artistName: "",
         artworkUrl60: "",
@@ -129,8 +131,11 @@ export default async function searchIosApps(input: Input) {
 
     return { apps: formattedApps };
   } catch (error) {
-    logger.error(`[search-apps tool] Error: ${error}`);
-    await showToast(Toast.Style.Failure, "Search Error", `Failed to search for apps: ${error}`);
-    throw new Error(`Failed to search for apps: ${error}`);
+    await handleAppSearchError(
+      error instanceof Error ? error : new Error(`Failed to search for apps: ${error}`),
+      input.query,
+      "search-apps"
+    );
+    return { apps: [] };
   }
 }

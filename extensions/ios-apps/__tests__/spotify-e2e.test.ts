@@ -1,7 +1,8 @@
 import nock from "nock";
-import * as fs from "fs";
 import * as path from "path";
 import { extractScreenshotsFromShoeboxJson } from "../src/utils/app-store-scraper";
+import { PlatformDirectories } from "../src/types";
+import { createShoeboxHtml, loadFixture } from "./test-helpers";
 
 // Mock logger to silence output during tests
 jest.mock("../src/utils/logger", () => ({
@@ -14,14 +15,12 @@ jest.mock("../src/utils/logger", () => ({
 }));
 
 describe("Spotify App End-to-End Testing", () => {
-  let spotifyFixture: any;
+  let spotifyFixture: Record<string, unknown>;
   let spotifyScreenshots: Array<{ url: string; type: string; index: number }>;
   
   beforeAll(() => {
     // Load Spotify fixture
-    const spotifyPath = path.join(__dirname, "../tests/fixtures/shoebox_spotify.json");
-    const spotifyData = fs.readFileSync(spotifyPath, "utf8");
-    spotifyFixture = JSON.parse(spotifyData);
+    spotifyFixture = loadFixture("shoebox_spotify.json");
     
     // Extract screenshots for testing
     const html = createShoeboxHtml(spotifyFixture);
@@ -33,22 +32,7 @@ describe("Spotify App End-to-End Testing", () => {
     nock.cleanAll();
   });
 
-  // Helper function to create HTML with shoebox JSON
-  function createShoeboxHtml(shoeboxJson: any): string {
-    return `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>App Store</title>
-      </head>
-      <body>
-        <script type="fastboot/shoebox" id="shoebox-media-api-cache-apps">
-          ${JSON.stringify(shoeboxJson)}
-        </script>
-      </body>
-      </html>
-    `;
-  }
+
 
   describe("Spotify fixture validation", () => {
     it("should extract screenshots from Spotify fixture", () => {
@@ -199,7 +183,6 @@ describe("Spotify App End-to-End Testing", () => {
   
   describe("Directory structure validation", () => {
     it("should validate platform directory names", () => {
-      const { PlatformDirectories } = require('../src/types');
       const testDir = '/test/screenshots';
       const platformDirs = PlatformDirectories(testDir);
       

@@ -1,18 +1,54 @@
-import { showToast, Toast } from "@raycast/api";
-import { exec } from "child_process";
-import { promisify } from "util";
+import { showFailureToast } from "@raycast/utils";
+import { spawn } from "child_process";
 import { IPATOOL_PATH, preferences } from "./paths";
 import { logger } from "./logger";
 
-const execAsync = promisify(exec);
+/**
+ * Secure spawn-based execution to prevent command injection
+ */
+function spawnAsync(command: string, args: string[]): Promise<{ stdout: string; stderr: string }> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args);
+    let stdout = "";
+    let stderr = "";
+
+    child.stdout?.on("data", (data) => {
+      stdout += data.toString();
+    });
+
+    child.stderr?.on("data", (data) => {
+      stderr += data.toString();
+    });
+
+    child.on("close", (code) => {
+      if (code === 0) {
+        resolve({ stdout, stderr });
+      } else {
+        reject(new Error(`Process exited with code ${code}: ${stderr}`));
+      }
+    });
+
+    child.on("error", (error) => {
+      reject(error);
+    });
+  });
+}
 
 /**
  * Logs in to Apple ID using ipatool and user preferences.
  */
 async function loginToAppleId(): Promise<void> {
-  await execAsync(
-    `${IPATOOL_PATH} auth login -e "${preferences.appleId}" -p "${preferences.password}" --format json --non-interactive`,
-  );
+  await spawnAsync(IPATOOL_PATH, [
+    "auth",
+    "login",
+    "-e",
+    preferences.appleId,
+    "-p",
+    preferences.password,
+    "--format",
+    "json",
+    "--non-interactive",
+  ]);
   logger.log("Successfully authenticated with Apple ID");
 }
 
@@ -23,7 +59,7 @@ export async function ensureAuthenticated(): Promise<boolean> {
   try {
     // Check if we're already authenticated
     // Add --format json to get JSON output
-    const { stdout } = await execAsync(`${IPATOOL_PATH} auth info --format json --non-interactive`);
+    const { stdout } = await spawnAsync(IPATOOL_PATH, ["auth", "info", "--format", "json", "--non-interactive"]);
 
     try {
       // Try to parse as JSON
@@ -52,7 +88,7 @@ export async function ensureAuthenticated(): Promise<boolean> {
       return true;
     } catch (loginError) {
       logger.error("Login error:", loginError);
-      showToast(Toast.Style.Failure, "Authentication failed", String(loginError));
+      showFailureToast(loginError, { title: "Authentication failed" });
       return false;
     }
   }

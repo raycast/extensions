@@ -1,5 +1,6 @@
 import { promisify } from "util";
-import { showToast, Toast, showHUD } from "@raycast/api";
+import { showHUD } from "@raycast/api";
+import { handleAuthError, handleAppSearchError, handleDownloadError } from "./utils/error-handler";
 import { IPATOOL_PATH, getDownloadsDirectory } from "./utils/paths";
 import { ensureAuthenticated } from "./utils/auth";
 import { safeJsonParse, extractFilePath } from "./utils/common";
@@ -30,8 +31,7 @@ export async function searchApps(query: string, limit = 20): Promise<IpaToolSear
     // Ensure we're authenticated before proceeding
     const isAuthenticated = await ensureAuthenticated();
     if (!isAuthenticated) {
-      logger.error("[ipatool] Authentication failed during app search");
-      showToast(Toast.Style.Failure, "Authentication failed", "Please check your Apple ID credentials");
+      await handleAuthError(new Error("Authentication failed during app search. Please check your Apple ID credentials."), false);
       return [];
     }
 
@@ -56,7 +56,7 @@ export async function searchApps(query: string, limit = 20): Promise<IpaToolSear
     return searchResponse.apps || [];
   } catch (error) {
     logger.error("Error searching apps:", error);
-    showToast(Toast.Style.Failure, "Error searching apps", String(error));
+    await handleAppSearchError(error instanceof Error ? error : new Error(String(error)), query, "searchApps");
     return [];
   }
 }
@@ -85,8 +85,7 @@ export async function downloadIPA(
     // Ensure we're authenticated before proceeding with download
     const isAuthenticated = await ensureAuthenticated();
     if (!isAuthenticated) {
-      logger.error("[ipatool] Authentication failed during app download");
-      showToast(Toast.Style.Failure, "Authentication failed", "Please check your Apple ID credentials");
+      await handleAuthError(new Error("Authentication failed during app download. Please check your Apple ID credentials."), false);
       return null;
     }
 
@@ -238,7 +237,7 @@ export async function downloadIPA(
             errorMessage = `Download failed: ${specificError}`;
           }
 
-          showToast(Toast.Style.Failure, "Download Failed", errorMessage);
+          await handleDownloadError(new Error(errorMessage), bundleId, "downloadIPA");
           reject(new Error(errorMessage));
           return;
         }
@@ -366,7 +365,7 @@ export async function downloadIPA(
 
         // If we're out of retries or it's not a TLS error, fail normally
         await showHUD("Download failed", { clearRootSearch: true });
-        showToast(Toast.Style.Failure, "Download Failed", error.message);
+        await handleDownloadError(error, bundleId, "downloadIPA");
         reject(error);
       });
     });
@@ -374,7 +373,7 @@ export async function downloadIPA(
     logger.error(`[ipatool] Unhandled download error: ${error}`);
     logger.error(`[ipatool] Error stack: ${(error as Error).stack || "No stack trace available"}`);
     await showHUD("Download failed", { clearRootSearch: true });
-    showToast(Toast.Style.Failure, "Download Failed", String(error));
+    await handleDownloadError(error instanceof Error ? error : new Error(String(error)), bundleId, "downloadIPA");
     return null;
   }
 }
@@ -391,8 +390,7 @@ export async function getAppDetails(bundleId: string) {
     // Ensure we're authenticated before proceeding
     const isAuthenticated = await ensureAuthenticated();
     if (!isAuthenticated) {
-      logger.error("[ipatool] Authentication failed during app details lookup");
-      showToast(Toast.Style.Failure, "Authentication failed", "Please check your Apple ID credentials");
+      await handleAuthError(new Error("Authentication failed during app details lookup. Please check your Apple ID credentials."), false);
       return null;
     }
 
@@ -468,6 +466,7 @@ export async function getAppDetails(bundleId: string) {
       iconUrl: "",
       sellerName: app.developer,
       price: app.price.toString(),
+      currency: "USD", // Default currency for ipatool results
       genres: [],
       size: "0",
       contentRating: "",
@@ -501,7 +500,7 @@ export async function getAppDetails(bundleId: string) {
   } catch (error) {
     logger.error(`[ipatool] Error getting app details for ${bundleId}: ${error}`);
     logger.error(`[ipatool] Error stack: ${(error as Error).stack || "No stack trace available"}`);
-    showToast(Toast.Style.Failure, "Error getting app details", String(error));
+    await handleAppSearchError(error instanceof Error ? error : new Error(String(error)), bundleId, "getAppDetails");
     return null;
   }
 }

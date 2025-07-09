@@ -110,7 +110,8 @@ export function useAppSearch(initialSearchText = "", debounceMs = 500, limit = 2
         name: app.name,
         bundleId: app.bundleId || app.bundleID || "", // Handle both bundleId and bundleID formats from ipatool
         version: app.version,
-        price: app.price.toString(),
+        price: app.price?.toString() || "0",
+        currency: "USD", // Default currency for ipatool results
         artistName: app.developer,
         // Required fields from AppDetails interface
         artworkUrl60: "",

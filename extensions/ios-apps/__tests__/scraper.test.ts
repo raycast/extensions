@@ -1,7 +1,10 @@
 import { extractScreenshotsFromShoeboxJson } from "../src/utils/app-store-scraper";
 import { logger } from "../src/utils/logger";
+import { PlatformType } from "../src/types";
 import * as fs from "fs";
 import * as path from "path";
+import * as os from "os";
+import { createShoeboxHtml } from "./test-helpers";
 
 // Mock logger to silence output during tests
 jest.mock("../src/utils/logger", () => ({
@@ -13,22 +16,7 @@ jest.mock("../src/utils/logger", () => ({
   },
 }));
 
-// Helper function to create HTML with shoebox JSON
-function createShoeboxHtml(shoeboxJson: any): string {
-  return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>App Store</title>
-    </head>
-    <body>
-      <script type="fastboot/shoebox" id="shoebox-media-api-cache-apps">
-        ${JSON.stringify(shoeboxJson)}
-      </script>
-    </body>
-    </html>
-  `;
-}
+
 
 describe("extractScreenshotsFromShoeboxJson", () => {
   const fixturesDir = path.join(__dirname, "../tests/fixtures");
@@ -39,7 +27,7 @@ describe("extractScreenshotsFromShoeboxJson", () => {
   });
 
   describe("with Instagram fixture", () => {
-    let instagramFixture: any;
+    let instagramFixture: Record<string, unknown>;
 
     beforeAll(() => {
       const instagramPath = path.join(fixturesDir, "shoebox_instagram.json");
@@ -123,7 +111,7 @@ describe("extractScreenshotsFromShoeboxJson", () => {
   });
 
   describe("with Microsoft Word fixture", () => {
-    let wordFixture: any;
+    let wordFixture: Record<string, unknown>;
 
     beforeAll(() => {
       const wordPath = path.join(fixturesDir, "shoebox_word.json");
@@ -148,9 +136,9 @@ describe("extractScreenshotsFromShoeboxJson", () => {
       expect(platformTypes.size).toBeGreaterThan(0);
       
       // Word likely supports multiple platforms
-      const expectedPlatforms = ["iPhone", "iPad", "Mac"];
+      const expectedPlatforms: PlatformType[] = ["iPhone", "iPad", "Mac"];
       const hasExpectedPlatform = expectedPlatforms.some(platform => 
-        platformTypes.has(platform as any)
+        platformTypes.has(platform)
       );
       expect(hasExpectedPlatform).toBe(true);
     });
@@ -264,7 +252,7 @@ describe("extractScreenshotsFromShoeboxJson", () => {
     describe("complete device type mapping coverage", () => {
       // Helper function to create mock data with specific device types
       const createMockDataWithDeviceTypes = (deviceTypes: Record<string, string>) => {
-        const customScreenshotsByType: Record<string, any[]> = {};
+        const customScreenshotsByType: Record<string, Array<{ url: string }>> = {};
         
         Object.keys(deviceTypes).forEach(deviceType => {
           customScreenshotsByType[deviceType] = [{
@@ -639,15 +627,7 @@ describe("extractScreenshotsFromShoeboxJson", () => {
   });
 
   describe("platform directory structure verification", () => {
-    // Import the required modules and functions for testing
-    const fs = require("fs");
-    const path = require("path");
-    const os = require("os");
-
-    // Mock the screenshot downloader to test directory creation
-    let mockDownloadAppScreenshots: any;
-    let mockPlatformDirectories: any;
-    let mockAppDetails: any;
+    // Test directory for platform structure verification
     let tempDir: string;
 
     beforeAll(() => {
@@ -663,28 +643,7 @@ describe("extractScreenshotsFromShoeboxJson", () => {
     });
 
     beforeEach(() => {
-      // Mock app details
-      mockAppDetails = {
-        bundleId: "com.test.app",
-        name: "Test App",
-        version: "1.0.0",
-        price: "Free",
-        artistName: "Test Developer",
-        artworkUrl60: "",
-        id: "123456789",
-        description: "Test app description",
-        iconUrl: "",
-        sellerName: "Test Seller",
-        genres: [],
-        size: "10MB",
-        contentRating: "4+",
-        artworkUrl512: "",
-        averageUserRating: 4.5,
-        averageUserRatingForCurrentVersion: 4.5,
-        userRatingCount: 100,
-        userRatingCountForCurrentVersion: 50,
-        releaseDate: "2023-01-01",
-      };
+      // Test setup for platform directory verification
     });
 
     it("should create directories only for platforms with ≥1 screenshot", async () => {
@@ -704,7 +663,7 @@ describe("extractScreenshotsFromShoeboxJson", () => {
       
       // Simulate the core logic from the downloader:
       // 1. Group screenshots by platform type
-      const screenshotsByType: Record<string, any[]> = {};
+      const screenshotsByType: Record<string, Array<{ url: string; type: string; index: number }>> = {};
       for (const screenshot of testScreenshots) {
         if (!screenshotsByType[screenshot.type]) {
           screenshotsByType[screenshot.type] = [];
@@ -792,16 +751,6 @@ describe("extractScreenshotsFromShoeboxJson", () => {
     });
 
     it("should verify platform directory structure follows pattern …/Screenshots/<Platform>/<n>.png", async () => {
-      // Create test screenshots for multiple platforms
-      const testScreenshots = [
-        { url: "https://example.com/iphone1.png", type: "iPhone", index: 0 },
-        { url: "https://example.com/iphone2.png", type: "iPhone", index: 1 },
-        { url: "https://example.com/ipad1.png", type: "iPad", index: 2 },
-        { url: "https://example.com/mac1.png", type: "Mac", index: 3 },
-        { url: "https://example.com/tv1.png", type: "AppleTV", index: 4 },
-        { url: "https://example.com/watch1.png", type: "AppleWatch", index: 5 },
-        { url: "https://example.com/vision1.png", type: "VisionPro", index: 6 },
-      ];
 
       // Import the PlatformDirectories function
       const { PlatformDirectories } = await import("../src/types");
@@ -850,7 +799,7 @@ describe("extractScreenshotsFromShoeboxJson", () => {
   });
 
   describe("Spotify fixture device type mapping", () => {
-    let spotifyFixture: any;
+    let spotifyFixture: Record<string, unknown>;
     let spotifyScreenshots: Array<{ url: string; type: string; index: number }>;  
 
     beforeAll(() => {

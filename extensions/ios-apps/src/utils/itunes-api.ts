@@ -3,11 +3,9 @@ import fetch from "node-fetch";
 import { showFailureToast } from "@raycast/utils";
 import { AppDetails, ITunesResponse, ITunesResult } from "../types";
 import { logger } from "./logger";
+import { ITUNES_API_BASE_URL, ITUNES_LOOKUP_ENDPOINT, ITUNES_SEARCH_ENDPOINT } from "./constants";
 
-// iTunes API Constants
-const ITUNES_API_BASE_URL = "https://itunes.apple.com";
-const ITUNES_LOOKUP_ENDPOINT = "/lookup";
-const ITUNES_SEARCH_ENDPOINT = "/search";
+// iTunes API Constants (imported from centralized constants)
 const ITUNES_DEFAULT_COUNTRY = "us";
 const ITUNES_SOFTWARE_ENTITY = "software";
 
@@ -62,6 +60,7 @@ export function convertITunesResultToAppDetails(
     sellerName: itunesData.sellerName || base.sellerName || "Unknown Developer",
     artistName: itunesData.artistName || base.artistName || "",
     price: itunesData.price?.toString() || base.price || "0",
+    currency: itunesData.currency || base.currency || "USD",
     genres: itunesData.genres && itunesData.genres.length > 0 ? itunesData.genres : base.genres || [],
     size: itunesData.fileSizeBytes?.toString() || base.size || "0",
     contentRating: itunesData.contentAdvisoryRating || base.contentRating || "",

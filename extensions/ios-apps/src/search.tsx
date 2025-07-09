@@ -59,7 +59,7 @@ export default function Search() {
                 subtitle={app.sellerName}
                 accessories={[
                   { text: app.version },
-                  { text: formatPrice(app.price) },
+                  { text: formatPrice(app.price, app.currency) },
                   { text: releaseDate },
                   { text: ratingText },
                 ]}
@@ -73,7 +73,7 @@ export default function Search() {
                     
                     **Developer:** ${app.sellerName}
                     
-                    **Price:** ${formatPrice(app.price)}
+                    **Price:** ${formatPrice(app.price, app.currency)}
                     
                     **Rating:** ${ratingText}
                     
@@ -91,7 +91,11 @@ export default function Search() {
                         <List.Item.Detail.Metadata.Label key="name" title="Name" text={app.name} />
                         <List.Item.Detail.Metadata.Label key="version" title="Version" text={app.version} />
                         <List.Item.Detail.Metadata.Label key="developer" title="Developer" text={app.sellerName} />
-                        <List.Item.Detail.Metadata.Label key="price" title="Price" text={formatPrice(app.price)} />
+                        <List.Item.Detail.Metadata.Label
+                          key="price"
+                          title="Price"
+                          text={formatPrice(app.price, app.currency)}
+                        />
                         <List.Item.Detail.Metadata.Label key="rating" title="Rating" text={ratingText} />
                         <List.Item.Detail.Metadata.Label key="bundleId" title="Bundle ID" text={app.bundleId} />
                         <List.Item.Detail.Metadata.Label key="releaseDate" title="Release Date" text={releaseDate} />

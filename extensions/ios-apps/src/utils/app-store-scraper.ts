@@ -3,6 +3,8 @@ import nodeFetch from "node-fetch";
 import { AppDetails, PlatformType, ScreenshotInfo, PlatformPreferences } from "../types";
 import { logger } from "./logger";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { APP_STORE_BASE_URL } from "./constants";
+import { handleToolError } from "./error-handler";
 
 /**
  * Raw screenshot data from App Store Shoebox JSON
@@ -27,8 +29,7 @@ interface PlatformData {
   };
 }
 
-// App Store constants
-const APP_STORE_BASE_URL = "https://apps.apple.com";
+// App Store constants (imported from centralized constants)
 
 // App Store image resolution constants
 const APP_STORE_IMAGE_RESOLUTIONS = {
@@ -205,7 +206,12 @@ export async function scrapeAppStoreScreenshots(
 
     const response = await nodeFetch(baseUrl);
     if (!response.ok) {
-      logger.error(`[Scraper] Failed to fetch App Store page: ${response.status}`);
+      await handleToolError(
+        new Error(`Failed to fetch App Store page: ${response.status}`),
+        "app-store-scraper",
+        "Failed to fetch App Store page",
+        false // Don't throw, return empty array instead
+      );
       return [];
     }
 
@@ -447,7 +453,7 @@ export function extractScreenshotsFromShoeboxJson(html: string): ScreenshotInfo[
     // STEP 6: Process all collected screenshot dictionaries
     // Transform device types to platform types and collect screenshot URLs
     for (const screenshotsByType of allScreenshotsByType) {
-      for (const [deviceType, screenshots_array] of Object.entries(screenshotsByType)) {
+      for (const [deviceType, screenshotsArray] of Object.entries(screenshotsByType)) {
         // Map Apple's internal device identifiers to our platform types using exact key lookup
         const platformType = deviceTypeToPlatform[deviceType];
 
@@ -460,8 +466,8 @@ export function extractScreenshotsFromShoeboxJson(html: string): ScreenshotInfo[
         logger.log(`[Scraper] Processing ${deviceType} screenshots, mapped to platform: ${platformType}`);
 
         // Process each screenshot URL for this device type
-        if (Array.isArray(screenshots_array)) {
-          screenshots_array.forEach((screenshot) => {
+        if (Array.isArray(screenshotsArray)) {
+          screenshotsArray.forEach((screenshot) => {
             if (screenshot && screenshot.url) {
               screenshots.push({
                 url: getHighestResolutionUrl(screenshot.url, platformType), // Transform to platform-specific highest resolution

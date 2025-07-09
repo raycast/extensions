@@ -19,6 +19,7 @@ export interface AppDetails {
   sellerName: string;
   version: string;
   price: string;
+  currency: string;
   genres: string[];
   size: string;
   contentRating: string;

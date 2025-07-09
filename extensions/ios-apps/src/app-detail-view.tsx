@@ -6,6 +6,7 @@ import { renderStarRating, formatDate } from "./utils/common";
 import { AppActionPanel } from "./components/app-action-panel";
 import { useAppDetails, useAppDownload } from "./hooks";
 import { logger } from "./utils/logger";
+import { getAppStoreUrl } from "./utils/constants";
 
 interface AppDetailViewProps {
   app: AppDetails;
@@ -39,7 +40,7 @@ export default function AppDetailView({ app: initialApp }: AppDetailViewProps) {
   logger.log("[AppDetailView] Using icon URL:", iconUrl);
 
   // Create a fallback App Store URL if trackViewUrl is not available
-  const appStoreUrl = app.trackViewUrl || `https://apps.apple.com/app/id${app.id}`;
+  const appStoreUrl = app.trackViewUrl || getAppStoreUrl(app.id);
   logger.log("[AppDetailView] Using App Store URL:", appStoreUrl);
 
   // Get the app rating
@@ -66,7 +67,14 @@ export default function AppDetailView({ app: initialApp }: AppDetailViewProps) {
   // Debug information - helps troubleshoot missing or incorrect data
   logger.log("[AppDetailView] App genres:", app.genres);
   logger.log("[AppDetailView] App sellerName:", app.sellerName);
-  logger.log("[AppDetailView] App price:", app.price, "formatted as:", formatPrice(app.price));
+  logger.log(
+    "[AppDetailView] App price:",
+    app.price,
+    "currency:",
+    app.currency,
+    "formatted as:",
+    formatPrice(app.price, app.currency),
+  );
   logger.log("[AppDetailView] App size:", app.size, "formatted as:", formatFileSize(app.size));
   // Log the full app object for comprehensive debugging (only in development)
   if (process.env.NODE_ENV === "development") {
@@ -109,7 +117,7 @@ ${app.screenshotUrls.map((url, index) => `![Screenshot ${index + 1}](${url}?rayc
           <Detail.Metadata.Label title="Developer" text={app.sellerName || "Unknown Developer"} icon={Icon.Person} />
 
           {app.price !== "0" && (
-            <Detail.Metadata.Label title="Price" text={formatPrice(app.price)} icon={Icon.BankNote} />
+            <Detail.Metadata.Label title="Price" text={formatPrice(app.price, app.currency)} icon={Icon.BankNote} />
           )}
 
           <Detail.Metadata.Label title={ratingCountText} text={ratingText} icon={Icon.Star} />

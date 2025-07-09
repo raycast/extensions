@@ -134,12 +134,12 @@ function analyzePlatformDistribution(options = {}) {
   
   if (fixturePaths.length === 0) {
     console.error("❌ No fixture files found in any of the searched directories");
-    return { allDeviceTypes: new Set(), fixtureResults: {} };
+    return { allDeviceTypes: [], fixtureResults: {}, totalScreenshotCounts: {} };
   }
 
   if (verbose) console.log("🔍 Checking platform distribution in shoebox fixtures...\n");
 
-  const allDeviceTypes = new Set();
+  const allDeviceTypes = [];
   const fixtureResults = {};
   const totalScreenshotCounts = {};
   
@@ -151,16 +151,16 @@ function analyzePlatformDistribution(options = {}) {
     const { platforms, screenshotCounts } = extractPlatformsFromFixture(filePath, verbose);
     
     fixtureResults[appName] = {
-      platforms: Array.from(platforms),
+      platforms,
       screenshotCounts
     };
     
-    if (platforms.size === 0) {
+    if (platforms.length === 0) {
       if (verbose) console.log("  ❌ No device types found");
     } else {
-      if (verbose) console.log(`  ✅ Found ${platforms.size} device types: ${Array.from(platforms).join(", ")}`);
+      if (verbose) console.log(`  ✅ Found ${platforms.length} device types: ${platforms.join(", ")}`);
       platforms.forEach(p => {
-        allDeviceTypes.add(p);
+        allDeviceTypes.push(p);
         totalScreenshotCounts[p] = (totalScreenshotCounts[p] || 0) + (screenshotCounts[p] || 0);
       });
     }
@@ -169,8 +169,8 @@ function analyzePlatformDistribution(options = {}) {
   
   if (verbose) {
     console.log(`📊 Summary - All unique device types found across fixtures:`);
-    console.log(`   ${Array.from(allDeviceTypes).sort().join(", ")}`);
-    console.log(`   Total: ${allDeviceTypes.size} unique device types`);
+    console.log(`   ${allDeviceTypes.sort().join(", ")}`);
+    console.log(`   Total: ${allDeviceTypes.length} unique device types`);
     console.log();
     console.log(`📸 Screenshot counts by device type:`);
     Object.entries(totalScreenshotCounts)
@@ -181,7 +181,7 @@ function analyzePlatformDistribution(options = {}) {
   }
   
   return { 
-    allDeviceTypes: Array.from(allDeviceTypes), 
+    allDeviceTypes,
     fixtureResults,
     totalScreenshotCounts
   };

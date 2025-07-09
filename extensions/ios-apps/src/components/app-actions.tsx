@@ -3,6 +3,7 @@ import { showFailureToast } from "@raycast/utils";
 import { AppDetails } from "../types";
 import { downloadIPA } from "../ipatool";
 import { downloadScreenshots } from "../utils/screenshot-downloader";
+import { getAppStoreUrl } from "../utils/constants";
 
 interface AppActionsProps {
   app: AppDetails;
@@ -15,7 +16,7 @@ interface AppActionsProps {
  */
 export function AppActions({ app, onDownload, onDownloadScreenshots }: AppActionsProps) {
   // Create a fallback App Store URL if trackViewUrl is not available
-  const appStoreUrl = app.trackViewUrl || (app.id ? `https://apps.apple.com/app/id${app.id}` : undefined);
+  const appStoreUrl = app.trackViewUrl || (app.id ? getAppStoreUrl(app.id) : undefined);
 
   // Default download handler if none provided
   const handleDownload = async () => {
@@ -40,7 +41,7 @@ export function AppActions({ app, onDownload, onDownloadScreenshots }: AppAction
       }
 
       // Fall back to direct download if no handler provided
-      return await downloadScreenshots(app.bundleId, app.name, app.version, app.price);
+      return await downloadScreenshots(app.bundleId, app.name, app.version);
     } catch (error) {
       console.error("Error downloading screenshots:", error);
       showFailureToast({ title: "Error downloading screenshots", message: String(error) });

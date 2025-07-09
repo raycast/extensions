@@ -3,6 +3,11 @@
 # dependencies
 /node_modules
 
+# raycast specific
+raycast-env.d.ts
+dist/
+build/
+
 # misc
 .DS_Store
 .windsurfrules

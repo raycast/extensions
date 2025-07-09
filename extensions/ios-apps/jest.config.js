@@ -8,8 +8,12 @@ export const transformIgnorePatterns = [
   'node_modules/(?!(node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill)/)',
 ];
 export const testMatch = [
-  '**/__tests__/**/*.(ts|tsx|js)',
+  '**/__tests__/**/*.(test|spec).(ts|tsx|js)',
   '**/*.(test|spec).(ts|tsx|js)',
+];
+export const testPathIgnorePatterns = [
+  '__tests__/test-helpers.ts',
+  '__tests__/.*helpers.*',
 ];
 export const moduleNameMapper = {
   '^@raycast/api$': '<rootDir>/__mocks__/@raycast/api.ts',
