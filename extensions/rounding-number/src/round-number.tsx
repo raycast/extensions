@@ -175,9 +175,14 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
         value={nearestValue}
         onChange={setNearestValue}
       />
-      {error && <Detail markdown={`## Error\n\n${error}`} />}
+      
+      <Form.Separator />
+      
+      {error && (
+        <Form.Description title="Error" text={error} />
+      )}
       {result !== null && !error && (
-        <Detail markdown={`## Result\n\n${result}`} />
+        <Form.Description title="Result" text={result.toString()} />
       )}
     </Form>
   );
