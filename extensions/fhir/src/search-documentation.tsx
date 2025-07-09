@@ -73,7 +73,7 @@ export default function SearchDocumentation() {
   // Get package contents when a package is selected
   const shouldFetchContents = Boolean(selectedPackageId);
   const { data: packageContentsData, isLoading: isLoadingResources } = useFetch(
-    getPackageContentsUrl(selectedPackageId || ""),
+    getPackageContentsUrl(selectedPackageId),
     {
       ...getPackageContentsOptions(),
       keepPreviousData: true,
