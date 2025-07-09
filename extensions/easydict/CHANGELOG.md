@@ -1,5 +1,9 @@
 # `Easydict` Changelog
 
+## [Bugfix] - {PR_MERGE_DATE}
+
+- Remove the unused file Icon file
+
 ## [v2.11.0] - 2025-07-09
 
 ### ✨ New Features
