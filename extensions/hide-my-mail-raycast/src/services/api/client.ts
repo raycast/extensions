@@ -11,7 +11,7 @@ export function createCloudflareClient(): Cloudflare {
 export async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Response> {
   const config = getApiConfig();
 
-  const headers = new Headers(options.headers);
+  const headers = new Headers(options.headers || {});
   headers.set("Authorization", `Bearer ${config.apiKey}`);
   headers.set("Content-Type", "application/json");
 
