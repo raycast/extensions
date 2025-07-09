@@ -1,6 +1,6 @@
 # `Easydict` Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2025-07-09
 
 - Remove the unused file Icon file
 
