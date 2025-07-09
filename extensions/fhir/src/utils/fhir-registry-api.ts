@@ -141,12 +141,7 @@ export function getSearchPackagesOptions(query: string): RequestInit {
                           positive: {
                             multi_match: {
                               query: query,
-                              fields: [
-                                "canonical",
-                                "title",
-                                "description",
-                                "name",
-                              ],
+                              fields: ["canonical", "title", "description", "name"],
                               type: "best_fields",
                               operator: "and",
                             },
@@ -154,11 +149,7 @@ export function getSearchPackagesOptions(query: string): RequestInit {
                           negative: {
                             multi_match: {
                               query: "test training testing dummy",
-                              fields: [
-                                "title^0.1",
-                                "name^0.1",
-                                "description^0.1",
-                              ],
+                              fields: ["title^0.1", "name^0.1", "description^0.1"],
                               type: "best_fields",
                               operator: "or",
                             },
@@ -175,10 +166,7 @@ export function getSearchPackagesOptions(query: string): RequestInit {
                                 {
                                   multi_match: {
                                     query: query,
-                                    fields: [
-                                      "contents.title",
-                                      "contents.canonical",
-                                    ],
+                                    fields: ["contents.title", "contents.canonical"],
                                     type: "most_fields",
                                     operator: "or",
                                   },
@@ -264,9 +252,7 @@ export function getPackageContentsOptions(): RequestInit {
   };
 }
 
-export function parsePackageContentsResponse(
-  data: unknown,
-): FHIRPackageContent[] {
+export function parsePackageContentsResponse(data: unknown): FHIRPackageContent[] {
   const response = data as FHIRPackageDetails;
 
   const packageCanonical = response.entity._source.canonical;
@@ -302,12 +288,8 @@ export function getResourceDetailOptions(): RequestInit & {
       }
 
       const contentType = response.headers.get("content-type") || "";
-      const isXml =
-        contentType.includes("application/xml") ||
-        contentType.includes("text/xml");
-      const isJson =
-        contentType.includes("application/json") ||
-        contentType.includes("text/json");
+      const isXml = contentType.includes("application/xml") || contentType.includes("text/xml");
+      const isJson = contentType.includes("application/json") || contentType.includes("text/json");
       try {
         if (isXml) {
           return parseXmlToJson(text);
@@ -319,9 +301,7 @@ export function getResourceDetailOptions(): RequestInit & {
         }
       } catch (error) {
         console.error("Failed to parse FHIR resource response:", error);
-        throw new Error(
-          `Failed to parse FHIR resource: ${error instanceof Error ? error.message : "Unknown error"}`,
-        );
+        throw new Error(`Failed to parse FHIR resource: ${error instanceof Error ? error.message : "Unknown error"}`);
       }
     },
   };

@@ -1,12 +1,4 @@
-import {
-  ActionPanel,
-  Action,
-  List,
-  showToast,
-  Toast,
-  Color,
-  Icon,
-} from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, Color, Icon } from "@raycast/api";
 import { useFetch, showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import {
@@ -15,20 +7,12 @@ import {
   parseSearchPackagesResponse,
   FHIRPackage,
 } from "./utils/fhir-registry-api";
-import {
-  pinPackage,
-  unpinPackage,
-  getPinnedPackages,
-  getCorePackages,
-  PinnedPackage,
-} from "./utils/storage";
+import { pinPackage, unpinPackage, getPinnedPackages, getCorePackages, PinnedPackage } from "./utils/storage";
 
 export default function SearchPackages() {
   const [searchText, setSearchText] = useState("");
   const [pinnedPackages, setPinnedPackages] = useState<PinnedPackage[]>([]);
-  const [pinnedPackageIds, setPinnedPackageIds] = useState<Set<string>>(
-    new Set(),
-  );
+  const [pinnedPackageIds, setPinnedPackageIds] = useState<Set<string>>(new Set());
 
   const corePackages = getCorePackages();
   const corePackageIds = new Set(corePackages.map((p) => p.id));
@@ -115,11 +99,7 @@ export default function SearchPackages() {
   if (error) {
     return (
       <List searchBarPlaceholder="Search FHIR packages...">
-        <List.EmptyView
-          icon={Icon.ExclamationMark}
-          title="Search Error"
-          description={error.message}
-        />
+        <List.EmptyView icon={Icon.ExclamationMark} title="Search Error" description={error.message} />
       </List>
     );
   }
@@ -152,15 +132,11 @@ export default function SearchPackages() {
 
   // Filter out core and pinned packages from search results to avoid duplicates
   const nonPinnedPackages =
-    packages?.filter(
-      (pkg) => !pinnedPackageIds.has(pkg.id) && !corePackageIds.has(pkg.id),
-    ) || [];
+    packages?.filter((pkg) => !pinnedPackageIds.has(pkg.id) && !corePackageIds.has(pkg.id)) || [];
 
   const showingResults = searchText && searchText.trim().length > 0;
   const totalResults = showingResults
-    ? filteredCorePackages.length +
-      filteredPinnedPackages.length +
-      nonPinnedPackages.length
+    ? filteredCorePackages.length + filteredPinnedPackages.length + nonPinnedPackages.length
     : filteredCorePackages.length + filteredPinnedPackages.length;
 
   return (
@@ -247,14 +223,7 @@ interface PackageListItemProps {
   getPackageTypeColor: (name: string) => Color;
 }
 
-function PackageListItem({
-  pkg,
-  isPinned,
-  isCore,
-  onPin,
-  onUnpin,
-  getPackageTypeColor,
-}: PackageListItemProps) {
+function PackageListItem({ pkg, isPinned, isCore, onPin, onUnpin, getPackageTypeColor }: PackageListItemProps) {
   return (
     <List.Item
       title={pkg.name}
@@ -268,18 +237,10 @@ function PackageListItem({
           metadata={
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.TagList title="Name">
-                <List.Item.Detail.Metadata.TagList.Item
-                  text={pkg.name}
-                  color={getPackageTypeColor(pkg.name)}
-                />
+                <List.Item.Detail.Metadata.TagList.Item text={pkg.name} color={getPackageTypeColor(pkg.name)} />
               </List.Item.Detail.Metadata.TagList>
 
-              {pkg.title && (
-                <List.Item.Detail.Metadata.Label
-                  title="Title"
-                  text={pkg.title}
-                />
-              )}
+              {pkg.title && <List.Item.Detail.Metadata.Label title="Title" text={pkg.title} />}
 
               <List.Item.Detail.Metadata.TagList title="Version">
                 <List.Item.Detail.Metadata.TagList.Item text={pkg.version} />
@@ -288,49 +249,25 @@ function PackageListItem({
               {pkg.fhirMajorVersion.length > 0 && (
                 <List.Item.Detail.Metadata.TagList title="FHIR Version">
                   {pkg.fhirMajorVersion.map((version) => (
-                    <List.Item.Detail.Metadata.TagList.Item
-                      key={version}
-                      text={`R${version}`}
-                      color={Color.Blue}
-                    />
+                    <List.Item.Detail.Metadata.TagList.Item key={version} text={`R${version}`} color={Color.Blue} />
                   ))}
                 </List.Item.Detail.Metadata.TagList>
               )}
 
               <List.Item.Detail.Metadata.Separator />
 
-              <List.Item.Detail.Metadata.Link
-                title="URL"
-                target={pkg.url}
-                text={pkg.url}
-              />
+              <List.Item.Detail.Metadata.Link title="URL" target={pkg.url} text={pkg.url} />
 
-              {pkg.publisher && (
-                <List.Item.Detail.Metadata.Label
-                  title="Publisher"
-                  text={pkg.publisher}
-                />
-              )}
+              {pkg.publisher && <List.Item.Detail.Metadata.Label title="Publisher" text={pkg.publisher} />}
 
-              {pkg.author && (
-                <List.Item.Detail.Metadata.Label
-                  title="Author"
-                  text={pkg.author}
-                />
-              )}
+              {pkg.author && <List.Item.Detail.Metadata.Label title="Author" text={pkg.author} />}
 
               {"totalDownloads" in pkg && (
-                <List.Item.Detail.Metadata.Label
-                  title="Downloads"
-                  text={pkg.totalDownloads.toLocaleString()}
-                />
+                <List.Item.Detail.Metadata.Label title="Downloads" text={pkg.totalDownloads.toLocaleString()} />
               )}
 
               {"date" in pkg && (
-                <List.Item.Detail.Metadata.Label
-                  title="Published"
-                  text={new Date(pkg.date).toLocaleDateString()}
-                />
+                <List.Item.Detail.Metadata.Label title="Published" text={new Date(pkg.date).toLocaleDateString()} />
               )}
             </List.Item.Detail.Metadata>
           }
@@ -341,11 +278,7 @@ function PackageListItem({
           <ActionPanel.Section>
             <Action.OpenInBrowser title="Open in Browser" url={pkg.url} />
             {isCore ? null : isPinned ? (
-              <Action
-                title="Unpin Package"
-                icon={Icon.PinDisabled}
-                onAction={onUnpin}
-              />
+              <Action title="Unpin Package" icon={Icon.PinDisabled} onAction={onUnpin} />
             ) : (
               <Action title="Pin Package" icon={Icon.Pin} onAction={onPin} />
             )}

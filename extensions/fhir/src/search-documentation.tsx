@@ -1,19 +1,5 @@
-import {
-  ActionPanel,
-  Action,
-  List,
-  Color,
-  Detail,
-  showToast,
-  Toast,
-  Icon,
-} from "@raycast/api";
-import {
-  usePromise,
-  useFetch,
-  useCachedState,
-  showFailureToast,
-} from "@raycast/utils";
+import { ActionPanel, Action, List, Color, Detail, showToast, Toast, Icon } from "@raycast/api";
+import { usePromise, useFetch, useCachedState, showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import Fuse from "fuse.js";
 import {
@@ -36,21 +22,15 @@ import {
 } from "./utils/storage";
 
 export default function SearchDocumentation() {
-  const [selectedPackageId, setSelectedPackageId] = useCachedState<string>(
-    "selected-package-id",
-    "",
-  );
+  const [selectedPackageId, setSelectedPackageId] = useCachedState<string>("selected-package-id", "");
   const [pinnedResources, setPinnedResources] = useState<PinnedResource[]>([]);
-  const [pinnedResourceIds, setPinnedResourceIds] = useState<Set<string>>(
-    new Set(),
-  );
+  const [pinnedResourceIds, setPinnedResourceIds] = useState<Set<string>>(new Set());
 
   // Get core and pinned packages
-  const { data: packages, isLoading: isLoadingPackages } =
-    usePromise(async () => {
-      await initializePinnedPackages();
-      return await getPinnedPackages();
-    }, []);
+  const { data: packages, isLoading: isLoadingPackages } = usePromise(async () => {
+    await initializePinnedPackages();
+    return await getPinnedPackages();
+  }, []);
 
   const corePackages = getCorePackages();
 
@@ -66,9 +46,7 @@ export default function SearchDocumentation() {
     loadPinnedResources();
   }, [selectedPackageId]); // Add selectedPackageId as dependency
 
-  const defaultPackageId =
-    corePackages.find((pkg) => pkg.id.includes("hl7.fhir.r5.core"))?.id ||
-    corePackages[0]?.id;
+  const defaultPackageId = corePackages.find((pkg) => pkg.id.includes("hl7.fhir.r5.core"))?.id || corePackages[0]?.id;
 
   // Get package contents when a package is selected
   const shouldFetchContents = Boolean(selectedPackageId);
@@ -84,34 +62,27 @@ export default function SearchDocumentation() {
   // Search state
   const [searchText, setSearchText] = useState("");
 
-  const resources = packageContentsData
-    ? parsePackageContentsResponse(packageContentsData)
-    : [];
+  const resources = packageContentsData ? parsePackageContentsResponse(packageContentsData) : [];
   const handlePackageChange = (packageId: string) => {
     setSelectedPackageId(packageId);
   };
 
-  const handlePinResource = async (
-    resource: FHIRPackageContent | PinnedResource,
-  ) => {
+  const handlePinResource = async (resource: FHIRPackageContent | PinnedResource) => {
     try {
       const resourceId = `${resource.id}-${selectedPackageId}`;
       const selectedPkg =
-        packages?.find((p) => p.id === selectedPackageId) ||
-        corePackages.find((p) => p.id === selectedPackageId);
+        packages?.find((p) => p.id === selectedPackageId) || corePackages.find((p) => p.id === selectedPackageId);
 
       if (!selectedPkg) return;
 
       await pinResource({
         id: resourceId,
         packageId: selectedPackageId,
-        resourceId:
-          "resourceId" in resource ? resource.resourceId : resource.id,
+        resourceId: "resourceId" in resource ? resource.resourceId : resource.id,
         title: resource.title,
         url: resource.url,
         resourceType: resource.resourceType,
-        packageName:
-          "packageName" in resource ? resource.packageName : selectedPkg.name,
+        packageName: "packageName" in resource ? resource.packageName : selectedPkg.name,
       });
 
       await loadPinnedResources();
@@ -179,8 +150,7 @@ export default function SearchDocumentation() {
 
     const scoredResults = fuseResults.map((result) => ({
       item: result.item,
-      combinedScore:
-        (result.score || 0) / getResourceTypeWeight(result.item.resourceType),
+      combinedScore: (result.score || 0) / getResourceTypeWeight(result.item.resourceType),
     }));
 
     scoredResults.sort((a, b) => a.combinedScore - b.combinedScore);
@@ -210,8 +180,7 @@ export default function SearchDocumentation() {
       if (!searchText.trim()) return true;
       const searchLower = searchText.toLowerCase();
       return (
-        resource.title.toLowerCase().includes(searchLower) ||
-        resource.resourceType.toLowerCase().includes(searchLower)
+        resource.title.toLowerCase().includes(searchLower) || resource.resourceType.toLowerCase().includes(searchLower)
       );
     });
 
@@ -239,37 +208,25 @@ export default function SearchDocumentation() {
         >
           <List.Dropdown.Section title="Core">
             {corePackages.map((pkg) => (
-              <List.Dropdown.Item
-                key={pkg.id}
-                title={pkg.title || pkg.id}
-                value={pkg.id}
-              />
+              <List.Dropdown.Item key={pkg.id} title={pkg.title || pkg.id} value={pkg.id} />
             ))}
           </List.Dropdown.Section>
           {packages && packages.length > 0 && (
             <List.Dropdown.Section title="Pinned">
               {packages.map((pkg) => (
-                <List.Dropdown.Item
-                  key={pkg.id}
-                  title={pkg.title || pkg.id}
-                  value={pkg.id}
-                />
+                <List.Dropdown.Item key={pkg.id} title={pkg.title || pkg.id} value={pkg.id} />
               ))}
             </List.Dropdown.Section>
           )}
         </List.Dropdown>
       }
     >
-      {filteredPinnedResources.length === 0 &&
-      nonPinnedResources.length === 0 ? (
+      {filteredPinnedResources.length === 0 && nonPinnedResources.length === 0 ? (
         <List.EmptyView icon={Icon.MagnifyingGlass} title="No Results" />
       ) : (
         <>
           {filteredPinnedResources.length > 0 && (
-            <List.Section
-              title="Pinned"
-              subtitle={filteredPinnedResources.length.toString()}
-            >
+            <List.Section title="Pinned" subtitle={filteredPinnedResources.length.toString()}>
               {filteredPinnedResources.map((resource) => {
                 const resourceId = `${resource.id}-${selectedPackageId}`;
                 return (
@@ -287,9 +244,7 @@ export default function SearchDocumentation() {
           {nonPinnedResources.length > 0 && (
             <List.Section
               title="Results"
-              subtitle={(
-                filteredResourcesCount - filteredPinnedResources.length
-              ).toString()}
+              subtitle={(filteredResourcesCount - filteredPinnedResources.length).toString()}
             >
               {nonPinnedResources.map((resource) => {
                 const resourceId = `${resource.id}-${selectedPackageId}`;
@@ -357,14 +312,9 @@ function FHIRResourceListItem({
       accessories={[
         {
           tag: {
-            value:
-              resource.resourceType ||
-              ("category" in resource ? resource.category : undefined) ||
-              "Unknown",
+            value: resource.resourceType || ("category" in resource ? resource.category : undefined) || "Unknown",
             color: getResourceTypeColor(
-              resource.resourceType ||
-                ("category" in resource ? resource.category : undefined) ||
-                "Unknown",
+              resource.resourceType || ("category" in resource ? resource.category : undefined) || "Unknown",
             ),
           },
         },
@@ -375,17 +325,11 @@ function FHIRResourceListItem({
             <Action.Push
               title="Show Details"
               icon={Icon.Eye}
-              target={
-                <ResourceDetail resource={resource as FHIRPackageContent} />
-              }
+              target={<ResourceDetail resource={resource as FHIRPackageContent} />}
             />
             <Action.OpenInBrowser title="Open in Browser" url={resource.url} />
             {isPinned && onUnpin ? (
-              <Action
-                title="Unpin Resource"
-                icon={Icon.PinDisabled}
-                onAction={onUnpin}
-              />
+              <Action title="Unpin Resource" icon={Icon.PinDisabled} onAction={onUnpin} />
             ) : onPin ? (
               <Action title="Pin Resource" icon={Icon.Pin} onAction={onPin} />
             ) : null}
@@ -422,9 +366,7 @@ function ResourceDetail({ resource }: { resource: FHIRPackageContent }) {
     },
   });
 
-  const detail = detailData
-    ? parseResourceDetailResponse(detailData)
-    : undefined;
+  const detail = detailData ? parseResourceDetailResponse(detailData) : undefined;
   if (isLoading) {
     return <Detail isLoading={true} navigationTitle={resource.title} />;
   }
@@ -446,13 +388,7 @@ function ResourceDetail({ resource }: { resource: FHIRPackageContent }) {
   return <ResourceDetailView resource={resource} detail={detail} />;
 }
 
-function ResourceDetailView({
-  resource,
-  detail,
-}: {
-  resource: FHIRPackageContent;
-  detail?: FHIRResourceDetail;
-}) {
+function ResourceDetailView({ resource, detail }: { resource: FHIRPackageContent; detail?: FHIRResourceDetail }) {
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
       case "active":
@@ -490,51 +426,28 @@ function ResourceDetailView({
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.TagList title="Resource Type">
-            <Detail.Metadata.TagList.Item
-              text={detail?.resourceType || resource.resourceType || "Unknown"}
-            />
+            <Detail.Metadata.TagList.Item text={detail?.resourceType || resource.resourceType || "Unknown"} />
           </Detail.Metadata.TagList>
 
           {detail?.status && (
             <Detail.Metadata.TagList title="Status">
-              <Detail.Metadata.TagList.Item
-                text={detail.status}
-                color={getStatusColor(detail.status)}
-              />
-              {detail.experimental && (
-                <Detail.Metadata.TagList.Item
-                  text="experimental"
-                  color={Color.Red}
-                />
-              )}
+              <Detail.Metadata.TagList.Item text={detail.status} color={getStatusColor(detail.status)} />
+              {detail.experimental && <Detail.Metadata.TagList.Item text="experimental" color={Color.Red} />}
             </Detail.Metadata.TagList>
           )}
 
           <Detail.Metadata.Separator />
 
-          {detail?.version && (
-            <Detail.Metadata.Label title="Version" text={detail.version} />
-          )}
+          {detail?.version && <Detail.Metadata.Label title="Version" text={detail.version} />}
 
-          {detail?.publisher && (
-            <Detail.Metadata.Label title="Publisher" text={detail.publisher} />
-          )}
+          {detail?.publisher && <Detail.Metadata.Label title="Publisher" text={detail.publisher} />}
 
-          {detail?.date && (
-            <Detail.Metadata.Label
-              title="Date"
-              text={new Date(detail.date).toLocaleDateString()}
-            />
-          )}
+          {detail?.date && <Detail.Metadata.Label title="Date" text={new Date(detail.date).toLocaleDateString()} />}
 
           {detail?.contact && detail.contact.length > 0 && (
             <Detail.Metadata.Label
               title="Contact"
-              text={
-                detail.contact[0].name ||
-                detail.contact[0].telecom?.[0]?.value ||
-                "Available"
-              }
+              text={detail.contact[0].name || detail.contact[0].telecom?.[0]?.value || "Available"}
             />
           )}
 
@@ -542,12 +455,7 @@ function ResourceDetailView({
             <Detail.Metadata.Label
               title="Jurisdiction"
               text={detail.jurisdiction
-                .map(
-                  (j) =>
-                    j.coding?.[0]?.display ||
-                    j.coding?.[0]?.code ||
-                    "Specified",
-                )
+                .map((j) => j.coding?.[0]?.display || j.coding?.[0]?.code || "Specified")
                 .join(", ")}
             />
           )}
@@ -555,10 +463,7 @@ function ResourceDetailView({
           {detail?.mapping && detail.mapping.length > 0 && (
             <Detail.Metadata.TagList title="Mappings">
               {detail.mapping.map((m) => (
-                <Detail.Metadata.TagList.Item
-                  key={m.name || m.identity}
-                  text={m.name || m.identity}
-                />
+                <Detail.Metadata.TagList.Item key={m.name || m.identity} text={m.name || m.identity} />
               ))}
             </Detail.Metadata.TagList>
           )}
@@ -567,10 +472,7 @@ function ResourceDetailView({
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser
-              title="Open in Browser"
-              url={detail?.url || resource.url}
-            />
+            <Action.OpenInBrowser title="Open in Browser" url={detail?.url || resource.url} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard

@@ -66,9 +66,7 @@ export async function getPinnedPackages(): Promise<PinnedPackage[]> {
   }
 }
 
-export async function setPinnedPackages(
-  packages: PinnedPackage[],
-): Promise<void> {
+export async function setPinnedPackages(packages: PinnedPackage[]): Promise<void> {
   await LocalStorage.setItem(PINNED_PACKAGES_KEY, JSON.stringify(packages));
 }
 
@@ -87,9 +85,7 @@ export async function getPinnedResources(): Promise<PinnedResource[]> {
   }
 }
 
-export async function setPinnedResources(
-  resources: PinnedResource[],
-): Promise<void> {
+export async function setPinnedResources(resources: PinnedResource[]): Promise<void> {
   await LocalStorage.setItem(PINNED_RESOURCES_KEY, JSON.stringify(resources));
 }
 
@@ -169,9 +165,7 @@ export async function initializePinnedPackages(): Promise<void> {
   return;
 }
 
-export async function getPinnedPackageById(
-  packageId: string,
-): Promise<PinnedPackage | undefined> {
+export async function getPinnedPackageById(packageId: string): Promise<PinnedPackage | undefined> {
   const packages = await getPinnedPackages();
   return packages.find((p) => p.id === packageId);
 }
