@@ -1,4 +1,4 @@
-# Focusflow - a Study Clock
+# FocusFlow - a Study Clock
 
 **FocusFlow** is a Raycast extension that helps you stay accountable by tracking focused study or work sessions (*FOCUS*) — and adds a bit of friendly competition through team collaboration (*FLOW*).
 
