@@ -30,6 +30,7 @@
       "preferences":[
         {
           "name": "copyToClipboard",
+          "label": "Copy Result to Clipboard",
           "title": "Copy Result to Clipboard",
           "description": "Automatically copy the rounded result to your clipboard after calculation.",
           "type": "checkbox",
