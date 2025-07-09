@@ -7,6 +7,7 @@ import type { AppDetails, IpaToolSearchApp } from "../types";
 import { IPATOOL_PATH } from "../utils/paths";
 import { ensureAuthenticated } from "../utils/auth";
 import { enrichAppDetails } from "../utils/itunes-api";
+import { validateIpatoolInstallation } from "../utils/ipatool-validator";
 
 const execFileAsync = promisify(execFile);
 
@@ -67,8 +68,19 @@ export function useAppSearch(initialSearchText = "", debounceMs = 500, limit = 2
     setError(null);
 
     try {
+      // First validate that ipatool is installed and accessible
+      const isIpatoolValid = await validateIpatoolInstallation();
+      if (!isIpatoolValid) {
+        setError("ipatool is not installed or accessible");
+        return;
+      }
+
       // Ensure the user is authenticated
-      await ensureAuthenticated();
+      const isAuthenticated = await ensureAuthenticated();
+      if (!isAuthenticated) {
+        setError("Authentication failed");
+        return;
+      }
 
       // Check if query is empty
       if (!query.trim()) {

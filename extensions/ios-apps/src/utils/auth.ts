@@ -2,6 +2,7 @@ import { showFailureToast } from "@raycast/utils";
 import { spawn } from "child_process";
 import { IPATOOL_PATH, preferences } from "./paths";
 import { logger } from "./logger";
+import { validateIpatoolInstallation } from "./ipatool-validator";
 
 /**
  * Secure spawn-based execution to prevent command injection
@@ -56,6 +57,12 @@ async function loginToAppleId(): Promise<void> {
  * Ensures the user is authenticated with Apple ID
  */
 export async function ensureAuthenticated(): Promise<boolean> {
+  // First validate that ipatool is installed and accessible
+  const isIpatoolValid = await validateIpatoolInstallation();
+  if (!isIpatoolValid) {
+    return false;
+  }
+
   try {
     // Check if we're already authenticated
     // Add --format json to get JSON output
