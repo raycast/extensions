@@ -11,8 +11,6 @@ export interface PinnedPackage {
   publisher?: string;
   author?: string;
   fhirMajorVersion: number[];
-  pinnedDate: string;
-  order: number;
 }
 
 export interface PinnedResource {
@@ -23,8 +21,6 @@ export interface PinnedResource {
   url: string;
   resourceType: string;
   packageName: string;
-  pinnedDate: string;
-  order: number;
 }
 
 const PINNED_PACKAGES_KEY = "fhir-pinned-packages";
@@ -41,8 +37,6 @@ export const CORE_PACKAGES: PinnedPackage[] = [
     url: "http://hl7.org/fhir/R5/",
     publisher: "HL7 International",
     fhirMajorVersion: [5],
-    pinnedDate: new Date().toISOString(),
-    order: 0,
   },
   {
     id: "hl7.fhir.r4.core|4.0.1",
@@ -54,8 +48,6 @@ export const CORE_PACKAGES: PinnedPackage[] = [
     url: "http://hl7.org/fhir/R4/",
     publisher: "HL7 International",
     fhirMajorVersion: [4],
-    pinnedDate: new Date().toISOString(),
-    order: 1,
   },
 ];
 
@@ -103,7 +95,7 @@ export async function setPinnedResources(
 
 // Pin/Unpin Package Functions
 export async function pinPackage(
-  packageData: Omit<PinnedPackage, "pinnedDate" | "order">,
+  packageData: PinnedPackage,
 ): Promise<void> {
   // Prevent core packages from being pinned
   if (isCorePackage(packageData.id)) {
@@ -120,8 +112,6 @@ export async function pinPackage(
 
   const newPackage: PinnedPackage = {
     ...packageData,
-    pinnedDate: new Date().toISOString(),
-    order: packages.length,
   };
 
   packages.push(newPackage);
@@ -149,7 +139,7 @@ export async function isPackagePinned(packageId: string): Promise<boolean> {
 
 // Pin/Unpin Resource Functions
 export async function pinResource(
-  resourceData: Omit<PinnedResource, "pinnedDate" | "order">,
+  resourceData: PinnedResource,
 ): Promise<void> {
   const resources = await getPinnedResources();
 
@@ -161,8 +151,6 @@ export async function pinResource(
 
   const newResource: PinnedResource = {
     ...resourceData,
-    pinnedDate: new Date().toISOString(),
-    order: resources.length,
   };
 
   resources.push(newResource);
