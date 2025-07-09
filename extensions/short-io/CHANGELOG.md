@@ -1,5 +1,10 @@
 # Short.io Changelog
 
+## [Search Links Enhancements] - {PR_MERGE_DATE}
+
+- `search-links` now allows you to view links independent of default
+- fix: `shorten-link-with-domain` persists Default Domain properly
+
 ## [Add Domain] - 2025-06-27
 
 - Add Domain inside `shorten-link-with-domain`

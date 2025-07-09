@@ -6,15 +6,20 @@ import axios from "axios";
 import { getDefaultDomain } from "../utils/common-utils";
 
 export const useShortLinks = (domainId?: string) => {
-  return useCachedPromise((domainId?: string) => {
-    return getShortLinks(domainId) as Promise<ShortLink[]>;
-  }, [domainId], {
-    initialData: []
-  });
+  return useCachedPromise(
+    (domainId?: string) => {
+      return getShortLinks(domainId) as Promise<ShortLink[]>;
+    },
+    [domainId],
+    {
+      initialData: [],
+    },
+  );
 };
 
 const getShortLinks = async (domainId?: string) => {
   const id = domainId || (await getDefaultDomain())?.id;
+  if (!id) return [];
   const listLinksResponse = (
     await axios.get(LIST_LINK_API, {
       params: {
