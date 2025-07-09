@@ -61,8 +61,12 @@ export const executeJxa = async (script: string) => {
         'APP_NOT_FOUND',
         message,
       );
-    // https://developer.apple.com/documentation/coreservices/1527221-anonymous/erraeeventnotpermitted
-    } else if (message.match(/not allowed assistive access/i) || message.match(/permission/i) || message.match(/-1743/)) {
+      // https://developer.apple.com/documentation/coreservices/1527221-anonymous/erraeeventnotpermitted
+    } else if (
+      message.match(/not allowed assistive access/i) ||
+      message.match(/permission/i) ||
+      message.match(/-1743/)
+    ) {
       throw new ThingsError(
         'Permission denied. Please grant Raycast access to Things in System Settings > Privacy & Security > Automation > Raycast > Things.',
         'PERMISSION_DENIED',
