@@ -55,11 +55,7 @@ export function useAppDownload() {
         await showHUD("Download failed", { clearRootSearch: true });
       }
 
-      showToast(
-        Toast.Style.Failure,
-        "Download Failed",
-        `Error: ${error instanceof Error ? error.message : String(error)}`,
-      );
+      await showFailureToast(error, { title: "Download Failed" });
 
       return undefined;
     } finally {
