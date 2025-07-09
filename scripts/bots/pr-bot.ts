@@ -255,7 +255,7 @@ async function checkForAiInPullRequestDiff(extensionFolder: string, { github, co
     if (filePath === `extensions/${extensionFolder}/package.json`) {
       try {
         // because it's a new extension, we need to get the content from the PR itself
-        if (file.status === 'added') {
+        if (file.status === 'added' || file.status === 'modified') {
           const { data: content } = await github.rest.repos.getContent({
             mediaType: {
               format: "raw",
