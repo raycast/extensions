@@ -145,22 +145,11 @@ export default function SearchPackages() {
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search FHIR packages..."
       throttle
+      filtering={false}
       isShowingDetail
     >
-      {totalResults === 0 ? (
-        showingResults ? (
-          <List.EmptyView
-            icon={Icon.ExclamationMark}
-            title="No Packages Found"
-            description="Try adjusting your search terms"
-          />
-        ) : (
-          <List.EmptyView
-            icon={Icon.MagnifyingGlass}
-            title="Search for FHIR Packages"
-            description="Enter a search term to find FHIR implementation guides and packages"
-          />
-        )
+      {totalResults === 0 && showingResults ? (
+        <List.EmptyView icon={Icon.MagnifyingGlass} title="No Packages Found" />
       ) : (
         <>
           {filteredCorePackages.length > 0 && (
@@ -295,7 +284,7 @@ function PackageListItem({ pkg, isPinned, isCore, onPin, onUnpin, getPackageType
           <ActionPanel.Section title="Copy to Clipboard">
             <Action.CopyToClipboard title="ID" content={pkg.id} />
             <Action.CopyToClipboard title="Name" content={pkg.name} />
-            <Action.CopyToClipboard title="URL" content={pkg.url} />
+            {pkg.url && <Action.CopyToClipboard title="URL" content={pkg.url} />}
           </ActionPanel.Section>
         </ActionPanel>
       }

@@ -256,9 +256,9 @@ export function getPackageContentsOptions(): RequestInit {
 export function parsePackageContentsResponse(data: unknown): FHIRPackageContent[] {
   const response = data as FHIRPackageDetails;
   const { name, version } = response.entity._source;
-
+  const contents = response.entity._source.contents || [];
   return (
-    response.entity._source.contents.map((item) => ({
+    contents.map((item) => ({
       id: item.id,
       canonical: item.canonical,
       title: item.title,

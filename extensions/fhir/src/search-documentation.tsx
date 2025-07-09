@@ -222,7 +222,7 @@ export default function SearchDocumentation() {
       }
     >
       {filteredPinnedResources.length === 0 && nonPinnedResources.length === 0 ? (
-        <List.EmptyView icon={Icon.MagnifyingGlass} title="No Results" />
+        <List.EmptyView icon={Icon.MagnifyingGlass} title="No Resources Found" />
       ) : (
         <>
           {filteredPinnedResources.length > 0 && (
