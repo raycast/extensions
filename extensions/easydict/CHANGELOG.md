@@ -1,6 +1,6 @@
 # `Easydict` Changelog
 
-## [v2.11.0] - {PR_MERGE_DATE}
+## [v2.11.0] - 2025-07-09
 
 ### ✨ New Features
 
