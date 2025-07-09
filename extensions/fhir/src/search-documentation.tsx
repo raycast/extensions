@@ -1,98 +1,461 @@
-import { ActionPanel, Action, List, environment, Color } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { readFileSync } from "fs";
-import { join } from "path";
+import {
+  ActionPanel,
+  Action,
+  List,
+  Color,
+  Detail,
+  showToast,
+  Toast,
+  Icon,
+} from "@raycast/api";
+import { usePromise, useFetch, useCachedState } from "@raycast/utils";
+import { useState, useEffect } from "react";
+import Fuse from "fuse.js";
+import {
+  getPackageContentsUrl,
+  getPackageContentsOptions,
+  parsePackageContentsResponse,
+  getResourceDetailOptions,
+  parseResourceDetailResponse,
+  FHIRPackageContent,
+  FHIRResourceDetail,
+} from "./utils/fhir-registry-api";
+import {
+  getPinnedPackages,
+  getCorePackages,
+  initializePinnedPackages,
+  getPinnedResources,
+  pinResource,
+  unpinResource,
+  PinnedResource,
+} from "./utils/storage";
 
-interface FHIRResource {
-  id: string;
-  resourceType: string;
-  name?: string;
-  url?: string;
-  status?: "draft" | "active" | "retired" | "unknown";
-  experimental?: boolean;
-  description?: string;
-  version?: string;
-  publisher?: string;
-  jurisdiction?: unknown[];
-  extension?: unknown[];
-}
+export default function SearchDocumentation() {
+  const [selectedPackageId, setSelectedPackageId] = useCachedState<string>(
+    "selected-package-id",
+    "",
+  );
+  const [pinnedResources, setPinnedResources] = useState<PinnedResource[]>([]);
+  const [pinnedResourceIds, setPinnedResourceIds] = useState<Set<string>>(
+    new Set(),
+  );
 
-export default function Command() {
-  const { data: resources, isLoading } = useCachedPromise(
-    async () => {
-      const filePath = join(environment.assetsPath, "hl7.fhir.r5.core.resources.json");
-      const fileContent = readFileSync(filePath, "utf-8");
-      const rawResources = JSON.parse(fileContent) as Partial<FHIRResource>[];
+  // Get core and pinned packages
+  const { data: packages, isLoading: isLoadingPackages } =
+    usePromise(async () => {
+      await initializePinnedPackages();
+      return await getPinnedPackages();
+    }, []);
 
-      return rawResources.map(
-        (resource): FHIRResource => ({
-          id: resource.id || "",
-          resourceType: resource.resourceType || "",
-          name: resource.name,
-          url: resource.url,
-          status: resource.status,
-          experimental: resource.experimental,
-          description: resource.description,
-          version: resource.version,
-          publisher: resource.publisher,
-          jurisdiction: resource.jurisdiction,
-          extension: resource.extension,
-        }),
-      );
-    },
-    [],
+  const corePackages = getCorePackages();
+
+  // Load pinned resources
+  const loadPinnedResources = async () => {
+    const pinned = await getPinnedResources();
+    setPinnedResources(pinned);
+    setPinnedResourceIds(new Set(pinned.map((r) => r.id)));
+  };
+
+  // Load pinned resources on component mount and when package changes
+  useEffect(() => {
+    loadPinnedResources();
+  }, [selectedPackageId]); // Add selectedPackageId as dependency
+
+  const defaultPackageId =
+    corePackages.find((pkg) => pkg.id.includes("hl7.fhir.r5.core"))?.id ||
+    corePackages[0]?.id;
+
+  // Get package contents when a package is selected
+  const shouldFetchContents = Boolean(selectedPackageId);
+  const { data: packageContentsData, isLoading: isLoadingResources } = useFetch(
+    getPackageContentsUrl(selectedPackageId || ""),
     {
+      ...getPackageContentsOptions(),
       keepPreviousData: true,
+      execute: shouldFetchContents,
     },
   );
 
-  // Group resources by type
-  const groupedResources =
-    resources?.reduce(
-      (groups, resource) => {
-        const type = resource.resourceType;
-        if (!groups[type]) {
-          groups[type] = [];
-        }
-        groups[type].push(resource);
-        return groups;
-      },
-      {} as Record<string, FHIRResource[]>,
-    ) || {};
+  // Search state
+  const [searchText, setSearchText] = useState("");
 
-  const sortedResourceTypes = Object.keys(groupedResources).sort();
+  const resources = packageContentsData
+    ? parsePackageContentsResponse(packageContentsData)
+    : [];
+  const handlePackageChange = (packageId: string) => {
+    setSelectedPackageId(packageId);
+  };
+
+  const handlePinResource = async (
+    resource: FHIRPackageContent | PinnedResource,
+  ) => {
+    try {
+      const resourceId = `${resource.id}-${selectedPackageId}`;
+      const selectedPkg =
+        packages?.find((p) => p.id === selectedPackageId) ||
+        corePackages.find((p) => p.id === selectedPackageId);
+
+      if (!selectedPkg) return;
+
+      await pinResource({
+        id: resourceId,
+        packageId: selectedPackageId,
+        resourceId:
+          "resourceId" in resource ? resource.resourceId : resource.id,
+        title: resource.title,
+        url: resource.url,
+        resourceType: resource.resourceType,
+        packageName:
+          "packageName" in resource ? resource.packageName : selectedPkg.name,
+      });
+
+      await loadPinnedResources();
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Resource pinned",
+        message: `${resource.title} has been pinned`,
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to pin resource",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  };
+
+  const handleUnpinResource = async (resourceId: string) => {
+    try {
+      await unpinResource(resourceId);
+      await loadPinnedResources();
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Resource unpinned",
+        message: "Resource has been unpinned",
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to unpin resource",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  };
+
+  // Resource type importance weighting
+  const getResourceTypeWeight = (resourceType: string): number => {
+    switch (resourceType?.toLowerCase()) {
+      case "structuredefinition":
+        return 3.0;
+      case "valueset":
+      case "codesystem":
+        return 2.5;
+      case "extension":
+        return 2.0;
+      case "searchparameter":
+        return 1.5;
+      case "operationdefinition":
+        return 1.2;
+      default:
+        return 1.0;
+    }
+  };
+
+  // Enhanced search filtering with fuzzy matching and weighting
+  let filteredResources = resources || [];
+  if (searchText.trim()) {
+    // Configure Fuse.js for fuzzy search
+    const fuse = new Fuse(filteredResources, {
+      keys: [{ name: "title", weight: 1.0 }],
+      threshold: 0.4,
+      distance: 100,
+      includeScore: true,
+    });
+
+    const fuseResults = fuse.search(searchText);
+
+    const scoredResults = fuseResults.map((result) => ({
+      item: result.item,
+      combinedScore:
+        (result.score || 0) / getResourceTypeWeight(result.item.resourceType),
+    }));
+
+    scoredResults.sort((a, b) => a.combinedScore - b.combinedScore);
+
+    filteredResources = scoredResults.map((scored) => scored.item);
+  } else {
+    // When no search, sort by resource type importance
+    filteredResources = filteredResources.sort((a, b) => {
+      const weightA = getResourceTypeWeight(a.resourceType);
+      const weightB = getResourceTypeWeight(b.resourceType);
+      if (weightA !== weightB) {
+        return weightB - weightA; // Higher weight first
+      }
+      return a.title.localeCompare(b.title); // Then alphabetical
+    });
+  }
+
+  const filteredResourcesCount = filteredResources.length;
+
+  // Limit to 50 items max to prevent memory issues
+  filteredResources = filteredResources.slice(0, 50);
+
+  // Filter pinned resources for current package and search
+  const filteredPinnedResources = pinnedResources
+    .filter((resource) => resource.packageId === selectedPackageId) // Only show resources for current package
+    .filter((resource) => {
+      if (!searchText.trim()) return true;
+      const searchLower = searchText.toLowerCase();
+      return (
+        resource.title.toLowerCase().includes(searchLower) ||
+        resource.resourceType.toLowerCase().includes(searchLower)
+      );
+    });
+
+  // Filter out pinned resources from regular results to avoid duplicates
+  const nonPinnedResources = filteredResources.filter((r) => {
+    const resourceId = `${r.id}-${selectedPackageId}`;
+    return !pinnedResourceIds.has(resourceId);
+  });
 
   return (
-    <List isLoading={isLoading} isShowingDetail={true} searchBarPlaceholder="Search FHIR documentation...">
-      {sortedResourceTypes.map((resourceType) => (
-        <List.Section
-          key={resourceType}
-          title={resourceType}
-          subtitle={groupedResources[resourceType].length.toString()}
+    <List
+      isLoading={isLoadingPackages || isLoadingResources}
+      searchBarPlaceholder="Search FHIR resources..."
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+      filtering={false}
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Select Package"
+          value={selectedPackageId}
+          onChange={handlePackageChange}
+          storeValue
+          defaultValue={defaultPackageId}
+          placeholder="Select Package"
         >
-          {groupedResources[resourceType].map((resource) => (
-            <FHIRResourceListItem key={resource.id} resource={resource} />
-          ))}
-        </List.Section>
-      ))}
+          <List.Dropdown.Section title="Core">
+            {corePackages.map((pkg) => (
+              <List.Dropdown.Item
+                key={pkg.id}
+                title={pkg.title || pkg.id}
+                value={pkg.id}
+              />
+            ))}
+          </List.Dropdown.Section>
+          {packages && packages.length > 0 && (
+            <List.Dropdown.Section title="Pinned">
+              {packages.map((pkg) => (
+                <List.Dropdown.Item
+                  key={pkg.id}
+                  title={pkg.title || pkg.id}
+                  value={pkg.id}
+                />
+              ))}
+            </List.Dropdown.Section>
+          )}
+        </List.Dropdown>
+      }
+    >
+      {filteredPinnedResources.length === 0 &&
+      nonPinnedResources.length === 0 ? (
+        <List.EmptyView icon={Icon.MagnifyingGlass} title="No Results" />
+      ) : (
+        <>
+          {filteredPinnedResources.length > 0 && (
+            <List.Section
+              title="Pinned"
+              subtitle={filteredPinnedResources.length.toString()}
+            >
+              {filteredPinnedResources.map((resource) => {
+                const resourceId = `${resource.id}-${selectedPackageId}`;
+                return (
+                  <FHIRResourceListItem
+                    key={resource.id || resourceId}
+                    resource={resource}
+                    isPinned={true}
+                    onPin={() => handlePinResource(resource)}
+                    onUnpin={() => handleUnpinResource(resourceId)}
+                  />
+                );
+              })}
+            </List.Section>
+          )}
+          {nonPinnedResources.length > 0 && (
+            <List.Section
+              title="Results"
+              subtitle={(
+                filteredResourcesCount - filteredPinnedResources.length
+              ).toString()}
+            >
+              {nonPinnedResources.map((resource) => {
+                const resourceId = `${resource.id}-${selectedPackageId}`;
+                return (
+                  <FHIRResourceListItem
+                    key={resource.id || resourceId}
+                    resource={resource}
+                    isPinned={false}
+                    onPin={() => handlePinResource(resource)}
+                    onUnpin={() => handleUnpinResource(resourceId)}
+                  />
+                );
+              })}
+            </List.Section>
+          )}
+        </>
+      )}
     </List>
   );
 }
 
-function FHIRResourceListItem({ resource }: { resource: FHIRResource }) {
-  const title = resource.name || resource.id;
+function FHIRResourceListItem({
+  resource,
+  isPinned,
+  onPin,
+  onUnpin,
+}: {
+  resource: FHIRPackageContent | PinnedResource;
+  isPinned?: boolean;
+  onPin?: () => void;
+  onUnpin?: () => void;
+}) {
+  const title = resource.title;
   const keywords = [
-    resource.id,
+    resource.title,
     resource.resourceType,
-    resource.description,
-    resource.publisher,
-    resource.status,
-  ].filter((keyword): keyword is string => Boolean(keyword));
+    "category" in resource ? resource.category : undefined,
+    "fileName" in resource ? resource.fileName : undefined,
+  ].filter(Boolean) as string[];
 
-  const descriptionMarkdown = resource.description ? `### ${title}\n\n${resource.description}` : "";
+  const getResourceTypeColor = (type: string) => {
+    switch (type.toLowerCase()) {
+      case "structuredefinition":
+        return Color.Blue;
+      case "valueset":
+        return Color.Green;
+      case "codesystem":
+        return Color.Orange;
+      case "searchparameter":
+        return Color.Purple;
+      case "operationdefinition":
+        return Color.Red;
+      case "extension":
+        return Color.Yellow;
+      default:
+        return Color.SecondaryText;
+    }
+  };
 
+  return (
+    <List.Item
+      title={title}
+      subtitle={resource.url}
+      keywords={keywords}
+      accessories={[
+        {
+          tag: {
+            value:
+              resource.resourceType ||
+              ("category" in resource ? resource.category : undefined) ||
+              "Unknown",
+            color: getResourceTypeColor(
+              resource.resourceType ||
+                ("category" in resource ? resource.category : undefined) ||
+                "Unknown",
+            ),
+          },
+        },
+      ]}
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section>
+            <Action.Push
+              title="Show Details"
+              icon={Icon.Eye}
+              target={
+                <ResourceDetail resource={resource as FHIRPackageContent} />
+              }
+            />
+            <Action.OpenInBrowser title="Open in Browser" url={resource.url} />
+            {isPinned && onUnpin ? (
+              <Action
+                title="Unpin Resource"
+                icon={Icon.PinDisabled}
+                onAction={onUnpin}
+              />
+            ) : onPin ? (
+              <Action title="Pin Resource" icon={Icon.Pin} onAction={onPin} />
+            ) : null}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.CopyToClipboard
+              title="Copy URL"
+              content={resource.url}
+              shortcut={{ modifiers: ["cmd"], key: "." }}
+            />
+            <Action.CopyToClipboard
+              title="Copy Title"
+              content={resource.title}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+            />
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+function ResourceDetail({ resource }: { resource: FHIRPackageContent }) {
+  const {
+    data: detailData,
+    isLoading,
+    error,
+  } = useFetch(resource.url, {
+    ...getResourceDetailOptions(),
+    onError: async (error) => {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to load resource details",
+        message: error.message,
+      });
+    },
+  });
+
+  const detail = detailData
+    ? parseResourceDetailResponse(detailData)
+    : undefined;
+  if (isLoading) {
+    return <Detail isLoading={true} navigationTitle={resource.title} />;
+  }
+
+  if (error) {
+    return (
+      <Detail
+        markdown={`# Error Loading Resource\n\n${error.message}`}
+        navigationTitle={resource.title}
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser title="Open in Browser" url={resource.url} />
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
+  return <ResourceDetailView resource={resource} detail={detail} />;
+}
+
+function ResourceDetailView({
+  resource,
+  detail,
+}: {
+  resource: FHIRPackageContent;
+  detail?: FHIRResourceDetail;
+}) {
   const getStatusColor = (status: string) => {
-    switch (status) {
+    switch (status?.toLowerCase()) {
       case "active":
         return Color.Green;
       case "draft":
@@ -106,57 +469,120 @@ function FHIRResourceListItem({ resource }: { resource: FHIRResource }) {
     }
   };
 
+  const title = detail?.title || detail?.name || resource.title;
+  let markdownContent = `## ${title}`;
+
+  if (detail?.description) {
+    markdownContent += `\n\n### Description\n\n${detail?.description}`;
+  }
+
+  if (detail?.purpose) {
+    markdownContent += `\n\n### Purpose\n\n${detail?.purpose}`;
+  }
+
+  if (detail?.url) {
+    markdownContent += `\n\n### URL\n\n${detail?.url}`;
+  }
+
   return (
-    <List.Item
-      title={title}
-      keywords={keywords}
-      detail={
-        <List.Item.Detail
-          markdown={descriptionMarkdown}
-          metadata={
-            <List.Item.Detail.Metadata>
-              <List.Item.Detail.Metadata.TagList title="Resource Type">
-                <List.Item.Detail.Metadata.TagList.Item text={resource.resourceType} />
-              </List.Item.Detail.Metadata.TagList>
+    <Detail
+      markdown={markdownContent}
+      navigationTitle={title}
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.TagList title="Resource Type">
+            <Detail.Metadata.TagList.Item
+              text={detail?.resourceType || resource.resourceType || "Unknown"}
+            />
+          </Detail.Metadata.TagList>
 
-              <List.Item.Detail.Metadata.TagList title="ID">
-                <List.Item.Detail.Metadata.TagList.Item text={resource.id} />
-              </List.Item.Detail.Metadata.TagList>
-
-              {resource.status && (
-                <List.Item.Detail.Metadata.TagList title="Status">
-                  <List.Item.Detail.Metadata.TagList.Item
-                    text={resource.status}
-                    color={getStatusColor(resource.status)}
-                  />
-                  {resource.experimental && (
-                    <List.Item.Detail.Metadata.TagList.Item text="experimental" color={Color.Red} />
-                  )}
-                </List.Item.Detail.Metadata.TagList>
+          {detail?.status && (
+            <Detail.Metadata.TagList title="Status">
+              <Detail.Metadata.TagList.Item
+                text={detail.status}
+                color={getStatusColor(detail.status)}
+              />
+              {detail.experimental && (
+                <Detail.Metadata.TagList.Item
+                  text="experimental"
+                  color={Color.Red}
+                />
               )}
+            </Detail.Metadata.TagList>
+          )}
 
-              <List.Item.Detail.Metadata.Separator />
+          <Detail.Metadata.Separator />
 
-              {resource.url && <List.Item.Detail.Metadata.Link title="URL" target={resource.url} text={resource.url} />}
-              {resource.version && <List.Item.Detail.Metadata.Label title="Version" text={resource.version} />}
-              {resource.publisher && <List.Item.Detail.Metadata.Label title="Publisher" text={resource.publisher} />}
-            </List.Item.Detail.Metadata>
-          }
-        />
+          {detail?.version && (
+            <Detail.Metadata.Label title="Version" text={detail.version} />
+          )}
+
+          {detail?.publisher && (
+            <Detail.Metadata.Label title="Publisher" text={detail.publisher} />
+          )}
+
+          {detail?.date && (
+            <Detail.Metadata.Label
+              title="Date"
+              text={new Date(detail.date).toLocaleDateString()}
+            />
+          )}
+
+          {detail?.contact && detail.contact.length > 0 && (
+            <Detail.Metadata.Label
+              title="Contact"
+              text={
+                detail.contact[0].name ||
+                detail.contact[0].telecom?.[0]?.value ||
+                "Available"
+              }
+            />
+          )}
+
+          {detail?.jurisdiction && detail.jurisdiction.length > 0 && (
+            <Detail.Metadata.Label
+              title="Jurisdiction"
+              text={detail.jurisdiction
+                .map(
+                  (j) =>
+                    j.coding?.[0]?.display ||
+                    j.coding?.[0]?.code ||
+                    "Specified",
+                )
+                .join(", ")}
+            />
+          )}
+
+          {detail?.mapping && detail.mapping.length > 0 && (
+            <Detail.Metadata.TagList title="Mappings">
+              {detail.mapping.map((m) => (
+                <Detail.Metadata.TagList.Item
+                  key={m.name || m.identity}
+                  text={m.name || m.identity}
+                />
+              ))}
+            </Detail.Metadata.TagList>
+          )}
+        </Detail.Metadata>
       }
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            {resource.url && <Action.OpenInBrowser title="Open in Browser" url={resource.url} />}
+            <Action.OpenInBrowser
+              title="Open in Browser"
+              url={detail?.url || resource.url}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
             <Action.CopyToClipboard
-              title="Copy Resource ID"
-              content={resource.id}
+              title="Copy URL"
+              content={detail?.url || resource.url}
               shortcut={{ modifiers: ["cmd"], key: "." }}
             />
-            {resource.url && (
+            {detail?.id && (
               <Action.CopyToClipboard
-                title="Copy URL"
-                content={resource.url}
+                title="Copy Resource ID"
+                content={detail.id}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
               />
             )}
