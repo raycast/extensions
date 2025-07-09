@@ -1,5 +1,9 @@
 # aerospace Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Added the new `Aerospace` Icon to the extension commands
+
 ## [Features] - 2025-06-19
 
 - Add monitor name to app switcher
@@ -15,7 +19,7 @@
 ## [New Feature] - 2024-10-13
 
 - Adds functionality to switch between apps in current workspace
-- Inspired by [ Yuriteixeira's Alfred workflow ](https://github.com/yuriteixeira/aerospace-workflow)
+- Inspired by [Yuriteixeira's Alfred workflow](https://github.com/yuriteixeira/aerospace-workflow)
 
 ## [Bug Fixes] - 2024-09-18
 
