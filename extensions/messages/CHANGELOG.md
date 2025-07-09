@@ -4,7 +4,7 @@
 
 When a search in Open Chats returns no matching chats and the input consists solely of valid phone-number characters, display a "Start New Chat" action to open the Messages app with the entered number. 
 
-## [Support for Hyphenated OTP Codes] - 2025-07-09
+## [Support for Hyphenated OTP Codes] - {PR_MERGE_DATE}
 
 Added detection for OTP codes formatted with hyphens (e.g. 123-456), requiring at least 3 digits on both sides.
 
