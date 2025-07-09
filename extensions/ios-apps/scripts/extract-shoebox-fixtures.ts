@@ -70,7 +70,7 @@ function processHtmlFile(inputPath: string, outputPath: string): void {
     console.log(`  📱 Found ${apps.length} app(s): ${appNames}`);
     
   } catch (error) {
-    console.log(`  ❌ Error processing ${inputPath}: ${error}`);
+    console.log(`  ❌ Error processing ${inputPath}: ${error.message || error.toString()});
   }
 }
 
