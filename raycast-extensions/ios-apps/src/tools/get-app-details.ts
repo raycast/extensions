@@ -70,7 +70,7 @@ export default async function getIosAppDetails(input: Input) {
 
     return { app: formattedDetails };
   } catch (error) {
-    console.error(`[get-app-details tool] Error: ${error}`);
-    throw new Error(`Failed to get app details: ${error}`);
+    console.error(`[get-app-details tool] Error:`, error);
+    throw new Error(`Failed to get app details: ${error.message || error}`);
   }
 }
