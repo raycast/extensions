@@ -146,10 +146,10 @@ brew install ipatool
 export function findIpatoolPath(): string | null {
   const commonPaths = [
     "/opt/homebrew/bin/ipatool", // Homebrew on Apple Silicon
-    "/usr/local/bin/ipatool",    // Homebrew on Intel
-    "/usr/bin/ipatool",          // System installation
+    "/usr/local/bin/ipatool", // Homebrew on Intel
+    "/usr/bin/ipatool", // System installation
     `${process.env.HOME}/.local/bin/ipatool`, // User local installation
-    `${process.env.HOME}/bin/ipatool`,        // User bin directory
+    `${process.env.HOME}/bin/ipatool`, // User bin directory
   ];
 
   for (const path of commonPaths) {
