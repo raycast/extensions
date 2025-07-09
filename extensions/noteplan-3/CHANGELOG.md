@@ -1,7 +1,7 @@
 # NotePlan 3 Changelog
 
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-07-09
 
 - Fix Daily plan display
 
