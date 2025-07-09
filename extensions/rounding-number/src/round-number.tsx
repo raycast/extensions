@@ -5,7 +5,6 @@ import {
   Clipboard,
   showToast,
   Toast,
-  Detail,
   ActionPanel,
   Action,
   getPreferenceValues,
@@ -175,12 +174,10 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
         value={nearestValue}
         onChange={setNearestValue}
       />
-      
+
       <Form.Separator />
-      
-      {error && (
-        <Form.Description title="Error" text={error} />
-      )}
+
+      {error && <Form.Description title="Error" text={error} />}
       {result !== null && !error && (
         <Form.Description title="Result" text={result.toString()} />
       )}
