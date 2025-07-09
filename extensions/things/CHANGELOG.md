@@ -4,6 +4,7 @@
 
 - Improve detection mechanism for projects to not depend on the existence of a project
 - Prevent crashes when receiving an `undefined` value from Things via JavaScript for Automation (JXA)
+- Improve detection of `PERMISSION_DENIED` errors (`-1743` error code)
 
 ## [Enhanced Error Handling] - 2025-07-07
 
