@@ -38,7 +38,9 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
   const preferences = getPreferenceValues<Preferences>();
 
   const [roundValue, setRoundValue] = useState(props.arguments.roundValue);
-  const [nearestValue, setNearestValue] = useState(props.arguments.nearestValue);
+  const [nearestValue, setNearestValue] = useState(
+    props.arguments.nearestValue,
+  );
   const [result, setResult] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -102,7 +104,9 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
     await showToast({
       style: Toast.Style.Success,
       title: "Rounded!",
-      message: `Result ${rounded} ${preferences.copyToClipboard ? "copied to clipboard." : ""}`,
+      message: `Result ${rounded} ${
+        preferences.copyToClipboard ? "copied to clipboard." : ""
+      }`,
     });
   }
 
@@ -145,7 +149,9 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
     await showToast({
       style: Toast.Style.Success,
       title: "Rounded!",
-      message: `Result ${rounded} ${preferences.copyToClipboard ? "copied to clipboard." : ""}`,
+      message: `Result ${rounded} ${
+        preferences.copyToClipboard ? "copied to clipboard." : ""
+      }`,
     });
   }
 
@@ -157,10 +163,22 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
         </ActionPanel>
       }
     >
-      <Form.TextField id="roundValue" title="Round" value={roundValue} onChange={setRoundValue} />
-      <Form.TextField id="nearestValue" title="To the nearest" value={nearestValue} onChange={setNearestValue} />
+      <Form.TextField
+        id="roundValue"
+        title="Round"
+        value={roundValue}
+        onChange={setRoundValue}
+      />
+      <Form.TextField
+        id="nearestValue"
+        title="To the nearest"
+        value={nearestValue}
+        onChange={setNearestValue}
+      />
       {error && <Detail markdown={`## Error\n\n${error}`} />}
-      {result !== null && !error && <Detail markdown={`## Result\n\n${result}`} />}
+      {result !== null && !error && (
+        <Detail markdown={`## Result\n\n${result}`} />
+      )}
     </Form>
   );
 }
