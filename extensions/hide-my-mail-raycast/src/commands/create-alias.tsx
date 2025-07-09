@@ -4,13 +4,7 @@ import { useForm } from "@raycast/utils";
 import { CreateAliasFormData, CreateAliasProps } from "../types";
 import { validateLabel, validateDescription, extractDomainFromEmail } from "../utils";
 import { getApiConfig } from "../services/api/config";
-import {
-  getUnusedRules,
-  createRule,
-  updateRule,
-  ensurePoolSize,
-  getAccountDomain,
-} from "../services/cf/rules";
+import { getUnusedRules, createRule, updateRule, ensurePoolSize, getAccountDomain } from "../services/cf/rules";
 
 export default function CreateAlias({ alias }: CreateAliasProps = {}) {
   const [isLoading, setIsLoading] = useState(false);
@@ -27,6 +21,13 @@ export default function CreateAlias({ alias }: CreateAliasProps = {}) {
         console.error("Failed to fetch domain:", error);
         // Fallback to extracting from destination email
         setDomain(extractDomainFromEmail(config.destinationEmail));
+
+        // Inform user about the fallback
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Domain Fetch Failed",
+          message: "Using fallback domain. Check your API configuration.",
+        });
       }
     };
 
@@ -43,7 +44,7 @@ export default function CreateAlias({ alias }: CreateAliasProps = {}) {
           throw new Error(labelValidation.error);
         }
 
-        const descValidation = validateDescription(values.description);
+        const descValidation = validateDescription(values.description || "");
         if (!descValidation.isValid) {
           throw new Error(descValidation.error);
         }
@@ -83,7 +84,14 @@ export default function CreateAlias({ alias }: CreateAliasProps = {}) {
 
             // Ensure pool size after using a rule
             if (config.preAllocatePool) {
-              ensurePoolSize(20).catch(console.error);
+              ensurePoolSize(20).catch((poolError) => {
+                console.error("Pool size maintenance failed:", poolError);
+                showToast({
+                  style: Toast.Style.Failure,
+                  title: "Pool Maintenance Warning",
+                  message: "Alias created but pool replenishment failed. Next alias creation may be slower.",
+                });
+              });
             }
           } else {
             throw new Error("Failed to create or find available alias");
@@ -150,7 +158,14 @@ export default function CreateAlias({ alias }: CreateAliasProps = {}) {
 
         // Ensure pool size after using a rule
         if (config.preAllocatePool) {
-          ensurePoolSize(20).catch(console.error);
+          ensurePoolSize(20).catch((poolError) => {
+            console.error("Pool size maintenance failed:", poolError);
+            showToast({
+              style: Toast.Style.Failure,
+              title: "Pool Maintenance Warning",
+              message: "Alias created but pool replenishment failed. Next alias creation may be slower.",
+            });
+          });
         }
 
         popToRoot();
@@ -173,10 +188,7 @@ export default function CreateAlias({ alias }: CreateAliasProps = {}) {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title={alias ? "Update Alias" : "Create Alias"}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title={alias ? "Update Alias" : "Create Alias"} onSubmit={handleSubmit} />
           {!alias && (
             <Action
               title="Use Random Unused Alias"
@@ -187,11 +199,7 @@ export default function CreateAlias({ alias }: CreateAliasProps = {}) {
         </ActionPanel>
       }
     >
-      <Form.TextField
-        title="Label"
-        placeholder="Enter a label for this alias (required)"
-        {...itemProps.label}
-      />
+      <Form.TextField title="Label" placeholder="Enter a label for this alias (required)" {...itemProps.label} />
       <Form.TextArea
         title="Description"
         placeholder="Enter a description for this alias (optional)"
@@ -199,18 +207,10 @@ export default function CreateAlias({ alias }: CreateAliasProps = {}) {
       />
       <Form.Separator />
       {alias && <Form.Description title="Editing Alias" text={`Email: ${alias.email}`} />}
-      <Form.Description
-        title="Destination"
-        text={`Aliases will forward to: ${config.destinationEmail}`}
-      />
-      {!alias && (
-        <Form.Description title="Domain" text={`New aliases will be created under: ${domain}`} />
-      )}
+      <Form.Description title="Destination" text={`Aliases will forward to: ${config.destinationEmail}`} />
+      {!alias && <Form.Description title="Domain" text={`New aliases will be created under: ${domain}`} />}
       {!alias && config.preAllocatePool && (
-        <Form.Description
-          title="Pool Mode"
-          text="Pre-allocation is enabled - aliases will be created faster"
-        />
+        <Form.Description title="Pool Mode" text="Pre-allocation is enabled - aliases will be created faster" />
       )}
     </Form>
   );

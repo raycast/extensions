@@ -11,6 +11,14 @@ A Raycast extension that allows you to create, list, edit, and delete Cloudflare
 - 📋 **Quick Copy**: Copy email addresses to the clipboard.
 - ⚡️ **Alias Pooling**: Pre-allocate a pool of aliases for even faster creation (optional).
 
+## Screenshots
+
+![List Email Aliases](./screenshots/list-aliases.png)
+![Create Email Alias](./screenshots/create-alias.png)
+![Edit Email Alias](./screenshots/edit-alias.png)
+![Delete Email Alias](./screenshots/delete-alias.png)
+
+
 ## Prerequisites
 
 1.  **Cloudflare Account**: A Cloudflare account with a configured domain.

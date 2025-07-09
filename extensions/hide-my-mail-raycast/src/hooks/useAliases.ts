@@ -1,6 +1,5 @@
 import { useCachedPromise } from "@raycast/utils";
 import { getUsedAliases } from "../services/cf/rules";
-import { AliasRule } from "../types";
 
 export function useAliases() {
   const {
@@ -8,19 +7,17 @@ export function useAliases() {
     error,
     isLoading,
     revalidate,
-  } = useCachedPromise(
-    async (): Promise<AliasRule[]> => {
-      return await getUsedAliases();
+  } = useCachedPromise(getUsedAliases, [], {
+    keepPreviousData: true,
+    initialData: [],
+    failureToastOptions: {
+      title: "Failed to Load Aliases",
+      message: "There was an error loading your email aliases. Please check your API configuration and try again.",
     },
-    [],
-    {
-      keepPreviousData: true,
-      initialData: [],
-    }
-  );
+  });
 
   return {
-    aliases: aliases || [],
+    aliases,
     error,
     isLoading,
     revalidate,

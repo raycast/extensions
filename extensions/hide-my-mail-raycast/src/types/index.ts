@@ -48,12 +48,12 @@ export type EmailRoutingSettings = CloudflareEmailRoutingSettings;
 
 export interface CreateAliasFormData {
   label: string;
-  description: string;
+  description?: string;
 }
 
 export interface EditAliasFormData {
   label: string;
-  description: string;
+  description?: string;
   aliasId: string;
 }
 

@@ -1,15 +1,5 @@
 import { useState } from "react";
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  showToast,
-  Toast,
-  Alert,
-  confirmAlert,
-  Color,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Icon, showToast, Toast, Alert, confirmAlert, Color } from "@raycast/api";
 import { useAliases } from "../hooks/useAliases";
 import { AliasDetail } from "../components/AliasDetail";
 import { AliasRule } from "../types";
@@ -17,7 +7,7 @@ import { deleteRule } from "../services/cf/rules";
 import CreateAlias from "./create-alias";
 
 export default function ListAliases() {
-  const { aliases, error, isLoading, revalidate } = useAliases();
+  const { aliases, isLoading, revalidate } = useAliases();
   const [showingDetail, setShowingDetail] = useState(false);
   const [searchText, setSearchText] = useState("");
 
@@ -55,15 +45,7 @@ export default function ListAliases() {
   };
 
   const getColorForTag = (label: string): Color => {
-    const colors = [
-      Color.Blue,
-      Color.Green,
-      Color.Orange,
-      Color.Red,
-      Color.Purple,
-      Color.Yellow,
-      Color.Magenta,
-    ];
+    const colors = [Color.Blue, Color.Green, Color.Orange, Color.Red, Color.Purple, Color.Yellow, Color.Magenta];
 
     if (!label || label === "Unlabeled") {
       return Color.SecondaryText;
@@ -77,16 +59,6 @@ export default function ListAliases() {
 
     return colors[Math.abs(hash) % colors.length];
   };
-
-  useEffect(() => {
-    if (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to Load Aliases",
-        message: error.message,
-      });
-    }
-  }, [error]);
 
   const filteredAliases = (aliases || []).filter((alias) => {
     const searchLower = searchText.toLowerCase();
@@ -155,7 +127,7 @@ export default function ListAliases() {
             ]}
             icon={{
               source: Icon.Envelope,
-              tintColor: alias.enabled ? "#00C853" : "#FF9800",
+              tintColor: alias.enabled ? Color.Green : Color.Orange,
             }}
             detail={showingDetail ? <AliasDetail alias={alias} /> : undefined}
             actions={
@@ -182,7 +154,7 @@ export default function ListAliases() {
                   title="Toggle Detail"
                   icon={Icon.Sidebar}
                   onAction={handleToggleDetail}
-                  shortcut={{ modifiers: ["cmd"], key: "d" }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
                 />
                 <Action.CopyToClipboard
                   title="Copy Forwarding Address"
@@ -193,7 +165,7 @@ export default function ListAliases() {
                   title="Refresh"
                   icon={Icon.RotateClockwise}
                   onAction={revalidate}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                  shortcut={{ modifiers: ["cmd", "opt"], key: "r" }}
                 />
               </ActionPanel>
             }

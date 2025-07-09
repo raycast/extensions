@@ -1,6 +1,6 @@
 Hide My Mail: Cloudflare Email Aliases Changelog
 
-## [Initial Version] - 2025-07-08
+## [Initial Version] - {PR_MERGE_DATE}
  
 ### Added
  

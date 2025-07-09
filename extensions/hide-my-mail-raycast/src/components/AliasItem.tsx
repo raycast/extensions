@@ -1,14 +1,4 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  Color,
-  Alert,
-  confirmAlert,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, Alert, confirmAlert, showToast, Toast } from "@raycast/api";
 import { AliasRule } from "../types";
 import { deleteRule } from "../services/cf/rules";
 import { getColorForTag } from "../utils/colors";

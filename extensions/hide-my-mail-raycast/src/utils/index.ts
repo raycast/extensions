@@ -2,6 +2,49 @@ export const APP_RULE_PREFIX = "[hide_mail]";
 export const EMPTY_LABEL = "unused";
 export const SEPARATOR = "|";
 
+// Rule format pattern documentation
+export const RULE_FORMAT_PATTERN = `${APP_RULE_PREFIX}${SEPARATOR}<timestamp>${SEPARATOR}<label>${SEPARATOR}<description>`;
+export const RULE_FORMAT_EXAMPLE = `${APP_RULE_PREFIX}${SEPARATOR}1642694400000${SEPARATOR}work${SEPARATOR}For work emails`;
+
+/**
+ * Rule name format specification:
+ *
+ * Format: [hide_mail]|<timestamp>|<label>|<description>
+ *
+ * Components:
+ * - PREFIX: "[hide_mail]" - Identifies rules created by this extension
+ * - TIMESTAMP: Unix timestamp in milliseconds (or microseconds for uniqueness)
+ * - LABEL: User-defined label for the alias (or "unused" for pre-allocated rules)
+ * - DESCRIPTION: User-defined description (or "unused" for pre-allocated rules)
+ *
+ * Examples:
+ * - Used alias: "[hide_mail]|1642694400000|work|For work emails"
+ * - Unused alias: "[hide_mail]|1642694400000|unused|unused"
+ *
+ * Notes:
+ * - All components are separated by the "|" character
+ * - Labels and descriptions cannot contain the "|" character
+ * - Unused rules have both label and description set to "unused"
+ */
+export const RULE_FORMAT_DOCUMENTATION = {
+  pattern: RULE_FORMAT_PATTERN,
+  example: RULE_FORMAT_EXAMPLE,
+  components: {
+    prefix: APP_RULE_PREFIX,
+    separator: SEPARATOR,
+    emptyValue: EMPTY_LABEL,
+  },
+} as const;
+
+/**
+ * Constructs a rule name following the documented format pattern
+ */
+export function constructRuleName(timestamp: number, label?: string, description?: string): string {
+  const normalizedLabel = label || EMPTY_LABEL;
+  const normalizedDescription = description || EMPTY_LABEL;
+  return `${APP_RULE_PREFIX}${SEPARATOR}${timestamp}${SEPARATOR}${normalizedLabel}${SEPARATOR}${normalizedDescription}`;
+}
+
 export function generateRandomEmail(domain: string): string {
   const adjectives = [
     "happy",

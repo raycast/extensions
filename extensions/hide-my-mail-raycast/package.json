@@ -87,7 +87,7 @@
       "title": "Pre-allocate Alias Pool",
       "description": "Pre-create unused aliases for faster alias generation (uses more rules)",
       "default": false,
-      "label": "Enable pre-allocation"
+      "label": "Enable Pre-allocation"
     }
   ]
 }

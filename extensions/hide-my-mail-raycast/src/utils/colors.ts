@@ -1,14 +1,6 @@
 import { Color } from "@raycast/api";
 
-const colors = [
-  Color.Red,
-  Color.Orange,
-  Color.Yellow,
-  Color.Green,
-  Color.Blue,
-  Color.Purple,
-  Color.Magenta,
-];
+const colors = [Color.Red, Color.Orange, Color.Yellow, Color.Green, Color.Blue, Color.Purple, Color.Magenta];
 
 // Function-based hash code generation
 function hashCode(str: string): number {
