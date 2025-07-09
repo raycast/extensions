@@ -1,5 +1,9 @@
 # Things Changelog
 
+## [Fix Error on Task Update] - {PR_MERGE_DATE}
+
+- Fix JXA errors when updating todos via actions
+
 ## [Improved Project Detection] - 2025-07-09
 
 - Improve detection mechanism for projects to not depend on the existence of a project
