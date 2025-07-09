@@ -27,22 +27,29 @@
   "commands": [
     {
       "name": "licenses",
-      "title": "Licenses",
+      "title": "Voew Licenses",
       "subtitle": "Keygen",
       "description": "List Licenses and Create new ones",
       "mode": "view"
     },
     {
       "name": "policies",
-      "title": "Policies",
+      "title": "List Policies",
       "subtitle": "Keygen",
       "description": "List Policies and Create new ones",
+      "mode": "view"
+    },
+    {
+      "name": "products",
+      "title": "View Products",
+      "subtitle": "Keygen",
+      "description": "List Products and Create new ones",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.99.3",
-    "@raycast/utils": "^1.19.1",
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.0.1",
     "dayjs": "^1.11.13"
   },
   "devDependencies": {

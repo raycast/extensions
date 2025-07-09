@@ -16,6 +16,14 @@ npm install --save @raycast/utils
 
 ## Changelog
 
+### v2.1.0
+
+- `getFavicon` will now respect the user's setting for the favicon provider. Note that the `Apple` provider isn't supported since it relies on a native API.
+
+### v2.0.1
+
+- Fix types for ESM extensions
+
 ### v2.0.0
 
 - The library can now be tree-shaken, reducing its size considerably.

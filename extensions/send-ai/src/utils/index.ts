@@ -2,7 +2,7 @@
 export { executeAction } from "./api-wrapper";
 export { provider } from "./auth";
 export { CacheAdapter } from "./cache";
-export { STORAGE_KEYS, BASE_BACKEND_URL, BACKEND_CALLBACK_URL, backendClient } from "./constants";
+export { STORAGE_KEYS } from "./constants";
 export { getErrorMessage, createErrorToast, createSuccessToast } from "./error";
 export { formatNumber, formatTokenBalance, formatUsdAmount, formatPercentage, formatPrice } from "./format";
 export { isValidSolanaAddress } from "./is-valid-address";

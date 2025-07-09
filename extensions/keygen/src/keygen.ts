@@ -13,20 +13,21 @@ const PAGE_SIZE = 15;
 export const MAX_PAGE_SIZE = 100;
 
 export const parseResponse = async (response: Response) => {
+  const result = await response.json();
   if (!response.ok) {
-    const err: ErrorResult = await response.json();
+    const err = result as ErrorResult;
     throw new Error(err.errors[0].detail);
   }
-  const result = await response.json();
   return result;
 };
 export const useKeygen = <T>(endpoint: string) =>
   useFetch(API_URL + endpoint, {
     headers,
     parseResponse,
-    mapResult(result: Result<T>) {
+    mapResult(result) {
+      const res = result as Result<T>;
       return {
-        data: result.data,
+        data: res.data,
       };
     },
   });
@@ -43,10 +44,11 @@ export const useKeygenPaginated = <T>(endpoint: string, { pageSize }: { pageSize
     {
       headers,
       parseResponse,
-      mapResult(result: PaginatedResult<T>) {
+      mapResult(result) {
+        const res = result as PaginatedResult<T>;
         return {
-          data: result.data,
-          hasMore: !!result.links.next,
+          data: res.data,
+          hasMore: !!res.links.next,
         };
       },
       initialData: [],

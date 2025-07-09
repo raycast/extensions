@@ -4,6 +4,8 @@ import { executeAction, provider, createErrorToast, formatNumber, formatTokenBal
 import { withAccessToken } from "@raycast/utils";
 import { PortfolioToken } from "./type";
 import GetTokenOverview from "./get-token-overview";
+import SellToken from "./sell-token";
+import BuyTokenForm from "./views/buy-token-form";
 
 interface PortfolioData {
   wallet: string;
@@ -46,27 +48,44 @@ function GetPortfolio() {
               </ActionPanel>
             }
           />
-          {portfolio.items.map((token) => (
-            <List.Item
-              key={token.address}
-              title={token.symbol}
-              subtitle={token.name}
-              accessories={[
-                { text: formatTokenBalance(token.uiAmount, token.symbol) },
-                { text: `$${formatNumber(token.valueUsd)}` },
-              ]}
-              icon={{ source: token.logoURI, mask: Image.Mask.Circle }}
-              actions={
-                <ActionPanel>
-                  <Action.Push
-                    title="View Details"
-                    target={<GetTokenOverview arguments={{ tokenAddress: token.address }} />}
-                  />
-                  <Action title="Refresh" onAction={loadPortfolio} />
-                </ActionPanel>
-              }
-            />
-          ))}
+          {portfolio.items.map((token) => {
+            if (!token.name || !token.symbol || !token.logoURI || !token.address || !token.uiAmount || !token.valueUsd)
+              return null;
+            return (
+              <List.Item
+                key={token.address}
+                title={token.symbol}
+                subtitle={token.name}
+                accessories={[
+                  { text: formatTokenBalance(token.uiAmount, token.symbol) },
+                  { text: `$${formatNumber(token.valueUsd)}` },
+                ]}
+                icon={{ source: token.logoURI, mask: Image.Mask.Circle }}
+                actions={
+                  <ActionPanel>
+                    <Action.Push
+                      title="View Details"
+                      target={<GetTokenOverview arguments={{ tokenAddress: token.address }} />}
+                    />
+                    <Action.Push
+                      title="Sell"
+                      target={
+                        <SellToken
+                          arguments={{
+                            inputMint: token.address,
+                            inputAmount: token.uiAmount.toString(),
+                            dontAutoExecute: true,
+                          }}
+                        />
+                      }
+                    />
+                    <Action.Push title="Buy More" target={<BuyTokenForm arguments={{ outputMint: token.address }} />} />
+                    <Action title="Refresh" onAction={loadPortfolio} />
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
         </>
       )}
     </List>

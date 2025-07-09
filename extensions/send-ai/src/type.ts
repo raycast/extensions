@@ -161,3 +161,24 @@ export interface DCAOrder {
   updatedAt: string;
   trades: DCAOrderTrade[];
 }
+
+export interface Transaction {
+  signature: string;
+  timestamp: number;
+  slot: number;
+  type: string;
+  status: string;
+  fee: number;
+  amount: number;
+  tokenMint?: string;
+  tokenSymbol?: string;
+  from: string;
+  to: string;
+  description: string;
+  source: string;
+}
+
+export interface TransactionHistoryResponse {
+  status: string;
+  data: Transaction[];
+}

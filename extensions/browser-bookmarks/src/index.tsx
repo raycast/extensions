@@ -11,7 +11,7 @@ import {
 } from "@raycast/api";
 import { getFavicon, useCachedPromise, useCachedState } from "@raycast/utils";
 import Fuse from "fuse.js";
-import { useState, useMemo, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import PermissionErrorScreen from "./components/PermissionErrorScreen";
 import SelectBrowsers from "./components/SelectBrowsers";
@@ -687,6 +687,18 @@ export default function Command() {
                     profiles={zen.profiles}
                     currentProfile={zen.currentProfile}
                     setCurrentProfile={zen.setCurrentProfile}
+                  />
+                </ActionPanel.Section>
+
+                <ActionPanel.Section>
+                  <Action.CreateQuicklink
+                    title="Create Quicklink"
+                    icon={Icon.Link}
+                    quicklink={{
+                      name: item.title,
+                      link: item.url,
+                    }}
+                    shortcut={{ modifiers: ["cmd"], key: "s" }}
                   />
                 </ActionPanel.Section>
 

@@ -21,9 +21,12 @@ function BuyToken(props: LaunchProps<{ arguments: BuyTokenFormValues }>) {
   }, [props.arguments.outputMint, props.arguments.inputAmount]);
 
   async function handleSubmit(values: BuyTokenFormValues) {
-    try {
-      setIsLoading(true);
+    if (isLoading) {
+      return;
+    }
+    setIsLoading(true);
 
+    try {
       const inputAmount = parseFloat(values.inputAmount);
 
       // Validation
