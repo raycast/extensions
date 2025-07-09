@@ -1,6 +1,6 @@
 # aerospace Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-07-09
 
 - Added the new `Aerospace` Icon to the extension commands
 
