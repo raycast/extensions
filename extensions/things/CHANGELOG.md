@@ -1,6 +1,6 @@
 # Things Changelog
 
-## [Improved Project Detection] - {PR_MERGE_DATE}
+## [Improved Project Detection] - 2025-07-09
 
 - Improve detection mechanism for projects to not depend on the existence of a project
 - Prevent crashes when receiving an `undefined` value from Things via JavaScript for Automation (JXA)
