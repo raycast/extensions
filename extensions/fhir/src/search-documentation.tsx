@@ -6,8 +6,6 @@ import {
   getPackageContentsUrl,
   getPackageContentsOptions,
   parsePackageContentsResponse,
-  getResourceDetailOptions,
-  parseResourceDetailResponse,
   FHIRPackageContent,
   FHIRResourceDetail,
 } from "./utils/fhir-registry-api";
@@ -80,7 +78,9 @@ export default function SearchDocumentation() {
         packageId: selectedPackageId,
         resourceId: "resourceId" in resource ? resource.resourceId : resource.id,
         title: resource.title,
-        url: resource.url,
+        canonical: resource.canonical,
+        jsonUrl: resource.jsonUrl,
+        simplifierUrl: resource.simplifierUrl,
         resourceType: resource.resourceType,
         packageName: "packageName" in resource ? resource.packageName : selectedPkg.name,
       });
@@ -228,14 +228,13 @@ export default function SearchDocumentation() {
           {filteredPinnedResources.length > 0 && (
             <List.Section title="Pinned" subtitle={filteredPinnedResources.length.toString()}>
               {filteredPinnedResources.map((resource) => {
-                const resourceId = `${resource.id}-${selectedPackageId}`;
                 return (
                   <FHIRResourceListItem
-                    key={resource.id || resourceId}
+                    key={resource.id}
                     resource={resource}
                     isPinned={true}
                     onPin={() => handlePinResource(resource)}
-                    onUnpin={() => handleUnpinResource(resourceId)}
+                    onUnpin={() => handleUnpinResource(resource.id)}
                   />
                 );
               })}
@@ -307,7 +306,7 @@ function FHIRResourceListItem({
   return (
     <List.Item
       title={title}
-      subtitle={resource.url}
+      subtitle={resource.canonical}
       keywords={keywords}
       accessories={[
         {
@@ -325,26 +324,25 @@ function FHIRResourceListItem({
             <Action.Push
               title="Show Details"
               icon={Icon.Eye}
-              target={<ResourceDetail resource={resource as FHIRPackageContent} />}
+              target={
+                <ResourceDetail
+                  resource={resource as FHIRPackageContent}
+                  isPinned={isPinned}
+                  onPin={onPin}
+                  onUnpin={onUnpin}
+                />
+              }
             />
-            <Action.OpenInBrowser title="Open in Browser" url={resource.url} />
+            <Action.OpenInBrowser url={resource.canonical} />
             {isPinned && onUnpin ? (
               <Action title="Unpin Resource" icon={Icon.PinDisabled} onAction={onUnpin} />
             ) : onPin ? (
               <Action title="Pin Resource" icon={Icon.Pin} onAction={onPin} />
             ) : null}
           </ActionPanel.Section>
-          <ActionPanel.Section>
-            <Action.CopyToClipboard
-              title="Copy URL"
-              content={resource.url}
-              shortcut={{ modifiers: ["cmd"], key: "." }}
-            />
-            <Action.CopyToClipboard
-              title="Copy Title"
-              content={resource.title}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
-            />
+          <ActionPanel.Section title="Open in Browser">
+            {/* eslint-disable-next-line @raycast/prefer-title-case */}
+            <Action.OpenInBrowser title="simplifier.net" url={resource.simplifierUrl} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -352,13 +350,22 @@ function FHIRResourceListItem({
   );
 }
 
-function ResourceDetail({ resource }: { resource: FHIRPackageContent }) {
+function ResourceDetail({
+  resource,
+  isPinned,
+  onPin,
+  onUnpin,
+}: {
+  resource: FHIRPackageContent;
+  isPinned?: boolean;
+  onPin?: () => void;
+  onUnpin?: () => void;
+}) {
   const {
-    data: detailData,
+    data: detail,
     isLoading,
     error,
-  } = useFetch(resource.url, {
-    ...getResourceDetailOptions(),
+  } = useFetch<FHIRResourceDetail>(resource.jsonUrl, {
     onError: async (error) => {
       await showFailureToast(error, {
         title: "Failed to load resource details",
@@ -366,7 +373,6 @@ function ResourceDetail({ resource }: { resource: FHIRPackageContent }) {
     },
   });
 
-  const detail = detailData ? parseResourceDetailResponse(detailData) : undefined;
   if (isLoading) {
     return <Detail isLoading={true} navigationTitle={resource.title} />;
   }
@@ -378,17 +384,29 @@ function ResourceDetail({ resource }: { resource: FHIRPackageContent }) {
         navigationTitle={resource.title}
         actions={
           <ActionPanel>
-            <Action.OpenInBrowser title="Open in Browser" url={resource.url} />
+            <Action.OpenInBrowser url={resource.canonical} />
           </ActionPanel>
         }
       />
     );
   }
 
-  return <ResourceDetailView resource={resource} detail={detail} />;
+  return <ResourceDetailView resource={resource} detail={detail} isPinned={isPinned} onPin={onPin} onUnpin={onUnpin} />;
 }
 
-function ResourceDetailView({ resource, detail }: { resource: FHIRPackageContent; detail?: FHIRResourceDetail }) {
+function ResourceDetailView({
+  resource,
+  detail,
+  isPinned,
+  onPin,
+  onUnpin,
+}: {
+  resource: FHIRPackageContent;
+  detail?: FHIRResourceDetail;
+  isPinned?: boolean;
+  onPin?: () => void;
+  onUnpin?: () => void;
+}) {
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
       case "active":
@@ -472,17 +490,26 @@ function ResourceDetailView({ resource, detail }: { resource: FHIRPackageContent
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser title="Open in Browser" url={detail?.url || resource.url} />
+            <Action.OpenInBrowser url={resource.canonical} />
+            {isPinned && onUnpin ? (
+              <Action title="Unpin Resource" icon={Icon.PinDisabled} onAction={onUnpin} />
+            ) : onPin ? (
+              <Action title="Pin Resource" icon={Icon.Pin} onAction={onPin} />
+            ) : null}
           </ActionPanel.Section>
-          <ActionPanel.Section>
+          <ActionPanel.Section title="Open in Browser">
+            {/* eslint-disable-next-line @raycast/prefer-title-case */}
+            <Action.OpenInBrowser title="simplifier.net" url={resource.simplifierUrl} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Copy to Clipboard">
             <Action.CopyToClipboard
-              title="Copy URL"
-              content={detail?.url || resource.url}
+              title="URL"
+              content={resource.canonical}
               shortcut={{ modifiers: ["cmd"], key: "." }}
             />
             {detail?.id && (
               <Action.CopyToClipboard
-                title="Copy Resource ID"
+                title="ID"
                 content={detail.id}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
               />

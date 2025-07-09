@@ -18,9 +18,11 @@ export interface PinnedResource {
   packageId: string;
   resourceId: number;
   title: string;
-  url: string;
+  canonical: string;
   resourceType: string;
   packageName: string;
+  simplifierUrl: string;
+  jsonUrl: string;
 }
 
 const PINNED_PACKAGES_KEY = "fhir-pinned-packages";

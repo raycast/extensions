@@ -224,6 +224,9 @@ interface PackageListItemProps {
 }
 
 function PackageListItem({ pkg, isPinned, isCore, onPin, onUnpin, getPackageTypeColor }: PackageListItemProps) {
+  const registryFHIRUrl = `https://registry.fhir.org/package/${pkg.id}`;
+  const simplifierUrl = `https://simplifier.net/packages/${pkg.name}/${pkg.version}`;
+
   return (
     <List.Item
       title={pkg.name}
@@ -256,7 +259,7 @@ function PackageListItem({ pkg, isPinned, isCore, onPin, onUnpin, getPackageType
 
               <List.Item.Detail.Metadata.Separator />
 
-              <List.Item.Detail.Metadata.Link title="URL" target={pkg.url} text={pkg.url} />
+              {pkg.url && <List.Item.Detail.Metadata.Link title="URL" target={pkg.url} text={pkg.url} />}
 
               {pkg.publisher && <List.Item.Detail.Metadata.Label title="Publisher" text={pkg.publisher} />}
 
@@ -276,17 +279,23 @@ function PackageListItem({ pkg, isPinned, isCore, onPin, onUnpin, getPackageType
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser title="Open in Browser" url={pkg.url} />
+            <Action.OpenInBrowser url={pkg.url || simplifierUrl} />
             {isCore ? null : isPinned ? (
               <Action title="Unpin Package" icon={Icon.PinDisabled} onAction={onUnpin} />
             ) : (
               <Action title="Pin Package" icon={Icon.Pin} onAction={onPin} />
             )}
           </ActionPanel.Section>
-          <ActionPanel.Section>
-            <Action.CopyToClipboard title="Copy ID" content={pkg.id} />
-            <Action.CopyToClipboard title="Copy Name" content={pkg.name} />
-            <Action.CopyToClipboard title="Copy URL" content={pkg.url} />
+          <ActionPanel.Section title="Open in Browser">
+            {/* eslint-disable-next-line @raycast/prefer-title-case */}
+            <Action.OpenInBrowser title="simplifier.net" url={simplifierUrl} />
+            {/* eslint-disable-next-line @raycast/prefer-title-case */}
+            <Action.OpenInBrowser title="registry.fhir.org" url={registryFHIRUrl} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Copy to Clipboard">
+            <Action.CopyToClipboard title="ID" content={pkg.id} />
+            <Action.CopyToClipboard title="Name" content={pkg.name} />
+            <Action.CopyToClipboard title="URL" content={pkg.url} />
           </ActionPanel.Section>
         </ActionPanel>
       }
