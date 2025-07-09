@@ -275,7 +275,7 @@ async function checkForAiInPullRequestDiff(extensionFolder: string, { github, co
       }
     }
 
-    if (file.status === 'added') {
+    if (file.status === 'added' || file.status === 'modified') {
       const aiFiles = ['ai.json', 'ai.yaml', 'ai.json5'];
 
       if (aiFiles.some(filename => filePath === `extensions/${extensionFolder}/${filename}`)) {
