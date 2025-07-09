@@ -1,6 +1,6 @@
 # Messages Changelog
 
-## [Start New Chat on No Results] - {PR_MERGE_DATE}
+## [Start New Chat on No Results] - 2025-07-09
 
 When a search in Open Chats returns no matching chats and the input consists solely of valid phone-number characters, display a "Start New Chat" action to open the Messages app with the entered number. 
 
