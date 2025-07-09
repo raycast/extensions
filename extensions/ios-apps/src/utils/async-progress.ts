@@ -166,7 +166,7 @@ export class AsyncProgress {
       this.toast.title = "All operations failed";
       this.toast.message = `${this.failed} of ${this.options.totalItems} operations failed`;
     } else if (hasFailures) {
-      this.toast.style = Toast.Style.Warning;
+      this.toast.style = Toast.Style.Failure;
       this.toast.title = "Operations partially completed";
 
       if (this.options.platformTracking && Object.keys(this.platformProgress).length > 0) {
