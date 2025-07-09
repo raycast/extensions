@@ -39,7 +39,11 @@ export function AliasItem({ alias, onEdit, onDelete }: AliasItemProps) {
         });
         onDelete();
       } catch (error) {
-        showFailureToast(error, { title: "Failed to Delete Alias" });
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to Delete Alias",
+          message: error instanceof Error ? error.message : "Unknown error",
+        });
       }
     }
   };
