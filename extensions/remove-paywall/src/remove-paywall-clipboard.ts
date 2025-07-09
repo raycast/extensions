@@ -4,7 +4,6 @@ import { getRemovePaywallURL } from "./utils";
 
 export default async function Command() {
   try {
-    await closeMainWindow();
     await showHUD("Processing clipboard...");
 
     const preferences = getPreferenceValues<Preferences>();
@@ -20,7 +19,8 @@ export default async function Command() {
     }
 
     if (clipboardText.startsWith("http://") || clipboardText.startsWith("https://")) {
-      const removedPaywallURL = getRemovePaywallURL(clipboardText, preferences.service);
+      const removedPaywallURL = getRemovePaywallURL(clipboardText, preferences.service || "https://12ft.io");
+      await closeMainWindow();
       await Clipboard.copy(removedPaywallURL);
       await showHUD("URL copied to clipboard!");
     } else {

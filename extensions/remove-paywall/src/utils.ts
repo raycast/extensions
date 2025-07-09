@@ -133,7 +133,9 @@ export function getRemovePaywallURL(currentURL: string, userPreferredService?: s
   if (currentURL.includes("medium.com")) {
     return `https://freedium.cfd/${currentURL}`;
   } else {
-    const service = userPreferredService;
-    return `${service}/${currentURL}`;
+    if (!userPreferredService?.startsWith("https://")) {
+      throw new Error("Preferred service must start with https://");
+    }
+    return `${userPreferredService}/${currentURL}`;
   }
 }
