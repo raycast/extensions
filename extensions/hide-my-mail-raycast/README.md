@@ -16,7 +16,6 @@ A Raycast extension that allows you to create, list, edit, and delete Cloudflare
 ![List Email Aliases](./screenshots/list-aliases.png)
 ![Create Email Alias](./screenshots/create-alias.png)
 ![Edit Email Alias](./screenshots/edit-alias.png)
-![Delete Email Alias](./screenshots/delete-alias.png)
 
 
 ## Prerequisites
