@@ -1,4 +1,5 @@
 import { closeMainWindow, showToast, Toast, open } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { promisify } from "util";
 import { exec as execCb } from "child_process";
 import { tmpdir } from "os";
@@ -51,11 +52,8 @@ export default async () => {
     } else {
       throw new Error("Search failed");
     }
-  } catch {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Search failed",
-    });
+  } catch (error) {
+    showFailureToast(error, { title: "Failed to search image" });
   } finally {
     if (existsSync(filePath)) {
       await unlink(filePath);

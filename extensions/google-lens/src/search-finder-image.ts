@@ -1,4 +1,6 @@
 import { closeMainWindow, getSelectedFinderItems, getFrontmostApplication, showToast, Toast, open } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import { existsSync } from "fs";
 import { readFile } from "fs/promises";
 import FormData from "form-data";
 import fetch from "node-fetch";
@@ -39,6 +41,10 @@ export default async () => {
 
     await closeMainWindow();
 
+    if (!existsSync(filePath)) {
+      throw new Error(`File not found: ${filePath}`);
+    }
+
     const buffer = await readFile(filePath);
 
     const form = new FormData();
@@ -64,10 +70,7 @@ export default async () => {
     } else {
       throw new Error("Search failed");
     }
-  } catch {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Search failed",
-    });
+  } catch (error) {
+    showFailureToast(error, { title: "Failed to search image" });
   }
 };
