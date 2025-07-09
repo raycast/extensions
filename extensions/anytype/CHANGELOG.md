@@ -1,6 +1,6 @@
 # Anytype Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2025-07-09
 
 - Fix error when creating objects without linked type properties
 - Fix display issues when Note layouts are missing icons
