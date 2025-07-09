@@ -77,6 +77,19 @@ export default async ({ github, context }: API) => {
         repo: context.repo.repo,
         labels: ["new extension"],
       });
+
+      // because it's a new extension, let's check for AI stuff in the PR diff
+      const aiFilesOrToolsExist = await checkForAiInPullRequestDiff(extensionFolder, { github, context });
+
+      if (aiFilesOrToolsExist) {
+        await github.rest.issues.addLabels({
+          issue_number: context.issue.number,
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          labels: ["AI Extension"],
+        });
+      }
+
       // `Congratulations on your new Raycast extension! :rocket:\n\nWe will aim to make the initial review within five working days. Once the PR is approved and merged, the extension will be available on our Store.`
       await comment({
         github,
@@ -220,6 +233,58 @@ async function getGitHubFile(path: string, { github, context }: Pick<API, "githu
 
   // @ts-ignore
   return data as string;
+}
+
+async function checkForAiInPullRequestDiff(extensionFolder: string, { github, context }: Pick<API, "github" | "context">) {
+  const { data: files } = await github.rest.pulls.listFiles({
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+    pull_number: context.issue.number,
+  });
+
+  let aiFilesOrToolsExist: boolean = false;
+
+  for (const file of files) {
+    const filePath = file.filename;
+
+    // we only care about files in the extension folder
+    if (!filePath.startsWith(`extensions/${extensionFolder}/`)) {
+      continue;
+    }
+
+    if (filePath === `extensions/${extensionFolder}/package.json`) {
+      try {
+        // because it's a new extension, we need to get the content from the PR itself
+        if (file.status === 'added' || file.status === 'modified') {
+          const { data: content } = await github.rest.repos.getContent({
+            mediaType: {
+              format: "raw",
+            },
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            path: filePath,
+            ref: context.payload.pull_request.head.sha,
+          });
+
+          const packageJsonObj = JSON.parse(content as unknown as string);
+
+          aiFilesOrToolsExist = !!packageJsonObj.tools;
+        }
+      } catch {
+        console.log(`Could not parse package.json for ${extensionFolder}`);
+      }
+    }
+
+    if (file.status === 'added' || file.status === 'modified') {
+      const aiFiles = ['ai.json', 'ai.yaml', 'ai.json5'];
+
+      if (aiFiles.some(filename => filePath === `extensions/${extensionFolder}/${filename}`)) {
+        aiFilesOrToolsExist = true;
+      }
+    }
+  }
+
+  return aiFilesOrToolsExist;
 }
 
 // Create a new comment or update the existing one
