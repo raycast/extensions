@@ -46,7 +46,11 @@ export const executeJxa = async (script: string) => {
       humanReadableOutput: false,
       language: 'JavaScript',
     });
-    return JSON.parse(result);
+
+    // JXA's non-human-readable output is similar to JSON, but is actually a JSON-like representation of the JavaScript object.
+    // While values should not be `undefined`, JXA will include {"key": undefined} in its output if they are.
+    // This is not valid JSON, so we replace those values with `null` to make it valid JSON.
+    return JSON.parse(result.replace(/:\s*undefined/g, ': null'));
   } catch (err: unknown) {
     const errorMessage = typeof err === 'string' ? err : err instanceof Error ? err.message : String(err);
     const message = errorMessage.replace('execution error: Error: ', '');
@@ -57,7 +61,12 @@ export const executeJxa = async (script: string) => {
         'APP_NOT_FOUND',
         message,
       );
-    } else if (message.match(/not allowed assistive access/i) || message.match(/permission/i)) {
+      // https://developer.apple.com/documentation/coreservices/1527221-anonymous/erraeeventnotpermitted
+    } else if (
+      message.match(/not allowed assistive access/i) ||
+      message.match(/permission/i) ||
+      message.match(/-1743/)
+    ) {
       throw new ThingsError(
         'Permission denied. Please grant Raycast access to Things in System Settings > Privacy & Security > Automation > Raycast > Things.',
         'PERMISSION_DENIED',
@@ -87,8 +96,7 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
   return executeJxa(`
   const things = Application('${preferences.thingsAppIdentifier}');
   const todos = things.lists.byId('${commandListNameToListIdMapping[commandListName]}').toDos();
-  const projectConstructor = things.projects()[0]?.constructor;
-  
+
   return todos.map(todo => ({
     id: todo.id(),
     name: todo.name(),
@@ -97,7 +105,7 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
     tags: todo.tagNames(),
     dueDate: todo.dueDate() && todo.dueDate().toISOString(),
     activationDate: todo.activationDate() && todo.activationDate().toISOString(),
-    isProject: projectConstructor && todo.constructor === projectConstructor,
+    isProject: todo.properties().pcls === "project",
     project: todo.project() && {
       id: todo.project().id(),
       name: todo.project().name(),
