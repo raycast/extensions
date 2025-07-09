@@ -2,9 +2,10 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ozbargain-deals",
   "title": "OzBargain Deals",
+  "subtitle": "OzBargain",
   "description": "Your lightning-fast portal to the latest and hottest deals from OzBargain. Browse new bargains, check their popularity score, and jump straight to the deal or discussion without leaving your keyboard. Essential for savvy shoppers in Australia!",
   "icon": "extension-icon.png",
-  "author": "user_b5fc17c15defcd857d5b",
+  "author": "55555",
   "license": "MIT",
   "commands": [
     {
@@ -19,7 +20,8 @@
           "description": "The maximum number of deals to fetch and display (e.g., 20, 50, 100). Default is 50. Note: The OzBargain RSS feed typically provides a fixed number of recent items, so setting a very high limit may not yield more results."
         }
       ],
-      "title": "Latest Deals",
+      "title": "View Latest Deals",
+      "subtitle": "OzBargain",
       "description": "Browse the latest and hottest deals posted on OzBargain.com.au",
       "mode": "view"
     }
@@ -27,7 +29,6 @@
   "dependencies": {
     "@raycast/api": "^1.100.3",
     "@raycast/utils": "^1.17.0",
-    "axios": "^1.10.0",
     "he": "^1.2.0",
     "sanitize-html": "^2.17.0",
     "turndown": "^7.2.0",

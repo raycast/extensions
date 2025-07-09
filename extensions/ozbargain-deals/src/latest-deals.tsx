@@ -1,6 +1,5 @@
 import { Action, ActionPanel, List, Detail, Icon, getPreferenceValues } from "@raycast/api";
 import React, { useState, useEffect, useCallback } from "react";
-import axios from "axios";
 import * as xml2js from "xml2js";
 import TurndownService from "turndown";
 import sanitizeHtml from "sanitize-html";
@@ -244,14 +243,18 @@ export default function LatestDeals() {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(OZB_FEED_URL);
+      const response = await fetch(OZB_FEED_URL);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.text();
       // Initialize XML parser using xml2js.Parser
       const parser = new xml2js.Parser({
         explicitArray: false,
         mergeAttrs: false, // Keep attributes separate
         ignoreAttrs: false, // Include attributes in parsing
       });
-      const result = await parser.parseStringPromise(response.data);
+      const result = await parser.parseStringPromise(data);
 
       // Access the items array with proper error handling
       const items: OzBargainFeedItem[] = Array.isArray(result?.rss?.channel?.item)
