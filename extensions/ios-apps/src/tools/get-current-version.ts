@@ -112,7 +112,7 @@ export default async function getCurrentVersion(input: Input) {
         await handleAppSearchError(
           new Error(`No app found with bundle ID: ${input.bundleId}`),
           input.bundleId,
-          "get-current-version"
+          "get-current-version",
         );
       }
 
@@ -128,7 +128,7 @@ export default async function getCurrentVersion(input: Input) {
         await handleAppSearchError(
           new Error(`No apps found matching "${input.query}"`),
           input.query,
-          "get-current-version"
+          "get-current-version",
         );
         return { version: "Unknown", appName: "Unknown", bundleId: "" };
       }
@@ -141,7 +141,7 @@ export default async function getCurrentVersion(input: Input) {
         await handleAppSearchError(
           new Error(`No relevant apps found matching "${input.query}"`),
           input.query,
-          "get-current-version"
+          "get-current-version",
         );
         return { version: "Unknown", appName: "Unknown", bundleId: "" };
       }
@@ -165,7 +165,7 @@ export default async function getCurrentVersion(input: Input) {
       error,
       "get-current-version tool",
       "Failed to get app version",
-      false // Don't throw, return error state instead
+      false, // Don't throw, return error state instead
     );
     return { version: "Error", appName: "Error", bundleId: "" };
   }

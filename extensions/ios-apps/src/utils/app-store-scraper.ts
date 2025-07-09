@@ -210,7 +210,7 @@ export async function scrapeAppStoreScreenshots(
         new Error(`Failed to fetch App Store page: ${response.status}`),
         "app-store-scraper",
         "Failed to fetch App Store page",
-        false // Don't throw, return empty array instead
+        false, // Don't throw, return empty array instead
       );
       return [];
     }

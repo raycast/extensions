@@ -36,9 +36,9 @@ export function useAppDownload() {
     // Prevent concurrent downloads globally
     if (globalDownloadState.isDownloading) {
       await handleDownloadError(
-        new Error(`Download already in progress for ${globalDownloadState.currentApp || 'another app'}`),
+        new Error(`Download already in progress for ${globalDownloadState.currentApp || "another app"}`),
         "start concurrent download",
-        "download"
+        "download",
       );
       return undefined;
     }
@@ -47,7 +47,7 @@ export function useAppDownload() {
       // Set global state first
       globalDownloadState.isDownloading = true;
       globalDownloadState.currentApp = name;
-      
+
       // Update local state
       setIsLoading(true);
       setCurrentDownload(name);
@@ -78,7 +78,7 @@ export function useAppDownload() {
           await handleDownloadError(
             new Error(`File not found at expected path: ${filePath}`),
             "verify downloaded file",
-            "download"
+            "download",
           );
           return undefined;
         }
@@ -87,11 +87,7 @@ export function useAppDownload() {
           await showHUD("Download failed", { clearRootSearch: true });
         }
 
-        await handleDownloadError(
-          new Error("Could not determine file path"),
-          "determine file path",
-          "download"
-        );
+        await handleDownloadError(new Error("Could not determine file path"), "determine file path", "download");
         return undefined;
       }
     } catch (error) {
@@ -99,18 +95,14 @@ export function useAppDownload() {
         await showHUD("Download failed", { clearRootSearch: true });
       }
 
-      await handleDownloadError(
-        error instanceof Error ? error : new Error(String(error)),
-        "download app",
-        "download"
-      );
+      await handleDownloadError(error instanceof Error ? error : new Error(String(error)), "download app", "download");
 
       return undefined;
     } finally {
       // Clear global state first
       globalDownloadState.isDownloading = false;
       globalDownloadState.currentApp = null;
-      
+
       // Update local state
       setIsLoading(false);
       setCurrentDownload(null);

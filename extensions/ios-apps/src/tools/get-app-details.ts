@@ -39,7 +39,7 @@ export default async function getIosAppDetails(input: Input) {
         await handleAppSearchError(
           new Error(`No apps found matching "${input.query}"`),
           input.query,
-          "get-app-details"
+          "get-app-details",
         );
         return { app: null };
       }
@@ -105,7 +105,7 @@ export default async function getIosAppDetails(input: Input) {
       await handleAppSearchError(
         new Error(`Could not determine bundle ID for "${input.query}". Search returned incomplete results.`),
         input.query,
-        "get-app-details"
+        "get-app-details",
       );
       return { app: null };
     }
@@ -115,7 +115,7 @@ export default async function getIosAppDetails(input: Input) {
       await handleAppSearchError(
         new Error(`Could not find app details for ${bundleId}`),
         input.query,
-        "get-app-details"
+        "get-app-details",
       );
       return { app: null };
     }

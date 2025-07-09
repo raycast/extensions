@@ -13,15 +13,15 @@ export const IPATOOL_PATH =
 // Get the downloads directory path from preferences or default to ~/Downloads
 export function getDownloadsDirectory(): string {
   let downloadPath: string;
-  
+
   if (preferences.downloadPath) {
     // Security check for directory traversal
     if (preferences.downloadPath.includes("..")) {
       throw new Error("Download path cannot contain directory traversal sequences");
     }
-    
+
     // Replace ~ with the actual home directory if present
-    downloadPath = preferences.downloadPath.startsWith("~") 
+    downloadPath = preferences.downloadPath.startsWith("~")
       ? preferences.downloadPath.replace("~", homedir())
       : preferences.downloadPath;
   } else {

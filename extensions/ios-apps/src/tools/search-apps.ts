@@ -134,7 +134,7 @@ export default async function searchIosApps(input: Input) {
     await handleAppSearchError(
       error instanceof Error ? error : new Error(`Failed to search for apps: ${error}`),
       input.query,
-      "search-apps"
+      "search-apps",
     );
     return { apps: [] };
   }

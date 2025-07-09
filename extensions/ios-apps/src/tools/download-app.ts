@@ -34,9 +34,11 @@ export default async function downloadIosApp(input: Input) {
 
     if (searchResults.length === 0) {
       await handleAppSearchError(
-        new Error(`No apps found matching "${input.query}". Please try a different search term or check the exact app name.`),
+        new Error(
+          `No apps found matching "${input.query}". Please try a different search term or check the exact app name.`,
+        ),
         input.query,
-        "download-app"
+        "download-app",
       );
       return { success: false, message: "No apps found" };
     }
@@ -61,7 +63,7 @@ export default async function downloadIosApp(input: Input) {
       await handleAppSearchError(
         new Error(`Could not determine bundle ID for "${input.query}"`),
         input.query,
-        "download-app"
+        "download-app",
       );
       return { success: false, message: "Could not determine bundle ID" };
     }
@@ -73,9 +75,11 @@ export default async function downloadIosApp(input: Input) {
 
       if (!filePath) {
         await handleDownloadError(
-          new Error(`The app "${appName}" could not be downloaded. It may not be available in your region or may have been removed from the App Store.`),
+          new Error(
+            `The app "${appName}" could not be downloaded. It may not be available in your region or may have been removed from the App Store.`,
+          ),
           appName,
-          "download-app"
+          "download-app",
         );
         return { success: false, message: "Download failed" };
       }
@@ -97,16 +101,18 @@ export default async function downloadIosApp(input: Input) {
 
       if (errorMessage.includes("not found") || errorMessage.includes("no app")) {
         await handleAppSearchError(
-          new Error(`The app "${input.query}" was not found in the App Store. It may not be available in your region or may have been removed.`),
+          new Error(
+            `The app "${input.query}" was not found in the App Store. It may not be available in your region or may have been removed.`,
+          ),
           input.query,
-          "download-app"
+          "download-app",
         );
         return { success: false, message: "App not found" };
       } else if (errorMessage.includes("authentication") || errorMessage.includes("login")) {
         await handleDownloadError(
           new Error(`Authentication failed. Please check your Apple ID credentials in the extension preferences.`),
           appName,
-          "download-app"
+          "download-app",
         );
         return { success: false, message: "Authentication failed" };
       } else {
@@ -146,7 +152,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
     // Check if the match might not be exact
     const queryLower = input.query.toLowerCase();
     const appNameLower = appName.toLowerCase();
-    const isExactMatch = appNameLower === queryLower;  // Only consider exact matches
+    const isExactMatch = appNameLower === queryLower; // Only consider exact matches
 
     let message = `Download "${appName}"?`;
     if (!isExactMatch) {

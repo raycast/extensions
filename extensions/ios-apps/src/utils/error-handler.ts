@@ -16,13 +16,13 @@ export async function handleToolError(
   shouldThrow: boolean = true,
 ): Promise<void> {
   const errorMessage = error instanceof Error ? error.message : String(error);
-  
+
   // Log the error with context
   logger.error(`[${context}] Error: ${errorMessage}`);
-  
+
   // Show user-friendly toast
   await showToast(Toast.Style.Failure, "Error", `${userMessage}: ${errorMessage}`);
-  
+
   // Optionally throw the error for further handling
   if (shouldThrow) {
     throw new Error(`${userMessage}: ${errorMessage}`);
@@ -35,17 +35,8 @@ export async function handleToolError(
  * @param query The search query that failed
  * @param toolName Name of the tool that failed
  */
-export async function handleAppSearchError(
-  error: unknown,
-  query: string,
-  toolName: string,
-): Promise<void> {
-  await handleToolError(
-    error,
-    `${toolName} tool`,
-    `Failed to find app "${query}"`,
-    true,
-  );
+export async function handleAppSearchError(error: unknown, query: string, toolName: string): Promise<void> {
+  await handleToolError(error, `${toolName} tool`, `Failed to find app "${query}"`, true);
 }
 
 /**
@@ -54,17 +45,8 @@ export async function handleAppSearchError(
  * @param operation Description of the operation that failed
  * @param toolName Name of the tool that failed
  */
-export async function handleDownloadError(
-  error: unknown,
-  operation: string,
-  toolName: string,
-): Promise<void> {
-  await handleToolError(
-    error,
-    `${toolName} tool`,
-    `Failed to ${operation}`,
-    true,
-  );
+export async function handleDownloadError(error: unknown, operation: string, toolName: string): Promise<void> {
+  await handleToolError(error, `${toolName} tool`, `Failed to ${operation}`, true);
 }
 
 /**
@@ -72,14 +54,6 @@ export async function handleDownloadError(
  * @param error The error that occurred
  * @param shouldThrow Whether to throw after handling (default: true)
  */
-export async function handleAuthError(
-  error: unknown,
-  shouldThrow: boolean = true,
-): Promise<void> {
-  await handleToolError(
-    error,
-    "authentication",
-    "Authentication failed",
-    shouldThrow,
-  );
+export async function handleAuthError(error: unknown, shouldThrow: boolean = true): Promise<void> {
+  await handleToolError(error, "authentication", "Authentication failed", shouldThrow);
 }

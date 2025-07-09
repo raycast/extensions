@@ -366,10 +366,12 @@ export async function downloadAppScreenshots(
     logger.log(`[Screenshot Downloader] Sample screenshots: ${JSON.stringify(sampleScreenshots)}`);
 
     // Create a sanitized folder name (prevent directory traversal)
-    const sanitizedAppName = path.basename(app.name
-      .split(":")[0]
-      .trim()
-      .replace(/[/?%*:|"<>]/g, "-"));
+    const sanitizedAppName = path.basename(
+      app.name
+        .split(":")[0]
+        .trim()
+        .replace(/[/?%*:|"<>]/g, "-"),
+    );
     const folderName = `${sanitizedAppName} Screenshots`;
     const screenshotsDir = path.join(downloadsDir, folderName);
 

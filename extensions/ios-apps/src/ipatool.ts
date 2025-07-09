@@ -31,7 +31,10 @@ export async function searchApps(query: string, limit = 20): Promise<IpaToolSear
     // Ensure we're authenticated before proceeding
     const isAuthenticated = await ensureAuthenticated();
     if (!isAuthenticated) {
-      await handleAuthError(new Error("Authentication failed during app search. Please check your Apple ID credentials."), false);
+      await handleAuthError(
+        new Error("Authentication failed during app search. Please check your Apple ID credentials."),
+        false,
+      );
       return [];
     }
 
@@ -85,7 +88,10 @@ export async function downloadIPA(
     // Ensure we're authenticated before proceeding with download
     const isAuthenticated = await ensureAuthenticated();
     if (!isAuthenticated) {
-      await handleAuthError(new Error("Authentication failed during app download. Please check your Apple ID credentials."), false);
+      await handleAuthError(
+        new Error("Authentication failed during app download. Please check your Apple ID credentials."),
+        false,
+      );
       return null;
     }
 
@@ -390,7 +396,10 @@ export async function getAppDetails(bundleId: string) {
     // Ensure we're authenticated before proceeding
     const isAuthenticated = await ensureAuthenticated();
     if (!isAuthenticated) {
-      await handleAuthError(new Error("Authentication failed during app details lookup. Please check your Apple ID credentials."), false);
+      await handleAuthError(
+        new Error("Authentication failed during app details lookup. Please check your Apple ID credentials."),
+        false,
+      );
       return null;
     }
 
