@@ -1,3 +1,3 @@
 # FHIR Changelog
 
-## [Initial Version] - 2025-07-07
+## [Initial Version] - {PR_MERGE_DATE}
