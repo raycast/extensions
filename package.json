@@ -88,10 +88,14 @@
       "name": "defaultDisableTime",
       "type": "textfield",
       "required": false,
-      "title": "Default Disable Time",
+      "title": "Default Disable Duration",
       "description": "Default duration for timed disable (e.g., 5m, 1h)",
       "default": "5m",
-      "placeholder": "5m"
+      "placeholder": "5m",
+      "validation": {
+        "pattern": "^\\d+[smh]$",
+        "message": "Duration must be in format like 5m, 1h, 30s"
+      }
     },
     {
       "name": "connectionTimeout",

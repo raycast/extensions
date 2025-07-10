@@ -1,14 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 
-export interface Preferences {
-  piholeUrl: string;
-  apiToken: string;
-  defaultDisableTime: string;
-  connectionTimeout: string;
-}
-
-export function getPreferences(): Preferences {
-  return getPreferenceValues<Preferences>();
+export function getPreferences() {
+  return getPreferenceValues();
 }
 
 export function sanitizeUrl(url: string): string {
@@ -18,9 +11,7 @@ export function sanitizeUrl(url: string): string {
 export function parseDuration(duration: string): number {
   const match = duration.match(/^(\d+)([smh])$/);
   if (!match) {
-    throw new Error(
-      `Invalid duration format: ${duration}. Use format like 5m, 1h, 30s`,
-    );
+    return 300; // 5 minutes
   }
 
   const [, value, unit] = match;
@@ -34,7 +25,7 @@ export function parseDuration(duration: string): number {
     case "h":
       return seconds * 3600;
     default:
-      throw new Error(`Invalid duration unit: ${unit}`);
+      return 300; // Default to 5 minutes for unknown units
   }
 }
 
@@ -50,8 +41,8 @@ export function formatDuration(seconds: number): string {
 
 export function validateUrl(url: string): boolean {
   try {
-    new URL(url);
-    return true;
+    const parsed = new URL(url);
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
   } catch {
     return false;
   }
@@ -60,5 +51,6 @@ export function validateUrl(url: string): boolean {
 export function getConnectionTimeout(): number {
   const preferences = getPreferences();
   const timeout = parseInt(preferences.connectionTimeout, 10);
-  return isNaN(timeout) ? 10 : timeout;
+  const value = isNaN(timeout) ? 10 : timeout;
+  return Math.max(1, Math.min(value, 60)); // Ensure timeout is between 1 and 60 seconds
 }

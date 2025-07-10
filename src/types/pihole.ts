@@ -40,7 +40,13 @@ export interface PiHoleDomainList {
 
 export interface PiHoleQueryResult {
   domain: string;
-  status: string;
+  status:
+    | "blocked"
+    | "allowed"
+    | "unknown"
+    | "no_recent_queries"
+    | "never_queried"
+    | string;
   reason: string;
   type: string;
   lastSeen: number;
