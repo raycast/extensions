@@ -67,7 +67,7 @@ function AssignToAction(props: {
 
     try {
       if (props.mutateList) {
-        await props.mutateList(updateIssue(props.issue.id, { assignedTo: user.user?.id }), {
+        await props.mutateList(updateIssue(props.issue, { assignedTo: user.user?.id }), {
           optimisticUpdate(data) {
             if (!data) {
               return [];
@@ -79,7 +79,7 @@ function AssignToAction(props: {
       }
 
       if (props.mutateDetail) {
-        await props.mutateDetail(updateIssue(props.issue.id, { assignedTo: user.user?.id }), {
+        await props.mutateDetail(updateIssue(props.issue, { assignedTo: user.user?.id }), {
           optimisticUpdate(data) {
             if (!data) {
               return;

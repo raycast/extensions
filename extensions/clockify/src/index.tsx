@@ -253,7 +253,7 @@ function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
         </Form.Dropdown>
       ) : null}
 
-      <Form.TextField id="description" defaultValue="" title="Description" />
+      <Form.TextField id="description" defaultValue="" title="Description" autoFocus />
     </Form>
   );
 }

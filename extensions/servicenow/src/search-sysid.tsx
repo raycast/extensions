@@ -42,9 +42,6 @@ export default async (props: LaunchProps) => {
     return;
   }
 
-  const script = `${findSysID.toString()}
-  findSysID("${sys_id}");`;
-
   const callBack = (response: string) => {
     const answer = response.match(/###(.*)###/);
     if (response.length === 0) showToast(Toast.Style.Failure, "Could not search for sys_id. (are you an Admin?)");
@@ -57,7 +54,7 @@ export default async (props: LaunchProps) => {
     }
   };
 
-  await client.startBackgroundScript(script, callBack);
+  await client.startBackgroundScript(findSysID(sys_id), callBack);
 };
 
 class ServiceNowClient {

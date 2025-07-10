@@ -1,4 +1,11 @@
-import { Action, ActionPanel, Application, Color, Grid, Icon } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Application,
+  Color,
+  Grid,
+  Icon,
+} from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
@@ -18,9 +25,15 @@ export default function ManageIconsCommand() {
   const [searchText, setSearchText] = useState("");
   const [modifiedFavorites, setModifiedFavorites] = useState<IconMetadata[]>();
 
-  const { data: favorites, isLoading: isFavoritesLoading } = useCachedPromise(Store.getFavorites);
+  const { data: favorites, isLoading: isFavoritesLoading } = useCachedPromise(
+    Store.getFavorites,
+  );
   const { data: apps, isLoading: isAppsLoading } = useModifiableApplications();
-  const { data: state, isLoading: isStateLoading, revalidate: revalidateState } = useCachedPromise(Store.getState);
+  const {
+    data: state,
+    isLoading: isStateLoading,
+    revalidate: revalidateState,
+  } = useCachedPromise(Store.getState);
 
   const isLoading = isFavoritesLoading || isAppsLoading || isStateLoading;
 
@@ -37,7 +50,9 @@ export default function ManageIconsCommand() {
   const hasActiveApps = activeApps.length > 0;
 
   const filteredApps = useMemo(() => {
-    return activeApps.filter((app) => app?.name.toLowerCase().includes(searchText.toLowerCase()));
+    return activeApps.filter((app) =>
+      app?.name.toLowerCase().includes(searchText.toLowerCase()),
+    );
   }, [activeApps, searchText]);
 
   const sortedFavorites = useMemo(() => {
@@ -62,7 +77,9 @@ export default function ManageIconsCommand() {
             accessory={
               !modifiedFavorites
                 ? {}
-                : modifiedFavorites.find((f) => f.objectID === favorite.objectID)
+                : modifiedFavorites.find(
+                      (f) => f.objectID === favorite.objectID,
+                    )
                   ? {}
                   : {
                       icon: {
@@ -94,7 +111,11 @@ export default function ManageIconsCommand() {
       <Grid.EmptyView
         icon={!hasActiveApps ? Icon.Tray : undefined}
         title={"No icons found"}
-        description={!hasActiveApps ? `Your collection is empty, press enter to open search` : ""}
+        description={
+          !hasActiveApps
+            ? `Your collection is empty, press enter to open search`
+            : ""
+        }
         actions={
           <ActionPanel>
             <Action.Push
@@ -119,7 +140,9 @@ function ApplicationSection({
   state: ApplicationState;
   onIconUpdated?: () => void;
 }) {
-  const { data: defaultIconPath } = useCachedPromise(getDefaultIconPath, [application]);
+  const { data: defaultIconPath } = useCachedPromise(getDefaultIconPath, [
+    application,
+  ]);
 
   const revert = async () => {
     await setIcon(application, null);
@@ -143,7 +166,11 @@ function ApplicationSection({
         }
         actions={
           <ActionPanel>
-            <Action title="Revert Icon to Default" icon={Icon.Undo} onAction={revert} />
+            <Action
+              title="Revert Icon to Default"
+              icon={Icon.Undo}
+              onAction={revert}
+            />
           </ActionPanel>
         }
       />
@@ -166,7 +193,13 @@ function ApplicationSection({
                 }
               : {}
           }
-          actions={<IconActions icon={icon} application={application} onApplied={onIconUpdated} />}
+          actions={
+            <IconActions
+              icon={icon}
+              application={application}
+              onApplied={onIconUpdated}
+            />
+          }
         />
       ))}
     </Grid.Section>

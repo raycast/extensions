@@ -1,5 +1,14 @@
 # Easy New File Changelog
 
+## [Form Layout] - 2025-06-23
+
+- New File with Template command now supports Form layout
+
+## [Create Dot Files] - 2025-05-23
+
+- New File Now command support Dot file type
+- New File with Template command now supports Dot file template
+
 ## [Any File Type] - 2024-06-26
 
 - Now you can create any file type with the New File Now command.

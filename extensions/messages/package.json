@@ -10,7 +10,8 @@
     "ramsay",
     "thomas",
     "aeorge",
-    "hayden_barnes"
+    "hayden_barnes",
+    "micha_van_eijk"
   ],
   "keywords": [
     "2fa"
@@ -353,7 +354,7 @@
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "22.7.4",
-    "@types/react": "18.3.10",
+    "@types/react": "19.0.10",
     "eslint": "^8.57.1",
     "eslint-plugin-import": "^2.30.0",
     "eslint-plugin-react-hooks": "^4.6.2",

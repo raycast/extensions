@@ -39,7 +39,7 @@ const Actions = (props: { projectID: string; isBillable: boolean }) => {
       <Action
         icon={Icon.BulletPoints}
         title={"Show Tasks"}
-        shortcut={{ modifiers: ["ctrl"], key: "space" }}
+        shortcut={{ modifiers: ["ctrl"], key: "enter" }}
         onAction={async () => {
           try {
             await launchCommand({

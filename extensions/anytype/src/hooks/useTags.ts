@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { getTags } from "../api";
 import { apiLimit } from "../utils";
 
-export function useTags(spaceId: string, propertyId: string) {
+export function useTags(spaceId: string, propertyId: string, config?: { execute?: boolean }) {
   const { data, error, isLoading, mutate, pagination } = useCachedPromise(
     (spaceId: string, propertyId: string) => async (options: { page: number }) => {
       const offset = options.page * apiLimit;
@@ -17,7 +17,7 @@ export function useTags(spaceId: string, propertyId: string) {
     [spaceId, propertyId],
     {
       keepPreviousData: true,
-      execute: !!spaceId && !!propertyId,
+      execute: !!spaceId && !!propertyId && config?.execute !== false,
     },
   );
 

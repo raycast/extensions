@@ -1,5 +1,9 @@
 # ServiceNow Extension Changelog
 
+## [Fix] - 2025-05-14
+
+Fixed an issue where the Search by Sys_ID command stopped working after publishing, due to function name minification during the build process.
+
 ## [Updates] - 2025-05-13
 
 - Added a new command for admins to **Search by Sys_ID**, allowing to search for a Sys_ID in the selected instance, or in any matching instance from the profiles if no instance is provided.

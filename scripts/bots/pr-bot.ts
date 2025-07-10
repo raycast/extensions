@@ -11,6 +11,16 @@ type API = {
 };
 
 export default async ({ github, context }: API) => {
+  if (context.payload.action === "ready_for_review" && context.payload.pull_request.draft === false) {
+    await github.rest.issues.addAssignees({
+      owner: context.repo.owner,
+      repo: context.repo.repo,
+      issue_number: context.issue.number,
+      assignees: ["pernielsentikaer"]
+    });
+    return;
+  }
+
   console.log("changed extensions", process.env.CHANGED_EXTENSIONS);
 
   if (!process.env.CHANGED_EXTENSIONS) {
@@ -67,6 +77,19 @@ export default async ({ github, context }: API) => {
         repo: context.repo.repo,
         labels: ["new extension"],
       });
+
+      // because it's a new extension, let's check for AI stuff in the PR diff
+      const aiFilesOrToolsExist = await checkForAiInPullRequestDiff(extensionFolder, { github, context });
+
+      if (aiFilesOrToolsExist) {
+        await github.rest.issues.addLabels({
+          issue_number: context.issue.number,
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          labels: ["AI Extension"],
+        });
+      }
+
       // `Congratulations on your new Raycast extension! :rocket:\n\nWe will aim to make the initial review within five working days. Once the PR is approved and merged, the extension will be available on our Store.`
       await comment({
         github,
@@ -82,6 +105,51 @@ export default async ({ github, context }: API) => {
       repo: context.repo.repo,
       labels: ["extension fix / improvement", await extensionLabel(extensionFolder, { github, context })],
     });
+
+    // Auto-label AI Extensions
+    let aiExtensionJson: string | undefined;
+    let aiExtensionYaml: string | undefined;
+    let aiExtensionJson5: string | undefined;
+    let tools: any;
+
+    // Check package.json tools first
+    try {
+      const packageJson = await getGitHubFile(`extensions/${extensionFolder}/package.json`, { github, context });
+      const packageJsonObj = JSON.parse(packageJson);
+      tools = packageJsonObj.tools;
+    } catch {
+      console.log(`no package.json tools for ${extensionFolder}`);
+    }
+
+    // Only check AI files if no tools found in package.json
+    if (!tools) {
+      try {
+        aiExtensionJson = await getGitHubFile(`extensions/${extensionFolder}/ai.json`, { github, context });
+      } catch {
+        console.log(`no ai.json for ${extensionFolder}`);
+      }
+
+      try {
+        aiExtensionYaml = await getGitHubFile(`extensions/${extensionFolder}/ai.yaml`, { github, context });
+      } catch {
+        console.log(`no ai.yaml for ${extensionFolder}`);
+      }
+
+      try {
+        aiExtensionJson5 = await getGitHubFile(`extensions/${extensionFolder}/ai.json5`, { github, context });
+      } catch {
+        console.log(`no ai.json5 for ${extensionFolder}`);
+      }
+    }
+
+    if (aiExtensionJson || aiExtensionYaml || aiExtensionJson5 || tools) {
+      await github.rest.issues.addLabels({
+        issue_number: context.issue.number,
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        labels: ["AI Extension"],
+      });
+    }
 
     if (!owners.length) {
       console.log("no maintainer for this extension");
@@ -165,6 +233,58 @@ async function getGitHubFile(path: string, { github, context }: Pick<API, "githu
 
   // @ts-ignore
   return data as string;
+}
+
+async function checkForAiInPullRequestDiff(extensionFolder: string, { github, context }: Pick<API, "github" | "context">) {
+  const { data: files } = await github.rest.pulls.listFiles({
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+    pull_number: context.issue.number,
+  });
+
+  let aiFilesOrToolsExist: boolean = false;
+
+  for (const file of files) {
+    const filePath = file.filename;
+
+    // we only care about files in the extension folder
+    if (!filePath.startsWith(`extensions/${extensionFolder}/`)) {
+      continue;
+    }
+
+    if (filePath === `extensions/${extensionFolder}/package.json`) {
+      try {
+        // because it's a new extension, we need to get the content from the PR itself
+        if (file.status === 'added' || file.status === 'modified') {
+          const { data: content } = await github.rest.repos.getContent({
+            mediaType: {
+              format: "raw",
+            },
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            path: filePath,
+            ref: context.payload.pull_request.head.sha,
+          });
+
+          const packageJsonObj = JSON.parse(content as unknown as string);
+
+          aiFilesOrToolsExist = !!packageJsonObj.tools;
+        }
+      } catch {
+        console.log(`Could not parse package.json for ${extensionFolder}`);
+      }
+    }
+
+    if (file.status === 'added' || file.status === 'modified') {
+      const aiFiles = ['ai.json', 'ai.yaml', 'ai.json5'];
+
+      if (aiFiles.some(filename => filePath === `extensions/${extensionFolder}/${filename}`)) {
+        aiFilesOrToolsExist = true;
+      }
+    }
+  }
+
+  return aiFilesOrToolsExist;
 }
 
 // Create a new comment or update the existing one

@@ -1,5 +1,9 @@
 # Trek Changelog
 
+## [Maintenance] - 2025-05-16
+
+- Remove outdated files
+
 ## [Scheduling and Quick Create] - 2025-03-08
 
 - New "Schedule Meeting" command that allows users to schedule meetings in Basecamp projects

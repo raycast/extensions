@@ -1,5 +1,21 @@
 # Messages Changelog
 
+## [Start New Chat on No Results] - 2025-07-09
+
+When a search in Open Chats returns no matching chats and the input consists solely of valid phone-number characters, display a "Start New Chat" action to open the Messages app with the entered number. 
+
+## [Support for Hyphenated OTP Codes] - 2025-07-09
+
+Added detection for OTP codes formatted with hyphens (e.g. 123-456), requiring at least 3 digits on both sides.
+
+## [Docs: Add note about automation permissions] - 2025-07-01
+
+Added a note about automation permissions for Raycast in the README.md file.
+
+## [Fix OTP Code Parsing for Messages with colons in the message body] - 2025-05-30
+
+Fixed an issue where OTP codes with colons in the message body were not being parsed correctly.
+
 ## [Fix OTP Code Parsing for Messages with Special Characters] - 2025-05-08
 
 Fixed issues with wrong number being parsed by adding additional common characters the regex and adding a bit more logic to select the largest OTP from the filtered list.

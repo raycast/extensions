@@ -23,7 +23,13 @@ import { DeleteTransactionAction } from '@components/actions/deleteTransactionAc
 const INFLOW_ICON = { source: Icon.PlusCircle, tintColor: Color.Green };
 const OUTFLOW_ICON = { source: Icon.MinusCircle, tintColor: Color.Red };
 
-export function TransactionItem({ transaction }: { transaction: TransactionDetail }) {
+export function TransactionItem({
+  transaction,
+  onTransactionDeleted,
+}: {
+  transaction: TransactionDetail;
+  onTransactionDeleted: () => void;
+}) {
   const {
     onGroup,
     onSort,
@@ -158,7 +164,7 @@ export function TransactionItem({ transaction }: { transaction: TransactionDetai
             <ToggleFlagsAction showFlags={showFlags} setShowFlags={setShowFlags} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Update Transaction">
-            <DeleteTransactionAction transaction={transaction} />
+            <DeleteTransactionAction transaction={transaction} onTransactionDeleted={onTransactionDeleted} />
             {transaction.approved ? '' : <ApproveTransactionAction transaction={transaction} />}
           </ActionPanel.Section>
           <ActionPanel.Section title="Change List View">

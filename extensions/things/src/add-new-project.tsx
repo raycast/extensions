@@ -1,7 +1,8 @@
-import { ActionPanel, Form, showToast, Icon, Action, Toast, LaunchProps, Color, AI, Detail } from '@raycast/api';
+import { ActionPanel, Form, showToast, Icon, Action, Toast, LaunchProps, Color, AI } from '@raycast/api';
 import { FormValidation, useCachedPromise, useForm } from '@raycast/utils';
 
-import { addProject, getAreas, getTags, thingsNotRunningError } from './api';
+import { addProject, getAreas, getTags } from './api';
+import ErrorView from './components/ErrorView';
 import { listItems } from './helpers';
 import { getDateString } from './utils';
 
@@ -22,8 +23,8 @@ type AddNewProjectProps = {
 };
 
 export function AddNewProject({ draftValues }: AddNewProjectProps) {
-  const { data: tags, isLoading: isLoadingTags } = useCachedPromise(() => getTags());
-  const { data: areas, isLoading: isLoadingAreas } = useCachedPromise(() => getAreas());
+  const { data: tags, isLoading: isLoadingTags, error: tagsError } = useCachedPromise(() => getTags());
+  const { data: areas, isLoading: isLoadingAreas, error: areasError } = useCachedPromise(() => getAreas());
 
   const { handleSubmit, itemProps, values, reset, focus, setValue } = useForm<FormValues>({
     async onSubmit(values) {
@@ -85,8 +86,11 @@ Tasks:`);
   }
 
   const isLoading = isLoadingTags || isLoadingAreas;
+  const error = tagsError || areasError;
 
-  if (!tags && !isLoading) return <Detail markdown={thingsNotRunningError} />;
+  if (error) {
+    return <ErrorView error={error} />;
+  }
 
   const now = new Date();
 

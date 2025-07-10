@@ -1,5 +1,5 @@
 import { Image } from "@raycast/api";
-import { RawTag, Tag } from ".";
+import { CreateTagRequest, RawTag, Tag } from ".";
 import { SpaceObject } from "./object";
 
 export type PropertyFieldValue = string | number | boolean | string[] | Date | null | undefined;
@@ -19,12 +19,15 @@ export enum PropertyFormat {
 }
 
 export interface CreatePropertyRequest {
+  key?: string;
   name: string;
   format: PropertyFormat;
+  tags?: CreateTagRequest[];
 }
 
 export interface UpdatePropertyRequest {
-  name: string;
+  key?: string;
+  name?: string;
 }
 
 export interface RawProperty {
@@ -71,7 +74,6 @@ export interface PropertyLink {
 
 export interface PropertyLinkWithValue {
   key: string;
-  format: PropertyFormat;
   text?: string;
   number?: number | null;
   select?: string | null;

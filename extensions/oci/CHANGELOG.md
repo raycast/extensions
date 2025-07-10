@@ -1,5 +1,10 @@
 # Oracle Cloud Changelog
 
+## [Add Terminate Instance Action] - 2025-06-03
+
+- (Confirm and) Terminate Instance
+- Add "Open in OCI" `Action`
+
 ## [Perform Instance Actions] - 2025-02-13
 
 - Add instance actions:

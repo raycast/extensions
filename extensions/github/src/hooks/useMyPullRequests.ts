@@ -6,6 +6,7 @@ import { uniqBy } from "lodash";
 import { getGitHubClient } from "../api/githubClient";
 import { PullRequestFieldsFragment } from "../generated/graphql";
 import { pluralize } from "../helpers";
+import { getRepositoryFilter } from "../helpers/repository";
 
 enum SectionType {
   Open = "Open",
@@ -24,6 +25,8 @@ export function useMyPullRequests({
   includeRecentlyClosed,
   includeReviewRequests,
   includeReviewed,
+  filterMode,
+  repositoryList,
 }: {
   repository: string | null;
   sortQuery: string;
@@ -32,16 +35,28 @@ export function useMyPullRequests({
   includeRecentlyClosed: boolean;
   includeReviewRequests: boolean;
   includeReviewed: boolean;
+  filterMode: Preferences.MyPullRequests["repositoryFilterMode"];
+  repositoryList: string[];
 }) {
   const { github } = getGitHubClient();
 
   const { data, ...rest } = useCachedPromise(
-    async (repo, sortTxt, enableAssigned, enableMentioned, enableClosed, enableReviewRequests, enableReviewed) => {
+    async (
+      repo,
+      sortTxt,
+      enableAssigned,
+      enableMentioned,
+      enableClosed,
+      enableReviewRequests,
+      enableReviewed,
+      filterMode,
+      repositoryList,
+    ) => {
       const numberOfDays = 14;
       const twoWeeksAgo = format(subDays(Date.now(), numberOfDays), "yyyy-MM-dd");
       const updatedFilter = `updated:>${twoWeeksAgo}`;
 
-      const repositoryFilter = repo ? `repo:${repo}` : "";
+      const repositoryFilter = getRepositoryFilter(filterMode, repositoryList, repo);
 
       const { includeTeamReviewRequests } = getPreferenceValues<Preferences>();
       const reviewRequestedQuery = includeTeamReviewRequests ? "review-requested" : "user-review-requested";
@@ -80,6 +95,8 @@ export function useMyPullRequests({
       includeRecentlyClosed,
       includeReviewRequests,
       includeReviewed,
+      filterMode,
+      repositoryList,
     ],
   );
 

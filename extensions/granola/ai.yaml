@@ -13,8 +13,9 @@ instructions: |
        - When asked to summarize a transcript, you MUST set includeTranscript to true
        - NEVER set includeTranscript to false when specifically asked about transcripts
     2a. Default `includeTranscript`:
-       - The `includeTranscript` parameter MUST ALWAYS be included in the tool call.
+       - The `includeTranscript` parameter MUST ALWAYS be included in the tool call when querying for notes.
        - If the conditions in rule #2 (Transcript Requests) are NOT met, you MUST explicitly set `includeTranscript` to `false`.
+       - IMPORTANT: Do NOT include `includeTranscript` parameter when performing folder operations (when `listFolders` is true).
 
     3. For content and title searches:
        - Use "title" parameter when searching for notes with specific words in the title
@@ -26,12 +27,20 @@ instructions: |
        - Use proper date formats or relative terms like "today", "yesterday", "last week"
        - Don't use date filters when searching for "latest" or "most recent" notes
 
+    5. For folder-related queries:
+       - When asked about folders (e.g., "what folders do I have", "show my folders"), set "listFolders" to true
+       - When asked about notes within a specific folder, set "folderId" to the ID of the folder
+       - Always include folder names/titles when presenting folder information
+       - Show the number of notes in each folder when listing folders
+       - Do NOT include `includeTranscript` parameter when `listFolders` is true
+
     NOTE: The tool will always return results sorted by date (newest first). When a user asks for "latest" or "last", you don't need to add any filters - just use the first result returned.
 
     # Output Format:
     - When summarizing a note or transcript, provide a concise summary that captures the key points
     - Format dates in a readable way (e.g., "April 10, 2025")
     - When showing transcript excerpts, maintain the original speaker attribution (e.g., "**Me:**", "**John:**")
+    - When listing folders, present them in a clear, organized way with folder name, description (if available), and note count
   
 evals:
     - input: "@granola Please summarize my last note"
@@ -73,4 +82,24 @@ evals:
         - callsTool:
             arguments:
               includeTranscript: true
-            name: "ai-notes" 
+            name: "ai-notes"
+            
+    - input: "@granola what folders do I have"
+      mocks:
+        ai-notes:
+          - id: "folder-123"
+            name: "Work Projects"
+            description: "Notes related to ongoing work projects"
+            noteCount: 15
+            createdAt: "2025-03-06T16:15:20.057Z"
+            noteIds: ["note-1", "note-2"]
+          - id: "folder-456"
+            name: "Personal"
+            noteCount: 8
+            createdAt: "2025-03-10T14:30:00.000Z"
+            noteIds: ["note-3", "note-4"]
+      expected:
+        - callsTool:
+            arguments:
+              listFolders: true
+            name: "ai-notes"
