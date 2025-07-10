@@ -9,6 +9,7 @@ import {
   ErrorDetails,
   getErrorDetails,
   Device,
+  MULLVAD_DEVICE_TAG,
 } from "./shared";
 
 function loadExitNodes(status: StatusResponse) {
@@ -70,44 +71,53 @@ export default function ExitNodeList() {
               }
             />
           )}
-          {exitNodes?.map((exitNode) => (
-            <List.Item
-              title={exitNode.name}
-              subtitle={exitNode.ipv4 + "    " + exitNode.os}
-              key={exitNode.key}
-              icon={
-                exitNode.online
-                  ? {
-                      source: {
-                        light: "connected_light.png",
-                        dark: "connected_dark.png",
-                      },
-                      mask: Image.Mask.Circle,
-                    }
-                  : {
-                      source: {
-                        light: "lastseen_light.png",
-                        dark: "lastseen_dark.png",
-                      },
-                      mask: Image.Mask.Circle,
-                    }
-              }
-              accessories={[
-                {
-                  tag: exitNode.exitnode ? `Connected` : "",
-                },
-              ]}
-              actions={
-                <ActionPanel>
-                  <Action title="Use as Exit Node" onAction={() => setExitNode(exitNode.dns, false)} />
-                  <Action
-                    title="Use as Exit Node and Allow LAN Access"
-                    onAction={() => setExitNode(exitNode.dns, true)}
-                  />
-                </ActionPanel>
-              }
-            />
-          ))}
+          {exitNodes?.map((exitNode) => {
+            const isMullvad = exitNode.tags?.includes(MULLVAD_DEVICE_TAG) && exitNode.location;
+            const title = exitNode.name;
+            const subtitle =
+              isMullvad && exitNode.location
+                ? `Mullvad Exit Node | ${exitNode.location.City}, ${exitNode.location.Country}`
+                : `${exitNode.ipv4}${exitNode.os ? ` | ${exitNode.os}` : ""}`;
+
+            return (
+              <List.Item
+                title={title}
+                subtitle={subtitle}
+                key={exitNode.key}
+                icon={
+                  exitNode.online
+                    ? {
+                        source: {
+                          light: "connected_light.png",
+                          dark: "connected_dark.png",
+                        },
+                        mask: Image.Mask.Circle,
+                      }
+                    : {
+                        source: {
+                          light: "lastseen_light.png",
+                          dark: "lastseen_dark.png",
+                        },
+                        mask: Image.Mask.Circle,
+                      }
+                }
+                accessories={[
+                  {
+                    tag: exitNode.exitnode ? `Connected` : "",
+                  },
+                ]}
+                actions={
+                  <ActionPanel>
+                    <Action title="Use as Exit Node" onAction={() => setExitNode(exitNode.dns, false)} />
+                    <Action
+                      title="Use as Exit Node and Allow LAN Access"
+                      onAction={() => setExitNode(exitNode.dns, true)}
+                    />
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
         </>
       )}
     </List>
