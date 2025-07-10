@@ -50,7 +50,7 @@
         "user",
         "contact"
       ],
-      "description": "Search for users by name and copy their email address.",
+      "description": "Search for users by name and copy their email address. Requires users:read.email Slack permission scope.",
       "mode": "view"
     },
     {
