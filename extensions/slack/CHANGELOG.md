@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [Channel, Channel History bug fixes and "Search Message" to Tools] - {PR_MERGE_DATE}
+## [Channel, Channel History bug fixes and "Search Message" to Tools] - 2025-07-10
 - Added the `search.message` slack api to enable AI to use the tool (search for full messages)
 - Fixed failure to find channelId when using get-channel-history with AI
 - Fixed issue that prevented importing all slack channels
