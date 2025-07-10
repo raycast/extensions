@@ -1,5 +1,11 @@
 # SteamGridDB
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Change the default Enter key behavior to Download Image
+- Add support for Windows
+- Bump all dependencies to the latest
+
 ## [Chore & Fixes] - 2024-10-10
 
 - Bump all dependencies to the latest
