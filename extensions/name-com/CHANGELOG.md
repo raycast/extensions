@@ -1,6 +1,6 @@
 # Name.com Changelog
 
-## [✨ AI Enhancements + Migrate API + Modernize] - {PR_MERGE_DATE}
+## [✨ AI Enhancements + Migrate API + Modernize] - 2025-07-10
 
 - ✨ AI Tools:
     1. `check-account-balance`
