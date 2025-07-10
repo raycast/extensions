@@ -68,6 +68,8 @@ export default async ({ github, context }: API) => {
   for (const extensionFolder of touchedExtensions) {
     const owners = codeowners[`/extensions/${extensionFolder}`];
 
+    let aiFilesOrToolsExist = false;
+
     if (!owners) {
       // it's a new extension
       console.log(`cannot find existing extension ${extensionFolder}`);
@@ -80,7 +82,7 @@ export default async ({ github, context }: API) => {
       });
 
       // because it's a new extension, let's check for AI stuff in the PR diff
-      const aiFilesOrToolsExist = await checkForAiInPullRequestDiff(extensionFolder, { github, context });
+      aiFilesOrToolsExist = await checkForAiInPullRequestDiff(extensionFolder, { github, context });
 
       if (aiFilesOrToolsExist) {
         console.log(`adding AI Extension label because ai files or tools exist for ${extensionFolder}`);
@@ -109,9 +111,6 @@ export default async ({ github, context }: API) => {
       labels: ["extension fix / improvement", await extensionLabel(extensionFolder, { github, context })],
     });
 
-    // Auto-label AI Extensions
-    let hasToolsOrAiFiles: boolean = false;
-
     // Check package.json tools first
     try {
       const packageJson = await getGitHubFile(`extensions/${extensionFolder}/package.json`, { github, context });
@@ -122,19 +121,19 @@ export default async ({ github, context }: API) => {
 
       console.log(`Existing: package.json content keys: ${Object.keys(packageJsonObj)}`);
 
-      hasToolsOrAiFiles = !!packageJsonObj.tools;
+      aiFilesOrToolsExist = !!packageJsonObj.tools;
     } catch {
       console.log(`Existing: no package.json tools for ${extensionFolder}`);
     }
 
     // Only check AI files if no tools found in package.json
-    if (!hasToolsOrAiFiles) {
+    if (!aiFilesOrToolsExist) {
       try {
         const aiExtensionJson = await getGitHubFile(`extensions/${extensionFolder}/ai.json`, { github, context });
 
         console.log(`Existing: ai.json for ${extensionFolder}: ${aiExtensionJson}`);
 
-        hasToolsOrAiFiles = true;
+        aiFilesOrToolsExist = true;
       } catch {
         console.log(`Existing: no ai.json for ${extensionFolder}`);
       }
@@ -144,7 +143,7 @@ export default async ({ github, context }: API) => {
 
         console.log(`Existing: ai.yaml for ${extensionFolder}: ${aiExtensionYaml}`);
 
-        hasToolsOrAiFiles = true;
+        aiFilesOrToolsExist = true;
       } catch {
         console.log(`Existing: no ai.yaml for ${extensionFolder}`);
       }
@@ -154,13 +153,18 @@ export default async ({ github, context }: API) => {
 
         console.log(`Existing: ai.json5 for ${extensionFolder}: ${aiExtensionJson5}`);
 
-        hasToolsOrAiFiles = true;
+        aiFilesOrToolsExist = true;
       } catch {
         console.log(`Existing: no ai.json5 for ${extensionFolder}`);
       }
     }
 
-    if (hasToolsOrAiFiles) {
+    if (!aiFilesOrToolsExist) {
+      // If we didn't find any AI files or tools in the package.json, let's check the PR diff
+      aiFilesOrToolsExist = await checkForAiInPullRequestDiff(extensionFolder, { github, context });
+    }
+
+    if (aiFilesOrToolsExist) {
       await github.rest.issues.addLabels({
         issue_number: context.issue.number,
         owner: context.repo.owner,
