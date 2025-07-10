@@ -1,7 +1,8 @@
-import { useFetch } from "@raycast/utils";
+import { showFailureToast, useCachedPromise, useFetch } from "@raycast/utils";
 import { API_HEADERS, API_URL } from "../utils/constants";
 import { showToast, Toast } from "@raycast/api";
-import { ErrorResponse, GetAPIKeysResponse, GetDomainsResponse } from "../utils/types";
+import { ErrorResponse, GetAPIKeysResponse } from "../utils/types";
+import { resend } from "./resend";
 
 const useResend = <T>(
   endpoint: string,
@@ -28,23 +29,30 @@ const useResend = <T>(
       await showToast(Toast.Style.Failure, String(error.cause ?? "Something went wrong"), error.message);
     },
     onData,
-  });
+});
 
+const showSuccessToast = async (items: unknown[], singular: string, plural=`${singular}s`) => {
+  const numOfItems = items.length;
+  await showToast(Toast.Style.Success, "Success", `Fetched ${numOfItems} ${numOfItems===1 ? singular : plural}`);
+}
+const onError = async (error: Error) => {
+  await showFailureToast(error, {title: String(error.cause ?? "Something went wrong")});
+}
 export const useGetDomains = () => {
-  const { data, ...rest } = useResend<GetDomainsResponse>("domains", {
-    animatedToastMessage: "Fetching Domains",
-    async onData(data) {
-      const numOfDomains = data.data.length;
-      await showToast({
-        title: "Success",
-        message: `Fetched ${numOfDomains} ${numOfDomains === 1 ? "domain" : "domains"}`,
-        style: Toast.Style.Success,
-      });
-    },
-  });
-  const domains = data?.data ?? [];
-  return { domains, ...rest };
-};
+  const { data, ...rest } = useCachedPromise(async () => {
+    await showToast(Toast.Style.Animated, "Processing...", "Fetching Domains");
+    const res = await resend.domains.list();
+    if (res.error) throw new Error(res.error.message, {cause: res.error.name});
+    const data = res.data?.data ?? [];
+    await showSuccessToast(data, "domain");
+    return data;
+  }, [], {
+    initialData: [],
+    onError,
+  })
+
+  return { domains: data, ...rest };
+}
 
 export const useGetAPIKeys = () => {
   const { data, ...rest } = useResend<GetAPIKeysResponse>("api-keys", {
