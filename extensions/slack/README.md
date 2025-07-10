@@ -28,7 +28,7 @@ If you don't want to log in through OAuth, you can use an access token instead. 
          # Command: Search & Unread Messages & Set Presence
          - users:read
          
-         # Command: Lookup Email
+         # Command: Lookup Email (requires workspace admin approval)
          - users:read.email
 
          # Command: Search & Unread Messages
