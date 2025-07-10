@@ -9,7 +9,8 @@ export async function openProject(cliPath: string, projectPath: string) {
   console.log("🚀 ~ openProject ~ stdout:", stdout);
   console.log("🚀 ~ openProject ~ stderr:", stderr);
 
-  const ideStarted = stderr && stderr.includes("IDE server has started");
+  const ideStarted =
+    stderr && (stderr.includes("IDE server has started") || stderr.includes("IDE server started successfully"));
 
   if (stderr && !ideStarted) {
     throw new Error(stderr);

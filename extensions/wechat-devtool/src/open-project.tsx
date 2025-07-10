@@ -21,7 +21,7 @@ export default function OpenProject() {
 
     try {
       await openProject(deviceConfig.cliPath, project.path);
-      showHUD("Project opened successfully");
+      showHUD("✅ Project opened successfully");
       pop();
     } catch (error) {
       showFailureToast(error, { title: "Failed to Open Project" });
