@@ -1,4 +1,5 @@
 import { Cache } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { DEFAULT_ISSUE } from "../constant/defaultIssue";
 import type { Issue } from "../models/issue";
@@ -19,14 +20,19 @@ export default function useUrlParser({ cache }: useUrlParserProps): UrlParserSta
 
     try {
       return JSON.parse(cached);
-    } catch {
+    } catch (error) {
+      showFailureToast(error, { title: "Failed to parse cache" });
       return DEFAULT_ISSUE;
     }
   });
 
   const resetStates = (): void => {
     setIssue(DEFAULT_ISSUE);
-    cache.remove("issue");
+    try {
+      cache.remove("issue");
+    } catch (error) {
+      showFailureToast(error, { title: "Failed to reset cache" });
+    }
   };
 
   const extractIdFromUrl = (url: string): string | undefined => {
@@ -75,7 +81,11 @@ export default function useUrlParser({ cache }: useUrlParserProps): UrlParserSta
     newIssue.body = body ?? undefined;
 
     setIssue(newIssue);
-    cache.set("issue", JSON.stringify(newIssue));
+    try {
+      cache.set("issue", JSON.stringify(newIssue));
+    } catch (error) {
+      showFailureToast(error, { title: "Failed to save to cache" });
+    }
   };
 
   return {

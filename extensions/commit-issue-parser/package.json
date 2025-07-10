@@ -20,7 +20,7 @@
   ],
   "preferences": [
     {
-      "name": "onSelection",
+      "name": "primaryAction",
       "title": "Primary Action",
       "description": "Set the default behavior when you select a commit name",
       "type": "dropdown",
@@ -32,8 +32,8 @@
           "value": "paste"
         },
         {
-          "title": "Copy & Paste on Active App",
-          "value": "copypaste"
+          "title": "Copy and Paste on Active App",
+          "value": "copy-and-paste"
         },
         {
           "title": "Copy to Clipboard",
@@ -69,7 +69,7 @@
       "description": "Configure the mode of your commit types",
       "type": "dropdown",
       "required": false,
-      "default": "default",
+      "default": "text",
       "data": [
         {
           "title": "Text",

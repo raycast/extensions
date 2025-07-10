@@ -8,7 +8,6 @@ export const COMMIT_TYPES: CommitType[] = [
   { label: "docs", emoji: "📝" },
   { label: "build", emoji: "🏗" },
   { label: "ci", emoji: "👷" },
-  { label: "wip", emoji: "🚧" },
   { label: "style", emoji: "💄" },
   { label: "test", emoji: "✅" },
   { label: "perf", emoji: "⚡️" },

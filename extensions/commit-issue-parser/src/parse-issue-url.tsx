@@ -1,5 +1,5 @@
 import { Cache, Color, getPreferenceValues, List } from "@raycast/api";
-import CustomActionPannel from "./components/customActionPannel";
+import CustomActionPanel from "./components/customActionPanel";
 import useCommitMessages from "./hooks/commitMessages";
 import useUrlParser from "./hooks/urlParser";
 import { Preferences } from "./models/preferences";
@@ -29,7 +29,7 @@ export default function Command() {
               ? [{ tag: { value: commit.label, color: Color.SecondaryText } }]
               : undefined
           }
-          actions={<CustomActionPannel commit={commit} preferences={preferences} />}
+          actions={<CustomActionPanel commit={commit} preferences={preferences} />}
         />
       ))}
     </List>
