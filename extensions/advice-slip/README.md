@@ -1,3 +1,3 @@
 # Advice Slip
 
-Get an advice slip
+Get an advice slip!
