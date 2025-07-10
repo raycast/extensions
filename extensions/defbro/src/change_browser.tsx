@@ -60,8 +60,8 @@ export default function BrowserList() {
               <Action
                 title="Set as Default"
                 onAction={async () => {
-                  visitItem(browser);
                   await execPromise(`${DEFBRO_PATH} ${browser.id}`);
+                  visitItem(browser);
                   await closeMainWindow({ popToRootType: PopToRootType.Immediate, clearRootSearch: true });
                 }}
               />
