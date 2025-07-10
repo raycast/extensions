@@ -26,7 +26,6 @@ export default async ({ github, context }: API) => {
     } catch (error) {
       console.error("Failed to assign PR:", error);
     }
-    return;
   }
 
   console.log("changed extensions", process.env.CHANGED_EXTENSIONS);
