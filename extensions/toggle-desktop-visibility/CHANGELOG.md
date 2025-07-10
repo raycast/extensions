@@ -1,6 +1,6 @@
 # Toggle Desktop Visibility Changelog
 
-## [Support Tahoe] - {PR_MERGE_DATE}
+## [Support Tahoe] - 2025-07-10
 - Added support for macOS Tahoe (version 26)
 
 ## [Support Sequoia] - 2024-10-10
