@@ -37,14 +37,14 @@
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@types/he": "^1.2.3",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
+    "@types/node": "^20.x.x",
+    "@types/react": "^18.x.x",
     "@types/sanitize-html": "^2.16.0",
     "@types/turndown": "^5.0.5",
     "@types/xml2js": "^0.4.14",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build",

@@ -15,7 +15,7 @@ export function useDeals() {
   const [searchText, setSearchText] = useState<string>("");
 
   const preferences = getPreferenceValues<Preferences>();
-  const itemLimit = Number(preferences.itemLimit);
+  const itemLimit = parseInt(preferences.itemLimit) || 20;
 
   const fetchDeals = useCallback(async () => {
     setLoading(true);

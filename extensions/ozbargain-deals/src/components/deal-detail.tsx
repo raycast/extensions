@@ -51,7 +51,7 @@ export function DealDetail({ deal }: { deal: Deal }) {
           <Detail.Metadata.Label title="Upvotes" text={deal.upvotes.toString()} icon={Icon.ArrowUp} />
           <Detail.Metadata.Label title="Downvotes" text={deal.downvotes.toString()} icon={Icon.ArrowDown} />
           <Detail.Metadata.Label title="Net Votes" text={deal.netVotes.toString()} icon={Icon.Gauge} />
-          <Detail.Metadata.Label title="Comments" text={deal.comments.toString()} icon={Icon.SpeechBubble} />
+          <Detail.Metadata.Label title="Comments" text={String(deal.comments ?? 0)} icon={Icon.SpeechBubble} />
           {deal.categories && deal.categories.length > 0 && (
             <Detail.Metadata.TagList title="Categories">
               {deal.categories.map((cat) => (

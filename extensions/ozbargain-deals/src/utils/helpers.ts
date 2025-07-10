@@ -17,7 +17,13 @@ turndownService.addRule("dealImage", {
     const src = element.getAttribute("src");
     const alt = element.getAttribute("alt") || "";
     if (src) {
-      return `![${alt}](${src})`;
+      try {
+        const sanitizedSrc = new URL(src).href; // Validate and sanitize URL
+        return `![${alt}](${sanitizedSrc})`;
+      } catch (error) {
+        console.error("Invalid image URL in deal description:", src, error);
+        return ""; // Return empty string if URL is invalid
+      }
     }
     return "";
   },
