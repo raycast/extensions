@@ -7,6 +7,7 @@ import {
   useNavigation,
   Icon,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { PiHoleQueryResult } from "./types/pihole";
 import { getPiHoleAPI } from "./utils/api-singleton";
 
@@ -68,10 +69,8 @@ function QueryDomainForm() {
     const { domain } = values;
 
     if (!domain.trim()) {
-      await showToast({
-        style: Toast.Style.Failure,
+      showFailureToast("Please enter a domain to query", {
         title: "Invalid Domain",
-        message: "Please enter a domain to query",
       });
       return;
     }
@@ -93,12 +92,7 @@ function QueryDomainForm() {
 
       push(<QueryResult result={result} />);
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Query Failed",
-        message:
-          error instanceof Error ? error.message : "Unknown error occurred",
-      });
+      showFailureToast(error, { title: "Query Failed" });
     }
   };
 

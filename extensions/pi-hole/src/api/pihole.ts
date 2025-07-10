@@ -377,7 +377,7 @@ export class PiHoleAPI {
           totalQueries > 0
             ? "No recent queries found"
             : "Domain has never been queried",
-        type: "",
+        type: "A",
         lastSeen: 0,
         queryCount: totalQueries,
       };
@@ -386,12 +386,66 @@ export class PiHoleAPI {
     const latestQuery = queries[0] ? queries[0] : {};
     return {
       domain,
-      status: (latestQuery.status as string) || "unknown",
+      status: this.parseQueryStatus(
+        (latestQuery.status as string) || "unknown",
+      ),
       reason: this.getStatusDescription(latestQuery.status as string),
-      type: (latestQuery.type as string) || "",
+      type: this.parseQueryType((latestQuery.type as string) || "A"),
       lastSeen: Number(latestQuery.time) || 0,
       queryCount: totalQueries,
     };
+  }
+
+  private parseQueryStatus(
+    status: string,
+  ): "blocked" | "allowed" | "unknown" | "no_recent_queries" | "never_queried" {
+    const validStatuses: (
+      | "blocked"
+      | "allowed"
+      | "unknown"
+      | "no_recent_queries"
+      | "never_queried"
+    )[] = [
+      "blocked",
+      "allowed",
+      "unknown",
+      "no_recent_queries",
+      "never_queried",
+    ];
+    return validStatuses.includes(
+      status as
+        | "blocked"
+        | "allowed"
+        | "unknown"
+        | "no_recent_queries"
+        | "never_queried",
+    )
+      ? (status as
+          | "blocked"
+          | "allowed"
+          | "unknown"
+          | "no_recent_queries"
+          | "never_queried")
+      : "unknown";
+  }
+
+  private parseQueryType(
+    type: string,
+  ): "A" | "AAAA" | "PTR" | "SRV" | "TXT" | "CNAME" | "MX" {
+    const validTypes: (
+      | "A"
+      | "AAAA"
+      | "PTR"
+      | "SRV"
+      | "TXT"
+      | "CNAME"
+      | "MX"
+    )[] = ["A", "AAAA", "PTR", "SRV", "TXT", "CNAME", "MX"];
+    return validTypes.includes(
+      type as "A" | "AAAA" | "PTR" | "SRV" | "TXT" | "CNAME" | "MX",
+    )
+      ? (type as "A" | "AAAA" | "PTR" | "SRV" | "TXT" | "CNAME" | "MX")
+      : "A";
   }
 
   private getStatusDescription(status: string): string {

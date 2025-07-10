@@ -1,4 +1,5 @@
 import { showToast, Toast, closeMainWindow } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { PiHoleAPI } from "./api/pihole";
 import { getPreferences } from "./utils/preferences";
 
@@ -22,11 +23,6 @@ export default async function EnableCommand() {
 
     await closeMainWindow();
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to Enable Pi-hole",
-      message:
-        error instanceof Error ? error.message : "Unknown error occurred",
-    });
+    showFailureToast(error, { title: "Failed to Enable Pi-hole" });
   }
 }

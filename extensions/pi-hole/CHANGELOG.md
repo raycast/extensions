@@ -1,6 +1,6 @@
 # Pi-hole Changelog
 
-## [Initial Version] - 2025-07-09
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Monitor Pi-hole status with real-time statistics dashboard
 - Enable and disable Pi-hole blocking with one click

@@ -104,7 +104,11 @@
       "title": "Connection Timeout",
       "description": "API connection timeout in seconds",
       "default": "10",
-      "placeholder": "10"
+      "placeholder": "10",
+      "validation": {
+        "pattern": "^\\d+$",
+        "message": "Timeout must be a number"
+      }
     }
   ],
   "dependencies": {

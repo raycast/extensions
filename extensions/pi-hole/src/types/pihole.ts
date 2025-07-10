@@ -45,10 +45,9 @@ export interface PiHoleQueryResult {
     | "allowed"
     | "unknown"
     | "no_recent_queries"
-    | "never_queried"
-    | string;
+    | "never_queried";
   reason: string;
-  type: string;
+  type: "A" | "AAAA" | "PTR" | "SRV" | "TXT" | "CNAME" | "MX";
   lastSeen: number;
   queryCount: number;
 }
