@@ -1,6 +1,6 @@
 # Tailscale Changelog
 
-## [Add new features] - 2025-07-10
+## [Add new features] - {PR_MERGE_DATE}
 
 - Distinguish Mullvad exit nodes from other exit nodes and show location
 
