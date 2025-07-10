@@ -11,8 +11,7 @@ type API = {
 };
 
 export default async ({ github, context }: API) => {
-  console.log("PR Bot triggered with action:", context.payload.action);
-  console.log("PR draft status:", context.payload.pull_request.draft);
+  const assignReadyForReviewTo = "pernielsentikaer";
 
   if (context.payload.action === "ready_for_review" && !context.payload.pull_request.draft) {
     try {
@@ -20,11 +19,11 @@ export default async ({ github, context }: API) => {
         owner: context.repo.owner,
         repo: context.repo.repo,
         issue_number: context.issue.number,
-        assignees: ["pernielsentikaer"]
+        assignees: [assignReadyForReviewTo]
       });
-      console.log("Successfully assigned PR");
+      console.log(`Successfully assigned PR to ${assignReadyForReviewTo}`);
     } catch (error) {
-      console.error("Failed to assign PR:", error);
+      console.error(`Failed to assign PR to ${assignReadyForReviewTo}:`, error);
     }
   }
 
@@ -121,48 +120,37 @@ export default async ({ github, context }: API) => {
     // Check package.json tools first
     try {
       const packageJson = await getGitHubFile(`extensions/${extensionFolder}/package.json`, { github, context });
-
-      console.log(`Existing: package.json for ${extensionFolder}: ${packageJson}`);
-
       const packageJsonObj = JSON.parse(packageJson);
-
-      console.log(`Existing: package.json content keys: ${Object.keys(packageJsonObj)}`);
 
       aiFilesOrToolsExist = !!packageJsonObj.tools;
     } catch {
-      console.log(`Existing: no package.json tools for ${extensionFolder}`);
+      console.log(`No package.json tools for ${extensionFolder}`);
     }
 
     // Only check AI files if no tools found in package.json
     if (!aiFilesOrToolsExist) {
       try {
-        const aiExtensionJson = await getGitHubFile(`extensions/${extensionFolder}/ai.json`, { github, context });
-
-        console.log(`Existing: ai.json for ${extensionFolder}: ${aiExtensionJson}`);
+        await getGitHubFile(`extensions/${extensionFolder}/ai.json`, { github, context });
 
         aiFilesOrToolsExist = true;
       } catch {
-        console.log(`Existing: no ai.json for ${extensionFolder}`);
+        console.log(`No ai.json for ${extensionFolder}`);
       }
 
       try {
-        const aiExtensionYaml = await getGitHubFile(`extensions/${extensionFolder}/ai.yaml`, { github, context });
-
-        console.log(`Existing: ai.yaml for ${extensionFolder}: ${aiExtensionYaml}`);
+        await getGitHubFile(`extensions/${extensionFolder}/ai.yaml`, { github, context });
 
         aiFilesOrToolsExist = true;
       } catch {
-        console.log(`Existing: no ai.yaml for ${extensionFolder}`);
+        console.log(`No ai.yaml for ${extensionFolder}`);
       }
 
       try {
-        const aiExtensionJson5 = await getGitHubFile(`extensions/${extensionFolder}/ai.json5`, { github, context });
-
-        console.log(`Existing: ai.json5 for ${extensionFolder}: ${aiExtensionJson5}`);
+        await getGitHubFile(`extensions/${extensionFolder}/ai.json5`, { github, context });
 
         aiFilesOrToolsExist = true;
       } catch {
-        console.log(`Existing: no ai.json5 for ${extensionFolder}`);
+        console.log(`No ai.json5 for ${extensionFolder}`);
       }
     }
 
@@ -273,15 +261,11 @@ async function checkForAiInPullRequestDiff(extensionFolder: string, { github, co
 
   let aiFilesOrToolsExist: boolean = false;
 
-  console.log(`PR: checking for ai in ${extensionFolder} in ${files.length} files`);
-
   for (const file of files) {
     const filePath = file.filename;
 
     // we only care about files in the extension folder
     if (!filePath.startsWith(`extensions/${extensionFolder}/`)) {
-      console.log(`PR: skipping file ${filePath} because it's not in the extension folder`);
-
       continue;
     }
 
@@ -299,29 +283,19 @@ async function checkForAiInPullRequestDiff(extensionFolder: string, { github, co
             ref: context.payload.pull_request.head.sha,
           });
 
-          console.log(`PR: package.json status: ${file.status}`);
-          
           const packageJsonObj = JSON.parse(content as unknown as string);
 
-          console.log(`PR: package.json content keys: ${Object.keys(packageJsonObj)}`);
-
           aiFilesOrToolsExist = !!packageJsonObj.tools;
-
-          console.log(`PR: package.json has tools: ${aiFilesOrToolsExist}`);
         }
       } catch {
-        console.log(`PR: Could not parse package.json for ${extensionFolder}`);
+        console.log(`Could not parse package.json for ${extensionFolder}`);
       }
     }
 
     if (file.status === 'added' || file.status === 'modified') {
       const aiFiles = ['ai.json', 'ai.yaml', 'ai.json5'];
 
-      console.log(`PR: checking for ai files in ${filePath}`);
-
       if (aiFiles.some(filename => filePath === `extensions/${extensionFolder}/${filename}`)) {
-        console.log(`PR: found ai file ${filePath}`);
-
         aiFilesOrToolsExist = true;
       }
     }
