@@ -27,6 +27,9 @@ If you don't want to log in through OAuth, you can use an access token instead. 
         user:
          # Command: Search & Unread Messages & Set Presence
          - users:read
+         
+         # Command: Lookup Email
+         - users:read.email
 
          # Command: Search & Unread Messages
          - channels:read

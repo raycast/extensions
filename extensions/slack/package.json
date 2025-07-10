@@ -8,7 +8,8 @@
   "contributors": [
     "stelo",
     "thomaslombart",
-    "Rob"
+    "Rob",
+    "pedram_navid"
   ],
   "pastContributors": [
     "Elliot67"
@@ -39,6 +40,18 @@
           "default": false
         }
       ]
+    },
+    {
+      "name": "lookup-email",
+      "title": "Lookup Email",
+      "subtitle": "Slack",
+      "keywords": [
+        "email",
+        "user",
+        "contact"
+      ],
+      "description": "Search for users by name and copy their email address.",
+      "mode": "view"
     },
     {
       "name": "search-messages",
