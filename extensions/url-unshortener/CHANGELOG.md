@@ -1,6 +1,6 @@
 # URL Unshortener Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-07-10
 
 - Undo previous changes that broke unshortening for some URLs. For example t.co links.
 - Make extension available to Windows users.
