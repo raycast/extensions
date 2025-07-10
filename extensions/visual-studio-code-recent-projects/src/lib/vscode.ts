@@ -125,9 +125,6 @@ export function getVSCodeCLIFilename(): string {
   if (!name || name.length <= 0) {
     return paths.Code;
   }
-
-  console.log(name);
-
   return name;
 }
 
@@ -138,18 +135,40 @@ export class VSCodeCLI {
     this.cliFilename = cliFilename;
   }
 
+  openPath(targetPath: string, newWindow = false) {
+    const args: string[] = [targetPath];
+    if (newWindow) {
+      args.unshift("--new-window");
+    }
+
+    if (isWin) {
+      const commandForCmdExe = `"${this.cliFilename}" ${newWindow ? "--new-window " : ""} "${targetPath}"`;
+      try {
+        child_process.execFileSync("cmd.exe", ["/c", commandForCmdExe], {
+          encoding: "utf8",
+          shell: true,
+        });
+      } catch (error: any) {
+        throw new Error(`Failed to open path "${targetPath}" with VS Code CLI: ${error.message || error}`);
+      }
+    } else {
+      try {
+        child_process.execFileSync(this.cliFilename, args, { encoding: "utf8" });
+      } catch (error: any) {
+        throw new Error(`Failed to open path "${targetPath}" with VS Code CLI: ${error.message || error}`);
+      }
+    }
+  }
+
   installExtensionByIDSync(id: string) {
     if (isWin) {
       const commandForCmdExe = `"${this.cliFilename}" --install-extension ${id} --force`;
-
       child_process.execFileSync("cmd.exe", ["/c", commandForCmdExe], {
         encoding: "utf8",
         shell: true,
       });
-
       return;
     }
-
     child_process.execFileSync(this.cliFilename, ["--install-extension", id, "--force"]);
   }
 
@@ -157,7 +176,6 @@ export class VSCodeCLI {
     if (isWin) {
       try {
         const commandForCmdExe = `"${this.cliFilename}" --uninstall-extension ${id} --force`;
-
         child_process.execFileSync("cmd.exe", ["/c", commandForCmdExe], {
           encoding: "utf8",
           shell: true,
@@ -165,10 +183,8 @@ export class VSCodeCLI {
       } catch (error) {
         console.log(error);
       }
-
       return;
     }
-
     child_process.execFileSync(this.cliFilename, ["--uninstall-extension", id, "--force"]);
   }
 
@@ -176,7 +192,6 @@ export class VSCodeCLI {
     if (isWin) {
       try {
         const commandForCmdExe = `"${this.cliFilename}" --new-window`;
-
         child_process.execFileSync("cmd.exe", ["/c", commandForCmdExe], {
           encoding: "utf8",
           shell: true,
@@ -184,10 +199,8 @@ export class VSCodeCLI {
       } catch (error) {
         console.log(error);
       }
-
       return;
     }
-
     child_process.execFileSync(this.cliFilename, ["--new-window"]);
   }
 }
@@ -231,6 +244,7 @@ async function getPackageJSONInfo(filename: string): Promise<PackageJSONInfo | u
   } catch (error) {
     //
   }
+  return undefined;
 }
 
 export async function getLocalExtensions(): Promise<Extension[] | undefined> {

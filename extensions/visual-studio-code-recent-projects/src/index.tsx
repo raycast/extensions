@@ -2,7 +2,7 @@ import { Action, ActionPanel, Color, Grid, Icon, open, openExtensionPreferences,
 import { usePromise } from "@raycast/utils";
 import { basename, dirname } from "path";
 import { useEffect, useState } from "react";
-import { runAppleScriptSync } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 import tildify from "tildify";
 import { fileURLToPath } from "url";
 import { RemoveMethods, useRecentEntries } from "./db";
@@ -184,7 +184,7 @@ function LocalItem(
   const getAction = (revert = false) => {
     return () => {
       if (closeOtherWindows !== revert) {
-        runAppleScriptSync(`
+        runAppleScript(`
         tell application "System Events"
           tell process "${build}"
             repeat while window 1 exists
