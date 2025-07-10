@@ -1,4 +1,5 @@
 import { List, ActionPanel, Action, Icon, closeMainWindow, PopToRootType, Detail, open } from "@raycast/api";
+import { useFrecencySorting } from "@raycast/utils";
 import execPromise from "./utils/execPromise";
 import { useState, useEffect, useMemo } from "react";
 import { useIsDefbroInstalled } from "./hooks/useIsDefbroInstalled";
@@ -9,6 +10,7 @@ import { Browser } from "./types";
 export default function BrowserList() {
   const [searchText, setSearchText] = useState("");
   const [browsers, setBrowsers] = useState<Browser[]>([]);
+  const { data: sortedBrowsers, visitItem } = useFrecencySorting(browsers);
   const [isLoading, setIsLoading] = useState(true);
   const isInstalled = useIsDefbroInstalled();
 
@@ -25,8 +27,8 @@ export default function BrowserList() {
   }, [isInstalled]);
 
   const filteredBrowsers = useMemo(() => {
-    return browsers.filter((browser) => browser.title.toLowerCase().includes(searchText.toLowerCase()));
-  }, [browsers, searchText]);
+    return sortedBrowsers.filter((browser: Browser) => browser.title.toLowerCase().includes(searchText.toLowerCase()));
+  }, [sortedBrowsers, searchText]);
 
   if (isInstalled === false) {
     return (
@@ -48,7 +50,7 @@ export default function BrowserList() {
       navigationTitle="Search Browser"
       isLoading={isLoading}
     >
-      {filteredBrowsers.map((browser) => (
+      {filteredBrowsers.map((browser: Browser) => (
         <List.Item
           key={browser.id}
           title={browser.title}
@@ -58,6 +60,7 @@ export default function BrowserList() {
               <Action
                 title="Set as Default"
                 onAction={async () => {
+                  visitItem(browser);
                   await execPromise(`${DEFBRO_PATH} ${browser.id}`);
                   await closeMainWindow({ popToRootType: PopToRootType.Immediate, clearRootSearch: true });
                 }}
