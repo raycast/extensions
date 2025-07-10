@@ -55,40 +55,30 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
   }
 
   /**
-   * Performs the initial calculation when the component mounts
-   */
-  useEffect(() => {
-    handleCalculate(roundValue, nearestValue);
-  }, []);
-
-  /**
    * Handles the calculation logic, validates inputs, updates state, and shows toast notifications
    *
    * @param roundStr - The string value to be rounded
    * @param nearestStr - The string value to round to
    */
   async function handleCalculate(roundStr: string, nearestStr: string) {
+    // Skip calculation if either field is empty
+    if (!roundStr || !nearestStr) {
+      setResult(null);
+      setError(null);
+      return;
+    }
+
     const num1 = Number(roundStr);
     const num2 = Number(nearestStr);
 
     if (isNaN(num1) || isNaN(num2)) {
       setError("Please provide valid numbers for both inputs.");
       setResult(null);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Invalid input",
-        message: "Please provide valid numbers for both inputs.",
-      });
       return;
     }
     if (num2 === 0) {
       setError("Nearest number must not be zero.");
       setResult(null);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Invalid input",
-        message: "Nearest number must not be zero.",
-      });
       return;
     }
 
@@ -110,55 +100,49 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
   }
 
   /**
-   * Handles form submission, performs validation, calculation, and updates the UI
+   * Handles manual copy to clipboard action
    */
-  async function handleSubmit() {
-    const num1 = Number(roundValue);
-    const num2 = Number(nearestValue);
-
-    if (isNaN(num1) || isNaN(num2)) {
+  async function handleCopyToClipboard() {
+    if (result !== null) {
+      await Clipboard.copy(result.toString());
       await showToast({
-        style: Toast.Style.Failure,
-        title: "Invalid input",
-        message: "Please enter valid numbers for both fields.",
+        style: Toast.Style.Success,
+        title: "Copied!",
+        message: `Result ${result} copied to clipboard.`,
       });
-      setResult(null);
-      setError("Please enter valid numbers for both fields.");
-      return;
     }
-    if (num2 === 0) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Invalid input",
-        message: "Nearest number must not be zero.",
-      });
-      setResult(null);
-      setError("Nearest number must not be zero.");
-      return;
-    }
+  }
 
-    const rounded = roundToNearest(num1, num2);
-    setResult(rounded);
-    setError(null);
+  /**
+   * Recalculates whenever roundValue or nearestValue changes
+   */
+  useEffect(() => {
+    handleCalculate(roundValue, nearestValue);
+  }, [roundValue, nearestValue]);
 
-    if (preferences.copyToClipboard) {
-      await Clipboard.copy(rounded.toString());
-    }
+  /**
+   * Handles roundValue input changes
+   */
+  function handleRoundValueChange(value: string) {
+    setRoundValue(value);
+  }
 
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Rounded!",
-      message: `Result ${rounded} ${
-        preferences.copyToClipboard ? "copied to clipboard." : ""
-      }`,
-    });
+  /**
+   * Handles nearestValue input changes
+   */
+  function handleNearestValueChange(value: string) {
+    setNearestValue(value);
   }
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Recalculate" onSubmit={handleSubmit} />
+          <Action
+            title="Copy Result to Clipboard"
+            onAction={handleCopyToClipboard}
+            shortcut={{ modifiers: ["cmd"], key: "c" }}
+          />
         </ActionPanel>
       }
     >
@@ -166,13 +150,13 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
         id="roundValue"
         title="Round"
         value={roundValue}
-        onChange={setRoundValue}
+        onChange={handleRoundValueChange}
       />
       <Form.TextField
         id="nearestValue"
         title="To the nearest"
         value={nearestValue}
-        onChange={setNearestValue}
+        onChange={handleNearestValueChange}
       />
 
       <Form.Separator />
