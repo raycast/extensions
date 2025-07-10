@@ -65,4 +65,4 @@ export function DealDetail({ deal }: { deal: Deal }) {
       }
     />
   );
-} 
+}

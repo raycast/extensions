@@ -37,4 +37,4 @@ export const sanitizeOptions = {
     }),
   },
   allowedSchemes: ["http", "https", "mailto"],
-}; 
+};

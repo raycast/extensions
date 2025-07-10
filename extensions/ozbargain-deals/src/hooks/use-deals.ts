@@ -99,4 +99,4 @@ export function useDeals() {
   });
 
   return { deals: filteredDeals, loading, error, setSearchText };
-} 
+}

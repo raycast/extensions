@@ -50,4 +50,4 @@ export type Deal = {
 // Type for TurndownService node elements
 export type TurndownNode = {
   getAttribute: (name: string) => string | null;
-}; 
+};
