@@ -1,5 +1,4 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
-import React from "react";
 import { Deal } from "../utils/types";
 import { MAX_DESCRIPTION_LENGTH } from "../utils/constants";
 import { timeAgo } from "../utils/helpers";

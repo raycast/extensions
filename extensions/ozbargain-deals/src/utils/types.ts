@@ -34,7 +34,7 @@ export type Deal = {
   id: string;
   title: string;
   link: string;
-  descriptionHtml: string; // Raw HTML description from feed
+  descriptionHtml: string; // Raw HTML description from feed, sanitized for security
   descriptionMarkdown: string; // HTML converted to Markdown
   upvotes: number;
   downvotes: number;

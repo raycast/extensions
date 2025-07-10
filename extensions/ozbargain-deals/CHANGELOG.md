@@ -1,3 +1,3 @@
 # OzBargain Deals Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [1.0.0] - {PR_MERGE_DATE}
