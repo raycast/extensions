@@ -11,13 +11,21 @@ type API = {
 };
 
 export default async ({ github, context }: API) => {
-  if (context.payload.action === "ready_for_review" && context.payload.pull_request.draft === false) {
-    await github.rest.issues.addAssignees({
-      owner: context.repo.owner,
-      repo: context.repo.repo,
-      issue_number: context.issue.number,
-      assignees: ["pernielsentikaer"]
-    });
+  console.log("PR Bot triggered with action:", context.payload.action);
+  console.log("PR draft status:", context.payload.pull_request.draft);
+
+  if (context.payload.action === "ready_for_review" && !context.payload.pull_request.draft) {
+    try {
+      await github.rest.issues.addAssignees({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        issue_number: context.issue.number,
+        assignees: ["pernielsentikaer"]
+      });
+      console.log("Successfully assigned PR");
+    } catch (error) {
+      console.error("Failed to assign PR:", error);
+    }
     return;
   }
 
