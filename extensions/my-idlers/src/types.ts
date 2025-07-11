@@ -155,3 +155,14 @@ export type Misc = Item & {
   owned_since: string;
   price: Pricing;
 };
+
+export type ErrorResponse =
+  | {
+      result: "fail";
+      messages: {
+        [key: string]: string[];
+      };
+    }
+  | {
+      message: string;
+    };

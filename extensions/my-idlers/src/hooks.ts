@@ -1,17 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { Pricing } from "./types";
+import { ErrorResponse, Pricing } from "./types";
 
-type ErrorResponse =
-  | {
-      result: "fail";
-      messages: {
-        [key: string]: string[];
-      };
-    }
-  | {
-      message: string;
-    };
 export default function useGet<T>(
   endpoint: string,
   { execute = true, onData }: { execute?: boolean; onData?: (data: T[]) => void } = {},
