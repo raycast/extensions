@@ -1,6 +1,6 @@
 # Ente Auth Changelog
 
-## [Bug fix] - {PR_MERGE_DATE}
+## [Bug fix] - 2025-07-11
 
 - removed flickering "no secrets found" message when opening the extension
 - slightly updated "no secrets found" message
