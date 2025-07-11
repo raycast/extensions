@@ -18,6 +18,7 @@ type Preferences = {
   iapOAuthClientId: string;
   raycastOAuthClientId: string;
   backstageUrl: string;
+  backstageStaticToken: string;
 };
 
 const preferences: Preferences = getPreferenceValues();
@@ -72,7 +73,11 @@ function SearchLinks({ svc }: { svc: Service }) {
   );
 }
 
-async function getIdTokenIfNeeded() {
+async function getAuthTokenIfNeeded() {
+  if (preferences.backstageStaticToken) {
+    return preferences.backstageStaticToken;
+  }
+
   if (preferences.raycastOAuthClientId && preferences.iapOAuthClientId) {
     await authorize(["openid", "email"], preferences.raycastOAuthClientId, preferences.iapOAuthClientId);
     const tokens = await client.getTokens();
@@ -83,7 +88,7 @@ async function getIdTokenIfNeeded() {
 }
 
 async function fetchBackstage() {
-  const idToken = await getIdTokenIfNeeded();
+  const idToken = await getAuthTokenIfNeeded();
 
   const res = await fetch(`${preferences.backstageUrl}/api/catalog/entities?filter=kind=component`, {
     headers: idToken
