@@ -45,7 +45,7 @@ export default function useCommitMessages({ preferences, issue }: CommitMessageP
       contentFormat === ContentFormat.LAZYGIT
         ? `${message}${body ? `\n${body}` : ""}`
         : contentFormat === ContentFormat.GIT
-          ? `git commit -m "${JSON.stringify(message)}"${body ? ` -m "${JSON.stringify(body)}"` : ""}`
+          ? `git commit -m ${JSON.stringify(message)}${body ? ` -m ${JSON.stringify(body)}` : ""}`
           : message;
 
     return {

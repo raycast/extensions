@@ -19,7 +19,7 @@ export default function Command() {
       searchText={issue.entry}
       onSearchTextChange={setEntry}
     >
-      {commitMessages.map((commit) => (
+      {commitMessages.map((commit, index) => (
         <List.Item
           id={commit.label}
           key={commit.label}
@@ -27,7 +27,7 @@ export default function Command() {
           accessories={
             preferences.typeMode === TypeMode.GITMOJI
               ? [{ tag: { value: commit.label, color: Color.SecondaryText } }]
-              : undefined
+              : [{ icon: commit.accessoryIcon, tooltip: index < 9 ? `⌘+${index + 1}` : undefined }]
           }
           actions={<CustomActionPanel commit={commit} preferences={preferences} />}
         />
