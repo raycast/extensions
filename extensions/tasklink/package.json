@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tasklink",
-  "title": "TaskLink",
+  "title": "Tasklink",
   "description": "Converts issue tracker Ids into clickable links",
   "icon": "command-icon.png",
   "author": "jrodalo",
@@ -12,13 +12,13 @@
   "commands": [
     {
       "name": "issue_id_to_html_link",
-      "title": "Convert Issue Ids Into Clickable HTML Links",
+      "title": "Convert Issue Ids into Clickable HTML Links",
       "description": "Converts issue tracker IDs into HTML links",
       "mode": "no-view"
     },
     {
       "name": "issue_id_to_markdown_link",
-      "title": "Convert Issue Ids Into Clickable Markdown Links",
+      "title": "Convert Issue Ids into Clickable Markdown Links",
       "description": "Converts issue tracker IDs into Markdown links",
       "mode": "no-view"
     }
