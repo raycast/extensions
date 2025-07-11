@@ -1,5 +1,19 @@
 # Media Converter Changelog
 
+## [1.4.2] - 2025-06-27
+
+### Added
+
+- Specify custom FFmpeg path from the Raycast app's extension preferences (optional)
+
+### Removed
+
+- FFmpegInstallPage.tsx: a page for specifying a custom FFmpeg path. Replaced by the proper handling of user preferences.
+
+### API Changes
+
+- Re-flowed the lost FFmpeg handling to HelloPage.tsx, previously at FFmpegInstallPage.tsx
+
 ## [1.4.1] - 2025-06-26
 
 Publish on windows

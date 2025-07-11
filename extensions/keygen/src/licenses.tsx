@@ -1,10 +1,11 @@
 import dayjs from "dayjs";
 import relatimeTime from "dayjs/plugin/relativeTime";
 import { API_URL, headers, MAX_PAGE_SIZE, parseResponse, useKeygenPaginated } from "./keygen";
-import { License, Policy } from "./interfaces";
+import { License, LicenseStatus, Policy } from "./interfaces";
 import { Action, ActionPanel, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import OpenInKeygen from "./open-in-keygen";
 import { FormValidation, useForm } from "@raycast/utils";
+import { LICENSE_STATUS_COLOR } from "./config";
 dayjs.extend(relatimeTime);
 
 export default function Licenses() {
@@ -25,8 +26,12 @@ export default function Licenses() {
         licenses.map((license) => (
           <List.Item
             key={license.id}
-            icon={Icon.Dot}
+            icon={{
+              value: { source: Icon.Dot, tintColor: LICENSE_STATUS_COLOR[license.attributes.status] },
+              tooltip: license.attributes.status,
+            }}
             title={license.id.slice(0, 8)}
+            subtitle={license.attributes.name || undefined}
             detail={
               <List.Item.Detail
                 metadata={
@@ -42,9 +47,15 @@ export default function Licenses() {
                     <List.Item.Detail.Metadata.Label title="Attributes" />
                     <List.Item.Detail.Metadata.Label title="Name" text={license.attributes.name || "--"} />
                     <List.Item.Detail.Metadata.Label title="Key" text={license.attributes.key} />
-                    {/* expiration */}
+                    <List.Item.Detail.Metadata.Label
+                      title="Expiry"
+                      text={`${license.attributes.expiry} (${dayjs(license.attributes.expiry).fromNow()})`}
+                    />
                     <List.Item.Detail.Metadata.TagList title="Status">
-                      <List.Item.Detail.Metadata.TagList.Item text={license.attributes.status} />
+                      <List.Item.Detail.Metadata.TagList.Item
+                        text={license.attributes.status}
+                        color={LICENSE_STATUS_COLOR[license.attributes.status]}
+                      />
                     </List.Item.Detail.Metadata.TagList>
                     <List.Item.Detail.Metadata.Label
                       title="Machines"
@@ -61,7 +72,7 @@ export default function Licenses() {
                     <List.Item.Detail.Metadata.TagList title="Protected">
                       <List.Item.Detail.Metadata.TagList.Item text={`${license.attributes.protected}`} />
                     </List.Item.Detail.Metadata.TagList>
-                    {/* scheme */}
+                    <List.Item.Detail.Metadata.Label title="Scheme" text={license.attributes.scheme || "---"} />
                     <List.Item.Detail.Metadata.TagList title="Suspended">
                       <List.Item.Detail.Metadata.TagList.Item text={`${license.attributes.suspended}`} />
                     </List.Item.Detail.Metadata.TagList>
@@ -69,7 +80,16 @@ export default function Licenses() {
                       title="Last Validation"
                       text={license.attributes.lastValidated?.toString() || "--"}
                     />
-                    {/* valid */}
+                    <List.Item.Detail.Metadata.Label
+                      title="Valid"
+                      icon={
+                        license.attributes.status === LicenseStatus.ACTIVE
+                          ? Icon.Check
+                          : license.attributes.status === LicenseStatus.EXPIRED
+                            ? Icon.Xmark
+                            : Icon.QuestionMark
+                      }
+                    />
                     <List.Item.Detail.Metadata.Label
                       title="Last Check-Out"
                       text={license.attributes.lastCheckOut?.toString() || "--"}

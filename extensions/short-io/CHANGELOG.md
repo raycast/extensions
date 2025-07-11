@@ -1,5 +1,15 @@
 # Short.io Changelog
 
+## [Search Links Enhancements] - 2025-07-09
+
+- `search-links` now allows you to view links independent of default
+- fix: `shorten-link-with-domain` persists Default Domain properly
+
+## [Add Domain] - 2025-06-27
+
+- Add Domain inside `shorten-link-with-domain`
+- Modernize extension to use latest Raycast config
+
 ## [Fix crash] - 2024-12-02
 
 - Fix potential crash issues in Search Links command

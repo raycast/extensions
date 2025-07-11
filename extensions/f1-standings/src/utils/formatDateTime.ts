@@ -6,7 +6,7 @@ const formatDateTime = (date: Date) => {
     return "";
   }
 
-  const preferences = getPreferenceValues<{ dateFormat: string }>();
-  return format(date, `E, ${preferences.dateFormat}, HH:mm`);
+  const preferences = getPreferenceValues<{ dateFormat: string; timeFormat: string }>();
+  return format(date, `E, ${preferences.dateFormat}, ${preferences.timeFormat}`);
 };
 export default formatDateTime;

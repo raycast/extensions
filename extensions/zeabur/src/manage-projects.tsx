@@ -61,18 +61,30 @@ export default function Command() {
               mask: Image.Mask.RoundedRectangle,
             }}
             accessories={[
-              {
-                tag: project.region.providerInfo.code,
-                tooltip: "Provider",
-              },
-              {
-                tag: project.region.country,
-                tooltip: "Country",
-              },
-              {
-                tag: project.region.city,
-                tooltip: "City",
-              },
+              ...(project.region.providerInfo?.code
+                ? [
+                    {
+                      tag: project.region.providerInfo.code,
+                      tooltip: "Provider",
+                    },
+                  ]
+                : []),
+              ...(project.region.country
+                ? [
+                    {
+                      tag: project.region.country,
+                      tooltip: "Country",
+                    },
+                  ]
+                : []),
+              ...(project.region.city
+                ? [
+                    {
+                      tag: project.region.city,
+                      tooltip: "City",
+                    },
+                  ]
+                : []),
             ]}
             actions={
               <ActionPanel>
