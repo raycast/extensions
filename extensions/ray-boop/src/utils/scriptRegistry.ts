@@ -77,6 +77,10 @@ import * as MinifyJSON from "../scripts/MinifyJSON.js";
 import * as MinifySQL from "../scripts/MinifySQL.js";
 import * as MinifyXML from "../scripts/MinifyXML.js";
 import * as NatSort from "../scripts/NatSort.js";
+import * as NormalizeToNFC from "../scripts/NormalizeToNFC.js";
+import * as NormalizeToNFD from "../scripts/NormalizeToNFD.js";
+import * as NormalizeToNFKC from "../scripts/NormalizeToNFKC.js";
+import * as NormalizeToNFKD from "../scripts/NormalizeToNFKD.js";
 import * as PhpUnserialize from "../scripts/PhpUnserialize.js";
 import * as QueryToJson from "../scripts/QueryToJson.js";
 import * as RemoveDuplicates from "../scripts/RemoveDuplicates.js";
@@ -352,6 +356,38 @@ export const scripts: Record<string, BoopScript> = {
     "Minifies SQL by removing whitespace",
     "📦",
     "sql,minify,compress",
+    "formatting",
+  ),
+  normalizeToNFC: createScript(
+    NormalizeToNFC,
+    "Normalize to NFC",
+    "Normalizes text to NFC (Normalization Form C)",
+    "🔤",
+    "normalize,nfc,unicode",
+    "formatting",
+  ),
+  normalizeToNFD: createScript(
+    NormalizeToNFD,
+    "Normalize to NFD",
+    "Normalizes text to NFD (Normalization Form D)",
+    "🔤",
+    "normalize,nfd,unicode",
+    "formatting",
+  ),
+  normalizeToNFKC: createScript(
+    NormalizeToNFKC,
+    "Normalize to NFKC",
+    "Normalizes text to NFKC (Normalization Form KC)",
+    "🔤",
+    "normalize,nfkc,unicode",
+    "formatting",
+  ),
+  normalizeToNFKD: createScript(
+    NormalizeToNFKD,
+    "Normalize to NFKD",
+    "Normalizes text to NFKD (Normalization Form KD)",
+    "🔤",
+    "normalize,nfkd,unicode",
     "formatting",
   ),
 

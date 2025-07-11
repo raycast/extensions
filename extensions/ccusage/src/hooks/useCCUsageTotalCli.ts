@@ -1,6 +1,5 @@
 import { useExec } from "@raycast/utils";
 import { TotalUsageResponseSchema } from "../types/usage-types";
-import { preferences } from "../preferences";
 import { getExecOptions } from "../utils/exec-options";
 import { stringToJSON } from "../utils/string-to-json-schema";
 
@@ -8,9 +7,7 @@ import { stringToJSON } from "../utils/string-to-json-schema";
  * Hook for executing `ccusage --json` command
  */
 export const useCCUsageTotalCli = () => {
-  const npxCommand = preferences.customNpxPath || "npx";
-
-  const result = useExec(npxCommand, ["ccusage@latest", "--json"], {
+  const result = useExec("npx", ["ccusage@latest", "--json"], {
     ...getExecOptions(),
     parseOutput: ({ stdout }) => {
       if (!stdout) {
