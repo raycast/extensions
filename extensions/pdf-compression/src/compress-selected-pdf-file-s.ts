@@ -1,4 +1,4 @@
-import { showToast, Toast, getSelectedFinderItems, showInFinder } from "@raycast/api";
+import { showToast, Toast, getSelectedFinderItems, showInFinder, FileSystemItem } from "@raycast/api";
 import { basename, dirname, join, extname } from "path";
 import { copyFile, access, constants } from "fs/promises";
 import { compressPDF } from "swift:../swift";
@@ -21,11 +21,24 @@ async function fileExists(path: string): Promise<boolean> {
 
 export default async function main() {
   // Get selected files in Finder
-  const items = await getSelectedFinderItems();
-  const pdfs = items.filter((item) => item.path.endsWith(".pdf"));
-  if (pdfs.length === 0) {
-    await showToast({ style: Toast.Style.Failure, title: "No PDF selected" });
-    return;
+  let pdfs: FileSystemItem[] = [];
+
+  try {
+    const selectedItems = await getSelectedFinderItems();
+    if (!selectedItems.length) {
+      throw new Error("No PDF selected");
+    }
+
+    pdfs = selectedItems.filter((item) => item.path.endsWith(".pdf"));
+    if (pdfs.length === 0) {
+      throw new Error("No PDF selected");
+    }
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Could not get selected PDF files",
+      message: String(error).trim().replace("Error: ", ""),
+    });
   }
 
   for (const pdf of pdfs) {
