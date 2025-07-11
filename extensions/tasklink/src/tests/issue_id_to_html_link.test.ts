@@ -34,8 +34,8 @@ describe("Issue ID to HTML Links", () => {
     await Command();
     expect(Clipboard.paste).toHaveBeenCalledWith({
       html:
-        `- <a href="https://example.com/RAY-123">RAY-123</a>: First\n` +
-        `- <a href="https://example.com/RAY-456">RAY-456</a>: Second\n` +
+        `- <a href="https://example.com/RAY-123">RAY-123</a>: First<br />` +
+        `- <a href="https://example.com/RAY-456">RAY-456</a>: Second<br />` +
         `- <a href="https://example.com/RAY-789">RAY-789</a>: Third`,
     });
   });
