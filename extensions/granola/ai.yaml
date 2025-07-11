@@ -69,8 +69,6 @@ instructions: |
     - When using save-to-notion, provide clear feedback about success/failure and include Notion URLs for successful saves
     - When using get-transcript, format the transcript content clearly with proper speaker attribution
 
-# Folder Management Guidelines:
-
 evals:
     - input: "@granola Please summarize my last note"
       mocks:
