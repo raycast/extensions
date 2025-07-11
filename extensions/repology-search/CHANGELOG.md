@@ -1,6 +1,6 @@
 # Repology Search Changelog
 
-## [Maintenance Release] - {PR_MERGE_DATE}
+## [Maintenance Release] - 2025-07-11
 
 - Fix "unauthorized" error when fetching data
 - Update dependencies
