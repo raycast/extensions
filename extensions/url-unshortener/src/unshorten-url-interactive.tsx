@@ -44,6 +44,11 @@ export default function UrlRedirectionList(props: LaunchProps) {
           const faviconUrl = getFaviconUrl(step.url);
           return { ...step, faviconUrl: faviconUrl || Icon.Globe };
         } catch (error: unknown) {
+          let errorMessage = "Failed to fetch favicon";
+          if (error instanceof Error) {
+            errorMessage = error.message;
+          }
+          console.error(`Error fetching favicon for ${step.url}:`, errorMessage);
           return { ...step, faviconUrl: Icon.Globe };
         }
       }),

@@ -16,7 +16,7 @@ export function isValidUrl(url: string) {
     try {
       new URL(url);
       return true;
-    } catch (_) {
+    } catch {
       return false;
     }
   }
@@ -96,6 +96,7 @@ export function getFaviconUrl(url: string) {
     const hostname = new URL(url).hostname;
     return `https://www.google.com/s2/favicons?domain=${hostname}`;
   } catch (error) {
+    console.error(`Error getting favicon URL for ${url}:`, error);
     return Icon.Globe;
   }
 }
