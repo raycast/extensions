@@ -1,6 +1,6 @@
 # DocSearch Changelog
 
-## [Added support for new documentation] - {PR_MERGE_DATE}
+## [Added support for new documentation] - 2025-07-11
 
 - 📄 Support [TailwindCSS V4](https://tailwindcss.com/)
 - 📄 Support [Next.js](https://nextjs.org/)
