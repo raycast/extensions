@@ -21,9 +21,14 @@ export default function Files({ bucket }: { bucket: sdk.Models.Bucket }) {
         <List.EmptyView
           title="Create your first file"
           description="Need a hand? Learn more in our documentation."
-          actions={<ActionPanel>
-            <Action.OpenInBrowser title="Documentation" url="https://appwrite.io/docs/products/storage/upload-download" />
-          </ActionPanel>}
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser
+                title="Documentation"
+                url="https://appwrite.io/docs/products/storage/upload-download"
+              />
+            </ActionPanel>
+          }
         />
       ) : (
         files.map((file) => <List.Item key={file.$id} icon={Icon.Document} title={file.$id} />)

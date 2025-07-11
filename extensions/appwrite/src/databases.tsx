@@ -28,8 +28,8 @@ export default function Databases() {
             icon={Icon.Coin}
             title={database.name}
             accessories={[
-              { icon: Icon.Plus, date: new Date(database.$createdAt), tooltip: `Created: ${database.$createdAt}`},
-              { icon: Icon.Pencil, date: new Date(database.$updatedAt), tooltip: `Updated: ${database.$updatedAt}`}
+              { icon: Icon.Plus, date: new Date(database.$createdAt), tooltip: `Created: ${database.$createdAt}` },
+              { icon: Icon.Pencil, date: new Date(database.$updatedAt), tooltip: `Updated: ${database.$updatedAt}` },
             ]}
             actions={
               <ActionPanel>
