@@ -1,0 +1,76 @@
+// Folder-specific settings
+//
+// For a full list of overridable settings, and general information on folder-specific settings,
+// see the documentation: https://zed.dev/docs/configuring-zed#settings-files
+{
+  "language_servers": ["!biome"],
+  "lsp": {
+    "biome": {
+      "enabled": false
+    },
+    "eslint": {
+      "enabled": true,
+      "settings": {
+        "codeActionOnSave": {
+          "rules": ["import/order"]
+        }
+      }
+    },
+    "prettier": {
+      "enabled": true
+    }
+  },
+  "languages": {
+    "JavaScript": {
+      "formatter": {
+        "external": {
+          "command": "prettier",
+          "arguments": ["--stdin-filepath", "{buffer_path}", "--config", ".prettierrc"]
+        }
+      },
+      "code_actions_on_format": {
+        "source.fixAll.eslint": true,
+        "source.organizeImports": true
+      },
+      "language_servers": ["!biome", "eslint", "!typescript-language-server", "..."]
+    },
+    "TypeScript": {
+      "formatter": {
+        "external": {
+          "command": "prettier",
+          "arguments": ["--stdin-filepath", "{buffer_path}", "--config", ".prettierrc"]
+        }
+      },
+      "code_actions_on_format": {
+        "source.fixAll.eslint": true,
+        "source.organizeImports": true
+      },
+      "language_servers": ["!biome", "eslint", "!typescript-language-server", "..."]
+    },
+    "TSX": {
+      "formatter": {
+        "external": {
+          "command": "prettier",
+          "arguments": ["--stdin-filepath", "{buffer_path}", "--config", ".prettierrc"]
+        }
+      },
+      "code_actions_on_format": {
+        "source.fixAll.eslint": true,
+        "source.organizeImports": true
+      },
+      "language_servers": ["!biome", "eslint", "!typescript-language-server", "..."]
+    },
+    "JSON": {
+      "formatter": {
+        "external": {
+          "command": "prettier",
+          "arguments": ["--stdin-filepath", "{buffer_path}", "--config", ".prettierrc"]
+        }
+      }
+    },
+    "Markdown": {
+      "format_on_save": "on",
+      "formatter": "prettier"
+    }
+  }
+}
