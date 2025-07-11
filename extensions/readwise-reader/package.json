@@ -63,6 +63,12 @@
           "placeholder": "Author",
           "type": "text",
           "required": false
+        },
+        {
+          "name": "tags",
+          "placeholder": "Tags",
+          "type": "text",
+          "required": false
         }
       ]
     },

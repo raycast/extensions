@@ -1,5 +1,12 @@
 # Readwise Reader Changelog
 
+## [Add document tags support] - {PR_MERGE_DATE}
+
+- Add optional tags support to `Save Link` command
+- Add optional tags support to `Save Links` command
+- Tags can be entered as comma-separated values
+- Tags are automatically parsed and sent to Readwise API
+
 ## [Add category filtering for documents in list view] - 2025-03-12
 
 - Add category filtering for documents in list view
