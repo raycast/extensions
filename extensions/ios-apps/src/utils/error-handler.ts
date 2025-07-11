@@ -1,5 +1,5 @@
 // Centralized error handling utility for iOS Apps extension
-import { showToast, Toast } from "@raycast/api";
+import { showToast, Toast, openExtensionPreferences } from "@raycast/api";
 import { logger } from "./logger";
 
 /**
@@ -50,10 +50,73 @@ export async function handleDownloadError(error: unknown, operation: string, too
 }
 
 /**
- * Handle authentication errors
+ * Handle authentication errors with enhanced detection and user guidance
  * @param error The error that occurred
  * @param shouldThrow Whether to throw after handling (default: true)
+ * @param showPreferencesAction Whether to show action to open preferences (default: true)
+ * @param redirectToAuthForm Optional function to redirect to auth form instead of preferences
  */
-export async function handleAuthError(error: unknown, shouldThrow: boolean = true): Promise<void> {
-  await handleToolError(error, "authentication", "Authentication failed", shouldThrow);
+export async function handleAuthError(
+  error: unknown,
+  shouldThrow: boolean = true,
+  showPreferencesAction: boolean = true,
+  redirectToAuthForm?: (initialError?: string) => void,
+): Promise<void> {
+  const errorMessage = error instanceof Error ? error.message : String(error);
+
+  // Log the error with context
+  logger.error(`[authentication] Error: ${errorMessage}`);
+
+  // Detect specific authentication error types
+  const isCredentialError =
+    errorMessage.toLowerCase().includes("authentication failed") ||
+    errorMessage.toLowerCase().includes("invalid credentials") ||
+    errorMessage.toLowerCase().includes("login failed");
+
+  const is2FARequired =
+    errorMessage.toLowerCase().includes("two-factor") ||
+    errorMessage.toLowerCase().includes("2fa") ||
+    errorMessage.toLowerCase().includes("verification code");
+
+  let userMessage = "Authentication failed";
+  let toastTitle = "Authentication Error";
+
+  if (is2FARequired) {
+    userMessage = "Two-factor authentication required";
+    toastTitle = "2FA Required";
+  } else if (isCredentialError) {
+    userMessage = "Invalid Apple ID credentials";
+    toastTitle = "Login Failed";
+  }
+
+  // Show user-friendly toast with specific guidance
+  if (redirectToAuthForm) {
+    // Redirect to auth form instead of showing preferences toast
+    await showToast({
+      style: Toast.Style.Failure,
+      title: toastTitle,
+      message: `${userMessage}. Redirecting to sign-in form...`,
+    });
+
+    // Redirect to auth form with the error message
+    redirectToAuthForm(errorMessage);
+  } else {
+    // Show traditional preferences toast
+    await showToast({
+      style: Toast.Style.Failure,
+      title: toastTitle,
+      message: `${userMessage}. Please check your Apple ID settings.`,
+      primaryAction: showPreferencesAction
+        ? {
+            title: "Open Preferences",
+            onAction: () => openExtensionPreferences(),
+          }
+        : undefined,
+    });
+  }
+
+  // Optionally throw the error for further handling
+  if (shouldThrow) {
+    throw new Error(`${userMessage}: ${errorMessage}`);
+  }
 }

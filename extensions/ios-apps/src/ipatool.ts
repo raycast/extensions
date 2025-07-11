@@ -1,15 +1,16 @@
+import { AppDetails, IpaToolSearchApp, IpaToolSearchResponse } from "./types";
+import { convertITunesResultToAppDetails, fetchITunesAppDetails } from "./utils/itunes-api";
+import { ensureAuthenticated } from "./utils/auth";
+import { execFile, spawn } from "child_process";
+import { extractFilePath, safeJsonParse } from "./utils/common";
+import fs from "fs";
+import path from "path";
+import { handleAppSearchError, handleAuthError, handleDownloadError } from "./utils/error-handler";
+import { getDownloadsDirectory, IPATOOL_PATH } from "./utils/paths";
+import { logger } from "./utils/logger";
 import { promisify } from "util";
 import { showHUD } from "@raycast/api";
-import { handleAuthError, handleAppSearchError, handleDownloadError } from "./utils/error-handler";
-import { IPATOOL_PATH, getDownloadsDirectory } from "./utils/paths";
-import { ensureAuthenticated } from "./utils/auth";
-import { safeJsonParse, extractFilePath } from "./utils/common";
-import { fetchITunesAppDetails, convertITunesResultToAppDetails } from "./utils/itunes-api";
-import path from "path";
-import fs from "fs";
-import { spawn, execFile } from "child_process";
-import { AppDetails, IpaToolSearchApp, IpaToolSearchResponse } from "./types";
-import { logger } from "./utils/logger";
+import { analyzeIpatoolError } from "./utils/ipatool-error-patterns";
 
 // Retry configuration for handling transient network errors
 const MAX_RETRIES = 3; // Maximum number of retry attempts
@@ -31,10 +32,7 @@ export async function searchApps(query: string, limit = 20): Promise<IpaToolSear
     // Ensure we're authenticated before proceeding
     const isAuthenticated = await ensureAuthenticated();
     if (!isAuthenticated) {
-      await handleAuthError(
-        new Error("Authentication failed during app search. Please check your Apple ID credentials."),
-        false,
-      );
+      // Error already handled by ensureAuthenticated via handleAuthError
       return [];
     }
 
@@ -88,10 +86,7 @@ export async function downloadIPA(
     // Ensure we're authenticated before proceeding with download
     const isAuthenticated = await ensureAuthenticated();
     if (!isAuthenticated) {
-      await handleAuthError(
-        new Error("Authentication failed during app download. Please check your Apple ID credentials."),
-        false,
-      );
+      // Error already handled by ensureAuthenticated via handleAuthError
       return null;
     }
 
@@ -187,7 +182,7 @@ export async function downloadIPA(
           logger.error(`[ipatool] Full stdout content: "${stdout}"`);
 
           // Parse JSON output from stdout to get specific error information
-          let errorMessage = `Process exited with code ${code}`;
+          const errorMessage = `Process exited with code ${code}`;
           let specificError = "";
 
           try {
@@ -228,22 +223,21 @@ export async function downloadIPA(
             }
           }
 
-          // Determine user-friendly error message based on specific error
-          if (specificError === "license is required") {
-            errorMessage = `The app "${appName}" requires a purchase or is not available for download. It may be a paid app or not available in your region.`;
-          } else if (specificError.includes("not found") || specificError.includes("no app")) {
-            errorMessage = `The app "${appName}" was not found in the App Store. It may not be available in your region or may have been removed.`;
-          } else if (specificError.includes("authentication") || specificError.includes("login")) {
-            errorMessage = `Authentication failed. Please check your Apple ID credentials in the extension preferences.`;
-          } else if (specificError.includes("permission") || specificError.includes("access")) {
-            errorMessage = `Permission denied. Please check file system permissions for the download directory.`;
-          } else if (specificError.includes("network") || specificError.includes("connection")) {
-            errorMessage = `Network error occurred during download. Please check your internet connection.`;
-          } else if (specificError) {
-            errorMessage = `Download failed: ${specificError}`;
-          }
+          // Use precise ipatool error analysis instead of manual pattern matching
+          const fullErrorMessage = `${errorMessage} ${specificError} ${stderr}`.trim();
+          const errorAnalysis = analyzeIpatoolError(fullErrorMessage, stderr);
 
-          await handleDownloadError(new Error(errorMessage), bundleId, "downloadIPA");
+          // Use the analyzed error message and routing
+          const finalErrorMessage = errorAnalysis.userMessage.includes(appName || bundleId)
+            ? errorAnalysis.userMessage
+            : errorAnalysis.userMessage.replace("App", `"${appName || bundleId}"`);
+
+          // Route to appropriate error handler based on analysis
+          if (errorAnalysis.isAuthError) {
+            await handleAuthError(new Error(finalErrorMessage), false);
+          } else {
+            await handleDownloadError(new Error(finalErrorMessage), bundleId, "downloadIPA");
+          }
           reject(new Error(errorMessage));
           return;
         }

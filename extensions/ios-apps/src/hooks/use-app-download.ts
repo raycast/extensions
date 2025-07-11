@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { showToast, Toast, showHUD } from "@raycast/api";
 import { downloadIPA } from "../ipatool";
-import { handleDownloadError } from "../utils/error-handler";
+import { handleDownloadError, handleAuthError } from "../utils/error-handler";
+import { analyzeIpatoolError } from "../utils/ipatool-error-patterns";
 
 // Global download state to prevent concurrent downloads across all hook instances
 const globalDownloadState = {
@@ -91,11 +92,29 @@ export function useAppDownload() {
         return undefined;
       }
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+
+      // Use precise ipatool error analysis instead of generic pattern matching
+      const errorAnalysis = analyzeIpatoolError(errorMessage);
+
       if (showHudMessages) {
-        await showHUD("Download failed", { clearRootSearch: true });
+        const hudMessage = errorAnalysis.isAuthError
+          ? "Authentication failed"
+          : errorAnalysis.errorType === "network"
+            ? "Network error"
+            : errorAnalysis.errorType === "app_not_found"
+              ? "App not found"
+              : "Download failed";
+        await showHUD(hudMessage, { clearRootSearch: true });
       }
 
-      await handleDownloadError(error instanceof Error ? error : new Error(String(error)), "download app", "download");
+      if (errorAnalysis.isAuthError) {
+        // Handle authentication errors with preferences redirect
+        await handleAuthError(new Error(errorAnalysis.userMessage), false);
+      } else {
+        // Handle general download errors with specific user message
+        await handleDownloadError(new Error(errorAnalysis.userMessage), "download app", "download");
+      }
 
       return undefined;
     } finally {

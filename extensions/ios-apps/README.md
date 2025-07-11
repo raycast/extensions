@@ -75,7 +75,6 @@ The extension uses a sophisticated approach to extract high-resolution screensho
    - `applewatch_2022`, `apple_watch` → AppleWatch
    - `applevision`, `visionpro` → VisionPro
    - `mac`, `macbook` → Mac
-   - `imessage`, `messages` → iMessage
 5. **URL Enhancement**: Screenshot URLs are automatically transformed to the highest resolution format
 
 #### Graceful Fallback Behavior
@@ -140,7 +139,6 @@ You can control which device platforms to include when downloading screenshots:
 - **Apple TV**: Disabled by default - includes tvOS app screenshots
 - **Apple Watch**: Disabled by default - includes watchOS app screenshots
 - **Vision Pro**: Disabled by default - includes visionOS app screenshots
-- **iMessage**: Disabled by default - includes iMessage app screenshots
 
 **How Platform Preferences Affect Scraping**:
 

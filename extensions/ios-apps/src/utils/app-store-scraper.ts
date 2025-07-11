@@ -47,7 +47,6 @@ const PLATFORM_MAX_RESOLUTIONS: Record<PlatformType, string> = {
   AppleTV: "3840x0w", // Matches 4K Apple TV screenshots
   AppleWatch: "396x0w", // Matches Apple Watch Ultra screenshots
   VisionPro: "3840x0w", // Highest fidelity immersive images
-  iMessage: "1290x0w", // Follows iPhone 6.7" format
 };
 
 /**
@@ -128,13 +127,12 @@ function getEnabledPlatforms(): PlatformType[] {
     if (preferences.includeAppleTV) enabledPlatforms.push("AppleTV");
     if (preferences.includeAppleWatch) enabledPlatforms.push("AppleWatch");
     if (preferences.includeVisionPro) enabledPlatforms.push("VisionPro");
-    if (preferences.includeIMessage) enabledPlatforms.push("iMessage");
 
     return enabledPlatforms;
   } catch (error) {
     logger.error("[Scraper] Error reading preferences, defaulting to all platforms:", error);
     // Default to all platforms if preferences can't be read
-    return ["iPhone", "iPad", "Mac", "AppleTV", "AppleWatch", "VisionPro", "iMessage"];
+    return ["iPhone", "iPad", "Mac", "AppleTV", "AppleWatch", "VisionPro"];
   }
 }
 
@@ -219,6 +217,20 @@ export async function scrapeAppStoreScreenshots(
 
     // Extract screenshots from shoebox JSON
     const allScreenshots = extractScreenshotsFromShoeboxJson(html);
+    logger.log(`[Scraper] Found ${allScreenshots.length} screenshots from base shoebox JSON`);
+
+    // All screenshots are now extracted from the base shoebox JSON
+    logger.log(
+      `[Scraper] Extracted screenshots by platform: ${JSON.stringify(
+        allScreenshots.reduce(
+          (acc, s) => {
+            acc[s.type] = (acc[s.type] || 0) + 1;
+            return acc;
+          },
+          {} as Record<string, number>,
+        ),
+      )}`,
+    );
 
     // Filter by enabled platforms
     const filteredScreenshots = filterScreenshotsByPlatforms(allScreenshots, enabledPlatforms);
@@ -371,8 +383,6 @@ export function extractScreenshotsFromShoeboxJson(html: string): ScreenshotInfo[
       applevision: "VisionPro",
       visionpro: "VisionPro", // Lowercase variant
       vision: "VisionPro",
-      imessage: "iMessage", // Not found in current fixtures but may exist
-      messages: "iMessage",
       macbook: "Mac",
       imac: "Mac",
     };
@@ -446,12 +456,14 @@ export function extractScreenshotsFromShoeboxJson(html: string): ScreenshotInfo[
 
     // Early exit if no screenshot data was found
     if (allScreenshotsByType.length === 0) {
-      logger.log(`[Scraper] No customScreenshotsByType found in any location`);
+      logger.log(`[Scraper] No screenshot data found in any location`);
       return screenshots;
     }
 
     // STEP 6: Process all collected screenshot dictionaries
     // Transform device types to platform types and collect screenshot URLs
+
+    // Process regular screenshots from customScreenshotsByType
     for (const screenshotsByType of allScreenshotsByType) {
       for (const [deviceType, screenshotsArray] of Object.entries(screenshotsByType)) {
         // Map Apple's internal device identifiers to our platform types using exact key lookup

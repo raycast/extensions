@@ -34,9 +34,28 @@ interface PlatformPreferences {
   includeAppleTV: boolean;
   includeAppleWatch: boolean;
   includeVisionPro: boolean;
-  includeIMessage: boolean;
   downloadTimeoutSeconds: string;
   maxConcurrentDownloads: string;
+}
+
+/**
+ * Check if any platforms are enabled in preferences
+ */
+function areAnyPlatformsEnabled(): boolean {
+  try {
+    const preferences = getPreferenceValues<PlatformPreferences>();
+    return (
+      preferences.includeIPhone ||
+      preferences.includeIPad ||
+      preferences.includeMac ||
+      preferences.includeAppleTV ||
+      preferences.includeAppleWatch ||
+      preferences.includeVisionPro
+    );
+  } catch (error) {
+    logger.error(`[Screenshot Downloader] Error reading platform preferences:`, error);
+    return true; // Default to true if we can't read preferences
+  }
 }
 
 /**
@@ -66,14 +85,11 @@ function logPlatformPreferences(): void {
     if (preferences.includeVisionPro) enabledPlatforms.push("VisionPro");
     else disabledPlatforms.push("VisionPro");
 
-    if (preferences.includeIMessage) enabledPlatforms.push("iMessage");
-    else disabledPlatforms.push("iMessage");
-
     logger.log(`[Screenshot Downloader] Platform preferences - Enabled: [${enabledPlatforms.join(", ")}]`);
     logger.log(`[Screenshot Downloader] Platform preferences - Disabled: [${disabledPlatforms.join(", ")}]`);
 
     if (enabledPlatforms.length === 0) {
-      logger.warn(`[Screenshot Downloader] WARNING: No platforms are enabled in preferences!`);
+      logger.warn(`[Screenshot Downloader] WARNING: No device types are enabled in preferences!`);
     }
   } catch (error) {
     logger.error(`[Screenshot Downloader] Error reading platform preferences:`, error);
@@ -397,21 +413,13 @@ export async function downloadAppScreenshots(
     }
 
     // Iterate over ALL platforms (from PlatformType enum) to ensure complete coverage
-    const allPlatformTypes: PlatformType[] = [
-      "iPhone",
-      "iPad",
-      "Mac",
-      "AppleTV",
-      "AppleWatch",
-      "VisionPro",
-      "iMessage",
-    ];
+    const allPlatformTypes: PlatformType[] = ["iPhone", "iPad", "Mac", "AppleTV", "AppleWatch", "VisionPro"];
 
     // Initialize empty arrays for platforms with no screenshots
     for (const platformType of allPlatformTypes) {
       if (!screenshotsByType[platformType]) {
         screenshotsByType[platformType] = [];
-        logger.log(`[Screenshot Downloader] No screenshots found for platform: ${platformType}`);
+        logger.log(`[Screenshot Downloader] it's still  for platform: ${platformType}`);
       }
     }
 
@@ -661,8 +669,16 @@ export async function downloadScreenshots(bundleId: string, appName = "", appVer
 
       if (!screenshots || screenshots.length === 0) {
         scrapingToast.style = Toast.Style.Failure;
-        scrapingToast.title = "No screenshots found";
-        scrapingToast.message = "This app may not have screenshots available";
+
+        // Check if no platforms are enabled in preferences
+        if (!areAnyPlatformsEnabled()) {
+          scrapingToast.title = "No Screenshots To Download!";
+          scrapingToast.message = "To download screenshots, enable at least one device type in preferences.";
+        } else {
+          scrapingToast.title = "No screenshots found";
+          scrapingToast.message = "This app may not have screenshots available";
+        }
+
         return null;
       }
 

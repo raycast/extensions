@@ -1,8 +1,9 @@
-import { showFailureToast } from "@raycast/utils";
 import { spawn } from "child_process";
 import { IPATOOL_PATH, preferences } from "./paths";
 import { logger } from "./logger";
 import { validateIpatoolInstallation } from "./ipatool-validator";
+import { handleAuthError } from "./error-handler";
+import { analyzeIpatoolError } from "./ipatool-error-patterns";
 
 /**
  * Secure spawn-based execution to prevent command injection
@@ -37,26 +38,47 @@ function spawnAsync(command: string, args: string[]): Promise<{ stdout: string; 
 
 /**
  * Logs in to Apple ID using ipatool and user preferences.
+ * @param twoFactorCode Optional 2FA code for two-factor authentication
  */
-async function loginToAppleId(): Promise<void> {
-  await spawnAsync(IPATOOL_PATH, [
+export async function loginToAppleId(appleId?: string, password?: string, twoFactorCode?: string): Promise<void> {
+  const args = [
     "auth",
     "login",
     "-e",
-    preferences.appleId,
+    appleId || preferences.appleId,
     "-p",
-    preferences.password,
+    password || preferences.password,
     "--format",
     "json",
     "--non-interactive",
-  ]);
-  logger.log("Successfully authenticated with Apple ID");
+  ];
+
+  // Add 2FA code if provided
+  if (twoFactorCode) {
+    args.push("--2fa", twoFactorCode);
+  }
+
+  try {
+    await spawnAsync(IPATOOL_PATH, args);
+    logger.log("Successfully authenticated with Apple ID");
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+
+    logger.error("Login failed", { error: errorMessage });
+
+    // Use precise ipatool error analysis with auth context
+    const errorAnalysis = analyzeIpatoolError(errorMessage, undefined, "auth");
+
+    // Throw specific error based on analysis
+    throw new Error(errorAnalysis.userMessage);
+  }
 }
 
 /**
  * Ensures the user is authenticated with Apple ID
+ * @param twoFactorCode Optional 2FA code for two-factor authentication
  */
-export async function ensureAuthenticated(): Promise<boolean> {
+export async function ensureAuthenticated(twoFactorCode?: string): Promise<boolean> {
   // First validate that ipatool is installed and accessible
   const isIpatoolValid = await validateIpatoolInstallation();
   if (!isIpatoolValid) {
@@ -64,39 +86,43 @@ export async function ensureAuthenticated(): Promise<boolean> {
   }
 
   try {
-    // Check if we're already authenticated
-    // Add --format json to get JSON output
-    const { stdout } = await spawnAsync(IPATOOL_PATH, ["auth", "info", "--format", "json", "--non-interactive"]);
+    // Check if we're already authenticated (skip if we have a 2FA code to submit)
+    if (!twoFactorCode) {
+      const { stdout } = await spawnAsync(IPATOOL_PATH, ["auth", "info", "--format", "json", "--non-interactive"]);
 
-    try {
-      // Try to parse as JSON
-      const status = JSON.parse(stdout);
+      try {
+        // Try to parse as JSON
+        const status = JSON.parse(stdout);
 
-      if (!status.authenticated) {
-        // If not authenticated, login
-        await loginToAppleId();
-        return true;
+        if (status.authenticated) {
+          return true; // Already authenticated
+        }
+      } catch (parseError) {
+        // If we can't parse as JSON, check if it contains "Not authenticated"
+        if (!stdout.includes("Not authenticated")) {
+          return true; // Assume authenticated if we can't determine status clearly
+        }
       }
-      return true;
-    } catch (parseError) {
-      // If we can't parse as JSON, check if it contains "Not authenticated"
-      if (stdout.includes("Not authenticated")) {
-        // If not authenticated, login
-        await loginToAppleId();
-        return true;
-      }
-      return false; // Force re-authentication if we can't determine status
     }
+
+    // Attempt to login (with or without 2FA code)
+    await loginToAppleId(twoFactorCode);
+    return true;
   } catch (error) {
-    logger.error("Authentication error:", error);
-    // Try to login anyway
-    try {
-      await loginToAppleId();
-      return true;
-    } catch (loginError) {
-      logger.error("Login error:", loginError);
-      showFailureToast(loginError, { title: "Authentication failed" });
-      return false;
+    const errorMessage = error instanceof Error ? error.message : String(error);
+
+    logger.error("Authentication check failed", { error: errorMessage });
+
+    // Use precise ipatool error analysis with auth context
+    const errorAnalysis = analyzeIpatoolError(errorMessage, undefined, "auth");
+
+    // Only handle authentication errors with preferences redirect
+    if (errorAnalysis.isAuthError) {
+      await handleAuthError(new Error(errorAnalysis.userMessage), false);
+      throw new Error(errorAnalysis.userMessage); // Re-throw with user-friendly message
     }
+
+    // For non-auth errors, just throw without special handling
+    throw error;
   }
 }

@@ -42,7 +42,7 @@ export interface AppDetails {
     ipadScreenshotUrls?: string[];
     appletvScreenshotUrls?: string[];
     watchScreenshotUrls?: string[];
-    messageScreenshotUrls?: string[];
+
     [key: string]: unknown;
   };
 }
@@ -151,7 +151,7 @@ export interface IpaToolSearchResponse {
 /**
  * Supported Apple platforms for screenshots
  */
-export type PlatformType = "iPhone" | "iPad" | "Mac" | "AppleTV" | "AppleWatch" | "VisionPro" | "iMessage";
+export type PlatformType = "iPhone" | "iPad" | "Mac" | "AppleTV" | "AppleWatch" | "VisionPro";
 
 /**
  * Screenshot information with platform context
@@ -172,7 +172,6 @@ export interface PlatformPreferences {
   includeAppleTV: boolean;
   includeAppleWatch: boolean;
   includeVisionPro: boolean;
-  includeIMessage: boolean;
 }
 
 /**
@@ -185,7 +184,6 @@ export const PlatformDirectories = (screenshotsDir: string): Record<PlatformType
   AppleTV: path.join(screenshotsDir, "TV"),
   AppleWatch: path.join(screenshotsDir, "Apple Watch"),
   VisionPro: path.join(screenshotsDir, "Vision Pro"),
-  iMessage: path.join(screenshotsDir, "iMessage"),
 });
 
 // =============================================================================

@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "search",
-      "title": "Search Apps",
+      "title": "Search iOS Apps",
       "subtitle": "iOS App Search",
       "description": "Search for iOS apps on the App Store",
       "mode": "view"
@@ -169,15 +169,6 @@
       "required": false
     },
     {
-      "name": "includeIMessage",
-      "title": "",
-      "description": "Download screenshots for iMessage devices",
-      "type": "checkbox",
-      "label": "iMessage",
-      "default": false,
-      "required": false
-    },
-    {
       "name": "includeVisionPro",
       "title": "",
       "description": "Download screenshots for Vision Pro devices",
@@ -188,8 +179,8 @@
     },
     {
       "name": "downloadTimeoutSeconds",
-      "title": "Download Timeout",
-      "description": "Timeout for individual screenshot downloads in seconds",
+      "title": "Download Timeout (in seconds)",
+      "description": "Timeout for individual screenshot downloads",
       "type": "textfield",
       "default": "90",
       "required": false

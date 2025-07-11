@@ -2,7 +2,8 @@ import { Icon, List } from "@raycast/api";
 import { formatPrice } from "./utils/paths";
 import { renderStarRating, formatDate } from "./utils/common";
 import { AppActionPanel } from "./components/app-action-panel";
-import { useAppSearch, useAppDownload } from "./hooks";
+import { useAppSearch } from "./hooks";
+import { useAppDownload } from "./hooks";
 
 export default function Search() {
   // Use the custom hooks - let useAppSearch manage the search text state
@@ -106,7 +107,7 @@ export default function Search() {
                 actions={
                   <AppActionPanel
                     app={app}
-                    onDownload={() => downloadApp(app.bundleId, app.name, app.version, app.price, true)}
+                    onDownload={() => downloadApp(app.bundleId, app.name, app.version, app.price)}
                     showViewDetails={true}
                   />
                 }

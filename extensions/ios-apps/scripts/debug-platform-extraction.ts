@@ -27,7 +27,6 @@ const mockPreferences = {
   includeAppleTV: true,
   includeAppleWatch: true,
   includeVisionPro: true,
-  includeIMessage: true,
 };
 
 // Mock Raycast API
@@ -80,7 +79,7 @@ async function testPlatformExtraction() {
       // Test filtering with different platform combinations
       const testConfigs = [
         { name: "iPhone + iPad only", platforms: ["iPhone", "iPad"] as PlatformType[] },
-        { name: "All platforms", platforms: ["iPhone", "iPad", "Mac", "AppleTV", "AppleWatch", "VisionPro", "iMessage"] as PlatformType[] },
+        { name: "All platforms", platforms: ["iPhone", "iPad", "Mac", "AppleTV", "AppleWatch", "VisionPro"] as PlatformType[] },
         { name: "Apple TV only", platforms: ["AppleTV"] as PlatformType[] },
       ];
       

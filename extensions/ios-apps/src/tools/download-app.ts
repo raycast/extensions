@@ -2,7 +2,8 @@ import { downloadIPA, searchApps } from "../ipatool";
 import path from "path";
 import { logger } from "../utils/logger";
 import { Tool } from "@raycast/api";
-import { handleAppSearchError, handleDownloadError } from "../utils/error-handler";
+import { handleAppSearchError, handleDownloadError, handleAuthError } from "../utils/error-handler";
+import { analyzeIpatoolError } from "../utils/ipatool-error-patterns";
 
 // Constants
 const SEARCH_RESULT_LIMIT = 1;
@@ -96,28 +97,33 @@ export default async function downloadIosApp(input: Input) {
     } catch (downloadError) {
       logger.error(`[download-app tool] Download error for "${appName}":`, downloadError);
 
-      // Check if this is a specific error we can provide better messaging for
+      // Use precise ipatool error analysis with download context
       const errorMessage = downloadError instanceof Error ? downloadError.message : String(downloadError);
+      const errorInfo = analyzeIpatoolError(errorMessage, undefined, "download");
 
-      if (errorMessage.includes("not found") || errorMessage.includes("no app")) {
-        await handleAppSearchError(
-          new Error(
-            `The app "${input.query}" was not found in the App Store. It may not be available in your region or may have been removed.`,
-          ),
-          input.query,
-          "download-app",
-        );
-        return { success: false, message: "App not found" };
-      } else if (errorMessage.includes("authentication") || errorMessage.includes("login")) {
-        await handleDownloadError(
-          new Error(`Authentication failed. Please check your Apple ID credentials in the extension preferences.`),
-          appName,
-          "download-app",
+      logger.log(`[download-app tool] Error analysis:`, {
+        isAuthError: errorInfo.isAuthError,
+        is2FARequired: errorInfo.is2FARequired,
+        errorType: errorInfo.errorType,
+        userMessage: errorInfo.userMessage,
+      });
+
+      if (errorInfo.isAuthError) {
+        // Handle authentication errors
+        await handleAuthError(
+          new Error(errorInfo.userMessage),
+          false, // Don't throw, we want to return gracefully
+          true, // Show preferences action
         );
         return { success: false, message: "Authentication failed" };
+      } else if (errorInfo.errorType === "app_not_found") {
+        // Handle app not found errors
+        await handleAppSearchError(new Error(errorInfo.userMessage), input.query, "download-app");
+        return { success: false, message: "App not found" };
       } else {
-        // Re-throw the original error for other cases
-        throw downloadError;
+        // Handle other download errors
+        await handleDownloadError(new Error(errorInfo.userMessage), appName, "download-app");
+        return { success: false, message: "Download failed" };
       }
     }
   } catch (error) {
