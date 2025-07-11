@@ -1,5 +1,10 @@
 # Ente Auth Changelog
 
+## [Bug fix] - 2025-07-11
+
+- removed flickering "no secrets found" message when opening the extension
+- slightly updated "no secrets found" message
+
 ## [Bug fix] - 2025-05-12
 
 - fix variable for assigning user preferred values

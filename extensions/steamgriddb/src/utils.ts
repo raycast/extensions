@@ -1,6 +1,6 @@
-import { writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { basename, join } from "node:path";
+import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import { Grid, getPreferenceValues } from "@raycast/api";
 import got from "got";
 import SGDB from "steamgriddb";
@@ -53,9 +53,9 @@ export const imageTypeSpecs: Record<
 };
 
 export const downloadImage = async (url: string) => {
-  const targetPath = join(tmpdir(), basename(url));
+  const targetPath = path.join(os.homedir(), "Downloads", path.basename(url));
   const file = await got(url).buffer();
-  await writeFile(targetPath, file);
+  await fs.writeFile(targetPath, file);
   return targetPath;
 };
 

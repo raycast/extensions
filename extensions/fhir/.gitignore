@@ -14,3 +14,6 @@ compiled_raycast_swift
 
 # Cursor IDE
 .cursor
+
+# Claude configuration
+CLAUDE.local.md

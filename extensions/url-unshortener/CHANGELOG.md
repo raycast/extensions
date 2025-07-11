@@ -1,5 +1,11 @@
 # URL Unshortener Changelog
 
+## [Fix] - 2025-07-10
+
+- Undo previous changes that broke unshortening for some URLs. For example t.co links.
+- Make extension available to Windows users.
+- Bump dependencies.
+
 ## [Improvement] - 2025-04-09
 
 - Fixed issue with selected text retrieval, adding clipboard fallback when frontmost application access fails
