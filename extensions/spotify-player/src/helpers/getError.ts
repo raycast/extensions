@@ -7,10 +7,12 @@ type ErrorObj = {
   isAuthError?: boolean;
 };
 
+const isAuthStatus = (status: number): boolean => status === 401 || status === 403;
+
 export function getError(error: unknown): ErrorObj {
   console.log("getError", error);
   if (error instanceof HttpError) {
-    const isAuthError = error.status === 401 || error.status === 403;
+    const isAuthError = isAuthStatus(error.status);
 
     if (typeof error.data === "string") {
       try {
@@ -70,7 +72,7 @@ export function getErrorMessage(error: unknown): string {
 
 export function isAuthError(error: unknown): boolean {
   if (error instanceof HttpError) {
-    return error.status === 401 || error.status === 403;
+    return isAuthStatus(error.status);
   }
   return false;
 }
