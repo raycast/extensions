@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "weread-sync",
-  "title": "Weread Sync",
-  "description": "Sync your highlights from Weread to Readwise automatically",
+  "title": "WeRead Sync",
+  "description": "Sync your highlights from WeRead to Readwise automatically",
   "icon": "extension-icon.png",
   "author": "owen_wang",
   "categories": [
@@ -21,19 +21,19 @@
   "commands": [
     {
       "name": "sync",
-      "title": "Weread Sync",
-      "description": "Sync your Weread highlights to Readwise and manage your library",
+      "title": "WeRead Sync",
+      "description": "Sync your WeRead highlights to Readwise and manage your library",
       "mode": "view"
     }
   ],
   "preferences": [
     {
       "name": "wereadCookie",
-      "type": "textfield",
+      "type": "password",
       "required": true,
-      "title": "Weread Cookie",
-      "description": "Your Weread authentication cookie",
-      "placeholder": "Paste your Weread cookie here..."
+      "title": "WeRead Cookie",
+      "description": "Your WeRead authentication cookie",
+      "placeholder": "Paste your WeRead cookie here..."
     },
     {
       "name": "readwiseToken",

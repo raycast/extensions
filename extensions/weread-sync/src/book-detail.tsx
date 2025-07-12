@@ -371,12 +371,14 @@ export default function BookDetail({ bookId, book }: BookDetailProps) {
                           }}
                           icon={isSynced ? Icon.Checkmark : Icon.Upload}
                         />
-                        <Action
-                          title={`Sync All ${newCount} New Highlights`}
-                          onAction={syncToReadwise}
-                          icon={Icon.Upload}
-                          shortcut={{ modifiers: ["cmd"], key: "s" }}
-                        />
+                        {newCount > 0 && (
+                          <Action
+                            title={`Sync All ${newCount} New Highlights`}
+                            onAction={syncToReadwise}
+                            icon={Icon.Upload}
+                            shortcut={{ modifiers: ["cmd"], key: "s" }}
+                          />
+                        )}
                         <Action
                           title="Refresh"
                           onAction={revalidate}
