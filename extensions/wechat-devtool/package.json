@@ -12,8 +12,7 @@
     "build": "ray build -e dist",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "publish": "ray publish",
-    "pull-contributions": "npx @raycast/api@latest pull-contributions"
+    "publish": "ray publish"
   },
   "dependencies": {
     "@raycast/api": "^1.93.1",
