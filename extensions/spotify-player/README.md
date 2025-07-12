@@ -1,126 +1,140 @@
-## 📋 Summary of Changes
+<p align="center">
+   <img src="https://user-images.githubusercontent.com/372831/227213056-29a98faf-f897-4cd0-9c39-ca8f218a4190.png">
+ </p>
 
-### 1. **Enhanced Error Detection** (`src/helpers/getError.ts`)
-```typescript
-// Added specific authentication error detection
-- Added `isAuthError` property to error objects
-- Enhanced `getErrorMessage()` with user-friendly auth error messages
-- New `isAuthError()` function to identify 401/403 errors
-```
+Spotify's most common features, now at your fingertips. Search for music and podcasts, browse your library, and control the playback. Glance at what's currently playing directly from the menu bar.
 
-**What it does**: Now the extension can specifically identify when authentication fails and provide better error messages.
+## Commands
 
-### 2. **Auto-Retry System** (`src/helpers/withRetry.ts`) ⭐ **Key Feature**
-```typescript
-// New retry mechanism with automatic re-authentication
-- `withRetry()` function automatically retries API calls on auth errors
-- `withAutoRetry()` higher-order function for wrapping API functions
-- Automatic token refresh when authentication fails
-```
+### Search
 
-**What it does**: When an API call fails due to authentication, it automatically tries to get a new token and retry the call.
+A single unified search command. Use this to search for artists, albums, songs, playlists, podcasts, and episodes. Use the dropdown menu to filter your search to a specific category. Each category offers contextual actions, so you can dive deeper into the search.
 
-### 3. **Updated Core API Functions**
-- **`src/api/getCurrentlyPlaying.ts`** - Now uses auto-retry
-- **`src/api/getMe.ts`** - Now uses auto-retry  
-- **`src/api/getPlaybackState.ts`** - Now uses auto-retry
+### Your Library
 
-**What it does**: The most commonly used API functions now automatically handle authentication failures.
+Use this to see your saved artists, albums, songs, playlists, and podcasts. Similar to the "Search" command, it includes a category dropdown and contextual actions.
 
-### 4. **Enhanced OAuth Configuration** (`src/api/oauth.ts`)
-```typescript
-// Added token expiration detection
-- `isTokenExpired()` function for better error categorization
-- Improved error handling patterns
-```
+### Now Playing
 
-**What it does**: Better detection of when tokens have expired.
+See what's currently playing. Use the actions (⌘ K) for further actions, such as Play/Pause, Like/Dislike, Skip, Start Radio, Add to Playlist, Connect Device and more.
 
-### 5. **Authentication State Management** (`src/hooks/useAuthState.ts`) ⭐ **Key Feature**
-```typescript
-// New React hook for managing auth state
-- Tracks authentication status
-- Provides re-authentication function
-- Shows user-friendly success/error messages
-- Handles initialization state
-```
+### Menu Bar Player
 
-**What it does**: Provides a centralized way to manage authentication state across the app.
+See what's currently playing in your Menu Bar. Click for further actions, such as Play/Pause, Like/Dislike, Skip, Start Radio, Add to Playlist, Connect Device and more. Refreshes every 10 seconds.
 
-### 6. **User-Friendly Error Component** (`src/components/AuthenticationError.tsx`)
-```typescript
-// New component for handling auth failures
-- Clear error messages explaining what happened
-- "Re-authenticate with Spotify" action button
-- "Open Spotify Web" fallback option
-- Higher-order component for wrapping other components
-```
+### Toggle Play/Pause
 
-**What it does**: When authentication fails, users see a clear error screen with easy re-authentication options.
+Use this to toggle the playback of the current song.
 
-## 🔧 How These Changes Work Together
+### Next
 
-### **Before** (Original Behavior):
-1. User inactive for extended period
-2. Spotify token expires
-3. Extension makes API call
-4. API call fails with generic error
-5. User sees confusing error message
-6. User has to manually figure out how to re-authenticate
+Use this to skip to the next song/episode.
 
-### **After** (New Behavior):
-1. User inactive for extended period
-2. Spotify token expires
-3. Extension makes API call
-4. **Auto-retry detects auth failure**
-5. **Automatically attempts re-authentication**
-6. **If successful**: API call proceeds normally
-7. **If re-auth fails**: User sees clear error with "Re-authenticate" button
+### Previous
 
-## 🎯 Key Benefits
+Use this to skip to the previous song/episode.
 
-### **Automatic Recovery**
-- Most authentication failures are now handled automatically
-- Users rarely need to manually re-authenticate
+## Disabled Commands
 
-### **Better User Experience**
-- Clear error messages explaining what happened
-- Easy one-click re-authentication
-- Success/failure feedback with toast messages
+This extension includes a few commands that are disabled by default. You can enable them by going to the extension's settings. These commands are:
 
-### **Robust Error Handling**
-- Specific detection of different error types
-- Intelligent retry logic (only retries auth errors)
-- Prevents infinite retry loops
+### Like
 
-### **Developer-Friendly**
-- Better logging for debugging
-- Reusable retry patterns for other API functions
-- Clean separation of concerns
+Use this to like the current song.
 
-## 🚀 What You Should Notice
+### Dislike
 
-1. **Fewer Disconnections**: The extension should stay connected longer
-2. **Automatic Recovery**: When disconnections happen, they often fix themselves
-3. **Clear Feedback**: When manual intervention is needed, you'll see helpful messages
-4. **Quick Recovery**: Re-authentication is now just one button click
+Use this to dislike the current song.
 
-## 🔄 Next Steps (Optional Improvements)
+### Add Playing Song to Playlist
 
-If you want to further enhance the system, you could:
+Use this to add the current song to a playlist of your choice.
 
-1. **Apply auto-retry to more API functions**:
-```typescript
-// Example for other functions
-export async function getMyPlaylists() {
-  return withRetry(async () => {
-    // existing function body
-  });
-}
-```
+### Remove Playing Song from Playlist
 
-2. **Add proactive token refresh** (background refresh before expiration)
+Use this to remove the current song from the playlist it's in.
 
-3. **Add user preferences** for retry behavior
+### Set Volume to 0%
 
-The core improvements are now in place and should significantly reduce your authentication issues! 🎵
+Use this to mute the volume.
+
+### Set Volume to 25%
+
+Use this to set the volume to 25%.
+
+### Set Volume to 50%
+
+Use this to set the volume to 50%.
+
+### Set Volume to 75%
+
+Use this to set the volume to 75%.
+
+### Set Volume to 100%
+
+Use this to set the volume to 100%.
+
+### Turn Volume Down
+
+Use this to turn the volume down by 10%.
+
+### Turn Volume Up
+
+Use this to turn the volume up by 10%.
+
+### Toggle Shuffle
+
+Use this to toggle shuffle.
+
+### Toggle Repeat
+
+Use this to toggle repeat.
+
+### Start Radio
+
+Use this to start a radio station based on the current song.
+
+### Copy URL
+
+Use this to copy the URL of the current song/episode.
+
+### Copy Artist And Title
+
+Use this to copy the artist and track title of the current song/episode.
+
+### Find Lyrics
+
+Use this to find and display lyrics for the currently playing song. The lyrics are fetched from Genius and displayed directly within Raycast, preserving section structure like [Intro], [Verse], and [Chorus]. Includes options to copy the lyrics or song information.
+
+### Just Play
+
+Use this to quickly start playing a song based on your query.
+
+### Generate Playlist
+
+Use this to get a playlist generated by Raycast AI based on a prompt. You can then add this playlist to Spotify or queue all the songs directly.
+
+### Skip 15 Seconds
+
+Use this to skip ahead 15 seconds.
+
+### Back 15 Seconds
+
+Use this to go back 15 seconds.
+
+---
+
+In order to use this extension, you'll need to authenticate with Spotify. This extension requires the following permissions [scopes](https://developer.spotify.com/documentation/web-api/concepts/scopes):
+
+- `playlist-modify-private`: To update your playlist, including private ones.
+- `playlist-modify-public`: To update your playlist.
+- `playlist-read-collaborative`: To fetch your playlists, including collaborative ones.
+- `playlist-read-private`: To fetch your playlists, including private ones.
+- `user-follow-read`: To fetch your followed artists.
+- `user-library-modify`: To update your liked songs/episodes.
+- `user-library-read`: To fetch your liked songs, artists, albums, podcasts, and episodes.
+- `user-modify-playback-state`: To control playback state, such as play/pause, skip, change volume, transfer playback, and more.
+- `user-read-currently-playing`: To fetch what's currently playing.
+- `user-read-playback-state`: To fetch playback state, such as volume, shuffle, repeat, and more.
+- `user-read-private`: To fetch your country code, so we can display songs available in your location only.
+- `user-top-read`: To fetch your top artists and tracks.
