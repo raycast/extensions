@@ -1,6 +1,5 @@
 import { useExec } from "@raycast/utils";
 import { DailyUsageCommandResponseSchema } from "../types/usage-types";
-import { preferences } from "../preferences";
 import { getExecOptions } from "../utils/exec-options";
 import { stringToJSON } from "../utils/string-to-json-schema";
 
@@ -8,9 +7,7 @@ import { stringToJSON } from "../utils/string-to-json-schema";
  * Hook for executing `ccusage daily --json` command
  */
 export const useCCUsageDailyCli = () => {
-  const npxCommand = preferences.customNpxPath || "npx";
-
-  const result = useExec(npxCommand, ["ccusage@latest", "daily", "--json"], {
+  const result = useExec("npx", ["ccusage@latest", "daily", "--json"], {
     ...getExecOptions(),
     parseOutput: ({ stdout }) => {
       if (!stdout) {

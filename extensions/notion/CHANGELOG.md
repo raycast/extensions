@@ -1,5 +1,10 @@
 # Notion Changelog
 
+## [Show page properties in page previews] - 2025-07-08
+
+- Page previews now display page properties
+- Added a checkbox to the extension preferences to control this behaviour, defaults to off.
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [Use pagination for fetching users list] - 2025-01-24

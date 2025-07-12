@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Add toggle to filter song name in menu bar] - 2025-07-08
+
+- Added new toggle for removing extra info like remix titles or versions from the song name in the menubar
+
 ## [Fix Search Feature] - 2025-07-03
 
 - Fixed an issue with the search functionality.

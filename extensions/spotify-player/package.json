@@ -38,8 +38,9 @@
     "eyal_levy",
     "jonasengelmann",
     "vmrjnvc",
-    "karthik_manikandan",
-    "kartheesan05"
+    "karthik_manikandan",    
+    "kartheesan05",
+    "joshkat"
   ],
   "pastContributors": [
     "bkeys818"
@@ -194,6 +195,14 @@
           "description": "If enabled, the artist's name will be hidden in the Menu Bar",
           "type": "checkbox",
           "label": "Hide artist's name",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "cleanupTitle",
+          "description": "If enabled cleans up extra info like remix titles or versions from the song name",
+          "type": "checkbox",
+          "label": "Cleanup song title",
           "default": false,
           "required": false
         },

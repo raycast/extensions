@@ -7,6 +7,7 @@ import { isValidSolanaAddress } from "./utils/is-valid-address";
 import { getPriceHistory } from "./utils/getPriceHistory";
 import BuyTokenForm from "./views/buy-token-form";
 import { RugcheckResult, TokenInfo } from "./type";
+import SellToken from "./sell-token";
 
 export const SOL_ADDRESS = "So11111111111111111111111111111111111111111";
 export const WRAPPED_SOL_ADDRESS = "So11111111111111111111111111111111111111112";
@@ -71,6 +72,22 @@ const ChartDurationOptions = {
   },
 };
 
+const getTokenBalanceInWallet = async (tokenAddress: string): Promise<number> => {
+  if (tokenAddress === WRAPPED_SOL_ADDRESS) {
+    const result = await executeAction("getSolBalance", {}, true, 1000 * 60);
+    return result.data as number;
+  }
+  const result = await executeAction(
+    "getTokenBalance",
+    {
+      mintAddress: tokenAddress,
+    },
+    true,
+    1000 * 60,
+  );
+  return result.data as number;
+};
+
 function GetTokenOverview(props: LaunchProps<{ arguments: { tokenAddress: string } }>) {
   const [isLoading, setIsLoading] = useState(false);
   const [tokenInfo, setTokenInfo] = useState<TokenInfo | null>(null);
@@ -78,6 +95,8 @@ function GetTokenOverview(props: LaunchProps<{ arguments: { tokenAddress: string
   const [chartDataUrl, setChartDataUrl] = useState<string | undefined>(undefined);
   const [chartDurationLabel, setChartDurationLabel] = useState<string | undefined>(undefined);
   const [rugcheckData, setRugcheckData] = useState<RugcheckResult | undefined>(undefined);
+  const [tokenBalance, setTokenBalance] = useState<number | undefined>(undefined);
+  const [dailyVolume, setDailyVolume] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     if (props.arguments.tokenAddress) {
@@ -117,16 +136,35 @@ function GetTokenOverview(props: LaunchProps<{ arguments: { tokenAddress: string
           1000 * 60 * 5,
         );
         tokenInfo = result.data as TokenInfo;
+        try {
+          const { data } = await executeAction(
+            "getTokenDataByTicker",
+            {
+              ticker: tokenInfo.symbol, // this is the token symbol
+            },
+            true,
+            1000 * 60 * 60,
+          );
+          setDailyVolume((data as { daily_volume: number }).daily_volume);
+        } catch (error) {
+          console.error(error);
+        }
       } else {
+        // if starts with $, remove the $
+        if (values.tokenAddress.startsWith("$")) {
+          values.tokenAddress = values.tokenAddress.slice(1);
+        }
         const { data } = await executeAction(
           "getTokenDataByTicker",
           {
-            ticker: values.tokenAddress,
+            ticker: values.tokenAddress, // this is the token symbol
           },
           true,
           1000 * 60 * 60,
         );
+
         finalTokenAddress = (data as { address: string }).address;
+        setDailyVolume((data as { daily_volume: number }).daily_volume);
         const { data: tokenInfoData } = (await executeAction(
           "getToken",
           {
@@ -140,6 +178,9 @@ function GetTokenOverview(props: LaunchProps<{ arguments: { tokenAddress: string
 
       setTokenInfo(tokenInfo);
       setTokenAddress(finalTokenAddress);
+
+      const tokenBalance = await getTokenBalanceInWallet(finalTokenAddress);
+      setTokenBalance(tokenBalance);
 
       // Fetch price history chart
       try {
@@ -226,7 +267,9 @@ function GetTokenOverview(props: LaunchProps<{ arguments: { tokenAddress: string
               color={Color.PrimaryText}
             />
           </Detail.Metadata.TagList>
+          <Detail.Metadata.Label title="Your Balance" text={`${tokenBalance?.toLocaleString()} ${tokenInfo.symbol}`} />
           <Detail.Metadata.Label title="Price" text={`$${formatPrice(tokenInfo.price)}`} />
+          {dailyVolume && <Detail.Metadata.Label title="Daily Volume" text={`$${formatNumber(dailyVolume)}`} />}
           <Detail.Metadata.Label title="Market Cap" text={`$${formatNumber(tokenInfo.marketCap)}`} />
           <Detail.Metadata.Label title="FDV" text={`$${formatNumber(tokenInfo.fdv)}`} />
           <Detail.Metadata.Label title="Liquidity" text={`$${formatNumber(tokenInfo.liquidity)}`} />
@@ -314,6 +357,18 @@ function GetTokenOverview(props: LaunchProps<{ arguments: { tokenAddress: string
       actions={
         <ActionPanel>
           <Action.Push title="Buy" target={<BuyTokenForm arguments={{ outputMint: tokenAddress }} />} />
+          <Action.Push
+            title="Sell"
+            target={
+              <SellToken
+                arguments={{
+                  inputMint: tokenAddress,
+                  inputAmount: tokenBalance?.toString() ?? "",
+                  dontAutoExecute: true,
+                }}
+              />
+            }
+          />
           <Action title="Refresh" onAction={() => loadTokenOverview({ tokenAddress })} />
           <Action title="View Last 1 Month Chart" onAction={() => loadChart("1M")} />
           <Action title="View Last 7 Days Chart" onAction={() => loadChart("7D")} />

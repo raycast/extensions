@@ -29,40 +29,65 @@ export type Todo = {
 
 export type CommandListName = 'inbox' | 'today' | 'anytime' | 'upcoming' | 'someday';
 
+export class ThingsError extends Error {
+  constructor(
+    message: string,
+    public readonly type: 'APP_NOT_FOUND' | 'PERMISSION_DENIED' | 'EXECUTION_ERROR' | 'UNKNOWN_ERROR',
+    public readonly originalError?: string,
+  ) {
+    super(message);
+    this.name = 'ThingsError';
+  }
+}
+
 export const executeJxa = async (script: string) => {
   try {
     const result = await runAppleScript(`(function(){${script}})()`, {
       humanReadableOutput: false,
       language: 'JavaScript',
     });
-    return JSON.parse(result);
+
+    // Some calls only update data and don't return anything
+    if (!result) {
+      return;
+    }
+
+    // JXA's non-human-readable output is similar to JSON, but is actually a JSON-like representation of the JavaScript object.
+    // While values should not be `undefined`, JXA will include {"key": undefined} in its output if they are.
+    // This is not valid JSON, so we replace those values with `null` to make it valid JSON.
+    return JSON.parse(result.replace(/:\s*undefined/g, ': null'));
   } catch (err: unknown) {
-    if (typeof err === 'string') {
-      const message = err.replace('execution error: Error: ', '');
-      if (message.match(/Application can't be found/)) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: 'Application not found',
-          message: 'Things must be running',
-        });
-      } else {
-        showToast({
-          style: Toast.Style.Failure,
-          title: 'Something went wrong',
-          message: message,
-        });
-      }
+    const errorMessage = typeof err === 'string' ? err : err instanceof Error ? err.message : String(err);
+    const message = errorMessage.replace('execution error: Error: ', '');
+
+    if (message.match(/Application can't be found/i)) {
+      throw new ThingsError(
+        'Things application not found. Please make sure Things is installed and running.',
+        'APP_NOT_FOUND',
+        message,
+      );
+      // https://developer.apple.com/documentation/coreservices/1527221-anonymous/erraeeventnotpermitted
+    } else if (
+      message.match(/not allowed assistive access/i) ||
+      message.match(/permission/i) ||
+      message.match(/-1743/)
+    ) {
+      throw new ThingsError(
+        'Permission denied. Please grant Raycast access to Things in System Settings > Privacy & Security > Automation > Raycast > Things.',
+        'PERMISSION_DENIED',
+        message,
+      );
+    } else if (message.match(/doesn't understand/i) || message.match(/can't get/i)) {
+      throw new ThingsError(
+        'Things automation interface error. This might be due to a Things version incompatibility or the app not being ready.',
+        'EXECUTION_ERROR',
+        message,
+      );
+    } else {
+      throw new ThingsError(`Unexpected error: ${message}`, 'UNKNOWN_ERROR', message);
     }
   }
 };
-
-export const thingsNotRunningError = `
-  ## Things Not Running
-  Please make sure Things is installed and running before using this extension.
-
-  ### But my Things app is running!
-  If Things is running, you may need to grant Raycast access to Things in *System Settings > Privacy & Security > Automation > Raycast > Things*
-`;
 
 const commandListNameToListIdMapping: Record<CommandListName, string> = {
   inbox: 'TMInboxListSource',
@@ -76,8 +101,7 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
   return executeJxa(`
   const things = Application('${preferences.thingsAppIdentifier}');
   const todos = things.lists.byId('${commandListNameToListIdMapping[commandListName]}').toDos();
-  const projectConstructor = things.projects()[0]?.constructor;
-  
+
   return todos.map(todo => ({
     id: todo.id(),
     name: todo.name(),
@@ -86,7 +110,7 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
     tags: todo.tagNames(),
     dueDate: todo.dueDate() && todo.dueDate().toISOString(),
     activationDate: todo.activationDate() && todo.activationDate().toISOString(),
-    isProject: projectConstructor && todo.constructor === projectConstructor,
+    isProject: todo.properties().pcls === "project",
     project: todo.project() && {
       id: todo.project().id(),
       name: todo.project().name(),
