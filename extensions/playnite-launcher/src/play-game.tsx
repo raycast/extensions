@@ -1,6 +1,7 @@
-import { List, ActionPanel, Action, Icon, Detail, showToast, Toast, Image } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Detail, Image } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { usePlaynite } from "./hooks/usePlaynite";
+import { showFailureToast } from "@raycast/utils";
 
 function ErrorView({ error }: { error: string }) {
   const isAddonError = error.includes("FlowLauncherExporter");
