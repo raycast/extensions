@@ -6,6 +6,7 @@ const execAsync = promisify(exec);
 export async function openProject(cliPath: string, projectPath: string) {
   const command = `"${cliPath}" open --project "${projectPath}"`;
   const { stderr, stdout } = await execAsync(command);
+
   console.log("🚀 ~ openProject ~ stdout:", stdout);
   console.log("🚀 ~ openProject ~ stderr:", stderr);
 

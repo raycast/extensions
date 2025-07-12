@@ -1,18 +1,14 @@
 export interface ExtensionConfig {
-  [deviceId: string]: DeviceConfig;
-}
-
-export interface DeviceConfig {
-  name: string;
   cliPath: string;
   projects: Project[];
 }
 
-export interface Project extends Record<string, unknown> {
+export interface Project {
   id: string;
   name: string;
   path: string;
-  lastUsedAt?: number;
+  lastUsedAt: number;
+  aliases: string[];
 }
 
 export interface WechatProjectConfig {
