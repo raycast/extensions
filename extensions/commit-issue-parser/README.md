@@ -1,16 +1,16 @@
 # Commit Issue Parser
 
-This Raycast plugin allows you to parse your issue urls (such as Jira, Github and Gitlab) to provide you with a commit name and description that you can use with Git!
+This Raycast plugin allows you to parse your issue urls (such as Jira, GitHub and GitLab) to provide you with a commit name and description that you can use with Git!
 
 ## Usage
 
 - Open Raycast and type "Parse Issue Url"
-- Enter the issue URL (Jira, GitHub or Gitlab)
+- Enter the issue URL (Jira, GitHub or GitLab)
 - Press `Enter` to paste in your active app the commit message you've selected
 
 While typing your url, you can specify optional parameters separated by `,` in the following order:
 
-- `url`: The issue URL (Jira, GitHub or Gitlab)
+- `url`: The issue URL (Jira, GitHub or GitLab)
 - `description`: A short description of the commit
 - `body`: A longer body for the commit message
 
@@ -43,6 +43,6 @@ It allows you to make the content format compatible with your tools as follows
 
 The extension is compatible with the following issue managers:
 
-- Github
-- Gitlab
+- GitHub
+- GitLab
 - Jira
