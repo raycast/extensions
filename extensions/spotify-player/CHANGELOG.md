@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Authentication Retry Mechanism] - 2025-01-15
+## [Authentication Retry Mechanism] - {PR_MERGE_DATE}
 
 ### 🔧 Major Authentication Improvements
 - **Fixed session disconnection issues**: Resolved frequent re-authentication prompts after periods of inactivity
