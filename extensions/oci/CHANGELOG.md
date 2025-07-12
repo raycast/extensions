@@ -1,5 +1,10 @@
 # Oracle Cloud Changelog
 
+## [View Object Storage Buckets + Implement Provider w/ Context] - {PR_MERGE_DATE}
+
+- add initial "Object Storage" command to view buckets
+- `dev`: implement Provider w/ Context so checks can be shared
+
 ## [Add Terminate Instance Action] - 2025-06-03
 
 - (Confirm and) Terminate Instance
