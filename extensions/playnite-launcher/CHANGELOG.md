@@ -1,5 +1,5 @@
 # Playnite for Raycast Changelog
 
-## [Initial Release] - 2025-07-12
+## [Initial Release] - {PR_MERGE_DATE}
 
 Initial version
