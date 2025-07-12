@@ -37,10 +37,8 @@ export default function Command() {
 
   useEffect(() => {
     if (renderErrors.length > 0) {
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast(new Error(`${renderErrors.length} game(s) could not be displayed properly`), {
         title: "Some games failed to load",
-        message: `${renderErrors.length} game(s) could not be displayed properly`,
       });
     }
   }, [renderErrors]);
