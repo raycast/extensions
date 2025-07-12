@@ -121,7 +121,7 @@ export default function Command() {
 
           return (
             <List.Item
-              key={game?.Id || Math.random()}
+              key={game.Id ?? renderErrors.length}
               title="[ERROR] Failed to render game"
               subtitle={`ID: ${game?.Id || "unknown"}`}
               icon={Icon.ExclamationMark}
