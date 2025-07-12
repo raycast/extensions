@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { provider } from "../api/oauth";
 import { setSpotifyClient } from "../helpers/withSpotifyClient";
 import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 export interface AuthState {
   isAuthenticated: boolean;
@@ -56,11 +57,7 @@ export function useAuthState(): AuthState {
       setLastAuthError(errorMessage);
       setIsAuthenticated(false);
 
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to reconnect to Spotify",
-        message: "Please try again or check your internet connection.",
-      });
+      showFailureToast(error, { title: "Failed to reconnect to Spotify" });
     } finally {
       setIsInitializing(false);
     }
