@@ -38,7 +38,7 @@ export async function deleteServer(server: Server) {
   return result;
 }
 
-export async function addServer(server: Record<string, string | number | boolean | undefined>) {
+export async function addServer(server: Record<string, string | number | boolean | string[] | undefined>) {
   const { url, api_key } = getPreferenceValues<Preferences>();
   const api_url = new URL("api/servers", url).toString();
   const response = await fetch(api_url, {

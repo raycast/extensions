@@ -12,11 +12,11 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { Item, Server, ServerType } from "../types";
+import { Currency, Item, Label, Server, ServerType, Term } from "../types";
 import PriceListItem from "./price-list-item";
 import NextDueDate from "./next-due-date";
 import { addServer, deleteServer, numOrUnlimited } from "../utils";
-import { MutatePromise, showFailureToast, useForm } from "@raycast/utils";
+import { FormValidation, MutatePromise, showFailureToast, useForm } from "@raycast/utils";
 import { useState } from "react";
 import useGet, { usePut } from "../hooks";
 
@@ -232,16 +232,24 @@ function AddServer({ mutate }: { mutate: MutatePromise<Server[]> }) {
   const { isLoading: isLoadingProviders, data: providers } = useGet<Item>("providers");
   const { isLoading: isLoadingLocations, data: locations } = useGet<Item>("locations");
   const { isLoading: isLoadingOS, data: os } = useGet<Item>("os");
+  const { isLoading: isLoadingLabels, data: labels } = useGet<Label>("labels");
   const { pop } = useNavigation();
 
   type AddServer = {
     hostname: string;
     server_type: string;
     os_id: string;
-    ssh: string;
+    ip1: string;
+    ip2: string;
+    ns1: string;
+    ns2: string;
+    ssh_port: string;
     bandwidth: string;
     was_promo: string;
     provider_id: string;
+    price: string;
+    payment_term: string;
+    currency: string;
     ram: string;
     ram_type: string;
     disk: string;
@@ -249,6 +257,8 @@ function AddServer({ mutate }: { mutate: MutatePromise<Server[]> }) {
     cpu: string;
     location_id: string;
     owned_since: Date | null;
+    next_due_date: Date | null;
+    labels: string[];
     show_public: boolean;
   };
   const { handleSubmit, itemProps } = useForm<AddServer>({
@@ -257,7 +267,10 @@ function AddServer({ mutate }: { mutate: MutatePromise<Server[]> }) {
       try {
         const body = {
           ...values,
+          active: 1,
+          price: +values.price,
           owned_since: values.owned_since?.toISOString().split("T")[0],
+          next_due_date: values.next_due_date?.toISOString().split("T")[0],
           show_public: +values.show_public as Server["show_public"]
         };
         await mutate(
@@ -271,15 +284,19 @@ function AddServer({ mutate }: { mutate: MutatePromise<Server[]> }) {
       }
     },
     initialValues: {
-      ssh: "22",
+      price: "2.50",
+      ssh_port: "22",
       bandwidth: "1000",
       ram: "2024",
       disk: "10",
       cpu: "2"
+    },
+    validation: {
+      hostname: FormValidation.Required
     }
   });
 
-  const isLoading = isLoadingProviders || isLoadingLocations || isLoadingOS || isAdding;
+  const isLoading = isLoadingProviders || isLoadingLocations || isLoadingOS || isLoadingLabels || isAdding;
 
   return (
     <Form
@@ -300,9 +317,11 @@ function AddServer({ mutate }: { mutate: MutatePromise<Server[]> }) {
           <Form.Dropdown.Item key={item.id} title={item.name} value={item.id.toString()} />
         ))}
       </Form.Dropdown>
-      {/* IP */}
-      {/* NS */}
-      <Form.TextField title="SSH" {...itemProps.ssh} />
+      <Form.TextField title="IP" {...itemProps.ip1} />
+      <Form.TextField title="IP" {...itemProps.ip2} />
+      <Form.TextField title="NS1" {...itemProps.ns1} />
+      <Form.TextField title="NS2" {...itemProps.ns2} />
+      <Form.TextField title="SSH" {...itemProps.ssh_port} />
       <Form.TextField title="Bandwidth GB" {...itemProps.bandwidth} />
       <Form.Dropdown title="Promo price" {...itemProps.was_promo}>
         <Form.Dropdown.Item title="Yes" value="1" />
@@ -313,9 +332,13 @@ function AddServer({ mutate }: { mutate: MutatePromise<Server[]> }) {
           <Form.Dropdown.Item key={provider.id} title={provider.name} value={provider.id.toString()} />
         ))}
       </Form.Dropdown>
-      {/* Price */}
-      {/* Price Term */}
-      {/* Price Currency */}
+      <Form.TextField title="Price" {...itemProps.price} />
+      <Form.Dropdown title="Term" {...itemProps.payment_term}>
+        {Object.entries(Term).filter(([key]) => isNaN(Number(key))).map(([key, val]) => <Form.Dropdown.Item key={key} title={key} value={val.toString()} />)}
+      </Form.Dropdown>
+      <Form.Dropdown title="Currency" {...itemProps.currency}>
+        {Object.entries(Currency).filter(([key]) => isNaN(Number(key))).map(([key, val]) => <Form.Dropdown.Item key={key} title={key} value={val} />)}
+      </Form.Dropdown>
       <Form.TextField title="RAM" {...itemProps.ram} />
       <Form.Dropdown title="RAM type" {...itemProps.ram_type}>
         <Form.Dropdown.Item title="MB" value="MB" />
@@ -333,7 +356,10 @@ function AddServer({ mutate }: { mutate: MutatePromise<Server[]> }) {
         ))}
       </Form.Dropdown>
       <Form.DatePicker title="Owned since" type={Form.DatePicker.Type.Date} {...itemProps.owned_since} />
-      {/* nxt due dte */}
+      <Form.DatePicker title="Next due date" type={Form.DatePicker.Type.Date} {...itemProps.next_due_date} />
+      <Form.TagPicker title="Label" {...itemProps.labels}>
+        {labels.map(label => <Form.TagPicker.Item key={label.id} title={label.label} value={label.id.toString()} />)}
+      </Form.TagPicker>
       <Form.Checkbox label="Allow some of this data to be public" {...itemProps.show_public} />
     </Form>
   );
