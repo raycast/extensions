@@ -13,7 +13,6 @@ export const useProvider = () => useContext(ProviderContext);
 export function OCIProvider({ children }: { children: React.ReactNode }) {
   try {
     const provider = new common.ConfigFileAuthenticationDetailsProvider();
-    if (!provider) return <Detail isLoading />;
     return <ProviderContext.Provider value={{ provider }}>{children}</ProviderContext.Provider>;
   } catch {
     return (

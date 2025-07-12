@@ -32,9 +32,9 @@ function ObjectStorage() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search buckets">
-      {buckets.map((bucket, bucketIndex) => (
+      {buckets.map((bucket) => (
         <List.Item
-          key={bucketIndex}
+          key={bucket.namespace + bucket.name}
           icon={Icon.Coin}
           title={bucket.name}
           accessories={[
