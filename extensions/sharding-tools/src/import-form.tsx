@@ -1,4 +1,5 @@
 import { Form, ActionPanel, Action, showToast, LocalStorage, Icon, useNavigation, Clipboard } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 
 type ShardInfo = {
@@ -103,7 +104,7 @@ export default function ImportForm({ onImportSuccess }: ImportFormProps) {
   // Process import
   async function handleImport(values: { configData: string; importMode: string }) {
     if (!values.configData.trim()) {
-      showToast({
+      showFailureToast({
         title: "Import failed",
         message: "Please input config data",
       });
@@ -116,7 +117,7 @@ export default function ImportForm({ onImportSuccess }: ImportFormProps) {
       const importConfig = validateAndParseConfig(values.configData);
 
       if (!importConfig) {
-        showToast({
+        showFailureToast({
           title: "Import failed",
           message: "Config data format error, please check JSON format",
         });
@@ -128,7 +129,16 @@ export default function ImportForm({ onImportSuccess }: ImportFormProps) {
       let currentConfigs: ShardInfo[] = [];
 
       if (existingData) {
-        currentConfigs = JSON.parse(existingData);
+        try {
+          currentConfigs = JSON.parse(existingData);
+        } catch (error) {
+          console.error("Failed to parse existing data:", error);
+          showFailureToast({
+            title: "Import failed",
+            message: `Failed to parse existing data`,
+          });
+          currentConfigs = [];
+        }
       }
 
       let finalConfigs: ShardInfo[];
@@ -169,7 +179,7 @@ export default function ImportForm({ onImportSuccess }: ImportFormProps) {
       pop();
     } catch (error) {
       console.error("Import failed:", error);
-      showToast({
+      showFailureToast({
         title: "Import failed",
         message: "Failed to save config data",
       });
@@ -190,14 +200,14 @@ export default function ImportForm({ onImportSuccess }: ImportFormProps) {
           message: "Config data has been loaded from clipboard",
         });
       } else {
-        showToast({
+        showFailureToast({
           title: "Clipboard is empty",
           message: "No text data available in clipboard",
         });
       }
     } catch (error) {
       console.error("Failed to read clipboard:", error);
-      showToast({
+      showFailureToast({
         title: "Read failed",
         message: "Failed to read clipboard content",
       });
