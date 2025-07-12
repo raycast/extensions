@@ -1,6 +1,6 @@
 # ScreenOCR Changelog
 
-## [Improvements] - 2025-07-13
+## [Improvements] - {PR_MERGE_DATE}
 
 - Added support for Arabic and Najdi languages
 - Added support for detecting barcodes and QR codes
