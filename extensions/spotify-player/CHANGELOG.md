@@ -1,5 +1,30 @@
 # Spotify Player Changelog
 
+## [Authentication Retry Mechanism] - 2025-01-15
+
+### 🔧 Major Authentication Improvements
+- **Fixed session disconnection issues**: Resolved frequent re-authentication prompts after periods of inactivity
+- **Auto-retry mechanism**: Automatically retries API calls when authentication fails, with intelligent re-authentication
+- **Enhanced error detection**: Specific handling for 401/403 authentication errors with user-friendly messages
+- **Smart recovery system**: When tokens expire, the extension automatically attempts to refresh them before prompting users
+- **Improved user experience**: Clear error messages and one-click re-authentication when manual intervention is needed
+
+### 🛠️ Technical Changes
+- Added `withRetry()` helper function for automatic API call retry logic
+- Enhanced error handling in `getError.ts` with authentication-specific detection
+- New `AuthenticationError` component providing clear re-authentication UI
+- Added `useAuthState()` React hook for centralized authentication state management
+- Updated core API functions (`getCurrentlyPlaying`, `getMe`, `getPlaybackState`) with retry logic
+- Improved OAuth configuration with better token expiration detection
+
+### 📊 Impact
+- Significantly reduced authentication interruptions during extended usage
+- Faster recovery from token expiration scenarios
+- Better debugging capabilities with enhanced error logging
+- Maintained backward compatibility with existing functionality
+
+## [Unreleased]
+
 ## [Add toggle to filter song name in menu bar] - 2025-07-08
 
 - Added new toggle for removing extra info like remix titles or versions from the song name in the menubar
