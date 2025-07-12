@@ -44,12 +44,21 @@ export default function ListProjects() {
     };
 
     if (await confirmAlert(options)) {
-      await mutate(neon.deleteProject(project.id), {
-        optimisticUpdate(data) {
-          return data.filter((p) => p.id !== project.id);
-        },
-        shouldRevalidateAfter: false,
-      });
+      const toast = await showToast(Toast.Style.Animated, "Deleting", project.name);
+      try {
+        await mutate(neon.deleteProject(project.id), {
+          optimisticUpdate(data) {
+            return data.filter((p) => p.id !== project.id);
+          },
+          shouldRevalidateAfter: false,
+        });
+        toast.style = Toast.Style.Success;
+        toast.title = "Deleted";
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failed";
+        toast.message = `${error}`;
+      }
     }
   };
 
