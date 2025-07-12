@@ -10,18 +10,21 @@
     {
       "name": "addtable",
       "title": "Add Shard Config",
+      "subtitle": "Sharding Tools",
       "description": "Add shard config, set shard parameters",
       "mode": "view"
     },
     {
       "name": "list",
       "title": "List Shard Configs",
+      "subtitle": "Sharding Tools",
       "description": "List saved shard configs and generated shard lists",
       "mode": "view"
     },
     {
       "name": "calculator",
       "title": "Shard Calculator",
+      "subtitle": "Sharding Tools",
       "description": "Input shard factor value to calculate corresponding database and table",
       "mode": "view"
     }

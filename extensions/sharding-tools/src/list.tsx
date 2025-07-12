@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import ShardForm from "./shard-form";
 import { ShardCalculator } from "./calculator";
 import ImportForm from "./import-form";
+import { showFailureToast } from "@raycast/utils";
 
 type ShardInfo = {
   id: string;
@@ -46,7 +47,7 @@ export default function Command() {
         }
       } catch (error) {
         console.error("Failed to load data:", error);
-        showToast({
+        showFailureToast({
           title: "Load failed",
           message: "Failed to load data from local storage",
         });
@@ -77,7 +78,7 @@ export default function Command() {
       });
     } catch (error) {
       console.error("Export failed:", error);
-      showToast({
+      showFailureToast({
         title: "Export failed",
         message: "Failed to export config data",
       });
@@ -123,7 +124,7 @@ export default function Command() {
       });
     } catch (error) {
       console.error("Failed to clear data:", error);
-      showToast({
+      showFailureToast({
         title: "Clear failed",
         message: "Failed to clear local storage data",
       });
@@ -142,7 +143,7 @@ export default function Command() {
       });
     } catch (error) {
       console.error("Failed to delete data:", error);
-      showToast({
+      showFailureToast({
         title: "Delete failed",
         message: "Failed to delete data",
       });
