@@ -166,10 +166,7 @@ export default function ImportForm({ onImportSuccess }: ImportFormProps) {
         onImportSuccess(importConfig.configs.length);
       }
 
-      // Delay a little bit to return to the previous page, ensure data has been updated
-      setTimeout(() => {
-        pop();
-      }, 100);
+      pop();
     } catch (error) {
       console.error("Import failed:", error);
       showToast({
