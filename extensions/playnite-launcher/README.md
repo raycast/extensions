@@ -1,4 +1,4 @@
-# Playnite
+# Playnite Launcher
 
 Launch your favorite games from Raycast using Playnite.
 
