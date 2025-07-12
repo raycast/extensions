@@ -35,3 +35,14 @@ export const provider = new OAuthService({
   refreshTokenUrl: "https://accounts.spotify.com/api/token",
   bodyEncoding: "url-encoded",
 });
+
+// Enhanced error detection for token expiration
+export const isTokenExpired = (error: unknown): boolean => {
+  const errorObj = error as { status?: number; message?: string };
+  return !!(
+    errorObj?.status === 401 ||
+    errorObj?.message?.includes("token") ||
+    errorObj?.message?.includes("unauthorized") ||
+    errorObj?.message?.includes("authentication")
+  );
+};
