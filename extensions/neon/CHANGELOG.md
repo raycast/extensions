@@ -1,5 +1,11 @@
 # Neon Changelog
 
+## [Create & Delete Project + Modernize] - {PR_MERGE_DATE}
+
+- Create Project
+- Delete Existing Project
+- Modernize to use latest Raycast configuration
+
 ## [Roles & Databases + Compute] - 2025-02-20
 
 - Update Project (basic): Edit a few fields of an existing project
