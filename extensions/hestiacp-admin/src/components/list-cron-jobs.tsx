@@ -115,11 +115,11 @@ function AddJob({ user, onJobAdded }: AddJobProps) {
     >
       <Form.TextArea title="Command" {...itemProps.command} />
 
-      <Form.TextField title="Minute" {...itemProps.minute} />
-      <Form.TextField title="Hour" {...itemProps.hour} />
-      <Form.TextField title="Day" {...itemProps.day} />
-      <Form.TextField title="Month" {...itemProps.month} />
-      <Form.TextField title="Day of Week" {...itemProps.weekday} />
+      <Form.TextField title="Minute" placeholder="*" {...itemProps.minute} />
+      <Form.TextField title="Hour" placeholder="*" {...itemProps.hour} />
+      <Form.TextField title="Day" placeholder="*" {...itemProps.day} />
+      <Form.TextField title="Month" placeholder="*" {...itemProps.month} />
+      <Form.TextField title="Day of Week" placeholder="*" {...itemProps.weekday} />
     </Form>
   );
 }
