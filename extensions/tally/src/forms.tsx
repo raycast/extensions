@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { API_HEADERS, API_URL, useTallyPaginated } from "./tally";
 import { Form, SubmissionResult } from "./interfaces";
 import OpenInTally from "./open-in-tally";
@@ -22,28 +22,24 @@ function Submissions({form}: {form: Form}) {
         headers: API_HEADERS,
         mapResult(result: SubmissionResult
         ) {
-            // const data = result.submissions.map(submission => {
-            //         const s = submission.responses.map(response => {
-            //             const question = result.questions.find(q => q.id===response.questionId);
-            //             return { question: question?.title, answer: response.value };
-            //         })
-            //         return {}
-            //     }
-            // )
-            // const data = result.submissions.map(submission => )
-            const data = result.submissions
             return {
-                data,
+                data: {
+                    questions: result.questions,
+                    submissions: result.submissions
+                },
                 hasMore: result.hasMore
             }
         },
-        initialData: []
+        initialData: {
+            questions: [],
+            submissions: [],
+        }
     })
 
     return <List isLoading={isLoading} isShowingDetail>
-        {data.map(d => <List.Item key={d.id} title={d.id} detail={<List.Item.Detail markdown={`
+        {data.submissions.map(d => <List.Item key={d.id} title={d.id} detail={<List.Item.Detail markdown={`
 | question | answer |
 |----------|--------|
-${Object.values(d.responses).map(response => `| ${response.questionId} | ${JSON.stringify(response.answer)} |`).join(`\n`)}`} />} />)}
+${Object.values(d.responses).map(response => `| ${data.questions.find(question=>question.id===response.questionId)?.title} | ${JSON.stringify(response.answer)} |`).join(`\n`)}`} />} />)}
     </List>
 }

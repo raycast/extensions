@@ -29,7 +29,7 @@ function RenameWorkspace({ workspace, onRename }: {workspace: Workspace, onRenam
                         body: JSON.stringify(values)
                     })
                     if (!response.ok) {
-                        const err: { message: string } = await response.json();
+                        const err = await response.json() as {message: string};
                         throw new Error(err.message);
                     }
                     toast.style = Toast.Style.Success
