@@ -26,7 +26,7 @@ export function EditBypassForm({ currentValue, service, onSave }: EditBypassForm
       });
 
       onSave();
-      pop(); // 返回到上一页面（Show Network Proxy）
+      pop(); // Return to previous page (Show Network Proxy)
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
