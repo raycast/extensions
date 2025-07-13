@@ -1,5 +1,4 @@
 import {getPreferenceValues} from "@raycast/api"
-import fetch from "node-fetch"
 import {
   ChecklistResponse,
   CreateTaskResponse,
@@ -12,7 +11,7 @@ export const getApiRoot = () => {
   return "https://focustask.app"
 }
 
-const preferences = getPreferenceValues()
+const preferences = getPreferenceValues<Preferences>()
 
 export const getTasks = async () => {
   const response = await fetchJson<TasksResponse>({path: "tasks"})

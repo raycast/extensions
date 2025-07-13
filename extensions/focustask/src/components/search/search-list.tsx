@@ -1,6 +1,6 @@
 import {Action, ActionPanel, Icon, List, useNavigation} from "@raycast/api"
-import {CreateForm} from "components/create/create-form"
-import {labelForTaskColumn, orderForTaskColumn} from "helpers/focustask"
+import {CreateForm} from "../../components/create/create-form"
+import {labelForTaskColumn, orderForTaskColumn} from "../../helpers/focustask"
 import {groupBy, mapValues, sortBy} from "lodash"
 import {useState} from "react"
 import {useFetchLists, useFetchTasks} from "../../api/hooks"
@@ -8,8 +8,6 @@ import {ChecklistListItem} from "./checklist-list-item"
 import {TaskListItem} from "./task-list-item"
 
 export const SearchList = () => {
-  const navigation = useNavigation()
-
   const {isLoading, tasks, error} = useFetchTasks()
   const {lists} = useFetchLists()
 
@@ -40,14 +38,10 @@ export const SearchList = () => {
 
   const placeholder = "Search for tasks and lists, or create a new task."
 
-  const handleCreate = async () => {
-    navigation.push(<CreateForm initialTitle={search} />)
-  }
-
   return (
     <List
       searchBarPlaceholder={placeholder}
-      isLoading={isLoading && tasks.length === 0}
+      isLoading={isLoading}
       searchText={search}
       onSearchTextChange={setSearch}
     >
@@ -71,10 +65,10 @@ export const SearchList = () => {
             title={`Create task: ${search}`}
             actions={
               <ActionPanel>
-                <Action
+                <Action.Push
                   title="Create Task"
                   icon={Icon.NewDocument}
-                  onAction={handleCreate}
+                  target={<CreateForm initialTitle={search} />}
                 />
               </ActionPanel>
             }

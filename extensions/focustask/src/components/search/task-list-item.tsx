@@ -1,7 +1,7 @@
 import {Action, ActionPanel, List} from "@raycast/api"
-import {Checklist, Task} from "api/types"
-import {colorForTailwind} from "helpers/colors"
-import {iconForDifficulty} from "helpers/focustask"
+import {Checklist, Task} from "../../api/types"
+import {colorForTailwind} from "../../helpers/colors"
+import {iconForDifficulty} from "../../helpers/focustask"
 import {FC} from "react"
 
 export const TaskListItem: FC<{task: Task; lists: Checklist[]}> = ({

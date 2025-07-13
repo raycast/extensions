@@ -1,7 +1,7 @@
 import {Action, ActionPanel, List} from "@raycast/api"
-import {getApiRoot} from "api/helpers"
-import {Checklist} from "api/types"
-import {colorForTailwind} from "helpers/colors"
+import {getApiRoot} from "../../api/helpers"
+import {Checklist} from "../../api/types"
+import {colorForTailwind} from "../../helpers/colors"
 import {FC} from "react"
 
 export const ChecklistListItem: FC<{checklist: Checklist}> = ({checklist}) => {

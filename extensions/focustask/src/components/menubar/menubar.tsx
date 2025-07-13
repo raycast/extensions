@@ -1,7 +1,7 @@
 import {Icon, MenuBarExtra, open} from "@raycast/api"
-import {getApiRoot} from "api/helpers"
-import {useFetchTasks} from "api/hooks"
-import {Task} from "api/types"
+import { getApiRoot } from "../../api/helpers"
+import {useFetchTasks} from "../../api/hooks"
+import {Task} from "../../api/types"
 import {uniq, sortBy} from "lodash"
 import {Fragment, useMemo} from "react"
 import {labelForTaskColumn} from "../../helpers/focustask"
@@ -39,12 +39,12 @@ export const Menubar = () => {
   )
 
   return (
-    <MenuBarExtra
+    (<MenuBarExtra
       icon={Icon.Bolt}
       title={tasks.length > 0 ? `${tasks.length}` : undefined}
       tooltip="Current FocusTask Tasks"
       isLoading={isLoading}
-    >
+    ><MenuBarExtra.Section>
       {isLoading && !allTasks.length ? (
         <MenuBarExtra.Item title="Loading" />
       ) : error ? (
@@ -57,7 +57,7 @@ export const Menubar = () => {
                 title={labelForTaskColumn(item.column) ?? ""}
                 icon={item.column === "current" ? Icon.Bolt : undefined}
               />
-              <MenuBarExtra.Separator />
+              {/* </MenuBarExtra.Section><MenuBarExtra.Section> */}
             </Fragment>
           ) : (
             <TaskItem key={i} task={item.task} />
@@ -66,13 +66,11 @@ export const Menubar = () => {
       ) : (
         <MenuBarExtra.Item title="No tasks in Current!" />
       )}
-
-      <MenuBarExtra.Separator />
-
+      </MenuBarExtra.Section><MenuBarExtra.Section>
       <MenuBarExtra.Item
         title="Open FocusTask"
         onAction={() => open(getApiRoot())}
-      />
-    </MenuBarExtra>
-  )
+      /></MenuBarExtra.Section>
+    </MenuBarExtra>)
+  );
 }
