@@ -22,12 +22,28 @@ const ListItem = ({
   onApplyTag: (tag: string, noteBody?: string) => void;
   showMenu?: boolean;
 }) => {
+  const generateBody = (note: Note) => {
+    if (note.summary) {
+      return `
+### Summary AI
+
+${note.summary ?? "No summary available."}
+
+---
+
+${note.body}
+`;
+    } else {
+      return note.body;
+    }
+  };
+
   return (
     <List.Item
       title={note.title}
       detail={
         <List.Item.Detail
-          markdown={note.body}
+          markdown={generateBody(note)}
           metadata={
             showMenu ? (
               <List.Item.Detail.Metadata>
@@ -93,14 +109,14 @@ const sortNotes = (notes: Note[], sort: Sort) => {
   });
 };
 
-const NotesList = () => {
+const NotesList = ({ sText, sTag }: { sText?: string; sTag?: string }) => {
   const [notes, setNotes] = useAtom(notesAtom);
   const [tags] = useAtom(tagsAtom);
   const [menu] = useCachedState("menu", false);
   const [sort] = useCachedState<Sort>("sort", "updated");
 
-  const [searchText, setSearchText] = useState("");
-  const [searchTag, setSearchTag] = useState("");
+  const [searchText, setSearchText] = useState(sText ?? "");
+  const [searchTag, setSearchTag] = useState(sTag ?? "");
   const [filteredNotes, setFilteredNotes] = useState<Note[]>([]);
 
   // Update notes on sort

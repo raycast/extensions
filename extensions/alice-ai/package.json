@@ -59,6 +59,14 @@
             {
               "title": "GPT-4 Turbo",
               "value": "gpt-4-turbo"
+            },
+            {
+              "title": "GPT-4o",
+              "value": "gpt-4o"
+            },
+            {
+              "title": "GPT-4o Mini",
+              "value": "gpt-4o-mini"
             }
           ],
           "required": true
@@ -101,10 +109,9 @@
     "@raycast/api": "^1.69.0",
     "@raycast/utils": "^1.14.0",
     "@reduxjs/toolkit": "^2.2.3",
-    "gpt-tokens": "^1.3.4",
-    "openai": "^4.38.5",
-    "zod": "^3.22.4",
-    "zustand": "^4.5.2"
+    "openai": "^4.56.0",
+    "zod": "^3.23.8",
+    "zustand": "^4.5.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

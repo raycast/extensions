@@ -12,12 +12,12 @@ export default function Command() {
     subtitle: getProgressBar((!includeWeekends && isWeekend(now)) || progress < 0 || progress > 100 ? null : progress),
   });
 
-  if ((!includeWeekends && isWeekend(now)) || progress < 0 || progress > 100) {
+  if ((!includeWeekends && isWeekend(now)) || progress <= 0 || progress >= 100) {
     return null;
   }
 
   return (
-    <MenuBarExtra icon={getIcon(hours)} title={getTitle(hours, minutes)}>
+    <MenuBarExtra icon={getIcon(hours, minutes)} title={getTitle(hours, minutes)}>
       <MenuBarExtra.Item
         title="Configure Command"
         shortcut={{ modifiers: ["cmd"], key: "," }}

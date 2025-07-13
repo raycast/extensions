@@ -26,9 +26,9 @@ const MovePinDirective: Placeholder = {
     const allGroups: Group[] = await getStorage(StorageKey.LOCAL_GROUPS);
     if (group != "None" && !allGroups.some((g) => g.name == group)) {
       if (group === "Expired Pins") {
-        await createNewGroup(group, "BellDisabled", undefined, undefined, undefined, Visibility.HIDDEN);
+        await createNewGroup({ name: group, icon: "BellDisabled", visibility: Visibility.HIDDEN });
       } else {
-        await createNewGroup(group, "None");
+        await createNewGroup({ name: group, icon: "None" });
       }
     }
 

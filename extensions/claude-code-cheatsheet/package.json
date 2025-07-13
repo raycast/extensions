@@ -1,0 +1,36 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "claude-code-cheatsheet",
+  "title": "Claude Code Cheatsheet",
+  "description": "A comprehensive, interactive cheatsheet for the Claude Code CLI. Instantly access the latest commands, options, and unique thinking keywords to supercharge your development workflow.",
+  "icon": "extension_icon.png",
+  "author": "harumeri",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Claude Code Cheatsheet",
+      "description": "Browse, search, and copy Claude Code commands, options, and shortcuts to streamline your coding process.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.99.4",
+    "@raycast/utils": "^2.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^24.0.0",
+    "eslint": "^8.57.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "preferences": []
+}

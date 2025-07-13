@@ -11,7 +11,10 @@ Trovu allows you to search 1000+ websites in a command-line way, with
 
 It's like [DuckDuckGo bangs](https://duckduckgo.com/bangs), but on steroids. And it's [free](https://github.com/trovu/trovu/blob/master/LICENSE).
 
-There is also a [video summarizing Trovu in 30 seconds](https://www.youtube.com/watch?v=gOUNhCion9M).
+## Videos
+
+- [Trovu in 30 seconds](https://www.youtube.com/watch?v=gOUNhCion9M)
+- How to use the [Raycast extension](https://www.youtube.com/watch?v=LCLKXdL-4_Y)
 
 ## Examples
 

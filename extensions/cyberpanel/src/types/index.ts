@@ -47,5 +47,6 @@ export type SuccessResponse =
 export type ErrorResponse = {
   [key: string]: 0;
 } & {
+  status: 0;
   error_message: string;
 };

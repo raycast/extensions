@@ -6,12 +6,14 @@
   "icon": "everhour-logo.png",
   "author": "farisaziz12",
   "contributors": [
-    "ahoereth"
+    "ahoereth",
+    "xmok",
+    "teisenhower"
+  ],
+  "categories": [
+    "Productivity"
   ],
   "license": "MIT",
-  "keywords": [
-    "everhour"
-  ],
   "commands": [
     {
       "name": "index",
@@ -26,6 +28,42 @@
       "subtitle": "Everhour",
       "description": "List your recent tasks from the last seven days",
       "mode": "view"
+    },
+    {
+      "name": "currentTimer",
+      "title": "Current Timer",
+      "subtitle": "Everhour",
+      "description": "View, Start, Stop the current timer",
+      "mode": "no-view",
+      "interval": "10s",
+      "arguments": [
+        {
+          "name": "quickAction",
+          "required": false,
+          "type": "dropdown",
+          "placeholder": "Quick Action",
+          "data": [
+            {
+              "title": "No action",
+              "value": ""
+            },
+            {
+              "title": "Start if stopped",
+              "value": "start"
+            },
+            {
+              "title": "Stop if started",
+              "value": "stop"
+            }
+          ]
+        },
+        {
+          "name": "comment",
+          "type": "text",
+          "required": false,
+          "placeholder": "Timer Comment"
+        }
+      ]
     }
   ],
   "preferences": [
@@ -39,21 +77,23 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.17.0",
     "node-fetch": "^3.0.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "react": "^18.2.0",
+    "typescript": "^5.5.4"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

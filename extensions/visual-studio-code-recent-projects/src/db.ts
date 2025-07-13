@@ -1,9 +1,9 @@
 import { Alert, Icon, Toast, confirmAlert, showToast } from "@raycast/api";
 import { useSQL } from "@raycast/utils";
+import fs from "fs";
 import { homedir } from "os";
 import { build } from "./preferences";
 import { EntryLike, RecentEntries } from "./types";
-import fs from "fs";
 import { isSameEntry } from "./utils";
 import { execFilePromise } from "./utils/exec";
 

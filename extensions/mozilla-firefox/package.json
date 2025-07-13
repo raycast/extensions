@@ -6,7 +6,8 @@
   "icon": "firefox-logo.png",
   "author": "crisboarna",
   "contributors": [
-    "serhii_kravchenko"
+    "serhii_kravchenko",
+    "Laptop765"
   ],
   "categories": [
     "Applications",
@@ -67,6 +68,16 @@
       "subtitle": "Mozilla Firefox",
       "description": "Search browser bookmarks.",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "profileDirectorySuffix",
+      "title": "Profile Directory Suffix",
+      "default": "default-release",
+      "description": "The Firefox profile directory suffix, the portion after the . in about://profiles",
+      "type": "textfield",
+      "required": false
     }
   ],
   "dependencies": {

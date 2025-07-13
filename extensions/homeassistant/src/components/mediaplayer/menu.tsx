@@ -1,9 +1,11 @@
-import { Icon, MenuBarExtra, Toast, showToast } from "@raycast/api";
-import { getErrorMessage, getFriendlyName, range } from "@lib/utils";
-import { getMediaPlayerTitleAndArtist } from "./utils";
+import { LastUpdateChangeMenubarItem } from "@components/menu";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
-import { CopyToClipboardMenubarItem } from "@components/menu";
+import { getErrorMessage, getFriendlyName, range } from "@lib/utils";
+import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
+import { Icon, MenuBarExtra, Toast, showToast } from "@raycast/api";
+import React from "react";
+import { getMediaPlayerTitleAndArtist } from "./utils";
 
 function volumeRange() {
   return range(0.0, 1.0, 0.05);
@@ -21,7 +23,7 @@ function MediaPlayerVolumeItem(props: { state: State; volume: number }) {
   return <MenuBarExtra.Item key={v} title={`${Math.round(v * 100)}%`} onAction={setVolume} />;
 }
 
-function MediaPlayerVolumeSubmenu(props: { state: State }): JSX.Element | null {
+function MediaPlayerVolumeSubmenu(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   const vl: number | undefined = s.attributes.volume_level;
   if (vl === undefined) {
@@ -36,7 +38,7 @@ function MediaPlayerVolumeSubmenu(props: { state: State }): JSX.Element | null {
   );
 }
 
-function MediaPlayerPlayPauseMenubarItem(props: { state: State }): JSX.Element | null {
+function MediaPlayerPlayPauseMenubarItem(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   const onAction = s.state === "off" || s.state === "unavailable" ? undefined : () => ha.playPauseMedia(s.entity_id);
   return (
@@ -49,14 +51,14 @@ function MediaPlayerPlayPauseMenubarItem(props: { state: State }): JSX.Element |
   );
 }
 
-function MediaPlayerNextMenubarItem(props: { state: State }): JSX.Element | null {
+function MediaPlayerNextMenubarItem(props: { state: State }): React.ReactElement | null {
   if (props.state.state !== "playing") {
     return null;
   }
   return <MenuBarExtra.Item title="Next" icon={Icon.Forward} onAction={() => ha.nextMedia(props.state.entity_id)} />;
 }
 
-function MediaPlayerPreviousMenubarItem(props: { state: State }): JSX.Element | null {
+function MediaPlayerPreviousMenubarItem(props: { state: State }): React.ReactElement | null {
   if (props.state.state !== "playing") {
     return null;
   }
@@ -65,7 +67,7 @@ function MediaPlayerPreviousMenubarItem(props: { state: State }): JSX.Element | 
   );
 }
 
-export function MediaPlayerMenubarItem(props: { state: State }): JSX.Element | null {
+export function MediaPlayerMenubarItem(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (s.state === "unavailable") {
     return null;
@@ -78,7 +80,7 @@ export function MediaPlayerMenubarItem(props: { state: State }): JSX.Element | n
     return t;
   };
   const icon = () => {
-    let icon = s.state === "playing" ? Icon.SpeakerOn : "mediaplayer.png";
+    let icon = s.state === "playing" ? Icon.SpeakerOn : "cast-connected.svg";
     const ep = s.attributes.entity_picture;
     if (ep) {
       icon = ha.urlJoin(ep);
@@ -91,8 +93,9 @@ export function MediaPlayerMenubarItem(props: { state: State }): JSX.Element | n
       <MediaPlayerNextMenubarItem state={s} />
       <MediaPlayerPreviousMenubarItem state={s} />
       <MediaPlayerVolumeSubmenu state={s} />
-      {mediaTitle && <CopyToClipboardMenubarItem title="Copy Track" content={mediaTitle} />}
-      <CopyToClipboardMenubarItem title="Copy Entity ID" content={s.entity_id} tooltip={s.entity_id} />
+      {mediaTitle && <RUIMenuBarExtra.CopyToClipboard title="Copy Track" content={mediaTitle} />}
+      <LastUpdateChangeMenubarItem state={s} />
+      <RUIMenuBarExtra.CopyToClipboard title="Copy Entity ID" content={s.entity_id} tooltip={s.entity_id} />
     </MenuBarExtra.Submenu>
   );
 }

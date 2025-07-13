@@ -1,44 +1,20 @@
-import { exec } from "child_process";
 import { ActionPanel, Action, Icon, confirmAlert, showToast, Toast, Alert } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
 import type { IFile } from "@putdotio/api-client";
-import { getPutioAccountInfo, getPutioClient } from "../api/withPutioClient";
+import { getPutioAccountInfo } from "../api/withPutioClient";
 import { Files } from "../files";
 import { RenameFile } from "../rename-file";
 import { deleteFile } from "../api/files";
-import { useIsVlcInstalled } from "../utils";
-
-const fetchFileDownloadURL = async (file: IFile) => {
-  try {
-    switch (file.file_type) {
-      case "IMAGE":
-      case "VIDEO": {
-        const response = await getPutioClient().get(`/files/${file.id}/url`);
-        return response.data.url as string;
-      }
-
-      default:
-        return null;
-    }
-  } catch (error) {
-    return null;
-  }
-};
-
-const fetchFileURLs = async (file: IFile) => {
-  const download = await fetchFileDownloadURL(file);
-
-  return {
-    download,
-    browse: `https://put.io/files/${file.id}`,
-    stream: file.stream_url,
-    mp4Stream: file.mp4_stream_url,
-  };
-};
+import { getAuthToken, useVLC } from "../utils";
+import { FileURLProvider } from "@putdotio/utilities";
+import PutioAPIClient from "@putdotio/api-client";
 
 export const FileListItemNavigationActions = ({ file }: { file: IFile }) => {
-  const isVlcInstalled = useIsVlcInstalled();
-  const { data: urls } = useCachedPromise(fetchFileURLs, [file]);
+  const vlc = useVLC();
+  const fileURLProvider = new FileURLProvider(PutioAPIClient.DEFAULT_OPTIONS.baseURL!, getAuthToken());
+  const browseURL = `https://put.io/files/${file.id}`;
+  const downloadURL = fileURLProvider.getDownloadURL(file.id);
+  const streamURL = fileURLProvider.getStreamURL(file);
+  const mp4StreamURL = fileURLProvider.getMP4StreamURL(file);
 
   return (
     <>
@@ -46,45 +22,48 @@ export const FileListItemNavigationActions = ({ file }: { file: IFile }) => {
         <Action.Push title="Open" target={<Files id={file.id} name={file.name} />} icon={Icon.ArrowRight} />
       ) : null}
 
-      {urls?.browse && <Action.OpenInBrowser title="Open in Browser" url={urls.browse} icon="putio.png" />}
-      {urls?.download && <Action.OpenInBrowser title="Download in Browser" url={urls.download} icon="putio.png" />}
+      <Action.OpenInBrowser title="Open in Browser" url={browseURL} icon="putio.png" />
 
-      {urls?.browse && (
-        <Action.CopyToClipboard
-          title="Copy URL"
-          content={urls.browse}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-        />
-      )}
+      {downloadURL && <Action.OpenInBrowser title="Download in Browser" url={downloadURL} icon="putio.png" />}
 
-      {urls?.download && (
+      <Action.CopyToClipboard
+        title="Copy URL"
+        content={browseURL}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+      />
+
+      {downloadURL && (
         <Action.CopyToClipboard
           title="Copy Download URL"
-          content={urls.download}
+          content={downloadURL}
           shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
         />
       )}
 
-      {urls?.stream && <Action.CopyToClipboard title="Copy Stream URL" content={urls.stream} />}
+      {streamURL && <Action.CopyToClipboard title="Copy Stream URL" content={streamURL} />}
 
-      {urls?.mp4Stream && <Action.CopyToClipboard title="Copy MP4 Stream URL" content={urls.mp4Stream} />}
+      {mp4StreamURL && (
+        <Action.CopyToClipboard
+          // eslint-disable-next-line @raycast/prefer-title-case -- MP4 is a proper noun
+          title="Copy MP4 Stream URL"
+          content={mp4StreamURL}
+        />
+      )}
 
-      {isVlcInstalled && urls?.stream && (
+      {vlc.isInstalled && streamURL && (
         <Action
-          icon={Icon.AppWindow}
-          onAction={() => {
-            exec(`vlc "${urls.stream}"`);
-          }}
+          icon={Icon.FilmStrip}
+          onAction={() => vlc.open(streamURL)}
+          // eslint-disable-next-line @raycast/prefer-title-case -- VLC is a proper noun
           title="Open in VLC"
         />
       )}
 
-      {isVlcInstalled && urls?.mp4Stream && (
+      {vlc.isInstalled && mp4StreamURL && (
         <Action
-          icon={Icon.AppWindow}
-          onAction={() => {
-            exec(`vlc "${urls.mp4Stream}"`);
-          }}
+          icon={Icon.FilmStrip}
+          onAction={() => vlc.open(mp4StreamURL)}
+          // eslint-disable-next-line @raycast/prefer-title-case -- VLC is a proper noun
           title="Open MP4 in VLC"
         />
       )}

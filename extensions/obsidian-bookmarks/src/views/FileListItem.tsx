@@ -16,7 +16,7 @@ export default function FileListItem({ file, loading, showDetail, setShowDetail 
       id={file.fullPath}
       title={file.attributes.title}
       subtitle={file.attributes.publisher ?? file.attributes.source}
-      accessories={file.attributes.tags.map((tag) => ({ text: tag }))}
+      accessories={(file.attributes.tags || []).map((tag) => ({ text: tag }))}
       icon={Icon.Link}
       actions={<DetailsActions file={file} showDetail={showDetail} setShowDetail={setShowDetail} />}
       detail={<FileItemDetail file={file} loading={loading} />}

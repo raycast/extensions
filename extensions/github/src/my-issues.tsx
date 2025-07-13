@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { getPreferenceValues, List } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useState } from "react";
 
@@ -16,7 +16,23 @@ function MyIssues() {
   const [sortQuery, setSortQuery] = useCachedState<string>("sort-query", ISSUE_DEFAULT_SORT_QUERY, {
     cacheNamespace: "github-my-issue",
   });
-  const { data: sections, isLoading, mutate: mutateList } = useMyIssues(selectedRepository, sortQuery);
+  const { showCreated, showAssigned, showMentioned, showRecentlyClosed, repositoryFilterMode, repositoryList } =
+    getPreferenceValues<Preferences.MyIssues>();
+
+  const {
+    data: sections,
+    isLoading,
+    mutate: mutateList,
+  } = useMyIssues({
+    repository: selectedRepository,
+    sortQuery,
+    showCreated,
+    showAssigned,
+    showMentioned,
+    showRecentlyClosed,
+    filterMode: repositoryFilterMode,
+    repositoryList: repositoryList?.split(",").map((r) => r.trim()) || [],
+  });
 
   return (
     <List

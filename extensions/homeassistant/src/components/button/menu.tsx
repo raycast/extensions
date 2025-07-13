@@ -1,4 +1,4 @@
-import { MenuBarSubmenu } from "@components/menu";
+import { LastUpdateChangeMenubarItem, MenuBarSubmenu } from "@components/menu";
 import { CopyEntityIDToClipboard } from "@components/state/menu";
 import { getIcon } from "@components/state/utils";
 import { ha } from "@lib/common";
@@ -18,6 +18,7 @@ export function ButtonMenubarItem(props: { state: State }) {
   return (
     <MenuBarSubmenu key={s.entity_id} title={getFriendlyName(s)} icon={getIcon(s)}>
       <ButtonPressMenubarItem state={s} />
+      <LastUpdateChangeMenubarItem state={s} />
       <CopyEntityIDToClipboard state={s} />
     </MenuBarSubmenu>
   );

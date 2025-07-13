@@ -7,6 +7,7 @@ import { getAuthenticatedUri, getBaseUrl } from "../api/request";
 import { getProjectAvatar, getUserAvatar } from "../helpers/avatars";
 import { formatDate, getCustomFieldsForDetail, getMarkdownFromHtml, getStatusColor } from "../helpers/issues";
 import { replaceAsync } from "../helpers/string";
+import { useEpicIssues } from "../hooks/useIssues";
 
 import IssueActions from "./IssueActions";
 import IssueDetailCustomFields from "./IssueDetailCustomFields";
@@ -28,7 +29,6 @@ export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps
       if (!issue) {
         return null;
       }
-
       const baseUrl = getBaseUrl();
       const description = issue.renderedFields?.description ?? "";
       // Resolve all the image URLs to data URIs in the cached promise for better performance
@@ -45,22 +45,39 @@ export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps
     { initialData: initialIssue },
   );
 
+  const { issues: epicIssues, isLoading: isLoadingEpicIssues } = useEpicIssues(issue?.key ?? "");
+
   const attachments = issue?.fields.attachment;
   const numberOfAttachments = attachments?.length ?? 0;
   const hasAttachments = numberOfAttachments > 0;
-
+  const hasChildIssues =
+    (issue?.fields.subtasks && issue.fields.subtasks.length > 0) || (epicIssues && epicIssues.length > 0);
   const { customMarkdownFields, customMetadataFields } = useMemo(() => getCustomFieldsForDetail(issue), [issue]);
 
   const markdown = useMemo(() => {
     if (!issue) {
       return "";
     }
-
-    let markdown = `# ${issue.fields.summary}`;
+    let markdown = `# ${issue.fields.summary} \n\n`;
     const description = issue.renderedFields?.description;
 
     if (description) {
       markdown += `\n\n${getMarkdownFromHtml(description)}`;
+    }
+
+    if (issue.fields.issuetype && issue.fields.issuetype.name === "Epic" && epicIssues) {
+      markdown += "\n\n## Child Issues\n";
+      epicIssues.forEach((childIssue) => {
+        markdown += `- ${childIssue.key} - ${childIssue.fields.summary}\n`;
+      });
+    }
+
+    const subtasks = issue.fields.subtasks;
+    if (subtasks && subtasks.length > 0) {
+      markdown += "\n\n## Child Issues\n";
+      subtasks.forEach((subtask) => {
+        markdown += `- ${subtask.key} - ${subtask.fields.summary}\n`;
+      });
     }
 
     customMarkdownFields.forEach((markdownField) => {
@@ -68,13 +85,13 @@ export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps
     });
 
     return markdown;
-  }, [issue]);
+  }, [issue, epicIssues, customMarkdownFields]);
 
   return (
     <Detail
       navigationTitle={issue?.key}
       markdown={markdown}
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingEpicIssues}
       metadata={
         <Detail.Metadata>
           {hasAttachments ? (
@@ -171,7 +188,16 @@ export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps
         </Detail.Metadata>
       }
       {...(issue
-        ? { actions: <IssueActions issue={issue} showAttachmentsAction={hasAttachments} mutateDetail={mutate} /> }
+        ? {
+            actions: (
+              <IssueActions
+                issue={issue}
+                showChildIssuesAction={hasChildIssues}
+                showAttachmentsAction={hasAttachments}
+                mutateDetail={mutate}
+              />
+            ),
+          }
         : null)}
     />
   );

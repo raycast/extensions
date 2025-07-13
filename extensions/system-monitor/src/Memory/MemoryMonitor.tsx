@@ -34,7 +34,7 @@ export default function MemoryMonitor() {
           totalMem={data?.totalMem || ""}
         />
       }
-      actions={<Actions />}
+      actions={<Actions radioButtonNumber={2} />}
     />
   );
 }

@@ -16,16 +16,7 @@ export default function SearchPinsMenuBar() {
   const { data: frontmostApp } = useFrontmostApp();
 
   return (
-    <MenuBarExtra
-      icon={{
-        source: {
-          light: "pinned-folders-menu-bar.png",
-          dark: "pinned-folders-menu-bar@dark.png",
-        },
-      }}
-      tooltip={"Quick Access"}
-      isLoading={isLoading}
-    >
+    <MenuBarExtra icon={Icon.Finder} tooltip={"Quick Access"} isLoading={isLoading}>
       {allDirectories.map(
         (typeDirectory, index) =>
           typeDirectory.directories.length > 0 && (
@@ -45,7 +36,7 @@ export default function SearchPinsMenuBar() {
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title={"Pin"}
-          icon={Icon.Pin}
+          icon={Icon.Tack}
           shortcut={{ modifiers: ["cmd"], key: "n" }}
           onAction={async () => {
             await launchCommand({ name: "pin", type: LaunchType.UserInitiated });

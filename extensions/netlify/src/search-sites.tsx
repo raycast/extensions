@@ -1,5 +1,5 @@
 import { ActionPanel, Color, Icon, List, Action } from '@raycast/api';
-import { getFavicon, usePromise } from '@raycast/utils';
+import { getFavicon, useCachedPromise, usePromise } from '@raycast/utils';
 import { useState } from 'react';
 
 import api from './utils/api';
@@ -11,6 +11,7 @@ import { Site } from './utils/interfaces';
 import { OpenOnNetlify, OpenRepo } from './components/actions';
 import DeployListView from './components/deploys';
 import TeamDropdown from './components/team-dropdown';
+import EnvListView from './components/envs';
 
 export default function Command() {
   const [query, setQuery] = useState<string>('');
@@ -19,8 +20,14 @@ export default function Command() {
     scoped: false,
   });
 
-  const { data: sites = [], isLoading: isLoadingSites } = usePromise(
-    async (query: string, team: string) => await api.getSites(query, team),
+  const {
+    data: sites = [],
+    isLoading: isLoadingSites,
+    pagination,
+  } = useCachedPromise(
+    (query: string, team: string) =>
+      async ({ page }) =>
+        await api.getSites(query, team, page + 1),
     [query, teamSlug],
   );
 
@@ -59,6 +66,7 @@ export default function Command() {
       searchBarAccessory={teams.length > 1 ? teamDropdown : undefined}
       searchBarPlaceholder="Search by site name..."
       throttle
+      pagination={pagination}
     >
       <List.Section title="Search results">
         {sites.map((site) => (
@@ -153,6 +161,11 @@ const SiteActions = ({
         icon={Icon.Rocket}
         title="Show Deploys"
         target={<DeployListView siteId={site.id} siteName={site.name} />}
+      />
+      <Action.Push
+        icon={Icon.MagnifyingGlass}
+        title="Show Environment Variables"
+        target={<EnvListView siteId={site.id} siteName={site.name} />}
       />
     </ActionPanel.Section>
     <ActionPanel.Section>

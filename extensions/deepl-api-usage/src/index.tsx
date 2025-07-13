@@ -18,21 +18,46 @@ export default function RecordList() {
     const storedRecords = await getRecordsFromStorage();
     setRecords(storedRecords);
     if (storedRecords.length > 0) {
-      try {
-        showToast(Toast.Style.Animated, "Fetching usage...");
-        const updatedRecords = await Promise.all(
-          storedRecords.map(async (record) => ({
-            ...record,
-            usage: await fetchUsage(record.apiKey),
-          })),
-        );
-        setRecords(updatedRecords);
-      } catch (err: any) {
-        showToast(Toast.Style.Failure, "Network Error", "Prioritize using cache, please refresh later");
-        return;
-      }
+      showToast(Toast.Style.Animated, "Fetching usage...");
 
-      showToast(Toast.Style.Success, "Fetch usage success");
+      const results = await Promise.allSettled(
+        storedRecords.map((record) => fetchUsage(record.apiKey).then((usage) => ({ id: record.id, usage }))),
+      );
+
+      const updatedRecords = [...storedRecords];
+      const errors: Array<{ key: string; error: string }> = [];
+
+      results.forEach((result, index) => {
+        if (result.status === "fulfilled") {
+          const { id, usage } = result.value;
+          const recordIndex = updatedRecords.findIndex((r) => r.id === id);
+          if (recordIndex !== -1) {
+            updatedRecords[recordIndex] = { ...updatedRecords[recordIndex], usage };
+          }
+        } else {
+          const errorMessage = result.reason?.message || String(result.reason);
+          errors.push({
+            key: storedRecords[index].apiKey,
+            error: errorMessage,
+          });
+          console.error(`Failed to fetch usage for key ${storedRecords[index].apiKey}:`, result.reason);
+        }
+      });
+
+      await LocalStorage.setItem("records", JSON.stringify(updatedRecords));
+      setRecords(updatedRecords);
+
+      if (errors.length > 0) {
+        const errorSummary = errors
+          .slice(0, 1)
+          .map((e) => `Key ${e.key.slice(0, 8)}***: ${e.error}`)
+          .join("\n");
+        const message = errors.length > 1 ? `${errorSummary}\n...and ${errors.length - 1} more errors` : errorSummary;
+
+        showToast(Toast.Style.Failure, "Failed to fetch some usage data", message);
+      } else {
+        showToast(Toast.Style.Success, "Fetch usage success");
+      }
     }
   };
 

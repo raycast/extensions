@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "virtualizor-enduser",
+  "title": "Virtualizor Enduser",
+  "description": "Manage Virtualizor Enduser instance",
+  "icon": "virtualizor.png",
+  "author": "xmok",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "virtualizor_url",
+      "title": "Virtualizor URL",
+      "placeholder": "https://example.com:4083",
+      "description": "URL of Virtualizor Instance w/ Port",
+      "required": true,
+      "type": "textfield"
+    },
+    {
+      "name": "api_key",
+      "title": "API Key",
+      "placeholder": "XXXXXXXXXXXXXXXX",
+      "description": "API Key from Virtualizor Panel",
+      "required": true,
+      "type": "password"
+    },
+    {
+      "name": "api_pass",
+      "title": "API Pass",
+      "placeholder": "xxXX...xxx",
+      "description": "API Password from Virtualizor Panel",
+      "required": true,
+      "type": "password"
+    }
+  ],
+  "commands": [
+    {
+      "name": "virtual-servers",
+      "title": "View Virtual Servers",
+      "description": "View Virtual Server Info and Restart, Stop",
+      "mode": "view"
+    },
+    {
+      "name": "logs",
+      "title": "View Logs",
+      "description": "View Instance Logs",
+      "mode": "view"
+    },
+    {
+      "name": "tasks",
+      "title": "View Tasks",
+      "description": "View Instance Tasks",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

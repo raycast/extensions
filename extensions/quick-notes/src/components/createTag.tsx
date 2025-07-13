@@ -1,16 +1,14 @@
-import { Form, ActionPanel, Action, showToast, useNavigation } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, useNavigation, Icon } from "@raycast/api";
 import { useAtom } from "jotai";
 import { tagsAtom } from "../services/atoms";
 import { colors, getRandomColor, getTintColor } from "../utils/utils";
 import { useState } from "react";
 import { useForm } from "@raycast/utils";
+import DeleteTags from "./deleteTags";
 
-type TagForm = {
-  name: string;
-  color: string;
-};
+type TagForm = { name: string; color: string };
 
-const CreateTag = () => {
+const CreateTag = ({ tag }: { tag?: string }) => {
   const [tags, setTag] = useAtom(tagsAtom);
   const { pop } = useNavigation();
   const [color, setColor] = useState(getRandomColor().name);
@@ -18,7 +16,7 @@ const CreateTag = () => {
   const { handleSubmit, itemProps } = useForm<TagForm>({
     async onSubmit(values) {
       // if tag already exists, don't do anything
-      if (tags.find((tag) => tag.name === values.name)) {
+      if (tags.find((tag) => tag.name.toLocaleLowerCase() === values.name.toLocaleLowerCase())) {
         showToast({ title: "Tag Exists" });
         pop();
         return;
@@ -27,12 +25,15 @@ const CreateTag = () => {
       showToast({ title: "Tag Saved" });
       pop();
     },
+    initialValues: { name: tag ?? "", color },
     validation: {
       name: (value) => {
         if (!value) {
           return "Tag is required";
         } else if (value.length > 100) {
           return "Tag < 100 chars";
+        } else if (tags.find((tag) => tag.name.toLocaleLowerCase() === value.toLocaleLowerCase())) {
+          return "Tag already exists";
         }
       },
     },
@@ -44,6 +45,12 @@ const CreateTag = () => {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Tag" onSubmit={handleSubmit} />
+          <Action.Push
+            title="Delete Tags"
+            icon={{ source: Icon.Trash, tintColor: getTintColor("red") }}
+            target={<DeleteTags />}
+            shortcut={{ modifiers: ["ctrl", "shift"], key: "t" }}
+          />
         </ActionPanel>
       }
     >

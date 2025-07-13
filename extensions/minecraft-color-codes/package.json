@@ -30,10 +30,27 @@
       "type": "checkbox",
       "default": true,
       "required": false
+    },
+    {
+      "name": "prefix1",
+      "title": "Primary prefix",
+      "description": "The prefix for color codes to use when Cmd+1 is pressed.",
+      "type": "textfield",
+      "default": "§",
+      "required": false
+    },
+    {
+      "name": "prefix2",
+      "title": "Secondary prefix",
+      "description": "The prefix for color codes to use when Cmd+2 is pressed.",
+      "type": "textfield",
+      "default": "&",
+      "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.72.1"
+    "@raycast/api": "^1.72.1",
+    "@raycast/utils": "^1.16.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

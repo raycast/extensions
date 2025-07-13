@@ -1,4 +1,11 @@
-import { Color, Icon, MenuBarExtra, getPreferenceValues, openCommandPreferences } from "@raycast/api";
+import {
+  Color,
+  Icon,
+  MenuBarExtra,
+  getPreferenceValues,
+  openCommandPreferences,
+  openExtensionPreferences,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { toggleSystemAudioInputLevel } from "./utils";
 import { AudioInputLevelCache } from "./audio-input-level-cache";
@@ -47,6 +54,7 @@ export default function muteMenuBar() {
         <MenuBarExtra.Item title={menuItemText} onAction={handleToggleIconButton} />
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
+        <MenuBarExtra.Item title="Configure default level" onAction={openExtensionPreferences} />
         <MenuBarExtra.Item icon={Icon.Gear} title="Settings" onAction={openCommandPreferences} />
       </MenuBarExtra.Section>
     </MenuBarExtra>

@@ -35,6 +35,17 @@
       ]
     },
     {
+      "name": "orientation-of-the-last-layer",
+      "title": "OLL",
+      "subtitle": "Algorithms",
+      "description": "Show algorithms for solving the cube with Orientation of the Last Layer (OLL)",
+      "mode": "view",
+      "keywords": [
+        "OLL",
+        "algorithms"
+      ]
+    },
+    {
       "name": "permutation-of-the-last-layer",
       "title": "PLL",
       "subtitle": "Algorithms",

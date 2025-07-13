@@ -1,8 +1,8 @@
 # Bilibili Changelog
 
-## [New Feature] - 2024-05-10
+## [New Feature] - 2024-09-10
 
-- Removed the commands `Popular Videos` and `Weekly Popular Series`.
+- Support search videos
 
 ## [New Feature] - 2023-12-30
 

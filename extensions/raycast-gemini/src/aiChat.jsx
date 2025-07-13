@@ -1,19 +1,21 @@
 import {
-  List,
-  ActionPanel,
   Action,
-  getPreferenceValues,
-  Toast,
-  Icon,
-  showToast,
-  Form,
-  useNavigation,
+  ActionPanel,
   confirmAlert,
+  Form,
+  getPreferenceValues,
+  getSelectedText,
+  Icon,
+  List,
+  LocalStorage,
+  showToast,
+  Toast,
+  useNavigation,
 } from "@raycast/api";
-import { useState, useEffect } from "react";
 import Gemini from "gemini-ai";
 import fetch from "node-fetch";
-import { LocalStorage } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { getSafetySettings } from "./api/safetySettings";
 
 export default function Chat({ launchContext }) {
   let toast = async (style, title, message) => {
@@ -24,6 +26,15 @@ export default function Chat({ launchContext }) {
     });
   };
 
+  function showFailureToast(error, options = {}) {
+    return showToast({
+      style: Toast.Style.Failure,
+      title: options.title || "Error",
+      message: error instanceof Error ? error.message : String(error),
+      primaryAction: options.primaryAction,
+    });
+  }
+
   const { apiKey, defaultModel } = getPreferenceValues();
   const gemini = new Gemini(apiKey, { fetch });
 
@@ -32,7 +43,6 @@ export default function Chat({ launchContext }) {
     const newChatNumbers = existingChatNames
       .filter((x) => x.match(/^New Chat \d+$/))
       .map((x) => parseInt(x.replace(prefix, "")));
-    console.log(newChatNumbers);
     let lowestAvailableNumber = 1;
     while (newChatNumbers.includes(lowestAvailableNumber)) {
       lowestAvailableNumber++;
@@ -50,12 +60,12 @@ export default function Chat({ launchContext }) {
             <Action.SubmitForm
               title="Create Chat"
               onSubmit={(values) => {
-                if (chatData.chats.map((x) => x.name).includes(values.chatName)) {
-                  toast(Toast.Style.Failure, "Chat with that name already exists.");
+                let newName = values.chatName.trim() || createNewChatName();
+                if (chatData.chats.map((x) => x.name).includes(newName)) {
+                  showFailureToast("Chat with that name already exists.");
                 } else {
                   pop();
                   setChatData((oldData) => {
-                    let newName = createNewChatName();
                     let newChatData = structuredClone(oldData);
                     newChatData.chats.push({
                       name: newName,
@@ -86,6 +96,13 @@ export default function Chat({ launchContext }) {
           <Form.Dropdown.Item title="Default" value="default" />
           <Form.Dropdown.Item title="Gemini 1.5 Pro" value="gemini-1.5-pro-latest" />
           <Form.Dropdown.Item title="Gemini 1.5 Flash" value="gemini-1.5-flash-latest" />
+          <Form.Dropdown.Item title="Gemini 2.0 Flash Experimental" value="gemini-2.0-flash-exp" />
+          <Form.Dropdown.Item title="Gemini Experimental 1206" value="gemini-exp-1206" />
+          <Form.Dropdown.Item
+            title="Gemini 2.0 Flash Thinking Experimental"
+            value="gemini-2.0-flash-thinking-exp-1219"
+          />
+          <Form.Dropdown.Item title="LearnLM 1.5 Pro Experimental" value="learnlm-1.5-pro-experimental" />
         </Form.Dropdown>
       </Form>
     );
@@ -125,8 +142,9 @@ export default function Chat({ launchContext }) {
                   try {
                     let currentChat = getChat(chatData.currentChat);
                     let aiChat = gemini.createChat({
-                      model: currentChat.model ?? "gemini-1.5-flash-latest",
+                      model: currentChat.model ?? defaultModel,
                       messages: currentChat.messages.map((x) => [x.prompt, x.answer]),
+                      safetySettings: getSafetySettings(),
                     });
 
                     await aiChat.ask(query, {
@@ -215,6 +233,19 @@ export default function Chat({ launchContext }) {
             }}
             shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
           />
+          <Action
+            icon={Icon.Clipboard}
+            title="Append Selected Text"
+            onAction={async () => {
+              try {
+                const selectedText = await getSelectedText();
+                setSearchText((oldText) => oldText + selectedText);
+              } catch (error) {
+                toast(Toast.Style.Failure, "Could not get the selected text");
+              }
+            }}
+            shortcut={{ modifiers: ["ctrl", "shift"], key: "v" }}
+          />
         </ActionPanel.Section>
         <ActionPanel.Section title="Danger zone">
           <Action
@@ -266,6 +297,7 @@ export default function Chat({ launchContext }) {
       </ActionPanel>
     );
   };
+
   let formatDate = (dateToCheckISO) => {
     const dateToCheck = new Date(dateToCheckISO);
     if (dateToCheck.toDateString() === new Date().toDateString()) {
@@ -285,13 +317,12 @@ export default function Chat({ launchContext }) {
 
         if (getChat(newData.currentChat, newData.chats).messages[0]?.finished === false) {
           let currentChat = getChat(newData.currentChat, newData.chats);
-          console.log(currentChat);
           let aiChat = gemini.createChat({
-            model: "gemini-1.5-pro-latest",
+            model: currentChat.model ?? defaultModel,
             messages: currentChat.messages.map((x) => [x.prompt, x.answer]),
+            safetySettings: getSafetySettings(),
           });
           currentChat.messages[0].answer = "";
-          console.log(toast);
           toast(Toast.Style.Animated, "Regenerating Last Message");
           (async () => {
             try {

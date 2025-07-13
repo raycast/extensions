@@ -8,9 +8,9 @@ All updates to an extension are made through a [Pull Request](https://github.com
 
 ## Steps
 
-1) Open a terminal window
-2) Navigate to a folder where you want the repository to land
-3) Run the below commands
+1. Open a terminal window
+2. Navigate to a folder where you want the repository to land
+3. Run the below commands
 
 _There are a few things you'll need to find and insert manually in the snippet below_
 
@@ -18,17 +18,17 @@ _There are a few things you'll need to find and insert manually in the snippet b
 
 Open the PR and click on the incomming ref as shown below
 
-![](../.gitbook/assets/go-to-ref.png)
+![](../.gitbook/assets/go-to-ref.webp)
 
 Now click the code button and copy the HTTPS path from the dropdown
 
 **BRANCH**
 
-You can see the branch on the above image, in this example it's `notion-quicklinks`
+You can see the branch on the above image (in this example it’s `notion-quicklinks`)
 
 **EXTENSION_NAME**
 
-Click the `Files Changed` tab and see which directy files is changed in, in this example it's `notion`
+Click the `Files Changed` tab to see in which directory files have been changed (in this example it’s `notion`)
 
 ```
 BRANCH="ext/soundboard"
@@ -43,4 +43,4 @@ cd "extensions/${EXTENSION_NAME}"
 npm install && npm run dev
 ```
 
-4) That's it, the extension should now be attached in Raycast
+4. That's it, the extension should now be attached in Raycast

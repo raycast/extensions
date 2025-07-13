@@ -13,8 +13,8 @@ import {
   RetrieveAllDomainsResponse,
 } from "./types";
 import { Toast, showToast } from "@raycast/api";
-import fetch from "node-fetch";
 import { API_HEADERS, API_KEY, API_METHOD, API_URL, SECRET_API_KEY } from "./constants";
+import { useFetch } from "@raycast/utils";
 
 const showError = (error: string) => {
   showToast({
@@ -42,6 +42,7 @@ const callApi = async (endpoint: string, animatedToastMessage = "", body?: Reque
       showError(response.message);
     }
     return response;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     const message = "Failed to execute request. Please try again later";
     showError(message);
@@ -68,13 +69,13 @@ export async function editRecordByDomainSubdomainAndType(
   domain: string,
   subdomain: string,
   type: DNSRecordType,
-  { ...params }: EditDNSRecordByDomainSubdomainAndIdRequest
+  { ...params }: EditDNSRecordByDomainSubdomainAndIdRequest,
 ) {
   const body = { ...params };
   return await callApi(
     `dns/editByNameType/${domain}/${type}${subdomain && "/" + subdomain}`,
     "Editing DNS Record",
-    body
+    body,
   );
 }
 export async function deleteRecordByDomainAndId(domain: string, id: number) {
@@ -83,7 +84,7 @@ export async function deleteRecordByDomainAndId(domain: string, id: number) {
 export async function deleteRecordByDomainSubdomainAndType(domain: string, subdomain: string, type: DNSRecordType) {
   return await callApi(
     `dns/deleteByNameType/${domain}/${type}${subdomain && "/" + subdomain}`,
-    "Deleting DNS Record(s)"
+    "Deleting DNS Record(s)",
   );
 }
 export async function retrieveRecordsByDomainOrId(domain: string, id: number) {
@@ -92,19 +93,29 @@ export async function retrieveRecordsByDomainOrId(domain: string, id: number) {
 export async function retrieveRecordsByDomainSubdomainAndType(domain: string, subdomain: string, type: DNSRecordType) {
   return await callApi(
     `dns/retrieveByNameType/${domain}/${type}${subdomain && "/" + subdomain}`,
-    "Retrieving DNS Record(s)"
+    "Retrieving DNS Record(s)",
   );
 }
 
-export async function retrieveSSLBundle(domain: string) {
-  return (await callApi(`ssl/retrieve/${domain}`, "Fetching SSL Bundle")) as ErrorResponse | RetrieveSSLBundleResponse;
+export function useRetrieveSSLBundle(domain: string) {
+  return usePorkbun<RetrieveSSLBundleResponse>(`ssl/retrieve/${domain}`, "Fetching SSL Bundle");
 }
 
 export async function retrieveAllDomains() {
-  return (await callApi("domain/listAll", "Fetching Domains")) as ErrorResponse | RetrieveAllDomainsResponse;
+  return (await callApi("domain/listAll", "Fetching Domains", {
+    includeLabels: "yes",
+  })) as ErrorResponse | RetrieveAllDomainsResponse;
 }
-export async function getNameServersByDomain(domain: string) {
-  return (await callApi(`domain/getNs/${domain}`, "Fetching Name Servers")) as ErrorResponse | GetNameServersResponse;
+export function useGetNameServersByDomain(domain: string) {
+  return usePorkbun<GetNameServersResponse>(`domain/getNs/${domain}`, "Fetching Name Servers", {
+    async onData(data) {
+      await showToast({
+        style: Toast.Style.Success,
+        title: "SUCCESS",
+        message: `Fetched ${data.ns.length} Name Servers`,
+      });
+    },
+  });
 }
 export async function updateNameServersByDomain(domain: string, { ...params }: UpdateNameServersRequest) {
   const body = { ...params };
@@ -122,3 +133,30 @@ export async function addUrlForwarding(domain: string, { ...params }: AddUrlForw
   const body = { ...params };
   return await callApi(`domain/addUrlForward/${domain}`, "Adding URL Forwarding", body);
 }
+
+export const usePorkbun = <T>(endpoint: string, animatedToastMessage = "", options?: { onData: (date: T) => void }) => {
+  const { isLoading, data, error, revalidate } = useFetch(API_URL + endpoint, {
+    method: API_METHOD,
+    headers: API_HEADERS,
+    body: JSON.stringify({
+      apikey: API_KEY,
+      secretapikey: SECRET_API_KEY,
+    }),
+    async parseResponse(response) {
+      const result = (await response.json()) as Response;
+      if (result.status === "ERROR") throw new Error(result.message);
+      return result as T;
+    },
+    async onWillExecute() {
+      await showToast(Toast.Style.Animated, "Processing...", animatedToastMessage);
+    },
+    async onData(data) {
+      options?.onData?.(data);
+    },
+    failureToastOptions: {
+      title: "Porkbun Error",
+    },
+    keepPreviousData: true,
+  });
+  return { isLoading, data, error, revalidate };
+};

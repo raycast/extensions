@@ -1,8 +1,19 @@
-import { Action, ActionPanel, Form, Icon, Toast, clearSearchBar, showToast, useNavigation } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  Toast,
+  clearSearchBar,
+  showToast,
+  useNavigation,
+  confirmAlert,
+} from "@raycast/api";
+import { useCachedState, showFailureToast } from "@raycast/utils";
 import { useMemo, useState } from "react";
 
-import { Client, Project, Task, TimeEntry, TimeEntryMetaData, createTimeEntry } from "@/api";
+import { Client, Project, Task, TimeEntry, TimeEntryMetaData, createTimeEntry, createTask } from "@/api";
+import { showClientsInForm, showProjectsInForm, showTasksInForm, showTagsInForm } from "@/helpers/preferences";
 import { useClients, useMe, useProjects, useTags, useTasks, useWorkspaces } from "@/hooks";
 
 interface CreateTimeEntryFormParams {
@@ -19,22 +30,29 @@ function CreateTimeEntryForm({
   const navigation = useNavigation();
   const { me, isLoadingMe } = useMe();
   const { workspaces, isLoadingWorkspaces } = useWorkspaces();
-  const { clients, isLoadingClients } = useClients();
-  const { projects, isLoadingProjects } = useProjects();
-  const { tasks, isLoadingTasks } = useTasks();
-  const { tags, isLoadingTags } = useTags();
+  const { clients, isLoadingClients } = showClientsInForm ? useClients() : { clients: [], isLoadingClients: false };
+  const { projects, isLoadingProjects } = showProjectsInForm
+    ? useProjects()
+    : { projects: [], isLoadingProjects: false };
+  const { tasks, isLoadingTasks, revalidateTasks } = showTasksInForm
+    ? useTasks()
+    : { tasks: [], isLoadingTasks: false, revalidateTasks: () => {} };
+  const { tags, isLoadingTags } = showTagsInForm ? useTags() : { tags: [], isLoadingTags: false };
 
-  const [selectedWorkspace, setSelectedWorkspace] = useCachedState("defaultWorspace", workspaces.at(0)?.id);
+  const [selectedWorkspace, setSelectedWorkspace] = useCachedState("defaultWorkspace", workspaces.at(0)?.id);
   const [selectedClient, setSelectedClient] = useState<Client | undefined>(() => {
-    return clients.find((client) => client.name === initialValues?.client_name);
+    return showClientsInForm ? clients.find((client) => client.name === initialValues?.client_name) : undefined;
   });
   const [selectedProject, setSelectedProject] = useState<Project | undefined>(() => {
-    return projects.find((project) => project.id === initialValues?.project_id);
+    return showProjectsInForm ? projects.find((project) => project.id === initialValues?.project_id) : undefined;
   });
   const [selectedTask, setSelectedTask] = useState<Task | undefined>(() => {
-    return tasks.find((task) => task.id === initialValues?.task_id);
+    return showTasksInForm ? tasks.find((task) => task.id === initialValues?.task_id) : undefined;
   });
-  const [selectedTags, setSelectedTags] = useState<string[]>(initialValues?.tags || []);
+  const [selectedTags, setSelectedTags] = useState<string[]>(showTagsInForm ? initialValues?.tags || [] : []);
+  const [billable, setBillable] = useState(initialValues?.billable || false);
+
+  const [taskSearch, setTaskSearch] = useState("");
 
   async function handleSubmit(values: { description: string; billable?: boolean }) {
     const workspaceId = selectedProject?.workspace_id || me?.default_workspace_id;
@@ -49,10 +67,10 @@ function CreateTimeEntryForm({
 
       await createTimeEntry({
         ...values,
-        projectId: selectedProject?.id,
+        projectId: showProjectsInForm ? selectedProject?.id : undefined,
         workspaceId,
-        tags: selectedTags,
-        taskId: selectedTask?.id,
+        tags: showTagsInForm ? selectedTags : [],
+        taskId: showTasksInForm ? selectedTask?.id : undefined,
       });
 
       await showToast(Toast.Style.Success, "Started time entry");
@@ -67,34 +85,46 @@ function CreateTimeEntryForm({
     }
   }
 
+  const isWorkspacePremium = useMemo(() => {
+    return workspaces.find((workspace) => workspace.id === selectedWorkspace)?.premium;
+  }, [workspaces, selectedWorkspace]);
+
   const filteredClients = useMemo(() => {
+    if (!showClientsInForm) return [];
     if (selectedProject) return clients.filter((client) => !client.archived && client.id === selectedProject.client_id);
-    else return clients.filter((client) => !client.archived && client.wid === selectedWorkspace);
-  }, [projects, selectedWorkspace, selectedProject]);
+    else
+      return clients.filter((client) => !client.archived && (client.wid === selectedWorkspace || !selectedWorkspace));
+  }, [projects, selectedWorkspace, selectedProject, showClientsInForm, clients]);
 
   const filteredProjects = useMemo(() => {
+    if (!showProjectsInForm) return [];
     if (selectedClient)
       return projects.filter((project) => project.client_id === selectedClient.id && project.status != "archived");
     else
-      return projects.filter((project) => project.workspace_id === selectedWorkspace && project.status != "archived");
-  }, [projects, selectedWorkspace, selectedClient]);
+      return projects.filter(
+        (project) => (project.workspace_id === selectedWorkspace || !selectedWorkspace) && project.status != "archived",
+      );
+  }, [projects, selectedWorkspace, selectedClient, showProjectsInForm]);
 
   const filteredTasks = useMemo(() => {
+    if (!showTasksInForm) return [];
     if (selectedProject) return tasks.filter((task) => task.project_id === selectedProject.id);
     else if (selectedClient)
       return tasks.filter(
         (task) => task.project_id === projects.find((project) => project.client_id === selectedClient.id)?.id,
       );
-    else return tasks.filter((task) => task.workspace_id === selectedWorkspace);
-  }, [tasks, selectedWorkspace, selectedClient, selectedProject]);
+    else return tasks.filter((task) => task.workspace_id === selectedWorkspace || !selectedWorkspace);
+  }, [tasks, selectedWorkspace, selectedClient, selectedProject, showTasksInForm]);
 
   const onWorkspaceChange = (workspaceId: string) => {
     const workspace = workspaces.find((workspace) => workspace.id === parseInt(workspaceId));
     if (workspace) setSelectedWorkspace(workspace.id);
-    setSelectedClient(undefined);
-    setSelectedProject(undefined);
-    setSelectedTask(undefined);
-    setSelectedTags([]);
+    if (showClientsInForm) setSelectedClient(undefined);
+    if (showProjectsInForm) {
+      setSelectedProject(undefined);
+      setSelectedTask(undefined);
+    }
+    if (showTagsInForm) setSelectedTags([]);
   };
 
   const onProjectChange = (projectId: string) => {
@@ -102,15 +132,42 @@ function CreateTimeEntryForm({
     if (project) setSelectedProject(project);
   };
 
-  const onTaskChange = (taskId: string) => {
-    const task = tasks.find((task) => task.id === parseInt(taskId));
-    setSelectedTask(task);
+  const onTaskChange = async (taskId: string) => {
+    if (taskId == "new_task") {
+      const newTaskName = taskSearch;
+      setTaskSearch("");
+      if (await confirmAlert({ title: "Create new task?", message: "Task name: " + newTaskName })) {
+        const toast = await showToast(Toast.Style.Animated, "Creating task...");
+        try {
+          if (!selectedWorkspace) throw Error("Workspace ID is undefined.");
+          if (!selectedProject) throw Error("Workspace ID is undefined.");
+          const newTask = await createTask(selectedWorkspace, selectedProject.id, newTaskName);
+          revalidateTasks();
+          setSelectedTask(newTask);
+          toast.style = Toast.Style.Success;
+          toast.title = "Created task";
+        } catch (error) {
+          await toast.hide();
+          await showFailureToast(error);
+        }
+      } else {
+        setSelectedTask(undefined);
+      }
+    } else {
+      const task = tasks.find((task) => task.id === parseInt(taskId));
+      setSelectedTask(task);
+    }
   };
 
   return (
     <Form
       isLoading={
-        isLoadingMe || isLoadingWorkspaces || isLoadingProjects || isLoadingClients || isLoadingTags || isLoadingTasks
+        isLoadingMe ||
+        isLoadingWorkspaces ||
+        (showClientsInForm && isLoadingClients) ||
+        (showProjectsInForm && isLoadingProjects) ||
+        (showTagsInForm && isLoadingTags) ||
+        (showTasksInForm && isLoadingTasks)
       }
       actions={
         <ActionPanel>
@@ -133,67 +190,89 @@ function CreateTimeEntryForm({
 
       <Form.TextField id="description" title="Description" autoFocus defaultValue={initialValues?.description} />
 
-      <Form.Dropdown
-        id="client"
-        title="Client"
-        defaultValue={selectedClient?.id.toString() || "-1"}
-        onChange={(clientId) =>
-          setSelectedClient(clientId === "-1" ? undefined : clients.find((client) => client.id === parseInt(clientId)))
-        }
-      >
-        {!isLoadingClients && (
-          <>
-            <Form.Dropdown.Item key="-1" value="-1" title={"No Client"} />
-            {filteredClients.map((client) => (
-              <Form.Dropdown.Item key={client.id} value={client.id.toString()} title={client.name} />
-            ))}
-          </>
-        )}
-      </Form.Dropdown>
-
-      <Form.Dropdown
-        id="project"
-        title="Project"
-        defaultValue={selectedProject?.id.toString() || "-1"}
-        onChange={onProjectChange}
-      >
-        {!isLoadingProjects && (
-          <>
-            <Form.Dropdown.Item key="-1" value="-1" title={"No Project"} icon={{ source: Icon.Circle }} />
-            {filteredProjects.map((project) => (
-              <Form.Dropdown.Item
-                key={project.id}
-                value={project.id.toString()}
-                title={project.name}
-                icon={{ source: Icon.Circle, tintColor: project.color }}
-              />
-            ))}
-          </>
-        )}
-      </Form.Dropdown>
-
-      {selectedProject && filteredTasks.length > 0 && (
-        <Form.Dropdown id="task" title="Task" defaultValue={"-1"} onChange={onTaskChange}>
-          {!isLoadingTasks && (
+      {showClientsInForm && (
+        <Form.Dropdown
+          id="client"
+          title="Client"
+          defaultValue={filteredClients.length > 0 ? selectedClient?.id.toString() || "-1" : undefined}
+          onChange={(clientId) =>
+            setSelectedClient(
+              clientId === "-1" ? undefined : clients.find((client) => client.id === parseInt(clientId)),
+            )
+          }
+        >
+          {!isLoadingClients && (
             <>
-              <Form.Dropdown.Item value="-1" title={"No task"} icon={{ source: Icon.Circle }} />
-              {filteredTasks.map((task) => (
-                <Form.Dropdown.Item key={task.id} value={task.id.toString()} title={task.name} />
+              <Form.Dropdown.Item key="-1" value="-1" title={"No Client"} />
+              {filteredClients.map((client) => (
+                <Form.Dropdown.Item key={client.id} value={client.id.toString()} title={client.name} />
               ))}
             </>
           )}
         </Form.Dropdown>
       )}
 
-      {selectedProject?.billable && <Form.Checkbox id="billable" label="" title="Billable" />}
+      {showProjectsInForm && (
+        <>
+          <Form.Dropdown
+            id="project"
+            title="Project"
+            defaultValue={selectedProject?.id.toString()}
+            onChange={onProjectChange}
+          >
+            {!isLoadingProjects && (
+              <>
+                <Form.Dropdown.Item key="-1" value="-1" title={"No Project"} icon={Icon.Circle} />
+                {filteredProjects.map((project) => (
+                  <Form.Dropdown.Item
+                    key={project.id}
+                    value={project.id.toString()}
+                    title={project.name}
+                    icon={{ source: Icon.Circle, tintColor: project.color }}
+                  />
+                ))}
+              </>
+            )}
+          </Form.Dropdown>
 
-      <Form.TagPicker id="tags" title="Tags" onChange={setSelectedTags} value={selectedTags}>
-        {tags
-          .filter((tag) => tag.workspace_id === selectedWorkspace)
-          .map((tag) => (
-            <Form.TagPicker.Item key={tag.id} value={tag.name.toString()} title={tag.name} />
-          ))}
-      </Form.TagPicker>
+          {selectedProject && showTasksInForm && (
+            <Form.Dropdown
+              id="task"
+              title="Task"
+              onChange={onTaskChange}
+              value={filteredTasks.length > 0 ? selectedTask?.id.toString() ?? "-1" : undefined}
+              onSearchTextChange={setTaskSearch}
+              onBlur={() => setTaskSearch("")}
+            >
+              {!isLoadingTasks && (
+                <>
+                  <Form.Dropdown.Item value="-1" title={"No task"} icon={Icon.Circle} />
+                  {filteredTasks.map((task) => (
+                    <Form.Dropdown.Item key={task.id} value={task.id.toString()} title={task.name} icon={Icon.Circle} />
+                  ))}
+                  {taskSearch !== "" && (
+                    <Form.Dropdown.Item value="new_task" title={taskSearch} icon={Icon.PlusCircle} />
+                  )}
+                </>
+              )}
+            </Form.Dropdown>
+          )}
+
+          {selectedProject?.billable && <Form.Checkbox id="billable" label="" title="Billable" />}
+        </>
+      )}
+
+      {showTagsInForm && (
+        <Form.TagPicker id="tags" title="Tags" onChange={setSelectedTags} value={selectedTags}>
+          {tags
+            .filter((tag) => tag.workspace_id === selectedWorkspace)
+            .map((tag) => (
+              <Form.TagPicker.Item key={tag.id} value={tag.name.toString()} title={tag.name} />
+            ))}
+        </Form.TagPicker>
+      )}
+
+      {isWorkspacePremium && <Form.Checkbox id="billable" label="Billable" value={billable} onChange={setBillable} />}
     </Form>
   );
 }

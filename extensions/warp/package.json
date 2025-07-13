@@ -2,12 +2,15 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "warp",
   "title": "Warp",
-  "description": "Open Warp tabs/windows and launch configurations.",
-  "icon": "extension-icon.png",
+  "description": "Open Warp tabs/windows and Launch Configurations.",
+  "icon": "warp-icon.png",
   "author": "joetannenbaum",
   "contributors": [
     "theRubberDuckiee",
-    "hakob_nersesian"
+    "hakob_nersesian",
+    "kamil_drzastwa",
+    "chrismessina",
+    "pernielsentikaer"
   ],
   "pastContributors": [
     "danulqua"
@@ -51,20 +54,41 @@
       "mode": "no-view"
     }
   ],
+  "preferences": [
+    {
+      "name": "warpApp",
+      "default": "stable",
+      "required": false,
+      "title": "Warp Release",
+      "description": "Select which Warp release to use when opening a directory or launch configuration.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Warp",
+          "value": "stable"
+        },
+        {
+          "title": "Warp Preview",
+          "value": "preview"
+        }
+      ]
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.48.7",
+    "@raycast/api": "^1.79.0",
     "@raycast/utils": "^1.4.8",
     "node-spotlight": "^1.0.0",
     "yaml": "^2.2.1"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {
@@ -73,5 +97,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

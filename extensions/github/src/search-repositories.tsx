@@ -29,7 +29,7 @@ function SearchRepositories() {
       `${searchFilter} ${searchText} ${sortQuery} fork:${preferences.includeForks} ${
         preferences.includeArchived ? "" : "archived:false"
       }`,
-    [searchText, searchFilter, sortQuery],
+    [searchText, searchFilter, sortQuery, preferences.includeForks, preferences.includeArchived],
   );
 
   const {
@@ -56,7 +56,7 @@ function SearchRepositories() {
 
   const foundRepositories = useMemo(
     () => data?.filter((repository) => !history.find((r) => r.id === repository.id)),
-    [data],
+    [data, history],
   );
 
   return (
@@ -71,7 +71,12 @@ function SearchRepositories() {
         {history.map((repository) => (
           <RepositoryListItem
             key={repository.id}
-            {...{ repository, onVisit: visitRepository, mutateList, sortQuery, setSortQuery, sortTypesData }}
+            repository={repository}
+            onVisit={visitRepository}
+            mutateList={mutateList}
+            sortQuery={sortQuery}
+            setSortQuery={setSortQuery}
+            sortTypesData={sortTypesData}
           />
         ))}
       </List.Section>
@@ -81,14 +86,17 @@ function SearchRepositories() {
           title={searchText ? "Search Results" : "Found Repositories"}
           subtitle={`${foundRepositories.length}`}
         >
-          {foundRepositories.map((repository) => {
-            return (
-              <RepositoryListItem
-                key={repository.id}
-                {...{ repository, onVisit: visitRepository, mutateList, sortQuery, setSortQuery, sortTypesData }}
-              />
-            );
-          })}
+          {foundRepositories.map((repository) => (
+            <RepositoryListItem
+              key={repository.id}
+              repository={repository}
+              onVisit={visitRepository}
+              mutateList={mutateList}
+              sortQuery={sortQuery}
+              setSortQuery={setSortQuery}
+              sortTypesData={sortTypesData}
+            />
+          ))}
         </List.Section>
       ) : null}
 

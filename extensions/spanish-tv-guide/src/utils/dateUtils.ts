@@ -1,25 +1,22 @@
-import { DateTime, Duration } from "luxon";
+import { DateTime, SystemZone } from "luxon";
+import { isString } from "./stringUtils";
 
-const TIME_ZONE = "Europe/Madrid";
+const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z?$/;
+const systemZone = SystemZone.instance;
 
-const oneDay = Duration.fromObject({ day: 1 });
+const now = () => DateTime.now().setZone(systemZone).toJSDate();
 
 const getTime = (date: Date) => {
-  return DateTime.fromJSDate(date).setZone(TIME_ZONE).toLocaleString(DateTime.TIME_24_SIMPLE);
+  return DateTime.fromJSDate(date, { zone: systemZone.name }).toLocaleString(DateTime.TIME_24_SIMPLE);
 };
 
-const now = () => {
-  return DateTime.now().setZone(TIME_ZONE, { keepLocalTime: true }).toJSDate();
+const dateReviver = (_: string, value: unknown) => {
+  if (isSerializedISODate(value)) {
+    return DateTime.fromISO(value).toJSDate();
+  }
+  return value;
 };
 
-const parseTime = (time: string) => {
-  return DateTime.fromISO(`${currentDate()}${time}`).setZone(TIME_ZONE, { keepLocalTime: true }).toJSDate();
-};
+const isSerializedISODate = (value: unknown): value is string => isString(value) && ISO_DATE_PATTERN.test(value);
 
-const plusOneDay = (date: Date) => {
-  return DateTime.fromJSDate(date).setZone(TIME_ZONE, { keepLocalTime: true }).plus(oneDay).toJSDate();
-};
-
-const currentDate = () => now().toISOString().substring(0, 11);
-
-export { getTime, now, parseTime, plusOneDay };
+export { dateReviver, getTime, now };

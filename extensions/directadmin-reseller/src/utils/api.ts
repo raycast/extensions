@@ -134,27 +134,13 @@ export async function changeUserTicketingEmail(body: ChangeUserTicketingEmailReq
 }
 
 //
-export async function getResellerIPs() {
-  return await callApi("SHOW_RESELLER_IPS", "Fetching Reseller IPs");
-}
-export async function getResellerIPInformation(ip: string) {
-  const params = new URLSearchParams({ ip });
-  return await callApi(`SHOW_RESELLER_IPS?${params}`, "Fetching Reseller IP Information");
-}
+// Moved to Hooks
 
 // PACKAGES
-export async function getUserPackages() {
-  return await callApi("PACKAGES_USER", "Fetching User Packages");
-}
-export async function getUserPackageInformation(packageName: string) {
-  const params = new URLSearchParams({ package: packageName });
-  return await callApi(`PACKAGES_USER?${params}`, "Fetching User Package Information");
-}
+// Moved to Hooks
 
 // DOMAINS
-export async function getDomains() {
-  return await callApi("SHOW_DOMAINS", "Fetching Domains");
-}
+// export async function getDomains() {
 export async function createDomain(body: CreateNewDomainRequest, userToImpersonate = "") {
   return await callApi("DOMAIN", "Creating Domain", body, userToImpersonate);
 }
@@ -169,9 +155,9 @@ export async function deleteSubdomain(body: DeleteSubdomainRequest, userToImpers
 }
 
 // Databases
-export async function getDatabases(userToImpersonate = "") {
-  return await callApi("DATABASES", "Fetching Databases", undefined, userToImpersonate);
-}
+// export async function getDatabases(userToImpersonate = "") {
+//   return await callApi("DATABASES", "Fetching Databases", undefined, userToImpersonate);
+// }
 export async function createDatabase(body: CreateDatabaseRequest, userToImpersonate = "") {
   return await callApi("DATABASES", "Creating Database", body, userToImpersonate);
 }

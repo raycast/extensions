@@ -7,7 +7,8 @@
   "author": "KartikKumarSahoo",
   "contributors": [
     "bromanko",
-    "crisboarna"
+    "crisboarna",
+    "xmok"
   ],
   "license": "MIT",
   "commands": [
@@ -45,6 +46,13 @@
       "subtitle": "Microsoft Edge",
       "description": "Open a new Microsoft Edge tab and also see existing open tabs to choose from.",
       "mode": "view"
+    },
+    {
+      "name": "copy-active-tab-url",
+      "title": "Copy Active Tab URL",
+      "subtitle": "Microsoft Edge",
+      "description": "Copy active tab URL in Microsoft Edge to Clipboard.",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -98,16 +106,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.55.0",
-    "@raycast/utils": "^1.4.13",
-    "run-applescript": "6.0.0"
+    "@raycast/api": "^1.86.0",
+    "@raycast/utils": "^1.18.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
     "prettier": "^2.5.1",
+    "react": "^18.2.0",
     "typescript": "^4.9.4"
   },
   "scripts": {
@@ -115,7 +123,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   },
   "repository": "git@github.com:raycast/extensions.git"
 }

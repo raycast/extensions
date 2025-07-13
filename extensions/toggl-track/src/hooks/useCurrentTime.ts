@@ -1,8 +1,15 @@
 import dayjs from "dayjs";
+import type { Dayjs } from "dayjs";
 import { useEffect, useState } from "react";
 
-export default function useCurrentTime() {
+interface CurrentTimeHook {
+  currentTime: Dayjs;
+  setCurrentTime: (time: Dayjs) => void;
+}
+
+export function useCurrentTime(): CurrentTimeHook {
   const [currentTime, setCurrentTime] = useState(dayjs());
+
   useEffect(() => {
     const intervalId = setInterval(() => {
       setCurrentTime(dayjs());
@@ -12,5 +19,9 @@ export default function useCurrentTime() {
       clearInterval(intervalId);
     };
   }, []);
-  return currentTime;
+
+  return {
+    currentTime,
+    setCurrentTime,
+  };
 }

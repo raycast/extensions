@@ -6,11 +6,7 @@ import { useEffect, useRef } from "react";
 import { getTintColor } from "../utils/utils";
 import { useForm } from "@raycast/utils";
 
-type NoteForm = {
-  title: string;
-  note: string;
-  tags: string[];
-};
+type NoteForm = { title: string; note: string; tags: string[] };
 
 const CreateEditNoteForm = ({
   createdAt,
@@ -47,6 +43,7 @@ const CreateEditNoteForm = ({
                 body: values.note,
                 tags: values.tags,
                 createdAt: n.createdAt,
+                summary: n.summary,
                 updatedAt: new Date(),
                 is_draft: false,
               }
@@ -69,11 +66,7 @@ const CreateEditNoteForm = ({
       showToast({ title: "Note Saved" });
       pop();
     },
-    initialValues: {
-      note,
-      title,
-      tags,
-    },
+    initialValues: { note, title, tags },
     validation: {
       title: (value) => {
         if (!value) {
@@ -109,15 +102,19 @@ const CreateEditNoteForm = ({
         return;
       }
 
-      if ((noteField || titleField) && !dataRef.current.submittedForm && (noteField !== note || titleField !== title)) {
+      if (
+        !dataRef.current.submittedForm &&
+        ((noteField && noteField !== note) || (titleField && titleField !== title))
+      ) {
         const noteExists = notes.find((n) => n.createdAt === createdAt);
         if (noteExists) {
           const updatedNotes = notes.map((n) => {
             if (n.createdAt === createdAt) {
               return {
                 ...n,
-                title: titleField ?? "",
-                body: noteField ?? "",
+                // Only update fields that have changed
+                title: titleField !== title ? titleField : n.title,
+                body: noteField !== note ? noteField : n.body,
                 tags: tagsField ?? [],
                 updatedAt: new Date(),
               };
@@ -126,6 +123,7 @@ const CreateEditNoteForm = ({
           });
           setNotes(updatedNotes);
         } else if (!noteExists) {
+          // For new notes
           setNotes([
             ...notes,
             {
@@ -151,17 +149,11 @@ const CreateEditNoteForm = ({
         <ActionPanel>
           <Action.SubmitForm
             title={"Save Note"}
-            icon={{
-              source: Icon.SaveDocument,
-              tintColor: getTintColor("green"),
-            }}
+            icon={{ source: Icon.SaveDocument, tintColor: getTintColor("green") }}
             onSubmit={handleSubmit}
           />
           <Action.Push
-            icon={{
-              source: Icon.Tag,
-              tintColor: getTintColor("turquoise"),
-            }}
+            icon={{ source: Icon.Tag, tintColor: getTintColor("turquoise") }}
             target={<CreateTag />}
             title="Create Tag"
             shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}

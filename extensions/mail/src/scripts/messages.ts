@@ -1,21 +1,19 @@
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { simpleParser } from "mailparser";
 import TurndownService from "turndown";
 import juice from "juice";
 import utf8 from "utf8";
 
-import { Account, Mailbox, Message, OutgoingMessage, OutgoingMessageAction, Preferences } from "../types";
-import { constructDate, formatMarkdown, stripHtmlComments, titleCase } from "../utils";
+import { Account, Mailbox, Message, OutgoingMessage, OutgoingMessageAction } from "../types";
+import { constructDate, formatMarkdown, messageLimit, stripHtmlComments, titleCase } from "../utils";
 import { Cache } from "../utils/cache";
 import { isArchiveMailbox, isJunkMailbox, isTrashMailbox } from "../utils/mailbox";
 import { blockAnchors, hideElements } from "../utils/turndown";
 import { Validation } from "../utils/validation";
 
 // Override plainTextMode preference until HTML formatting issues in prod build are resolved
-const preferences = { ...getPreferenceValues(), plainTextMode: true } as Preferences;
-const messageLimit = preferences.messageLimit ? parseInt(preferences.messageLimit) : 10;
-const plainTextMode = preferences.plainTextMode ?? false;
+const plainTextMode = true;
 
 export const tellMessage = async (message: Message, mailbox: Mailbox, script: string): Promise<string> => {
   if (!script.includes("msg")) {
@@ -42,7 +40,7 @@ export const openMessage = async (message: Message, mailbox: Mailbox) => {
 export const toggleMessageRead = async (
   message: Message,
   mailbox: Mailbox,
-  { silent = false }: { silent?: boolean } = {}
+  { silent = false }: { silent?: boolean } = {},
 ) => {
   try {
     const account = Cache.getAccount(message.account);
@@ -57,7 +55,7 @@ export const toggleMessageRead = async (
             read: !message.read,
           },
           account.id,
-          innerMailbox.name
+          innerMailbox.name,
         );
       });
     }
@@ -213,7 +211,7 @@ export const deleteMessage = async (message: Message, mailbox: Mailbox) => {
         activate
         delay 0.5
 		    tell application "System Events" to key code 51
-      `
+      `,
     );
   } catch (error) {
     await showToast(Toast.Style.Failure, "Error deleting message");
@@ -252,11 +250,74 @@ export const getRecipients = async (message: Message, mailbox: Mailbox): Promise
   }
 };
 
+export const getRecentMessagesContent = async () => {
+  const script = `
+  tell application "Mail"
+    set currentDate to current date
+    set fifteenMinutesAgo to currentDate - (15 * minutes)
+    
+    set msgs to {}
+    set output to ""
+    
+    set allAccounts to every account
+    
+    repeat with i from 1 to count of allAccounts
+      set currentAccount to item i of allAccounts
+      
+      set inboxMailbox to mailbox "INBOX" of currentAccount
+      
+      set inboxMessages to (messages of inboxMailbox whose date received > fifteenMinutesAgo)
+      
+      set msgs to msgs & inboxMessages
+    end repeat
+    
+    set msgCount to count of msgs
+    
+    if msgCount is 0 then
+      return ""
+    else
+      repeat with i from 1 to msgCount
+        set messageContent to (date received of item i of msgs) & "|||DELIMITER|||" & content of item i of msgs
+        set output to output & messageContent & "$end"
+      end repeat
+      return output
+    end if
+  end tell
+  `;
+
+  let data: string;
+  try {
+    data = await runAppleScript(script, {
+      humanReadableOutput: true,
+      timeout: 60000,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("Command timed out")) {
+      console.error("AppleScript Timed Out");
+    } else {
+      console.error("Error Running AppleScript");
+    }
+    return undefined;
+  }
+
+  const messages = data.split("$end").filter(Boolean);
+
+  const sortedMessages = messages
+    .map((msg) => {
+      const [dateReceived, content] = msg.split("|||DELIMITER|||");
+      return { dateReceived: constructDate(dateReceived), content };
+    })
+    .toSorted((a, b) => b.dateReceived.getTime() - a.dateReceived.getTime()) // most recent first
+    .map((msg) => msg.content);
+
+  return sortedMessages;
+};
+
 export const getMessages = async (
   account: Account,
   mailbox: Mailbox,
+  unreadOnly = false,
   numMessages = messageLimit,
-  unreadOnly = false
 ): Promise<Message[] | undefined> => {
   let messages = Cache.getMessages(account.id, mailbox.name);
 
@@ -285,33 +346,43 @@ export const getMessages = async (
     return output
   `;
 
+  let data: string;
   try {
-    const response: string[] = (await runAppleScript(script)).split("$end");
-    response.pop();
-
-    const newMessages: Message[] = response.map((line: string) => {
-      const [id, subject, senderName, senderAddress, date, read, numAttachments] = line.split("$break");
-      return {
-        id,
-        account: account.name,
-        accountAddress: account.email,
-        subject,
-        date: constructDate(date),
-        read: read === "true",
-        numAttachments: parseInt(numAttachments),
-        senderName,
-        senderAddress,
-      };
+    data = await runAppleScript(script, {
+      humanReadableOutput: true,
+      timeout: 60000,
     });
-
-    // Get messages after await as they might have changed
-    messages = Cache.getMessages(account.id, mailbox.name);
-    messages = newMessages.concat(messages);
-
-    Cache.setMessages(messages, account.id, mailbox.name);
   } catch (error) {
-    console.error(error);
+    if (error instanceof Error && error.message.includes("Command timed out")) {
+      console.error("AppleScript Timed Out");
+    } else {
+      console.error("Error Running AppleScript");
+    }
+    return undefined;
   }
+  const response: string[] = data.split("$end");
+  response.pop();
+
+  const newMessages: Message[] = response.map((line: string) => {
+    const [id, subject, senderName, senderAddress, date, read, numAttachments] = line.split("$break");
+    return {
+      id,
+      account: account.name,
+      accountAddress: account.emails[0],
+      subject,
+      date: constructDate(date),
+      read: read === "true",
+      numAttachments: parseInt(numAttachments),
+      senderName,
+      senderAddress,
+    };
+  });
+
+  // Get messages after await as they might have changed
+  messages = Cache.getMessages(account.id, mailbox.name);
+  messages = newMessages.concat(messages);
+
+  Cache.setMessages(messages, account.id, mailbox.name);
 
   const result = unreadOnly ? messages.filter((x) => !x.read) : messages;
   return result.slice(0, messageLimit);
@@ -373,7 +444,7 @@ export const getMessageMarkdown = async (message: Message, mailbox: Mailbox): Pr
 
     turndownService.use([hideElements, blockAnchors]);
 
-    const markdown = turndownService.turndown(html);
+    const markdown = turndownService.turndown(html ?? "");
 
     return formatMarkdown(message.subject, markdown);
   } catch (error) {
@@ -387,7 +458,7 @@ export const sendMessage = async (
   outgoingMessage: OutgoingMessage,
   action = OutgoingMessageAction.New,
   message?: Message,
-  mailbox?: Mailbox
+  mailbox?: Mailbox,
 ) => {
   if (outgoingMessage.to.length === 0) {
     await showToast(Toast.Style.Failure, "No recipients specified");
@@ -437,8 +508,8 @@ export const sendMessage = async (
       set theAttachments to {"${attachments.join(`", "`)}"}
       set newMessage to ${actionScript}
       set properties of newMessage to {sender: "${outgoingMessage.account}", subject: "${
-    outgoingMessage.subject
-  }", content: "${outgoingMessage.content}", visible: false}
+        outgoingMessage.subject
+      }", content: "${outgoingMessage.content}", visible: false}
       tell newMessage
         repeat with theTo in theTos
           make new recipient at end of to recipients with properties {address:theTo}

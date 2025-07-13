@@ -1,10 +1,14 @@
-# <img src="./assets/porkbun.png" width="20" height="20" /> Porkbun Raycast Extension
+<p align="center">
+    <img src="./assets/porkbun.png" width="200" height="200" />
+</p>
+
+# Porkbun Raycast Extension
 
 This is a Raycast extension for [Porkbun](https://porkbun.com/). With this extension, you can fetch latest domain pricing and create, list, edit or delete DNS records, URL Forwarding and Name Servers for API-enabled domains in your account.
 
 ## 🚀 Getting Started
 
-1. **Install extensions**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/xmok/porkbun)
+1. **Install extension**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/xmok/porkbun) OR via Raycast Store
 
 2. **Get your API Key and API Secret Key**: The first time you use the extension, you'll need to enter your Porkbun API keys:
 

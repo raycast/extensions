@@ -64,7 +64,7 @@ export default function RecordItem({
           {record.inUse ? (
             <Action
               icon={Icon.Xmark}
-              title="Mark As Unused"
+              title="Mark as Unused"
               onAction={() => {
                 onMarkUnused(record.id);
               }}
@@ -72,7 +72,7 @@ export default function RecordItem({
           ) : (
             <Action
               icon={Icon.Check}
-              title="Mark As In Use"
+              title="Mark as in Use"
               onAction={() => {
                 onMarkInUse(record.id);
               }}

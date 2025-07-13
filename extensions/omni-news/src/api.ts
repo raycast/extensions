@@ -1,65 +1,111 @@
-import { getPreferenceValues } from "@raycast/api";
+import { Cache, getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
-import { Article } from "./Article";
+import { Article } from "./models/article";
 import {
   createDuration,
   checkForCategory,
   getImageLink,
   sortArticleByTime,
   checkForDescription,
-} from "./ArticleUtils";
+} from "./articleUtils";
+import { ArticleDto, ArticleResponse } from "./models/dto/articleDto";
+import { CachedData } from "./models/cachedData";
 
-export async function fecthArticle() {
+// Create a cache instance
+const cache = new Cache();
+const CACHE_KEY = "omni-articles";
+const CACHE_EXPIRY = 5 * 60 * 1000; // 5 minutes
+
+export async function fetchArticles() {
   const preferences = getPreferenceValues();
   const limit = preferences.OmniNewsLimit;
   const removeAds = preferences.OmniNewsShowAds;
   const baseUrl = "https://omni.se/";
-  const url = "https://omni-content.omni.news/articles?&limit=" + limit;
 
-  const articles: Article[] = [];
-  await fetch(url, {
+  // Fetch from cache first
+  const cachedString = cache.get(CACHE_KEY);
+  if (cachedString) {
+    try {
+      const cachedData = JSON.parse(cachedString) as CachedData;
+      const now = Date.now();
+
+      if (now - cachedData.timestamp < CACHE_EXPIRY) {
+        return cachedData.articles;
+      }
+    } catch (error) {
+      console.error("Error parsing cached data:", error);
+    }
+  }
+
+  // If cache is expired or not available, fetch fresh data
+  try {
+    const articleData = await fetchArticlesFromApi(limit);
+    const articles = mapToArticles(articleData.flat(), baseUrl, removeAds);
+
+    const cacheData: CachedData = {
+      articles: articles,
+      timestamp: Date.now(),
+    };
+    cache.set(CACHE_KEY, JSON.stringify(cacheData));
+
+    return articles;
+  } catch (error) {
+    console.error("Failed to fetch articles:", error);
+    return [];
+  }
+}
+
+async function fetchArticlesFromApi(limit: number) {
+  const url = `https://omni-content.omni.news/articles?&limit=${limit}`;
+
+  const response = await fetch(url, {
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
     },
-  })
-    .then(function (response) {
-      return response.json() as any;
-    })
-    .then(function (myJson) {
-      for (let i = 0; i < limit; i++) {
-        const articleResponse = myJson.articles[i][0];
+  });
 
-        const article_id: string = articleResponse.article_id;
-        const title: string = Object(articleResponse.title)["value"];
+  if (!response.ok) {
+    throw new Error(`API request failed with status ${response.status}`);
+  }
 
-        if (article_id == undefined || title == undefined) {
-          continue;
-        }
+  const data = (await response.json()) as ArticleResponse;
+  return data.articles || [];
+}
 
-        const category = checkForCategory(articleResponse).valueOf();
-        if (removeAds && category == "Annonsmaterial") {
-          continue;
-        }
-        const description: string = checkForDescription(articleResponse);
-        const articleLink: string = baseUrl + article_id;
-        const imageLink = getImageLink(articleResponse);
-        const duration = createDuration(articleResponse);
+function mapToArticles(
+  articleData: ArticleDto[],
+  baseUrl: string,
+  removeAds: boolean,
+): Article[] {
+  const articles: Article[] = [];
 
-        const article: Article = {
-          article_id: article_id,
-          title: title,
-          description: description,
-          articleLink: articleLink,
-          imageLink: imageLink,
-          duration: duration,
-          category: category,
-          url: baseUrl + article_id,
-        };
+  for (const article of articleData) {
+    const articleResponse = Array.isArray(article) ? article[0] : article;
 
-        articles.push(article);
-      }
+    const article_id = articleResponse?.article_id;
+    const title = articleResponse?.title?.value;
+
+    if (!article_id || !title) {
+      continue;
+    }
+
+    const category = checkForCategory(articleResponse);
+    if (removeAds && category === "Annonsmaterial") {
+      continue;
+    }
+
+    articles.push({
+      article_id,
+      title,
+      description: checkForDescription(articleResponse),
+      articleLink: `${baseUrl}${article_id}`,
+      imageLink: getImageLink(articleResponse),
+      duration: createDuration(articleResponse),
+      category,
+      url: `${baseUrl}${article_id}`,
     });
+  }
 
   return sortArticleByTime(articles);
 }

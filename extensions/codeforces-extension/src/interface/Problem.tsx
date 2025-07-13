@@ -1,9 +1,8 @@
 export interface Problem {
+  id: string;
+  name: string;
   contestId: number;
   index: string;
-  name: string;
-  type: string;
-  points: number;
-  rating: number;
+  rating?: number;
   tags: string[];
 }

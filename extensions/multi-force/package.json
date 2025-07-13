@@ -1,0 +1,49 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "multi-force",
+  "title": "MultiForce",
+  "description": "Allows a Salesforce Developer to access and authenticate orgs availabe via the SF command line tools.",
+  "icon": "multiforce-icon.png",
+  "author": "brian_j_decoder22",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Manage Salesforce Orgs",
+      "description": "Create and use Salesforce logins created via Salesforce's SF CLI tool and quickly log in to orgs you are working in.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.67.1",
+    "@raycast/utils": "^1.12.5",
+    "@salesforce/core": "^6.5.3",
+    "@salesforce/plugin-org": "^4.3.4",
+    "chalk": "^5.3.0",
+    "inquirer": "^9.2.14",
+    "lodash": "^4.17.21",
+    "strip-ansi": "^7.1.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.24.8",
+    "@babel/core": "^7.24.9",
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "babel-cli": "^6.26.0",
+    "babel-plugin-transform-import-meta": "^2.2.1",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

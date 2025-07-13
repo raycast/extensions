@@ -1,0 +1,180 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "at-profile",
+  "title": "@ Profile",
+  "description": "Quickly open profiles on social platforms.",
+  "icon": "at-icon.png",
+  "author": "chrismessina",
+  "contributors": [
+    "pedrecal",
+    "thomasjost"
+  ],
+  "categories": [
+    "Web"
+  ],
+  "keywords": [
+    "mention",
+    "social",
+    "profile"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "quick-open",
+      "title": "Open Profile",
+      "subtitle": "@ Profile",
+      "description": "Quickly open a profile on a social site",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "profile",
+          "type": "text",
+          "placeholder": "Profile",
+          "required": true
+        },
+        {
+          "name": "site",
+          "type": "dropdown",
+          "placeholder": "Platform",
+          "required": true,
+          "data": [
+            {
+              "title": "Behance",
+              "value": "behance"
+            },
+            {
+              "title": "CodePen",
+              "value": "codepen"
+            },
+            {
+              "title": "Dev.to",
+              "value": "devto"
+            },
+            {
+              "title": "Dribbble",
+              "value": "dribbble"
+            },
+            {
+              "title": "Facebook",
+              "value": "facebook"
+            },
+            {
+              "title": "GitHub",
+              "value": "github"
+            },
+            {
+              "title": "Instagram",
+              "value": "instagram"
+            },
+            {
+              "title": "LinkedIn",
+              "value": "linkedin"
+            },
+            {
+              "title": "Medium",
+              "value": "medium"
+            },
+            {
+              "title": "Product Hunt",
+              "value": "producthunt"
+            },
+            {
+              "title": "Raycast",
+              "value": "raycast"
+            },
+            {
+              "title": "Reddit",
+              "value": "reddit"
+            },
+            {
+              "title": "Spotify",
+              "value": "spotify"
+            },
+            {
+              "title": "Threads",
+              "value": "threads"
+            },
+            {
+              "title": "TikTok",
+              "value": "tiktok"
+            },
+            {
+              "title": "X",
+              "value": "x"
+            },
+            {
+              "title": "YouTube",
+              "value": "youtube"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "open",
+      "title": "Open Profile",
+      "description": "Quickly open a profile on a social site"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.80.0",
+    "@raycast/utils": "^1.19.1"
+  },
+  "ai": {
+    "evals": [
+      {
+        "input" : "@at-profile open raycast on instagram",
+        "mocks" : {
+          "open" : "Successfully called \"open\""
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+                "profile" : "raycast",
+                "site" : "instagram"
+              },
+              "name" : "open"
+            }
+          }
+        ]
+      },
+      {
+        "input" : "@at-profile open chrismessina on x",
+        "mocks" : {
+          "open" : "Successfully called \"open\""
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+                "profile" : "chrismessina",
+                "site" : "x"
+              },
+              "name" : "open"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "evals": "npx ray evals"
+  }
+}

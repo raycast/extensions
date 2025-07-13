@@ -1,6 +1,6 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { Preferences, TagsResponse } from "../types";
+import { TagsResponse } from "../types";
 
 export function useTags() {
   const preferences: Preferences = getPreferenceValues();

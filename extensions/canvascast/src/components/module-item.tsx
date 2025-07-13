@@ -1,43 +1,32 @@
 import { List, Action, ActionPanel, Icon, Color, Toast, showToast } from "@raycast/api";
-import React, { useEffect, useState } from "react";
 import { moduleitem } from "../utils/types";
-import {
-  appendRecentModuleItem,
-  appendPinnedModuleItem,
-  removeRecentModuleItem,
-  removePinnedModuleItem,
-  clearRecentModuleItems,
-  clearPinnedModuleItems,
-  isTopPinnedModuleItem,
-  isBottomPinnedModuleItem,
-  moveUpPinnedModuleItem,
-  moveDownPinnedModuleItem,
-} from "../utils/recent";
+import { PinActions, RecentActions, useModuleStore } from "../utils/store";
 import { Icons, getIsCodeFile } from "../utils/utils";
+import { getPreferenceValues } from "@raycast/api";
 import open from "open";
+
+const preferences = getPreferenceValues();
 
 export const ModuleItem = (props: {
   id: number;
   url: string;
   item: moduleitem;
-  refresh: () => void;
   pinned?: boolean;
   recent?: boolean;
 }) => {
-  const [isTopPinned, setIsTopPinned] = useState<boolean>(false);
-  const [isBottomPinned, setIsBottomPinned] = useState<boolean>(false);
+  const { addToRecent } = useModuleStore();
 
-  if (props.pinned) {
-    useEffect(() => {
-      const getItemPosition = async () => {
-        setIsTopPinned(await isTopPinnedModuleItem(props.id, props.item.id));
-        setIsBottomPinned(await isBottomPinnedModuleItem(props.id, props.item.id));
-      };
-      getItemPosition();
-    }, [props.refresh]);
-  }
-
-  return (
+  return props.item.type === "SubHeader" && props.item.url === undefined ? (
+    <List.Item
+      id={props.item.id.toString()}
+      title={props.item.name}
+      actions={
+        <ActionPanel>
+          <Action.CopyToClipboard title={"Copy Title"} content={props.item.name} />
+        </ActionPanel>
+      }
+    />
+  ) : (
     <List.Item
       id={`${props.pinned ? "pin" : props.recent ? "recent" : ""}${props.item.id}`}
       title={props.item.name}
@@ -45,28 +34,37 @@ export const ModuleItem = (props: {
         source: getIsCodeFile(props.item.name)
           ? Icons["Code"]
           : props.item.passcode
-          ? Icons["Passcode"]
-          : props.item.type in Icons
-          ? Icons[props.item.type]
-          : Icon.ExclamationMark,
+            ? Icons["Passcode"]
+            : props.item.type in Icons
+              ? Icons[props.item.type]
+              : Icon.ExclamationMark,
       }}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser
             url={props.item.url}
             icon={{ source: Icon.Link }}
-            onOpen={async () => {
-              await appendRecentModuleItem(props.id, props.item);
-              props.refresh();
-            }}
+            onOpen={() => addToRecent(props.id, props.item)}
           />
-          {props.item.download && (
+          {props.item.content_id && (
             <Action
               title="Download File"
-              onAction={async () => {
-                await open(props.item.download, { background: true });
-                await appendRecentModuleItem(props.id, props.item);
-                props.refresh();
+              onAction={() => {
+                open(
+                  `https://${preferences.domain}/courses/${props.id}/files/${props.item.content_id}/download?download_frd=1`,
+                  { background: true },
+                )
+                  .then(() => {
+                    showToast(Toast.Style.Success, "Download Started");
+                    addToRecent(props.id, props.item);
+                  })
+                  .catch((error) => {
+                    showToast({
+                      title: "Download Failed",
+                      message: error.message,
+                      style: Toast.Style.Failure,
+                    });
+                  });
               }}
               icon={{ source: Icon.Download }}
             />
@@ -76,104 +74,18 @@ export const ModuleItem = (props: {
               <Action.CopyToClipboard
                 title="Copy Passcode"
                 content={props.item.passcode}
-                onCopy={async () => {
-                  await appendRecentModuleItem(props.id, props.item);
-                  props.refresh();
-                }}
+                onCopy={() => addToRecent(props.id, props.item)}
               />
               <Action.Paste
                 title="Paste Passcode"
                 content={props.item.passcode}
-                shortcut={{ modifiers: ["cmd"], key: "p" }}
-                onPaste={async () => {
-                  await appendRecentModuleItem(props.id, props.item);
-                  props.refresh();
-                }}
+                onPaste={() => addToRecent(props.id, props.item)}
               />
             </ActionPanel.Section>
           )}
           <ActionPanel.Section>
-            {props.pinned ? (
-              <React.Fragment>
-                {!isTopPinned && (
-                  <Action
-                    title="Move Up in Pinned"
-                    shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
-                    icon={{ source: Icon.ArrowUp }}
-                    onAction={async () => {
-                      await moveUpPinnedModuleItem(props.id, props.item.id);
-                      props.refresh();
-                    }}
-                  />
-                )}
-                {!isBottomPinned && (
-                  <Action
-                    title="Move Down in Pinned"
-                    shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
-                    icon={{ source: Icon.ArrowDown }}
-                    onAction={async () => {
-                      await moveDownPinnedModuleItem(props.id, props.item.id);
-                      props.refresh();
-                    }}
-                  />
-                )}
-                <Action
-                  title="Remove Pinned Item"
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
-                  icon={{ source: Icon.PinDisabled }}
-                  onAction={async () => {
-                    removePinnedModuleItem(props.id, props.item.id);
-                    props.refresh();
-                    showToast(Toast.Style.Success, `Removed Pinned Item`);
-                  }}
-                />
-                <Action
-                  title="Clear Pinned Items"
-                  icon={{ source: Icon.XMarkCircleFilled, tintColor: Color.Red }}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-                  onAction={async () => {
-                    clearPinnedModuleItems(props.id);
-                    props.refresh();
-                    showToast(Toast.Style.Success, "Pinned Items Cleared");
-                  }}
-                />
-              </React.Fragment>
-            ) : (
-              <Action
-                title="Pin Item"
-                icon={{ source: Icon.Pin }}
-                shortcut={{ modifiers: ["cmd"], key: "p" }}
-                onAction={async () => {
-                  await appendPinnedModuleItem(props.id, props.item);
-                  props.refresh();
-                  showToast(Toast.Style.Success, "Item Pinned");
-                }}
-              />
-            )}
-            {props.recent && (
-              <React.Fragment>
-                <Action
-                  title="Remove Recent Item"
-                  onAction={async () => {
-                    await removeRecentModuleItem(props.id, props.item.id);
-                    props.refresh();
-                    showToast(Toast.Style.Success, "Recent Item Removed");
-                  }}
-                  icon={{ source: Icon.Trash, tintColor: Color.Red }}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
-                />
-                <Action
-                  title="Clear Recent Items"
-                  onAction={async () => {
-                    await clearRecentModuleItems(props.id);
-                    props.refresh();
-                    showToast(Toast.Style.Success, "Recent Items Cleared");
-                  }}
-                  icon={{ source: Icon.Trash, tintColor: Color.Red }}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-                />
-              </React.Fragment>
-            )}
+            <PinActions id={props.id} item={props.item} isPinned={props.pinned} />
+            {props.recent && <RecentActions id={props.id} item={props.item} />}
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.OpenInBrowser

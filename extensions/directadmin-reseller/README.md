@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="./assets/directadmin-reseller.png" width="200" height="200" />
+    <img src="./assets/directadmin-reseller@dark.png" width="200" height="200" />
 </p>
 
 # DirectAdmin [Reseller] Raycast Extension

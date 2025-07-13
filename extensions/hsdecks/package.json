@@ -24,7 +24,7 @@
   "dependencies": {
     "@raycast/api": "^1.69.0",
     "@raycast/utils": "^1.13.5",
-    "axios": "^1.6.8",
+    "axios": "^1.8.4",
     "cheerio": "^1.0.0-rc.12",
     "jsdom": "^24.0.0",
     "ts-node": "^10.9.2",

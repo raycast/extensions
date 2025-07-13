@@ -54,8 +54,8 @@ export class SearchHistory {
       JSON.stringify(
         searchHistory.length > this.SEARCH_HISTORY_LIMIT
           ? searchHistory.slice(0, this.SEARCH_HISTORY_LIMIT)
-          : searchHistory
-      )
+          : searchHistory,
+      ),
     );
   }
 

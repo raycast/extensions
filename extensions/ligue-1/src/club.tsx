@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
-import { Club } from "./types";
+import { ClubIdentity } from "./types";
 import { getClubs } from "./api";
 import SeasonDropdown from "./components/season_dropdown";
-import { Action, ActionPanel, Grid, Icon } from "@raycast/api";
-import ClubSquad from "./components/squad";
+import { Grid } from "@raycast/api";
 
 export default function Club() {
-  const [clubs, setClubs] = useState<Club[]>();
+  const [clubs, setClubs] = useState<ClubIdentity[]>();
   const [season, setSeason] = useState<string>("");
 
   useEffect(() => {
@@ -32,16 +31,7 @@ export default function Club() {
           <Grid.Item
             key={club.id}
             title={club.name}
-            content={club.logo}
-            actions={
-              <ActionPanel>
-                <Action.Push
-                  title="Club Squad"
-                  icon={Icon.Sidebar}
-                  target={<ClubSquad {...club} />}
-                />
-              </ActionPanel>
-            }
+            content={club.assets.logo.medium}
           />
         );
       })}

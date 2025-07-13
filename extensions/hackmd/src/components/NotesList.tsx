@@ -37,17 +37,20 @@ export default function NotesList({
       return [];
     }
 
-    const groupedNotes = notes.sort(sortByLastChanged).reduce((acc, note) => {
-      const category = (note.tags?.length > 0 && Array.isArray(note.tags) && note.tags[0]) || "No Category";
+    const groupedNotes = notes.sort(sortByLastChanged).reduce(
+      (acc, note) => {
+        const category = (note.tags?.length > 0 && Array.isArray(note.tags) && note.tags[0]) || "No Category";
 
-      if (!acc[category]) {
-        acc[category] = [note];
-      } else {
-        acc[category].push(note);
-      }
+        if (!acc[category]) {
+          acc[category] = [note];
+        } else {
+          acc[category].push(note);
+        }
 
-      return acc;
-    }, {} as Record<string, Note[]>);
+        return acc;
+      },
+      {} as Record<string, Note[]>,
+    );
 
     return Object.entries(groupedNotes).sort(sortCategoryByLastChanged);
   }, [notes]);

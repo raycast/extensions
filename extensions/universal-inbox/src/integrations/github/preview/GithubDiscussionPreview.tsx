@@ -1,4 +1,4 @@
-import { Notification, getNotificationHtmlUrl } from "../../../notification";
+import { getNotificationHtmlUrl, Notification } from "../../../notification";
 import { Detail, ActionPanel, Action } from "@raycast/api";
 import { GithubDiscussion } from "../types";
 import { useMemo } from "react";

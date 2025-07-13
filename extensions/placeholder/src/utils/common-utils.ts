@@ -1,33 +1,32 @@
 import fse from "fs-extra";
-import { Cache, environment, open, showHUD, showInFinder, showToast, Toast } from "@raycast/api";
-import { copyFileByPath } from "./applescript-utils";
 import { homedir } from "os";
-import { axiosGetImageArrayBuffer } from "./axios-utils";
-import Style = Toast.Style;
+import { Cache, Toast, environment, open, showHUD, showInFinder, showToast } from "@raycast/api";
+import { copyFileByPath } from "@/utils/applescript-utils";
+import { fetchArrayBuffer } from "@/utils/fetch";
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
 };
 
 export async function downloadAndCopyImage(url: string) {
-  const toast = await showToast(Style.Animated, "Downloading and copying...");
+  const toast = await showToast(Toast.Style.Animated, "Downloading and copying...");
   const selectedPath = environment.supportPath;
   const filePath = selectedPath.endsWith("/") ? `${selectedPath}placeholder.jpg` : `${selectedPath}/placeholder.jpg`;
 
-  fse.writeFileSync(filePath, Buffer.from(await axiosGetImageArrayBuffer(url)));
+  fse.writeFileSync(filePath, Buffer.from(await fetchArrayBuffer(url)));
   await copyFileByPath(filePath);
   await toast.hide();
   await showHUD("Image copied to clipboard");
 }
 
 export async function downloadImage(url: string, size: string, name = "") {
-  const toast = await showToast(Style.Animated, "Downloading...");
+  const toast = await showToast(Toast.Style.Animated, "Downloading...");
   try {
     const downloadedPath = homedir() + "/Downloads/";
     const fileName = buildFileName(downloadedPath, (isEmpty(name) ? "placeholder" : name) + "-" + size, "jpg");
     const filePath = `${downloadedPath}/${fileName}`;
 
-    fse.writeFileSync(filePath, Buffer.from(await axiosGetImageArrayBuffer(url)));
+    fse.writeFileSync(filePath, Buffer.from(await fetchArrayBuffer(url)));
     const options: Toast.Options = {
       style: Toast.Style.Success,
       title: "Success!",

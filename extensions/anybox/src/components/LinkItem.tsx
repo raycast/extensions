@@ -73,6 +73,14 @@ interface Props {
   searchText: string;
 }
 
+function openURL(url: string, preferredBrowser: string) {
+  if (preferredBrowser) {
+    open(url, preferredBrowser);
+  } else {
+    open(url);
+  }
+}
+
 export default function LinkItem(props: Props) {
   const { pop } = useNavigation();
 
@@ -120,9 +128,9 @@ export default function LinkItem(props: Props) {
         onAction={() => {
           if (isSearchEngine) {
             const newURL = item.url.replace("_keyword_", encodeURIComponent(searchText));
-            open(newURL, item.preferredBrowser);
+            openURL(newURL, item.preferredBrowser);
           } else {
-            open(item.url, item.preferredBrowser);
+            openURL(item.url, item.preferredBrowser);
             updateDateLastOpened(item.id);
           }
           onFinished();

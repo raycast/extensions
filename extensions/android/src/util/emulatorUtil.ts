@@ -66,7 +66,7 @@ export async function getEmulators(): Promise<Emulator[]> {
     const emulators = avdsResponse
       .split("\n")
       .map((item) => item.trim())
-      .filter((item) => item.length > 0)
+      .filter((item) => !item.startsWith("INFO    |") && item.length > 0)
       .map((item) => {
         const runningEmulator = runningEmulators.find(
           (runningEmulator) => runningEmulator.name === item

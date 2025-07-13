@@ -1,11 +1,12 @@
-import { ActionPanel, Action, List, Icon, showToast, Toast } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
-import { useRef, useState } from "react";
 import os from "node:os";
 import spotlight from "node-spotlight";
+import { useRef, useState } from "react";
+import { ActionPanel, Action, List, Icon, showToast, Toast, Keyboard } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { Category, SearchResult } from "./types";
 import useLocalStorage from "./hooks/useLocalStorage";
-import { newTab, newWindow } from "./uri";
+import { getNewTabUri, getNewWindowUri } from "./uri";
+import { getAppName } from "./constants";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -103,7 +104,10 @@ export default function Command() {
     >
       {searchText && <List.EmptyView title="No directories found" description="Try refining your search" />}
       {!searchText && (
-        <List.EmptyView title="Search for a directory" description="Open a directory on your computer in Warp" />
+        <List.EmptyView
+          title="Search for a directory"
+          description={`Open a directory on your computer in ${getAppName()}`}
+        />
       )}
       <List.Section title={Category.PINNED}>
         {filteredPins.map((searchResult) => (
@@ -158,36 +162,35 @@ function SearchListItem(props: {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser icon={Icon.Terminal} title="Open in New Warp Tab" url={newTab(searchResult.path)} />
+            <Action.OpenInBrowser
+              icon={Icon.Terminal}
+              title={`Open in New ${getAppName()} Tab`}
+              url={getNewTabUri(searchResult.path)}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.OpenInBrowser
-              title="Open in New Warp Window"
-              url={newWindow(searchResult.path)}
-              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              title={`Open in New ${getAppName()} Window`}
+              url={getNewWindowUri(searchResult.path)}
+              shortcut={Keyboard.Shortcut.Common.Open}
             />
             <Action.CreateQuicklink
-              title="Save as Quicklink: New Tab"
-              quicklink={{ link: newTab(searchResult.path) }}
+              title={`Save as Quicklink: New ${getAppName()} Tab`}
+              quicklink={{ link: getNewTabUri(searchResult.path) }}
             />
             <Action.CreateQuicklink
-              title="Save as Quicklink: New Window"
-              quicklink={{ link: newWindow(searchResult.path) }}
+              title={`Save as Quicklink: New ${getAppName()} Window`}
+              quicklink={{ link: getNewWindowUri(searchResult.path) }}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
             {!isPinned ? (
-              <Action
-                title="Pin Directory"
-                icon={Icon.Pin}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-                onAction={onPin}
-              />
+              <Action title="Pin Directory" icon={Icon.Pin} shortcut={Keyboard.Shortcut.Common.Pin} onAction={onPin} />
             ) : (
               <Action
                 title="Unpin Directory"
                 icon={Icon.PinDisabled}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                shortcut={Keyboard.Shortcut.Common.Pin}
                 onAction={onPin}
               />
             )}
@@ -198,7 +201,7 @@ function SearchListItem(props: {
                   <Action
                     title="Move Up in Pinned"
                     icon={Icon.ArrowUp}
-                    shortcut={{ key: "arrowUp", modifiers: ["cmd", "opt"] }}
+                    shortcut={Keyboard.Shortcut.Common.MoveUp}
                     onAction={() => onRearrange(searchResult, "up")}
                   />
                 )}
@@ -207,7 +210,7 @@ function SearchListItem(props: {
                   <Action
                     title="Move Down in Pinned"
                     icon={Icon.ArrowDown}
-                    shortcut={{ key: "arrowDown", modifiers: ["cmd", "opt"] }}
+                    shortcut={Keyboard.Shortcut.Common.MoveDown}
                     onAction={() => onRearrange(searchResult, "down")}
                   />
                 )}

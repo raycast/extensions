@@ -1,58 +1,34 @@
-import { ActionPanel, clearSearchBar, Icon, List, Action, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List } from "@raycast/api";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
-import { useMemo } from "react";
 
-import { createTimeEntry, TimeEntry } from "@/api";
+import { removeTimeEntry } from "@/api/timeEntries";
 import TimeEntryForm from "@/components/CreateTimeEntryForm";
 import RunningTimeEntry from "@/components/RunningTimeEntry";
+import UpdateTimeEntryForm from "@/components/UpdateTimeEntryForm";
 import { ExtensionContextProvider } from "@/context/ExtensionContext";
 import { formatSeconds } from "@/helpers/formatSeconds";
-import { useTimeEntries, useRunningTimeEntry } from "@/hooks";
+import Shortcut from "@/helpers/shortcuts";
+import { Verb, withToast } from "@/helpers/withToast";
+import { useProcessedTimeEntries } from "@/hooks/useProcessedTimeEntries";
+import { useTimeEntryActions } from "@/hooks/useTimeEntryActions";
+import { useTotalDurationToday } from "@/hooks/useTotalDurationToday";
 
 dayjs.extend(duration);
 
 function ListView() {
-  const { timeEntries, isLoadingTimeEntries, revalidateTimeEntries } = useTimeEntries();
-  const { runningTimeEntry, isLoadingRunningTimeEntry, revalidateRunningTimeEntry } = useRunningTimeEntry();
+  const {
+    isLoading,
+    mutateTimeEntries,
+    revalidateRunningTimeEntry,
+    revalidateTimeEntries,
+    runningTimeEntry,
+    timeEntries,
+    timeEntriesWithUniqueProjectAndDescription,
+  } = useProcessedTimeEntries();
 
-  const isLoading = isLoadingTimeEntries || isLoadingRunningTimeEntry;
-
-  const timeEntriesWithUniqueProjectAndDescription = timeEntries.reduce<typeof timeEntries>((acc, timeEntry) => {
-    if (
-      timeEntry.id === runningTimeEntry?.id ||
-      acc.find((t) => t.description === timeEntry.description && t.project_id === timeEntry.project_id)
-    )
-      return acc;
-    return [...acc, timeEntry];
-  }, []);
-
-  const totalDurationToday = useMemo(() => {
-    let seconds = timeEntries
-      .slice(runningTimeEntry ? 1 : 0)
-      .filter((timeEntry) => dayjs(timeEntry.start).isSame(dayjs(), "day"))
-      .reduce((acc, timeEntry) => acc + timeEntry.duration, 0);
-    if (runningTimeEntry) seconds += dayjs().diff(dayjs(runningTimeEntry.start), "second");
-    return seconds;
-  }, [timeEntries, runningTimeEntry]);
-
-  async function resumeTimeEntry(timeEntry: TimeEntry) {
-    await showToast(Toast.Style.Animated, "Starting timer...");
-    try {
-      await createTimeEntry({
-        projectId: timeEntry.project_id ?? undefined,
-        workspaceId: timeEntry.workspace_id,
-        description: timeEntry.description,
-        tags: timeEntry.tags,
-        billable: timeEntry.billable,
-      });
-      revalidateRunningTimeEntry();
-      await showToast(Toast.Style.Success, "Time entry resumed");
-      await clearSearchBar({ forceScrollToTop: true });
-    } catch (e) {
-      await showToast(Toast.Style.Failure, "Failed to resume time entry");
-    }
-  }
+  const totalDurationToday = useTotalDurationToday(timeEntries, runningTimeEntry);
+  const { resumeTimeEntry } = useTimeEntryActions(revalidateRunningTimeEntry, revalidateTimeEntries);
 
   return (
     <List
@@ -61,7 +37,11 @@ function ListView() {
       navigationTitle={isLoading ? undefined : `Today: ${formatSeconds(totalDurationToday)}`}
     >
       {runningTimeEntry && (
-        <RunningTimeEntry {...{ runningTimeEntry, revalidateRunningTimeEntry, revalidateTimeEntries }} />
+        <RunningTimeEntry
+          runningTimeEntry={runningTimeEntry}
+          revalidateRunningTimeEntry={revalidateRunningTimeEntry}
+          revalidateTimeEntries={revalidateTimeEntries}
+        />
       )}
       <List.Section title="Actions">
         <List.Item
@@ -93,7 +73,11 @@ function ListView() {
               keywords={[timeEntry.description, timeEntry.project_name || "", timeEntry.client_name || ""]}
               title={timeEntry.description || "No description"}
               subtitle={(timeEntry.client_name ? timeEntry.client_name + " | " : "") + (timeEntry.project_name ?? "")}
-              accessories={[...timeEntry.tags.map((tag) => ({ tag })), { text: timeEntry.billable ? "$" : "" }]}
+              accessories={[
+                ...timeEntry.tags.map((tag) => ({ tag })),
+                timeEntry.billable ? { tag: { value: "$" } } : {},
+                { text: formatSeconds(timeEntry.duration) },
+              ]}
               icon={{ source: Icon.Circle, tintColor: timeEntry.project_color }}
               actions={
                 <ActionPanel>
@@ -103,18 +87,59 @@ function ListView() {
                     icon={{ source: Icon.Clock }}
                   />
                   <Action.Push
+                    title="Edit Time Entry"
+                    icon={Icon.Pencil}
+                    target={
+                      <ExtensionContextProvider>
+                        <UpdateTimeEntryForm timeEntry={timeEntry} revalidateTimeEntries={revalidateTimeEntries} />
+                      </ExtensionContextProvider>
+                    }
+                  />
+                  <Action.Push
                     title="Create Similar Time Entry"
                     icon={{ source: Icon.Plus }}
+                    shortcut={Shortcut.Duplicate}
                     target={
                       <ExtensionContextProvider>
                         <TimeEntryForm
+                          initialValues={timeEntry}
                           revalidateRunningTimeEntry={revalidateRunningTimeEntry}
                           revalidateTimeEntries={revalidateTimeEntries}
-                          initialValues={timeEntry}
                         />
                       </ExtensionContextProvider>
                     }
                   />
+                  <ActionPanel.Section>
+                    <Action
+                      title="Delete Time Entry"
+                      icon={Icon.Trash}
+                      style={Action.Style.Destructive}
+                      shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                      onAction={async () => {
+                        await confirmAlert({
+                          title: "Delete Time Entry",
+                          message: "Are you sure you want to delete this time entry?",
+                          icon: {
+                            source: Icon.Trash,
+                            tintColor: Color.Red,
+                          },
+                          primaryAction: {
+                            title: "Delete",
+                            style: Alert.ActionStyle.Destructive,
+                            onAction: () => {
+                              withToast({
+                                noun: "Time Entry",
+                                verb: Verb.Delete,
+                                action: async () => {
+                                  await mutateTimeEntries(removeTimeEntry(timeEntry.workspace_id, timeEntry.id));
+                                },
+                              });
+                            },
+                          },
+                        });
+                      }}
+                    />
+                  </ActionPanel.Section>
                 </ActionPanel>
               }
             />

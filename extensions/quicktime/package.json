@@ -2,40 +2,51 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quicktime",
   "title": "QuickTime Recording",
-  "description": "This extension has collection of commands that lets you start screen recording, movie recording and sound recording instantly.",
+  "description": "Start screen recording, movie recording and sound recording instantly.",
   "icon": "quicktime.png",
   "author": "pradeepb28",
-  "categories": ["Productivity", "Applications"],
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "contributors": [
+    "xmok"
+  ],
   "license": "MIT",
   "commands": [
+    {
+      "name": "start-movie-recording",
+      "title": "Start Movie Recording",
+      "subtitle": "QuickTime",
+      "description": "Start movie recording using QuickTime player.",
+      "mode": "no-view"
+    },
     {
       "name": "start-screen-recording",
       "title": "Start Screen Recording",
       "subtitle": "QuickTime",
-      "description": "This command lets your start screen recording using QuickTime player.",
+      "description": "Start screen recording using QuickTime player.",
       "mode": "no-view"
     },
     {
       "name": "start-audio-recording",
       "title": "Start Audio Recording",
       "subtitle": "QuickTime",
-      "description": "This command lets your start audio recording using QuickTime player.",
+      "description": "Start audio recording using QuickTime player.",
       "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.30.3",
-    "run-applescript": "^6.0.0"
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {
@@ -43,5 +54,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

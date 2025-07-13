@@ -1,0 +1,191 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "easyvariable",
+  "title": "Easy Variable",
+  "description": "Convert Any Language Text into an English Variable Name",
+  "icon": "extension-icon.png",
+  "author": "keleus",
+  "contributors": [
+    "litomore"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Data"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "type": "checkbox",
+      "title": "Switch Translate",
+      "description": "Use Google Translate, may need proxy",
+      "required": false,
+      "name": "enableGoogleTranslate",
+      "default": false,
+      "label": "Google Translate"
+    },
+    {
+      "type": "checkbox",
+      "description": "Use Raycast Pro AI for translation",
+      "required": false,
+      "name": "enableRaycastTranslate",
+      "default": false,
+      "label": "Raycast AI"
+    },
+    {
+      "type": "checkbox",
+      "description": "Enable Youdao Web Translate",
+      "required": false,
+      "name": "enableYoudaoTranslate",
+      "default": true,
+      "label": "Youdao Translate"
+    },
+    {
+      "type": "checkbox",
+      "description": "Need zhipuai Api Key,glm-4-flash is free",
+      "required": false,
+      "name": "enableGLMTranslate",
+      "default": false,
+      "label": "GLM Translate"
+    },
+    {
+      "type": "checkbox",
+      "description": "Need OpenAI Api Key,or other OpenAI style Api",
+      "required": false,
+      "name": "enableOpenAITranslate",
+      "default": false,
+      "label": "OpenAI Translate"
+    },
+    {
+      "type": "checkbox",
+      "description": "Need Deepseek Api Key",
+      "required": false,
+      "name": "enableDeepseekTranslate",
+      "default": false,
+      "label": "Deepseek Translate"
+    },
+    {
+      "type": "checkbox",
+      "description": "Enable Tencent Translate SecretId and SecretKey",
+      "required": false,
+      "name": "enableTencentTranslate",
+      "default": false,
+      "label": "Tencent Translate"
+    },
+    {
+      "type": "textfield",
+      "title": "Http Proxy",
+      "description": "Http Proxy URL",
+      "required": false,
+      "placeholder": "http://127.0.0.1:7890",
+      "name": "httpProxy",
+      "default": ""
+    },
+    {
+      "type": "password",
+      "title": "GLM API Key",
+      "name": "glmApiKey",
+      "default": "",
+      "required": false,
+      "description": "API Key for ZhipuAI Platform"
+    },
+    {
+      "type": "password",
+      "title": "OpenAI API Key",
+      "name": "openaiApiKey",
+      "default": "",
+      "required": false,
+      "description": "API Key for OpenAI Platform"
+    },
+    {
+      "type": "textfield",
+      "title": "OpenAI Model",
+      "name": "openaiModel",
+      "default": "gpt-3.5-turbo",
+      "required": false,
+      "description": "OpenAI Model Name (e.g., gpt-3.5-turbo, gpt-4)"
+    },
+    {
+      "type": "textfield",
+      "title": "OpenAI Base URL",
+      "name": "openaiBaseUrl",
+      "default": "https://api.openai.com/v1",
+      "required": false,
+      "description": "OpenAI API Base URL"
+    },
+    {
+      "type": "password",
+      "title": "Deepseek API Key",
+      "name": "deepseekApiKey",
+      "default": "",
+      "required": false,
+      "description": "API Key for Deepseek Platform"
+    },
+    {
+      "type": "password",
+      "title": "Tencent SecretId",
+      "name": "tencentSecretId",
+      "default": "",
+      "required": false,
+      "description": "Tencent SecretId"
+    },
+    {
+      "type": "password",
+      "title": "Tencent SecretKey",
+      "name": "tencentSecretKey",
+      "default": "",
+      "required": false,
+      "description": "Tencent SecretKey"
+    }
+  ],
+  "commands": [
+    {
+      "name": "named",
+      "title": "Named Variable",
+      "subtitle": "Easy Variable",
+      "description": "Generate variable name according to the input text",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "queryText",
+          "placeholder": "Enter text to convert",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@langchain/core": "^0.3.39",
+    "@langchain/deepseek": "^0.0.1",
+    "@langchain/openai": "^0.4.4",
+    "@raycast/api": "^1.91.1",
+    "@raycast/utils": "^1.17.0",
+    "@vitalets/google-translate-api": "^9.2.1",
+    "axios": "^1.8.4",
+    "cheerio": "^1.0.0",
+    "https-proxy-agent": "^7.0.6",
+    "lodash": "^4.17.21",
+    "mac-system-proxy": "^1.0.4",
+    "node-fetch": "^3.3.2",
+    "run-applescript": "^7.0.0",
+    "tencentcloud-sdk-nodejs-tmt": "^4.0.1027",
+    "zhipuai-sdk-nodejs-v4": "^0.1.12"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/lodash": "^4.17.15",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

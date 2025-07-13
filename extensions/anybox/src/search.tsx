@@ -18,7 +18,10 @@ function looseMatch(query: string, content: string): boolean {
   if (query.length === 0) {
     return true;
   }
-  const keywords = query.split(" ").filter((val) => val.length > 0);
+  const keywords = query
+    .split(" ")
+    .filter((val) => val.length > 0)
+    .map((val) => val.toLowerCase());
   const matchName = content.toLowerCase();
 
   for (const keyword of keywords) {

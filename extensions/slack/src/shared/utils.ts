@@ -3,6 +3,11 @@ import { showFailureToast } from "@raycast/utils";
 import { CodedError, ErrorCode } from "@slack/web-api";
 import { formatDistance } from "date-fns";
 import { slack } from "./client/WebClient";
+import * as emoji from "node-emoji";
+
+function convertSlackEmojiToUnicode(text: string): string {
+  return emoji.emojify(text);
+}
 
 const timeDifference = (date: Date): string => {
   const now = new Date();
@@ -87,4 +92,19 @@ const handleError = async (error: CodedError | Error | unknown, title?: string) 
   return showFailureToast(error, { title: title ?? "Something unexpected happened" });
 };
 
-export { timeDifference, convertTimestampToDate, buildScriptEnsuringSlackIsRunning, handleError };
+const isValidChannelId = (channelId?: string) => {
+  if (channelId == null) return false;
+
+  const channelIdRegex = /^C[A-Z0-9]{8,}$/;
+
+  return channelIdRegex.test(channelId.trim());
+};
+
+export {
+  timeDifference,
+  convertTimestampToDate,
+  buildScriptEnsuringSlackIsRunning,
+  handleError,
+  convertSlackEmojiToUnicode,
+  isValidChannelId,
+};

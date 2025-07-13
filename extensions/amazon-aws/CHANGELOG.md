@@ -1,5 +1,44 @@
 # Amazon AWS Changelog
 
+## [Fixes] - 2025-06-18
+- Fix local development crashing without AWS Vault.
+
+## [Console command] - 2025-06-13
+- Add AWS Audit Manager service to console command
+- Fix Amazon Bedrock service details (previously had incorrect AWS Audit Manager information)
+
+## [Console command] - 2025-05-23
+- Fix full URLs (e.g. `https://quicksight.aws.amazon.com`) routing correctly to the console
+
+## [Console command] - 2025-04-25
+- Update WAF & Shield path to '/wafv2/homev2/home' for WAFv2 migration
+- Update AWS Firewall Manager path to '/wafv2/fmsv2/home' for Firewall Manager v2
+- Add common abbreviations 'cfn' for CloudFormation and 'sfn' for Step Functions
+
+## [S3 command] - 2025-04-15
+
+- Add "Copy S3 URI" action
+
+## [Secrets command] - 2024-12-06
+
+- Add actions to copy individual secret values [#14582](https://github.com/raycast/extensions/issues/14582)
+- Updated the dependencies to get rid of critical security vulnerabilities.
+
+## [Lambda command] - 2024-10-28
+
+- Add an Invoke option which allows to save, update or delete payloads and saves the result in clipboard
+
+## [Glue command] - 2024-10-21
+
+- Add Glue command to list Glue jobs, job runs, job definitions and to trigger a job run [#13316](https://github.com/raycast/extensions/pull/13316)
+
+## [Pipelines, DDB, CFN commands] - 2024-07-29
+
+- Pipelines: Reduced the size per page to reduce throttling: [#13304](https://github.com/raycast/extensions/issues/13304)
+- DDB: Handle pagination upfront instead of Raycast pagination. Also, adds frecency sorting.
+- DDB: Add item count to accessories and handle mutation during item update/deletion.
+- CFN: Handle pagination upfront instead of Raycast pagination. Also, adds frecency sorting.
+
 ## [S3 Command] - 2024-07-12
 
 - added reverse order option

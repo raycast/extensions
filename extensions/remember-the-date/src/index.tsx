@@ -2,7 +2,7 @@ import { Form, ActionPanel, Action, showToast, Icon, Color, popToRoot } from "@r
 import { Item } from "./types";
 import { getItems, saveItems } from "./storage";
 import { nanoid } from "nanoid";
-import { refreshMenuBar, validateItem } from "./utils";
+import { refreshCommands, validateItem } from "./utils";
 import { useCachedPromise } from "@raycast/utils";
 import { getFormattedList } from "./list";
 
@@ -17,7 +17,7 @@ export default function Command() {
       popToRoot();
       await saveItems(existingItems);
       await mutate(getFormattedList());
-      await refreshMenuBar();
+      await refreshCommands();
       showToast({ title: "Success", message: "Successfully added item" });
     }
   }

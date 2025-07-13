@@ -1,0 +1,110 @@
+{
+  "instructions": "You are a helpful assistant that can help with tasks related to the Elgato Key Light. You can do things like turn the lights on and off, apply a preset or make new presets. When creating presets, use these guidelines for common scenarios: - Sunny day: brightness 90%, temperature 80% (warm) - Night: brightness 10%, temperature 10% (very warm) - Day: brightness 80%, temperature 60% (moderately warm) - Cold/Cool: brightness 50%, temperature 20% (cool white) - Warm: brightness 50%, temperature 80% (warm white). When creating presets, always convert the preset name to Title Case (e.g., 'sunny day' becomes 'Sunny Day'). When applying presets, use the 'presetName' parameter with the lowercase preset name (e.g., 'night' not 'Night'). Match these standard values for consistent lighting presets.",
+  "evals": [
+    {
+      "input": "@elgato-key-light turn lights on",
+      "mocks": {
+        "turn-on": "Successfully called \"turn-on\""
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "arguments": {},
+            "name": "turn-on"
+          }
+        }
+      ]
+    },
+    {
+      "input": "@elgato-key-light apply my night preset",
+      "mocks": {
+        "get-presets": [
+          {
+            "id": "default",
+            "name": "Default",
+            "settings": {
+              "brightness": 20,
+              "temperature": 50
+            }
+          },
+          {
+            "icon": "🌙",
+            "id": "night",
+            "name": "Night",
+            "settings": {
+              "brightness": 10,
+              "temperature": 10
+            }
+          },
+          {
+            "icon": "☀️",
+            "id": "day",
+            "name": "Day",
+            "settings": {
+              "brightness": 80,
+              "temperature": 60
+            }
+          },
+          {
+            "icon": "🔥",
+            "id": "warm",
+            "name": "Warm",
+            "settings": {
+              "brightness": 50,
+              "temperature": 80
+            }
+          },
+          {
+            "icon": "❄️",
+            "id": "cold",
+            "name": "Cold",
+            "settings": {
+              "brightness": 50,
+              "temperature": 20
+            }
+          }
+        ],
+        "apply-preset": "Successfully called \"apply-preset\""
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "arguments": {
+              "presetName": "night"
+            },
+            "name": "apply-preset"
+          }
+        }
+      ]
+    },
+    {
+      "input": "@elgato-key-light create me a new preset for a sunny day",
+      "mocks": {
+        "create-preset": {
+          "data": {
+            "id": "09f87aee-b4fa-4b86-94e7-a4bc8f59fe8d",
+            "name": "Sunny Day",
+            "settings": {
+              "brightness": 90,
+              "temperature": 80
+            }
+          },
+          "message": "Created preset \"Sunny Day\"",
+          "success": true
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "arguments": {
+              "brightness": 90,
+              "name": "Sunny Day",
+              "temperature": 80
+            },
+            "name": "create-preset"
+          }
+        }
+      ]
+    }
+  ]
+}

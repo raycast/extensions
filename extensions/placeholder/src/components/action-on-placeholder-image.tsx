@@ -1,10 +1,10 @@
+import type { Dispatch, SetStateAction } from "react";
 import { Action, ActionPanel, Icon } from "@raycast/api";
-import StylizePlaceholder from "../stylize-placeholder";
-import { PicsumImageAction } from "./picsum-image-action";
-import { ActionOpenPreferences } from "./action-open-preferences";
-import React, { Dispatch, SetStateAction } from "react";
-import { PicsumImage } from "../types/types";
-import { RevealImageAction } from "./reveal-image-action";
+import type { PicsumImage } from "@/types/types";
+import { ActionOpenPreferences } from "@/components/action-open-preferences";
+import { PicsumImageAction } from "@/components/picsum-image-action";
+import { RevealImageAction } from "@/components/reveal-image-action";
+import StylizePlaceholder from "@/pages/stylize-placeholder";
 
 export function ActionOnPlaceholderImage(props: {
   picsumImage: PicsumImage;

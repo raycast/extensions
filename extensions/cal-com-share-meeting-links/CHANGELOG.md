@@ -1,5 +1,17 @@
 # Cal.com Share Meeting Links Changelog
 
+## [Update] - 2025-04-14
+
+- Adds created at date to bookings, to show booking date
+
+## [Update] - 2025-04-01
+
+- Adds action to open availability troubleshooter for meeting links
+
+## [Update] - 2024-07-29
+
+- Display event prices
+
 ## [Visual refresh and Improvements] - 2024-07-04
 
 - Visual refresh for "View Bookings" and "Share Meeting Links" commands

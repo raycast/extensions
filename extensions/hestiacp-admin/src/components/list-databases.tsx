@@ -56,7 +56,7 @@ export default function ListDatabasesComponent({ user }: ListDatabasesComponentP
                 <Action.Push
                   title="Add Database"
                   icon={Icon.Plus}
-                  target={<AddDatabase user={user} onDatabaseAdded={() => revalidate?.()} />}
+                  target={<AddDatabase user={user} onDatabaseAdded={revalidate} />}
                 />
               </ActionPanel>
             }

@@ -49,7 +49,7 @@ export default function Pin() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm icon={Icon.Pin} title="Pin" onSubmit={handleSubmit} />
+          <Action.SubmitForm icon={Icon.Tack} title="Pin" onSubmit={handleSubmit} />
           <Action title={"Fetch Path"} icon={Icon.Repeat} onAction={mutate} />
           <ActionConfigureCommand />
         </ActionPanel>

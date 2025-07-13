@@ -2,7 +2,7 @@ import { ActionPanel, Color, Action, Icon, List, getPreferenceValues } from "@ra
 import { useEffect, useState } from "react";
 import { useCache } from "../cache";
 import { getGitLabGQL, gitlab } from "../common";
-import { dataToProject, Group, Project } from "../gitlabapi";
+import { dataToProject, Group, Milestone, Project } from "../gitlabapi";
 import { getTextIcon, GitLabIcons, useImage } from "../icons";
 import { getFirstChar, hashRecord, showErrorToast } from "../utils";
 import { GitLabOpenInBrowserAction } from "./actions";
@@ -193,6 +193,7 @@ export function useMyGroups(args?: { query?: string; parentGroupID?: number; top
 }
 
 export interface GroupInfo {
+  milestones?: Milestone[];
   groups: Group[];
   projects: Project[];
 }

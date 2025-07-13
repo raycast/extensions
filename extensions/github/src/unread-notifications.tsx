@@ -1,27 +1,28 @@
 import {
   Color,
+  getPreferenceValues,
   Icon,
+  Image,
+  launchCommand,
   LaunchType,
   MenuBarExtra,
-  Toast,
-  getPreferenceValues,
-  launchCommand,
   open,
   openCommandPreferences,
   openExtensionPreferences,
   showToast,
-  Image,
+  Toast,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { useMemo } from "react";
 
 import { getGitHubClient } from "./api/githubClient";
-import { Notification } from "./components/NotificationListItem";
 import {
   getGitHubIcon,
   getGitHubURL,
   getNotificationIcon,
   getNotificationSubtitle,
   getNotificationTooltip,
+  Notification,
 } from "./helpers/notifications";
 import { withGitHubClient } from "./helpers/withGithubClient";
 import { useViewer } from "./hooks/useViewer";
@@ -33,11 +34,39 @@ function UnreadNotifications() {
 
   const viewer = useViewer();
 
+  const repositoryListArray = useMemo(() => {
+    if (!preferences.repositoryList) return [];
+    return preferences.repositoryList
+      .split(",")
+      .map((repo) => repo.trim())
+      .filter((repo) => repo.length > 0);
+  }, [preferences.repositoryList]);
+
   const { data, isLoading, mutate } = useCachedPromise(async () => {
-    const response = await octokit.rest.activity.listNotificationsForAuthenticatedUser();
+    const response = await octokit.activity.listNotificationsForAuthenticatedUser();
+    let notifications = response.data;
+
+    if (preferences.repositoryFilterMode !== "all" && repositoryListArray.length > 0) {
+      if (preferences.repositoryFilterMode === "include") {
+        notifications = notifications.filter((notification) =>
+          repositoryListArray.some((repo) => repo.toLowerCase() === notification.repository.full_name.toLowerCase()),
+        );
+      } else {
+        notifications = notifications.filter(
+          (notification) =>
+            !repositoryListArray.some((repo) => repo.toLowerCase() === notification.repository.full_name.toLowerCase()),
+        );
+      }
+    }
+
     return Promise.all(
-      response.data.map(async (notification: Notification) => {
-        const icon = await getNotificationIcon(notification);
+      notifications.map(async (notification: Notification) => {
+        let icon: { value: Image; tooltip: string };
+        try {
+          icon = await getNotificationIcon(notification);
+        } catch (error) {
+          icon = { value: { source: Icon.Warning, tintColor: Color.Red }, tooltip: "Could not load icon" };
+        }
         return { ...notification, icon };
       }),
     );
@@ -47,7 +76,7 @@ function UnreadNotifications() {
 
   async function markAllNotificationsAsRead() {
     try {
-      await mutate(octokit.rest.activity.markNotificationsAsRead(), {
+      await mutate(octokit.activity.markNotificationsAsRead(), {
         optimisticUpdate() {
           return [];
         },
@@ -65,7 +94,7 @@ function UnreadNotifications() {
           open(`${notification.repository.html_url}/invitations`);
         } else {
           await open(await getGitHubURL(notification, viewer?.id));
-          await octokit.rest.activity.markThreadAsRead({ thread_id: parseInt(notification.id) });
+          await octokit.activity.markThreadAsRead({ thread_id: parseInt(notification.id) });
         }
       };
 
@@ -81,7 +110,7 @@ function UnreadNotifications() {
 
   async function markNotificationAsRead(notification: Notification) {
     try {
-      await mutate(octokit.rest.activity.markThreadAsRead({ thread_id: parseInt(notification.id) }), {
+      await mutate(octokit.activity.markThreadAsRead({ thread_id: parseInt(notification.id) }), {
         optimisticUpdate(data) {
           return data?.filter((n: Notification) => n.id !== notification.id) ?? [];
         },

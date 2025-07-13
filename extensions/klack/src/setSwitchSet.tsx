@@ -26,6 +26,24 @@ const brands = [
         ]
     },
     {
+        name: 'Flurples',
+        switchSets: [
+            {
+                name: 'Cardboard',
+                color: '#f6ac8a'
+            }
+        ]
+    },
+    {
+        name: 'Gateron',
+        switchSets: [
+            {
+                name: 'Milky Yellow',
+                color: '#feedac'
+            }
+        ]
+    },
+    {
         name: 'NovelKeys',
         switchSets: [
             {
@@ -45,6 +63,7 @@ export default function Command() {
     const [searchText, setSearchText] = useState('')
     const [filteredList, filterList] = useState(brands)
     const [currentSwitchSet, setCurrentSwitchSet] = useState('')
+    const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
         filterList(
@@ -66,7 +85,10 @@ export default function Command() {
                 true
             )
 
-            if (switchSet) setCurrentSwitchSet(switchSet)
+            if (switchSet) {
+                setCurrentSwitchSet(switchSet)
+                setIsLoading(false)
+            }
         }
 
         getCurrentSwitchSet()
@@ -82,7 +104,8 @@ export default function Command() {
             filtering={false}
             onSearchTextChange={setSearchText}
             navigationTitle="Select Switch Sets"
-            searchBarPlaceholder="Select Switch Set">
+            searchBarPlaceholder="Select Switch Set"
+            isLoading={isLoading}>
             {filteredList.map((brand) => (
                 <List.Section key={brand.name} title={`${brand.name}™`}>
                     {brand.switchSets.map((switchSet) => (

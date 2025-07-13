@@ -12,3 +12,8 @@ shrinkwrap.yaml
 # development
 .eslintcache
 tsconfig.tsbuildinfo
+raycast-env.d.ts
+
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift

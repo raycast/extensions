@@ -1,5 +1,5 @@
 import { SearchItem } from './types';
-import { Clipboard, showHUD, ActionPanel, Action } from '@raycast/api';
+import { Clipboard, showHUD, ActionPanel, Action, getPreferenceValues } from '@raycast/api';
 
 export const copySvgToClipboard = async (icon: SearchItem) => {
   // Since v6, Font Awesome stopped setting the SVGs fill color to currentColor, this restores that behavior.
@@ -40,45 +40,91 @@ export const familyStylesByPrefix: { [key: string]: string } = {
   fasl: 'Sharp, Light',
   fast: 'Sharp, Thin',
   fad: 'Duotone, Solid',
+  fadr: 'Duotone, Regular',
+  fadl: 'Duotone, Light',
+  fadt: 'Duotone, Thin',
   fas: 'Classic, Solid',
   far: 'Classic, Regular',
   fal: 'Classic, Light',
   fat: 'Classic, Thin',
   fab: 'Classic, Brands',
+  fasds: 'Sharp Duotone, Solid',
+  fasdr: 'Sharp Duotone, Regular',
+  fasdl: 'Sharp Duotone, Light',
+  fasdt: 'Sharp Duotone, Thin',
 };
 
+//these are for determining which icon to use in the family/style selection menu
 export function iconForStyle(prefix: string) {
-  if (prefix === 'fast' || prefix === 'fat') {
-    return 'thin.svg';
-  } else if (prefix === 'fasr' || prefix === 'far') {
-    return 'regular.svg';
-  } else if (prefix === 'fasl' || prefix === 'fal') {
-    return 'light.svg';
-  } else if (prefix === 'fass' || prefix === 'fas') {
-    return 'solid.svg';
-  } else if (prefix === 'fad') {
-    return 'duotone-new.svg';
-  } else {
-    return 'brand.svg';
-  }
+  return `${familyStylesByPrefix[prefix].replace(', ', '-').replace(' ', '-').toLowerCase()}.svg`;
 }
 
 export function iconActions(searchItem: SearchItem) {
-  return (
-    <ActionPanel>
-      <Action title={`Copy Icon Name`} icon="copy-clipboard-16" onAction={() => copyFASlugToClipboard(searchItem)} />
-      <Action
-        title={`Copy Icon Classes`}
-        icon="copy-clipboard-16"
-        onAction={() => copyFAClassesToClipboard(searchItem)}
-      />
-      <Action title={`Copy as SVG`} icon="copy-clipboard-16" onAction={() => copySvgToClipboard(searchItem)} />
-      <Action title={`Copy Icon Glyph`} icon="copy-clipboard-16" onAction={() => copyFAGlyphToClipboard(searchItem)} />
-      <Action
-        title={`Copy Icon Unicode`}
-        icon="copy-clipboard-16"
-        onAction={() => copyFAUnicodeClipboard(searchItem)}
-      />
-    </ActionPanel>
-  );
+  const { PRIMARY_ACTION } = getPreferenceValues();
+
+  const actions = [
+    {
+      action: (
+        <Action
+          key="copyIconName"
+          title={`Copy Icon Name`}
+          icon="copy-clipboard-16"
+          onAction={() => copyFASlugToClipboard(searchItem)}
+        />
+      ),
+      id: 'copyIconName',
+    },
+    {
+      action: (
+        <Action
+          key="copyIconClasses"
+          title={`Copy Icon Classes`}
+          icon="copy-clipboard-16"
+          onAction={() => copyFAClassesToClipboard(searchItem)}
+        />
+      ),
+      id: 'copyIconClasses',
+    },
+    {
+      action: (
+        <Action
+          key="copyAsSvg"
+          title={`Copy as SVG`}
+          icon="copy-clipboard-16"
+          onAction={() => copySvgToClipboard(searchItem)}
+        />
+      ),
+      id: 'copyAsSvg',
+    },
+    {
+      action: (
+        <Action
+          key="copyIconGlyph"
+          title={`Copy Icon Glyph`}
+          icon="copy-clipboard-16"
+          onAction={() => copyFAGlyphToClipboard(searchItem)}
+        />
+      ),
+      id: 'copyIconGlyph',
+    },
+    {
+      action: (
+        <Action
+          key="copyIconUnicode"
+          title={`Copy Icon Unicode`}
+          icon="copy-clipboard-16"
+          onAction={() => copyFAUnicodeClipboard(searchItem)}
+        />
+      ),
+      id: 'copyIconUnicode',
+    },
+  ];
+
+  const primaryActionIndex = actions.findIndex((a) => a.id === PRIMARY_ACTION);
+  if (primaryActionIndex > -1) {
+    const [primaryAction] = actions.splice(primaryActionIndex, 1);
+    actions.unshift(primaryAction);
+  }
+
+  return <ActionPanel>{actions.map((a) => a.action)}</ActionPanel>;
 }

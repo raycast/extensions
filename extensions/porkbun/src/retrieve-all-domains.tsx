@@ -43,7 +43,7 @@ export default function RetrieveAllDomains() {
               if (filter === "status_active") return item.status === "ACTIVE";
               else if (filter === "status_null") return !item.status;
               else if (filter.includes("tld_")) return item.tld === filter.slice(4);
-            })
+            }),
       );
     })();
   }, [domains, filter, searchText]);
@@ -118,7 +118,7 @@ export default function RetrieveAllDomains() {
                     icon={Icon.Forward}
                     target={<GetURLForwardingComponent domain={item.domain} />}
                   />
-                  <ActionPanel.Submenu title="Go To" icon={Icon.ArrowRight}>
+                  <ActionPanel.Submenu title="Go to" icon={Icon.ArrowRight}>
                     <Action
                       title="Retrieve DNS Records"
                       icon={Icon.Text}
@@ -227,6 +227,19 @@ export default function RetrieveAllDomains() {
                         title="Not Local"
                         icon={item.notLocal === "1" ? Icon.Check : Icon.Multiply}
                       />
+                      {"labels" in item ? (
+                        <List.Item.Detail.Metadata.TagList title="Labels">
+                          {item.labels?.map((label) => (
+                            <List.Item.Detail.Metadata.TagList.Item
+                              key={label.id}
+                              text={label.title}
+                              color={label.color}
+                            />
+                          ))}
+                        </List.Item.Detail.Metadata.TagList>
+                      ) : (
+                        <List.Item.Detail.Metadata.Label title="Labels" icon={Icon.Minus} />
+                      )}
                     </List.Item.Detail.Metadata>
                   }
                 />

@@ -1,3 +1,9 @@
 import { getPreferenceValues } from "@raycast/api";
 
-export const preferences = getPreferenceValues();
+type DefaultOpen = "browser" | "pocket-website";
+
+type Preferences = {
+  defaultOpen: DefaultOpen;
+};
+
+export const preferences = getPreferenceValues<Preferences>();

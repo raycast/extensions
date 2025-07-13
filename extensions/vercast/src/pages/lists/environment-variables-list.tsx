@@ -1,6 +1,6 @@
 import { ActionPanel, confirmAlert, Icon, List, showToast, useNavigation, Action, Toast } from "@raycast/api";
 import { ReactElement, useEffect, useState } from "react";
-import { CreateEnvironment, Environment, Project, Team } from "../../types";
+import { CreateEnvironment, Environment, Project } from "../../types";
 import {
   createEnvironmentVariable,
   deleteEnvironmentVariableById,
@@ -94,10 +94,10 @@ const EnvironmentVariables = ({ project, team }: Props) => {
 
   const itemActions = (v: Environment) => (
     <ActionPanel>
-      <Action
+      <Action.Push
         title="Edit"
         icon={Icon.Pencil}
-        onAction={() => push(<EditEnvironmentVariable envVar={v} updateEnvVar={updateEnvVar} />)}
+        target={<EditEnvironmentVariable envVar={v} updateEnvVar={updateEnvVar} />}
       />
       <Action
         title="Delete"

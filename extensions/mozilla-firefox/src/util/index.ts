@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { getPreferenceValues } from "@raycast/api";
 
 const userDataDirectoryPath = () => {
   if (!process.env.HOME) {
@@ -11,12 +12,16 @@ const userDataDirectoryPath = () => {
 
 const getProfileName = (userDirectoryPath: string) => {
   const profiles = fs.readdirSync(userDirectoryPath);
+  const preferences = getPreferenceValues<Preferences>();
 
+  const customProfile = profiles.filter((profile) => profile.endsWith(preferences.profileDirectorySuffix))[0];
   const releaseProfile = profiles.filter((profile) => profile.endsWith(".default-release"))[0];
   const nightlyProfile = profiles.filter((profile) => profile.endsWith(".default-nightly"))[0];
   const esrProfile = profiles.filter((profile) => profile.endsWith(".default-esr"))[0];
 
-  if (releaseProfile) {
+  if (customProfile) {
+    return customProfile;
+  } else if (releaseProfile) {
     return releaseProfile;
   } else if (nightlyProfile) {
     return nightlyProfile;

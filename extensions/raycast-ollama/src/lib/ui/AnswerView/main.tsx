@@ -1,27 +1,26 @@
 import * as React from "react";
 import { Action, ActionPanel, Detail, Icon, List, showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { GetModel, Run } from "./function";
+import { convertAnswerToChat, GetModel, Run } from "./function";
 import { CommandAnswer } from "../../settings/enum";
 import { OllamaApiGenerateResponse, OllamaApiTagsResponseModel } from "../../ollama/types";
 import { EditModel } from "./form/EditModel";
 import { Creativity } from "../../enum";
+import { RaycastImage } from "../../types";
+import { OllamaApiModelCapability } from "../../ollama/enum";
 
 interface props {
   prompt: string;
   command?: CommandAnswer;
   server?: string;
   model?: string;
+  capabilities?: OllamaApiModelCapability[];
   creativity?: Creativity;
   keep_alive?: string;
 }
 
 /**
  * Return JSX element with generated text and relative metadata.
- * @param props.command - Command Type.
- * @param props.systemPrompt - System Prompt.
- * @param props.server - Ollama Server Name.
- * @param props.model - Ollama Model Tag Name.
  * @returns Raycast Answer View.
  */
 export function AnswerView(props: props): JSX.Element {
@@ -32,15 +31,17 @@ export function AnswerView(props: props): JSX.Element {
   } = usePromise(GetModel, [props.command, props.server, props.model], {
     onError: (e) => {
       if (
-        String(e) === "Settings for this Command unavailable" ||
-        String(e) === "Model unavailable on given server" ||
-        String(e) == "Error: Verify Ollama is Installed and Currently Running."
+        e.message === "Settings for this Command unavailable" ||
+        e.message === "Model unavailable on given server" ||
+        e.message == "Verify Ollama is Installed and Currently Running."
       )
         setShowSelectModelForm(true);
-      showToast({ style: Toast.Style.Failure, title: String(e) });
+      showToast({ style: Toast.Style.Failure, title: e.message });
     },
   });
   const [loading, setLoading]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] = React.useState(false);
+  const query: React.MutableRefObject<undefined | string> = React.useRef();
+  const images: React.MutableRefObject<undefined | RaycastImage[]> = React.useRef();
   const [imageView, setImageView]: [string, React.Dispatch<React.SetStateAction<string>>] = React.useState("");
   const [answer, setAnswer]: [string, React.Dispatch<React.SetStateAction<string>>] = React.useState("");
   const [answerMetadata, setAnswerMetadata]: [
@@ -54,6 +55,8 @@ export function AnswerView(props: props): JSX.Element {
       Run(
         Model,
         props.prompt,
+        query,
+        images,
         setLoading,
         setImageView,
         setAnswer,
@@ -80,6 +83,7 @@ export function AnswerView(props: props): JSX.Element {
         command={props.command}
         setShow={setShowSelectModelForm}
         revalidate={RevalidateModel}
+        capabilities={props.capabilities}
         server={!IsLoadingModel && Model ? Model.server.name : undefined}
         model={!IsLoadingModel && Model ? Model.tag.name : undefined}
         keep_alive={!IsLoadingModel && Model ? Model.keep_alive : undefined}
@@ -105,6 +109,16 @@ export function AnswerView(props: props): JSX.Element {
             icon={Icon.Box}
             onAction={() => setShowSelectModelForm(true)}
             shortcut={{ modifiers: ["cmd"], key: "m" }}
+          />
+        )}
+        {Model && !loading && answer && (
+          <Action
+            title="Continue as Chat"
+            icon={Icon.SpeechBubble}
+            onAction={async () =>
+              await convertAnswerToChat(Model, query.current, images.current, answer, answerMetadata)
+            }
+            shortcut={{ modifiers: ["cmd"], key: "n" }}
           />
         )}
       </ActionPanel>
@@ -167,7 +181,7 @@ export function AnswerView(props: props): JSX.Element {
 
   if (answer === "")
     return (
-      <List isLoading={loading || IsLoadingModel}>
+      <List isLoading={loading || IsLoadingModel} actions={!loading && !IsLoadingModel && <AnswerAction />}>
         {""}
         <List.EmptyView icon={Icon.CircleProgress} title="Loading Model" />
       </List>

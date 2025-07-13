@@ -11,7 +11,7 @@ export default function Results() {
 
   const dates = groupBy(
     data.sort((a, b) => b.utcDate.localeCompare(a.utcDate)),
-    (match) => format(new Date(match.utcDate), "EEE d MMM yyyy")
+    (match) => format(new Date(match.utcDate), "EEE d MMM yyyy"),
   );
 
   return (

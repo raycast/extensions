@@ -39,7 +39,7 @@ export function WorkflowRunActions({ workflowRun, repository, mutateList }: Work
     await showToast({ style: Toast.Style.Animated, title: "Sending re-run request" });
 
     try {
-      await octokit.rest.actions.reRunWorkflow({ run_id: workflowRun.id, owner, repo });
+      await octokit.actions.reRunWorkflow({ run_id: workflowRun.id, owner, repo });
 
       await mutateList();
 
@@ -61,7 +61,7 @@ export function WorkflowRunActions({ workflowRun, repository, mutateList }: Work
     await showToast({ style: Toast.Style.Animated, title: "Sending re-run workflow failed jobs request" });
 
     try {
-      await octokit.rest.actions.reRunWorkflowFailedJobs({ run_id: workflowRun.id, owner, repo });
+      await octokit.actions.reRunWorkflowFailedJobs({ run_id: workflowRun.id, owner, repo });
 
       await mutateList();
 
@@ -83,7 +83,7 @@ export function WorkflowRunActions({ workflowRun, repository, mutateList }: Work
     await showToast({ style: Toast.Style.Animated, title: "Sending cancel request" });
 
     try {
-      await octokit.rest.actions.cancelWorkflowRun({ run_id: workflowRun.id, owner, repo });
+      await octokit.actions.cancelWorkflowRun({ run_id: workflowRun.id, owner, repo });
 
       await mutateList();
 
@@ -105,7 +105,7 @@ export function WorkflowRunActions({ workflowRun, repository, mutateList }: Work
     await showToast({ style: Toast.Style.Animated, title: "Deleting Run" });
 
     try {
-      await octokit.rest.actions.deleteWorkflowRun({ run_id: workflowRun.id, owner, repo });
+      await octokit.actions.deleteWorkflowRun({ run_id: workflowRun.id, owner, repo });
 
       await mutateList();
 
@@ -127,12 +127,12 @@ export function WorkflowRunActions({ workflowRun, repository, mutateList }: Work
       <Action.OpenInBrowser url={workflowRun.html_url} />
 
       {workflowRun.status === "completed" ? (
-        <Action title="Re-Run Workflow" icon={Icon.Clock} onAction={rerunWorkflow} />
+        <Action title="Rerun Workflow" icon={Icon.Clock} onAction={rerunWorkflow} />
       ) : null}
 
       {workflowRun.status === "completed" && workflowRun.conclusion !== "success" ? (
         <Action
-          title="Re-Run Workflow Failed Jobs"
+          title="Rerun Workflow Failed Jobs"
           icon={Icon.Redo}
           onAction={rerunWorkflowFailedJobs}
           shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}

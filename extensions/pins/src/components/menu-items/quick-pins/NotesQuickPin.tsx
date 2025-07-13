@@ -49,20 +49,12 @@ export default function NotesQuickPin(props: NotesQuickPinProps) {
       onAction={async () => {
         if (notes.length == 1) {
           const cmd = `osascript -e 'Application("Notes").notes.byId("${notes[0].id}").show()' -l "JavaScript"`;
-          await createNewPin(
-            notes[0].name,
-            cmd,
-            app.path,
-            targetGroup?.name || "None",
-            "None",
-            undefined,
-            true,
-            false,
-            undefined,
-            undefined,
-            [],
-            "",
-          );
+          await createNewPin({
+            name: notes[0].name,
+            url: cmd,
+            icon: app.path,
+            group: targetGroup?.name || "None",
+          });
         } else {
           let newGroupName = "New Note Group";
           if (targetGroup) {
@@ -73,24 +65,16 @@ export default function NotesQuickPin(props: NotesQuickPinProps) {
               newGroupName = `New Note Group (${iter})`;
               iter++;
             }
-            await createNewGroup(newGroupName, app.path);
+            await createNewGroup({ name: newGroupName, icon: app.path });
           }
           for (const note of notes) {
             const cmd = `osascript -e 'Application("Notes").notes.byId("${note.id}").show()' -l "JavaScript"`;
-            await createNewPin(
-              note.name,
-              cmd,
-              app.path,
-              newGroupName,
-              "None",
-              undefined,
-              true,
-              false,
-              undefined,
-              undefined,
-              [],
-              "",
-            );
+            await createNewPin({
+              name: note.name,
+              url: cmd,
+              icon: app.path,
+              group: newGroupName,
+            });
           }
         }
       }}

@@ -5,7 +5,7 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-09-03 12:43:31
- * Last modified  : 2023-11-01 00:44:12
+ * Last modified  : 2024-07-05 01:56:56
  */
 
 import { LocalStorage, showToast, Toast } from "@raycast/api";
@@ -156,25 +156,25 @@ const examplePins: Pin[] = [
   },
   {
     id: 17,
-    name: "Copy Address",
-    url: "{{copy:{{address}}}}",
-    icon: "House",
-    group: "Placeholder Examples",
-    application: "None",
-  },
-  {
-    id: 18,
-    name: "Copy Date",
+    name: "Date: {{date}}",
     url: "{{copy:{{date}}}}",
     icon: "Calendar",
     group: "Placeholder Examples",
     application: "None",
   },
   {
+    id: 18,
+    name: "Day: {{day}}",
+    url: "{{copy:{{day}}}}",
+    icon: "Calendar",
+    group: "Placeholder Examples",
+    application: "None",
+  },
+  {
     id: 19,
-    name: "Paste UUID",
-    url: "{{paste:{{uuid}}}}",
-    icon: "Number27",
+    name: "Time: {{time}}",
+    url: "{{copy:{{time}}}}",
+    icon: "Clock",
     group: "Placeholder Examples",
     application: "None",
   },
@@ -195,6 +195,22 @@ const examplePins: Pin[] = [
     group: "Raycast AI Examples",
     application: "None",
     tags: ["AI", "selection"],
+  },
+  {
+    id: 22,
+    name: "Copy Address",
+    url: "{{copy:{{address}}}}",
+    icon: "House",
+    group: "Placeholder Examples",
+    application: "None",
+  },
+  {
+    id: 23,
+    name: "Paste UUID",
+    url: "{{paste:{{uuid}}}}",
+    icon: "Number27",
+    group: "Placeholder Examples",
+    application: "None",
   },
 ];
 

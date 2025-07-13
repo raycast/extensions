@@ -1,4 +1,4 @@
-import { ActionPanel, Grid, List } from "@raycast/api";
+import { ActionPanel, Grid, Icon, List } from "@raycast/api";
 import React from "react";
 import { Layout } from "../types/types";
 import { ActionLaunchPin } from "./action-launch-pin";
@@ -10,7 +10,7 @@ export function QuickAccessEmptyView(props: { layout: string }) {
   const { layout } = props;
   return layout === Layout.GRID ? (
     <Grid.EmptyView
-      icon={{ source: { light: "empty-view-icon.png", dark: "empty-view-icon@dark.png" } }}
+      icon={Icon.Finder}
       title={title}
       description={description}
       actions={
@@ -22,7 +22,7 @@ export function QuickAccessEmptyView(props: { layout: string }) {
     />
   ) : (
     <List.EmptyView
-      icon={{ source: { light: "empty-view-icon.png", dark: "empty-view-icon@dark.png" } }}
+      icon={Icon.Finder}
       title={title}
       description={description}
       actions={

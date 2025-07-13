@@ -17,12 +17,12 @@ export function ActionOnPins(props: {
     <>
       <ActionLaunchPin />
       <Action
-        icon={Icon.PinDisabled}
+        icon={Icon.TackDisabled}
         title={`Unpin`}
         shortcut={{ modifiers: ["cmd"], key: "u" }}
         onAction={async () => {
           await alertDialog(
-            Icon.PinDisabled,
+            Icon.TackDisabled,
             "Unpin",
             `Are you sure you want to unpin the ${directory.directory.name}?`,
             "Unpin",
@@ -38,12 +38,12 @@ export function ActionOnPins(props: {
         }}
       />
       <Action
-        icon={Icon.PinDisabled}
+        icon={Icon.TackDisabled}
         title={`Unpin All`}
         shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
         onAction={async () => {
           await alertDialog(
-            Icon.PinDisabled,
+            Icon.TackDisabled,
             "Unpin All",
             "Are you sure you  want to unpin all files and folders?",
             "Unpin All",

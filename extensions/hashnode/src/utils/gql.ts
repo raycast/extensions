@@ -1,16 +1,16 @@
-import { preferences } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import fetch, { Response } from "node-fetch";
 
-const HASHNODE_URL = "https://api.hashnode.com/";
+const HASHNODE_URL = "https://gql.hashnode.com/";
 
 async function gql<T>(query: string, variables = {}): Promise<T> {
-  const token = preferences.token?.value as string;
+  const { token } = getPreferenceValues<Preferences>();
 
   return fetch(HASHNODE_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: token ?? "",
+      Authorization: token,
     },
     body: JSON.stringify({
       query,

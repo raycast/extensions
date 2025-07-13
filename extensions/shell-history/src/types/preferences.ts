@@ -1,15 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  maxLines: string;
-  removeDuplicates: boolean;
-  rememberShellTag: boolean;
-  primaryAction: string;
-  showTips: boolean;
-}
-
-export const { maxLines, removeDuplicates, rememberShellTag, primaryAction, showTips } =
-  getPreferenceValues<Preferences>();
+export const { maxLines, historyTimestamp, removeDuplicates, rememberShellTag, primaryAction, showTips } =
+  getPreferenceValues<Preferences.Index>();
 
 export enum PrimaryAction {
   PASTE = "Paste",

@@ -1,6 +1,6 @@
 import YAML from "yaml";
+import { Note } from "../api/vault/notes/notes.types";
 
-import { Note } from "./interfaces";
 import { CODE_BLOCK_REGEX, INLINE_TAGS_REGEX, YAML_FRONTMATTER_REGEX } from "./constants";
 import { sortByAlphabet } from "./utils";
 
