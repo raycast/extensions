@@ -91,16 +91,6 @@ export async function unshortenUrl(url: string): Promise<{ redirectionSteps: Red
   }
 }
 
-export function getFaviconUrl(url: string) {
-  try {
-    const hostname = new URL(url).hostname;
-    return `https://www.google.com/s2/favicons?domain=${hostname}`;
-  } catch (error) {
-    console.error(`Error getting favicon URL for ${url}:`, error);
-    return Icon.Globe;
-  }
-}
-
 export const getTagColor = (statusCode: number) => {
   if (statusCode >= 200 && statusCode < 300) return Color.Green;
   if (statusCode >= 300 && statusCode < 400) return Color.Yellow;
