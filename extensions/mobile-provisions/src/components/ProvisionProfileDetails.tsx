@@ -49,14 +49,6 @@ function MetadataLabels({ profile }: { profile: ProvisioningProfile }) {
   );
 }
 
-export function ListDetailMetadata({ profile }: { profile: ProvisioningProfile }) {
-  return (
-    <Detail.Metadata>
-      <MetadataLabels profile={profile} />
-    </Detail.Metadata>
-  );
-}
-
 export function DetailMetadata({ profile }: { profile: ProvisioningProfile }) {
   return (
     <Detail.Metadata>
@@ -93,6 +85,13 @@ export function ProfileActions({ profile }: { profile: ProvisioningProfile }) {
             content={profile.Entitlements["application-identifier"]}
           />
         )}
+      </ActionPanel.Section>
+      <ActionPanel.Section>
+        <Action.Trash
+          title="Remove Provision"
+          paths={[profile.filePath]}
+          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+        />
       </ActionPanel.Section>
     </>
   );

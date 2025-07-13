@@ -7,7 +7,7 @@ import { ProvisioningProfile } from "./types";
 import { parseProvisioningProfile } from "./utils/parser";
 import { useState } from "react";
 import { getProfileTypeColor } from "./utils/helpers";
-import { getMarkdown, ListDetailMetadata, ProfileActions } from "./components/ProvisionProfileDetails";
+import { getMarkdown, DetailMetadata, ProfileActions } from "./components/ProvisionProfileDetails";
 
 const PROFILES_PATH = path.join(os.homedir(), "Library/MobileDevice/Provisioning Profiles");
 
@@ -47,10 +47,12 @@ function ProfileListItem({
   profile,
   isShowingDetail,
   onToggleDetails,
+  globalActions,
 }: {
   profile: ProvisioningProfile;
   isShowingDetail: boolean;
   onToggleDetails: () => void;
+  globalActions?: React.ReactNode;
 }) {
   const accessories: List.Item.Accessory[] = isShowingDetail
     ? []
@@ -78,7 +80,7 @@ function ProfileListItem({
       accessories={accessories}
       keywords={keywords}
       quickLook={{ path: profile.filePath }}
-      detail={<List.Item.Detail markdown={getMarkdown(profile)} metadata={<ListDetailMetadata profile={profile} />} />}
+      detail={<List.Item.Detail markdown={getMarkdown(profile)} metadata={<DetailMetadata profile={profile} />} />}
       actions={
         <ActionPanel>
           <Action
@@ -87,6 +89,7 @@ function ProfileListItem({
             onAction={onToggleDetails}
           />
           <ProfileActions profile={profile} />
+          {globalActions}
         </ActionPanel>
       }
     />
@@ -97,6 +100,21 @@ export default function ShowMobileProvisions() {
   const { data: profiles, isLoading } = usePromise(getProvisioningProfiles, []);
   const [isShowingDetail, setIsShowingDetail] = useState(false);
 
+  const expiredProfiles = profiles?.filter((p) => p.ExpirationDate < new Date()) ?? [];
+
+  function RemoveAllExpiredProvisionsAction() {
+    if (expiredProfiles.length === 0) return null;
+    return (
+      <ActionPanel.Section>
+        <Action.Trash
+          title="Remove All Expired Provisions"
+          paths={expiredProfiles.map((p) => p.filePath)}
+          shortcut={{ modifiers: ["ctrl", "opt"], key: "x" }}
+        />
+      </ActionPanel.Section>
+    );
+  }
+
   return (
     <List isLoading={isLoading} isShowingDetail={isShowingDetail}>
       {profiles?.map((profile) => (
@@ -105,6 +123,7 @@ export default function ShowMobileProvisions() {
           profile={profile}
           isShowingDetail={isShowingDetail}
           onToggleDetails={() => setIsShowingDetail((v) => !v)}
+          globalActions={<RemoveAllExpiredProvisionsAction />}
         />
       ))}
     </List>

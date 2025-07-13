@@ -2,30 +2,33 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mobile-provisions",
   "title": "Mobile Provisions",
-  "description": "Dump installed mobileprovision files",
+  "description": "Manage and inspect Apple mobile provisioning profiles with detailed information about certificates, entitlements, and provisioned devices",
   "icon": "extension-icon.png",
   "author": "ernest0n",
   "license": "MIT",
   "categories": [
-    "Developer Tools"
+    "Developer Tools",
+    "System"
   ],
   "keywords": [
     "mobileprovision",
     "certificate",
     "apple",
-    "signing"
+    "signing",
+    "entitlements",
+    "provision profile"
   ],
   "commands": [
     {
       "name": "show-mobile-provisions",
       "title": "Show Mobile Provisions",
-      "description": "Display list of installed .mobileprovision files",
+      "description": "Browse and manage all installed .mobileprovision files with detailed information, search, and bulk actions",
       "mode": "view"
     },
     {
       "name": "dump-provision-profile",
       "title": "Dump Provision Profile",
-      "description": "Dump a provision profile from a file path",
+      "description": "Inspect a specific .mobileprovision file by providing its file path",
       "mode": "view",
       "arguments": [
         {
