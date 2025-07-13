@@ -1,6 +1,6 @@
 # Instagram Media Downloader Changelog
 
-## [Update] - 2025-07-13
+## [Update] - {PR_MERGE_DATE}
 
 - Update the URL for obtaining the Instagram story.
 
