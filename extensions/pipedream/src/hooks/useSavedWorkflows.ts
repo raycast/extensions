@@ -1,10 +1,11 @@
 import { useCallback } from "react";
-import { LocalStorage } from "@raycast/api";
+import { LocalStorage, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { fetchWorkflowDetails } from "../services/api";
 import { useUserInfo } from "./useUserInfo";
-import { SavedWorkflow, WorkflowDetails } from "../types";
+import { SavedWorkflow, WorkflowDetails, Preferences } from "../types";
 import { LOCALSTORAGE_KEY } from "../utils/constants";
+import { DEMO_WORKFLOWS } from "../utils/demo-data";
 
 type UseSavedWorkflowsReturn = {
   workflows: SavedWorkflow[];
@@ -17,17 +18,24 @@ export function useSavedWorkflows(): UseSavedWorkflowsReturn {
   const { orgId, isLoading: isLoadingOrgId, revalidate: revalidateOrgId } = useUserInfo();
 
   const fetchAndUpdateWorkflows = useCallback(async () => {
-    if (!orgId) {
-      await revalidateOrgId();
-      if (!orgId) throw new Error("Organization ID is missing");
+    const { PIPEDREAM_API_KEY } = getPreferenceValues<Preferences>();
+    const isDemo = PIPEDREAM_API_KEY === "demo";
+    const currentOrgId = orgId;
+    if (!currentOrgId) {
+      throw new Error("Organization ID is missing. Please check your API key and try again.");
     }
 
     const savedWorkflowsJson = await LocalStorage.getItem<string>(LOCALSTORAGE_KEY);
-    const savedWorkflows: SavedWorkflow[] = savedWorkflowsJson ? JSON.parse(savedWorkflowsJson) : [];
+    let savedWorkflows: SavedWorkflow[] = savedWorkflowsJson ? JSON.parse(savedWorkflowsJson) : [];
+
+    if (isDemo && savedWorkflows.length === 0) {
+      savedWorkflows = DEMO_WORKFLOWS;
+      await LocalStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(savedWorkflows));
+    }
 
     const updatedWorkflows = await Promise.all(
       savedWorkflows.map(async (workflow) => {
-        const details: WorkflowDetails = await fetchWorkflowDetails(workflow.id, orgId);
+        const details: WorkflowDetails = await fetchWorkflowDetails(workflow.id, currentOrgId);
         return {
           ...workflow,
           triggerCount: details.triggers?.length ?? 0,
@@ -62,6 +70,7 @@ type UseWorkflowActionsReturn = {
   updateWorkflow: (updatedWorkflow: SavedWorkflow) => Promise<void>;
   removeWorkflow: (workflowId: string) => Promise<void>;
   toggleMenuBarVisibility: (workflowId: string) => Promise<void>;
+  removeAllWorkflows: () => Promise<void>;
 };
 
 export function useWorkflowActions(): UseWorkflowActionsReturn {
@@ -116,10 +125,15 @@ export function useWorkflowActions(): UseWorkflowActionsReturn {
     [workflows, updateLocalStorage],
   );
 
+  const removeAllWorkflows = useCallback(async () => {
+    await updateLocalStorage([]);
+  }, [updateLocalStorage]);
+
   return {
     addWorkflow,
     updateWorkflow,
     removeWorkflow,
     toggleMenuBarVisibility,
+    removeAllWorkflows,
   };
 }

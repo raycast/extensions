@@ -1,6 +1,14 @@
+export type SortOption = "name" | "errors" | "triggers" | "steps";
+export type FilterOption = "all" | "menuBar" | "notMenuBar" | "errors";
+
 export interface SavedWorkflow {
   id: string;
   customName: string;
+  /**
+   * Optional folder used for grouping workflows in the UI. Defaults to an
+   * empty string which represents the root level.
+   */
+  folder?: string;
   url: string;
   triggerCount: number;
   stepCount: number;
@@ -67,6 +75,19 @@ export interface WorkflowError {
   };
 }
 
+export type ErrorCategory =
+  | "api_error"
+  | "authentication_error"
+  | "rate_limit_error"
+  | "timeout_error"
+  | "validation_error"
+  | "network_error"
+  | "configuration_error"
+  | "data_processing_error"
+  | "unknown";
+
+export type ErrorSeverity = "low" | "medium" | "high" | "critical";
+
 export interface WorkflowErrorResponse {
   page_info: {
     start_cursor: string;
@@ -85,12 +106,33 @@ export interface WorkflowErrorInfo {
 
 export interface Preferences {
   PIPEDREAM_API_KEY: string;
+  DEFAULT_SORT?: "name" | "errors" | "triggers" | "steps";
+  DEFAULT_FILTER?: "all" | "menuBar" | "notMenuBar" | "errors";
+  REFRESH_INTERVAL_SECONDS?: string; // stored as string in Raycast prefs
 }
 
 export interface WorkflowDetails {
   id: string;
   name: string;
-  active: boolean;
   triggers: unknown[];
   steps: unknown[];
+}
+
+export interface WorkflowEvent {
+  id: string;
+  timestamp: string;
+  status: "success" | "error" | "pending";
+  execution_time_ms: number;
+  error_message?: string;
+  event_data: Record<string, unknown>;
+}
+
+export interface EventHistory {
+  page_info: {
+    start_cursor: string;
+    total_count: number;
+    end_cursor: string;
+    count: number;
+  };
+  data: WorkflowEvent[];
 }

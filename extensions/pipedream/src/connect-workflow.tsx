@@ -1,141 +1,127 @@
 import { Form, ActionPanel, Action, showToast, Toast, useNavigation } from "@raycast/api";
-import { useState, useEffect } from "react";
-import { useUserInfo } from "./hooks/useUserInfo";
-import { fetchWorkflowDetails } from "./services/api";
-import { useWorkflowActions } from "./hooks/useSavedWorkflows";
+import { useWorkflowActions, useSavedWorkflows } from "./hooks/useSavedWorkflows";
 import { SavedWorkflow } from "./types";
-import { WORKFLOW_ID_PREFIX, PIPEDREAM_BASE_URL } from "./utils/constants";
+import { fetchWorkflowDetails } from "./services/api";
+import { useUserInfo } from "./hooks/useUserInfo";
+import { getExistingFolders } from "./utils/workflow";
+import { useState } from "react";
 
-export default function AddWorkflow() {
-  const [workflowId, setWorkflowId] = useState("");
-  const [customName, setCustomName] = useState("");
-  const [workflowIdError, setWorkflowIdError] = useState<string | undefined>();
-  const [customNameError, setCustomNameError] = useState<string | undefined>();
-  const [apiError, setApiError] = useState<string | undefined>();
-  const [isLoading, setIsLoading] = useState(false);
-
-  const { addWorkflow, updateWorkflow } = useWorkflowActions();
-  const { orgId, isLoading: isLoadingUserInfo, error: userInfoError } = useUserInfo();
+export default function ConnectWorkflow() {
+  const { addWorkflow } = useWorkflowActions();
+  const { orgId } = useUserInfo();
   const { pop } = useNavigation();
+  const { workflows } = useSavedWorkflows();
+  const existingFolders = getExistingFolders(workflows);
+  const [folderChoice, setFolderChoice] = useState<string>("");
+  const [customFolder, setCustomFolder] = useState("");
+  const [addToMenuBar, setAddToMenuBar] = useState(true);
 
-  useEffect(() => {
-    if (userInfoError) {
-      setApiError(`Error loading user info: ${String(userInfoError)}`);
-    } else if (!isLoadingUserInfo && !orgId) {
-      setApiError("Unable to retrieve organization information. Please try again later.");
-    } else {
-      setApiError(undefined);
-    }
-  }, [isLoadingUserInfo, userInfoError, orgId]);
-
-  const validateForm = () => {
-    let isValid = true;
-
-    if (!workflowId.trim()) {
-      setWorkflowIdError("Please enter a Workflow ID");
-      isValid = false;
-    } else if (!workflowId.startsWith(WORKFLOW_ID_PREFIX)) {
-      setWorkflowIdError(`Workflow ID must start with '${WORKFLOW_ID_PREFIX}'`);
-      isValid = false;
-    } else {
-      setWorkflowIdError(undefined);
-    }
-
-    if (!customName.trim()) {
-      setCustomNameError("Please enter a Custom Name");
-      isValid = false;
-    } else {
-      setCustomNameError(undefined);
-    }
-
-    return isValid;
-  };
-
-  const handleSubmit = async () => {
-    if (!validateForm()) return;
-
-    setApiError(undefined);
-
+  const handleSubmit = async (values: { workflowId: string; customName: string }) => {
     if (!orgId) {
-      setApiError("Organization ID is missing. Please try again later.");
+      showToast({
+        title: "Error",
+        message: "Organization ID is missing. Please check your API key.",
+        style: Toast.Style.Failure,
+      });
       return;
     }
 
-    setIsLoading(true);
+    // Validate workflow ID format
+    if (!values.workflowId.startsWith("p_")) {
+      showToast({
+        title: "Invalid Workflow ID",
+        message: "Workflow ID must start with 'p_' (e.g., p_abc123)",
+        style: Toast.Style.Failure,
+      });
+      return;
+    }
 
     try {
-      const workflowData = await fetchWorkflowDetails(workflowId, orgId);
+      // Fetch workflow details to validate
+      const workflowDetails = await fetchWorkflowDetails(values.workflowId, orgId);
+
+      // Determine final folder
+      const finalFolder = folderChoice === "__custom__" ? customFolder : folderChoice;
+
       const newWorkflow: SavedWorkflow = {
-        id: workflowId,
-        customName: customName,
-        url: `${PIPEDREAM_BASE_URL}${workflowId}`,
-        triggerCount: workflowData.triggers?.length || 0,
-        stepCount: workflowData.steps?.length || 0,
-        showInMenuBar: true,
+        id: values.workflowId,
+        customName: values.customName,
+        folder: finalFolder,
+        url: `https://pipedream.com/@/workflow/${values.workflowId}`,
+        triggerCount: workflowDetails.triggers?.length || 0,
+        stepCount: workflowDetails.steps?.length || 0,
+        showInMenuBar: addToMenuBar,
         sortOrder: 0,
       };
 
-      const existingWorkflow = await addWorkflow(newWorkflow);
-      const isUpdate = !!existingWorkflow;
+      const existing = await addWorkflow(newWorkflow);
 
-      if (isUpdate) {
-        await updateWorkflow(newWorkflow);
-        showToast({ title: "Success", message: "Workflow updated", style: Toast.Style.Success });
+      if (existing) {
+        showToast({
+          title: "Workflow Already Connected",
+          message: `"${existing.customName}" is already in your workflow list`,
+          style: Toast.Style.Failure,
+        });
       } else {
-        showToast({ title: "Success", message: "New workflow added", style: Toast.Style.Success });
+        showToast({
+          title: "Success",
+          message: `"${newWorkflow.customName}" has been connected successfully`,
+          style: Toast.Style.Success,
+        });
+        pop();
       }
-
-      setWorkflowId("");
-      setCustomName("");
-      pop();
     } catch (error) {
-      setApiError("Failed to add/update workflow. Please try again.");
-    } finally {
-      setIsLoading(false);
+      showToast({
+        title: "Error",
+        message: `Failed to connect workflow: ${error instanceof Error ? error.message : String(error)}`,
+        style: Toast.Style.Failure,
+      });
     }
   };
 
-  if (isLoadingUserInfo) {
-    return <Form isLoading={true} />;
-  }
-
   return (
     <Form
-      isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Add/Update Workflow" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Connect Workflow" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.TextField
         id="workflowId"
         title="Workflow ID"
-        placeholder="Enter Workflow ID"
-        value={workflowId}
-        onChange={(newValue) => {
-          setWorkflowId(newValue);
-          setWorkflowIdError(undefined);
-        }}
-        error={workflowIdError}
-        autoFocus
-        info={`The Workflow ID starts with '${WORKFLOW_ID_PREFIX}' and can be found in the URL of your workflow on Pipedream.`}
+        placeholder="p_abc123"
+        info="Enter the workflow ID from Pipedream. You can find this in the workflow URL or in the workflow settings."
       />
-
       <Form.TextField
         id="customName"
         title="Custom Name"
-        placeholder="Enter a custom name for this workflow"
-        value={customName}
-        onChange={(newValue) => {
-          setCustomName(newValue);
-          setCustomNameError(undefined);
-        }}
-        error={customNameError}
-        info="This name is used only within this extension and does not affect the workflow name in Pipedream."
+        placeholder="My Workflow"
+        info="Give this workflow a custom name for display in the extension. This will be used instead of the workflow ID in lists."
       />
-
-      {apiError && <Form.Description title="Error" text={apiError} />}
+      <Form.Dropdown
+        id="folder"
+        title="Folder"
+        value={folderChoice}
+        onChange={setFolderChoice}
+        info="Optional: Organize workflows into folders for better organization."
+      >
+        <Form.Dropdown.Item value="" title="None" />
+        {existingFolders.map((f) => (
+          <Form.Dropdown.Item key={f} value={f} title={f} />
+        ))}
+        <Form.Dropdown.Item value="__custom__" title="Add Folder..." />
+      </Form.Dropdown>
+      {folderChoice === "__custom__" && (
+        <Form.TextField
+          id="customFolder"
+          title="New Folder"
+          value={customFolder}
+          onChange={setCustomFolder}
+          info="Enter the name for your new folder."
+        />
+      )}
+      <Form.Checkbox id="addToMenuBar" label="Add to Menu Bar" value={addToMenuBar} onChange={setAddToMenuBar} />
     </Form>
   );
 }

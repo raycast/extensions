@@ -1,7 +1,8 @@
 {
   "name": "pipedream",
+  "version": "2.0.0",
   "title": "Pipedream",
-  "description": "Add, manage, and monitor your Pipedream workflows. Track errors, perform quick actions, and view workflow statuses directly from Raycast and your menu bar.",
+  "description": "Manage Pipedream workflows with AI-powered error analysis. Connect, monitor, and optimize your workflows directly from Raycast.",
   "icon": "pipedream-logo.png",
   "author": "olekristianbe",
   "categories": [
@@ -25,11 +26,18 @@
     },
     {
       "name": "menu-bar-workflows",
-      "title": "Show Workflow Status",
+      "title": "Show in Menu Bar",
       "subtitle": "Pipedream",
       "description": "Display workflow status, error counts, and quick actions in the menu bar",
       "mode": "menu-bar",
       "interval": "5m"
+    },
+    {
+      "name": "workflow-analytics",
+      "title": "Workflow Analytics",
+      "subtitle": "Pipedream",
+      "description": "View detailed analytics, metrics, and performance data for your workflows. Includes AI-powered error analysis for intelligent insights.",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -38,7 +46,85 @@
       "type": "password",
       "required": true,
       "title": "Pipedream API Key",
-      "description": "Your Pipedream API key. For setup instructions, see the About This Extension section in preferences."
+      "description": "Requires a Pipedream account. Generate your API key at https://pipedream.com/settings/user and enter it here."
+    },
+    {
+      "name": "DEFAULT_SORT",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Sort Order",
+      "description": "Choose how workflows are sorted by default",
+      "data": [
+        {
+          "title": "Name",
+          "value": "name"
+        },
+        {
+          "title": "Error Count",
+          "value": "errors"
+        },
+        {
+          "title": "Trigger Count",
+          "value": "triggers"
+        },
+        {
+          "title": "Step Count",
+          "value": "steps"
+        }
+      ],
+      "default": "name"
+    },
+    {
+      "name": "DEFAULT_FILTER",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Filter",
+      "description": "Choose the initial filter view for workflows",
+      "data": [
+        {
+          "title": "All Workflows",
+          "value": "all"
+        },
+        {
+          "title": "Menu Bar Only",
+          "value": "menuBar"
+        },
+        {
+          "title": "With Errors",
+          "value": "errors"
+        }
+      ],
+      "default": "all"
+    },
+    {
+      "name": "REFRESH_INTERVAL_SECONDS",
+      "type": "dropdown",
+      "required": false,
+      "title": "Refresh Interval",
+      "description": "How often to update error counts in the background",
+      "data": [
+        {
+          "title": "5 minutes",
+          "value": "300"
+        },
+        {
+          "title": "10 minutes",
+          "value": "600"
+        },
+        {
+          "title": "15 minutes",
+          "value": "900"
+        },
+        {
+          "title": "30 minutes",
+          "value": "1800"
+        },
+        {
+          "title": "1 hour",
+          "value": "3600"
+        }
+      ],
+      "default": "300"
     }
   ],
   "dependencies": {
@@ -52,17 +138,22 @@
     "@types/node": "~18.8.3",
     "@types/node-fetch": "^2.6.11",
     "@types/react": "^18.0.9",
+    "@types/jest": "^29.5.4",
     "@typescript-eslint/eslint-plugin": "^6.8.0",
     "@typescript-eslint/parser": "^6.8.0",
     "eslint": "^8.51.0",
     "eslint-config-prettier": "^9.0.0",
     "prettier": "^3.0.3",
+    "ts-jest": "^29.1.1",
+    "jest": "^29.6.2",
+    "@testing-library/react": "^14.0.0",
     "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint",
-    "publish": "raycast-scripts publish"
+    "publish": "raycast-scripts publish",
+    "test": "jest"
   }
 }
