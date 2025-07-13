@@ -27,8 +27,7 @@ export function TemplateSelection({ service, onTemplateApplied, mode = "select" 
       const allTemplates = await TemplateManager.getAllAvailableTemplates();
       setTemplates(allTemplates);
     } catch (error) {
-      console.error("Error loading templates:", error);
-      await showToast({
+      await showFailureToast(error, { title: "Failed to load templates" });
         style: Toast.Style.Failure,
         title: "Failed to load templates",
         message: error instanceof Error ? error.message : "Unknown error occurred",
