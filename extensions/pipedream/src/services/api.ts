@@ -1,6 +1,6 @@
 import fetch, { RequestInit, Response } from "node-fetch";
 import { getPreferenceValues } from "@raycast/api";
-import { WorkflowErrorResponse, Preferences, UserInfo, WorkflowDetails, EventHistory } from "../types";
+import { WorkflowErrorResponse, UserInfo, WorkflowDetails, EventHistory } from "../types";
 import { API_ENDPOINT } from "../utils/constants";
 import { DEMO_ERRORS } from "../utils/demo-data";
 
@@ -8,8 +8,8 @@ import { DEMO_ERRORS } from "../utils/demo-data";
  * Retrieve preferences dynamically so that updates to the API key are reflected
  * without restarting the extension.
  */
-function getPreferences(): Preferences {
-  return getPreferenceValues<Preferences>();
+function getPreferences() {
+  return getPreferenceValues();
 }
 
 function isDemo(): boolean {
@@ -20,7 +20,7 @@ class APIError extends Error {
   constructor(
     public status: number,
     public statusText: string,
-    public body: string,
+    public body: string
   ) {
     super(`API Error: ${status} ${statusText}`);
     this.name = "APIError";
@@ -93,7 +93,7 @@ export async function fetchWorkflowDetails(workflowId: string, orgId: string): P
 export async function toggleWorkflowStatus(
   workflowId: string,
   orgId: string,
-  active: boolean,
+  active: boolean
 ): Promise<WorkflowDetails> {
   if (isDemo()) {
     return Promise.resolve({ id: workflowId, name: `Demo ${workflowId}`, triggers: [], steps: [] });
@@ -138,7 +138,7 @@ export async function fetchWorkflowErrors(workflowId: string, orgId: string): Pr
   }
   try {
     const response = await fetchWithAuth(
-      `${API_ENDPOINT}/workflows/${workflowId}/$errors/event_summaries?expand=event&limit=100&org_id=${orgId}`,
+      `${API_ENDPOINT}/workflows/${workflowId}/$errors/event_summaries?expand=event&limit=100&org_id=${orgId}`
     );
     return response.json();
   } catch (error) {
@@ -170,7 +170,7 @@ export async function fetchWorkflowEventHistory(workflowId: string, orgId: strin
   try {
     // Use the error endpoint to get recent events (errors)
     const response = await fetchWithAuth(
-      `${API_ENDPOINT}/workflows/${workflowId}/$errors/event_summaries?expand=event&limit=${limit}&org_id=${orgId}`,
+      `${API_ENDPOINT}/workflows/${workflowId}/$errors/event_summaries?expand=event&limit=${limit}&org_id=${orgId}`
     );
     const errorData = await response.json();
 
@@ -178,14 +178,13 @@ export async function fetchWorkflowEventHistory(workflowId: string, orgId: strin
     const events =
       errorData.data?.map((error: unknown, index: number) => {
         const errorObj = error as Record<string, unknown>;
+        const hasError = ((errorObj.event as Record<string, unknown>)?.error as Record<string, unknown>)?.msg;
         return {
           id: (errorObj.id as string) || `event_${index}`,
           timestamp: new Date((errorObj.indexed_at_ms as number) || Date.now()).toISOString(),
-          status: "error" as const,
+          status: hasError ? ("error" as const) : ("success" as const),
           execution_time_ms: 2000, // Default estimate
-          error_message:
-            (((errorObj.event as Record<string, unknown>)?.error as Record<string, unknown>)?.msg as string) ||
-            "Unknown error",
+          error_message: (hasError as string) || undefined,
           event_data:
             (((errorObj.event as Record<string, unknown>)?.original_event as Record<string, unknown>)?.data as Record<
               string,

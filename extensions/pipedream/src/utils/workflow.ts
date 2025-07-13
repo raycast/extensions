@@ -7,7 +7,7 @@ const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: "bas
  */
 export function getExistingFolders(workflows: SavedWorkflow[]): string[] {
   const folders = new Set<string>();
-  workflows.forEach((workflow) => {
+  workflows.forEach(workflow => {
     if (workflow.folder) {
       folders.add(workflow.folder);
     }
@@ -19,7 +19,7 @@ export function getExistingFolders(workflows: SavedWorkflow[]): string[] {
  * Groups workflows by folder
  */
 export function groupWorkflowsByFolder<T extends { folder?: string; customName: string }>(
-  workflows: T[],
+  workflows: T[]
 ): Record<string, T[]> {
   const groups = workflows.reduce<Record<string, T[]>>((acc, wf) => {
     const folder = wf.folder ?? "";
@@ -28,8 +28,10 @@ export function groupWorkflowsByFolder<T extends { folder?: string; customName: 
     return acc;
   }, {});
 
-  Object.keys(groups).forEach((key) => {
-    groups[key].sort((a, b) => collator.compare(a.customName, b.customName));
+  Object.keys(groups).forEach(key => {
+    if (groups[key]) {
+      groups[key]!.sort((a, b) => collator.compare(a.customName, b.customName));
+    }
   });
 
   return groups;
@@ -65,8 +67,10 @@ export function sortWorkflows(workflows: SavedWorkflow[], sortBy: "name" | "erro
         return b.triggerCount - a.triggerCount;
       case "steps":
         return b.stepCount - a.stepCount;
-      default:
-        return 0;
+      default: {
+        const _exhaustiveCheck: never = sortBy;
+        throw new Error(`Unhandled sort option: ${_exhaustiveCheck}`);
+      }
     }
   });
 }
@@ -77,13 +81,17 @@ export function sortWorkflows(workflows: SavedWorkflow[], sortBy: "name" | "erro
 export function filterWorkflows(workflows: SavedWorkflow[], filterBy: "all" | "menuBar" | "notMenuBar" | "errors") {
   switch (filterBy) {
     case "menuBar":
-      return workflows.filter((w) => w.showInMenuBar);
+      return workflows.filter(w => w.showInMenuBar);
     case "notMenuBar":
-      return workflows.filter((w) => !w.showInMenuBar);
+      return workflows.filter(w => !w.showInMenuBar);
     case "errors":
       // For now, return all workflows since we don't have error data in the workflow list
       return workflows;
-    default:
+    case "all":
       return workflows;
+    default: {
+      const _exhaustiveCheck: never = filterBy;
+      throw new Error(`Unhandled filter option: ${_exhaustiveCheck}`);
+    }
   }
 }

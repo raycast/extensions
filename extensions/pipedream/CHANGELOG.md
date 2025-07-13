@@ -1,6 +1,24 @@
-# Pipedream Workflow Manager Changelog
+# Changelog
 
-## [2.0.0] - 2024-06-13
+All notable changes to the Pipedream Workflow Manager extension will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### Added
+
+- Enhanced documentation and setup instructions
+- Improved package.json metadata and keywords
+- Better development scripts and type checking
+
+### Changed
+
+- Updated categories from "Other" to "Developer Tools" and "Productivity"
+- Enhanced README with better structure and clearer instructions
+
+## [2.0.0] - {PR_MERGE_DATE}
 
 ### Major Refactor & Improvements
 
@@ -21,7 +39,7 @@
 
 ---
 
-## [1.6.0] - 2025-07-13
+## [1.6.0] - {PR_MERGE_DATE}
 
 ### 🤖 AI-Powered Error Analysis
 
@@ -44,7 +62,7 @@
 - **Enhanced Error Handling**: Comprehensive error handling for AI generation with user-friendly feedback
 - **Performance Optimization**: Efficient processing of large error datasets for AI analysis
 
-## [1.5.0] - 2025-07-13
+## [1.5.0] - {PR_MERGE_DATE}
 
 ### 🎯 Enhanced User Experience
 
@@ -73,7 +91,7 @@
 - **Enhanced Types**: Comprehensive type definitions for all features
 - **Better Code Organization**: Improved code structure and maintainability
 
-## [1.4.1] - 2025-07-13
+## [1.4.1] - {PR_MERGE_DATE}
 
 ### Improvements
 
@@ -82,7 +100,7 @@
   - Added "Go to workflow management" quick action in the analytics view.
 - **UI/UX Tweaks**: Minor improvements to tooltips, action labels, and overall interface consistency.
 
-## [1.4.0] - 2025-07-13
+## [1.4.0] - {PR_MERGE_DATE}
 
 ### New Features
 
@@ -96,14 +114,14 @@
 - **Performance**: Optimized API calls and data processing
 - **Error Handling**: More robust error handling throughout the application
 
-## [1.3.1] - 2025-07-13
+## [1.3.1] - {PR_MERGE_DATE}
 
 ### Bug Fixes
 
 - **Build Issues**: Fixed import/export issues that were causing build failures
 - **Type Errors**: Resolved TypeScript compilation errors
 
-## [1.3.0] - 2025-07-13
+## [1.3.0] - {PR_MERGE_DATE}
 
 ### New Features
 
@@ -119,14 +137,14 @@
 - **Error Handling**: More robust error handling throughout the application
 - **Performance**: Optimized API calls and data processing
 
-## [1.2.1] - 2025-07-13
+## [1.2.1] - {PR_MERGE_DATE}
 
 ### Bug Fixes
 
 - **Build Error**: Fixed missing export for workflow-analytics command
 - **TypeScript**: Resolved compilation issues
 
-## [1.2.0] - 2025-07-13
+## [1.2.0] - {PR_MERGE_DATE}
 
 ### New Features
 
@@ -147,7 +165,7 @@
 - **Type Safety**: Enhanced TypeScript types
 - **Performance**: Optimized rendering and data processing
 
-## [1.1.0] - 2025-07-13
+## [1.1.0] - {PR_MERGE_DATE}
 
 ### New Features
 
@@ -162,7 +180,7 @@
 - **Error Handling**: More robust error handling throughout the application
 - **Performance**: Optimized API calls and data processing
 
-## [1.0.0] - 2025-07-13
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Initial Release
 

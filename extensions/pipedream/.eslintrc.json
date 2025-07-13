@@ -1,4 +1,23 @@
 {
   "root": true,
-  "extends": ["@raycast"]
+  "extends": ["@raycast"],
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "env": {
+    "browser": true,
+    "es2020": true,
+    "node": true
+  },
+  "rules": {
+    "prefer-const": "error",
+    "no-var": "error",
+    "no-unused-vars": "warn",
+    "@typescript-eslint/no-unused-vars": "warn",
+    "no-console": "warn"
+  }
 }

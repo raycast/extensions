@@ -3,7 +3,7 @@ import { LocalStorage, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { fetchWorkflowDetails } from "../services/api";
 import { useUserInfo } from "./useUserInfo";
-import { SavedWorkflow, WorkflowDetails, Preferences } from "../types";
+import { SavedWorkflow, WorkflowDetails } from "../types";
 import { LOCALSTORAGE_KEY } from "../utils/constants";
 import { DEMO_WORKFLOWS } from "../utils/demo-data";
 
@@ -15,7 +15,7 @@ type UseSavedWorkflowsReturn = {
 };
 
 export function useSavedWorkflows(): UseSavedWorkflowsReturn {
-  const { orgId, isLoading: isLoadingOrgId, revalidate: revalidateOrgId } = useUserInfo();
+  const { orgId, isLoading: isLoadingOrgId } = useUserInfo();
 
   const fetchAndUpdateWorkflows = useCallback(async () => {
     const { PIPEDREAM_API_KEY } = getPreferenceValues<Preferences>();
@@ -34,19 +34,19 @@ export function useSavedWorkflows(): UseSavedWorkflowsReturn {
     }
 
     const updatedWorkflows = await Promise.all(
-      savedWorkflows.map(async (workflow) => {
+      savedWorkflows.map(async workflow => {
         const details: WorkflowDetails = await fetchWorkflowDetails(workflow.id, currentOrgId);
         return {
           ...workflow,
           triggerCount: details.triggers?.length ?? 0,
           stepCount: details.steps?.length ?? 0,
         };
-      }),
+      })
     );
 
     await LocalStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(updatedWorkflows));
     return updatedWorkflows;
-  }, [orgId, revalidateOrgId]);
+  }, [orgId]);
 
   const {
     data: workflows,
@@ -81,48 +81,56 @@ export function useWorkflowActions(): UseWorkflowActionsReturn {
       await LocalStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(updatedWorkflows));
       refreshWorkflows();
     },
-    [refreshWorkflows],
+    [refreshWorkflows]
   );
 
   const addWorkflow = useCallback(
     async (newWorkflow: SavedWorkflow) => {
-      const existingWorkflow = workflows.find((w) => w.id === newWorkflow.id);
+      // Force refresh to ensure we have the latest data
+      await refreshWorkflows();
+
+      // Check against actual localStorage data to avoid race conditions
+      const savedWorkflowsJson = await LocalStorage.getItem<string>(LOCALSTORAGE_KEY);
+      const savedWorkflows: SavedWorkflow[] = savedWorkflowsJson ? JSON.parse(savedWorkflowsJson) : [];
+
+      const existingWorkflow = savedWorkflows.find(w => w.id === newWorkflow.id);
       if (existingWorkflow) {
         return existingWorkflow;
       }
-      const updatedWorkflows = [...workflows, newWorkflow];
+
+      const updatedWorkflows = [...savedWorkflows, newWorkflow];
       await updateLocalStorage(updatedWorkflows);
-      return undefined;
+      return newWorkflow; // Return the new workflow on success
     },
-    [workflows, updateLocalStorage],
+    [updateLocalStorage, refreshWorkflows]
   );
 
   const updateWorkflow = useCallback(
     async (updatedWorkflow: SavedWorkflow) => {
-      const updatedWorkflows = workflows.map((workflow) =>
-        workflow.id === updatedWorkflow.id ? updatedWorkflow : workflow,
+      const updatedWorkflows = workflows.map(workflow =>
+        workflow.id === updatedWorkflow.id ? updatedWorkflow : workflow
       );
       await updateLocalStorage(updatedWorkflows);
     },
-    [workflows, updateLocalStorage],
+    [workflows, updateLocalStorage]
   );
 
   const removeWorkflow = useCallback(
     async (workflowId: string) => {
-      const updatedWorkflows = workflows.filter((workflow) => workflow.id !== workflowId);
+      const updatedWorkflows = workflows.filter(workflow => workflow.id !== workflowId);
       await updateLocalStorage(updatedWorkflows);
     },
-    [workflows, updateLocalStorage],
+    [workflows, updateLocalStorage]
   );
 
   const toggleMenuBarVisibility = useCallback(
     async (workflowId: string) => {
-      const updatedWorkflows = workflows.map((workflow) =>
-        workflow.id === workflowId ? { ...workflow, showInMenuBar: !workflow.showInMenuBar } : workflow,
+      const updatedWorkflows = workflows.map(workflow =>
+        workflow.id === workflowId ? { ...workflow, showInMenuBar: !workflow.showInMenuBar } : workflow
       );
       await updateLocalStorage(updatedWorkflows);
     },
-    [workflows, updateLocalStorage],
+    [workflows, updateLocalStorage]
   );
 
   const removeAllWorkflows = useCallback(async () => {

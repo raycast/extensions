@@ -128,7 +128,6 @@ export function WorkflowItem({
                 shortcut={{ modifiers: ["cmd"], key: "v" }}
               />
             )}
-            {!onCustomAction && <Action.OpenInBrowser url={workflow.url} title="Open in Pipedream" icon={Icon.Globe} />}
           </ActionPanel.Section>
 
           <ActionPanel.Section title="AI Actions">

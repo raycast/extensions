@@ -1,6 +1,7 @@
 import { AI, showToast, Toast, Action, Icon, useNavigation } from "@raycast/api";
 import { SavedWorkflow, WorkflowError } from "../types";
 import AISummaryView from "./AISummaryView";
+import { showFailureToast } from "@raycast/utils";
 
 export async function generateAIErrorSummary(errors: WorkflowError[], prompt: string): Promise<string> {
   try {
@@ -10,7 +11,7 @@ export async function generateAIErrorSummary(errors: WorkflowError[], prompt: st
 
     // Format error data for AI analysis
     const errorLogs = errors
-      .map((error) => {
+      .map(error => {
         const timestamp = new Date(error.indexed_at_ms).toISOString();
         const errorMessage = error.event?.error?.msg || "Unknown error";
         return `[${timestamp}] ${errorMessage}`;
@@ -43,11 +44,7 @@ export function AIErrorSummaryAction({ workflow }: { workflow: SavedWorkflow }) 
       // Navigate to the AI summary view
       push(<AISummaryView workflow={workflow} />);
     } catch (error) {
-      showToast({
-        title: "Error",
-        message: error instanceof Error ? error.message : String(error),
-        style: Toast.Style.Failure,
-      });
+      showFailureToast(error, { title: "Error generating AI summary" });
     }
   };
 
@@ -75,11 +72,7 @@ export function AIErrorSummaryItem({ workflow }: { workflow: SavedWorkflow }) {
       // Navigate to the AI summary view
       push(<AISummaryView workflow={workflow} />);
     } catch (error) {
-      showToast({
-        title: "Error",
-        message: error instanceof Error ? error.message : String(error),
-        style: Toast.Style.Failure,
-      });
+      showFailureToast(error, { title: "Error generating AI summary" });
     }
   };
 

@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Detail, ActionPanel, Action, Icon, showToast, Toast, Clipboard, useNavigation } from "@raycast/api";
+import { Detail, ActionPanel, Action, showToast, Toast, useNavigation, Icon, Clipboard } from "@raycast/api";
 import { generateAIErrorSummary } from "./AIErrorSummary";
 import { useUserInfo } from "../hooks/useUserInfo";
 import { SavedWorkflow, WorkflowError } from "../types";
 import { fetchWorkflowErrors } from "../services/api";
 import { WorkflowAnalyticsView } from "../workflow-analytics";
+import { showFailureToast } from "@raycast/utils";
 
 interface AISummaryViewProps {
   workflow: SavedWorkflow;
@@ -17,68 +18,42 @@ export default function AISummaryView({ workflow }: AISummaryViewProps) {
   const [isGenerating, setIsGenerating] = useState(false);
 
   const getOptimizedPrompt = (): string => {
-    return `Analyze these Pipedream workflow errors and provide a clear, actionable summary.
+    return `You are an expert workflow analyst. Analyze the following error logs from a Pipedream workflow and provide a concise, actionable summary.
 
-**CRITICAL: Only use the actual error data provided. Do NOT guess, assume, or make up information. Do NOT search the web or use external knowledge.**
+Please structure your response with these sections:
+## Error Summary
+- Brief overview of the main issues
 
-**IMPORTANT: Use EXACTLY this format:**
+## Common Patterns
+- Identify recurring error types or patterns
 
-## Key Issues
-- Point 1 (max 12 words, based ONLY on actual errors)
-- Point 2 (max 12 words, based ONLY on actual errors)
-- Point 3 (max 12 words, based ONLY on actual errors)
+## Root Causes
+- Analyze the underlying causes
 
-## Error Patterns
-- Pattern 1 (max 12 words, from actual error data)
-- Pattern 2 (max 12 words, from actual error data)
-
-## Recommended Actions
-- Action 1 (max 12 words, based on specific error types found)
-- Action 2 (max 12 words, based on specific error types found)
-- Action 3 (max 12 words, based on specific error types found)
+## Recommendations
+- Provide specific, actionable steps to resolve issues
 
 ## Helpful Links
-- [Pipedream Documentation](https://pipedream.com/docs)
-- [Troubleshooting Guide](https://pipedream.com/docs/troubleshooting)
+- Add relevant Pipedream documentation links based on error types
 
-**RULES:**
-1. Only analyze the provided error logs
-2. Do not make assumptions about causes not mentioned in the logs
-3. Keep each bullet point under 12 words
-4. Use clear, actionable language
-5. Focus on patterns you can actually see in the data
-6. If no clear patterns emerge, say "No clear patterns detected in the provided logs"`;
+Keep the response concise, well-formatted with markdown, and focus on practical insights that help resolve the workflow issues.`;
   };
 
   // Generate relevant links based on error types
   function generateRelevantLinks(errors: WorkflowError[]): string {
-    const links = [
-      "[Pipedream Documentation](https://pipedream.com/docs)",
-      "[Error Troubleshooting Guide](https://pipedream.com/docs/errors)",
-      "[Workflow Debugging](https://pipedream.com/docs/debugging)",
-    ];
+    const errorMessages = errors
+      .map(e => e.event?.error?.msg || "")
+      .join(" ")
+      .toLowerCase();
 
-    // Analyze errors for specific types and add relevant links
-    const errorMessages = errors.map((e) => e.event?.error?.msg?.toLowerCase() || "").join(" ");
-
-    if (errorMessages.includes("rate limit") || errorMessages.includes("429")) {
-      links.push("[Rate Limiting Guide](https://pipedream.com/docs/rate-limits)");
-    }
-
-    if (errorMessages.includes("authentication") || errorMessages.includes("401") || errorMessages.includes("403")) {
-      links.push("[Authentication Setup](https://pipedream.com/docs/authentication)");
-    }
-
-    if (errorMessages.includes("timeout") || errorMessages.includes("408")) {
-      links.push("[Timeout Configuration](https://pipedream.com/docs/timeouts)");
-    }
+    const links: string[] = [];
 
     if (errorMessages.includes("api") || errorMessages.includes("http")) {
-      links.push("[HTTP Request Errors](https://pipedream.com/docs/http-errors)");
+      links.push("[API Integration Guide](https://pipedream.com/docs/api)");
     }
 
-    if (errorMessages.includes("webhook") || errorMessages.includes("hook")) {
-      links.push("[Webhook Configuration](https://pipedream.com/docs/webhooks)");
+    if (errorMessages.includes("auth") || errorMessages.includes("authentication")) {
+      links.push("[Authentication Setup](https://pipedream.com/docs/auth)");
     }
 
     if (errorMessages.includes("trigger") || errorMessages.includes("event")) {
@@ -89,7 +64,7 @@ export default function AISummaryView({ workflow }: AISummaryViewProps) {
       links.push("[Step Configuration](https://pipedream.com/docs/steps)");
     }
 
-    return links.map((link) => `- ${link}`).join("\n");
+    return links.map(link => `- ${link}`).join("\n");
   }
 
   // Post-process AI output to fix bullet formatting
@@ -114,7 +89,7 @@ export default function AISummaryView({ workflow }: AISummaryViewProps) {
     processed = processed.replace(/^- \s+/gm, "- ");
 
     // Limit bullets per section to 3-4 max
-    processed = processed.replace(/(## [^\n]+\n)((- [^\n]+\n?){4,})/g, (match, header, bullets) => {
+    processed = processed.replace(/(## [^\n]+\n)((- [^\n]+\n?){4,})/g, (_match, header, bullets) => {
       const lines = bullets.trim().split("\n").filter(Boolean);
       return header + "\n" + lines.slice(0, 4).join("\n") + "\n";
     });
@@ -128,7 +103,7 @@ export default function AISummaryView({ workflow }: AISummaryViewProps) {
 
   const handleGenerateSummary = async () => {
     if (!orgId) {
-      showToast(Toast.Style.Failure, "Organization ID not available");
+      showFailureToast("Organization ID not available");
       return;
     }
 
@@ -136,7 +111,7 @@ export default function AISummaryView({ workflow }: AISummaryViewProps) {
     try {
       const errorResponse = await fetchWorkflowErrors(workflow.id, orgId);
       if (!errorResponse.data || errorResponse.data.length === 0) {
-        showToast(Toast.Style.Failure, "No errors found to analyze");
+        showFailureToast("No errors found to analyze");
         setIsGenerating(false);
         return;
       }
@@ -151,11 +126,7 @@ export default function AISummaryView({ workflow }: AISummaryViewProps) {
       setSummary(processedSummary);
       showToast(Toast.Style.Success, "AI Summary Generated");
     } catch (error) {
-      showToast(
-        Toast.Style.Failure,
-        "Failed to generate summary",
-        error instanceof Error ? error.message : "Unknown error",
-      );
+      showFailureToast(error, { title: "Failed to generate summary" });
     } finally {
       setIsGenerating(false);
     }
@@ -170,22 +141,18 @@ export default function AISummaryView({ workflow }: AISummaryViewProps) {
 
   const handleViewRawLogs = async () => {
     if (!orgId) {
-      showToast(Toast.Style.Failure, "Organization ID not available");
+      showFailureToast("Organization ID not available");
       return;
     }
     try {
       const errorResponse = await fetchWorkflowErrors(workflow.id, orgId);
       if (!errorResponse.data || errorResponse.data.length === 0) {
-        showToast(Toast.Style.Failure, "No errors found");
+        showFailureToast("No errors found");
         return;
       }
       push(<RawLogsView workflow={workflow} errors={errorResponse.data} />);
     } catch (error) {
-      showToast(
-        Toast.Style.Failure,
-        "Failed to fetch raw logs",
-        error instanceof Error ? error.message : "Unknown error",
-      );
+      showFailureToast(error, { title: "Failed to fetch raw logs" });
     }
   };
 

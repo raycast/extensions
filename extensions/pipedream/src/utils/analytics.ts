@@ -14,8 +14,8 @@ export function calculateBasicAnalytics(events: WorkflowEvent[]) {
   }
 
   const totalEvents = events.length;
-  const successEvents = events.filter((e) => e.status === "success");
-  const errorEvents = events.filter((e) => e.status === "error");
+  const successEvents = events.filter(e => e.status === "success");
+  const errorEvents = events.filter(e => e.status === "error");
   const successRate = (successEvents.length / totalEvents) * 100;
   const averageExecutionTime = events.reduce((sum, e) => sum + e.execution_time_ms, 0) / totalEvents;
 
@@ -33,7 +33,10 @@ export function calculateBasicAnalytics(events: WorkflowEvent[]) {
 export function getStepPerformance(events: WorkflowEvent[]) {
   const stepPerformance: Record<string, { avgExecutionTime: number; successRate: number; errorCount: number }> = {};
 
-  events.forEach((event) => {
+  // Filter events once and reuse
+  const filteredEvents = events.filter(e => e.status === "success" || e.status === "error");
+
+  filteredEvents.forEach(event => {
     // For now, we'll use the overall execution time since step-specific data isn't available
     const stepName = "overall";
     if (!stepPerformance[stepName]) {
@@ -47,13 +50,14 @@ export function getStepPerformance(events: WorkflowEvent[]) {
   });
 
   // Calculate averages
-  Object.keys(stepPerformance).forEach((stepName) => {
-    const stepEvents = events.filter((e) => e.status === "success" || e.status === "error");
-    if (stepEvents.length > 0) {
-      stepPerformance[stepName].avgExecutionTime /= stepEvents.length;
-      stepPerformance[stepName].successRate =
-        (stepEvents.filter((e) => e.status === "success").length / stepEvents.length) * 100;
-      stepPerformance[stepName].errorCount = stepEvents.filter((e) => e.status === "error").length;
+  const successEvents = filteredEvents.filter(e => e.status === "success");
+  const errorEvents = filteredEvents.filter(e => e.status === "error");
+
+  Object.keys(stepPerformance).forEach(stepName => {
+    if (filteredEvents.length > 0 && stepPerformance[stepName]) {
+      stepPerformance[stepName]!.avgExecutionTime /= filteredEvents.length;
+      stepPerformance[stepName]!.successRate = (successEvents.length / filteredEvents.length) * 100;
+      stepPerformance[stepName]!.errorCount = errorEvents.length;
     }
   });
 

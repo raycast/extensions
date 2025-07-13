@@ -5,6 +5,7 @@ import { fetchWorkflowDetails } from "./services/api";
 import { useUserInfo } from "./hooks/useUserInfo";
 import { getExistingFolders } from "./utils/workflow";
 import { useState } from "react";
+import { showFailureToast } from "@raycast/utils";
 
 export default function ConnectWorkflow() {
   const { addWorkflow } = useWorkflowActions();
@@ -18,21 +19,13 @@ export default function ConnectWorkflow() {
 
   const handleSubmit = async (values: { workflowId: string; customName: string }) => {
     if (!orgId) {
-      showToast({
-        title: "Error",
-        message: "Organization ID is missing. Please check your API key.",
-        style: Toast.Style.Failure,
-      });
+      showFailureToast("Organization ID is missing. Please check your API key.");
       return;
     }
 
     // Validate workflow ID format
     if (!values.workflowId.startsWith("p_")) {
-      showToast({
-        title: "Invalid Workflow ID",
-        message: "Workflow ID must start with 'p_' (e.g., p_abc123)",
-        style: Toast.Style.Failure,
-      });
+      showFailureToast("Workflow ID must start with 'p_' (e.g., p_abc123)");
       return;
     }
 
@@ -57,11 +50,7 @@ export default function ConnectWorkflow() {
       const existing = await addWorkflow(newWorkflow);
 
       if (existing) {
-        showToast({
-          title: "Workflow Already Connected",
-          message: `"${existing.customName}" is already in your workflow list`,
-          style: Toast.Style.Failure,
-        });
+        showFailureToast(`"${existing.customName}" is already in your workflow list`);
       } else {
         showToast({
           title: "Success",
@@ -71,11 +60,7 @@ export default function ConnectWorkflow() {
         pop();
       }
     } catch (error) {
-      showToast({
-        title: "Error",
-        message: `Failed to connect workflow: ${error instanceof Error ? error.message : String(error)}`,
-        style: Toast.Style.Failure,
-      });
+      showFailureToast(`Failed to connect workflow: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
 
@@ -107,7 +92,7 @@ export default function ConnectWorkflow() {
         info="Optional: Organize workflows into folders for better organization."
       >
         <Form.Dropdown.Item value="" title="None" />
-        {existingFolders.map((f) => (
+        {existingFolders.map(f => (
           <Form.Dropdown.Item key={f} value={f} title={f} />
         ))}
         <Form.Dropdown.Item value="__custom__" title="Add Folder..." />

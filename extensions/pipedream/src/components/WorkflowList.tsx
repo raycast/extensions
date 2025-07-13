@@ -16,7 +16,7 @@ import { useSavedWorkflows, useWorkflowActions } from "../hooks/useSavedWorkflow
 import { useUserInfo } from "../hooks/useUserInfo";
 import { useWorkflowErrors } from "../hooks/useWorkflowErrors";
 import { useMemo, useState } from "react";
-import { SavedWorkflow, Preferences } from "../types";
+import { SavedWorkflow } from "../types";
 import { groupWorkflowsByFolder, getExistingFolders } from "../utils/workflow";
 import { WorkflowItem } from "./WorkflowItem";
 import { useOptimisticToggle } from "../hooks/useOptimisticToggle";
@@ -29,7 +29,7 @@ const sortWorkflows = (
   workflows: SavedWorkflow[],
   sortBy: SortOption,
   sortOrder: "asc" | "desc",
-  errorCounts: Record<string, number>,
+  errorCounts: Record<string, number>
 ) => {
   return [...workflows].sort((a, b) => {
     let comparison = 0;
@@ -54,11 +54,11 @@ const sortWorkflows = (
 const filterWorkflows = (workflows: SavedWorkflow[], filterBy: FilterOption, errorCounts: Record<string, number>) => {
   switch (filterBy) {
     case "menuBar":
-      return workflows.filter((w) => w.showInMenuBar);
+      return workflows.filter(w => w.showInMenuBar);
     case "notMenuBar":
-      return workflows.filter((w) => !w.showInMenuBar);
+      return workflows.filter(w => !w.showInMenuBar);
     case "errors":
-      return workflows.filter((w) => (errorCounts[w.id] ?? 0) > 0);
+      return workflows.filter(w => (errorCounts[w.id] ?? 0) > 0);
     default:
       return workflows;
   }
@@ -90,7 +90,7 @@ export function WorkflowList({
   const { workflows, isLoading, error, refreshWorkflows } = useSavedWorkflows();
   const { updateWorkflow, removeWorkflow, toggleMenuBarVisibility } = useWorkflowActions();
   const { orgId } = useUserInfo();
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues();
   const [sortOrder] = useState<"asc" | "desc">("asc");
   const [sortBy, setSortBy] = useState<SortOption>(prefs.DEFAULT_SORT ?? "name");
   const [filterBy, setFilterBy] = useState<FilterOption>(prefs.DEFAULT_FILTER ?? "all");
@@ -99,7 +99,7 @@ export function WorkflowList({
   const { errorInfo, refreshErrorInfo } = useWorkflowErrors(
     workflows,
     orgId ?? undefined,
-    prefs.REFRESH_INTERVAL_SECONDS ? parseInt(prefs.REFRESH_INTERVAL_SECONDS) * 1000 : 0,
+    prefs.REFRESH_INTERVAL_SECONDS ? parseInt(prefs.REFRESH_INTERVAL_SECONDS) * 1000 : 0
   );
 
   const toggleActive = useOptimisticToggle(
@@ -109,11 +109,11 @@ export function WorkflowList({
       await refreshWorkflows();
       await refreshErrorInfo();
     },
-    orgId || undefined,
+    orgId || undefined
   );
 
   const handleActivate = async (workflowId: string) => {
-    const workflow = workflows.find((w) => w.id === workflowId);
+    const workflow = workflows.find(w => w.id === workflowId);
     if (!workflow) return;
     const options: Alert.Options = {
       title: "Activate Workflow",
@@ -128,7 +128,7 @@ export function WorkflowList({
   };
 
   const handleDeactivate = async (workflowId: string) => {
-    const workflow = workflows.find((w) => w.id === workflowId);
+    const workflow = workflows.find(w => w.id === workflowId);
     if (!workflow) return;
     const options: Alert.Options = {
       title: "Deactivate Workflow",
@@ -161,12 +161,12 @@ export function WorkflowList({
 
   const workflowsByFolder = useMemo(
     () => groupWorkflowsByFolder(filteredAndSortedWorkflows),
-    [filteredAndSortedWorkflows],
+    [filteredAndSortedWorkflows]
   );
 
   const sortedFolderNames = useMemo(() => {
     return Object.keys(workflowsByFolder)
-      .filter((f) => f !== "")
+      .filter(f => f !== "")
       .sort((a, b) => collator.compare(a ?? "", b ?? ""));
   }, [workflowsByFolder]);
 
@@ -198,7 +198,7 @@ export function WorkflowList({
         currentName={currentName}
         onSave={async (newName: string) => {
           try {
-            await updateWorkflow({ ...workflows.find((w) => w.id === workflowId)!, customName: newName });
+            await updateWorkflow({ ...workflows.find(w => w.id === workflowId)!, customName: newName });
             showToast({ title: "Success", message: "Workflow name updated", style: Toast.Style.Success });
             await refreshWorkflows();
             await refreshErrorInfo();
@@ -210,7 +210,7 @@ export function WorkflowList({
             });
           }
         }}
-      />,
+      />
     );
   };
 
@@ -220,7 +220,7 @@ export function WorkflowList({
         currentFolder={currentFolder}
         onSave={async (newFolder: string) => {
           try {
-            await updateWorkflow({ ...workflows.find((w) => w.id === workflowId)!, folder: newFolder });
+            await updateWorkflow({ ...workflows.find(w => w.id === workflowId)!, folder: newFolder });
             showToast({ title: "Success", message: "Workflow folder updated", style: Toast.Style.Success });
             await refreshWorkflows();
             await refreshErrorInfo();
@@ -232,7 +232,7 @@ export function WorkflowList({
             });
           }
         }}
-      />,
+      />
     );
   };
 
@@ -282,7 +282,7 @@ export function WorkflowList({
         <List.Dropdown
           tooltip="Sort and Filter Options"
           storeValue={true}
-          onChange={(newValue) => {
+          onChange={newValue => {
             const [action, value] = newValue.split("-");
             if (action === "sort") {
               setSortBy(value as SortOption);
@@ -328,9 +328,9 @@ export function WorkflowList({
         </ActionPanel>
       }
     >
-      {sortedFolderNames.map((fld) => (
+      {sortedFolderNames.map(fld => (
         <List.Section key={fld} title={fld}>
-          {workflowsByFolder[fld].map((workflow) => (
+          {workflowsByFolder[fld]?.map(workflow => (
             <WorkflowItem
               key={workflow.id}
               workflow={workflow}
@@ -356,7 +356,7 @@ export function WorkflowList({
       ))}
       {workflowsByFolder[""] && (
         <List.Section key="no-folder" title="No Folder">
-          {workflowsByFolder[""]?.map((workflow) => (
+          {workflowsByFolder[""]?.map(workflow => (
             <WorkflowItem
               key={workflow.id}
               workflow={workflow}
@@ -422,7 +422,7 @@ function EditWorkflowFolder({
   const existingFolders = getExistingFolders(workflows);
   const { pop } = useNavigation();
   const [folderChoice, setFolderChoice] = useState<string>(
-    currentFolder && existingFolders.includes(currentFolder) ? currentFolder : currentFolder ? "__custom__" : "",
+    currentFolder && existingFolders.includes(currentFolder) ? currentFolder : currentFolder ? "__custom__" : ""
   );
   const [customFolder, setCustomFolder] = useState(folderChoice === "__custom__" ? currentFolder : "");
 
@@ -442,7 +442,7 @@ function EditWorkflowFolder({
     >
       <Form.Dropdown id="folder" title="Folder" value={folderChoice} onChange={setFolderChoice}>
         <Form.Dropdown.Item value="" title="None" />
-        {existingFolders.map((f) => (
+        {existingFolders.map(f => (
           <Form.Dropdown.Item key={f} value={f} title={f} />
         ))}
         <Form.Dropdown.Item value="__custom__" title="Add Folder..." />

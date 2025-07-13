@@ -17,13 +17,19 @@ Manage your Pipedream workflows directly from Raycast with AI-powered error anal
 - **Raw Logs View**: Direct access to view raw error logs for detailed investigation
 - **Enhanced Error Management**: Comprehensive error categorization, severity assessment, and resolution tracking
 
-## Setup
+## Quick Start
 
-1. Install the extension from the Raycast store.
-2. You'll need a Pipedream account and API key to use this extension.
-   - Sign in or create an account on [Pipedream](https://pipedream.com/)
-   - Your API key can be generated under [User Settings](https://pipedream.com/settings/user)
-3. Open the extension in Raycast and enter your API key when prompted.
+### Prerequisites
+
+- A Pipedream account ([Sign up here](https://pipedream.com/))
+- Your Pipedream API key ([Get it here](https://pipedream.com/settings/user))
+
+### Installation
+
+1. Install the extension from the Raycast store
+2. Open the extension in Raycast
+3. Enter your Pipedream API key when prompted
+4. Start managing your workflows!
 
 ## Commands
 
@@ -63,17 +69,17 @@ View detailed analytics and performance data for your workflows:
 - **Copy & Regenerate Actions**: Easy copy-to-clipboard and regenerate functionality for AI summaries
 - **Smart Link Generation**: Automatically adds relevant Pipedream documentation links based on error types
 
-## Preferences
+## Configuration
 
 Configure the extension behavior in Raycast preferences:
 
 - **Default Sort**: Choose how workflows are sorted by default (name, errors, triggers, steps)
 - **Default Filter**: Set the initial filter view (all, menu bar, errors)
-- **Refresh Interval**: Customize how often error counts are updated (5-60 minutes)
+- **Refresh Interval**: Set how often error counts are updated (5 minutes by default)
 
 ## AI-Powered Error Analysis
 
-The extension now includes intelligent error analysis powered by Raycast AI:
+The extension includes intelligent error analysis powered by Raycast AI:
 
 - **Smart Categorization**: Errors are automatically categorized by type (API, authentication, network, etc.)
 - **Severity Assessment**: Errors are assessed for severity to help prioritize fixes
@@ -92,7 +98,7 @@ The extension provides comprehensive error tracking:
 - **Quick Access**: Jump directly to error logs from the menu bar or management interface
 - **Enhanced Error Management**: Comprehensive error categorization, severity assessment, and resolution tracking
 
-## Tips
+## Tips & Tricks
 
 - Use the menu bar item for quick access to your workflows and error counts
 - Set your preferred default sort and filter in preferences for a personalized experience
@@ -115,6 +121,47 @@ The extension provides comprehensive error tracking:
 - **Performance**: Efficient data fetching and caching for smooth operation
 - **Enhanced Error Management**: Comprehensive error categorization, severity assessment, and resolution tracking
 
+## Development
+
+### Prerequisites
+
+- Node.js 18 or later
+- Raycast CLI
+
+### Setup
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd pipedream
+
+# Install dependencies
+npm install
+
+# Start development
+npm run dev
+```
+
+### Available Scripts
+
+- `npm run dev` - Start development mode
+- `npm run build` - Build for production
+- `npm run lint` - Run ESLint
+- `npm run test` - Run tests
+- `npm run type-check` - Run TypeScript type checking
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
 ## Feedback
 
 If you have any issues or suggestions, please [open an issue](https://github.com/raycast/extensions/issues) in the Raycast extensions repository.
+
+## License
+
+This project is licensed under the MIT License.

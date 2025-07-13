@@ -6,7 +6,19 @@
   "icon": "pipedream-logo.png",
   "author": "olekristianbe",
   "categories": [
-    "Other"
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "pipedream",
+    "workflow",
+    "automation",
+    "api",
+    "integration",
+    "monitoring",
+    "analytics",
+    "ai",
+    "error-tracking"
   ],
   "license": "MIT",
   "commands": [
@@ -150,10 +162,11 @@
     "typescript": "^5.2.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "lint": "ray lint",
     "publish": "raycast-scripts publish",
-    "test": "jest"
+    "test": "jest",
+    "type-check": "tsc --noEmit"
   }
 }

@@ -1,7 +1,8 @@
-import { showToast, Toast, environment, Cache } from "@raycast/api";
+import { Cache } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { fetchUserInfo } from "../services/api";
 import { UserInfo } from "../types";
+import { showFailureToast } from "@raycast/utils";
 
 const ORG_ID_CACHE_KEY = "pipedream_org_id";
 const cache = new Cache();
@@ -36,16 +37,14 @@ export function useUserInfo(): UseUserInfoReturn {
         }
 
         // Cache the orgId
-        const orgId = data.data.orgs[0].id;
-        cache.set(ORG_ID_CACHE_KEY, orgId);
+        const orgId = data.data.orgs[0]?.id;
+        if (orgId) {
+          cache.set(ORG_ID_CACHE_KEY, orgId);
+        }
 
         return data as UserInfo;
       } catch (e) {
-        showToast({
-          title: "Error fetching user info",
-          message: e instanceof Error ? e.message : "Unknown error",
-          style: Toast.Style.Failure,
-        });
+        showFailureToast(e, { title: "Error fetching user info" });
         throw e;
       }
     },
@@ -53,7 +52,7 @@ export function useUserInfo(): UseUserInfoReturn {
     {
       keepPreviousData: true,
       initialData: { data: { orgs: [{ id: cache.get(ORG_ID_CACHE_KEY) }] } } as UserInfo,
-    },
+    }
   );
 
   return {
@@ -63,8 +62,4 @@ export function useUserInfo(): UseUserInfoReturn {
     orgId: userInfo?.data?.orgs[0]?.id ?? null,
     revalidate,
   };
-}
-
-if (environment.isDevelopment) {
-  // Development environment check remains, but logging is removed
 }

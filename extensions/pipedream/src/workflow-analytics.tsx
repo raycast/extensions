@@ -78,7 +78,7 @@ function EditWorkflowFolder({
         info="Select a folder to organize this workflow"
       >
         <Form.Dropdown.Item value="" title="No Folder" />
-        {existingFolders.map((f) => (
+        {existingFolders.map(f => (
           <Form.Dropdown.Item key={f} value={f} title={f} />
         ))}
       </Form.Dropdown>
@@ -111,7 +111,7 @@ export function WorkflowAnalyticsView({ workflow, errors }: WorkflowAnalyticsPro
             });
           }
         }}
-      />,
+      />
     );
   };
 
@@ -131,7 +131,7 @@ export function WorkflowAnalyticsView({ workflow, errors }: WorkflowAnalyticsPro
             });
           }
         }}
-      />,
+      />
     );
   };
 
@@ -165,7 +165,7 @@ export function WorkflowAnalyticsView({ workflow, errors }: WorkflowAnalyticsPro
           {errorCategories.map(([category, count]) => (
             <List.Item
               key={category}
-              title={category.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}
+              title={category.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
               subtitle={`${count} errors`}
               icon={Icon.Tag}
             />
@@ -175,9 +175,10 @@ export function WorkflowAnalyticsView({ workflow, errors }: WorkflowAnalyticsPro
 
       <List.Section title="Recent Error Events">
         {errors.length > 0 ? (
-          errors.slice(0, 10).map((error) => {
+          errors.slice(0, 10).map(error => {
             const category = categorizeError(error);
-            const severity = determineSeverity(error, 1);
+            const categoryErrors = errors.filter(e => categorizeError(e) === category);
+            const severity = determineSeverity(error, categoryErrors.length);
             const errorAge = getErrorAge(error);
 
             return (

@@ -104,16 +104,9 @@ export interface WorkflowErrorInfo {
   lastError?: WorkflowError;
 }
 
-export interface Preferences {
-  PIPEDREAM_API_KEY: string;
-  DEFAULT_SORT?: "name" | "errors" | "triggers" | "steps";
-  DEFAULT_FILTER?: "all" | "menuBar" | "notMenuBar" | "errors";
-  REFRESH_INTERVAL_SECONDS?: string; // stored as string in Raycast prefs
-}
-
 export interface WorkflowDetails {
   id: string;
-  name: string;
+  name?: string;
   triggers: unknown[];
   steps: unknown[];
 }
@@ -136,3 +129,5 @@ export interface EventHistory {
   };
   data: WorkflowEvent[];
 }
+
+// Note: Preferences interface is auto-generated in raycast-env.d.ts

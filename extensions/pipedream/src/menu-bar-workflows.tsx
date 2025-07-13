@@ -5,12 +5,14 @@ import { fetchWorkflowErrors } from "./services/api";
 import { useUserInfo } from "./hooks/useUserInfo";
 import { useSavedWorkflows, useWorkflowActions } from "./hooks/useSavedWorkflows";
 
+const SEVEN_DAYS_IN_MS = 7 * 24 * 60 * 60 * 1000;
+
 export default function MenuBarWorkflows() {
   const { workflows, isLoading, refreshWorkflows } = useSavedWorkflows();
   const { toggleMenuBarVisibility } = useWorkflowActions();
   const { orgId } = useUserInfo();
   const [workflowErrors, setWorkflowErrors] = useState<Record<string, { errorCount: number; errors: WorkflowError[] }>>(
-    {},
+    {}
   );
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
 
@@ -18,15 +20,13 @@ export default function MenuBarWorkflows() {
     if (!orgId || !workflows.length) return;
 
     try {
-      const menuBarWorkflows = workflows.filter((w) => w.showInMenuBar);
+      const menuBarWorkflows = workflows.filter(w => w.showInMenuBar);
 
       // Fetch errors for menu bar workflows in parallel
-      const errorPromises = menuBarWorkflows.map(async (workflow) => {
+      const errorPromises = menuBarWorkflows.map(async workflow => {
         try {
           const errorResponse = await fetchWorkflowErrors(workflow.id, orgId);
-          const recentErrors = errorResponse.data.filter(
-            (error) => Date.now() - error.indexed_at_ms < 7 * 24 * 60 * 60 * 1000, // 7 days
-          );
+          const recentErrors = errorResponse.data.filter(error => Date.now() - error.indexed_at_ms < SEVEN_DAYS_IN_MS);
           return {
             workflowId: workflow.id,
             errorCount: recentErrors.length,
@@ -44,7 +44,7 @@ export default function MenuBarWorkflows() {
 
       const errorResults = await Promise.all(errorPromises);
       const errorData: Record<string, { errorCount: number; errors: WorkflowError[] }> = {};
-      errorResults.forEach((result) => {
+      errorResults.forEach(result => {
         errorData[result.workflowId] = {
           errorCount: result.errorCount,
           errors: result.errors,
@@ -138,11 +138,11 @@ export default function MenuBarWorkflows() {
 
   return (
     <MenuBarExtra title="Pipedream">
-      {sortedFolderNames.map((folder) => (
+      {sortedFolderNames.map(folder => (
         <MenuBarExtra.Section key={folder} title={folder}>
-          {workflowsByFolder[folder].map((workflow) => {
+          {workflowsByFolder[folder]?.map(workflow => {
             const errorInfo = workflowErrors[workflow.id];
-            const errorCount = errorInfo?.errorCount ?? 0;
+            const errorCount = errorInfo?.errorCount || 0;
             return (
               <MenuBarExtra.Submenu
                 key={workflow.id}
@@ -155,7 +155,7 @@ export default function MenuBarWorkflows() {
                   title="Copy Workflow URL"
                   onAction={() => copyWorkflowUrl(workflow.url, workflow.customName)}
                 />
-                {(errorCount ?? 0) > 0 && (
+                {errorCount > 0 && (
                   <MenuBarExtra.Item
                     icon={Icon.ExclamationMark}
                     title={`View ${errorCount} Errors in Browser`}
