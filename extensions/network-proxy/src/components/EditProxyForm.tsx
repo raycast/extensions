@@ -97,7 +97,7 @@ export function EditProxyForm({ proxyType, currentValue, service, onSave }: Edit
       });
 
       onSave();
-      pop(); // 返回到上一页面（Show Network Proxy）
+      pop(); // Navigate back to the previous page (Show Network Proxy)
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
