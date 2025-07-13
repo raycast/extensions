@@ -4,6 +4,7 @@ import { SavedWorkflow } from "./types";
 import { fetchWorkflowDetails } from "./services/api";
 import { useUserInfo } from "./hooks/useUserInfo";
 import { getExistingFolders } from "./utils/workflow";
+import { PIPEDREAM_BASE_URL } from "./utils/constants";
 import { useState } from "react";
 import { showFailureToast } from "@raycast/utils";
 
@@ -40,7 +41,7 @@ export default function ConnectWorkflow() {
         id: values.workflowId,
         customName: values.customName,
         folder: finalFolder,
-        url: `https://pipedream.com/@/workflow/${values.workflowId}`,
+        url: `${PIPEDREAM_BASE_URL}${values.workflowId}`,
         triggerCount: workflowDetails.triggers?.length || 0,
         stepCount: workflowDetails.steps?.length || 0,
         showInMenuBar: addToMenuBar,

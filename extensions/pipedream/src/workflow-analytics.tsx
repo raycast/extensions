@@ -1,12 +1,13 @@
-import { List, ActionPanel, Action, Icon, showToast, Toast, useNavigation, Form } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useUserInfo } from "./hooks/useUserInfo";
 import { SavedWorkflow, WorkflowError } from "./types";
 import { fetchWorkflowErrors } from "./services/api";
 import { WorkflowList } from "./components/WorkflowList";
 import ManageWorkflowsView from "./manage-workflows";
 import { AIErrorSummaryAction } from "./components/AIErrorSummary";
-import { useWorkflowActions, useSavedWorkflows } from "./hooks/useSavedWorkflows";
-import { getExistingFolders } from "./utils/workflow";
+import { useWorkflowActions } from "./hooks/useSavedWorkflows";
+import { EditWorkflowProperty } from "./components/EditWorkflowProperty";
+import { PIPEDREAM_ERROR_HISTORY_URL } from "./utils/constants";
 import {
   categorizeError,
   determineSeverity,
@@ -20,72 +21,6 @@ interface WorkflowAnalyticsProps {
   errors: WorkflowError[];
 }
 
-function EditWorkflowName({
-  currentName,
-  onSave,
-}: {
-  currentName: string;
-  onSave: (newName: string) => Promise<void>;
-}) {
-  const { pop } = useNavigation();
-
-  const handleSubmit = async (values: { name: string }) => {
-    await onSave(values.name);
-    pop();
-  };
-
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Save Name" onSubmit={handleSubmit} />
-        </ActionPanel>
-      }
-    >
-      <Form.TextField id="name" title="Workflow Name" defaultValue={currentName} placeholder="Enter workflow name" />
-    </Form>
-  );
-}
-
-function EditWorkflowFolder({
-  currentFolder,
-  onSave,
-}: {
-  currentFolder: string;
-  onSave: (newFolder: string) => Promise<void>;
-}) {
-  const { pop } = useNavigation();
-  const { workflows } = useSavedWorkflows();
-  const existingFolders = getExistingFolders(workflows);
-
-  const handleSubmit = async (values: { folder: string }) => {
-    await onSave(values.folder);
-    pop();
-  };
-
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Save Folder" onSubmit={handleSubmit} />
-        </ActionPanel>
-      }
-    >
-      <Form.Dropdown
-        id="folder"
-        title="Folder"
-        defaultValue={currentFolder}
-        info="Select a folder to organize this workflow"
-      >
-        <Form.Dropdown.Item value="" title="No Folder" />
-        {existingFolders.map(f => (
-          <Form.Dropdown.Item key={f} value={f} title={f} />
-        ))}
-      </Form.Dropdown>
-    </Form>
-  );
-}
-
 export function WorkflowAnalyticsView({ workflow, errors }: WorkflowAnalyticsProps) {
   const { orgId } = useUserInfo();
   const { updateWorkflow } = useWorkflowActions();
@@ -97,8 +32,10 @@ export function WorkflowAnalyticsView({ workflow, errors }: WorkflowAnalyticsPro
 
   const handleEditName = () => {
     push(
-      <EditWorkflowName
-        currentName={workflow.customName}
+      <EditWorkflowProperty
+        label="Workflow Name"
+        property="name"
+        currentValue={workflow.customName}
         onSave={async (newName: string) => {
           try {
             await updateWorkflow({ ...workflow, customName: newName });
@@ -117,8 +54,10 @@ export function WorkflowAnalyticsView({ workflow, errors }: WorkflowAnalyticsPro
 
   const handleEditFolder = () => {
     push(
-      <EditWorkflowFolder
-        currentFolder={workflow.folder ?? ""}
+      <EditWorkflowProperty
+        label="Folder"
+        property="folder"
+        currentValue={workflow.folder ?? ""}
         onSave={async (newFolder: string) => {
           try {
             await updateWorkflow({ ...workflow, folder: newFolder });
@@ -203,7 +142,7 @@ export function WorkflowAnalyticsView({ workflow, errors }: WorkflowAnalyticsPro
                 actions={
                   <ActionPanel>
                     <Action.OpenInBrowser
-                      url={`https://pipedream.com/@/event-history?status=error&id=${workflow.id}`}
+                      url={`${PIPEDREAM_ERROR_HISTORY_URL}${workflow.id}`}
                       title="View Full Error History"
                       icon={Icon.Globe}
                     />
@@ -250,7 +189,7 @@ export function WorkflowAnalyticsView({ workflow, errors }: WorkflowAnalyticsPro
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
-                url={`https://pipedream.com/@/event-history?status=error&id=${workflow.id}`}
+                url={`${PIPEDREAM_ERROR_HISTORY_URL}${workflow.id}`}
                 title="View Error History"
                 icon={Icon.Globe}
               />

@@ -16,7 +16,7 @@ export function useOptimisticToggle(
       if (!original) return;
 
       // optimistic update
-      await updateWorkflow(original);
+      await updateWorkflow({ ...original, active: newStatus });
       try {
         await toggleWorkflowStatus(workflowId, orgId, newStatus);
       } catch (error) {

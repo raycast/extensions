@@ -75,7 +75,7 @@ Configure the extension behavior in Raycast preferences:
 
 - **Default Sort**: Choose how workflows are sorted by default (name, errors, triggers, steps)
 - **Default Filter**: Set the initial filter view (all, menu bar, errors)
-- **Refresh Interval**: Set how often error counts are updated (5 minutes by default)
+- **Refresh Interval**: Customize how often error counts are updated (5, 10, 15, 30, or 60 minutes)
 
 ## AI-Powered Error Analysis
 

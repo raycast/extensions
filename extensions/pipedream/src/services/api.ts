@@ -45,8 +45,14 @@ async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Re
   } catch (error) {
     if (error instanceof APIError) {
       throw error;
+    } else if (
+      error instanceof Error &&
+      "code" in error &&
+      (error.code === "ENOTFOUND" || error.code === "ECONNRESET")
+    ) {
+      throw new Error("Network error. Please check your internet connection and try again.");
     } else if (error instanceof Error) {
-      throw new Error("Network error. Please check your internet connection.");
+      throw new Error(`An unexpected error occurred: ${error.message}`);
     } else {
       throw new Error("An unknown error occurred");
     }
@@ -55,10 +61,23 @@ async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Re
 
 function handleAPIError(error: unknown, operation: string): Error {
   if (error instanceof APIError) {
-    if (error.status === 401 || error.status === 403 || error.status === 404) {
-      return new Error(`${operation} failed. Please check your API key in the "Configure Extension".`);
-    } else {
-      return new Error(`${operation} failed. Please try again later.`);
+    switch (error.status) {
+      case 401:
+      case 403:
+        return new Error(
+          `${operation} failed. The API key is invalid or has insufficient permissions. Please check your API key in the "Configure Extension".`
+        );
+      case 404:
+        return new Error(
+          `${operation} failed. The requested resource was not found. Please check the workflow ID and try again.`
+        );
+      case 500:
+      case 502:
+      case 503:
+      case 504:
+        return new Error(`${operation} failed due to a server error (status ${error.status}). Please try again later.`);
+      default:
+        return new Error(`${operation} failed with status ${error.status}.`);
     }
   }
   return error instanceof Error ? error : new Error("An unknown error occurred");
@@ -182,7 +201,7 @@ export async function fetchWorkflowEventHistory(workflowId: string, orgId: strin
         return {
           id: (errorObj.id as string) || `event_${index}`,
           timestamp: new Date((errorObj.indexed_at_ms as number) || Date.now()).toISOString(),
-          status: hasError ? ("error" as const) : ("success" as const),
+          status: "error" as const,
           execution_time_ms: 2000, // Default estimate
           error_message: (hasError as string) || undefined,
           event_data:

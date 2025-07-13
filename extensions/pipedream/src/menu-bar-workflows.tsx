@@ -4,6 +4,7 @@ import { SavedWorkflow, WorkflowError } from "./types";
 import { fetchWorkflowErrors } from "./services/api";
 import { useUserInfo } from "./hooks/useUserInfo";
 import { useSavedWorkflows, useWorkflowActions } from "./hooks/useSavedWorkflows";
+import { PIPEDREAM_ERROR_HISTORY_URL } from "./utils/constants";
 
 const SEVEN_DAYS_IN_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -76,7 +77,7 @@ export default function MenuBarWorkflows() {
   };
 
   const getErrorUrl = (workflowId: string) => {
-    return `https://pipedream.com/@/event-history?status=error&id=${workflowId}`;
+    return `${PIPEDREAM_ERROR_HISTORY_URL}${workflowId}`;
   };
 
   const copyWorkflowUrl = async (url: string, workflowName: string) => {

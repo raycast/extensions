@@ -17,7 +17,7 @@ export default {
       statements: 70,
     },
   },
-  testMatch: ["<rootDir>/src/**/__tests__/**/*.{ts,tsx}", "<rootDir>/src/**/*.{test,spec}.{ts,tsx}"],
+  testMatch: ["<rootDir>/src/**/__tests__/**/*.{ts,tsx}", "<rootDir>/src/**/*.{test,spec}.{ts,tsx}", "<rootDir>/test/**/*.{test,spec}.{ts,tsx}"],
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json"],
-  setupFilesAfterEnv: ["<rootDir>/src/test/setup.ts"],
+  
 };

@@ -1,4 +1,4 @@
-import { AI, showToast, Toast, Action, Icon, useNavigation } from "@raycast/api";
+import { AI, showToast, Toast, Action, Icon, useNavigation, environment } from "@raycast/api";
 import { SavedWorkflow, WorkflowError } from "../types";
 import AISummaryView from "./AISummaryView";
 import { showFailureToast } from "@raycast/utils";
@@ -20,6 +20,9 @@ export async function generateAIErrorSummary(errors: WorkflowError[], prompt: st
 
     const fullPrompt = `${prompt}\n\nError logs (last ${errors.length} errors):\n${errorLogs}`;
 
+    if (!environment.canAccess(AI)) {
+      throw new Error("AI is not available in this environment.");
+    }
     const summary = await AI.ask(fullPrompt, {
       creativity: "medium",
     });

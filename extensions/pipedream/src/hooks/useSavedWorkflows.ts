@@ -1,11 +1,29 @@
 import { useCallback } from "react";
-import { LocalStorage, getPreferenceValues } from "@raycast/api";
+import { LocalStorage, getPreferenceValues, Cache } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { fetchWorkflowDetails } from "../services/api";
 import { useUserInfo } from "./useUserInfo";
 import { SavedWorkflow, WorkflowDetails } from "../types";
-import { LOCALSTORAGE_KEY } from "../utils/constants";
+import { LOCALSTORAGE_KEY, PIPEDREAM_BASE_URL } from "../utils/constants";
 import { DEMO_WORKFLOWS } from "../utils/demo-data";
+
+const cache = new Cache();
+const WORKFLOW_DETAILS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+// Migration function to update workflow URLs to the correct format
+const migrateWorkflowUrls = (workflows: SavedWorkflow[]): SavedWorkflow[] => {
+  return workflows.map(workflow => {
+    const correctUrl = `${PIPEDREAM_BASE_URL}${workflow.id}`;
+    // If the URL is not exactly correct, fix it
+    if (workflow.url !== correctUrl) {
+      return {
+        ...workflow,
+        url: correctUrl,
+      };
+    }
+    return workflow;
+  });
+};
 
 type UseSavedWorkflowsReturn = {
   workflows: SavedWorkflow[];
@@ -28,6 +46,15 @@ export function useSavedWorkflows(): UseSavedWorkflowsReturn {
     const savedWorkflowsJson = await LocalStorage.getItem<string>(LOCALSTORAGE_KEY);
     let savedWorkflows: SavedWorkflow[] = savedWorkflowsJson ? JSON.parse(savedWorkflowsJson) : [];
 
+    // Migrate existing workflows to use the correct URL format
+    const migratedWorkflows = migrateWorkflowUrls(savedWorkflows);
+
+    // Save migrated workflows if any were updated
+    if (JSON.stringify(migratedWorkflows) !== JSON.stringify(savedWorkflows)) {
+      await LocalStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(migratedWorkflows));
+      savedWorkflows = migratedWorkflows;
+    }
+
     if (isDemo && savedWorkflows.length === 0) {
       savedWorkflows = DEMO_WORKFLOWS;
       await LocalStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(savedWorkflows));
@@ -35,7 +62,21 @@ export function useSavedWorkflows(): UseSavedWorkflowsReturn {
 
     const updatedWorkflows = await Promise.all(
       savedWorkflows.map(async workflow => {
+        const cacheKey = `workflow_details_${workflow.id}`;
+        const cachedDetails = cache.get(cacheKey);
+        if (cachedDetails) {
+          const { data, timestamp } = JSON.parse(cachedDetails);
+          if (Date.now() - timestamp < WORKFLOW_DETAILS_CACHE_TTL) {
+            return {
+              ...workflow,
+              triggerCount: data.triggers?.length ?? 0,
+              stepCount: data.steps?.length ?? 0,
+            };
+          }
+        }
+
         const details: WorkflowDetails = await fetchWorkflowDetails(workflow.id, currentOrgId);
+        cache.set(cacheKey, JSON.stringify({ data: details, timestamp: Date.now() }));
         return {
           ...workflow,
           triggerCount: details.triggers?.length ?? 0,

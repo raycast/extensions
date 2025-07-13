@@ -55,38 +55,51 @@ export function formatWorkflowData(workflow: SavedWorkflow) {
 /**
  * Sorts workflows by the specified criteria
  */
-export function sortWorkflows(workflows: SavedWorkflow[], sortBy: "name" | "errors" | "triggers" | "steps") {
+export function sortWorkflows(
+  workflows: SavedWorkflow[],
+  sortBy: "name" | "errors" | "triggers" | "steps",
+  sortOrder: "asc" | "desc",
+  errorCounts: Record<string, number>
+) {
   return [...workflows].sort((a, b) => {
+    let comparison = 0;
     switch (sortBy) {
       case "name":
-        return a.customName.localeCompare(b.customName);
+        comparison = a.customName.localeCompare(b.customName);
+        break;
       case "errors":
-        // For now, we'll sort by name since we don't have error counts in the workflow data
-        return a.customName.localeCompare(b.customName);
+        comparison = (errorCounts[b.id] ?? 0) - (errorCounts[a.id] ?? 0);
+        break;
       case "triggers":
-        return b.triggerCount - a.triggerCount;
+        comparison = b.triggerCount - a.triggerCount;
+        break;
       case "steps":
-        return b.stepCount - a.stepCount;
+        comparison = b.stepCount - a.stepCount;
+        break;
       default: {
         const _exhaustiveCheck: never = sortBy;
         throw new Error(`Unhandled sort option: ${_exhaustiveCheck}`);
       }
     }
+    return sortOrder === "asc" ? comparison : -comparison;
   });
 }
 
 /**
  * Filters workflows based on criteria
  */
-export function filterWorkflows(workflows: SavedWorkflow[], filterBy: "all" | "menuBar" | "notMenuBar" | "errors") {
+export function filterWorkflows(
+  workflows: SavedWorkflow[],
+  filterBy: "all" | "menuBar" | "notMenuBar" | "errors",
+  errorCounts: Record<string, number>
+) {
   switch (filterBy) {
     case "menuBar":
       return workflows.filter(w => w.showInMenuBar);
     case "notMenuBar":
       return workflows.filter(w => !w.showInMenuBar);
     case "errors":
-      // For now, return all workflows since we don't have error data in the workflow list
-      return workflows;
+      return workflows.filter(w => (errorCounts[w.id] ?? 0) > 0);
     case "all":
       return workflows;
     default: {

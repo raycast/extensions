@@ -1,6 +1,6 @@
 {
   "name": "pipedream",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "title": "Pipedream",
   "description": "Manage Pipedream workflows with AI-powered error analysis. Connect, monitor, and optimize your workflows directly from Raycast.",
   "icon": "pipedream-logo.png",

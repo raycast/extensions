@@ -108,6 +108,7 @@ Keep the response concise, well-formatted with markdown, and focus on practical 
     }
 
     setIsGenerating(true);
+    showToast({ title: "Generating AI Summary", message: "Please wait...", style: Toast.Style.Animated });
     try {
       const errorResponse = await fetchWorkflowErrors(workflow.id, orgId);
       if (!errorResponse.data || errorResponse.data.length === 0) {

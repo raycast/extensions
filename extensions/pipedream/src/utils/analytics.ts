@@ -50,11 +50,11 @@ export function getStepPerformance(events: WorkflowEvent[]) {
   });
 
   // Calculate averages
-  const successEvents = filteredEvents.filter(e => e.status === "success");
-  const errorEvents = filteredEvents.filter(e => e.status === "error");
-
   Object.keys(stepPerformance).forEach(stepName => {
     if (filteredEvents.length > 0 && stepPerformance[stepName]) {
+      const successEvents = filteredEvents.filter(e => e.status === "success");
+      const errorEvents = filteredEvents.filter(e => e.status === "error");
+
       stepPerformance[stepName]!.avgExecutionTime /= filteredEvents.length;
       stepPerformance[stepName]!.successRate = (successEvents.length / filteredEvents.length) * 100;
       stepPerformance[stepName]!.errorCount = errorEvents.length;

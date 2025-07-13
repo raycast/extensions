@@ -8,7 +8,6 @@ import {
   confirmAlert,
   Alert,
   useNavigation,
-  Form,
   getPreferenceValues,
   open,
 } from "@raycast/api";
@@ -17,52 +16,15 @@ import { useUserInfo } from "../hooks/useUserInfo";
 import { useWorkflowErrors } from "../hooks/useWorkflowErrors";
 import { useMemo, useState } from "react";
 import { SavedWorkflow } from "../types";
-import { groupWorkflowsByFolder, getExistingFolders } from "../utils/workflow";
+import { groupWorkflowsByFolder, sortWorkflows, filterWorkflows } from "../utils/workflow";
 import { WorkflowItem } from "./WorkflowItem";
 import { useOptimisticToggle } from "../hooks/useOptimisticToggle";
+import { EditWorkflowProperty } from "./EditWorkflowProperty";
+import { PIPEDREAM_ERROR_HISTORY_URL } from "../utils/constants";
 const collator = new Intl.Collator(undefined, { sensitivity: "base" });
 
 type SortOption = "name" | "errors" | "triggers" | "steps";
 type FilterOption = "all" | "menuBar" | "notMenuBar" | "errors";
-
-const sortWorkflows = (
-  workflows: SavedWorkflow[],
-  sortBy: SortOption,
-  sortOrder: "asc" | "desc",
-  errorCounts: Record<string, number>
-) => {
-  return [...workflows].sort((a, b) => {
-    let comparison = 0;
-    switch (sortBy) {
-      case "name":
-        comparison = collator.compare(a.customName ?? "", b.customName ?? "");
-        break;
-      case "errors":
-        comparison = (errorCounts[b.id] ?? 0) - (errorCounts[a.id] ?? 0);
-        break;
-      case "triggers":
-        comparison = b.triggerCount - a.triggerCount;
-        break;
-      case "steps":
-        comparison = b.stepCount - a.stepCount;
-        break;
-    }
-    return sortOrder === "asc" ? comparison : -comparison;
-  });
-};
-
-const filterWorkflows = (workflows: SavedWorkflow[], filterBy: FilterOption, errorCounts: Record<string, number>) => {
-  switch (filterBy) {
-    case "menuBar":
-      return workflows.filter(w => w.showInMenuBar);
-    case "notMenuBar":
-      return workflows.filter(w => !w.showInMenuBar);
-    case "errors":
-      return workflows.filter(w => (errorCounts[w.id] ?? 0) > 0);
-    default:
-      return workflows;
-  }
-};
 
 interface WorkflowListProps {
   onWorkflowAction?: (workflow: SavedWorkflow) => void;
@@ -194,8 +156,10 @@ export function WorkflowList({
 
   const handleEditName = (workflowId: string, currentName: string) => {
     push(
-      <EditWorkflowName
-        currentName={currentName}
+      <EditWorkflowProperty
+        label="Workflow Name"
+        property="name"
+        currentValue={currentName}
         onSave={async (newName: string) => {
           try {
             await updateWorkflow({ ...workflows.find(w => w.id === workflowId)!, customName: newName });
@@ -216,8 +180,10 @@ export function WorkflowList({
 
   const handleEditFolder = (workflowId: string, currentFolder: string) => {
     push(
-      <EditWorkflowFolder
-        currentFolder={currentFolder}
+      <EditWorkflowProperty
+        label="Folder"
+        property="folder"
+        currentValue={currentFolder}
         onSave={async (newFolder: string) => {
           try {
             await updateWorkflow({ ...workflows.find(w => w.id === workflowId)!, folder: newFolder });
@@ -338,11 +304,7 @@ export function WorkflowList({
               onEditName={showEdit ? () => handleEditName(workflow.id, workflow.customName) : undefined}
               onEditFolder={showEdit ? () => handleEditFolder(workflow.id, workflow.folder ?? "") : undefined}
               onToggleMenuBar={showMenuBarToggle ? () => toggleMenuBarVisibility(workflow.id) : undefined}
-              onViewErrors={
-                showViewErrors
-                  ? () => open(`https://pipedream.com/@/event-history?status=error&id=${workflow.id}`)
-                  : undefined
-              }
+              onViewErrors={showViewErrors ? () => open(`${PIPEDREAM_ERROR_HISTORY_URL}${workflow.id}`) : undefined}
               onViewDetails={showViewDetails ? () => handleViewDetails(workflow) : undefined}
               onDelete={showDelete ? () => handleDeleteWorkflow(workflow.id) : undefined}
               onCustomAction={onWorkflowAction ? () => onWorkflowAction(workflow) : undefined}
@@ -364,11 +326,7 @@ export function WorkflowList({
               onEditName={showEdit ? () => handleEditName(workflow.id, workflow.customName) : undefined}
               onEditFolder={showEdit ? () => handleEditFolder(workflow.id, workflow.folder ?? "") : undefined}
               onToggleMenuBar={showMenuBarToggle ? () => toggleMenuBarVisibility(workflow.id) : undefined}
-              onViewErrors={
-                showViewErrors
-                  ? () => open(`https://pipedream.com/@/event-history?status=error&id=${workflow.id}`)
-                  : undefined
-              }
+              onViewErrors={showViewErrors ? () => open(`${PIPEDREAM_ERROR_HISTORY_URL}${workflow.id}`) : undefined}
               onViewDetails={showViewDetails ? () => handleViewDetails(workflow) : undefined}
               onDelete={showDelete ? () => handleDeleteWorkflow(workflow.id) : undefined}
               onCustomAction={onWorkflowAction ? () => onWorkflowAction(workflow) : undefined}
@@ -381,75 +339,5 @@ export function WorkflowList({
         </List.Section>
       )}
     </List>
-  );
-}
-
-function EditWorkflowName({
-  currentName,
-  onSave,
-}: {
-  currentName: string;
-  onSave: (newName: string) => Promise<void>;
-}) {
-  const { pop } = useNavigation();
-
-  const handleSubmit = async (values: { name: string }) => {
-    await onSave(values.name);
-    pop();
-  };
-
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Save" onSubmit={handleSubmit} />
-        </ActionPanel>
-      }
-    >
-      <Form.TextField id="name" title="Workflow Name" defaultValue={currentName} />
-    </Form>
-  );
-}
-
-function EditWorkflowFolder({
-  currentFolder,
-  onSave,
-}: {
-  currentFolder: string;
-  onSave: (newFolder: string) => Promise<void>;
-}) {
-  const { workflows } = useSavedWorkflows();
-  const existingFolders = getExistingFolders(workflows);
-  const { pop } = useNavigation();
-  const [folderChoice, setFolderChoice] = useState<string>(
-    currentFolder && existingFolders.includes(currentFolder) ? currentFolder : currentFolder ? "__custom__" : ""
-  );
-  const [customFolder, setCustomFolder] = useState(folderChoice === "__custom__" ? currentFolder : "");
-
-  const handleSubmit = async () => {
-    const finalFolder = folderChoice === "__custom__" ? customFolder : folderChoice;
-    await onSave(finalFolder);
-    pop();
-  };
-
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Save" onSubmit={handleSubmit} />
-        </ActionPanel>
-      }
-    >
-      <Form.Dropdown id="folder" title="Folder" value={folderChoice} onChange={setFolderChoice}>
-        <Form.Dropdown.Item value="" title="None" />
-        {existingFolders.map(f => (
-          <Form.Dropdown.Item key={f} value={f} title={f} />
-        ))}
-        <Form.Dropdown.Item value="__custom__" title="Add Folder..." />
-      </Form.Dropdown>
-      {folderChoice === "__custom__" && (
-        <Form.TextField id="customFolder" title="New Folder" value={customFolder} onChange={setCustomFolder} />
-      )}
-    </Form>
   );
 }
