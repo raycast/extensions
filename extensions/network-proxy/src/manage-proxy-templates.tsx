@@ -75,11 +75,7 @@ export default function ManageProxyTemplates() {
         message: `Proxy configuration "${template.name}" has been applied successfully`,
       });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to apply template",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
-      });
+      await showFailureToast(error, { title: "Failed to apply template" });
     }
   };
 
