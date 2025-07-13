@@ -57,7 +57,7 @@ If you get a *self-signed certificate* error, you need to fix the SSL of your in
 | v-add-access-key | ❌ | - |
 | v-add-backup-host | ❌ | - |
 | v-add-cron-hestia-autoupdate | ❌ | - |
-| v-add-cron-job | ❌ | - |
+| v-add-cron-job | ✅ | - |
 | v-add-cron-letsencrypt-job | ❌ | - |
 | v-add-cron-reports | ❌ | - |
 | v-add-cron-restart-job | ❌ | - |
@@ -323,7 +323,7 @@ If you get a *self-signed certificate* error, you need to fix the SSL of your in
 | v-list-apis | ❌ | - |
 | v-list-backup-host | ❌ | - |
 | v-list-cron-job | ❌ | - |
-| v-list-cron-jobs | ❌ | - |
+| v-list-cron-jobs | ✅ | - |
 | v-list-database | ❌ | - |
 | v-list-database-host | ❌ | - |
 | v-list-database-hosts | ❌ | - |

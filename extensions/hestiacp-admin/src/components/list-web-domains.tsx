@@ -51,6 +51,7 @@ export default function ListWebDomainsComponent({ user }: ListWebDomainsComponen
                     />
                   </ActionPanel.Submenu>
                   <Action.Push
+                    // eslint-disable-next-line @raycast/prefer-title-case
                     title="View Domain SSL"
                     icon={Icon.Lock}
                     target={<ViewDomainSSL user={user} domain={domain} />}
