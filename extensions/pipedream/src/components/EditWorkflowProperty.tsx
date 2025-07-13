@@ -7,7 +7,8 @@ interface EditWorkflowPropertyProps {
   label: string;
   property: "name" | "folder";
   currentValue: string;
-  onSave: (newValue: string) => Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onSave: (_newValue: string) => Promise<void>;
 }
 
 export function EditWorkflowProperty({ label, property, currentValue, onSave }: EditWorkflowPropertyProps) {

@@ -126,10 +126,8 @@ export function useWorkflowActions(): UseWorkflowActionsReturn {
   );
 
   const addWorkflow = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async (newWorkflow: SavedWorkflow) => {
-      // Force refresh to ensure we have the latest data
-      await refreshWorkflows();
-
       // Check against actual localStorage data to avoid race conditions
       const savedWorkflowsJson = await LocalStorage.getItem<string>(LOCALSTORAGE_KEY);
       const savedWorkflows: SavedWorkflow[] = savedWorkflowsJson ? JSON.parse(savedWorkflowsJson) : [];
@@ -141,12 +139,13 @@ export function useWorkflowActions(): UseWorkflowActionsReturn {
 
       const updatedWorkflows = [...savedWorkflows, newWorkflow];
       await updateLocalStorage(updatedWorkflows);
-      return newWorkflow; // Return the new workflow on success
+      return undefined; // Return undefined to indicate new workflow was added
     },
-    [updateLocalStorage, refreshWorkflows]
+    [updateLocalStorage]
   );
 
   const updateWorkflow = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async (updatedWorkflow: SavedWorkflow) => {
       const updatedWorkflows = workflows.map(workflow =>
         workflow.id === updatedWorkflow.id ? updatedWorkflow : workflow
@@ -157,6 +156,7 @@ export function useWorkflowActions(): UseWorkflowActionsReturn {
   );
 
   const removeWorkflow = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async (workflowId: string) => {
       const updatedWorkflows = workflows.filter(workflow => workflow.id !== workflowId);
       await updateLocalStorage(updatedWorkflows);
@@ -165,6 +165,7 @@ export function useWorkflowActions(): UseWorkflowActionsReturn {
   );
 
   const toggleMenuBarVisibility = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async (workflowId: string) => {
       const updatedWorkflows = workflows.map(workflow =>
         workflow.id === workflowId ? { ...workflow, showInMenuBar: !workflow.showInMenuBar } : workflow

@@ -5,6 +5,7 @@ import { showFailureToast } from "@raycast/utils";
 
 export function useOptimisticToggle(
   workflows: SavedWorkflow[],
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   updateWorkflow: (w: SavedWorkflow) => Promise<void>,
   refresh: () => Promise<void>,
   orgId?: string

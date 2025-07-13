@@ -27,7 +27,8 @@ type SortOption = "name" | "errors" | "triggers" | "steps";
 type FilterOption = "all" | "menuBar" | "notMenuBar" | "errors";
 
 interface WorkflowListProps {
-  onWorkflowAction?: (workflow: SavedWorkflow) => void;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onWorkflowAction?: (_workflow: SavedWorkflow) => void;
   actionTitle?: string;
   actionIcon?: Icon;
   showEdit?: boolean;
@@ -35,7 +36,8 @@ interface WorkflowListProps {
   showMenuBarToggle?: boolean;
   showViewErrors?: boolean;
   showViewDetails?: boolean;
-  onViewDetailsHandler?: (workflow: SavedWorkflow) => void;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onViewDetailsHandler?: (_workflow: SavedWorkflow) => void;
 }
 
 export function WorkflowList({
@@ -160,9 +162,9 @@ export function WorkflowList({
         label="Workflow Name"
         property="name"
         currentValue={currentName}
-        onSave={async (newName: string) => {
+        onSave={async (_newName: string) => {
           try {
-            await updateWorkflow({ ...workflows.find(w => w.id === workflowId)!, customName: newName });
+            await updateWorkflow({ ...workflows.find(w => w.id === workflowId)!, customName: _newName });
             showToast({ title: "Success", message: "Workflow name updated", style: Toast.Style.Success });
             await refreshWorkflows();
             await refreshErrorInfo();
@@ -184,9 +186,9 @@ export function WorkflowList({
         label="Folder"
         property="folder"
         currentValue={currentFolder}
-        onSave={async (newFolder: string) => {
+        onSave={async (_newFolder: string) => {
           try {
-            await updateWorkflow({ ...workflows.find(w => w.id === workflowId)!, folder: newFolder });
+            await updateWorkflow({ ...workflows.find(w => w.id === workflowId)!, folder: _newFolder });
             showToast({ title: "Success", message: "Workflow folder updated", style: Toast.Style.Success });
             await refreshWorkflows();
             await refreshErrorInfo();

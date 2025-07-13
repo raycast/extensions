@@ -51,7 +51,7 @@ export default function ConnectWorkflow() {
       const existing = await addWorkflow(newWorkflow);
 
       if (existing) {
-        showFailureToast(`"${existing.customName}" is already in your workflow list`);
+        showFailureToast(`"${existing.customName}" (ID: ${existing.id}) is already in your workflow list`);
       } else {
         showToast({
           title: "Success",

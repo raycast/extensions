@@ -34,7 +34,6 @@ export default function MenuBarWorkflows() {
             errors: recentErrors.slice(0, 5), // Show last 5 errors
           };
         } catch (error) {
-          console.error(`Failed to fetch errors for workflow ${workflow.id}:`, error);
           return {
             workflowId: workflow.id,
             errorCount: 0,
@@ -55,7 +54,6 @@ export default function MenuBarWorkflows() {
       setWorkflowErrors(errorData);
       setLastRefresh(new Date());
     } catch (error) {
-      console.error("Failed to fetch errors:", error);
       showToast({
         title: "Error",
         message: "Failed to refresh error data",

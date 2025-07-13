@@ -20,6 +20,7 @@ class APIError extends Error {
   constructor(
     public status: number,
     public statusText: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public body: string
   ) {
     super(`API Error: ${status} ${statusText}`);

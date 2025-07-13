@@ -14,6 +14,7 @@ export interface SavedWorkflow {
   stepCount: number;
   showInMenuBar: boolean;
   sortOrder: number;
+  active?: boolean;
 }
 
 export interface UserInfo {
