@@ -5,6 +5,7 @@ import { TemplateManager } from "./utils/template";
 import { NetworkUtils } from "./utils/network";
 import { CreateTemplateForm } from "./components/CreateTemplateForm";
 import { EditTemplateForm } from "./components/EditTemplateForm";
+import { showFailureToast } from "@raycast/utils";
 
 export default function ManageProxyTemplates() {
   const [templates, setTemplates] = useState<ProxyTemplate[]>([]);
