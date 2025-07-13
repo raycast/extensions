@@ -1,3 +1,3 @@
-# network proxy Changelog
+# Network Proxy Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
