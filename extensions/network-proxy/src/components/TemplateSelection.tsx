@@ -5,6 +5,7 @@ import { TemplateManager } from "../utils/template";
 import { NetworkUtils } from "../utils/network";
 import { ProxyUtils } from "../utils/proxy";
 import { CreateTemplateForm } from "./CreateTemplateForm";
+import { showFailureToast } from "@raycast/utils";
 
 interface TemplateSelectionProps {
   service: string;
@@ -28,10 +29,6 @@ export function TemplateSelection({ service, onTemplateApplied, mode = "select" 
       setTemplates(allTemplates);
     } catch (error) {
       await showFailureToast(error, { title: "Failed to load templates" });
-        style: Toast.Style.Failure,
-        title: "Failed to load templates",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
-      });
     } finally {
       setIsLoading(false);
     }
