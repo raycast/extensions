@@ -120,6 +120,7 @@ export class TemplateManager {
     currentSettings: ProxySettings,
   ): Promise<void> {
     // Filter out only the enabled proxy settings
+    // Create template settings with all proxy configurations
     const templateSettings: ProxySettings = {
       httpProxy: currentSettings.httpProxy,
       httpsProxy: currentSettings.httpsProxy,
