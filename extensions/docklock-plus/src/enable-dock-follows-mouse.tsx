@@ -1,4 +1,5 @@
-import { showToast, showFailureToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import { showToast, Toast } from "@raycast/api";
 import { isDockLockPlusInstalled } from "./utils";
 import { promisify } from "util";
 import { exec } from "child_process";

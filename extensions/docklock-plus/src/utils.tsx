@@ -1,4 +1,4 @@
-import { showFailureToast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { execSync } from "child_process";
 
 interface DisplayDriver {
