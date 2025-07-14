@@ -1,5 +1,13 @@
 # SSH Manager Changelog
 
+## [] - {PR_MERGE_DATE}
+
+- In Create, "name" is now `Required`
+- Add README.md
+- Remove `Preferences` type
+- Remove `.trunk` folder
+- Use Raycast Utils `run-applescript`
+
 ## [Add Ghostty Support] - 2025-04-04
 
 - Added support for Ghostty as an option to open ssh connections.
