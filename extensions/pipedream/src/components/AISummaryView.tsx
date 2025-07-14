@@ -164,6 +164,9 @@ Keep the response concise, well-formatted with markdown, and focus on practical 
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Workflow" text={workflow.customName} />
+          <Detail.Metadata.Label title="Workflow ID" text={workflow.id} />
+          <Detail.Metadata.Label title="Folder" text={workflow.folder || "Root"} />
+          <Detail.Metadata.Separator />
           <Detail.Metadata.Label
             title="Status"
             text={isGenerating ? "Generating..." : summary ? "Complete" : "Ready"}

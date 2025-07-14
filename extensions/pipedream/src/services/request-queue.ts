@@ -13,7 +13,8 @@ interface QueuedRequest<T = unknown> {
 }
 
 class RequestQueue {
-  private queue: QueuedRequest<unknown>[] = [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private queue: QueuedRequest<any>[] = [];
   private processing = false;
   private concurrentRequests = 0;
   private maxConcurrent = 3;
@@ -61,7 +62,8 @@ class RequestQueue {
     this.processing = false;
   }
 
-  private async executeRequest(request: QueuedRequest<unknown>): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private async executeRequest(request: QueuedRequest<any>): Promise<void> {
     try {
       const result = await request.fn();
       request.resolve(result);

@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, showToast, Toast, useNavigation, Clipboard } from "@raycast/api";
 import { SavedWorkflow, WorkflowError } from "../types";
 import { useUserInfo } from "../hooks/useUserInfo";
 import { fetchWorkflowErrors, exportWorkflowAsJSON } from "../services/api";
@@ -267,23 +267,25 @@ export function WorkflowDetailView({
             icon={Icon.Download}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard
+                <Action
                   title="Export as JSON"
                   icon={Icon.Download}
-                  content=""
-                  onCopy={async () => {
-                    const toast = await showToast({ title: "Exporting workflow...", style: Toast.Style.Animated });
+                  onAction={async () => {
+                    await showToast({ title: "Exporting workflow...", style: Toast.Style.Animated });
                     try {
                       const jsonData = await exportWorkflowAsJSON(workflow.id, orgId);
-                      toast.style = Toast.Style.Success;
-                      toast.title = "Success";
-                      toast.message = "Workflow JSON copied to clipboard";
-                      return jsonData;
+                      await showToast({
+                        title: "Success",
+                        message: "Workflow JSON copied to clipboard",
+                        style: Toast.Style.Success,
+                      });
+                      await Clipboard.copy(jsonData);
                     } catch (error) {
-                      toast.style = Toast.Style.Failure;
-                      toast.title = "Export Failed";
-                      toast.message = `Failed to export workflow: ${error instanceof Error ? error.message : String(error)}`;
-                      return "";
+                      await showToast({
+                        title: "Export Failed",
+                        message: `Failed to export workflow: ${error instanceof Error ? error.message : String(error)}`,
+                        style: Toast.Style.Failure,
+                      });
                     }
                   }}
                 />

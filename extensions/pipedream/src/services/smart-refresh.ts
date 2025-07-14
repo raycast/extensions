@@ -2,7 +2,7 @@
  * Smart refresh system that only fetches errors for workflows with recent activity
  */
 
-import { SavedWorkflow } from "../types";
+import { SavedWorkflow, WorkflowError } from "../types";
 import { requestQueue } from "./request-queue";
 import { fetchWorkflowErrors } from "./api";
 
@@ -92,7 +92,7 @@ class SmartRefreshManager {
   async smartRefresh(
     workflows: SavedWorkflow[],
     orgId: string,
-    onUpdate: (workflowId: string, errorCount: number, errors: unknown[]) => void
+    onUpdate: (workflowId: string, errorCount: number, errors: WorkflowError[]) => void
   ): Promise<void> {
     if (this.isRefreshing) return;
 

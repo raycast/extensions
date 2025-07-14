@@ -3,17 +3,13 @@ import { SavedWorkflow } from "../types";
 import { getExistingFolders } from "../utils/workflow";
 import { useState } from "react";
 
-interface FormValues {
-  url?: string;
-  customName?: string;
-  folder?: string;
-  showInMenuBar?: boolean;
-}
+// Form values are handled dynamically with any type for flexibility
 
 interface WorkflowFormProps {
   workflow?: SavedWorkflow;
   workflows: SavedWorkflow[];
-  onSubmit: (values: FormValues) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onSubmit: (values: any) => void;
   isConnecting?: boolean;
 }
 
@@ -23,7 +19,8 @@ export function WorkflowForm({ workflow, workflows, onSubmit, isConnecting = fal
   const [customFolder, setCustomFolder] = useState("");
   const [addToMenuBar, setAddToMenuBar] = useState(workflow?.showInMenuBar ?? true);
 
-  const handleSubmit = (values: FormValues) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleSubmit = (values: any) => {
     const finalFolder = folderChoice === "__custom__" ? customFolder : folderChoice;
     const finalValues = {
       ...values,
