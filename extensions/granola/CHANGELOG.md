@@ -1,6 +1,6 @@
 # Granola Changelog
 
-## [1.5] - {PR_MERGE_DATE}
+## [1.5] - 2025-07-14
 
 ### 🚀 Major New Features
 - **Work with multiple notes at once.** New Export Transcripts and Export Notes commands for selecting and processing multiple notes simultaneously.
