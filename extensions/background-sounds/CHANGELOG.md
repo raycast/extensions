@@ -1,6 +1,6 @@
 # Background Sounds Changelog
 
-## [Maintainance] - {PR_MERGE_DATE}
+## [Maintainance] - 2025-07-14
 
 - Bumped dependencies to the latest versions.
 
