@@ -1,6 +1,8 @@
 import { List, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
+import { promisify } from "util";
 import { exec } from "child_process";
+const execAsync = promisify(exec);
 
 import { getDisplayNames, isDockLockPlusInstalled } from "./utils";
 
@@ -9,20 +11,41 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const inst = isDockLockPlusInstalled();
-    if (!inst) {
-      showToast(Toast.Style.Failure, "DockLock Plus not installed", "Install it at https://docklockpro.com");
+    async function loadDisplays() {
+      const inst = await isDockLockPlusInstalled();
+      if (!inst) {
+        await showToast(Toast.Style.Failure, "DockLock Plus not installed", "Install it at https://docklockpro.com");
+        setIsLoading(false);
+        return;
+      }
+      const names = await getDisplayNames();
+      setDisplays(names);
       setIsLoading(false);
-      return;
     }
-    const names = getDisplayNames();
-    setDisplays(names);
-    setIsLoading(false);
+
+    loadDisplays();
   }, []);
 
-  function moveDockToDisplay(display: string) {
-    exec(`open "docklockplus://moveToDisplay?name=${encodeURIComponent(display)}"`);
-    showToast(Toast.Style.Success, "Dock moved", `The Dock was moved to display: ${display}`);
+  async function moveDockToDisplay(display: string) {
+    if (!/^[\w\s\-.+]+$/.test(display)) {
+      await showToast(
+        Toast.Style.Failure,
+        "Invalid Display Name",
+        `Suspicious display name rejected: "${display}". Please send a screenshot of your display list to support@docklock.pro.`,
+      );
+      return;
+    }
+
+    try {
+      await execAsync(`open "docklockplus://moveToDisplay?name=${encodeURIComponent(display)}"`);
+      showToast(Toast.Style.Success, `The Dock was moved to display: ${display}`);
+    } catch (error) {
+      await showToast(
+        Toast.Style.Failure,
+        `Failed to move Dock to the display: ${display}`,
+        `Could not communicate with DockLock Plus. Error: ${error}`,
+      );
+    }
   }
 
   return (

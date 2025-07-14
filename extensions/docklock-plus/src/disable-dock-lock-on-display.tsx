@@ -1,6 +1,8 @@
 import { List, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
+import { promisify } from "util";
 import { exec } from "child_process";
+const execAsync = promisify(exec);
 
 import { getDisplayNames, isDockLockPlusInstalled } from "./utils";
 
@@ -24,8 +26,24 @@ export default function Command() {
   }, []);
 
   const moveDockToDisplay = async (display: string) => {
-    exec(`open "docklockplus://disableDockLockOnDisplay?name=${encodeURIComponent(display)}"`);
-    await showToast(Toast.Style.Success, "DockLock Disabled", `Disabled DockLock on display: ${display}`);
+    if (!/^[\w\s\-.+]+$/.test(display)) {
+      await showToast(
+        Toast.Style.Failure,
+        "Invalid Display Name",
+        `Suspicious display name rejected: "${display}". Please send a screenshot of your display list to support@docklock.pro.`,
+      );
+      return;
+    }
+    try {
+      await execAsync(`open "docklockplus://disableDockLockOnDisplay?name=${encodeURIComponent(display)}"`);
+      showToast(Toast.Style.Success, `DockLock Disabled on display: ${display}`);
+    } catch (error) {
+      await showToast(
+        Toast.Style.Failure,
+        `Failed to disable DockLock on display: ${display}`,
+        `Could not communicate with DockLock Plus. Error: ${error}`,
+      );
+    }
   };
 
   return (

@@ -1,4 +1,5 @@
 import { execSync } from "child_process";
+import { showToast, Toast } from "@raycast/api";
 
 interface DisplayDriver {
   _name?: string;
@@ -11,7 +12,7 @@ interface SPDisplayData {
   }>;
 }
 
-export function getDisplayNames(): string[] {
+export async function getDisplayNames(): Promise<string[]> {
   try {
     const stdout = execSync("/usr/sbin/system_profiler SPDisplaysDataType -json", { encoding: "utf8" });
     const data = JSON.parse(stdout) as SPDisplayData;
@@ -27,7 +28,7 @@ export function getDisplayNames(): string[] {
     });
     return Array.from(new Set(names));
   } catch (error) {
-    console.error("Error fetching display names:", error);
+    await showToast(Toast.Style.Failure, "Error fetching display names", String(error));
     return [];
   }
 }

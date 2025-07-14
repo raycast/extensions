@@ -32,7 +32,6 @@ A Raycast extension to control DockLock Plus via keyboard shortcuts, commands, a
 | `move-dock-left.tsx`               | Move Dock Left                         |
 | `move-dock-right.tsx`              | Move Dock Right                        |
 | `move-to-display-by-name.tsx`      | Move Dock to Display                   |
-| `move-to-coordinates.tsx`          | Move Dock to Coordinates               |
 | `enable-dock-lock.tsx`             | Enable DockLock                        |
 | `disable-dock-lock.tsx`            | Disable DockLock                       |
 | `enable-dock-follows-mouse.tsx`    | Enable Dock Follows Mouse              |
