@@ -1,6 +1,6 @@
 # Readwise Reader Changelog
 
-## [Add desktop app support] - {PR_MERGE_DATE}
+## [Add desktop app support] - 2025-07-14
 
 - Add option to open documents in Readwise Reader desktop app
 
