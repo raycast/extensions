@@ -1,15 +1,16 @@
 import { useCallback } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { fetchWorkflowErrors } from "../services/api";
-import { SavedWorkflow } from "../types";
+import { SavedWorkflow, WorkflowError } from "../types";
 import { isWithinLastWeek } from "../utils/time";
 import { useEffect } from "react";
 
 export function useWorkflowErrors(workflows: SavedWorkflow[], orgId?: string, refreshIntervalMs = 0) {
   const fetchCounts = useCallback(async () => {
-    if (!orgId || workflows.length === 0) return {} as Record<string, { count: number; lastError?: string }>;
+    if (!orgId || !workflows || workflows.length === 0)
+      return {} as Record<string, { count: number; lastError?: string; errors: WorkflowError[] }>;
 
-    const info: Record<string, { count: number; lastError?: string }> = {};
+    const info: Record<string, { count: number; lastError?: string; errors: WorkflowError[] }> = {};
     await Promise.all(
       workflows.map(async wf => {
         try {
@@ -18,9 +19,10 @@ export function useWorkflowErrors(workflows: SavedWorkflow[], orgId?: string, re
           info[wf.id] = {
             count: recent.length,
             lastError: recent[0]?.event?.error?.msg ?? undefined,
+            errors: recent,
           };
         } catch (_) {
-          info[wf.id] = { count: 0 };
+          info[wf.id] = { count: 0, errors: [] };
         }
       })
     );
@@ -32,7 +34,7 @@ export function useWorkflowErrors(workflows: SavedWorkflow[], orgId?: string, re
     revalidate,
     isLoading,
   } = useCachedPromise(fetchCounts, [], {
-    execute: !!orgId && workflows.length > 0,
+    execute: !!orgId && !!workflows && workflows.length > 0,
   });
 
   useEffect(() => {

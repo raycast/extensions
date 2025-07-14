@@ -129,6 +129,14 @@ export async function toggleWorkflowStatus(
   }
 }
 
+export async function activateWorkflow(workflowId: string, orgId: string): Promise<WorkflowDetails> {
+  return toggleWorkflowStatus(workflowId, orgId, true);
+}
+
+export async function deactivateWorkflow(workflowId: string, orgId: string): Promise<WorkflowDetails> {
+  return toggleWorkflowStatus(workflowId, orgId, false);
+}
+
 export async function fetchUserInfo(): Promise<UserInfo> {
   if (isDemo()) {
     return Promise.resolve({
@@ -148,7 +156,11 @@ export async function fetchUserInfo(): Promise<UserInfo> {
   }
 }
 
-export async function fetchWorkflowErrors(workflowId: string, orgId: string): Promise<WorkflowErrorResponse> {
+export async function fetchWorkflowErrors(
+  workflowId: string,
+  orgId: string,
+  limit = 100
+): Promise<WorkflowErrorResponse> {
   if (isDemo()) {
     const data = DEMO_ERRORS[workflowId] ?? [];
     return Promise.resolve({
@@ -158,12 +170,25 @@ export async function fetchWorkflowErrors(workflowId: string, orgId: string): Pr
   }
   try {
     const response = await fetchWithAuth(
-      `${API_ENDPOINT}/workflows/${workflowId}/$errors/event_summaries?expand=event&limit=100&org_id=${orgId}`
+      `${API_ENDPOINT}/workflows/${workflowId}/$errors/event_summaries?expand=event&limit=${limit}&org_id=${orgId}`
     );
     return response.json();
   } catch (error) {
     throw handleAPIError(error, "Fetching workflow errors");
   }
+}
+
+/**
+ * Fetches comprehensive error data for trending analysis
+ * Attempts to get more errors by increasing the limit for better 7-day coverage
+ */
+export async function fetchWorkflowErrorsForTrending(
+  workflowId: string,
+  orgId: string
+): Promise<WorkflowErrorResponse> {
+  // Try to get more errors for better trending analysis
+  // Start with 500 errors which should cover most 7-day periods
+  return fetchWorkflowErrors(workflowId, orgId, 500);
 }
 
 export async function fetchWorkflowEventHistory(workflowId: string, orgId: string, limit = 50): Promise<EventHistory> {
@@ -248,5 +273,31 @@ export async function cloneWorkflow(workflowId: string, newName: string, orgId: 
     });
   } catch (error) {
     throw handleAPIError(error, "Cloning workflow");
+  }
+}
+
+export async function exportWorkflowAsJSON(workflowId: string, orgId: string): Promise<string> {
+  try {
+    const workflowDetails = await fetchWorkflowDetails(workflowId, orgId);
+
+    const exportData = {
+      exportedAt: new Date().toISOString(),
+      exportVersion: "1.0",
+      workflow: {
+        id: workflowDetails.id,
+        name: workflowDetails.name,
+        triggers: workflowDetails.triggers,
+        steps: workflowDetails.steps,
+      },
+      metadata: {
+        triggerCount: workflowDetails.triggers.length,
+        stepCount: workflowDetails.steps.length,
+        exportedBy: "Raycast Pipedream Extension v2.3",
+      },
+    };
+
+    return JSON.stringify(exportData, null, 2);
+  } catch (error) {
+    throw handleAPIError(error, "Exporting workflow as JSON");
   }
 }

@@ -12,7 +12,7 @@ export function useOptimisticToggle(
 ) {
   return useCallback(
     async (workflowId: string, newStatus: boolean) => {
-      if (!orgId) return;
+      if (!orgId || !workflows) return;
       const original = workflows.find(w => w.id === workflowId);
       if (!original) return;
 

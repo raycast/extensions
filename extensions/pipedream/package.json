@@ -1,6 +1,6 @@
 {
   "name": "pipedream",
-  "version": "2.0.1",
+  "version": "3.0.0",
   "title": "Pipedream",
   "description": "Manage Pipedream workflows with AI-powered error analysis. Connect, monitor, and optimize your workflows directly from Raycast.",
   "icon": "pipedream-logo.png",
@@ -33,7 +33,7 @@
       "name": "manage-workflows",
       "title": "Manage Workflows",
       "subtitle": "Pipedream",
-      "description": "View, manage, sort, and filter your saved Pipedream workflows",
+      "description": "Comprehensive workflow management with editing, error analytics, AI insights, and performance tracking all in one place.",
       "mode": "view"
     },
     {
@@ -43,13 +43,6 @@
       "description": "Display workflow status, error counts, and quick actions in the menu bar",
       "mode": "menu-bar",
       "interval": "5m"
-    },
-    {
-      "name": "workflow-analytics",
-      "title": "Workflow Analytics",
-      "subtitle": "Pipedream",
-      "description": "View detailed analytics, metrics, and performance data for your workflows. Includes AI-powered error analysis for intelligent insights.",
-      "mode": "view"
     }
   ],
   "preferences": [
@@ -137,6 +130,71 @@
         }
       ],
       "default": "300"
+    },
+    {
+      "name": "CRITICAL_ERROR_THRESHOLD",
+      "type": "dropdown",
+      "required": false,
+      "title": "Critical Error Threshold",
+      "description": "Number of errors that trigger critical severity indicator",
+      "data": [
+        {
+          "title": "5 errors",
+          "value": "5"
+        },
+        {
+          "title": "10 errors",
+          "value": "10"
+        },
+        {
+          "title": "15 errors",
+          "value": "15"
+        },
+        {
+          "title": "20 errors",
+          "value": "20"
+        },
+        {
+          "title": "25 errors",
+          "value": "25"
+        }
+      ],
+      "default": "10"
+    },
+    {
+      "name": "WARNING_ERROR_THRESHOLD",
+      "type": "dropdown",
+      "required": false,
+      "title": "Warning Error Threshold", 
+      "description": "Number of errors that trigger warning severity indicator",
+      "data": [
+        {
+          "title": "1 error",
+          "value": "1"
+        },
+        {
+          "title": "3 errors",
+          "value": "3"
+        },
+        {
+          "title": "5 errors",
+          "value": "5"
+        },
+        {
+          "title": "8 errors",
+          "value": "8"
+        }
+      ],
+      "default": "3"
+    },
+    {
+      "name": "SHOW_NEW_ERROR_BADGES",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show New Error Badges",
+      "description": "Display badges for workflows with new errors after being marked as fixed",
+      "default": true,
+      "label": "Show 'NEW' badges for recently fixed workflows with new errors"
     }
   ],
   "dependencies": {

@@ -4,7 +4,6 @@ import { generateAIErrorSummary } from "./AIErrorSummary";
 import { useUserInfo } from "../hooks/useUserInfo";
 import { SavedWorkflow, WorkflowError } from "../types";
 import { fetchWorkflowErrors } from "../services/api";
-import { WorkflowAnalyticsView } from "../workflow-analytics";
 import { showFailureToast } from "@raycast/utils";
 
 interface AISummaryViewProps {
@@ -195,12 +194,6 @@ Keep the response concise, well-formatted with markdown, and focus on practical 
             icon={Icon.Document}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
             onAction={handleViewRawLogs}
-          />
-          <Action
-            title="Back to Workflow"
-            icon={Icon.ArrowLeft}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
-            onAction={() => push(<WorkflowAnalyticsView workflow={workflow} errors={[]} />)}
           />
         </ActionPanel>
       }

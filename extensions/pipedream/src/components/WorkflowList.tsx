@@ -1,110 +1,46 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  showToast,
-  Toast,
-  confirmAlert,
-  Alert,
-  useNavigation,
-  getPreferenceValues,
-  open,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Icon, showToast, Toast, getPreferenceValues, open } from "@raycast/api";
 import { useSavedWorkflows, useWorkflowActions } from "../hooks/useSavedWorkflows";
 import { useUserInfo } from "../hooks/useUserInfo";
 import { useWorkflowErrors } from "../hooks/useWorkflowErrors";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { SavedWorkflow } from "../types";
 import { groupWorkflowsByFolder, sortWorkflows, filterWorkflows } from "../utils/workflow";
 import { WorkflowItem } from "./WorkflowItem";
-import { useOptimisticToggle } from "../hooks/useOptimisticToggle";
-import { EditWorkflowProperty } from "./EditWorkflowProperty";
 import { PIPEDREAM_ERROR_HISTORY_URL } from "../utils/constants";
+import { shouldAutoUnmarkAsFixed } from "../utils/error-resolution";
 const collator = new Intl.Collator(undefined, { sensitivity: "base" });
 
 type SortOption = "name" | "errors" | "triggers" | "steps";
 type FilterOption = "all" | "menuBar" | "notMenuBar" | "errors";
 
 interface WorkflowListProps {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onWorkflowAction?: (_workflow: SavedWorkflow) => void;
-  actionTitle?: string;
-  actionIcon?: Icon;
   showEdit?: boolean;
-  showDelete?: boolean;
-  showMenuBarToggle?: boolean;
   showViewErrors?: boolean;
-  showViewDetails?: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onViewDetailsHandler?: (_workflow: SavedWorkflow) => void;
+  onViewErrorsHandler?: (_workflow: SavedWorkflow) => void;
+  onEdit?: (workflow: SavedWorkflow) => void;
 }
 
 export function WorkflowList({
   onWorkflowAction,
-  actionTitle,
-  actionIcon,
   showEdit = true,
-  showDelete = true,
-  showMenuBarToggle = true,
   showViewErrors = true,
-  showViewDetails = false,
-  onViewDetailsHandler,
+  onViewErrorsHandler,
+  onEdit,
 }: WorkflowListProps) {
   const { workflows, isLoading, error, refreshWorkflows } = useSavedWorkflows();
-  const { updateWorkflow, removeWorkflow, toggleMenuBarVisibility } = useWorkflowActions();
+  const { unmarkWorkflowAsFixed } = useWorkflowActions();
   const { orgId } = useUserInfo();
   const prefs = getPreferenceValues();
   const [sortOrder] = useState<"asc" | "desc">("asc");
   const [sortBy, setSortBy] = useState<SortOption>(prefs.DEFAULT_SORT ?? "name");
   const [filterBy, setFilterBy] = useState<FilterOption>(prefs.DEFAULT_FILTER ?? "all");
-  const { push } = useNavigation();
 
   const { errorInfo, refreshErrorInfo } = useWorkflowErrors(
     workflows,
     orgId ?? undefined,
     prefs.REFRESH_INTERVAL_SECONDS ? parseInt(prefs.REFRESH_INTERVAL_SECONDS) * 1000 : 0
   );
-
-  const toggleActive = useOptimisticToggle(
-    workflows,
-    updateWorkflow,
-    async () => {
-      await refreshWorkflows();
-      await refreshErrorInfo();
-    },
-    orgId || undefined
-  );
-
-  const handleActivate = async (workflowId: string) => {
-    const workflow = workflows.find(w => w.id === workflowId);
-    if (!workflow) return;
-    const options: Alert.Options = {
-      title: "Activate Workflow",
-      message: `Are you sure you want to activate '${workflow.customName || workflow.id}'?`,
-      primaryAction: { title: "Activate", style: Alert.ActionStyle.Default },
-    };
-    if (await confirmAlert(options)) {
-      await toggleActive(workflowId, true);
-      showToast({ title: "Activated", message: "Workflow activated", style: Toast.Style.Success });
-      await refreshErrorInfo();
-    }
-  };
-
-  const handleDeactivate = async (workflowId: string) => {
-    const workflow = workflows.find(w => w.id === workflowId);
-    if (!workflow) return;
-    const options: Alert.Options = {
-      title: "Deactivate Workflow",
-      message: `Are you sure you want to deactivate '${workflow.customName || workflow.id}'?`,
-      primaryAction: { title: "Deactivate", style: Alert.ActionStyle.Destructive },
-    };
-    if (await confirmAlert(options)) {
-      await toggleActive(workflowId, false);
-      showToast({ title: "Deactivated", message: "Workflow deactivated", style: Toast.Style.Success });
-      await refreshErrorInfo();
-    }
-  };
 
   const errorCounts: Record<string, number> = useMemo(() => {
     const map: Record<string, number> = {};
@@ -134,83 +70,53 @@ export function WorkflowList({
       .sort((a, b) => collator.compare(a ?? "", b ?? ""));
   }, [workflowsByFolder]);
 
-  const handleDeleteWorkflow = async (workflowId: string) => {
-    const options: Alert.Options = {
-      title: "Remove Workflow from Extension",
-      message:
-        "Are you sure you want to remove this workflow from the extension? This will not delete the workflow from Pipedream, only from this list.",
-      primaryAction: {
-        title: "Remove",
-        style: Alert.ActionStyle.Destructive,
-      },
+  const handleViewErrors = (workflow: SavedWorkflow) => {
+    if (onViewErrorsHandler) {
+      onViewErrorsHandler(workflow);
+    } else {
+      open(`${PIPEDREAM_ERROR_HISTORY_URL}${workflow.id}`);
+    }
+  };
+
+  useEffect(() => {
+    if (!workflows || workflows.length === 0) return;
+
+    const autoUnmarkWorkflows = async () => {
+      const workflowsToUnmark: string[] = [];
+
+      workflows.forEach(workflow => {
+        if (workflow.errorResolution) {
+          const currentErrors = errorInfo[workflow.id]?.errors || [];
+          if (shouldAutoUnmarkAsFixed(workflow, currentErrors)) {
+            workflowsToUnmark.push(workflow.id);
+          }
+        }
+      });
+
+      if (workflowsToUnmark.length > 0) {
+        await Promise.all(workflowsToUnmark.map(workflowId => unmarkWorkflowAsFixed(workflowId)));
+
+        if (workflowsToUnmark.length === 1) {
+          const workflow = workflows.find(w => w.id === workflowsToUnmark[0]);
+          showToast({
+            title: "Auto-unmarked",
+            message: `${workflow?.customName || workflow?.id} has new errors`,
+            style: Toast.Style.Animated,
+          });
+        } else {
+          showToast({
+            title: "Auto-unmarked",
+            message: `${workflowsToUnmark.length} workflows have new errors`,
+            style: Toast.Style.Animated,
+          });
+        }
+
+        await refreshWorkflows();
+      }
     };
 
-    if (await confirmAlert(options)) {
-      await removeWorkflow(workflowId);
-      showToast({
-        title: "Success",
-        message: "Workflow removed from extension list",
-        style: Toast.Style.Success,
-      });
-      await refreshErrorInfo();
-    }
-  };
-
-  const handleEditName = (workflowId: string, currentName: string) => {
-    push(
-      <EditWorkflowProperty
-        label="Workflow Name"
-        property="name"
-        currentValue={currentName}
-        onSave={async (_newName: string) => {
-          try {
-            await updateWorkflow({ ...workflows.find(w => w.id === workflowId)!, customName: _newName });
-            showToast({ title: "Success", message: "Workflow name updated", style: Toast.Style.Success });
-            await refreshWorkflows();
-            await refreshErrorInfo();
-          } catch (error) {
-            showToast({
-              title: "Error",
-              message: `Failed to update workflow name: ${error instanceof Error ? error.message : String(error)}`,
-              style: Toast.Style.Failure,
-            });
-          }
-        }}
-      />
-    );
-  };
-
-  const handleEditFolder = (workflowId: string, currentFolder: string) => {
-    push(
-      <EditWorkflowProperty
-        label="Folder"
-        property="folder"
-        currentValue={currentFolder}
-        onSave={async (_newFolder: string) => {
-          try {
-            await updateWorkflow({ ...workflows.find(w => w.id === workflowId)!, folder: _newFolder });
-            showToast({ title: "Success", message: "Workflow folder updated", style: Toast.Style.Success });
-            await refreshWorkflows();
-            await refreshErrorInfo();
-          } catch (error) {
-            showToast({
-              title: "Error",
-              message: `Failed to update workflow folder: ${error instanceof Error ? error.message : String(error)}`,
-              style: Toast.Style.Failure,
-            });
-          }
-        }}
-      />
-    );
-  };
-
-  const handleViewDetails = (workflow: SavedWorkflow) => {
-    if (onViewDetailsHandler) {
-      onViewDetailsHandler(workflow);
-    } else if (onWorkflowAction) {
-      onWorkflowAction(workflow);
-    }
-  };
+    autoUnmarkWorkflows();
+  }, [workflows, errorInfo, unmarkWorkflowAsFixed, refreshWorkflows]);
 
   if (isLoading) {
     return <List isLoading={true} />;
@@ -284,15 +190,6 @@ export function WorkflowList({
               await refreshErrorInfo();
             }}
           />
-          <Action
-            title="Edit Workflow Folder"
-            icon={Icon.Folder}
-            shortcut={{ modifiers: ["cmd"], key: "f" }}
-            onAction={() => {
-              // This will be handled by individual workflow items
-              // The action is available in the command palette for quick access
-            }}
-          />
         </ActionPanel>
       }
     >
@@ -303,17 +200,10 @@ export function WorkflowList({
               key={workflow.id}
               workflow={workflow}
               errorCount={errorCounts[workflow.id] ?? 0}
-              onEditName={showEdit ? () => handleEditName(workflow.id, workflow.customName) : undefined}
-              onEditFolder={showEdit ? () => handleEditFolder(workflow.id, workflow.folder ?? "") : undefined}
-              onToggleMenuBar={showMenuBarToggle ? () => toggleMenuBarVisibility(workflow.id) : undefined}
-              onViewErrors={showViewErrors ? () => open(`${PIPEDREAM_ERROR_HISTORY_URL}${workflow.id}`) : undefined}
-              onViewDetails={showViewDetails ? () => handleViewDetails(workflow) : undefined}
-              onDelete={showDelete ? () => handleDeleteWorkflow(workflow.id) : undefined}
+              currentErrors={errorInfo[workflow.id]?.errors || []}
+              onEdit={showEdit && onEdit ? () => onEdit(workflow) : undefined}
+              onViewErrors={showViewErrors ? () => handleViewErrors(workflow) : undefined}
               onCustomAction={onWorkflowAction ? () => onWorkflowAction(workflow) : undefined}
-              customActionTitle={actionTitle}
-              customActionIcon={actionIcon}
-              onActivate={() => handleActivate(workflow.id)}
-              onDeactivate={() => handleDeactivate(workflow.id)}
             />
           ))}
         </List.Section>
@@ -325,17 +215,10 @@ export function WorkflowList({
               key={workflow.id}
               workflow={workflow}
               errorCount={errorCounts[workflow.id] ?? 0}
-              onEditName={showEdit ? () => handleEditName(workflow.id, workflow.customName) : undefined}
-              onEditFolder={showEdit ? () => handleEditFolder(workflow.id, workflow.folder ?? "") : undefined}
-              onToggleMenuBar={showMenuBarToggle ? () => toggleMenuBarVisibility(workflow.id) : undefined}
-              onViewErrors={showViewErrors ? () => open(`${PIPEDREAM_ERROR_HISTORY_URL}${workflow.id}`) : undefined}
-              onViewDetails={showViewDetails ? () => handleViewDetails(workflow) : undefined}
-              onDelete={showDelete ? () => handleDeleteWorkflow(workflow.id) : undefined}
+              currentErrors={errorInfo[workflow.id]?.errors || []}
+              onEdit={showEdit && onEdit ? () => onEdit(workflow) : undefined}
+              onViewErrors={showViewErrors ? () => handleViewErrors(workflow) : undefined}
               onCustomAction={onWorkflowAction ? () => onWorkflowAction(workflow) : undefined}
-              customActionTitle={actionTitle}
-              customActionIcon={actionIcon}
-              onActivate={() => handleActivate(workflow.id)}
-              onDeactivate={() => handleDeactivate(workflow.id)}
             />
           ))}
         </List.Section>

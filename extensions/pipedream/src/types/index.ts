@@ -15,6 +15,20 @@ export interface SavedWorkflow {
   showInMenuBar: boolean;
   sortOrder: number;
   active?: boolean;
+  /**
+   * Error resolution tracking
+   */
+  errorResolution?: {
+    markedAsFixedAt: number; // timestamp when errors were marked as fixed
+    lastKnownErrorCount: number; // error count when marked as fixed
+    lastKnownErrorTimestamp?: number; // timestamp of the last known error when marked as fixed
+    resolvedBy?: string; // user who marked as fixed
+    notes?: string; // resolution notes
+    resolutionTime?: number; // time taken to resolve in milliseconds
+    attempts?: number; // number of resolution attempts
+    lastAttemptAt?: number; // timestamp of last resolution attempt
+    errorCategories?: Record<string, number>; // categories of errors when marked as fixed
+  };
 }
 
 export interface UserInfo {

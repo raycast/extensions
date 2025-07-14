@@ -101,3 +101,6 @@ dist
 # Temporary folders
 tmp/
 temp/
+
+# Claude specific files
+.claude/

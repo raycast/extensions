@@ -3,9 +3,10 @@ import { LocalStorage, getPreferenceValues, Cache } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { fetchWorkflowDetails } from "../services/api";
 import { useUserInfo } from "./useUserInfo";
-import { SavedWorkflow, WorkflowDetails } from "../types";
+import { SavedWorkflow, WorkflowDetails, WorkflowError } from "../types";
 import { LOCALSTORAGE_KEY, PIPEDREAM_BASE_URL } from "../utils/constants";
 import { DEMO_WORKFLOWS } from "../utils/demo-data";
+import { createErrorResolution } from "../utils/error-resolution";
 
 const cache = new Cache();
 const WORKFLOW_DETAILS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
@@ -112,6 +113,8 @@ type UseWorkflowActionsReturn = {
   removeWorkflow: (workflowId: string) => Promise<void>;
   toggleMenuBarVisibility: (workflowId: string) => Promise<void>;
   removeAllWorkflows: () => Promise<void>;
+  markWorkflowAsFixed: (workflowId: string, currentErrors: WorkflowError[]) => Promise<void>;
+  unmarkWorkflowAsFixed: (workflowId: string) => Promise<void>;
 };
 
 export function useWorkflowActions(): UseWorkflowActionsReturn {
@@ -179,11 +182,35 @@ export function useWorkflowActions(): UseWorkflowActionsReturn {
     await updateLocalStorage([]);
   }, [updateLocalStorage]);
 
+  const markWorkflowAsFixed = useCallback(
+    async (workflowId: string, currentErrors: WorkflowError[]) => {
+      const updatedWorkflows = workflows.map(workflow =>
+        workflow.id === workflowId
+          ? { ...workflow, errorResolution: createErrorResolution(currentErrors, workflow.errorResolution) }
+          : workflow
+      );
+      await updateLocalStorage(updatedWorkflows);
+    },
+    [workflows, updateLocalStorage]
+  );
+
+  const unmarkWorkflowAsFixed = useCallback(
+    async (workflowId: string) => {
+      const updatedWorkflows = workflows.map(workflow =>
+        workflow.id === workflowId ? { ...workflow, errorResolution: undefined } : workflow
+      );
+      await updateLocalStorage(updatedWorkflows);
+    },
+    [workflows, updateLocalStorage]
+  );
+
   return {
     addWorkflow,
     updateWorkflow,
     removeWorkflow,
     toggleMenuBarVisibility,
     removeAllWorkflows,
+    markWorkflowAsFixed,
+    unmarkWorkflowAsFixed,
   };
 }

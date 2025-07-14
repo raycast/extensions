@@ -5,173 +5,159 @@ All notable changes to the Pipedream Workflow Manager extension will be document
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.0] - {PR_MERGE_DATE}
+## [Major UX Overhaul and Command Consolidation] - {PR_MERGE_DATE}
 
-### Major Refactor & Improvements
+- Added dedicated workflow detail view accessible by pressing Enter on any workflow
+- Added organized action sections: Error Management, Workflow Management, and Advanced Actions with live updates
+- Added Copy Workflow ID functionality alongside Copy Workflow URL
+- Added Export Workflow as JSON in Advanced Actions
+- Added AI Error Analysis prominently displayed in Error Management section with star icon
+- Added confirmation dialogs for destructive actions
+- Simplified command structure from 5 to 3 commands by consolidating Workflow Analytics and Error Analytics into Manage Workflows
+- Enhanced Manage Workflows to serve as the main hub with embedded error analytics
+- Simplified action panels from 7 sections to 3 logical groups
+- Improved primary action focus: Enter goes to details, Cmd+E for quick edit, Cmd+V for errors
+- Cleaned menu bar display with error counts without overwhelming color/severity indicators
+- Streamlined error analytics interface with clickable trend analysis, removed duplicate AI summary
+- Fixed primary actions issue where "Open in Browser" took precedence over "View Details"
+- Fixed state synchronization for menu bar toggle and error resolution updates
+- Improved cross-command navigation and deeplink handling
+- Removed redundant commands and confusing bulk selection operations
+- Removed visual clutter including arrows from workflow list and overwhelming color indicators
+- Removed duplicate features like redundant Peak Error Day from trending section
 
-- **Codebase cleanup:** Removed unused code, types, and utilities for a leaner, more maintainable extension.
-- **Improved maintainability:** All types, utilities, and components are now lean and only include what is actually used.
-- **UI/UX improvements:**
-  - Renamed "View Recent Errors" to "View Workflow Details" for clarity.
-  - AI Error Summary is now only shown when there are actual errors.
-  - All actions and Command-K palette entries use clear, user-friendly names.
-- **Raycast best practices:**
-  - All commands, metadata, and preferences reviewed and updated for Raycast Store requirements.
-  - No unused components, hooks, or assets remain.
-  - All assets and icons are properly referenced.
-- **Performance & accessibility:**
-  - Improved conditional rendering and reduced unnecessary logic.
-  - Ensured all UI elements are accessible and performant.
-- **Ready for Raycast Store review and publishing.**
+## [Enhanced Error Analytics and Workflow Management] - 2025-07-14
+
+- Added dedicated Error Analytics command for comprehensive error analysis with trending, categorization, and AI-powered insights
+- Added consolidated workflow editing with unified "Edit Workflow" action accessible via Cmd+E shortcut
+- Added reusable form for modifying workflow name and folder across Connect Workflow and Manage Workflows commands
+- Improved command structure with distinct, focused purposes and clear cross-linking between Manage Workflows and Workflow Analytics
+- Enhanced navigation with direct workflow view access for better user flow
+- Fixed critical loading hang in Error Analytics command due to user data fetching timing issue
+- Fixed error trending logic to accurately reflect days with data, especially for workflows with sparse or clustered errors
+- Improved loading indicators and error messages across the extension
+- Fixed workflow list refresh to automatically reflect changes to menu bar visibility and folders
+- Removed unused EditWorkflowProperty.tsx and EditWorkflow.tsx components after editing functionality consolidation
+- Updated package.json command descriptions to reflect new focused roles
+
+## [Type Safety and Code Quality Improvements] - 2025-07-13
+
+- Resolved TypeScript errors and improved type definitions
+- Fixed ESLint warnings and improved code consistency
+- Added automatic migration of existing workflow URLs to new format
+- Enhanced test suite with improved workflow type validation
+
+## [Major Refactor and Raycast Store Preparation] - 2025-07-13
+
+- Cleaned codebase by removing unused code, types, and utilities for better maintainability
+- Streamlined all types, utilities, and components to include only what is actually used
+- Renamed "View Recent Errors" to "View Workflow Details" for clarity
+- Updated AI Error Summary to only show when there are actual errors
+- Improved all actions and Command-K palette entries with clear, user-friendly names
+- Reviewed and updated all commands, metadata, and preferences for Raycast Store requirements
+- Removed all unused components, hooks, and assets
+- Ensured all assets and icons are properly referenced
+- Improved conditional rendering and reduced unnecessary logic
+- Enhanced UI elements for better accessibility and performance
+- Prepared extension for Raycast Store review and publishing
 
 ---
 
-## [1.6.0] - {PR_MERGE_DATE}
+## [AI-Powered Error Analysis] - 2025-07-13
 
-### 🤖 AI-Powered Error Analysis
+- Added revolutionary AI-powered error analysis providing intelligent insights into workflow issues
+- Added smart error categorization with AI analyzing error patterns from up to 100 recent errors
+- Added actionable recommendations generated by AI based on actual error data
+- Implemented data-driven insights purely based on provided error logs without external assumptions
+- Optimized AI prompts for concise, well-structured summaries with clear markdown formatting
+- Added dedicated AI summary view with beautiful interface and markdown support
+- Added copy & regenerate actions for easy clipboard access and AI summary regeneration
+- Added raw logs view for direct access to detailed error investigation
+- Implemented smart link generation automatically adding relevant Pipedream documentation links based on error types
+- Integrated seamless Raycast AI for intelligent error analysis
+- Enhanced error handling with comprehensive AI generation feedback
+- Optimized performance for efficient processing of large error datasets
 
-- **AI Error Summary**: Revolutionary AI-powered error analysis that provides intelligent insights into workflow issues
-- **Smart Error Categorization**: AI automatically categorizes and analyzes error patterns from up to 100 recent errors
-- **Actionable Recommendations**: AI generates specific, actionable recommendations based on actual error data
-- **Data-Driven Insights**: AI analysis is purely based on provided error logs without external assumptions
-- **Enhanced Prompting**: Optimized AI prompts for concise, well-structured summaries with clear markdown formatting
+## [Enhanced Menu Bar and User Experience] - 2025-07-13
 
-### 🎯 Enhanced User Experience
+- Improved menu bar with better error handling, loading states, and auto-refresh
+- Added "Copy Workflow URL" functionality throughout the app
+- Enhanced error handling with user-friendly toast notifications
+- Implemented menu bar auto-refresh every 5 minutes for real-time updates
+- Improved analytics view with error categorization and severity assessment
+- Enhanced TypeScript types for better error handling
+- Optimized API calls with parallel processing for better performance
+- Added graceful handling of API failures with fallback mechanisms
+- Improved loading indicators throughout the application
+- Added user-friendly success and error notifications
+- Updated icons for better visual consistency
+- Improved navigation between different views
+- Enhanced error display with severity indicators and timestamps
+- Added comprehensive type definitions for all features
+- Improved code structure and maintainability
 
-- **Dedicated AI Summary View**: Beautiful, dedicated page for AI analysis with markdown support
-- **Copy & Regenerate Actions**: Easy copy-to-clipboard and regenerate functionality for AI summaries
-- **Raw Logs View**: Direct access to view raw error logs for detailed investigation
-- **Smart Link Generation**: Automatically adds relevant Pipedream documentation links based on error types
+## [Quick Actions and UI Enhancements] - 2025-07-13
 
-### 🔧 Technical Improvements
+- Added "Copy Workflow URL" as a quick action in the analytics view
+- Added "Go to workflow management" quick action in the analytics view
+- Minor improvements to tooltips, action labels, and overall interface consistency
 
-- **AI Integration**: Seamless integration with Raycast AI for intelligent error analysis
-- **Enhanced Error Handling**: Comprehensive error handling for AI generation with user-friendly feedback
-- **Performance Optimization**: Efficient processing of large error datasets for AI analysis
+## [Enhanced Export and Workflow Management] - 2025-07-13
 
-## [1.5.0] - {PR_MERGE_DATE}
+- Improved workflow export functionality with better error handling
+- Streamlined workflow management with better organization
+- Enhanced error tracking and analytics capabilities
+- Better user interface with improved navigation and feedback
+- Optimized API calls and data processing
+- More robust error handling throughout the application
 
-### 🎯 Enhanced User Experience
+## [Build and TypeScript Fixes] - 2025-07-13
 
-- **Improved Menu Bar**: Enhanced menu bar with better error handling, loading states, and auto-refresh
-- **Copy Workflow URL**: Added "Copy Workflow URL" functionality throughout the app
-- **Better Error Handling**: Robust error handling with user-friendly toast notifications
-- **Auto-refresh**: Menu bar automatically refreshes every 5 minutes for real-time updates
-- **Enhanced Analytics**: Improved analytics view with error categorization and severity assessment
+- Fixed import/export issues that were causing build failures
+- Resolved TypeScript compilation errors
 
-### 🔧 Technical Improvements
+## [Enhanced Error Management and Analytics] - 2025-07-13
 
-- **Type Safety**: Enhanced TypeScript types for better error handling
-- **Performance**: Optimized API calls with parallel processing for better performance
-- **Error Recovery**: Graceful handling of API failures with fallback mechanisms
+- Improved error categorization, severity assessment, and resolution tracking
+- Enhanced analytics with performance metrics and error statistics
+- Better workflow organization and management capabilities
+- Improved export functionality with better data handling
+- Better user interface with improved navigation and feedback
+- Enhanced TypeScript types for better development experience
+- More robust error handling throughout the application
+- Optimized API calls and data processing
 
-### 📱 UI/UX Enhancements
+## [Build Error Fixes] - 2025-07-13
 
-- **Loading States**: Better loading indicators throughout the application
-- **Toast Notifications**: User-friendly success and error notifications
-- **Icon Consistency**: Updated icons for better visual consistency
-- **Navigation**: Improved navigation between different views
-- **Error Display**: Enhanced error display with severity indicators and timestamps
+- Fixed missing export for workflow-analytics command
+- Resolved TypeScript compilation issues
 
-### 🛠️ Developer Experience
+## [Reusable WorkflowList Component and Enhanced Analytics] - 2025-07-13
 
-- **Enhanced Types**: Comprehensive type definitions for all features
-- **Better Code Organization**: Improved code structure and maintainability
+- Added reusable WorkflowList component for consistent workflow display across all views with sorting, filtering, and folder structure
+- Improved analytics view with clear sections and individual error items
+- Improved navigation between different views
+- Enhanced error count display with accurate counting logic
+- Unified design language across all views
+- Improved workflow organization and display
+- Better user feedback and error handling
+- Added shared components for better maintainability
+- Enhanced TypeScript types
+- Optimized rendering and data processing
 
-## [1.4.1] - {PR_MERGE_DATE}
+## [Workflow Analytics and Error Categorization] - 2025-07-13
 
-### Improvements
+- Added detailed analytics for individual workflows including error statistics and performance metrics
+- Added automatic categorization of workflow errors by type and severity
+- Added export functionality for workflow configurations as JSON
+- Enhanced error tracking and resolution capabilities
+- Improved user interface with better navigation and feedback
+- More robust error handling throughout the application
+- Optimized API calls and data processing
 
-- **Quick Actions Enhancements**:
-  - Added "Copy Workflow URL" as a quick action in the analytics view.
-  - Added "Go to workflow management" quick action in the analytics view.
-- **UI/UX Tweaks**: Minor improvements to tooltips, action labels, and overall interface consistency.
+## [Initial Release] - 2024-07-20
 
-## [1.4.0] - {PR_MERGE_DATE}
-
-### New Features
-
-- **Enhanced Export**: Improved workflow export functionality with better error handling
-- **Workflow Management**: Streamlined workflow management with better organization
-- **Error Analytics**: Enhanced error tracking and analytics capabilities
-
-### Improvements
-
-- **UI/UX**: Better user interface with improved navigation and feedback
-- **Performance**: Optimized API calls and data processing
-- **Error Handling**: More robust error handling throughout the application
-
-## [1.3.1] - {PR_MERGE_DATE}
-
-### Bug Fixes
-
-- **Build Issues**: Fixed import/export issues that were causing build failures
-- **Type Errors**: Resolved TypeScript compilation errors
-
-## [1.3.0] - {PR_MERGE_DATE}
-
-### New Features
-
-- **Enhanced Error Management**: Improved error categorization, severity assessment, and resolution tracking
-- **Advanced Analytics**: Enhanced analytics with performance metrics and error statistics
-- **Improved Workflow Management**: Better workflow organization and management capabilities
-- **Enhanced Export/Import**: Improved export functionality with better data handling
-- **UI/UX Improvements**: Better user interface with improved navigation and feedback
-
-### Technical Improvements
-
-- **Type Safety**: Enhanced TypeScript types for better development experience
-- **Error Handling**: More robust error handling throughout the application
-- **Performance**: Optimized API calls and data processing
-
-## [1.2.1] - {PR_MERGE_DATE}
-
-### Bug Fixes
-
-- **Build Error**: Fixed missing export for workflow-analytics command
-- **TypeScript**: Resolved compilation issues
-
-## [1.2.0] - {PR_MERGE_DATE}
-
-### New Features
-
-- **Reusable WorkflowList Component**: Consistent workflow display across all views with sorting, filtering, and folder structure
-- **Enhanced Analytics**: Improved analytics view with clear sections and individual error items
-- **Better Navigation**: Improved navigation between different views
-- **Error Count Display**: Enhanced error count display with accurate counting logic
-
-### UI/UX Improvements
-
-- **Consistent Design**: Unified design language across all views
-- **Better Organization**: Improved workflow organization and display
-- **Enhanced Feedback**: Better user feedback and error handling
-
-### Technical Improvements
-
-- **Code Reusability**: Shared components for better maintainability
-- **Type Safety**: Enhanced TypeScript types
-- **Performance**: Optimized rendering and data processing
-
-## [1.1.0] - {PR_MERGE_DATE}
-
-### New Features
-
-- **Workflow Analytics**: View detailed analytics for individual workflows including error statistics and performance metrics
-- **Error Categorization**: Automatic categorization of workflow errors by type and severity
-- **Export Functionality**: Export workflow configurations as JSON
-- **Enhanced Error Management**: Better error tracking and resolution capabilities
-
-### Improvements
-
-- **UI/UX**: Improved user interface with better navigation and feedback
-- **Error Handling**: More robust error handling throughout the application
-- **Performance**: Optimized API calls and data processing
-
-## [1.0.0] - {PR_MERGE_DATE}
-
-### Initial Release
-
-- **Workflow Management**: Connect, view, and manage Pipedream workflows
-- **Menu Bar Integration**: Quick access to workflows from the menu bar
-- **Error Tracking**: Monitor workflow errors and performance
-- **Basic Analytics**: View workflow statistics and error counts
+- Connect, view, and manage Pipedream workflows
+- Quick access to workflows from the menu bar
+- Monitor workflow errors and performance
+- View workflow statistics and error counts

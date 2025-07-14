@@ -1,16 +1,17 @@
-import { MenuBarExtra, Icon, open, Clipboard, showToast, Toast } from "@raycast/api";
+import { MenuBarExtra, Icon, open, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { SavedWorkflow, WorkflowError } from "./types";
-import { fetchWorkflowErrors } from "./services/api";
+// import { fetchWorkflowErrors } from "./services/api";
+import { smartRefreshManager } from "./services/smart-refresh";
 import { useUserInfo } from "./hooks/useUserInfo";
 import { useSavedWorkflows, useWorkflowActions } from "./hooks/useSavedWorkflows";
-import { PIPEDREAM_ERROR_HISTORY_URL } from "./utils/constants";
+import { getErrorResolutionStatus } from "./utils/error-resolution";
 
-const SEVEN_DAYS_IN_MS = 7 * 24 * 60 * 60 * 1000;
+// const SEVEN_DAYS_IN_MS = 7 * 24 * 60 * 60 * 1000;
 
 export default function MenuBarWorkflows() {
   const { workflows, isLoading, refreshWorkflows } = useSavedWorkflows();
-  const { toggleMenuBarVisibility } = useWorkflowActions();
+  const { toggleMenuBarVisibility, markWorkflowAsFixed, unmarkWorkflowAsFixed } = useWorkflowActions();
   const { orgId } = useUserInfo();
   const [workflowErrors, setWorkflowErrors] = useState<Record<string, { errorCount: number; errors: WorkflowError[] }>>(
     {}
@@ -18,40 +19,23 @@ export default function MenuBarWorkflows() {
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
 
   const fetchErrors = async () => {
-    if (!orgId || !workflows.length) return;
+    if (!orgId || !workflows || !workflows.length) return;
 
     try {
-      const menuBarWorkflows = workflows.filter(w => w.showInMenuBar);
-
-      // Fetch errors for menu bar workflows in parallel
-      const errorPromises = menuBarWorkflows.map(async workflow => {
-        try {
-          const errorResponse = await fetchWorkflowErrors(workflow.id, orgId);
-          const recentErrors = errorResponse.data.filter(error => Date.now() - error.indexed_at_ms < SEVEN_DAYS_IN_MS);
-          return {
-            workflowId: workflow.id,
-            errorCount: recentErrors.length,
-            errors: recentErrors.slice(0, 5), // Show last 5 errors
-          };
-        } catch (error) {
-          return {
-            workflowId: workflow.id,
-            errorCount: 0,
-            errors: [],
-          };
+      await smartRefreshManager.smartRefresh(
+        workflows,
+        orgId,
+        (workflowId: string, errorCount: number, errors: WorkflowError[]) => {
+          setWorkflowErrors(prev => ({
+            ...prev,
+            [workflowId]: {
+              errorCount,
+              errors,
+            },
+          }));
         }
-      });
+      );
 
-      const errorResults = await Promise.all(errorPromises);
-      const errorData: Record<string, { errorCount: number; errors: WorkflowError[] }> = {};
-      errorResults.forEach(result => {
-        errorData[result.workflowId] = {
-          errorCount: result.errorCount,
-          errors: result.errors,
-        };
-      });
-
-      setWorkflowErrors(errorData);
       setLastRefresh(new Date());
     } catch (error) {
       showToast({
@@ -74,25 +58,27 @@ export default function MenuBarWorkflows() {
     open(url);
   };
 
-  const getErrorUrl = (workflowId: string) => {
-    return `${PIPEDREAM_ERROR_HISTORY_URL}${workflowId}`;
+  const handleMarkAsFixed = async (workflowId: string, workflowName: string) => {
+    const currentErrors = workflowErrors[workflowId]?.errors || [];
+    await markWorkflowAsFixed(workflowId, currentErrors);
+    showToast({
+      title: "Success",
+      message: `${workflowName} marked as fixed`,
+      style: Toast.Style.Success,
+    });
+    await refreshWorkflows();
+    await fetchErrors();
   };
 
-  const copyWorkflowUrl = async (url: string, workflowName: string) => {
-    try {
-      await Clipboard.copy(url);
-      showToast({
-        title: "Copied!",
-        message: `${workflowName} URL copied to clipboard`,
-        style: Toast.Style.Success,
-      });
-    } catch (error) {
-      showToast({
-        title: "Error",
-        message: "Failed to copy URL",
-        style: Toast.Style.Failure,
-      });
-    }
+  const handleUnmarkAsFixed = async (workflowId: string, workflowName: string) => {
+    await unmarkWorkflowAsFixed(workflowId);
+    showToast({
+      title: "Success",
+      message: `${workflowName} unmarked as fixed`,
+      style: Toast.Style.Success,
+    });
+    await refreshWorkflows();
+    await fetchErrors();
   };
 
   if (!orgId) {
@@ -104,7 +90,7 @@ export default function MenuBarWorkflows() {
     );
   }
 
-  if (isLoading) {
+  if (isLoading || !workflows) {
     // Show a loading menu item so the menu is clickable
     return (
       <MenuBarExtra title="Pipedream">
@@ -142,26 +128,52 @@ export default function MenuBarWorkflows() {
           {workflowsByFolder[folder]?.map(workflow => {
             const errorInfo = workflowErrors[workflow.id];
             const errorCount = errorInfo?.errorCount || 0;
+            const currentErrors = errorInfo?.errors || [];
+            const errorResolutionStatus = getErrorResolutionStatus(workflow, currentErrors);
+
+            // Build simple title with error count
+            let title = workflow.customName;
+
+            if (errorResolutionStatus.isMarkedAsFixed) {
+              if (errorResolutionStatus.hasNewErrors && errorResolutionStatus.newErrorsCount) {
+                title += ` (${errorCount} - ${errorResolutionStatus.newErrorsCount} new)`;
+              } else {
+                title += ` (${errorCount} - Fixed)`;
+              }
+            } else if (errorCount > 0) {
+              title += ` (${errorCount >= 100 ? "100+" : errorCount})`;
+            }
+
+            // Use simple icon based on error status
+            const icon = errorCount > 0 ? Icon.ExclamationMark : Icon.Checkmark;
+
             return (
-              <MenuBarExtra.Submenu
-                key={workflow.id}
-                title={`${workflow.customName} (${errorCount >= 100 ? "100+" : errorCount})`}
-                icon={errorCount > 0 ? Icon.ExclamationMark : Icon.Checkmark}
-              >
+              <MenuBarExtra.Submenu key={workflow.id} title={title} icon={icon}>
                 <MenuBarExtra.Item icon={Icon.Globe} title="Open Workflow" onAction={() => openUrl(workflow.url)} />
-                <MenuBarExtra.Item
-                  icon={Icon.Link}
-                  title="Copy Workflow URL"
-                  onAction={() => copyWorkflowUrl(workflow.url, workflow.customName)}
-                />
+
                 {errorCount > 0 && (
                   <MenuBarExtra.Item
                     icon={Icon.ExclamationMark}
-                    title={`View ${errorCount} Errors in Browser`}
-                    onAction={() => openUrl(getErrorUrl(workflow.id))}
+                    title="View Error Analytics"
+                    onAction={() => open("raycast://extensions/olekristianbe/pipedream/manage-workflows")}
                   />
                 )}
-                <MenuBarExtra.Separator />
+
+                {errorCount > 0 && !errorResolutionStatus.isMarkedAsFixed && (
+                  <MenuBarExtra.Item
+                    icon={Icon.Checkmark}
+                    title="Mark Errors as Fixed"
+                    onAction={() => handleMarkAsFixed(workflow.id, workflow.customName)}
+                  />
+                )}
+                {errorResolutionStatus.isMarkedAsFixed && (
+                  <MenuBarExtra.Item
+                    icon={Icon.XMarkCircle}
+                    title="Unmark as Fixed"
+                    onAction={() => handleUnmarkAsFixed(workflow.id, workflow.customName)}
+                  />
+                )}
+
                 <MenuBarExtra.Item
                   icon={Icon.EyeSlash}
                   title="Remove from Menu Bar"
@@ -189,9 +201,9 @@ export default function MenuBarWorkflows() {
           onAction={() => open("raycast://extensions/olekristianbe/pipedream/manage-workflows")}
         />
         <MenuBarExtra.Item
-          title="View Analytics"
-          icon={Icon.BarChart}
-          onAction={() => open("raycast://extensions/olekristianbe/pipedream/workflow-analytics")}
+          title="Connect Workflow"
+          icon={Icon.Plus}
+          onAction={() => open("raycast://extensions/olekristianbe/pipedream/connect-workflow")}
         />
       </MenuBarExtra.Section>
     </MenuBarExtra>
