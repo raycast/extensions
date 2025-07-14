@@ -1,5 +1,10 @@
 # URL Unshortener Changelog
 
+## [Maintainance] - 2025-07-14
+
+- Updated eslint to version 9.30.1.
+- Fixed new linting issues that were introduced by the update.
+
 ## [Fix] - 2025-07-10
 
 - Undo previous changes that broke unshortening for some URLs. For example t.co links.
