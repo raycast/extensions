@@ -1,5 +1,8 @@
 # Mobile Provisions
 
+![Preview](metadata/mobile-provisions-3.png)
+
+
 A Raycast extension that helps you manage and inspect Apple mobile provisioning profiles installed on your system. View detailed information about certificates, entitlements, provisioned devices, and more.
 
 ## Show Mobile Provisions
@@ -27,3 +30,5 @@ This command allows you to inspect a specific .mobileprovision file by providing
 - **Certificate Details** - View developer certificates with expiration dates
 - **Entitlements Inspector** - Examine all entitlements in JSON format
 - **Device Management** - Browse and copy UDIDs of provisioned devices
+
+<a href="https://www.buymeacoffee.com/ernest0n" target="_blank"><img src="https://raw.githubusercontent.com/appcraftstudio/buymeacoffee/master/Images/snapshot-bmc-button.png" alt="Buy Me A Coffee" style="width: 200px" ></a>
