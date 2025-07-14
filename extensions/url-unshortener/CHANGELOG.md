@@ -1,6 +1,6 @@
 # URL Unshortener Changelog
 
-## [Maintainance] - {PR_MERGE_DATE}
+## [Maintainance] - 2025-07-14
 
 - Updated eslint to version 9.30.1.
 - Fixed new linting issues that were introduced by the update.
