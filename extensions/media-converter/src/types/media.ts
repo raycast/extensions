@@ -3,10 +3,40 @@
 // =============================================================================
 
 // Basic format extensions
-export const INPUT_VIDEO_EXTENSIONS = [".mov", ".mp4", ".avi", ".mkv", ".mpg", ".webm"] as const;
+export const INPUT_VIDEO_EXTENSIONS = [
+  ".mov",
+  ".mp4",
+  ".avi",
+  ".mkv",
+  ".mpg",
+  ".webm",
+  ".ts",
+  ".mpeg",
+  ".vob",
+  ".m2ts",
+  ".mts",
+  ".m4v",
+  ".flv",
+  ".3gp",
+  ".asf",
+  ".wmv",
+  ".rmvb",
+  ".ogv",
+  ".mxf",
+  ".nut",
+  ".dv",
+  ".gxf",
+  ".rm",
+  ".cdxl",
+  ".wtv",
+  ".m3u8",
+  ".mpd",
+  ".seg",
+  ".txd",
+] as const;
 export const INPUT_IMAGE_EXTENSIONS = [
   ".jpg",
-  ".jpeg", 
+  ".jpeg",
   ".png",
   ".webp",
   ".heic",
@@ -14,11 +44,53 @@ export const INPUT_IMAGE_EXTENSIONS = [
   ".tif",
   ".avif",
   ".bmp",
+  ".pcx",
+  ".tga",
+  ".ras",
+  ".sgi",
+  ".ppm",
+  ".pgm",
+  ".pbm",
+  ".pnm",
+  ".xbm",
+  ".xpm",
+  ".ico",
+  ".jp2",
+  ".j2k",
+  ".pcd",
+  ".cin",
+  ".wbmp",
+  ".xface",
 ] as const;
-export const INPUT_AUDIO_EXTENSIONS = [".mp3", ".aac", ".wav", ".m4a", ".flac"] as const;
+export const INPUT_AUDIO_EXTENSIONS = [
+  ".mp3",
+  ".aac",
+  ".wav",
+  ".m4a",
+  ".flac",
+  ".aif",
+  ".aiff",
+  ".ogg",
+  ".oga",
+  ".alac",
+  ".wma",
+  ".opus",
+  ".amr",
+  ".caf",
+  ".au",
+  ".snd",
+  ".ape",
+  ".dsf",
+  ".dff",
+  ".mpc",
+  ".wv",
+  ".spx",
+  ".xa",
+  ".ra",
+] as const;
 
 export const OUTPUT_VIDEO_EXTENSIONS = [".mp4", ".avi", ".mov", ".mkv", ".mpg", ".webm"] as const;
-export const OUTPUT_AUDIO_EXTENSIONS = [".mp3", ".aac", ".wav", ".flac"] as const;
+export const OUTPUT_AUDIO_EXTENSIONS = [".mp3", ".aac", ".wav", ".flac", ".m4a"] as const;
 export const OUTPUT_IMAGE_EXTENSIONS = [".jpg", ".png", ".webp", ".heic", ".tiff", ".avif"] as const;
 
 export const INPUT_ALL_EXTENSIONS = [
@@ -53,22 +125,13 @@ export type AllOutputExtension = (typeof OUTPUT_ALL_EXTENSIONS)[number];
 // Image Quality Settings
 // =============================================================================
 
-export type ImageQualityPercentage = "0" | "5" | "10" | "15" | "20" | "25" | "30" | "35" | "40" | "45" | "50" | "55" | "60" | "65" | "70" | "75" | "80" | "85" | "90" | "95" | "100";
-
-export type PngQuality = "png-24" | "png-8";
-export type WebpQuality = ImageQualityPercentage | "lossless";
-export type TiffQuality = "deflate" | "lzw";
-export type JpgQuality = ImageQualityPercentage;
-export type AvifQuality = ImageQualityPercentage;
-export type HeicQuality = ImageQualityPercentage;
-
 export type ImageQualitySettings = {
-  ".jpg": JpgQuality;
-  ".png": PngQuality;
-  ".webp": WebpQuality;
-  ".heic": HeicQuality;
-  ".tiff": TiffQuality;
-  ".avif": AvifQuality;
+  ".jpg": number;
+  ".png": "png-24" | "png-8";
+  ".webp": number | "lossless";
+  ".heic": number;
+  ".tiff": "deflate" | "lzw";
+  ".avif": number;
 };
 
 export type ImageQuality<T extends OutputImageExtension> = ImageQualitySettings[T];
@@ -104,6 +167,7 @@ export type FlacQuality = {
 export type AudioQualitySettings = {
   ".mp3": Mp3Quality;
   ".aac": AacQuality;
+  ".m4a": AacQuality;
   ".wav": WavQuality;
   ".flac": FlacQuality;
 };
@@ -115,11 +179,97 @@ export type AudioQuality<T extends OutputAudioExtension> = AudioQualitySettings[
 // =============================================================================
 
 export type VideoEncodingMode = "crf" | "vbr" | "vbr-2-pass";
-export type VideoCrf = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "13" | "14" | "15" | "16" | "17" | "18" | "19" | "20" | "21" | "22" | "23" | "24" | "25" | "26" | "27" | "28" | "29" | "30" | "31" | "32" | "33" | "34" | "35" | "36" | "37" | "38" | "39" | "40" | "41" | "42" | "43" | "44" | "45" | "46" | "47" | "48" | "49" | "50" | "51";
-export type VideoBitrate = "500" | "750" | "1000" | "1500" | "2000" | "3000" | "4000" | "5000" | "8000" | "10000" | "15000" | "20000" | "25000" | "30000" | "40000" | "50000";
+export type VideoCrf =
+  | "0"
+  | "1"
+  | "2"
+  | "3"
+  | "4"
+  | "5"
+  | "6"
+  | "7"
+  | "8"
+  | "9"
+  | "10"
+  | "11"
+  | "12"
+  | "13"
+  | "14"
+  | "15"
+  | "16"
+  | "17"
+  | "18"
+  | "19"
+  | "20"
+  | "21"
+  | "22"
+  | "23"
+  | "24"
+  | "25"
+  | "26"
+  | "27"
+  | "28"
+  | "29"
+  | "30"
+  | "31"
+  | "32"
+  | "33"
+  | "34"
+  | "35"
+  | "36"
+  | "37"
+  | "38"
+  | "39"
+  | "40"
+  | "41"
+  | "42"
+  | "43"
+  | "44"
+  | "45"
+  | "46"
+  | "47"
+  | "48"
+  | "49"
+  | "50"
+  | "51";
+export type VideoBitrate =
+  | "500"
+  | "750"
+  | "1000"
+  | "1500"
+  | "2000"
+  | "3000"
+  | "4000"
+  | "5000"
+  | "8000"
+  | "10000"
+  | "15000"
+  | "20000"
+  | "25000"
+  | "30000"
+  | "40000"
+  | "50000";
 
-export type H264Preset = "ultrafast" | "superfast" | "veryfast" | "faster" | "fast" | "medium" | "slow" | "slower" | "veryslow";
-export type H265Preset = "ultrafast" | "superfast" | "veryfast" | "faster" | "fast" | "medium" | "slow" | "slower" | "veryslow";
+export type H264Preset =
+  | "ultrafast"
+  | "superfast"
+  | "veryfast"
+  | "faster"
+  | "fast"
+  | "medium"
+  | "slow"
+  | "slower"
+  | "veryslow";
+export type H265Preset =
+  | "ultrafast"
+  | "superfast"
+  | "veryfast"
+  | "faster"
+  | "fast"
+  | "medium"
+  | "slow"
+  | "slower"
+  | "veryslow";
 export type ProResVariant = "proxy" | "lt" | "standard" | "hq" | "4444" | "4444xq";
 export type VP9Quality = "good" | "best" | "realtime";
 
@@ -133,10 +283,7 @@ export type Mp4Quality = {
 
 export type AviQuality = {
   encodingMode: VideoEncodingMode;
-} & (
-  | { encodingMode: "crf"; crf: VideoCrf }
-  | { encodingMode: "vbr" | "vbr-2-pass"; bitrate: VideoBitrate }
-);
+} & ({ encodingMode: "crf"; crf: VideoCrf } | { encodingMode: "vbr" | "vbr-2-pass"; bitrate: VideoBitrate });
 
 export type MovQuality = {
   variant: ProResVariant;
@@ -152,10 +299,7 @@ export type MkvQuality = {
 
 export type MpgQuality = {
   encodingMode: VideoEncodingMode;
-} & (
-  | { encodingMode: "crf"; crf: VideoCrf }
-  | { encodingMode: "vbr" | "vbr-2-pass"; bitrate: VideoBitrate }
-);
+} & ({ encodingMode: "crf"; crf: VideoCrf } | { encodingMode: "vbr" | "vbr-2-pass"; bitrate: VideoBitrate });
 
 export type WebmQuality = {
   encodingMode: VideoEncodingMode;
@@ -180,14 +324,46 @@ export type VideoQuality<T extends OutputVideoExtension> = VideoQualitySettings[
 // Universal Quality Type (Conditional based on extension)
 // =============================================================================
 
-export type QualitySettings<T extends AllOutputExtension> = 
-  T extends OutputImageExtension 
-    ? ImageQuality<T>
-    : T extends OutputAudioExtension 
-      ? AudioQuality<T>
-      : T extends OutputVideoExtension
-        ? VideoQuality<T>
-        : never;
+export type QualitySettings<T extends AllOutputExtension> = T extends OutputImageExtension
+  ? ImageQuality<T>
+  : T extends OutputAudioExtension
+    ? AudioQuality<T>
+    : T extends OutputVideoExtension
+      ? VideoQuality<T>
+      : never;
+
+// =============================================================================
+// Helper types for property extraction
+// =============================================================================
+
+// Helper union types for audio quality properties
+export type AudioBitrateValue = Mp3Quality["bitrate"] | AacQuality["bitrate"];
+export type AudioProfileValue = AacQuality["profile"];
+export type AudioSampleRateValue = WavQuality["sampleRate"] | FlacQuality["sampleRate"];
+export type AudioBitDepthValue = WavQuality["bitDepth"] | FlacQuality["bitDepth"];
+export type AudioCompressionValue = FlacQuality["compressionLevel"];
+export type AudioVbrValue = Mp3Quality["vbr"];
+
+// Helper union types for video quality properties
+export type VideoEncodingModeValue = VideoEncodingMode;
+export type VideoCrfValue = VideoCrf;
+export type VideoBitrateValue = VideoBitrate;
+export type VideoPresetValue = H264Preset | H265Preset;
+export type VideoVariantValue = ProResVariant;
+export type VideoQualityValue = VP9Quality;
+
+// Type guards for checking specific format types
+export function isImageFormat(format: AllOutputExtension): format is OutputImageExtension {
+  return OUTPUT_IMAGE_EXTENSIONS.includes(format as OutputImageExtension);
+}
+
+export function isAudioFormat(format: AllOutputExtension): format is OutputAudioExtension {
+  return OUTPUT_AUDIO_EXTENSIONS.includes(format as OutputAudioExtension);
+}
+
+export function isVideoFormat(format: AllOutputExtension): format is OutputVideoExtension {
+  return OUTPUT_VIDEO_EXTENSIONS.includes(format as OutputVideoExtension);
+}
 
 // =============================================================================
 // Conversion Parameters
@@ -210,12 +386,12 @@ export interface ConversionResult {
 // =============================================================================
 
 export const DEFAULT_IMAGE_QUALITY: ImageQualitySettings = {
-  ".jpg": "80",
+  ".jpg": 80,
   ".png": "png-24",
-  ".webp": "80",
-  ".heic": "80",
+  ".webp": 80,
+  ".heic": 80,
   ".tiff": "deflate",
-  ".avif": "80",
+  ".avif": 80,
 };
 
 export const DEFAULT_AUDIO_QUALITY: AudioQualitySettings = {
@@ -223,6 +399,7 @@ export const DEFAULT_AUDIO_QUALITY: AudioQualitySettings = {
   ".aac": { bitrate: "192", profile: "aac_low" },
   ".wav": { sampleRate: "44100", bitDepth: "16" },
   ".flac": { compressionLevel: "5", sampleRate: "44100", bitDepth: "16" },
+  ".m4a": { bitrate: "192", profile: "aac_low" },
 };
 
 export const DEFAULT_VIDEO_QUALITY: VideoQualitySettings = {

@@ -66,7 +66,10 @@ export function getUniqueOutputPath(filePath: string, extension: string): string
   return finalOutputPath;
 }
 
-export function checkExtensionType(file: string, allowedExtensions?: ReadonlyArray<string> | null): MediaType | boolean {
+export function checkExtensionType(
+  file: string,
+  allowedExtensions?: ReadonlyArray<string> | null,
+): MediaType | boolean {
   const extension = path.extname(file).toLowerCase();
   if (!allowedExtensions) {
     return getMediaType(extension) || false;
@@ -227,6 +230,14 @@ export async function convertMedia<T extends AllOutputExtension>(
         }
         break;
       }
+      case ".m4a": {
+        const m4aQuality = quality as AudioQuality<".m4a">;
+        ffmpegCmd += ` -c:a aac -b:a ${m4aQuality.bitrate}k`;
+        if (m4aQuality.profile) {
+          ffmpegCmd += ` -profile:a ${m4aQuality.profile}`;
+        }
+        break;
+      }
       case ".wav": {
         const wavQuality = quality as AudioQuality<".wav">;
         ffmpegCmd += ` -c:a pcm_s${wavQuality.bitDepth}le -ar ${wavQuality.sampleRate}`;
@@ -259,7 +270,7 @@ export async function convertMedia<T extends AllOutputExtension>(
       case ".mp4": {
         const mp4Quality = quality as VideoQuality<".mp4">;
         ffmpegCmd += ` -vcodec h264 -acodec aac -preset ${mp4Quality.preset}`;
-        
+
         if (mp4Quality.encodingMode === "crf") {
           ffmpegCmd += ` -crf ${mp4Quality.crf}`;
         } else {
@@ -267,7 +278,7 @@ export async function convertMedia<T extends AllOutputExtension>(
           if (mp4Quality.maxBitrate) {
             ffmpegCmd += ` -maxrate ${mp4Quality.maxBitrate}k -bufsize ${Number(mp4Quality.maxBitrate) * 2}k`;
           }
-          
+
           if (mp4Quality.encodingMode === "vbr-2-pass") {
             // First pass
             const firstPassCmd = ffmpegCmd + ` -pass 1 -f null /dev/null`;
@@ -281,12 +292,12 @@ export async function convertMedia<T extends AllOutputExtension>(
       case ".avi": {
         const aviQuality = quality as VideoQuality<".avi">;
         ffmpegCmd += ` -vcodec libxvid -acodec mp3`;
-        
+
         if (aviQuality.encodingMode === "crf") {
           ffmpegCmd += ` -crf ${aviQuality.crf}`;
         } else {
           ffmpegCmd += ` -b:v ${aviQuality.bitrate}k`;
-          
+
           if (aviQuality.encodingMode === "vbr-2-pass") {
             const firstPassCmd = ffmpegCmd + ` -pass 1 -f null /dev/null`;
             await execPromise(firstPassCmd);
@@ -297,18 +308,25 @@ export async function convertMedia<T extends AllOutputExtension>(
       }
       case ".mov": {
         const movQuality = quality as VideoQuality<".mov">;
-        const proresProfile = movQuality.variant === "proxy" ? "0" :
-                              movQuality.variant === "lt" ? "1" :
-                              movQuality.variant === "standard" ? "2" :
-                              movQuality.variant === "hq" ? "3" :
-                              movQuality.variant === "4444" ? "4" : "5";
+        const proresProfile =
+          movQuality.variant === "proxy"
+            ? "0"
+            : movQuality.variant === "lt"
+              ? "1"
+              : movQuality.variant === "standard"
+                ? "2"
+                : movQuality.variant === "hq"
+                  ? "3"
+                  : movQuality.variant === "4444"
+                    ? "4"
+                    : "5";
         ffmpegCmd += ` -vcodec prores -profile:v ${proresProfile} -acodec pcm_s16le`;
         break;
       }
       case ".mkv": {
         const mkvQuality = quality as VideoQuality<".mkv">;
         ffmpegCmd += ` -vcodec libx265 -acodec aac -preset ${mkvQuality.preset}`;
-        
+
         if (mkvQuality.encodingMode === "crf") {
           ffmpegCmd += ` -crf ${mkvQuality.crf}`;
         } else {
@@ -316,7 +334,7 @@ export async function convertMedia<T extends AllOutputExtension>(
           if (mkvQuality.maxBitrate) {
             ffmpegCmd += ` -maxrate ${mkvQuality.maxBitrate}k -bufsize ${Number(mkvQuality.maxBitrate) * 2}k`;
           }
-          
+
           if (mkvQuality.encodingMode === "vbr-2-pass") {
             const firstPassCmd = ffmpegCmd + ` -pass 1 -f null /dev/null`;
             await execPromise(firstPassCmd);
@@ -328,12 +346,12 @@ export async function convertMedia<T extends AllOutputExtension>(
       case ".mpg": {
         const mpgQuality = quality as VideoQuality<".mpg">;
         ffmpegCmd += ` -vcodec mpeg2video -acodec mp3`;
-        
+
         if (mpgQuality.encodingMode === "crf") {
           ffmpegCmd += ` -crf ${mpgQuality.crf}`;
         } else {
           ffmpegCmd += ` -b:v ${mpgQuality.bitrate}k`;
-          
+
           if (mpgQuality.encodingMode === "vbr-2-pass") {
             const firstPassCmd = ffmpegCmd + ` -pass 1 -f null /dev/null`;
             await execPromise(firstPassCmd);
@@ -345,7 +363,7 @@ export async function convertMedia<T extends AllOutputExtension>(
       case ".webm": {
         const webmQuality = quality as VideoQuality<".webm">;
         ffmpegCmd += ` -vcodec libvpx-vp9 -acodec libopus -quality ${webmQuality.quality}`;
-        
+
         if (webmQuality.encodingMode === "crf") {
           ffmpegCmd += ` -crf ${webmQuality.crf}`;
         } else {
@@ -353,7 +371,7 @@ export async function convertMedia<T extends AllOutputExtension>(
           if (webmQuality.maxBitrate) {
             ffmpegCmd += ` -maxrate ${webmQuality.maxBitrate}k -bufsize ${Number(webmQuality.maxBitrate) * 2}k`;
           }
-          
+
           if (webmQuality.encodingMode === "vbr-2-pass") {
             const firstPassCmd = ffmpegCmd + ` -pass 1 -f null /dev/null`;
             await execPromise(firstPassCmd);
