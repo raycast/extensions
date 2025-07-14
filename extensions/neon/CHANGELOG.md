@@ -1,6 +1,6 @@
 # Neon Changelog
 
-## [Create & Delete Project + Modernize] - {PR_MERGE_DATE}
+## [Create & Delete Project + Modernize] - 2025-07-14
 
 - Create Project
 - Delete Existing Project
