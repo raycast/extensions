@@ -66,10 +66,11 @@ export async function readDataFromQRCodeOnScreen(type: ScanType): Promise<QRCode
         output.data = await selectMacOsQRCodeRegion(path);
       }
 
-      if (isWin) {
+      if (isMacOs) {
+        output.data = await selectMacOsQRCodeRegion(path);
+      } else if (isWin) {
         output.data = await selectWindowsQRCodeRegion(path);
       }
-
       break;
     }
   }
