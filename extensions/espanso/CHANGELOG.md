@@ -1,6 +1,6 @@
 # Espanso Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-07-14
 
 - Add a custom Espanso binary path in preferences to make it work even with non-standard installations.
 
