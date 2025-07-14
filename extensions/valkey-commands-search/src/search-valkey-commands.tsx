@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, showFailureToast } from "@raycast/api";
+import { List, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import * as cheerio from "cheerio";
 
@@ -60,12 +60,13 @@ export default function CommandSearch() {
     // then turn it into our Command[]
     mapResult: (html) => ({ data: parseCommands(html) }),
     onError: (error) => {
-      showFailureToast(error, { title: "Failed to fetch commands" });
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch commands",
+        message: error instanceof Error ? error.message : String(error),
+      });
     },
-    failureToastOptions: {
-      title: "Fetch Error",
-      message: "Unable to load Valkey commands.",
-    },
+    // No need for failureToastOptions as we're handling errors in onError
   });
 
   // Group commands by category
