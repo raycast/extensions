@@ -43,4 +43,7 @@ export const sanitizeOptions = {
   // Force stripping of all attributes not explicitly allowed. This is a very strong security measure.
   // This option is not directly available in sanitize-html, but implied by not listing attributes.
   // To achieve a similar effect, we ensure allowedAttributes are strictly defined.
+  disallowedTagsMode: "escape", // Escape disallowed tags instead of just discarding content
+  enforceHtmlBoundary: true, // Discard content outside <html></html> tags
+  nestingLimit: 10, // Limit nesting depth to prevent overly complex or malicious structures
 };

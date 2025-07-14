@@ -74,9 +74,9 @@ export function isValidUrl(urlString: string): boolean {
     // A simple check for relative paths that don't start with protocol and don't contain XSS vectors.
     const lowerCaseUrl = urlString.toLowerCase();
     if (lowerCaseUrl.startsWith("/") || lowerCaseUrl.startsWith("./") || lowerCaseUrl.startsWith("../")) {
-        // Basic check to prevent common XSS in relative paths (e.g., /%20javascript:alert(1))
-        // This is a very simplistic check and might need more sophistication depending on how relative URLs are handled downstream.
-        return !lowerCaseUrl.includes("javascript:") && !lowerCaseUrl.includes("data:");
+      // Basic check to prevent common XSS in relative paths (e.g., /%20javascript:alert(1))
+      // This is a very simplistic check and might need more sophistication depending on how relative URLs are handled downstream.
+      return !lowerCaseUrl.includes("javascript:") && !lowerCaseUrl.includes("data:");
     }
     return false;
   }
