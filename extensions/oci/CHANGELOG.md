@@ -1,6 +1,6 @@
 # Oracle Cloud Changelog
 
-## [View Object Storage Buckets + Implement Provider w/ Context] - {PR_MERGE_DATE}
+## [View Object Storage Buckets + Implement Provider w/ Context] - 2025-07-14
 
 - add initial "Object Storage" command to view buckets
 - `dev`: implement Provider w/ Context so checks can be shared
