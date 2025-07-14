@@ -1,86 +1,106 @@
 import { exec } from 'child_process';
-import Jimp from 'jimp';
-import jsQR from 'jsqr';
 import { closeMainWindow, Clipboard } from '@raycast/api';
-import { Monitor } from './lib/node-screenshots';
+import { runPowerShellScript } from '@raycast/utils';
 import fs from 'fs/promises';
 import { promisify } from 'util';
-import os from 'os';
-
-// example qrcodes https://gist.github.com/kcramer/c6148fb906e116d84e4bde7b2ab56992
-
-const isWin = process.platform === 'win32';
-const isMacOs = process.platform === 'darwin';
-
-export type ScanType = 'scan' | 'select' | null;
-
+import { extractQRCodeFromImage } from '.';
 const execAsync = promisify(exec);
-const TEMP_DIR = os.tmpdir();
 
-async function getDisplayCount() {
-  const { stdout } = await execAsync('/usr/sbin/system_profiler SPDisplaysDataType | grep Resolution: | wc -l');
-  const count = parseInt(stdout.trim(), 10) || 1;
-  return count;
+export interface DisplayInfo {
+  X: number;
+  Y: number;
+  Width: number;
+  Height: number;
+  DeviceName: string;
 }
 
-async function extractQRCodeFromImage(path: string) {
-  const image = await Jimp.read(path);
-  const { data, width, height } = image.bitmap;
-  const code = jsQR(Uint8ClampedArray.from(data), width, height);
-  return code?.data;
+async function getWindowsDisplaysInfo(): Promise<DisplayInfo[]> {
+  const getDisplaysScript = `
+Add-Type -AssemblyName System.Windows.Forms
+$allScreens = [System.Windows.Forms.Screen]::AllScreens
+$displayList = @()
+foreach ($screen in $allScreens) {
+    $displayList += [PSCustomObject]@{
+        X = $screen.Bounds.X;
+        Y = $screen.Bounds.Y;
+        Width = $screen.Bounds.Width;
+        Height = $screen.Bounds.Height;
+        DeviceName = $screen.DeviceName;
+    }
+}
+$displayList | ConvertTo-Json -Compress
+    `;
+
+  const rawDisplayInfoJson = await runPowerShellScript(getDisplaysScript);
+  let displays: DisplayInfo[] = [];
+  try {
+    const parsed = JSON.parse(rawDisplayInfoJson);
+    if (Array.isArray(parsed)) {
+      displays = parsed;
+    } else if (typeof parsed === 'object' && parsed !== null) {
+      displays = [parsed];
+    }
+  } catch (parseError) {
+    throw new Error('Could not parse display information from PowerShell.');
+  }
+  return displays;
 }
 
-function isGoogleAuthenticatorMigration(str?: string) {
-  return str?.startsWith('otpauth-migration://');
+async function captureWindowsScreenshot(
+  screenX: number,
+  screenY: number,
+  screenWidth: number,
+  screenHeight: number,
+  outputPath: string
+): Promise<void> {
+  const singleScreenCaptureScript = `
+Add-Type -AssemblyName System.Windows.Forms
+
+try {
+    $ScreenX = ${screenX}
+    $ScreenY = ${screenY}
+    $ScreenWidth = ${screenWidth}
+    $ScreenHeight = ${screenHeight}
+    $OutputPath = "${outputPath}" # Crucial to double-quote the path
+
+    Write-Host "Capturing screen at X:$($ScreenX), Y:$($ScreenY) with size $($ScreenWidth)x$($ScreenHeight) to $($OutputPath)..."
+
+    $bmp = New-Object System.Drawing.Bitmap($ScreenWidth, $ScreenHeight)
+    $graphics = [System.Drawing.Graphics]::FromImage($bmp)
+
+    $graphics.CopyFromScreen($ScreenX, $ScreenY, 0, 0, (New-Object System.Drawing.Size($ScreenWidth, $ScreenHeight)))
+
+    $bmp.Save($OutputPath, [System.Drawing.Imaging.ImageFormat]::Png)
+    Write-Host "Screenshot saved successfully."
+
+    $graphics.Dispose()
+    $bmp.Dispose()
+
+} catch {
+    Write-Error "Error capturing single screenshot: $($_.Exception.Message)"
+    throw $_.Exception # Re-throw to be caught by runPowerShellScript
+}
+    `;
+
+  await runPowerShellScript(singleScreenCaptureScript);
 }
 
-type QRCodeReadOutput = {
-  data?: string;
-  isGoogleAuthenticatorMigration?: boolean;
-};
-
-async function scanMacOsQRCodeAcrossDisplays(path: string): Promise<string | undefined> {
+export async function scanWindowsQRCodeAcrossDisplays(path: string): Promise<string | undefined> {
   let scannedData: string | undefined;
-  for (let i = 0; i < (await getDisplayCount()); i++) {
-    await execAsync(`/usr/sbin/screencapture -xD ${i + 1} ${path}`);
-    scannedData = await extractQRCodeFromImage(path);
-    if (scannedData) break;
-  }
 
   try {
-    await fs.unlink(path);
-  } catch (cleanUpError) {
-    console.warn(`Could not delete temporary file ${path}:`, cleanUpError);
-  }
+    const displays = await getWindowsDisplaysInfo();
 
-  return scannedData;
-}
+    if (displays.length === 0) {
+      console.warn('No displays found. Skipping screenshot capture.');
+      return;
+    }
 
-async function selectMacOsQRCodeRegion(path: string): Promise<string | undefined> {
-  await execAsync(`/usr/sbin/screencapture -xi ${path}`);
-  const selectedData = await extractQRCodeFromImage(path);
-
-  try {
-    await fs.unlink(path);
-  } catch (cleanUpError) {
-    console.warn(`Could not delete temporary file ${path}:`, cleanUpError);
-  }
-  return selectedData;
-}
-
-async function scanWindowsQRCodeAcrossDisplays(path: string): Promise<string | undefined> {
-  let scannedData: string | undefined;
-
-  try {
-    const displays = await Monitor.all();
-
-    // we hide raycast to capture qr code
     await closeMainWindow();
+
     for (const display of displays) {
-      // Capture each display individually
-      let image = await display.captureImage();
-      let data = await image.toPng();
-      await fs.writeFile(path, data);
+      await captureWindowsScreenshot(display.X, display.Y, display.Width, display.Height, path);
+
       scannedData = await extractQRCodeFromImage(path);
       if (scannedData) {
         break; // Stop if a QR code is found
@@ -170,15 +190,15 @@ async function openUriSchemeAndWaitForExit(uri: string, processNames: string[], 
 
 async function readClipBoardFile(path: string) {
   let scannedData: string | undefined;
-  // TODO: clipboard api not supported on windows right now
-  const { file } = await Clipboard.read();
-
-  if (file) {
-    await fs.writeFile(path, file);
-    scannedData = await extractQRCodeFromImage(path);
-  }
 
   try {
+    const { file } = await Clipboard.read();
+
+    if (file) {
+      await fs.writeFile(path, file);
+      scannedData = await extractQRCodeFromImage(path);
+    }
+
     await fs.unlink(path);
   } catch (cleanUpError) {
     console.warn(`Could not delete temporary file ${path}:`, cleanUpError);
@@ -187,10 +207,10 @@ async function readClipBoardFile(path: string) {
   return scannedData;
 }
 
-async function selectWindowsQRCodeRegion(path: string): Promise<string | undefined> {
+export async function selectWindowsQRCodeRegion(path: string): Promise<string | undefined> {
   try {
-    // We hide raycast
     await closeMainWindow();
+
     await openUriSchemeAndWaitForExit('ms-screenclip://?clippingMode=Rectangle', [
       'ScreenClippingHost.exe',
       'SnippingTool.exe',
@@ -207,54 +227,4 @@ async function selectWindowsQRCodeRegion(path: string): Promise<string | undefin
     console.error('Error selecting Windows QR code region:', error);
     return undefined;
   }
-}
-
-export async function readDataFromQRCodeOnScreen(type: ScanType): Promise<QRCodeReadOutput> {
-  const path = `${TEMP_DIR}/raycast-one-time-password-qr.png`;
-  const output: QRCodeReadOutput = {};
-
-  switch (type) {
-    case 'scan':
-      {
-        if (isMacOs) {
-          output.data = await scanMacOsQRCodeAcrossDisplays(path);
-        }
-
-        if (isWin) {
-          output.data = await scanWindowsQRCodeAcrossDisplays(path);
-        }
-      }
-
-      break;
-    case 'select': {
-      if (isMacOs) {
-        output.data = await selectMacOsQRCodeRegion(path);
-      }
-
-      if (isWin) {
-        output.data = await selectWindowsQRCodeRegion(path);
-      }
-
-      break;
-    }
-  }
-
-  output.isGoogleAuthenticatorMigration = isGoogleAuthenticatorMigration(output.data);
-
-  return output;
-}
-
-export function getCurrentSeconds() {
-  return Math.round(new Date().getTime() / 1000);
-}
-
-export function splitStrToParts(str: string, partLength = 3) {
-  const regex = new RegExp(`(.{${partLength}})`, 'g');
-  return str.replace(regex, '$1 ').trim();
-}
-
-export function parseUrl<T extends string>(url: string) {
-  const qs = url.slice(url.indexOf('?'));
-  const searchParams = new URLSearchParams(qs);
-  return Object.fromEntries(searchParams.entries()) as { [K in T]: string };
 }

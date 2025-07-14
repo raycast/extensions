@@ -64,7 +64,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.100.3",
-    "@raycast/utils": "^2.0.1",
+    "@raycast/utils": "^2.2.0",
     "hi-base32": "^0.5.1",
     "jimp": "^0.22.7",
     "jsqr": "^1.4.0",
