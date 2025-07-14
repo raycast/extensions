@@ -54,10 +54,11 @@ export async function readDataFromQRCodeOnScreen(type: ScanType): Promise<QRCode
           output.data = await scanMacOsQRCodeAcrossDisplays(path);
         }
 
-        if (isWin) {
+        if (isMacOs) {
+          output.data = await scanMacOsQRCodeAcrossDisplays(path);
+        } else if (isWin) {
           output.data = await scanWindowsQRCodeAcrossDisplays(path);
         }
-      }
 
       break;
     case 'select': {
