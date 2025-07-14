@@ -1,8 +1,3 @@
-// Define preferences interface for type safety
-export type Preferences = {
-  itemLimit: string; // Stored as string, will be parsed to number
-};
-
 // Define the structure that matches the actual OzBargain RSS feed
 export type OzBargainFeedItem = {
   title: string;

@@ -1,8 +1,10 @@
+import * as SanitizeHTML from "sanitize-html";
+
 export const OZB_FEED_URL = "https://www.ozbargain.com.au/feed";
 export const MAX_DESCRIPTION_LENGTH = 1500; // Truncate long descriptions in Detail view
 
 // Configure sanitize-html options for safe HTML processing
-export const sanitizeOptions = {
+export const sanitizeOptions: SanitizeHTML.IOptions = {
   allowedTags: [
     "p",
     "br",
@@ -39,7 +41,6 @@ export const sanitizeOptions = {
     }),
   },
   allowedSchemes: ["http", "https"], // Removed mailto, as it's less common in deal descriptions and can be a vector.
-  disallowedAttributes: ["onerror", "onload", "style", "script", "data-*"], // Added script and data-* to disallowed attributes
   // Force stripping of all attributes not explicitly allowed. This is a very strong security measure.
   // This option is not directly available in sanitize-html, but implied by not listing attributes.
   // To achieve a similar effect, we ensure allowedAttributes are strictly defined.

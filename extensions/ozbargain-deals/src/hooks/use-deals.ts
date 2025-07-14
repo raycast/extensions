@@ -1,10 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
-import { getPreferenceValues } from "@raycast/api";
 import * as xml2js from "xml2js";
 import sanitizeHtml from "sanitize-html";
 import he from "he";
 
-import { Preferences, OzBargainFeedItem, Deal } from "../utils/types";
+import { OzBargainFeedItem, Deal } from "../utils/types";
 import { OZB_FEED_URL, sanitizeOptions } from "../utils/constants";
 import { turndownService, extractStoreFromTitle } from "../utils/helpers";
 
@@ -14,8 +13,7 @@ export function useDeals() {
   const [error, setError] = useState<string | null>(null);
   const [searchText, setSearchText] = useState<string>("");
 
-  const preferences = getPreferenceValues<Preferences>();
-  const itemLimit = parseInt(preferences.itemLimit) || 20;
+  const itemLimit = 20;
 
   const fetchDeals = useCallback(async () => {
     setLoading(true);
