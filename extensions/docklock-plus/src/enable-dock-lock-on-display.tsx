@@ -50,7 +50,7 @@ export default function Command() {
           title={display}
           actions={
             <ActionPanel>
-              <Action title="Enable Docklock on This Display" onAction={() => moveDockToDisplay(display)} />
+              <Action title="Enable DockLock on This Display" onAction={() => moveDockToDisplay(display)} />
             </ActionPanel>
           }
         />
