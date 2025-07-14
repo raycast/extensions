@@ -40,7 +40,7 @@ $displayList | ConvertTo-Json -Compress
     } else if (typeof parsed === 'object' && parsed !== null) {
       displays = [parsed];
     }
-  } catch (parseError) {
+  } catch {
     throw new Error('Could not parse display information from PowerShell.');
   }
   return displays;
@@ -103,7 +103,7 @@ export async function scanWindowsQRCodeAcrossDisplays(path: string): Promise<str
 
       scannedData = await extractQRCodeFromImage(path);
       if (scannedData) {
-        break; // Stop if a QR code is found
+        break;
       }
     }
 
