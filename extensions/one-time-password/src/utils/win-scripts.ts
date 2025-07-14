@@ -172,8 +172,8 @@ async function openUriSchemeAndWaitForExit(uri: string, processNames: string[], 
           }
         } catch (checkError: any) {
           console.error(`Error checking process ${pName}: ${checkError.message}`);
-          // Decide if this error should stop the polling or just log.
-          // For now, we'll continue polling.
+          clearInterval(intervalId);
+          return reject(checkError);
         }
       }
 
@@ -185,7 +185,6 @@ async function openUriSchemeAndWaitForExit(uri: string, processNames: string[], 
         // console.log(`Processes ${processNames.join(', ')} still running. Polling again...`);
       }
     }, pollInterval);
-  });
 }
 
 async function readClipBoardFile(path: string) {
