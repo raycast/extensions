@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { showFailureToast } from "@raycast/utils";
 import * as xml2js from "xml2js";
 import sanitizeHtml from "sanitize-html";
 import he from "he";
@@ -75,7 +76,9 @@ export function useDeals() {
     } catch (err: unknown) {
       console.error("Failed to fetch OzBargain deals:", err);
       setError("Failed to load deals. Please check your internet connection or try again later.");
-      // showFailureToast(err, { title: "Failed to Load Deals" }); // Toast handled by the calling component
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      showFailureToast(err, { title: "Failed to Load Deals" });
     } finally {
       setLoading(false);
     }

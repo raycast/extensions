@@ -1,9 +1,20 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { Deal } from "../utils/types";
 import { MAX_DESCRIPTION_LENGTH } from "../utils/constants";
 import { isValidUrl, timeAgo } from "../utils/helpers";
+import { useEffect } from "react";
 
 export function DealDetail({ deal }: { deal: Deal }) {
+  useEffect(() => {
+    if (deal.imageUrl && !isValidUrl(deal.imageUrl)) {
+      showFailureToast("Invalid Image URL", { title: "Error Loading Image" });
+    }
+    if (deal.link && !isValidUrl(deal.link)) {
+      showFailureToast("Invalid Deal Link", { title: "Error Opening Deal" });
+    }
+  }, [deal.imageUrl, deal.link]);
+
   // Construct the Markdown content for the Detail view
   const markdownContent = `
   ${deal.imageUrl && isValidUrl(deal.imageUrl) ? `![Deal Image](${deal.imageUrl})\n\n` : ""}
