@@ -1,6 +1,6 @@
 # Valkey Commands Documentation Changelog
 
-## [Added command grouping] - {PR_MERGE_DATE}
+## [Added command grouping] - 2025-07-14
 
 - Added explicit grouping to the commands
 - Updated dependencies
