@@ -1,4 +1,4 @@
-import { showToast, Toast } from "@raycast/api";
+import { showToast, showFailureToast, Toast } from "@raycast/api";
 import { isDockLockPlusInstalled } from "./utils";
 import { promisify } from "util";
 import { exec } from "child_process";
@@ -9,7 +9,6 @@ export default async function Command(): Promise<void> {
     await showFailureToast("", { title: "DockLock Plus not installed. Install it at https://docklockpro.com" });
     return;
   }
-
   try {
     await execAsync('open "docklockplus://enableDockFollowsMouse"');
     showToast(Toast.Style.Success, "Dock follows mouse enabled. The Dock will now follow your cursor");
