@@ -25,6 +25,8 @@ export const sanitizeOptions = {
     "ol",
     "li",
     "blockquote",
+    "code",
+    "pre",
   ],
   allowedAttributes: {
     a: ["href", "title", "rel"],
@@ -37,4 +39,5 @@ export const sanitizeOptions = {
     }),
   },
   allowedSchemes: ["http", "https", "mailto"],
+  disallowedAttributes: ["onerror", "onload", "style"],
 };

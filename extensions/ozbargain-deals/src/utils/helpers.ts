@@ -18,6 +18,10 @@ turndownService.addRule("dealImage", {
     const alt = element.getAttribute("alt") || "";
     if (src) {
       try {
+        if (!isValidUrl(src)) {
+          console.warn("Blocked invalid or unsafe URL scheme in deal image:", src);
+          return "";
+        }
         const sanitizedSrc = new URL(src).href; // Validate and sanitize URL
         return `![${alt}](${sanitizedSrc})`;
       } catch (error) {
@@ -40,6 +44,22 @@ turndownService.addRule("dealLink", {
     return content;
   },
 });
+
+/**
+ * Validates if a URL is safe and has an allowed protocol.
+ * @param urlString The URL string to validate.
+ * @returns True if the URL is valid and safe, false otherwise.
+ */
+export function isValidUrl(urlString: string): boolean {
+  try {
+    const url = new URL(urlString);
+    // Allow only http and https protocols
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    // URL constructor will throw an error for invalid URLs
+    return false;
+  }
+}
 
 // Helper function to extract store name from title
 export function extractStoreFromTitle(title: string): string {
