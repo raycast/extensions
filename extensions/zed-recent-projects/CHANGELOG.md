@@ -1,5 +1,9 @@
 #  Zed Recent Projects Changelog
 
+## [Fixes] - 2025-07-07
+
+- Add `Zed Dev` app build option
+
 ## [Fixes] - 2025-04-03
 
 - Show Git branch label based on extension preferences

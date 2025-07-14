@@ -45,7 +45,7 @@ type NoteItem = {
 
 const NOTES_DB = resolve(homedir(), "Library/Group Containers/group.com.apple.notes/NoteStore.sqlite");
 
-export async function getNotes(maxQueryResults: number) {
+export async function getNotes(maxQueryResults: number, filterByTags: string[] = []) {
   const query = `
     SELECT
         'x-coredata://' || zmd.z_uuid || '/ICNote/p' || note.z_pk AS id,
@@ -146,7 +146,7 @@ export async function getNotes(maxQueryResults: number) {
     })
     .sort((a, b) => (a.modifiedAt && b.modifiedAt && a.modifiedAt < b.modifiedAt ? 1 : -1));
 
-  const notesWithAdditionalFields = notes.map((note) => {
+  let notesWithAdditionalFields = notes.map((note) => {
     const noteInvitation = invitations?.find((inv) => inv.noteId === note.id);
     const noteLinks = links?.filter((link) => link.notePk == note.pk);
 
@@ -175,6 +175,13 @@ export async function getNotes(maxQueryResults: number) {
       tags: noteTags ?? [],
     };
   });
+
+  if (filterByTags.length) {
+    notesWithAdditionalFields = notesWithAdditionalFields.filter((note) => {
+      const noteTags = note.tags.map((t) => t.text);
+      return filterByTags.every((tag) => noteTags.includes(`#${tag.replace("#", "")}`));
+    });
+  }
 
   return notesWithAdditionalFields;
 }

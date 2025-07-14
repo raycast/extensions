@@ -111,7 +111,7 @@ export default function Command() {
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action title="Open Extension Preferences" onAction={openCommandPreferences} />
+          <Action title="Open Command Preferences" onAction={openCommandPreferences} />
         </ActionPanel>
       }
     />
