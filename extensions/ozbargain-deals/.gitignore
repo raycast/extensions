@@ -3,7 +3,6 @@
 # dependencies
 /node_modules
 yarn.lock
-package-lock.json
 
 # Raycast specific files
 raycast-env.d.ts
