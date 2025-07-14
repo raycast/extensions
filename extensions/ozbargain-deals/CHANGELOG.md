@@ -1,8 +1,6 @@
 # OzBargain Deals Changelog
 
-## [1.0.0] - 2024-07-15
-
-### Added
+## [Initial Version]  - {PR_MERGE_DATE}
 
 - Initial release of the OzBargain Deals extension.
 - Browse latest deals from OzBargain.
