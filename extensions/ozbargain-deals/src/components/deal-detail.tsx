@@ -15,7 +15,6 @@ export function DealDetail({ deal }: { deal: Deal }) {
     }
   }, [deal.imageUrl, deal.link]);
 
-  // Construct the Markdown content for the Detail view
   const markdownContent = `
   ${deal.imageUrl && isValidUrl(deal.imageUrl) ? `![Deal Image](${deal.imageUrl})\n\n` : ""}
   # ${deal.title.split(" @ ")[0]}
@@ -34,7 +33,7 @@ export function DealDetail({ deal }: { deal: Deal }) {
 
   return (
     <Detail
-      navigationTitle={deal.title} // Title shown in the navigation bar
+      navigationTitle={deal.title}
       markdown={markdownContent}
       actions={
         <ActionPanel>
@@ -53,7 +52,6 @@ export function DealDetail({ deal }: { deal: Deal }) {
           )}
         </ActionPanel>
       }
-      // Metadata section provides structured information
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Store" text={deal.store} icon={Icon.Tag} />

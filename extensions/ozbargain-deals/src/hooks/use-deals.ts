@@ -76,8 +76,6 @@ export function useDeals() {
     } catch (err: unknown) {
       console.error("Failed to fetch OzBargain deals:", err);
       setError("Failed to load deals. Please check your internet connection or try again later.");
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
       showFailureToast(err, { title: "Failed to Load Deals" });
     } finally {
       setLoading(false);

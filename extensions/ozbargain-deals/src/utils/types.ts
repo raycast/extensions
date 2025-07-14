@@ -1,36 +1,38 @@
-// Define the structure that matches the actual OzBargain RSS feed
 export type OzBargainFeedItem = {
   title: string;
   link: string;
   description: string;
   comments?: string;
   category?: string | string[];
-  "ozb:meta"?: {
-    $: {
-      "comment-count"?: string;
-      "votes-pos"?: string;
-      "votes-neg"?: string;
-      image?: string;
-      url?: string;
-    };
-  };
-  "media:thumbnail"?: {
-    $: {
-      url: string;
-    };
-  };
+  "ozb:meta"?:
+    | {
+        $?: {
+          "comment-count"?: string;
+          "votes-pos"?: string;
+          "votes-neg"?: string;
+          image?: string;
+          url?: string;
+        };
+      }
+    | undefined;
+  "media:thumbnail"?:
+    | {
+        $?: {
+          url: string;
+        };
+      }
+    | undefined;
   "dc:creator"?: string;
   pubDate: string;
   guid?: string;
 };
 
-// Define the structured data for a deal after parsing
 export type Deal = {
   id: string;
   title: string;
   link: string;
-  descriptionHtml: string; // Raw HTML description from feed, sanitized for security
-  descriptionMarkdown: string; // HTML converted to Markdown
+  descriptionHtml: string;
+  descriptionMarkdown: string;
   upvotes: number;
   downvotes: number;
   comments: number;
@@ -38,11 +40,10 @@ export type Deal = {
   creator: string;
   pubDate: Date;
   categories: string[];
-  imageUrl?: string; // Optional main image
-  netVotes: number; // upvotes - downvotes
+  imageUrl?: string;
+  netVotes: number;
 };
 
-// Type for TurndownService node elements
 export type TurndownNode = {
   getAttribute: (name: string) => string | null;
 };
