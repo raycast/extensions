@@ -1,6 +1,6 @@
 # Readwise Reader Changelog
 
-## [Add document tags support] - {PR_MERGE_DATE}
+## [Add document tags support] - 2025-07-14
 
 - Add optional tags support to `Save Link` command
 - Add optional tags support to `Save Links` command
