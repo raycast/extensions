@@ -19,12 +19,14 @@
     {
       "name": "index",
       "title": "Open New App Instance",
+      "subtitle": "Select an app",
       "description": "Select an installed application and launch a new instance of it",
       "mode": "view"
     },
     {
       "name": "current",
       "title": "New Instance",
+      "subtitle": "Current App",
       "description": "Launch a new instance of the currently active application",
       "mode": "no-view"
     }

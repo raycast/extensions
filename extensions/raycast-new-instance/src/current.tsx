@@ -1,4 +1,5 @@
-import { getFrontmostApplication, showToast, Toast } from "@raycast/api";
+import { getFrontmostApplication } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { launchNewInstance } from "./utils";
 
 export default async function Command() {
@@ -9,10 +10,7 @@ export default async function Command() {
     // Launch new instance using shared utility
     await launchNewInstance(frontmostApp);
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Could not find current application",
-      message: error instanceof Error ? error.message : "Unknown error occurred",
-    });
+    // getFrontmostApplication() throws an error if no application is open
+    await showFailureToast(error, { title: "Could not find current application" });
   }
 }

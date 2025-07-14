@@ -1,4 +1,5 @@
 import { Application, closeMainWindow, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { exec } from "child_process";
 import { promisify } from "util";
 
@@ -18,13 +19,9 @@ export async function launchNewInstance(application: Application) {
       style: Toast.Style.Success,
       title: `Launched new instance of ${application.name}`,
     });
-
-    await closeMainWindow();
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to launch application",
-      message: error instanceof Error ? error.message : "Unknown error occurred",
-    });
+    await showFailureToast(error, { title: "Failed to launch application" });
+  } finally {
+    await closeMainWindow({ clearRootSearch: true });
   }
 }
