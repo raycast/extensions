@@ -6,6 +6,9 @@ export default defineConfig({
   schema: "./src/lib/schema.ts",
   dialect: "sqlite",
   dbCredentials: {
-    url: `${environment.supportPath}/raycast-focus-stats.db`,
+    // When generating new migrations, since drizzle doesn't actually need to connect to the
+    // database, comment out this line, otherwise `npx` will complain that `@raycast/api` can't be
+    // found.
+    url: `./${environment.supportPath}/raycast-focus-stats.db`,
   },
 });

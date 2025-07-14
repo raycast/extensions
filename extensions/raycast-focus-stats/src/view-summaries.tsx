@@ -10,7 +10,7 @@ import { InitWrapper } from "./components/init/init-wrapper";
 
 export default function Command() {
   const [date, setDate] = useState<Date>(new Date());
-  const [sessions] = useState<Session[]>([]);
+  const [sessions, setSessions] = useState<Session[]>([]);
 
   const entries = useMemo(() => {
     const summary = sessions.reduce(
@@ -34,9 +34,9 @@ export default function Command() {
   return (
     <InitWrapper
       children={(initialized) => {
-        const { isLoading, data: sessions = [] } = usePromise(
+        const { isLoading } = usePromise(
           async (date: Date) => {
-            return getSessionsByDate(date);
+            return setSessions(getSessionsByDate(date));
           },
           [date],
           // Only execute the function inside `usePromise` when `initialized` is
