@@ -2,7 +2,6 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "granola",
   "title": "Granola",
-  "version": "1.5",
   "description": "Create, manage, and review notes in Granola",
   "icon": "extension-icon.png",
   "author": "Rob",
@@ -15,7 +14,6 @@
     "Communication"
   ],
   "license": "MIT",
-  "preferences": [],
   "commands": [
     {
       "name": "search-notes",
