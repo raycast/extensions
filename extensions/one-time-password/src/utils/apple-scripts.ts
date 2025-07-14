@@ -12,7 +12,8 @@ async function getDisplayCount() {
 
 export async function scanMacOsQRCodeAcrossDisplays(path: string): Promise<string | undefined> {
   let scannedData: string | undefined;
-  for (let i = 0; i < (await getDisplayCount()); i++) {
+  const displayCount = await getDisplayCount();
+  for (let i = 0; i < displayCount; i++) {
     await execAsync(`/usr/sbin/screencapture -xD ${i + 1} ${path}`);
     scannedData = await extractQRCodeFromImage(path);
     if (scannedData) break;
