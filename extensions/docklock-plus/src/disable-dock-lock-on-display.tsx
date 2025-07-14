@@ -12,7 +12,7 @@ export default function Command() {
   useEffect(() => {
     async function init() {
       if (!(await isDockLockPlusInstalled())) {
-        await showToast(Toast.Style.Failure, "DockLock Plus not installed", "Install it at https://docklockpro.com");
+        await showFailureToast("", { title: "DockLock Plus not installed. Install it at https://docklockpro.com" });
         return;
       }
       try {
@@ -27,22 +27,18 @@ export default function Command() {
 
   const moveDockToDisplay = async (display: string) => {
     if (!/^[\w\s\-.+]+$/.test(display)) {
-      await showToast(
-        Toast.Style.Failure,
-        "Invalid Display Name",
-        `Suspicious display name rejected: "${display}". Please send a screenshot of your display list to support@docklock.pro.`,
-      );
+      await showFailureToast("", {
+        title: "Invalid Display Name. Please send a screenshot of your display list to support@docklock.pro",
+      });
       return;
     }
     try {
       await execAsync(`open "docklockplus://disableDockLockOnDisplay?name=${encodeURIComponent(display)}"`);
       showToast(Toast.Style.Success, `DockLock Disabled on display: ${display}`);
     } catch (error) {
-      await showToast(
-        Toast.Style.Failure,
-        `Failed to disable DockLock on display: ${display}`,
-        `Could not communicate with DockLock Plus. Error: ${error}`,
-      );
+      await showFailureToast(error, {
+        title: "Failed to disable DockLock on selected display. Could not communicate with DockLock Plus",
+      });
     }
   };
 

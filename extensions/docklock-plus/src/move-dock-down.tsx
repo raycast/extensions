@@ -6,17 +6,13 @@ const execAsync = promisify(exec);
 
 export default async function Command(): Promise<void> {
   if (!(await isDockLockPlusInstalled())) {
-    await showToast(Toast.Style.Failure, "DockLock Plus not installed", "Install it at https://docklockpro.com");
+    await showFailureToast(error, { title: "DockLock Plus not installed. Install it at https://docklockpro.com" });
     return;
   }
   try {
     await execAsync('open "docklockplus://moveDockDown"');
     showToast(Toast.Style.Success, "Dock moved down. The Dock was moved to the display below");
   } catch (error) {
-    await showToast(
-      Toast.Style.Failure,
-      "Failed to move Dock down",
-      `Could not communicate with DockLock Plus. Error: ${error}`,
-    );
+    await showFailureToast(error, { title: "Failed to move Dock down. Could not communicate with DockLock Plus" });
   }
 }

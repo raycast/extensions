@@ -1,5 +1,4 @@
 import { execSync } from "child_process";
-import { showToast, Toast } from "@raycast/api";
 
 interface DisplayDriver {
   _name?: string;
@@ -28,7 +27,7 @@ export async function getDisplayNames(): Promise<string[]> {
     });
     return Array.from(new Set(names));
   } catch (error) {
-    await showToast(Toast.Style.Failure, "Error fetching display names", String(error));
+    await showFailureToast(error, { title: "Error fetching display names" });
     return [];
   }
 }

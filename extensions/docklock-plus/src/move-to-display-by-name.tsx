@@ -14,7 +14,7 @@ export default function Command() {
     async function loadDisplays() {
       const inst = await isDockLockPlusInstalled();
       if (!inst) {
-        await showToast(Toast.Style.Failure, "DockLock Plus not installed", "Install it at https://docklockpro.com");
+        await showFailureToast(error, { title: "DockLock Plus not installed. Install it at https://docklockpro.com" });
         setIsLoading(false);
         return;
       }
@@ -28,11 +28,10 @@ export default function Command() {
 
   async function moveDockToDisplay(display: string) {
     if (!/^[\w\s\-.+]+$/.test(display)) {
-      await showToast(
-        Toast.Style.Failure,
-        "Invalid Display Name",
-        `Suspicious display name rejected: "${display}". Please send a screenshot of your display list to support@docklock.pro.`,
-      );
+      await showFailureToast("", {
+        title:
+          "Suspicious display name rejected. Please send a screenshot of your display list to support@docklock.pro",
+      });
       return;
     }
 
@@ -40,11 +39,9 @@ export default function Command() {
       await execAsync(`open "docklockplus://moveToDisplay?name=${encodeURIComponent(display)}"`);
       showToast(Toast.Style.Success, `The Dock was moved to display: ${display}`);
     } catch (error) {
-      await showToast(
-        Toast.Style.Failure,
-        `Failed to move Dock to the display: ${display}`,
-        `Could not communicate with DockLock Plus. Error: ${error}`,
-      );
+      await showFailureToast(error, {
+        title: "Failed to move Dock to the selected display. Could not communicate with DockLock Plus",
+      });
     }
   }
 

@@ -6,7 +6,7 @@ const execAsync = promisify(exec);
 
 export default async function Command(): Promise<void> {
   if (!(await isDockLockPlusInstalled())) {
-    await showToast(Toast.Style.Failure, "DockLock Plus not installed", "Install it at https://docklockpro.com");
+    await showFailureToast(error, { title: "DockLock Plus not installed. Install it at https://docklockpro.com" });
     return;
   }
 
@@ -14,10 +14,6 @@ export default async function Command(): Promise<void> {
     await execAsync('open "docklockplus://enableDockLock"');
     showToast(Toast.Style.Success, "DockLock enabled. The DockLock engine has been started");
   } catch (error) {
-    await showToast(
-      Toast.Style.Failure,
-      "Failed to enable DockLock",
-      `Could not communicate with DockLock Plus. Error: ${error}`,
-    );
+    await showFailureToast(error, { title: "Failed to enable DockLock. Could not communicate with DockLock Plus" });
   }
 }
