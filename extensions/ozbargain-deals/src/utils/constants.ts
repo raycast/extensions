@@ -13,8 +13,8 @@ export const sanitizeOptions = {
     "i",
     "a",
     "img",
-    "div",
-    "span",
+    // Removed div and span as they are often used for layout and can be abused.
+    // Headings are kept as they are structural for content.
     "h1",
     "h2",
     "h3",
@@ -35,9 +35,12 @@ export const sanitizeOptions = {
   transformTags: {
     a: (tagName: string, attribs: { [key: string]: string }) => ({
       tagName,
-      attribs: { ...attribs, rel: "noopener noreferrer" },
+      attribs: { ...attribs, rel: "noopener noreferrer nofollow" }, // Added nofollow
     }),
   },
-  allowedSchemes: ["http", "https", "mailto"],
-  disallowedAttributes: ["onerror", "onload", "style"],
+  allowedSchemes: ["http", "https"], // Removed mailto, as it's less common in deal descriptions and can be a vector.
+  disallowedAttributes: ["onerror", "onload", "style", "script", "data-*"], // Added script and data-* to disallowed attributes
+  // Force stripping of all attributes not explicitly allowed. This is a very strong security measure.
+  // This option is not directly available in sanitize-html, but implied by not listing attributes.
+  // To achieve a similar effect, we ensure allowedAttributes are strictly defined.
 };

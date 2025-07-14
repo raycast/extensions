@@ -1,12 +1,12 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import { Deal } from "../utils/types";
 import { MAX_DESCRIPTION_LENGTH } from "../utils/constants";
-import { timeAgo } from "../utils/helpers";
+import { isValidUrl, timeAgo } from "../utils/helpers";
 
 export function DealDetail({ deal }: { deal: Deal }) {
   // Construct the Markdown content for the Detail view
   const markdownContent = `
-  ${deal.imageUrl ? `![Deal Image](${deal.imageUrl})\n\n` : ""}
+  ${deal.imageUrl && isValidUrl(deal.imageUrl) ? `![Deal Image](${deal.imageUrl})\n\n` : ""}
   # ${deal.title.split(" @ ")[0]}
   
   *   **Store:** ${deal.store}
@@ -30,12 +30,14 @@ export function DealDetail({ deal }: { deal: Deal }) {
           <Action.OpenInBrowser url={deal.link} title="Open Deal in Browser" />
           <Action.CopyToClipboard content={deal.link} title="Copy Deal Link" />
           <Action.CopyToClipboard content={deal.title} title="Copy Deal Title" />
-          <Action.OpenInBrowser
-            url={`${deal.link}#comments`}
-            title="Open Comments in Browser"
-            icon={Icon.SpeechBubble}
-          />
-          {deal.imageUrl && (
+          {isValidUrl(`${deal.link}#comments`) && (
+            <Action.OpenInBrowser
+              url={`${deal.link}#comments`}
+              title="Open Comments in Browser"
+              icon={Icon.SpeechBubble}
+            />
+          )}
+          {deal.imageUrl && isValidUrl(deal.imageUrl) && (
             <Action.OpenInBrowser url={deal.imageUrl} title="View Image in Browser" icon={Icon.Image} />
           )}
         </ActionPanel>
@@ -59,7 +61,9 @@ export function DealDetail({ deal }: { deal: Deal }) {
             </Detail.Metadata.TagList>
           )}
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Link title="Original Link" target={deal.link} text="View on OzBargain" />
+          {isValidUrl(deal.link) && (
+            <Detail.Metadata.Link title="Original Link" target={deal.link} text="View on OzBargain" />
+          )}
         </Detail.Metadata>
       }
     />
