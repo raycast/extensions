@@ -3,11 +3,12 @@
   "name": "raycast-new-instance",
   "title": "New Instance",
   "description": "Launch a new instance of any installed application on your Mac",
+  "version": "1.0.0",
   "icon": "icon.png",
   "author": "Caramel",
   "categories": [
     "Applications",
-    "Productivity"
+    "System"
   ],
   "license": "MIT",
   "repository": {
