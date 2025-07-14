@@ -1,5 +1,9 @@
 # Readwise Reader Changelog
 
+## [Add desktop app support] - 2025-07-14
+
+- Add option to open documents in Readwise Reader desktop app
+
 ## [Add document tags support] - 2025-07-14
 
 - Add optional tags support to `Save Link` command
