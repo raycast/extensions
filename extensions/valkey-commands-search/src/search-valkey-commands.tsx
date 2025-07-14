@@ -27,13 +27,7 @@ function parseCommands(html: string): Command[] {
         const href = a.attr("href") ?? "";
 
         if (name && href) {
-          let description = entry
-            .clone()
-            .children("code")
-            .remove()
-            .end()
-            .text()
-            .trim();
+          let description = entry.clone().children("code").remove().end().text().trim();
 
           // Strip wrapping quotes and collapse whitespace
           if (description.startsWith('"') && description.endsWith('"')) {
@@ -54,24 +48,25 @@ function parseCommands(html: string): Command[] {
 }
 
 export default function CommandSearch() {
-  const { isLoading, data: commands = [], revalidate } = useFetch<string, Command[], Command[]>(
-    "https://valkey.io/commands/",
-    {
-      initialData: [],
-      keepPreviousData: true,
-      // First get raw HTML
-      parseResponse: async (res) => res.text(),
-      // then turn it into our Command[]
-      mapResult: (html) => ({ data: parseCommands(html) }),
-      onError: (error) => {
-        showFailureToast(error, { title: "Failed to fetch commands" });
-      },
-      failureToastOptions: {
-        title: "Fetch Error",
-        message: "Unable to load Valkey commands.",
-      },
-    }
-  );
+  const {
+    isLoading,
+    data: commands = [],
+    revalidate,
+  } = useFetch<string, Command[], Command[]>("https://valkey.io/commands/", {
+    initialData: [],
+    keepPreviousData: true,
+    // First get raw HTML
+    parseResponse: async (res) => res.text(),
+    // then turn it into our Command[]
+    mapResult: (html) => ({ data: parseCommands(html) }),
+    onError: (error) => {
+      showFailureToast(error, { title: "Failed to fetch commands" });
+    },
+    failureToastOptions: {
+      title: "Fetch Error",
+      message: "Unable to load Valkey commands.",
+    },
+  });
 
   // Group commands by category
   const byCategory = commands.reduce<Record<string, Command[]>>((acc, cmd) => {
