@@ -14,7 +14,7 @@ export default function Command() {
     async function loadDisplays() {
       const inst = await isDockLockPlusInstalled();
       if (!inst) {
-        await showFailureToast(error, { title: "DockLock Plus not installed. Install it at https://docklockpro.com" });
+        await showFailureToast("", { title: "DockLock Plus not installed. Install it at https://docklockpro.com" });
         setIsLoading(false);
         return;
       }

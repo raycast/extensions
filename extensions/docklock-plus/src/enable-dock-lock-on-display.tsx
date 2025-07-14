@@ -12,7 +12,7 @@ export default function Command() {
   useEffect(() => {
     async function init() {
       if (!(await isDockLockPlusInstalled())) {
-        await showFailureToast(error, { title: "DockLock Plus not installed. Install it at https://docklockpro.com" });
+        await showFailureToast("", { title: "DockLock Plus not installed. Install it at https://docklockpro.com" });
         return;
       }
       try {

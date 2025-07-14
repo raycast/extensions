@@ -6,7 +6,7 @@ const execAsync = promisify(exec);
 
 export default async function Command(): Promise<void> {
   if (!(await isDockLockPlusInstalled())) {
-    await showFailureToast(error, { title: "DockLock Plus not installed. Install it at https://docklockpro.com" });
+    await showFailureToast("", { title: "DockLock Plus not installed. Install it at https://docklockpro.com" });
     return;
   }
   try {
