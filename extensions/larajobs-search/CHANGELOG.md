@@ -1,6 +1,6 @@
 # LaraJobs Search Changelog
 
-## [Update Metadata Image] - {PR_MERGE_DATE}
+## [Update Metadata Image] - 2025-07-14
 
 - Update the metadata image to reflect filter
 - Update Raycast deps as `favicon`s were not loading
