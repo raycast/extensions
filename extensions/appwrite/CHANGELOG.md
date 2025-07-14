@@ -1,6 +1,6 @@
 # Appwrite Changelog
 
-## [DB, Storage, User Enhancements] - {PR_MERGE_DATE}
+## [DB, Storage, User Enhancements] - 2025-07-14
 
 - In **Databases**:
     1. `show` createdAt, updatedAt
