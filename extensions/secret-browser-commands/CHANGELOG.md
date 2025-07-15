@@ -1,6 +1,6 @@
 # Secret Browser Commands Changelog
 
-## [1.0.1] - {PR_MERGE_DATE}
+## [1.0.1] - 2025-07-15
 
 * Chore: update ESLint integration
 
