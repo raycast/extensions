@@ -1,4 +1,3 @@
-import React from "react";
 import { useNavigation, showToast, Toast, showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { openProject } from "./utils/cli";
