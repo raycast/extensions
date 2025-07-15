@@ -100,7 +100,7 @@ export class ProxyUtils {
         accessories: [{ text: "Exceptions" }],
         type: "bypass",
         value: settings.noProxy,
-        editable: true, // 改为可编辑
+        editable: true,
       });
     }
 

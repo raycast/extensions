@@ -476,7 +476,7 @@ export default function Command() {
           key="create-template"
           title="Save as Template"
           icon={Icon.SaveDocument}
-          target={<CreateTemplateForm onSave={() => {}} />}
+          target={<CreateTemplateForm onSave={() => fetchProxySettings(service)} />}
         />,
       );
     }

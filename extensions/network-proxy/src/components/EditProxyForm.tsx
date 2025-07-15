@@ -2,6 +2,7 @@ import { Form, ActionPanel, Action, showToast, Toast, useNavigation } from "@ray
 import { useState } from "react";
 import { ProxyUtils } from "../utils/proxy";
 import { NetworkUtils } from "../utils/network";
+import { showFailureToast } from "@raycast/utils";
 
 interface EditProxyFormProps {
   proxyType: "http" | "https" | "socks" | "auto";
@@ -58,10 +59,8 @@ export function EditProxyForm({ proxyType, currentValue, service, onSave }: Edit
 
   const handleSave = async () => {
     if (!validateInput(value)) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Invalid Input",
-        message: proxyType === "auto" ? "Please enter a valid URL" : "Please enter a valid server:port format",
+      await showFailureToast(new Error(proxyType === "auto" ? "Invalid URL" : "Invalid server:port format"), {
+        title: "Failed to create template",
       });
       return;
     }
@@ -97,7 +96,7 @@ export function EditProxyForm({ proxyType, currentValue, service, onSave }: Edit
       });
 
       onSave();
-      pop(); // 返回到上一页面（Show Network Proxy）
+      pop(); // Return to previous page (Show Network Proxy)
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,

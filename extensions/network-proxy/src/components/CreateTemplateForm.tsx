@@ -2,6 +2,7 @@ import { Form, ActionPanel, Action, showToast, Toast, popToRoot } from "@raycast
 import { useState } from "react";
 import { TemplateManager } from "../utils/template";
 import { ProxySettings } from "../types/proxy";
+import { showFailureToast } from "@raycast/utils";
 
 interface CreateTemplateFormProps {
   onSave: () => void;
@@ -62,11 +63,7 @@ export function CreateTemplateForm({ onSave, initialSettings, isFromLastUsed = f
       onSave();
       popToRoot();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to create template",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
-      });
+      await showFailureToast(error, { title: "Failed to create template" });
     } finally {
       setIsLoading(false);
     }

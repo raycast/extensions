@@ -246,7 +246,7 @@ export class NetworkUtils {
 
       // Get HTTPS proxy
       const httpsInfo = await getProxyInfo("securewebproxy", "HTTPS");
-      if (httpsInfo.enabled && httpsInfo.server && httpInfo.port) {
+      if (httpsInfo.enabled && httpsInfo.server && httpsInfo.port) {
         settings.httpsProxy = `${httpsInfo.server}:${httpsInfo.port}`;
       }
 

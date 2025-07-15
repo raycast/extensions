@@ -22,11 +22,7 @@ export default function ManageProxyTemplates() {
       const currentService = await NetworkUtils.getPrimaryNetworkService();
       setService(currentService);
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load templates",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
-      });
+      await showFailureToast(error, { title: "Failed to load templates" });
     } finally {
       setIsLoading(false);
     }

@@ -10,6 +10,7 @@
     {
       "name": "show-network-proxy",
       "title": "Show Network Proxy",
+      "subtitle": "Network Proxy",
       "description": "Display current network proxy settings in a list view",
       "mode": "view"
     },
