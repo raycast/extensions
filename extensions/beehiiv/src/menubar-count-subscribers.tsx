@@ -1,11 +1,6 @@
 import { Icon, MenuBarExtra, open, getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-type Preferences = {
-  apiKey: string;
-  publicationId: string;
-};
-
 type PublicationResponse = {
   data: {
     id: string;
@@ -26,7 +21,7 @@ type PublicationResponse = {
   };
 };
 
-const preferences = getPreferenceValues<Preferences>();
+const preferences = getPreferenceValues();
 
 const BASE_URL = `https://api.beehiiv.com/v2/publications/${preferences.publicationId}?expand=stats`;
 
