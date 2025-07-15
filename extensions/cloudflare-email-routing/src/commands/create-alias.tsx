@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Form, ActionPanel, Action, showToast, Toast, popToRoot, Clipboard } from "@raycast/api";
-import { useForm, usePromise } from "@raycast/utils";
+import { useForm, useCachedPromise } from "@raycast/utils";
 import { CreateAliasFormData, CreateAliasProps } from "../types";
 import { validateLabel, validateDescription, extractDomainFromEmail } from "../utils";
 import { getApiConfig } from "../services/api/config";
@@ -11,30 +11,24 @@ export default function CreateAlias({ alias }: CreateAliasProps = {}) {
   const config = getApiConfig();
 
   // Fetch the correct domain for alias creation
-  const { data: domain } = usePromise(
-    async () => {
-      try {
-        return await getAccountDomain();
-      } catch (error) {
-        console.error("Failed to fetch domain:", error);
-        // Fallback to extracting from destination email
-        const fallbackDomain = extractDomainFromEmail(config.destinationEmail);
+  const { data: domain } = useCachedPromise(async () => {
+    try {
+      return await getAccountDomain();
+    } catch (error) {
+      console.error("Failed to fetch domain:", error);
+      // Fallback to extracting from destination email
+      const fallbackDomain = extractDomainFromEmail(config.destinationEmail);
 
-        // Inform user about the fallback
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Domain Fetch Failed",
-          message: "Using fallback domain. Check your API configuration.",
-        });
+      // Inform user about the fallback
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Domain Fetch Failed",
+        message: "Using fallback domain. Check your API configuration.",
+      });
 
-        return fallbackDomain;
-      }
-    },
-    [config.destinationEmail],
-    {
-      keepPreviousData: true,
+      return fallbackDomain;
     }
-  );
+  }, [config.destinationEmail]);
 
   const { handleSubmit, itemProps } = useForm<CreateAliasFormData>({
     async onSubmit(values) {
@@ -49,6 +43,10 @@ export default function CreateAlias({ alias }: CreateAliasProps = {}) {
         const descValidation = validateDescription(values.description || "");
         if (!descValidation.isValid) {
           throw new Error(descValidation.error);
+        }
+
+        if (!domain) {
+          throw new Error("Domain not available. Please check your configuration.");
         }
 
         if (alias) {
@@ -148,6 +146,10 @@ export default function CreateAlias({ alias }: CreateAliasProps = {}) {
 
   const handleUseRandomUnused = async () => {
     try {
+      if (!domain) {
+        throw new Error("Domain not available. Please check your configuration.");
+      }
+
       setIsLoading(true);
       showToast({
         style: Toast.Style.Animated,
