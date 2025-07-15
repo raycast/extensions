@@ -1,3 +1,12 @@
+type Range<
+  START extends number,
+  END extends number,
+  ARR extends unknown[] = [],
+  ACC extends number = never,
+> = ARR["length"] extends END
+  ? ACC | END
+  : Range<START, END, [...ARR, 1], ARR["length"] extends START ? ARR["length"] : ACC | ARR["length"]>;
+
 // =============================================================================
 // Media Converter Type Declarations
 // =============================================================================
@@ -126,12 +135,12 @@ export type AllOutputExtension = (typeof OUTPUT_ALL_EXTENSIONS)[number];
 // =============================================================================
 
 export type ImageQualitySettings = {
-  ".jpg": number;
+  ".jpg": Range<0, 100>;
   ".png": "png-24" | "png-8";
-  ".webp": number | "lossless";
-  ".heic": number;
+  ".webp": Range<0, 100> | "lossless";
+  ".heic": Range<0, 100>;
   ".tiff": "deflate" | "lzw";
-  ".avif": number;
+  ".avif": Range<0, 100>;
 };
 
 export type ImageQuality<T extends OutputImageExtension> = ImageQualitySettings[T];
@@ -179,59 +188,7 @@ export type AudioQuality<T extends OutputAudioExtension> = AudioQualitySettings[
 // =============================================================================
 
 export type VideoEncodingMode = "crf" | "vbr" | "vbr-2-pass";
-export type VideoCrf =
-  | "0"
-  | "1"
-  | "2"
-  | "3"
-  | "4"
-  | "5"
-  | "6"
-  | "7"
-  | "8"
-  | "9"
-  | "10"
-  | "11"
-  | "12"
-  | "13"
-  | "14"
-  | "15"
-  | "16"
-  | "17"
-  | "18"
-  | "19"
-  | "20"
-  | "21"
-  | "22"
-  | "23"
-  | "24"
-  | "25"
-  | "26"
-  | "27"
-  | "28"
-  | "29"
-  | "30"
-  | "31"
-  | "32"
-  | "33"
-  | "34"
-  | "35"
-  | "36"
-  | "37"
-  | "38"
-  | "39"
-  | "40"
-  | "41"
-  | "42"
-  | "43"
-  | "44"
-  | "45"
-  | "46"
-  | "47"
-  | "48"
-  | "49"
-  | "50"
-  | "51";
+export type VideoCrf = Range<0, 51>;
 export type VideoBitrate =
   | "500"
   | "750"
@@ -250,17 +207,7 @@ export type VideoBitrate =
   | "40000"
   | "50000";
 
-export type H264Preset =
-  | "ultrafast"
-  | "superfast"
-  | "veryfast"
-  | "faster"
-  | "fast"
-  | "medium"
-  | "slow"
-  | "slower"
-  | "veryslow";
-export type H265Preset =
+export type H26XPreset =
   | "ultrafast"
   | "superfast"
   | "veryfast"
@@ -275,7 +222,7 @@ export type VP9Quality = "good" | "best" | "realtime";
 
 export type Mp4Quality = {
   encodingMode: VideoEncodingMode;
-  preset: H264Preset;
+  preset: H26XPreset;
 } & (
   | { encodingMode: "crf"; crf: VideoCrf }
   | { encodingMode: "vbr" | "vbr-2-pass"; bitrate: VideoBitrate; maxBitrate?: VideoBitrate }
@@ -291,7 +238,7 @@ export type MovQuality = {
 
 export type MkvQuality = {
   encodingMode: VideoEncodingMode;
-  preset: H265Preset;
+  preset: H26XPreset;
 } & (
   | { encodingMode: "crf"; crf: VideoCrf }
   | { encodingMode: "vbr" | "vbr-2-pass"; bitrate: VideoBitrate; maxBitrate?: VideoBitrate }
@@ -348,22 +295,9 @@ export type AudioVbrValue = Mp3Quality["vbr"];
 export type VideoEncodingModeValue = VideoEncodingMode;
 export type VideoCrfValue = VideoCrf;
 export type VideoBitrateValue = VideoBitrate;
-export type VideoPresetValue = H264Preset | H265Preset;
+export type VideoPresetValue = H26XPreset;
 export type VideoVariantValue = ProResVariant;
 export type VideoQualityValue = VP9Quality;
-
-// Type guards for checking specific format types
-export function isImageFormat(format: AllOutputExtension): format is OutputImageExtension {
-  return OUTPUT_IMAGE_EXTENSIONS.includes(format as OutputImageExtension);
-}
-
-export function isAudioFormat(format: AllOutputExtension): format is OutputAudioExtension {
-  return OUTPUT_AUDIO_EXTENSIONS.includes(format as OutputAudioExtension);
-}
-
-export function isVideoFormat(format: AllOutputExtension): format is OutputVideoExtension {
-  return OUTPUT_VIDEO_EXTENSIONS.includes(format as OutputVideoExtension);
-}
 
 // =============================================================================
 // Conversion Parameters
@@ -403,12 +337,12 @@ export const DEFAULT_AUDIO_QUALITY: AudioQualitySettings = {
 };
 
 export const DEFAULT_VIDEO_QUALITY: VideoQualitySettings = {
-  ".mp4": { encodingMode: "crf", crf: "23", preset: "medium" },
-  ".avi": { encodingMode: "crf", crf: "23" },
+  ".mp4": { encodingMode: "crf", crf: 23, preset: "medium" },
+  ".avi": { encodingMode: "crf", crf: 23 },
   ".mov": { variant: "standard" },
-  ".mkv": { encodingMode: "crf", crf: "23", preset: "medium" },
-  ".mpg": { encodingMode: "crf", crf: "23" },
-  ".webm": { encodingMode: "crf", crf: "30", quality: "good" },
+  ".mkv": { encodingMode: "crf", crf: 23, preset: "medium" },
+  ".mpg": { encodingMode: "crf", crf: 23 },
+  ".webm": { encodingMode: "crf", crf: 30, quality: "good" },
 };
 
 // =============================================================================

@@ -32,9 +32,7 @@ import {
   type VideoPresetValue,
   type VideoVariantValue,
   type VideoQualityValue,
-  isImageFormat,
-  isAudioFormat,
-  isVideoFormat,
+  getMediaType,
 } from "../types/media";
 
 export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }) {
@@ -263,30 +261,30 @@ function QualitySettings({
   currentQuality: QualitySettings<AllOutputExtension> | null;
   onQualityChange: (quality: QualitySettings<AllOutputExtension>) => void;
 }) {
-  if (isImageFormat(outputFormat)) {
+  if (getMediaType(outputFormat) === "image") {
     return (
       <ImageQualitySettings
-        outputFormat={outputFormat}
+        outputFormat={outputFormat as OutputImageExtension}
         currentQuality={currentQuality as ImageQuality<OutputImageExtension> | null}
         onQualityChange={onQualityChange as (quality: ImageQuality<OutputImageExtension>) => void}
       />
     );
   }
 
-  if (isAudioFormat(outputFormat)) {
+  if (getMediaType(outputFormat) === "audio") {
     return (
       <AudioQualitySettings
-        outputFormat={outputFormat}
+        outputFormat={outputFormat as OutputAudioExtension}
         currentQuality={currentQuality as AudioQuality<OutputAudioExtension> | null}
         onQualityChange={onQualityChange as (quality: AudioQuality<OutputAudioExtension>) => void}
       />
     );
   }
 
-  if (isVideoFormat(outputFormat)) {
+  if (getMediaType(outputFormat) === "video") {
     return (
       <VideoQualitySettings
-        outputFormat={outputFormat}
+        outputFormat={outputFormat as OutputVideoExtension}
         currentQuality={currentQuality as VideoQuality<OutputVideoExtension> | null}
         onQualityChange={onQualityChange as (quality: VideoQuality<OutputVideoExtension>) => void}
       />
@@ -316,10 +314,8 @@ function ImageQualitySettings({
           value={(currentQuality as string) || "png-24"}
           onChange={(value) => onQualityChange(value as ImageQuality<OutputImageExtension>)}
         >
-          <Form.Dropdown.Section>
-            <Form.Dropdown.Item value="png-24" title="PNG-24 (24-bit RGB, full color)" />
-            <Form.Dropdown.Item value="png-8" title="PNG-8 (8-bit indexed, 256 colors)" />
-          </Form.Dropdown.Section>
+          <Form.Dropdown.Item value="png-24" title="PNG-24 (24-bit RGB, full color)" />
+          <Form.Dropdown.Item value="png-8" title="PNG-8 (8-bit indexed, 256 colors)" />
         </Form.Dropdown>
         <Form.Description text="PNG-24 is lossless with full color range. PNG-8 uses indexed colors (256 max) for smaller file sizes. FFmpeg's PNG-8 implementation badly handles transparency." />
       </>
@@ -335,10 +331,8 @@ function ImageQualitySettings({
           value={(currentQuality as string) || "deflate"}
           onChange={(value) => onQualityChange(value as ImageQuality<OutputImageExtension>)}
         >
-          <Form.Dropdown.Section>
-            <Form.Dropdown.Item value="deflate" title="Deflate (recommended, smaller size)" />
-            <Form.Dropdown.Item value="lzw" title="LZW (wider compatibility)" />
-          </Form.Dropdown.Section>
+          <Form.Dropdown.Item value="deflate" title="Deflate (recommended, smaller size)" />
+          <Form.Dropdown.Item value="lzw" title="LZW (wider compatibility)" />
         </Form.Dropdown>
         <Form.Description text="Here, TIFF is always lossless." />
       </>
@@ -359,13 +353,15 @@ function ImageQualitySettings({
         }
       }}
     >
-      {outputFormat === ".webp" && <Form.Dropdown.Item value="lossless" title="Lossless" />}
-      <Form.Dropdown.Section>
-        {percentages.map((q) => {
-          const title = outputFormat === ".avif" && q === "100" ? "100 (lossless)" : q.toString();
-          return <Form.Dropdown.Item key={q} value={q.toString()} title={title} />;
-        })}
-      </Form.Dropdown.Section>
+      {outputFormat === ".webp" && (
+        <Form.Dropdown.Section>
+          <Form.Dropdown.Item value="lossless" title="Lossless" />
+        </Form.Dropdown.Section>
+      )}
+      {percentages.map((q) => {
+        const title = outputFormat === ".avif" && q === "100" ? "100 (lossless)" : q.toString();
+        return <Form.Dropdown.Item key={q} value={q.toString()} title={title} />;
+      })}
     </Form.Dropdown>
   );
 }
@@ -589,7 +585,7 @@ function VideoQualitySettings({
     if (currentQuality && "crf" in currentQuality) {
       return currentQuality.crf;
     }
-    return "23";
+    return 23;
   };
 
   const getBitrate = (): VideoBitrateValue => {
@@ -726,8 +722,8 @@ function VideoQualitySettings({
           <Form.Dropdown
             id="crf"
             title="CRF Value"
-            value={crf}
-            onChange={(value) => setCrf(value as VideoCrfValue)}
+            value={crf.toString()}
+            onChange={(value) => setCrf(parseInt(value) as VideoCrfValue)}
             info="Lower values = better quality, larger files. 18-28 is typically used."
           >
             {Array.from({ length: 52 }, (_, i) => i).map((value) => (
