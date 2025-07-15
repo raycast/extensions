@@ -2,7 +2,7 @@
 
 ## [New command to copy user email address] - {PR_MERGE_DATE}
 
-- Added a command to copy a user's email address through Slack. You may need to reauth to Slack for this to work.
+- Added a command to copy a user's email address through Slack (requires `users:read.email` scope). You may need to reauth to Slack for this to work.
 
 ## [Fix YAML manifest errors in README] - 2025-06-25
 
