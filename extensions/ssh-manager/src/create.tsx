@@ -1,29 +1,27 @@
-import { Action, ActionPanel, Form, Icon, showHUD, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, PopToRootType, showHUD } from "@raycast/api";
 import { nanoid } from "nanoid";
 import { getConnections, saveConnections } from "./storage.api";
 import { ISSHConnection } from "./types";
 import { FormValidation, useForm } from "@raycast/utils";
 
 export default function Main() {
-  const { pop } = useNavigation();
-
-  const {handleSubmit, itemProps} = useForm<ISSHConnection>({
+  const { handleSubmit, itemProps } = useForm<ISSHConnection>({
     onSubmit(values) {
       saveConnection(values);
     },
     validation: {
-      name: FormValidation.Required
-    }
-  })
+      name: FormValidation.Required,
+    },
+  });
 
   async function saveConnection(connection: ISSHConnection) {
     const existingConnections = await getConnections();
     existingConnections.push({ ...connection, id: nanoid() });
 
     await saveConnections(existingConnections);
-    await showHUD(`✅ Connection [${connection.name}] saved!`);
-
-    pop();
+    await showHUD(`✅ Connection [${connection.name}] saved!`, {
+      popToRootType: PopToRootType.Immediate,
+    });
   }
 
   return (
@@ -37,7 +35,11 @@ export default function Main() {
       <Form.TextField title="Connection Name" {...itemProps.name} />
       <Form.TextField title="Server Address" placeholder={"A resolvable DNS name or IP"} {...itemProps.address} />
       <Form.TextField title="Username (optional)" placeholder={"A username to authenticate with"} {...itemProps.user} />
-      <Form.TextField title="Port (optional)" placeholder={"An optional custom port (other than 22)"} {...itemProps.port} />
+      <Form.TextField
+        title="Port (optional)"
+        placeholder={"An optional custom port (other than 22)"}
+        {...itemProps.port}
+      />
       <Form.TextField
         title="SSH Key Location (optional)"
         placeholder={"An optional key path to authenticate with"}

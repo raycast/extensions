@@ -1,9 +1,12 @@
 # SSH Manager Changelog
 
-## [] - {PR_MERGE_DATE}
+## [Select SSH Config File] - {PR_MERGE_DATE}
 
+- Select SSH Config File (ref: [Issue #19941](https://github.com/raycast/extensions/issues/19941))
+- Replace `useEffect` with `usePromise`
 - In Create, "name" is now `Required`
 - Add README.md
+- Add metadata images
 - Remove `Preferences` type
 - Remove `.trunk` folder
 - Use Raycast Utils `run-applescript`

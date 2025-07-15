@@ -498,8 +498,8 @@ function getConnectionString(item: ISSHConnection) {
 }
 
 export default function Command() {
-  const { isLoading: loading, data: connectionsList = [], revalidate } = usePromise(getConnections)
-  
+  const { isLoading: loading, data: connectionsList = [], revalidate } = usePromise(getConnections);
+
   async function removeItem(item: ISSHConnection) {
     const confirmed = await confirmAlert({
       title: "Remove Connection",
