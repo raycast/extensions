@@ -110,21 +110,22 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.100.2",
-    "@raycast/utils": "^2.0.1",
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.2.0",
     "date-fns": "^4.1.0",
     "fast-fuzzy": "^1.12.0",
     "got": "^14.4.7",
     "lodash": "^4.17.21",
-    "nano-spawn": "^1.0.2",
+    "pacote": "^21.0.0",
     "raycast-cross-extension": "^0.2.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
-    "@types/lodash": "^4.17.18",
+    "@types/lodash": "^4.17.20",
+    "@types/pacote": "^11.1.8",
     "@types/react": "^19.1.8",
-    "eslint": "^9.29.0",
-    "prettier": "^3.5.3",
+    "eslint": "^9.31.0",
+    "prettier": "^3.6.2",
     "typescript": "^5.8.3"
   }
 }
