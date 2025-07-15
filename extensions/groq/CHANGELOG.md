@@ -1,6 +1,6 @@
 # Groq Changelog
 
-## [Updated Models] - {PR_MERGE_DATE}
+## [Updated Models] - 2025-07-15
 
 - Added `Kimi K2 Instruct 128K`
 - Added `Llama Guard 4 12B 128K`
