@@ -1,8 +1,10 @@
 import getCache from "../utils/getCache";
 import { convertDocumentToMarkdown } from "../utils/convertJsonNodes";
 import { showFailureToast } from "@raycast/utils";
-import { Document, DocumentStructure } from "../utils/types";
-import { getTranscript, getFolders } from "../utils/fetchData";
+import { Document, DocumentStructure, PanelsByDocId } from "../utils/types";
+import { getTranscript } from "../utils/fetchData";
+import { getPanelId } from "../utils/getPanelId";
+import { getFolderInfoForAI, getFoldersWithCache } from "../utils/folderHelpers";
 
 type Input = {
   /**
@@ -42,6 +44,15 @@ type Input = {
    * Use when a user asks about notes in a specific folder
    */
   folderId?: string;
+  /**
+   * Optional content type to return
+   * - "enhanced": AI-enhanced notes from panels (default)
+   * - "original": User's original notes/content
+   * - "auto": Automatically choose best available content
+   * Use "original" when user specifically asks for "my notes", "what I wrote", "original content"
+   * Use "enhanced" when user asks for "AI notes", "enhanced", "processed notes"
+   */
+  contentType?: "enhanced" | "original" | "auto";
 };
 
 type Note = {
@@ -101,6 +112,33 @@ type FolderInfo = {
 };
 
 /**
+ * Helper function to resolve enhanced content from panels
+ * @param panels - The document panels data
+ * @param documentId - The document ID to get content for
+ * @returns The resolved content string, or empty string if not found
+ */
+function resolveEnhancedContent(panels: PanelsByDocId | undefined, documentId: string): string {
+  if (!panels || !documentId || !panels[documentId]) {
+    return "";
+  }
+
+  const panelId = getPanelId(panels, documentId);
+  if (!panelId || !panels[documentId][panelId]) {
+    return "";
+  }
+
+  const panelData = panels[documentId][panelId];
+
+  if (panelData.content) {
+    return convertDocumentToMarkdown(panelData.content);
+  } else if (panelData.original_content) {
+    return panelData.original_content;
+  }
+
+  return "";
+}
+
+/**
  * Returns a list of notes from Granola that match the provided filters,
  * or folder information when listFolders is true.
  *
@@ -112,22 +150,11 @@ type FolderInfo = {
  * For folder queries, it returns folder metadata including note counts.
  */
 export default async function tool(input: Input): Promise<Note[] | FolderInfo[]> {
-  // Handle folder listing request
+  // Handle folder listing request using shared folder service
   if (input.listFolders) {
     try {
-      const response = await getFolders();
-      const folders = Object.values(response.lists);
-
-      return folders.map((folder) => ({
-        id: folder.id,
-        name: folder.title,
-        description: folder.description || undefined,
-        noteCount: folder.document_ids.length,
-        createdAt: folder.created_at,
-        noteIds: folder.document_ids,
-      }));
+      return await getFolderInfoForAI();
     } catch (error) {
-      console.error("Error fetching folders:", error);
       showFailureToast({ title: "Failed to fetch folders", message: String(error) });
       return [];
     }
@@ -135,32 +162,33 @@ export default async function tool(input: Input): Promise<Note[] | FolderInfo[]>
 
   const cache = getCache();
   const documents = Object.values(cache?.state?.documents) as Document[];
+  const panels = cache?.state?.documentPanels;
   const notes: Note[] = [];
 
   if (!documents) {
     return [];
   }
 
-  // If folderId is provided, get the folder's document IDs
+  // If folderId is provided, get the folder's document IDs using shared folder service
   let folderDocumentIds: string[] = [];
   if (input.folderId) {
     try {
-      const response = await getFolders();
-      const folder = Object.values(response.lists).find((f) => f.id === input.folderId);
+      const folders = await getFoldersWithCache({ includeDocumentIds: true });
+      const folder = folders.find((f) => f.id === input.folderId);
       if (folder) {
         folderDocumentIds = folder.document_ids;
       }
     } catch (error) {
-      console.error("Error fetching folder:", error);
       showFailureToast({ title: "Failed to fetch folder", message: String(error) });
     }
   }
 
-  // Get folder information for each document
+  // Get folder information for each document using shared folder service
   const documentToFolders: Record<string, string[]> = {};
   try {
-    const response = await getFolders();
-    Object.values(response.lists).forEach((folder) => {
+    const folders = await getFoldersWithCache({ includeDocumentIds: true });
+
+    folders.forEach((folder) => {
       folder.document_ids.forEach((docId) => {
         if (!documentToFolders[docId]) {
           documentToFolders[docId] = [];
@@ -169,22 +197,57 @@ export default async function tool(input: Input): Promise<Note[] | FolderInfo[]>
       });
     });
   } catch (error) {
-    console.error("Error mapping documents to folders:", error);
+    // Continue without folder information if fetching fails
   }
 
   // Collect all notes first
   for (const document of documents) {
-    if (!document?.title || !document?.created_at || !document?.notes?.content || !document?.id) continue;
+    if (!document?.title || !document?.created_at || !document?.id) continue;
 
     // Skip if we're filtering by folder and this document isn't in the folder
     if (input.folderId && folderDocumentIds.length > 0 && !folderDocumentIds.includes(document.id)) {
       continue;
     }
 
+    // Content resolution strategy based on user preference
+    let content = "";
+    const requestedContentType = input.contentType || "auto";
+
+    if (requestedContentType === "original") {
+      // User explicitly wants their original notes
+      if (document.notes_markdown) {
+        content = document.notes_markdown;
+      }
+    } else if (requestedContentType === "enhanced") {
+      // User explicitly wants AI-enhanced notes
+      content = resolveEnhancedContent(panels, document.id);
+
+      // If no enhanced content, try document.notes (structured notes)
+      if (!content && document.notes?.content) {
+        content = convertDocumentToMarkdown(document.notes as unknown as DocumentStructure);
+      }
+    } else {
+      // Auto mode: Try enhanced first, then fall back to original
+      content = resolveEnhancedContent(panels, document.id);
+
+      // If no panel content, try document.notes (structured notes)
+      if (!content && document.notes?.content) {
+        content = convertDocumentToMarkdown(document.notes as unknown as DocumentStructure);
+      }
+
+      // Final fallback to user's original markdown notes
+      if (!content && document.notes_markdown) {
+        content = document.notes_markdown;
+      }
+    }
+
+    // Skip if we still have no content
+    if (!content) continue;
+
     const note: Note = {
       title: document.title,
       date: new Date(document.created_at).toISOString(),
-      content: convertDocumentToMarkdown(document.notes as unknown as DocumentStructure),
+      content: content,
       id: document.id,
       folderIds: documentToFolders[document.id] || [],
     };
@@ -275,7 +338,6 @@ export default async function tool(input: Input): Promise<Note[] | FolderInfo[]>
           note.transcript = await getTranscript(note.id);
         } catch (error) {
           // If transcript fetch fails, continue without it
-          console.error(`Failed to fetch transcript for note ${note.id}:`, error);
         }
       }),
     );
