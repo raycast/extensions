@@ -1,6 +1,6 @@
 # Easings Changelog
 
-## [Normal & Spring Easings Improvements] - {PR_MERGE_DATE}
+## [Normal & Spring Easings Improvements] - 2025-07-15
 
 - Added support for custom spring animations with physics-based parameters (stiffness, damping, mass)
 - Added support for custom cubic-bezier (normal) easings
