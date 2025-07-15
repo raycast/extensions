@@ -1,5 +1,9 @@
 # Easy New File Changelog
 
+## [Default Directory] - {PR_MERGE_DATE}
+
+- Support setting Default Directory for new file command when finder has no window
+
 ## [Form Layout] - 2025-06-23
 
 - New File with Template command now supports Form layout

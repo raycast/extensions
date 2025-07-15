@@ -10,7 +10,7 @@ import { rtfPreContent } from "./utils/constants";
 import { createdAction, layout } from "./types/preferences";
 import NewFileWithDetails from "./new-file-with-details";
 import { useTemplateFiles } from "./hooks/useTemplateFiles";
-import { parse } from "path";
+import path, { parse } from "path";
 
 export default function NewFileWithTemplate() {
   const navigationTitle = "New File with Template";
@@ -69,15 +69,15 @@ export default function NewFileWithTemplate() {
   }
 }
 
-export function buildFileName(path: string, name: string, extension: string) {
-  const directoryExists = fse.existsSync(path + name + "." + extension);
+export function buildFileName(desPath: string, name: string, extension: string) {
+  const directoryExists = fse.existsSync(path.join(desPath, name + "." + extension));
   if (!directoryExists) {
     return name + "." + extension;
   } else {
     let index = 2;
     while (directoryExists) {
       const newName = name + " " + index + "." + extension;
-      const directoryExists = fse.existsSync(path + newName);
+      const directoryExists = fse.existsSync(path.join(desPath, newName));
       if (!directoryExists) {
         return newName;
       }
@@ -91,7 +91,7 @@ export async function createNewFile(fileType: FileType, desPath: string, fileNam
   fileName = isEmpty(fileName)
     ? buildFileName(desPath, fileType.name, fileType.extension)
     : fileName + "." + fileType.extension;
-  const filePath = desPath + fileName;
+  const filePath = path.join(desPath, fileName);
 
   switch (fileType.name) {
     case "Excel": {
@@ -129,8 +129,7 @@ export async function createNewFileByTemplate(template: TemplateType, desPath: s
       customFileName = customFileName + "." + template.extension;
     }
   }
-
-  const filePath = desPath + customFileName;
+  const filePath = path.join(desPath, customFileName);
   fse.copyFileSync(template.path, filePath);
   await showCreateSuccess(customFileName, filePath, desPath);
 }
