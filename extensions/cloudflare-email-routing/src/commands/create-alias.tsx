@@ -28,7 +28,7 @@ export default function CreateAlias({ alias }: CreateAliasProps = {}) {
 
       return fallbackDomain;
     }
-  }, [config.destinationEmail]);
+  });
 
   const { handleSubmit, itemProps } = useForm<CreateAliasFormData>({
     async onSubmit(values) {
@@ -48,6 +48,8 @@ export default function CreateAlias({ alias }: CreateAliasProps = {}) {
         if (!domain) {
           throw new Error("Domain not available. Please check your configuration.");
         }
+
+        const safeDomain = domain as string;
 
         if (alias) {
           // Edit existing alias
@@ -74,7 +76,7 @@ export default function CreateAlias({ alias }: CreateAliasProps = {}) {
               title: "Creating New Alias",
               message: "Generating new email alias...",
             });
-            await createRule(domain);
+            await createRule(safeDomain);
             unusedRules = await getUnusedRules();
           }
 
@@ -150,6 +152,8 @@ export default function CreateAlias({ alias }: CreateAliasProps = {}) {
         throw new Error("Domain not available. Please check your configuration.");
       }
 
+      const safeDomain = domain as string;
+
       setIsLoading(true);
       showToast({
         style: Toast.Style.Animated,
@@ -165,7 +169,7 @@ export default function CreateAlias({ alias }: CreateAliasProps = {}) {
           title: "Creating New Alias",
           message: "No unused aliases found, creating new one...",
         });
-        await createRule(domain);
+        await createRule(safeDomain);
         unusedRules = await getUnusedRules();
       }
 
