@@ -1,6 +1,6 @@
 # Brand Icons Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-07-15
 
 - Use [pacote](https://npmjs.com/pacote) for downloading and extracting icons
 - Bump all dependencies to the latest
