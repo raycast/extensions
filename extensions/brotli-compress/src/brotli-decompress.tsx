@@ -102,7 +102,7 @@ function DecompressView() {
   if (error) {
     return (
       <Detail
-        markdown={`# ❌ Decompression Error\n\n${error}\n\n## Tips:\n- Make sure the input is valid base64 encoded Brotli compressed data\n- Check that the data was compressed using the same tool\n- Verify there are no extra characters or whitespace`}
+        markdown={`# ❌ Decompression Error\n\n${error}\n\n## Tips:\n- Make sure the input is valid Brotli compressed data\n- Check that the data was compressed using the same tool\n- Verify there are no extra characters or whitespace`}
         navigationTitle="Brotli Decompress"
       />
     );
