@@ -3,7 +3,6 @@
   "name": "raycast-new-instance",
   "title": "New Instance",
   "description": "Launch a new instance of any installed application on your Mac",
-  "version": "1.0.0",
   "icon": "icon.png",
   "author": "Caramel",
   "categories": [
@@ -11,10 +10,6 @@
     "System"
   ],
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:CaramelFur/Raycast-New-Instance.git"
-  },
   "commands": [
     {
       "name": "index",
@@ -33,11 +28,12 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.100.3",
-    "@raycast/utils": "2.2.0"
+    "@raycast/utils": "^2.2.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.31.0",
-    "@types/node": "24.0.13",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^24.0.14",
     "@types/react": "^19.0.10",
     "@typescript-eslint/eslint-plugin": "^8.37.0",
     "@typescript-eslint/parser": "^8.37.0",
