@@ -59,13 +59,12 @@ export function appendMatchToFile(fileContent: string, fileName: string, espanso
 
 export function getMatches(espansoMatchDir: string, options?: { packagePath: boolean }): NormalizedEspansoMatch[] {
   const finalMatches: NormalizedEspansoMatch[] = [];
+  const loadedFiles = new Set<string>();
 
   function readDirectory(dir: string) {
     const items = fse.readdirSync(dir, { withFileTypes: true });
-
     for (const item of items) {
       const fullPath = path.join(dir, item.name);
-
       if (item.isDirectory()) {
         if (options?.packagePath) {
           const packageFilePath = path.join(fullPath, "package.yml");
@@ -82,20 +81,40 @@ export function getMatches(espansoMatchDir: string, options?: { packagePath: boo
   }
 
   function processFile(filePath: string) {
+    if (loadedFiles.has(filePath)) return;
+    loadedFiles.add(filePath);
     const content = fse.readFileSync(filePath);
-    const { matches = [] }: { matches?: EspansoMatch[] } = YAML.parse(content.toString()) ?? {};
+    const parsed = YAML.parse(content.toString()) ?? {};
+    const matches: EspansoMatch[] = Array.isArray(parsed.matches) ? parsed.matches : [];
 
+    if (Array.isArray(parsed.imports)) {
+      for (const importPath of parsed.imports) {
+        const resolvedPath = path.resolve(path.dirname(filePath), importPath);
+        if (fse.existsSync(resolvedPath)) {
+          processFile(resolvedPath);
+        }
+      }
+    }
+
+    // Derive category from relative path, matching UI logic
+    const relPath = path.relative(espansoMatchDir, filePath);
+    let category =
+      relPath && !relPath.startsWith("..") && relPath !== ""
+        ? relPath.split(path.sep)[0]?.replace(/\.yml$/, "")
+        : path.basename(filePath, ".yml");
+    // Capitalize category for UI consistency
+    category = category.charAt(0).toUpperCase() + category.slice(1);
     finalMatches.push(
       ...matches.flatMap((obj: EspansoMatch) => {
         if ("trigger" in obj) {
           const { trigger, replace, form, label } = obj;
-          return [{ triggers: [trigger], replace, form, label, filePath }];
+          return [{ triggers: [trigger], replace, form, label, filePath, category }];
         } else if ("triggers" in obj) {
           const { triggers, replace, form, label } = obj;
-          return triggers.map((trigger: string) => ({ triggers: [trigger], replace, form, label, filePath }));
+          return triggers.map((trigger: string) => ({ triggers: [trigger], replace, form, label, filePath, category }));
         } else if ("regex" in obj) {
           const { regex, replace, form, label } = obj;
-          return [{ triggers: [regex], replace, form, label, filePath }];
+          return [{ triggers: [regex], replace, form, label, filePath, category }];
         } else {
           return [];
         }
@@ -104,7 +123,6 @@ export function getMatches(espansoMatchDir: string, options?: { packagePath: boo
   }
 
   readDirectory(espansoMatchDir);
-
   return finalMatches;
 }
 

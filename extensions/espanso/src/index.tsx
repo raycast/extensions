@@ -34,22 +34,24 @@ export default function Command() {
         const sortedMatches = sortMatches(combinedMatches);
 
         const categoriesSet = new Set<string>();
-        const formattedMatches: FormattedMatch[] = sortedMatches
-          .filter((match) => !match.form) // Filter out items with a `form` property
-          .map((match, index) => {
-            const pathParts = match.filePath.split("match/")[1]?.split("/") || [];
-            let category = pathParts[0]?.replace(".yml", "") ?? "";
-            let subcategory = pathParts[1]?.replace(".yml", "");
 
+        const formattedMatches: FormattedMatch[] = sortedMatches
+          .filter((match) => !match.form)
+          .map((match, index) => {
+            let category = match.category;
+            let subcategory = "";
+            if (!category) {
+              const pathParts = match.filePath.split("match/")[1]?.split("/") || [];
+              category = pathParts[0]?.replace(".yml", "") ?? "";
+              subcategory = pathParts[1]?.replace(".yml", "");
+            }
             if (subcategory?.toLowerCase() === "index" || subcategory === category) {
               subcategory = "";
             } else {
               subcategory = kebabCase(subcategory ?? "");
             }
-
             category = kebabCase(category);
             categoriesSet.add(category);
-
             return {
               ...match,
               category,
@@ -77,7 +79,6 @@ export default function Command() {
         setIsLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
