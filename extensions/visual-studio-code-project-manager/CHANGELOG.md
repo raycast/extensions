@@ -2,7 +2,7 @@
 
 ## [Update] - {PR_MERGE_DATE}
 
-- Add preference to hide projects that set as disabled (enabled: false) in the project list.
+- Add preference to hide disabled projects (those with "enabled": false) in the project list.
 
 ## [Update] - 2024-07-05
 
