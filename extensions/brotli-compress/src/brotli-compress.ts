@@ -46,19 +46,11 @@ export default async function Command() {
     try {
       compressedText = compressText(textToCompress);
     } catch (error: unknown) {
-      if (progressToast) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Compression failed",
-          message: error instanceof Error ? error.message : "Failed to compress the text using Brotli.",
-        });
-      } else {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Compression failed",
-          message: error instanceof Error ? error.message : "Failed to compress the text using Brotli.",
-        });
-      }
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Compression failed",
+        message: error instanceof Error ? error.message : "Failed to compress the text using Brotli.",
+      });
       console.error("Compression error:", error);
       return;
     }
