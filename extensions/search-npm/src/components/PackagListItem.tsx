@@ -40,7 +40,7 @@ export const PackageListItem = ({
   handleFaveChange,
   isViewingFavorites,
   isHistoryItem,
-}: PackageListItemProps): JSX.Element => {
+}: PackageListItemProps) => {
   const { defaultOpenAction, historyCount } =
     getPreferenceValues<ExtensionPreferences>()
   const pkg = result

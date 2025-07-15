@@ -6,7 +6,7 @@ interface ReadmeProps {
   repo: string
 }
 
-export const Readme = ({ user, repo }: ReadmeProps): JSX.Element => {
+export const Readme = ({ user, repo }: ReadmeProps) => {
   const { data, isLoading } = useReadme(user, repo)
 
   return <Detail markdown={data} isLoading={isLoading} />

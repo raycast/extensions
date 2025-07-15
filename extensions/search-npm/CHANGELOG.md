@@ -1,5 +1,10 @@
 # Search npm Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Add support for Windows
+- Bump all dependencies to the latest
+
 ## [Fixes] - 2025-02-05
 
 - Fix URL parsing issue

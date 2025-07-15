@@ -17,6 +17,10 @@
     "ridemountainpig",
     "dbrooks"
   ],
+  "platform": [
+    "macOS",
+    "Windows"
+  ],
   "license": "MIT",
   "categories": [
     "Developer Tools"
@@ -136,22 +140,22 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.88.4",
-    "@raycast/utils": "^1.18.1",
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.2.0",
     "dedupe": "^4.0.3",
-    "git-url-parse": "^16.0.0",
-    "tiny-relative-date": "^1.3.0",
-    "use-debounce": "^10.0.4"
+    "git-url-parse": "^16.1.0",
+    "tiny-relative-date": "^2.0.2",
+    "use-debounce": "^10.0.5"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/git-url-parse": "^9.0.3",
-    "@types/node": "^22.10.5",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/git-url-parse": "^16.0.2",
+    "@types/node": "^24.0.14",
     "@types/parse-github-url": "^1.0.3",
-    "@types/react": "^18.3.18",
-    "eslint": "^8.57.1",
-    "prettier": "^3.4.2",
-    "typescript": "^5.7.3"
+    "@types/react": "^19.1.8",
+    "eslint": "^9.31.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",
