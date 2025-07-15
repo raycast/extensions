@@ -3,8 +3,8 @@ import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useEffect } from "react";
 import { ANTHROPIC_MODEL } from "../../../const/defaults";
 import { ALERT, FINDING_ANSWER } from "../../../const/toast_messages";
-import { Question } from "../../../hooks/useQuestions";
-import { AnthropicPreferences } from "../../../summarizeVideoWithAnthropic";
+import type { Question } from "../../../hooks/useQuestions";
+import type { AnthropicPreferences } from "../../../summarizeVideoWithAnthropic";
 import { generateQuestionId } from "../../../utils/generateQuestionId";
 import { getFollowUpQuestionSnippet } from "../../../utils/getAiInstructionSnippets";
 
@@ -43,7 +43,7 @@ export function useAnthropicFollowUpQuestion({
       setQuestions((prevQuestions) => [
         {
           id: qID,
-          question: "Initial Summary of the video",
+          question,
           answer: "",
         },
         ...prevQuestions,
@@ -55,7 +55,7 @@ export function useAnthropicFollowUpQuestion({
           max_tokens: 8192,
           stream: true,
           messages: [{ role: "user", content: getFollowUpQuestionSnippet(question, transcript) }],
-          temperature: parseInt(creativity),
+          temperature: Number.parseInt(creativity, 10),
         },
         { signal: abortController.signal },
       );
@@ -87,5 +87,5 @@ export function useAnthropicFollowUpQuestion({
     return () => {
       abortController.abort();
     };
-  }, [question, transcript]);
+  }, [question, transcript, abortController, anthropicApiToken, anthropicModel, creativity, setQuestion, setQuestions]);
 }

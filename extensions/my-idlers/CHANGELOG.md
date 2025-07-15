@@ -1,5 +1,9 @@
 # MyIdlers Changelog
 
+## [Separate Active and Inactive Items] - 2025-06-23
+
+- **Domain**, **Shared**, **Reseller** and **Server** are now split into "Active" and "Inactive" sections
+
 ## [Delete Server] - 2025-04-08
 
 - Optimistically delete server through `Action`

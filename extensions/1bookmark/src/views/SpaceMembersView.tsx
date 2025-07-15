@@ -3,9 +3,10 @@ import { Icon, List } from "@raycast/api";
 import { CachedQueryClientProvider } from "../components/CachedQueryClientProvider";
 import { SpaceMemberItemActionPanel } from "../components/SpaceMemberItemActionPanel";
 import { useMemo } from "react";
+import { useMe } from "../hooks/use-me.hook";
 
 export const Body = (props: { spaceId: string }) => {
-  const me = trpc.user.me.useQuery();
+  const me = useMe();
   const { spaceId } = props;
   const { data, refetch, isFetching } = trpc.user.listBySpaceId.useQuery(spaceId);
 

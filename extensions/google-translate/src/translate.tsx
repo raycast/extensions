@@ -2,7 +2,7 @@ import React, { ReactElement, useState } from "react";
 import { List, showToast, Toast, Action, Icon, ActionPanel } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useDebouncedValue, usePreferences, useSelectedLanguagesSet, useTextState } from "./hooks";
-import { getLanguageFlag, supportedLanguagesByCode } from "./languages";
+import { supportedLanguagesByCode } from "./languages";
 import { LanguageManagerListDropdown } from "./LanguagesManager";
 import { doubleWayTranslate, simpleTranslate, playTTS } from "./simple-translate";
 import { ConfigurableCopyPasteActions, OpenOnGoogleTranslateWebsiteAction, ToggleFullTextAction } from "./actions";
@@ -13,7 +13,7 @@ const DoubleWayTranslateItem: React.FC<{
   selectedLanguageSet: LanguageCodeSet;
   toggleShowingDetail: () => void;
 }> = ({ toggleShowingDetail, value, selectedLanguageSet }) => {
-  const { data: results } = usePromise(doubleWayTranslate, [value, selectedLanguageSet], {
+  const { data: results, isLoading } = usePromise(doubleWayTranslate, [value, selectedLanguageSet], {
     onError(error) {
       showToast({
         style: Toast.Style.Failure,
@@ -23,13 +23,17 @@ const DoubleWayTranslateItem: React.FC<{
     },
   });
 
+  if (isLoading) {
+    return <List.EmptyView icon={Icon.Hourglass} title="Translating..." />;
+  }
+
   return (
     <>
       {results?.map((r, index) => {
         const langFrom = supportedLanguagesByCode[r.langFrom];
         const langTo = supportedLanguagesByCode[r.langTo];
-        const languages = `${getLanguageFlag(langFrom, langFrom?.code)} -> ${getLanguageFlag(langTo, langTo?.code)}`;
-        const tooltip = `${langFrom?.name ?? langFrom?.code} -> ${langTo?.name ?? langTo?.code}`;
+        const languages = `${langFrom.name} -> ${langTo.name}`;
+        const tooltip = `${langFrom?.name} -> ${langTo?.name}`;
         return (
           <React.Fragment key={index}>
             <List.Item
@@ -95,8 +99,8 @@ const TranslateItem: React.FC<{
 
   const langFrom = supportedLanguagesByCode[langFromCode];
   const langTo = supportedLanguagesByCode[langToCode];
-  const languages = `${getLanguageFlag(langFrom, langFrom?.code)} -> ${getLanguageFlag(langTo, langTo?.code)}`;
-  const tooltip = `${langFrom?.name ?? langFrom?.code} -> ${langTo?.name ?? langTo?.code}`;
+  const languages = `${langFrom.name} -> ${langTo.name}`;
+  const tooltip = `${langFrom?.name} -> ${langTo?.name}`;
 
   return (
     <List.Item
@@ -143,7 +147,7 @@ export default function Translate(): ReactElement {
       {selectedLanguageSet.langTo.length === 1 ? (
         <DoubleWayTranslateItem
           value={debouncedValue}
-          selectedLanguageSet={selectedLanguageSet}
+          selectedLanguageSet={{ langFrom: selectedLanguageSet.langFrom, langTo: selectedLanguageSet.langTo, proxy }}
           toggleShowingDetail={() => setIsShowingDetail(!isShowingDetail)}
         />
       ) : (

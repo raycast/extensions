@@ -1,5 +1,15 @@
 # Oracle Cloud Changelog
 
+## [View Object Storage Buckets + Implement Provider w/ Context] - 2025-07-14
+
+- add initial "Object Storage" command to view buckets
+- `dev`: implement Provider w/ Context so checks can be shared
+
+## [Add Terminate Instance Action] - 2025-06-03
+
+- (Confirm and) Terminate Instance
+- Add "Open in OCI" `Action`
+
 ## [Perform Instance Actions] - 2025-02-13
 
 - Add instance actions:

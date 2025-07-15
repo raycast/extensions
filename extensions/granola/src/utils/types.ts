@@ -88,16 +88,44 @@ export interface Notes {
   content: NoteContent[];
 }
 
+/**
+ * Represents the content for a panel in the Granola UI
+ */
 interface PanelContent {
+  /**
+   * The original HTML content of the note as a string
+   */
   original_content: string;
+
+  /**
+   * Optional structured document representation for rich rendering
+   * This represents a parsed version of the original_content with proper document structure
+   */
+  content?: DocumentStructure;
 }
 
-interface PanelsByPanelId {
-  [panelId: string]: PanelContent;
+/**
+ * A UUID string representing a panel identifier
+ */
+export type PanelId = string;
+
+/**
+ * A UUID string representing a document identifier
+ */
+export type DocId = string;
+
+/**
+ * Maps panel IDs to their content
+ */
+export interface PanelsByPanelId {
+  [panelId: PanelId]: PanelContent;
 }
 
-interface PanelsByDocId {
-  [docId: string]: PanelsByPanelId;
+/**
+ * Maps document IDs to panels by panel ID
+ */
+export interface PanelsByDocId {
+  [docId: DocId]: PanelsByPanelId;
 }
 
 export interface NoteActionsProps {
@@ -169,4 +197,47 @@ export interface TranscriptSegment {
   id: string;
   is_final: boolean;
   end_timestamp: string;
+}
+
+// Folder list types
+export interface FolderIcon {
+  type: string;
+  color: string;
+  value: string;
+}
+
+export interface FolderMember {
+  user_id: string;
+  name: string;
+  email: string;
+  avatar: string;
+  role: string;
+  created_at: string;
+}
+
+export interface Folder {
+  id: string;
+  title: string;
+  description: string | null;
+  icon: FolderIcon;
+  visibility: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+  workspace_id: string | null;
+  preset: string | null;
+  is_favourited: boolean;
+  user_role: string;
+  sharing_link_visibility: string;
+  members: FolderMember[];
+  invites: unknown[];
+  slack_channel: string | null;
+  is_shared: boolean;
+  document_ids: string[];
+}
+
+export interface FoldersResponse {
+  lists: {
+    [key: string]: Folder;
+  };
 }

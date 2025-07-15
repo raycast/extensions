@@ -1,4 +1,10 @@
-import { Color, getPreferenceValues, Grid, Icon, openCommandPreferences } from "@raycast/api";
+import {
+  Color,
+  getPreferenceValues,
+  Grid,
+  Icon,
+  openCommandPreferences,
+} from "@raycast/api";
 import { showFailureToast, useCachedPromise, usePromise } from "@raycast/utils";
 import { IconActions } from "./components/icon-actions.tsx";
 import { search } from "./helpers/api.ts";
@@ -8,14 +14,20 @@ import { useDebounce } from "./helpers/utils.ts";
 const preferences = getPreferenceValues<Preferences.SearchIcons>();
 
 export default function SearchIconsCommand() {
-  const { data: favorites, revalidate: revalidateFavorites } = usePromise(Store.getFavorites);
+  const { data: favorites, revalidate: revalidateFavorites } = usePromise(
+    Store.getFavorites,
+  );
 
   const { debouncedValue: searchText, setValue } = useDebounce("", 400);
 
   const { isLoading, data, pagination } = useCachedPromise(
     (searchText: string) => async (options: { page: number }) => {
       try {
-        const response = await search(preferences.apiKey, options.page, searchText);
+        const response = await search(
+          preferences.apiKey,
+          options.page,
+          searchText,
+        );
 
         return {
           data: response.hits,
@@ -68,7 +80,13 @@ export default function SearchIconsCommand() {
                 }
               : {}
           }
-          actions={<IconActions icon={icon} searchText={searchText} onFavoritesChange={revalidateFavorites} />}
+          actions={
+            <IconActions
+              icon={icon}
+              searchText={searchText}
+              onFavoritesChange={revalidateFavorites}
+            />
+          }
         />
       ))}
       <Grid.EmptyView title="No icons found" />

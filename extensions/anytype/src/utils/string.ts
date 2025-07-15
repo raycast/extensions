@@ -11,7 +11,8 @@ export function pluralize(
   { suffix = "s", withNumber = false }: { suffix?: string; withNumber?: boolean } = {},
 ): string {
   let pluralizedNoun;
-  if (noun.endsWith("y") && count !== 1) {
+  const shouldUseIes = noun.endsWith("y") && !/[aeiou]y$/i.test(noun) && count !== 1;
+  if (shouldUseIes) {
     pluralizedNoun = `${noun.slice(0, -1)}ies`;
   } else {
     pluralizedNoun = `${noun}${count !== 1 ? suffix : ""}`;
@@ -99,7 +100,6 @@ export function injectEmojiIntoHeading(markdown: string, icon?: Image.ImageLike)
  * @returns True if the string is a valid emoji, false otherwise.
  */
 export function isEmoji(s: string) {
-  const re = emojiRegex();
-  const match = re.exec(s);
+  const match = emojiRegex().exec(s);
   return match !== null && match[0] === s;
 }

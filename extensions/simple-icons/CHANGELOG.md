@@ -1,5 +1,23 @@
 # Brand Icons Changelog
 
+## [Maintenance] - 2025-07-15
+
+- Use [pacote](https://npmjs.com/pacote) for downloading and extracting icons
+- Bump all dependencies to the latest
+
+## [Routine Maintenance] - 2025-06-20
+
+- We reached 3300+ icons!
+- Update extension icon to liquid glass style
+- Update extension screenshots with macOS Tahoe wallpaper
+- Bump all dependencies to the latest
+
+## [Routine Maintenance] - 2025-06-04
+
+- Use local vendor instead of simple-icons/sdk
+- Add compatibility with Simple Icons v15
+- Bump all dependencies to the latest
+
 ## [Fixes] - 2025-02-28
 
 - Fix a long prompt issue
@@ -130,4 +148,4 @@
 
 ## [Initial Version] - 2024-01-12
 
-- Over 2900 Free SVG icons for popular brands. See them all on one page at https://simpleicons.org. Contributions, corrections & requests can be made on GitHub.
+- Over 2900 SVG icons for popular brands. See them all on one page at https://simpleicons.org. Contributions, corrections & requests can be made on GitHub.

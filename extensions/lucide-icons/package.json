@@ -24,6 +24,36 @@
       "mode": "view",
       "preferences": [
         {
+          "name": "primaryAction",
+          "type": "dropdown",
+          "required": false,
+          "title": "Primary Action",
+          "description": "Primary action to use",
+          "default": "copy-name",
+          "data": [
+            {
+              "title": "Copy Name",
+              "value": "copy-name"
+            },
+            {
+              "title": "Copy SVG",
+              "value": "copy-svg"
+            },
+            {
+              "title": "Paste SVG",
+              "value": "paste-svg"
+            },
+            {
+              "title": "Copy Component",
+              "value": "copy-component"
+            },
+            {
+              "title": "Open In Browser",
+              "value": "open-in-browser"
+            }
+          ]
+        },
+        {
           "name": "pascalCaseName",
           "title": "Copy Icon Name",
           "label": "Copy name in Pascal Case",

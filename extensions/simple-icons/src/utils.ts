@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { createWriteStream } from "node:fs";
 import { access, constants, copyFile, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { pipeline as streamPipeline } from "node:stream/promises";
+import pacote from "pacote";
 import {
   AI,
   Cache,
@@ -18,9 +17,8 @@ import {
 } from "@raycast/api";
 import { useAI } from "@raycast/utils";
 import { Searcher } from "fast-fuzzy";
-import got, { Progress } from "got";
-import spawn from "nano-spawn";
-import { getIconSlug } from "simple-icons/sdk";
+import got from "got";
+import { getIconSlug } from "./vender/simple-icons-sdk.js";
 import { IconData, JsDelivrNpmResponse, LaunchContext, Release } from "./types.js";
 
 const cache = new Cache();
@@ -42,47 +40,22 @@ export const buildDeeplinkParameters = (launchContext?: LaunchContext) => {
   return "?context=" + encodeURIComponent(JSON.stringify(launchContext));
 };
 
-export const downloadAssetPack = async (version: string) => {
-  const toast = await showToast({
+export const pacoteAssetPack = async (version: string) => {
+  await showToast({
     style: Toast.Style.Animated,
     title: "Downloading asset pack",
   });
-  return new Promise<void>((resolve) => {
-    const readStream = got.stream(`https://codeload.github.com/simple-icons/simple-icons/zip/refs/tags/${version}`);
-    const destination = join(environment.supportPath, `pack-${version}.zip`);
-    readStream.on("response", async () => {
-      await streamPipeline(readStream, createWriteStream(destination));
-      resolve();
-    });
-    readStream.on("downloadProgress", (progress: Progress) => {
-      if (progress.percent === 1) return;
-      toast.title = `Downloading asset pack (${(progress.percent * 100).toFixed(0)}%)`;
-    });
-  });
-};
-
-export const extractAssetPack = async (version: string) => {
-  await showToast({
-    style: Toast.Style.Animated,
-    title: "Extracting asset pack",
-  });
-  const zipPath = join(environment.supportPath, `pack-${version}.zip`);
-  const destination = join(environment.assetsPath, `pack`);
-  await spawn("unzip", ["-o", zipPath, "-d", destination]);
+  await pacote.extract(`simple-icons@${version}`, join(environment.assetsPath, "pack", `simple-icons-${version}`));
 };
 
 export const cacheAssetPack = async (version: string) => {
-  const zipPath = join(environment.supportPath, `pack-${version}.zip`);
   const destination = join(environment.assetsPath, `pack`);
   try {
-    await access(zipPath, constants.R_OK | constants.W_OK);
     await access(destination, constants.R_OK | constants.W_OK);
   } catch {
     cache.set("cached-version", "");
-    await cleanDownloadPack();
     await cleanAssetPack();
-    await downloadAssetPack(version);
-    await extractAssetPack(version);
+    await pacoteAssetPack(version);
     cache.set("cached-version", version);
   }
 };
@@ -90,7 +63,14 @@ export const cacheAssetPack = async (version: string) => {
 export const loadCachedJson = async (version: string) => {
   const [major] = version.split(".");
   const isNewFormat = Number(major) >= 14;
-  const jsonPath = join(environment.assetsPath, "pack", `simple-icons-${version}`, "_data", "simple-icons.json");
+  const isNewDataFolder = Number(major) >= 15;
+  const jsonPath = join(
+    environment.assetsPath,
+    "pack",
+    `simple-icons-${version}`,
+    isNewDataFolder ? "data" : "_data",
+    "simple-icons.json",
+  );
   const jsonFile = await readFile(jsonPath, "utf8");
   const json = JSON.parse(jsonFile);
   const icons = isNewFormat ? (json as IconData[]) : (json.icons as IconData[]);
@@ -167,15 +147,6 @@ export const copySvg = async ({ version, icon, pathOnly }: { version: string; ic
   toast.style = Toast.Style.Success;
   Clipboard.copy(svg);
   await showHUD("Copied to Clipboard");
-};
-
-export const cleanDownloadPack = async () => {
-  const directories = await readdir(environment.supportPath);
-  await Promise.all(
-    directories
-      .filter((d) => d.startsWith("pack-"))
-      .map((d) => rm(join(environment.supportPath, d), { recursive: true, force: true })),
-  );
 };
 
 export const cleanAssetPack = async () => {

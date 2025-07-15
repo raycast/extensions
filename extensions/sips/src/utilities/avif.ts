@@ -11,6 +11,7 @@ import { execSync } from "child_process";
 
 import { LocalStorage, Toast, confirmAlert, showToast } from "@raycast/api";
 import { showErrorToast } from "./utils";
+import { existsSync } from "fs";
 
 /**
  * Attempts to install the AVIF encoder using Homebrew.
@@ -20,7 +21,7 @@ import { showErrorToast } from "./utils";
 async function installAVIFEnc(): Promise<boolean> {
   let brewPath = "";
   try {
-    brewPath = execSync(`/bin/zsh -ilc "which brew"`).toString().trim();
+    brewPath = execSync(`/bin/zsh -lc 'realpath "$(which brew)"'`).toString().trim();
   } catch (error) {
     console.error(error);
   }
@@ -50,7 +51,13 @@ async function installAVIFEnc(): Promise<boolean> {
       style: Toast.Style.Animated,
     });
     try {
-      execSync(`${brewPath} install libavif`);
+      // Use '|| true' to ignore intermediate errors; we verify installation separately
+      execSync(`/bin/zsh -ilc '${brewPath} install --quiet libavif || true'`);
+
+      if (!verifyInstall()) {
+        throw new Error(`The avifenc binary has not been added to the user's $PATH`);
+      }
+
       toast.title = "AVIF Encoder installed successfully!";
       toast.style = Toast.Style.Success;
       return true;
@@ -71,6 +78,24 @@ async function installAVIFEnc(): Promise<boolean> {
   return false;
 }
 
+async function verifyInstall() {
+  const MAX_VERIFICATION_ATTEMPTS = 7;
+  const ATTEMPT_DELAY_DURATION = 1000;
+
+  let exists = false;
+  let attempts = 0;
+  while (!exists && attempts < MAX_VERIFICATION_ATTEMPTS) {
+    const encoderPath = execSync(`/bin/zsh -lc 'command -v avifenc'`).toString().trim();
+    if (existsSync(encoderPath)) {
+      exists = true;
+      break;
+    }
+    await new Promise((resolve) => setTimeout(resolve, ATTEMPT_DELAY_DURATION));
+    attempts++;
+  }
+  return exists;
+}
+
 /**
  * Gets the paths to the AVIF encoder and decoder.
  *
@@ -83,23 +108,20 @@ export async function getAVIFEncPaths() {
   if (!encoderPath || !decoderPath) {
     // Get the path to the AVIF encoder
     try {
-      encoderPath = execSync(`/bin/zsh -ilc "which avifenc"`).toString().trim();
-      decoderPath = execSync(`/bin/zsh -ilc "which avifdec"`).toString().trim();
+      encoderPath = execSync(`/bin/zsh -lc 'realpath "$(which avifenc)"'`).toString().trim();
+      decoderPath = execSync(`/bin/zsh -lc 'realpath "$(which avifdec)"'`).toString().trim();
     } catch (error) {
       // If the AVIF encoder is not found, prompt the user to install it
       if (await installAVIFEnc()) {
         try {
-          encoderPath = execSync(`/bin/zsh -ilc "which avifenc"`).toString().trim();
-          decoderPath = execSync(`/bin/zsh -ilc "which avifdec"`).toString().trim();
-          await LocalStorage.setItem("avifEncoderPath", encoderPath);
-          await LocalStorage.setItem("avifDecoderPath", decoderPath);
+          return await getAVIFEncPaths();
         } catch (error) {
           console.error(error);
           showErrorToast(
             "AVIF Encoder not found.",
             error as Error,
             undefined,
-            "Please install the libavif Homebrew formula and try again.",
+            "Please install the libavif Homebrew formula manually and try again.",
           );
         }
       } else {

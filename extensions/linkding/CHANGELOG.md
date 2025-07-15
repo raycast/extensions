@@ -1,5 +1,20 @@
 # Linkding Changelog
 
+## [Fixes] - 2025-06-26
+
+- fix!: use server-side filtering to handle large bookmark counts
+- fix!: remove Firefox-specific code (doesn't work)
+- fix: allow clearing metadata when automatically set
+
+## [Fix] - 2025-05-27
+
+- fix: use more reliable AppleScript to get Firefox URL
+
+## [Fix & Feature] - 2025-05-26
+
+- feat: save current browser tab
+- fix: update filtered bookmarks on delete
+
 ## [Refactor & Features] - 2025-04-16
 
 - refactor!: use raycast fetch API (removes "Ignore SSL" option)

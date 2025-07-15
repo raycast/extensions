@@ -4,10 +4,12 @@
 
 # Neon
 
-This is a Raycast extension for [Neon](https://neon.tech/) - The database you love, on a serverless platform designed to help you build reliable and scalable applications faster. With this extension you can: 
+This is a Raycast extension for [Neon](https://neon.tech/) - _The database you love, on a serverless platform designed to help you build reliable and scalable applications faster_. With this extension you can: 
 
 - List, Revoke, Create API Keys
 - List Projects
+    - Create Project
+    - Delete Project
     - View Project monitoring (System operations)
     - Update Project (basic): Edit a few fields of an existing project
     - List Project Branches
