@@ -1,10 +1,11 @@
 # Espanso Changelog
 
+
 ## [Improvements] - {PR_MERGE_DATE}
 
 - Support for `imports` in Espanso YAML files: you can now import matches from other files, and imported matches will appear in search with the correct category (based on the imported file name or path).
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-07-14
 
 - Add a custom Espanso binary path in preferences to make it work even with non-standard installations.
 

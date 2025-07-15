@@ -13,14 +13,22 @@
     {
       "name": "core",
       "title": "Manage Core Services",
+      "subtitle": "Oracle Cloud",
       "description": "Manage Instances and more",
+      "mode": "view"
+    },
+    {
+      "name": "object-storage",
+      "title": "Manage Object Storage Services",
+      "subtitle": "Oracle Cloud",
+      "description": "Manage Object Storage & Archive Storage",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.94.0",
-    "@raycast/utils": "^1.19.1",
-    "oci-sdk": "^2.110.0"
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.2.0",
+    "oci-sdk": "^2.112.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
