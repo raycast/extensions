@@ -4,7 +4,6 @@ import TurndownService from "turndown";
 
 async function getClipboardHTML(): Promise<string> {
   // Helper function to get HTML from clipboard using AppleScript as @raycast/api clipboard does not read HTML from the clipboard properly
-  // const { html } = await Clipboard.read();
   let clipboardContent = "";
 
   try {
