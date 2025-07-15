@@ -1,6 +1,6 @@
 # Remove Paywall Changelog
 
-## [Browser integration and advanced features] - {PR_MERGE_DATE}
+## [Browser integration and advanced features] - 2025-07-15
 
 - Added "Remove Paywall from Current Tab" command with automatic browser detection
 - Added "Remove Paywall from Clipboard" command 
