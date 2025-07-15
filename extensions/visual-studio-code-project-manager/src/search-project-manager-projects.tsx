@@ -68,8 +68,6 @@ function getProjectEntries(storagePath: string): ProjectEntry[] {
     projectEntries = projectEntries.filter(({ enabled }) => enabled === true);
   }
 
-  console.log(projectEntries);
-
   return projectEntries;
 }
 
