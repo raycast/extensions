@@ -64,7 +64,7 @@ export function useAppDownload() {
         const fs = await import("fs");
         if (fs.existsSync(filePath)) {
           if (showHudMessages) {
-            await showHUD("Download complete", { clearRootSearch: true });
+            await showHUD("Download Complete", { clearRootSearch: true });
           }
 
           showToast(Toast.Style.Success, "Download Complete", `${name} saved to ${filePath}`);
@@ -73,7 +73,7 @@ export function useAppDownload() {
         } else {
           // File path returned but file doesn't exist
           if (showHudMessages) {
-            await showHUD("Download failed", { clearRootSearch: true });
+            await showHUD("Download Failed", { clearRootSearch: true });
           }
 
           await handleDownloadError(
@@ -85,7 +85,7 @@ export function useAppDownload() {
         }
       } else {
         if (showHudMessages) {
-          await showHUD("Download failed", { clearRootSearch: true });
+          await showHUD("Download Failed", { clearRootSearch: true });
         }
 
         await handleDownloadError(new Error("Could not determine file path"), "determine file path", "download");
@@ -99,12 +99,12 @@ export function useAppDownload() {
 
       if (showHudMessages) {
         const hudMessage = errorAnalysis.isAuthError
-          ? "Authentication failed"
+          ? "Authentication Failed"
           : errorAnalysis.errorType === "network"
-            ? "Network error"
+            ? "Network Error"
             : errorAnalysis.errorType === "app_not_found"
-              ? "App not found"
-              : "Download failed";
+              ? "App Not Found"
+              : "Download Failed";
         await showHUD(hudMessage, { clearRootSearch: true });
       }
 

@@ -2,7 +2,7 @@ import { getAppDetails, searchApps } from "../ipatool";
 import { logger } from "../utils/logger";
 import { formatPrice } from "../utils/paths";
 import { formatDate } from "../utils/common";
-import { handleAppSearchError } from "../utils/error-handler";
+import { handleAppSearchError, sanitizeQuery } from "../utils/error-handler";
 import { getAppStoreUrl } from "../utils/constants";
 
 // Constants
@@ -24,7 +24,7 @@ type Input = {
  * Get detailed information about an iOS app by name or bundle ID
  */
 export default async function getIosAppDetails(input: Input) {
-  logger.log(`[get-app-details tool] Getting details for app: "${input.query}"`);
+  logger.log(`[get-app-details tool] Getting details for app: "${sanitizeQuery(input.query)}"`);
 
   try {
     // Will store the app details
@@ -32,7 +32,7 @@ export default async function getIosAppDetails(input: Input) {
 
     // If no bundle ID is provided, search for the app first
     if (!bundleId) {
-      logger.log(`[get-app-details tool] No bundle ID provided, searching for app: "${input.query}"`);
+      logger.log(`[get-app-details tool] No bundle ID provided, searching for app: "${sanitizeQuery(input.query)}"`);
       const searchResults = await searchApps(input.query, SEARCH_RESULT_LIMIT);
 
       if (searchResults.length === 0) {
@@ -45,7 +45,7 @@ export default async function getIosAppDetails(input: Input) {
       }
 
       // Log all search results for debugging
-      logger.log(`[get-app-details tool] Found ${searchResults.length} results for "${input.query}"`);
+      logger.log(`[get-app-details tool] Found ${searchResults.length} results for "${sanitizeQuery(input.query)}"`);
       searchResults.forEach((app, index) => {
         logger.log(
           `[get-app-details tool] Result ${index + 1}: ${app.name} (${app.bundleId || app.bundleID || "unknown bundle ID"}) by ${app.developer || "unknown developer"}`,
@@ -147,5 +147,6 @@ export default async function getIosAppDetails(input: Input) {
     return { app: formattedDetails };
   } catch (error) {
     await handleAppSearchError(error, input.query, "get-app-details");
+    return { app: null };
   }
 }

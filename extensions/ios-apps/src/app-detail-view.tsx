@@ -1,5 +1,6 @@
 // Displays comprehensive information about an iOS app with metadata and actions
-import { Detail, Color, Icon, showToast, Toast } from "@raycast/api";
+import { Detail, Color, Icon } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { AppDetails } from "./types";
 import { formatPrice } from "./utils/paths";
 import { renderStarRating, formatDate } from "./utils/common";
@@ -116,7 +117,7 @@ ${app.screenshotUrls.map((url, index) => `![Screenshot ${index + 1}](${url}?rayc
 
           <Detail.Metadata.Label title="Developer" text={app.sellerName || "Unknown Developer"} icon={Icon.Person} />
 
-          {app.price !== "0" && (
+          {app.price && parseFloat(app.price) > 0 && (
             <Detail.Metadata.Label title="Price" text={formatPrice(app.price, app.currency)} icon={Icon.BankNote} />
           )}
 
@@ -146,7 +147,7 @@ ${app.screenshotUrls.map((url, index) => `![Screenshot ${index + 1}](${url}?rayc
           app={app}
           onDownload={() => {
             if (!app.bundleId) {
-              showToast(Toast.Style.Failure, "Cannot download app", "Bundle ID is missing");
+              showFailureToast(new Error("Bundle ID is missing"), { title: "Cannot download app" });
               return Promise.resolve(null);
             }
             return downloadApp(app.bundleId, app.name, app.version, app.price, true);

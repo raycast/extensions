@@ -81,3 +81,27 @@ export function formatDate(dateString: string | undefined): string {
     day: "numeric",
   });
 }
+
+/**
+ * Truncates text at word boundaries to avoid cutting words in half
+ * @param text The text to truncate
+ * @param maxLength Maximum length before truncation
+ * @returns Truncated text with ellipsis if needed
+ */
+export function truncateAtWordBoundary(text: string, maxLength: number): string {
+  if (!text || text.length <= maxLength) {
+    return text;
+  }
+
+  // Find the last space before the max length
+  const truncated = text.substring(0, maxLength);
+  const lastSpaceIndex = truncated.lastIndexOf(" ");
+
+  // If we found a space and it's not too close to the beginning, use it
+  if (lastSpaceIndex > maxLength * 0.7) {
+    return truncated.substring(0, lastSpaceIndex) + "...";
+  }
+
+  // Otherwise, just truncate at max length and add ellipsis
+  return truncated + "...";
+}

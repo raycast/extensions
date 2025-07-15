@@ -3,12 +3,14 @@
  * This provides much more reliable error detection than generic pattern matching
  */
 
+import { sanitizeQuery } from "./error-handler";
+
 export interface IpatoolErrorInfo {
   isAuthError: boolean;
   is2FARequired: boolean;
   isCredentialError: boolean;
   userMessage: string;
-  errorType: "auth" | "2fa" | "credentials" | "network" | "permission" | "app_not_found" | "generic";
+  errorType: "2fa" | "credentials" | "network" | "permission" | "app_not_found" | "generic";
 }
 
 /**
@@ -22,7 +24,7 @@ export function analyzeIpatoolError(
   stderr?: string,
   context?: "auth" | "download" | "search",
 ): IpatoolErrorInfo {
-  const fullMessage = `${errorMessage} ${stderr || ""}`.toLowerCase();
+  const fullMessage = `${errorMessage.trim()} ${(stderr || "").trim()}`.trim().toLowerCase();
 
   // 2FA Required - exact message from ipatool source
   if (
@@ -120,7 +122,11 @@ export function analyzeIpatoolError(
   }
 
   // App not found
-  if (fullMessage.includes("not found") || fullMessage.includes("no app") || fullMessage.includes("does not exist")) {
+  if (
+    fullMessage.includes("app not found") ||
+    fullMessage.includes("no app") ||
+    fullMessage.includes("does not exist")
+  ) {
     return {
       isAuthError: false,
       is2FARequired: false,
@@ -135,7 +141,7 @@ export function analyzeIpatoolError(
   if (
     context === "auth" &&
     (fullMessage.includes("process exited with code 1") || fullMessage.includes("exit code 1")) &&
-    (stderr === "" || !stderr || stderr.trim() === "")
+    !stderr?.trim()
   ) {
     return {
       isAuthError: true,
@@ -152,7 +158,9 @@ export function analyzeIpatoolError(
     isAuthError: false,
     is2FARequired: false,
     isCredentialError: false,
-    userMessage: `Download failed: ${errorMessage}`,
+    userMessage: errorMessage.trim()
+      ? `Download failed: ${sanitizeQuery(errorMessage.trim())}`
+      : "Download failed. Please try again or check your connection.",
     errorType: "generic",
   };
 }

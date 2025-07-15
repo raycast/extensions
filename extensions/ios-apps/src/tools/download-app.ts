@@ -2,7 +2,7 @@ import { downloadIPA, searchApps } from "../ipatool";
 import path from "path";
 import { logger } from "../utils/logger";
 import { Tool } from "@raycast/api";
-import { handleAppSearchError, handleDownloadError, handleAuthError } from "../utils/error-handler";
+import { handleAppSearchError, handleDownloadError, handleAuthError, sanitizeQuery } from "../utils/error-handler";
 import { analyzeIpatoolError } from "../utils/ipatool-error-patterns";
 
 // Constants
@@ -21,7 +21,7 @@ type Input = {
  * Download an iOS app by name or bundle ID
  */
 export default async function downloadIosApp(input: Input) {
-  logger.log(`[download-app tool] Starting download for app: "${input.query}"`);
+  logger.log(`[download-app tool] Starting download for app: "${sanitizeQuery(input.query)}"`);
 
   try {
     let bundleId = "";
@@ -30,7 +30,7 @@ export default async function downloadIosApp(input: Input) {
     let price = "0";
 
     // Search for the app by name
-    logger.log(`[download-app tool] Searching for app: "${input.query}"`);
+    logger.log(`[download-app tool] Searching for app: "${sanitizeQuery(input.query)}"`);
     const searchResults = await searchApps(input.query, SEARCH_RESULT_LIMIT);
 
     if (searchResults.length === 0) {
@@ -56,7 +56,9 @@ export default async function downloadIosApp(input: Input) {
     // Log if we're using a different app than what was searched for
     const queryLower = input.query.toLowerCase();
     if (appName.toLowerCase() !== queryLower) {
-      logger.log(`[download-app tool] Note: Using closest match "${appName}" for search "${input.query}"`);
+      logger.log(
+        `[download-app tool] Note: Using closest match "${appName}" for search "${sanitizeQuery(input.query)}"`,
+      );
     }
 
     // Download the app
@@ -128,11 +130,12 @@ export default async function downloadIosApp(input: Input) {
     }
   } catch (error) {
     logger.error(`[download-app tool] Error:`, error);
-    // Re-throw the original error to preserve detailed error messages from downloadIPA
-    if (error instanceof Error) {
-      throw error;
-    }
-    throw new Error(`Failed to download app: ${String(error)}`);
+    await handleDownloadError(
+      error instanceof Error ? error : new Error(`Failed to download app: ${String(error)}`),
+      "download app",
+      "download-app",
+    );
+    return { success: false, message: "Download failed" };
   }
 }
 

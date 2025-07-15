@@ -5,7 +5,7 @@ import { execFile, spawn } from "child_process";
 import { extractFilePath, safeJsonParse } from "./utils/common";
 import fs from "fs";
 import path from "path";
-import { handleAppSearchError, handleAuthError, handleDownloadError } from "./utils/error-handler";
+import { handleAppSearchError, handleAuthError, handleDownloadError, sanitizeQuery } from "./utils/error-handler";
 import { getDownloadsDirectory, IPATOOL_PATH } from "./utils/paths";
 import { logger } from "./utils/logger";
 import { promisify } from "util";
@@ -27,7 +27,7 @@ const execFileAsync = promisify(execFile);
  */
 export async function searchApps(query: string, limit = 20): Promise<IpaToolSearchApp[]> {
   try {
-    logger.log(`[ipatool] Searching for apps with query: "${query}", limit: ${limit}`);
+    logger.log(`[ipatool] Searching for apps with query: "${sanitizeQuery(query)}", limit: ${limit}`);
 
     // Ensure we're authenticated before proceeding
     const isAuthenticated = await ensureAuthenticated();
@@ -38,7 +38,7 @@ export async function searchApps(query: string, limit = 20): Promise<IpaToolSear
 
     // Execute the search command with proper formatting and non-interactive mode
     // Using execFile with array arguments to prevent command injection
-    logger.log(`[ipatool] Executing search for query: ${query} with limit: ${limit}`);
+    logger.log(`[ipatool] Executing search for query: ${sanitizeQuery(query)} with limit: ${limit}`);
     const { stdout } = await execFileAsync(IPATOOL_PATH, [
       "search",
       query,
@@ -98,7 +98,7 @@ export async function downloadIPA(
     await showHUD(`Downloading ${appName || bundleId}${retryInfo}...`, { clearRootSearch: true });
 
     // Check if the app is paid based on price value
-    const isPaid = price !== "0" && price !== "";
+    const isPaid = price && parseFloat(price) > 0;
     logger.log(`[ipatool] Downloading app: ${appName || bundleId}, isPaid: ${isPaid}, price: ${price}${retryInfo}`);
 
     // Use spawn instead of exec to get real-time output
@@ -206,21 +206,27 @@ export async function downloadIPA(
           }
 
           // Check if this is a network error that might be transient
-          if (stderr.includes("TLS") || stderr.includes("network") || stderr.includes("connection")) {
-            if (retryCount < MAX_RETRIES) {
-              logger.log(
-                `[ipatool] Network error detected, retrying in ${retryDelay}ms (attempt ${retryCount + 1}/${MAX_RETRIES})`,
-              );
-              await new Promise((resolve) => setTimeout(resolve, retryDelay));
-              return downloadIPA(
-                bundleId,
-                appName,
-                appVersion,
-                price,
-                retryCount + 1,
-                Math.min(retryDelay * 2, MAX_RETRY_DELAY),
-              );
-            }
+          // Check both stderr and parsed error messages from stdout
+          const isNetworkError =
+            stderr.includes("TLS") ||
+            stderr.includes("network") ||
+            stderr.includes("connection") ||
+            specificError.includes("tls") ||
+            specificError.includes("network") ||
+            specificError.includes("connection") ||
+            specificError.includes("bad record MAC");
+
+          if (isNetworkError && retryCount < MAX_RETRIES) {
+            const nextRetryCount = retryCount + 1;
+            const nextRetryDelay = Math.min(retryDelay * 1.5, MAX_RETRY_DELAY);
+
+            logger.log(
+              `[ipatool] Network/TLS error detected: "${specificError}". Retrying in ${retryDelay}ms (attempt ${nextRetryCount}/${MAX_RETRIES})`,
+            );
+            await showHUD(`Network error. Retrying in ${Math.round(retryDelay / 1000)}s...`, { clearRootSearch: true });
+
+            await new Promise((resolve) => setTimeout(resolve, retryDelay));
+            return downloadIPA(bundleId, appName, appVersion, price, nextRetryCount, nextRetryDelay);
           }
 
           // Use precise ipatool error analysis instead of manual pattern matching
@@ -236,7 +242,7 @@ export async function downloadIPA(
           if (errorAnalysis.isAuthError) {
             await handleAuthError(new Error(finalErrorMessage), false);
           } else {
-            await handleDownloadError(new Error(finalErrorMessage), bundleId, "downloadIPA");
+            await handleDownloadError(new Error(finalErrorMessage), "download app", "downloadIPA");
           }
           reject(new Error(errorMessage));
           return;
@@ -365,15 +371,18 @@ export async function downloadIPA(
 
         // If we're out of retries or it's not a TLS error, fail normally
         await showHUD("Download failed", { clearRootSearch: true });
-        await handleDownloadError(error, bundleId, "downloadIPA");
+        await handleDownloadError(error, "download app", "downloadIPA");
         reject(error);
       });
     });
   } catch (error) {
-    logger.error(`[ipatool] Unhandled download error: ${error}`);
-    logger.error(`[ipatool] Error stack: ${(error as Error).stack || "No stack trace available"}`);
+    logger.error(`[ipatool] Unhandled download error: ${error instanceof Error ? error.message : String(error)}`);
+    if (error instanceof Error && error.stack) {
+      logger.error(`[ipatool] Error stack: ${error.stack}`);
+    }
+    logger.error(`[ipatool] Error details:`, error);
     await showHUD("Download failed", { clearRootSearch: true });
-    await handleDownloadError(error instanceof Error ? error : new Error(String(error)), bundleId, "downloadIPA");
+    await handleDownloadError(error instanceof Error ? error : new Error(String(error)), "download app", "downloadIPA");
     return null;
   }
 }
@@ -501,8 +510,13 @@ export async function getAppDetails(bundleId: string) {
     logger.log(`[ipatool] Successfully parsed app details for ${bundleId}`);
     return result;
   } catch (error) {
-    logger.error(`[ipatool] Error getting app details for ${bundleId}: ${error}`);
-    logger.error(`[ipatool] Error stack: ${(error as Error).stack || "No stack trace available"}`);
+    logger.error(
+      `[ipatool] Error getting app details for ${bundleId}: ${error instanceof Error ? error.message : String(error)}`,
+    );
+    if (error instanceof Error && error.stack) {
+      logger.error(`[ipatool] Error stack: ${error.stack}`);
+    }
+    logger.error(`[ipatool] Error details:`, error);
     await handleAppSearchError(error instanceof Error ? error : new Error(String(error)), bundleId, "getAppDetails");
     return null;
   }

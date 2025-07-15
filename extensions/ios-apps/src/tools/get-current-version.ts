@@ -3,7 +3,7 @@ import { logger } from "../utils/logger";
 import { Tool } from "@raycast/api";
 import type { ITunesResult } from "../types";
 import { filterAndSortApps, isExactMatch, isSignificantlyMorePopular } from "../utils/app-search";
-import { handleAppSearchError, handleToolError } from "../utils/error-handler";
+import { handleAppSearchError, handleToolError, sanitizeQuery } from "../utils/error-handler";
 
 // Constants
 const SEARCH_RESULT_LIMIT = 10;
@@ -24,7 +24,9 @@ type Input = {
  * Confirmation function to handle disambiguation when multiple apps match
  */
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
-  logger.log(`[get-current-version confirmation] Checking if disambiguation needed for: "${input.query}"`);
+  logger.log(
+    `[get-current-version confirmation] Checking if disambiguation needed for: "${sanitizeQuery(input.query)}"`,
+  );
 
   // Skip confirmation if bundle ID is provided
   if (input.bundleId) {
@@ -52,7 +54,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
     }
 
     // Log all results sorted by popularity
-    logger.log(`[get-current-version confirmation] Apps ranked by popularity for "${input.query}":`);
+    logger.log(`[get-current-version confirmation] Apps ranked by popularity for "${sanitizeQuery(input.query)}":`);
     sortedApps.forEach((app: ITunesResult, index: number) => {
       logger.log(
         `[get-current-version confirmation] ${index + 1}. ${app.trackName} by ${app.artistName} - ${app.userRatingCount.toLocaleString()} ratings (${app.averageUserRating.toFixed(1)}★)`,
@@ -86,7 +88,13 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
       })),
     };
   } catch (error) {
-    logger.error(`[get-current-version confirmation] Error during disambiguation check: ${error}`);
+    logger.error(
+      `[get-current-version confirmation] Error during disambiguation check: ${error instanceof Error ? error.message : String(error)}`,
+    );
+    if (error instanceof Error && error.stack) {
+      logger.error(`[get-current-version confirmation] Error stack: ${error.stack}`);
+    }
+    logger.error(`[get-current-version confirmation] Error details:`, error);
     return undefined; // Let the main function handle errors
   }
 };
@@ -95,7 +103,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
  * Get the current version number of an iOS app by name or bundle ID
  */
 export default async function getCurrentVersion(input: Input) {
-  logger.log(`[get-current-version tool] Starting version lookup for: "${input.query}"`);
+  logger.log(`[get-current-version tool] Starting version lookup for: "${sanitizeQuery(input.query)}"`);
 
   try {
     let appData: ITunesResult;
@@ -114,17 +122,20 @@ export default async function getCurrentVersion(input: Input) {
           input.bundleId,
           "get-current-version",
         );
+        return { version: "Unknown", appName: "Unknown", bundleId: "" };
       }
 
       appData = searchResults[0];
     } else {
-      logger.log(`[get-current-version tool] No bundle ID provided, searching for app: "${input.query}"`);
+      logger.log(
+        `[get-current-version tool] No bundle ID provided, searching for app: "${sanitizeQuery(input.query)}"`,
+      );
 
       // Search iTunes API directly
       const searchResults = await searchITunesApps(input.query, SEARCH_RESULT_LIMIT);
 
       if (searchResults.length === 0) {
-        logger.log(`[get-current-version tool] No apps found for query: "${input.query}"`);
+        logger.log(`[get-current-version tool] No apps found for query: "${sanitizeQuery(input.query)}"`);
         await handleAppSearchError(
           new Error(`No apps found matching "${input.query}"`),
           input.query,
@@ -137,7 +148,7 @@ export default async function getCurrentVersion(input: Input) {
       const sortedApps = filterAndSortApps(searchResults, input.query);
 
       if (sortedApps.length === 0) {
-        logger.log(`[get-current-version tool] No relevant apps found for query: "${input.query}"`);
+        logger.log(`[get-current-version tool] No relevant apps found for query: "${sanitizeQuery(input.query)}"`);
         await handleAppSearchError(
           new Error(`No relevant apps found matching "${input.query}"`),
           input.query,

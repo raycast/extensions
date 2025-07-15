@@ -35,7 +35,15 @@ Once you have Homebrew installed, install [ipatool](https://github.com/majd/ipat
 brew install ipatool
 ```
 
-By default, the extension looks for `ipatool` at `/opt/homebrew/bin/ipatool`. If your installation is in a different location, you can specify the path in the extension preferences.
+The extension automatically detects `ipatool` installation in common locations:
+
+- **Apple Silicon Macs**: `/opt/homebrew/bin/ipatool` (default Homebrew path)
+- **Intel Macs**: `/usr/local/bin/ipatool` (default Homebrew path)
+- **System installation**: `/usr/bin/ipatool`
+- **User installations**: `~/.local/bin/ipatool`, `~/bin/ipatool`
+- **PATH lookup**: Any location in your system PATH
+
+If your installation is in a different location, you can specify the custom path in the extension preferences.
 
 ## How It Works
 

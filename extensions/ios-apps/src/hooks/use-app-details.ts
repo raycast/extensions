@@ -15,32 +15,46 @@ interface UseAppDetailsResult {
  */
 export function useAppDetails(initialApp: AppDetails): UseAppDetailsResult {
   const [app, setApp] = useState<AppDetails>(initialApp);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+
     async function loadEnrichedAppDetails() {
       // Skip if we don't have the minimum required data
       if (!initialApp.bundleId) {
-        setIsLoading(false);
-        return;
+        return; // Loading state already correctly initialized
       }
+
+      if (!isMounted) return;
 
       setIsLoading(true);
       setError(null);
 
       try {
         const enrichedApp = await enrichAppDetails(initialApp);
-        setApp(enrichedApp);
+        if (isMounted) {
+          setApp(enrichedApp);
+        }
       } catch (error) {
         console.error("Error loading enriched app details:", error);
-        setError(`Error: ${error}`);
+        if (isMounted) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          setError(`Error: ${errorMessage}`);
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
 
     loadEnrichedAppDetails();
+
+    return () => {
+      isMounted = false;
+    };
   }, [
     initialApp.bundleId,
     initialApp.id,

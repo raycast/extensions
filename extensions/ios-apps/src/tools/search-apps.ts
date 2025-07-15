@@ -3,7 +3,8 @@ import { enrichAppDetails } from "../utils/itunes-api";
 import { AppDetails } from "../types";
 import { logger } from "../utils/logger";
 import { showToast, Toast } from "@raycast/api";
-import { handleAppSearchError } from "../utils/error-handler";
+import { handleAppSearchError, sanitizeQuery } from "../utils/error-handler";
+import { truncateAtWordBoundary } from "../utils/common";
 
 // No initial confirmation - search will execute immediately
 
@@ -22,7 +23,9 @@ type Input = {
  * Search for iOS apps by name or keyword
  */
 export default async function searchIosApps(input: Input) {
-  logger.log(`[search-apps tool] Searching for apps with query: "${input.query}", limit: ${input.limit || 10}`);
+  logger.log(
+    `[search-apps tool] Searching for apps with query: "${sanitizeQuery(input.query)}", limit: ${input.limit || 10}`,
+  );
 
   // Ensure limit is within bounds
   const validLimit = Math.min(Math.max(1, Number(input.limit) || 10), 20);
@@ -87,7 +90,7 @@ export default async function searchIosApps(input: Input) {
           developer: enriched.sellerName,
           icon: enriched.artworkUrl512 || enriched.artworkUrl60 || enriched.iconUrl,
           rating: enriched.averageUserRating,
-          description: enriched.description?.substring(0, 200) + (enriched.description?.length > 200 ? "..." : ""),
+          description: enriched.description ? truncateAtWordBoundary(enriched.description, 200) : "",
         };
       } catch (error) {
         completedApps++;

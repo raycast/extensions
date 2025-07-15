@@ -1,5 +1,6 @@
 import { homedir } from "os";
 import { existsSync, accessSync, constants, mkdirSync } from "fs";
+import { resolve, normalize } from "path";
 import { getPreferenceValues } from "@raycast/api";
 import { ExtensionPreferences } from "../types";
 
@@ -15,15 +16,53 @@ export function getDownloadsDirectory(): string {
   let downloadPath: string;
 
   if (preferences.downloadPath) {
-    // Security check for directory traversal
-    if (preferences.downloadPath.includes("..")) {
-      throw new Error("Download path cannot contain directory traversal sequences");
+    // Comprehensive security validation for directory traversal
+    const rawPath = preferences.downloadPath;
+
+    // Check for various directory traversal patterns
+    const dangerousPatterns = [
+      "..", // Basic traversal
+      "%2e%2e", // URL encoded ..
+      "%2E%2E", // URL encoded .. (uppercase)
+      "..%2f", // Mixed encoding
+      "..%2F", // Mixed encoding (uppercase)
+      "%2e%2e%2f", // Full URL encoded ../
+      "%2E%2E%2F", // Full URL encoded ../ (uppercase)
+      "....//", // Double dot variations
+    ];
+
+    const lowerPath = rawPath.toLowerCase();
+    for (const pattern of dangerousPatterns) {
+      if (lowerPath.includes(pattern.toLowerCase())) {
+        throw new Error(`Download path contains unsafe directory traversal pattern: ${pattern}`);
+      }
     }
 
     // Replace ~ with the actual home directory if present
-    downloadPath = preferences.downloadPath.startsWith("~")
-      ? preferences.downloadPath.replace("~", homedir())
-      : preferences.downloadPath;
+    downloadPath = rawPath.startsWith("~") ? rawPath.replace("~", homedir()) : rawPath;
+
+    // Normalize and resolve the path to handle any remaining traversal attempts
+    downloadPath = resolve(normalize(downloadPath));
+
+    // Ensure the resolved path is within safe boundaries (user's home directory or common safe locations)
+    const homeDir = homedir();
+    const safePaths = [
+      homeDir,
+      "/tmp",
+      "/var/tmp",
+      "/Users", // macOS users directory
+    ];
+
+    const isWithinSafePath = safePaths.some((safePath) => {
+      const resolvedSafePath = resolve(safePath);
+      return downloadPath.startsWith(resolvedSafePath);
+    });
+
+    if (!isWithinSafePath) {
+      throw new Error(
+        `Download path must be within user home directory or other safe locations. Resolved path: ${downloadPath}`,
+      );
+    }
   } else {
     downloadPath = `${homedir()}/Downloads`;
   }

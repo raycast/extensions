@@ -1,6 +1,24 @@
 // Centralized error handling utility for iOS Apps extension
 import { showToast, Toast, openExtensionPreferences } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { logger } from "./logger";
+
+/**
+ * Sanitize query strings to remove potentially sensitive information before logging
+ * @param query The query string to sanitize
+ * @returns Sanitized query string safe for logging
+ */
+export function sanitizeQuery(query: string): string {
+  // Remove common sensitive patterns
+  return query
+    .replace(/token[=:]\s*[^\s&]+/gi, "token=***")
+    .replace(/key[=:]\s*[^\s&]+/gi, "key=***")
+    .replace(/password[=:]\s*[^\s&]+/gi, "password=***")
+    .replace(/auth[=:]\s*[^\s&]+/gi, "auth=***")
+    .replace(/bearer\s+[^\s&]+/gi, "bearer ***")
+    .replace(/[a-f0-9]{32,}/gi, "***") // Remove long hex strings (potential tokens/hashes)
+    .replace(/[A-Za-z0-9+/]{20,}={0,2}/g, "***"); // Remove base64-like strings
+}
 
 /**
  * Handle errors consistently across all tools
@@ -21,7 +39,7 @@ export async function handleToolError(
   logger.error(`[${context}] Error: ${errorMessage}`);
 
   // Show user-friendly toast
-  await showToast(Toast.Style.Failure, "Error", `${userMessage}: ${errorMessage}`);
+  await showFailureToast(error instanceof Error ? error : new Error(errorMessage), { title: userMessage });
 
   // Optionally throw the error for further handling
   if (shouldThrow) {
@@ -36,7 +54,8 @@ export async function handleToolError(
  * @param toolName Name of the tool that failed
  */
 export async function handleAppSearchError(error: unknown, query: string, toolName: string): Promise<void> {
-  await handleToolError(error, `${toolName} tool`, `Failed to find app "${query}"`, true);
+  const sanitizedQuery = sanitizeQuery(query);
+  await handleToolError(error, `${toolName} tool`, `Failed to find app "${sanitizedQuery}"`, true);
 }
 
 /**
@@ -46,7 +65,8 @@ export async function handleAppSearchError(error: unknown, query: string, toolNa
  * @param toolName Name of the tool that failed
  */
 export async function handleDownloadError(error: unknown, operation: string, toolName: string): Promise<void> {
-  await handleToolError(error, `${toolName} tool`, `Failed to ${operation}`, true);
+  const sanitizedOperation = sanitizeQuery(operation);
+  await handleToolError(error, `${toolName} tool`, `Failed to ${sanitizedOperation}`, true);
 }
 
 /**
@@ -68,15 +88,16 @@ export async function handleAuthError(
   logger.error(`[authentication] Error: ${errorMessage}`);
 
   // Detect specific authentication error types
+  const lowerErrorMessage = errorMessage.toLowerCase();
   const isCredentialError =
-    errorMessage.toLowerCase().includes("authentication failed") ||
-    errorMessage.toLowerCase().includes("invalid credentials") ||
-    errorMessage.toLowerCase().includes("login failed");
+    lowerErrorMessage.includes("authentication failed") ||
+    lowerErrorMessage.includes("invalid credentials") ||
+    lowerErrorMessage.includes("login failed");
 
   const is2FARequired =
-    errorMessage.toLowerCase().includes("two-factor") ||
-    errorMessage.toLowerCase().includes("2fa") ||
-    errorMessage.toLowerCase().includes("verification code");
+    lowerErrorMessage.includes("two-factor") ||
+    lowerErrorMessage.includes("2fa") ||
+    lowerErrorMessage.includes("verification code");
 
   let userMessage = "Authentication failed";
   let toastTitle = "Authentication Error";

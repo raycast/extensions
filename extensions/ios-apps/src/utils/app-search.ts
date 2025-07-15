@@ -108,9 +108,13 @@ export function scoreAndSortIpaToolApps(
  * Get the best matching app from ipatool search results
  * @param apps List of ipatool search results
  * @param query User search query
- * @returns Best matching app
+ * @returns Best matching app, or undefined if no apps provided
  */
-export function getBestIpaToolMatch(apps: IpaToolSearchApp[], query: string): IpaToolSearchApp {
+export function getBestIpaToolMatch(apps: IpaToolSearchApp[], query: string): IpaToolSearchApp | undefined {
+  if (apps.length === 0) {
+    return undefined;
+  }
+
   const scoredResults = scoreAndSortIpaToolApps(apps, query);
   return scoredResults[0].app;
 }

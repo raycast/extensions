@@ -156,7 +156,7 @@ evals:
     mocks:
       download-app: |
         The app **Raycast: AI, Notes and more** has been downloaded successfully. 
-        You can find the file named `Raycast- AI, Notes and more 1.0.6.ipa` in your downloads folder.
+        You can find the file named `Raycast 1.0.6.ipa` in your downloads folder.
 
   - input: "@ios-apps download a non-existent app like 'SuperFakeApp12345'"
     expected:

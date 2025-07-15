@@ -17,5 +17,6 @@ export const ITUNES_LOOKUP_ENDPOINT = "/lookup";
  * @returns Complete App Store URL
  */
 export function getAppStoreUrl(appId: string | number): string {
-  return `${APP_STORE_APP_URL_TEMPLATE}${appId}`;
+  const url = new URL(`${APP_STORE_APP_URL_TEMPLATE}${appId}`);
+  return url.toString();
 }

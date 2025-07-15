@@ -1,8 +1,12 @@
 import { existsSync } from "fs";
-import { execSync } from "child_process";
+import { spawnSync } from "child_process";
 import { showToast, Toast, open } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { IPATOOL_PATH } from "./paths";
 import { logger } from "./logger";
+
+// Constants
+const IPATOOL_GITHUB_URL = "https://github.com/majd/ipatool";
 
 /**
  * Validates that ipatool is installed and accessible
@@ -18,9 +22,13 @@ export async function validateIpatoolInstallation(): Promise<boolean> {
 
     // Try to execute ipatool to verify it works
     try {
-      execSync(`"${IPATOOL_PATH}" --version`, { timeout: 5000 });
-      logger.log(`[ipatool] Found working ipatool at: ${IPATOOL_PATH}`);
-      return true;
+      const result = spawnSync(IPATOOL_PATH, ["--version"], { timeout: 5000 });
+      if (result.status === 0) {
+        logger.log(`[ipatool] Found working ipatool at: ${IPATOOL_PATH}`);
+        return true;
+      } else {
+        throw new Error(`ipatool exited with status ${result.status}`);
+      }
     } catch (execError) {
       await showIpatoolExecutionError(execError);
       return false;
@@ -43,7 +51,7 @@ async function showIpatoolNotFoundError(): Promise<void> {
     primaryAction: {
       title: "Install ipatool",
       onAction: () => {
-        open("https://github.com/majd/ipatool");
+        open(IPATOOL_GITHUB_URL);
       },
     },
     secondaryAction: {
@@ -80,11 +88,7 @@ async function showIpatoolExecutionError(error: unknown): Promise<void> {
  * Shows generic ipatool error
  */
 async function showGenericIpatoolError(error: unknown): Promise<void> {
-  await showToast({
-    style: Toast.Style.Failure,
-    title: "ipatool validation failed",
-    message: error instanceof Error ? error.message : "Unknown error",
-  });
+  await showFailureToast(error, { title: "ipatool validation failed" });
 }
 
 /**
@@ -96,7 +100,7 @@ async function showInstallationInstructions(): Promise<void> {
 brew install ipatool
 
 # Alternative: Manual installation
-# 1. Download from: https://github.com/majd/ipatool/releases
+# 1. Download from: ${IPATOOL_GITHUB_URL}/releases
 # 2. Place in /opt/homebrew/bin/ (Apple Silicon) or /usr/local/bin/ (Intel)
 # 3. Make executable: chmod +x /path/to/ipatool
 
@@ -155,9 +159,13 @@ export function findIpatoolPath(): string | null {
   for (const path of commonPaths) {
     if (existsSync(path)) {
       try {
-        execSync(`"${path}" --version`, { timeout: 5000 });
-        logger.log(`[ipatool] Found working ipatool at: ${path}`);
-        return path;
+        const result = spawnSync(path, ["--version"], { timeout: 5000 });
+        if (result.status === 0) {
+          logger.log(`[ipatool] Found working ipatool at: ${path}`);
+          return path;
+        } else {
+          logger.log(`[ipatool] Found but non-functional ipatool at: ${path}`);
+        }
       } catch {
         logger.log(`[ipatool] Found but non-functional ipatool at: ${path}`);
       }
@@ -166,11 +174,13 @@ export function findIpatoolPath(): string | null {
 
   // Try to find in PATH
   try {
-    execSync("which ipatool", { timeout: 5000 });
-    const pathResult = execSync("which ipatool", { encoding: "utf8", timeout: 5000 }).trim();
-    if (pathResult && existsSync(pathResult)) {
-      logger.log(`[ipatool] Found ipatool in PATH: ${pathResult}`);
-      return pathResult;
+    const result = spawnSync("which", ["ipatool"], { encoding: "utf8", timeout: 5000 });
+    if (result.status === 0 && result.stdout) {
+      const pathResult = result.stdout.toString().trim();
+      if (pathResult && existsSync(pathResult)) {
+        logger.log(`[ipatool] Found ipatool in PATH: ${pathResult}`);
+        return pathResult;
+      }
     }
   } catch {
     // ipatool not in PATH
