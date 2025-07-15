@@ -23,6 +23,27 @@ function LookupEmail() {
     return "username" in item && "conversationId" in item;
   });
 
+  async function fetchUserEmail(userId: string): Promise<string | null> {
+    const slackWebClient = getSlackWebClient();
+    const userInfo = await slackWebClient.users.info({ user: userId });
+    return userInfo.user?.profile?.email || null;
+  }
+
+  function parseEmailError(error: unknown): string {
+    if (error instanceof Error) {
+      if (error.message.includes("not_in_channel")) {
+        return "You need to be in a shared channel with this user.";
+      } else if (error.message.includes("missing_scope")) {
+        return "Missing 'users:read.email' permission. Please re-authorize.";
+      } else if (error.message.includes("rate_limited")) {
+        return "Rate limited. Please wait a moment and try again.";
+      } else {
+        return error.message;
+      }
+    }
+    return "An unexpected error occurred";
+  }
+
   async function fetchAndCopyEmail(user: User) {
     try {
       await showToast({
@@ -31,10 +52,7 @@ function LookupEmail() {
         message: `Getting email for ${user.name}`,
       });
 
-      // Fetch email for this specific user only when needed
-      const slackWebClient = getSlackWebClient();
-      const userInfo = await slackWebClient.users.info({ user: user.id });
-      const email = userInfo.user?.profile?.email;
+      const email = await fetchUserEmail(user.id);
 
       if (email) {
         await Clipboard.copy(email);
@@ -52,17 +70,7 @@ function LookupEmail() {
       }
     } catch (error) {
       console.error("Failed to fetch email:", error);
-
-      let errorMessage = "Unknown error";
-      if (error instanceof Error) {
-        if (error.message.includes("rate_limited")) {
-          errorMessage = "Rate limited. Please wait a moment and try again.";
-        } else if (error.message.includes("missing_scope")) {
-          errorMessage = "Missing 'users:read.email' permission. Please re-authorize.";
-        } else {
-          errorMessage = error.message;
-        }
-      }
+      const errorMessage = parseEmailError(error);
 
       await showToast({
         style: Toast.Style.Failure,
@@ -123,9 +131,7 @@ function LookupEmail() {
                           title: "Fetching email...",
                         });
 
-                        const slackWebClient = getSlackWebClient();
-                        const userInfo = await slackWebClient.users.info({ user: user.id });
-                        const email = userInfo.user?.profile?.email;
+                        const email = await fetchUserEmail(user.id);
 
                         if (email) {
                           const formatted = `${user.name} <${email}>`;
@@ -142,9 +148,12 @@ function LookupEmail() {
                           });
                         }
                       } catch (error) {
+                        const errorMessage = parseEmailError(error);
+
                         await showToast({
                           style: Toast.Style.Failure,
                           title: "Failed to fetch email",
+                          message: errorMessage,
                         });
                       }
                     }}

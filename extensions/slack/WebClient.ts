@@ -38,7 +38,13 @@ export interface SlackMember {
 const slack = OAuthService.slack({
   scope: "users:read users:read.email channels:read groups:read im:read mpim:read channels:history groups:history im:history mpim:history channels:write groups:write im:write mpim:write users:write dnd:read dnd:write search:read users.profile:write emoji:read",
   onAuthorize({ token }) {
-    slackWebClient = new WebClient(token, { rejectRateLimitedCalls: true });
+    slackWebClient = new WebClient(token, { 
+      retryConfig: {
+        retries: 3,
+        factor: 2,
+        randomize: true
+      }
+    });
   },
 });
 let slackWebClient: WebClient | null = null;
@@ -48,7 +54,13 @@ export const slack = OAuthService.slack({
     "users:read users:read.email channels:read groups:read im:read mpim:read channels:history groups:history im:history mpim:history channels:write groups:write im:write mpim:write users:write dnd:read dnd:write search:read users.profile:write emoji:read",
   personalAccessToken: accessToken,
   onAuthorize({ token }) {
-    slackWebClient = new WebClient(token, { rejectRateLimitedCalls: true });
+    slackWebClient = new WebClient(token, { 
+      retryConfig: {
+        retries: 3,
+        factor: 2,
+        randomize: true
+      }
+    });
   },
 });
 
