@@ -42,7 +42,7 @@ A Raycast extension for compressing and decompressing text using the Brotli algo
 2. Or manually install:
    ```bash
    git clone <repository>
-   cd brotli
+   cd brotli-compress
    npm install
    npm run build
    ```
