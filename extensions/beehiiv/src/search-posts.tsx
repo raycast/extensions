@@ -2,12 +2,6 @@ import { ActionPanel, Action, List, getPreferenceValues, Icon, Cache } from "@ra
 import { useEffect, useState, useRef } from "react";
 import fetch from "node-fetch";
 
-// Define interfaces
-interface Preferences {
-  apiKey: string;
-  publicationId: string;
-}
-
 const preferences = getPreferenceValues<Preferences>();
 
 interface Post {

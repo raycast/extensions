@@ -77,7 +77,7 @@ Metrics auto-refresh every 30 minutes.
 1. **API Key** – Generate in beehiiv → *Settings ▸ API*.
 2. **Publication ID** – Check in beehiiv → *Settings ▸ API*. You need to use a value under the `API V2`.
 
-Paste both values in the extensions' Preferences. That's it!
+Paste both values in the extension Preferences. That's it!
 
 
 ---

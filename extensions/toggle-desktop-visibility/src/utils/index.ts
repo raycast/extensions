@@ -1,7 +1,8 @@
 import { spawnSync } from "child_process";
 import * as MontereyAndBefore from "./monterey-and-before";
 import * as Sonoma from "./sonoma";
-import * as Sequoia from "./sequoia"; // Assuming you have a module for Sequoia
+import * as Sequoia from "./sequoia";
+import * as Tahoe from "./tahoe";
 
 function getMacosMajorVersion() {
   const { stdout } = spawnSync("sw_vers", ["-productVersion"], { encoding: "utf-8" });
@@ -16,8 +17,14 @@ function isSequoia() {
   return getMacosMajorVersion() === 15;
 }
 
+function isTahoe() {
+  return getMacosMajorVersion() === 26;
+}
+
 export function areDesktopIconsHidden() {
-  if (isSequoia()) {
+  if (isTahoe()) {
+    return Tahoe.areDesktopIconsHidden();
+  } else if (isSequoia()) {
     return Sequoia.areDesktopIconsHidden();
   } else if (isSonoma()) {
     return Sonoma.areDesktopIconsHidden();
@@ -27,7 +34,9 @@ export function areDesktopIconsHidden() {
 }
 
 export function hideDesktopIcons() {
-  if (isSequoia()) {
+  if (isTahoe()) {
+    Tahoe.hideDesktopIcons();
+  } else if (isSequoia()) {
     Sequoia.hideDesktopIcons();
   } else if (isSonoma()) {
     Sonoma.hideDesktopIcons();
@@ -37,7 +46,9 @@ export function hideDesktopIcons() {
 }
 
 export function showDesktopIcons() {
-  if (isSequoia()) {
+  if (isTahoe()) {
+    Tahoe.showDesktopIcons();
+  } else if (isSequoia()) {
     Sequoia.showDesktopIcons();
   } else if (isSonoma()) {
     Sonoma.showDesktopIcons();
@@ -47,7 +58,9 @@ export function showDesktopIcons() {
 }
 
 export function areDesktopWidgetsHidden() {
-  if (isSequoia()) {
+  if (isTahoe()) {
+    return Tahoe.areDesktopWidgetsHidden();
+  } else if (isSequoia()) {
     return Sequoia.areDesktopWidgetsHidden();
   } else if (isSonoma()) {
     return Sonoma.areDesktopWidgetsHidden();
@@ -57,7 +70,9 @@ export function areDesktopWidgetsHidden() {
 }
 
 export function hideDesktopWidgets() {
-  if (isSequoia()) {
+  if (isTahoe()) {
+    Tahoe.hideDesktopWidgets();
+  } else if (isSequoia()) {
     Sequoia.hideDesktopWidgets();
   } else if (isSonoma()) {
     Sonoma.hideDesktopWidgets();
@@ -67,7 +82,9 @@ export function hideDesktopWidgets() {
 }
 
 export function showDesktopWidgets() {
-  if (isSequoia()) {
+  if (isTahoe()) {
+    Tahoe.showDesktopWidgets();
+  } else if (isSequoia()) {
     Sequoia.showDesktopWidgets();
   } else if (isSonoma()) {
     Sonoma.showDesktopWidgets();

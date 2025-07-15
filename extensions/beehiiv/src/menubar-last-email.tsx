@@ -3,11 +3,6 @@ import { MenuBarExtra, Icon, getPreferenceValues, openExtensionPreferences, open
 import { useEffect, useState } from "react";
 import fetch from "node-fetch";
 
-interface Preferences {
-  apiKey: string;
-  publicationId: string;
-}
-
 const preferences = getPreferenceValues<Preferences>();
 
 interface PostStats {
@@ -35,7 +30,7 @@ export default function LastEmailStatsMenuBar() {
   const fetchLastEmail = async () => {
     try {
       setIsLoading(true);
-      // Pobieramy najnowszy post z rozwinięciem statystyk
+      // Fetch latest post with stats expansion
       const response = await fetch(
         `https://api.beehiiv.com/v2/publications/${preferences.publicationId}/posts?expand[]=stats&limit=10&status=confirmed&order_by=created&direction=desc`,
         {

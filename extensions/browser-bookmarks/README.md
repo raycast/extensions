@@ -1,6 +1,6 @@
 # Browser Bookmarks
 
-Integrate bookmarks from Chrome, Brave, Edge, Firefox, Safari, Arc, Sidekick, Vivaldi, or Prisma Access.
+Integrate bookmarks from Chrome, Brave, Edge, Firefox, Safari, Arc, Sidekick, Vivaldi, Prisma Access, Dia, or Ghost Browser.
 
 ## Configuration
 
@@ -10,6 +10,7 @@ If you have multiple profiles, you can select the one you want from the enabled 
 
 - Brave: `⌘` + `⇧` + `B`
 - Chrome: `⌘` + `⇧` + `C`
+- Dia: `⌘` + `⇧` + `D`
 - Edge: `⌘` + `⇧` + `E`
 - Firefox: `⌘` + `⇧` + `F`
 - Arc: `⌘` + `⇧` + `A`

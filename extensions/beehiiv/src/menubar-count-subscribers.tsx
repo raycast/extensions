@@ -38,8 +38,6 @@ export default function SubscriberCount() {
     },
   });
 
-  console.log(data);
-
   return (
     <MenuBarExtra
       isLoading={isLoading}

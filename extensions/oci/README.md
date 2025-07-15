@@ -4,7 +4,9 @@
 
 # Oracle Cloud
 
-This is a Raycast extension for [Oracle Cloud](https://cloud.oracle.com/). With this extension you can view **Core Services** (only Instances for now) and **VNIC Attachments**.
+This is a Raycast extension for [Oracle Cloud](https://cloud.oracle.com/). With this extension you can:
+- View **Core Services** (only Instances for now) and **VNIC Attachments**
+- View **Object Storage** *Buckets*.
 
 ## 🚀 Getting Started
 
@@ -43,5 +45,6 @@ Looking for more infra extensions? Try these:
 <a title="Install appwrite Raycast Extension" href="https://www.raycast.com/xmok/appwrite"><img src="https://www.raycast.com/xmok/appwrite/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 <a title="Install coolify Raycast Extension" href="https://www.raycast.com/xmok/coolify"><img src="https://www.raycast.com/xmok/coolify/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 <a title="Install cyberpanel Raycast Extension" href="https://www.raycast.com/xmok/cyberpanel"><img src="https://www.raycast.com/xmok/cyberpanel/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install dokploy Raycast Extension" href="https://www.raycast.com/xmok/dokploy"><img src="https://www.raycast.com/xmok/dokploy/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 <a title="Install hestiacp-admin Raycast Extension" href="https://www.raycast.com/xmok/hestiacp-admin"><img src="https://www.raycast.com/xmok/hestiacp-admin/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 <a title="Install vultr Raycast Extension" href="https://www.raycast.com/xmok/vultr"><img src="https://www.raycast.com/xmok/vultr/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>

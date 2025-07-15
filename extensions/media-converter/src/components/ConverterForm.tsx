@@ -1,4 +1,5 @@
-import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, showInFinder, Icon, openCommandPreferences } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import {
   convertMedia,
@@ -8,7 +9,6 @@ import {
   OUTPUT_IMAGE_EXTENSIONS,
   OUTPUT_ALL_EXTENSIONS,
 } from "../utils/converter";
-import { execPromise } from "../utils/exec";
 
 export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }) {
   const [selectedFileType, setSelectedFileType] = useState<"video" | "image" | "audio" | null>(null);
@@ -17,10 +17,14 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
   // TODO: Proper type for quality setting? Maybe split the quality setting into a union type for each format?
   // Currently represents 0-100 in steps of 5 (as strings) for jpg heic avif webp, "lossless" for webp, "lzw" or "deflate" for tiff, "png-24" or "png-8" for png
   const [currentQualitySetting, setCurrentQualitySetting] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (initialFiles && initialFiles.length > 0) {
       handleFileSelect(initialFiles);
+    } else {
+      // TODO: fix this
+      setIsLoading(false);
     }
   }, [initialFiles]);
 
@@ -60,33 +64,40 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
         showToast({
           style: Toast.Style.Failure,
           title: "Invalid files in selection",
-          message: `Kept ${processedFiles.length} ${primaryFileType} file(s). ${files.length - processedFiles.length} other file(s) from your selection were invalid or of a different type and have been discarded.`, // Updated message
+          message: `Kept ${processedFiles.length} ${primaryFileType} file${processedFiles.length > 1 ? "s" : ""}. ${files.length - processedFiles.length} other file${files.length - processedFiles.length > 1 ? "s" : ""} from your selection were invalid or of a different type and have been discarded.`,
         });
       }
 
       setCurrentFiles(processedFiles);
       setSelectedFileType(primaryFileType);
+
+      // Initialize output format with default value based on file type
+      if (primaryFileType === "image") {
+        setOutputFormat(".jpg");
+        setCurrentQualitySetting("80");
+      } else if (primaryFileType === "audio") {
+        setOutputFormat(".mp3");
+        setCurrentQualitySetting("");
+      } else if (primaryFileType === "video") {
+        setOutputFormat(".mp4");
+        setCurrentQualitySetting("");
+      }
     } catch (error) {
+      const errorMessage = String(error);
       showToast({
         style: Toast.Style.Failure,
         title: "Error processing files",
-        message: String(error),
+        message: errorMessage,
       });
       setCurrentFiles([]);
       setSelectedFileType(null);
     }
+
+    setIsLoading(false);
   };
 
   const handleSubmit = async () => {
-    if (!currentFiles || currentFiles.length === 0) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "No files selected",
-        message: "Please select at least one file to convert",
-      });
-      return;
-    }
-
+    setIsLoading(true);
     const toast = await showToast({
       style: Toast.Style.Animated,
       // TODO: When converting video, we could show the progress percentage. This would require to find a solution when multiple files are being converted.
@@ -113,27 +124,53 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
         await showToast({
           style: Toast.Style.Success,
           title: "File converted successfully!",
-          message: "Press ⌘O to open the converted file",
+          message: "⌘O to open the file",
           primaryAction: {
             title: "Open File",
             shortcut: { modifiers: ["cmd"], key: "o" },
             onAction: () => {
-              execPromise(`open "${outputPath}"`);
+              showInFinder(outputPath);
             },
           },
         });
       } catch (error) {
         await toast.hide();
-        await showToast({ style: Toast.Style.Failure, title: "Conversion failed", message: String(error) });
+        const errorMessage = String(error);
+
+        // Check if the error is related to FFmpeg not being installed
+        if (errorMessage.includes("FFmpeg is not installed or configured")) {
+          showFailureToast(new Error("FFmpeg needs to be configured to convert files"), {
+            title: "FFmpeg not found",
+            primaryAction: {
+              title: "Configure FFmpeg",
+              onAction: () => {
+                // Open command preferences to set FFmpeg path
+                openCommandPreferences();
+              },
+            },
+          });
+        } else {
+          await showToast({ style: Toast.Style.Failure, title: "Conversion failed", message: errorMessage });
+        }
       }
     }
+    setIsLoading(false);
   };
 
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Convert" onSubmit={handleSubmit} />
+          {currentFiles && currentFiles.length > 0 && selectedFileType && (
+            <Action.SubmitForm
+              title="Convert"
+              onSubmit={handleSubmit}
+              icon={Icon.NewDocument}
+              // For some reason, this still shows up as cmd+return instead of just return, so no use for now
+              /* shortcut={{ modifiers: [], key: "return" }} */
+            />
+          )}
         </ActionPanel>
       }
     >
@@ -150,16 +187,21 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
         <Form.Dropdown
           id="format"
           title="Select output format"
-          defaultValue={selectedFileType === "image" ? ".jpg" : selectedFileType === "audio" ? ".mp3" : ".mp4"}
+          value={
+            outputFormat || (selectedFileType === "image" ? ".jpg" : selectedFileType === "audio" ? ".mp3" : ".mp4")
+          }
           onChange={(newFormat) => {
             setOutputFormat(newFormat as (typeof OUTPUT_ALL_EXTENSIONS)[number]);
           }}
         >
           {selectedFileType === "image" ? (
             <Form.Dropdown.Section title="Image Formats">
-              {OUTPUT_IMAGE_EXTENSIONS.map((format) => (
-                <Form.Dropdown.Item key={format} value={format} title={format} />
-              ))}
+              {/* HEIC is only supported on macOS with SIPS, so we filter it out on other platforms. */}
+              {OUTPUT_IMAGE_EXTENSIONS.filter((format) => process.platform === "darwin" || format !== ".heic").map(
+                (format) => (
+                  <Form.Dropdown.Item key={format} value={format} title={format} />
+                ),
+              )}
             </Form.Dropdown.Section>
           ) : selectedFileType === "audio" ? (
             <Form.Dropdown.Section title="Audio Formats">
@@ -183,7 +225,7 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
             <Form.Dropdown
               id="qualitySetting"
               title={`Select quality`}
-              defaultValue={outputFormat === ".png" ? "png-24" : "80"}
+              value={currentQualitySetting}
               onChange={setCurrentQualitySetting}
             >
               {outputFormat === ".png" && (
