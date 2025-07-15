@@ -1,6 +1,6 @@
 # Paste to Markdown Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2025-07-15
 
 ### Added
 
