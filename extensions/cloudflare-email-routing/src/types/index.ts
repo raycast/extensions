@@ -38,7 +38,6 @@ export interface AliasRule {
 
 export interface ApiConfig {
   apiKey: string;
-  accountId: string;
   zoneId: string;
   destinationEmail: string;
   preAllocatePool: boolean;

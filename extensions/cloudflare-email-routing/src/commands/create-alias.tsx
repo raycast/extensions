@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import { Form, ActionPanel, Action, showToast, Toast, popToRoot } from "@raycast/api";
-import { useForm } from "@raycast/utils";
+import { useState } from "react";
+import { Form, ActionPanel, Action, showToast, Toast, popToRoot, Clipboard } from "@raycast/api";
+import { useForm, usePromise } from "@raycast/utils";
 import { CreateAliasFormData, CreateAliasProps } from "../types";
 import { validateLabel, validateDescription, extractDomainFromEmail } from "../utils";
 import { getApiConfig } from "../services/api/config";
@@ -8,19 +8,17 @@ import { getUnusedRules, createRule, updateRule, ensurePoolSize, getAccountDomai
 
 export default function CreateAlias({ alias }: CreateAliasProps = {}) {
   const [isLoading, setIsLoading] = useState(false);
-  const [domain, setDomain] = useState<string>("");
   const config = getApiConfig();
 
   // Fetch the correct domain for alias creation
-  useEffect(() => {
-    const fetchDomain = async () => {
+  const { data: domain } = usePromise(
+    async () => {
       try {
-        const accountDomain = await getAccountDomain();
-        setDomain(accountDomain);
+        return await getAccountDomain();
       } catch (error) {
         console.error("Failed to fetch domain:", error);
         // Fallback to extracting from destination email
-        setDomain(extractDomainFromEmail(config.destinationEmail));
+        const fallbackDomain = extractDomainFromEmail(config.destinationEmail);
 
         // Inform user about the fallback
         showToast({
@@ -28,11 +26,15 @@ export default function CreateAlias({ alias }: CreateAliasProps = {}) {
           title: "Domain Fetch Failed",
           message: "Using fallback domain. Check your API configuration.",
         });
-      }
-    };
 
-    fetchDomain();
-  }, [config.destinationEmail]);
+        return fallbackDomain;
+      }
+    },
+    [config.destinationEmail],
+    {
+      keepPreviousData: true,
+    }
+  );
 
   const { handleSubmit, itemProps } = useForm<CreateAliasFormData>({
     async onSubmit(values) {
@@ -56,6 +58,12 @@ export default function CreateAlias({ alias }: CreateAliasProps = {}) {
             style: Toast.Style.Success,
             title: "Alias Updated",
             message: `Successfully updated ${alias.email}`,
+            primaryAction: {
+              title: "Copy Email",
+              onAction: () => {
+                Clipboard.copy(alias.email);
+              },
+            },
           });
         } else {
           // Create new alias
@@ -80,6 +88,12 @@ export default function CreateAlias({ alias }: CreateAliasProps = {}) {
               style: Toast.Style.Success,
               title: "Alias Created",
               message: `Successfully created ${ruleToUse.email}`,
+              primaryAction: {
+                title: "Copy Email",
+                onAction: () => {
+                  Clipboard.copy(ruleToUse.email);
+                },
+              },
             });
 
             // Ensure pool size after using a rule
@@ -100,10 +114,17 @@ export default function CreateAlias({ alias }: CreateAliasProps = {}) {
 
         popToRoot();
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         showToast({
           style: Toast.Style.Failure,
           title: alias ? "Failed to Update Alias" : "Failed to Create Alias",
-          message: error instanceof Error ? error.message : "Unknown error",
+          message: errorMessage,
+          primaryAction: {
+            title: "Copy Error",
+            onAction: () => {
+              Clipboard.copy(errorMessage);
+            },
+          },
         });
       } finally {
         setIsLoading(false);
@@ -154,6 +175,12 @@ export default function CreateAlias({ alias }: CreateAliasProps = {}) {
           style: Toast.Style.Success,
           title: "Alias Created",
           message: `Successfully created ${ruleToUse.email}`,
+          primaryAction: {
+            title: "Copy Email",
+            onAction: () => {
+              Clipboard.copy(ruleToUse.email);
+            },
+          },
         });
 
         // Ensure pool size after using a rule

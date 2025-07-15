@@ -1,6 +1,6 @@
-# Hide My Mail: Cloudflare Email Aliases
+# Cloudflare Email Routing
 
-A Raycast extension that allows you to create, list, edit, and delete Cloudflare email aliases directly from Raycast. This extension is based on the [Hide My Mail](https://github.com/webmonch/hide-my-mail-cloudflare) Chrome extension.
+A Raycast extension that allows you to create, list, edit, and delete Cloudflare email aliases directly from Raycast. 
 
 ## Features
 
@@ -13,9 +13,11 @@ A Raycast extension that allows you to create, list, edit, and delete Cloudflare
 
 ## Screenshots
 
-![List Email Aliases](./screenshots/list-aliases.png)
-![Create Email Alias](./screenshots/create-alias.png)
-![Edit Email Alias](./screenshots/edit-alias.png)
+![Onboarding](./metadata/cloudflare-email-routing-1.png)
+![Commands](./metadata/cloudflare-email-routing-2.png)
+![Create Email Alias](./metadata/cloudflare-email-routing-3.png)
+![List Email Alias](./metadata/cloudflare-email-routing-4.png)
+![Edit Email Alias](./metadata/cloudflare-email-routing-5.png)
 
 
 ## Prerequisites
@@ -32,7 +34,6 @@ After installing the extension, you will need to configure the following prefere
 
 -   **Cloudflare API Key**: Your API token with `Email Routing:Edit` permissions.
 -   **Zone ID**: The Zone ID for the domain where your email routing is configured.
--   **Account ID**: Your Cloudflare Account ID.
 -   **Destination Email Address**: The real email address where your aliases will forward emails to.
 -   **Pre-allocate Alias Pool** (Optional): Enable to pre-create a pool of unused aliases for faster generation.
 
