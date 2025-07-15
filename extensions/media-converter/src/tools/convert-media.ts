@@ -4,12 +4,23 @@ import {
   OUTPUT_AUDIO_EXTENSIONS,
   OUTPUT_VIDEO_EXTENSIONS, */
   /* OUTPUT_ALL_EXTENSIONS, */
+} from "../utils/converter";
+import {
   INPUT_IMAGE_EXTENSIONS,
   INPUT_AUDIO_EXTENSIONS,
   INPUT_VIDEO_EXTENSIONS,
-} from "../utils/converter";
+  type QualitySettings,
+  type QualityLevel,
+  type OutputImageExtension,
+  type OutputAudioExtension,
+  type OutputVideoExtension,
+  type ImageQuality,
+  type AudioQuality,
+  type VideoQuality,
+  DEFAULT_QUALITIES,
+} from "../types/media";
 import { findFFmpegPath } from "../utils/ffmpeg";
-import { Tool } from "@raycast/api";
+import { Image, Tool } from "@raycast/api";
 import path from "path";
 import os from "os";
 import fs from "fs";
@@ -40,6 +51,87 @@ function getMediaType(filePath: string): "image" | "audio" | "video" | null {
   return null;
 }
 
+function getQualitySettings(outputFormat: string, qualityLevel: QualityLevel): QualitySettings {
+  // For most formats, we'll use presets based on quality level
+  switch (outputFormat) {
+    // Image formats
+    case ".jpg":
+    case ".heic":
+    case ".avif":
+      const imageQualityValue = qualityLevel === "low" ? 60 : qualityLevel === "medium" ? 80 : 95;
+      return { [outputFormat]: imageQualityValue } as unknown as ImageQuality;
+
+    case ".webp":
+      if (qualityLevel === "lossless") {
+        return { ".webp": "lossless" } as ImageQuality;
+      }
+      const webpQualityValue = qualityLevel === "low" ? 60 : qualityLevel === "medium" ? 80 : 95;
+      return { ".webp": webpQualityValue } as ImageQuality;
+
+    case ".png":
+      return { ".png": "png-24" } as ImageQuality;
+
+    case ".tiff":
+      return { ".tiff": "deflate" } as ImageQuality;
+
+    // Audio formats
+    case ".mp3":
+      const mp3Bitrate = qualityLevel === "low" ? "128" : qualityLevel === "medium" ? "192" : "320";
+      return { ".mp3": { bitrate: mp3Bitrate, vbr: true } } as AudioQuality;
+
+    case ".aac":
+    case ".m4a":
+      const aacBitrate = qualityLevel === "low" ? "128" : qualityLevel === "medium" ? "192" : "320";
+      return { [outputFormat]: { bitrate: aacBitrate, profile: "aac_low" } } as unknown as AudioQuality;
+
+    case ".wav":
+      const wavSampleRate = qualityLevel === "lossless" ? "48000" : "44100";
+      const wavBitDepth = qualityLevel === "lossless" ? "24" : "16";
+      return { ".wav": { sampleRate: wavSampleRate, bitDepth: wavBitDepth } } as AudioQuality;
+
+    case ".flac":
+      const flacLevel = qualityLevel === "low" ? "3" : qualityLevel === "medium" ? "5" : "8";
+      const flacSampleRate = qualityLevel === "lossless" ? "48000" : "44100";
+      const flacBitDepth = qualityLevel === "lossless" ? "24" : "16";
+      return {
+        ".flac": { compressionLevel: flacLevel, sampleRate: flacSampleRate, bitDepth: flacBitDepth },
+      } as AudioQuality;
+
+    // Video formats
+    case ".mp4":
+      const mp4Crf = qualityLevel === "low" ? 28 : qualityLevel === "medium" ? 23 : 18;
+      const mp4Preset = qualityLevel === "low" ? "fast" : qualityLevel === "medium" ? "medium" : "slow";
+      return { ".mp4": { encodingMode: "crf", crf: mp4Crf, preset: mp4Preset } } as VideoQuality;
+
+    case ".mkv":
+      const mkvCrf = qualityLevel === "low" ? 28 : qualityLevel === "medium" ? 23 : 18;
+      const mkvPreset = qualityLevel === "low" ? "fast" : qualityLevel === "medium" ? "medium" : "slow";
+      return { ".mkv": { encodingMode: "crf", crf: mkvCrf, preset: mkvPreset } } as VideoQuality;
+
+    case ".avi":
+      const aviCrf = qualityLevel === "low" ? 28 : qualityLevel === "medium" ? 23 : 18;
+      return { ".avi": { encodingMode: "crf", crf: aviCrf } } as VideoQuality;
+
+    case ".mov":
+      const movVariant = qualityLevel === "low" ? "proxy" : qualityLevel === "medium" ? "standard" : "hq";
+      return { ".mov": { variant: movVariant } } as VideoQuality;
+
+    case ".mpg":
+      const mpgCrf = qualityLevel === "low" ? 28 : qualityLevel === "medium" ? 23 : 18;
+      return { ".mpg": { encodingMode: "crf", crf: mpgCrf } } as VideoQuality;
+
+    case ".webm":
+      const webmCrf = qualityLevel === "low" ? 35 : qualityLevel === "medium" ? 30 : 25;
+      const webmQuality = qualityLevel === "high" ? "best" : "good";
+      return { ".webm": { encodingMode: "crf", crf: webmCrf, quality: webmQuality } } as VideoQuality;
+
+    default:
+      // Fallback to default quality from the constants
+      const defaultQuality = DEFAULT_QUALITIES[outputFormat as keyof typeof DEFAULT_QUALITIES];
+      return { [outputFormat]: defaultQuality } as unknown as QualitySettings;
+  }
+}
+
 type Input = {
   inputPath: string;
   // I cannot, for the life of me, figure out how to get the type of this array to be a union of its values
@@ -65,7 +157,7 @@ type Input = {
     | ".heic"
     | ".tiff"
     | ".avif";
-  quality?: string;
+  quality: QualityLevel;
 };
 
 export default async function ConvertMedia({ inputPath, outputFileType, quality }: Input) {
@@ -100,12 +192,26 @@ export default async function ConvertMedia({ inputPath, outputFileType, quality 
 
   try {
     let outputPath: string;
+    const qualitySettings = getQualitySettings(outputFileType, quality);
+
     if (mediaType === "image") {
-      outputPath = await convertMedia(fullPath, outputFileType, quality);
+      outputPath = await convertMedia(
+        fullPath,
+        outputFileType as OutputImageExtension,
+        qualitySettings as ImageQuality,
+      );
     } else if (mediaType === "audio") {
-      outputPath = await convertMedia(fullPath, outputFileType);
+      outputPath = await convertMedia(
+        fullPath,
+        outputFileType as OutputAudioExtension,
+        qualitySettings as AudioQuality,
+      );
     } else if (mediaType === "video") {
-      outputPath = await convertMedia(fullPath, outputFileType);
+      outputPath = await convertMedia(
+        fullPath,
+        outputFileType as OutputVideoExtension,
+        qualitySettings as VideoQuality,
+      );
     } else {
       return {
         type: "error",
@@ -135,10 +241,8 @@ export const confirmation: Tool.Confirmation<Input> = async ({ inputPath, output
       { name: "Input Path", value: fullPath },
       { name: "Input Media Type", value: mediaType || "Unknown" },
       { name: "Output File Type", value: outputFileType },
+      { name: "Quality", value: String(quality) },
     ];
-    if (quality) {
-      info.push({ name: "Quality", value: quality });
-    }
 
     return {
       message,

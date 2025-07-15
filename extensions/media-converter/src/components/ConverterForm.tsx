@@ -1,46 +1,47 @@
 import { Form, ActionPanel, Action, showToast, Toast, showInFinder, Icon, openCommandPreferences } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
+import { convertMedia, checkExtensionType } from "../utils/converter";
 import {
-  convertMedia,
-  checkExtensionType,
   OUTPUT_VIDEO_EXTENSIONS,
   OUTPUT_AUDIO_EXTENSIONS,
   OUTPUT_IMAGE_EXTENSIONS,
-  OUTPUT_ALL_EXTENSIONS,
   type MediaType,
   type AllOutputExtension,
   type QualitySettings,
-  getDefaultQuality,
   type OutputImageExtension,
   type OutputAudioExtension,
-  type OutputVideoExtension,
+  /* type OutputVideoExtension, */
   type ImageQuality,
   type AudioQuality,
   type VideoQuality,
-} from "../utils/converter";
-import {
-  type AudioBitrateValue,
-  type AudioProfileValue,
-  type AudioSampleRateValue,
-  type AudioBitDepthValue,
-  type AudioCompressionValue,
-  type AudioVbrValue,
-  type VideoEncodingModeValue,
-  type VideoCrfValue,
-  type VideoBitrateValue,
-  type VideoPresetValue,
-  type VideoVariantValue,
-  type VideoQualityValue,
   getMediaType,
+  AUDIO_BITRATES,
+  type AudioBitrate,
+  AUDIO_SAMPLE_RATES,
+  type AudioSampleRate,
+  AUDIO_BIT_DEPTH,
+  type AudioBitDepth,
+  AUDIO_PROFILES,
+  type AudioProfile,
+  DEFAULT_QUALITIES,
+  AUDIO_COMPRESSION_LEVEL,
+  type AudioCompressionLevel,
 } from "../types/media";
 
 export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }) {
   const [selectedFileType, setSelectedFileType] = useState<MediaType | null>(null);
   const [currentFiles, setCurrentFiles] = useState<string[]>(initialFiles || []);
   const [outputFormat, setOutputFormat] = useState<AllOutputExtension | null>(null);
-  const [currentQualitySetting, setCurrentQualitySetting] = useState<QualitySettings<AllOutputExtension> | null>(null);
+  const [currentQualitySetting, setCurrentQualitySetting] = useState<QualitySettings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Helper function to get default quality settings for a format
+  const getDefaultQuality = (format: AllOutputExtension): QualitySettings => {
+    return {
+      [format]: DEFAULT_QUALITIES[format as keyof typeof DEFAULT_QUALITIES],
+    } as MediaType extends "image" ? ImageQuality : MediaType extends "audio" ? AudioQuality : VideoQuality;
+  };
 
   useEffect(() => {
     if (initialFiles && initialFiles.length > 0) {
@@ -94,17 +95,16 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
       setCurrentFiles(processedFiles);
       setSelectedFileType(primaryFileType);
 
-      // Initialize output format with default value based on file type
-      if (primaryFileType === "image") {
-        setOutputFormat(".jpg");
-        setCurrentQualitySetting(getDefaultQuality(".jpg"));
-      } else if (primaryFileType === "audio") {
-        setOutputFormat(".mp3");
-        setCurrentQualitySetting(getDefaultQuality(".mp3"));
-      } else if (primaryFileType === "video") {
-        setOutputFormat(".mp4");
-        setCurrentQualitySetting(getDefaultQuality(".mp4"));
-      }
+      // Initialize default output format and quality based on file type
+      const defaultFormat =
+        primaryFileType === "image"
+          ? (".jpg" as const)
+          : primaryFileType === "audio"
+            ? (".mp3" as const)
+            : (".mp4" as const);
+
+      setOutputFormat(defaultFormat);
+      setCurrentQualitySetting(getDefaultQuality(defaultFormat));
     } catch (error) {
       const errorMessage = String(error);
       showToast({
@@ -210,9 +210,7 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
         <Form.Dropdown
           id="format"
           title="Select output format"
-          value={
-            outputFormat || (selectedFileType === "image" ? ".jpg" : selectedFileType === "audio" ? ".mp3" : ".mp4")
-          }
+          value={outputFormat!}
           onChange={(newFormat) => {
             const format = newFormat as AllOutputExtension;
             setOutputFormat(format);
@@ -221,15 +219,12 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
         >
           <Form.Dropdown.Section>
             {(() => {
-              let availableExtensions: readonly AllOutputExtension[] = [];
-
-              if (selectedFileType === "image") {
-                availableExtensions = OUTPUT_IMAGE_EXTENSIONS;
-              } else if (selectedFileType === "audio") {
-                availableExtensions = OUTPUT_AUDIO_EXTENSIONS;
-              } else if (selectedFileType === "video") {
-                availableExtensions = OUTPUT_VIDEO_EXTENSIONS;
-              }
+              const availableExtensions =
+                selectedFileType === "image"
+                  ? OUTPUT_IMAGE_EXTENSIONS
+                  : selectedFileType === "audio"
+                    ? OUTPUT_AUDIO_EXTENSIONS
+                    : OUTPUT_VIDEO_EXTENSIONS;
 
               /* HEIC is only supported on macOS with SIPS, so we filter it out on other platforms. */
               return availableExtensions
@@ -240,7 +235,7 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
         </Form.Dropdown>
       )}
       {/* Quality Settings */}
-      {selectedFileType && outputFormat && OUTPUT_ALL_EXTENSIONS.includes(outputFormat) && (
+      {selectedFileType && outputFormat && currentQualitySetting && (
         <QualitySettings
           outputFormat={outputFormat}
           currentQuality={currentQualitySetting}
@@ -258,61 +253,65 @@ function QualitySettings({
   onQualityChange,
 }: {
   outputFormat: AllOutputExtension;
-  currentQuality: QualitySettings<AllOutputExtension> | null;
-  onQualityChange: (quality: QualitySettings<AllOutputExtension>) => void;
+  currentQuality: QualitySettings;
+  onQualityChange: (quality: QualitySettings) => void;
 }) {
-  if (getMediaType(outputFormat) === "image") {
-    return (
-      <ImageQualitySettings
-        outputFormat={outputFormat as OutputImageExtension}
-        currentQuality={currentQuality as ImageQuality<OutputImageExtension> | null}
-        onQualityChange={onQualityChange as (quality: ImageQuality<OutputImageExtension>) => void}
-      />
-    );
+  const currentMediaType = getMediaType(outputFormat)!;
+  switch (currentMediaType) {
+    case "image":
+      return (
+        <ImageQualitySettings
+          outputFormat={outputFormat as OutputImageExtension}
+          currentQuality={currentQuality as ImageQuality}
+          onQualityChange={onQualityChange as (quality: ImageQuality) => void}
+        />
+      );
+    case "audio":
+      return (
+        <AudioQualitySettings
+          outputFormat={outputFormat as OutputAudioExtension}
+          currentQuality={currentQuality as AudioQuality}
+          onQualityChange={onQualityChange as (quality: AudioQuality) => void}
+        />
+      );
+    case "video":
+    /* return (
+       <VideoQualitySettings
+         outputFormat={outputFormat as OutputVideoExtension}
+         currentQuality={currentQuality as VideoQuality}
+         onQualityChange={onQualityChange as (quality: VideoQuality) => void}
+       />
+     ); */
   }
-
-  if (getMediaType(outputFormat) === "audio") {
-    return (
-      <AudioQualitySettings
-        outputFormat={outputFormat as OutputAudioExtension}
-        currentQuality={currentQuality as AudioQuality<OutputAudioExtension> | null}
-        onQualityChange={onQualityChange as (quality: AudioQuality<OutputAudioExtension>) => void}
-      />
-    );
-  }
-
-  if (getMediaType(outputFormat) === "video") {
-    return (
-      <VideoQualitySettings
-        outputFormat={outputFormat as OutputVideoExtension}
-        currentQuality={currentQuality as VideoQuality<OutputVideoExtension> | null}
-        onQualityChange={onQualityChange as (quality: VideoQuality<OutputVideoExtension>) => void}
-      />
-    );
-  }
-
-  return null;
 }
 
-// Image Quality Settings Component
 function ImageQualitySettings({
   outputFormat,
   currentQuality,
   onQualityChange,
 }: {
   outputFormat: OutputImageExtension;
-  currentQuality: ImageQuality<OutputImageExtension> | null;
-  onQualityChange: (quality: ImageQuality<OutputImageExtension>) => void;
+  currentQuality: ImageQuality;
+  onQualityChange: (quality: ImageQuality) => void;
 }) {
-  const percentages = [...Array(21).keys()].map((i) => (100 - i * 5).toString());
+  const getCurrentValue = () => {
+    return currentQuality[outputFormat];
+  };
+
+  const handleChange = (value: string | number) => {
+    const newQuality = { ...currentQuality } as ImageQuality;
+    (newQuality as Record<string, string | number>)[outputFormat] = value;
+    onQualityChange(newQuality);
+  };
+
   if (outputFormat === ".png") {
     return (
       <>
         <Form.Dropdown
           id="qualitySetting"
           title="Select quality"
-          value={(currentQuality as string) || "png-24"}
-          onChange={(value) => onQualityChange(value as ImageQuality<OutputImageExtension>)}
+          value={(getCurrentValue() as string) || "png-24"}
+          onChange={(value) => handleChange(value)}
         >
           <Form.Dropdown.Item value="png-24" title="PNG-24 (24-bit RGB, full color)" />
           <Form.Dropdown.Item value="png-8" title="PNG-8 (8-bit indexed, 256 colors)" />
@@ -328,8 +327,8 @@ function ImageQualitySettings({
         <Form.Dropdown
           id="qualitySetting"
           title="Select compression type"
-          value={(currentQuality as string) || "deflate"}
-          onChange={(value) => onQualityChange(value as ImageQuality<OutputImageExtension>)}
+          value={(getCurrentValue() as string) || "deflate"}
+          onChange={(value) => handleChange(value)}
         >
           <Form.Dropdown.Item value="deflate" title="Deflate (recommended, smaller size)" />
           <Form.Dropdown.Item value="lzw" title="LZW (wider compatibility)" />
@@ -344,12 +343,12 @@ function ImageQualitySettings({
     <Form.Dropdown
       id="qualitySetting"
       title="Select quality"
-      value={(currentQuality as number)?.toString() || "80"}
+      value={(getCurrentValue() as number)?.toString() || "80"}
       onChange={(value) => {
         if (value === "lossless") {
-          onQualityChange(value as ImageQuality<OutputImageExtension>);
+          handleChange("lossless");
         } else {
-          onQualityChange(parseInt(value) as ImageQuality<OutputImageExtension>);
+          handleChange(Number(value));
         }
       }}
     >
@@ -358,473 +357,201 @@ function ImageQualitySettings({
           <Form.Dropdown.Item value="lossless" title="Lossless" />
         </Form.Dropdown.Section>
       )}
-      {percentages.map((q) => {
-        const title = outputFormat === ".avif" && q === "100" ? "100 (lossless)" : q.toString();
-        return <Form.Dropdown.Item key={q} value={q.toString()} title={title} />;
-      })}
+      {[...Array(21).keys()]
+        .map((i) => (100 - i * 5).toString())
+        .map((q) => {
+          const title = outputFormat === ".avif" && q === "100" ? "100 (lossless)" : q.toString();
+          return <Form.Dropdown.Item key={q} value={q.toString()} title={title} />;
+        })}
     </Form.Dropdown>
   );
 }
 
-// Audio Quality Settings Component
+// TODO: If the selected output setting surpasses the quality of the original file, show the input audio's bitrate/profile/sample, which file is that.
+// Just a warning, letting the user know that the output file will not be better than the input file.
 function AudioQualitySettings({
   outputFormat,
   currentQuality,
   onQualityChange,
 }: {
   outputFormat: OutputAudioExtension;
-  currentQuality: AudioQuality<OutputAudioExtension> | null;
-  onQualityChange: (quality: AudioQuality<OutputAudioExtension>) => void;
+  currentQuality: AudioQuality;
+  onQualityChange: (quality: AudioQuality) => void;
 }) {
-  // Safe property access with proper type casting
-  const getBitrate = (): AudioBitrateValue => {
-    if (currentQuality && "bitrate" in currentQuality) {
-      return currentQuality.bitrate;
-    }
-    return "192";
+  const getCurrentSettings = () => {
+    return currentQuality[outputFormat];
   };
 
-  const getVbr = (): boolean => {
-    if (currentQuality && "vbr" in currentQuality) {
-      return currentQuality.vbr || false;
-    }
-    return false;
+  const updateSettings = (newSettings: unknown) => {
+    const newQuality = { ...currentQuality } as AudioQuality;
+    (newQuality as Record<string, unknown>)[outputFormat] = newSettings;
+    onQualityChange(newQuality);
   };
 
-  const getProfile = (): AudioProfileValue => {
-    if (currentQuality && "profile" in currentQuality) {
-      return currentQuality.profile || "aac_low";
-    }
-    return "aac_low";
-  };
-
-  const getSampleRate = (): AudioSampleRateValue => {
-    if (currentQuality && "sampleRate" in currentQuality) {
-      return currentQuality.sampleRate;
-    }
-    return "44100";
-  };
-
-  const getBitDepth = (): AudioBitDepthValue => {
-    if (currentQuality && "bitDepth" in currentQuality) {
-      return currentQuality.bitDepth;
-    }
-    return "16";
-  };
-
-  const getCompressionLevel = (): AudioCompressionValue => {
-    if (currentQuality && "compressionLevel" in currentQuality) {
-      return currentQuality.compressionLevel;
-    }
-    return "5";
-  };
-
-  const [bitrate, setBitrate] = useState<AudioBitrateValue>(getBitrate());
-  const [vbr, setVbr] = useState<boolean>(getVbr());
-  const [profile, setProfile] = useState<AudioProfileValue>(getProfile());
-  const [sampleRate, setSampleRate] = useState<AudioSampleRateValue>(getSampleRate());
-  const [bitDepth, setBitDepth] = useState<AudioBitDepthValue>(getBitDepth());
-  const [compressionLevel, setCompressionLevel] = useState<AudioCompressionValue>(getCompressionLevel());
-
-  const updateQuality = () => {
-    if (outputFormat === ".mp3") {
-      onQualityChange({ bitrate, vbr } as AudioQuality<OutputAudioExtension>);
-    } else if (outputFormat === ".aac" || outputFormat === ".m4a") {
-      onQualityChange({ bitrate, profile } as AudioQuality<OutputAudioExtension>);
-    } else if (outputFormat === ".wav") {
-      onQualityChange({ sampleRate, bitDepth } as AudioQuality<OutputAudioExtension>);
-    } else if (outputFormat === ".flac") {
-      onQualityChange({ compressionLevel, sampleRate, bitDepth } as AudioQuality<OutputAudioExtension>);
-    }
-  };
-
-  useEffect(() => {
-    updateQuality();
-  }, [bitrate, vbr, profile, sampleRate, bitDepth, compressionLevel]);
-
-  const bitrates: AudioBitrateValue[] = ["64", "96", "128", "160", "192", "224", "256", "320"];
-
-  if (outputFormat === ".mp3") {
-    return (
-      <>
-        <Form.Dropdown
-          id="mp3Bitrate"
-          title="Bitrate"
-          value={bitrate}
-          onChange={(value) => setBitrate(value as AudioBitrateValue)}
-        >
-          {bitrates.map((rate) => (
-            <Form.Dropdown.Item key={rate} value={rate} title={`${rate} kbps`} />
-          ))}
-        </Form.Dropdown>
-        <Form.Checkbox
-          id="mp3Vbr"
-          title="Variable Bitrate (VBR)"
-          label="Use variable bitrate encoding for better quality"
-          value={vbr}
-          onChange={setVbr}
-        />
-      </>
-    );
-  }
-
-  if (outputFormat === ".aac" || outputFormat === ".m4a") {
-    return (
-      <>
-        <Form.Dropdown
-          id="aacBitrate"
-          title="Bitrate"
-          value={bitrate}
-          onChange={(value) => setBitrate(value as AudioBitrateValue)}
-        >
-          {bitrates.map((rate) => (
-            <Form.Dropdown.Item key={rate} value={rate} title={`${rate} kbps`} />
-          ))}
-        </Form.Dropdown>
-        <Form.Dropdown
-          id="aacProfile"
-          title="AAC Profile"
-          value={profile}
-          onChange={(value) => setProfile(value as AudioProfileValue)}
-        >
-          <Form.Dropdown.Item value="aac_low" title="AAC Low Complexity (recommended)" />
-          <Form.Dropdown.Item value="aac_he" title="AAC High Efficiency" />
-          <Form.Dropdown.Item value="aac_he_v2" title="AAC High Efficiency v2" />
-        </Form.Dropdown>
-      </>
-    );
-  }
-
-  if (outputFormat === ".wav") {
-    return (
-      <>
-        <Form.Dropdown
-          id="wavSampleRate"
-          title="Sample Rate"
-          value={sampleRate}
-          onChange={(value) => setSampleRate(value as AudioSampleRateValue)}
-        >
-          <Form.Dropdown.Item value="22050" title="22,050 Hz" />
-          <Form.Dropdown.Item value="44100" title="44,100 Hz (CD Quality)" />
-          <Form.Dropdown.Item value="48000" title="48,000 Hz (Professional)" />
-          <Form.Dropdown.Item value="96000" title="96,000 Hz (High-res)" />
-        </Form.Dropdown>
-        <Form.Dropdown
-          id="wavBitDepth"
-          title="Bit Depth"
-          value={bitDepth}
-          onChange={(value) => setBitDepth(value as AudioBitDepthValue)}
-        >
-          <Form.Dropdown.Item value="16" title="16-bit" />
-          <Form.Dropdown.Item value="24" title="24-bit" />
-          <Form.Dropdown.Item value="32" title="32-bit" />
-        </Form.Dropdown>
-      </>
-    );
-  }
-
-  if (outputFormat === ".flac") {
-    return (
-      <>
-        <Form.Dropdown
-          id="flacCompression"
-          title="Compression Level"
-          value={compressionLevel}
-          onChange={(value) => setCompressionLevel(value as AudioCompressionValue)}
-        >
-          {["0", "1", "2", "3", "4", "5", "6", "7", "8"].map((level) => (
-            <Form.Dropdown.Item key={level} value={level} title={`${level} ${level === "5" ? "(recommended)" : ""}`} />
-          ))}
-        </Form.Dropdown>
-        <Form.Dropdown
-          id="flacSampleRate"
-          title="Sample Rate"
-          value={sampleRate}
-          onChange={(value) => setSampleRate(value as AudioSampleRateValue)}
-        >
-          <Form.Dropdown.Item value="22050" title="22,050 Hz" />
-          <Form.Dropdown.Item value="44100" title="44,100 Hz (CD Quality)" />
-          <Form.Dropdown.Item value="48000" title="48,000 Hz (Professional)" />
-          <Form.Dropdown.Item value="96000" title="96,000 Hz (High-res)" />
-        </Form.Dropdown>
-        <Form.Dropdown
-          id="flacBitDepth"
-          title="Bit Depth"
-          value={bitDepth}
-          onChange={(value) => setBitDepth(value as AudioBitDepthValue)}
-        >
-          <Form.Dropdown.Item value="16" title="16-bit" />
-          <Form.Dropdown.Item value="24" title="24-bit" />
-        </Form.Dropdown>
-      </>
-    );
-  }
-
-  return null;
-}
-
-// Video Quality Settings Component
-function VideoQualitySettings({
-  outputFormat,
-  currentQuality,
-  onQualityChange,
-}: {
-  outputFormat: OutputVideoExtension;
-  currentQuality: VideoQuality<OutputVideoExtension> | null;
-  onQualityChange: (quality: VideoQuality<OutputVideoExtension>) => void;
-}) {
-  // Safe property access with proper type casting
-  const getEncodingMode = (): VideoEncodingModeValue => {
-    if (currentQuality && "encodingMode" in currentQuality) {
-      return currentQuality.encodingMode;
-    }
-    return "crf";
-  };
-
-  const getCrf = (): VideoCrfValue => {
-    if (currentQuality && "crf" in currentQuality) {
-      return currentQuality.crf;
-    }
-    return 23;
-  };
-
-  const getBitrate = (): VideoBitrateValue => {
-    if (currentQuality && "bitrate" in currentQuality) {
-      return currentQuality.bitrate;
-    }
-    return "2000";
-  };
-
-  const getMaxBitrate = (): VideoBitrateValue | "" => {
-    if (currentQuality && "maxBitrate" in currentQuality) {
-      return currentQuality.maxBitrate || "";
-    }
-    return "";
-  };
-
-  const getPreset = (): VideoPresetValue => {
-    if (currentQuality && "preset" in currentQuality) {
-      return currentQuality.preset;
-    }
-    return "medium";
-  };
-
-  const getVariant = (): VideoVariantValue => {
-    if (currentQuality && "variant" in currentQuality) {
-      return currentQuality.variant;
-    }
-    return "standard";
-  };
-
-  const getQuality = (): VideoQualityValue => {
-    if (currentQuality && "quality" in currentQuality) {
-      return currentQuality.quality;
-    }
-    return "good";
-  };
-
-  const [encodingMode, setEncodingMode] = useState<VideoEncodingModeValue>(getEncodingMode());
-  const [crf, setCrf] = useState<VideoCrfValue>(getCrf());
-  const [bitrate, setBitrate] = useState<VideoBitrateValue>(getBitrate());
-  const [maxBitrate, setMaxBitrate] = useState<VideoBitrateValue | "">(getMaxBitrate());
-  const [preset, setPreset] = useState<VideoPresetValue>(getPreset());
-  const [variant, setVariant] = useState<VideoVariantValue>(getVariant());
-  const [quality, setQuality] = useState<VideoQualityValue>(getQuality());
-
-  const updateQuality = () => {
-    if (outputFormat === ".mp4") {
-      if (encodingMode === "crf") {
-        onQualityChange({ encodingMode, crf, preset } as VideoQuality<OutputVideoExtension>);
-      } else {
-        const qualitySettings = { encodingMode, bitrate, preset };
-        if (maxBitrate) {
-          onQualityChange({ ...qualitySettings, maxBitrate } as VideoQuality<OutputVideoExtension>);
-        } else {
-          onQualityChange(qualitySettings as VideoQuality<OutputVideoExtension>);
-        }
-      }
-    } else if (outputFormat === ".avi") {
-      if (encodingMode === "crf") {
-        onQualityChange({ encodingMode, crf } as VideoQuality<OutputVideoExtension>);
-      } else {
-        onQualityChange({ encodingMode, bitrate } as VideoQuality<OutputVideoExtension>);
-      }
-    } else if (outputFormat === ".mov") {
-      onQualityChange({ variant } as VideoQuality<OutputVideoExtension>);
-    } else if (outputFormat === ".mkv") {
-      if (encodingMode === "crf") {
-        onQualityChange({ encodingMode, crf, preset } as VideoQuality<OutputVideoExtension>);
-      } else {
-        const qualitySettings = { encodingMode, bitrate, preset };
-        if (maxBitrate) {
-          onQualityChange({ ...qualitySettings, maxBitrate } as VideoQuality<OutputVideoExtension>);
-        } else {
-          onQualityChange(qualitySettings as VideoQuality<OutputVideoExtension>);
-        }
-      }
-    } else if (outputFormat === ".mpg") {
-      if (encodingMode === "crf") {
-        onQualityChange({ encodingMode, crf } as VideoQuality<OutputVideoExtension>);
-      } else {
-        onQualityChange({ encodingMode, bitrate } as VideoQuality<OutputVideoExtension>);
-      }
-    } else if (outputFormat === ".webm") {
-      if (encodingMode === "crf") {
-        onQualityChange({ encodingMode, crf, quality } as VideoQuality<OutputVideoExtension>);
-      } else {
-        const qualitySettings = { encodingMode, bitrate, quality };
-        if (maxBitrate) {
-          onQualityChange({ ...qualitySettings, maxBitrate } as VideoQuality<OutputVideoExtension>);
-        } else {
-          onQualityChange(qualitySettings as VideoQuality<OutputVideoExtension>);
-        }
-      }
-    }
-  };
-
-  useEffect(() => {
-    updateQuality();
-  }, [encodingMode, crf, bitrate, maxBitrate, preset, variant, quality]);
-
-  if (outputFormat === ".mov") {
-    return (
-      <Form.Dropdown
-        id="proresVariant"
-        title="ProRes Variant"
-        value={variant}
-        onChange={(value) => setVariant(value as VideoVariantValue)}
-      >
-        <Form.Dropdown.Item value="proxy" title="ProRes Proxy (lowest quality, smallest size)" />
-        <Form.Dropdown.Item value="lt" title="ProRes LT (low quality)" />
-        <Form.Dropdown.Item value="standard" title="ProRes 422 (standard quality)" />
-        <Form.Dropdown.Item value="hq" title="ProRes 422 HQ (high quality)" />
-        <Form.Dropdown.Item value="4444" title="ProRes 4444 (highest quality with alpha)" />
-        <Form.Dropdown.Item value="4444xq" title="ProRes 4444 XQ (extreme quality)" />
-      </Form.Dropdown>
-    );
-  }
+  // Derive controls from the AudioQuality type structure dynamically
+  const controls = Object.keys(getCurrentSettings()) as (keyof AudioQuality[OutputAudioExtension])[];
 
   return (
-    <>
-      <Form.Dropdown
-        id="encodingMode"
-        title="Encoding Mode"
-        value={encodingMode}
-        onChange={(value) => setEncodingMode(value as VideoEncodingModeValue)}
-      >
-        <Form.Dropdown.Item value="crf" title="CRF (Constant Rate Factor) - Quality-based" />
-        <Form.Dropdown.Item value="vbr" title="VBR (Variable Bitrate) - Size-based" />
-        <Form.Dropdown.Item value="vbr-2-pass" title="VBR 2-Pass - Best quality for target size" />
-      </Form.Dropdown>
-
-      {encodingMode === "crf" ? (
-        <>
-          <Form.Dropdown
-            id="crf"
-            title="CRF Value"
-            value={crf.toString()}
-            onChange={(value) => setCrf(parseInt(value) as VideoCrfValue)}
-            info="Lower values = better quality, larger files. 18-28 is typically used."
-          >
-            {Array.from({ length: 52 }, (_, i) => i).map((value) => (
-              <Form.Dropdown.Item
-                key={value}
-                value={value.toString()}
-                title={`${value} ${value === 18 ? "(excellent)" : value === 23 ? "(good default)" : value === 28 ? "(acceptable)" : ""}`}
-              />
-            ))}
-          </Form.Dropdown>
-        </>
-      ) : (
-        <>
-          <Form.Dropdown
-            id="bitrate"
-            title="Target Bitrate"
-            value={bitrate}
-            onChange={(value) => setBitrate(value as VideoBitrateValue)}
-          >
-            {[
-              "500",
-              "750",
-              "1000",
-              "1500",
-              "2000",
-              "3000",
-              "4000",
-              "5000",
-              "8000",
-              "10000",
-              "15000",
-              "20000",
-              "25000",
-              "30000",
-              "40000",
-              "50000",
-            ].map((rate) => (
-              <Form.Dropdown.Item key={rate} value={rate} title={`${rate} kbps`} />
-            ))}
-          </Form.Dropdown>
-          <Form.Dropdown
-            id="maxBitrate"
-            title="Max Bitrate (optional)"
-            value={maxBitrate}
-            onChange={(value) => setMaxBitrate(value as VideoBitrateValue | "")}
-          >
-            <Form.Dropdown.Item value="" title="None" />
-            {[
-              "750",
-              "1000",
-              "1500",
-              "2000",
-              "3000",
-              "4000",
-              "5000",
-              "8000",
-              "10000",
-              "15000",
-              "20000",
-              "25000",
-              "30000",
-              "40000",
-              "50000",
-            ].map((rate) => (
-              <Form.Dropdown.Item key={rate} value={rate} title={`${rate} kbps`} />
-            ))}
-          </Form.Dropdown>
-        </>
-      )}
-
-      {(outputFormat === ".mp4" || outputFormat === ".mkv") && (
-        <Form.Dropdown
-          id="preset"
-          title="Encoding Preset"
-          value={preset}
-          onChange={(value) => setPreset(value as VideoPresetValue)}
-        >
-          <Form.Dropdown.Item value="ultrafast" title="Ultrafast (fastest encoding, largest files)" />
-          <Form.Dropdown.Item value="superfast" title="Superfast" />
-          <Form.Dropdown.Item value="veryfast" title="Very Fast" />
-          <Form.Dropdown.Item value="faster" title="Faster" />
-          <Form.Dropdown.Item value="fast" title="Fast" />
-          <Form.Dropdown.Item value="medium" title="Medium (recommended balance)" />
-          <Form.Dropdown.Item value="slow" title="Slow (better compression)" />
-          <Form.Dropdown.Item value="slower" title="Slower" />
-          <Form.Dropdown.Item value="veryslow" title="Very Slow (best compression)" />
-        </Form.Dropdown>
-      )}
-
-      {outputFormat === ".webm" && (
-        <Form.Dropdown
-          id="quality"
-          title="Quality Mode"
-          value={quality}
-          onChange={(value) => setQuality(value as VideoQualityValue)}
-        >
-          <Form.Dropdown.Item value="good" title="Good (recommended)" />
-          <Form.Dropdown.Item value="best" title="Best (slower encoding)" />
-          <Form.Dropdown.Item value="realtime" title="Realtime (fastest encoding)" />
-        </Form.Dropdown>
-      )}
-    </>
+    <DynamicAudioQualitySettings
+      outputFormat={outputFormat}
+      controls={controls}
+      settings={getCurrentSettings()}
+      onSettingsChange={updateSettings}
+    />
   );
+
+  // Note: keep this as a separate function in case we need it for some other reason later
+  function DynamicAudioQualitySettings({
+    outputFormat,
+    controls,
+    settings,
+    onSettingsChange,
+  }: {
+    outputFormat: OutputAudioExtension;
+    controls: (keyof AudioQuality[OutputAudioExtension])[];
+    settings: AudioQuality[OutputAudioExtension];
+    onSettingsChange: (settings: AudioQuality[OutputAudioExtension]) => void;
+  }) {
+    const renderControl = (controlType: keyof AudioQuality[OutputAudioExtension]) => {
+      // Type-safe access to current value
+      const currentValue = (settings as Record<string, unknown>)?.[controlType as string];
+
+      switch (controlType) {
+        case "bitrate":
+          return (
+            <Form.Dropdown
+              key="bitrate"
+              id="bitrate"
+              title="Bitrate"
+              value={(currentValue as AudioBitrate) || "192"}
+              onChange={(bitrate: string) => onSettingsChange({ ...settings, [controlType]: bitrate as AudioBitrate })}
+              info="Higher bitrates provide better audio quality but larger file sizes"
+            >
+              {AUDIO_BITRATES.map((rate) => (
+                <Form.Dropdown.Item
+                  key={rate}
+                  value={rate}
+                  title={`${rate} kbps${rate === "64" ? " (Very low quality)" : rate === "192" ? " (Regular quality)" : rate === "320" ? " (Very high quality)" : ""}`}
+                />
+              ))}
+            </Form.Dropdown>
+          );
+
+        case "vbr":
+          return (
+            <Form.Checkbox
+              key="vbr"
+              id="vbr"
+              title="Variable Bitrate (VBR)"
+              label="Use variable bitrate encoding for better quality"
+              value={(currentValue as boolean) || false}
+              onChange={(vbr: boolean) => onSettingsChange({ ...settings, [controlType]: vbr })}
+              info="VBR adjusts bitrate dynamically, often producing better quality at similar file sizes"
+            />
+          );
+
+        case "profile":
+          return (
+            <Form.Dropdown
+              key="profile"
+              id="profile"
+              title="Profile"
+              value={(currentValue as AudioProfile) || "aac_low"}
+              onChange={(profile: string) => onSettingsChange({ ...settings, [controlType]: profile as AudioProfile })}
+              info="Different AAC profiles optimize for various use cases and bitrate ranges"
+            >
+              {AUDIO_PROFILES.map((profile) => (
+                <Form.Dropdown.Item
+                  key={profile}
+                  value={profile}
+                  title={
+                    profile === "aac_low"
+                      ? "AAC-LC (Low Complexity) - Standard quality"
+                      : profile === "aac_he"
+                        ? "HE-AAC v1 - High efficiency for lower bitrates"
+                        : "HE-AAC v2 - Most efficient for very low bitrates"
+                  }
+                />
+              ))}
+            </Form.Dropdown>
+          );
+
+        case "sampleRate":
+          return (
+            <Form.Dropdown
+              key="sampleRate"
+              id="sampleRate"
+              title="Sample Rate"
+              value={(currentValue as AudioSampleRate) || "44100"}
+              onChange={(sampleRate: string) =>
+                onSettingsChange({ ...settings, [controlType]: sampleRate as AudioSampleRate })
+              }
+              info={
+                outputFormat === ".flac"
+                  ? "Higher sample rates capture more detail but create larger files"
+                  : "FLAC preserves all audio data regardless of sample rate"
+              }
+            >
+              {AUDIO_SAMPLE_RATES.map((rate) => (
+                <Form.Dropdown.Item
+                  key={rate}
+                  value={rate}
+                  title={`${rate} Hz (${rate === "22050" ? "Phone quality" : rate === "44100" ? "CD quality" : rate === "48000" ? "DVD/Digital TV quality" : "High-resolution audio"})`}
+                />
+              ))}
+            </Form.Dropdown>
+          );
+
+        case "bitDepth":
+          return (
+            <Form.Dropdown
+              key="bitDepth"
+              id="bitDepth"
+              title="Bit Depth"
+              value={(currentValue as AudioBitDepth) || "16"}
+              onChange={(bitDepth: string) =>
+                onSettingsChange({ ...settings, [controlType]: bitDepth as AudioBitDepth })
+              }
+              info="Higher bit depths provide greater dynamic range and lower noise floor"
+            >
+              {AUDIO_BIT_DEPTH.filter((depth) => !(outputFormat === ".flac" && depth === "32")).map((depth) => (
+                <Form.Dropdown.Item
+                  key={depth}
+                  value={depth}
+                  title={
+                    depth +
+                    "-bit (" +
+                    (depth === "16" ? "CD quality" : depth === "24" ? "Professional/Hi-Res" : "Professional float") +
+                    ")"
+                  }
+                />
+              ))}
+            </Form.Dropdown>
+          );
+
+        case "compressionLevel":
+          return (
+            <Form.Dropdown
+              key="compressionLevel"
+              id="compressionLevel"
+              title="Compression Level"
+              value={(currentValue as AudioCompressionLevel)?.toString() || "5"}
+              onChange={(level: string) =>
+                onSettingsChange({ ...settings, [controlType]: level as AudioCompressionLevel })
+              }
+              info="Higher compression levels reduce file size but take longer to encode"
+            >
+              {AUDIO_COMPRESSION_LEVEL.map((level) => (
+                <Form.Dropdown.Item key={level} value={level} title={`${level}`} />
+              ))}
+            </Form.Dropdown>
+          );
+
+        default:
+          return null;
+      }
+    };
+
+    return <>{controls.map((controlType) => renderControl(controlType))}</>;
+  }
 }

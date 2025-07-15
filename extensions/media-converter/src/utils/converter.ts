@@ -4,14 +4,9 @@ import os from "os";
 import { findFFmpegPath } from "./ffmpeg";
 import { execPromise } from "./exec";
 import {
-  INPUT_VIDEO_EXTENSIONS,
-  INPUT_IMAGE_EXTENSIONS,
-  INPUT_AUDIO_EXTENSIONS,
-  INPUT_ALL_EXTENSIONS,
   OUTPUT_VIDEO_EXTENSIONS,
   OUTPUT_AUDIO_EXTENSIONS,
   OUTPUT_IMAGE_EXTENSIONS,
-  OUTPUT_ALL_EXTENSIONS,
   MediaType,
   AllOutputExtension,
   OutputImageExtension,
@@ -21,35 +16,8 @@ import {
   ImageQuality,
   AudioQuality,
   VideoQuality,
-  getDefaultQuality,
   getMediaType,
 } from "../types/media";
-
-// Re-export for backwards compatibility
-export {
-  INPUT_VIDEO_EXTENSIONS,
-  INPUT_IMAGE_EXTENSIONS,
-  INPUT_AUDIO_EXTENSIONS,
-  INPUT_ALL_EXTENSIONS,
-  OUTPUT_VIDEO_EXTENSIONS,
-  OUTPUT_AUDIO_EXTENSIONS,
-  OUTPUT_IMAGE_EXTENSIONS,
-  OUTPUT_ALL_EXTENSIONS,
-  getDefaultQuality,
-  getMediaType,
-};
-
-export type {
-  MediaType,
-  AllOutputExtension,
-  OutputImageExtension,
-  OutputAudioExtension,
-  OutputVideoExtension,
-  QualitySettings,
-  ImageQuality,
-  AudioQuality,
-  VideoQuality,
-};
 
 export function getUniqueOutputPath(filePath: string, extension: string): string {
   const outputFilePath = filePath.replace(path.extname(filePath), extension);
@@ -81,7 +49,7 @@ export function checkExtensionType(
 export async function convertMedia<T extends AllOutputExtension>(
   filePath: string,
   outputFormat: T,
-  quality: QualitySettings<T>,
+  quality: QualitySettings,
 ): Promise<string> {
   const ffmpegPath = await findFFmpegPath();
 
@@ -93,7 +61,7 @@ export async function convertMedia<T extends AllOutputExtension>(
   // If image
   if (checkExtensionType(filePath, OUTPUT_IMAGE_EXTENSIONS)) {
     const currentOutputFormat = outputFormat as OutputImageExtension;
-    const imageQuality = quality as ImageQuality<typeof currentOutputFormat>;
+    const imageQuality = quality as ImageQuality;
     const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
 
     let tempHeicFile: string | null = null;
@@ -107,7 +75,7 @@ export async function convertMedia<T extends AllOutputExtension>(
         try {
           // Attempt HEIC conversion using SIPS directly
           await execPromise(
-            `sips --setProperty format heic --setProperty formatOptions ${Number(imageQuality)} "${filePath}" --out "${finalOutputPath}"`,
+            `sips --setProperty format heic --setProperty formatOptions ${imageQuality[".heic"]} "${filePath}" --out "${finalOutputPath}"`,
           );
         } catch (error) {
           // Parse error to provide more specific feedback
@@ -154,10 +122,10 @@ export async function convertMedia<T extends AllOutputExtension>(
         switch (currentOutputFormat) {
           case ".jpg":
             // mjpeg takes in 2 (best) to 31 (worst)
-            ffmpegCmd += ` -q:v ${Math.round(31 - (Number(imageQuality) / 100) * 29)}`;
+            ffmpegCmd += ` -q:v ${Math.round(31 - (imageQuality[".jpg"] / 100) * 29)}`;
             break;
           case ".png":
-            if (imageQuality === "png-8") {
+            if (imageQuality[".png"] === "png-8") {
               const tempPaletteFileName = `${path.basename(filePath, path.extname(filePath))}_palette_${Date.now()}.png`;
               tempPaletteFile = path.join(os.tmpdir(), tempPaletteFileName);
 
@@ -172,21 +140,21 @@ export async function convertMedia<T extends AllOutputExtension>(
             break;
           case ".webp":
             ffmpegCmd += " -c:v libwebp";
-            if (imageQuality === "lossless") {
+            if (imageQuality[".webp"] === "lossless") {
               ffmpegCmd += " -lossless 1";
             } else {
-              ffmpegCmd += ` -quality ${Number(imageQuality)}`;
+              ffmpegCmd += ` -quality ${imageQuality[".webp"]}`;
             }
             break;
           case ".tiff":
-            ffmpegCmd += ` -compression_algo ${imageQuality}`;
+            ffmpegCmd += ` -compression_algo ${imageQuality[".tiff"]}`;
             break;
           case ".avif":
             // libaom-av1 takes in 0 (best/lossless) to 63 (worst)
-            ffmpegCmd += ` -c:v libaom-av1 -crf ${Math.round(63 - (Number(imageQuality) / 100) * 63)} -still-picture 1`;
+            ffmpegCmd += ` -c:v libaom-av1 -crf ${Math.round(63 - (Number(imageQuality[".avif"]) / 100) * 63)} -still-picture 1`;
             break;
         }
-        if (currentOutputFormat !== ".png" || imageQuality !== "png-8") {
+        if (currentOutputFormat !== ".png" || imageQuality[".png"] !== "png-8") {
           ffmpegCmd += ` -y "${finalOutputPath}"`;
         }
         await execPromise(ffmpegCmd);
@@ -208,45 +176,46 @@ export async function convertMedia<T extends AllOutputExtension>(
   // If audio
   else if (checkExtensionType(filePath, OUTPUT_AUDIO_EXTENSIONS)) {
     const currentOutputFormat = outputFormat as OutputAudioExtension;
+    const audioQuality = quality as AudioQuality;
 
     ffmpegCmd += ` "${filePath}"`;
 
     switch (currentOutputFormat) {
       case ".mp3": {
-        const mp3Quality = quality as AudioQuality<".mp3">;
+        const mp3Settings = audioQuality[".mp3"];
         ffmpegCmd += ` -c:a libmp3lame`;
-        if (mp3Quality.vbr) {
-          ffmpegCmd += ` -q:a ${Math.round((320 - Number(mp3Quality.bitrate)) / 40)}`; // Convert bitrate to VBR quality
+        if (mp3Settings.vbr) {
+          ffmpegCmd += ` -q:a ${Math.round((320 - Number(mp3Settings.bitrate)) / 40)}`; // Convert bitrate to VBR quality
         } else {
-          ffmpegCmd += ` -b:a ${mp3Quality.bitrate}k`;
+          ffmpegCmd += ` -b:a ${mp3Settings.bitrate}k`;
         }
         break;
       }
       case ".aac": {
-        const aacQuality = quality as AudioQuality<".aac">;
-        ffmpegCmd += ` -c:a aac -b:a ${aacQuality.bitrate}k`;
-        if (aacQuality.profile) {
-          ffmpegCmd += ` -profile:a ${aacQuality.profile}`;
+        const aacSettings = audioQuality[".aac"];
+        ffmpegCmd += ` -c:a aac -b:a ${aacSettings.bitrate}k`;
+        if (aacSettings.profile) {
+          ffmpegCmd += ` -profile:a ${aacSettings.profile}`;
         }
         break;
       }
       case ".m4a": {
-        const m4aQuality = quality as AudioQuality<".m4a">;
-        ffmpegCmd += ` -c:a aac -b:a ${m4aQuality.bitrate}k`;
-        if (m4aQuality.profile) {
-          ffmpegCmd += ` -profile:a ${m4aQuality.profile}`;
+        const m4aSettings = audioQuality[".m4a"];
+        ffmpegCmd += ` -c:a aac -b:a ${m4aSettings.bitrate}k`;
+        if (m4aSettings.profile) {
+          ffmpegCmd += ` -profile:a ${m4aSettings.profile}`;
         }
         break;
       }
       case ".wav": {
-        const wavQuality = quality as AudioQuality<".wav">;
-        ffmpegCmd += ` -c:a pcm_s${wavQuality.bitDepth}le -ar ${wavQuality.sampleRate}`;
+        const wavSettings = audioQuality[".wav"];
+        ffmpegCmd += ` -c:a pcm_s${wavSettings.bitDepth}le -ar ${wavSettings.sampleRate}`;
         break;
       }
       case ".flac": {
-        const flacQuality = quality as AudioQuality<".flac">;
-        ffmpegCmd += ` -c:a flac -compression_level ${flacQuality.compressionLevel} -ar ${flacQuality.sampleRate}`;
-        if (flacQuality.bitDepth === "24") {
+        const flacSettings = audioQuality[".flac"];
+        ffmpegCmd += ` -c:a flac -compression_level ${flacSettings.compressionLevel} -ar ${flacSettings.sampleRate}`;
+        if (flacSettings.bitDepth === "24") {
           ffmpegCmd += ` -sample_fmt s32`;
         }
         break;
@@ -263,12 +232,13 @@ export async function convertMedia<T extends AllOutputExtension>(
   // If video
   else if (checkExtensionType(filePath, OUTPUT_VIDEO_EXTENSIONS)) {
     const currentOutputFormat = outputFormat as OutputVideoExtension;
+    const videoQuality = quality as VideoQuality;
 
     ffmpegCmd += ` "${filePath}"`;
 
     switch (currentOutputFormat) {
       case ".mp4": {
-        const mp4Quality = quality as VideoQuality<".mp4">;
+        const mp4Quality = videoQuality[".mp4"];
         ffmpegCmd += ` -vcodec h264 -acodec aac -preset ${mp4Quality.preset}`;
 
         if (mp4Quality.encodingMode === "crf") {
@@ -290,7 +260,7 @@ export async function convertMedia<T extends AllOutputExtension>(
         break;
       }
       case ".avi": {
-        const aviQuality = quality as VideoQuality<".avi">;
+        const aviQuality = videoQuality[".avi"];
         ffmpegCmd += ` -vcodec libxvid -acodec mp3`;
 
         if (aviQuality.encodingMode === "crf") {
@@ -307,7 +277,7 @@ export async function convertMedia<T extends AllOutputExtension>(
         break;
       }
       case ".mov": {
-        const movQuality = quality as VideoQuality<".mov">;
+        const movQuality = videoQuality[".mov"];
         const proresProfile =
           movQuality.variant === "proxy"
             ? "0"
@@ -324,7 +294,7 @@ export async function convertMedia<T extends AllOutputExtension>(
         break;
       }
       case ".mkv": {
-        const mkvQuality = quality as VideoQuality<".mkv">;
+        const mkvQuality = videoQuality[".mkv"];
         ffmpegCmd += ` -vcodec libx265 -acodec aac -preset ${mkvQuality.preset}`;
 
         if (mkvQuality.encodingMode === "crf") {
@@ -344,7 +314,7 @@ export async function convertMedia<T extends AllOutputExtension>(
         break;
       }
       case ".mpg": {
-        const mpgQuality = quality as VideoQuality<".mpg">;
+        const mpgQuality = videoQuality[".mpg"];
         ffmpegCmd += ` -vcodec mpeg2video -acodec mp3`;
 
         if (mpgQuality.encodingMode === "crf") {
@@ -361,7 +331,7 @@ export async function convertMedia<T extends AllOutputExtension>(
         break;
       }
       case ".webm": {
-        const webmQuality = quality as VideoQuality<".webm">;
+        const webmQuality = videoQuality[".webm"];
         ffmpegCmd += ` -vcodec libvpx-vp9 -acodec libopus -quality ${webmQuality.quality}`;
 
         if (webmQuality.encodingMode === "crf") {
