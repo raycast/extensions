@@ -4,10 +4,6 @@ import os from "os";
 import { findFFmpegPath } from "./ffmpeg";
 import { execPromise } from "./exec";
 import {
-  OUTPUT_VIDEO_EXTENSIONS,
-  OUTPUT_AUDIO_EXTENSIONS,
-  OUTPUT_IMAGE_EXTENSIONS,
-  MediaType,
   AllOutputExtension,
   OutputImageExtension,
   OutputAudioExtension,
@@ -18,6 +14,12 @@ import {
   VideoQuality,
   getMediaType,
 } from "../types/media";
+
+function convertQualityToCrf(qualityPercentage: number): number {
+  // Map 100% quality to CRF 0, and 0% quality to CRF 51
+  // Using a linear mapping for simplicity
+  return Math.round(51 - (qualityPercentage / 100) * 51);
+}
 
 export function getUniqueOutputPath(filePath: string, extension: string): string {
   const outputFilePath = filePath.replace(path.extname(filePath), extension);
@@ -34,18 +36,6 @@ export function getUniqueOutputPath(filePath: string, extension: string): string
   return finalOutputPath;
 }
 
-export function checkExtensionType(
-  file: string,
-  allowedExtensions?: ReadonlyArray<string> | null,
-): MediaType | boolean {
-  const extension = path.extname(file).toLowerCase();
-  if (!allowedExtensions) {
-    return getMediaType(extension) || false;
-  } else {
-    return allowedExtensions.includes(extension as (typeof allowedExtensions)[number]) ? true : false;
-  }
-}
-
 export async function convertMedia<T extends AllOutputExtension>(
   filePath: string,
   outputFormat: T,
@@ -58,308 +48,285 @@ export async function convertMedia<T extends AllOutputExtension>(
   }
 
   let ffmpegCmd = `"${ffmpegPath.path}" -i`;
-  // If image
-  if (checkExtensionType(filePath, OUTPUT_IMAGE_EXTENSIONS)) {
-    const currentOutputFormat = outputFormat as OutputImageExtension;
-    const imageQuality = quality as ImageQuality;
-    const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
+  const currentMediaType = getMediaType(path.extname(filePath))!;
+  switch (currentMediaType) {
+    case "image": {
+      const currentOutputFormat = outputFormat as OutputImageExtension;
+      const imageQuality = quality as ImageQuality;
+      const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
 
-    let tempHeicFile: string | null = null;
-    let tempPaletteFile: string | null = null;
-    const extension = path.extname(filePath).toLowerCase();
-    let processedInputPath = filePath;
+      let tempHeicFile: string | null = null;
+      let tempPaletteFile: string | null = null;
+      const extension = path.extname(filePath).toLowerCase();
+      let processedInputPath = filePath;
 
-    try {
-      // HEIC conversion is theoretically only available on macOS via the built-in SIPS utility.
-      if (currentOutputFormat === ".heic") {
-        try {
-          // Attempt HEIC conversion using SIPS directly
-          await execPromise(
-            `sips --setProperty format heic --setProperty formatOptions ${imageQuality[".heic"]} "${filePath}" --out "${finalOutputPath}"`,
-          );
-        } catch (error) {
-          // Parse error to provide more specific feedback
-          const errorMessage = String(error).toLowerCase();
-
-          if (errorMessage.includes("command not found") || errorMessage.includes("not recognized")) {
-            throw new Error(
-              "HEIC conversion failed: 'sips' command not found. " +
-                "Converting to HEIC format is theoretically only available on macOS, " +
-                "as it requires the built-in SIPS utility with proper HEIC support " +
-                "(libheif, libde265, and x265 dependencies).",
-            );
-          } else {
-            throw new Error(
-              "HEIC conversion failed: SIPS command found but conversion unsuccessful. " +
-                "This may indicate that your SIPS installation lacks proper HEIC support. " +
-                "Converting to HEIC format typically requires macOS with built-in SIPS that includes " +
-                "libheif, libde265, and x265 dependencies. Error details: " +
-                String(error),
-            );
-          }
-        }
-      } else {
-        // If the input file is HEIC and the output format is not HEIC, convert to PNG first
-        if (extension === ".heic") {
+      try {
+        // HEIC conversion is theoretically only available on macOS via the built-in SIPS utility.
+        if (currentOutputFormat === ".heic") {
           try {
-            const tempFileName = `${path.basename(filePath, ".heic")}_temp_${Date.now()}.png`;
-            tempHeicFile = path.join(os.tmpdir(), tempFileName);
-
-            await execPromise(`sips --setProperty format png "${filePath}" --out "${tempHeicFile}"`);
-
-            processedInputPath = tempHeicFile;
+            // Attempt HEIC conversion using SIPS directly
+            await execPromise(
+              `sips --setProperty format heic --setProperty formatOptions ${imageQuality[".heic"]} "${filePath}" --out "${finalOutputPath}"`,
+            );
           } catch (error) {
-            console.error(`Error pre-processing HEIC file: ${filePath}`, error);
-            if (tempHeicFile && fs.existsSync(tempHeicFile)) {
-              fs.unlinkSync(tempHeicFile);
-            }
-            throw new Error(`Failed to preprocess HEIC file: ${String(error)}`);
-          }
-        }
+            // Parse error to provide more specific feedback
+            const errorMessage = String(error);
 
-        ffmpegCmd += ` "${processedInputPath}"`;
-
-        switch (currentOutputFormat) {
-          case ".jpg":
-            // mjpeg takes in 2 (best) to 31 (worst)
-            ffmpegCmd += ` -q:v ${Math.round(31 - (imageQuality[".jpg"] / 100) * 29)}`;
-            break;
-          case ".png":
-            if (imageQuality[".png"] === "png-8") {
-              const tempPaletteFileName = `${path.basename(filePath, path.extname(filePath))}_palette_${Date.now()}.png`;
-              tempPaletteFile = path.join(os.tmpdir(), tempPaletteFileName);
-
-              // Generate palette first
-              await execPromise(
-                `"${ffmpegPath.path}" -i "${processedInputPath}" -vf "palettegen=max_colors=256" -y "${tempPaletteFile}"`,
+            if (errorMessage.includes("command not found") || errorMessage.includes("not recognized")) {
+              throw new Error(
+                "HEIC conversion failed: 'sips' command not found. " +
+                  "Converting to HEIC format is theoretically only available on macOS, " +
+                  "as it requires the built-in SIPS utility with proper HEIC support " +
+                  "(libheif, libde265, and x265 dependencies).",
               );
-              // Then apply palette
-              ffmpegCmd = `"${ffmpegPath.path}" -i "${processedInputPath}" -i "${tempPaletteFile}" -lavfi "paletteuse=dither=bayer:bayer_scale=5"`;
-            }
-            ffmpegCmd += ` -compression_level 100 "${finalOutputPath}"`;
-            break;
-          case ".webp":
-            ffmpegCmd += " -c:v libwebp";
-            if (imageQuality[".webp"] === "lossless") {
-              ffmpegCmd += " -lossless 1";
             } else {
-              ffmpegCmd += ` -quality ${imageQuality[".webp"]}`;
+              throw new Error(
+                "HEIC conversion failed: SIPS command found but conversion unsuccessful. " +
+                  "This may indicate that your SIPS installation lacks proper HEIC support. " +
+                  "Converting to HEIC format typically requires macOS with built-in SIPS that includes " +
+                  "libheif, libde265, and x265 dependencies. Error details: " +
+                  String(error),
+              );
             }
-            break;
-          case ".tiff":
-            ffmpegCmd += ` -compression_algo ${imageQuality[".tiff"]}`;
-            break;
-          case ".avif":
-            // libaom-av1 takes in 0 (best/lossless) to 63 (worst)
-            ffmpegCmd += ` -c:v libaom-av1 -crf ${Math.round(63 - (Number(imageQuality[".avif"]) / 100) * 63)} -still-picture 1`;
-            break;
+          }
+        } else {
+          // If the input file is HEIC and the output format is not HEIC, convert to PNG first
+          if (extension === ".heic") {
+            try {
+              const tempFileName = `${path.basename(filePath, ".heic")}_temp_${Date.now()}.png`;
+              tempHeicFile = path.join(os.tmpdir(), tempFileName);
+
+              await execPromise(`sips --setProperty format png "${filePath}" --out "${tempHeicFile}"`);
+
+              processedInputPath = tempHeicFile;
+            } catch (error) {
+              console.error(`Error pre-processing HEIC file: ${filePath}`, error);
+              if (tempHeicFile && fs.existsSync(tempHeicFile)) {
+                fs.unlinkSync(tempHeicFile);
+              }
+              throw new Error(`Failed to preprocess HEIC file: ${String(error)}`);
+            }
+          }
+
+          ffmpegCmd += ` "${processedInputPath}"`;
+
+          switch (currentOutputFormat) {
+            case ".jpg":
+              // mjpeg takes in 2 (best) to 31 (worst)
+              ffmpegCmd += ` -q:v ${Math.round(31 - (imageQuality[".jpg"] / 100) * 29)}`;
+              break;
+            case ".png":
+              if (imageQuality[".png"] === "png-8") {
+                const tempPaletteFileName = `${path.basename(filePath, path.extname(filePath))}_palette_${Date.now()}.png`;
+                tempPaletteFile = path.join(os.tmpdir(), tempPaletteFileName);
+
+                // Generate palette first
+                await execPromise(
+                  `"${ffmpegPath.path}" -i "${processedInputPath}" -vf "palettegen=max_colors=256" -y "${tempPaletteFile}"`,
+                );
+                // Then apply palette
+                ffmpegCmd = `"${ffmpegPath.path}" -i "${processedInputPath}" -i "${tempPaletteFile}" -lavfi "paletteuse=dither=bayer:bayer_scale=5"`;
+              }
+              ffmpegCmd += ` -compression_level 100 "${finalOutputPath}"`;
+              break;
+            case ".webp":
+              ffmpegCmd += " -c:v libwebp";
+              if (imageQuality[".webp"] === "lossless") {
+                ffmpegCmd += " -lossless 1";
+              } else {
+                ffmpegCmd += ` -quality ${imageQuality[".webp"]}`;
+              }
+              break;
+            case ".tiff":
+              ffmpegCmd += ` -compression_algo ${imageQuality[".tiff"]}`;
+              break;
+            case ".avif":
+              // libaom-av1 takes in 0 (best/lossless) to 63 (worst)
+              ffmpegCmd += ` -c:v libaom-av1 -crf ${Math.round(63 - (Number(imageQuality[".avif"]) / 100) * 63)} -still-picture 1`;
+              break;
+          }
+          if (currentOutputFormat !== ".png" || imageQuality[".png"] !== "png-8") {
+            ffmpegCmd += ` -y "${finalOutputPath}"`;
+          }
+          await execPromise(ffmpegCmd);
         }
-        if (currentOutputFormat !== ".png" || imageQuality[".png"] !== "png-8") {
-          ffmpegCmd += ` -y "${finalOutputPath}"`;
+        return finalOutputPath;
+      } catch (error) {
+        console.error(`Error converting ${processedInputPath} to ${currentOutputFormat}:`, error);
+        throw error;
+      } finally {
+        // Clean up temp files if they exist
+        if (tempHeicFile && fs.existsSync(tempHeicFile)) {
+          fs.unlinkSync(tempHeicFile);
         }
-        await execPromise(ffmpegCmd);
+        if (tempPaletteFile && fs.existsSync(tempPaletteFile)) {
+          fs.unlinkSync(tempPaletteFile);
+        }
       }
+    }
+
+    case "audio": {
+      const currentOutputFormat = outputFormat as OutputAudioExtension;
+      const audioQuality = quality as AudioQuality;
+      const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
+
+      ffmpegCmd += ` "${filePath}"`;
+
+      switch (currentOutputFormat) {
+        case ".mp3": {
+          const mp3Settings = audioQuality[".mp3"];
+          ffmpegCmd += ` -c:a libmp3lame`;
+          if (mp3Settings.vbr) {
+            ffmpegCmd += ` -q:a ${Math.round((320 - Number(mp3Settings.bitrate)) / 40)}`; // Convert bitrate to VBR quality
+          } else {
+            ffmpegCmd += ` -b:a ${mp3Settings.bitrate}k`;
+          }
+          break;
+        }
+        case ".aac": {
+          const aacSettings = audioQuality[".aac"];
+          ffmpegCmd += ` -c:a aac -b:a ${aacSettings.bitrate}k`;
+          if (aacSettings.profile) {
+            ffmpegCmd += ` -profile:a ${aacSettings.profile}`;
+          }
+          break;
+        }
+        case ".m4a": {
+          const m4aSettings = audioQuality[".m4a"];
+          ffmpegCmd += ` -c:a aac -b:a ${m4aSettings.bitrate}k`;
+          if (m4aSettings.profile) {
+            ffmpegCmd += ` -profile:a ${m4aSettings.profile}`;
+          }
+          break;
+        }
+        case ".wav": {
+          const wavSettings = audioQuality[".wav"];
+          ffmpegCmd += ` -c:a pcm_s${wavSettings.bitDepth}le -ar ${wavSettings.sampleRate}`;
+          break;
+        }
+        case ".flac": {
+          const flacSettings = audioQuality[".flac"];
+          ffmpegCmd += ` -c:a flac -compression_level ${flacSettings.compressionLevel} -ar ${flacSettings.sampleRate}`;
+          if (flacSettings.bitDepth === "24") {
+            ffmpegCmd += ` -sample_fmt s32`;
+          }
+          break;
+        }
+        default:
+          throw new Error(`Unknown audio output format: ${currentOutputFormat}`);
+      }
+
+      ffmpegCmd += ` -y "${finalOutputPath}"`;
+      await execPromise(ffmpegCmd);
       return finalOutputPath;
-    } catch (error) {
-      console.error(`Error converting ${processedInputPath} to ${currentOutputFormat}:`, error);
-      throw error;
-    } finally {
-      // Clean up temp files if they exist
-      if (tempHeicFile && fs.existsSync(tempHeicFile)) {
-        fs.unlinkSync(tempHeicFile);
-      }
-      if (tempPaletteFile && fs.existsSync(tempPaletteFile)) {
-        fs.unlinkSync(tempPaletteFile);
-      }
-    }
-  }
-  // If audio
-  else if (checkExtensionType(filePath, OUTPUT_AUDIO_EXTENSIONS)) {
-    const currentOutputFormat = outputFormat as OutputAudioExtension;
-    const audioQuality = quality as AudioQuality;
-
-    ffmpegCmd += ` "${filePath}"`;
-
-    switch (currentOutputFormat) {
-      case ".mp3": {
-        const mp3Settings = audioQuality[".mp3"];
-        ffmpegCmd += ` -c:a libmp3lame`;
-        if (mp3Settings.vbr) {
-          ffmpegCmd += ` -q:a ${Math.round((320 - Number(mp3Settings.bitrate)) / 40)}`; // Convert bitrate to VBR quality
-        } else {
-          ffmpegCmd += ` -b:a ${mp3Settings.bitrate}k`;
-        }
-        break;
-      }
-      case ".aac": {
-        const aacSettings = audioQuality[".aac"];
-        ffmpegCmd += ` -c:a aac -b:a ${aacSettings.bitrate}k`;
-        if (aacSettings.profile) {
-          ffmpegCmd += ` -profile:a ${aacSettings.profile}`;
-        }
-        break;
-      }
-      case ".m4a": {
-        const m4aSettings = audioQuality[".m4a"];
-        ffmpegCmd += ` -c:a aac -b:a ${m4aSettings.bitrate}k`;
-        if (m4aSettings.profile) {
-          ffmpegCmd += ` -profile:a ${m4aSettings.profile}`;
-        }
-        break;
-      }
-      case ".wav": {
-        const wavSettings = audioQuality[".wav"];
-        ffmpegCmd += ` -c:a pcm_s${wavSettings.bitDepth}le -ar ${wavSettings.sampleRate}`;
-        break;
-      }
-      case ".flac": {
-        const flacSettings = audioQuality[".flac"];
-        ffmpegCmd += ` -c:a flac -compression_level ${flacSettings.compressionLevel} -ar ${flacSettings.sampleRate}`;
-        if (flacSettings.bitDepth === "24") {
-          ffmpegCmd += ` -sample_fmt s32`;
-        }
-        break;
-      }
-      default:
-        throw new Error(`Unknown audio output format: ${currentOutputFormat}`);
     }
 
-    const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
-    ffmpegCmd += ` -y "${finalOutputPath}"`;
-    await execPromise(ffmpegCmd);
-    return finalOutputPath;
-  }
-  // If video
-  else if (checkExtensionType(filePath, OUTPUT_VIDEO_EXTENSIONS)) {
-    const currentOutputFormat = outputFormat as OutputVideoExtension;
-    const videoQuality = quality as VideoQuality;
+    case "video": {
+      const currentOutputFormat = outputFormat as OutputVideoExtension;
+      const videoQuality = quality as VideoQuality;
 
-    ffmpegCmd += ` "${filePath}"`;
+      ffmpegCmd += ` "${filePath}"`;
 
-    switch (currentOutputFormat) {
-      case ".mp4": {
-        const mp4Quality = videoQuality[".mp4"];
-        ffmpegCmd += ` -vcodec h264 -acodec aac -preset ${mp4Quality.preset}`;
+      // Add format-specific codec and settings
+      switch (currentOutputFormat) {
+        case ".mp4": {
+          const mp4Quality = videoQuality[".mp4"];
+          ffmpegCmd += ` -vcodec h264 -acodec aac -preset ${mp4Quality.preset}`;
+          break;
+        }
+        case ".avi": {
+          ffmpegCmd += ` -vcodec libxvid -acodec mp3`;
+          break;
+        }
+        case ".mov": {
+          const movQuality = videoQuality[".mov"];
+          const proresProfiles = {
+            proxy: "0",
+            lt: "1",
+            standard: "2",
+            hq: "3",
+            "4444": "4",
+            "4444xq": "5",
+          };
+          ffmpegCmd += ` -vcodec prores -profile:v ${proresProfiles[movQuality.variant]} -acodec pcm_s16le`;
+          break;
+        }
+        case ".mkv": {
+          const mkvQuality = videoQuality[".mkv"];
+          ffmpegCmd += ` -vcodec libx265 -acodec aac -preset ${mkvQuality.preset}`;
+          break;
+        }
+        case ".mpg": {
+          ffmpegCmd += ` -vcodec mpeg2video -acodec mp3`;
+          break;
+        }
+        case ".webm": {
+          const webmQuality = videoQuality[".webm"];
+          ffmpegCmd += ` -vcodec libvpx-vp9 -acodec libopus -quality ${webmQuality.quality}`;
+          break;
+        }
+        default:
+          throw new Error(`Unknown video output format: ${currentOutputFormat}`);
+      }
 
-        if (mp4Quality.encodingMode === "crf") {
-          ffmpegCmd += ` -crf ${mp4Quality.crf}`;
-        } else {
-          ffmpegCmd += ` -b:v ${mp4Quality.bitrate}k`;
-          if (mp4Quality.maxBitrate) {
-            ffmpegCmd += ` -maxrate ${mp4Quality.maxBitrate}k -bufsize ${Number(mp4Quality.maxBitrate) * 2}k`;
-          }
+      // Handle encoding mode (unified for all formats except .mov)
+      const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
+      let logFilePrefix: string | null = null;
 
-          if (mp4Quality.encodingMode === "vbr-2-pass") {
-            // First pass
-            const firstPassCmd = ffmpegCmd + ` -pass 1 -f null /dev/null`;
-            await execPromise(firstPassCmd);
-            // Second pass will be executed below
-            ffmpegCmd += ` -pass 2`;
+      if (currentOutputFormat !== ".mov") {
+        const qualitySettings = videoQuality[currentOutputFormat];
+
+        if ("encodingMode" in qualitySettings) {
+          if (qualitySettings.encodingMode === "crf") {
+            ffmpegCmd += ` -crf ${convertQualityToCrf(qualitySettings.crf)}`;
+          } else {
+            // VBR or VBR 2-pass
+            ffmpegCmd += ` -b:v ${qualitySettings.bitrate}k`;
+
+            if ("maxBitrate" in qualitySettings && qualitySettings.maxBitrate) {
+              ffmpegCmd += ` -maxrate ${qualitySettings.maxBitrate}k -bufsize ${Number(qualitySettings.maxBitrate) * 2}k`;
+            }
+
+            if (qualitySettings.encodingMode === "vbr-2-pass") {
+              // First pass - need to specify log file prefix for 2-pass encoding
+              logFilePrefix = path.join(os.tmpdir(), `ffmpeg2pass_${Date.now()}`);
+              const nullDevice = process.platform === "win32" ? "NUL" : "/dev/null";
+              const firstPassCmd = ffmpegCmd + ` -pass 1 -passlogfile "${logFilePrefix}" -f null ${nullDevice}`;
+              try {
+                await execPromise(firstPassCmd);
+              } catch (error) {
+                throw new Error(`First pass encoding failed: ${error}`);
+              }
+              // Second pass will be executed below
+              ffmpegCmd += ` -pass 2 -passlogfile "${logFilePrefix}"`;
+            }
           }
         }
-        break;
       }
-      case ".avi": {
-        const aviQuality = videoQuality[".avi"];
-        ffmpegCmd += ` -vcodec libxvid -acodec mp3`;
 
-        if (aviQuality.encodingMode === "crf") {
-          ffmpegCmd += ` -crf ${aviQuality.crf}`;
-        } else {
-          ffmpegCmd += ` -b:v ${aviQuality.bitrate}k`;
-
-          if (aviQuality.encodingMode === "vbr-2-pass") {
-            const firstPassCmd = ffmpegCmd + ` -pass 1 -f null /dev/null`;
-            await execPromise(firstPassCmd);
-            ffmpegCmd += ` -pass 2`;
+      try {
+        ffmpegCmd += ` -y "${finalOutputPath}"`;
+        console.log(`Executing FFmpeg command: ${ffmpegCmd}`);
+        await execPromise(ffmpegCmd);
+        return finalOutputPath;
+      } finally {
+        // Clean up 2-pass log files if they exist
+        if (logFilePrefix) {
+          try {
+            if (fs.existsSync(`${logFilePrefix}-0.log`)) {
+              fs.unlinkSync(`${logFilePrefix}-0.log`);
+            }
+            if (fs.existsSync(`${logFilePrefix}-0.log.mbtree`)) {
+              fs.unlinkSync(`${logFilePrefix}-0.log.mbtree`);
+            }
+          } catch (error) {
+            console.warn("Failed to clean up FFmpeg log files:", error);
           }
         }
-        break;
       }
-      case ".mov": {
-        const movQuality = videoQuality[".mov"];
-        const proresProfile =
-          movQuality.variant === "proxy"
-            ? "0"
-            : movQuality.variant === "lt"
-              ? "1"
-              : movQuality.variant === "standard"
-                ? "2"
-                : movQuality.variant === "hq"
-                  ? "3"
-                  : movQuality.variant === "4444"
-                    ? "4"
-                    : "5";
-        ffmpegCmd += ` -vcodec prores -profile:v ${proresProfile} -acodec pcm_s16le`;
-        break;
-      }
-      case ".mkv": {
-        const mkvQuality = videoQuality[".mkv"];
-        ffmpegCmd += ` -vcodec libx265 -acodec aac -preset ${mkvQuality.preset}`;
-
-        if (mkvQuality.encodingMode === "crf") {
-          ffmpegCmd += ` -crf ${mkvQuality.crf}`;
-        } else {
-          ffmpegCmd += ` -b:v ${mkvQuality.bitrate}k`;
-          if (mkvQuality.maxBitrate) {
-            ffmpegCmd += ` -maxrate ${mkvQuality.maxBitrate}k -bufsize ${Number(mkvQuality.maxBitrate) * 2}k`;
-          }
-
-          if (mkvQuality.encodingMode === "vbr-2-pass") {
-            const firstPassCmd = ffmpegCmd + ` -pass 1 -f null /dev/null`;
-            await execPromise(firstPassCmd);
-            ffmpegCmd += ` -pass 2`;
-          }
-        }
-        break;
-      }
-      case ".mpg": {
-        const mpgQuality = videoQuality[".mpg"];
-        ffmpegCmd += ` -vcodec mpeg2video -acodec mp3`;
-
-        if (mpgQuality.encodingMode === "crf") {
-          ffmpegCmd += ` -crf ${mpgQuality.crf}`;
-        } else {
-          ffmpegCmd += ` -b:v ${mpgQuality.bitrate}k`;
-
-          if (mpgQuality.encodingMode === "vbr-2-pass") {
-            const firstPassCmd = ffmpegCmd + ` -pass 1 -f null /dev/null`;
-            await execPromise(firstPassCmd);
-            ffmpegCmd += ` -pass 2`;
-          }
-        }
-        break;
-      }
-      case ".webm": {
-        const webmQuality = videoQuality[".webm"];
-        ffmpegCmd += ` -vcodec libvpx-vp9 -acodec libopus -quality ${webmQuality.quality}`;
-
-        if (webmQuality.encodingMode === "crf") {
-          ffmpegCmd += ` -crf ${webmQuality.crf}`;
-        } else {
-          ffmpegCmd += ` -b:v ${webmQuality.bitrate}k`;
-          if (webmQuality.maxBitrate) {
-            ffmpegCmd += ` -maxrate ${webmQuality.maxBitrate}k -bufsize ${Number(webmQuality.maxBitrate) * 2}k`;
-          }
-
-          if (webmQuality.encodingMode === "vbr-2-pass") {
-            const firstPassCmd = ffmpegCmd + ` -pass 1 -f null /dev/null`;
-            await execPromise(firstPassCmd);
-            ffmpegCmd += ` -pass 2`;
-          }
-        }
-        break;
-      }
-      default:
-        throw new Error(`Unknown video output format: ${currentOutputFormat}`);
     }
 
-    const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
-    ffmpegCmd += ` -y "${finalOutputPath}"`;
-    console.log(`Executing FFmpeg command: ${ffmpegCmd}`);
-    await execPromise(ffmpegCmd);
-    return finalOutputPath;
+    default:
+      throw new Error(`Unsupported media type for file: ${filePath}`);
   }
-  // Theoretically, this should never happen
-  throw new Error(`Unsupported output format: ${outputFormat}`);
 }

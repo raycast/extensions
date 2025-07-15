@@ -153,7 +153,6 @@ export type ImageQuality = {
 // Audio Quality Settings
 // =============================================================================
 
-// Common audio values
 export const AUDIO_BITRATES = ["64", "96", "128", "160", "192", "224", "256", "320"] as const;
 export type AudioBitrate = (typeof AUDIO_BITRATES)[number];
 export const AUDIO_SAMPLE_RATES = ["22050", "44100", "48000", "96000"] as const;
@@ -164,6 +163,8 @@ export const AUDIO_PROFILES = ["aac_low", "aac_he", "aac_he_v2"] as const;
 export type AudioProfile = (typeof AUDIO_PROFILES)[number];
 export const AUDIO_COMPRESSION_LEVEL = ["0", "1", "2", "3", "4", "5", "6", "7", "8"] as const;
 export type AudioCompressionLevel = (typeof AUDIO_COMPRESSION_LEVEL)[number];
+
+export type AudioControlType = "bitrate" | "vbr" | "profile" | "sampleRate" | "bitDepth" | "compressionLevel";
 
 export type AudioQuality = {
   ".mp3": { bitrate: AudioBitrate; vbr?: boolean };
@@ -181,42 +182,55 @@ export type AudioQuality = {
 // Video Quality Settings
 // =============================================================================
 
-// Common video values
-export type VideoEncodingMode = "crf" | "vbr" | "vbr-2-pass";
-export type VideoCrf = Range<0, 51>;
+export const VIDEO_ENCODING_MODES = ["crf", "vbr", "vbr-2-pass"] as const;
+export type VideoEncodingMode = (typeof VIDEO_ENCODING_MODES)[number];
+export type VideoCrf = Percentage; // 0-100 for user-friendly quality (converted to FFmpeg CRF 0-51 internally)
 export const VIDEO_BITRATE = [
-  "500",
-  "750",
-  "1000",
-  "1500",
-  "2000",
-  "3000",
-  "4000",
-  "5000",
-  "8000",
-  "10000",
-  "15000",
-  "20000",
-  "25000",
-  "30000",
-  "40000",
   "50000",
+  "40000",
+  "30000",
+  "25000",
+  "20000",
+  "15000",
+  "10000",
+  "8000",
+  "5000",
+  "4000",
+  "3000",
+  "2000",
+  "1500",
+  "1000",
+  "750",
+  "500",
 ] as const;
 export type VideoBitrate = (typeof VIDEO_BITRATE)[number];
 export const VIDEO_PRESET = [
-  "ultrafast",
-  "superfast",
-  "veryfast",
-  "faster",
-  "fast",
-  "medium",
-  "slow",
-  "slower",
   "veryslow",
-];
+  "slower",
+  "slow",
+  "medium",
+  "fast",
+  "faster",
+  "veryfast",
+  "superfast",
+  "ultrafast",
+] as const;
 export type VideoPreset = (typeof VIDEO_PRESET)[number];
-export type ProResVariant = "proxy" | "lt" | "standard" | "hq" | "4444" | "4444xq";
-export type VP9Quality = "good" | "best" | "realtime";
+export const PRORES_VARIANTS = ["4444xq", "4444", "hq", "standard", "lt", "proxy"] as const;
+export type ProResVariant = (typeof PRORES_VARIANTS)[number];
+export const VP9_QUALITY = ["best", "good", "realtime"] as const;
+export type VP9Quality = (typeof VP9_QUALITY)[number];
+
+export type VideoControlType =
+  | "encodingMode"
+  | "crf"
+  | "vbr"
+  | "vbr-2-pass"
+  | "bitrate"
+  | "maxBitrate"
+  | "preset"
+  | "quality"
+  | "variant";
 
 export type VideoQuality = {
   ".mp4":
@@ -242,6 +256,7 @@ export type VideoQuality = {
 // =============================================================================
 
 export type QualitySettings = ImageQuality | AudioQuality | VideoQuality;
+export type AllControlType = VideoControlType | AudioControlType | "qualityLevel";
 
 // =============================================================================
 // Default Quality Settings
@@ -267,13 +282,22 @@ export const DEFAULT_QUALITIES = {
     bitDepth: "16",
   },
 
-  // Video defaults
-  ".mp4": { encodingMode: "crf", crf: 23, preset: "medium" },
-  ".avi": { encodingMode: "crf", crf: 23 },
+  // Video defaults (CRF mode)
+  ".mp4": { encodingMode: "crf", crf: 75, preset: "medium" },
+  ".avi": { encodingMode: "crf", crf: 75 },
   ".mov": { variant: "standard" },
-  ".mkv": { encodingMode: "crf", crf: 23, preset: "medium" },
-  ".mpg": { encodingMode: "crf", crf: 23 },
-  ".webm": { encodingMode: "crf", crf: 30, quality: "good" },
+  ".mkv": { encodingMode: "crf", crf: 75, preset: "medium" },
+  ".mpg": { encodingMode: "crf", crf: 75 },
+  ".webm": { encodingMode: "crf", crf: 60, quality: "good" },
+} as const;
+
+// Video VBR defaults (for when switching to VBR modes)
+export const DEFAULT_VBR_QUALITIES = {
+  ".mp4": { encodingMode: "vbr", bitrate: "2000", preset: "medium" },
+  ".avi": { encodingMode: "vbr", bitrate: "2000" },
+  ".mkv": { encodingMode: "vbr", bitrate: "2000", preset: "medium" },
+  ".mpg": { encodingMode: "vbr", bitrate: "2000" },
+  ".webm": { encodingMode: "vbr", bitrate: "2000", quality: "good" },
 } as const;
 
 // =============================================================================
