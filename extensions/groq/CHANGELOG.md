@@ -1,5 +1,12 @@
 # Groq Changelog
 
+## [Updated Models] - 2025-07-15
+
+- Added `Kimi K2 Instruct 128K`
+- Added `Llama Guard 4 12B 128K`
+- Added `Qwen 3 32B 128K`
+- Deprecated `Qwen QWQ 32B 128K` in favor of `Qwen 3 32B 128K`
+
 ## [Updated Models] - 2025-04-07
 
 - Added `Llama 4 Scout` and `Llama 4 Maverick`
