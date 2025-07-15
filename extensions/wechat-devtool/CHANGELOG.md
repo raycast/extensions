@@ -1,6 +1,6 @@
 # WeChat DevTool Changelog
 
-## [Updated Packages] - 2025-07-15
+## [Updated Packages] - {PR_MERGE_DATE}
 
 ## [First Release] - 2025-07-11
 
