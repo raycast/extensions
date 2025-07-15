@@ -1,6 +1,6 @@
 # Ideate Changelog
 
-## [Updated package-lock.json] - 2025-07-15
+## [Updated package-lock.json] - {PR_MERGE_DATE}
 
 ## [Updated README] - 2025-07-15
 
