@@ -64,6 +64,12 @@ function getProjectEntries(storagePath: string): ProjectEntry[] {
     projectEntries = projectEntries.filter(({ tags }) => Array.isArray(tags) && tags.length);
   }
 
+  if (preferences.hideProjectsNotEnabled) {
+    projectEntries = projectEntries.filter(({ enabled }) => enabled === true);
+  }
+
+  console.log(projectEntries);
+
   return projectEntries;
 }
 
