@@ -1,6 +1,6 @@
 # Visual Studio Code - Project Manager Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-07-15
 
 - Add preference to hide disabled projects (those with "enabled": false) in the project list.
 
