@@ -18,7 +18,7 @@ export const sanitizeOptions: SanitizeHTML.IOptions = {
     }),
   },
   allowedSchemes: ["http", "https"],
-  disallowedTagsMode: "escape",
+  disallowedTagsMode: "discard",
   enforceHtmlBoundary: true,
   nestingLimit: 10,
 };
