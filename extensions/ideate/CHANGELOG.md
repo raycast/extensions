@@ -1,6 +1,6 @@
 # Ideate Changelog
 
-## [Unreleased] - 2025-06-26
+## [Updated README] - {PR_MERGE_DATE}
 
 ### Changed
 - Updated README documentation
