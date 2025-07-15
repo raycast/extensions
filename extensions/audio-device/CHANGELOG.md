@@ -1,5 +1,9 @@
 # Audio Device Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Added frecency sorting to the devices list
+
 ## [Update] - 2025-06-26
 
 - Added support for device name for quick links
