@@ -18,11 +18,6 @@ function LookupEmail() {
     return <List isLoading={false} searchBarPlaceholder="Search for a user by name..." />;
   }
 
-  const users = data?.[0]?.filter((item): item is User => {
-    // Check if it's a user by looking for user-specific properties
-    return "username" in item && "conversationId" in item;
-  });
-
   async function fetchUserEmail(userId: string): Promise<string | null> {
     const slackWebClient = getSlackWebClient();
     const userInfo = await slackWebClient.users.info({ user: userId });
