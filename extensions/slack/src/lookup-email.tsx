@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, List, showToast, Toast, Clipboard } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, showToast, Toast, Clipboard, Color } from "@raycast/api";
 import { User, useChannels } from "./shared/client";
 import { withSlackClient } from "./shared/withSlackClient";
 import { handleError } from "./shared/utils";
@@ -91,7 +91,7 @@ function LookupEmail() {
             accessories={[
               {
                 text: user.statusText,
-                icon: user.statusEmoji ? { source: Icon.Message, tintColor: "#000" } : undefined,
+                icon: user.statusEmoji ? { source: Icon.Message, tintColor: Color.PrimaryText } : undefined,
               },
             ]}
             actions={
