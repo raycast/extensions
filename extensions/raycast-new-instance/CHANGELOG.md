@@ -1,6 +1,6 @@
 # New Instance Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2025-07-15
 
 - Initial creation of the Raycast New Instance extension
 - Added "Open New App Instance" command to select and launch new instances of installed applications
