@@ -1,6 +1,6 @@
 import path from "path";
 import { readFile } from "fs/promises";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Detail, environment } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 

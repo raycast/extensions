@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { List, ActionPanel, Action, Icon, useNavigation, confirmAlert, Alert, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { getCurrentDeviceName, getAllDeviceConfigs, saveConfig } from "./utils/config";

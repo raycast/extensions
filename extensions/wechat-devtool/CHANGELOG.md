@@ -1,6 +1,6 @@
 # WeChat DevTool Changelog
 
-## [Updated package-lock.json] - 2025-07-15
+## [Updated Packages] - 2025-07-15
 
 ## [First Release] - 2025-07-11
 
