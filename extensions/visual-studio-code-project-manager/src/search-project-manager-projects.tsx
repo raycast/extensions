@@ -65,7 +65,7 @@ function getProjectEntries(storagePath: string): ProjectEntry[] {
   }
 
   if (preferences.hideProjectsNotEnabled) {
-    projectEntries = projectEntries.filter(e => e.enabled);
+    projectEntries = projectEntries.filter((e) => e.enabled);
   }
 
   return projectEntries;
