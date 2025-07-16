@@ -1,5 +1,10 @@
 # World Clock Changelog
 
+## [Bugfix & Maintenance] - {PR_MERGE_DATE}
+
+- Avoid accessing the `.map` function on possibly undefined data
+- Bump all dependencies to the latest
+
 ## [Optimization Extension] - 2025-04-29
 
 - Supports non-integer time zone offset
