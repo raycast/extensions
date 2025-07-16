@@ -184,13 +184,13 @@ export default function SwitchProfile() {
         try {
           const restoreResult = await import("./utils/config-manager").then((m) => m.restoreConfig(backupPath));
 
-          if (restoreResult.success) {
+          if (!restoreResult.success) {
             throw new Error(
-              `Failed to restart Claude Desktop: ${restartResult.error}. Configuration has been restored from backup.`,
+              `Failed to restart Claude Desktop: ${restartResult.error}. CRITICAL: Failed to restore backup. You may need to manually restore your Claude Desktop configuration.`,
             );
           } else {
             throw new Error(
-              `Failed to restart Claude Desktop: ${restartResult.error}. CRITICAL: Failed to restore backup. You may need to manually restore your Claude Desktop configuration.`,
+              `Failed to restart Claude Desktop: ${restartResult.error}. Configuration has been restored from backup.`,
             );
           }
         } catch (restoreError) {

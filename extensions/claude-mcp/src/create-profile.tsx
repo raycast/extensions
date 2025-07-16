@@ -82,6 +82,15 @@ export default function CreateProfile() {
             ? (args as string).match(/(?:[^\s"]+|"[^"]*")+/g)?.map((arg: string) => arg.replace(/^"|"$/g, "")) || []
             : args;
 
+        if (processedServers[server.name]) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Validation Error",
+            message: `Server name "${server.name}" is already used. Each server must have a unique name.`,
+          });
+          return;
+        }
+
         processedServers[server.name] = {
           command: server.command,
           args: processedArgs,

@@ -140,12 +140,15 @@ export function useProfileSort(profiles: ProfileSummary[]) {
         case "name":
           comparison = a.name.localeCompare(b.name);
           break;
-        case "created":
-          comparison = a.createdAt.getTime() - b.createdAt.getTime();
+        case "created": {
+          const aCreated = a.createdAt?.getTime() ?? 0;
+          const bCreated = b.createdAt?.getTime() ?? 0;
+          comparison = aCreated - bCreated;
           break;
+        }
         case "lastUsed": {
-          const aLastUsed = a.lastUsed?.getTime() || 0;
-          const bLastUsed = b.lastUsed?.getTime() || 0;
+          const aLastUsed = a.lastUsed?.getTime() ?? 0;
+          const bLastUsed = b.lastUsed?.getTime() ?? 0;
           comparison = aLastUsed - bLastUsed;
           break;
         }

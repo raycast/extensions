@@ -104,8 +104,8 @@ export class ValidationService implements IValidationService {
 
     // Categorize issues
     const errors = issues.filter((issue) => issue.severity === ValidationSeverity.ERROR);
-    const warnings = issues.filter((issue) => issue.severity === "warning");
-    const info = issues.filter((issue) => issue.severity === "info");
+    const warnings = issues.filter((issue) => issue.severity === ValidationSeverity.WARNING);
+    const info = issues.filter((issue) => issue.severity === ValidationSeverity.INFO);
 
     return {
       valid: errors.length === 0,
@@ -188,8 +188,8 @@ export class ValidationService implements IValidationService {
 
     // Categorize issues
     const errors = issues.filter((issue) => issue.severity === ValidationSeverity.ERROR);
-    const warnings = issues.filter((issue) => issue.severity === "warning");
-    const info = issues.filter((issue) => issue.severity === "info");
+    const warnings = issues.filter((issue) => issue.severity === ValidationSeverity.WARNING);
+    const info = issues.filter((issue) => issue.severity === ValidationSeverity.INFO);
 
     return {
       valid: errors.length === 0,

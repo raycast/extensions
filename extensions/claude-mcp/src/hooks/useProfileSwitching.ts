@@ -58,8 +58,8 @@ export function useProfileSwitching(): UseProfileSwitchingResult {
           await notificationService.showSuccess(`${profile.name} is already active`);
 
           const result: ProfileSwitchResult = {
-            success: false,
-            error: `${profile.name} is already active`,
+            success: true,
+            message: `${profile.name} is already active`,
           };
 
           setState((prev) => ({
