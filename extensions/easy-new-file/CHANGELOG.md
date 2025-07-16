@@ -1,6 +1,6 @@
 # Easy New File Changelog
 
-## [Default Directory] - {PR_MERGE_DATE}
+## [Default Directory] - 2025-07-16
 
 - Support setting Default Directory for new file command when Finder has no window
 - Optimize extension icons for macOS Tahoe
