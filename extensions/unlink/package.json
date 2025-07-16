@@ -3,10 +3,10 @@
   "name": "unlink",
   "title": "Unlink",
   "description": "Automatically cleans messy clipboard URLs and email links. Removes tracking parameters (utm_*, fbclid), decodes email tracking redirects, strips mailto: prefixes, and formats with clean page titles.",
-  "icon": "extension-icon.png",
+  "icon": "icon.png",
   "author": "teaneedz",
   "license": "MIT",
-	"categories": ["Developer Tools"],
+  "categories": ["Developer Tools"],
   "commands": [
     {
       "name": "unlink",
