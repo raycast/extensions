@@ -6,6 +6,7 @@
   "icon": "icon.png",
   "author": "chrismessina",
   "license": "MIT",
+  "type": "module",
   "keywords": [
     "browsers",
     "urls",

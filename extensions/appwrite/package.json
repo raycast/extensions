@@ -18,8 +18,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.99.3",
-    "@raycast/utils": "^1.19.1",
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.2.0",
     "node-appwrite": "^17.0.0"
   },
   "devDependencies": {
