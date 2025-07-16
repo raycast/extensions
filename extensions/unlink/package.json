@@ -1,15 +1,16 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "unlink",
-  "title": "UnLink",
+  "title": "Unlink",
   "description": "Automatically cleans messy clipboard URLs and email links. Removes tracking parameters (utm_*, fbclid), decodes email tracking redirects, strips mailto: prefixes, and formats with clean page titles.",
   "icon": "extension-icon.png",
   "author": "teaneedz",
   "license": "MIT",
+	"categories": ["Developer Tools"],
   "commands": [
     {
       "name": "unlink",
-      "title": "UnLink",
+      "title": "Unlink",
       "description": "Cleans clipboard URLs by removing tracking parameters, decoding email tracking redirects, extracting email addresses from mailto links, and formatting with page titles",
       "mode": "no-view",
       "script": "unlink.ts"

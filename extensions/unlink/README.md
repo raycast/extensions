@@ -34,8 +34,12 @@ Email Redirect Decoding:
 https://track.customer.io/e/c/encoded_redirect → https://actualsite.com/article
 
 ## Development
-bashnpm install
+
+```
+bash
+npm install
 npm run dev
+```
 
 ## License
 MIT License - see LICENSE file for details.

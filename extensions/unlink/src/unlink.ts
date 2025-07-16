@@ -82,29 +82,31 @@ async function resolveRedirects(url: string): Promise<string> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000); // Longer timeout for redirects
 
-    // Try with a more convincing browser User-Agent
-    const response = await fetch(url, {
-      signal: controller.signal,
-      method: "GET", // Changed from HEAD to GET for better compatibility
-      redirect: "follow",
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.6 Safari/605.1.15",
-        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.5",
-        "Accept-Encoding": "gzip, deflate, br",
-        DNT: "1",
-        Connection: "keep-alive",
-        "Upgrade-Insecure-Requests": "1",
-      },
-    });
+    try {
+      // Try with a more convincing browser User-Agent
+      const response = await fetch(url, {
+        signal: controller.signal,
+        method: "GET", // Changed from HEAD to GET for better compatibility
+        redirect: "follow",
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.6 Safari/605.1.15",
+          Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          "Accept-Language": "en-US,en;q=0.5",
+          "Accept-Encoding": "gzip, deflate, br",
+          DNT: "1",
+          Connection: "keep-alive",
+          "Upgrade-Insecure-Requests": "1",
+        },
+      });
 
-    clearTimeout(timeoutId);
-
-    // Return the final URL after all redirects
-    const finalUrl = response.url;
-    console.log(`Redirect resolution: ${url} -> ${finalUrl}`);
-    return finalUrl;
+      // Return the final URL after all redirects
+      const finalUrl = response.url;
+      console.log(`Redirect resolution: ${url} -> ${finalUrl}`);
+      return finalUrl;
+    } finally {
+      clearTimeout(timeoutId); // FIXED: Clear timeout to prevent memory leak
+    }
   } catch (error) {
     console.log(`Redirect resolution failed for ${url}:`, error);
     return url; // Return original if resolution fails
@@ -122,26 +124,28 @@ async function fetchPageTitle(url: string): Promise<string | null> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3000);
 
-    const response = await fetch(url, {
-      signal: controller.signal,
-      redirect: "follow", // Follow redirects to get final URL
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
-      },
-    });
+    try {
+      const response = await fetch(url, {
+        signal: controller.signal,
+        redirect: "follow", // Follow redirects to get final URL
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+        },
+      });
 
-    clearTimeout(timeoutId);
+      if (!response.ok) return null;
 
-    if (!response.ok) return null;
+      const html = await response.text();
+      const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
 
-    const html = await response.text();
-    const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+      if (titleMatch && titleMatch[1]) {
+        return titleMatch[1].trim().replace(/\s+/g, " ");
+      }
 
-    if (titleMatch && titleMatch[1]) {
-      return titleMatch[1].trim().replace(/\s+/g, " ");
+      return null;
+    } finally {
+      clearTimeout(timeoutId); // FIXED: Clear timeout to prevent memory leak
     }
-
-    return null;
   } catch {
     return null;
   }
