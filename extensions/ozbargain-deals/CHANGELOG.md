@@ -2,7 +2,7 @@
 
 ## [Initial Release] - {PR_MERGE_DATE}
 
-- Release of the OzBargain Deals extension.
+- Initial release of the OzBargain Deals extension.
 - Browse latest deals from OzBargain.
 - View deal details including description, votes, comments, store, and categories.
 - Actions to open deal in browser, copy link/title, and view comments.
