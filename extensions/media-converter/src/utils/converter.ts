@@ -148,6 +148,7 @@ export async function convertMedia<T extends AllOutputExtension>(
           if (currentOutputFormat !== ".png" || imageQuality[".png"] !== "png-8") {
             ffmpegCmd += ` -y "${finalOutputPath}"`;
           }
+          console.log(`Executing FFmpeg image command: ${ffmpegCmd}`);
           await execPromise(ffmpegCmd);
         }
         return finalOutputPath;
@@ -217,6 +218,7 @@ export async function convertMedia<T extends AllOutputExtension>(
       }
 
       ffmpegCmd += ` -y "${finalOutputPath}"`;
+      console.log(`Executing FFmpeg audio command: ${ffmpegCmd}`);
       await execPromise(ffmpegCmd);
       return finalOutputPath;
     }
@@ -306,18 +308,31 @@ export async function convertMedia<T extends AllOutputExtension>(
 
       try {
         ffmpegCmd += ` -y "${finalOutputPath}"`;
-        console.log(`Executing FFmpeg command: ${ffmpegCmd}`);
+        console.log(`Executing FFmpeg video command: ${ffmpegCmd}`);
         await execPromise(ffmpegCmd);
         return finalOutputPath;
       } finally {
         // Clean up 2-pass log files if they exist
         if (logFilePrefix) {
           try {
-            if (fs.existsSync(`${logFilePrefix}-0.log`)) {
-              fs.unlinkSync(`${logFilePrefix}-0.log`);
-            }
-            if (fs.existsSync(`${logFilePrefix}-0.log.mbtree`)) {
-              fs.unlinkSync(`${logFilePrefix}-0.log.mbtree`);
+            // Clean up all possible FFmpeg 2-pass log files
+            const logFiles = [
+              `${logFilePrefix}-0.log`,
+              `${logFilePrefix}-0.log.mbtree`,
+              `${logFilePrefix}-0.log.temp`,
+              `${logFilePrefix}-1.log`,
+              `${logFilePrefix}-1.log.mbtree`,
+              `${logFilePrefix}-1.log.temp`,
+            ];
+
+            for (const logFile of logFiles) {
+              if (fs.existsSync(logFile)) {
+                try {
+                  fs.unlinkSync(logFile);
+                } catch (fileError) {
+                  console.warn(`Failed to clean up log file ${logFile}:`, fileError);
+                }
+              }
             }
           } catch (error) {
             console.warn("Failed to clean up FFmpeg log files:", error);

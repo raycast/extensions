@@ -204,6 +204,8 @@ export const VIDEO_BITRATE = [
   "500",
 ] as const;
 export type VideoBitrate = (typeof VIDEO_BITRATE)[number];
+export const VIDEO_MAX_BITRATE = ["", ...VIDEO_BITRATE] as const;
+export type VideoMaxBitrate = (typeof VIDEO_MAX_BITRATE)[number];
 export const VIDEO_PRESET = [
   "veryslow",
   "slower",
@@ -235,20 +237,20 @@ export type VideoControlType =
 export type VideoQuality = {
   ".mp4":
     | { encodingMode: "crf"; crf: VideoCrf; preset: VideoPreset }
-    | { encodingMode: "vbr" | "vbr-2-pass"; bitrate: VideoBitrate; maxBitrate?: VideoBitrate; preset: VideoPreset };
+    | { encodingMode: "vbr" | "vbr-2-pass"; bitrate: VideoBitrate; maxBitrate: VideoMaxBitrate; preset: VideoPreset };
   ".avi":
     | { encodingMode: "crf"; crf: VideoCrf }
-    | { encodingMode: "vbr" | "vbr-2-pass"; bitrate: VideoBitrate; maxBitrate?: VideoBitrate };
+    | { encodingMode: "vbr" | "vbr-2-pass"; bitrate: VideoBitrate; maxBitrate: VideoMaxBitrate };
   ".mov": { variant: ProResVariant };
   ".mkv":
     | { encodingMode: "crf"; crf: VideoCrf; preset: VideoPreset }
-    | { encodingMode: "vbr" | "vbr-2-pass"; bitrate: VideoBitrate; maxBitrate?: VideoBitrate; preset: VideoPreset };
+    | { encodingMode: "vbr" | "vbr-2-pass"; bitrate: VideoBitrate; maxBitrate: VideoMaxBitrate; preset: VideoPreset };
   ".mpg":
     | { encodingMode: "crf"; crf: VideoCrf }
-    | { encodingMode: "vbr" | "vbr-2-pass"; bitrate: VideoBitrate; maxBitrate?: VideoBitrate };
+    | { encodingMode: "vbr" | "vbr-2-pass"; bitrate: VideoBitrate; maxBitrate: VideoMaxBitrate };
   ".webm":
     | { encodingMode: "crf"; crf: VideoCrf; quality: VP9Quality }
-    | { encodingMode: "vbr" | "vbr-2-pass"; bitrate: VideoBitrate; maxBitrate?: VideoBitrate; quality: VP9Quality };
+    | { encodingMode: "vbr" | "vbr-2-pass"; bitrate: VideoBitrate; maxBitrate: VideoMaxBitrate; quality: VP9Quality };
 };
 
 // =============================================================================
@@ -293,11 +295,11 @@ export const DEFAULT_QUALITIES = {
 
 // Video VBR defaults (for when switching to VBR modes)
 export const DEFAULT_VBR_QUALITIES = {
-  ".mp4": { encodingMode: "vbr", bitrate: "2000", preset: "medium" },
-  ".avi": { encodingMode: "vbr", bitrate: "2000" },
-  ".mkv": { encodingMode: "vbr", bitrate: "2000", preset: "medium" },
-  ".mpg": { encodingMode: "vbr", bitrate: "2000" },
-  ".webm": { encodingMode: "vbr", bitrate: "2000", quality: "good" },
+  ".mp4": { encodingMode: "vbr", bitrate: "2000", maxBitrate: "", preset: "medium" },
+  ".avi": { encodingMode: "vbr", bitrate: "2000", maxBitrate: "" },
+  ".mkv": { encodingMode: "vbr", bitrate: "2000", maxBitrate: "", preset: "medium" },
+  ".mpg": { encodingMode: "vbr", bitrate: "2000", maxBitrate: "" },
+  ".webm": { encodingMode: "vbr", bitrate: "2000", maxBitrate: "", quality: "good" },
 } as const;
 
 // =============================================================================

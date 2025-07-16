@@ -169,6 +169,7 @@ type Input = {
     | ".aac"
     | ".wav"
     | ".flac"
+    | ".m4a"
     // IMAGE
     | ".jpg"
     | ".png"

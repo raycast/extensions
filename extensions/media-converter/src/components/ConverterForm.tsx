@@ -38,8 +38,11 @@ import {
   AudioControlType,
   AllControlType,
   VideoControlType,
+  VideoMaxBitrate,
+  VIDEO_MAX_BITRATE,
 } from "../types/media";
 import path from "path";
+import { execPromise } from "../utils/exec";
 
 export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }) {
   const [selectedFileType, setSelectedFileType] = useState<MediaType | null>(null);
@@ -72,11 +75,15 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
     }
 
     try {
-      let primaryFileType: "video" | "image" | "audio" | false = false;
+      let primaryFileType: MediaType | null = null;
       for (const file of files) {
+        if (path.extname(file) === ".heic" && process.platform !== "darwin") {
+          continue; // Skip .heic files when not on macOS.
+          // TODO: implement SharpJS, solve this state.
+        }
         const type = getMediaType(path.extname(file));
         if (type) {
-          primaryFileType = type as "video" | "image" | "audio";
+          primaryFileType = type as MediaType;
           break; // Found the first valid file type
         }
       }
@@ -86,6 +93,15 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
           style: Toast.Style.Failure,
           title: "Invalid selection",
           message: "No valid media files selected. Please select video, image, or audio files.",
+          secondaryAction: {
+            title: "See supported formats",
+            shortcut: { modifiers: ["cmd"], key: "o" },
+            onAction: () => {
+              execPromise(
+                "open https://www.raycast.com/leandro.maia/media-converter#:~:text=supported%20input%20formats",
+              );
+            },
+          },
         });
         setCurrentFiles([]);
         setSelectedFileType(null);
@@ -101,6 +117,15 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
           style: Toast.Style.Failure,
           title: "Invalid files in selection",
           message: `Kept ${processedFiles.length} ${primaryFileType} file${processedFiles.length > 1 ? "s" : ""}. ${files.length - processedFiles.length} other file${files.length - processedFiles.length > 1 ? "s" : ""} from your selection were invalid or of a different type and have been discarded.`,
+          secondaryAction: {
+            title: "See supported formats",
+            shortcut: { modifiers: ["cmd"], key: "o" },
+            onAction: () => {
+              execPromise(
+                "open https://www.raycast.com/leandro.maia/media-converter#:~:text=supported%20input%20formats",
+              );
+            },
+          },
         });
       }
 
@@ -248,7 +273,7 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
       )}
       {/* Quality Settings */}
       {selectedFileType && outputFormat && currentQualitySetting && (
-        <QualitySettings
+        <QualitySettingsComponent
           outputFormat={outputFormat}
           currentQuality={currentQualitySetting}
           onQualityChange={setCurrentQualitySetting}
@@ -261,7 +286,7 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
 // TODO: If the selected output setting surpasses the quality of the original file, show the input audio's bitrate/profile/sample, which file is that.
 // Just a warning, letting the user know that the output file will not be better than the input file.
 
-function QualitySettings({
+function QualitySettingsComponent({
   outputFormat,
   currentQuality,
   onQualityChange,
@@ -594,8 +619,8 @@ function QualitySettings({
                       mode === "crf"
                         ? "CRF (Constant Rate Factor) - Quality-based"
                         : mode === "vbr"
-                          ? "VBR (Variable Bitrate) - Single pass"
-                          : "VBR 2-Pass - Better quality, slower"
+                          ? "VBR (Variable Bitrate)"
+                          : "VBR 2-Pass - Better quality, 2× slower"
                     }
                   />
                 ))}
@@ -644,15 +669,21 @@ function QualitySettings({
                 key="maxBitrate"
                 id="maxBitrate"
                 title="Max Bitrate"
-                value={currentValue as VideoBitrate}
+                value={currentValue as VideoMaxBitrate}
                 onChange={(maxBitrate: string) =>
-                  onSettingsChange({ ...settingsObj, [controlType]: maxBitrate as VideoBitrate })
+                  onSettingsChange({ ...settingsObj, [controlType]: maxBitrate as VideoMaxBitrate })
                 }
                 info="Optional maximum bitrate limit. Leave empty for no limit."
               >
-                <Form.Dropdown.Item value="" title="No limit" />
-                {VIDEO_BITRATE.map((rate) => (
-                  <Form.Dropdown.Item key={rate} value={rate} title={`${rate} kbps`} />
+                {VIDEO_MAX_BITRATE.filter((rate) => {
+                  if (rate === "") return true;
+
+                  const currentBitrate = settingsObj?.bitrate as VideoBitrate;
+                  if (!currentBitrate) return true;
+
+                  return parseInt(rate) >= parseInt(currentBitrate);
+                }).map((rate) => (
+                  <Form.Dropdown.Item key={rate} value={rate} title={`${rate === "" ? "No limit" : rate + " kbps"}`} />
                 ))}
               </Form.Dropdown>
             );
