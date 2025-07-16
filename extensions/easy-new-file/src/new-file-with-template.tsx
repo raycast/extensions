@@ -70,20 +70,21 @@ export default function NewFileWithTemplate() {
 }
 
 export function buildFileName(desPath: string, name: string, extension: string) {
-  const directoryExists = fse.existsSync(path.join(desPath, name + "." + extension));
-  if (!directoryExists) {
+  const originalPath = path.join(desPath, name + "." + extension);
+  if (!fse.existsSync(originalPath)) {
     return name + "." + extension;
   } else {
     let index = 2;
-    while (directoryExists) {
-      const newName = name + " " + index + "." + extension;
-      const directoryExists = fse.existsSync(path.join(desPath, newName));
-      if (!directoryExists) {
-        return newName;
-      }
+    let newName: string;
+    let newPath: string;
+
+    do {
+      newName = name + " " + index + "." + extension;
+      newPath = path.join(desPath, newName);
       index++;
-    }
-    return name + "-" + index + "." + extension;
+    } while (fse.existsSync(newPath));
+
+    return newName;
   }
 }
 
