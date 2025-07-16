@@ -1,6 +1,6 @@
 # World Clock Changelog
 
-## [Bugfix & Maintenance] - {PR_MERGE_DATE}
+## [Bugfix & Maintenance] - 2025-07-16
 
 - Avoid accessing the `.map` function on possibly undefined data
 - Bump all dependencies to the latest
