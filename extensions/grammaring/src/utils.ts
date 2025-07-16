@@ -49,7 +49,7 @@ Output: "hey where did you bought that keyboard?"
 Input: "this release is very {very important synonym} for our roadmap!"
 Output: "this release is crucial for our roadmap!"
 
-Input: "wow, really like it man {emoji}
+Input: "wow, really like it man {emoji}"
 Output: "wow, really like it man 👍"
 
 Input: "valentin your part of the dinner were $ {33 + 10}, pay meeee"
