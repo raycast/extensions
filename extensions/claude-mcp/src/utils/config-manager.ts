@@ -4,7 +4,7 @@
  */
 
 import { promises as fs } from "fs";
-import { join } from "path";
+import { join, basename } from "path";
 import { homedir } from "os";
 import { MCPServersConfig, StorageResult } from "../types";
 
@@ -469,7 +469,7 @@ export async function cleanupOldBackups(keepCount = 10): Promise<StorageResult<n
         await fs.unlink(backupPath);
 
         // Also delete corresponding metadata file
-        const backupFilename = backupPath.split("/").pop() || "";
+        const backupFilename = basename(backupPath);
         const metadataFilename = generateBackupMetadataFilename(backupFilename);
         const metadataPath = join(BACKUP_DIR, metadataFilename);
 

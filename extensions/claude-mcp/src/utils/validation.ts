@@ -42,10 +42,17 @@ const VALIDATION_CONFIG = {
   MAX_ARGS_COUNT: 50,
   MAX_ENV_VARS_COUNT: 100,
   ALLOWED_COMMAND_PREFIXES: [
+    // Unix/Linux/macOS paths
     "/usr/local/bin/",
     "/usr/bin/",
     "/bin/",
     "/opt/",
+    // Windows paths
+    "C:\\Program Files\\",
+    "C:\\Program Files (x86)\\",
+    "C:\\Windows\\System32\\",
+    "C:\\Windows\\",
+    // Cross-platform executables
     "node",
     "python",
     "python3",

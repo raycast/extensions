@@ -63,7 +63,7 @@ export interface IProfileLifecycleManager {
  * Profile usage tracking
  */
 export interface IProfileUsageTracker {
-  recordUsage(id: ProfileId): Promise<void>;
+  recordUsage(id: ProfileId): Promise<StorageResult<boolean>>;
   getUsageStatistics(id: ProfileId): Promise<
     StorageResult<{
       usageCount: number;
