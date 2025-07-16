@@ -2,7 +2,8 @@
 
 ## [Default Directory] - {PR_MERGE_DATE}
 
-- Support setting Default Directory for new file command when finder has no window
+- Support setting Default Directory for new file command when Finder has no window
+- Optimize extension icons for macOS Tahoe
 
 ## [Form Layout] - 2025-06-23
 
