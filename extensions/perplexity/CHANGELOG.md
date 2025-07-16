@@ -1,6 +1,6 @@
 # Perplexity Changelog
 
-## [Perplexity App Support] - {PR_MERGE_DATE}
+## [Perplexity App Support] - 2025-07-16
 
 - Add new command preferences to allow opening the Perplexity app, instead of the browser.
 - Remove unsupported legacy fields and options.
