@@ -1,25 +1,21 @@
-import { useNavigation, showToast, Toast, showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { openProject } from "./utils/cli";
-import { Project, DeviceConfig } from "./types";
+import { useNavigation, showToast, Toast, showHUD } from "@raycast/api";
+
 import ProjectList from "./components/project-list";
+import { openProject } from "./utils/cli";
+import { Project, ExtensionConfig } from "./types";
 
 export default function OpenProject() {
   const { pop } = useNavigation();
 
-  async function handleOpenProject(project: Project, deviceConfig: DeviceConfig | undefined) {
-    if (!deviceConfig) {
-      await showFailureToast(new Error("Device configuration not found"), { title: "Configuration Missing" });
-      return;
-    }
-
+  async function handleOpenProject(project: Project, config: ExtensionConfig) {
     showToast({
       style: Toast.Style.Animated,
       title: "Opening project...",
     });
 
     try {
-      await openProject(deviceConfig.cliPath, project.path);
+      await openProject(config.cliPath, project.path);
       showHUD("✅ Project opened successfully");
       pop();
     } catch (error) {
