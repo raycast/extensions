@@ -14,14 +14,14 @@
     {
       "name": "list-aliases",
       "title": "List Email Aliases",
-      "subtitle": "List and manage all your Cloudflare email aliases",
+      "subtitle": "Cloudflare Email Routing",
       "description": "List all your Cloudflare email aliases with search and management actions.",
       "mode": "view"
     },
     {
       "name": "create-alias",
       "title": "Create Email Alias",
-      "subtitle": "Create a new email alias",
+      "subtitle": "Cloudflare Email Routing",
       "description": "Create a new random email alias that forwards to your real inbox.",
       "mode": "view"
     }

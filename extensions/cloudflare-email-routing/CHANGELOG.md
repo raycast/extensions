@@ -1,4 +1,4 @@
-Hide My Mail: Cloudflare Email Aliases Changelog
+Cloudflare Email Routing Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
  
