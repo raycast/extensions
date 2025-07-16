@@ -1,6 +1,6 @@
 #  Zed Recent Projects Changelog
 
-## [Fixes] - 2025-07-12
+## [Fixes] - 2025-07-16
 
 - Fix missing local projects
 
