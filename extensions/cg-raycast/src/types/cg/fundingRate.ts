@@ -1,5 +1,5 @@
 /**
- * 资金费率
+ * Funding Rate Interface
  */
 export interface Margin {
   exchangeLogo: string;

@@ -1,3 +1,6 @@
+/**
+ * Open Interest Information Interface
+ */
 export interface IOpenInterestInfo {
   exchangeLogo: string;
   exchangeName: string;

@@ -1,5 +1,5 @@
 /**
- * 跌幅榜 & 持仓榜
+ * CoinMarket interface
  */
 export interface CoinMarket {
   avgFundingRateByOi: number;

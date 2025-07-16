@@ -26,20 +26,20 @@ function OpenInterestDetail({ symbol }: { symbol: string }) {
             <List.Item.Detail
               metadata={
                 <List.Item.Detail.Metadata>
-                  <List.Item.Detail.Metadata.Label title="价格" text={info.price ? formatPrice(info.price) : ""} />
+                  <List.Item.Detail.Metadata.Label title="Price" text={info.price ? formatPrice(info.price) : ""} />
                   <List.Item.Detail.Metadata.Label
-                    title={`持仓量(${info.symbol})`}
+                    title={`OI (${info.symbol})`}
                     text={`${info.openInterestAmount ? formatAmount(info.openInterestAmount) : ""} ${info.symbol}`}
                   />
                   <List.Item.Detail.Metadata.Label
                     title="持仓量"
                     text={info.openInterest ? formatAmount(info.openInterest) : ""}
                   />
-                  <List.Item.Detail.Metadata.Label title="占比" text={`${info.rate ? info.rate : ""} %`} />
+                  <List.Item.Detail.Metadata.Label title="Rate" text={`${info.rate ? info.rate : ""} %`} />
                   <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label title="1h 持仓变化" text={`${info.h1OIChangePercent} %`} />
-                  <List.Item.Detail.Metadata.Label title="4h 持仓变化" text={`${info.h4OIChangePercent} %`} />
-                  <List.Item.Detail.Metadata.Label title="24h 持仓变化" text={`${info.h24Change} %`} />
+                  <List.Item.Detail.Metadata.Label title="1h Change" text={`${info.h1OIChangePercent} %`} />
+                  <List.Item.Detail.Metadata.Label title="4h Change" text={`${info.h4OIChangePercent} %`} />
+                  <List.Item.Detail.Metadata.Label title="24h Change" text={`${info.h24Change} %`} />
                   <List.Item.Detail.Metadata.Separator />
                 </List.Item.Detail.Metadata>
               }
@@ -49,16 +49,16 @@ function OpenInterestDetail({ symbol }: { symbol: string }) {
       ))}
       {
         <List.Item
-          title="总计"
-          subtitle={`${marketData?.data?.length || 0} 个交易所`}
+          title=""
+          subtitle={`${marketData?.data?.length || 0} Exchanges`}
           accessories={[
             {
               text: formatAmount(totalOI),
-              tooltip: `总持仓量：${formatAmount(totalOI)}`,
+              tooltip: `Total OI：${formatAmount(totalOI)}`,
             },
             {
               text: formatAmount(totalVolume),
-              tooltip: `总成交量：${formatAmount(totalVolume)}`,
+              tooltip: `Total Volume：${formatAmount(totalVolume)}`,
             },
           ]}
         />

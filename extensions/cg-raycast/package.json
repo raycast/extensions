@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cg-raycast",
   "title": "CG Raycast",
-  "description": "CG 的 Raycast 扩展，用于在 Raycast 中搜索 Cryptocurrency 价格和持仓信息。",
+  "description": "A Raycast extension for fast querying of cryptocurrency data.",
   "icon": "icon.png",
   "author": "RealTong",
   "categories": [
