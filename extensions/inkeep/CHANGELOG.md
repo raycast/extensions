@@ -1,6 +1,6 @@
 # Inkeep Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-03-03
 
 - Initial version of the Inkeep Raycast extension
 - Added "Ask Inkeep" command, supports streaming responses, documentation links, and confidence score
