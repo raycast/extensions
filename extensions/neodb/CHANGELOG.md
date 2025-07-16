@@ -1,5 +1,10 @@
 # NeoDB Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Add support for Windows
+- Bump all dependencies to the latest
+
 ## [New Additions] - 2024-11-04
 
 - You can now set an optional "Preferred Language" in `Preferences`. When fetching Results, the extension will prioritize results in chosen language.
