@@ -1,5 +1,9 @@
 # System Monitor Changelog
 
+## [New Additions] - {PR_MERGE_DATE}
+
+- Add a new preference option for the `Menubar System Monitor` command to customize the menu bar icon.
+
 ## [Improvements] - 2025-06-04
 
 - Improve the script to ensure it waits for the Activity Monitor to open before clicking the radio button
