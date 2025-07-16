@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import { open } from "@raycast/api";
+import { open, environment } from "@raycast/api";
 import { ProfileListView } from "../ui/ProfileListView";
 import { useProfileList, useProfileFilter, useProfileSort } from "../../hooks/useProfileList";
 import { ServiceProvider } from "../../context/ServiceProvider";
@@ -16,8 +16,8 @@ function ProfileListContent() {
   const { sortBy, sortOrder, sortedProfiles, toggleSort } = useProfileSort(filteredProfiles);
 
   const handleCreateProfile = async () => {
-    // Open create profile command
-    await open(`raycast://extensions/benkim0414/claude-mcp/create-profile`);
+    // Open create profile command using dynamic extension info
+    await open(`raycast://extensions/${environment.extensionName}/create-profile`);
   };
 
   const handleRetry = () => {
