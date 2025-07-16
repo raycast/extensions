@@ -7,6 +7,28 @@ import { copyImageToClipboard, pasteImage, searchImage } from "../utils/helpers"
 import { ImageLayout, ImageLayouts } from "../utils/consts";
 import { DuckDuckGoImage } from "../utils/search";
 
+const QUERY_EXAMPLES: string[] = [
+  "cute cats",
+  "nature landscapes",
+  "abstract art wallpaper",
+  "delicious food photography",
+  "architecture modern buildings",
+  "vintage cars",
+  "space nebula",
+  "colorful flowers",
+  "urban street photography",
+  "wildlife animals",
+  "minimalist design",
+  "underwater marine life",
+  "mountain peaks",
+  "fashion portraits",
+  "historic landmarks",
+];
+
+function getExampleQuery(): string {
+  return QUERY_EXAMPLES[Math.floor(Math.random() * QUERY_EXAMPLES.length)];
+}
+
 function ActionsPanel({ item }: { item: DuckDuckGoImage }) {
   return (
     <ActionPanel>
@@ -37,7 +59,7 @@ function ActionsPanel({ item }: { item: DuckDuckGoImage }) {
       <Action
         title="Copy Image"
         shortcut={{
-          modifiers: ["cmd"],
+          modifiers: ["cmd", "shift"],
           key: "c",
         }}
         icon={Icon.Clipboard}
@@ -75,6 +97,9 @@ export default function Command() {
   const [layout, setLayout] = useState<ImageLayouts>(ImageLayout["Any size"]);
   const abortable = useRef<AbortController>(new AbortController());
 
+  // A new example query will be created on each re-render. Maybe not super optimal, but it's not too critical
+  const exampleQuery = getExampleQuery();
+
   const { isLoading, data, pagination } = useCachedPromise(
     (searchText: string, searchLayout: ImageLayouts) =>
       async ({ cursor }: PaginationOptions) => {
@@ -100,6 +125,7 @@ export default function Command() {
     <Grid
       inset={Grid.Inset.Zero}
       isLoading={isLoading}
+      searchText={query}
       onSearchTextChange={setQuery}
       searchBarPlaceholder="Search image on DuckDuckGo"
       pagination={pagination}
@@ -117,26 +143,44 @@ export default function Command() {
         </Grid.Dropdown>
       }
     >
-      {data &&
-        data
-          .filter((item, index, self) => self.findIndex((t) => t.image_token === item.image_token) === index)
-          .map((item) => (
-            <Grid.Item
-              key={item.image_token}
-              content={
-                {
-                  source: item.thumbnail,
-                } as Image
+      {data.length > 0
+        ? data
+            .filter((item, index, self) => self.findIndex((t) => t.image_token === item.image_token) === index)
+            .map((item) => (
+              <Grid.Item
+                key={item.image_token}
+                content={
+                  {
+                    source: item.thumbnail,
+                  } as Image
+                }
+                title={item.title}
+                id={item.image_token}
+                accessory={{
+                  icon: Icon.Link,
+                  tooltip: `Source: ${item.source}`,
+                }}
+                actions={<ActionsPanel item={item} />}
+              />
+            ))
+        : query.trim() === "" && (
+            // If the query field is empty -- then we show an example query
+            // Overwise we use the default behavior (No Result)
+            <Grid.EmptyView
+              title="Start typing your query!"
+              description={`Try to type something like this: ${exampleQuery}`}
+              icon={Icon.MagnifyingGlass}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title="Use Example Query"
+                    onAction={() => setQuery(exampleQuery)}
+                    icon={Icon.MagnifyingGlass}
+                  />
+                </ActionPanel>
               }
-              title={item.title}
-              id={item.image_token}
-              accessory={{
-                icon: Icon.Link,
-                tooltip: `Source: ${item.source}`,
-              }}
-              actions={<ActionsPanel item={item} />}
             />
-          ))}
+          )}
     </Grid>
   );
 }
