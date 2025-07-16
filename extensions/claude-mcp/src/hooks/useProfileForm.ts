@@ -7,7 +7,7 @@ import { useState, useCallback, useEffect } from "react";
 import { MCPServerConfig } from "../types";
 import { MCPProfile, CreateProfileInput, UpdateProfileInput } from "../types/profile-types";
 import { useProfileManager, useValidationService, useNotificationService } from "../context/ServiceProvider";
-import { DetailedValidationResult } from "../utils/validation";
+import { DetailedValidationResult, ValidationSeverity } from "../utils/validation";
 
 export interface MCPServerFormData extends MCPServerConfig {
   name: string;
@@ -142,7 +142,7 @@ export function useProfileForm(
         valid: false,
         errors: [
           {
-            severity: "error" as const,
+            severity: ValidationSeverity.ERROR,
             code: "VALIDATION_ERROR",
             message: errorMessage,
           },
@@ -324,7 +324,7 @@ async function convertFormDataToProfile(formData: ProfileFormData): Promise<Part
     const args = server.args || [];
     const processedArgs =
       typeof args === "string"
-        ? args.match(/(?:[^\s"]+|"[^"]*")+/g)?.map((arg) => arg.replace(/^"|"$/g, "")) || []
+        ? (args as string).match(/(?:[^\s"]+|"[^"]*")+/g)?.map((arg: string) => arg.replace(/^"|"$/g, "")) || []
         : args;
 
     mcpServers[server.name] = {

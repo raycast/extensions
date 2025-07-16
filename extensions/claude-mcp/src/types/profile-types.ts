@@ -46,8 +46,7 @@ export interface MCPProfile extends ProfileMetadata, ProfileTimestamps, ProfileC
 /**
  * Profile creation input (excludes auto-generated fields)
  */
-export interface CreateProfileInput extends ProfileMetadata, ProfileConfiguration {
-  id?: never; // Explicitly exclude id from input
+export interface CreateProfileInput extends Omit<ProfileMetadata, "id">, ProfileConfiguration {
   createdAt?: never; // Explicitly exclude createdAt from input
   lastUsed?: never; // Explicitly exclude lastUsed from input
 }

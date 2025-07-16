@@ -96,7 +96,6 @@ export default function ProfileDetailView({ profileId, onRefresh }: ProfileDetai
       }`,
       primaryAction: {
         title: "Delete",
-        style: Action.Style.Destructive,
       },
       dismissAction: {
         title: "Cancel",

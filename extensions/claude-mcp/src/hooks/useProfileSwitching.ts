@@ -232,7 +232,13 @@ export function useSystemStatus() {
 
   const [systemStatus, setSystemStatus] = useState<{
     isLoading: boolean;
-    status: StorageResult<boolean> | null;
+    status: StorageResult<{
+      claudeInstalled: boolean;
+      configExists: boolean;
+      configWritable: boolean;
+      activeProfile: string | null;
+      totalProfiles: number;
+    }> | null;
     error: string | null;
   }>({
     isLoading: false,
@@ -248,7 +254,7 @@ export function useSystemStatus() {
 
       setSystemStatus({
         isLoading: false,
-        status: result.success ? result.data : null,
+        status: result.success && result.data ? result : null,
         error: result.success ? null : result.error || "Failed to get system status",
       });
 

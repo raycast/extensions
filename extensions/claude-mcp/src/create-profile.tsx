@@ -79,7 +79,7 @@ export default function CreateProfile() {
         const args = server.args || [];
         const processedArgs =
           typeof args === "string"
-            ? args.match(/(?:[^\s"]+|"[^"]*")+/g)?.map((arg) => arg.replace(/^"|"$/g, "")) || []
+            ? (args as string).match(/(?:[^\s"]+|"[^"]*")+/g)?.map((arg: string) => arg.replace(/^"|"$/g, "")) || []
             : args;
 
         processedServers[server.name] = {

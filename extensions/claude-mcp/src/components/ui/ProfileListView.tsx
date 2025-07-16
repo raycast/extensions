@@ -45,7 +45,6 @@ export function ProfileListView({
       }`,
       primaryAction: {
         title: "Delete",
-        style: Action.Style.Destructive,
       },
       dismissAction: {
         title: "Cancel",

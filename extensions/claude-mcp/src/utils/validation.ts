@@ -690,16 +690,19 @@ export function validateConfiguration(config: unknown): DetailedValidationResult
     return categorizeIssues(issues);
   }
 
+  // Type assertion after validation
+  const configObj = config as Record<string, unknown>;
+
   // Validate mcpServers if present
-  if (config.mcpServers !== undefined) {
-    if (typeof config.mcpServers !== "object" || Array.isArray(config.mcpServers)) {
+  if (configObj.mcpServers !== undefined) {
+    if (typeof configObj.mcpServers !== "object" || Array.isArray(configObj.mcpServers)) {
       issues.push(
         createIssue(
           ValidationSeverity.ERROR,
           "INVALID_MCP_SERVERS_TYPE",
           "mcpServers must be a plain object",
           "mcpServers",
-          config.mcpServers,
+          configObj.mcpServers,
         ),
       );
     }
@@ -707,7 +710,7 @@ export function validateConfiguration(config: unknown): DetailedValidationResult
 
   // Check for unknown top-level properties (info level)
   const knownProperties = ["mcpServers"];
-  const unknownProperties = Object.keys(config).filter((key) => !knownProperties.includes(key));
+  const unknownProperties = Object.keys(configObj).filter((key) => !knownProperties.includes(key));
 
   for (const prop of unknownProperties) {
     issues.push(
@@ -716,7 +719,7 @@ export function validateConfiguration(config: unknown): DetailedValidationResult
         "UNKNOWN_PROPERTY",
         `Unknown configuration property: ${prop}`,
         prop,
-        config[prop],
+        configObj[prop],
       ),
     );
   }

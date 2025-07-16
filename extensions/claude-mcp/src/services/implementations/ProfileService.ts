@@ -329,10 +329,10 @@ export class ProfileService implements IProfileManager {
       return {
         success: true,
         data: {
-          claudeInstalled: claudeResult.success && claudeResult.data,
-          configExists: configStatusResult.success && configStatusResult.data.exists,
-          configWritable: configStatusResult.success && configStatusResult.data.writable,
-          activeProfile: activeProfileResult.success ? activeProfileResult.data : null,
+          claudeInstalled: claudeResult.success && !!claudeResult.data,
+          configExists: configStatusResult.success && !!configStatusResult.data?.exists,
+          configWritable: configStatusResult.success && !!configStatusResult.data?.writable,
+          activeProfile: activeProfileResult.success ? (activeProfileResult.data ?? null) : null,
           totalProfiles: profilesResult.success ? profilesResult.data?.length || 0 : 0,
         },
       };

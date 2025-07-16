@@ -585,7 +585,7 @@ export async function getClaudeProcessInfo(): Promise<
         memoryUsage?: string;
       };
     } = {
-      isInstalled: installedResult.data,
+      isInstalled: installedResult.data ?? false,
       isRunning: runningResult.data?.isRunning || false,
     };
 

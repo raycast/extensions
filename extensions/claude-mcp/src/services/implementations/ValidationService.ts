@@ -6,6 +6,7 @@
 import { MCPProfile, MCPServerConfig, MCPServersConfig } from "../../types";
 import {
   DetailedValidationResult,
+  ValidationSeverity,
   validateProfile,
   validateMCPServer,
   validateMCPServers,
@@ -68,7 +69,7 @@ export class ValidationService implements IValidationService {
     // Check if name is provided for creation
     if (!input.name || input.name.trim().length === 0) {
       issues.push({
-        severity: "error" as const,
+        severity: ValidationSeverity.ERROR,
         code: "MISSING_NAME",
         message: "Profile name is required for creation",
         field: "name",
@@ -79,7 +80,7 @@ export class ValidationService implements IValidationService {
     // Check if MCP servers are provided for creation
     if (!input.mcpServers || Object.keys(input.mcpServers).length === 0) {
       issues.push({
-        severity: "error" as const,
+        severity: ValidationSeverity.ERROR,
         code: "MISSING_MCP_SERVERS",
         message: "At least one MCP server must be configured",
         field: "mcpServers",
@@ -92,7 +93,7 @@ export class ValidationService implements IValidationService {
       const nameAvailable = await this.isProfileNameAvailable(input.name);
       if (!nameAvailable) {
         issues.push({
-          severity: "error" as const,
+          severity: ValidationSeverity.ERROR,
           code: "DUPLICATE_NAME",
           message: `Profile with name "${input.name}" already exists`,
           field: "name",
@@ -102,7 +103,7 @@ export class ValidationService implements IValidationService {
     }
 
     // Categorize issues
-    const errors = issues.filter((issue) => issue.severity === "error");
+    const errors = issues.filter((issue) => issue.severity === ValidationSeverity.ERROR);
     const warnings = issues.filter((issue) => issue.severity === "warning");
     const info = issues.filter((issue) => issue.severity === "info");
 
@@ -122,7 +123,7 @@ export class ValidationService implements IValidationService {
         valid: false,
         errors: [
           {
-            severity: "error" as const,
+            severity: ValidationSeverity.ERROR,
             code: "PROFILE_NOT_FOUND",
             message: `Profile with ID "${id}" not found`,
             field: "id",
@@ -155,7 +156,7 @@ export class ValidationService implements IValidationService {
       const nameAvailable = await this.isProfileNameAvailable(updates.name, id);
       if (!nameAvailable) {
         issues.push({
-          severity: "error" as const,
+          severity: ValidationSeverity.ERROR,
           code: "DUPLICATE_NAME",
           message: `Profile with name "${updates.name}" already exists`,
           field: "name",
@@ -167,7 +168,7 @@ export class ValidationService implements IValidationService {
     // Validate that ID and createdAt are not being changed
     if ("id" in updates && updates.id !== existingProfile.id) {
       issues.push({
-        severity: "error" as const,
+        severity: ValidationSeverity.ERROR,
         code: "IMMUTABLE_FIELD",
         message: "Profile ID cannot be changed",
         field: "id",
@@ -177,7 +178,7 @@ export class ValidationService implements IValidationService {
 
     if ("createdAt" in updates && updates.createdAt !== existingProfile.createdAt) {
       issues.push({
-        severity: "error" as const,
+        severity: ValidationSeverity.ERROR,
         code: "IMMUTABLE_FIELD",
         message: "Profile creation date cannot be changed",
         field: "createdAt",
@@ -186,7 +187,7 @@ export class ValidationService implements IValidationService {
     }
 
     // Categorize issues
-    const errors = issues.filter((issue) => issue.severity === "error");
+    const errors = issues.filter((issue) => issue.severity === ValidationSeverity.ERROR);
     const warnings = issues.filter((issue) => issue.severity === "warning");
     const info = issues.filter((issue) => issue.severity === "info");
 
