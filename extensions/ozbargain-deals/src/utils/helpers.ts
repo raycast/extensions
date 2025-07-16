@@ -1,5 +1,6 @@
 import TurndownService from "turndown";
 import he from "he";
+import { showFailureToast } from "@raycast/utils";
 import { TurndownNode } from "./types";
 
 export const turndownService = new TurndownService({
@@ -24,7 +25,7 @@ turndownService.addRule("dealImage", {
         const sanitizedSrc = new URL(src).href;
         return `![${alt}](${sanitizedSrc})`;
       } catch (error) {
-        console.error("Invalid image URL in deal description:", src, error);
+        showFailureToast(error, { title: "Invalid Image URL in Deal" });
         return "";
       }
     }
