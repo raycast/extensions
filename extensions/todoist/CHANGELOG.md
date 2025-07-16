@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+## [Windows support] - {PR_MERGE_DATE}
+
+- Added Windows support
+
 ## [Add task priority mapping for Todoist API] - 2025-06-12
  - Add a priority mapping function to ensure the user-selected priority aligns with the priority value used in the backend.
 
