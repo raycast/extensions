@@ -207,7 +207,7 @@ Please check that the profile exists and try again.`}
                 title={isActive ? "Already Active" : "Switch to Profile"}
                 onAction={handleSwitchProfile}
                 icon={isActive ? Icon.CheckCircle : Icon.ArrowRight}
-                style={isActive ? Action.Style.Regular : Action.Style.Regular}
+                style={Action.Style.Regular}
               />
             </ActionPanel.Section>
             <ActionPanel.Section>

@@ -59,7 +59,6 @@ export function useProfileSwitching(): UseProfileSwitchingResult {
 
           const result: ProfileSwitchResult = {
             success: true,
-            message: `${profile.name} is already active`,
           };
 
           setState((prev) => ({

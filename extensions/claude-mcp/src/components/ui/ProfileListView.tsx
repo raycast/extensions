@@ -5,6 +5,7 @@
 
 import React from "react";
 import { List, ActionPanel, Action, Icon, Color, confirmAlert, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { ProfileSummary } from "../../types/profile-types";
 import ProfileDetailView from "../ProfileDetailView";
 import EditProfileForm from "../EditProfileForm";
@@ -59,7 +60,11 @@ export function ProfileListView({
       const deleteResult = await deleteProfile(profile.id);
 
       if (!deleteResult.success) {
-        throw new Error(deleteResult.error || "Failed to delete profile");
+        await showFailureToast({
+          title: "Failed to delete profile",
+          message: deleteResult.error ?? "Unknown error occurred",
+        });
+        return;
       }
 
       await showToast({
@@ -70,8 +75,7 @@ export function ProfileListView({
 
       onRefresh();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast({
         title: "Failed to delete profile",
         message: error instanceof Error ? error.message : "Unknown error occurred",
       });

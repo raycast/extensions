@@ -92,7 +92,7 @@ export interface IProfileSearcher {
     profiles: ProfileSummary[],
     sortBy: "name" | "created" | "lastUsed" | "serverCount",
     order: "asc" | "desc",
-  ): ProfileSummary[];
+  ): Promise<StorageResult<ProfileSummary[]>>;
 }
 
 /**
