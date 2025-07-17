@@ -34,7 +34,7 @@ export class Logger {
     } catch (error) {
       // If we can't read preferences, log the initialization error but continue
       // This could happen during extension initialization or preference corruption
-      console.error('[Logger] Failed to read preferences for verbose logging:', error);
+      console.error("[Logger] Failed to read preferences for verbose logging:", error);
       // Default to not logging when preferences are unavailable
     }
   }
