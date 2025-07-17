@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ens-sight",
+  "title": "Ensight — ENS Lookup Tool",
+  "description": "Discover Ethereum identities instantly. ENSight lets you look up Ethereum addresses or ENS names and view associated identity data, onchain and offchain",
+  "icon": "ens-icon.png",
+  "author": "happysingh",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "commands": [
+    {
+      "name": "lookup-ens-name",
+      "title": "Lookup ENS Name",
+      "description": "Resolve ENS or domain name to address",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "name",
+          "placeholder": "ENS or domain name",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "reverse-lookup-address",
+      "title": "Reverse Lookup Address",
+      "description": "Find ENS name for an address",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "ethAddress",
+          "placeholder": "Ethereum address",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@ensdomains/ensjs": "^4.0.2",
+    "@raycast/api": "^1.100.3",
+    "date-fns": "^4.1.0",
+    "viem": "^2.32.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
