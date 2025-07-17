@@ -1,0 +1,3 @@
+# ArgoCD
+
+Open ArgoCD instances
