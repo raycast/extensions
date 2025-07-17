@@ -14,7 +14,7 @@ export default function CreateAlias({ alias }: CreateAliasProps = {}) {
   const { data: domain } = useCachedPromise(async () => {
     try {
       return await getAccountDomain();
-    } catch (error) {
+    } catch {
       // Fallback to extracting from destination email
       const fallbackDomain = extractDomainFromEmail(config.destinationEmail);
 
