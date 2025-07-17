@@ -1,6 +1,6 @@
 # WeRead Sync Changelog
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [1.0.0] - 2025-07-17
 
 ### Features
 - **Browse WeRead Library**: View all your WeRead books with highlights
