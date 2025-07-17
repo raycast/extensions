@@ -19,8 +19,8 @@ async function handleItemSelect(item: any) {
 
   await showToast({
     style: Toast.Style.Success,
-    title: "Erfolgreich gestempelt!",
-    message: item.id == -1 ? "Du wurdest ausgestempelt." : `Du wurdest in ${item.title} gestempelt.`,
+    title: "Stamp successful!",
+    message: item.id == -1 ? "Time tracking updated successfully." : `You're now clocked in to "${item.title}".`,
   });
   await popToRoot();
 }

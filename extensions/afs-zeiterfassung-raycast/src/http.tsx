@@ -132,22 +132,19 @@ export default class Http {
 
     //Fehler behandeln
     //Fehler keine verbindung zum Server
-    if (response?.status === 0) result = { success: false, message: `Der Server ist leider nicht erreichbar.` };
+    if (response?.status === 0) result = { success: false, message: `Oops! Can’t connect to the server right now.` };
     //Fehlermeldung von Server behandeln wenn vorhanden
     else
       result = {
         success: false,
         message:
-          response?.data?.message ||
-          response?.data?.title ||
-          response?.statusText ||
-          "Ein unbekannter Fehler ist aufgetreten.",
+          response?.data?.message || response?.data?.title || response?.statusText || "Whoops! Something went wrong.",
       };
     console.log(response);
 
     showToast({
       style: Toast.Style.Failure,
-      title: "Fehler",
+      title: "Error",
       message: result.message,
     });
     return result;
