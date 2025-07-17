@@ -285,6 +285,7 @@
   "qeude/close-finder": "close-finder",
   "adam_vyborny/cloud-cli-login-statuses": "cloud-cli-login-statuses",
   "destiner/cloudflare": "cloudflare",
+  "erayack/cloudflare-email-routing": "cloudflare-email-routing",
   "anandubajith/cloudflare-warp": "cloudflare-warp",
   "colbyfayock/cloudinary": "cloudinary",
   "xilopaint/cnpj-lookup": "cnpj-lookup",
