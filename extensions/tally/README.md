@@ -29,7 +29,6 @@ This is a Raycast extension for [Tally](https://tally.so/). With this extension 
 ## 🗒️ Note
 
 > ⚠️ Tally’s API is currently in public beta and subject to change.
-REMINDER: 
 
 ---
 

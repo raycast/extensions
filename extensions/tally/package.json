@@ -10,7 +10,7 @@
     {
       "name": "api_token",
       "title": "API Token",
-      "description": "API Key from Tally Settings",
+      "description": "API Token from Tally Settings",
       "type": "password",
       "required": true,
       "placeholder": "tly-XXX...xxx"

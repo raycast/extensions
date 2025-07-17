@@ -28,7 +28,7 @@ interface Question {
   id: string;
   title: string;
 }
-type Value = string | number | boolean | object;
+type Value = string | number | boolean | Record<string, unknown>;
 interface TallyResponse {
   questionId: string;
   answer: Value | Value[];
