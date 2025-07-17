@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tally",
   "title": "Tally",
-  "description": "",
+  "description": "Tally is the simplest way to create forms, for free.",
   "icon": "tally.png",
   "author": "xmok",
   "license": "MIT",
@@ -10,7 +10,7 @@
     {
       "name": "api_token",
       "title": "API Token",
-      "description": "",
+      "description": "API Key from Tally Settings",
       "type": "password",
       "required": true,
       "placeholder": "tly-XXX...xxx"
@@ -21,16 +21,20 @@
       "name": "forms",
       "title": "Forms",
       "subtitle": "Tally",
-      "description": "",
+      "description": "View Forms and Submissions",
       "mode": "view"
     },
     {
       "name": "workspaces",
       "title": "Workspaces",
       "subtitle": "Tally",
-      "description": "",
+      "description": "View and Rename Workspaces",
       "mode": "view"
     }
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "dependencies": {
     "@raycast/api": "^1.100.3",

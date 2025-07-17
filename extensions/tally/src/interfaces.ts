@@ -1,59 +1,59 @@
 enum Status {
-    BLANK="BLANK",
-    DRAFT="DRAFT",
-    PUBLISHED="PUBLISHED",
-    DELETED ="DELETED",
+  BLANK = "BLANK",
+  DRAFT = "DRAFT",
+  PUBLISHED = "PUBLISHED",
+  DELETED = "DELETED",
 }
 export interface Form {
-    id: string;
-    name: string;
-    status: Status;
-    updatedAt: string;
+  id: string;
+  name: string;
+  status: Status;
+  updatedAt: string;
 }
 
 interface Member {
-    id: string;
+  id: string;
 }
 interface Invite {
-    id: string;
+  id: string;
 }
 export interface Workspace {
-    id: string;
-    name: string | null;
-    members: Member[];
-    invites: Invite[];
+  id: string;
+  name: string | null;
+  members: Member[];
+  invites: Invite[];
 }
 
 interface Question {
-    id: string;
-    title: string;
+  id: string;
+  title: string;
 }
 type Value = string | number | boolean | object;
 interface TallyResponse {
-    questionId: string;
-    answer: Value | Value[];
+  questionId: string;
+  answer: Value | Value[];
 }
 interface Submission {
-    id: string;
-    responses: TallyResponse[];
+  id: string;
+  responses: TallyResponse[];
 }
 export interface SubmissionResult {
-    page: number;
+  page: number;
   limit: number;
   hasMore: boolean;
-    totalNumberOfSubmissionsPerFilter: {
+  totalNumberOfSubmissionsPerFilter: {
     all: number;
     completed: number;
     partial: number;
-  }
+  };
   questions: Question[];
   submissions: Submission[];
 }
 
 export interface PaginatedResult<T> {
-    items: T[];
-    page: number;
-    limit: number;
-    total: number;
-    hasMore: boolean;
+  items: T[];
+  page: number;
+  limit: number;
+  total: number;
+  hasMore: boolean;
 }
