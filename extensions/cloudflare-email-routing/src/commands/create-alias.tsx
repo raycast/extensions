@@ -15,7 +15,6 @@ export default function CreateAlias({ alias }: CreateAliasProps = {}) {
     try {
       return await getAccountDomain();
     } catch (error) {
-      console.error("Failed to fetch domain:", error);
       // Fallback to extracting from destination email
       const fallbackDomain = extractDomainFromEmail(config.destinationEmail);
 
