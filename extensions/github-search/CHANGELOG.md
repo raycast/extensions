@@ -1,6 +1,6 @@
 # GitHub Search Changelog
 
-## [Updates] - {PR_MERGE_DATE}
+## [Updates] - 2025-07-17
 
 - Add preference to toggle default reuse open GitHub search tab
 
