@@ -1,9 +1,9 @@
 import { OAuth, showHUD } from "@raycast/api";
 
 const PROVIDER_ID = "buenote-auth0";
-const AUTH0_DOMAIN = "dev-gfcysmxlyt2fbx27.us.auth0.com";
+const AUTH0_DOMAIN = "auth.buenote.app";
 const AUTH0_CLIENT_ID = "JCC0f0MP038c7UWtBbkV4v4DYCuNfGnq";
-const AUTH0_AUDIENCE = "https://dev-gfcysmxlyt2fbx27.us.auth0.com/api/v2/";
+const AUTH0_AUDIENCE = "https://buenote.app/api/";
 
 const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.App, // or .Web if you use web redirect
@@ -14,8 +14,10 @@ const client = new OAuth.PKCEClient({
 });
 
 export async function getValidAccessToken(): Promise<string> {
+  console.log("[OAuth] getValidAccessToken called");
   let tokenSet = await client.getTokens();
   if (!tokenSet || tokenSet.isExpired()) {
+    console.log("[OAuth] No valid token set, starting OAuth flow");
     // Start OAuth flow
     const authRequest = await client.authorizationRequest({
       endpoint: `https://${AUTH0_DOMAIN}/authorize`,
@@ -25,7 +27,9 @@ export async function getValidAccessToken(): Promise<string> {
         audience: AUTH0_AUDIENCE,
       },
     });
+    console.log("[OAuth] authorizationRequest created", authRequest);
     const { authorizationCode } = await client.authorize(authRequest);
+    console.log("[OAuth] authorize result", { authorizationCode });
     // Exchange code for tokens
     const tokenResponse = await fetch(`https://${AUTH0_DOMAIN}/oauth/token`, {
       method: "POST",
@@ -39,6 +43,7 @@ export async function getValidAccessToken(): Promise<string> {
         audience: AUTH0_AUDIENCE,
       }),
     }).then((res) => res.json());
+    console.log("[OAuth] tokenResponse", tokenResponse);
     await client.setTokens({
       accessToken: tokenResponse.access_token,
       refreshToken: tokenResponse.refresh_token,
@@ -47,6 +52,9 @@ export async function getValidAccessToken(): Promise<string> {
       scope: tokenResponse.scope,
     });
     tokenSet = await client.getTokens();
+    console.log("[OAuth] Tokens set", tokenSet);
+  } else {
+    console.log("[OAuth] Using cached token set", tokenSet);
   }
   return tokenSet!.accessToken;
 }
@@ -60,9 +68,8 @@ export async function clearTokens() {
   // Removes any stored OAuth tokens – callers can then trigger getValidAccessToken() to re-authenticate
   // Raycast SDK exposes removeTokens() for PKCEClient instances. If the method is unavailable for
   // some reason, fall back to setting an empty token set.
-  // @ts-expect-error – removeTokens exists at runtime even if not in typings
-  if (typeof client.removeTokens === "function") {
-    await client.removeTokens();
+  if (typeof (client as any).removeTokens === "function") {
+    await (client as any).removeTokens();
   } else {
     // Fallback: overwrite with an expired token set so getValidAccessToken triggers the flow
     await client.setTokens({ accessToken: "", refreshToken: "", expiresIn: 0 });

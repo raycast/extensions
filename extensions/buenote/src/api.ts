@@ -95,26 +95,29 @@ export async function runTemplate(
     console.log("[runTemplate] Failed to parse JSON:", e); // DEBUG
   }
   if (!res.ok) throw new Error(`Failed ${res.status}`);
-  if (!json || !json.task_id) throw new Error("No task_id in response");
-  return json;
+  if (!json || typeof json !== "object" || !("task_id" in json)) throw new Error("No task_id in response");
+  return json as { task_id: string };
 }
 
 export async function pollTask(
   taskId: string,
-): Promise<{ task_id: string } | undefined> {
+): Promise<{ task_id?: string; status?: string; result?: unknown; error?: string } | undefined> {
   const token = await getValidAccessToken();
   console.log("[pollTask] GET /tasks/" + taskId); // DEBUG
-  const res = await fetch(`${BASE_URL}/tasks/${taskId}`, {
+  const res = await fetchWithRateLimit(`${BASE_URL}/tasks/${taskId}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
+  console.log("[pollTask] Response status:", res.status); // DEBUG
   let json: unknown = null;
   try {
     json = await res.json();
+    console.log("[pollTask] Response JSON:", json); // DEBUG
   } catch (e) {
-    // handle error
+    console.log("[pollTask] Failed to parse JSON:", e); // DEBUG
   }
-  if (typeof json === "object" && json !== null && "task_id" in json) {
-    return json as { task_id: string };
+  if (typeof json === "object" && json !== null && "status" in json) {
+    return json as { task_id?: string; status?: string; result?: unknown; error?: string };
   }
+  console.log("[pollTask] Invalid response format, returning undefined"); // DEBUG
   return undefined;
 }

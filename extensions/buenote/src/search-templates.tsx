@@ -190,7 +190,7 @@ function RunForm({
       try {
         const token = await (await import("./auth")).getValidAccessToken();
         const res = await fetch(
-          `http://127.0.0.1:5001/api/templates/${templateId}`,
+          `https://buenote.app/api/templates/${templateId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           },
@@ -227,13 +227,21 @@ function RunForm({
       let attempts = 0;
       let result: unknown = null;
       while (attempts < 120) {
+        console.log("[RunForm] Polling attempt", attempts + 1); // DEBUG
         const resp = await pollTask(task_id);
-        if (resp.status === "success") {
+        console.log("[RunForm] Poll response:", resp); // DEBUG
+        if (resp && resp.status === "success") {
           result = resp.result;
+          console.log("[RunForm] Task completed successfully, result:", result); // DEBUG
           break;
         }
-        if (resp.status === "failure") {
-          throw new Error(resp.error);
+        if (resp && resp.status === "failure") {
+          throw new Error(resp.error || "Task failed");
+        }
+        if (!resp) {
+          console.log("[RunForm] No response from poll, continuing..."); // DEBUG
+        } else {
+          console.log("[RunForm] Task still running, status:", resp.status); // DEBUG
         }
         await new Promise((r) => setTimeout(r, 1000));
         attempts += 1;
