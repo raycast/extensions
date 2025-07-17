@@ -32,8 +32,7 @@ Read more on: https://www.smartcalendars.ai/
 2. **Option 2**: Select an image file in Finder
 3. Open Raycast and run "Create Calendar Event/Reminder from Image"
 
-
-### Features
+## Key Capabilities
 - Extract multiple events from a single image or text 
 - Supports recurrence and alarms
 - Works with images from clipboard or selected files

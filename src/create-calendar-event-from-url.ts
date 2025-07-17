@@ -1,4 +1,5 @@
 import { Clipboard, showToast, Toast, open } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 export default async function Command() {
   try {
@@ -13,22 +14,14 @@ export default async function Command() {
 
     // Check if we have text to process
     if (!clipboardText) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "No URL found in clipboard",
-        message: "Copy a URL first",
-      });
+      await showFailureToast("No URL found in clipboard");
       return;
     }
 
     // Validate that it's a proper URL
     const urlRegex = /^https?:\/\/.+/i;
     if (!urlRegex.test(clipboardText.trim())) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Invalid URL",
-        message: "URL must start with http:// or https://",
-      });
+      await showFailureToast("Invalid URL - must start with http:// or https://");
       return;
     }
 
@@ -59,12 +52,8 @@ export default async function Command() {
       title: "Calendar event/reminder created",
       message: "URL sent to Smart Calendars app",
     });
-  } catch (error) {
+  } catch {
     // Show error toast
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to create calendar event/reminder",
-      message: String(error),
-    });
+    await showFailureToast("Failed to create calendar event/reminder");
   }
 }

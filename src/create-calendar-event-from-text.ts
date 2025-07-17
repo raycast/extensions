@@ -1,4 +1,5 @@
 import { Clipboard, showToast, Toast, open } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 export default async function Command() {
   try {
@@ -13,11 +14,7 @@ export default async function Command() {
 
     // Check if we have text to process
     if (!clipboardText) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "No text found in clipboard",
-        message: "Copy some text first",
-      });
+      await showFailureToast("No text found in clipboard");
       return;
     }
 
@@ -48,12 +45,8 @@ export default async function Command() {
       title: "Calendar event/reminder created",
       message: "Text sent to Smart Calendars app",
     });
-  } catch (error) {
+  } catch {
     // Show error toast
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to create calendar event/reminder",
-      message: String(error),
-    });
+    await showFailureToast("Failed to create calendar event/reminder");
   }
 }

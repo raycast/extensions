@@ -1,4 +1,5 @@
 import { Clipboard, showToast, Toast, open, getSelectedFinderItems, Form, ActionPanel, Action } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { readFileSync } from "fs";
 import { basename } from "path";
 import { fileURLToPath } from "url";
@@ -30,21 +31,13 @@ async function convertImageToJPEG(imageBuffer: Buffer): Promise<Buffer> {
     // Check if it might be an unsupported format
     const errorMessage = String(error);
     if (errorMessage.includes("Unsupported MIME type") || errorMessage.includes("format")) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Unsupported image format",
-        message: "Please use JPEG, PNG, GIF, BMP, or TIFF images.",
-      });
+      await showFailureToast("Unsupported image format - Please use JPEG, PNG, GIF, BMP, or TIFF images");
       throw new Error("Unsupported image format");
     }
 
     // Fallback with more forgiving size limits when compression fails
     if (originalSizeMB > 10) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Image too large",
-        message: `Image is ${originalSizeMB.toFixed(1)}MB. Compression failed. Please use images smaller than 10MB.`,
-      });
+      await showFailureToast(`Image too large (${originalSizeMB.toFixed(1)}MB) - Please use images smaller than 10MB`);
       throw new Error("Image file too large");
     }
 
@@ -110,13 +103,9 @@ async function processImageData(imageData: Buffer, imageSource: string, fileName
       title: "Calendar event/reminder created",
       message: `Image "${fileName}" from ${imageSource} sent to Smart Calendars app`,
     });
-  } catch (error) {
+  } catch {
     // Show error toast
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to create calendar event/reminder",
-      message: String(error),
-    });
+    await showFailureToast("Failed to create calendar event/reminder");
   }
 }
 
