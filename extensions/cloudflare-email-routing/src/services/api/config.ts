@@ -2,7 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { ApiConfig } from "../../types";
 
 export function getApiConfig(): ApiConfig {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues();
 
   // Ensure we're getting string values, not objects
   const config = {
