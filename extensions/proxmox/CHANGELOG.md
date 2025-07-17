@@ -1,5 +1,10 @@
 # Proxmox Changelog
 
+## [] - {PR_MERGE_DATE}
+
+- token is now password
+- modernize
+
 ## [Handle Errors] - 2024-07-17
 
 ## [Added Pause/Resume VM] - 2024-04-05

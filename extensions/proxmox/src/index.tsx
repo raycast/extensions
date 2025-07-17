@@ -276,28 +276,21 @@ function getMockData(): PveVm[] {
 const USE_MOCK_DATA = process.env.NODE_ENV === "development";
 
 export default function Command() {
-  let vmListData;
-  try {
-    vmListData = useVmList();
-  } catch (e) {
-    showFailureToast(e);
-    return (
-      <Detail
+  const { isLoading, data, error, revalidate, mutate } = useVmList();
+
+  if (error) return <Detail
         markdown="Something went wrong, check your preferences."
         actions={
           <ActionPanel>
             <Action title="Open Preferences" onAction={openExtensionPreferences} />
           </ActionPanel>
         }
-      />
-    );
-  }
+      />;
 
-  const { isLoading, data, revalidate, mutate } = vmListData;
   const [type, setType] = useState<string>("all");
 
   // it's not safe to use hooks inside a condition, but it's fine for dev
-  const dataToUse = USE_MOCK_DATA ? useState(getMockData)[0] : data;
+  const dataToUse = !USE_MOCK_DATA ? useState(getMockData)[0] : data;
   const filteredData =
     dataToUse?.filter((vm) => {
       if (type === "all") {
