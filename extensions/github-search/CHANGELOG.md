@@ -1,5 +1,9 @@
 # GitHub Search Changelog
 
+## [Updates] - {PR_MERGE_DATE}
+
+- Add preference to toggle default reuse open GitHub search tab
+
 ## [Updates] - 2025-03-07
 
 - Improve Chrome & Safari window handling
