@@ -20,6 +20,20 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "save-link-from-clipboard",
+      "title": "Save Link from Clipboard",
+      "description": "Create a webloc file from the first link in the clipboard and copy it to clipboard.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Custom title (optional)",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {

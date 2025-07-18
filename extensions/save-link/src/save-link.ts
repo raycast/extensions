@@ -1,7 +1,7 @@
 import { BrowserExtension, Clipboard, LaunchProps, showHUD } from "@raycast/api";
-import { mkdirSync, writeFileSync } from "fs";
-import { homedir } from "os";
+import { writeFileSync } from "fs";
 import { join } from "path";
+import { createSafeFilename, createWeblocContent, ensureCacheDirectory } from "./utils";
 
 interface Arguments {
   title?: string;
@@ -20,29 +20,17 @@ export default async function main(props: LaunchProps<{ arguments: Arguments }>)
       return;
     }
 
-    // Create a cache directory for the webloc file following macOS specifications
-    const cacheDir = join(homedir(), "Library", "Caches", "com.raycast.save-link");
-    try {
-      mkdirSync(cacheDir, { recursive: true });
-    } catch {
-      // Directory might already exist, that's fine
-    }
+    // Create cache directory
+    const cacheDir = ensureCacheDirectory();
 
     // Use custom title if provided, otherwise use page title
     const titleToUse = customTitle || activeTab.title || "Untitled";
-    const safeTitle = titleToUse.replace(/[^\w\s-]/g, "").replace(/\s+/g, " ").trim().slice(0, 50);
+    const safeTitle = createSafeFilename(titleToUse);
     const filename = `${safeTitle || "Link"}.webloc`;
     const filePath = join(cacheDir, filename);
 
-    // Create the webloc file content (XML plist format)
-    const weblocContent = `<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-	<key>URL</key>
-	<string>${activeTab.url}</string>
-</dict>
-</plist>`;
+    // Create the webloc file content
+    const weblocContent = createWeblocContent(activeTab.url);
 
     // Write the webloc file
     writeFileSync(filePath, weblocContent, "utf8");
