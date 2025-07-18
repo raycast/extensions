@@ -211,11 +211,12 @@ async function readClipBoardFile(path: string) {
     if (file) {
       await fs.writeFile(path, file);
       scannedData = await extractQRCodeFromImage(path);
+      await fs.unlink(path);
+    } else {
+      throw new Error('Failed to capture screenshot area');
     }
-
-    await fs.unlink(path);
-  } catch (cleanUpError) {
-    console.warn(`Could not delete temporary file ${path}:`, cleanUpError);
+  } catch (error) {
+    console.warn(error);
   }
 
   return scannedData;
