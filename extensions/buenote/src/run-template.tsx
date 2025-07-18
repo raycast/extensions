@@ -1,6 +1,6 @@
 import React from "react";
 import { useEffect, useState } from "react";
-import { ActionPanel, Action, List, useNavigation } from "@raycast/api";
+import { ActionPanel, Action, List, useNavigation, open } from "@raycast/api";
 import { fetchRecentTemplates, TemplateCard } from "./api";
 import { RunForm } from "./search-templates";
 // import { SearchTemplates, RunForm as SearchRunForm } from "./search-templates";
