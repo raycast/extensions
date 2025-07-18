@@ -157,10 +157,6 @@
       "placeholder": "https://jsonhero.io or http://localhost:8787"
     }
   ],
-  "platforms": [
-    "macOS",
-    "Windows"
-  ],
   "dependencies": {
     "@raycast/api": "^1.101.1"
   },

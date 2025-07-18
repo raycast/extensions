@@ -1,6 +1,6 @@
 # Open in JSON Hero Changelog
 
-## [QoL Enhancements + Modernize + Windows] - {PR_MERGE_DATE}
+## [QoL Enhancements + Modernize] - {PR_MERGE_DATE}
 
 - See more `Toast`s so you know what's happening
 - If there is no domain in `Preferences`, automatically use the default
@@ -10,7 +10,6 @@
 - `add`: README (ref: [Issue #14924](https://github.com/raycast/extensions/issues/14924))
 - `add`: metadata image
 - `chore`: remove extra deps
-- ✅ Windows ready!
 
 ## [Preferences] - 2024-12-20
 
