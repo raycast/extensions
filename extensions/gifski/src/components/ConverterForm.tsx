@@ -49,7 +49,7 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
           },
         });
 
-        console.log("Storing defaults", form.fps, form.scaleW, form.scaleH);
+        // Store defaults for next use
         await LocalStorage.setItem("fps", form.fps);
         await LocalStorage.setItem("scaleW", form.scaleW);
         await LocalStorage.setItem("scaleH", form.scaleH);
