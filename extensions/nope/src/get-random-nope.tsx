@@ -34,11 +34,7 @@ export default function Command() {
       const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
       setError(errorMessage);
       console.error("Error fetching nope:", error);
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Something went wrong",
-        message: errorMessage,
-      });
+      showFailureToast(error, { title: "Something went wrong" });
     } finally {
       setIsLoading(false);
     }
