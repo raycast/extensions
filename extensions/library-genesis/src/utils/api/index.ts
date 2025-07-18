@@ -21,6 +21,16 @@ export const getLibgenSearchResults = async (
 
   const { parse } = getMirror(libgenUrl);
 
+  const params = new URLSearchParams({
+    req: searchContent,
+    res: "100",
+    covers: "on",
+    filesuns: "all"
+  });
+  ["t", "a", "s", "y", "p", "i"].forEach(column => params.append("columns[]", column));
+  ["f", "e", "s", "a", "p", "w"].forEach(object => params.append("objects[]", object));
+  ["l", "c", "a", "m", "r", "s"].forEach(topic => params.append("topics[]", topic));
+
   const queryUrl =
     searchType === SearchType.Fiction
       ? libgenUrl +
@@ -32,15 +42,8 @@ export const getLibgenSearchResults = async (
           format: "",
         })
       : libgenUrl +
-        "/search.php?" +
-        new URLSearchParams({
-          req: searchContent,
-          open: "0",
-          res: "100",
-          view: "detailed",
-          phrase: "1",
-          column: "def",
-        });
+        "/index.php?" +
+        new URLSearchParams(params);
 
   console.log(`Libgen Query URL: ${queryUrl}`);
 

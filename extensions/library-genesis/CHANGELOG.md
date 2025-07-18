@@ -1,5 +1,10 @@
 # Library Genesis Changelog
 
+## [] - {PR_MERGE_DATE}
+
+- added: `libgen.bz`, `libgen.li`
+- removed: `libgen.is`, `libgen.st`
+
 ## [Experimental Fiction Search] - 2024-10-22
 
 - You can now choose to search for Fiction or Non-Fiction (default) titles every time. Fiction search results currently have the following:
