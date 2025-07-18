@@ -1,0 +1,57 @@
+{
+  "name": "raykit",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "ray dev"
+  },
+  "title": "Raykit Command Center",
+  "description": "Unified Raycast interface for RAG, orgkit, tools, and workflows.",
+  "icon": "command-icon.png",
+  "author": "petermsimon@gmail.com",
+  "license": "MIT",
+  "categories": ["Productivity"],
+  "dependencies": {
+    "@raycast/api": "^1.101.1",
+    "@raycast/utils": "^1.15.0",
+    "node-fetch": "^3.3.2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "typescript": "^5.8.3"
+  },
+  "commands": [
+    {
+      "name": "run-shell-command",
+      "title": "Run Shell Command",
+      "description": "Executes a shell command on the user's machine and returns the output. Useful for file system operations (ls, tree, grep), system diagnostics (ps, top), and running scripts.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "command",
+          "type": "text",
+          "required": true,
+          "placeholder": "Enter shell command (e.g., pwd, ls, echo)"
+        }
+      ]
+    },
+    {
+      "name": "query-rag-brain",
+      "title": "Query Personal Knowledge Base",
+      "description": "AI-only action. Queries the personal RAG knowledge base to answer questions about files, notes, and projects.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "required": true,
+          "placeholder": "Enter your question"
+        }
+      ]
+    }
+  ]
+}

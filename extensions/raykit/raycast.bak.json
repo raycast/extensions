@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "name": "raykit",
+  "title": "Raykit Command Center",
+  "description": "Unified Raycast interface for RAG, orgkit, tools, and workflows.",
+  "author": "petermsimon",
+  "icon": "assets/icon.png",
+  "commands": [
+    {
+      "name": "query",
+      "title": "Search RAG Index",
+      "description": "Search indexed chunks from local RAG server",
+      "mode": "view",
+      "arguments": [],
+      "icon": "list-icon"
+    },
+    {
+      "name": "summarize",
+      "title": "Summarize File",
+      "description": "Summarize a selected indexed file",
+      "mode": "view"
+    },
+    {
+      "name": "list-files",
+      "title": "List Indexed Files",
+      "description": "Show all files in the local RAG index",
+      "mode": "view"
+    },
+    {
+      "name": "restart-raycast",
+      "title": "Restart Raycast",
+      "description": "Quit and relaunch Raycast.app",
+      "mode": "no-view",
+      "icon": "raycast-icon"
+    }
+  ]
+}
