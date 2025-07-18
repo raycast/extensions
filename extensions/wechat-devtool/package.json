@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wechat-devtool",
   "title": "WeChat DevTool",
-  "description": "Quickly open and manage WeChat Mini Program projects with multi-device support using the official CLI.",
-  "version": "1.0.0",
+  "description": "Quickly open WeChat Mini Program projects via official CLI.",
+  "version": "1.1.0",
   "icon": "icon.png",
   "author": "tofrankie",
   "license": "MIT",
@@ -15,15 +15,16 @@
     "publish": "ray publish"
   },
   "dependencies": {
-    "@raycast/api": "^1.93.1",
-    "@raycast/utils": "^1.19.0"
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^1.19.1",
+    "pinyin-pro": "^3.26.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "18.18.4",
-    "@types/react": "18.2.27",
-    "eslint": "^8.57.1",
-    "prettier": "^3.6.0",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.31.0",
+    "prettier": "^3.6.2",
     "typescript": "^5.8.3"
   },
   "categories": [
@@ -40,14 +41,14 @@
       "name": "open-project",
       "title": "Open Project",
       "subtitle": "WeChat DevTool",
-      "description": "Quickly open Mini Program projects in WeChat DevTool",
+      "description": "Open Mini Program projects via WeChat DevTool.",
       "mode": "view"
     },
     {
       "name": "configure",
       "title": "Configure Projects",
       "subtitle": "WeChat DevTool",
-      "description": "Configure Mini Program projects and device settings",
+      "description": "Configure Mini Program projects.",
       "mode": "view"
     }
   ]

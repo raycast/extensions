@@ -41,7 +41,7 @@
 /extensions/airsy                                                   @piotrzaborow
 /extensions/airtable                                                @marks @SeanKeenan-at @pernielsentikaer @xmok
 /extensions/aiven                                                   @xmok
-/extensions/akkoma                                                  @Sevichecc @LitoMore
+/extensions/akkoma                                                  @sevi418 @LitoMore
 /extensions/alacritty                                               @jose-elias-alvarez
 /extensions/aleph                                                   @d7mtg
 /extensions/algolia                                                 @valentindotxyz
@@ -230,7 +230,7 @@
 /extensions/cerebras                                                @EvanZhouDev
 /extensions/certificate-viewer                                      @gamerslouis
 /extensions/chakra-ui-docs                                          @pgvr @Ansub @StanleyDing
-/extensions/change-case                                             @erics118 @pernielsentikaer @nagauta @PWrzesinski @yug2005
+/extensions/change-case                                             @erics118 @pernielsentikaer @nagauta @PWrzesinski @yug2005 @ridemountainpig
 /extensions/change-scroll-direction                                 @gregoralbrecht @emilshr
 /extensions/changedetection-io                                      @xmok
 /extensions/charged                                                 @apoorvsadana
@@ -286,6 +286,7 @@
 /extensions/close-finder                                            @qeude
 /extensions/cloud-cli-login-statuses                                @AdamVyborny
 /extensions/cloudflare                                              @Destiner @niklaswa @teziovsky @xmok
+/extensions/cloudflare-email-routing                                @erayack
 /extensions/cloudflare-warp                                         @anandubajith
 /extensions/cloudinary                                              @colbyfayock @xmok
 /extensions/cnpj-lookup                                             @xilopaint
@@ -746,7 +747,7 @@
 /extensions/graphcdn                                                @mathieudutour @xmok
 /extensions/greip                                                   @gre-dev @pernielsentikaer
 /extensions/grok-ai                                                 @andreiciobotar
-/extensions/groq                                                    @maximilianzuern @dezik
+/extensions/groq                                                    @maximilianzuern @dezik @agungjsp
 /extensions/groq-tools                                              @juice49
 /extensions/groundhog-day                                           @xmok
 /extensions/growthbook                                              @farisaziz12
@@ -1073,7 +1074,7 @@
 /extensions/markdown-to-rich-text                                   @vegetablesB
 /extensions/markprompt                                              @nickrttn
 /extensions/masked-link-generator                                   @Visual-Studio-Coder
-/extensions/mastodon                                                @Sevichecc @Sevichecc @pernielsentikaer @LitoMore
+/extensions/mastodon                                                @sevi418 @BasixKOR @pernielsentikaer @LitoMore
 /extensions/mastodon-search                                         @daveverwer
 /extensions/material-icons                                          @creasty @201549BL @3llomi
 /extensions/matter                                                  @cernezan @xmok @MaicolBen
@@ -1119,7 +1120,7 @@
 /extensions/mindnode                                                @natsustan
 /extensions/minecraft-color-codes                                   @lafkpages @pernielsentikaer
 /extensions/minecraft-crafting-recipes                              @lafkpages
-/extensions/miniflux                                                @Sevichecc @revett
+/extensions/miniflux                                                @sevi418 @revett
 /extensions/minio-manager                                           @2214372851
 /extensions/minion-ipsum                                            @vigosan
 /extensions/minisim                                                 @okwasniewski
@@ -1190,7 +1191,7 @@
 /extensions/nature-remo                                             @uetchy
 /extensions/naver-search                                            @ajchemist @2JS
 /extensions/nba-game-viewer                                         @AbhinavPalacharla @djpowers @michaelli1324 @degouville @jfkisafk @jamtur01 @gohadar
-/extensions/neodb                                                   @Sevichecc @xmok
+/extensions/neodb                                                   @sevi418 @xmok
 /extensions/neon                                                    @xmok
 /extensions/nepali-date-converter                                   @Beedhan
 /extensions/netease-music                                           @chyroc
@@ -1359,6 +1360,7 @@
 /extensions/paste-as-plain-text                                     @koinzhang @pantajoe @kero13ro
 /extensions/paste-from-apple-books                                  @winann
 /extensions/paste-from-kindle                                       @jasoncarey
+/extensions/paste-to-markdown                                       @wei
 /extensions/pastebin                                                @vimtor
 /extensions/pastefy                                                 @JulianFun123
 /extensions/pastery                                                 @xmok
@@ -1374,7 +1376,7 @@
 /extensions/percentage-calculator                                   @theapache64
 /extensions/perchance-generator                                     @Visual-Studio-Coder
 /extensions/performance-hud                                         @say4n
-/extensions/perplexity                                              @third774
+/extensions/perplexity                                              @third774 @third774
 /extensions/perplexity-api                                          @maximilianzuern @xilopaint @thomaspaulmann
 /extensions/personio                                                @Boosteblume @marcjulianschwarz
 /extensions/pestphp-documentation                                   @danyelkeddah
@@ -1540,6 +1542,7 @@
 /extensions/raycast-monkeytype-theme                                @ridemountainpig
 /extensions/raycast-motion-preview                                  @ayarse
 /extensions/raycast-mux                                             @adamgoose
+/extensions/raycast-new-instance                                    @CaramelFur
 /extensions/raycast-notification                                    @maxnyby @jfkisafk @LitoMore
 /extensions/raycast-nrm                                             @lihaizhong
 /extensions/raycast-ollama                                          @MassimilianoPasquini97
@@ -1596,7 +1599,7 @@
 /extensions/remember-this                                           @Ek2100
 /extensions/remove-background                                       @maantje @FezVrasta
 /extensions/remove-background-powered-by-mac                        @remorses @ridemountainpig @andreaselia
-/extensions/remove-paywall                                          @tegola @whitespacecode @DannySeidel @artivilla
+/extensions/remove-paywall                                          @tegola @whitespacecode @DannySeidel @artivilla @maxoliinyk
 /extensions/remove-window-from-set                                  @Silv-1
 /extensions/rename-images-with-ai                                   @husnainfareed
 /extensions/renaming                                                @theodaguier @pernielsentikaer @ridemountainpig
@@ -2084,7 +2087,7 @@
 /extensions/virtualizor-enduser                                     @xmok
 /extensions/virustotal                                              @sadv1r
 /extensions/vision-directory                                        @marckohlbrugge
-/extensions/visual-studio-code-project-manager                      @MarkusLanger @GastroGeek @4very @theherk @TobiasYin @yossizahn @eduwass @gadenbuie @hsm
+/extensions/visual-studio-code-project-manager                      @MarkusLanger @GastroGeek @4very @theherk @TobiasYin @yossizahn @eduwass @gadenbuie @hsm @azhsetiawan
 /extensions/visual-studio-code-recent-projects                      @thomaspaulmann @iainsimmons @macbookandrew @cy-98 @immint023 @pernielsentikaer @vimtor @tonka3000 @aka-rabbi-inv @oilbeater @QIanGua @hakob8956 @erics118 @tmwrnr @tleo19 @aeither @yug2005 @VatsalSy @Tarocch1 @list-jonas @xilopaint @lacherogwu @Nenuial
 /extensions/vivaldi                                                 @crisboarna @iwex
 /extensions/vivapb                                                  @codrkoaz
@@ -2119,6 +2122,7 @@
 /extensions/wechat                                                  @raffeyang @JokeNeverSoke @LitoMore
 /extensions/wechat-devtool                                          @toFrankie
 /extensions/week-number                                             @koinzhang
+/extensions/weread-sync                                             @changbinwang
 /extensions/what-happened-today                                     @nikhiltiwari0
 /extensions/whatsapp                                                @vimtor @xmok @p-gurbani
 /extensions/whisper-dictation                                       @Spuddy10345
@@ -2154,7 +2158,7 @@
 /extensions/workflowy-inbox                                         @cameronapak
 /extensions/workouts                                                @samuelkraft @codesjedi @pernielsentikaer @diannemcewan @pernielsentikaer
 /extensions/worktrees                                               @canac
-/extensions/world-clock                                             @koinzhang @ridemountainpig
+/extensions/world-clock                                             @koinzhang @ridemountainpig @LitoMore
 /extensions/world-cup                                               @ismamz @djpowers @pernielsentikaer
 /extensions/wp-bones                                                @gfazioli
 /extensions/wp-cli-command-explorer                                 @aslamdoctor

@@ -43,6 +43,10 @@
               "title": "Llama 4 Maverick 131k"
             },
             {
+              "value": "meta-llama/llama-guard-4-12b",
+              "title": "Llama Guard 4 12B 128K"
+            },
+            {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
             },
@@ -131,6 +135,10 @@
             {
               "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
               "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-guard-4-12b",
+              "title": "Llama Guard 4 12B 128K"
             },
             {
               "value": "deepseek-r1-distill-llama-70b",
@@ -223,6 +231,10 @@
               "title": "Llama 4 Maverick 131k"
             },
             {
+              "value": "meta-llama/llama-guard-4-12b",
+              "title": "Llama Guard 4 12B 128K"
+            },
+            {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
             },
@@ -311,6 +323,10 @@
             {
               "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
               "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-guard-4-12b",
+              "title": "Llama Guard 4 12B 128K"
             },
             {
               "value": "deepseek-r1-distill-llama-70b",
@@ -403,6 +419,10 @@
               "title": "Llama 4 Maverick 131k"
             },
             {
+              "value": "meta-llama/llama-guard-4-12b",
+              "title": "Llama Guard 4 12B 128K"
+            },
+            {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
             },
@@ -491,6 +511,10 @@
             {
               "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
               "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-guard-4-12b",
+              "title": "Llama Guard 4 12B 128K"
             },
             {
               "value": "deepseek-r1-distill-llama-70b",
@@ -597,6 +621,10 @@
             {
               "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
               "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-guard-4-12b",
+              "title": "Llama Guard 4 12B 128K"
             },
             {
               "value": "deepseek-r1-distill-llama-70b",
@@ -706,6 +734,10 @@
               "title": "Llama 4 Maverick 131k"
             },
             {
+              "value": "meta-llama/llama-guard-4-12b",
+              "title": "Llama Guard 4 12B 128K"
+            },
+            {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
             },
@@ -795,6 +827,10 @@
             {
               "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
               "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-guard-4-12b",
+              "title": "Llama Guard 4 12B 128K"
             },
             {
               "value": "deepseek-r1-distill-llama-70b",
@@ -888,6 +924,10 @@
               "title": "Llama 4 Maverick 131k"
             },
             {
+              "value": "meta-llama/llama-guard-4-12b",
+              "title": "Llama Guard 4 12B 128K"
+            },
+            {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
             },
@@ -977,6 +1017,10 @@
             {
               "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
               "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-guard-4-12b",
+              "title": "Llama Guard 4 12B 128K"
             },
             {
               "value": "deepseek-r1-distill-llama-70b",
@@ -1070,6 +1114,10 @@
               "title": "Llama 4 Maverick 131k"
             },
             {
+              "value": "meta-llama/llama-guard-4-12b",
+              "title": "Llama Guard 4 12B 128K"
+            },
+            {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
             },
@@ -1159,6 +1207,10 @@
             {
               "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
               "title": "Llama 4 Maverick 131k"
+            },
+            {
+              "value": "meta-llama/llama-guard-4-12b",
+              "title": "Llama Guard 4 12B 128K"
             },
             {
               "value": "deepseek-r1-distill-llama-70b",
@@ -1252,6 +1304,10 @@
               "title": "Llama 4 Maverick 131k"
             },
             {
+              "value": "meta-llama/llama-guard-4-12b",
+              "title": "Llama Guard 4 12B 128K"
+            },
+            {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
             },
@@ -1332,6 +1388,10 @@
         {
           "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
           "title": "Llama 4 Maverick 131k"
+        },
+        {
+          "value": "meta-llama/llama-guard-4-12b",
+          "title": "Llama Guard 4 12B 128K"
         },
         {
           "value": "deepseek-r1-distill-llama-70b",

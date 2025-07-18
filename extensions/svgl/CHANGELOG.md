@@ -1,6 +1,6 @@
 # svgl Changelog
 
-## [✨ AI Enhancements] - {PR_MERGE_DATE}
+## [✨ AI Enhancements] - 2025-04-02
 
 AI Tools to:
 - Get SVG Logo

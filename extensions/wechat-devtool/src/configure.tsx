@@ -1,155 +1,369 @@
-import React, { useState, useEffect } from "react";
-import { List, ActionPanel, Action, Icon, useNavigation, confirmAlert, Alert, showToast, Toast } from "@raycast/api";
+import path from "path";
+import { readFile, access } from "fs/promises";
+import { useState, useEffect, Fragment } from "react";
+import { Form, ActionPanel, Action, Icon, useNavigation, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { getCurrentDeviceName, getAllDeviceConfigs, saveConfig } from "./utils/config";
-import DeviceForm from "./components/device-form";
-import ReadmeView from "./readme-view";
-import { ExtensionConfig } from "./types";
-import { WECHAT_DEVTOOL_CLI_PATH } from "./constants";
 
-export default function Configure() {
-  const [devices, setDevices] = useState<ExtensionConfig>({});
+import ReadmeView from "./readme-view";
+import { WECHAT_DEVTOOL_CLI_PATH } from "./constants";
+import { getExtensionConfig, updateExtensionConfig, createEmptyProject } from "./utils/config";
+import { ExtensionConfig, Project, WechatProjectConfig } from "./types";
+
+interface FormErrors {
+  cliPath?: string;
+  projects?: Array<{
+    name?: string;
+    path?: string;
+  }>;
+}
+
+interface ConfigureProps {
+  onConfigChange?: () => void;
+}
+
+export default function Configure({ onConfigChange }: ConfigureProps) {
+  const { pop, push } = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
-  const { push } = useNavigation();
+  const [cliPath, setCliPath] = useState(WECHAT_DEVTOOL_CLI_PATH);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [errorVisible, setErrorVisible] = useState(false);
 
   useEffect(() => {
-    loadDevices();
+    loadConfig();
   }, []);
 
-  async function loadDevices() {
+  async function loadConfig() {
     try {
       setIsLoading(true);
-      const config = await getAllDeviceConfigs();
-      setDevices(config);
+      const config = await getExtensionConfig();
+      const hasProjects = config.projects.length > 0;
+      if (hasProjects) {
+        setCliPath(config.cliPath);
+        setProjects(config.projects);
+      } else {
+        setProjects([createEmptyProject()]);
+      }
     } catch (error) {
-      console.error("Failed to load devices:", error);
+      console.error("Failed to load config:", error);
       await showFailureToast(error, { title: "Failed to Load", message: "Could not load configuration" });
     } finally {
       setIsLoading(false);
     }
   }
 
-  async function handleAddDevice() {
-    push(
-      <DeviceForm
-        initialData={{
-          cliPath: WECHAT_DEVTOOL_CLI_PATH,
-          projects: [],
-        }}
-        onSuccess={loadDevices}
-      />,
-    );
+  function showErrors(newErrors: FormErrors) {
+    setErrors(newErrors);
+    setErrorVisible(true);
+
+    setTimeout(() => {
+      setErrorVisible(false);
+    }, 3000);
   }
 
-  async function handleEditDevice(deviceId: string) {
-    const deviceConfig = devices[deviceId];
-    if (!deviceConfig) return;
-    push(
-      <DeviceForm
-        initialData={{
-          id: deviceId,
-          name: deviceConfig.name,
-          cliPath: deviceConfig.cliPath,
-          projects: deviceConfig.projects,
-        }}
-        onSuccess={loadDevices}
-      />,
-    );
+  function clearError(errorKey: string) {
+    setErrors((prev) => {
+      const newErrors = { ...prev };
+      if (errorKey.startsWith("project_")) {
+        const [, index, field] = errorKey.split("_");
+        const projectIndex = parseInt(index);
+        if (newErrors.projects && newErrors.projects[projectIndex]) {
+          newErrors.projects[projectIndex] = { ...newErrors.projects[projectIndex], [field]: undefined };
+        }
+      } else {
+        (newErrors as Record<string, string | undefined>)[errorKey] = undefined;
+      }
+      return newErrors;
+    });
   }
 
-  async function handleDeleteDevice(deviceId: string) {
-    const deviceConfig = devices[deviceId];
-    if (!deviceConfig) return;
+  function handleCliPathChange(files: string[]) {
+    const normalizedPath = files[0] ? path.normalize(files[0]) : "";
+    setCliPath(normalizedPath);
+    clearError("cliPath");
+  }
 
-    const confirmed = await confirmAlert({
-      title: "Delete Configuration",
-      message: `Are you sure you want to delete "${deviceConfig.name}" and its project configuration? This action cannot be undone.`,
-      primaryAction: {
-        title: "Delete",
-        style: Alert.ActionStyle.Destructive,
-      },
-      dismissAction: {
-        title: "Cancel",
-        style: Alert.ActionStyle.Cancel,
-      },
+  function handleProjectNameChange(index: number, value: string) {
+    updateProject(index, { ...projects[index], name: value });
+    clearError(`project_${index}_name`);
+  }
+
+  function handleProjectValidationError(index: number, project: Project, errorMessage: string) {
+    showFailureToast(new Error(errorMessage), { title: "Invalid Project" });
+    showErrors({
+      [`project_${index}_path`]: "Selected path is not a valid WeChat Mini Program project",
+    });
+    if (!project.path) {
+      updateProject(index, { ...project, path: "" });
+    } else {
+      updateProject(index, { ...project, path: project.path });
+    }
+  }
+
+  async function handleProjectPathChange(index: number, files: string[]) {
+    const selectedPath = files[0] ? path.normalize(files[0]) : "";
+    const project = projects[index];
+
+    updateProject(index, { ...project, path: selectedPath });
+    clearError(`project_${index}_path`);
+
+    if (!selectedPath) return;
+
+    if (!validateProjectPath(selectedPath)) {
+      showErrors({
+        [`project_${index}_path`]: "Selected path is required",
+      });
+      if (!project.path) {
+        updateProject(index, { ...project, path: "" });
+      } else {
+        updateProject(index, { ...project, path: project.path });
+      }
+      return;
+    }
+
+    if (!(await validateWechatProject(selectedPath))) {
+      handleProjectValidationError(index, project, "Invalid WeChat Mini Program Project");
+      return;
+    }
+
+    // Auto-fill project name if empty
+    if (!project.name.trim()) {
+      const projectName = await getProjectName(selectedPath);
+      if (projectName) {
+        updateProject(index, { ...project, path: selectedPath, name: projectName });
+      }
+    }
+  }
+
+  function validate() {
+    const newErrors: FormErrors = {};
+    let hasErrors = false;
+
+    if (!cliPath.trim()) {
+      newErrors.cliPath = "Required";
+      hasErrors = true;
+    }
+
+    const projectErrors: { name?: string; path?: string }[] = [];
+    projects.forEach((project, index) => {
+      const projectError: { name?: string; path?: string } = {};
+      if (!project.name.trim()) {
+        projectError.name = "Required";
+        hasErrors = true;
+      }
+      if (!project.path.trim()) {
+        projectError.path = "Required";
+        hasErrors = true;
+      }
+      if (projectError.name || projectError.path) {
+        projectErrors[index] = projectError;
+      }
     });
 
-    if (confirmed) {
-      const updatedDevices = { ...devices };
-      delete updatedDevices[deviceId];
-      setDevices(updatedDevices);
-      await saveConfig(updatedDevices);
+    if (projectErrors.length > 0) {
+      newErrors.projects = projectErrors;
+    }
 
+    if (hasErrors) {
+      showErrors(newErrors);
+    }
+
+    return !hasErrors;
+  }
+
+  async function handleSubmit() {
+    if (!validate()) {
+      await showFailureToast(new Error("Please complete all required fields"), {
+        title: "Required Fields Missing",
+      });
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const config: ExtensionConfig = {
+        cliPath: cliPath.trim(),
+        projects: projects.map((project) => ({ ...project, name: project.name.trim(), path: project.path.trim() })),
+      };
+      await updateExtensionConfig(config);
       await showToast({
         style: Toast.Style.Success,
-        title: "Configuration Deleted",
-        message: `Deleted "${deviceConfig.name}" configuration`,
+        title: "Configuration Saved",
       });
+      onConfigChange?.();
+      pop();
+    } catch (error) {
+      await showFailureToast(error, { title: "Failed to Save" });
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  function handleReset() {
+    const newProject = createEmptyProject();
+
+    setCliPath(WECHAT_DEVTOOL_CLI_PATH);
+    setProjects([newProject]);
+
+    showToast({
+      style: Toast.Style.Success,
+      title: "Configuration Reset",
+      message: "Configuration has been reset to default values.",
+    });
+  }
+
+  function addProject() {
+    const newProject = createEmptyProject();
+    setProjects([...projects, newProject]);
+  }
+
+  function updateProject(index: number, project: Project) {
+    const updatedProjects = [...projects];
+    updatedProjects[index] = project;
+    setProjects(updatedProjects);
+  }
+
+  function removeProject(index: number) {
+    const updatedProjects = projects.filter((_, projectIndex) => projectIndex !== index);
+
+    // If removing the last project, add an empty one
+    if (updatedProjects.length === 0) {
+      setProjects([createEmptyProject()]);
+    } else {
+      setProjects(updatedProjects);
     }
   }
 
   return (
-    <List
+    <Form
       isLoading={isLoading}
-      searchBarPlaceholder="Search configurations..."
+      navigationTitle="Configure Projects"
       actions={
         <ActionPanel>
+          <Action title="Save" icon={Icon.Check} onAction={handleSubmit} shortcut={{ modifiers: ["cmd"], key: "s" }} />
+          <Action title="Cancel" icon={Icon.Xmark} onAction={pop} />
           <Action
-            title="Add Configuration"
+            title="Add Project"
             icon={Icon.Plus}
-            onAction={handleAddDevice}
+            onAction={() => addProject()}
             shortcut={{ modifiers: ["cmd"], key: "n" }}
           />
           <Action title="About This Extension" icon={Icon.Book} onAction={() => push(<ReadmeView />)} />
+          {projects.map((project, index) => {
+            // Don't show remove action if there's only one empty project
+            const isOnlyEmptyProject = projects.length === 1 && !project.name.trim() && !project.path.trim();
+            if (isOnlyEmptyProject) {
+              return null;
+            }
+
+            return (
+              <Action
+                key={`remove_${project.id}`}
+                title={project.name.trim() ? `Remove ${project.name.trim()}` : `Remove Project ${index + 1}`}
+                icon={Icon.Minus}
+                style={Action.Style.Destructive}
+                onAction={() => removeProject(index)}
+              />
+            );
+          })}
+          <Action
+            title="Reset Configuration"
+            icon={Icon.Trash}
+            style={Action.Style.Destructive}
+            onAction={handleReset}
+          />
         </ActionPanel>
       }
     >
-      {Object.entries(devices).map(([deviceId, deviceConfig]) => (
-        <List.Item
-          key={deviceId}
-          icon={Icon.Devices}
-          title={deviceConfig.name}
-          subtitle={`${deviceConfig.projects.length} projects`}
-          accessories={deviceConfig.name === getCurrentDeviceName() ? [{ text: "Current Device" }] : []}
-          actions={
-            <ActionPanel>
-              <Action title="Edit Configuration" icon={Icon.Pencil} onAction={() => handleEditDevice(deviceId)} />
-              <Action
-                title="Add Configuration"
-                icon={Icon.Plus}
-                onAction={handleAddDevice}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
-              />
-              <Action title="About This Extension" icon={Icon.Book} onAction={() => push(<ReadmeView />)} />
-              <Action
-                title="Delete Configuration"
-                icon={Icon.Trash}
-                style={Action.Style.Destructive}
-                onAction={() => handleDeleteDevice(deviceId)}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+      <Form.FilePicker
+        id="cliPath"
+        title="WeChat DevTool CLI Path"
+        value={cliPath ? [cliPath] : []}
+        onChange={handleCliPathChange}
+        canChooseFiles
+        canChooseDirectories={false}
+        allowMultipleSelection={false}
+        info={`WeChat DevTool CLI executable, typically located at "${WECHAT_DEVTOOL_CLI_PATH}"`}
+        error={errorVisible ? errors.cliPath : undefined}
+      />
+      <Form.Separator />
+      <Form.Description text="You can add or remove projects via Actions panel." />
+      <Form.Separator />
+      {projects.map((project, index) => {
+        const projectError = errors.projects && errors.projects[index] ? errors.projects[index] : {};
+        const isLastProject = index === projects.length - 1;
 
-      {Object.keys(devices).length === 0 && (
-        <List.EmptyView
-          icon={Icon.Devices}
-          title="No Configurations"
-          description="Configure project settings for different devices"
-          actions={
-            <ActionPanel>
-              <Action
-                title="Add Configuration"
-                icon={Icon.Plus}
-                onAction={handleAddDevice}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
-              />
-              <Action title="About This Extension" icon={Icon.Book} onAction={() => push(<ReadmeView />)} />
-            </ActionPanel>
-          }
-        />
-      )}
-    </List>
+        return (
+          <Fragment key={project.id}>
+            <Form.Description text={`Project ${index + 1}`} />
+            <Form.TextField
+              id={`project_${index}_name`}
+              title="Project Name"
+              placeholder="Enter project name"
+              value={project.name}
+              onChange={(value) => handleProjectNameChange(index, value)}
+              error={errorVisible ? projectError.name : undefined}
+            />
+            <Form.FilePicker
+              id={`project_${index}_path`}
+              title="Project Path"
+              value={project.path ? [project.path] : []}
+              onChange={(files) => handleProjectPathChange(index, files)}
+              canChooseFiles={false}
+              canChooseDirectories
+              allowMultipleSelection={false}
+              info="WeChat Mini Program project directory (must contain project.config.json)"
+              error={errorVisible ? projectError.path : undefined}
+            />
+            {!isLastProject && <Form.Separator />}
+          </Fragment>
+        );
+      })}
+    </Form>
   );
+}
+
+async function isValidWechatMiniprogramDir(dirPath: string) {
+  const projectConfigPath = path.resolve(dirPath, "project.config.json");
+
+  try {
+    await access(projectConfigPath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function getProjectName(projectPath: string) {
+  const configPath = path.resolve(projectPath, "project.config.json");
+  const privateConfigPath = path.resolve(projectPath, "project.private.config.json");
+
+  try {
+    const privateConfigContent = await readFile(privateConfigPath, "utf8");
+    const privateConfig: WechatProjectConfig = JSON.parse(privateConfigContent);
+    if (privateConfig.projectname) {
+      return decodeURIComponent(privateConfig.projectname);
+    }
+  } catch {
+    // Private config doesn't exist or is invalid, try public config
+  }
+
+  try {
+    const configContent = await readFile(configPath, "utf8");
+    const config: WechatProjectConfig = JSON.parse(configContent);
+    if (config.projectname) {
+      return decodeURIComponent(config.projectname);
+    }
+  } catch {
+    // Config doesn't exist or is invalid
+  }
+
+  return null;
+}
+
+function validateProjectPath(selectedPath: string): boolean {
+  return selectedPath.trim().length > 0;
+}
+
+async function validateWechatProject(selectedPath: string): Promise<boolean> {
+  return await isValidWechatMiniprogramDir(selectedPath);
 }

@@ -1,6 +1,6 @@
 # Brew Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-02-17
 
 - Add a new action to open the Brew formula/cask page in the browser
 

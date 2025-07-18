@@ -4,6 +4,7 @@ export const allModels = [
   { name: "Follow global model", id: "global" },
   { name: "Llama 4 Scout 131k", id: "meta-llama/llama-4-scout-17b-16e-instruct" },
   { name: "Llama 4 Maverick 131k", id: "meta-llama/llama-4-maverick-17b-128e-instruct" },
+  { name: "Llama Guard 4 12B 128K", id: "meta-llama/llama-guard-4-12b" },
   { name: "DeepSeek R1 70B 128k", id: "deepseek-r1-distill-llama-70b" },
   { name: "DeepSeek R1 32B 128K", id: "deepseek-r1-distill-qwen-32b" },
   { name: "Llama 3.3 70B 128k", id: "llama-3.3-70b-versatile" },

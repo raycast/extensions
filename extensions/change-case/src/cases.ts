@@ -8,6 +8,7 @@ import {
   titleCase,
   spongeCase,
   swapCase,
+  sentenceCase,
 } from "./customCases";
 import { getPreferenceValues } from "@raycast/api";
 
@@ -29,7 +30,7 @@ export const functions: CaseFunctions = {
   "Pascal Snake Case": changeCase.pascalSnakeCase,
   "Path Case": changeCase.pathCase,
   "Random Case": spongeCase,
-  "Sentence Case": changeCase.sentenceCase,
+  "Sentence Case": sentenceCase,
   "Snake Case": changeCase.snakeCase,
   "Swap Case": swapCase,
   "Title Case": titleCase,
