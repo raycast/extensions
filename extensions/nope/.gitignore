@@ -5,3 +5,7 @@
 
 # misc
 .DS_Store
+
+# Raycast
+raycast-env.d.ts
+dist/
