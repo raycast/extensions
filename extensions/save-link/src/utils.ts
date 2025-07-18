@@ -1,7 +1,10 @@
 import { Clipboard, showHUD } from "@raycast/api";
-import { mkdirSync, writeFileSync } from "fs";
+import { mkdirSync, readdirSync, statSync, unlinkSync, writeFileSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
+
+// Configuration
+const MAX_CACHE_FILES = 20; // Maximum number of webloc files to keep in cache
 
 // Types
 export interface WeblocFileOptions {
@@ -82,6 +85,39 @@ export function extractDomainFromUrl(url: string): string {
   }
 }
 
+// Function to clean up old cache files, keeping only the most recent ones
+export function cleanupOldCacheFiles(cacheDir: string, maxFiles: number = 20): void {
+  try {
+    const files = readdirSync(cacheDir)
+      .filter(file => file.endsWith('.webloc'))
+      .map(file => {
+        const filePath = join(cacheDir, file);
+        return {
+          name: file,
+          path: filePath,
+          mtime: statSync(filePath).mtime
+        };
+      })
+      .sort((a, b) => b.mtime.getTime() - a.mtime.getTime()); // Sort by modification time, newest first
+
+    // If we have more files than the limit, remove the oldest ones
+    if (files.length > maxFiles) {
+      const filesToRemove = files.slice(maxFiles);
+      for (const file of filesToRemove) {
+        try {
+          unlinkSync(file.path);
+        } catch (error) {
+          // Ignore errors when deleting files (file might be in use, etc.)
+          console.warn(`Failed to delete cache file ${file.name}:`, error);
+        }
+      }
+    }
+  } catch (error) {
+    // Ignore errors during cleanup - it's not critical
+    console.warn("Failed to cleanup cache files:", error);
+  }
+}
+
 // Main function to create and copy webloc file
 export async function createAndCopyWeblocFile(options: WeblocFileOptions): Promise<void> {
   const { url, customTitle, fallbackTitle = "Link", titleSource = "default" } = options;
@@ -100,6 +136,9 @@ export async function createAndCopyWeblocFile(options: WeblocFileOptions): Promi
 
   // Write the webloc file
   writeFileSync(filePath, weblocContent, "utf8");
+
+  // Clean up old cache files to prevent accumulation
+  cleanupOldCacheFiles(cacheDir, MAX_CACHE_FILES);
 
   // Copy the file to clipboard
   const fileContent: Clipboard.Content = { file: filePath };

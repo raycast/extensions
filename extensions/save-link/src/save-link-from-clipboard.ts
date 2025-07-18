@@ -1,5 +1,5 @@
 import { Clipboard, LaunchProps, showHUD } from "@raycast/api";
-import { createAndCopyWeblocFile, extractUrlFromText, extractDomainFromUrl } from "./utils";
+import { createAndCopyWeblocFile, extractDomainFromUrl, extractUrlFromText } from "./utils";
 
 interface Arguments {
   title?: string;
