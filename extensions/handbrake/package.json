@@ -22,6 +22,7 @@
       "name": "convert",
       "title": "Convert Video",
       "description": "Converts the selected video to another format using a preset",
+      "subtitle": "HandBrake",
       "mode": "view"
     }
   ],
