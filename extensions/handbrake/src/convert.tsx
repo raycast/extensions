@@ -41,7 +41,7 @@ export default function Command() {
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Link title="Github" target="https://github.com/marcopelegrini" text="marcopelegrini" />
-          <Detail.Metadata.Link title="download" target="http://handbrake.fr/downloads2.php" text="HandBrake CLI" />
+          <Detail.Metadata.Link title="download" target="https://handbrake.fr/downloads2.php" text="HandBrake CLI" />
         </Detail.Metadata>
       }
       markdown={`
