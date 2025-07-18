@@ -1,9 +1,15 @@
-import { BrowserExtension, Clipboard, showHUD } from "@raycast/api";
+import { BrowserExtension, Clipboard, LaunchProps, showHUD } from "@raycast/api";
 import { mkdirSync, writeFileSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
 
-export default async function main() {
+interface Arguments {
+  title?: string;
+}
+
+export default async function main(props: LaunchProps<{ arguments: Arguments }>) {
+  const { title: customTitle } = props.arguments;
+  
   try {
     // Get the active browser tab
     const tabs = await BrowserExtension.getTabs();
@@ -22,9 +28,9 @@ export default async function main() {
       // Directory might already exist, that's fine
     }
 
-    // Generate a safe filename from the page title or URL
-    const pageTitle = activeTab.title || "Untitled";
-    const safeTitle = pageTitle.replace(/[^\w\s-]/g, "").replace(/\s+/g, " ").trim().slice(0, 50);
+    // Use custom title if provided, otherwise use page title
+    const titleToUse = customTitle || activeTab.title || "Untitled";
+    const safeTitle = titleToUse.replace(/[^\w\s-]/g, "").replace(/\s+/g, " ").trim().slice(0, 50);
     const filename = `${safeTitle || "Link"}.webloc`;
     const filePath = join(tempDir, filename);
 
@@ -45,7 +51,8 @@ export default async function main() {
     const fileContent: Clipboard.Content = { file: filePath };
     await Clipboard.copy(fileContent);
 
-    await showHUD(`📋 Copied "${safeTitle}.webloc" to clipboard`);
+    const titleSource = customTitle ? "custom title" : "page title";
+    await showHUD(`📋 Copied "${safeTitle}.webloc" to clipboard (using ${titleSource})`);
   } catch (error) {
     console.error("Error creating webloc file:", error);
     await showHUD(`❌ Failed to create webloc file: ${error instanceof Error ? error.message : String(error)}`);
