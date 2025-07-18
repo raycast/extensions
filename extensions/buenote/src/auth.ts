@@ -42,7 +42,12 @@ export async function getValidAccessToken(): Promise<string> {
         redirect_uri: authRequest.redirectURI,
         audience: AUTH0_AUDIENCE,
       }),
-    }).then((res) => res.json());
+    }).then((res) => {
+      if (!res.ok) {
+        throw new Error(`Token exchange failed: ${res.status} ${res.statusText}`);
+      }
+      return res.json();
+    });
     console.log("[OAuth] tokenResponse", tokenResponse);
     await client.setTokens({
       accessToken: tokenResponse.access_token,
