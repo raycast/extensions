@@ -28,7 +28,11 @@ export function createWeblocContent(url: string): string {
 
 // Function to create a safe filename
 export function createSafeFilename(title: string): string {
-  return title.replace(/[^\w\s-]/g, "").replace(/\s+/g, " ").trim().slice(0, 50);
+  return title
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 50);
 }
 
 // Function to ensure cache directory exists
@@ -62,7 +66,7 @@ export function extractUrlFromText(text: string): string | null {
   // If not, look for URLs in the text using regex
   const urlRegex = /(https?:\/\/[^\s]+)/gi;
   const matches = text.match(urlRegex);
-  
+
   if (matches && matches.length > 0) {
     // Return the first valid URL found
     for (const match of matches) {
@@ -71,7 +75,7 @@ export function extractUrlFromText(text: string): string | null {
       }
     }
   }
-  
+
   return null;
 }
 
@@ -89,13 +93,13 @@ export function extractDomainFromUrl(url: string): string {
 export function cleanupOldCacheFiles(cacheDir: string, maxFiles: number = 20): void {
   try {
     const files = readdirSync(cacheDir)
-      .filter(file => file.endsWith('.webloc'))
-      .map(file => {
+      .filter((file) => file.endsWith(".webloc"))
+      .map((file) => {
         const filePath = join(cacheDir, file);
         return {
           name: file,
           path: filePath,
-          mtime: statSync(filePath).mtime
+          mtime: statSync(filePath).mtime,
         };
       })
       .sort((a, b) => b.mtime.getTime() - a.mtime.getTime()); // Sort by modification time, newest first
@@ -121,7 +125,7 @@ export function cleanupOldCacheFiles(cacheDir: string, maxFiles: number = 20): v
 // Main function to create and copy webloc file
 export async function createAndCopyWeblocFile(options: WeblocFileOptions): Promise<void> {
   const { url, customTitle, fallbackTitle = "Link", titleSource = "default" } = options;
-  
+
   // Create cache directory
   const cacheDir = ensureCacheDirectory();
 

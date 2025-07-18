@@ -7,11 +7,11 @@ interface Arguments {
 
 export default async function main(props: LaunchProps<{ arguments: Arguments }>) {
   const { title: customTitle } = props.arguments;
-  
+
   try {
     // Read clipboard content
     const clipboardContent = await Clipboard.read();
-    
+
     if (!clipboardContent.text) {
       await showHUD("❌ No text found in clipboard");
       return;
@@ -19,7 +19,7 @@ export default async function main(props: LaunchProps<{ arguments: Arguments }>)
 
     // Extract URL from clipboard text
     const url = extractUrlFromText(clipboardContent.text);
-    
+
     if (!url) {
       await showHUD("❌ No valid URL found in clipboard");
       return;
@@ -30,9 +30,8 @@ export default async function main(props: LaunchProps<{ arguments: Arguments }>)
       url,
       customTitle,
       fallbackTitle: extractDomainFromUrl(url),
-      titleSource: "domain name"
+      titleSource: "domain name",
     });
-
   } catch (error) {
     console.error("Error creating webloc file from clipboard:", error);
     await showHUD(`❌ Failed to create webloc file: ${error instanceof Error ? error.message : String(error)}`);

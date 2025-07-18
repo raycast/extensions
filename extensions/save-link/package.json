@@ -4,7 +4,7 @@
   "title": "Save Link",
   "description": "Get the current browser tab URL and generate a webloc file, then copy it to clipboard.",
   "icon": "extension-icon.png",
-  "author": "simon_r",
+  "author": "ViGeng",
   "license": "MIT",
   "commands": [
     {

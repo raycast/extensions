@@ -7,12 +7,12 @@ interface Arguments {
 
 export default async function main(props: LaunchProps<{ arguments: Arguments }>) {
   const { title: customTitle } = props.arguments;
-  
+
   try {
     // Get the active browser tab
     const tabs = await BrowserExtension.getTabs();
-    const activeTab = tabs.find(tab => tab.active);
-    
+    const activeTab = tabs.find((tab) => tab.active);
+
     if (!activeTab || !activeTab.url) {
       await showHUD("❌ No active browser tab found");
       return;
@@ -23,9 +23,8 @@ export default async function main(props: LaunchProps<{ arguments: Arguments }>)
       url: activeTab.url,
       customTitle,
       fallbackTitle: activeTab.title || "Untitled",
-      titleSource: "page title"
+      titleSource: "page title",
     });
-
   } catch (error) {
     console.error("Error creating webloc file:", error);
     await showHUD(`❌ Failed to create webloc file: ${error instanceof Error ? error.message : String(error)}`);
