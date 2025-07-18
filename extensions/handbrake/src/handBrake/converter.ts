@@ -27,7 +27,7 @@ export function getUniqueOutputPath(filePath: string, extension: string): string
 
 export function checkExtensionType(file: string, allowedExtensions: ReadonlyArray<string>): boolean {
   const extension = path.extname(file).toLowerCase();
-  return allowedExtensions.includes(extension as (typeof allowedExtensions)[number]) ? true : false;
+  return allowedExtensions.includes(extension as (typeof allowedExtensions)[number]);
 }
 
 export async function convertMedia(
