@@ -62,10 +62,11 @@ const getModelInfo = (encoding: TiktokenEncoding): string => {
 };
 
 export default async function Command() {
+  let encoder: ReturnType<typeof get_encoding> | undefined;
   try {
     await initialize();
     const { tokenizer }: Preferences = getPreferenceValues();
-    const encoder = get_encoding(tokenizer);
+    encoder = get_encoding(tokenizer);
 
     const selectedText = await getSelectedText();
 
@@ -76,8 +77,6 @@ export default async function Command() {
     const tokens = encoder.encode(selectedText);
     const tokenCount = tokens.length;
 
-    encoder.free();
-
     await showToast({
       style: Toast.Style.Success,
       title: `${tokenCount} tokens (${getModelInfo(tokenizer)})`,
@@ -87,5 +86,7 @@ export default async function Command() {
       style: Toast.Style.Failure,
       title: err instanceof Error ? `Error: ${err.message}` : `Error: Could not count tokens from selected text`,
     });
+  } finally {
+    encoder?.free();
   }
 }
