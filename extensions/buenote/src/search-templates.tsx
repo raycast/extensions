@@ -249,11 +249,7 @@ function RunForm({
       await showToast({ style: Toast.Style.Success, title: "Generated" });
       push(<ResultDetail result={result} />);
     } catch (e: unknown) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: String(e),
-      });
+      showFailureToast(e, { title: "Error" });
     } finally {
       setIsLoading(false);
     }
