@@ -1,0 +1,167 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tree-generator",
+  "title": "Tree Generator",
+  "description": "Generate and view directory structure as a tree",
+  "icon": "tree-list.png",
+  "author": "wuyuxiangX",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "generate-directory-tree",
+      "title": "Generate Directory Tree",
+      "description": "Generate a tree view of the current directory structure",
+      "mode": "view"
+    },
+    {
+      "name": "quick-tree",
+      "title": "Quick Directory Tree",
+      "description": "Quickly generate and copy directory tree to clipboard",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "generateTreeMaxDepth",
+      "title": "Generate Tree Default Max Depth",
+      "description": "Default maximum depth for Generate Directory Tree command",
+      "type": "textfield",
+      "default": "3",
+      "required": false
+    },
+    {
+      "name": "generateTreeRespectGitignore",
+      "title": "Generate Tree Default Respect .gitignore",
+      "description": "Default setting for respecting .gitignore files in Generate Directory Tree",
+      "type": "checkbox",
+      "label": "Respect .gitignore files by default",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "generateTreeShowHidden",
+      "title": "Generate Tree Default Show Hidden Files",
+      "description": "Default setting for showing hidden files in Generate Directory Tree",
+      "type": "checkbox",
+      "label": "Show hidden files by default",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "generateTreeDirectoriesOnly",
+      "title": "Generate Tree Default Directories Only",
+      "description": "Default setting for showing only directories in Generate Directory Tree",
+      "type": "checkbox",
+      "label": "Show only directories by default",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "generateTreeShowSizes",
+      "title": "Generate Tree Default Show File Sizes",
+      "description": "Default setting for displaying file sizes in Generate Directory Tree",
+      "type": "checkbox",
+      "label": "Display file sizes by default",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "generateTreeShowCounts",
+      "title": "Generate Tree Default Show Directory Counts",
+      "description": "Default setting for showing file/directory counts in Generate Directory Tree",
+      "type": "checkbox",
+      "label": "Show directory counts by default",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "generateTreeIgnorePatterns",
+      "title": "Generate Tree Default Ignore Patterns",
+      "description": "Default ignore patterns for Generate Directory Tree. Separate multiple patterns with | (pipe character). Example: node_modules|.git|*.log|.DS_Store",
+      "type": "textfield",
+      "default": "node_modules|.git|*.log|.DS_Store",
+      "required": false
+    },
+    {
+      "name": "quickTreeMaxDepth",
+      "title": "Quick Tree Max Depth",
+      "description": "Maximum depth for Quick Directory Tree command",
+      "type": "textfield",
+      "default": "3",
+      "required": false
+    },
+    {
+      "name": "quickTreeRespectGitignore",
+      "title": "Quick Tree Respect .gitignore",
+      "description": "Whether Quick Directory Tree should respect .gitignore files",
+      "type": "checkbox",
+      "label": "Respect .gitignore files",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "quickTreeShowHidden",
+      "title": "Quick Tree Show Hidden Files",
+      "description": "Whether Quick Directory Tree should show hidden files and directories",
+      "type": "checkbox",
+      "label": "Show hidden files and directories",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "quickTreeDirectoriesOnly",
+      "title": "Quick Tree Directories Only",
+      "description": "Whether Quick Directory Tree should show only directories",
+      "type": "checkbox",
+      "label": "Show only directories",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "quickTreeShowSizes",
+      "title": "Quick Tree Show File Sizes",
+      "description": "Whether Quick Directory Tree should display file sizes",
+      "type": "checkbox",
+      "label": "Display file sizes",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "quickTreeShowCounts",
+      "title": "Quick Tree Show Directory Counts",
+      "description": "Whether Quick Directory Tree should show file/directory counts",
+      "type": "checkbox",
+      "label": "Show directory counts",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "quickTreeIgnorePatterns",
+      "title": "Quick Tree Ignore Patterns",
+      "description": "Ignore patterns for Quick Directory Tree. Separate multiple patterns with | (pipe character). Example: node_modules|.git|*.log|.DS_Store",
+      "type": "textfield",
+      "default": "node_modules|.git|*.log|.DS_Store",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.101.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
