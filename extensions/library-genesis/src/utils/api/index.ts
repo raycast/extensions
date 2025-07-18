@@ -21,27 +21,49 @@ export const getLibgenSearchResults = async (
 
   const { parse } = getMirror(libgenUrl);
 
+  const fields = [
+    "t",  // title
+    "a",  // author(s)
+    "s",  // series
+    "y",  // year
+    "p",  // publisher
+    "i",  // isbn
+  ];
+  const objects = [
+    "f",  // files
+    "e",  // editions
+    "s",  // series
+    "a",  // authors
+    "p",  // publishers
+    "w",  // works
+  ];
+  const topics = {
+    fiction: [
+      "f",  // fiction
+      "r",  // fiction rus
+      "c",  // comics
+    ],
+    nonfiction: [
+      "l",  // libgen
+      "a",  // scientific articles
+      "m",  // magazines
+      "s",  // standards
+    ]
+  }
   const params = new URLSearchParams({
     req: searchContent,
     res: "100",
     covers: "on",
     filesuns: "all"
   });
-  ["t", "a", "s", "y", "p", "i"].forEach(column => params.append("columns[]", column));
-  ["f", "e", "s", "a", "p", "w"].forEach(object => params.append("objects[]", object));
-  ["l", "c", "a", "m", "r", "s"].forEach(topic => params.append("topics[]", topic));
+  fields.forEach(column => params.append("columns[]", column));
+  objects.forEach(object => params.append("objects[]", object));
+  if (searchType===SearchType.Fiction) topics.fiction.forEach(topic => params.append("topics[]", topic));
+  else if (searchType===SearchType.NonFiction) topics.nonfiction.forEach(topic => params.append("topics[]", topic));
+  else [...topics.fiction, ...topics.nonfiction].forEach(topic => params.append("topics[]", topic));
 
   const queryUrl =
-    searchType === SearchType.Fiction
-      ? libgenUrl +
-        `/fiction/?` +
-        new URLSearchParams({
-          q: searchContent,
-          criteria: "",
-          language: "",
-          format: "",
-        })
-      : libgenUrl +
+libgenUrl +
         "/index.php?" +
         new URLSearchParams(params);
 

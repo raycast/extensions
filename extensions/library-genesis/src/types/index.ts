@@ -59,4 +59,5 @@ export interface LibgenPreferences {
 export enum SearchType {
   "Fiction" = 0,
   "NonFiction" = 1,
+  "All" = 2
 }

@@ -2,6 +2,7 @@
 
 ## [] - {PR_MERGE_DATE}
 
+- automatically searches again on type change
 - added: `libgen.bz`, `libgen.li`
 - removed: `libgen.is`, `libgen.st`
 

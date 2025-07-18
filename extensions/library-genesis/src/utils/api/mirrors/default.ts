@@ -78,23 +78,13 @@ export const parseContentIntoBooks = (content: string, libgenUrl?: string): Book
   const books: BookEntry[] = [];
   const $ = load(content);
 
-  const titleElement = $("title");
-  if (titleElement.text().includes("fiction")) return parseFiction($, libgenUrl);
-
   // get all the book elements from the page
-  // the detailed page uses tables to display each book entry
-  // the correct tables are direct children of the body
-  const bookElements = $("body")
-    .children("table")
-    .filter((i, el) => {
-      // filter out the table that contains the search results
-      return $(el).attr("rules") === "cols" && $(el).attr("width") === "100%" && $(el).attr("border") === "0";
-    });
-
+  const bookElements = $("#tablelibgen tbody tr");
   // get the book entries from the table
   for (let i = 0; i < bookElements.length; i++) {
     const bookElement = bookElements.eq(i);
-    const book = parseBookFromTableInDetailedView(bookElement, libgenUrl);
+    const book = parseBookFromRow(bookElement, libgenUrl);
+    if (!i) console.log(book)
     books.push(book);
   }
 
@@ -112,47 +102,62 @@ const parseFiction = ($: CheerioAPI, libgenUrl?: string) => {
 
   return books;
 };
-const parseBookFromFictionTable = (row: Cheerio<Element>, libgenUrl?: string): BookEntry => {
+
+const parseBookFromRow = (row: Cheerio<Element>, libgenUrl?: string): BookEntry => {
   const bookElement = row;
   const contentCols = bookElement.children("td");
   libgenUrl = libgenUrl ? libgenUrl : DEFAULT_MIRROR.name;
+  const buildLibgenUrl = (route="") => !route ? "N/A" : new URL(route, libgenUrl).toString();
 
   //col 1
-  const author = contentCols.eq(0).find("a").first().text();
+  const coverUrl = buildLibgenUrl(contentCols.eq(0).children("a").first().children("img").first().attr("src"));
+  // col 2
+  const titleCol = contentCols.eq(1);
+  const titleColLinks = titleCol.find("a");
+  const infoUrl = buildLibgenUrl(titleColLinks.first().attr("href"));
+  const id = infoUrl.split("id=").pop();
+  const title = titleColLinks.first().text().trimEnd();
+  const isbn = titleColLinks.find("i font").first().text();
+  
+  // if (title.includes("Batman & Dracula")) console.log(titleCol.find("a[title]").first().attr("title")?.trim())
+  const times = titleCol.find("a[title]").first().attr("title")?.replace("Add/Edit : ", "").split(";")[0].split("/");
+  const timeAdded = times ? times[0] : "N/A";
+  const timeLastModified = times ? times[1] : "N/A";
   // col 3
-  const titleCol = contentCols.eq(2);
-  const infoUrl = libgenUrl + titleCol.find("a").first().attr("href");
-  const title = titleCol.find("a").first().text();
-  const isbn = titleCol.find("p.catalog_identifier").first().text().replace("ISBN: ", "");
+  const author = contentCols.eq(2).text();
   // col 4
-  const language = contentCols.eq(3).text();
+  const publisher = contentCols.eq(3).text();
   // col 5
+  const year = contentCols.eq(4).text().trim();
   const fileCol = contentCols.eq(4).text().trim().split("/");
-  const extension = fileCol[0];
   const fileSize = fileCol[1];
   // col 6
-  const downloadUrl = contentCols.eq(5).find("a").first().attr("href") || "";
-  const md5 = downloadUrl.split("/").at(-1);
-
-  const coverUrl = libgenUrl + "/static/no_cover.png";
-
+  const language = contentCols.eq(5).text();
+  // col 7
+  const pages = contentCols.eq(6).text();
+  // col 9
+  const extension = contentCols.eq(8).text();
+  // col 10
+  const downloadUrl = contentCols.eq(9).find("a").first().attr("href") || "";
+  const md5 = downloadUrl.split("md5=").at(-1);
+  
   const book: BookEntry = {
     title: title,
     author: author || "N/A",
-    year: "N/A",
+    year,
     edition: "N/A",
-    downloadUrl: downloadUrl,
-    infoUrl: infoUrl || "",
-    pages: "N/A",
-    language: language,
-    publisher: "N/A",
+    downloadUrl,
+    infoUrl,
+    pages,
+    language: language || "N/A",
+    publisher: publisher || "N/A",
     fileSize: fileSize,
     extension: extension,
-    coverUrl: coverUrl || "",
+    coverUrl: coverUrl,
     md5: md5 || "N/A",
-    id: "N/A",
-    timeAdded: "N/A",
-    timeLastModified: "N/A",
+    id,
+    timeAdded,
+    timeLastModified,
     isbn: isbn || "N/A",
   };
   return book;
