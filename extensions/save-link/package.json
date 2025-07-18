@@ -34,6 +34,12 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "open-save-folder",
+      "title": "Open Save Folder",
+      "description": "Navigate to your cached links directory.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

@@ -10,7 +10,8 @@ export default async function main(props: LaunchProps<{ arguments: Arguments }>)
 
   try {
     // Get the active browser tab
-    const activeTab = await BrowserExtension.getActiveTab();
+    const tabs = await BrowserExtension.getTabs();
+    const activeTab = tabs.find(tab => tab.active);
 
     if (!activeTab || !activeTab.url) {
       await showHUD("❌ No active browser tab found");
