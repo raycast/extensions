@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.0] - 2025-07-12
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 - Initial major release of the Buenote Raycast extension.
