@@ -9,7 +9,7 @@ export default async function main(props: LaunchProps<{ arguments: Arguments.Ind
   try {
     const text = await Clipboard.readText();
     if (!text) throw new Error("No text found in Clipboard");
-    const json = await JSON.parse(text);
+    const json = JSON.parse(text);
 
     toast.title = "Uploading JSON";
     const document = await createNewDocument(title, json, ttl);
@@ -56,7 +56,10 @@ async function createNewDocument(
   const endpoint = getEndpoint();
 
   const response = await fetch(endpoint, options);
-  const jsonResponse = await response.json();
+  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-  return jsonResponse as { id: string; location: string };
+  const jsonResponse = (await response.json()) as { id: string; location: string };
+  if (!jsonResponse.id || !jsonResponse.location) throw new Error("Invalid response format");
+
+  return jsonResponse;
 }
