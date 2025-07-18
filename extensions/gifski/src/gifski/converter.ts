@@ -8,7 +8,6 @@ import { execPromise } from "../util/exec";
  * New settings are welcome as long as they're tested
  */
 export const INPUT_VIDEO_EXTENSIONS = [".mov", ".mp4", ".avi", ".mkv", ".mpg", ".webm"] as const;
-export const OUTPUT_VIDEO_EXTENSIONS = [".mp4", ".mkv", ".webm"] as const;
 
 export function getUniqueOutputPath(filePath: string, extension: string): string {
   const outputFilePath = filePath.replace(path.extname(filePath), extension);
