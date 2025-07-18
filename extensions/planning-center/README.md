@@ -45,28 +45,6 @@ When searching for people, you can:
 - Press **Command-Enter** to copy the person's phone number to the clipboard.
 - Press **Option-Enter** to copy the person's email address to the clipboard.
 
-## Local Development
-
-To run the extension locally in Raycast for development:
-
-1. Clone this repository and install dependencies:
-
-   ```sh
-   git clone https://github.com/caleb531/planning-center-raycast.git
-   cd planning-center-raycast
-   npm install
-   ```
-
-2. Start the development server:
-
-   ```sh
-   npm run dev
-   ```
-
-After you've run `npm run dev` for the first time, the local extension will be
-installed into Raycast, so you do not need to keep the process running unless
-you want to test changes locally.
-
 ## Disclaimer
 
 This project is not affiliated with Planning Center.
