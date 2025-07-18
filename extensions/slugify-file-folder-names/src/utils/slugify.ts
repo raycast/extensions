@@ -34,7 +34,7 @@ const CHAR_MAP: Record<string, string> = {
   Ė: "e",
   Ę: "e",
 
-  // í ì î ï ī į → i (including Turkish ı and İ)
+  // í ì î ï ī į → i
   í: "i",
   ì: "i",
   î: "i",
@@ -51,7 +51,7 @@ const CHAR_MAP: Record<string, string> = {
   Į: "i",
   I: "i",
 
-  // ó ò ô ö œ õ ø ō → o (including Turkish ö)
+  // ó ò ô ö œ õ ø ō → o
   ó: "o",
   ò: "o",
   ô: "o",
@@ -69,7 +69,7 @@ const CHAR_MAP: Record<string, string> = {
   Ø: "o",
   Ō: "o",
 
-  // ú ù û ü ū → u (including Turkish ü)
+  // ú ù û ü ū → u
   ú: "u",
   ù: "u",
   û: "u",
@@ -81,15 +81,15 @@ const CHAR_MAP: Record<string, string> = {
   Ü: "u",
   Ū: "u",
 
-  // c variants (including Turkish ç)
+  // c variants
   ç: "c",
   Ç: "c",
 
-  // g variants (including Turkish ğ)
+  // g variants
   ğ: "g",
   Ğ: "g",
 
-  // s variants (including Turkish ş)
+  // s variants
   ş: "s",
   Ş: "s",
 
@@ -103,13 +103,124 @@ const CHAR_MAP: Record<string, string> = {
   Ž: "z",
 };
 
+// German-specific character mappings with proper transliterations
+const GERMAN_CHAR_MAP: Record<string, string> = {
+  // German umlauts with proper transliterations
+  ä: "ae",
+  ö: "oe",
+  ü: "ue",
+  Ä: "Ae",
+  Ö: "Oe",
+  Ü: "Ue",
+  ß: "ss",
+
+  // Keep all other character mappings from default map
+  // á à â æ ã å ā → a
+  á: "a",
+  à: "a",
+  â: "a",
+  æ: "a",
+  ã: "a",
+  å: "a",
+  ā: "a",
+  Á: "a",
+  À: "a",
+  Â: "a",
+  Æ: "a",
+  Ã: "a",
+  Å: "a",
+  Ā: "a",
+
+  // é è ê ë ē ė ę → e
+  é: "e",
+  è: "e",
+  ê: "e",
+  ë: "e",
+  ē: "e",
+  ė: "e",
+  ę: "e",
+  É: "e",
+  È: "e",
+  Ê: "e",
+  Ë: "e",
+  Ē: "e",
+  Ė: "e",
+  Ę: "e",
+
+  // í ì î ï ī į → i
+  í: "i",
+  ì: "i",
+  î: "i",
+  ï: "i",
+  ī: "i",
+  į: "i",
+  ı: "i",
+  İ: "i",
+  Í: "i",
+  Ì: "i",
+  Î: "i",
+  Ï: "i",
+  Ī: "i",
+  Į: "i",
+  I: "i",
+
+  // ó ò ô œ õ ø ō → o
+  ó: "o",
+  ò: "o",
+  ô: "o",
+  œ: "o",
+  õ: "o",
+  ø: "o",
+  ō: "o",
+  Ó: "o",
+  Ò: "o",
+  Ô: "o",
+  Œ: "o",
+  Õ: "o",
+  Ø: "o",
+  Ō: "o",
+
+  // ú ù û ū → u
+  ú: "u",
+  ù: "u",
+  û: "u",
+  ū: "u",
+  Ú: "u",
+  Ù: "u",
+  Û: "u",
+  Ū: "u",
+
+  // c variants
+  ç: "c",
+  Ç: "c",
+
+  // g variants
+  ğ: "g",
+  Ğ: "g",
+
+  // s variants
+  ş: "s",
+  Ş: "s",
+
+  // Other special characters
+  ñ: "n",
+  Ñ: "n",
+  ý: "y",
+  Ý: "y",
+  ž: "z",
+  Ž: "z",
+};
+
 /**
  * Converts a string to a URL-friendly slug
  * @param text - The text to slugify
  * @param options - Slugify options
  * @returns The slugified string
  */
-export function slugify(text: string, options: { preserveExtension?: boolean } = {}): string {
+export function slugify(
+  text: string,
+  options: { preserveExtension?: boolean; useGermanTranslation?: boolean } = {},
+): string {
   if (!text) return "";
 
   let slug = text;
@@ -124,10 +235,13 @@ export function slugify(text: string, options: { preserveExtension?: boolean } =
     }
   }
 
+  // Choose character mapping based on German umlaut transliteration option
+  const charMap = options.useGermanTranslation ? GERMAN_CHAR_MAP : CHAR_MAP;
+
   // Apply character mappings
   slug = slug
     .split("")
-    .map((char) => CHAR_MAP[char] || char)
+    .map((char) => charMap[char] || char)
     .join("");
 
   // Convert to lowercase
@@ -157,8 +271,13 @@ export function slugify(text: string, options: { preserveExtension?: boolean } =
  * Generates a safe filename by slugifying and handling potential conflicts
  * @param originalName - The original filename
  * @param preserveExtension - Whether to preserve the file extension
+ * @param useGermanTranslation - Whether to use German umlaut transliterations
  * @returns The slugified filename
  */
-export function generateSlugFilename(originalName: string, preserveExtension: boolean = true): string {
-  return slugify(originalName, { preserveExtension });
+export function generateSlugFilename(
+  originalName: string,
+  preserveExtension: boolean = true,
+  useGermanTranslation: boolean = false,
+): string {
+  return slugify(originalName, { preserveExtension, useGermanTranslation });
 }
