@@ -63,7 +63,7 @@ async function fetchPeople(query: string): Promise<Person[]> {
     },
   });
   if (res.status === 401) {
-    throw new Error("Invalid API credentials. Please check your app_id and app_secret in Raycast preferences.");
+    throw new Error("Invalid API credentials. Please check your Client ID and Secret in Raycast preferences.");
   }
   if (!res.ok) {
     throw new Error(`Failed to fetch people: ${res.statusText}`);
@@ -142,7 +142,6 @@ export default function Command() {
             <Action.OpenInBrowser url={`https://people.planningcenteronline.com/people/AC${person.id}`} />
             <Action
               title="Copy Phone Number"
-              shortcut={{ modifiers: ["cmd"], key: "enter" }}
               onAction={async () => {
                 const phone = await fetchPhone(person.id);
                 await Clipboard.copy(phone);

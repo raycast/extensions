@@ -1,3 +1,5 @@
 # Planning Center for Raycast Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [v1.0.0] - {PR_MERGE_DATE}
+
+- Initial stable release

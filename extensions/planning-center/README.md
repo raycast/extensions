@@ -12,13 +12,15 @@ Quickly look up people in Planning Center and copy their contact info using Rayc
 1. Visit https://api.planningcenteronline.com/oauth/applications (log in if prompted)
 2. Scroll down the page to the **Personal Access Tokens** section
 3. Click the **Create one now** button
-4. Copy the **Application ID** and **Secret**; save them to a safe place
+4. Copy the **Client ID** and **Secret**; save them to a safe place
 
-Do not share the Application ID and Secret with anyone. Together, they grant access to your entire Planning Center account, so they should be handled with great care.
+Do not share the Secret with anyone. When combined with the Client ID, it grants
+access to your entire Planning Center account, so it should be handled with
+great care.
 
 ### 2. Enter ID and Secret into Raycast preferences
 
-After installing the extension, open **Raycast Preferences → Extensions → Planning Center** for Raycast, and enter your App ID and Secret in the provided
+After installing the extension, open **Raycast Preferences → Extensions → Planning Center** for Raycast, and enter your Client ID and Secret in the provided
 fields on the right-hand side.
 
 ## Usage
