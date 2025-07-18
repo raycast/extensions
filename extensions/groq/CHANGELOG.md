@@ -1,6 +1,6 @@
 # Groq Changelog
 
-## [Updated Models] - {PR_MERGE_DATE}
+## [Updated Models] - 2025-07-18
 
 - Removed `Llama Guard 4 12B 128K`
 
