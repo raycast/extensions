@@ -1,5 +1,9 @@
 # Groq Changelog
 
+## [Updated Models] - 2025-07-18
+
+- Removed `Llama Guard 4 12B 128K`
+
 ## [Updated Models] - 2025-07-15
 
 - Added `Kimi K2 Instruct 128K`
