@@ -139,7 +139,11 @@ export async function createAndCopyWeblocFile(options: WeblocFileOptions): Promi
   const weblocContent = createWeblocContent(url);
 
   // Write the webloc file
-  writeFileSync(filePath, weblocContent, "utf8");
+  try {
+    writeFileSync(filePath, weblocContent, "utf8");
+  } catch (error) {
+    throw new Error(`Failed to create webloc file: ${error}`);
+  }
 
   // Clean up old cache files to prevent accumulation
   cleanupOldCacheFiles(cacheDir, MAX_CACHE_FILES);
