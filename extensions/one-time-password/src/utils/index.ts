@@ -52,27 +52,21 @@ export async function readDataFromQRCodeOnScreen(type: ScanType): Promise<QRCode
       {
         if (isMacOs) {
           output.data = await scanMacOsQRCodeAcrossDisplays(path);
-        }
-
-        if (isMacOs) {
-          output.data = await scanMacOsQRCodeAcrossDisplays(path);
         } else if (isWin) {
           output.data = await scanWindowsQRCodeAcrossDisplays(path);
         }
-
-      break;
-    case 'select': {
-      if (isMacOs) {
-        output.data = await selectMacOsQRCodeRegion(path);
       }
 
-      if (isMacOs) {
-        output.data = await selectMacOsQRCodeRegion(path);
-      } else if (isWin) {
-        output.data = await selectWindowsQRCodeRegion(path);
+      break;
+    case 'select':
+      {
+        if (isMacOs) {
+          output.data = await selectMacOsQRCodeRegion(path);
+        } else if (isWin) {
+          output.data = await selectWindowsQRCodeRegion(path);
+        }
       }
       break;
-    }
   }
 
   output.isGoogleAuthenticatorMigration = isGoogleAuthenticatorMigration(output.data);

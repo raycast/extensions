@@ -51,7 +51,7 @@ async function captureWindowsScreenshot(
   screenY: number,
   screenWidth: number,
   screenHeight: number,
-  outputPath: string
+  outputPath: string,
 ): Promise<void> {
   const singleScreenCaptureScript = `
 Add-Type -AssemblyName System.Windows.Forms
@@ -123,33 +123,33 @@ export async function scanWindowsQRCodeAcrossDisplays(path: string): Promise<str
   return scannedData;
 }
 
-async function isProcessRunning(processName: string) {
+interface ExecError extends Error {
+  code?: number;
+}
+
+async function isProcessRunning(processName: string): Promise<boolean> {
   try {
     const { stdout } = await execAsync(`tasklist /FI "IMAGENAME eq ${processName}"`);
-    // Check if the process name appears in the output, excluding the header line.
-    // The output typically looks like:
-    // Image Name                PID Session Name        Session#    Mem Usage
-    // ========================= ======== ================ =========== ============
-    // ScreenClippingHost.exe      1234 Console                   1     12,345 K
     const isRunning =
       stdout.toLowerCase().includes(processName.toLowerCase()) && !stdout.toLowerCase().startsWith('image name');
     return isRunning;
-  } catch (error: any) {
-    if (error.code === 1) {
-      // Command executed but no process found (tasklist returns exit code 1 if no process matches)
-      return false;
+  } catch (error) {
+    if (error instanceof Error) {
+      if ('code' in error && (error as ExecError).code === 1) {
+        return false;
+      }
+      console.error(`Error executing tasklist for ${processName}: ${error.message}`);
+      throw error;
+    } else {
+      console.error(`An unexpected error occurred for ${processName}:`, error);
+      throw new Error(`Unknown error type in isProcessRunning: ${String(error)}`);
     }
-    console.error(`Error executing tasklist for ${processName}: ${error.message}`);
-    throw error; // Re-throw other errors
   }
 }
 
 async function openUriSchemeAndWaitForExit(uri: string, processNames: string[], pollInterval: number = 500) {
-  return new Promise<void>(async (resolve, reject) => {
-    console.log(`Attempting to open URI scheme: ${uri}`);
-
-    // Launch the URI scheme using 'start' command.
-    // 'start' itself exits immediately after launching the URI, so we need to monitor the process.
+  console.log(`Attempting to open URI scheme: ${uri}`);
+  return new Promise<void>((resolve, reject) => {
     execAsync(`start "" "${uri}"`)
       .then(() => {
         console.log(`URI scheme "${uri}" launched. Now monitoring for process exit...`);
@@ -161,30 +161,45 @@ async function openUriSchemeAndWaitForExit(uri: string, processNames: string[], 
       });
 
     // Start polling for the process to exit
-    const intervalId = setInterval(async () => {
+    const intervalId = setInterval(() => {
       let anyProcessRunning = false;
-      for (const pName of processNames) {
-        try {
-          const running = await isProcessRunning(pName);
-          if (running) {
-            anyProcessRunning = true;
-            break; // Found one running, no need to check others
+      (async () => {
+        for (const pName of processNames) {
+          try {
+            const running = await isProcessRunning(pName);
+            if (running) {
+              anyProcessRunning = true;
+              break; // Found one running, no need to check others
+            }
+          } catch (checkError) {
+            if (checkError instanceof Error) {
+              if ('code' in checkError && (checkError as ExecError).code !== undefined) {
+                console.error(
+                  `Error checking process ${pName}: ${checkError.message} (Code: ${(checkError as ExecError).code})`,
+                );
+              } else {
+                console.error(`Error checking process ${pName}: ${checkError.message}`);
+              }
+              clearInterval(intervalId);
+              return reject(checkError);
+            } else {
+              console.error(`An unexpected non-Error object occurred while checking process ${pName}:`, checkError);
+              clearInterval(intervalId);
+              return reject(new Error(`Unknown error type in polling for ${pName}: ${String(checkError)}`));
+            }
           }
-        } catch (checkError: any) {
-          console.error(`Error checking process ${pName}: ${checkError.message}`);
-          clearInterval(intervalId);
-          return reject(checkError);
         }
-      }
 
-      if (!anyProcessRunning) {
-        clearInterval(intervalId); // Stop polling
-        console.log(`All monitored processes (${processNames.join(', ')}) have exited.`);
-        resolve(); // Resolve the promise as the process has exited
-      } else {
-        // console.log(`Processes ${processNames.join(', ')} still running. Polling again...`);
-      }
+        if (!anyProcessRunning) {
+          clearInterval(intervalId);
+          console.log(`All monitored processes (${processNames.join(', ')}) have exited.`);
+          resolve();
+        } else {
+          // console.log(`Processes ${processNames.join(', ')} still running. Polling again...`);
+        }
+      })();
     }, pollInterval);
+  });
 }
 
 async function readClipBoardFile(path: string) {
