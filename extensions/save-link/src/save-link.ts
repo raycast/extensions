@@ -20,10 +20,10 @@ export default async function main(props: LaunchProps<{ arguments: Arguments }>)
       return;
     }
 
-    // Create a temporary directory for the webloc file
-    const tempDir = join(homedir(), ".raycast-temp");
+    // Create a cache directory for the webloc file following macOS specifications
+    const cacheDir = join(homedir(), "Library", "Caches", "com.raycast.save-link");
     try {
-      mkdirSync(tempDir, { recursive: true });
+      mkdirSync(cacheDir, { recursive: true });
     } catch {
       // Directory might already exist, that's fine
     }
@@ -32,7 +32,7 @@ export default async function main(props: LaunchProps<{ arguments: Arguments }>)
     const titleToUse = customTitle || activeTab.title || "Untitled";
     const safeTitle = titleToUse.replace(/[^\w\s-]/g, "").replace(/\s+/g, " ").trim().slice(0, 50);
     const filename = `${safeTitle || "Link"}.webloc`;
-    const filePath = join(tempDir, filename);
+    const filePath = join(cacheDir, filename);
 
     // Create the webloc file content (XML plist format)
     const weblocContent = `<?xml version="1.0" encoding="UTF-8"?>
