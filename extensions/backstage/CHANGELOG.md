@@ -1,6 +1,6 @@
 # Backstage Changelog
 
-## [Support static token] - {PR_MERGE_DATE}
+## [Support static token] - 2025-07-18
 
 - address [issue 20382](https://github.com/raycast/extensions/issues/20382) and
   support Backstage static token authentication
