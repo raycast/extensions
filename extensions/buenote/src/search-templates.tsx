@@ -198,7 +198,6 @@ function RunForm({
         if (!res.ok)
           throw new Error(`Failed to fetch template details (${res.status})`);
         const data = await res.json();
-        console.log("[RunForm] Template details fetched:", data); // DEBUG
         const fields = Object.entries(data.inputs || {}).map(
           ([name, meta]: [string, unknown]) => ({
             name,
