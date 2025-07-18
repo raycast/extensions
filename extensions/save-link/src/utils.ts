@@ -1,6 +1,15 @@
-import { mkdirSync } from "fs";
+import { Clipboard, showHUD } from "@raycast/api";
+import { mkdirSync, writeFileSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
+
+// Types
+export interface WeblocFileOptions {
+  url: string;
+  customTitle?: string;
+  fallbackTitle?: string;
+  titleSource?: string;
+}
 
 // Function to create webloc file content
 export function createWeblocContent(url: string): string {
@@ -61,4 +70,42 @@ export function extractUrlFromText(text: string): string | null {
   }
   
   return null;
+}
+
+// Function to extract domain name from URL
+export function extractDomainFromUrl(url: string): string {
+  try {
+    const urlObj = new URL(url);
+    return urlObj.hostname.replace("www.", "");
+  } catch {
+    return "Link";
+  }
+}
+
+// Main function to create and copy webloc file
+export async function createAndCopyWeblocFile(options: WeblocFileOptions): Promise<void> {
+  const { url, customTitle, fallbackTitle = "Link", titleSource = "default" } = options;
+  
+  // Create cache directory
+  const cacheDir = ensureCacheDirectory();
+
+  // Determine the title to use
+  const titleToUse = customTitle || fallbackTitle;
+  const safeTitle = createSafeFilename(titleToUse);
+  const filename = `${safeTitle || "Link"}.webloc`;
+  const filePath = join(cacheDir, filename);
+
+  // Create the webloc file content
+  const weblocContent = createWeblocContent(url);
+
+  // Write the webloc file
+  writeFileSync(filePath, weblocContent, "utf8");
+
+  // Copy the file to clipboard
+  const fileContent: Clipboard.Content = { file: filePath };
+  await Clipboard.copy(fileContent);
+
+  // Show success message
+  const source = customTitle ? "custom title" : titleSource;
+  await showHUD(`📋 Copied "${safeTitle}.webloc" to clipboard (using ${source})`);
 }
