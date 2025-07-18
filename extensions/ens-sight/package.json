@@ -14,6 +14,7 @@
     {
       "name": "lookup-ens-name",
       "title": "Lookup ENS Name",
+      "subtitle": "Ensight — ENS Lookup Tool",
       "description": "Resolve ENS or domain name to address",
       "mode": "view",
       "arguments": [
@@ -28,6 +29,7 @@
     {
       "name": "reverse-lookup-address",
       "title": "Reverse Lookup Address",
+      "subtitle": "Ensight — ENS Lookup Tool",
       "description": "Find ENS name for an address",
       "mode": "view",
       "arguments": [

@@ -1,6 +1,6 @@
-# ENS Lookup
+# Ensight — ENS Lookup Tool
 
-Search Ethereum Name Service (ENS) names and resolve Ethereum addresses without leaving Raycast. ENS  Address
+Search Ethereum Name Service (ENS) names and resolve Ethereum addresses without leaving Raycast.
 
 ## Features
 
@@ -23,10 +23,6 @@ Search Ethereum Name Service (ENS) names and resolve Ethereum addresses without 
 - Open the command: **Reverse Lookup Address**
 - Enter an Ethereum address (for example, `0x...`).
 - View the associated ENS name and profile.
-
-## Screenshot
-
-![Example Image](/assets/example.png)
 
 ## Requirements
 
