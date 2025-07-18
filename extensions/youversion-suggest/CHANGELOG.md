@@ -1,5 +1,10 @@
 # YouVersion Bible Suggest Changelog
 
+## [v3.6.0] - {PR_MERGE_DATE}
+
+- Adopted more modern engine for fetching Bible data
+- Removed obsolete code and packages
+
 ## [v3.5.0] - 2024-06-17
 
 - Added language support for Filipino (tgl)
