@@ -20,7 +20,7 @@
   "commands": [
     {
       "name": "convert",
-      "title": "Convert to Gif",
+      "title": "Convert to GIF",
       "description": "Converts the selected video to GIF",
       "mode": "view"
     }
