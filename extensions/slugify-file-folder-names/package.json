@@ -21,7 +21,7 @@
           "label": "Enable German umlaut translation (ä→ae, ö→oe, ü→ue, ß→ss)",
           "description": "When enabled, German umlauts will be converted to their proper transliterations instead of single characters (ä→ae, ö→oe, ü→ue, ß→ss)",
           "required": false,
-          "default": false
+          "default": false,
         }
       ]
     }
