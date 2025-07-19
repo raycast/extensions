@@ -289,7 +289,7 @@ export default () => {
                   target={<SetupKey onSubmit={handleFormSubmit} />}
                 />
                 <Action
-                  title="Scan a Qr Code"
+                  title="Scan a QR Code"
                   icon={Icon.Camera}
                   onAction={() => scanQRCode('scan')}
                   shortcut={{
@@ -298,7 +298,7 @@ export default () => {
                   }}
                 />
                 <Action
-                  title="Select a Qr Code"
+                  title="Select a QR Code"
                   icon={Icon.Camera}
                   shortcut={{
                     macOS: { modifiers: ['cmd'], key: 's' },
