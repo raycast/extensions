@@ -283,16 +283,27 @@ export default () => {
             }
             actions={
               <ActionPanel>
-                <Action title="Scan a Qr Code" icon={Icon.Camera} onAction={() => scanQRCode('scan')} />
                 <Action.Push
                   title="Enter a Setup Key"
                   icon={Icon.Keyboard}
                   target={<SetupKey onSubmit={handleFormSubmit} />}
                 />
                 <Action
+                  title="Scan a Qr Code"
+                  icon={Icon.Camera}
+                  onAction={() => scanQRCode('scan')}
+                  shortcut={{
+                    macOS: { modifiers: ['cmd'], key: 'i' },
+                    windows: { modifiers: ['ctrl'], key: 'i' },
+                  }}
+                />
+                <Action
                   title="Select a Qr Code"
                   icon={Icon.Camera}
-                  shortcut={{ modifiers: ['cmd'], key: 'i' }}
+                  shortcut={{
+                    macOS: { modifiers: ['cmd'], key: 's' },
+                    windows: { modifiers: ['ctrl'], key: 's' },
+                  }}
                   onAction={() => scanQRCode('select')}
                 />
               </ActionPanel>

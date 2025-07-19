@@ -1,5 +1,5 @@
 import { exec } from 'child_process';
-import { closeMainWindow, Clipboard } from '@raycast/api';
+import { closeMainWindow } from '@raycast/api';
 import { runPowerShellScript } from '@raycast/utils';
 import fs from 'fs/promises';
 import { promisify } from 'util';
@@ -79,6 +79,42 @@ try {
 } catch {
     Write-Error "Error capturing single screenshot: $($_.Exception.Message)"
     throw $_.Exception # Re-throw to be caught by runPowerShellScript
+}
+    `;
+
+  await runPowerShellScript(singleScreenCaptureScript);
+}
+
+async function saveClipboardImage(outputPath: string): Promise<void> {
+  const singleScreenCaptureScript = `
+Add-Type -AssemblyName System.Windows.Forms
+Add-Type -AssemblyName System.Drawing # Required for ImageFormat
+
+
+$savePath = "${outputPath}"
+
+if ([System.Windows.Forms.Clipboard]::ContainsImage()) {
+    try {
+        # Get the image from the clipboard
+        $clipboardImage = [System.Windows.Forms.Clipboard]::GetImage()
+
+        # Save the image as PNG to the specified file path
+        $clipboardImage.Save($savePath, [System.Drawing.Imaging.ImageFormat]::Png)
+
+        Write-Host "Clipboard image successfully saved as PNG to: $($savePath)" -ForegroundColor Green
+    }
+    catch {
+        throw "Error saving clipboard image: $($_.Exception.Message)" # Throw error if saving fails
+    }
+    finally {
+        # Dispose of the image object to free up resources
+        if ($clipboardImage) {
+            $clipboardImage.Dispose()
+        }
+    }
+} else {
+    # Throw an error if no image is found in the clipboard
+    throw "No image found in the clipboard. Please ensure an image is copied before running the script."
 }
     `;
 
@@ -206,17 +242,13 @@ async function readClipBoardFile(path: string) {
   let scannedData: string | undefined;
 
   try {
-    const { file } = await Clipboard.read();
-
-    if (file) {
-      await fs.writeFile(path, file);
-      scannedData = await extractQRCodeFromImage(path);
-      await fs.unlink(path);
-    } else {
-      throw new Error('Failed to capture screenshot area');
-    }
+    await saveClipboardImage(path);
+    scannedData = await extractQRCodeFromImage(path);
+    await fs.unlink(path);
   } catch (error) {
-    console.warn(error);
+    console.log('Failed to read scanned image');
+
+    return undefined;
   }
 
   return scannedData;
