@@ -1,5 +1,5 @@
 import { environment, Icon } from "@raycast/api";
-import { execa } from "execa";
+import { execa, execaSync } from "execa";
 import { chmod } from "fs/promises";
 import { join } from "path";
 import { DisplayInfo, Mode, DisplayKind } from "./types";
@@ -25,19 +25,23 @@ export async function setMode(displayId: number, mode: Mode): Promise<boolean | 
   await chmod(command, "755");
 
   try {
-    const { stdout } = await execa(command, [
-      "set-mode",
-      `${displayId}`,
-      "-w",
-      `${mode.width}`,
-      "-h",
-      `${mode.height}`,
-      "-s",
-      `${mode.scale}`,
-      "-r",
-      `${mode.refreshRate}`,
-      "--json",
-    ]);
+    const { stdout } = execaSync(
+      command,
+      [
+        "set-mode",
+        `${displayId}`,
+        "-w",
+        `${mode.width}`,
+        "-h",
+        `${mode.height}`,
+        "-s",
+        `${mode.scale}`,
+        "-r",
+        `${mode.refreshRate}`,
+        "--json",
+      ],
+      { timeout: 5000 },
+    );
 
     const parsed: boolean = JSON.parse(stdout);
 

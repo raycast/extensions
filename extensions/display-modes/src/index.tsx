@@ -1,6 +1,6 @@
 import { ActionPanel, List, Action, useNavigation, showHUD, Icon } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { ReactNode, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { listDisplays, setMode, formatDisplayMode, formatDisplayTitle, formatDisplaySubtitle } from "./utils";
 import { DisplayInfo, areModesEqual } from "./types";
 
@@ -18,7 +18,7 @@ export default function Command() {
 
   const navigation = useNavigation();
 
-  function detail(display: DisplayInfo): ReactNode {
+  function DetailComponent({ display }: { display: DisplayInfo }) {
     // First, map the modes to an array of objects with mode and isEqual properties
     const modesWithComparison = display.modes.map((mode) => ({
       mode: mode,
@@ -71,7 +71,11 @@ export default function Command() {
             subtitle={formatDisplaySubtitle(display)}
             actions={
               <ActionPanel>
-                <Action.Push title="Show Display Modes" icon={Icon.Monitor} target={detail(display)} />
+                <Action.Push
+                  title="Show Display Modes"
+                  icon={Icon.Monitor}
+                  target={<DetailComponent display={display} />}
+                />
               </ActionPanel>
             }
           />
