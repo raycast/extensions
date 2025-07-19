@@ -45,12 +45,12 @@ export const CopyCdn = ({ icon }: ActionProps) => {
 };
 
 export const CopyJsdelivr = ({ icon, version }: ActionProps) => {
-  const jsdelivrCdnLink = `https://cdn.jsdelivr.net/npm/simple-icons@${version}/icons/${getIconSlug(icon)}.svg`;
+  const jsdelivrCdnLink = `https://cdn.jsdelivr.net/npm/${version}/icons/${getIconSlug(icon)}.svg`;
   return <Action.CopyToClipboard title="Copy jsDelivr CDN Link" content={jsdelivrCdnLink} />;
 };
 
 export const CopyUnpkg = ({ icon, version }: ActionProps) => {
-  const unpkgCdnLink = `https://unpkg.com/simple-icons@${version}/icons/${getIconSlug(icon)}.svg`;
+  const unpkgCdnLink = `https://unpkg.com/${version}/icons/${getIconSlug(icon)}.svg`;
   return <Action.CopyToClipboard title="Copy unpkg CDN Link" content={unpkgCdnLink} />;
 };
 

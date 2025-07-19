@@ -37,6 +37,15 @@
       "default": ""
     },
     {
+      "name": "releaseVersion",
+      "title": "Release Version",
+      "placeholder": "e.g. simple-icons@latest",
+      "description": "This field is used to specify the release version of the npm package. It is used to download the asset pack from npm. You can use a versioned release (e.g. `simple-icons@14`) or a tag (e.g. `latest`). If you leave it empty, the extension will use the latest version of the package.",
+      "required": false,
+      "type": "textfield",
+      "default": "simple-icons"
+    },
+    {
       "name": "defaultDetailAction",
       "title": "Default detail action",
       "description": "The default action when viewing detail of an item",
@@ -110,7 +119,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.100.3",
+    "@raycast/api": "^1.101.1",
     "@raycast/utils": "^2.2.0",
     "date-fns": "^4.1.0",
     "fast-fuzzy": "^1.12.0",
