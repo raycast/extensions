@@ -1,10 +1,14 @@
 # Library Genesis Changelog
 
-## [] - {PR_MERGE_DATE}
+## [Fix Search + Modernize] - {PR_MERGE_DATE}
 
+- fix: search was not working due to site changes (ref: [Issue #20481](https://github.com/raycast/extensions/issues/20481))
+- ⚠️ only downloads from default gateway
 - automatically searches again on type change
 - added: `libgen.bz`, `libgen.li`
 - removed: `libgen.is`, `libgen.st`
+- **Fiction** titles now support same items as all other
+- Modernize to use latest Raycast config
 
 ## [Experimental Fiction Search] - 2024-10-22
 

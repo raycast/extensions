@@ -1,6 +1,6 @@
 import { memo } from "react";
 
-import { List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 
 import type { BookEntry } from "@/types";
 
@@ -11,7 +11,7 @@ interface BookItemProps {
 }
 
 function BookItemF({ book }: BookItemProps, key: number) {
-  const markdown = `<img src="${book.coverUrl}" alt="cover" height="180"/>`;
+  const markdown = book.coverUrl === "N/A" ? "## Cover N/A" : `<img src="${book.coverUrl}" alt="cover" height="180"/>`;
 
   return (
     <List.Item
@@ -19,6 +19,7 @@ function BookItemF({ book }: BookItemProps, key: number) {
       title={book.title}
       icon={{
         source: book.coverUrl,
+        fallback: Icon.Book,
       }}
       actions={<BookActionPanel book={book}></BookActionPanel>}
       detail={
@@ -57,5 +58,5 @@ function BookItemF({ book }: BookItemProps, key: number) {
     />
   );
 }
-
+// @ts-expect-error No overload matches this call.
 export const BookItem = memo(BookItemF);
