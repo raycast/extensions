@@ -8,22 +8,22 @@
   "author": "tarikkavaz",
   "categories": ["Productivity", "System", "Other"],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "enableGermanTranslation",
+      "type": "checkbox",
+      "title": "Transliterate German Umlauts",
+      "label": "Enable German umlaut translation (ä→ae, ö→oe, ü→ue, ß→ss)",
+      "description": "When enabled, German umlauts will be converted to their proper transliterations instead of single characters (ä→ae, ö→oe, ü→ue, ß→ss)",
+      "default": false
+    }
+  ],
   "commands": [
     {
       "name": "slug",
       "title": "Slugify Selected Files & Folders",
       "description": "Convert selected files and folders in Finder to URL-friendly slug names",
-      "mode": "no-view",
-      "preferences": [
-        {
-          "name": "enableGermanTranslation",
-          "title": "Transliterate German Umlauts",
-          "label": "Enable German umlaut translation (ä→ae, ö→oe, ü→ue, ß→ss)",
-          "description": "When enabled, German umlauts will be converted to their proper transliterations instead of single characters (ä→ae, ö→oe, ü→ue, ß→ss)",
-          "required": false,
-          "default": false
-        }
-      ]
+      "mode": "no-view"
     }
   ],
   "dependencies": {
