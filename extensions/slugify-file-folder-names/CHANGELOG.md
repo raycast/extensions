@@ -1,6 +1,6 @@
 # Slugify File / Folder Names Changelog
 
-## [1.1.0] - 2025-01-28
+## [1.1.0] - {PR_MERGE_DATE}
 
 ### Added
 - **Transliterate German Umlauts**: New preference setting to enable proper German umlaut transliteration
