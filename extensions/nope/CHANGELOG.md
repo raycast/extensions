@@ -4,5 +4,5 @@
 
 - Added fetching with the API
 - Added Toast Notifications On Unexpected Events
-- Added Re-roll Functionability
+- Added Re-roll Functionality
 - Added Add to Clipboard Action
