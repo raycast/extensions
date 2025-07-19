@@ -12,7 +12,7 @@
   ],
   "preferences": [
     {
-      "description": "View extension's README for instructions.",
+      "description": "Set the expiration time for links. After this period, links will be automatically deleted.",
       "name": "expiredTime",
       "required": true,
       "default": "2week",
@@ -60,7 +60,7 @@
     {
       "name": "add",
       "title": "Add Bookmark",
-      "description": "Add a bookmark by entering URL and title. Title is automatically fetched when URL is entered.",
+      "description": "Add a bookmark by entering URL and title. Title is automatically fetched when URL is entered. Also you can edit title.",
       "mode": "view"
     },
     {
