@@ -12,7 +12,7 @@ async function buildAppMap(): Promise<Map<string, string>> {
 
   try {
     const { stdout } = await execAsync(
-      `find /Applications ~/Applications /System/Applications -name "*.app" -maxdepth 2 2>/dev/null`,
+      `find /Applications ~/Applications /System/Applications -name "*.app" -maxdepth 2 2>/dev/null`
     );
     const paths = stdout.trim().split("\n");
 
@@ -24,8 +24,8 @@ async function buildAppMap(): Promise<Map<string, string>> {
         appMap.set(name, fullPath);
       }
     }
-  } catch {
-    // Silent fail is OK
+  } catch (error) {
+    await showToast({ style: Toast.Style.Failure, title: "Failed to scan apps", message: String(error) });
   }
 
   return appMap;
@@ -41,7 +41,7 @@ export default function Command() {
         const appMap = await buildAppMap();
 
         const { stdout } = await execAsync(
-          `osascript -e 'tell application "System Events" to get name of every process'`,
+          `osascript -e 'tell application "System Events" to get name of every process'`
         );
 
         const rawNames = stdout
@@ -64,8 +64,8 @@ export default function Command() {
         }
 
         setApps(resolvedApps.sort((a, b) => a.name.localeCompare(b.name)));
-      } catch {
-        showToast({ style: Toast.Style.Failure, title: "Could not fetch running apps" });
+      } catch (error) {
+        await showToast({ style: Toast.Style.Failure, title: "Could not fetch running apps", message: String(error) });
       } finally {
         setIsLoading(false);
       }
