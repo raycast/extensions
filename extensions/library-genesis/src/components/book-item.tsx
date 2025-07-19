@@ -10,12 +10,11 @@ interface BookItemProps {
   book: BookEntry;
 }
 
-function BookItemF({ book }: BookItemProps, key: number) {
+function BookItemF({ book }: BookItemProps) {
   const markdown = book.coverUrl === "N/A" ? "## Cover N/A" : `<img src="${book.coverUrl}" alt="cover" height="180"/>`;
 
   return (
     <List.Item
-      key={key}
       title={book.title}
       icon={{
         source: book.coverUrl,
@@ -58,5 +57,5 @@ function BookItemF({ book }: BookItemProps, key: number) {
     />
   );
 }
-// @ts-expect-error No overload matches this call.
+
 export const BookItem = memo(BookItemF);

@@ -15,7 +15,6 @@ export const parseContentIntoBooks = (content: string, libgenUrl?: string): Book
   for (let i = 0; i < bookElements.length; i++) {
     const bookElement = bookElements.eq(i);
     const book = parseBookFromRow(bookElement, libgenUrl);
-    if (!i) console.log(book);
     books.push(book);
   }
 
@@ -35,7 +34,7 @@ const parseBookFromRow = (row: Cheerio<Element>, libgenUrl?: string): BookEntry 
   const titleColLinks = titleCol.find("a");
   const infoUrl = buildLibgenUrl(titleColLinks.first().attr("href"));
   const id = infoUrl.split("id=").pop();
-  const title = titleCol.children("b").first().text() || titleColLinks.first().text().trimEnd();
+  const title = titleCol.children("b").first().text() || titleColLinks.first().text().trimEnd(); //. title sometimes inside <b> and sometimes inside <a>
   const isbn = titleColLinks.find("i font").first().text();
   const times = titleCol.find("a[title]").first().attr("title")?.replace("Add/Edit : ", "").split(";")[0].split("/");
   const timeAdded = times ? times[0] : "N/A";
@@ -46,12 +45,12 @@ const parseBookFromRow = (row: Cheerio<Element>, libgenUrl?: string): BookEntry 
   const publisher = contentCols.eq(3).text();
   // col 5
   const year = contentCols.eq(4).text().trim();
-  const fileCol = contentCols.eq(4).text().trim().split("/");
-  const fileSize = fileCol[1];
   // col 6
   const language = contentCols.eq(5).text();
   // col 7
   const pages = contentCols.eq(6).text();
+  // col 8
+  const fileSize = contentCols.eq(7).find("a").first().text();
   // col 9
   const extension = contentCols.eq(8).text();
   // col 10

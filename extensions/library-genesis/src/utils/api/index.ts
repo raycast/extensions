@@ -62,7 +62,7 @@ export const getLibgenSearchResults = async (
   else if (searchType === SearchType.NonFiction) topics.nonfiction.forEach((topic) => params.append("topics[]", topic));
   else [...topics.fiction, ...topics.nonfiction].forEach((topic) => params.append("topics[]", topic));
 
-  const queryUrl = libgenUrl + "/index.php?" + new URLSearchParams(params);
+  const queryUrl = libgenUrl + "/index.php?" + params.toString();
 
   console.log(`Libgen Query URL: ${queryUrl}`);
 
