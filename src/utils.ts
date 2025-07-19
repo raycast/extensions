@@ -5,7 +5,10 @@ export async function restartApp(appName: string): Promise<void> {
   try {
     await runAppleScript(`
       tell application "${appName}" to quit
-      delay 1
+      repeat until not (application "${appName}" is running)
+        delay 0.2
+      end repeat
+      delay 0.5
       tell application "${appName}" to launch
     `);
     await showToast({ style: Toast.Style.Success, title: ` Restarted ${appName}` });

@@ -51,9 +51,11 @@ export default function Command() {
 
         const resolvedApps: AppEntry[] = [];
 
+        const DENY_LIST = ["Finder", "WindowServer", "loginwindow", "SystemUIServer"];
         for (const name of rawNames) {
           const path = appMap.get(name);
           if (!path) continue;
+          if (DENY_LIST.includes(name)) continue;
 
           resolvedApps.push({
             name,
