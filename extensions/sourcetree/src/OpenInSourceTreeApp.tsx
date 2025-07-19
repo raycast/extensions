@@ -9,7 +9,7 @@ interface OpenInSourceTreeAppProps {
 
 const bin = Preferences.get().bin;
 
-export function OpenInSourceTreeApp({ repo }: OpenInSourceTreeAppProps): JSX.Element {
+export function OpenInSourceTreeApp({ repo }: OpenInSourceTreeAppProps) {
   async function handleAction() {
     const cmd = `${bin} ${repo.path}`;
 

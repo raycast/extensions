@@ -8,12 +8,10 @@ const cache = new Cache();
 export function executeCommand(cwd: string, command: string): Promise<string | null> {
   return getFromCommand(cwd, command);
 
-  /*
-  const cache = getFromCache(cwd, command);
-  const cmd = getFromCommand(cwd, command);
+  // const cache = getFromCache(cwd, command);
+  // const cmd = getFromCommand(cwd, command);
 
-  return Promise.any([cache, cmd]);
-  */
+  // return Promise.any([cache, cmd]);
 }
 
 function getFromCommand(cwd: string, command: string): Promise<string | null> {
@@ -29,18 +27,19 @@ function getFromCommand(cwd: string, command: string): Promise<string | null> {
     // immediately as desired
     setTimeout(() => {
       exec(command, { cwd })
-        .then((r: any) => {
+        .then((r) => {
           const result = r.stdout.trim();
           storeInCache(cwd, command, result);
           resolve(result);
         })
-        .catch((e: any) => {
+        .catch(() => {
           resolve(null);
         });
     }, 100);
   });
 }
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 function getFromCache(cwd: string, command: string): Promise<string | null> {
   const result = cache.get(`${cwd}#${command}`);
 

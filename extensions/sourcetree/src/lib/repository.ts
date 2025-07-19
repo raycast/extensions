@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import * as bplist from "bplist-parser";
 import * as fs from "fs";
 import { executeCommand } from "./cached-command";

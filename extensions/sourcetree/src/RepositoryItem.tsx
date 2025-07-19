@@ -13,7 +13,7 @@ interface RepositoryItemProps {
   repo: Repository;
 }
 
-export function RepositoryItem({ repo }: RepositoryItemProps): JSX.Element {
+export function RepositoryItem({ repo }: RepositoryItemProps) {
   const { data } = useCachedPromise(getGitStatus, [repo.path], {
     keepPreviousData: true,
     execute: true,

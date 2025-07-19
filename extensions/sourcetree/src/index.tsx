@@ -9,7 +9,7 @@ import { BinNotAvailable } from "./BinNotAvailable";
 const pref = Preferences.get();
 const repo = new RepositoryList(pref.plist);
 
-export default function Command(): JSX.Element {
+export default function Command() {
   const { isLoading, data, error } = useCachedPromise(getRepositoryList, [], {
     keepPreviousData: true,
     execute: true,

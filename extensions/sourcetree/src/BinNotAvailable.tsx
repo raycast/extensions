@@ -4,7 +4,7 @@ interface BinNotAvailableProps {
   bin: string;
 }
 
-export function BinNotAvailable({ bin }: BinNotAvailableProps): JSX.Element {
+export function BinNotAvailable({ bin }: BinNotAvailableProps) {
   const message = [
     "# Unable to find Sourcetree command line tools",
     `The path for the command line tools are currently set to:`,
