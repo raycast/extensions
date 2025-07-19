@@ -246,7 +246,7 @@ async function readClipBoardFile(path: string) {
     scannedData = await extractQRCodeFromImage(path);
     await fs.unlink(path);
   } catch (error) {
-    console.log('Failed to read scanned image');
+    console.log('Failed to read scanned image', error);
 
     return undefined;
   }
