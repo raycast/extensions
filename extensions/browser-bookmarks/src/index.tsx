@@ -12,6 +12,7 @@ import {
 import { getFavicon, useCachedPromise, useCachedState } from "@raycast/utils";
 import Fuse from "fuse.js";
 import { useEffect, useMemo, useState } from "react";
+import path from "path";
 
 import PermissionErrorScreen from "./components/PermissionErrorScreen";
 import SelectBrowsers from "./components/SelectBrowsers";
@@ -36,7 +37,7 @@ import useSidekickBookmarks from "./hooks/useSidekickBookmarks";
 import useVivaldiBookmarks from "./hooks/useVivaldiBrowser";
 import useWhaleBookmarks from "./hooks/useWhaleBookmarks";
 import useZenBookmarks from "./hooks/useZenBookmarks";
-import { getMacOSDefaultBrowser } from "./utils/browsers";
+import { getDefaultBrowser } from "./utils/browsers";
 // Note: frecency is intentionally misspelled: https://wiki.mozilla.org/User:Jesse/NewFrecency.
 import { BookmarkFrecency, getBookmarkFrecency } from "./utils/frecency";
 
@@ -60,6 +61,8 @@ type Folder = {
 export default function Command() {
   const { data: availableBrowsers } = useAvailableBrowsers();
 
+  //console.log("availableBrowsers data:", availableBrowsers);
+
   const { showDomain, openBookmarkBrowser } = getPreferenceValues<Preferences>();
 
   const {
@@ -70,11 +73,12 @@ export default function Command() {
     async (browsers) => {
       // If the user only has one browser, let's not bother with LocalStorage stuff
       if (browsers && browsers.length === 1) {
-        return [browsers[0].bundleId as string];
+        // Assuming the single browser's path is what should be stored
+        return [browsers[0].path];
       }
 
-      // We pull the default browser to enable it to eliminate the need for the user to select this on first run
-      const defaultBrowser = await getMacOSDefaultBrowser();
+      let defaultBrowser = await getDefaultBrowser();
+
       const browsersItem = await LocalStorage.getItem("browsers");
 
       return browsersItem ? (JSON.parse(browsersItem.toString()) as string[]) : [defaultBrowser];
@@ -93,7 +97,6 @@ export default function Command() {
     mutate: mutateFrecencies,
   } = useCachedPromise(async () => {
     const frecenciesItem = await LocalStorage.getItem("frecencies");
-
     return frecenciesItem
       ? (JSON.parse(frecenciesItem.toString()) as Record<string, BookmarkFrecency | undefined>)
       : {};
@@ -105,27 +108,67 @@ export default function Command() {
   const [query, setQuery] = useState("");
   const [selectedFolderId, setSelectedFolderId] = useState("");
 
-  const hasArc = browsers.includes(BROWSERS_BUNDLE_ID.arc) ?? false;
-  const hasBrave = browsers.includes(BROWSERS_BUNDLE_ID.brave) ?? false;
-  const hasBraveBeta = browsers.includes(BROWSERS_BUNDLE_ID.braveBeta) ?? false;
-  const hasBraveNightly = browsers.includes(BROWSERS_BUNDLE_ID.braveNightly) ?? false;
-  const hasChrome = browsers.includes(BROWSERS_BUNDLE_ID.chrome) ?? false;
-  const hasChromeBeta = browsers.includes(BROWSERS_BUNDLE_ID.chromeBeta) ?? false;
-  const hasChromeDev = browsers.includes(BROWSERS_BUNDLE_ID.chromeDev) ?? false;
-  const hasDia = browsers.includes(BROWSERS_BUNDLE_ID.dia) ?? false;
-  const hasEdge = browsers.includes(BROWSERS_BUNDLE_ID.edge) ?? false;
-  const hasEdgeCanary = browsers.includes(BROWSERS_BUNDLE_ID.edgeCanary) ?? false;
-  const hasEdgeDev = browsers.includes(BROWSERS_BUNDLE_ID.edgeDev) ?? false;
-  const hasFirefox = browsers.includes(BROWSERS_BUNDLE_ID.firefox) ?? false;
-  const hasFirefoxDev = browsers.includes(BROWSERS_BUNDLE_ID.firefoxDev) ?? false;
-  const hasGhostBrowser = browsers.includes(BROWSERS_BUNDLE_ID.ghostBrowser) ?? false;
-  const hasIsland = browsers.includes(BROWSERS_BUNDLE_ID.island) ?? false;
-  const hasPrismaAccess = browsers.includes(BROWSERS_BUNDLE_ID.prismaAccess) ?? false;
-  const hasSafari = browsers.includes(BROWSERS_BUNDLE_ID.safari) ?? false;
-  const hasSidekick = browsers.includes(BROWSERS_BUNDLE_ID.sidekick) ?? false;
-  const hasVivaldi = browsers.includes(BROWSERS_BUNDLE_ID.vivaldi) ?? false;
-  const hasZen = browsers.includes(BROWSERS_BUNDLE_ID.zen) ?? false;
-  const hasWhale = browsers.includes(BROWSERS_BUNDLE_ID.whale) ?? false;
+  const getBrowserPathForType = (browserKey: keyof typeof BROWSERS_BUNDLE_ID) => {
+    const browserDef = BROWSERS_BUNDLE_ID[browserKey];
+    return availableBrowsers?.find((app) => {
+      const appBundleId = app.bundleId?.toLowerCase();
+      const appPath = app.path;
+      const exeName = process.platform === "win32" && appPath ? path.basename(appPath).toLowerCase() : undefined;
+
+      if (process.platform === "win32" && browserDef.windowsExeName && exeName) {
+        return browserDef.windowsExeName.toLowerCase() === exeName;
+      }
+      if (process.platform === "darwin" && browserDef.bundleId && appBundleId) {
+        return browserDef.bundleId.toLowerCase() === appBundleId;
+      }
+      return false;
+    })?.path;
+  };
+
+  // Get paths for each browser type
+  const arcPath = getBrowserPathForType("arc");
+  const bravePath = getBrowserPathForType("brave");
+  const braveBetaPath = getBrowserPathForType("braveBeta");
+  const braveNightlyPath = getBrowserPathForType("braveNightly");
+  const chromePath = getBrowserPathForType("chrome");
+  const chromeBetaPath = getBrowserPathForType("chromeBeta");
+  const chromeDevPath = getBrowserPathForType("chromeDev");
+  const diaPath = getBrowserPathForType("dia");
+  const edgePath = getBrowserPathForType("edge");
+  const edgeCanaryPath = getBrowserPathForType("edgeCanary");
+  const edgeDevPath = getBrowserPathForType("edgeDev");
+  const firefoxPath = getBrowserPathForType("firefox");
+  const firefoxDevPath = getBrowserPathForType("firefoxDev");
+  const ghostBrowserPath = getBrowserPathForType("ghostBrowser");
+  const islandPath = getBrowserPathForType("island");
+  const prismaAccessPath = getBrowserPathForType("prismaAccess");
+  const safariPath = getBrowserPathForType("safari");
+  const sidekickPath = getBrowserPathForType("sidekick");
+  const vivaldiPath = getBrowserPathForType("vivaldi");
+  const zenPath = getBrowserPathForType("zen");
+  const whalePath = getBrowserPathForType("whale");
+
+  const hasArc = browsers.includes(arcPath as string);
+  const hasBrave = browsers.includes(bravePath as string);
+  const hasBraveBeta = browsers.includes(braveBetaPath as string);
+  const hasBraveNightly = browsers.includes(braveNightlyPath as string);
+  const hasChrome = browsers.includes(chromePath as string);
+  const hasChromeBeta = browsers.includes(chromeBetaPath as string);
+  const hasChromeDev = browsers.includes(chromeDevPath as string);
+  const hasDia = browsers.includes(diaPath as string);
+  const hasEdge = browsers.includes(edgePath as string);
+  const hasEdgeCanary = browsers.includes(edgeCanaryPath as string);
+  const hasEdgeDev = browsers.includes(edgeDevPath as string);
+  const hasFirefox = browsers.includes(firefoxPath as string) || browsers.includes(firefoxDevPath as string);
+  const hasFirefoxDev = browsers.includes(firefoxDevPath as string);
+  const hasGhostBrowser = browsers.includes(ghostBrowserPath as string);
+  const hasIsland = browsers.includes(islandPath as string);
+  const hasPrismaAccess = browsers.includes(prismaAccessPath as string);
+  const hasSafari = browsers.includes(safariPath as string);
+  const hasSidekick = browsers.includes(sidekickPath as string);
+  const hasVivaldi = browsers.includes(vivaldiPath as string);
+  const hasZen = browsers.includes(zenPath as string);
+  const hasWhale = browsers.includes(whalePath as string);
 
   const arc = useArcBookmarks(hasArc);
   const brave = useBraveBookmarks(hasBrave);
@@ -332,7 +375,7 @@ export default function Command() {
 
         // If both frecencies are defined,put the one with the higher frecency first
         if (a.item.bookmarkFrecency && b.item.bookmarkFrecency) {
-          return b.item.bookmarkFrecency.frecency - a.item.bookmarkFrecency.frecency;
+          return b.item.bookmarkFrecency.frecency - a.item.bookmarkFrecency.facy;
         }
 
         // If both frecencies are undefined, sort by their score
@@ -443,9 +486,9 @@ export default function Command() {
     return <PermissionErrorScreen />;
   }
 
-  // Get the browser name from the bundle ID to open the bookmark's in its associated browser
-  function browserBundleToName(bundleId: string) {
-    return availableBrowsers?.find((browser) => browser.bundleId === bundleId)?.name;
+  // Function to get the browser name from its path
+  function browserPathToName(browserPath: string) {
+    return availableBrowsers?.find((browser) => browser.path === browserPath)?.name;
   }
 
   return (
@@ -508,7 +551,7 @@ export default function Command() {
                 {openBookmarkBrowser ? (
                   <Action.Open
                     title="Open in Browser"
-                    application={openBookmarkBrowser ? browserBundleToName(item.browser) : undefined}
+                    application={openBookmarkBrowser ? browserPathToName(item.browser) : undefined}
                     target={item.url}
                     onOpen={() => updateFrecency(item)}
                   />
@@ -526,7 +569,7 @@ export default function Command() {
                   ) : null}
 
                   <SelectProfileSubmenu
-                    bundleId={BROWSERS_BUNDLE_ID.arc}
+                    browserPath={arcPath}
                     name="Arc"
                     icon="arc.png"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
@@ -535,7 +578,7 @@ export default function Command() {
                     setCurrentProfile={arc.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
-                    bundleId={BROWSERS_BUNDLE_ID.brave}
+                    browserPath={bravePath}
                     name="Brave"
                     icon="brave.png"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
@@ -544,7 +587,7 @@ export default function Command() {
                     setCurrentProfile={brave.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
-                    bundleId={BROWSERS_BUNDLE_ID.braveBeta}
+                    browserPath={braveBetaPath}
                     name="Brave Beta"
                     icon="brave.png"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
@@ -553,7 +596,7 @@ export default function Command() {
                     setCurrentProfile={braveBeta.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
-                    bundleId={BROWSERS_BUNDLE_ID.braveNightly}
+                    browserPath={braveNightlyPath}
                     name="Brave Nightly"
                     icon="brave.png"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
@@ -562,7 +605,7 @@ export default function Command() {
                     setCurrentProfile={braveNightly.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
-                    bundleId={BROWSERS_BUNDLE_ID.chrome}
+                    browserPath={chromePath}
                     name="Chrome"
                     icon="chrome.png"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
@@ -571,7 +614,7 @@ export default function Command() {
                     setCurrentProfile={chrome.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
-                    bundleId={BROWSERS_BUNDLE_ID.chromeBeta}
+                    browserPath={chromeBetaPath}
                     name="Chrome Beta"
                     icon="chrome-beta.png"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
@@ -580,7 +623,7 @@ export default function Command() {
                     setCurrentProfile={chromeBeta.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
-                    bundleId={BROWSERS_BUNDLE_ID.chromeDev}
+                    browserPath={chromeDevPath}
                     name="Chrome Dev"
                     icon="chrome-dev.png"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
@@ -589,7 +632,7 @@ export default function Command() {
                     setCurrentProfile={chromeDev.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
-                    bundleId={BROWSERS_BUNDLE_ID.dia}
+                    browserPath={diaPath}
                     name="Dia"
                     icon="dia.png"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
@@ -598,7 +641,7 @@ export default function Command() {
                     setCurrentProfile={dia.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
-                    bundleId={BROWSERS_BUNDLE_ID.edge}
+                    browserPath={edgePath}
                     name="Edge"
                     icon="edge.png"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
@@ -607,7 +650,7 @@ export default function Command() {
                     setCurrentProfile={edge.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
-                    bundleId={BROWSERS_BUNDLE_ID.edgeCanary}
+                    browserPath={edgeCanaryPath}
                     name="Edge Canary"
                     icon="edge.png"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
@@ -616,7 +659,7 @@ export default function Command() {
                     setCurrentProfile={edgeCanary.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
-                    bundleId={BROWSERS_BUNDLE_ID.edgeDev}
+                    browserPath={edgeDevPath}
                     name="Edge Dev"
                     icon="edge.png"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
@@ -625,7 +668,7 @@ export default function Command() {
                     setCurrentProfile={edgeDev.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
-                    bundleId={BROWSERS_BUNDLE_ID.firefox}
+                    browserPath={firefoxPath}
                     name="Firefox"
                     icon="firefox.png"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
@@ -634,7 +677,7 @@ export default function Command() {
                     setCurrentProfile={firefox.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
-                    bundleId={BROWSERS_BUNDLE_ID.firefoxDev}
+                    browserPath={firefoxDevPath}
                     name="Firefox Dev"
                     icon="firefoxDev.png"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
@@ -644,7 +687,7 @@ export default function Command() {
                   />
                   {/* Note: Ghost Browser doesn't seem to have a profile feature - no profile switching submenu added for it. */}
                   <SelectProfileSubmenu
-                    bundleId={BROWSERS_BUNDLE_ID.island}
+                    browserPath={islandPath}
                     name="Island"
                     icon="island.png"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
@@ -653,7 +696,7 @@ export default function Command() {
                     setCurrentProfile={island.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
-                    bundleId={BROWSERS_BUNDLE_ID.prismaAccess}
+                    browserPath={prismaAccessPath}
                     name="Prisma Access"
                     icon="prisma-access.png"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
@@ -662,7 +705,7 @@ export default function Command() {
                     setCurrentProfile={prismaAccess.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
-                    bundleId={BROWSERS_BUNDLE_ID.vivaldi}
+                    browserPath={vivaldiPath}
                     name="Vivaldi"
                     icon="vivaldi.png"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
@@ -671,7 +714,7 @@ export default function Command() {
                     setCurrentProfile={vivaldi.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
-                    bundleId={BROWSERS_BUNDLE_ID.whale}
+                    browserPath={whalePath}
                     name="Whale"
                     icon="whale.png"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
@@ -680,7 +723,7 @@ export default function Command() {
                     setCurrentProfile={whale.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
-                    bundleId={BROWSERS_BUNDLE_ID.zen}
+                    browserPath={zenPath}
                     name="Zen"
                     icon="zen.png"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "z" }}
@@ -748,7 +791,7 @@ function SelectBrowserAction({ browsers, setBrowsers }: SelectBrowsersAction) {
 }
 
 type SelectProfileSubmenuProps = {
-  bundleId: string;
+  browserPath: string | undefined;
   name: string;
   icon: string;
   shortcut: Keyboard.Shortcut;
@@ -758,7 +801,7 @@ type SelectProfileSubmenuProps = {
 };
 
 function SelectProfileSubmenu({
-  bundleId,
+  browserPath,
   name,
   icon,
   shortcut,
@@ -767,9 +810,9 @@ function SelectProfileSubmenu({
   setCurrentProfile,
 }: SelectProfileSubmenuProps) {
   const { data: availableBrowsers } = useAvailableBrowsers();
+  const isBrowserAvailable = availableBrowsers?.some((browser) => browser.path === browserPath);
 
-  const hasBrowser = availableBrowsers?.map((browser) => browser.bundleId).includes(bundleId);
-  if (!hasBrowser || profiles.length <= 1) {
+  if (!isBrowserAvailable || profiles.length <= 1) {
     return null;
   }
 
