@@ -5,10 +5,10 @@ export default async function main() {
   try {
     // Get the cache directory path
     const cacheDir = ensureCacheDirectory();
-    
+
     // Open the directory in Finder
     await open(cacheDir);
-    
+
     // Show success message
     await showHUD("📂 Opened cached links directory");
   } catch (error) {
