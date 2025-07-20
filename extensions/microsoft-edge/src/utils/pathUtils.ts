@@ -33,5 +33,5 @@ export const getCollectionsDbPath = (profile?: string) =>
     ...getDefaultEdgeProfilePath(),
     profile ?? DEFAULT_PROFILE_ID,
     "Collections",
-    "collectionsSQLite"
+    "collectionsSQLite",
   );
