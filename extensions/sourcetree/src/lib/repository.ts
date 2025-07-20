@@ -3,12 +3,15 @@
 import * as bplist from "bplist-parser";
 import * as fs from "fs";
 import { executeCommand } from "./cached-command";
+import { execSync } from "child_process";
 
-export enum RepositoryType {
-  GIT = "git",
-  MERCURIAL = "mercurial",
-  UNKNOWN = "unknown",
-}
+export const REPOSITORY_TYPE = {
+  GIT: "git",
+  MERCURIAL: "mercurial",
+  UNKNOWN: "unknown",
+} as const;
+
+type RepositoryType = (typeof REPOSITORY_TYPE)[keyof typeof REPOSITORY_TYPE];
 
 export interface RepositoryState {
   branch: string | null;
@@ -76,109 +79,98 @@ export class RepositoryList {
           meta.parent = this.getFolderTree(root, meta.parent);
           return meta;
         })
-        .map((meta: any) => ({
-          hashValue: meta.hashValue,
-          name: meta.name,
-          exists: fs.existsSync(meta.path),
-          path: meta.path,
-          tree: meta.parent,
+        .map((meta: any) => {
+          // I'm not entirely sure what meta.repositoryType represents, so I used a straightforward approach.
+          const formattedType = detectRepositoryType(meta.path);
 
-          getRepositoryState: () => {
-            return getRepositoryState(meta.path);
-          },
-        }));
+          return {
+            hashValue: meta.hashValue,
+            name: meta.name,
+            exists: fs.existsSync(meta.path),
+            path: meta.path,
+            tree: meta.parent,
+            repositoryType: formattedType,
+
+            getRepositoryState: () => {
+              return getRepositoryState(meta.path, formattedType);
+            },
+          };
+        });
     });
   }
 }
 
-export function detectRepositoryType(path: string): Promise<RepositoryType> {
-  return executeCommand(path, "git rev-parse --git-dir")
-    .then((gitResult) => {
-      if (gitResult) {
-        return RepositoryType.GIT;
-      }
-      return executeCommand(path, "hg root").then((hgResult) => {
-        if (hgResult) {
-          return RepositoryType.MERCURIAL;
-        } else {
-          return RepositoryType.UNKNOWN;
-        }
-      });
-    })
-    .catch(() => {
-      return executeCommand(path, "hg root")
-        .then((hgResult) => {
-          if (hgResult) {
-            return RepositoryType.MERCURIAL;
-          } else {
-            return RepositoryType.UNKNOWN;
-          }
-        })
-        .catch(() => {
-          return RepositoryType.UNKNOWN;
-        });
-    });
+export function detectRepositoryType(path: string): RepositoryType {
+  try {
+    execSync("git rev-parse --show-toplevel", { cwd: path, encoding: "utf-8" });
+    return REPOSITORY_TYPE.GIT;
+  } catch {
+    // ignore
+  }
+
+  try {
+    execSync("hg root", { cwd: path, encoding: "utf-8" });
+    return REPOSITORY_TYPE.MERCURIAL;
+  } catch {
+    // ignore
+  }
+
+  return REPOSITORY_TYPE.UNKNOWN;
 }
 
-export function getGitBranch(path: string): Promise<string | null> {
+export function getGitBranch(path: string) {
   return executeCommand(path, "git rev-parse --abbrev-ref HEAD");
 }
 
-export function getHgBranch(path: string): Promise<string | null> {
-  return executeCommand(path, "hg branch");
-}
-
-export function getGitAhead(path: string): Promise<string | null> {
+export function getGitAhead(path: string) {
   return executeCommand(path, "git rev-list --count @{u}..HEAD");
 }
 
-export function getHgAhead(path: string): Promise<string | null> {
-  return executeCommand(path, "hg outgoing -q").then((result) => {
-    if (!result) return "0";
-    return result.split("\n").length.toString();
-  });
-}
-
-export function getGitBehind(path: string): Promise<string | null> {
+export function getGitBehind(path: string) {
   return executeCommand(path, "git rev-list --count HEAD..@{u}");
 }
 
-export function getHgBehind(path: string): Promise<string | null> {
-  return executeCommand(path, "hg incoming -q").then((result) => {
-    if (!result) return "0";
-    return result.split("\n").length.toString();
+export function getHgBranch(path: string) {
+  return executeCommand(path, "hg branch");
+}
+
+export function getHgAhead(path: string) {
+  return executeCommand(path, "hg outgoing -q").then((result) => {
+    return result?.split("\n").length.toString() ?? "0";
   });
 }
 
-export function getRepositoryState(path: string): Promise<RepositoryState> {
-  return detectRepositoryType(path).then((repoType) => {
-    switch (repoType) {
-      case RepositoryType.GIT:
-        return Promise.all([getGitBranch(path), getGitAhead(path), getGitBehind(path)]).then(
-          ([branch, ahead, behind]) => ({
-            branch,
-            ahead,
-            behind,
-          }),
-        );
-
-      case RepositoryType.MERCURIAL:
-        return Promise.all([getHgBranch(path), getHgAhead(path), getHgBehind(path)]).then(
-          ([branch, ahead, behind]) => ({
-            branch,
-            ahead,
-            behind,
-          }),
-        );
-
-      default:
-        return Promise.resolve({
-          branch: null,
-          ahead: null,
-          behind: null,
-        });
-    }
+export function getHgBehind(path: string) {
+  return executeCommand(path, "hg incoming -q").then((result) => {
+    return result?.split("\n").length.toString() ?? "0";
   });
+}
+
+export function getRepositoryState(path: string, repoType: RepositoryType): Promise<RepositoryState> {
+  switch (repoType) {
+    case REPOSITORY_TYPE.GIT:
+      return Promise.all([getGitBranch(path), getGitAhead(path), getGitBehind(path)]).then(
+        ([branch, ahead, behind]) => ({
+          branch,
+          ahead,
+          behind,
+        }),
+      );
+
+    case REPOSITORY_TYPE.MERCURIAL:
+      return Promise.all([getHgBranch(path), getHgAhead(path), getHgBehind(path)]).then(([branch, ahead, behind]) => ({
+        branch,
+        ahead,
+        behind,
+      }));
+
+    default:
+      return Promise.resolve({
+        branch: null,
+        ahead: null,
+        behind: null,
+      });
+  }
 }
 
 export interface Repository {
@@ -187,6 +179,7 @@ export interface Repository {
   exists: boolean;
   path: string;
   tree: string[];
+  repositoryType: RepositoryType;
 
   getRepositoryState(): Promise<RepositoryState>;
 }

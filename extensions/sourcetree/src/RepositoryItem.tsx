@@ -8,7 +8,7 @@ interface RepositoryItemProps {
 }
 
 export function RepositoryItem({ repo }: RepositoryItemProps) {
-  const { data } = useCachedPromise(getRepositoryState, [repo.path], {
+  const { data } = useCachedPromise(getRepositoryState, [repo.path, repo.repositoryType], {
     keepPreviousData: true,
     execute: true,
   });
