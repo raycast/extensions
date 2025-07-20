@@ -1,0 +1,119 @@
+instructions: |
+  You are an AI assistant for @ Profile, a Raycast extension for quickly opening profiles on social platforms. When a user asks to open a profile or mentions social media handles, follow these guidelines:
+
+  # Primary Function
+  Your main job is to use the `open` tool to open user profiles on social platforms. Always call the tool when users request to open a profile.
+
+  # Tool Usage Guidelines
+
+  ## Always use the `open` tool for profile opening requests:
+  - When the user says "open [username] on [platform]"
+  - When the user mentions "@[username]" and a platform
+  - When the user wants to navigate to someone's social media profile
+  - The tool requires exactly two parameters:
+    - `profile`: The username/handle (required, without @ symbol)
+    - `site`: The social platform name (required, lowercase)
+
+  ## Supported platforms include:
+  - threads, x, github, instagram, raycast, facebook, reddit, youtube, linkedin, tiktok
+  - Custom platforms may also be available
+  
+  ## Platform handling:
+  - Convert "twitter" to "x"
+  - Remove @ symbols from usernames before calling the tool
+  - Use lowercase platform names
+  - If a platform is disabled or unavailable, explain this to the user
+
+  # Response Guidelines
+  - Always call the `open` tool for valid profile opening requests
+  - Be concise and direct in responses
+  - If platform is unclear, ask for clarification
+  - Use the exact profile name and site as provided by the user
+
+evals:
+  - input: "@at-profile open raycast on instagram"
+    mocks:
+      open: "Successfully called \"open\""
+    expected:
+      - callsTool:
+          name: "open"
+          arguments:
+            profile: "raycast"
+            site: "instagram"
+
+  - input: "@at-profile open chrismessina on x"
+    mocks:
+      open: "Successfully called \"open\""
+    expected:
+      - callsTool:
+          name: "open"
+          arguments:
+            profile: "chrismessina"
+            site: "x"
+
+  # Extended evals for new functionality
+  
+  # Opening profile with stored username suggestion  
+  - input: "@at-profile open testuser1 on threads"
+    mocks:
+      open: "Successfully called \"open\""
+    expected:
+      - callsTool:
+          name: "open"
+          arguments:
+            profile: "testuser1"
+            site: "threads"
+            
+  # Opening profile with username from history
+  - input: "@at-profile open demoaccount on github"
+    mocks:
+      open: "Successfully called \"open\""
+    expected:
+      - callsTool:
+          name: "open"
+          arguments:
+            profile: "demoaccount"
+            site: "github"
+            
+  # Disabled app should not be available (linkedin disabled in test-settings)
+  - input: "@at-profile open chrismessina on linkedin"
+    mocks:
+      open: "Platform linkedin is not available or disabled"
+    expected:
+      - not:
+          callsTool:
+            name: "open"
+            arguments:
+              site: "linkedin"
+              
+  # TikTok is also disabled in test-settings
+  - input: "@at-profile open user on tiktok"
+    mocks:
+      open: "Platform tiktok is not available or disabled"
+    expected:
+      - not:
+          callsTool:
+            name: "open"
+            arguments:
+              site: "tiktok"
+              
+  # Custom platform from test-settings should work
+  - input: "@at-profile open testuser on testplatform"
+    mocks:
+      open: "Successfully called \"open\""
+    expected:
+      - callsTool:
+          name: "open"
+          arguments:
+            profile: "testuser"
+            site: "testplatform"
+            
+  # Adding Threads to social apps (custom CRUD example)
+  - input: "@at-profile Add Threads to the list of social apps"
+    expected:
+      - includes: "Threads"
+      
+  # Request for custom platform that doesn't exist
+  - input: "@at-profile open user on mastodon"
+    expected:
+      - includes: "not available"

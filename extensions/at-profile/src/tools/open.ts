@@ -1,5 +1,6 @@
 import { open } from "@raycast/api";
 import { getAllSites } from "../sites";
+import { addUsername } from "../storage";
 import { showFailureToast } from "@raycast/utils";
 
 type Input = {
@@ -41,9 +42,15 @@ const tool = async (input: Input) => {
     showFailureToast(`Site "${site}" not found or not enabled`, { title: "Failed to find site" });
     return;
   }
-  const url = selectedSite.urlTemplate.replace("{profile}", profile);
+
+  // Normalize profile (remove leading @ if present)
+  const normalizedProfile = profile.startsWith("@") ? profile.slice(1) : profile;
+
+  const url = selectedSite.urlTemplate.replace("{profile}", normalizedProfile);
   try {
     await open(url);
+    // Add username to history after successful open
+    await addUsername(normalizedProfile);
   } catch (error) {
     showFailureToast(`Failed to open ${site} profile: ${profile}`, { title: "Failed to open URL" });
   }

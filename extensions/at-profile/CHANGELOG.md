@@ -1,8 +1,22 @@
 # @ Profile Changelog
 
+## [Enhanced Platform Management] - 2025-01-07
+
+### Added
+- **New "Manage Apps" Command**: Renamed and enhanced platform management interface
+- Dynamic platform loading - no more hardcoded dropdown values
+- Real-time platform status updates with enable/disable functionality
+- Comprehensive YAML import/export for settings backup and sharing
+- Enhanced documentation with screenshots and feature explanations
+
+### Changed
+- Command renamed from "Manage Platforms" to "Manage Apps" for better clarity
+- Improved user interface with clearer section titles
+- Updated README with comprehensive feature documentation
+
 ## Fixed - {PR_MERGE_DATE}
 
-- Fixed Twitter and X to lead to X [#18534]https://github.com/raycast/extensions/issues/18534)
+- Fixed Twitter and X to lead to X [#18534](https://github.com/raycast/extensions/issues/18534)
 
 ## [Add AI Tool] - 2025-03-10
 
