@@ -1,9 +1,10 @@
 import { Cache } from "@raycast/api";
 import * as util from "util";
-import { exec as execcb } from "child_process";
+import { exec as execcb, execSync } from "child_process";
 
 const exec = util.promisify(execcb);
 const cache = new Cache();
+let cachedSSHAuthSock: string | undefined;
 
 export function executeCommand(cwd: string, command: string): Promise<string | null> {
   return getFromCommand(cwd, command);
@@ -26,7 +27,13 @@ function getFromCommand(cwd: string, command: string): Promise<string | null> {
     // when this timeout is set, then the button does appear
     // immediately as desired
     setTimeout(() => {
-      exec(command, { cwd })
+      const env = { ...process.env };
+
+      // Setting the SSH_AUTH_SOCK environment variable may be required when using encrypted private keys
+      const sshAuthSock = getSSHAuthSock();
+      if (sshAuthSock) Object.assign(env, { SSH_AUTH_SOCK: sshAuthSock });
+
+      exec(command, { cwd, env })
         .then((r) => {
           const result = r.stdout.trim();
           storeInCache(cwd, command, result);
@@ -52,4 +59,21 @@ function getFromCache(cwd: string, command: string): Promise<string | null> {
 
 function storeInCache(cwd: string, command: string, result: string) {
   cache.set(`${cwd}#${command}`, result);
+}
+
+function getSSHAuthSock() {
+  if (cachedSSHAuthSock !== undefined) return cachedSSHAuthSock;
+
+  try {
+    const result = execSync("launchctl getenv SSH_AUTH_SOCK", { encoding: "utf8" }).trim();
+    if (result) {
+      cachedSSHAuthSock = result;
+      return cachedSSHAuthSock;
+    }
+  } catch {
+    // ignore error
+  }
+
+  cachedSSHAuthSock = "";
+  return "";
 }

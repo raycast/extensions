@@ -1,10 +1,14 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sourcetree",
+  "version": "1.1.0",
   "title": "Sourcetree",
   "description": "Search and open Sourcetree repositories",
   "icon": "sourcetree_512x512x32.png",
   "author": "i906",
+  "contributors": [
+    "tofrankie"
+  ],
   "categories": [
     "Developer Tools"
   ],
@@ -45,6 +49,8 @@
   },
   "keywords": [
     "Git",
+    "Hg",
+    "Mercurial",
     "Sourcetree",
     "Atlassian"
   ],

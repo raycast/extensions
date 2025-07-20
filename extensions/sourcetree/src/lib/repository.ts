@@ -4,6 +4,18 @@ import * as bplist from "bplist-parser";
 import * as fs from "fs";
 import { executeCommand } from "./cached-command";
 
+export enum RepositoryType {
+  GIT = "git",
+  MERCURIAL = "mercurial",
+  UNKNOWN = "unknown",
+}
+
+export interface RepositoryState {
+  branch: string | null;
+  ahead: string | null;
+  behind: string | null;
+}
+
 export class RepositoryList {
   private plistPath: string;
 
@@ -71,32 +83,102 @@ export class RepositoryList {
           path: meta.path,
           tree: meta.parent,
 
-          getBranch: () => {
-            return getBranch(meta.path);
-          },
-
-          getAhead: () => {
-            return getAhead(meta.path);
-          },
-
-          getBehind: () => {
-            return getBehind(meta.path);
+          getRepositoryState: () => {
+            return getRepositoryState(meta.path);
           },
         }));
     });
   }
 }
 
-export function getBranch(path: string): Promise<string | null> {
+export function detectRepositoryType(path: string): Promise<RepositoryType> {
+  return executeCommand(path, "git rev-parse --git-dir")
+    .then((gitResult) => {
+      if (gitResult) {
+        return RepositoryType.GIT;
+      }
+      return executeCommand(path, "hg root").then((hgResult) => {
+        if (hgResult) {
+          return RepositoryType.MERCURIAL;
+        } else {
+          return RepositoryType.UNKNOWN;
+        }
+      });
+    })
+    .catch(() => {
+      return executeCommand(path, "hg root")
+        .then((hgResult) => {
+          if (hgResult) {
+            return RepositoryType.MERCURIAL;
+          } else {
+            return RepositoryType.UNKNOWN;
+          }
+        })
+        .catch(() => {
+          return RepositoryType.UNKNOWN;
+        });
+    });
+}
+
+export function getGitBranch(path: string): Promise<string | null> {
   return executeCommand(path, "git rev-parse --abbrev-ref HEAD");
 }
 
-export function getAhead(path: string): Promise<string | null> {
+export function getHgBranch(path: string): Promise<string | null> {
+  return executeCommand(path, "hg branch");
+}
+
+export function getGitAhead(path: string): Promise<string | null> {
   return executeCommand(path, "git rev-list --count @{u}..HEAD");
 }
 
-export function getBehind(path: string): Promise<string | null> {
+export function getHgAhead(path: string): Promise<string | null> {
+  return executeCommand(path, "hg outgoing -q").then((result) => {
+    if (!result) return "0";
+    return result.split("\n").length.toString();
+  });
+}
+
+export function getGitBehind(path: string): Promise<string | null> {
   return executeCommand(path, "git rev-list --count HEAD..@{u}");
+}
+
+export function getHgBehind(path: string): Promise<string | null> {
+  return executeCommand(path, "hg incoming -q").then((result) => {
+    if (!result) return "0";
+    return result.split("\n").length.toString();
+  });
+}
+
+export function getRepositoryState(path: string): Promise<RepositoryState> {
+  return detectRepositoryType(path).then((repoType) => {
+    switch (repoType) {
+      case RepositoryType.GIT:
+        return Promise.all([getGitBranch(path), getGitAhead(path), getGitBehind(path)]).then(
+          ([branch, ahead, behind]) => ({
+            branch,
+            ahead,
+            behind,
+          }),
+        );
+
+      case RepositoryType.MERCURIAL:
+        return Promise.all([getHgBranch(path), getHgAhead(path), getHgBehind(path)]).then(
+          ([branch, ahead, behind]) => ({
+            branch,
+            ahead,
+            behind,
+          }),
+        );
+
+      default:
+        return Promise.resolve({
+          branch: null,
+          ahead: null,
+          behind: null,
+        });
+    }
+  });
 }
 
 export interface Repository {
@@ -106,9 +188,7 @@ export interface Repository {
   path: string;
   tree: string[];
 
-  getBranch(): Promise<string | null>;
-  getAhead(): Promise<string | null>;
-  getBehind(): Promise<string | null>;
+  getRepositoryState(): Promise<RepositoryState>;
 }
 
 export class PlistMissingError extends Error {}
