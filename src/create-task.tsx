@@ -14,12 +14,11 @@ import {
 } from "@raycast/api";
 import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
 
-import { addComment, addTask, AddTaskArgs, uploadFile } from "./api";
+import { addComment, quickAddTask, uploadFile } from "./api";
 import RefreshAction from "./components/RefreshAction";
 import TaskDetail from "./components/TaskDetail";
 import { getCollaboratorIcon, getProjectCollaborators } from "./helpers/collaborators";
 import { getColorByKey } from "./helpers/colors";
-import { getAPIDate } from "./helpers/dates";
 import { priorities } from "./helpers/priorities";
 import { getPriorityIcon } from "./helpers/priorities";
 import { getProjectIcon } from "./helpers/projects";
@@ -63,61 +62,22 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
 
   const lowestPriority = priorities[priorities.length - 1];
 
-  const { handleSubmit, itemProps, values, focus, reset } = useForm<CreateTaskValues>({
+  const { handleSubmit, itemProps, values, focus, reset, setValue } = useForm<CreateTaskValues>({
     async onSubmit(values) {
       if (shouldCloseMainWindow) {
         await closeMainWindow({ popToRootType: PopToRootType.Suspended });
-      }
-
-      const body: AddTaskArgs = { content: values.content, description: values.description };
-
-      if (values.date) {
-        body.due = {
-          date: Form.DatePicker.isFullDay(values.date) ? getAPIDate(values.date) : values.date.toISOString(),
-        };
-      }
-
-      if (values.deadline) {
-        body.deadline = {
-          date: getAPIDate(values.deadline),
-        };
-      }
-
-      if (values.duration) {
-        body.duration = {
-          unit: "minute",
-          amount: parseInt(values.duration, 10),
-        };
-      }
-
-      if (values.priority) {
-        body.priority = parseInt(values.priority);
-      }
-
-      if (values.projectId) {
-        body.project_id = values.projectId;
-      }
-
-      if (values.sectionId) {
-        body.section_id = values.sectionId;
-      }
-      if (values.responsibleUid) {
-        body.responsible_uid = values.responsibleUid;
-      }
-
-      if (values.labels && values.labels.length > 0) {
-        body.labels = values.labels;
-      }
-
-      if (values.parentId) {
-        body.parent_id = values.parentId;
       }
 
       const toast = new Toast({ style: Toast.Style.Animated, title: "Creating task" });
       await toast.show();
 
       try {
-        const { id, data: newData } = await addTask(body, { data, setData });
+        // Always use quick-add API for server-side natural language parsing
+        const { id } = await quickAddTask({ 
+          text: values.content,
+          note: values.description || undefined
+        });
+
         toast.style = Toast.Style.Success;
         toast.title = "Task created";
 
@@ -141,7 +101,7 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
             try {
               toast.message = "Uploading file and adding to comment…";
               const file = await uploadFile(values.files[0]);
-              await addComment({ item_id: id, file_attachment: file, content: "" }, { data: newData, setData });
+              await addComment({ item_id: id, file_attachment: file, content: "" }, { data, setData });
               toast.message = "File uploaded and added to comment";
             } catch {
               toast.message = `Failed uploading file and adding to comment`;
@@ -208,13 +168,17 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Task" onSubmit={handleSubmit} icon={Icon.Plus} />
-
           <RefreshAction />
         </ActionPanel>
       }
       enableDrafts={!fromProjectId && !fromTodayEmptyView && !fromLabel}
     >
-      <Form.TextField {...itemProps.content} title="Title" placeholder="Buy fruits" />
+      <Form.TextField 
+        {...itemProps.content} 
+        title="Title" 
+        placeholder="Buy fruits p1 #Work @urgent today at 5pm" 
+        info="Natural language parsing enabled: p1-p4 (priority), #project, @label, dates/times. Uses Todoist's server-side parsing."
+      />
 
       <Form.TextArea
         {...itemProps.description}
