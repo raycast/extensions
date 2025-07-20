@@ -3,7 +3,7 @@
 ## [Fix New Tab + Modernize] - {PR_MERGE_DATE}
 
 - Fix: **New Tab** command would crash (ref: [Issue #16017](https://github.com/raycast/extensions/issues/16017))
-- Modernize to use latest Raycat configuration
+- Modernize to use latest Raycast configuration
 - Specify extension is "MacOS" only due to use of `AppleScript`
 
 ## [Enhancements] - 2024-12-03
