@@ -119,28 +119,31 @@ export default function ResultView(props: ResultViewProps) {
     getResult();
   }, []);
 
-  const markdownSegments = [];
+  const segments: string[] = [];
   if (user_extra_msg) {
-    markdownSegments.push(formatUserMessage(user_extra_msg) + "\n\n");
+    segments.push(formatUserMessage(user_extra_msg) + "\n\n");
   }
-  if (metrics.model.includes("deepseek") || metrics.model.includes("qwen-qwq")) {
-    const splitResponse = response.split("</think>");
-    const thinkSegment = splitResponse[0].replace("<think>", "");
-    markdownSegments.push("Thinking:\n ```" + thinkSegment + "```");
-    markdownSegments.push(splitResponse[1]);
+  const isSpecial = metrics.model.includes("deepseek") || metrics.model.includes("qwen/qwen3-32b");
+  if (isSpecial) {
+    const [thinkRaw, rest] = response.split("</think>");
+    const thinkText = thinkRaw.replace("<think>", "");
+    segments.push(`\`\`\`${thinkText}\`\`\``);
+    segments.push(rest);
   } else {
-    markdownSegments.push(response);
+    segments.push(response);
   }
+  const markdown = segments.join("");
+  const copyContent = (isSpecial ? response.split("</think>")[1] ?? response : response).trim();
 
   return (
     <Detail
       isLoading={loading}
-      markdown={markdownSegments.join("")}
+      markdown={markdown}
       actions={
         !loading && (
           <ActionPanel title="Actions">
-            <Action.CopyToClipboard title="Copy Results" content={response} />
-            <Action.Paste title="Paste Results" content={response} />
+            <Action.CopyToClipboard title="Copy Results" content={copyContent} />
+            <Action.Paste title="Paste Results" content={copyContent} />
             <Action
               title="Retry"
               icon={Icon.Repeat}
