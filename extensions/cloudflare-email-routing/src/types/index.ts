@@ -19,9 +19,9 @@ interface CloudflarePaginatedResponseSuccess<T> {
     page: number;
     per_page: number;
     total_count: number;
-  }
+  };
 }
-export type CloudflarePaginatedResponse<T> = CloudflarePaginatedResponseSuccess<T> | CloudflareResponseFailure
+export type CloudflarePaginatedResponse<T> = CloudflarePaginatedResponseSuccess<T> | CloudflareResponseFailure;
 
 export interface CloudflareResponseInfo {
   code: number;

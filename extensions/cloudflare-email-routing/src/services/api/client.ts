@@ -15,8 +15,8 @@ export class CloudflareApiError extends Error {
 
 const { apiKey } = getApiConfig();
 export const cloudflare = new Cloudflare({
-  apiToken: apiKey
-})
+  apiToken: apiKey,
+});
 
 export function createCloudflareClient(): Cloudflare {
   const config = getApiConfig();
