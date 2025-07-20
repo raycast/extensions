@@ -1,4 +1,4 @@
-import { ActionPanel, popToRoot, showToast, Toast } from "@raycast/api";
+import { Action, popToRoot, showToast, Toast } from "@raycast/api";
 import { execSync } from "child_process";
 import { Repository } from "./lib/repository";
 import { Preferences } from "./lib/preferences";
@@ -24,5 +24,5 @@ export function OpenInSourceTreeApp({ repo }: OpenInSourceTreeAppProps) {
     }
   }
 
-  return <ActionPanel.Item title={`Open with Sourcetree`} icon="sourcetree_256x256x32.png" onAction={handleAction} />;
+  return <Action title={`Open with Sourcetree`} icon="sourcetree_256x256x32.png" onAction={handleAction} />;
 }
