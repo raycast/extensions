@@ -47,16 +47,8 @@
               "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "deepseek-r1-distill-qwen-32b",
-              "title": "DeepSeek R1 32B 128K"
-            },
-            {
               "value": "llama-3.3-70b-versatile",
               "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.3-70b-specdec",
-              "title": "Llama 3.3 70B SpecDec 8k"
             },
             {
               "value": "llama-3.1-8b-instant",
@@ -77,14 +69,6 @@
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "qwen-2.5-32b",
-              "title": "Qwen 2.5 32B 128K"
-            },
-            {
-              "value": "qwen-2.5-coder-32b",
-              "title": "Qwen 2.5 Coder 32B 128K"
             },
             {
               "value": "qwen/qwen3-32b",
@@ -137,16 +121,8 @@
               "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "deepseek-r1-distill-qwen-32b",
-              "title": "DeepSeek R1 32B 128K"
-            },
-            {
               "value": "llama-3.3-70b-versatile",
               "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.3-70b-specdec",
-              "title": "Llama 3.3 70B SpecDec 8k"
             },
             {
               "value": "llama-3.1-8b-instant",
@@ -167,14 +143,6 @@
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "qwen-2.5-32b",
-              "title": "Qwen 2.5 32B 128K"
-            },
-            {
-              "value": "qwen-2.5-coder-32b",
-              "title": "Qwen 2.5 Coder 32B 128K"
             },
             {
               "value": "qwen/qwen3-32b",
@@ -227,16 +195,8 @@
               "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "deepseek-r1-distill-qwen-32b",
-              "title": "DeepSeek R1 32B 128K"
-            },
-            {
               "value": "llama-3.3-70b-versatile",
               "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.3-70b-specdec",
-              "title": "Llama 3.3 70B SpecDec 8k"
             },
             {
               "value": "llama-3.1-8b-instant",
@@ -257,14 +217,6 @@
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "qwen-2.5-32b",
-              "title": "Qwen 2.5 32B 128K"
-            },
-            {
-              "value": "qwen-2.5-coder-32b",
-              "title": "Qwen 2.5 Coder 32B 128K"
             },
             {
               "value": "qwen/qwen3-32b",
@@ -317,16 +269,8 @@
               "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "deepseek-r1-distill-qwen-32b",
-              "title": "DeepSeek R1 32B 128K"
-            },
-            {
               "value": "llama-3.3-70b-versatile",
               "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.3-70b-specdec",
-              "title": "Llama 3.3 70B SpecDec 8k"
             },
             {
               "value": "llama-3.1-8b-instant",
@@ -347,14 +291,6 @@
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "qwen-2.5-32b",
-              "title": "Qwen 2.5 32B 128K"
-            },
-            {
-              "value": "qwen-2.5-coder-32b",
-              "title": "Qwen 2.5 Coder 32B 128K"
             },
             {
               "value": "qwen/qwen3-32b",
@@ -407,16 +343,8 @@
               "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "deepseek-r1-distill-qwen-32b",
-              "title": "DeepSeek R1 32B 128K"
-            },
-            {
               "value": "llama-3.3-70b-versatile",
               "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.3-70b-specdec",
-              "title": "Llama 3.3 70B SpecDec 8k"
             },
             {
               "value": "llama-3.1-8b-instant",
@@ -437,14 +365,6 @@
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "qwen-2.5-32b",
-              "title": "Qwen 2.5 32B 128K"
-            },
-            {
-              "value": "qwen-2.5-coder-32b",
-              "title": "Qwen 2.5 Coder 32B 128K"
             },
             {
               "value": "qwen/qwen3-32b",
@@ -497,16 +417,8 @@
               "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "deepseek-r1-distill-qwen-32b",
-              "title": "DeepSeek R1 32B 128K"
-            },
-            {
               "value": "llama-3.3-70b-versatile",
               "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.3-70b-specdec",
-              "title": "Llama 3.3 70B SpecDec 8k"
             },
             {
               "value": "llama-3.1-8b-instant",
@@ -527,14 +439,6 @@
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "qwen-2.5-32b",
-              "title": "Qwen 2.5 32B 128K"
-            },
-            {
-              "value": "qwen-2.5-coder-32b",
-              "title": "Qwen 2.5 Coder 32B 128K"
             },
             {
               "value": "qwen/qwen3-32b",
@@ -603,16 +507,8 @@
               "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "deepseek-r1-distill-qwen-32b",
-              "title": "DeepSeek R1 32B 128K"
-            },
-            {
               "value": "llama-3.3-70b-versatile",
               "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.3-70b-specdec",
-              "title": "Llama 3.3 70B SpecDec 8k"
             },
             {
               "value": "llama-3.1-8b-instant",
@@ -633,14 +529,6 @@
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "qwen-2.5-32b",
-              "title": "Qwen 2.5 32B 128K"
-            },
-            {
-              "value": "qwen-2.5-coder-32b",
-              "title": "Qwen 2.5 Coder 32B 128K"
             },
             {
               "value": "qwen/qwen3-32b",
@@ -710,16 +598,8 @@
               "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "deepseek-r1-distill-qwen-32b",
-              "title": "DeepSeek R1 32B 128K"
-            },
-            {
               "value": "llama-3.3-70b-versatile",
               "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.3-70b-specdec",
-              "title": "Llama 3.3 70B SpecDec 8k"
             },
             {
               "value": "llama-3.1-8b-instant",
@@ -740,14 +620,6 @@
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "qwen-2.5-32b",
-              "title": "Qwen 2.5 32B 128K"
-            },
-            {
-              "value": "qwen-2.5-coder-32b",
-              "title": "Qwen 2.5 Coder 32B 128K"
             },
             {
               "value": "qwen/qwen3-32b",
@@ -801,16 +673,8 @@
               "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "deepseek-r1-distill-qwen-32b",
-              "title": "DeepSeek R1 32B 128K"
-            },
-            {
               "value": "llama-3.3-70b-versatile",
               "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.3-70b-specdec",
-              "title": "Llama 3.3 70B SpecDec 8k"
             },
             {
               "value": "llama-3.1-8b-instant",
@@ -831,14 +695,6 @@
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "qwen-2.5-32b",
-              "title": "Qwen 2.5 32B 128K"
-            },
-            {
-              "value": "qwen-2.5-coder-32b",
-              "title": "Qwen 2.5 Coder 32B 128K"
             },
             {
               "value": "qwen/qwen3-32b",
@@ -892,16 +748,8 @@
               "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "deepseek-r1-distill-qwen-32b",
-              "title": "DeepSeek R1 32B 128K"
-            },
-            {
               "value": "llama-3.3-70b-versatile",
               "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.3-70b-specdec",
-              "title": "Llama 3.3 70B SpecDec 8k"
             },
             {
               "value": "llama-3.1-8b-instant",
@@ -922,14 +770,6 @@
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "qwen-2.5-32b",
-              "title": "Qwen 2.5 32B 128K"
-            },
-            {
-              "value": "qwen-2.5-coder-32b",
-              "title": "Qwen 2.5 Coder 32B 128K"
             },
             {
               "value": "qwen/qwen3-32b",
@@ -983,16 +823,8 @@
               "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "deepseek-r1-distill-qwen-32b",
-              "title": "DeepSeek R1 32B 128K"
-            },
-            {
               "value": "llama-3.3-70b-versatile",
               "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.3-70b-specdec",
-              "title": "Llama 3.3 70B SpecDec 8k"
             },
             {
               "value": "llama-3.1-8b-instant",
@@ -1013,14 +845,6 @@
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "qwen-2.5-32b",
-              "title": "Qwen 2.5 32B 128K"
-            },
-            {
-              "value": "qwen-2.5-coder-32b",
-              "title": "Qwen 2.5 Coder 32B 128K"
             },
             {
               "value": "qwen/qwen3-32b",
@@ -1074,16 +898,8 @@
               "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "deepseek-r1-distill-qwen-32b",
-              "title": "DeepSeek R1 32B 128K"
-            },
-            {
               "value": "llama-3.3-70b-versatile",
               "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.3-70b-specdec",
-              "title": "Llama 3.3 70B SpecDec 8k"
             },
             {
               "value": "llama-3.1-8b-instant",
@@ -1104,14 +920,6 @@
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "qwen-2.5-32b",
-              "title": "Qwen 2.5 32B 128K"
-            },
-            {
-              "value": "qwen-2.5-coder-32b",
-              "title": "Qwen 2.5 Coder 32B 128K"
             },
             {
               "value": "qwen/qwen3-32b",
@@ -1165,16 +973,8 @@
               "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "deepseek-r1-distill-qwen-32b",
-              "title": "DeepSeek R1 32B 128K"
-            },
-            {
               "value": "llama-3.3-70b-versatile",
               "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.3-70b-specdec",
-              "title": "Llama 3.3 70B SpecDec 8k"
             },
             {
               "value": "llama-3.1-8b-instant",
@@ -1195,14 +995,6 @@
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "qwen-2.5-32b",
-              "title": "Qwen 2.5 32B 128K"
-            },
-            {
-              "value": "qwen-2.5-coder-32b",
-              "title": "Qwen 2.5 Coder 32B 128K"
             },
             {
               "value": "qwen/qwen3-32b",
@@ -1256,16 +1048,8 @@
               "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "deepseek-r1-distill-qwen-32b",
-              "title": "DeepSeek R1 32B 128K"
-            },
-            {
               "value": "llama-3.3-70b-versatile",
               "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.3-70b-specdec",
-              "title": "Llama 3.3 70B SpecDec 8k"
             },
             {
               "value": "llama-3.1-8b-instant",
@@ -1286,14 +1070,6 @@
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "qwen-2.5-32b",
-              "title": "Qwen 2.5 32B 128K"
-            },
-            {
-              "value": "qwen-2.5-coder-32b",
-              "title": "Qwen 2.5 Coder 32B 128K"
             },
             {
               "value": "qwen/qwen3-32b",
@@ -1338,16 +1114,8 @@
           "title": "DeepSeek R1 70B 128k"
         },
         {
-          "value": "deepseek-r1-distill-qwen-32b",
-          "title": "DeepSeek R1 32B 128K"
-        },
-        {
           "value": "llama-3.3-70b-versatile",
           "title": "Llama 3.3 70B 128k"
-        },
-        {
-          "value": "llama-3.3-70b-specdec",
-          "title": "Llama 3.3 70B SpecDec 8k"
         },
         {
           "value": "llama-3.1-8b-instant",
@@ -1368,14 +1136,6 @@
         {
           "value": "gemma2-9b-it",
           "title": "Gemma2 9B 8k"
-        },
-        {
-          "value": "qwen-2.5-32b",
-          "title": "Qwen 2.5 32B 128K"
-        },
-        {
-          "value": "qwen-2.5-coder-32b",
-          "title": "Qwen 2.5 Coder 32B 128K"
         },
         {
           "value": "qwen/qwen3-32b",

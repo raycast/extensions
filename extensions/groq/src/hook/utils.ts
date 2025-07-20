@@ -5,16 +5,12 @@ export const allModels = [
   { name: "Llama 4 Scout 131k", id: "meta-llama/llama-4-scout-17b-16e-instruct" },
   { name: "Llama 4 Maverick 131k", id: "meta-llama/llama-4-maverick-17b-128e-instruct" },
   { name: "DeepSeek R1 70B 128k", id: "deepseek-r1-distill-llama-70b" },
-  { name: "DeepSeek R1 32B 128K", id: "deepseek-r1-distill-qwen-32b" },
   { name: "Llama 3.3 70B 128k", id: "llama-3.3-70b-versatile" },
-  { name: "Llama 3.3 70B SpecDec 8k", id: "llama-3.3-70b-specdec" },
   { name: "Llama 3.1 8B 128k", id: "llama-3.1-8b-instant" },
   { name: "Llama 3 70B 8k", id: "llama3-70b-8192" },
   { name: "Llama 3 8B 8k", id: "llama3-8b-8192" },
   { name: "Gemma2 9B 8k", id: "gemma2-9b-it" },
   { name: "Mistral Saba 24B 32K", id: "mistral-saba-24b" },
-  { name: "Qwen 2.5 32B 128K", id: "qwen-2.5-32b" },
-  { name: "Qwen 2.5 Coder 32B 128K", id: "qwen-2.5-coder-32b" },
   { name: "Qwen 3 32B 128K", id: "qwen/qwen3-32b" },
   { name: "Kimi K2 Instruct 128K", id: "moonshotai/kimi-k2-instruct" },
 ];
@@ -46,15 +42,9 @@ export function estimatePrice(prompt_token: number, output_token: number, model:
     case "deepseek-r1-distill-llama-70b":
       price = ((prompt_token * 0.75) / 1_000_000 + (output_token * 0.99) / 1_000_000) * 100;
       break;
-    case "deepseek-r1-distill-qwen-32b":
-      price = ((prompt_token * 0.69) / 1_000_000 + (output_token * 0.69) / 1_000_000) * 100;
-      break;
     case "llama3-70b-8192":
     case "llama-3.3-70b-versatile":
       price = ((prompt_token * 0.59) / 1_000_000 + (output_token * 0.79) / 1_000_000) * 100;
-      break;
-    case "llama-3.3-70b-specdec":
-      price = ((prompt_token * 0.59) / 1_000_000 + (output_token * 0.99) / 1_000_000) * 100;
       break;
     case "llama3-8b-8192":
     case "llama-3.1-8b-instant":
@@ -64,10 +54,6 @@ export function estimatePrice(prompt_token: number, output_token: number, model:
       price = ((prompt_token * 0.2) / 1_000_000 + (output_token * 0.2) / 1_000_000) * 100;
       break;
     case "mistral-saba-24b":
-      price = ((prompt_token * 0.79) / 1_000_000 + (output_token * 0.79) / 1_000_000) * 100;
-      break;
-    case "qwen-2.5-32b":
-    case "qwen-2.5-coder-32b":
       price = ((prompt_token * 0.79) / 1_000_000 + (output_token * 0.79) / 1_000_000) * 100;
       break;
     case "qwen/qwen3-32b":
