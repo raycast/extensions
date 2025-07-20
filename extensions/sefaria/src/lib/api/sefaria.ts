@@ -157,7 +157,10 @@ export class SefariaApi {
       if (!acc.has(category)) {
         acc.set(category, []);
       }
-      acc.get(category)!.push(result);
+      const categoryResults = acc.get(category);
+      if (categoryResults) {
+        categoryResults.push(result);
+      }
       return acc;
     }, new Map<string, SearchResult[]>());
 

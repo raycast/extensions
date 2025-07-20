@@ -32,6 +32,7 @@ Failed to retrieve: **${reference}**
   if (isLoading) {
     return (
       <Detail
+        isLoading={true}
         markdown={`# ${APP_CONSTANTS.MESSAGES.LOADING.SOURCE}
 
 Fetching **${reference}** from Sefaria database...

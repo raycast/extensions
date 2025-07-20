@@ -41,6 +41,7 @@ export default function GetSourceCommand() {
         title="Reference"
         placeholder="e.g., Exod. 17:15, Exodus 17:15, Shemot 17:15, Berakhot 14b, Rashi on Genesis 1:1"
         info="Enter a biblical reference, Talmudic reference, or commentary reference"
+        autoFocus={true}
       />
     </Form>
   );

@@ -3,6 +3,8 @@ import { useRef, useMemo, useDeferredValue } from "react";
 import { SefariaApi } from "../api/sefaria";
 import { InfiniteSearchReturn, InfiniteSearchData, CategorySearchReturn, CategorySearchData } from "../types/sefaria";
 
+const DEFAULT_PAGE_SIZE = 20;
+
 /**
  * Hook for searching Sefaria texts with infinite scroll support
  */
@@ -22,7 +24,7 @@ export function useSefariaInfiniteSearch(query: string): InfiniteSearchReturn {
         };
       }
 
-      const pageSize = 20;
+      const pageSize = DEFAULT_PAGE_SIZE;
       const from = options.page * pageSize;
 
       const response = await SefariaApi.search(searchQuery, pageSize, from);
@@ -68,7 +70,7 @@ export function useSefariaInfiniteSearch(query: string): InfiniteSearchReturn {
     data: transformedData,
     isLoading: isLoading || isStale,
     error,
-    pagination: pagination || { hasMore: false, onLoadMore: () => {}, pageSize: 20 },
+    pagination: pagination || { hasMore: false, onLoadMore: () => {}, pageSize: DEFAULT_PAGE_SIZE },
   };
 }
 
@@ -112,7 +114,7 @@ export function useSefariaCategories(query: string): CategorySearchReturn {
     data: transformedData,
     isLoading: isLoading || isStale,
     error,
-    pagination: { hasMore: false, onLoadMore: () => {}, pageSize: 20 },
+    pagination: { hasMore: false, onLoadMore: () => {}, pageSize: DEFAULT_PAGE_SIZE },
   };
 }
 

@@ -11,7 +11,7 @@ import { SearchListProps } from "../types/sefaria";
  */
 export function SearchList({ query, data, error, isLoading, onSelectResult }: Omit<SearchListProps, "pagination">) {
   if (error) {
-    showFailureToast(APP_CONSTANTS.MESSAGES.ERROR.SEARCH_FAILED);
+    showFailureToast(error, { title: APP_CONSTANTS.MESSAGES.ERROR.SEARCH_FAILED });
     return (
       <List.Item
         title="Search Error"
