@@ -176,6 +176,50 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
     }
   }, [parsedData.projectId, setValue, values.projectId]);
 
+  // Auto-update date field based on parsed natural language date
+  useEffect(() => {
+    if (parsedData.parsedDate) {
+      // Always update the date if a new one is parsed, 
+      // but only if the user hasn't manually set a different date
+      const currentDateString = values.date?.toISOString();
+      const parsedDateString = parsedData.parsedDate.toISOString();
+      
+      if (currentDateString !== parsedDateString) {
+        setValue("date", parsedData.parsedDate);
+      }
+    }
+  }, [parsedData.parsedDate, setValue, values.date]);
+
+  // Auto-update deadline field based on parsed deadline
+  useEffect(() => {
+    if (parsedData.parsedDeadline) {
+      // Always update the deadline if a new one is parsed,
+      // but only if the user hasn't manually set a different deadline
+      const currentDeadlineString = values.deadline?.toISOString();
+      const parsedDeadlineString = parsedData.parsedDeadline.toISOString();
+      
+      if (currentDeadlineString !== parsedDeadlineString) {
+        setValue("deadline", parsedData.parsedDeadline);
+      }
+    }
+  }, [parsedData.parsedDeadline, setValue, values.deadline]);
+
+  // NOTE: We intentionally do NOT update the content/title field
+  // The user should be able to type freely without any automatic modifications
+  // Only the other fields (date, priority, project, labels) get auto-populated
+
+  // Auto-update labels field based on parsed labels
+  useEffect(() => {
+    if (parsedData.labels && parsedData.labels.length > 0) {
+      // Merge existing labels with new parsed labels, avoiding duplicates
+      const currentLabels = values.labels || [];
+      const newLabels = [...new Set([...currentLabels, ...parsedData.labels])];
+      if (newLabels.length !== currentLabels.length) {
+        setValue("labels", newLabels);
+      }
+    }
+  }, [parsedData.labels, setValue, values.labels]);
+
   const projectSections = sections?.filter((section) => section.project_id === values.projectId);
 
   const collaborators = getProjectCollaborators(values.projectId, data);
@@ -194,8 +238,8 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
       <Form.TextField
         {...itemProps.content}
         title="Title"
-        placeholder="Buy fruits p1 #Work @urgent today at 5pm"
-        info="Natural language parsing enabled: p1-p4 (priority), #project, @label, dates/times. Uses Todoist's server-side parsing."
+        placeholder="Buy milk tomorrow p1 #Personal @urgent {march 30}"
+        info="Natural language parsing: p1-p4 (priority), #project, @label, natural dates (tomorrow, monday at 2pm), {deadline}. Powered by chrono-node and Todoist patterns."
       />
 
       <Form.TextArea
