@@ -207,7 +207,7 @@ function AddWebDomain({ user, onWebDomainAdded }: AddWebDomainProps) {
     async onData() {
       await showToast({
         title: "SUCCESS",
-        message: `Added ${values.domain}>`,
+        message: `Added ${values.domain}`,
       });
       onWebDomainAdded();
       pop();

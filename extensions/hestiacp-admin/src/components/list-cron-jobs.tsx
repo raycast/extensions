@@ -19,7 +19,7 @@ export default function ListCronJobsComponent({ user }: ListCronJobsComponentPro
           <List.Item
             key={job}
             title={job}
-            icon={{ source: Icon.Coin, tintColor: data.SUSPENDED === "yes" ? Color.Yellow : Color.Green }}
+            icon={{ source: Icon.Clock, tintColor: data.SUSPENDED === "yes" ? Color.Yellow : Color.Green }}
             detail={
               <List.Item.Detail
                 markdown={data.CMD}

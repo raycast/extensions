@@ -4,7 +4,7 @@
 
 # Hestia Control Panel [Admin] Raycast Extension
 
-This is a Raycast extension for [Hestia Control Panel](https://hestiacp.com/) Admin level accounts. With this extension you can manage Users, Domains, Mail Domains, Databases, and more (see the last section for table of what is included).
+This is a Raycast extension for [Hestia Control Panel](https://hestiacp.com/) Admin level accounts. With this extension you can manage Users, Domains, Mail Domains, Databases, Cron Jobs and more (see the last section for table of what is included).
 
 ## 🚀 Getting Started
 
