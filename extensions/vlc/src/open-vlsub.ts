@@ -1,7 +1,7 @@
 import { showHUD } from "@raycast/api";
 import { exec } from "child_process";
 
-export default async function main() {
+export default function main() {
   showHUD("Opening VLsub, please wait...");
   const appleScript = `
     tell application "VLC"
