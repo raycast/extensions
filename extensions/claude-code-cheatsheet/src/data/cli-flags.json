@@ -10,11 +10,7 @@
       "usage": "claude --print \"<query>\"",
       "example": "claude --print \"Explain this file structure\"",
       "category": "flag",
-      "tags": [
-        "non-interactive",
-        "one-shot",
-        "print"
-      ]
+      "tags": ["non-interactive", "one-shot", "print"]
     },
     {
       "id": "output-format",
@@ -23,11 +19,7 @@
       "usage": "claude --output-format <format>",
       "example": "claude --output-format json \"Analyze this API response\"",
       "category": "flag",
-      "tags": [
-        "format",
-        "json",
-        "output"
-      ]
+      "tags": ["format", "json", "output"]
     },
     {
       "id": "verbose",
@@ -36,11 +28,7 @@
       "usage": "claude --verbose",
       "example": "claude --verbose \"Explain with debug information\"",
       "category": "flag",
-      "tags": [
-        "debug",
-        "detailed",
-        "verbose"
-      ]
+      "tags": ["debug", "detailed", "verbose"]
     },
     {
       "id": "debug",
@@ -49,11 +37,7 @@
       "usage": "claude --debug",
       "example": "claude --debug \"analyze this code\"",
       "category": "flag",
-      "tags": [
-        "debug",
-        "troubleshooting",
-        "verbose"
-      ]
+      "tags": ["debug", "troubleshooting", "verbose"]
     },
     {
       "id": "input-format",
@@ -62,11 +46,7 @@
       "usage": "claude --input-format <format>",
       "example": "claude --input-format stream-json --print \"query\"",
       "category": "flag",
-      "tags": [
-        "format",
-        "input",
-        "stream-json"
-      ]
+      "tags": ["format", "input", "stream-json"]
     },
     {
       "id": "mcp-debug",
@@ -77,11 +57,7 @@
       "category": "flag",
       "deprecated": true,
       "alternative": "--debug",
-      "tags": [
-        "MCP",
-        "debug",
-        "deprecated"
-      ]
+      "tags": ["MCP", "debug", "deprecated"]
     },
     {
       "id": "mcp-config",
@@ -90,12 +66,7 @@
       "usage": "claude --mcp-config <file or string>",
       "example": "claude --mcp-config ./mcp-servers.json",
       "category": "flag",
-      "tags": [
-        "JSON",
-        "MCP",
-        "config",
-        "servers"
-      ]
+      "tags": ["JSON", "MCP", "config", "servers"]
     },
     {
       "id": "resume-flag",
@@ -104,11 +75,7 @@
       "usage": "claude -r [sessionId]",
       "example": "claude -r abc123",
       "category": "flag",
-      "tags": [
-        "restore",
-        "resume",
-        "session"
-      ]
+      "tags": ["restore", "resume", "session"]
     },
     {
       "id": "continue-flag",
@@ -117,11 +84,7 @@
       "usage": "claude --continue",
       "example": "claude -c",
       "category": "flag",
-      "tags": [
-        "continue",
-        "conversation",
-        "latest"
-      ]
+      "tags": ["continue", "conversation", "latest"]
     },
     {
       "id": "dangerously-skip-permissions",
@@ -131,12 +94,7 @@
       "example": "claude --dangerously-skip-permissions \"fix bugs\"",
       "category": "flag",
       "warning": true,
-      "tags": [
-        "bypass",
-        "dangerous",
-        "permissions",
-        "skip"
-      ]
+      "tags": ["bypass", "dangerous", "permissions", "skip"]
     },
     {
       "id": "allowed-tools",
@@ -145,12 +103,7 @@
       "usage": "claude --allowedTools <tools>",
       "example": "claude --allowedTools bash,read,write",
       "category": "flag",
-      "tags": [
-        "allowed",
-        "permissions",
-        "restriction",
-        "tools"
-      ]
+      "tags": ["allowed", "permissions", "restriction", "tools"]
     },
     {
       "id": "disallowed-tools",
@@ -159,12 +112,7 @@
       "usage": "claude --disallowedTools <tools>",
       "example": "claude --disallowedTools bash,edit",
       "category": "flag",
-      "tags": [
-        "disallowed",
-        "permissions",
-        "restriction",
-        "tools"
-      ]
+      "tags": ["disallowed", "permissions", "restriction", "tools"]
     },
     {
       "id": "add-dir",
@@ -173,13 +121,7 @@
       "usage": "claude --add-dir <directories...>",
       "example": "claude --add-dir /path/to/apps /path/to/lib",
       "category": "flag",
-      "tags": [
-        "absolute",
-        "additional",
-        "directory",
-        "multiple",
-        "working"
-      ]
+      "tags": ["absolute", "additional", "directory", "multiple", "working"]
     },
     {
       "id": "model",
@@ -188,11 +130,7 @@
       "usage": "claude --model <model>",
       "example": "claude --model sonnet",
       "category": "flag",
-      "tags": [
-        "AI",
-        "model",
-        "selection"
-      ]
+      "tags": ["AI", "model", "selection"]
     },
     {
       "id": "version",
@@ -201,10 +139,7 @@
       "usage": "claude --version",
       "example": "claude --version",
       "category": "flag",
-      "tags": [
-        "info",
-        "version"
-      ]
+      "tags": ["info", "version"]
     },
     {
       "id": "help",
@@ -213,10 +148,7 @@
       "usage": "claude --help",
       "example": "claude --help",
       "category": "flag",
-      "tags": [
-        "documentation",
-        "help"
-      ]
+      "tags": ["documentation", "help"]
     },
     {
       "id": "max-turns",
@@ -225,12 +157,7 @@
       "usage": "claude -p --max-turns <number> \"<query>\"",
       "example": "claude -p --max-turns 3 \"Refactor this code\"",
       "category": "flag",
-      "tags": [
-        "agentic",
-        "limit",
-        "non-interactive",
-        "turns"
-      ]
+      "tags": ["agentic", "limit", "non-interactive", "turns"]
     },
     {
       "id": "permission-prompt-tool",
@@ -239,13 +166,7 @@
       "usage": "claude -p --permission-prompt-tool <tool> \"<query>\"",
       "example": "claude -p --permission-prompt-tool mcp_auth_tool \"Deploy to production\"",
       "category": "flag",
-      "tags": [
-        "mcp",
-        "non-interactive",
-        "permissions",
-        "prompt",
-        "tool"
-      ]
+      "tags": ["mcp", "non-interactive", "permissions", "prompt", "tool"]
     },
     {
       "id": "permission-mode",
@@ -255,12 +176,7 @@
       "example": "claude --permission-mode plan",
       "isNew": true,
       "category": "flag",
-      "tags": [
-        "mode",
-        "permissions",
-        "plan",
-        "session"
-      ]
+      "tags": ["mode", "permissions", "plan", "session"]
     },
     {
       "id": "append-system-prompt",
@@ -270,11 +186,7 @@
       "example": "claude --append-system-prompt \"Always respond concisely\"",
       "isNew": true,
       "category": "flag",
-      "tags": [
-        "append",
-        "prompt",
-        "system"
-      ]
+      "tags": ["append", "prompt", "system"]
     },
     {
       "id": "fallback-model",
@@ -284,12 +196,7 @@
       "example": "claude --fallback-model haiku --print \"query\"",
       "isNew": true,
       "category": "flag",
-      "tags": [
-        "fallback",
-        "model",
-        "overload",
-        "print"
-      ]
+      "tags": ["fallback", "model", "overload", "print"]
     },
     {
       "id": "ide-flag",
@@ -299,12 +206,7 @@
       "example": "claude --ide",
       "isNew": true,
       "category": "flag",
-      "tags": [
-        "auto",
-        "connect",
-        "ide",
-        "startup"
-      ]
+      "tags": ["auto", "connect", "ide", "startup"]
     },
     {
       "id": "strict-mcp-config",
@@ -314,12 +216,7 @@
       "example": "claude --strict-mcp-config --mcp-config ./mcp-servers.json",
       "isNew": true,
       "category": "flag",
-      "tags": [
-        "config",
-        "mcp",
-        "servers",
-        "strict"
-      ]
+      "tags": ["config", "mcp", "servers", "strict"]
     },
     {
       "id": "session-id",
@@ -329,11 +226,7 @@
       "example": "claude --session-id 12345678-1234-1234-1234-123456789abc",
       "isNew": true,
       "category": "flag",
-      "tags": [
-        "id",
-        "session",
-        "uuid"
-      ]
+      "tags": ["id", "session", "uuid"]
     }
   ]
 }

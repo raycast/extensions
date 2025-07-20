@@ -83,7 +83,7 @@
       "name": "forceLoginMethod",
       "description": "Use 'claudeai' to restrict login to Claude.ai accounts, 'console' to restrict login to Anthropic Console (API usage billing) accounts.",
       "usage": "\"forceLoginMethod\": \"claudeai\"",
-      "example": "{\n  \"forceLoginMethod\": \"claudeai\"\n}",
+      "example": "{\n  \"forceLoginMethod\": \"console\"\n}",
       "isNew": true,
       "category": "settings",
       "tags": ["account", "authentication", "login", "restrict"]
