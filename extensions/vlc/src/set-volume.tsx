@@ -1,7 +1,13 @@
 import { showHUD, getPreferenceValues } from "@raycast/api";
 import { VLC_REMOTE_URL } from "./constants";
 
-export default async function main(input: any) {
+interface SetVolumeArguments {
+  arguments: {
+    percentage: string;
+  };
+}
+
+export default async function main(input: SetVolumeArguments) {
   const percentageStr = input?.arguments?.percentage;
   const percentage = Number(percentageStr);
   if (isNaN(percentage) || percentage < 0 || percentage > 125) {
@@ -16,7 +22,8 @@ export default async function main(input: any) {
     const res = await fetch(url, { headers: { Authorization: `Basic ${auth}` } });
     if (!res.ok) throw new Error("Request failed");
     await showHUD(`🔊 Volume set to ${percentage}%`);
-  } catch (e: any) {
-    await showHUD(`Failed to set volume: ${e?.message || e}`);
+  } catch (e) {
+    const error = e instanceof Error ? e.message : String(e);
+    await showHUD(`Failed to set volume: ${error}`);
   }
 }

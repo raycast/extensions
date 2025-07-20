@@ -3,7 +3,7 @@
   "name": "vlc",
   "title": "VLC",
   "description": "Seamlessly control VLC Media Player from Raycast. Play, pause, skip tracks, adjust volume, seek, toggle fullscreen, and more—all from your keyboard. Requires VLC's HTTP interface enabled.",
-  "icon": "extension-icon.svg",
+  "icon": "extension-icon.png",
   "author": "kud",
   "license": "MIT",
   "commands": [

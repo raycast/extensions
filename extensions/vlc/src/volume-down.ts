@@ -9,7 +9,7 @@ export default async function main() {
     const res = await fetch(url, { headers: { Authorization: `Basic ${auth}` } });
     if (!res.ok) throw new Error("Request failed");
     await showHUD("🔉 Volume Down");
-  } catch (e) {
+  } catch {
     await showHUD("Failed to decrease volume");
   }
 }

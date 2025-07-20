@@ -9,7 +9,7 @@ export default async function main() {
     const res = await fetch(url, { headers: { Authorization: `Basic ${auth}` } });
     if (!res.ok) throw new Error("Request failed");
     await showHUD("🔀 Toggle Random");
-  } catch (e) {
+  } catch {
     await showHUD("Failed to toggle random");
   }
 }
