@@ -1,7 +1,7 @@
 import { EmailRoutingRule } from "cloudflare/resources/email-routing/rules/rules";
-import { fetchWithAuth } from "../api/client";
+import { cloudflare, fetchWithAuth } from "../api/client";
 import { getApiConfig } from "../api/config";
-import { AliasRule, ParsedAliasMeta } from "../../types";
+import { AliasRule, CloudflarePaginatedResponse, CloudflareResponse, ParsedAliasMeta } from "../../types";
 import {
   APP_RULE_PREFIX,
   SEPARATOR,
@@ -10,6 +10,8 @@ import {
   extractDomainFromEmail,
   constructRuleName,
 } from "../../utils";
+import Cloudflare from "cloudflare";
+import { Zone } from "cloudflare/resources/zones/zones";
 
 // Rate limiting helper
 class RateLimiter {
@@ -52,7 +54,12 @@ export async function getAccountDomain(): Promise<string> {
   // Get zone information to extract the domain name
   const url = `https://api.cloudflare.com/client/v4/zones/${config.zoneId}`;
   const response = await fetchWithAuth(url);
-  const data = await response.json();
+  const data = await response.json() as CloudflareResponse<Zone>;
+  
+//   const client = new Cloudflare({
+//   apiToken: 'Sn3lZJTBX6kkg7OdcBUAxOO963GEIyGQqnFTOFYY',
+// });
+// const zone = await client.emailRouting.rules.list("");
 
   if (!data.success) {
     throw new Error(
@@ -66,11 +73,17 @@ export async function getAccountDomain(): Promise<string> {
 
 export async function getAllRules(): Promise<EmailRoutingRule[]> {
   const config = getApiConfig();
+  const all = [];
+  for await (const emailRoutingRule of cloudflare.emailRouting.rules.list(config.zoneId)) {
+    all.push(emailRoutingRule)
+  }
+  return all;
+
 
   // First, get the total count to determine how many pages we need
   const firstPageUrl = `https://api.cloudflare.com/client/v4/zones/${config.zoneId}/email/routing/rules?per_page=50&page=1`;
   const firstResponse = await fetchWithAuth(firstPageUrl);
-  const firstData = await firstResponse.json();
+  const firstData = await firstResponse.json() as CloudflarePaginatedResponse<EmailRoutingRule>;
 
   if (!firstData.success) {
     throw new Error(
@@ -95,7 +108,7 @@ export async function getAllRules(): Promise<EmailRoutingRule[]> {
   }
 
   // Wait for all remaining pages
-  const remainingPages = await Promise.all(remainingPagePromises);
+  const remainingPages = await Promise.all(remainingPagePromises) as CloudflarePaginatedResponse<EmailRoutingRule>[];
 
   // Combine all results
   const allRules = [...firstData.result];
