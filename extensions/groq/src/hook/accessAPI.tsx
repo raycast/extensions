@@ -2,15 +2,9 @@ import { getSelectedText, Detail, ActionPanel, Action, showToast, Toast, Icon } 
 import { useEffect, useState } from "react";
 import { global_model, enable_streaming, openai, show_metadata } from "./configAPI";
 import { Stream } from "openai/streaming";
-import { allModels as changeModels, currentDate, countToken, estimatePrice } from "./utils";
+import { allModels as changeModels, currentDate, countToken, estimatePrice, formatUserMessage } from "./utils";
 import { ResultViewProps } from "./ResultView.types";
 import { OpenAIError } from "openai";
-
-const formatUserMessage = (message: string): string =>
-  message
-    .split("\n")
-    .map((line) => `>${line}`)
-    .join("\n");
 
 export default function ResultView(props: ResultViewProps) {
   const { sys_prompt, selected_text, user_extra_msg, model_override, toast_title, temperature } = props;

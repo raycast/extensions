@@ -52,3 +52,10 @@ export const currentDate = new Date().toLocaleString("en-US", {
 export function countToken(content: string) {
   return encode(content).length;
 }
+
+export function formatUserMessage(message: string): string {
+  return message
+    .split("\n")
+    .map((line) => `>${line}`)
+    .join("\n");
+}
