@@ -3,6 +3,7 @@
 ## [Bugfix & Enhancement] - {PR_MERGE_DATE}
 
 - Fix a bug which cannot update icon packs
+- Add a field `file` to cross-extension callback values
 - Add a new preference option for loading history versions
 - Bump all dependencies to the latest
 

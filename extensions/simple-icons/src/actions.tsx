@@ -1,10 +1,11 @@
 /* eslint @raycast/prefer-title-case: off */
 import { useEffect, useState } from "react";
-import { Action, Icon } from "@raycast/api";
+import path from "node:path";
+import { Action, Icon, environment } from "@raycast/api";
 import { callbackLaunchCommand } from "raycast-cross-extension";
 import { getIconSlug } from "./vender/simple-icons-sdk.js";
 import { IconData, LaunchContext } from "./types.js";
-import { copySvg, makeCopyToDownload } from "./utils.js";
+import { copySvg, getFileLink, makeCopyToDownload } from "./utils.js";
 import Releases from "./views/releases.js";
 
 type ActionProps = {
@@ -76,12 +77,14 @@ export const Supports = () => (
   </>
 );
 
-export const LaunchCommand = ({ callbackLaunchOptions, icon }: LaunchContext & ActionProps) => (
+export const LaunchCommand = ({ callbackLaunchOptions, icon, version }: LaunchContext & ActionProps) => (
   <Action
     title="Use This Icon"
     icon={Icon.Checkmark}
     onAction={async () => {
-      callbackLaunchCommand(callbackLaunchOptions, { icon });
+      callbackLaunchCommand(callbackLaunchOptions, {
+        icon: { ...icon, file: path.join(environment.assetsPath, getFileLink(icon.slug, version)) },
+      });
     }}
   />
 );

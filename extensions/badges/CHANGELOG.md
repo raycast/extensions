@@ -1,5 +1,10 @@
 # Badges Changelog
 
+## [Enhancement] - {PR_MERGE_DATE}
+
+- Add support for using base64 encoded SVG for logo
+- Bump all dependencies to the latest
+
 ## [Enhancement] - 2025-01-12
 
 - Add support for setting label to empty

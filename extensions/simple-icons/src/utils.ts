@@ -199,6 +199,8 @@ export const getAliases = (icon: IconData) => {
   return [...new Set([...aka, ...dup, ...loc])];
 };
 
+export const getFileLink = (slug: string, version: string) => `pack/${version}/icons/${slug}.svg`;
+
 export const getKeywords = (icon: IconData) =>
   [
     icon.title,
