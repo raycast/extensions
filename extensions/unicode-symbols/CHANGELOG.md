@@ -1,6 +1,6 @@
 # Unicode Symbols
 
-## [Improvements] - 2025-06-20
+## [Improvements] - 2025-07-20
 
 - Added the "CHARACTER TABULATION" (tab whitespace character) to the datasets.
 
