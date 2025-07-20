@@ -47,10 +47,10 @@
           ]
         }
       ],
-      "platforms: [
+      "platforms": [
         "macOS",
         "Windows"
-      ]
+      ],
       "preferences": [
         {
           "name": "model",
