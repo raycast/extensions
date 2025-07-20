@@ -13,6 +13,7 @@ import {
   getPreferenceValues,
 } from "@raycast/api";
 import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
+import { useEffect } from "react";
 
 import { addComment, quickAddTask, uploadFile } from "./api";
 import RefreshAction from "./components/RefreshAction";
@@ -25,6 +26,7 @@ import { getProjectIcon } from "./helpers/projects";
 import { getTaskAppUrl, getTaskUrl } from "./helpers/tasks";
 import { withTodoistApi } from "./helpers/withTodoistApi";
 import { isTodoistInstalled } from "./hooks/useIsTodoistInstalled";
+import { useNLPParser } from "./hooks/useNLPParser";
 import useSyncData from "./hooks/useSyncData";
 
 type CreateTaskValues = {
@@ -73,9 +75,9 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
 
       try {
         // Always use quick-add API for server-side natural language parsing
-        const { id } = await quickAddTask({ 
+        const { id } = await quickAddTask({
           text: values.content,
-          note: values.description || undefined
+          note: values.description || undefined,
         });
 
         toast.style = Toast.Style.Success;
@@ -158,6 +160,22 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
     },
   });
 
+  // Real-time NLP parsing
+  const parsedData = useNLPParser(values.content, projects);
+
+  // Auto-update form fields based on parsed data
+  useEffect(() => {
+    if (parsedData.priority !== undefined && String(parsedData.priority) !== values.priority) {
+      setValue("priority", String(parsedData.priority));
+    }
+  }, [parsedData.priority, setValue, values.priority]);
+
+  useEffect(() => {
+    if (parsedData.projectId !== undefined && parsedData.projectId !== values.projectId) {
+      setValue("projectId", parsedData.projectId);
+    }
+  }, [parsedData.projectId, setValue, values.projectId]);
+
   const projectSections = sections?.filter((section) => section.project_id === values.projectId);
 
   const collaborators = getProjectCollaborators(values.projectId, data);
@@ -173,10 +191,10 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
       }
       enableDrafts={!fromProjectId && !fromTodayEmptyView && !fromLabel}
     >
-      <Form.TextField 
-        {...itemProps.content} 
-        title="Title" 
-        placeholder="Buy fruits p1 #Work @urgent today at 5pm" 
+      <Form.TextField
+        {...itemProps.content}
+        title="Title"
+        placeholder="Buy fruits p1 #Work @urgent today at 5pm"
         info="Natural language parsing enabled: p1-p4 (priority), #project, @label, dates/times. Uses Todoist's server-side parsing."
       />
 
