@@ -109,8 +109,8 @@
     "macOS"
   ],
   "dependencies": {
-    "@raycast/api": "^1.94.0",
-    "@raycast/utils": "^1.18.1"
+    "@raycast/api": "^1.101.1",
+    "@raycast/utils": "^2.2.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -118,8 +118,6 @@
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
-    "react": "^18.2.0",
-    "react-devtools": "^6.1.1",
     "typescript": "^5.8.2"
   },
   "scripts": {
