@@ -1,4 +1,5 @@
 import { showHUD, getPreferenceValues } from "@raycast/api";
+import { VLC_REMOTE_URL } from "./constants";
 
 export default async function main(input: any) {
   const percentageStr = input?.arguments?.percentage;
@@ -9,7 +10,7 @@ export default async function main(input: any) {
   }
   const { vlc_password } = getPreferenceValues();
   const volume = Math.round((percentage / 100) * 256);
-  const url = `http://localhost:8080/requests/status.json?command=volume&val=${volume}`;
+  const url = `${VLC_REMOTE_URL}?command=volume&val=${volume}`;
   const auth = Buffer.from(`:${vlc_password}`).toString("base64");
   try {
     const res = await fetch(url, { headers: { Authorization: `Basic ${auth}` } });
