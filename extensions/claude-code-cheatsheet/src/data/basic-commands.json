@@ -10,7 +10,11 @@
       "usage": "claude",
       "example": "claude",
       "category": "basic",
-      "tags": ["basic", "interactive", "REPL"]
+      "tags": [
+        "REPL",
+        "basic",
+        "interactive"
+      ]
     },
     {
       "id": "claude-query",
@@ -19,7 +23,11 @@
       "usage": "claude \"<initial-prompt>\"",
       "example": "claude \"Please review this code\"",
       "category": "basic",
-      "tags": ["initial", "interactive", "prompt"]
+      "tags": [
+        "initial",
+        "interactive",
+        "prompt"
+      ]
     },
     {
       "id": "claude-print",
@@ -28,7 +36,11 @@
       "usage": "claude -p \"<query>\"",
       "example": "claude -p \"Please explain this function\"",
       "category": "basic",
-      "tags": ["non-interactive", "one-shot", "print"]
+      "tags": [
+        "non-interactive",
+        "one-shot",
+        "print"
+      ]
     },
     {
       "id": "claude-continue",
@@ -37,7 +49,12 @@
       "usage": "claude -c",
       "example": "claude -c",
       "category": "basic",
-      "tags": ["continue", "conversation", "latest", "resume"]
+      "tags": [
+        "continue",
+        "conversation",
+        "latest",
+        "resume"
+      ]
     },
     {
       "id": "claude-config",
@@ -48,7 +65,12 @@
       "deprecated": true,
       "alternative": "Use settings.json configuration file instead",
       "category": "basic",
-      "tags": ["config", "deprecated", "management", "settings"]
+      "tags": [
+        "config",
+        "deprecated",
+        "management",
+        "settings"
+      ]
     },
     {
       "id": "claude-update",
@@ -57,7 +79,12 @@
       "usage": "claude update",
       "example": "claude update",
       "category": "basic",
-      "tags": ["latest", "maintenance", "update", "upgrade"]
+      "tags": [
+        "latest",
+        "maintenance",
+        "update",
+        "upgrade"
+      ]
     },
     {
       "id": "claude-mcp",
@@ -66,7 +93,12 @@
       "usage": "claude mcp",
       "example": "claude mcp",
       "category": "basic",
-      "tags": ["configuration", "MCP", "protocol", "server"]
+      "tags": [
+        "MCP",
+        "configuration",
+        "protocol",
+        "server"
+      ]
     },
     {
       "id": "claude-migrate-installer",
@@ -75,7 +107,12 @@
       "usage": "claude migrate-installer",
       "example": "claude migrate-installer",
       "category": "basic",
-      "tags": ["installation", "local", "migration", "npm"]
+      "tags": [
+        "installation",
+        "local",
+        "migration",
+        "npm"
+      ]
     },
     {
       "id": "claude-doctor",
@@ -84,7 +121,12 @@
       "usage": "claude doctor",
       "example": "claude doctor",
       "category": "basic",
-      "tags": ["check", "diagnosis", "health", "status"]
+      "tags": [
+        "check",
+        "diagnosis",
+        "health",
+        "status"
+      ]
     },
     {
       "id": "claude-pipe",
@@ -93,7 +135,12 @@
       "usage": "command | claude -p \"<query>\"",
       "example": "cat logs.txt | claude -p \"analyze these errors\"",
       "category": "basic",
-      "tags": ["input", "integration", "pipe", "stream"]
+      "tags": [
+        "input",
+        "integration",
+        "pipe",
+        "stream"
+      ]
     },
     {
       "id": "claude-continue-print",
@@ -102,7 +149,11 @@
       "usage": "claude -c -p \"<query>\"",
       "example": "claude -c -p \"Check for type errors\"",
       "category": "basic",
-      "tags": ["continue", "non-interactive", "sdk"]
+      "tags": [
+        "continue",
+        "non-interactive",
+        "sdk"
+      ]
     },
     {
       "id": "claude-resume-session",
@@ -111,7 +162,41 @@
       "usage": "claude -r \"<session-id>\" \"<query>\"",
       "example": "claude -r \"ab-cde-123\" \"Finish writing this function\"",
       "category": "basic",
-      "tags": ["id", "resume", "session"]
+      "tags": [
+        "id",
+        "resume",
+        "session"
+      ]
+    },
+    {
+      "id": "claude-setup-token",
+      "name": "claude setup-token",
+      "description": "Set up a long-lived authentication token (requires Claude subscription).",
+      "usage": "claude setup-token",
+      "example": "claude setup-token",
+      "isNew": true,
+      "category": "basic",
+      "tags": [
+        "auth",
+        "setup",
+        "subscription",
+        "token"
+      ]
+    },
+    {
+      "id": "claude-install",
+      "name": "claude install",
+      "description": "Install Claude Code native build. Use [target] to specify version (stable, latest, or specific version).",
+      "usage": "claude install [target]",
+      "example": "claude install stable",
+      "isNew": true,
+      "category": "basic",
+      "tags": [
+        "build",
+        "install",
+        "native",
+        "version"
+      ]
     }
   ]
 }

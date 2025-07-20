@@ -4,13 +4,32 @@
   "description": "Slash commands available in Claude Code",
   "commands": [
     {
-      "id": "add-dir",
+      "id": "slash-add-dir",
       "name": "/add-dir",
       "description": "Add additional working directories to the current Claude Code session for broader project context.",
       "usage": "/add-dir",
       "example": "/add-dir",
       "category": "slash",
-      "tags": ["directory", "project", "workspace"]
+      "tags": [
+        "directory",
+        "project",
+        "workspace"
+      ]
+    },
+    {
+      "id": "bashes",
+      "name": "/bashes",
+      "description": "List and manage background bash shells running in the current session.",
+      "usage": "/bashes",
+      "example": "/bashes",
+      "isNew": true,
+      "category": "slash",
+      "tags": [
+        "background",
+        "bash",
+        "manage",
+        "shells"
+      ]
     },
     {
       "id": "bug",
@@ -19,7 +38,11 @@
       "usage": "/bug",
       "example": "/bug",
       "category": "slash",
-      "tags": ["bug", "issue", "report"]
+      "tags": [
+        "bug",
+        "issue",
+        "report"
+      ]
     },
     {
       "id": "clear",
@@ -28,7 +51,11 @@
       "usage": "/clear",
       "example": "/clear",
       "category": "slash",
-      "tags": ["clear", "delete", "history"]
+      "tags": [
+        "clear",
+        "delete",
+        "history"
+      ]
     },
     {
       "id": "compact",
@@ -37,7 +64,12 @@
       "usage": "/compact [instructions]",
       "example": "/compact focus on bug fixes",
       "category": "slash",
-      "tags": ["compact", "compress", "focus", "summarize"]
+      "tags": [
+        "compact",
+        "compress",
+        "focus",
+        "summarize"
+      ]
     },
     {
       "id": "config",
@@ -46,7 +78,11 @@
       "usage": "/config",
       "example": "/config",
       "category": "slash",
-      "tags": ["configuration", "modify", "settings"]
+      "tags": [
+        "configuration",
+        "modify",
+        "settings"
+      ]
     },
     {
       "id": "cost",
@@ -55,7 +91,11 @@
       "usage": "/cost",
       "example": "/cost",
       "category": "slash",
-      "tags": ["cost", "statistics", "tokens"]
+      "tags": [
+        "cost",
+        "statistics",
+        "tokens"
+      ]
     },
     {
       "id": "doctor",
@@ -64,16 +104,41 @@
       "usage": "/doctor",
       "example": "/doctor",
       "category": "slash",
-      "tags": ["check", "diagnostics", "doctor", "health"]
+      "tags": [
+        "check",
+        "diagnostics",
+        "doctor",
+        "health"
+      ]
     },
     {
-      "id": "help",
+      "id": "slash-help",
       "name": "/help",
       "description": "Shows a help message with a list of available slash commands and their functions.",
       "usage": "/help",
       "example": "/help",
       "category": "slash",
-      "tags": ["documentation", "help", "support"]
+      "tags": [
+        "documentation",
+        "help",
+        "support"
+      ]
+    },
+    {
+      "id": "hooks",
+      "name": "/hooks",
+      "description": "Manage hook configurations for tool events and workflow automation.",
+      "usage": "/hooks",
+      "example": "/hooks",
+      "isNew": true,
+      "category": "slash",
+      "tags": [
+        "automation",
+        "configuration",
+        "events",
+        "hooks",
+        "tools"
+      ]
     },
     {
       "id": "ide",
@@ -82,7 +147,12 @@
       "usage": "/ide",
       "example": "/ide",
       "category": "slash",
-      "tags": ["development", "IDE", "integration", "status"]
+      "tags": [
+        "IDE",
+        "development",
+        "integration",
+        "status"
+      ]
     },
     {
       "id": "init",
@@ -91,7 +161,13 @@
       "usage": "/init",
       "example": "/init",
       "category": "slash",
-      "tags": ["CLAUDE.md", "documentation", "initialize", "project", "start"]
+      "tags": [
+        "CLAUDE.md",
+        "documentation",
+        "initialize",
+        "project",
+        "start"
+      ]
     },
     {
       "id": "install-github-app",
@@ -100,7 +176,13 @@
       "usage": "/install-github-app",
       "example": "/install-github-app",
       "category": "slash",
-      "tags": ["Actions", "automation", "GitHub", "repository", "setup"]
+      "tags": [
+        "Actions",
+        "GitHub",
+        "automation",
+        "repository",
+        "setup"
+      ]
     },
     {
       "id": "login",
@@ -109,7 +191,13 @@
       "usage": "/login",
       "example": "/login",
       "category": "slash",
-      "tags": ["account", "authentication", "login", "sign-in", "switch"]
+      "tags": [
+        "account",
+        "authentication",
+        "login",
+        "sign-in",
+        "switch"
+      ]
     },
     {
       "id": "logout",
@@ -118,7 +206,12 @@
       "usage": "/logout",
       "example": "/logout",
       "category": "slash",
-      "tags": ["account", "exit", "logout", "sign out"]
+      "tags": [
+        "account",
+        "exit",
+        "logout",
+        "sign out"
+      ]
     },
     {
       "id": "mcp",
@@ -127,7 +220,13 @@
       "usage": "/mcp",
       "example": "/mcp",
       "category": "slash",
-      "tags": ["connection", "MCP", "protocol", "server", "status"]
+      "tags": [
+        "MCP",
+        "connection",
+        "protocol",
+        "server",
+        "status"
+      ]
     },
     {
       "id": "memory",
@@ -136,7 +235,26 @@
       "usage": "/memory",
       "example": "/memory",
       "category": "slash",
-      "tags": ["CLAUDE.md", "edit", "memory"]
+      "tags": [
+        "CLAUDE.md",
+        "edit",
+        "memory"
+      ]
+    },
+    {
+      "id": "migrate-installer",
+      "name": "/migrate-installer",
+      "description": "Migrate from global npm installation to local installation for better version control.",
+      "usage": "/migrate-installer",
+      "example": "/migrate-installer",
+      "isNew": true,
+      "category": "slash",
+      "tags": [
+        "installation",
+        "local",
+        "migration",
+        "npm"
+      ]
     },
     {
       "id": "pr_comments",
@@ -145,7 +263,13 @@
       "usage": "/pr_comments",
       "example": "/pr_comments",
       "category": "slash",
-      "tags": ["comments", "GitHub", "PR", "pull request", "review"]
+      "tags": [
+        "GitHub",
+        "PR",
+        "comments",
+        "pull request",
+        "review"
+      ]
     },
     {
       "id": "permissions",
@@ -154,7 +278,14 @@
       "usage": "/permissions",
       "example": "/permissions",
       "category": "slash",
-      "tags": ["access", "allowed-tools", "control", "deny", "permissions", "rules"]
+      "tags": [
+        "access",
+        "allowed-tools",
+        "control",
+        "deny",
+        "permissions",
+        "rules"
+      ]
     },
     {
       "id": "review",
@@ -163,7 +294,11 @@
       "usage": "/review",
       "example": "/review",
       "category": "slash",
-      "tags": ["check", "code", "review"]
+      "tags": [
+        "check",
+        "code",
+        "review"
+      ]
     },
     {
       "id": "release-notes",
@@ -172,7 +307,13 @@
       "usage": "/release-notes",
       "example": "/release-notes",
       "category": "slash",
-      "tags": ["changelog", "notes", "release", "updates", "version"]
+      "tags": [
+        "changelog",
+        "notes",
+        "release",
+        "updates",
+        "version"
+      ]
     },
     {
       "id": "terminal-setup",
@@ -181,7 +322,13 @@
       "usage": "/terminal-setup",
       "example": "/terminal-setup",
       "category": "slash",
-      "tags": ["enhancements", "key binding", "keybindings", "setup", "terminal"]
+      "tags": [
+        "enhancements",
+        "key binding",
+        "keybindings",
+        "setup",
+        "terminal"
+      ]
     },
     {
       "id": "upgrade",
@@ -190,7 +337,13 @@
       "usage": "/upgrade",
       "example": "/upgrade",
       "category": "slash",
-      "tags": ["Max", "Opus", "rate limits", "subscription", "upgrade"]
+      "tags": [
+        "Max",
+        "Opus",
+        "rate limits",
+        "subscription",
+        "upgrade"
+      ]
     },
     {
       "id": "vim",
@@ -199,16 +352,55 @@
       "usage": "/vim",
       "example": "/vim",
       "category": "slash",
-      "tags": ["enable", "mode", "Vim"]
+      "tags": [
+        "Vim",
+        "enable",
+        "mode"
+      ]
     },
     {
-      "id": "model",
+      "id": "slash-model",
       "name": "/model",
       "description": "Allows you to view or change the AI model being used for the current session.",
       "usage": "/model",
       "example": "/model",
       "category": "slash",
-      "tags": ["AI", "change", "configuration", "model"]
+      "tags": [
+        "AI",
+        "change",
+        "configuration",
+        "model"
+      ]
+    },
+    {
+      "id": "export",
+      "name": "/export",
+      "description": "Export the current conversation for sharing or archival purposes.",
+      "usage": "/export",
+      "example": "/export",
+      "isNew": true,
+      "category": "slash",
+      "tags": [
+        "archival",
+        "export",
+        "save",
+        "sharing"
+      ]
+    },
+    {
+      "id": "resume",
+      "name": "/resume",
+      "description": "Switch between conversations within Claude Code session.",
+      "usage": "/resume",
+      "example": "/resume",
+      "isNew": true,
+      "category": "slash",
+      "tags": [
+        "conversation",
+        "resume",
+        "session",
+        "switch"
+      ]
     },
     {
       "id": "exit",
@@ -217,7 +409,11 @@
       "usage": "/exit",
       "example": "/exit",
       "category": "slash",
-      "tags": ["exit", "quit", "REPL"]
+      "tags": [
+        "REPL",
+        "exit",
+        "quit"
+      ]
     },
     {
       "id": "status",
@@ -226,7 +422,14 @@
       "usage": "/status",
       "example": "/status",
       "category": "slash",
-      "tags": ["account", "connectivity", "diagnostics", "status", "system", "version"]
+      "tags": [
+        "account",
+        "connectivity",
+        "diagnostics",
+        "status",
+        "system",
+        "version"
+      ]
     }
   ]
 }
