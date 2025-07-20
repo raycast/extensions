@@ -9,6 +9,7 @@ Organize and manage your project-related links in one place.
 - Quick search through projects and links
 - Open all project links with a single command
 - Keyboard shortcuts for efficient navigation
+- Recent projects section sorted by usage frequency
 
 ## Usage
 
@@ -21,6 +22,10 @@ Organize and manage your project-related links in one place.
    - `Cmd` + `C`: Copy link URL
    - `Cmd` + `Shift` + `O`: Open all links
    - `Cmd` + `Shift` + `Backspace`: Delete item
+
+## Preferences
+
+- **Max Recent Projects**: Set how many recent projects to show (default: 3)
 
 ## Support
 

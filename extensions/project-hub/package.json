@@ -19,6 +19,16 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "maxRecentProjects",
+      "type": "textfield",
+      "required": false,
+      "title": "Max Recent Projects",
+      "description": "Maximum number of recent projects to show (default: 3)",
+      "default": "3"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.99.3",
     "@raycast/utils": "^1.19.1"
