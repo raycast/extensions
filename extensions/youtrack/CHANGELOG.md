@@ -1,5 +1,9 @@
 # YouTrack Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Bugfixes and improvements
+
 ## [Update] - 2025-06-23
 
 - Move screenshots to `metadata`
