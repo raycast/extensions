@@ -8,7 +8,7 @@ Organize and manage your project-related links in one place.
 - Organize links within projects with automatic favicons
 - Quick search through projects and links
 - Open all project links with a single command
-- Keyboard shortcuts for efficient navigation
+- Keyboard shortcuts for efficient navigation (⌘1, ⌘2, ⌘3 for recent projects)
 - Recent projects section sorted by usage frequency
 
 ## Usage

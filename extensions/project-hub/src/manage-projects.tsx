@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, List, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, showToast, Toast, getPreferenceValues, Keyboard } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Project } from "./types";
 import { getProjects, deleteProject } from "./utils/storage";
@@ -15,7 +15,7 @@ export default function Command() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const preferences = getPreferenceValues<Preferences>();
-  const maxRecent = parseInt(preferences.maxRecentProjects || "3");
+  const maxRecent = Math.min(Math.max(parseInt(preferences.maxRecentProjects || "3"), 1), 9);
 
   async function loadProjects() {
     try {
@@ -82,7 +82,7 @@ export default function Command() {
                       title="Open Project"
                       icon={Icon.ArrowRight}
                       target={<ProjectView project={project} />}
-                      shortcut={{ modifiers: ["cmd"], key: `${index + 1}` as "1" | "2" | "3" }}
+                      shortcut={{ modifiers: ["cmd"], key: `${index + 1}` as Keyboard.KeyEquivalent }}
                     />
                     <Action.Push
                       title="Edit Project"

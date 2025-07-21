@@ -41,8 +41,8 @@ export function ProjectView({ project }: ProjectViewProps) {
   useEffect(() => {
     loadLinks();
     // Track project usage when component mounts
-    updateProjectUsage(project.id).catch(async (error) => {
-      await showFailureToast(error, { title: "Failed to update project usage" });
+    updateProjectUsage(project.id).catch((error) => {
+      showFailureToast(error, { title: "Failed to update project usage" });
     });
   }, [project.id]);
 
