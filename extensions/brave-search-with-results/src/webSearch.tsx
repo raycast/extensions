@@ -1,5 +1,5 @@
 import { List, ActionPanel, Action, Icon, LaunchProps } from "@raycast/api";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 
 import useWebSearch from "./hooks/useWebSearch.js";
 import useHistory, { Type } from "./hooks/useHistory.js";
@@ -7,6 +7,7 @@ import useHistory, { Type } from "./hooks/useHistory.js";
 import groupHistory from "./utils/groupHistory.js";
 import formatUrl from "./utils/formatUrl.js";
 import useSuggestions from "./hooks/useSuggestions.js";
+import useMode from "./hooks/useMode.js";
 
 enum Mode {
   History,
@@ -14,18 +15,12 @@ enum Mode {
   Search,
 }
 
-export default function Command(props: LaunchProps) {
+export default function WebSearchCommand(props: LaunchProps) {
   const [fallbackText, setFallbackText] = useState(props.fallbackText);
   const [query, setQuery] = useState("");
   const [searching, setSearching] = useState(false);
 
-  const mode = useMemo(() => {
-    if (searching === false && query.length === 0) return Mode.History;
-    if (searching === false && query.length > 0) return Mode.Suggestions;
-    if (searching) return Mode.Search;
-
-    throw new Error("Invalid mode");
-  }, [searching, query]);
+  const mode = useMode(searching, query);
 
   const {
     isLoading: isLoadingHistory,
@@ -33,7 +28,7 @@ export default function Command(props: LaunchProps) {
     addToHistory,
     removeFromHistory,
     clearHistory,
-  } = useHistory();
+  } = useHistory(Type.Web);
   const { isLoading: isLoadingSuggestions, results: suggestionsResults } = useSuggestions(
     query,
     mode === Mode.Suggestions,
@@ -42,6 +37,28 @@ export default function Command(props: LaunchProps) {
 
   const historyGroups = useMemo(() => groupHistory(historyItems), [historyItems]);
   const isLoading = isLoadingHistory || isLoadingSuggestions || isLoadingWebSearch;
+
+  const onSearchTextChange = useCallback(
+    (query: string) => {
+      // When called as a fallback, Raycast calls this function with the fallback text, which should…
+      // …add the query to the history.
+      // …invoke the search .
+      const fallbackTextSearchTextChange = fallbackText === query;
+
+      setQuery(query);
+
+      if (fallbackTextSearchTextChange) {
+        setSearching(true);
+        addToHistory(query);
+      } else {
+        setSearching(false);
+      }
+
+      // Avoid that upcoming function calls are treated as fallback calls
+      setFallbackText(undefined);
+    },
+    [fallbackText, addToHistory, setSearching, setQuery, setFallbackText],
+  );
 
   const historyList = historyGroups.map((historyGroup) => (
     <List.Section key={historyGroup.title} title={historyGroup.title}>
@@ -58,7 +75,7 @@ export default function Command(props: LaunchProps) {
                   icon={Icon.MagnifyingGlass}
                   title="Search"
                   onAction={() => {
-                    addToHistory(item.query, Type.Web);
+                    addToHistory(item.query);
                     setQuery(item.query);
                     setSearching(true);
                   }}
@@ -101,7 +118,7 @@ export default function Command(props: LaunchProps) {
                 icon={Icon.MagnifyingGlass}
                 title="Search"
                 onAction={() => {
-                  addToHistory(suggestionsResult.query, Type.Web);
+                  addToHistory(suggestionsResult.query);
                   setQuery(suggestionsResult.query);
                   setSearching(true);
                 }}
@@ -147,29 +164,7 @@ export default function Command(props: LaunchProps) {
   );
 
   return (
-    <List
-      searchText={query}
-      onSearchTextChange={(query) => {
-        // When called as a fallback, Raycast calls this function with the fallback text, which should…
-        // …add the query to the history.
-        // …invoke the search .
-        const fallbackTextSearchTextChange = fallbackText === query;
-
-        setQuery(query);
-
-        if (fallbackTextSearchTextChange) {
-          setSearching(true);
-          addToHistory(query, Type.Web);
-        } else {
-          setSearching(false);
-        }
-
-        // Avoid that upcoming function calls are treated as fallback calls
-        setFallbackText(undefined);
-      }}
-      isLoading={isLoading}
-      filtering={false}
-    >
+    <List searchText={query} onSearchTextChange={onSearchTextChange} isLoading={isLoading} filtering={false}>
       {mode === Mode.History && historyList}
       {mode === Mode.Suggestions && suggestionsList}
       {mode === Mode.Search && webSearchList}
