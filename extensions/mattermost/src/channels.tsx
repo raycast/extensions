@@ -13,7 +13,7 @@ import {
   openExtensionPreferences,
 } from "@raycast/api";
 import { getAvatarIcon, runAppleScript, showFailureToast, usePromise } from "@raycast/utils";
-import { useState } from "react";
+import { JSX, useState } from "react";
 import { DateTime } from "luxon";
 import { MattermostClient } from "./shared/MattermostClient";
 import { Channel, UserProfile } from "./shared/MattermostTypes";
@@ -72,19 +72,20 @@ function ChannelsFinderList(): JSX.Element {
     if (preference.deepLinkType === "application") {
       try {
         await runAppleScript('launch application "Mattermost"');
-      } catch (error) {
+      } catch {
         await showFailureToast("Is Mattermost installed?", { title: "Error launching Mattermost" });
       }
     }
     const cachedState = await getCachedState();
-    cachedState && setState(cachedState);
+    if (cachedState) setState(cachedState);
 
-    await showToast(Toast.Style.Animated, "Fetch teams...");
+    const toast = await showToast(Toast.Style.Animated, "Fetch teams...");
 
     const [profile, teams] = await Promise.all([MattermostClient.getMe(), MattermostClient.getTeams()]);
     const teamsUI: TeamUI[] = teams.map((team) => ({ id: team.id, name: team.name }));
 
-    await showToast(Toast.Style.Success, `Found ${teamsUI.length} teams`);
+    toast.style = Toast.Style.Success
+    toast.title = `Found ${teamsUI.length} teams`;
     setCachedState({ profile: profile, teams: teamsUI });
     setState({ profile: profile, teams: teamsUI });
   });
@@ -280,7 +281,7 @@ function ChannelList(props: { profile: UserProfile; team: TeamUI }) {
     try {
       await open(fullDeeplink);
       await closeMainWindow();
-    } catch (error) {
+    } catch {
       await showFailureToast("Is Mattermost Running?", { title: "Error opening in Mattermost" });
     }
   }
