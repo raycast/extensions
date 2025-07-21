@@ -33,6 +33,19 @@ export function useBrowserLink() {
               get value of UI element 1 of combo box 1 of navigation
             end tell
           `);
+        case "app.zen-browser.zen":
+          return runAppleScript(`
+            tell application "System Events"
+                set zen to application process "Zen"
+
+                get properties of zen
+
+                set frontWindow to front window of zen
+                set firstGroup to first group of frontWindow
+                set navigation to toolbar "Navigation" of group 1 of group 1 of firstGroup
+                get value of UI element 1 of combo box 1 of group 1 of navigation
+            end tell
+          `);
         default:
           break;
       }

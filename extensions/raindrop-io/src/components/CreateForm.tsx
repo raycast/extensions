@@ -71,7 +71,12 @@ type CreateFormProps = {
 };
 
 async function getLinkTitle(link: string) {
-  return fetch(link)
+  let url = link.trim();
+  if (!url.match(/^https?:\/\//)) {
+    url = `https://${url}`;
+  }
+
+  return fetch(url)
     .then((response) => response.text())
     .then((html) => {
       const match = html.match(/<title>(.*?)<\/title>/i);
