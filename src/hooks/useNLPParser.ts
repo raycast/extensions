@@ -44,10 +44,12 @@ export function useNLPParser(content: string, projects?: Project[]): ParsedData 
     let parsedDeadline: Date | undefined;
     let labels: string[] = [];
 
-    // Parse deadline patterns first ({date expression})
-    const deadlineMatch = content.match(/\{([^}]+)\}/);
-    if (deadlineMatch) {
-      deadlineString = deadlineMatch[1];
+    // Parse deadline patterns - use the LAST occurrence ({date expression})
+    const deadlineMatches = Array.from(content.matchAll(/\{([^}]+)\}/g));
+    if (deadlineMatches.length > 0) {
+      // Use the last deadline pattern found
+      const lastDeadlineMatch = deadlineMatches[deadlineMatches.length - 1];
+      deadlineString = lastDeadlineMatch[1];
       
       // Parse the deadline using chrono with enhanced configuration
       const deadlineResults = chrono.casual.parse(deadlineString, new Date(), { forwardDate: true });
@@ -56,16 +58,20 @@ export function useNLPParser(content: string, projects?: Project[]): ParsedData 
       }
     }
 
-    // Parse labels (@label) - extract all labels
-    const labelMatches = content.match(/@(\w+)/g);
-    if (labelMatches) {
-      labels = labelMatches.map(match => match.replace('@', ''));
+    // Parse labels (@label) - extract all labels, keeping the most recent of each unique label
+    const labelMatches = Array.from(content.matchAll(/@(\w+)/g));
+    if (labelMatches.length > 0) {
+      // Get all labels but remove duplicates, keeping the last occurrence of each
+      const allLabels = labelMatches.map(match => match[1]);
+      labels = [...new Set(allLabels.reverse())].reverse(); // Remove duplicates, keeping last occurrence
     }
 
-    // Parse priority patterns (p1, p2, p3, p4)
-    const priorityMatch = content.match(/\bp([1-4])\b/i);
-    if (priorityMatch) {
-      const priorityNumber = parseInt(priorityMatch[1], 10);
+    // Parse priority patterns - use the LAST occurrence (p1, p2, p3, p4)
+    const priorityMatches = Array.from(content.matchAll(/\bp([1-4])\b/gi));
+    if (priorityMatches.length > 0) {
+      // Use the last priority pattern found
+      const lastPriorityMatch = priorityMatches[priorityMatches.length - 1];
+      const priorityNumber = parseInt(lastPriorityMatch[1], 10);
 
       // Convert user input to Todoist priority values
       // p1 (user) -> priority 4 (todoist), p4 (user) -> priority 1 (todoist)
@@ -79,10 +85,12 @@ export function useNLPParser(content: string, projects?: Project[]): ParsedData 
       priority = priorityMap[priorityNumber];
     }
 
-    // Parse project patterns (#ProjectName)
-    const projectMatch = content.match(/#([a-zA-Z0-9_\u00A0-\uFFFF]+)/);
-    if (projectMatch && projects) {
-      const userProjectName = projectMatch[1];
+    // Parse project patterns - use the LAST occurrence (#ProjectName)
+    const projectMatches = Array.from(content.matchAll(/#([a-zA-Z0-9_\u00A0-\uFFFF]+)/g));
+    if (projectMatches.length > 0 && projects) {
+      // Use the last project pattern found
+      const lastProjectMatch = projectMatches[projectMatches.length - 1];
+      const userProjectName = lastProjectMatch[1];
 
       // Find matching project with case-insensitive and emoji-stripped comparison
       const matchingProject = projects.find((project) => {
@@ -97,7 +105,7 @@ export function useNLPParser(content: string, projects?: Project[]): ParsedData 
     }
 
     // Enhanced natural language date parsing using chrono-node
-    // We parse from the original content to find dates
+    // We parse from the original content to find dates - use the LAST/MOST RECENT date found
     const customChrono = chrono.casual.clone();
     
     // Parse dates with enhanced options for better coverage
@@ -106,16 +114,11 @@ export function useNLPParser(content: string, projects?: Project[]): ParsedData 
     });
     
     if (dateResults.length > 0) {
-      // Find the best date match (longest, most specific)
-      let bestMatch = dateResults[0];
-      for (const result of dateResults) {
-        if (result.text.length > bestMatch.text.length) {
-          bestMatch = result;
-        }
-      }
+      // Use the LAST date found (most recent in the text)
+      const lastDateResult = dateResults[dateResults.length - 1];
       
-      dateString = bestMatch.text;
-      parsedDate = bestMatch.start.date();
+      dateString = lastDateResult.text;
+      parsedDate = lastDateResult.start.date();
     }
 
     // Return the original content as cleanedTitle (no cleaning applied)
