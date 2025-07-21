@@ -13,9 +13,9 @@ import {
   getPreferenceValues,
 } from "@raycast/api";
 import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
-import { addComment, quickAddTask, uploadFile } from "./api";
+import { addComment, addTask, quickAddTask, uploadFile } from "./api";
 import RefreshAction from "./components/RefreshAction";
 import TaskDetail from "./components/TaskDetail";
 import { getCollaboratorIcon, getProjectCollaborators } from "./helpers/collaborators";
@@ -74,11 +74,66 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
       await toast.show();
 
       try {
-        // Always use quick-add API for server-side natural language parsing
-        const { id } = await quickAddTask({
-          text: values.content,
-          note: values.description || undefined,
-        });
+        // Hybrid approach: Detect if user has manually overridden any form fields
+        const hasManualDate = values.date && (!parsedData.parsedDate || values.date.getTime() !== parsedData.parsedDate.getTime());
+        const hasManualDeadline = values.deadline && (!parsedData.parsedDeadline || values.deadline.getTime() !== parsedData.parsedDeadline.getTime());
+        const hasManualPriority = values.priority && parseInt(values.priority) !== parsedData.priority;
+        const hasManualProject = values.projectId && values.projectId !== parsedData.projectId;
+        const hasManualLabels = values.labels && values.labels.some(label => !parsedData.labels?.includes(label));
+        const hasManualSection = values.sectionId && values.sectionId !== "";
+        const hasManualResponsible = values.responsibleUid && values.responsibleUid !== "";
+        const hasManualParent = values.parentId && values.parentId !== "";
+        const hasDuration = values.duration && values.duration !== "";
+        const hasFiles = values.files && values.files.length > 0;
+
+        const hasManualOverrides = hasManualDate || hasManualDeadline || hasManualPriority || 
+                                  hasManualProject || hasManualLabels || hasManualSection || 
+                                  hasManualResponsible || hasManualParent || hasDuration || hasFiles;
+
+        let id: string;
+
+        if (hasManualOverrides) {
+          // Use addTask API with explicit parameters when user has manual overrides
+          const taskData = await addTask({
+            content: values.content,
+            description: values.description || undefined,
+            
+            // Manual values override NLP, fallback to NLP if no manual value
+            due: values.date ? { date: values.date.toISOString() } : 
+                 parsedData.parsedDate ? { date: parsedData.parsedDate.toISOString() } : undefined,
+            
+            deadline: values.deadline ? { date: values.deadline.toISOString() } :
+                     parsedData.parsedDeadline ? { date: parsedData.parsedDeadline.toISOString() } : undefined,
+            
+            priority: parseInt(values.priority) || parsedData.priority || undefined,
+            project_id: values.projectId || parsedData.projectId || undefined,
+            section_id: values.sectionId || undefined,
+            parent_id: values.parentId || undefined,
+            responsible_uid: values.responsibleUid || undefined,
+            
+            // Merge labels: manual + NLP labels (remove duplicates)
+            labels: [...new Set([
+              ...(values.labels || []),
+              ...(parsedData.labels || [])
+            ])],
+            
+            // Duration only if specified
+            duration: values.duration ? {
+              unit: "minute" as const,
+              amount: parseInt(values.duration, 10)
+            } : undefined,
+          }, { data, setData });
+          
+          id = taskData.id || "";
+        } else {
+          // Use quickAddTask API for pure NLP parsing when no manual overrides
+          const taskData = await quickAddTask({
+            text: values.content,
+            note: values.description || undefined,
+          });
+          
+          id = taskData.id;
+        }
 
         toast.style = Toast.Style.Success;
         toast.title = "Task created";
@@ -163,59 +218,146 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
   // Real-time NLP parsing
   const parsedData = useNLPParser(values.content, projects);
 
-  // Auto-update form fields based on parsed data
-  useEffect(() => {
-    if (parsedData.priority !== undefined && String(parsedData.priority) !== values.priority) {
-      setValue("priority", String(parsedData.priority));
-    }
-  }, [parsedData.priority, setValue, values.priority]);
+  // Track last action timestamps for each field
+  // This implements "last action wins" logic where whichever happened most recently
+  // (manual field selection or NLP parsing from typing) takes precedence
+  // 
+  // Example scenarios:
+  // 1. User types "tomorrow p1" -> NLP sets date and priority
+  // 2. User manually changes priority -> manual priority overrides NLP  
+  // 3. User types "friday" -> if typing happened after manual change, NLP wins again
+  // 4. This ensures the most recent user intent is always respected
+  const lastActionRef = useRef<{
+    priority: { source: 'nlp' | 'manual'; timestamp: number };
+    projectId: { source: 'nlp' | 'manual'; timestamp: number };
+    date: { source: 'nlp' | 'manual'; timestamp: number };
+    deadline: { source: 'nlp' | 'manual'; timestamp: number };
+    labels: { source: 'nlp' | 'manual'; timestamp: number };
+    contentChanged: number; // Track when content was last changed for NLP parsing
+  }>({
+    priority: { source: 'nlp', timestamp: 0 },
+    projectId: { source: 'nlp', timestamp: 0 },
+    date: { source: 'nlp', timestamp: 0 },
+    deadline: { source: 'nlp', timestamp: 0 },
+    labels: { source: 'nlp', timestamp: 0 },
+    contentChanged: 0,
+  });
 
-  useEffect(() => {
-    if (parsedData.projectId !== undefined && parsedData.projectId !== values.projectId) {
-      setValue("projectId", parsedData.projectId);
-    }
-  }, [parsedData.projectId, setValue, values.projectId]);
+  // Previous values to detect manual changes
+  const prevValuesRef = useRef(values);
 
-  // Auto-update date field based on parsed natural language date
+  // Detect manual field changes and update tracking
+  useEffect(() => {
+    const now = Date.now();
+    const prev = prevValuesRef.current;
+    
+    // Detect manual priority change
+    if (values.priority !== prev.priority) {
+      lastActionRef.current.priority = { source: 'manual', timestamp: now };
+    }
+    
+    // Detect manual project change
+    if (values.projectId !== prev.projectId) {
+      lastActionRef.current.projectId = { source: 'manual', timestamp: now };
+    }
+    
+    // Detect manual date change
+    if (values.date?.getTime() !== prev.date?.getTime()) {
+      lastActionRef.current.date = { source: 'manual', timestamp: now };
+    }
+    
+    // Detect manual deadline change
+    if (values.deadline?.getTime() !== prev.deadline?.getTime()) {
+      lastActionRef.current.deadline = { source: 'manual', timestamp: now };
+    }
+    
+    // Detect manual labels change
+    if (JSON.stringify(values.labels) !== JSON.stringify(prev.labels)) {
+      lastActionRef.current.labels = { source: 'manual', timestamp: now };
+    }
+    
+    // Track content changes for NLP timing
+    if (values.content !== prev.content) {
+      lastActionRef.current.contentChanged = now;
+    }
+    
+    // Update previous values
+    prevValuesRef.current = values;
+  });
+
+  // Auto-update priority based on NLP parsing - respect last action
+  useEffect(() => {
+    if (parsedData.priority !== undefined) {
+      const nlpTimestamp = lastActionRef.current.contentChanged;
+      const manualTimestamp = lastActionRef.current.priority.timestamp;
+      
+      // Only update if NLP parsing is more recent than last manual change
+      if (nlpTimestamp > manualTimestamp) {
+        setValue("priority", String(parsedData.priority));
+        lastActionRef.current.priority = { source: 'nlp', timestamp: nlpTimestamp };
+      }
+    }
+  }, [parsedData.priority, setValue]);
+
+  // Auto-update project based on NLP parsing - respect last action
+  useEffect(() => {
+    if (parsedData.projectId !== undefined) {
+      const nlpTimestamp = lastActionRef.current.contentChanged;
+      const manualTimestamp = lastActionRef.current.projectId.timestamp;
+      
+      // Only update if NLP parsing is more recent than last manual change
+      if (nlpTimestamp > manualTimestamp) {
+        setValue("projectId", parsedData.projectId);
+        lastActionRef.current.projectId = { source: 'nlp', timestamp: nlpTimestamp };
+      }
+    }
+  }, [parsedData.projectId, setValue]);
+
+  // Auto-update date based on NLP parsing - respect last action
   useEffect(() => {
     if (parsedData.parsedDate) {
-      // Always update the date if a new one is parsed, 
-      // but only if the user hasn't manually set a different date
-      const currentDateString = values.date?.toISOString();
-      const parsedDateString = parsedData.parsedDate.toISOString();
+      const nlpTimestamp = lastActionRef.current.contentChanged;
+      const manualTimestamp = lastActionRef.current.date.timestamp;
       
-      if (currentDateString !== parsedDateString) {
+      // Only update if NLP parsing is more recent than last manual change
+      if (nlpTimestamp > manualTimestamp) {
         setValue("date", parsedData.parsedDate);
+        lastActionRef.current.date = { source: 'nlp', timestamp: nlpTimestamp };
       }
     }
-  }, [parsedData.parsedDate, setValue, values.date]);
+  }, [parsedData.parsedDate, setValue]);
 
-  // Auto-update deadline field based on parsed deadline
+  // Auto-update deadline based on NLP parsing - respect last action
   useEffect(() => {
     if (parsedData.parsedDeadline) {
-      // Always update the deadline if a new one is parsed,
-      // but only if the user hasn't manually set a different deadline
-      const currentDeadlineString = values.deadline?.toISOString();
-      const parsedDeadlineString = parsedData.parsedDeadline.toISOString();
+      const nlpTimestamp = lastActionRef.current.contentChanged;
+      const manualTimestamp = lastActionRef.current.deadline.timestamp;
       
-      if (currentDeadlineString !== parsedDeadlineString) {
+      // Only update if NLP parsing is more recent than last manual change
+      if (nlpTimestamp > manualTimestamp) {
         setValue("deadline", parsedData.parsedDeadline);
+        lastActionRef.current.deadline = { source: 'nlp', timestamp: nlpTimestamp };
       }
     }
-  }, [parsedData.parsedDeadline, setValue, values.deadline]);
+  }, [parsedData.parsedDeadline, setValue]);
 
-  // NOTE: We intentionally do NOT update the content/title field
-  // The user should be able to type freely without any automatic modifications
-  // Only the other fields (date, priority, project, labels) get auto-populated
-
-  // Auto-update labels field based on parsed labels
+  // Auto-update labels based on NLP parsing - respect last action
   useEffect(() => {
     if (parsedData.labels && parsedData.labels.length > 0) {
-      // Merge existing labels with new parsed labels, avoiding duplicates
-      const currentLabels = values.labels || [];
-      const newLabels = [...new Set([...currentLabels, ...parsedData.labels])];
-      if (newLabels.length !== currentLabels.length) {
-        setValue("labels", newLabels);
+      const nlpTimestamp = lastActionRef.current.contentChanged;
+      const manualTimestamp = lastActionRef.current.labels.timestamp;
+      
+      // Only update if NLP parsing is more recent than last manual change
+      if (nlpTimestamp > manualTimestamp) {
+        const currentLabels = values.labels || [];
+        
+        // Add new parsed labels that aren't already present
+        const newLabelsToAdd = parsedData.labels.filter(label => !currentLabels.includes(label));
+        
+        if (newLabelsToAdd.length > 0) {
+          setValue("labels", [...currentLabels, ...newLabelsToAdd]);
+          lastActionRef.current.labels = { source: 'nlp', timestamp: nlpTimestamp };
+        }
       }
     }
   }, [parsedData.labels, setValue, values.labels]);
@@ -235,11 +377,11 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
       }
       enableDrafts={!fromProjectId && !fromTodayEmptyView && !fromLabel}
     >
-      <Form.TextField
+            <Form.TextField
         {...itemProps.content}
         title="Title"
         placeholder="Buy milk tomorrow p1 #Personal @urgent {march 30}"
-        info="Natural language parsing: p1-p4 (priority), #project, @label, natural dates (tomorrow, monday at 2pm), {deadline}. Powered by chrono-node and Todoist patterns."
+        info="Natural language parsing: p1-p4 (priority), #project, @label, natural dates (tomorrow, monday at 2pm), {deadline}. Last action wins - manual field selection or typing updates take precedence based on timing."
       />
 
       <Form.TextArea
