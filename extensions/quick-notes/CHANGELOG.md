@@ -1,5 +1,9 @@
 # Quick Notes Changelog
 
+## Bugfix - [PR_MERGE_DATE]
+
+- Fix note opening externally if note title contains space
+
 ## [New Command] - 2025-06-26
 
 -  Open Note Externally
