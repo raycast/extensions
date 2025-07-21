@@ -106,10 +106,20 @@ export function useNLPParser(content: string, projects?: Project[]): ParsedData 
 
     // Enhanced natural language date parsing using chrono-node
     // We parse from the original content to find dates - use the LAST/MOST RECENT date found
+    // BUT exclude any dates that are inside curly braces (deadline patterns)
     const customChrono = chrono.casual.clone();
     
+    // Create a version of content with deadline patterns removed to avoid conflicts
+    let contentForDateParsing = content;
+    
+    // Remove complete deadline patterns {date} from date parsing
+    contentForDateParsing = contentForDateParsing.replace(/\{[^}]+\}/g, '');
+    
+    // Also remove incomplete deadline patterns {partial to avoid parsing dates inside them
+    contentForDateParsing = contentForDateParsing.replace(/\{[^}]*$/g, '');
+    
     // Parse dates with enhanced options for better coverage
-    const dateResults = customChrono.parse(content, new Date(), { 
+    const dateResults = customChrono.parse(contentForDateParsing, new Date(), { 
       forwardDate: true  // Prefer future dates when ambiguous (like Todoist does)
     });
     
