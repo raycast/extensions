@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { StateRequestDTO } from "../dto/state.dto";
 import Http, { HttpFunctionResult } from "./http";
-import { AFSPreferences, StateItem } from "./modals";
+import { AFSPreferences, StateItem } from "../models/models";
 
 export interface StateItemDTO {
   id: number;
@@ -34,11 +34,10 @@ export default class States {
    * @param {number} userId
    * @returns
    */
-  public async updateState(stateId: number): Promise<HttpFunctionResult<any>> {
-    const result: HttpFunctionResult<any> = await this.http.PUT<any, any>("user/state", {
+  public async updateState(stateId: number): Promise<HttpFunctionResult> {
+    const result: HttpFunctionResult = await this.http.PUT<undefined, StateRequestDTO>("user/state", {
       state: stateId,
     });
-
     return result;
   }
 }

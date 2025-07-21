@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "zeiterfassung",
-      "title": "zeiterfassung",
+      "title": "Zeiterfassung",
       "description": "Opens the list of time tracking statuses.",
       "mode": "view"
     }

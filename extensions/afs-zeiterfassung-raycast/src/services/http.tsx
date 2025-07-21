@@ -1,12 +1,13 @@
 /* eslint-disable no-async-promise-executor */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosInstance, AxiosResponse } from "axios";
-import { AFSPreferences } from "./modals";
+import { AFSPreferences } from "../models/models";
 import User from "./user";
 import { LocalStorage, showToast, Toast } from "@raycast/api";
 import https from "https";
+import { LoginResponseDTO } from "../dto/auth.dto";
 
-export interface HttpFunctionResult<T> {
+export interface HttpFunctionResult<T = undefined> {
   success: boolean;
   data?: T;
   message?: string;
@@ -48,13 +49,12 @@ export default class Http {
    * @param query - Eine Liste von Schlüssel-Wert-Paaren, die als Abfrageparameter an die GET-Anfrage angehängt werden sollen.
    * @returns Eine Promise, die das Ergebnis der GET-Anfrage enthält.
    */
-  async GET<T>(
+  public async GET<T>(
     route: string,
     ...query: { key: string; value: string | number | boolean }[]
   ): Promise<HttpFunctionResult<T>> {
     try {
       const querys: string = query.length > 0 ? query.map((q) => `${q.key}=${q.value}`).join("&") : "";
-      console.log(`/api/${route}?${querys}`);
       const result: AxiosResponse<{ data: T }> = await this.axiosInstance.get(`/api/${route}?${querys}`, {
         headers: {
           Authorization: `Bearer ${await User.getAccessToken()}`,
@@ -64,8 +64,6 @@ export default class Http {
       });
       return this.handleResponse<T>(result);
     } catch (error: any) {
-      console.log(error);
-
       return this.handleResponse<T>(error.request);
     }
   }
@@ -77,14 +75,14 @@ export default class Http {
    * @param data - Die Daten, die mit der Anfrage gesendet werden sollen.
    * @returns Ein Promise, das ein HttpFunctionResult-Objekt mit dem Ergebnis der Anfrage enthält.
    */
-  async POST<T, D>(route: string, data: D): Promise<HttpFunctionResult<T>> {
+  public async POST<T, D>(route: string, data: D): Promise<HttpFunctionResult<T>> {
     try {
       const result: AxiosResponse<{ data: T }> = await this.axiosInstance.post(`/api/${route}`, data, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${await User.getAccessToken()}`,
         },
-        validateStatus: () => true,
+        validateStatus: (status: number) => status >= 200 && status <= 299,
       });
       return this.handleResponse<T>(result);
     } catch (error: any) {
@@ -101,14 +99,14 @@ export default class Http {
    * @param {D} data - Die Daten, die an den Server gesendet werden.
    * @returns {Promise<T>} - Ein Promise, das den Rückgabewert der Anfrage enthält.
    */
-  async PUT<T, D>(route: string = "", data: D) {
+  public async PUT<T, D>(route: string = "", data: D) {
     try {
       const result: AxiosResponse<{ data: T }> = await this.axiosInstance.put(`/api/${route}`, data, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${await User.getAccessToken()}`,
         },
-        validateStatus: () => true,
+        validateStatus: (status: number) => status >= 200 && status <= 299,
       });
       return this.handleResponse<T>(result);
     } catch (error: any) {
@@ -123,7 +121,7 @@ export default class Http {
    * @param response - Die HTTP-Antwort.
    * @returns Das HttpFunctionResult-Objekt, das den Erfolg der Anfrage und die Daten oder Fehlermeldung enthält.
    */
-  handleResponse<T>(response: any): HttpFunctionResult<T> {
+  private handleResponse<T>(response: AxiosResponse): HttpFunctionResult<T> {
     if (response?.status >= 200 && response?.status <= 299) return { success: true, data: response?.data };
 
     console.error(response);
@@ -140,7 +138,6 @@ export default class Http {
         message:
           response?.data?.message || response?.data?.title || response?.statusText || "Whoops! Something went wrong.",
       };
-    console.log(response);
 
     showToast({
       style: Toast.Style.Failure,
@@ -155,25 +152,25 @@ export default class Http {
    *
    * @returns Eine Promise, die den neuen Zugriffstoken als Zeichenkette enthält.
    */
-  requestNewAccessToken(): Promise<string> {
-    return new Promise(async (resolve, reject) => {
-      const axiosRefreshInstace = axios.create({
-        baseURL: this.afsPreferences.server,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${(await User.getRefreshToken()) ?? ""}`,
-        },
-      });
-      axiosRefreshInstace
-        .get("/api/auth/renew")
-        .then((response) => {
-          if (response?.data?.data) {
-            LocalStorage.setItem("AFS_ACCESS_TOKEN", response.data.access_token);
-            LocalStorage.setItem("AFS_REFRESH_TOKEN", response.data.refresh_token);
-            resolve(response.data.access_token);
-          }
-        })
-        .catch((err) => reject(err));
+  private async requestNewAccessToken(): Promise<string | undefined> {
+    const axiosRefreshInstace = axios.create({
+      baseURL: this.afsPreferences.server,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${(await User.getRefreshToken()) ?? ""}`,
+      },
     });
+
+    try {
+      const response: AxiosResponse<LoginResponseDTO> = await axiosRefreshInstace.get("/api/auth/renew");
+      if (response?.data) {
+        LocalStorage.setItem("AFS_ACCESS_TOKEN", response.data.access_token);
+        LocalStorage.setItem("AFS_REFRESH_TOKEN", response.data.refresh_token);
+        return response.data!.access_token!;
+      } else throw new Error("Failed to request new access token.");
+    } catch (error: any) {
+      console.error("Error requesting new access token:", error);
+      throw new Error("Failed to request new access token.");
+    }
   }
 }

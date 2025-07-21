@@ -1,17 +1,16 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { ActionPanel, Action, List, popToRoot, showToast, Toast, getPreferenceValues } from "@raycast/api";
-import { AFSPreferences, StateItem } from "./modals";
-import User from "./user";
-import States from "./states";
+import { AFSPreferences, StateItem } from "./models/models";
+import User from "./services/user";
+import States from "./services/states";
 import { useEffect, useState } from "react";
-import { HttpFunctionResult } from "./http";
+import { HttpFunctionResult } from "./services/http";
+import { LoginResponseDTO } from "./dto/auth.dto";
 
 let afsPreferences: AFSPreferences;
 let states: States;
 
-async function handleItemSelect(item: any) {
-  const result: HttpFunctionResult<any> = await states.updateState(item.id);
+async function handleItemSelect(item: StateItem) {
+  const result: HttpFunctionResult = await states.updateState(item.id);
   if (!result.success) {
     await showToast({ style: Toast.Style.Failure, title: "Fehler", message: result.message });
     return;
@@ -34,10 +33,18 @@ export default function Command() {
       states = new States(afsPreferences);
       const user: User = new User(afsPreferences);
 
-      if (!(await user.login())) return;
+      const loginResponse: HttpFunctionResult<LoginResponseDTO> = await user.login();
+      if (!loginResponse.success) {
+        await showToast({ style: Toast.Style.Failure, title: "Login failed", message: loginResponse.message });
+        return;
+      }
 
       const stateResult: HttpFunctionResult<StateItem[]> = await states.getStates();
-      if (!stateResult.success) return;
+
+      if (!stateResult.success) {
+        await showToast({ style: Toast.Style.Failure, title: "Error", message: stateResult.message });
+        return;
+      }
 
       setItems([{ id: -1, title: "Gehen" }, { id: 0, title: "Kommen" }, ...stateResult.data!]);
     };
