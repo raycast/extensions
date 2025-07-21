@@ -81,7 +81,7 @@ const Actions = ({
               icon={{ source: Icon.Folder, tintColor: getTintColor("turquoise") }}
               shortcut={{ modifiers: ["cmd"], key: "o" }}
               onAction={() => {
-                open(`${preferences.fileLocation}/${slugify(title)}.md`);
+                open(`${preferences.fileLocation}/${slugify(`${title}`)}.md`);
               }}
             />
           </>
