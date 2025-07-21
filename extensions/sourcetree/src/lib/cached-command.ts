@@ -27,7 +27,7 @@ function getFromCommand(cwd: string, command: string): Promise<string | null> {
     // when this timeout is set, then the button does appear
     // immediately as desired
     setTimeout(() => {
-      const env = { ...process.env };
+      const env = { ...process.env, PATH: getEnvPath() };
 
       // Setting the SSH_AUTH_SOCK environment variable may be required when using encrypted private keys
       const sshAuthSock = getSSHAuthSock();
@@ -76,4 +76,14 @@ function getSSHAuthSock() {
 
   cachedSSHAuthSock = "";
   return "";
+}
+
+export function executeCommandSync(cwd: string, command: string) {
+  const env = { ...process.env, PATH: getEnvPath() };
+  return execSync(command, { cwd, env });
+}
+
+function getEnvPath() {
+  // Support for Mercurial installed via Homebrew
+  return [process.env.PATH, "/usr/bin", "/usr/local/bin", "/opt/homebrew/bin"].join(":");
 }

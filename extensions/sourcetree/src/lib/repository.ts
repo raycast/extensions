@@ -2,8 +2,7 @@
 
 import * as bplist from "bplist-parser";
 import * as fs from "fs";
-import { executeCommand } from "./cached-command";
-import { execSync } from "child_process";
+import { executeCommand, executeCommandSync } from "./cached-command";
 
 export const REPOSITORY_TYPE = {
   GIT: "git",
@@ -102,14 +101,14 @@ export class RepositoryList {
 
 export function detectRepositoryType(path: string): RepositoryType {
   try {
-    execSync("git rev-parse --show-toplevel", { cwd: path, encoding: "utf-8" });
+    executeCommandSync(path, "git rev-parse --show-toplevel");
     return REPOSITORY_TYPE.GIT;
   } catch {
     // ignore
   }
 
   try {
-    execSync("hg root", { cwd: path, encoding: "utf-8" });
+    executeCommandSync(path, "hg root");
     return REPOSITORY_TYPE.MERCURIAL;
   } catch {
     // ignore
