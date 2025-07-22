@@ -15,6 +15,7 @@
     {
       "name": "search-resources",
       "title": "Search Resources",
+      "subtitle": "Twingate",
       "description": "Browse and access your Twingate resources",
       "mode": "view"
     },
