@@ -79,7 +79,7 @@ export default function GameDetail({
             }
           }
         } catch (error) {
-          showFailureToast(error, { title: "Could not fetch prices" });
+          showHUD("Could not fetch prices");
         }
 
         // Fetch price history
