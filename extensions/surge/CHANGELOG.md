@@ -1,6 +1,6 @@
 # Surge Changelog
 
-## [Major refactoring and new standalone commands] - 2025-07-22
+## [Major refactoring and new standalone commands] - {PR_MERGE_DATE}
 
 - **New standalone commands**: Added three new focused commands for quick access
   - `toggle-proxy`: Toggle system proxy setting with no-view mode for instant action
