@@ -55,7 +55,7 @@ export interface ITADInfo {
     boxart?: string;
   };
   tags?: string[];
-  developers?: string[] | ITADDeveloper[];
+  developers?: Array<string | ITADDeveloper>;
   release_date?: string;
   reviews?: {
     score_desc?: string;
