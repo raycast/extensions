@@ -1,0 +1,18 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+
+# Raycast specific files
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env.development
+
+# misc
+.DS_Store
