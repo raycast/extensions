@@ -267,6 +267,7 @@ If you encounter any issues or have questions:
 
 ## Changelog
 
+### [1.0.0] - {PR_MERGE_DATE}
 ### Version 1.0.0
 
 - Initial release
