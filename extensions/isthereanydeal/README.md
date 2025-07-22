@@ -8,6 +8,20 @@ A powerful Raycast extension for finding the best video game deals across multip
 
 https://github.com/user-attachments/assets/3a0ab9fd-839c-477c-8845-b7e192e88107
 
+<p align="center">
+
+  <img src="./assets/ITAD-1.png" width="350" alt="IsThereAnyDeal Screenshot 1">
+
+  <img src="./assets/ITAD-2.png" width="350" alt="IsThereAnyDeal Screenshot 2">
+
+  <img src="./assets/ITAD-3.png" width="350" alt="IsThereAnyDeal Screenshot 3">
+
+  <img src="./assets/ITAD-4.png" width="350" alt="IsThereAnyDeal Screenshot 4">
+
+  <img src="./assets/ITAD-5.png" width="350" alt="IsThereAnyDeal Screenshot 5">
+
+</p>
+
 ## Features
 
 ### 🎮 Game Search & Discovery
