@@ -2,8 +2,8 @@
 
 ## [Show the Artist name when liking a song] - {PR_MERGE_DATE}
 
-- Added the artist name into the message in the HUB when liking a new song
-- Added the artist name into the message in the HUB attempting to like an already liked song
+- Added the artist name into the message in the HUD when liking a new song
+- Added the artist name into the message in the HUD attempting to like an already liked song
 
 
 ## [Add toggle to filter song name in menu bar] - 2025-07-08
