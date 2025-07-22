@@ -14,10 +14,10 @@
     {
       "title": "API Token",
       "name": "token",
-    "type": "password",
-    "required": true,
-    "description": "API Token from Host.io Dashboard",
-          "placeholder": "xXXxx0X"
+      "type": "password",
+      "required": true,
+      "description": "API Token from Host.io Dashboard",
+      "placeholder": "xXXxx0X"
     }
   ],
   "commands": [
@@ -37,8 +37,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.98.2",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.101.1",
+    "@raycast/utils": "^2.2.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
