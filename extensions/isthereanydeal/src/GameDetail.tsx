@@ -1,3 +1,5 @@
+// GameDetail.tsx
+
 import { Detail, ActionPanel, Action, useNavigation, showHUD, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useLocalStorage } from "@raycast/utils";
@@ -80,6 +82,7 @@ export default function GameDetail({
           }
         } catch (error) {
           showHUD("Could not fetch prices");
+          logBoth("[GameDetail] Error fetching prices:", error);
         }
 
         // Fetch price history
