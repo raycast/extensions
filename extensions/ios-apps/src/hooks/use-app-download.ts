@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { showToast, Toast, showHUD } from "@raycast/api";
-import { downloadIPA } from "../ipatool";
+import { downloadApp } from "../ipatool";
 import { handleDownloadError, handleAuthError } from "../utils/error-handler";
 import { analyzeIpatoolError } from "../utils/ipatool-error-patterns";
 
@@ -27,7 +27,7 @@ export function useAppDownload() {
    * @param showHudMessages Whether to show HUD messages during download
    * @returns The path to the downloaded file or undefined if download failed
    */
-  const downloadApp = async (
+  const handleDownload = async (
     bundleId: string,
     name: string,
     version: string,
@@ -57,7 +57,7 @@ export function useAppDownload() {
         await showHUD(`Downloading ${name}...`, { clearRootSearch: true });
       }
 
-      const filePath = await downloadIPA(bundleId, name, version, price);
+      const filePath = await downloadApp(bundleId, name, version, price);
 
       if (filePath) {
         // Verify file actually exists before showing success
@@ -129,7 +129,7 @@ export function useAppDownload() {
   };
 
   return {
-    downloadApp,
+    downloadApp: handleDownload,
     isLoading,
     currentDownload,
   };

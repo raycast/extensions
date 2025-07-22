@@ -9,8 +9,9 @@ export interface IpatoolErrorInfo {
   isAuthError: boolean;
   is2FARequired: boolean;
   isCredentialError: boolean;
+  isLicenseRequired: boolean;
   userMessage: string;
-  errorType: "2fa" | "credentials" | "network" | "permission" | "app_not_found" | "generic";
+  errorType: "2fa" | "credentials" | "network" | "permission" | "app_not_found" | "license_required" | "generic";
 }
 
 /**
@@ -37,6 +38,7 @@ export function analyzeIpatoolError(
       isAuthError: true,
       is2FARequired: true,
       isCredentialError: false,
+      isLicenseRequired: false,
       userMessage: "Two-factor authentication required. Please provide the 6-digit code from your trusted device.",
       errorType: "2fa",
     };
@@ -51,6 +53,7 @@ export function analyzeIpatoolError(
       isAuthError: true,
       is2FARequired: false,
       isCredentialError: true,
+      isLicenseRequired: false,
       userMessage: "Password is required. Please check your Apple ID password in preferences.",
       errorType: "credentials",
     };
@@ -70,21 +73,31 @@ export function analyzeIpatoolError(
       isAuthError: true,
       is2FARequired: false,
       isCredentialError: true,
+      isLicenseRequired: false,
       userMessage: "Invalid Apple ID credentials. Please check your email and password in preferences.",
       errorType: "credentials",
     };
   }
 
-  // App Store specific errors
-  if (
-    fullMessage.includes("license is required") ||
-    fullMessage.includes("not available for download") ||
-    fullMessage.includes("requires a purchase")
-  ) {
+  // License required - specific case for apps that need a license (often free apps)
+  if (fullMessage.includes("license is required")) {
     return {
       isAuthError: false,
       is2FARequired: false,
       isCredentialError: false,
+      isLicenseRequired: true,
+      userMessage: "App requires a license. Attempting to obtain license...",
+      errorType: "license_required",
+    };
+  }
+
+  // App Store errors - not available, requires purchase, etc.
+  if (fullMessage.includes("not available for download") || fullMessage.includes("requires a purchase")) {
+    return {
+      isAuthError: false,
+      is2FARequired: false,
+      isCredentialError: false,
+      isLicenseRequired: false,
       userMessage: "App requires purchase or is not available in your region.",
       errorType: "app_not_found",
     };
@@ -101,6 +114,7 @@ export function analyzeIpatoolError(
       isAuthError: false,
       is2FARequired: false,
       isCredentialError: false,
+      isLicenseRequired: false,
       userMessage: "Network error occurred. Please check your internet connection.",
       errorType: "network",
     };
@@ -116,6 +130,7 @@ export function analyzeIpatoolError(
       isAuthError: false,
       is2FARequired: false,
       isCredentialError: false,
+      isLicenseRequired: false,
       userMessage: "Permission denied. Please check file system permissions.",
       errorType: "permission",
     };
@@ -131,6 +146,7 @@ export function analyzeIpatoolError(
       isAuthError: false,
       is2FARequired: false,
       isCredentialError: false,
+      isLicenseRequired: false,
       userMessage: "App not found. It may not be available in your region or may have been removed.",
       errorType: "app_not_found",
     };
@@ -147,6 +163,7 @@ export function analyzeIpatoolError(
       isAuthError: true,
       is2FARequired: false,
       isCredentialError: true,
+      isLicenseRequired: false,
       userMessage: "Authentication failed. Please check your Apple ID credentials in preferences.",
       errorType: "credentials",
     };
@@ -158,6 +175,7 @@ export function analyzeIpatoolError(
     isAuthError: false,
     is2FARequired: false,
     isCredentialError: false,
+    isLicenseRequired: false,
     userMessage: errorMessage.trim()
       ? `Download failed: ${sanitizeQuery(errorMessage.trim())}`
       : "Download failed. Please try again or check your connection.",

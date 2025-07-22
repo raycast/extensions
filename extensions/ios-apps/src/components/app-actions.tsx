@@ -1,7 +1,7 @@
 import { ActionPanel, Action, Icon } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { AppDetails } from "../types";
-import { downloadIPA } from "../ipatool";
+import { downloadApp } from "../ipatool";
 import { downloadScreenshots } from "../utils/screenshot-downloader";
 import { getAppStoreUrl } from "../utils/constants";
 
@@ -26,7 +26,7 @@ export function AppActions({ app, onDownload, onDownloadScreenshots }: AppAction
       }
 
       // Fall back to direct download if no handler provided
-      return await downloadIPA(app.bundleId, app.name, app.version, app.price);
+      return await downloadApp(app.bundleId, app.name, app.version, app.price);
     } catch (error) {
       console.error("Error downloading app:", error);
       showFailureToast({ title: "Error downloading app", message: String(error) });

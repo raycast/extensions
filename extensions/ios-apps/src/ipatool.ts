@@ -20,6 +20,142 @@ const MAX_RETRY_DELAY = 10000; // Maximum delay between retries (10 seconds)
 const execFileAsync = promisify(execFile);
 
 /**
+ * Secure spawn-based execution to prevent command injection
+ */
+function spawnAsync(command: string, args: string[]): Promise<{ stdout: string; stderr: string }> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args);
+    let stdout = "";
+    let stderr = "";
+
+    child.stdout?.on("data", (data) => {
+      stdout += data.toString();
+    });
+
+    child.stderr?.on("data", (data) => {
+      stderr += data.toString();
+    });
+
+    child.on("close", (code) => {
+      if (code === 0) {
+        resolve({ stdout, stderr });
+      } else {
+        reject(new Error(`Process exited with code ${code}: ${stderr}`));
+      }
+    });
+
+    child.on("error", (error) => {
+      reject(error);
+    });
+  });
+}
+
+/**
+ * Checks if an app is free (price is $0) and eligible for automatic purchase
+ * @param price The price string from app details
+ * @returns boolean - true if app is free and eligible for purchase
+ */
+export function isFreeApp(price?: string): boolean {
+  if (!price) {
+    return false;
+  }
+
+  // Check if price is exactly "0" or "0.00" or similar free indicators
+  const numericPrice = parseFloat(price);
+  const isFree = numericPrice === 0;
+
+  logger.log(`[ipatool] App price eligibility check: price="${price}", numeric=${numericPrice}, isFree=${isFree}`);
+
+  return isFree;
+}
+
+/**
+ * Attempts to purchase an app using ipatool
+ * @param bundleId The bundle identifier of the app
+ * @param appName Optional app name for logging
+ * @returns Promise<boolean> - true if purchase was successful, false otherwise
+ */
+export async function purchaseApp(bundleId: string, appName?: string): Promise<boolean> {
+  try {
+    const displayName = appName || bundleId;
+    logger.log(`[ipatool] Attempting to purchase app: ${displayName} (${bundleId})`);
+
+    await showHUD(`Attempting to purchase ${displayName}...`, { clearRootSearch: true });
+
+    // Execute the purchase command using secure spawn
+    const { stdout, stderr } = await spawnAsync(IPATOOL_PATH, [
+      "purchase",
+      "--bundle-identifier",
+      bundleId,
+      "--format",
+      "json",
+      "--non-interactive",
+      "--verbose",
+    ]);
+
+    logger.log(`[ipatool] Purchase command completed for ${displayName}`);
+    logger.log(`[ipatool] stdout: ${stdout}`);
+
+    if (stderr) {
+      logger.log(`[ipatool] stderr: ${stderr}`);
+    }
+
+    // Check for success indicators in the output
+    if (stdout.includes('"success": true') || stdout.includes("license obtained")) {
+      logger.log(`[ipatool] Purchase successful for ${displayName}`);
+      await showHUD(`Successfully purchased ${displayName}`, { clearRootSearch: true });
+      return true;
+    }
+
+    // If we get here, the purchase might have failed
+    logger.log(`[ipatool] Purchase may have failed for ${displayName}. Checking for errors...`);
+    logger.log(`[ipatool] Purchase stdout: ${stdout}`);
+    logger.log(`[ipatool] Purchase stderr: ${stderr}`);
+
+    // Analyze any errors
+    const errorAnalysis = analyzeIpatoolError(stdout + stderr, stderr);
+
+    if (errorAnalysis.isAuthError) {
+      logger.error(`[ipatool] Authentication error during app purchase: ${errorAnalysis.userMessage}`);
+      await handleAuthError(new Error(errorAnalysis.userMessage), false);
+      return false;
+    }
+
+    // For non-auth errors, provide more specific error information
+    logger.log(`[ipatool] Purchase failed for ${displayName}: ${errorAnalysis.userMessage}`);
+
+    // Check for specific purchase failure reasons
+    const combinedOutput = (stdout + stderr).toLowerCase();
+    if (combinedOutput.includes("already purchased") || combinedOutput.includes("already owned")) {
+      logger.log(`[ipatool] App ${displayName} appears to be already purchased`);
+      return true; // Treat as success if already owned
+    }
+
+    if (combinedOutput.includes("not available") || combinedOutput.includes("not found")) {
+      logger.log(`[ipatool] App ${displayName} not available for purchase in this region`);
+    }
+
+    if (combinedOutput.includes("requires payment") || combinedOutput.includes("not free")) {
+      logger.log(`[ipatool] App ${displayName} is not free and requires payment`);
+    }
+
+    return false;
+  } catch (error) {
+    logger.error(`[ipatool] Error during app purchase for ${appName || bundleId}:`, error);
+
+    // Analyze the error message
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorAnalysis = analyzeIpatoolError(errorMessage, errorMessage);
+
+    if (errorAnalysis.isAuthError) {
+      await handleAuthError(error instanceof Error ? error : new Error(errorMessage), false);
+    }
+
+    return false;
+  }
+}
+
+/**
  * Search for iOS apps using ipatool
  * @param query Search query
  * @param limit Maximum number of results
@@ -63,16 +199,16 @@ export async function searchApps(query: string, limit = 20): Promise<IpaToolSear
 }
 
 /**
- * Download an iOS app using ipatool
- * @param bundleId Bundle ID of the app to download
- * @param appName App name for file renaming
- * @param appVersion App version for file renaming
- * @param price App price to determine if it's paid (optional)
- * @param retryCount Current retry attempt (used internally)
- * @param retryDelay Delay before retry in ms (used internally)
- * @returns Path to the downloaded file
+ * Download an app from the App Store using ipatool
+ * @param bundleId Bundle identifier of the app to download
+ * @param appName Optional app name for logging
+ * @param appVersion Optional app version for logging
+ * @param price Optional price for determining if app is paid
+ * @param retryCount Current retry attempt (used for exponential backoff)
+ * @param retryDelay Current retry delay in milliseconds
+ * @returns Promise<string | null> - Path to the downloaded app file or null if failed
  */
-export async function downloadIPA(
+export async function downloadApp(
   bundleId: string,
   appName = "",
   appVersion = "",
@@ -98,8 +234,10 @@ export async function downloadIPA(
     await showHUD(`Downloading ${appName || bundleId}${retryInfo}...`, { clearRootSearch: true });
 
     // Check if the app is paid based on price value
-    const isPaid = price && parseFloat(price) > 0;
-    logger.log(`[ipatool] Downloading app: ${appName || bundleId}, isPaid: ${isPaid}, price: ${price}${retryInfo}`);
+    const isPaidApp = price && parseFloat(price) > 0;
+    logger.log(
+      `[ipatool] Downloading app: ${appName || bundleId}, isPaidApp: ${isPaidApp}, price: ${price}${retryInfo}`,
+    );
 
     // Use spawn instead of exec to get real-time output
     return new Promise<string | null>((resolve, reject) => {
@@ -117,7 +255,7 @@ export async function downloadIPA(
       ];
 
       // Add purchase flag for paid apps
-      if (isPaid) {
+      if (isPaidApp) {
         logger.log("Adding --purchase flag for paid app");
         args.push("--purchase");
       }
@@ -226,7 +364,7 @@ export async function downloadIPA(
             await showHUD(`Network error. Retrying in ${Math.round(retryDelay / 1000)}s...`, { clearRootSearch: true });
 
             await new Promise((resolve) => setTimeout(resolve, retryDelay));
-            return downloadIPA(bundleId, appName, appVersion, price, nextRetryCount, nextRetryDelay);
+            return downloadApp(bundleId, appName, appVersion, price, nextRetryCount, nextRetryDelay);
           }
 
           // Use precise ipatool error analysis instead of manual pattern matching
@@ -234,15 +372,49 @@ export async function downloadIPA(
           const errorAnalysis = analyzeIpatoolError(fullErrorMessage, stderr);
 
           // Use the analyzed error message and routing
-          const finalErrorMessage = errorAnalysis.userMessage.includes(appName || bundleId)
+          let finalErrorMessage = errorAnalysis.userMessage.includes(appName || bundleId)
             ? errorAnalysis.userMessage
             : errorAnalysis.userMessage.replace("App", `"${appName || bundleId}"`);
+
+          // Check if this is a license required error for a free app
+          if (errorAnalysis.isLicenseRequired && isFreeApp(price)) {
+            logger.log(
+              `[ipatool] License required for free app ${appName || bundleId}. Attempting automatic purchase...`,
+            );
+
+            try {
+              const purchaseSuccess = await purchaseApp(bundleId, appName);
+
+              if (purchaseSuccess) {
+                logger.log(`[ipatool] License purchase successful for ${appName || bundleId}. Retrying download...`);
+                await showHUD(`License obtained. Retrying download...`, { clearRootSearch: true });
+
+                // Retry the download after successful license purchase
+                return downloadApp(bundleId, appName, appVersion, price, 0, INITIAL_RETRY_DELAY);
+              } else {
+                logger.log(
+                  `[ipatool] License purchase failed for ${appName || bundleId}. Proceeding with error handling.`,
+                );
+                await showHUD(`Failed to obtain license for ${appName || bundleId}`, { clearRootSearch: true });
+
+                // Update the error message to be more specific about license purchase failure
+                finalErrorMessage = `License purchase failed for free app "${appName || bundleId}". This may be due to authentication issues or App Store restrictions.`;
+              }
+            } catch (purchaseError) {
+              logger.error(`[ipatool] Error during license purchase attempt:`, purchaseError);
+              await showHUD(`License purchase error for ${appName || bundleId}`, { clearRootSearch: true });
+
+              // Update the error message to include the purchase error details
+              const purchaseErrorMsg = purchaseError instanceof Error ? purchaseError.message : String(purchaseError);
+              finalErrorMessage = `License purchase failed for free app "${appName || bundleId}": ${purchaseErrorMsg}`;
+            }
+          }
 
           // Route to appropriate error handler based on analysis
           if (errorAnalysis.isAuthError) {
             await handleAuthError(new Error(finalErrorMessage), false);
           } else {
-            await handleDownloadError(new Error(finalErrorMessage), "download app", "downloadIPA");
+            await handleDownloadError(new Error(finalErrorMessage), "download app", "downloadApp");
           }
           reject(new Error(errorMessage));
           return;
@@ -360,7 +532,7 @@ export async function downloadIPA(
           setTimeout(async () => {
             try {
               // Retry the download
-              const result = await downloadIPA(bundleId, appName, appVersion, price, nextRetryCount, nextRetryDelay);
+              const result = await downloadApp(bundleId, appName, appVersion, price, nextRetryCount, nextRetryDelay);
               resolve(result);
             } catch (retryError) {
               reject(retryError);
@@ -371,7 +543,7 @@ export async function downloadIPA(
 
         // If we're out of retries or it's not a TLS error, fail normally
         await showHUD("Download failed", { clearRootSearch: true });
-        await handleDownloadError(error, "download app", "downloadIPA");
+        await handleDownloadError(error, "download app", "downloadApp");
         reject(error);
       });
     });
@@ -382,7 +554,7 @@ export async function downloadIPA(
     }
     logger.error(`[ipatool] Error details:`, error);
     await showHUD("Download failed", { clearRootSearch: true });
-    await handleDownloadError(error instanceof Error ? error : new Error(String(error)), "download app", "downloadIPA");
+    await handleDownloadError(error instanceof Error ? error : new Error(String(error)), "download app", "downloadApp");
     return null;
   }
 }

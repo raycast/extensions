@@ -1,4 +1,4 @@
-import { downloadIPA, searchApps } from "../ipatool";
+import { downloadApp, searchApps } from "../ipatool";
 import path from "path";
 import { logger } from "../utils/logger";
 import { Tool } from "@raycast/api";
@@ -74,7 +74,7 @@ export default async function downloadIosApp(input: Input) {
     logger.log(`[download-app tool] Starting download for ${appName} (${bundleId})`);
 
     try {
-      const filePath = await downloadIPA(bundleId, appName, appVersion, price);
+      const filePath = await downloadApp(bundleId, appName, appVersion, price);
 
       if (!filePath) {
         await handleDownloadError(
