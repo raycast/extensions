@@ -307,7 +307,7 @@ export default function Command() {
                   shortcut={{ modifiers: ["cmd"], key: "d" }}
                 />
                 <ActionPanel.Submenu
-                  title="Set Country/Region"
+                  title="Set Country/region"
                   icon={Icon.Globe}
                   shortcut={{ modifiers: ["cmd"], key: "t" }}
                 >
@@ -336,7 +336,7 @@ export default function Command() {
           accessories={[{ text: countryToUse, icon: Icon.Globe, tooltip: `Country: ${countryToUse}` }]}
           actions={
             <ActionPanel>
-              <ActionPanel.Submenu title="Set Country/Region" icon={Icon.Globe}>
+              <ActionPanel.Submenu title="Set Country/region" icon={Icon.Globe}>
                 {COMMON_COUNTRIES.map((c) => (
                   <Action
                     key={c.code}
