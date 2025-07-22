@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { PagerDutyApiResponse } from "./types";
+import { OnCallScheduleEntry, PagerDutyApiResponse, PagerDutyOnCall, PagerDutyUser } from "./types";
 
 interface Preferences {
   apiToken: string;
@@ -19,20 +19,20 @@ export class PagerDutyAPI {
     this.userEmail = preferences.userEmail;
 
     if (!this.apiToken || !this.userEmail) {
-      throw new Error("PagerDuty API token and email are required. Please configure them in extension preferences.");
+      throw new Error("PagerDuty API token and user email are required. Please configure them in preferences.");
     }
   }
 
-  private async makeRequest<T>(endpoint: string, params: Record): Promise {
+  private async makeRequest<T>(endpoint: string, params: Record<string, string | string[]> = {}): Promise<T> {
     try {
       const url = new URL(endpoint, PAGERDUTY_API_BASE);
 
-      // Add parameters to URL
+      // Add query parameters
       Object.entries(params).forEach(([key, value]) => {
         if (Array.isArray(value)) {
-          value.forEach((v) => url.searchParams.append(key, v));
+          value.forEach((v: string) => url.searchParams.append(key, v));
         } else {
-          url.searchParams.append(key, value);
+          url.searchParams.set(key, value as string);
         }
       });
 
@@ -40,6 +40,7 @@ export class PagerDutyAPI {
       const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT);
 
       const response = await fetch(url.toString(), {
+        method: "GET",
         headers: {
           Authorization: `Token token=${this.apiToken}`,
           Accept: "application/vnd.pagerduty+json;version=2",
@@ -51,18 +52,19 @@ export class PagerDutyAPI {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        const errorMessages = {
-          401: "Invalid PagerDuty API token. Please check your credentials.",
-          403: "Access denied. Please ensure your API token has the required permissions.",
-        };
-
-        if (response.status in errorMessages) {
-          throw new Error(errorMessages[response.status as keyof typeof errorMessages]);
-        } else if (response.status >= 500) {
-          throw new Error("PagerDuty service is temporarily unavailable. Please try again later.");
-        } else {
-          throw new Error(`PagerDuty API error: ${response.status} ${response.statusText}`);
+        if (response.status === 401) {
+          throw new Error("Invalid PagerDuty API token. Please check your API token in preferences.");
         }
+        if (response.status === 403) {
+          throw new Error("Access denied. Please ensure your API token has the required permissions.");
+        }
+        if (response.status === 400) {
+          throw new Error("Bad request. Please check your configuration and try again.");
+        }
+        if (response.status >= 500) {
+          throw new Error("PagerDuty service is temporarily unavailable. Please try again later.");
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       return (await response.json()) as T;
@@ -77,12 +79,13 @@ export class PagerDutyAPI {
     }
   }
 
-  private async getCurrentUser(): Promise {
-    const response = await this.makeRequest<PagerDutyApiResponse>("/users", {
+  private async getCurrentUser(): Promise<PagerDutyUser> {
+    type UserResponse = PagerDutyApiResponse<PagerDutyUser>;
+    const response = await this.makeRequest<UserResponse>("/users", {
       query: this.userEmail,
     });
 
-    const user = response.users?.find((u) => u.email === this.userEmail);
+    const user = response.users?.find((u: PagerDutyUser) => u.email === this.userEmail);
     if (!user) {
       throw new Error(`User with email ${this.userEmail} not found. Please check your email address.`);
     }
@@ -90,34 +93,37 @@ export class PagerDutyAPI {
     return user;
   }
 
-  private async getOnCallSchedules(): Promise {
-    const user = await this.getCurrentUser();
+  private async getOnCallSchedules(): Promise<PagerDutyOnCall[]> {
+    const user: PagerDutyUser = await this.getCurrentUser();
     const now = new Date();
 
-    // Split into smaller chunks to avoid API limits
-    // Get past 2 months and future 2 months separately
-    const twoMonthsAgo = new Date(now.getTime() - 2 * 30 * 24 * 60 * 60 * 1000);
-    const twoMonthsFromNow = new Date(now.getTime() + 2 * 30 * 24 * 60 * 60 * 1000);
+    // Try 4 months first (2 past + 2 future)
+    const fourMonthsAgo = new Date(now);
+    fourMonthsAgo.setMonth(now.getMonth() - 2);
+    const fourMonthsFromNow = new Date(now);
+    fourMonthsFromNow.setMonth(now.getMonth() + 2);
 
     try {
-      // Fetch past and future data in one call with a smaller range
-      const response = await this.makeRequest<PagerDutyApiResponse>("/oncalls", {
+      type OnCallResponse = PagerDutyApiResponse<PagerDutyOnCall>;
+      const response = await this.makeRequest<OnCallResponse>("/oncalls", {
         "user_ids[]": user.id,
-        since: twoMonthsAgo.toISOString(),
-        until: twoMonthsFromNow.toISOString(),
-        limit: "100", // Explicit limit to avoid issues
+        since: fourMonthsAgo.toISOString(),
+        until: fourMonthsFromNow.toISOString(),
+        limit: "100",
       });
 
       return response.oncalls || [];
     } catch (error) {
-      // If still getting 400, try with even smaller range (1 month past + 2 months future)
-      if (error instanceof Error && error.message.includes("400")) {
-        const oneMonthAgo = new Date(now.getTime() - 1 * 30 * 24 * 60 * 60 * 1000);
+      // Fallback to 3 months (1 past + 2 future) if 4 months fails
+      if (error instanceof Error && error.message.includes("Bad request")) {
+        const oneMonthAgo = new Date(now);
+        oneMonthAgo.setMonth(now.getMonth() - 1);
 
-        const fallbackResponse = await this.makeRequest<PagerDutyApiResponse>("/oncalls", {
+        type OnCallResponse = PagerDutyApiResponse<PagerDutyOnCall>;
+        const fallbackResponse = await this.makeRequest<OnCallResponse>("/oncalls", {
           "user_ids[]": user.id,
           since: oneMonthAgo.toISOString(),
-          until: twoMonthsFromNow.toISOString(),
+          until: fourMonthsFromNow.toISOString(),
           limit: "100",
         });
 
@@ -127,73 +133,78 @@ export class PagerDutyAPI {
     }
   }
 
-  async getCurrentOnCallStatus(): Promise {
-    const onCallData = await this.getOnCallSchedules();
+  async getCurrentOnCallStatus(): Promise<{ schedules: OnCallScheduleEntry[] }> {
+    const onCallData: PagerDutyOnCall[] = await this.getOnCallSchedules();
     const now = new Date();
 
-    const currentOnCall = onCallData
-      .filter((entry) => {
+    const currentSchedules: OnCallScheduleEntry[] = onCallData
+      .filter((entry: PagerDutyOnCall) => {
         const start = new Date(entry.start);
         const end = new Date(entry.end);
         return now >= start && now <= end;
       })
-      .map((entry) => ({
-        schedule: entry.schedule,
-        user: entry.user,
-        start: new Date(entry.start),
-        end: new Date(entry.end),
-        level: entry.escalation_level,
-      }));
+      .map(
+        (entry: PagerDutyOnCall): OnCallScheduleEntry => ({
+          schedule: entry.schedule,
+          user: entry.user,
+          start: new Date(entry.start),
+          end: new Date(entry.end),
+          level: entry.escalation_level,
+        }),
+      );
 
-    return {
-      isOnCall: currentOnCall.length > 0,
-      schedules: currentOnCall,
-    };
+    return { schedules: currentSchedules };
   }
 
-  async getUpcomingOnCallSchedules(): Promise {
-    const onCallData = await this.getOnCallSchedules();
+  async getUpcomingOnCallSchedules(): Promise<OnCallScheduleEntry[]> {
+    const onCallData: PagerDutyOnCall[] = await this.getOnCallSchedules();
     const now = new Date();
 
     return onCallData
-      .filter((entry) => new Date(entry.start) > now)
-      .map((entry) => ({
-        schedule: entry.schedule,
-        user: entry.user,
-        start: new Date(entry.start),
-        end: new Date(entry.end),
-        level: entry.escalation_level,
-      }))
-      .sort((a, b) => a.start.getTime() - b.start.getTime());
+      .filter((entry: PagerDutyOnCall) => new Date(entry.start) > now)
+      .map(
+        (entry: PagerDutyOnCall): OnCallScheduleEntry => ({
+          schedule: entry.schedule,
+          user: entry.user,
+          start: new Date(entry.start),
+          end: new Date(entry.end),
+          level: entry.escalation_level,
+        }),
+      )
+      .sort((a: OnCallScheduleEntry, b: OnCallScheduleEntry) => a.start.getTime() - b.start.getTime());
   }
 
-  async getPastOnCallSchedules(): Promise {
-    const onCallData = await this.getOnCallSchedules();
+  async getPastOnCallSchedules(): Promise<OnCallScheduleEntry[]> {
+    const onCallData: PagerDutyOnCall[] = await this.getOnCallSchedules();
     const now = new Date();
 
     return onCallData
-      .filter((entry) => new Date(entry.end) < now)
-      .map((entry) => ({
-        schedule: entry.schedule,
-        user: entry.user,
-        start: new Date(entry.start),
-        end: new Date(entry.end),
-        level: entry.escalation_level,
-      }))
-      .sort((a, b) => b.start.getTime() - a.start.getTime()); // Sort past schedules in reverse chronological order
+      .filter((entry: PagerDutyOnCall) => new Date(entry.end) < now)
+      .map(
+        (entry: PagerDutyOnCall): OnCallScheduleEntry => ({
+          schedule: entry.schedule,
+          user: entry.user,
+          start: new Date(entry.start),
+          end: new Date(entry.end),
+          level: entry.escalation_level,
+        }),
+      )
+      .sort((a: OnCallScheduleEntry, b: OnCallScheduleEntry) => b.start.getTime() - a.start.getTime());
   }
 
-  async getAllOnCallSchedules(): Promise {
-    const onCallData = await this.getOnCallSchedules();
+  async getAllOnCallSchedules(): Promise<OnCallScheduleEntry[]> {
+    const onCallData: PagerDutyOnCall[] = await this.getOnCallSchedules();
 
     return onCallData
-      .map((entry) => ({
-        schedule: entry.schedule,
-        user: entry.user,
-        start: new Date(entry.start),
-        end: new Date(entry.end),
-        level: entry.escalation_level,
-      }))
-      .sort((a, b) => a.start.getTime() - b.start.getTime());
+      .map(
+        (entry: PagerDutyOnCall): OnCallScheduleEntry => ({
+          schedule: entry.schedule,
+          user: entry.user,
+          start: new Date(entry.start),
+          end: new Date(entry.end),
+          level: entry.escalation_level,
+        }),
+      )
+      .sort((a: OnCallScheduleEntry, b: OnCallScheduleEntry) => a.start.getTime() - b.start.getTime());
   }
 }

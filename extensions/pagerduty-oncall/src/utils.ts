@@ -126,31 +126,41 @@ export const categorizeSchedule = (schedule: OnCallScheduleEntry, now: Date = ne
   isUpcoming: schedule.start > now,
 });
 
+// Type aliases to prevent ESLint from stripping generics
+type ScheduleGroup = Record<string, OnCallScheduleEntry[]>;
+type FilterMap = Record<FilterType, () => OnCallScheduleEntry[]>;
+
 /**
  * Groups schedules by month-year for organized display
  * @param schedules - Array of schedule entries
  * @returns Record with month-year keys and schedule arrays
  */
-export const groupSchedulesByMonth = (schedules: OnCallScheduleEntry[]): Record =>
-  schedules.reduce((groups, schedule) => {
-    const monthYear = formatMonthYear(schedule.start);
-    return {
-      ...groups,
-      [monthYear]: [...(groups[monthYear] || []), schedule],
-    };
-  }, {} as Record);
+export const groupSchedulesByMonth = (schedules: OnCallScheduleEntry[]): ScheduleGroup => {
+  const groups: ScheduleGroup = {};
+
+  schedules.forEach((schedule: OnCallScheduleEntry) => {
+    const monthYear: string = formatMonthYear(schedule.start);
+    if (!groups[monthYear]) {
+      groups[monthYear] = [];
+    }
+    groups[monthYear].push(schedule);
+  });
+
+  return groups;
+};
 
 /**
  * Sorts month keys chronologically
  * @param groupedSchedules - Grouped schedules object
  * @returns Array of month keys sorted by date
  */
-export const sortMonthsChronologically = (groupedSchedules: Record): string[] =>
-  Object.keys(groupedSchedules).sort((a, b) => {
-    const aDate = new Date(groupedSchedules[a][0].start);
-    const bDate = new Date(groupedSchedules[b][0].start);
+export const sortMonthsChronologically = (groupedSchedules: ScheduleGroup): string[] => {
+  return Object.keys(groupedSchedules).sort((a: string, b: string) => {
+    const aDate: Date = new Date(groupedSchedules[a][0].start);
+    const bDate: Date = new Date(groupedSchedules[b][0].start);
     return aDate.getTime() - bDate.getTime();
   });
+};
 
 // =============================================================================
 // FILTER UTILITIES
@@ -158,10 +168,12 @@ export const sortMonthsChronologically = (groupedSchedules: Record): string[] =>
 
 export type FilterType = "recent_and_upcoming" | "past" | "all";
 
+type FilterConfig = Record<FilterType, { title: string; description: string }>;
+
 /**
  * Available filter configurations for the extension
  */
-export const FILTER_CONFIG = {
+export const FILTER_CONFIG: FilterConfig = {
   recent_and_upcoming: {
     title: "Recent & Upcoming",
     description: "Last 2 completed shifts + all upcoming",
@@ -174,7 +186,7 @@ export const FILTER_CONFIG = {
     title: "All (4 months)",
     description: "Next 4 months from today",
   },
-} as const;
+};
 
 /**
  * Filters schedules based on the selected filter type using modern ES6 approach
@@ -192,27 +204,27 @@ export const filterSchedules = (
   filterType: FilterType,
 ): OnCallScheduleEntry[] => {
   const { current, all, upcoming, past } = schedules;
-  const now = new Date();
+  const now: Date = new Date();
 
-  const filterMap: Record = {
-    recent_and_upcoming: () => [
+  const filterMap: FilterMap = {
+    recent_and_upcoming: (): OnCallScheduleEntry[] => [
       ...past.slice(-2), // Last 2 completed shifts
       ...current, // Currently active
       ...upcoming, // All upcoming
     ],
-    past: () => past,
-    all: () => {
+    past: (): OnCallScheduleEntry[] => past,
+    all: (): OnCallScheduleEntry[] => {
       // Show only schedules from today onwards for the next 4 months
-      const fourMonthsFromNow = new Date(now);
+      const fourMonthsFromNow: Date = new Date(now);
       fourMonthsFromNow.setMonth(now.getMonth() + 4);
 
       return all
         .filter(
-          (schedule) =>
+          (schedule: OnCallScheduleEntry) =>
             schedule.start >= now && // From today onwards
             schedule.start <= fourMonthsFromNow, // Within 4 months
         )
-        .sort((a, b) => a.start.getTime() - b.start.getTime());
+        .sort((a: OnCallScheduleEntry, b: OnCallScheduleEntry) => a.start.getTime() - b.start.getTime());
     },
   };
 
