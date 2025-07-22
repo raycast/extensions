@@ -79,7 +79,7 @@ export default function GameDetail({
             }
           }
         } catch (error) {
-          logBoth("[GameDetail] Error fetching prices:", error);
+          showFailureToast(error, { title: "Could not fetch prices" });
         }
 
         // Fetch price history
