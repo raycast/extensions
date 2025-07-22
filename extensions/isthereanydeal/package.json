@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "IsThereAnyDeal",
-  "title": "IsThereAnyDeal",
+  "name": "isthereanydeal",
+  "title": "Isthereanydeal",
   "description": "Search for game deals and track prices across multiple stores",
   "icon": "ITAD-logo.png",
   "author": "gabeperez",
@@ -13,7 +13,6 @@
     "url": "https://github.com/gabeperez/isthereanydeal.git"
   },
   "categories": [
-    "Shopping",
     "Productivity"
   ],
   "keywords": [
