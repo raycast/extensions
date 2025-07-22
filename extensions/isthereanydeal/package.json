@@ -3,7 +3,7 @@
   "name": "isthereanydeal",
   "title": "Is There Any Deal",
   "description": "Search for game deals and track prices across multiple stores",
-  "icon": "extension-icon.png",
+  "icon": "ITAD-logo.png",
   "author": "gabeperez",
   "license": "MIT",
   "version": "1.0.1",
