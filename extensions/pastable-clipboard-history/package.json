@@ -1,0 +1,86 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pastable-clipboard-history",
+  "title": "Pastable Clipboard History",
+  "description": "Instantly paste clipboard items from positions 0-5 with dedicated keyboard shortcuts",
+  "icon": "clipboard.png",
+  "author": "wook",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "paste-current",
+      "title": "Paste Current Clipboard Item",
+      "description": "Paste the current clipboard item (position 0)",
+      "mode": "no-view"
+    },
+    {
+      "name": "paste-first",
+      "title": "Paste 1st Previous Clipboard Item",
+      "description": "Paste the 1st previous clipboard item (offset 1)",
+      "mode": "no-view"
+    },
+    {
+      "name": "paste-second",
+      "title": "Paste 2nd Previous Clipboard Item",
+      "description": "Paste the 2nd previous clipboard item (offset 2)",
+      "mode": "no-view"
+    },
+    {
+      "name": "paste-third",
+      "title": "Paste 3rd Previous Clipboard Item",
+      "description": "Paste the 3rd previous clipboard item (offset 3)",
+      "mode": "no-view"
+    },
+    {
+      "name": "paste-fourth",
+      "title": "Paste 4th Previous Clipboard Item",
+      "description": "Paste the 4th previous clipboard item (offset 4)",
+      "mode": "no-view"
+    },
+    {
+      "name": "paste-fifth",
+      "title": "Paste 5th Previous Clipboard Item",
+      "description": "Paste the 5th previous clipboard item (offset 5)",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.101.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/jest": "^29.5.14",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "husky": "^9.1.7",
+    "jest": "^29.7.0",
+    "lint-staged": "^16.1.2",
+    "prettier": "^3.0.0",
+    "ts-jest": "^29.4.0",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "verify": "node scripts/verify-setup.js",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "src/**/*.{ts,tsx,js,jsx}": [
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
+  }
+}
