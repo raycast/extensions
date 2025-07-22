@@ -35,8 +35,10 @@
   "dependencies": {
     "@raycast/api": "^1.97.1",
     "@raycast/utils": "^1.17.0",
+    "@types/proper-lockfile": "^4.1.4",
     "better-sqlite3-multiple-ciphers": "^11.10.0",
     "drizzle-orm": "^0.43.1",
+    "proper-lockfile": "^4.1.2",
     "tar-stream": "^3.1.7"
   },
   "devDependencies": {

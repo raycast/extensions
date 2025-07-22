@@ -26,7 +26,7 @@ export const DatabaseMigrationsFolder = (function () {
   return resolve(environment.assetsPath, `drizzle`);
 })();
 
-const DatabasePath = (function () {
+export const DatabasePath = (function () {
   return resolve(environment.supportPath, `sessions.db`);
 })();
 

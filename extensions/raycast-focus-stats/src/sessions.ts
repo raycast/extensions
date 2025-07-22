@@ -4,6 +4,7 @@ import { getDatabase } from "./lib/db";
 import { sessionsTable } from "./lib/schema";
 import { and, gte, lte } from "drizzle-orm";
 import { showToast, Toast } from "@raycast/api";
+import { SqliteError } from "better-sqlite3-multiple-ciphers";
 
 const cache = new Cache();
 
@@ -52,16 +53,32 @@ export function removeCurrentSession() {
 
 /**
  * Saves the provided session data to the database.
+ * Checks for existing sessions with the same timestamp to prevent duplicates.
  *
  * @param {Session} session - The session object to be saved
  * @returns {void}
  */
 export async function saveSession(session: NewSession): Promise<void> {
-  await getDatabase().insert(sessionsTable).values({
-    goal: session.goal,
-    duration: session.duration,
-    timestamp: session.start.getTime(),
-  });
+  const timestamp = session.start.getTime();
+
+  try {
+    await getDatabase().insert(sessionsTable).values({
+      goal: session.goal,
+      duration: session.duration,
+      timestamp: timestamp,
+    });
+  } catch (error) {
+    // The `goal` and `timestamp` columns have a composite unique constraint in order to prevent
+    // duplicate sessions for the same goal and timestamp.
+    // When such a session already exists, let's simply log a message as this was an issue that
+    // could happen when running the "Sync Sessions" command multiple times at roughly the same
+    // exact moment, leading to duplicates.
+    if (error instanceof SqliteError && error.code === "SQLITE_CONSTRAINT_UNIQUE") {
+      console.log(`Session already exists for timestamp ${session.start.toISOString()}, skipping duplicate`);
+    } else {
+      console.error(`Failed to save session: ${error}`);
+    }
+  }
 }
 
 /**
