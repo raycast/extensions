@@ -6,8 +6,10 @@
 
 A powerful Raycast extension for finding the best video game deals across multiple regions and stores. Search for games, compare prices, and track historical pricing data all from your Raycast launcher.
 
+## Demo
 https://github.com/user-attachments/assets/3a0ab9fd-839c-477c-8845-b7e192e88107
 
+## Screenshots
 <p align="center">
 
   <img src="./assets/ITAD-1.png" width="350" alt="IsThereAnyDeal Screenshot 1">
