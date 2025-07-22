@@ -42,3 +42,7 @@ coverage/
 # Temporary files
 *.tmp
 *.temp
+
+# Development documentation (optional)
+DEVELOPMENT.md
+OPTIMIZATION_SUMMARY.md
