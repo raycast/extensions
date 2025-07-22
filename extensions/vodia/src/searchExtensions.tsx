@@ -162,7 +162,7 @@ export default function Command() {
             .filter((ext) => {
               const searchLower = searchText.toLowerCase();
               return (
-                ext.name.toString().includes(searchLower) ||
+                ext.name.includes(searchLower) ||
                 ext.first_name.toLowerCase().includes(searchLower) ||
                 ext.display_name.toLowerCase().includes(searchLower) ||
                 ext.email_address.toLowerCase().includes(searchLower) ||
@@ -178,7 +178,7 @@ export default function Command() {
                   subtitle={`Ext. ${ext.name}` + " - " + `${extWithDomain.domain}`}
                   accessories={[
                     { text: ext.email_address },
-                    ...(ext.alias?.length > 1 ? [{ text: ext.alias.slice(1).join(", ") }] : []),
+                    ...(ext.alias.length > 1 ? [{ text: ext.alias.slice(1).join(", ") }] : []),
                   ]}
                   icon={ext.dnd === true ? Icon.CircleFilled : Icon.Circle}
                   actions={
@@ -189,7 +189,7 @@ export default function Command() {
                       />
                       <Action.CopyToClipboard
                         title="Copy Extension Id"
-                        content={ext.name.toString()}
+                        content={ext.name}
                         shortcut={{ modifiers: ["cmd"], key: "c" }}
                       />
                       <Action.CopyToClipboard

@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "searchDomains",
-      "title": "Search Domains",
+      "title": "Search Vodia Domains",
       "description": "Search for a domain.",
       "mode": "view"
     },

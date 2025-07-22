@@ -41,15 +41,15 @@ export function DomainCommandList({ domain }: { domain: DomainListItem }) {
 
   return (
     <List>
-      {commands.map((command, index) => (
+      {commands.map((command) => (
         <List.Item
-          key={index}
+          key={command.title}
           title={command.title}
           subtitle={command.description}
           icon={command.icon}
           actions={
             <ActionPanel>
-              <Action title="Execute Command" onAction={command.action} />
+              <Action title={command.title} onAction={command.action} />
               <Action.OpenInBrowser
                 title="Open in Browser"
                 shortcut={{ modifiers: ["cmd"], key: "b" }}

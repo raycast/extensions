@@ -3,6 +3,7 @@ import { ActionPanel, List, Action, Icon, getPreferenceValues, clearSearchBar } 
 import { useState, useEffect } from "react";
 import fetch from "node-fetch";
 import { DomainCommandList, DomainListItem } from "./components/DomainCommandList";
+import { showFailureToast } from "@raycast/utils";
 
 // Define the structure of preferences
 interface Preferences {
@@ -46,12 +47,8 @@ export default function Command() {
         const password = preferences.password;
         const url = "https://" + preferences.domain + "/rest/system/domains";
 
-        // Log the request details for debugging
-        console.log("Attempting to fetch from:", url);
-
         // Create Basic Auth header
         const authString = Buffer.from(`${username}:${password}`).toString("base64");
-        console.log("Using Authorization header:", `Basic ${authString}`);
 
         // Make the API request with proper headers
         const response = await fetch(url, {
@@ -64,19 +61,14 @@ export default function Command() {
           },
         });
 
-        // Log response details for debugging
-        console.log("Response status:", response.status);
-        console.log("Response headers:", response.headers);
-
         // Check if the response was successful
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status} ${response.statusText}`);
+          // throw new Error(`HTTP error! status: ${response.status} ${response.statusText}`);
+          showFailureToast(error, { title: "response.statusText" });
         }
 
         // Get the response body as text
         const text = await response.text();
-        console.log("Response body length:", text.length);
-        console.log("Response body preview:", text.substring(0, 200));
 
         // Validate that we received a response
         if (!text) {
@@ -135,9 +127,9 @@ export default function Command() {
   // Render the list of domains
   return (
     <List isLoading={isLoading}>
-      {domains.map((domain, index) => (
+      {domains.map((domain) => (
         <List.Item
-          key={index}
+          key={domain.name}
           title={domain.display}
           subtitle={domain.name}
           actions={

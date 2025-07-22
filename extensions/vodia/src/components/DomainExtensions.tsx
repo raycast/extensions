@@ -35,7 +35,6 @@ export function DomainExtensions({ domain }: { domain: DomainListItem }) {
         const username = preferences.username;
         const password = preferences.password;
         const url = "https://" + preferences.domain + `/rest/domain/${domain.name}/extensions`;
-        console.log(url);
 
         const authString = Buffer.from(`${username}:${password}`).toString("base64");
 
@@ -86,9 +85,9 @@ export function DomainExtensions({ domain }: { domain: DomainListItem }) {
   return (
     <List isLoading={isLoading}>
       <List.Section title={`Extensions for ${domain.display}`}>
-        {extensions.map((ext, index) => (
+        {extensions.map((ext) => (
           <List.Item
-            key={index}
+            key={ext.id}
             title={ext.first_name + " " + ext.display_name}
             subtitle={ext.id.toString()}
             accessories={[{ text: ext.email_address }, ...(ext.alias?.length ? [{ text: ext.alias.join(", ") }] : [])]}
