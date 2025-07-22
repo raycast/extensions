@@ -1,11 +1,16 @@
 import { QueryCache, QueryClient, useQuery } from "@tanstack/react-query";
 import { api } from "./index.js";
 import { useMembership } from "../utils/membership.js";
+import { showFailureToast } from "@raycast/utils";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 10 * 1_000,
+      throwOnError(error) {
+        showFailureToast(error);
+        return false;
+      },
     },
   },
   queryCache: new QueryCache({}),
