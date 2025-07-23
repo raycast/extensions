@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fabulous",
   "title": "Fabulous",
-  "description": "",
+  "description": "List Domains and their DNS Records",
   "categories": [
     "Developer Tools"
   ],
@@ -14,7 +14,7 @@
       "name": "username",
       "title": "Username",
       "placeholder": "username",
-      "description": "",
+      "description": "Your Fabulous Username",
       "required": true,
       "type": "textfield"
     },
@@ -22,7 +22,7 @@
       "name": "password",
       "title": "Password",
       "placeholder": "password",
-      "description": "",
+      "description": "Your Fabulous Password",
       "required": true,
       "type": "password"
     }
@@ -32,13 +32,13 @@
       "name": "domains",
       "title": "Domains",
       "subtitle": "Fabulous",
-      "description": "",
+      "description": "List Domains and their DNS Records",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.100.3",
-    "@raycast/utils": "^2.0.1",
+    "@raycast/api": "^1.101.1",
+    "@raycast/utils": "^2.2.0",
     "fast-xml-parser": "^5.2.5"
   },
   "devDependencies": {
