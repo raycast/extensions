@@ -66,8 +66,8 @@ export function useNLPParser(content: string, projects?: Project[]): ParsedData 
     }
 
     // Parse labels (@label) - extract all labels, keeping the most recent of each unique label
-    // Updated regex to capture labels with spaces: @"Label Name" or @LabelName
-    const labelMatches = Array.from(content.matchAll(/@(?:"([^"]+)"|([a-zA-Z0-9_\u00A0-\uFFFF]+(?:\s+[a-zA-Z0-9_\u00A0-\uFFFF]+)*))/g));
+    // More conservative regex to avoid capturing too much text
+    const labelMatches = Array.from(content.matchAll(/@(?:"([^"]+)"|([a-zA-Z0-9_\u00A0-\uFFFF]+(?:\s+[a-zA-Z0-9_\u00A0-\uFFFF]+)*?)(?=\s|$))/g));
     if (labelMatches.length > 0) {
       // Get all labels but remove duplicates, keeping the last occurrence of each
       // match[1] is quoted label, match[2] is unquoted label (may have spaces)
@@ -95,29 +95,54 @@ export function useNLPParser(content: string, projects?: Project[]): ParsedData 
     }
 
     // Parse project patterns - use the LAST occurrence (#ProjectName)
-    // Updated regex to capture projects with spaces: #"Project Name" or #ProjectName
+    // Simple approach: capture minimal words and validate against project list
     const projectMatches = Array.from(content.matchAll(/#(?:"([^"]+)"|([a-zA-Z0-9_\u00A0-\uFFFF]+(?:\s+[a-zA-Z0-9_\u00A0-\uFFFF]+)*))/g));
     if (projectMatches.length > 0 && projects) {
-      // Use the last project pattern found
-      const lastProjectMatch = projectMatches[projectMatches.length - 1];
-      // match[1] is quoted project, match[2] is unquoted project (may have spaces)
-      const userProjectName = lastProjectMatch[1] || lastProjectMatch[2];
+      // Try each match from last to first to get the most recent one
+      for (let i = projectMatches.length - 1; i >= 0; i--) {
+        const match = projectMatches[i];
+        let candidateName = match[1] || match[2]; // match[1] is quoted, match[2] is unquoted
+        
+        // For unquoted matches, try shortest possible matches first
+        if (!match[1] && match[2]) { // Only for unquoted matches
+          const words = candidateName.split(/\s+/);
+          
+          // Try progressively longer combinations starting from single word
+          for (let wordCount = 1; wordCount <= words.length; wordCount++) {
+            const testName = words.slice(0, wordCount).join(' ');
+            
+            const matchingProject = projects.find((project) => {
+              const normalizedProjectName = normalizeProjectName(project.name);
+              const normalizedUserInput = normalizeProjectName(testName);
+              return normalizedProjectName === normalizedUserInput;
+            });
 
-      // Find matching project with case-insensitive and emoji-stripped comparison
-      const matchingProject = projects.find((project) => {
-        const normalizedProjectName = normalizeProjectName(project.name);
-        const normalizedUserInput = normalizeProjectName(userProjectName);
-        return normalizedProjectName === normalizedUserInput;
-      });
+            if (matchingProject) {
+              projectId = matchingProject.id;
+              break; // Found a match, stop looking
+            }
+          }
+          
+          if (projectId) break; // Found match, exit outer loop
+        } else {
+          // For quoted matches, use the full quoted content
+          const matchingProject = projects.find((project) => {
+            const normalizedProjectName = normalizeProjectName(project.name);
+            const normalizedUserInput = normalizeProjectName(candidateName);
+            return normalizedProjectName === normalizedUserInput;
+          });
 
-      if (matchingProject) {
-        projectId = matchingProject.id;
+          if (matchingProject) {
+            projectId = matchingProject.id;
+            break; // Found a match, stop looking
+          }
+        }
       }
     }
 
     // Enhanced natural language date parsing using chrono-node
     // We parse from the original content to find dates - use the LAST/MOST RECENT date found
-    // BUT exclude any dates that are inside curly braces (deadline patterns), labels (@), or projects (#)
+    // BUT exclude any dates that are inside curly braces (deadline patterns), labels (@), or actual projects (#)
     const customChrono = chrono.casual.clone();
     
     // Create a version of content with patterns removed to avoid date parsing conflicts
@@ -132,8 +157,28 @@ export function useNLPParser(content: string, projects?: Project[]): ParsedData 
     // Remove label patterns to prevent date parsing within labels (@"This Month" or @ThisMonth)
     contentForDateParsing = contentForDateParsing.replace(/@(?:"[^"]+"|[a-zA-Z0-9_\u00A0-\uFFFF]+(?:\s+[a-zA-Z0-9_\u00A0-\uFFFF]+)*)/g, '');
     
-    // Remove project patterns to prevent date parsing within projects (#"March Project" or #MarchProject)
-    contentForDateParsing = contentForDateParsing.replace(/#(?:"[^"]+"|[a-zA-Z0-9_\u00A0-\uFFFF]+(?:\s+[a-zA-Z0-9_\u00A0-\uFFFF]+)*)/g, '');
+    // Smart project removal: Only remove actual project names that exist in the projects list
+    if (projects && projects.length > 0) {
+      const projectMatches = Array.from(content.matchAll(/#(?:"([^"]+)"|([a-zA-Z0-9_\u00A0-\uFFFF]+(?:\s+[a-zA-Z0-9_\u00A0-\uFFFF]+)*?)(?=\s|$))/g));
+      
+      for (const match of projectMatches) {
+        const userProjectName = match[1] || match[2];
+        
+        // Check if this is actually a project name that exists
+        const matchingProject = projects.find((project) => {
+          const normalizedProjectName = normalizeProjectName(project.name);
+          const normalizedUserInput = normalizeProjectName(userProjectName);
+          return normalizedProjectName === normalizedUserInput;
+        });
+        
+        // Only remove if it's an actual project name
+        if (matchingProject) {
+          const fullMatch = match[0]; // The complete match like "#VISA" or "#"Project Name""
+          const escapedMatch = fullMatch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          contentForDateParsing = contentForDateParsing.replace(new RegExp(escapedMatch, 'g'), '');
+        }
+      }
+    }
     
     // Parse dates with enhanced options for better coverage
     const dateResults = customChrono.parse(contentForDateParsing, new Date(), { 

@@ -170,17 +170,40 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
   const updateTitleWithPriority = (newPriority: string) => {
     let updatedContent = values.content;
     
-    // Remove existing priority patterns
-    updatedContent = updatedContent.replace(/\bp[1-4]\b/gi, '').replace(/\s+/g, ' ').trim();
+    // Find and replace only the LAST priority pattern
+    const priorityRegex = /\bp[1-4]\b/gi;
+    const matches = Array.from(updatedContent.matchAll(priorityRegex));
     
-    // Add new priority if not default
-    const priorityNumber = parseInt(newPriority);
-    if (priorityNumber && priorityNumber !== lowestPriority.value) {
-      // Convert Todoist priority to user format: 4->p1, 3->p2, 2->p3, 1->p4
-      const priorityMap: Record<number, string> = { 4: 'p1', 3: 'p2', 2: 'p3', 1: 'p4' };
-      const priorityText = priorityMap[priorityNumber];
-      if (priorityText) {
-        updatedContent = `${updatedContent.trim()} ${priorityText}`.trim();
+    if (matches.length > 0) {
+      // Replace only the last priority match
+      const lastMatch = matches[matches.length - 1];
+      const beforeMatch = updatedContent.substring(0, lastMatch.index);
+      const afterMatch = updatedContent.substring(lastMatch.index! + lastMatch[0].length);
+      
+      // Add new priority if not default, otherwise just remove the old one
+      const priorityNumber = parseInt(newPriority);
+      if (priorityNumber && priorityNumber !== lowestPriority.value) {
+        // Convert Todoist priority to user format: 4->p1, 3->p2, 2->p3, 1->p4
+        const priorityMap: Record<number, string> = { 4: 'p1', 3: 'p2', 2: 'p3', 1: 'p4' };
+        const priorityText = priorityMap[priorityNumber];
+        if (priorityText) {
+          updatedContent = `${beforeMatch}${priorityText}${afterMatch}`.replace(/\s+/g, ' ').trim();
+        } else {
+          updatedContent = `${beforeMatch}${afterMatch}`.replace(/\s+/g, ' ').trim();
+        }
+      } else {
+        updatedContent = `${beforeMatch}${afterMatch}`.replace(/\s+/g, ' ').trim();
+      }
+    } else {
+      // No existing priority to replace, add new priority at the end if not default
+      const priorityNumber = parseInt(newPriority);
+      if (priorityNumber && priorityNumber !== lowestPriority.value) {
+        // Convert Todoist priority to user format: 4->p1, 3->p2, 2->p3, 1->p4
+        const priorityMap: Record<number, string> = { 4: 'p1', 3: 'p2', 2: 'p3', 1: 'p4' };
+        const priorityText = priorityMap[priorityNumber];
+        if (priorityText) {
+          updatedContent = `${updatedContent.trim()} ${priorityText}`.trim();
+        }
       }
     }
     
@@ -190,15 +213,84 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
   const updateTitleWithProject = (newProjectId: string) => {
     let updatedContent = values.content;
     
-    // Remove existing project patterns
-    updatedContent = updatedContent.replace(/#(?:"[^"]+"|[a-zA-Z0-9_\u00A0-\uFFFF]+(?:\s+[a-zA-Z0-9_\u00A0-\uFFFF]+)*)/g, '').replace(/\s+/g, ' ').trim();
+    // Use the same smart project detection logic as the NLP parser
+    const projectRegex = /#(?:"([^"]+)"|([a-zA-Z0-9_\u00A0-\uFFFF]+(?:\s+[a-zA-Z0-9_\u00A0-\uFFFF]+)*))/g;
+    const projectMatches = Array.from(updatedContent.matchAll(projectRegex));
     
-    // Add new project if selected
-    if (newProjectId && projects) {
+    if (projectMatches.length > 0) {
+      // Find the last valid project match using the same logic as NLP parser
+      let lastValidMatch = null;
+      let lastValidProject = null;
+      
+      for (let i = projectMatches.length - 1; i >= 0; i--) {
+        const match = projectMatches[i];
+        let candidateName = match[1] || match[2]; // match[1] is quoted, match[2] is unquoted
+        
+        // For unquoted matches, try shortest possible matches first
+        if (!match[1] && match[2] && projects) {
+          const words = candidateName.split(/\s+/);
+          
+          // Try progressively longer combinations starting from single word
+          for (let wordCount = 1; wordCount <= words.length; wordCount++) {
+            const testName = words.slice(0, wordCount).join(' ');
+            
+            const matchingProject = projects.find((project) => {
+              return project.name.toLowerCase() === testName.toLowerCase();
+            });
+
+            if (matchingProject) {
+              lastValidMatch = {
+                ...match,
+                actualLength: match.index + `#${testName}`.length,
+                projectName: testName
+              };
+              lastValidProject = matchingProject;
+              break;
+            }
+          }
+          
+          if (lastValidMatch) break;
+        } else if (match[1] && projects) {
+          // For quoted matches, use the full quoted content
+          const matchingProject = projects.find((project) => {
+            return project.name.toLowerCase() === candidateName.toLowerCase();
+          });
+
+          if (matchingProject) {
+            lastValidMatch = {
+              ...match,
+              actualLength: match.index + match[0].length,
+              projectName: candidateName
+            };
+            lastValidProject = matchingProject;
+            break;
+          }
+        }
+      }
+      
+      if (lastValidMatch) {
+        // Replace only the valid project match
+        const beforeMatch = updatedContent.substring(0, lastValidMatch.index);
+        const afterMatch = updatedContent.substring(lastValidMatch.actualLength);
+        
+        if (newProjectId && projects) {
+          const project = projects.find(p => p.id === newProjectId);
+          if (project) {
+            const projectName = project.name;
+            const projectText = projectName.includes(' ') ? `#"${projectName}"` : `#${projectName}`;
+            updatedContent = `${beforeMatch}${projectText}${afterMatch}`.replace(/\s+/g, ' ').trim();
+          } else {
+            updatedContent = `${beforeMatch}${afterMatch}`.replace(/\s+/g, ' ').trim();
+          }
+        } else {
+          updatedContent = `${beforeMatch}${afterMatch}`.replace(/\s+/g, ' ').trim();
+        }
+      }
+    } else if (newProjectId && projects) {
+      // No existing project to replace, add new project at the end
       const project = projects.find(p => p.id === newProjectId);
       if (project) {
         const projectName = project.name;
-        // Use quotes if project name has spaces
         const projectText = projectName.includes(' ') ? `#"${projectName}"` : `#${projectName}`;
         updatedContent = `${updatedContent.trim()} ${projectText}`.trim();
       }
@@ -210,8 +302,8 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
   const updateTitleWithLabels = (newLabels: string[]) => {
     let updatedContent = values.content;
     
-    // Remove existing label patterns
-    updatedContent = updatedContent.replace(/@(?:"[^"]+"|[a-zA-Z0-9_\u00A0-\uFFFF]+(?:\s+[a-zA-Z0-9_\u00A0-\uFFFF]+)*)/g, '').replace(/\s+/g, ' ').trim();
+    // Remove existing label patterns - more conservative regex to avoid capturing too much
+    updatedContent = updatedContent.replace(/@(?:"[^"]+"|[a-zA-Z0-9_\u00A0-\uFFFF]+(?:\s+[a-zA-Z0-9_\u00A0-\uFFFF]+)*?)(?=\s|$)/g, '').replace(/\s+/g, ' ').trim();
     
     // Add new labels
     if (newLabels && newLabels.length > 0) {
@@ -228,15 +320,42 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
   const updateTitleWithDate = (newDate: Date | null) => {
     let updatedContent = values.content;
     
-    // Remove existing date text if we know what it is from the parser
+    // Remove the LAST date occurrence if we know what it is from the parser
     if (parsedData.dateString) {
       // Create a regex to match the exact date string that was parsed
-      const dateRegex = new RegExp(`\\b${parsedData.dateString.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
-      updatedContent = updatedContent.replace(dateRegex, '').replace(/\s+/g, ' ').trim();
-    }
-    
-    // Add new date if provided
-    if (newDate) {
+      const escapedDateString = parsedData.dateString.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const dateRegex = new RegExp(`\\b${escapedDateString}\\b`, 'gi');
+      
+      // Find all matches and replace only the last one
+      const matches = Array.from(updatedContent.matchAll(dateRegex));
+      if (matches.length > 0) {
+        const lastMatch = matches[matches.length - 1];
+        const beforeMatch = updatedContent.substring(0, lastMatch.index);
+        const afterMatch = updatedContent.substring(lastMatch.index! + lastMatch[0].length);
+        
+        // Add new date if provided, otherwise just remove the old one
+        if (newDate) {
+          const today = new Date();
+          const tomorrow = new Date(today);
+          tomorrow.setDate(today.getDate() + 1);
+          
+          let dateText = '';
+          if (newDate.toDateString() === today.toDateString()) {
+            dateText = 'today';
+          } else if (newDate.toDateString() === tomorrow.toDateString()) {
+            dateText = 'tomorrow';  
+          } else {
+            // Format as "Jan 15" or similar
+            dateText = newDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          }
+          
+          updatedContent = `${beforeMatch}${dateText}${afterMatch}`.replace(/\s+/g, ' ').trim();
+        } else {
+          updatedContent = `${beforeMatch}${afterMatch}`.replace(/\s+/g, ' ').trim();
+        }
+      }
+    } else if (newDate) {
+      // No existing date to replace, add new date at the end
       const today = new Date();
       const tomorrow = new Date(today);
       tomorrow.setDate(today.getDate() + 1);
@@ -260,11 +379,39 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
   const updateTitleWithDeadline = (newDeadline: Date | null) => {
     let updatedContent = values.content;
     
-    // Remove existing deadline patterns
-    updatedContent = updatedContent.replace(/\{[^}]*\}/g, '').replace(/\s+/g, ' ').trim();
+    // Find and replace only the LAST deadline pattern
+    const deadlineRegex = /\{[^}]*\}/g;
+    const matches = Array.from(updatedContent.matchAll(deadlineRegex));
     
-    // Add new deadline
-    if (newDeadline) {
+    if (matches.length > 0) {
+      // Replace only the last deadline match
+      const lastMatch = matches[matches.length - 1];
+      const beforeMatch = updatedContent.substring(0, lastMatch.index);
+      const afterMatch = updatedContent.substring(lastMatch.index! + lastMatch[0].length);
+      
+      // Add new deadline if provided, otherwise just remove the old one
+      if (newDeadline) {
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(today.getDate() + 1);
+        
+        let deadlineText = '';
+        if (newDeadline.toDateString() === today.toDateString()) {
+          deadlineText = '{today}';
+        } else if (newDeadline.toDateString() === tomorrow.toDateString()) {
+          deadlineText = '{tomorrow}';
+        } else {
+          // Format as "{Jan 15}" or similar
+          const dateStr = newDeadline.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          deadlineText = `{${dateStr}}`;
+        }
+        
+        updatedContent = `${beforeMatch}${deadlineText}${afterMatch}`.replace(/\s+/g, ' ').trim();
+      } else {
+        updatedContent = `${beforeMatch}${afterMatch}`.replace(/\s+/g, ' ').trim();
+      }
+    } else if (newDeadline) {
+      // No existing deadline to replace, add new deadline at the end
       const today = new Date();
       const tomorrow = new Date(today);
       tomorrow.setDate(today.getDate() + 1);
