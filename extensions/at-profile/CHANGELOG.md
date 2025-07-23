@@ -18,7 +18,7 @@
 - Enhanced documentation with screenshots and feature explanations
 
 ### Changed
-- Command renamed from "Manage Apps" to "Manage Apps" for better clarity
+- Improved app management interface with better organization
 - Improved user interface with clearer section titles
 - Updated README with comprehensive feature documentation
 

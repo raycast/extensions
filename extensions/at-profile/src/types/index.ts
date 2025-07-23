@@ -53,6 +53,13 @@ export interface CustomAppUpdate {
   enabled?: boolean;
 }
 
+export interface HistoryItem {
+  username: string;
+  app: string;
+  appName: string;
+  favicon?: string;
+}
+
 export interface HistoryItemWithFavicon extends UsageHistoryItem {
   favicon?: Image.ImageLike;
 }
@@ -66,7 +73,7 @@ export interface CustomAppFormProps {
   app?: {
     id: string;
     name: string;
-    url: string;
+    urlTemplate: string;
     enabled: boolean;
   };
   onSave?: () => void;

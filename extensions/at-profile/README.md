@@ -25,8 +25,8 @@ Quickly visit profiles on social sites with intelligent app management and custo
 
 ### 📦 Built-in App Library
 Includes support for major social apps:
-- Twitter/X, Instagram, LinkedIn, GitHub, TikTok
-- And many more popular social and professional networks
+- X, Instagram, LinkedIn, GitHub, Reddit, YouTube
+- Includes support for custom apps defined by the user
 
 ## Usage
 
@@ -79,9 +79,9 @@ export const defaultApps: App[] = [
 ```
 
 ### File Structure
-- `src/quick-open.tsx` - Main profile search interface
+- `src/open-profile.tsx` - Main profile search interface
 - `src/manage-apps.tsx` - App management interface
-- `src/custom-app-form.tsx` - Form for adding/editing custom apps
-- `src/apps.ts` - Default app definitions and utilities
+- `src/forms/custom-app-form.tsx` - Form for adding/editing custom apps
+- `src/hooks/apps.ts` - Default app definitions and utilities
 - `src/yaml-settings.ts` - YAML import/export functionality
-- `src/storage.ts` - Local storage utilities
+- `src/utils/custom-app-utils.ts` - Custom app utilities and storage helpers

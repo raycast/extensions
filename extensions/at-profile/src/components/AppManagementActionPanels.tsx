@@ -48,7 +48,7 @@ export function AppManagementActionPanels({
                 app={{
                   id: app.id,
                   name: app.name,
-                  url: app.url,
+                  urlTemplate: app.urlTemplate,
                   enabled: app.enabled,
                 }}
                 onSave={onSave}

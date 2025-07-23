@@ -61,7 +61,7 @@ export default function CustomAppForm({ app, onSave }: CustomAppFormProps) {
         title="URL Template"
         placeholder="https://example.com/{profile}"
         info="Use {profile} as a placeholder for the username"
-        defaultValue={app?.url || ""}
+        defaultValue={app?.urlTemplate || ""}
         error={urlError}
         onChange={() => setUrlError(undefined)}
       />

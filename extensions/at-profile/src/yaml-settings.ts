@@ -116,7 +116,7 @@ export async function importSettingsFromYAML(yamlContent: string): Promise<void>
       }
 
       // Second pass: import usage history
-      for (const item of settings.usageHistory.reverse()) {
+      for (const item of [...settings.usageHistory].reverse()) {
         if (item && typeof item === "object" && item.username && item.app && item.appName) {
           await addToUsageHistory(item.username, item.app, item.appName);
         }

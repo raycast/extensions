@@ -14,8 +14,8 @@ Stores a list of previously used usernames for autocomplete and quick access.
 - **Order**: Most recently used first
 - **Example**: `["johndoe", "jane_smith", "developer123"]`
 
-### 2. `platformSettings`: `PlatformSetting[]`
-Stores user preferences for each platform (enabled/disabled state).
+### 2. `appSettings`: `AppSetting[]`
+Stores user preferences for each app (enabled/disabled state).
 
 - **Type**: Array of objects with `{ value: string; enabled: boolean }`
 - **Purpose**: Allows users to enable/disable specific platforms
@@ -52,8 +52,9 @@ The following constants are defined in `src/apps.ts`:
 ```typescript
 export const STORAGE_KEYS = {
   USERNAME_HISTORY: 'usernameHistory',
-  PLATFORM_SETTINGS: 'platformSettings',
-  CUSTOM_PLATFORMS: 'customApps'
+  USAGE_HISTORY: 'usageHistory',
+  APP_SETTINGS: 'appSettings',
+  CUSTOM_APPS: 'customApps'
 } as const;
 ```
 
@@ -64,7 +65,7 @@ export const STORAGE_KEYS = {
 ### Version History
 
 - **v1**: Initial version with only `customApps` key
-- **v2**: Added `usernameHistory` and `platformSettings`, renamed `customApps` to `customApps`
+- **v2**: Added `usernameHistory` and `appSettings`, improved custom app storage and handling
 
 ## Migration Strategy
 
@@ -111,14 +112,14 @@ The following functions are available for interacting with LocalStorage:
 - `getUsernameHistory(): Promise<string[]>`
 - `addToUsernameHistory(username: string): Promise<void>`
 
-### Platform Settings
-- `getPlatformSettings(): Promise<PlatformSetting[]>`
-- `updatePlatformSettings(settings: PlatformSetting[]): Promise<void>`
+### App Settings
+- `getAppSettings(): Promise<AppSetting[]>`
+- `updateAppSettings(settings: AppSetting[]): Promise<void>`
 
 ### Custom Apps
-- `getcustomApps(): Promise<Site[]>`
-- `addCustomPlatform(platform: Site): Promise<void>`
-- `removeCustomPlatform(value: string): Promise<void>`
+- `getCustomApps(): Promise<App[]>`
+- `addCustomApp(app: App): Promise<void>`
+- `removeCustomApp(value: string): Promise<void>`
 
 ## Best Practices
 

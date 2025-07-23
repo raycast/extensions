@@ -1,11 +1,6 @@
-import { Action, ActionPanel, Icon, LaunchType } from "@raycast/api";
+import { ActionPanel, Action, Icon, popToRoot, LaunchType } from "@raycast/api";
+import { HistoryItem } from "../types";
 
-interface HistoryItem {
-  username: string;
-  app: string;
-  appName: string;
-  favicon?: string;
-}
 
 interface HistoryActionPanelsProps {
   item: HistoryItem;
