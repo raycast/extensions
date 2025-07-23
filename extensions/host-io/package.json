@@ -24,7 +24,7 @@
     {
       "name": "get-full-domain-data",
       "title": "Get Full Domain Data",
-      "description": "Get Full Domain Data",
+      "description": "Retrieve comprehensive domain information including DNS, web data, and related domains",
       "mode": "view",
       "arguments": [
         {
