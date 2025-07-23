@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Toast, showToast, Clipboard } from "@raycast/api";
 import chroma from "chroma-js";
 import { palette } from "./tailwind-palette";
 
@@ -14,7 +14,25 @@ interface Match {
 
 export default function Command({ arguments: { hex } }: Readonly<{ arguments: Args }>) {
   const input = normalizeHex(hex ?? "");
-  const matches = input ? findMatches(input) : [];
+  let matches: Match[] = [];
+
+  if (hex && !input) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Invalid Hex Code",
+      message: "Please enter a valid 3 or 6 digit hex color (e.g. #aabbcc or #abc).",
+    });
+  } else if (input) {
+    try {
+      matches = findMatches(input);
+    } catch {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Color Processing Error",
+        message: "Could not process the provided color. Please check your input.",
+      });
+    }
+  }
 
   return (
     <List isShowingDetail searchBarPlaceholder="#aabbcc">
@@ -61,22 +79,38 @@ function normalizeHex(value: string): string | null {
 }
 
 function findMatches(inputHex: string, max = 5): Match[] {
-  const [l1, a1, b1] = chroma(inputHex).lab();
+  let l1: number, a1: number, b1: number;
+  try {
+    [l1, a1, b1] = chroma(inputHex).lab();
+  } catch {
+    throw new Error("Invalid color input");
+  }
 
-  const matches: Match[] = Object.entries(palette).map(([token, hex]) => {
-    const [l2, a2, b2] = chroma(hex).lab();
-    const deltaE = Math.hypot(l1 - l2, a1 - a2, b1 - b2);
-    return { token, hex, deltaE };
-  });
+  const matches: Match[] = Object.entries(palette)
+    .map(([token, hex]) => {
+      let l2: number, a2: number, b2: number;
+      try {
+        [l2, a2, b2] = chroma(hex).lab();
+      } catch {
+        // Skip invalid palette colors
+        return null;
+      }
+      const deltaE = Math.hypot(l1 - l2, a1 - a2, b1 - b2);
+      return { token, hex, deltaE };
+    })
+    .filter(Boolean) as Match[];
 
   matches.sort((a, b) => a.deltaE - b.deltaE);
   const [best] = matches;
 
-  showToast({
-    style: Toast.Style.Success,
-    title: `Closest match: ${best.token}`,
-    message: best.hex,
-  });
+  if (best) {
+    showToast({
+      style: Toast.Style.Success,
+      title: `Closest match copied to clipboard: ${best.token}`,
+      message: best.hex,
+    });
+    Clipboard.copy(best.token);
+  }
 
   return matches.slice(0, max);
 }
