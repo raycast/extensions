@@ -287,80 +287,108 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
 
   // Auto-update priority based on NLP parsing - respect last action
   useEffect(() => {
-    if (parsedData.priority !== undefined) {
-      const nlpTimestamp = lastActionRef.current.contentChanged;
-      const manualTimestamp = lastActionRef.current.priority.timestamp;
-      
-      // Only update if NLP parsing is more recent than last manual change
-      if (nlpTimestamp > manualTimestamp) {
+    const nlpTimestamp = lastActionRef.current.contentChanged;
+    const manualTimestamp = lastActionRef.current.priority.timestamp;
+    
+    // Only update if NLP parsing is more recent than last manual change
+    if (nlpTimestamp > manualTimestamp) {
+      if (parsedData.priority !== undefined) {
         setValue("priority", String(parsedData.priority));
+        lastActionRef.current.priority = { source: 'nlp', timestamp: nlpTimestamp };
+      } else {
+        // Reset to default priority when parameter is removed from title
+        setValue("priority", String(lowestPriority.value));
         lastActionRef.current.priority = { source: 'nlp', timestamp: nlpTimestamp };
       }
     }
-  }, [parsedData.priority, setValue]);
+  }, [parsedData.priority, setValue, lowestPriority.value]);
 
   // Auto-update project based on NLP parsing - respect last action
   useEffect(() => {
-    if (parsedData.projectId !== undefined) {
-      const nlpTimestamp = lastActionRef.current.contentChanged;
-      const manualTimestamp = lastActionRef.current.projectId.timestamp;
-      
-      // Only update if NLP parsing is more recent than last manual change
-      if (nlpTimestamp > manualTimestamp) {
+    const nlpTimestamp = lastActionRef.current.contentChanged;
+    const manualTimestamp = lastActionRef.current.projectId.timestamp;
+    
+    // Only update if NLP parsing is more recent than last manual change
+    if (nlpTimestamp > manualTimestamp) {
+      if (parsedData.projectId !== undefined) {
         setValue("projectId", parsedData.projectId);
+        lastActionRef.current.projectId = { source: 'nlp', timestamp: nlpTimestamp };
+      } else {
+        // Reset to "No project" when parameter is removed from title
+        setValue("projectId", fromProjectId ?? "");
         lastActionRef.current.projectId = { source: 'nlp', timestamp: nlpTimestamp };
       }
     }
-  }, [parsedData.projectId, setValue]);
+  }, [parsedData.projectId, setValue, fromProjectId]);
 
   // Auto-update date based on NLP parsing - respect last action
   useEffect(() => {
-    if (parsedData.parsedDate) {
-      const nlpTimestamp = lastActionRef.current.contentChanged;
-      const manualTimestamp = lastActionRef.current.date.timestamp;
-      
-      // Only update if NLP parsing is more recent than last manual change
-      if (nlpTimestamp > manualTimestamp) {
+    const nlpTimestamp = lastActionRef.current.contentChanged;
+    const manualTimestamp = lastActionRef.current.date.timestamp;
+    
+    // Only update if NLP parsing is more recent than last manual change
+    if (nlpTimestamp > manualTimestamp) {
+      if (parsedData.parsedDate) {
         setValue("date", parsedData.parsedDate);
+        lastActionRef.current.date = { source: 'nlp', timestamp: nlpTimestamp };
+      } else {
+        // Reset to null/empty when date parameter is removed from title
+        setValue("date", fromTodayEmptyView ? new Date() : null);
         lastActionRef.current.date = { source: 'nlp', timestamp: nlpTimestamp };
       }
     }
-  }, [parsedData.parsedDate, setValue]);
+  }, [parsedData.parsedDate, setValue, fromTodayEmptyView]);
 
   // Auto-update deadline based on NLP parsing - respect last action
   useEffect(() => {
-    if (parsedData.parsedDeadline) {
-      const nlpTimestamp = lastActionRef.current.contentChanged;
-      const manualTimestamp = lastActionRef.current.deadline.timestamp;
-      
-      // Only update if NLP parsing is more recent than last manual change
-      if (nlpTimestamp > manualTimestamp) {
+    const nlpTimestamp = lastActionRef.current.contentChanged;
+    const manualTimestamp = lastActionRef.current.deadline.timestamp;
+    
+    // Only update if NLP parsing is more recent than last manual change
+    if (nlpTimestamp > manualTimestamp) {
+      if (parsedData.parsedDeadline) {
         setValue("deadline", parsedData.parsedDeadline);
+        lastActionRef.current.deadline = { source: 'nlp', timestamp: nlpTimestamp };
+      } else {
+        // Reset to null when deadline parameter is removed from title
+        setValue("deadline", null);
         lastActionRef.current.deadline = { source: 'nlp', timestamp: nlpTimestamp };
       }
     }
   }, [parsedData.parsedDeadline, setValue]);
 
+  // Track which labels were added via NLP vs manual selection
+  const nlpLabelsRef = useRef<string[]>([]);
+
   // Auto-update labels based on NLP parsing - respect last action
   useEffect(() => {
-    if (parsedData.labels && parsedData.labels.length > 0) {
-      const nlpTimestamp = lastActionRef.current.contentChanged;
-      const manualTimestamp = lastActionRef.current.labels.timestamp;
+    const nlpTimestamp = lastActionRef.current.contentChanged;
+    const manualTimestamp = lastActionRef.current.labels.timestamp;
+    
+    // Only update if NLP parsing is more recent than last manual change
+    if (nlpTimestamp > manualTimestamp) {
+      const currentLabels = values.labels || [];
+      const initialLabels = fromLabel ? [fromLabel] : [];
       
-      // Only update if NLP parsing is more recent than last manual change
-      if (nlpTimestamp > manualTimestamp) {
-        const currentLabels = values.labels || [];
+      if (parsedData.labels && parsedData.labels.length > 0) {
+        // Remove old NLP labels and add new ones
+        const manualLabels = currentLabels.filter(label => !nlpLabelsRef.current.includes(label));
+        const newLabels = [...new Set([...manualLabels, ...parsedData.labels])];
         
-        // Add new parsed labels that aren't already present
-        const newLabelsToAdd = parsedData.labels.filter(label => !currentLabels.includes(label));
+        setValue("labels", newLabels);
+        nlpLabelsRef.current = parsedData.labels;
+        lastActionRef.current.labels = { source: 'nlp', timestamp: nlpTimestamp };
+      } else {
+        // Remove only NLP-added labels when all label parameters are removed from title
+        const manualLabels = currentLabels.filter(label => !nlpLabelsRef.current.includes(label));
+        const resetLabels = [...new Set([...initialLabels, ...manualLabels])];
         
-        if (newLabelsToAdd.length > 0) {
-          setValue("labels", [...currentLabels, ...newLabelsToAdd]);
-          lastActionRef.current.labels = { source: 'nlp', timestamp: nlpTimestamp };
-        }
+        setValue("labels", resetLabels);
+        nlpLabelsRef.current = [];
+        lastActionRef.current.labels = { source: 'nlp', timestamp: nlpTimestamp };
       }
     }
-  }, [parsedData.labels, setValue, values.labels]);
+  }, [parsedData.labels, setValue, values.labels, fromLabel]);
 
   const projectSections = sections?.filter((section) => section.project_id === values.projectId);
 
@@ -381,7 +409,7 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
         {...itemProps.content}
         title="Title"
         placeholder="Buy milk tomorrow p1 #Personal @urgent {march 30}"
-        info="Natural language parsing: p1-p4 (priority), #project, @label, natural dates (tomorrow, monday at 2pm), {deadline}. Last action wins - manual field selection or typing updates take precedence based on timing."
+        info="Natural language parsing: p1-p4 (priority), #project, @label, natural dates (tomorrow, monday at 2pm), {deadline}. Fields auto-update as you type or remove parameters. Last action wins - manual field changes or typing take precedence based on timing."
       />
 
       <Form.TextArea
