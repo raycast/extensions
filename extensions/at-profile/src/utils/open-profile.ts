@@ -1,0 +1,48 @@
+import { open, showToast, Toast, popToRoot } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import { getAllApps } from "../hooks/apps";
+import { addToUsernameHistory, addToUsageHistory } from "../hooks/apps";
+
+/**
+ * Centralized function to open a profile on a social app
+ * @param username The username/profile to open
+ * @param appValue The app identifier (e.g., "github", "twitter")
+ * @param shouldPopToRoot Whether to pop to root after opening (default: true)
+ * @returns Promise<void>
+ */
+export async function openProfile(username: string, appValue: string, shouldPopToRoot = true): Promise<void> {
+  try {
+    const apps = await getAllApps();
+
+    if (apps.length === 0) {
+      throw new Error("No apps are currently enabled. Please enable apps in Manage Apps.");
+    }
+
+    const selectedApp = apps.find((app) => app.value === appValue);
+    if (!selectedApp) {
+      throw new Error(`App "${appValue}" not found or is disabled`);
+    }
+
+    // Normalize profile (remove leading @ if present)
+    const normalizedProfile = username.startsWith("@") ? username.slice(1) : username;
+
+    const url = selectedApp.urlTemplate.replace("{profile}", normalizedProfile);
+    await open(url);
+
+    // Add to both legacy username history and new usage history
+    await addToUsernameHistory(normalizedProfile);
+    await addToUsageHistory(normalizedProfile, selectedApp.value, selectedApp.name);
+
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Profile opened",
+      message: `Opened ${normalizedProfile} on ${selectedApp.name}`,
+    });
+
+    if (shouldPopToRoot) {
+      await popToRoot();
+    }
+  } catch (error) {
+    await showFailureToast((error as Error).message, { title: "Failed to open profile" });
+  }
+}

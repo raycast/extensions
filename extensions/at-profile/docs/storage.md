@@ -28,8 +28,8 @@ Stores user preferences for each platform (enabled/disabled state).
   ]
   ```
 
-### 3. `customPlatforms`: `Site[]`
-Stores user-defined custom platforms with the same shape as default platforms.
+### 3. `customApps`: `Site[]`
+Stores user-defined custom apps with the same shape as default platforms.
 
 - **Type**: Array of `Site` objects
 - **Schema**: `{ name: string; value: string; urlTemplate: string }`
@@ -47,13 +47,13 @@ Stores user-defined custom platforms with the same shape as default platforms.
 
 ## Storage Key Constants
 
-The following constants are defined in `src/sites.ts`:
+The following constants are defined in `src/apps.ts`:
 
 ```typescript
 export const STORAGE_KEYS = {
   USERNAME_HISTORY: 'usernameHistory',
   PLATFORM_SETTINGS: 'platformSettings',
-  CUSTOM_PLATFORMS: 'customPlatforms'
+  CUSTOM_PLATFORMS: 'customApps'
 } as const;
 ```
 
@@ -63,8 +63,8 @@ export const STORAGE_KEYS = {
 
 ### Version History
 
-- **v1**: Initial version with only `customSites` key
-- **v2**: Added `usernameHistory` and `platformSettings`, renamed `customSites` to `customPlatforms`
+- **v1**: Initial version with only `customApps` key
+- **v2**: Added `usernameHistory` and `platformSettings`, renamed `customApps` to `customApps`
 
 ## Migration Strategy
 
@@ -72,8 +72,8 @@ export const STORAGE_KEYS = {
 
 The migration from v1 to v2 is handled automatically and transparently:
 
-1. **Preserves existing custom platforms**: Data from the legacy `customSites` key is migrated to `customPlatforms`
-2. **Automatic migration**: Occurs on first access to custom platforms after upgrade
+1. **Preserves existing custom apps**: Data from the legacy `customApps` key is migrated to `customApps`
+2. **Automatic migration**: Occurs on first access to custom apps after upgrade
 3. **Clean up**: Legacy key is removed after successful migration
 4. **Non-destructive**: If migration fails, original data remains intact
 
@@ -81,16 +81,16 @@ The migration from v1 to v2 is handled automatically and transparently:
 
 ```typescript
 // Check new key first
-let customPlatformsJson = await LocalStorage.getItem<string>(STORAGE_KEYS.CUSTOM_PLATFORMS);
+let customAppsJson = await LocalStorage.getItem<string>(STORAGE_KEYS.CUSTOM_PLATFORMS);
 
 // If not found, try legacy key and migrate
-if (!customPlatformsJson) {
-  const legacyCustomSitesJson = await LocalStorage.getItem<string>('customSites');
-  if (legacyCustomSitesJson) {
+if (!customAppsJson) {
+  const legacycustomAppsJson = await LocalStorage.getItem<string>('customApps');
+  if (legacycustomAppsJson) {
     // Migrate from v1 to v2
-    await LocalStorage.setItem(STORAGE_KEYS.CUSTOM_PLATFORMS, legacyCustomSitesJson);
-    await LocalStorage.removeItem('customSites');
-    customPlatformsJson = legacyCustomSitesJson;
+    await LocalStorage.setItem(STORAGE_KEYS.CUSTOM_PLATFORMS, legacycustomAppsJson);
+    await LocalStorage.removeItem('customApps');
+    customAppsJson = legacycustomAppsJson;
   }
 }
 ```
@@ -115,8 +115,8 @@ The following functions are available for interacting with LocalStorage:
 - `getPlatformSettings(): Promise<PlatformSetting[]>`
 - `updatePlatformSettings(settings: PlatformSetting[]): Promise<void>`
 
-### Custom Platforms
-- `getCustomPlatforms(): Promise<Site[]>`
+### Custom Apps
+- `getcustomApps(): Promise<Site[]>`
 - `addCustomPlatform(platform: Site): Promise<void>`
 - `removeCustomPlatform(value: string): Promise<void>`
 

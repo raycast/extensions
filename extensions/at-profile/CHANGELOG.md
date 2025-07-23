@@ -1,5 +1,13 @@
 # @ Profile Changelog
 
+## [Profile History and Custom Apps] - {PR_MERGE_DATE}
+
+### Added
+
+- **New "Profile History" Command**: Displays a list of recently opened profiles
+- **New "Custom Apps" Command**: Allows users to add custom apps to the extension
+
+
 ## [Enhanced Platform Management] - 2025-01-07
 
 ### Added
@@ -10,7 +18,7 @@
 - Enhanced documentation with screenshots and feature explanations
 
 ### Changed
-- Command renamed from "Manage Platforms" to "Manage Apps" for better clarity
+- Command renamed from "Manage Apps" to "Manage Apps" for better clarity
 - Improved user interface with clearer section titles
 - Updated README with comprehensive feature documentation
 

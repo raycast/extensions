@@ -1,23 +1,14 @@
 import { ActionPanel, Action, Form, useNavigation, Icon } from "@raycast/api";
 import { useState } from "react";
-import { addCustomApp, updateCustomApp, CustomAppInput } from "./custom-platform-utils";
+import { addCustomApp, updateCustomApp } from "../utils/custom-app-utils";
+import { CustomAppFormProps, CustomAppInput } from "../types";
 
-interface CustomPlatformFormProps {
-  platform?: {
-    id: string;
-    name: string;
-    url: string;
-    enabled: boolean;
-  };
-  onSave?: () => void;
-}
-
-export default function CustomPlatformForm({ platform, onSave }: CustomPlatformFormProps) {
+export default function CustomAppForm({ app, onSave }: CustomAppFormProps) {
   const { pop } = useNavigation();
   const [nameError, setNameError] = useState<string | undefined>();
   const [urlError, setUrlError] = useState<string | undefined>();
 
-  const isEditing = !!platform;
+  const isEditing = !!app;
 
   const handleSubmit = async (values: { name: string; url: string; enabled: boolean }) => {
     const input: CustomAppInput = {
@@ -29,8 +20,8 @@ export default function CustomPlatformForm({ platform, onSave }: CustomPlatformF
     try {
       let result;
 
-      if (isEditing && platform) {
-        result = await updateCustomApp(platform.id, input);
+      if (isEditing && app) {
+        result = await updateCustomApp(app.id, input);
       } else {
         result = await addCustomApp(input);
       }
@@ -50,7 +41,7 @@ export default function CustomPlatformForm({ platform, onSave }: CustomPlatformF
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={isEditing ? "Update Platform" : "Add Platform"}
+            title={isEditing ? "Update Social App" : "Add Social App"}
             icon={isEditing ? Icon.Pencil : Icon.Plus}
             onSubmit={handleSubmit}
           />
@@ -59,9 +50,9 @@ export default function CustomPlatformForm({ platform, onSave }: CustomPlatformF
     >
       <Form.TextField
         id="name"
-        title="Platform Name"
+        title="Social App Name"
         placeholder="e.g., Custom Social Network"
-        defaultValue={platform?.name || ""}
+        defaultValue={app?.name || ""}
         error={nameError}
         onChange={() => setNameError(undefined)}
       />
@@ -70,20 +61,24 @@ export default function CustomPlatformForm({ platform, onSave }: CustomPlatformF
         title="URL Template"
         placeholder="https://example.com/{profile}"
         info="Use {profile} as a placeholder for the username"
-        defaultValue={platform?.url || ""}
+        defaultValue={app?.url || ""}
         error={urlError}
         onChange={() => setUrlError(undefined)}
       />
       <Form.Checkbox
         id="enabled"
         title="Enabled"
-        label="Include this platform in the profile search"
-        defaultValue={platform?.enabled ?? true}
+        label="Include this social app in the profile search"
+        defaultValue={app?.enabled ?? true}
       />
       <Form.Separator />
       <Form.Description
         title="URL Template Help"
         text="The {profile} placeholder will be replaced with the actual username when opening a profile. For example: https://example.com/{profile} becomes https://example.com/username"
+      />
+      <Form.Description
+        title="Icon"
+        text="The app icon will be automatically fetched from the website's favicon using the URL template you provide."
       />
     </Form>
   );

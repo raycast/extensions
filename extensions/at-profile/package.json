@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "at-profile",
   "title": "@ Profile",
-  "description": "Quickly open profiles on social platforms.",
+  "description": "Quickly open profiles on social apps.",
   "icon": "at-icon.png",
   "author": "chrismessina",
   "contributors": [
@@ -19,17 +19,83 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "quick-open",
+      "name": "open-profile",
       "title": "Open Profile",
       "subtitle": "@ Profile",
-      "description": "Quickly open a profile on a social site",
+      "description": "Open a profile on a social app",
       "mode": "view"
+    },
+    {
+      "name": "quick-open",
+      "title": "Quick Open",
+      "subtitle": "@ Profile",
+      "description": "Quickly open a profile from a list of social apps",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "profile",
+          "placeholder": "Profile",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "site",
+          "placeholder": "Platform",
+          "type": "dropdown",
+          "required": true,
+          "data": [
+            { "title": "Bluesky", "value": "bluesky" },
+            {
+              "title": "Facebook",
+              "value": "facebook"
+            },
+            { "title": "GitHub", "value": "github" },
+            { "title": "Instagram", "value": "instagram" },
+            { "title": "LinkedIn", "value": "linkedin" },
+            { "title": "Raycast", "value": "raycast" },
+            { "title": "Reddit", "value": "reddit" },
+            { "title": "Threads", "value": "threads" },
+            { "title": "TikTok", "value": "tiktok" },
+            { "title": "X", "value": "x" },
+            { "title": "YouTube", "value": "youtube" }
+          ]
+        }
+      ]
     },
     {
       "name": "manage-apps",
       "title": "Manage Apps",
       "subtitle": "@ Profile",
-      "description": "Manage social apps and add custom platforms",
+      "description": "Enable, disable, or add custom apps",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "action",
+          "placeholder": "action (optional)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "history",
+      "title": "History",
+      "subtitle": "@ Profile",
+      "description": "Browse recently opened profiles",
+      "mode": "view"
+    },
+    {
+      "name": "export-apps",
+      "title": "Export Apps",
+      "subtitle": "@ Profile",
+      "description": "Export all Apps to a YAML file",
+      "mode": "view"
+    },
+    {
+      "name": "import-apps",
+      "title": "Import Apps",
+      "subtitle": "@ Profile",
+      "description": "Import Apps from a YAML file",
       "mode": "view"
     }
   ],
@@ -37,7 +103,7 @@
     {
       "name": "open",
       "title": "Open Profile",
-      "description": "Quickly open a profile on a social site"
+      "description": "Quickly open a profile on a social app"
     }
   ],
   "dependencies": {
@@ -46,21 +112,22 @@
     "js-yaml": "^4.1.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
+    "@raycast/eslint-config": "^1.0.11",
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
+    "@types/node": "^20.10.2",
+    "@types/react": "^19.1.8",
+    "callsites": "^4.2.0",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "evals": "npx ray evals",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish",
-    "evals": "npx ray evals"
+    "publish": "npx @raycast/api@latest publish"
   }
 }

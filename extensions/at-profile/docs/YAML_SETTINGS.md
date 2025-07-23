@@ -4,7 +4,7 @@ The @ Profile extension supports importing and exporting settings through YAML f
 
 ## Features
 
-- **Export Settings**: Save all your settings (username history, platform preferences, custom platforms) to a YAML file
+- **Export Settings**: Save all your settings (username history, platform preferences, custom apps) to a YAML file
 - **Import Settings**: Load settings from a YAML file to restore or sync your configuration
 - **Sample YAML**: Generate a template YAML file for reference
 
@@ -12,7 +12,7 @@ The @ Profile extension supports importing and exporting settings through YAML f
 
 ### Exporting Settings
 
-1. Open the **Manage Platforms** command
+1. Open the **Manage Apps** command
 2. Navigate to the **YAML Settings** section
 3. Select **Export Settings to File**
 4. Press **Enter** to export
@@ -21,7 +21,7 @@ The @ Profile extension supports importing and exporting settings through YAML f
 
 ### Importing Settings
 
-1. Open the **Manage Platforms** command
+1. Open the **Manage Apps** command
 2. Navigate to the **YAML Settings** section
 3. Select **Import Settings from File**
 4. Either:
@@ -32,7 +32,7 @@ The @ Profile extension supports importing and exporting settings through YAML f
 
 ### Generating Sample YAML
 
-1. Open the **Manage Platforms** command
+1. Open the **Manage Apps** command
 2. Navigate to the **YAML Settings** section
 3. Select **Export Settings to File**
 4. Choose **Generate Sample YAML**
@@ -59,7 +59,7 @@ platformSettings:
   tiktok: false
   threads: true
   raycast: true
-customPlatforms:
+customApps:
   - name: Mastodon
     value: mastodon
     urlTemplate: https://mastodon.social/@{profile}
@@ -75,7 +75,7 @@ customPlatforms:
 - **version**: File format version (currently "1.0")
 - **usernameHistory**: Array of previously searched usernames
 - **platformSettings**: Object mapping platform IDs to enabled/disabled state
-- **customPlatforms**: Array of custom social platforms
+- **customApps**: Array of custom social platforms
 
 #### Custom Platform Fields
 
@@ -93,7 +93,7 @@ Export your settings before making major changes, then import them to restore if
 Export settings from one device and import them on another to keep your configuration synchronized.
 
 ### Team Sharing
-Share custom platforms and preferred settings with team members.
+Share custom apps and preferred settings with team members.
 
 ### Bulk Configuration
 Create YAML files programmatically or edit them in a text editor for bulk changes.
@@ -101,7 +101,7 @@ Create YAML files programmatically or edit them in a text editor for bulk change
 ## Notes
 
 - Importing settings will merge with existing data (usernames are added to history, platforms are updated)
-- Custom platforms with duplicate `value` fields may cause conflicts during import
+- Custom apps with duplicate `value` fields may cause conflicts during import
 - The export file is saved to your home directory by default
 - File selection for import can be done through Finder selection or by specifying a file path
 
@@ -110,7 +110,7 @@ Create YAML files programmatically or edit them in a text editor for bulk change
 ### Import Fails
 - Ensure the YAML file is properly formatted
 - Check that the `version` field is present
-- Verify that custom platforms have all required fields (`name`, `value`, `urlTemplate`)
+- Verify that custom apps have all required fields (`name`, `value`, `urlTemplate`)
 
 ### Export Fails
 - Check that you have write permissions to your home directory

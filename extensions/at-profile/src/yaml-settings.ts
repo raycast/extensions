@@ -1,65 +1,50 @@
 import * as yaml from "js-yaml";
-import { showToast, Toast, getSelectedFinderItems } from "@raycast/api";
+import { getSelectedFinderItems } from "@raycast/api";
 import { readFileSync, writeFileSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
 import {
-  Site,
-  updatePlatformSettings,
-  PlatformSetting,
-  defaultSites,
-  getUsernameHistory,
-  getPlatformSettings,
-  getCustomPlatforms,
-  addToUsernameHistory,
-  addCustomPlatform,
-} from "./sites";
-
-// Types for YAML settings structure
-export interface YAMLSettings {
-  version: string;
-  usernameHistory: string[];
-  platformSettings: Record<string, boolean>;
-  customPlatforms: Array<{
-    id?: string;
-    name: string;
-    value: string;
-    urlTemplate: string;
-    enabled: boolean;
-  }>;
-}
+  getCustomApps,
+  getAppSettings,
+  updateAppSettings,
+  addToUsageHistory,
+  getUsageHistory,
+  defaultApps,
+} from "./hooks/apps";
+import { addCustomApp } from "./utils/custom-app-utils";
+import { YAMLSettings, AppSetting } from "./types";
 
 /**
  * Export all settings to YAML format
  */
 export async function exportSettingsToYAML(): Promise<string> {
   try {
-    const usernameHistory = await getUsernameHistory();
-    const platformSettings = await getPlatformSettings();
-    const customPlatforms = await getCustomPlatforms();
+    const usageHistory = await getUsageHistory();
+    const appSettings = await getAppSettings();
+    const customApps = await getCustomApps();
 
-    // Convert platform settings to a more readable format
-    const platformSettingsMap: Record<string, boolean> = {};
+    // Convert app settings to a more readable format
+    const appSettingsMap: Record<string, boolean> = {};
 
-    // Add all default sites to settings map with current enabled status
-    for (const site of defaultSites) {
-      platformSettingsMap[site.value] = true; // Default to enabled
+    // Add all default apps to settings map with current enabled status
+    for (const app of defaultApps) {
+      appSettingsMap[app.value] = true; // Default to enabled
     }
 
     // Override with actual stored settings
-    platformSettings.forEach((setting) => {
-      platformSettingsMap[setting.value] = setting.enabled;
+    appSettings.forEach((setting) => {
+      appSettingsMap[setting.value] = setting.enabled;
     });
 
     const yamlSettings: YAMLSettings = {
       version: "1.0",
-      usernameHistory,
-      platformSettings: platformSettingsMap,
-      customPlatforms: customPlatforms.map((platform) => ({
-        name: platform.name,
-        value: platform.value,
-        urlTemplate: platform.urlTemplate,
-        enabled: true, // Custom platforms are enabled by default
+      usageHistory,
+      appSettings: appSettingsMap,
+      customApps: customApps.map((app) => ({
+        name: app.name,
+        value: app.value,
+        urlTemplate: app.urlTemplate,
+        enabled: true, // Custom apps are enabled by default
       })),
     };
 
@@ -90,64 +75,110 @@ export async function importSettingsFromYAML(yamlContent: string): Promise<void>
       throw new Error("Missing version field in YAML settings");
     }
 
-    // Import username history
-    if (settings.usernameHistory && Array.isArray(settings.usernameHistory)) {
-      for (const username of settings.usernameHistory.reverse()) {
-        if (typeof username === "string" && username.trim()) {
-          await addToUsernameHistory(username.trim());
+    // Import usage history and create missing apps
+    if (settings.usageHistory && Array.isArray(settings.usageHistory)) {
+      // Get existing apps to check against
+      const existingCustomApps = await getCustomApps();
+      const allExistingApps = [...defaultApps, ...existingCustomApps];
+      const existingAppValues = new Set(allExistingApps.map((app) => app.value));
+      const appsToCreate = new Map<string, { name: string; value: string }>();
+
+      // First pass: identify apps that need to be created
+      for (const item of settings.usageHistory) {
+        if (item && typeof item === "object" && item.username && item.app && item.appName) {
+          if (!existingAppValues.has(item.app)) {
+            appsToCreate.set(item.app, {
+              name: item.appName,
+              value: item.app,
+            });
+          }
+        }
+      }
+
+      // Create missing custom apps with placeholder URL templates
+      for (const [, appInfo] of appsToCreate) {
+        const customAppInput = {
+          name: appInfo.name,
+          urlTemplate: `https://example.com/{profile}`, // Placeholder URL template
+          enabled: true,
+        };
+
+        try {
+          const result = await addCustomApp(customAppInput);
+          if (result.success) {
+            console.log(`Created custom app for imported usage history: ${appInfo.name}`);
+          } else {
+            console.log(`Custom app already exists for usage history: ${appInfo.name}`);
+          }
+        } catch (error) {
+          console.warn(`Failed to create custom app ${appInfo.name}:`, error);
+        }
+      }
+
+      // Second pass: import usage history
+      for (const item of settings.usageHistory.reverse()) {
+        if (item && typeof item === "object" && item.username && item.app && item.appName) {
+          await addToUsageHistory(item.username, item.app, item.appName);
         }
       }
     }
 
-    // Import platform settings
-    if (settings.platformSettings && typeof settings.platformSettings === "object") {
-      const platformSettings: PlatformSetting[] = [];
+    // Import app settings
+    if (settings.appSettings && typeof settings.appSettings === "object") {
+      const appSettings: AppSetting[] = [];
 
-      for (const [platformValue, enabled] of Object.entries(settings.platformSettings)) {
+      for (const [appValue, enabled] of Object.entries(settings.appSettings)) {
         if (typeof enabled === "boolean") {
-          platformSettings.push({
-            value: platformValue,
+          appSettings.push({
+            value: appValue,
             enabled,
           });
         }
       }
 
-      await updatePlatformSettings(platformSettings);
+      await updateAppSettings(appSettings);
     }
 
-    // Import custom platforms
-    if (settings.customPlatforms && Array.isArray(settings.customPlatforms)) {
-      for (const platform of settings.customPlatforms) {
-        if (platform && typeof platform === "object" && platform.name && platform.value && platform.urlTemplate) {
-          const customPlatformSite: Site = {
-            name: platform.name,
-            value: platform.value,
-            urlTemplate: platform.urlTemplate,
+    // Import custom apps with duplicate checking
+    if (settings.customApps && Array.isArray(settings.customApps)) {
+      const importResults = {
+        imported: 0,
+        skipped: 0,
+        failed: 0,
+      };
+
+      for (const app of settings.customApps) {
+        if (app && typeof app === "object" && app.name && app.value && app.urlTemplate) {
+          const customAppInput = {
+            name: app.name.trim(),
+            urlTemplate: app.urlTemplate.trim(),
+            enabled: true, // Default to enabled for imported apps
           };
 
           try {
-            await addCustomPlatform(customPlatformSite);
+            const result = await addCustomApp(customAppInput);
+            if (result.success) {
+              importResults.imported++;
+              console.log(`Successfully imported custom app: ${app.name}`);
+            } else {
+              importResults.skipped++;
+              console.log(`Skipped duplicate custom app: ${app.name}`);
+            }
           } catch (error) {
-            console.warn(`Failed to import custom platform ${platform.name}:`, error);
+            importResults.failed++;
+            console.warn(`Failed to import custom app ${app.name}:`, error);
           }
         }
       }
-    }
 
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Settings Imported",
-      message: "Your settings have been successfully imported from YAML",
-    });
+      console.log(
+        `Import summary - Imported: ${importResults.imported}, Skipped: ${importResults.skipped}, Failed: ${importResults.failed}`,
+      );
+    }
   } catch (error) {
     console.error("Error importing settings from YAML:", error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Import Failed",
-      message: errorMessage,
-    });
-    throw error;
+    throw new Error(errorMessage);
   }
 }
 
@@ -162,22 +193,10 @@ export async function exportSettingsToFile(filename?: string): Promise<string> {
 
   try {
     writeFileSync(filePath, yamlContent, "utf8");
-
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Settings Exported",
-      message: `Settings saved to ${fileName}`,
-    });
-
     return filePath;
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Export Failed",
-      message: errorMessage,
-    });
-    throw error;
+    throw new Error(errorMessage);
   }
 }
 
@@ -208,12 +227,7 @@ export async function importSettingsFromFile(filePath?: string): Promise<void> {
     await importSettingsFromYAML(yamlContent);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Import Failed",
-      message: errorMessage,
-    });
-    throw error;
+    throw new Error(errorMessage);
   }
 }
 
@@ -223,8 +237,27 @@ export async function importSettingsFromFile(filePath?: string): Promise<void> {
 export function generateSampleYAML(): string {
   const sampleSettings: YAMLSettings = {
     version: "1.0",
-    usernameHistory: ["johndoe", "janedoe", "example_user"],
-    platformSettings: {
+    usageHistory: [
+      {
+        username: "johndoe",
+        app: "github",
+        appName: "GitHub",
+        timestamp: Date.now() - 86400000, // 1 day ago
+      },
+      {
+        username: "janedoe",
+        app: "x",
+        appName: "X",
+        timestamp: Date.now() - 172800000, // 2 days ago
+      },
+      {
+        username: "example_user",
+        app: "mastodon",
+        appName: "Mastodon",
+        timestamp: Date.now() - 259200000, // 3 days ago
+      },
+    ],
+    appSettings: {
       x: true,
       instagram: true,
       github: true,
@@ -236,7 +269,7 @@ export function generateSampleYAML(): string {
       threads: true,
       raycast: true,
     },
-    customPlatforms: [
+    customApps: [
       {
         name: "Mastodon",
         value: "mastodon",

@@ -14,7 +14,7 @@ platformSettings:
   tiktok: false
   threads: true
   raycast: true
-customPlatforms:
+customApps:
   - name: "Test Platform"
     value: "testplatform"
     urlTemplate: "https://example.com/{profile}"
