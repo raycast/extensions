@@ -16,8 +16,12 @@ export type ParsedData = {
 
 /**
  * Hook for real-time NLP parsing of task content
- * Parses priority patterns (p1-p4), project names (#project), 
- * labels (@label), dates (natural language), and deadlines ({date})
+ * Parses priority patterns (p1-p4), project names (#project or #"Project Name"), 
+ * labels (@label or @"Label Name"), dates (natural language), and deadlines ({date})
+ * 
+ * Supports spaces in project and label names using quotes or natural spacing:
+ * - #"Project Name" or #Project Name for projects with spaces
+ * - @"Label Name" or @Label Name for labels with spaces
  * 
  * NOTE: This hook does NOT modify the original content - it only extracts
  * information to populate other form fields. The title remains unchanged.
@@ -27,6 +31,9 @@ export type ParsedData = {
  * - Times: "tomorrow at 3pm", "monday at 12:30"
  * - Relative: "in 3 days", "in 2 weeks"
  * - Complex: "next friday at 2pm", "monday morning"
+ * 
+ * Date parsing excludes content within labels and projects to prevent conflicts
+ * (e.g., "@This Month" won't be parsed as a date, only as a label)
  */
 export function useNLPParser(content: string, projects?: Project[]): ParsedData {
   return useMemo(() => {
@@ -59,10 +66,12 @@ export function useNLPParser(content: string, projects?: Project[]): ParsedData 
     }
 
     // Parse labels (@label) - extract all labels, keeping the most recent of each unique label
-    const labelMatches = Array.from(content.matchAll(/@(\w+)/g));
+    // Updated regex to capture labels with spaces: @"Label Name" or @LabelName
+    const labelMatches = Array.from(content.matchAll(/@(?:"([^"]+)"|([a-zA-Z0-9_\u00A0-\uFFFF]+(?:\s+[a-zA-Z0-9_\u00A0-\uFFFF]+)*))/g));
     if (labelMatches.length > 0) {
       // Get all labels but remove duplicates, keeping the last occurrence of each
-      const allLabels = labelMatches.map(match => match[1]);
+      // match[1] is quoted label, match[2] is unquoted label (may have spaces)
+      const allLabels = labelMatches.map(match => match[1] || match[2]);
       labels = [...new Set(allLabels.reverse())].reverse(); // Remove duplicates, keeping last occurrence
     }
 
@@ -86,11 +95,13 @@ export function useNLPParser(content: string, projects?: Project[]): ParsedData 
     }
 
     // Parse project patterns - use the LAST occurrence (#ProjectName)
-    const projectMatches = Array.from(content.matchAll(/#([a-zA-Z0-9_\u00A0-\uFFFF]+)/g));
+    // Updated regex to capture projects with spaces: #"Project Name" or #ProjectName
+    const projectMatches = Array.from(content.matchAll(/#(?:"([^"]+)"|([a-zA-Z0-9_\u00A0-\uFFFF]+(?:\s+[a-zA-Z0-9_\u00A0-\uFFFF]+)*))/g));
     if (projectMatches.length > 0 && projects) {
       // Use the last project pattern found
       const lastProjectMatch = projectMatches[projectMatches.length - 1];
-      const userProjectName = lastProjectMatch[1];
+      // match[1] is quoted project, match[2] is unquoted project (may have spaces)
+      const userProjectName = lastProjectMatch[1] || lastProjectMatch[2];
 
       // Find matching project with case-insensitive and emoji-stripped comparison
       const matchingProject = projects.find((project) => {
@@ -106,10 +117,10 @@ export function useNLPParser(content: string, projects?: Project[]): ParsedData 
 
     // Enhanced natural language date parsing using chrono-node
     // We parse from the original content to find dates - use the LAST/MOST RECENT date found
-    // BUT exclude any dates that are inside curly braces (deadline patterns)
+    // BUT exclude any dates that are inside curly braces (deadline patterns), labels (@), or projects (#)
     const customChrono = chrono.casual.clone();
     
-    // Create a version of content with deadline patterns removed to avoid conflicts
+    // Create a version of content with patterns removed to avoid date parsing conflicts
     let contentForDateParsing = content;
     
     // Remove complete deadline patterns {date} from date parsing
@@ -117,6 +128,12 @@ export function useNLPParser(content: string, projects?: Project[]): ParsedData 
     
     // Also remove incomplete deadline patterns {partial to avoid parsing dates inside them
     contentForDateParsing = contentForDateParsing.replace(/\{[^}]*$/g, '');
+    
+    // Remove label patterns to prevent date parsing within labels (@"This Month" or @ThisMonth)
+    contentForDateParsing = contentForDateParsing.replace(/@(?:"[^"]+"|[a-zA-Z0-9_\u00A0-\uFFFF]+(?:\s+[a-zA-Z0-9_\u00A0-\uFFFF]+)*)/g, '');
+    
+    // Remove project patterns to prevent date parsing within projects (#"March Project" or #MarchProject)
+    contentForDateParsing = contentForDateParsing.replace(/#(?:"[^"]+"|[a-zA-Z0-9_\u00A0-\uFFFF]+(?:\s+[a-zA-Z0-9_\u00A0-\uFFFF]+)*)/g, '');
     
     // Parse dates with enhanced options for better coverage
     const dateResults = customChrono.parse(contentForDateParsing, new Date(), { 

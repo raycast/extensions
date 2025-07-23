@@ -408,8 +408,8 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
             <Form.TextField
         {...itemProps.content}
         title="Title"
-        placeholder="Buy milk tomorrow p1 #Personal @urgent {march 30}"
-        info="Natural language parsing: p1-p4 (priority), #project, @label, natural dates (tomorrow, monday at 2pm), {deadline}. Fields auto-update as you type or remove parameters. Last action wins - manual field changes or typing take precedence based on timing."
+        placeholder="Buy milk tomorrow p1 #Personal @This Month {march 30}"
+        info="Natural language parsing: p1-p4 (priority), #project or #&quot;Project Name&quot;, @label or @&quot;Label Name&quot;, natural dates (tomorrow, monday at 2pm), {deadline}. Fields auto-update as you type or remove parameters. Last action wins - manual field changes or typing take precedence based on timing."
       />
 
       <Form.TextArea
