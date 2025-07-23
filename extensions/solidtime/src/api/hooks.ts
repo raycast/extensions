@@ -7,13 +7,13 @@ export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 10 * 1_000,
-      throwOnError(error) {
-        showFailureToast(error);
-        return false;
-      },
     },
   },
-  queryCache: new QueryCache({}),
+  queryCache: new QueryCache({
+    onError(error) {
+      showFailureToast(error);
+    },
+  }),
 });
 
 export function useMemberships() {

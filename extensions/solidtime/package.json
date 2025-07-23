@@ -48,7 +48,8 @@
       "title": "API Key",
       "description": "Your Solidtime API Key",
       "type": "password",
-      "required": true
+      "required": true,
+      "placeholder": "eY...xx"
     },
     {
       "name": "onTimeEntryAction",

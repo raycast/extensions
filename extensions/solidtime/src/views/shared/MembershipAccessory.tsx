@@ -10,7 +10,7 @@ export default function MembershipAccessory() {
     <List.Dropdown
       tooltip="Organization"
       value={ctx.membership?.id}
-      isLoading
+      isLoading={memberships.isLoading}
       onChange={(id) => {
         const membership = memberships.data?.find((m) => m.id === id);
         if (membership) ctx.setMembership(membership);
@@ -19,7 +19,7 @@ export default function MembershipAccessory() {
       {memberships.data && (
         <List.Dropdown.Section title="Organization">
           {memberships.data.map((membership) => (
-            <List.Dropdown.Item key={membership.id} title={membership.organization.name} value={membership.id} />
+            <List.Dropdown.Item key={membership.id} title={`My Org`} value={membership.id} />
           ))}
         </List.Dropdown.Section>
       )}
