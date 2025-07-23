@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Update Google Drive Homepage URL] - 2025-06-19
+## [Update Google Drive Homepage URL] - 2025-07-23
 
 Update Google Drive Homepage URL to the correct one.
 
