@@ -139,7 +139,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     title: "Google Drive",
     description: "This MCP server integrates with Google Drive to allow listing, reading, and searching over files.",
     icon: "https://svgl.app/library/drive.svg",
-    homepage: "https://github.com/modelcontextprotocol/servers/tree/main/src/gdrive",
+    homepage: "https://github.com/modelcontextprotocol/servers-archived/tree/main/src/gdrive",
     configuration: {
       command: "npx",
       args: ["-y", "@modelcontextprotocol/server-gdrive"],
