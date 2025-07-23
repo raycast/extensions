@@ -19,7 +19,7 @@ export default function MembershipAccessory() {
       {memberships.data && (
         <List.Dropdown.Section title="Organization">
           {memberships.data.map((membership) => (
-            <List.Dropdown.Item key={membership.id} title={`My Org`} value={membership.id} />
+            <List.Dropdown.Item key={membership.id} title={membership.organization.name} value={membership.id} />
           ))}
         </List.Dropdown.Section>
       )}

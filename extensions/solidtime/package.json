@@ -36,8 +36,8 @@
   "preferences": [
     {
       "name": "url",
-      "title": "solidtime URL",
-      "description": "Your solidtime URL",
+      "title": "Solidtime URL",
+      "description": "Your Solidtime URL",
       "type": "textfield",
       "required": true,
       "placeholder": "https://app.solidtime.io/",
