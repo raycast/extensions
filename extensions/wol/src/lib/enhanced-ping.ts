@@ -13,6 +13,35 @@ function detectOSFromTTL(ttl: number): string {
 export function enhancedPing(ip: string, mac?: string, previousLastSeen?: Date): Promise<NetworkInfo> {
   return new Promise((resolve) => {
     // Enhanced ping command with more details
+    import { exec } from "child_process";
+import { NetworkInfo } from "../types";
+
+// Validate IP address format
+function isValidIP(ip: string): boolean {
+  const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+  return ipRegex.test(ip);
+}
+
+// OS detection based on TTL values
+function detectOSFromTTL(ttl: number): string {
+  if (ttl <= 64) return "Linux/macOS";
+  if (ttl <= 128) return "Windows";
+  if (ttl <= 255) return "Network Device";
+  return "Unknown";
+}
+
+// Enhanced ping that collects detailed network information
+export function enhancedPing(ip: string, mac?: string, previousLastSeen?: Date): Promise<NetworkInfo> {
+  return new Promise((resolve) => {
+    if (!isValidIP(ip)) {
+      resolve({
+        isOnline: false,
+        lastSeen: previousLastSeen,
+      });
+      return;
+    }
+    
+    // Enhanced ping command with more details
     exec(`/sbin/ping -c 3 -W 1000 ${ip}`, (err, stdout) => {
       const networkInfo: NetworkInfo = {
         isOnline: false,
