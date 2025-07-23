@@ -1,6 +1,6 @@
 # Wake on Lan Changelog
 
-## [Feat] - 2024-12-15
+## [Feat] - {PR_MERGE_DATE}
 
 - **Automatic Status Monitoring**: Added real-time device status checking every 8 seconds with automatic updates
 - **Enhanced Device Details**: Show response time, connection quality, OS detection, hostname, and accurate "Last Seen" timestamps
