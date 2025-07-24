@@ -1,6 +1,6 @@
 # NeoDB Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-07-24
 
 - Add support for Windows
 - Bump all dependencies to the latest
