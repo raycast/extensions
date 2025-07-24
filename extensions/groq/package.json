@@ -63,10 +63,6 @@
               "title": "Llama 3 8B 8k"
             },
             {
-              "value": "mistral-saba-24b",
-              "title": "Mistral Saba 24B 32K"
-            },
-            {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
             },
@@ -135,10 +131,6 @@
             {
               "value": "llama3-8b-8192",
               "title": "Llama 3 8B 8k"
-            },
-            {
-              "value": "mistral-saba-24b",
-              "title": "Mistral Saba 24B 32K"
             },
             {
               "value": "gemma2-9b-it",
@@ -211,10 +203,6 @@
               "title": "Llama 3 8B 8k"
             },
             {
-              "value": "mistral-saba-24b",
-              "title": "Mistral Saba 24B 32K"
-            },
-            {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
             },
@@ -283,10 +271,6 @@
             {
               "value": "llama3-8b-8192",
               "title": "Llama 3 8B 8k"
-            },
-            {
-              "value": "mistral-saba-24b",
-              "title": "Mistral Saba 24B 32K"
             },
             {
               "value": "gemma2-9b-it",
@@ -359,10 +343,6 @@
               "title": "Llama 3 8B 8k"
             },
             {
-              "value": "mistral-saba-24b",
-              "title": "Mistral Saba 24B 32K"
-            },
-            {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
             },
@@ -431,10 +411,6 @@
             {
               "value": "llama3-8b-8192",
               "title": "Llama 3 8B 8k"
-            },
-            {
-              "value": "mistral-saba-24b",
-              "title": "Mistral Saba 24B 32K"
             },
             {
               "value": "gemma2-9b-it",
@@ -521,10 +497,6 @@
             {
               "value": "llama3-8b-8192",
               "title": "Llama 3 8B 8k"
-            },
-            {
-              "value": "mistral-saba-24b",
-              "title": "Mistral Saba 24B 32K"
             },
             {
               "value": "gemma2-9b-it",
@@ -614,10 +586,6 @@
               "title": "Llama 3 8B 8k"
             },
             {
-              "value": "mistral-saba-24b",
-              "title": "Mistral Saba 24B 32K"
-            },
-            {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
             },
@@ -687,10 +655,6 @@
             {
               "value": "llama3-8b-8192",
               "title": "Llama 3 8B 8k"
-            },
-            {
-              "value": "mistral-saba-24b",
-              "title": "Mistral Saba 24B 32K"
             },
             {
               "value": "gemma2-9b-it",
@@ -764,10 +728,6 @@
               "title": "Llama 3 8B 8k"
             },
             {
-              "value": "mistral-saba-24b",
-              "title": "Mistral Saba 24B 32K"
-            },
-            {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
             },
@@ -837,10 +797,6 @@
             {
               "value": "llama3-8b-8192",
               "title": "Llama 3 8B 8k"
-            },
-            {
-              "value": "mistral-saba-24b",
-              "title": "Mistral Saba 24B 32K"
             },
             {
               "value": "gemma2-9b-it",
@@ -914,10 +870,6 @@
               "title": "Llama 3 8B 8k"
             },
             {
-              "value": "mistral-saba-24b",
-              "title": "Mistral Saba 24B 32K"
-            },
-            {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
             },
@@ -987,10 +939,6 @@
             {
               "value": "llama3-8b-8192",
               "title": "Llama 3 8B 8k"
-            },
-            {
-              "value": "mistral-saba-24b",
-              "title": "Mistral Saba 24B 32K"
             },
             {
               "value": "gemma2-9b-it",
@@ -1064,10 +1012,6 @@
               "title": "Llama 3 8B 8k"
             },
             {
-              "value": "mistral-saba-24b",
-              "title": "Mistral Saba 24B 32K"
-            },
-            {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
             },
@@ -1128,10 +1072,6 @@
         {
           "value": "llama3-8b-8192",
           "title": "Llama 3 8B 8k"
-        },
-        {
-          "value": "mistral-saba-24b",
-          "title": "Mistral Saba 24B 32K"
         },
         {
           "value": "gemma2-9b-it",
