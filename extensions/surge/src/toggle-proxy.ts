@@ -2,9 +2,9 @@ import { getPreferenceValues, showToast, showHUD, Toast } from "@raycast/api"
 import api from "./api"
 
 export default async function Command() {
-  const preferences = getPreferenceValues()
-  const xKey = preferences["x-key"] as string
-  const port = preferences.port as string
+  const preferences = getPreferenceValues<ExtensionPreferences>()
+  const xKey = preferences["x-key"]
+  const port = preferences.port
 
   try {
     // First, get the current system proxy status

@@ -12,9 +12,9 @@ interface PolicyGroups {
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues()
-  const xKey = preferences["x-key"] as string
-  const port = preferences.port as string
+  const preferences = getPreferenceValues<ExtensionPreferences>()
+  const xKey = preferences["x-key"]
+  const port = preferences.port
 
   const [policyGroups, setPolicyGroups] = useState<PolicyGroups>({})
   const [selectedOptions, setSelectedOptions] = useState<string[]>([])
