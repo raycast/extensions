@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [Windows support] - {PR_MERGE_DATE}
+## [Windows support] - 2025-07-24
 
 - Added Windows support
 
