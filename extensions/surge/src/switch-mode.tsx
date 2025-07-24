@@ -24,9 +24,9 @@ const OUTBOUND_MODES = {
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues()
-  const xKey = preferences["x-key"] as string
-  const port = preferences.port as string
+  const preferences = getPreferenceValues<ExtensionPreferences>()
+  const xKey = preferences["x-key"]
+  const port = preferences.port
 
   const [currentMode, setCurrentMode] = useState<string>("")
   const [isLoading, setIsLoading] = useState(true)
