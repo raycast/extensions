@@ -1,5 +1,20 @@
 # Groq Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Enhancements:
+  - Clipboard copy now excludes thinking tokens, ensuring only final content is copied.
+  - System and user prompts updated to use XML tags for clearer message formatting.
+  - User prompts now explicitly reference `selected_text` for more precise context.
+  - Pricing estimation function simplified for better performance and readability.
+  - Moved `formatUserMessage` helper into `utils.ts` for improved code organization.
+
+- Deprecated Models:
+    - `deepseek-r1-distill-qwen-32b`
+    - `qwen-2.5-coder-32b`
+    - `llama-3.3-70b-specdec`
+    - `mistral-saba-24b`
+
 ## [Updated Models] - 2025-07-18
 
 - Removed `Llama Guard 4 12B 128K`
