@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "find-your-repo",
+  "title": "Find Your Repo",
+  "description": "find your repo locaion",
+  "icon": "logo.png",
+  "author": "wan-kong",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Find Your Repo",
+      "subtitle": "通过git地址查找本地仓库",
+      "description": "输入git地址，在本地目录中查找匹配的仓库",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "gitUrl",
+          "placeholder": "Git 地址 (可选)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "searchPath",
+      "title": "搜索路径",
+      "description": "设置搜索仓库的根目录路径",
+      "type": "textfield",
+      "default": "~",
+      "required": false
+    },
+    {
+      "name": "maxDepth",
+      "title": "搜索深度",
+      "description": "设置递归搜索的最大深度",
+      "type": "textfield",
+      "default": "3",
+      "required": false
+    },
+    {
+      "name": "excludeDirs",
+      "title": "排除目录",
+      "description": "设置要排除的目录名称，用逗号分隔",
+      "type": "textfield",
+      "default": "node_modules,.venv,venv,__pycache__,.next,dist,build",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.101.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
