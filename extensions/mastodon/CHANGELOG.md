@@ -1,6 +1,6 @@
 # Mastodon Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-07-24
 
 - Add support for Windows
 - Routine maintenance and code cleanup
