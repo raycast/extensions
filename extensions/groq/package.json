@@ -89,7 +89,7 @@
           "title": "Summarize Prompt",
           "description": "The prompt for the summarize command.",
           "type": "textfield",
-          "default": "Summarize all relevant aspects from the following selected_text as concise as possible.",
+          "default": "Summarize all relevant aspects from the following selected_text concisely.",
           "required": false
         },
         {
