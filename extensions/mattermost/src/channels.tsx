@@ -228,7 +228,7 @@ function ChannelList(props: { profile: UserProfile; team: TeamUI }) {
       setCachedState(cachedState);
     }
 
-    const profilesStatuses = directChatsMap.keys.length
+    const profilesStatuses = directChatsMap.size
       ? await MattermostClient.getProfilesStatus(Array.from(directChatsMap.keys()))
       : [];
     profilesStatuses.forEach((status) => {
