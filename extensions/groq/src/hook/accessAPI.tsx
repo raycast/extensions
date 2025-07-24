@@ -117,7 +117,7 @@ export default function ResultView(props: ResultViewProps) {
   if (user_extra_msg) {
     segments.push(formatUserMessage(user_extra_msg) + "\n\n");
   }
-  const isThinking = metrics.model.includes("deepseek-r1") || metrics.model.includes("qwen/qwen3-32b");
+  const isThinking = metrics.model.includes("deepseek-r1-distill-llama-70b") || metrics.model.includes("qwen/qwen3-32b");
   if (isThinking) {
     const [thinkRaw, rest] = response.split("</think>");
     const thinkText = thinkRaw.replace("<think>", "");

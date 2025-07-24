@@ -10,7 +10,6 @@ export const allModels = [
   { name: "Llama 3 70B 8k", id: "llama3-70b-8192" },
   { name: "Llama 3 8B 8k", id: "llama3-8b-8192" },
   { name: "Gemma2 9B 8k", id: "gemma2-9b-it" },
-  { name: "Mistral Saba 24B 32K", id: "mistral-saba-24b" },
   { name: "Qwen 3 32B 128K", id: "qwen/qwen3-32b" },
   { name: "Kimi K2 Instruct 128K", id: "moonshotai/kimi-k2-instruct" },
 ];
@@ -23,8 +22,7 @@ const MODEL_RATES: Record<string, { input: number; output: number }> = {
   "llama3-70b-8192": { input: 0.59, output: 0.79 },
   "llama3-8b-8192": { input: 0.05, output: 0.08 },
   "llama-3.1-8b-instant": { input: 0.05, output: 0.08 },
-  "gemma-9b-it": { input: 0.2, output: 0.2 },
-  "mistral-saba-24b": { input: 0.79, output: 0.79 },
+  "gemma2-9b-it": { input: 0.2, output: 0.2 },
   "qwen/qwen3-32b": { input: 0.29, output: 0.59 },
   "moonshotai/kimi-k2-instruct": { input: 1.0, output: 3.0 },
 };
