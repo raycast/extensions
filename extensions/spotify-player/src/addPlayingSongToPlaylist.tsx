@@ -162,7 +162,7 @@ function AddToPlaylistCommand(props: AddToPlaylistCommandProps) {
                           if (isInPlaylist) {
                             await showToast({
                               title: "Duplicate found",
-                              style: Toast.Style.Success,
+                              style: Toast.Style.Failure,
                               primaryAction: {
                                 async onAction() {
                                   await addTrack();
