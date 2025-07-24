@@ -18,7 +18,7 @@ const formatPrereqTree = (tree?: Prereq): string => {
 
     if (typeof node === "string") {
       const match = node.match(MODULE_PREREQ_REG);
-      if (match === null || match.length != 3 || !match[2]) {
+      if (match === null || match.length !== 3 || !match[2]) {
         sections.push(`${indent}- ${node}`);
         return;
       }
