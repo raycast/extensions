@@ -20,8 +20,8 @@ export default function ResultView(props: ResultViewProps) {
   });
 
   async function getChatResponse(sysPrompt: string, selectedText: string, model: string, temp: number) {
-    const fullSysPrompt = `Current date: ${currentDate}.\n\n${sysPrompt}`;
-    const userPrompt = `${user_extra_msg ? `${user_extra_msg.trim()}\n\n` : ""}${selectedText ? `The following is the text:\n"${selectedText.trim()}"` : ""}`;
+    const fullSysPrompt = `You are an LLM provided by Groq.\nCurrent date: ${currentDate}.\n<goal>\n${sysPrompt}\n</goal>`;
+    const userPrompt = `${user_extra_msg ? `<user_query>\n${user_extra_msg.trim()}\n</user_query>\n\n` : ""}${selectedText ? `Selected text by the user:\n<selected_text>\n${selectedText.trim()}\n</selected_text>\n\n` : ""}`;
     try {
       const response = await openai.chat.completions.create({
         model,
@@ -117,8 +117,8 @@ export default function ResultView(props: ResultViewProps) {
   if (user_extra_msg) {
     segments.push(formatUserMessage(user_extra_msg) + "\n\n");
   }
-  const isSpecial = metrics.model.includes("deepseek") || metrics.model.includes("qwen/qwen3-32b");
-  if (isSpecial) {
+  const isThinking = metrics.model.includes("deepseek-r1") || metrics.model.includes("qwen/qwen3-32b");
+  if (isThinking) {
     const [thinkRaw, rest] = response.split("</think>");
     const thinkText = thinkRaw.replace("<think>", "");
     segments.push(`\`\`\`${thinkText}\`\`\``);
@@ -127,7 +127,7 @@ export default function ResultView(props: ResultViewProps) {
     segments.push(response);
   }
   const markdown = segments.join("");
-  const copyContent = (isSpecial ? response.split("</think>")[1] ?? response : response).trim();
+  const copyContent = (isThinking ? response.split("</think>")[1] ?? response : response).trim();
 
   return (
     <Detail
