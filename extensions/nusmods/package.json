@@ -8,7 +8,14 @@
   "categories": [
     "Data"
   ],
+  "contributors": [
+    "putttim"
+  ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "keywords": [
     "nus",
     "nusmods",
@@ -24,13 +31,12 @@
     {
       "name": "search-nus-courses",
       "title": "Search NUS Courses",
-      "subtitle": "Search and explore NUS course offerings for current academic year",
       "description": "Quickly find NUS modules by code or title, view comprehensive course details including prerequisites, workload, timetables, and exam schedules.",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.96.0",
+    "@raycast/api": "^1.100.3",
     "@raycast/utils": "^1.17.0",
     "@zod/mini": "^4.0.0-beta.20250420T053007"
   },
