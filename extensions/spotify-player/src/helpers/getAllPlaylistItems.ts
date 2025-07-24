@@ -3,10 +3,10 @@ import { getPlaylistTracks } from "../api/getPlaylistTracks";
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { PlaylistTrackObject, SimplifiedPlaylistObject } from "./spotify.api";
 
-const CACHE_REFRESH_RATE = getPreferenceValues().cacheRefreshTime;
-const STALE_AFTER_MS = 1000 * 60 * 60 * 24 * CACHE_REFRESH_RATE; // cacheRefreshTime days
-
 export default async function getAllPlaylistItems(playlist: SimplifiedPlaylistObject) {
+  const CACHE_REFRESH_RATE = getPreferenceValues().cacheRefreshTime;
+  const STALE_AFTER_MS = 1000 * 60 * 60 * 24 * CACHE_REFRESH_RATE; // cacheRefreshTime days
+
   if (!playlist.id) {
     throw Error("No playlist ID specified");
   }
