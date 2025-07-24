@@ -24,16 +24,28 @@ export const formatTime = (date: Date): string =>
 /**
  * Formats a date with smart relative formatting
  * @param date - The date to format
- * @returns Smart formatted date (e.g., "Today", "Tomorrow", "Mon, Dec 25")
+ * @returns Smart formatted date (e.g., "Today", "Tomorrow", "in 2 days", "Mon, Dec 25")
  */
 export const formatDate = (date: Date): string => {
   const today = new Date();
-  const tomorrow = new Date(today);
-  tomorrow.setDate(today.getDate() + 1);
 
-  if (date.toDateString() === today.toDateString()) return "Today";
-  if (date.toDateString() === tomorrow.toDateString()) return "Tomorrow";
+  // Normalize dates to midnight for proper day comparison
+  const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const dateMidnight = new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
+  const diffMs = dateMidnight.getTime() - todayMidnight.getTime();
+  const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
+  // Handle same day
+  if (diffDays === 0) return "Today";
+
+  // Handle future dates within 3 days
+  if (diffDays > 0 && diffDays <= 3) {
+    if (diffDays === 1) return "Tomorrow";
+    return `in ${pluralize(diffDays, "day")}`;
+  }
+
+  // Fall back to full date format for dates beyond 3 days or in the past
   return date.toLocaleDateString("en-US", {
     weekday: "short",
     month: "short",
@@ -42,16 +54,11 @@ export const formatDate = (date: Date): string => {
 };
 
 /**
- * Formats a date for display in accessories (day abbreviation and date)
+ * Formats a date for display in accessories with relative formatting
  * @param date - The date to format
- * @returns Formatted string for accessories (e.g., "Tue, Jul 25")
+ * @returns Formatted string for accessories (e.g., "Today", "Tomorrow", "in 2 days", "Tue, Jul 25")
  */
-export const formatAccessoryDate = (date: Date): string =>
-  date.toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-  });
+export const formatAccessoryDate = (date: Date): string => formatDate(date);
 
 /**
  * Calculates and formats the duration between two dates

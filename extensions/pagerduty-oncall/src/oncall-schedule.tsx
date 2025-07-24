@@ -3,24 +3,24 @@
  * Optimized with modern ES6 features and comprehensive utility functions
  */
 
-import React, { useState, useMemo } from "react";
-import { List, ActionPanel, Action, Icon, Color, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, openExtensionPreferences } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
+import { useMemo, useState } from "react";
 import { PagerDutyAPI } from "./api";
 import { OnCallScheduleEntry } from "./types";
 import {
-  FilterType,
-  FILTER_CONFIG,
-  filterSchedules,
-  groupSchedulesByMonth,
-  sortMonthsChronologically,
-  searchSchedules,
-  formatDateRange,
-  formatAccessoryDate,
   calculateDuration,
-  getScheduleName,
   categorizeSchedule,
   createUniqueKey,
+  FILTER_CONFIG,
+  filterSchedules,
+  FilterType,
+  formatAccessoryDate,
+  formatDateRange,
+  getScheduleName,
+  groupSchedulesByMonth,
+  searchSchedules,
+  sortMonthsChronologically,
 } from "./utils";
 
 /**

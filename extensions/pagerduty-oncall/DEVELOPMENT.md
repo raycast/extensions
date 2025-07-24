@@ -309,7 +309,6 @@ npm run fix-lint # Auto-fix linting issues
 
 ### **Publishing Checklist:**
 
-- [ ] Update `author` field in `package.json`
 - [ ] Run `npm run build` successfully
 - [ ] Run `npm run lint` with no errors
 - [ ] Test all filter options

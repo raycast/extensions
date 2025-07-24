@@ -56,5 +56,3 @@ Once configured, the extension will show:
 - Your API token is stored locally in Raycast's secure preferences
 - No data is transmitted to third parties - only direct PagerDuty API calls
 - Read-only API access ensures your PagerDuty data cannot be modified
-
-## 📞 Troubleshooting
