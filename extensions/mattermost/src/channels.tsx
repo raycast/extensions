@@ -21,7 +21,7 @@ import { withAuthorization } from "./shared/withAuthorization";
 
 async function getCachedState(): Promise<State | undefined> {
   return LocalStorage.getItem<string>("channels-state").then((cachedStateJson) =>
-    cachedStateJson ? (JSON.parse(cachedStateJson) as State) : undefined
+    cachedStateJson ? (JSON.parse(cachedStateJson) as State) : undefined,
   );
 }
 
@@ -84,7 +84,7 @@ function ChannelsFinderList(): JSX.Element {
     const [profile, teams] = await Promise.all([MattermostClient.getMe(), MattermostClient.getTeams()]);
     const teamsUI: TeamUI[] = teams.map((team) => ({ id: team.id, name: team.name }));
 
-    toast.style = Toast.Style.Success
+    toast.style = Toast.Style.Success;
     toast.title = `Found ${teamsUI.length} teams`;
     setCachedState({ profile: profile, teams: teamsUI });
     setState({ profile: profile, teams: teamsUI });
@@ -165,7 +165,7 @@ function ChannelList(props: { profile: UserProfile; team: TeamUI }) {
       directChatsMap.set(profileId, chat);
     });
 
-    const directChatProfiles = directChatsMap.keys.length
+    const directChatProfiles = directChatsMap.size
       ? await MattermostClient.getProfilesByIds(Array.from(directChatsMap.keys()))
       : [];
     directChatProfiles.forEach((profile) => {

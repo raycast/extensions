@@ -1,6 +1,9 @@
 # Mattermost Changelog
 
-## [] - {PR_MERGE_DATE}
+## [Fix DMs Not Shown] - {PR_MERGE_DATE}
+
+- Fix: Direct Messages would not show in `Search Channels` (ref: [Issue #19587](https://github.com/raycast/extensions/issues/19587))
+- Modernize to use latest Raycast config
 
 ## [Enhancements] - 2024-10-22
 
