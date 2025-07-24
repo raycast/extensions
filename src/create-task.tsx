@@ -713,7 +713,16 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
         {...itemProps.content}
         title="Title"
         placeholder="Buy milk tomorrow p1 #Personal @This Month {march 30}"
-        info="Bidirectional natural language parsing: Type parameters in title OR use dropdowns - both update each other. p1-p4 (priority), #project or #&quot;Project Name&quot;, @label or @&quot;Label Name&quot;, natural dates (tomorrow, monday at 2pm), {deadline}. Always uses quickAddTask API like Todoist."
+        info="✨ Smart Task Creation: Type naturally and watch the form fill itself! Try 'Buy groceries tomorrow p2 #Home @urgent' or use the dropdowns below - both ways work together seamlessly.
+
+🎯 What you can type:
+• Priority: p1 (urgent), p2 (high), p3 (medium), p4 (low)
+• Projects: #ProjectName or #&quot;Project Name&quot; (for names with spaces)
+• Labels: @label or @&quot;Label Name&quot; (for names with spaces)  
+• Dates: tomorrow, next Friday, Monday at 3pm, in 2 weeks
+• Deadlines: {March 30} or {next month}
+
+💡 The form updates as you type, and any changes in the dropdowns will update your title too!"
       />
 
       <Form.TextArea
