@@ -15,6 +15,33 @@ export default function Command() {
   const tempFileRef = useRef<string | null>(null);
   const preferences = getPreferenceValues<Preferences>();
 
+  // Extract the clipboard-only generation logic into a reusable function
+  async function generateFromClipboardOnly() {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const clipboardText = await Clipboard.readText();
+      if (clipboardText && clipboardText.trim()) {
+        const outputPath = await generateMermaidDiagram(clipboardText, tempFileRef);
+        setImagePath(outputPath);
+
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Diagram generated from clipboard",
+        });
+      } else {
+        throw new Error("Clipboard is empty");
+      }
+    } catch (error) {
+      await showFailureToast(error, {
+        title: "Failed to use clipboard",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   async function processMermaidCode() {
     if (isProcessingRef.current) return;
     isProcessingRef.current = true;
@@ -223,32 +250,7 @@ ${error}
               title="Use Clipboard Only"
               icon={Icon.Clipboard}
               shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
-              onAction={async () => {
-                // Force using clipboard only
-                try {
-                  setIsLoading(true);
-                  setError(null);
-
-                  const clipboardText = await Clipboard.readText();
-                  if (clipboardText && clipboardText.trim()) {
-                    const outputPath = await generateMermaidDiagram(clipboardText, tempFileRef);
-                    setImagePath(outputPath);
-
-                    await showToast({
-                      style: Toast.Style.Success,
-                      title: "Diagram generated from clipboard",
-                    });
-                  } else {
-                    throw new Error("Clipboard is empty");
-                  }
-                } catch (error) {
-                  await showFailureToast(error, {
-                    title: "Failed to use clipboard",
-                  });
-                } finally {
-                  setIsLoading(false);
-                }
-              }}
+              onAction={generateFromClipboardOnly}
             />
           </ActionPanel>
         }
@@ -296,32 +298,7 @@ graph TD
             title="Generate from Clipboard Only"
             icon={Icon.Clipboard}
             shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
-            onAction={async () => {
-              // Force using clipboard only
-              try {
-                setIsLoading(true);
-                setError(null);
-
-                const clipboardText = await Clipboard.readText();
-                if (clipboardText && clipboardText.trim()) {
-                  const outputPath = await generateMermaidDiagram(clipboardText, tempFileRef);
-                  setImagePath(outputPath);
-
-                  await showToast({
-                    style: Toast.Style.Success,
-                    title: "Diagram generated from clipboard",
-                  });
-                } else {
-                  throw new Error("Clipboard is empty");
-                }
-              } catch (error) {
-                await showFailureToast(error, {
-                  title: "Failed to use clipboard",
-                });
-              } finally {
-                setIsLoading(false);
-              }
-            }}
+            onAction={generateFromClipboardOnly}
           />
         </ActionPanel>
       }
