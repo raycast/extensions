@@ -15,7 +15,7 @@ import {
 import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
 import { useEffect, useRef } from "react";
 
-import { addComment, addTask, quickAddTask, uploadFile } from "./api";
+import { addComment, addTask, quickAddTask, uploadFile, Label } from "./api";
 import RefreshAction from "./components/RefreshAction";
 import TaskDetail from "./components/TaskDetail";
 import { getCollaboratorIcon, getProjectCollaborators } from "./helpers/collaborators";
@@ -164,7 +164,7 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
   });
 
   // Real-time NLP parsing
-  const parsedData = useNLPParser(values.content, projects);
+  const parsedData = useNLPParser(values.content, projects, labels);
 
   // Helper functions to update title based on dropdown changes
   const updateTitleWithPriority = (newPriority: string) => {
@@ -302,8 +302,77 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
   const updateTitleWithLabels = (newLabels: string[]) => {
     let updatedContent = values.content;
     
-    // Remove existing label patterns - more conservative regex to avoid capturing too much
-    updatedContent = updatedContent.replace(/@(?:"[^"]+"|[a-zA-Z0-9_\u00A0-\uFFFF]+(?:\s+[a-zA-Z0-9_\u00A0-\uFFFF]+)*?)(?=\s|$)/g, '').replace(/\s+/g, ' ').trim();
+    if (labels) {
+      // Find and remove all valid label matches using smart detection
+      const validMatches: Array<{index: number, length: number, name: string}> = [];
+      
+      // First, find all quoted labels @"label name"
+      const quotedRegex = /@"([^"]+)"/g;
+      let match;
+      while ((match = quotedRegex.exec(updatedContent)) !== null) {
+        const labelName = match[1];
+        const matchingLabel = findBestLabelMatch(labels, labelName);
+        
+        if (matchingLabel) {
+          validMatches.push({
+            index: match.index,
+            length: match[0].length,
+            name: labelName
+          });
+        }
+      }
+      
+      // Then, find unquoted labels by scanning for @ and trying progressive matches
+      const atRegex = /@/g;
+      let atMatch;
+      while ((atMatch = atRegex.exec(updatedContent)) !== null) {
+        const startIndex = atMatch.index;
+        
+        // Skip if this @ is already part of a quoted label we found
+        const isPartOfQuoted = validMatches.some(vm => 
+          startIndex >= vm.index && startIndex < vm.index + vm.length
+        );
+        if (isPartOfQuoted) continue;
+        
+        // Extract text after @ until we hit whitespace or special characters
+        const afterAt = updatedContent.substring(startIndex + 1);
+        const textMatch = afterAt.match(/^[a-zA-Z0-9_\u00A0-\uFFFF\s]*/);
+        
+        if (textMatch) {
+          const candidateText = textMatch[0];
+          const words = candidateText.trim().split(/\s+/).filter(w => w.length > 0);
+          
+          // Try progressively longer combinations starting from single word
+          for (let wordCount = 1; wordCount <= words.length; wordCount++) {
+            const testName = words.slice(0, wordCount).join(' ');
+            
+            const matchingLabel = findBestLabelMatch(labels, testName);
+
+            if (matchingLabel) {
+              validMatches.push({
+                index: startIndex,
+                length: `@${testName}`.length,
+                name: testName
+              });
+              break; // Take the shortest match
+            }
+          }
+        }
+      }
+      
+      // Remove duplicates and sort by index (reverse order for removal)
+      const uniqueMatches = validMatches.filter((match, index, array) => 
+        array.findIndex(m => m.index === match.index) === index
+      );
+      uniqueMatches.sort((a, b) => b.index - a.index);
+      
+      // Remove valid matches in reverse order to maintain indices
+      for (const match of uniqueMatches) {
+        const before = updatedContent.substring(0, match.index);
+        const after = updatedContent.substring(match.index + match.length);
+        updatedContent = `${before}${after}`.replace(/\s+/g, ' ').trim();
+      }
+    }
     
     // Add new labels
     if (newLabels && newLabels.length > 0) {
@@ -752,6 +821,59 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
       </Form.Dropdown>
     </Form>
   );
+}
+
+/**
+ * Finds the best matching label using tiered matching strategy:
+ * 1. Exact match (case-sensitive, with emojis)
+ * 2. Case-insensitive match (with emojis)
+ * 3. Emoji-insensitive match (case-sensitive) 
+ * 4. Fully normalized match (case-insensitive, no emojis)
+ */
+function findBestLabelMatch(labels: Label[], userInput: string): Label | undefined {
+  const trimmedInput = userInput.trim();
+  
+  // Tier 1: Exact match (case-sensitive, with emojis)
+  let match = labels.find(label => label.name === trimmedInput);
+  if (match) return match;
+  
+  // Tier 2: Case-insensitive match (with emojis)
+  match = labels.find(label => label.name.toLowerCase() === trimmedInput.toLowerCase());
+  if (match) return match;
+  
+  // Tier 3: Emoji-insensitive match (case-sensitive)
+  const inputWithoutEmojis = removeEmojis(trimmedInput);
+  match = labels.find(label => removeEmojis(label.name) === inputWithoutEmojis);
+  if (match) return match;
+  
+  // Tier 4: Fully normalized match (case-insensitive, no emojis)
+  const normalizedInput = normalizeLabelName(trimmedInput);
+  match = labels.find(label => normalizeLabelName(label.name) === normalizedInput);
+  
+  return match;
+}
+
+/**
+ * Removes emojis from a string using the same regex as normalization functions
+ */
+function removeEmojis(text: string): string {
+  const emojiRegex =
+    /[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu;
+  
+  return text.replace(emojiRegex, "").trim();
+}
+
+/**
+ * Normalizes label name by converting to lowercase and removing emojis
+ */
+function normalizeLabelName(name: string): string {
+  const emojiRegex =
+    /[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu;
+
+  return name
+    .replace(emojiRegex, "") // Remove emojis
+    .toLowerCase() // Convert to lowercase
+    .trim(); // Remove leading/trailing whitespace
 }
 
 export default withTodoistApi(CreateTask);

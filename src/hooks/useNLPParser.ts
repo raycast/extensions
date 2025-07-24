@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import * as chrono from "chrono-node";
 
-import { Project } from "../api";
+import { Project, Label } from "../api";
 
 export type ParsedData = {
   cleanedTitle: string;
@@ -35,7 +35,7 @@ export type ParsedData = {
  * Date parsing excludes content within labels and projects to prevent conflicts
  * (e.g., "@This Month" won't be parsed as a date, only as a label)
  */
-export function useNLPParser(content: string, projects?: Project[]): ParsedData {
+export function useNLPParser(content: string, projects?: Project[], allLabels?: Label[]): ParsedData {
   return useMemo(() => {
     if (!content) {
       return { cleanedTitle: content };
@@ -65,14 +65,44 @@ export function useNLPParser(content: string, projects?: Project[]): ParsedData 
       }
     }
 
-    // Parse labels (@label) - extract all labels, keeping the most recent of each unique label
-    // More conservative regex to avoid capturing too much text
-    const labelMatches = Array.from(content.matchAll(/@(?:"([^"]+)"|([a-zA-Z0-9_\u00A0-\uFFFF]+(?:\s+[a-zA-Z0-9_\u00A0-\uFFFF]+)*?)(?=\s|$))/g));
-    if (labelMatches.length > 0) {
-      // Get all labels but remove duplicates, keeping the last occurrence of each
-      // match[1] is quoted label, match[2] is unquoted label (may have spaces)
-      const allLabels = labelMatches.map(match => match[1] || match[2]);
-      labels = [...new Set(allLabels.reverse())].reverse(); // Remove duplicates, keeping last occurrence
+    // Parse labels (@label) - extract all labels using smart shortest-first matching
+    // Use the same approach as projects: capture all text then validate against actual labels
+    const labelMatches = Array.from(content.matchAll(/@(?:"([^"]+)"|([a-zA-Z0-9_\u00A0-\uFFFF]+(?:\s+[a-zA-Z0-9_\u00A0-\uFFFF]+)*))/g));
+    if (labelMatches.length > 0 && allLabels) {
+      const validLabels: string[] = [];
+      
+      // Process each label match to find valid labels
+      for (const match of labelMatches) {
+        let candidateName = match[1] || match[2]; // match[1] is quoted, match[2] is unquoted
+        
+        // For unquoted matches, try shortest possible matches first
+        if (!match[1] && match[2]) { // Only for unquoted matches
+          const words = candidateName.split(/\s+/);
+          
+          // Try progressively longer combinations starting from single word
+          for (let wordCount = 1; wordCount <= words.length; wordCount++) {
+            const testName = words.slice(0, wordCount).join(' ');
+            
+            const matchingLabel = findBestLabelMatch(allLabels, testName);
+
+            if (matchingLabel) {
+              validLabels.push(matchingLabel.name);
+              break; // Found a match, stop looking for longer combinations
+            }
+          }
+        } else {
+          // For quoted matches, use the full quoted content
+          const matchingLabel = findBestLabelMatch(allLabels, candidateName);
+
+          if (matchingLabel) {
+            validLabels.push(matchingLabel.name);
+          }
+        }
+      }
+      
+      // Remove duplicates, keeping the last occurrence of each unique label
+      const uniqueLabels = [...new Set(validLabels.reverse())].reverse();
+      labels = uniqueLabels;
     }
 
     // Parse priority patterns - use the LAST occurrence (p1, p2, p3, p4)
@@ -111,11 +141,7 @@ export function useNLPParser(content: string, projects?: Project[]): ParsedData 
           for (let wordCount = 1; wordCount <= words.length; wordCount++) {
             const testName = words.slice(0, wordCount).join(' ');
             
-            const matchingProject = projects.find((project) => {
-              const normalizedProjectName = normalizeProjectName(project.name);
-              const normalizedUserInput = normalizeProjectName(testName);
-              return normalizedProjectName === normalizedUserInput;
-            });
+            const matchingProject = findBestProjectMatch(projects, testName);
 
             if (matchingProject) {
               projectId = matchingProject.id;
@@ -126,11 +152,7 @@ export function useNLPParser(content: string, projects?: Project[]): ParsedData 
           if (projectId) break; // Found match, exit outer loop
         } else {
           // For quoted matches, use the full quoted content
-          const matchingProject = projects.find((project) => {
-            const normalizedProjectName = normalizeProjectName(project.name);
-            const normalizedUserInput = normalizeProjectName(candidateName);
-            return normalizedProjectName === normalizedUserInput;
-          });
+          const matchingProject = findBestProjectMatch(projects, candidateName);
 
           if (matchingProject) {
             projectId = matchingProject.id;
@@ -165,11 +187,7 @@ export function useNLPParser(content: string, projects?: Project[]): ParsedData 
         const userProjectName = match[1] || match[2];
         
         // Check if this is actually a project name that exists
-        const matchingProject = projects.find((project) => {
-          const normalizedProjectName = normalizeProjectName(project.name);
-          const normalizedUserInput = normalizeProjectName(userProjectName);
-          return normalizedProjectName === normalizedUserInput;
-        });
+        const matchingProject = findBestProjectMatch(projects, userProjectName);
         
         // Only remove if it's an actual project name
         if (matchingProject) {
@@ -219,4 +237,89 @@ function normalizeProjectName(name: string): string {
     .replace(emojiRegex, "") // Remove emojis
     .toLowerCase() // Convert to lowercase
     .trim(); // Remove leading/trailing whitespace
+}
+
+/**
+ * Normalizes label name by converting to lowercase and removing emojis
+ * Same logic as normalizeProjectName for consistency
+ */
+function normalizeLabelName(name: string): string {
+  // Remove emojis using regex that matches most emoji ranges
+  const emojiRegex =
+    /[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu;
+
+  return name
+    .replace(emojiRegex, "") // Remove emojis
+    .toLowerCase() // Convert to lowercase
+    .trim(); // Remove leading/trailing whitespace
+}
+
+/**
+ * Finds the best matching project using tiered matching strategy:
+ * 1. Exact match (case-sensitive, with emojis)
+ * 2. Case-insensitive match (with emojis) 
+ * 3. Emoji-insensitive match (case-sensitive)
+ * 4. Fully normalized match (case-insensitive, no emojis)
+ */
+function findBestProjectMatch(projects: Project[], userInput: string): Project | undefined {
+  const trimmedInput = userInput.trim();
+  
+  // Tier 1: Exact match (case-sensitive, with emojis)
+  let match = projects.find(project => project.name === trimmedInput);
+  if (match) return match;
+  
+  // Tier 2: Case-insensitive match (with emojis)
+  match = projects.find(project => project.name.toLowerCase() === trimmedInput.toLowerCase());
+  if (match) return match;
+  
+  // Tier 3: Emoji-insensitive match (case-sensitive)
+  const inputWithoutEmojis = removeEmojis(trimmedInput);
+  match = projects.find(project => removeEmojis(project.name) === inputWithoutEmojis);
+  if (match) return match;
+  
+  // Tier 4: Fully normalized match (case-insensitive, no emojis)
+  const normalizedInput = normalizeProjectName(trimmedInput);
+  match = projects.find(project => normalizeProjectName(project.name) === normalizedInput);
+  
+  return match;
+}
+
+/**
+ * Finds the best matching label using tiered matching strategy:
+ * 1. Exact match (case-sensitive, with emojis)
+ * 2. Case-insensitive match (with emojis)
+ * 3. Emoji-insensitive match (case-sensitive) 
+ * 4. Fully normalized match (case-insensitive, no emojis)
+ */
+function findBestLabelMatch(labels: Label[], userInput: string): Label | undefined {
+  const trimmedInput = userInput.trim();
+  
+  // Tier 1: Exact match (case-sensitive, with emojis)
+  let match = labels.find(label => label.name === trimmedInput);
+  if (match) return match;
+  
+  // Tier 2: Case-insensitive match (with emojis)
+  match = labels.find(label => label.name.toLowerCase() === trimmedInput.toLowerCase());
+  if (match) return match;
+  
+  // Tier 3: Emoji-insensitive match (case-sensitive)
+  const inputWithoutEmojis = removeEmojis(trimmedInput);
+  match = labels.find(label => removeEmojis(label.name) === inputWithoutEmojis);
+  if (match) return match;
+  
+  // Tier 4: Fully normalized match (case-insensitive, no emojis)
+  const normalizedInput = normalizeLabelName(trimmedInput);
+  match = labels.find(label => normalizeLabelName(label.name) === normalizedInput);
+  
+  return match;
+}
+
+/**
+ * Removes emojis from a string using the same regex as normalization functions
+ */
+function removeEmojis(text: string): string {
+  const emojiRegex =
+    /[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu;
+  
+  return text.replace(emojiRegex, "").trim();
 }
