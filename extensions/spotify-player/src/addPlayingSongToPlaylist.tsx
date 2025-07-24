@@ -156,6 +156,7 @@ function AddToPlaylistCommand(props: AddToPlaylistCommandProps) {
                           for (const item of playlistItems) {
                             if (item?.uri === currentlyPlayingData.item?.uri) {
                               isInPlaylist = true;
+                              break;
                             }
                           }
 
