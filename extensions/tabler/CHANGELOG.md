@@ -1,5 +1,11 @@
 # tabler Changelog
 
+## [Copy HTML Char Actions + Modernize] - {PR_MERGE_DATE}
+
+- Added 'Copy ... HTML Char' actions when available (ref: [Issue #20572](https://github.com/raycast/extensions/issues/20572))
+- Replaced `axios` with `useFetch` 
+- Modernize to use latest Raycast configuration
+
 ## [New Actions & Filled Version Indicator] - 2024-08-14
 
 - Updated outline URL so icons displayed correctly
