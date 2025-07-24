@@ -153,8 +153,8 @@ function AddToPlaylistCommand(props: AddToPlaylistCommandProps) {
                           const playlistItems = await getAllPlaylistItems(playlist);
                           let isInPlaylist = false;
 
-                          for (const item of playlistItems) {
-                            if (item?.uri === currentlyPlayingData.item?.uri) {
+                          for (const uri of playlistItems) {
+                            if (uri === currentlyPlayingData.item?.uri) {
                               isInPlaylist = true;
                               break;
                             }

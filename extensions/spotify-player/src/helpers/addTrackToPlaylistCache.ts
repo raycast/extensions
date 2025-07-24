@@ -9,13 +9,12 @@ export default async function addTrackToPlaylistCache(playlistId: string, track:
   if (!cached) return;
 
   try {
-    const parsed = JSON.parse(cached) as PlaylistTrackObject[];
-
+    const parsed = JSON.parse(cached);
     const newTrackEntry: PlaylistTrackObject = {
       uri: track.uri,
     };
 
-    parsed.push(newTrackEntry);
+    parsed.push(newTrackEntry?.uri);
 
     await Promise.all([
       LocalStorage.setItem(cacheKey, JSON.stringify(parsed)),
