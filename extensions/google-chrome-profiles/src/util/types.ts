@@ -79,3 +79,8 @@ export type GoogleChromeBookmarkFile = {
     synced: GoogleChromeBookmarkFolder;
   };
 };
+
+export interface Preferences {
+  newBlankTabURL: string;
+  newTabURL: string;
+}
