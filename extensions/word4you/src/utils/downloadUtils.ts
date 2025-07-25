@@ -33,7 +33,7 @@ export async function downloadFile(url: string, destDir: string, options: { file
       const MAX_REDIRECTS = 5;
 
       if (redirectCount >= MAX_REDIRECTS) {
-        reject(new Error(`Too many redirects ({redirectCount})`));
+reject(new Error(`Too many redirects (${redirectCount})`));
         return;
       }
 
