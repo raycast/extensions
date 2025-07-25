@@ -11,8 +11,8 @@ const expectedResults = [
       projectId: "1", // Personal
       labels: ["urgent"],
       dateString: "tomorrow",
-      parsedDate: "Date object for tomorrow"
-    }
+      parsedDate: "Date object for tomorrow",
+    },
   },
   {
     input: "Meeting with team next friday at 2pm p2 #Work",
@@ -21,8 +21,8 @@ const expectedResults = [
       priority: 3, // p2 maps to Todoist priority 3
       projectId: "2", // Work
       dateString: "next friday at 2pm",
-      parsedDate: "Date object for next friday at 2pm"
-    }
+      parsedDate: "Date object for next friday at 2pm",
+    },
   },
   {
     input: "Call dentist {march 30} @health",
@@ -30,8 +30,8 @@ const expectedResults = [
       cleanTitle: "Call dentist",
       labels: ["health"],
       deadlineString: "march 30",
-      parsedDeadline: "Date object for march 30"
-    }
+      parsedDeadline: "Date object for march 30",
+    },
   },
   {
     input: "Review documents p3 #Work @review monday",
@@ -41,8 +41,8 @@ const expectedResults = [
       projectId: "2", // Work
       labels: ["review"],
       dateString: "monday",
-      parsedDate: "Date object for monday"
-    }
+      parsedDate: "Date object for monday",
+    },
   },
   {
     input: "Grocery shopping today @errands @shopping",
@@ -50,8 +50,8 @@ const expectedResults = [
       cleanTitle: "Grocery shopping",
       labels: ["errands", "shopping"],
       dateString: "today",
-      parsedDate: "Date object for today"
-    }
+      parsedDate: "Date object for today",
+    },
   },
   {
     input: "Submit report {friday} p1 #Work @important tomorrow at 10am",
@@ -63,9 +63,9 @@ const expectedResults = [
       dateString: "tomorrow at 10am",
       parsedDate: "Date object for tomorrow at 10am",
       deadlineString: "friday",
-      parsedDeadline: "Date object for friday"
-    }
-  }
+      parsedDeadline: "Date object for friday",
+    },
+  },
 ];
 
 expectedResults.forEach((test, index) => {
