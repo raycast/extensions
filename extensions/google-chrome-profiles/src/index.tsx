@@ -52,7 +52,9 @@ const ProfileItem = (props: { index: number; profile: Profile }) => {
             title="Open in Google Chrome"
             icon={Icon.Globe}
             onAction={async () => {
-              await openGoogleChrome(profile.directory, "", async () => { await showHUD("Opening profile..."); });
+              await openGoogleChrome(profile.directory, "", async () => {
+                await showHUD("Opening profile...");
+              });
             }}
           />
           <Action.CreateQuicklink
@@ -253,7 +255,9 @@ function BookmarksActionPanel(props: { profile: Profile; url: string }) {
         title="Open in Google Chrome"
         icon={Icon.Globe}
         onAction={() => {
-          openGoogleChrome(props.profile.directory, props.url, async () => { await showHUD("Opening bookmark..."); });
+          openGoogleChrome(props.profile.directory, props.url, async () => {
+            await showHUD("Opening bookmark...");
+          });
         }}
       />
       <Action

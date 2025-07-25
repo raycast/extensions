@@ -5,7 +5,9 @@ export default async function Command(props: LaunchProps) {
   const profileDirectory = props.launchContext?.directory;
 
   if (profileDirectory) {
-    await openGoogleChrome(profileDirectory, "", async () => { await showHUD("Opening profile..."); });
+    await openGoogleChrome(profileDirectory, "", async () => {
+      await showHUD("Opening profile...");
+    });
     await popToRoot();
     await closeMainWindow();
   }
