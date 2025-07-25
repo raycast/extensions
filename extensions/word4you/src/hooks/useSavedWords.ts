@@ -21,11 +21,7 @@ export function useSavedWords() {
       setSavedWordsMap(wordsMap);
     } catch (error) {
       console.error("Error loading saved words:", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: "Failed to load saved words",
-      });
+      showFailureToast(error, { title: "Failed to load saved words" });
     } finally {
       setIsLoadingSaved(false);
     }
