@@ -228,6 +228,22 @@ describe('getSummary', () => {
       expect(summary.assets[0]?.gainLoss).toBe(50) // All value is gain since no investment
     })
 
+    it('handles completely empty portfolio (no trades at all)', () => {
+      // Scenario: Brand new user who has never made any trades
+      const emptyBalance: typeof mockBalance = []
+      const emptyTrades: typeof Trades.Type = []
+      const emptyPrices = new Map<string, number>()
+
+      const summary = getSummary(emptyBalance, emptyTrades)(emptyPrices)
+
+      // Portfolio should be completely empty with zero totals
+      expect(summary.assets).toEqual([])
+      expect(summary.totals.invested).toBe(0)
+      expect(summary.totals.currentValue).toBe(0)
+      expect(summary.totals.gainLoss).toBe(0)
+      expect(summary.totals.gainLossPercent).toBe(0)
+    })
+
     it('validates weighted average calculation edge case', () => {
       // Test case: what happens with very small amounts?
       const smallBalance = [

@@ -53,7 +53,7 @@ export default function Portfolio() {
 
   useEffect(() => {
     loadPortfolio()
-  }, [true])
+  }, [])
 
   useEffect(() => {
     setIsLoading(!summary)
@@ -82,7 +82,6 @@ export default function Portfolio() {
       searchBarPlaceholder="Search assets..."
     >
       {summary?.assets.map(asset => {
-        const currencySymbol = '€'
         const iconPath = getCryptocurrencyIcon(asset.symbol)
         return (
           <List.Item
@@ -92,7 +91,7 @@ export default function Portfolio() {
             accessories={[
               {
                 text: {
-                  value: formatCurrency(asset.currentPrice, currencySymbol),
+                  value: formatCurrency(asset.currentPrice),
                   color: Color.SecondaryText,
                 },
               },
@@ -103,15 +102,12 @@ export default function Portfolio() {
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label
                       title="Current Price"
-                      text={formatCurrency(asset.currentPrice, currencySymbol)}
+                      text={formatCurrency(asset.currentPrice)}
                     />
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label
                       title="Average Buy Price"
-                      text={formatCurrency(
-                        asset.averageBuyPrice,
-                        currencySymbol,
-                      )}
+                      text={formatCurrency(asset.averageBuyPrice)}
                     />
                     <List.Item.Detail.Metadata.Label
                       title="Balance"
@@ -120,19 +116,16 @@ export default function Portfolio() {
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label
                       title="Invested"
-                      text={formatCurrency(asset.totalInvested, currencySymbol)}
+                      text={formatCurrency(asset.totalInvested)}
                     />
                     <List.Item.Detail.Metadata.Label
                       title="Current Value"
-                      text={formatCurrency(asset.totalValue, currencySymbol)}
+                      text={formatCurrency(asset.totalValue)}
                     />
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label
                       title="Gain/Loss"
-                      text={formatSignedCurrencyWithColor(
-                        asset.gainLoss,
-                        currencySymbol,
-                      )}
+                      text={formatSignedCurrencyWithColor(asset.gainLoss)}
                     />
                     <List.Item.Detail.Metadata.Label
                       title="Gain/Loss %"
@@ -169,7 +162,6 @@ export default function Portfolio() {
                     title="Gain/Loss"
                     text={formatSignedCurrencyWithColor(
                       summary.totals.gainLoss,
-                      '€',
                     )}
                   />
                   <List.Item.Detail.Metadata.Label
