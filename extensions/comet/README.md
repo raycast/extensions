@@ -22,7 +22,6 @@ A powerful Raycast extension for seamless integration with Comet browser, featur
 
 - **AI Tools**: Programmatic browser control for Claude and other AI assistants
 - **Perplexity Search**: Automatic search query routing to Perplexity.ai
-- **Voice Commands**: Natural language browser automation
 
 ### ⚙️ **Advanced Features**
 
