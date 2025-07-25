@@ -18,6 +18,6 @@
 - Bug fix and minor refactoring
 - Migration to a newer version of the API
 
-## [Refactor] - 2025-07-24
+## [Refactor] - {PR_MERGE_DATE}
 
 - Refactor the extension to use the new `open-profile` and `open-profile-url` commands.
