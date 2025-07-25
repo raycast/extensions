@@ -1,6 +1,6 @@
 # T3 Chat Changelog
 
-## [v1.2.1] - 2025-07-24
+## [v1.2.1] - {PR_MERGE_DATE}
 
 - Updated icon
 
