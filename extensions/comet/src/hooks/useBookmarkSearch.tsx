@@ -5,11 +5,12 @@ import { NoBookmarksError, NotInstalledError, UnknownError } from "../components
 import { getBookmarks } from "../util";
 
 export function useBookmarkSearch(
-  query?: string
+  query?: string,
+  initialProfile?: string
 ): Required<SearchResult<HistoryEntry> & { readonly errorView: ReactNode }> {
   const [data, setData] = useState<HistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [profile, setProfile] = useState<string>();
+  const [profile, setProfile] = useState<string | undefined>(initialProfile);
   const [errorView, setErrorView] = useState<ReactNode>();
 
   const revalidate = useCallback(

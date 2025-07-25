@@ -2,7 +2,7 @@ import { List } from "@raycast/api";
 import { useEffect } from "react";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { existsSync, promises } from "fs";
-import { getLocalStatePath } from "../util";
+import { getLocalStatePath, getAvailableProfiles } from "../util";
 import { CometProfile } from "../interfaces";
 import { DEFAULT_COMET_PROFILE_ID, COMET_PROFILE_KEY, COMET_PROFILES_KEY } from "../constants";
 
@@ -11,16 +11,29 @@ interface Props {
 }
 
 async function loadCometProfiles(): Promise<CometProfile[]> {
-  const path = getLocalStatePath();
-  if (!existsSync(path)) {
-    return [{ name: "Default", id: "Default" }];
+  try {
+    // First try to load from Local State file (includes profile names)
+    const path = getLocalStatePath();
+    if (existsSync(path)) {
+      const cometState = await promises.readFile(path, "utf-8");
+      const parsed = JSON.parse(cometState);
+      if (parsed.profile?.info_cache) {
+        const profiles = parsed.profile.info_cache;
+        return Object.entries<{ name: string }>(profiles).map(([key, val]) => ({
+          name: val.name,
+          id: key,
+        }));
+      }
+    }
+  } catch (error) {
+    // If Local State parsing fails, fall back to directory listing
   }
 
-  const cometState = await promises.readFile(path, "utf-8");
-  const profiles = JSON.parse(cometState).profile.info_cache;
-  return Object.entries<{ name: string }>(profiles).map(([key, val]) => ({
-    name: val.name,
-    id: key,
+  // Fallback: get available profiles from directory listing
+  const availableProfiles = getAvailableProfiles();
+  return availableProfiles.map((id) => ({
+    name: id === "Default" ? "Default" : `Profile ${id.split(" ")[1] || id}`,
+    id: id,
   }));
 }
 
@@ -46,7 +59,7 @@ export default function CometProfileDropDown({ onProfileSelected }: Props) {
     }
   }, [selectedProfile]);
 
-  if (!profiles || profiles.length < 2) {
+  if (!profiles || profiles.length === 0) {
     return null;
   }
 

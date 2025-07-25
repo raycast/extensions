@@ -7,6 +7,16 @@ type Input = {
   query?: string;
 };
 
+function normalizeUrl(url: string): string {
+  // If URL already has protocol, return as is
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+
+  // Add https:// protocol by default
+  return `https://${url}`;
+}
+
 export default async function (input: Input) {
   // If a query is provided, search with Perplexity
   if (input.query) {
@@ -17,8 +27,9 @@ export default async function (input: Input) {
 
   // If a website is provided, open it directly
   if (input.website) {
-    await createNewTabToWebsite(input.website);
-    return `Opening new tab to ${input.website}`;
+    const normalizedUrl = normalizeUrl(input.website);
+    await createNewTabToWebsite(normalizedUrl);
+    return `Opening new tab to ${normalizedUrl}`;
   }
 
   // Otherwise, open empty tab

@@ -45,6 +45,97 @@ export const getHistoryDbPath = (profile?: string) => getCometFilePath("History"
 
 export const getLocalStatePath = () => path.join(userLibraryDirectoryPath(), ...defaultCometStatePath);
 
+const getCometProfilesDirectory = () => {
+  const { profilePath } = getPreferenceValues<Preferences>();
+  if (profilePath) {
+    return path.dirname(profilePath);
+  } else {
+    return path.join(userLibraryDirectoryPath(), ...defaultCometProfilePath);
+  }
+};
+
+export const getAvailableProfiles = (): string[] => {
+  try {
+    const profilesDir = getCometProfilesDirectory();
+    if (!fs.existsSync(profilesDir)) {
+      return [DEFAULT_COMET_PROFILE_ID];
+    }
+
+    const items = fs.readdirSync(profilesDir);
+    const profiles: string[] = [];
+
+    // Add Default profile if it exists
+    if (items.includes("Default")) {
+      profiles.push("Default");
+    }
+
+    // Add all Profile X directories
+    items
+      .filter((item) => {
+        const itemPath = path.join(profilesDir, item);
+        return fs.statSync(itemPath).isDirectory() && (item.startsWith("Profile ") || item === "Default");
+      })
+      .forEach((item) => {
+        if (item !== "Default") {
+          profiles.push(item);
+        }
+      });
+
+    return profiles.length > 0 ? profiles : [DEFAULT_COMET_PROFILE_ID];
+  } catch (error) {
+    return [DEFAULT_COMET_PROFILE_ID];
+  }
+};
+
+export const getProfileMapping = (): { [key: string]: string } => {
+  try {
+    const path = getLocalStatePath();
+    if (!fs.existsSync(path)) {
+      return {};
+    }
+
+    const cometState = fs.readFileSync(path, "utf-8");
+    const parsed = JSON.parse(cometState);
+    if (parsed.profile?.info_cache) {
+      const profiles = parsed.profile.info_cache;
+      const mapping: { [key: string]: string } = {};
+
+      Object.entries<{ name: string }>(profiles).forEach(([id, profile]) => {
+        // Map display name to ID
+        mapping[profile.name.toLowerCase()] = id;
+        // Also map ID to itself for consistency
+        mapping[id.toLowerCase()] = id;
+        // Map "default" to "Default" for consistency
+        if (id === "Default") {
+          mapping["default"] = "Default";
+        }
+      });
+
+      return mapping;
+    }
+  } catch (error) {
+    // Fallback: just return available profiles mapped to themselves
+  }
+
+  const availableProfiles = getAvailableProfiles();
+  const mapping: { [key: string]: string } = {};
+  availableProfiles.forEach((profile) => {
+    mapping[profile.toLowerCase()] = profile;
+  });
+  return mapping;
+};
+
+export const resolveProfileName = (profileInput?: string): string | undefined => {
+  if (!profileInput) {
+    return undefined;
+  }
+
+  const mapping = getProfileMapping();
+  const resolved = mapping[profileInput.toLowerCase()];
+
+  return resolved || profileInput; // Fallback to original input if not found
+};
+
 const getBookmarksFilePath = (profile?: string) => getCometFilePath("Bookmarks", profile);
 
 function extractBookmarkFromBookmarkDirectory(bookmarkDirectory: BookmarkDirectory): HistoryEntry[] {
