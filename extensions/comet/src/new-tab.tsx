@@ -81,17 +81,17 @@ export default function Command() {
   if (!searchText || searchText.trim() === "") {
     actionTitle = "Open Empty Tab";
     icon = Icon.Plus;
-    actions = <CometActions.NewTab />;
+    actions = <CometActions.NewTab profile={profile} />;
   } else if (isUrl(searchText)) {
     // Add protocol if missing
     const url = searchText.startsWith("http") ? searchText : `https://${searchText}`;
     actionTitle = `Open "${searchText}"`;
     icon = Icon.Globe;
-    actions = <CometActions.NewTab url={url} />;
+    actions = <CometActions.NewTab url={url} profile={profile} />;
   } else {
     actionTitle = `Search "${searchText}" with Perplexity`;
     icon = Icon.MagnifyingGlass;
-    actions = <CometActions.NewTab query={searchText} />;
+    actions = <CometActions.NewTab query={searchText} profile={profile} />;
   }
 
   return (

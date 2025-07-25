@@ -20,6 +20,9 @@ export function useBookmarkSearch(
   );
 
   useEffect(() => {
+    setErrorView(undefined); // Reset error state on each new search
+    setIsLoading(true);
+
     getBookmarks(profile)
       .then((bookmarks) => {
         setData(
@@ -35,7 +38,7 @@ export function useBookmarkSearch(
         if (e.message === NOT_INSTALLED_MESSAGE) {
           setErrorView(<NotInstalledError />);
         } else if (e.message === NO_BOOKMARKS_MESSAGE) {
-          setErrorView(<NoBookmarksError />);
+          setErrorView(<NoBookmarksError onProfileSelected={revalidate} />);
         } else {
           setErrorView(<UnknownError />);
         }

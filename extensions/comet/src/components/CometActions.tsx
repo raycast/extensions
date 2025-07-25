@@ -1,6 +1,6 @@
 import { ReactElement } from "react";
 import { Action, ActionPanel, closeMainWindow, Icon } from "@raycast/api";
-import { closeActiveTab, createNewTab, createNewTabToWebsite, setActiveTab } from "../actions";
+import { closeActiveTab, createNewTabToWebsite, createNewTabWithProfile, setActiveTab } from "../actions";
 import { Tab } from "../interfaces";
 
 export class CometActions {
@@ -9,7 +9,7 @@ export class CometActions {
   public static TabHistory = HistoryItemActions;
 }
 
-function NewTabActions({ query, url }: { query?: string; url?: string }): ReactElement {
+function NewTabActions({ query, url, profile }: { query?: string; url?: string; profile?: string }): ReactElement {
   let actionTitle = "Open Empty Tab";
   if (query) {
     actionTitle = `Search "${query}"`;
@@ -19,14 +19,13 @@ function NewTabActions({ query, url }: { query?: string; url?: string }): ReactE
 
   const handleAction = async () => {
     try {
-      // Use the same logic as the working AI tool
       if (query) {
         const perplexityUrl = `https://perplexity.ai/search?q=${encodeURIComponent(query)}`;
-        await createNewTabToWebsite(perplexityUrl);
+        await createNewTabWithProfile(profile, perplexityUrl);
       } else if (url) {
-        await createNewTabToWebsite(url);
+        await createNewTabWithProfile(profile, url);
       } else {
-        await createNewTab();
+        await createNewTabWithProfile(profile);
       }
     } catch (error) {
       console.error("Error in NewTabActions:", error);

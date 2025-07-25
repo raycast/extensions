@@ -1,8 +1,29 @@
-import { Detail, showToast, Toast } from "@raycast/api";
-import { DEFAULT_ERROR_TITLE, UnknownErrorText } from "../../constants";
+import { List, Action, ActionPanel, open } from "@raycast/api";
 
 export function UnknownError() {
-  showToast(Toast.Style.Failure, DEFAULT_ERROR_TITLE, "Something happened while trying to run your command");
-
-  return <Detail markdown={UnknownErrorText} />;
+  return (
+    <List>
+      <List.EmptyView
+        icon="⚠️"
+        title="Something went wrong"
+        description="An unexpected error occurred. Try again or check if Comet browser is properly installed and accessible."
+        actions={
+          <ActionPanel>
+            <Action
+              title="Open Comet Browser"
+              onAction={async () => {
+                await open("comet://");
+              }}
+            />
+            <Action
+              title="Download Comet Browser"
+              onAction={async () => {
+                await open("https://comet.perplexity.ai/");
+              }}
+            />
+          </ActionPanel>
+        }
+      />
+    </List>
+  );
 }

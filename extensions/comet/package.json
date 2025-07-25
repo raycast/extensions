@@ -259,28 +259,6 @@
       "required": false,
       "title": "Favicon",
       "type": "checkbox"
-    },
-    {
-      "data": [
-        {
-          "title": "Default(classic)",
-          "value": "default"
-        },
-        {
-          "title": "Current Profile",
-          "value": "profile_current"
-        },
-        {
-          "title": "Original Profile",
-          "value": "profile_original"
-        }
-      ],
-      "default": "default",
-      "description": "When 'Default(classic), the tab will be opened in the profile open, or topmost profile window if multiple windows are open. When 'Current Profile', the tab will be opened in the profile specified in the 'Profile' field. When 'Original Profile' it will open in original profile tab is sourced from",
-      "name": "openTabInProfile",
-      "required": false,
-      "title": "Open Tab In Profile",
-      "type": "dropdown"
     }
   ],
   "dependencies": {

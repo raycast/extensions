@@ -76,11 +76,19 @@ const extractBookmarks = (rawBookmarks: RawBookmarks): HistoryEntry[] => {
 };
 
 export const getBookmarks = async (profile?: string): Promise<HistoryEntry[]> => {
-  const bookmarksFilePath = getBookmarksFilePath(profile);
-  if (!fs.existsSync(bookmarksFilePath)) {
+  try {
+    const bookmarksFilePath = getBookmarksFilePath(profile);
+    const fileBuffer = await fs.promises.readFile(bookmarksFilePath, { encoding: "utf-8" });
+    const bookmarks = extractBookmarks(JSON.parse(fileBuffer));
+
+    if (bookmarks.length === 0) {
+      throw new Error(NO_BOOKMARKS_MESSAGE);
+    }
+
+    return bookmarks;
+  } catch (error) {
+    // If it's a profile that doesn't exist or file that doesn't exist,
+    // always return the "no bookmarks" message
     throw new Error(NO_BOOKMARKS_MESSAGE);
   }
-
-  const fileBuffer = await fs.promises.readFile(bookmarksFilePath, { encoding: "utf-8" });
-  return extractBookmarks(JSON.parse(fileBuffer));
 };
