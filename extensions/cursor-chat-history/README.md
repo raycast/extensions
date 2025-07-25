@@ -1,109 +1,66 @@
-# Cursor Chat History Search - Raycast Extension
+# Cursor Chat History Search
 
-Cursorのチャット履歴を検索するRaycast Extensionです。ローカルに保存されているCursorのチャット履歴を素早く検索し、過去の会話内容を簡単に見つけることができます。
+Search and access your Cursor AI chat history instantly from Raycast
 
-## 機能
+[![raycast-cross-extension-badge]][raycast-cross-extension-link]
 
-- 📝 全てのワークスペースのチャット履歴を検索
-- 🔍 タイトルとコンテンツでのフルテキスト検索
-- 📅 日時とワークスペース情報の表示
-- 📋 チャット内容のクリップボードへのコピー
-- 🎼 通常のチャットとComposerセッションの区別
-- 📖 詳細ビューでのマークダウン表示
+![Cursor Chat History screenshot](./metadata/cursor-chat-history-1.png)
 
-## インストール
+## Features
 
-1. このリポジトリをクローンします：
+Quickly find and revisit your past AI conversations from Cursor without leaving Raycast.
 
-```bash
-git clone https://github.com/yourusername/cursor-chat-history.git
-cd cursor-chat-history
-```
+- 🔍 **Fast Search**: Full-text search across all chat titles and content
+- 🏢 **Multi-Workspace**: Search chat history from all your Cursor workspaces
+- 📋 **Quick Copy**: Copy chat content to clipboard with one click
+- 🎼 **Smart Detection**: Automatically distinguishes between regular chats and Composer sessions
+- 📖 **Rich Preview**: View chat content with proper markdown formatting
+- ⚡ **Instant Access**: No need to open Cursor to browse your chat history
 
-2. 依存関係をインストールします：
+## How to Use
 
-```bash
-npm install
-```
+1. Open Raycast and type "Search Cursor Chat History"
+2. Enter keywords to search through your chat history
+3. Browse results with workspace and timestamp information
+4. Select any chat to view full conversation
+5. Use ⌘C to copy content or ⌘K for more actions
 
-3. Raycast Extension として開発モードで実行します：
+## What Gets Searched
 
-```bash
-npm run dev
-```
+- All AI chat conversations from Cursor
+- Composer session history
+- Chat titles and full message content
+- Conversations across all your workspaces
 
-## 使用方法
+## Requirements
 
-1. Raycastを開いて `Search Cursor Chat History` を検索します
-2. 検索バーでキーワードを入力してチャット履歴を検索します
-3. 検索結果から目的のチャットを選択します
-4. 詳細ビューでチャット内容を確認できます
-5. アクションパネルから内容をコピーできます
+- **Cursor**: Must be installed and have some chat history
+- **macOS**: Compatible with macOS 10.15 and later
+- **Storage**: Reads from Cursor's local data at `~/Library/Application Support/Cursor/User/workspaceStorage`
 
-## Cursorチャット履歴の保存場所
+## Troubleshooting
 
-このExtensionは以下の場所からCursorのチャット履歴を読み取ります：
+**No results found?**
 
-- **macOS**: `~/Library/Application Support/Cursor/User/workspaceStorage`
-- **Windows**: `%APPDATA%\Cursor\User\workspaceStorage`
-- **Linux**: `~/.config/Cursor/User/workspaceStorage`
+- Make sure you have some chat history in Cursor
+- Try different search keywords
+- Restart Cursor if you just created new chats
 
-各ワークスペースフォルダ内の`state.vscdb`ファイルがSQLiteデータベースとして使用されます。
+**Missing recent chats?**
 
-## 検索できるデータ
+- Close and reopen the extension to refresh data
+- Ensure Cursor has properly saved your recent conversations
 
-- チャット履歴（`workbench.panel.aichat.view.aichat.chatdata`）
-- Composerセッション（`composer.composerData`）
-- ユーザーとAIアシスタントの会話
-- チャットタイトルと内容
+---
 
-## 技術仕様
+## For Developers
 
-- **プラットフォーム**: Raycast Extension (macOS)
-- **言語**: TypeScript
-- **データベース**: SQLite (better-sqlite3)
-- **フレームワーク**: React + Raycast API
-
-## 注意事項
-
-- Node.js 22.14.0以上が推奨されます
-- Cursorがインストールされている必要があります
-- チャット履歴が存在しない場合は、空の結果が表示されます
-
-## トラブルシューティング
-
-### チャット履歴が見つからない場合
-
-1. Cursorが正しくインストールされていることを確認してください
-2. 少なくとも1つのチャットセッションが存在することを確認してください
-3. 上記の保存場所にファイルが存在することを確認してください
-
-### 検索結果が表示されない場合
-
-1. 検索キーワードを変更してみてください
-2. チャット履歴のデータベースファイルが破損していないか確認してください
-3. Cursorを再起動してからもう一度試してください
-
-## 開発
+Want to contribute or report issues? Visit our [GitHub repository](https://github.com/raycast/extensions).
 
 ```bash
-# 開発モードで実行
-npm run dev
-
-# ビルド
-npm run build
-
-# Lintチェック
-npm run lint
-
-# Lint修正
-npm run fix-lint
+# Development setup
+npm install && npm run dev
 ```
 
-## ライセンス
-
-MIT License
-
-## 貢献
-
-プルリクエストや問題の報告は歓迎します。機能要求やバグ報告は、GitHubのIssuesにて行ってください。
+[raycast-cross-extension-badge]: https://shields.io/badge/Raycast-Cross--Extension-eee?labelColor=FF6363&logo=raycast&logoColor=fff&style=flat-square
+[raycast-cross-extension-link]: https://github.com/LitoMore/raycast-cross-extension-conventions
