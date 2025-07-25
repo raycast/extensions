@@ -116,18 +116,18 @@ export async function createNewTabToWebsite(website: string): Promise<void> {
   `);
 }
 
-export async function createNewTabWithProfile(profileId?: string, website?: string): Promise<void> {
+export async function createNewTabWithProfile(website?: string): Promise<void> {
   // Simple logic: always add tab to active window, create window if none exists
   try {
+    // Escape quotes and special characters in the URL to prevent injection
+    const escapedWebsite = website ? website.replace(/"/g, '\\"').replace(/\\/g, "\\\\") : "";
+
     await runAppleScript(`
       set winExists to false
       tell application "Comet"
-          repeat with win in every window
-              if index of win is 1 then
-                  set winExists to true
-                  exit repeat
-              end if
-          end repeat
+          if (count of windows) > 0 then
+              set winExists to true
+          end if
 
           if not winExists then
               make new window
@@ -136,7 +136,7 @@ export async function createNewTabWithProfile(profileId?: string, website?: stri
           end if
 
           tell window 1
-              set newTab to make new tab ${website ? `with properties {URL:"${website}"}` : ""}
+              set newTab to make new tab ${website ? `with properties {URL:"${escapedWebsite}"}` : ""}
           end tell
       end tell
       return true

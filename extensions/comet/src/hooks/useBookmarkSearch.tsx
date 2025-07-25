@@ -13,12 +13,9 @@ export function useBookmarkSearch(
   const [profile, setProfile] = useState<string | undefined>(initialProfile);
   const [errorView, setErrorView] = useState<ReactNode>();
 
-  const revalidate = useCallback(
-    (profileId: string) => {
-      setProfile(profileId);
-    },
-    [profile]
-  );
+  const revalidate = useCallback((profileId: string) => {
+    setProfile(profileId);
+  }, []);
 
   useEffect(() => {
     setErrorView(undefined); // Reset error state on each new search
