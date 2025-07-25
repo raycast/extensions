@@ -15,7 +15,7 @@ import {
 import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
 import { useEffect, useRef } from "react";
 
-import { addComment, addTask, quickAddTask, uploadFile, Label } from "./api";
+import { addComment, quickAddTask, uploadFile, Label } from "./api";
 import RefreshAction from "./components/RefreshAction";
 import TaskDetail from "./components/TaskDetail";
 import { getCollaboratorIcon, getProjectCollaborators } from "./helpers/collaborators";
@@ -220,11 +220,10 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
     if (projectMatches.length > 0) {
       // Find the last valid project match using the same logic as NLP parser
       let lastValidMatch = null;
-      let lastValidProject = null;
       
       for (let i = projectMatches.length - 1; i >= 0; i--) {
         const match = projectMatches[i];
-        let candidateName = match[1] || match[2]; // match[1] is quoted, match[2] is unquoted
+        const candidateName = match[1] || match[2]; // match[1] is quoted, match[2] is unquoted
         
         // For unquoted matches, try shortest possible matches first
         if (!match[1] && match[2] && projects) {
@@ -244,7 +243,6 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
                 actualLength: match.index + `#${testName}`.length,
                 projectName: testName
               };
-              lastValidProject = matchingProject;
               break;
             }
           }
@@ -262,7 +260,6 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
               actualLength: match.index + match[0].length,
               projectName: candidateName
             };
-            lastValidProject = matchingProject;
             break;
           }
         }
