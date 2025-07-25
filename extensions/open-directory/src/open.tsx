@@ -9,7 +9,6 @@ import {
   ActionPanel,
   Icon,
   Form,
-  popToRoot,
   LocalStorage,
   closeMainWindow,
 } from "@raycast/api";
@@ -252,7 +251,7 @@ export default function Command(props: { arguments: Arguments }) {
       navigationTitle={hasError ? "Error" : `Directory: ${basename(currentPath) || currentPath}`}
       isShowingDetail={showingDetail}
       selectedItemId={selectedItemId}
-      onSelectionChange={setSelectedItemId}
+      onSelectionChange={(id) => setSelectedItemId(id || "current-directory")}
       actions={<ActionPanel>{getQuickNavActions()}</ActionPanel>}
     >
       {/* Only show directory navigation if we have a valid directory */}
@@ -270,7 +269,7 @@ export default function Command(props: { arguments: Arguments }) {
                   title="Open in Finder"
                   onAction={async () => {
                     await showInFinder(currentPath);
-                    popToRoot();
+                    await closeMainWindow();
                   }}
                   icon={Icon.Finder}
                 />
@@ -292,7 +291,7 @@ export default function Command(props: { arguments: Arguments }) {
                     title="Show in Finder"
                     onAction={async () => {
                       await showInFinder(parentDir);
-                      popToRoot();
+                      await closeMainWindow();
                     }}
                     icon={Icon.Finder}
                   />
@@ -323,7 +322,6 @@ export default function Command(props: { arguments: Arguments }) {
                       title="Launch Application"
                       onAction={async () => {
                         await open(item.path);
-                        // popToRoot();
                         await closeMainWindow();
                       }}
                       icon={Icon.Play}
@@ -333,8 +331,7 @@ export default function Command(props: { arguments: Arguments }) {
                       shortcut={{ modifiers: ["cmd"], key: "f" }}
                       onAction={async () => {
                         await showInFinder(item.path);
-                        // popToRoot();
-                        await closeMainWindow();
+          
                       }}
                       icon={Icon.Finder}
                     /> */}
@@ -348,7 +345,6 @@ export default function Command(props: { arguments: Arguments }) {
                       shortcut={{ modifiers: ["cmd"], key: "o" }}
                       onAction={async () => {
                         await showInFinder(item.path);
-                        // popToRoot();
                         await closeMainWindow();
                       }}
                       icon={Icon.Finder}
@@ -368,7 +364,6 @@ export default function Command(props: { arguments: Arguments }) {
                       title="Show in Finder"
                       onAction={async () => {
                         await showInFinder(item.path);
-                        // popToRoot();
                         await closeMainWindow();
                       }}
                       shortcut={{ modifiers: ["cmd"], key: "o" }}
