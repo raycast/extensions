@@ -55,43 +55,48 @@ export default function useUrlParser({ cache }: useUrlParserProps): UrlParserSta
   };
 
   const parseUrl = (urlEntry: string): string => {
-    const url = new URL(urlEntry);
+    try {
+      const url = new URL(urlEntry);
 
-    // Github Projects URL handling
-    const githubProjectMatch = urlEntry.match(
-      /^https:\/\/github\.com\/orgs\/[^/]+\/projects\/\d+\/views\/\d+\?.*issue=([^&]+)/,
-    );
-    if (githubProjectMatch) {
-      const issueParam = githubProjectMatch[1];
-      const decodedIssue = decodeURIComponent(issueParam);
-      const parts = decodedIssue.split("|");
-      if (parts.length === 3) {
-        const [org, repo, issueNumber] = parts;
-        return `https://github.com/${org}/${repo}/issues/${issueNumber}`;
+      // Github Projects URL handling
+      const githubProjectMatch = urlEntry.match(
+        /^https:\/\/github\.com\/orgs\/[^/]+\/projects\/\d+\/views\/\d+\?.*issue=([^&]+)/,
+      );
+      if (githubProjectMatch) {
+        const issueParam = githubProjectMatch[1];
+        const decodedIssue = decodeURIComponent(issueParam);
+        const parts = decodedIssue.split("|");
+        if (parts.length === 3) {
+          const [org, repo, issueNumber] = parts;
+          return `https://github.com/${org}/${repo}/issues/${issueNumber}`;
+        }
       }
-    }
 
-    // Jira URL handling
-    const jiraMatch = urlEntry.match(
-      /^(https?:\/\/[^/]+\.atlassian\.net)\/jira\/software\/projects\/[^/]+\/boards\/\d+\?.*selectedIssue=([^&]+)/,
-    );
-    if (jiraMatch) {
-      const [, baseUrl, selectedIssue] = jiraMatch;
-      return `${baseUrl}/browse/${selectedIssue}`;
-    }
-
-    // Filter out unnecessary params
-    const paramsToKeep = ["focusedCommentId"];
-    const filteredParams = new URLSearchParams();
-
-    paramsToKeep.forEach((param) => {
-      const value = url.searchParams.get(param);
-      if (value) {
-        filteredParams.set(param, value);
+      // Jira URL handling
+      const jiraMatch = urlEntry.match(
+        /^(https?:\/\/[^/]+\.atlassian\.net)\/jira\/software\/projects\/[^/]+\/boards\/\d+\?.*selectedIssue=([^&]+)/,
+      );
+      if (jiraMatch) {
+        const [, baseUrl, selectedIssue] = jiraMatch;
+        return `${baseUrl}/browse/${selectedIssue}`;
       }
-    });
 
-    return url.origin + url.pathname + (filteredParams.toString() ? "?" + filteredParams.toString() : "");
+      // Filter out unnecessary params
+      const paramsToKeep = ["focusedCommentId"];
+      const filteredParams = new URLSearchParams();
+
+      paramsToKeep.forEach((param) => {
+        const value = url.searchParams.get(param);
+        if (value) {
+          filteredParams.set(param, value);
+        }
+      });
+
+      return url.origin + url.pathname + (filteredParams.toString() ? "?" + filteredParams.toString() : "");
+    } catch {
+      // For invalid URLs, return the original entry
+      return urlEntry;
+    }
   };
 
   const updateIssueUrl = (entry: string): void => {
