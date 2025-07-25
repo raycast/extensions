@@ -1,6 +1,6 @@
 # Directory Browser Changelog
 
-## [Initial Version] 
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Browse and navigate directories with intuitive interface
 - Split-view layout with directory listing and file details
