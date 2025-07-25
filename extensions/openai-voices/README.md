@@ -104,7 +104,7 @@ All changes are saved automatically and take effect immediately.
 - **`tts-1`** – Standard quality with lower latency
 
 ### Voices
-All 11 OpenAI voices are available: `alloy`, `ash`, `ballad`, `coral`, `echo`, `fable`, `nova`, `onyx`, `sage`, `shimmer`
+All 10 OpenAI voices are available: `alloy`, `ash`, `ballad`, `coral`, `echo`, `fable`, `nova`, `onyx`, `sage`, `shimmer`
 
 ### Instructions Examples
 - "Speak very clearly and slowly"

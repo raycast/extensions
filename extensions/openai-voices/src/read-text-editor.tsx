@@ -1,81 +1,72 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Form,
-  getSelectedText,
-  showToast,
-  Toast,
-  useNavigation,
-} from '@raycast/api'
-import { useEffect, useState } from 'react'
-import { play } from './play'
-import { useTTS } from './useTTS'
+import { Action, ActionPanel, Clipboard, Form, getSelectedText, showToast, Toast, useNavigation } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { play } from "./play";
+import { useTTS } from "./useTTS";
 
 export default function Command() {
-  const [text, setText] = useState('')
-  const [isInitializing, setIsInitializing] = useState(true)
-  const { isReady, speak, isLoading, error } = useTTS()
-  const { pop } = useNavigation()
+  const [text, setText] = useState("");
+  const [isInitializing, setIsInitializing] = useState(true);
+  const { isReady, speak, isLoading, error } = useTTS();
+  const { pop } = useNavigation();
 
   useEffect(() => {
     async function fetchText() {
       try {
-        const selectedText = await getSelectedText()
-        setText(selectedText)
+        const selectedText = await getSelectedText();
+        setText(selectedText);
       } catch {
-        const clipboardText = (await Clipboard.readText()) ?? ''
-        setText(clipboardText)
+        const clipboardText = (await Clipboard.readText()) ?? "";
+        setText(clipboardText);
       } finally {
-        setIsInitializing(false)
+        setIsInitializing(false);
       }
     }
-    fetchText()
-  }, [])
+    fetchText();
+  }, []);
 
   useEffect(() => {
     if (error) {
       showToast({
         style: Toast.Style.Failure,
-        title: 'Configuration error',
+        title: "Configuration error",
         message: error.message,
-      })
+      });
     }
-  }, [error])
+  }, [error]);
 
   async function handleSubmit() {
     if (!text.trim()) {
       await showToast({
         style: Toast.Style.Failure,
-        title: 'No text to speak',
-        message: 'Please enter some text in the text area.',
-      })
-      return
+        title: "No text to speak",
+        message: "Please enter some text in the text area.",
+      });
+      return;
     }
 
     if (!isReady) {
       await showToast({
         style: Toast.Style.Failure,
-        title: 'Not ready to speak',
-        message: 'Please configure the extension first.',
-      })
-      return
+        title: "Not ready to speak",
+        message: "Please configure the extension first.",
+      });
+      return;
     }
 
     try {
-      const { audio, format } = await speak(text)
-      await play(audio, format)
+      const { audio, format } = await speak(text);
+      await play(audio, format);
       await showToast({
         style: Toast.Style.Success,
-        title: 'Finished speaking',
-      })
-      pop()
+        title: "Finished speaking",
+      });
+      pop();
     } catch (err) {
       await showToast({
         style: Toast.Style.Failure,
-        title: 'Failed to generate speech',
-        message: err instanceof Error ? err.message : 'Unknown error',
-      })
+        title: "Failed to generate speech",
+        message: err instanceof Error ? err.message : "Unknown error",
+      });
     }
   }
 
@@ -85,7 +76,7 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Read Aloud" onSubmit={handleSubmit} />
-          <Action title="Clear Text" onAction={() => setText('')} />
+          <Action title="Clear Text" onAction={() => setText("")} />
         </ActionPanel>
       }
     >
@@ -97,5 +88,5 @@ export default function Command() {
         onChange={setText}
       />
     </Form>
-  )
+  );
 }

@@ -1,6 +1,6 @@
 # OpenAI Voices Changelog
 
-## [Initial Version] - 2025-07-24
+## [Initial Version] - {PR_MERGE_DATE}
 
 🎉 **First release of OpenAI Voices extension for Raycast!**
 
