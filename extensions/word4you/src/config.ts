@@ -66,10 +66,17 @@ export function getDownloadUrl(): { url: string; assetName: string; expectedHash
   return { url, assetName, expectedHash };
 }
 
-// Get the default vocabulary path from the CLI's configuration
+// Get the vocabulary path using the base directory from preferences
 export function getVocabularyPath(): string {
-  // Use a fixed path to avoid issues with CLI path resolution
-  return path.join(os.homedir(), "word4you", "vocabulary_notebook.md");
+  const preferences = getPreferences();
+  let baseDir = preferences.vocabularyBaseDir || "~";
+
+  // Expand ~ to home directory
+  if (baseDir.startsWith("~")) {
+    baseDir = baseDir.replace("~", os.homedir());
+  }
+
+  return path.join(baseDir, "word4you", "vocabulary_notebook.md");
 }
 
 // Ensure directory exists for vocabulary file
