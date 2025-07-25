@@ -51,7 +51,8 @@ export function parseRawWordExplanation(output: string, word: string): WordExpla
       } else if (line.match(/<!--.*-->/)) {
         const metadata = line.replace("<!--", "").replace("-->", "").trim().split(" ");
 
-        for (let i = 0; i < metadata.length; i++) {
+        for (let j = 0; j < metadata.length; j++) {
+          const split = metadata[j].split("=");
           const split = metadata[i].split("=");
           if (split[0] === "timestamp") {
             timestamp = split[1];
