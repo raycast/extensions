@@ -9,7 +9,7 @@ export class CometActions {
   public static TabHistory = HistoryItemActions;
 }
 
-function NewTabActions({ query, url, profile }: { query?: string; url?: string; profile?: string }): ReactElement {
+function NewTabActions({ query, url }: { query?: string; url?: string }): ReactElement {
   let actionTitle = "Open Empty Tab";
   if (query) {
     actionTitle = `Search "${query}"`;
@@ -21,11 +21,11 @@ function NewTabActions({ query, url, profile }: { query?: string; url?: string; 
     try {
       if (query) {
         const perplexityUrl = `https://perplexity.ai/search?q=${encodeURIComponent(query)}`;
-        await createNewTabWithProfile(profile, perplexityUrl);
+        await createNewTabWithProfile(perplexityUrl);
       } else if (url) {
-        await createNewTabWithProfile(profile, url);
+        await createNewTabWithProfile(url);
       } else {
-        await createNewTabWithProfile(profile);
+        await createNewTabWithProfile();
       }
     } catch (error) {
       console.error("Error in NewTabActions:", error);
