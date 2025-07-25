@@ -43,5 +43,5 @@ A powerful Raycast extension for seamless integration with Comet browser, featur
 - `Search History` - Browse and open from browser history
 - `Search Bookmarks` - Access saved bookmarks quickly
 - `Search All` - Unified search across tabs, history, and bookmarks
-- `New Window` - Create new browser window
-- `New Incognito Window` - Open private browsing session
+- `Create New Window` - Create new browser window
+- `Create New Incognito Window` - Open private browsing session
