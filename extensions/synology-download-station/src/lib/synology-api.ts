@@ -1,4 +1,5 @@
-import { LocalStorage, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { LocalStorage, getPreferenceValues } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import {
   SynologyAuthResponse,
   SynologyTasksResponse,
@@ -287,15 +288,5 @@ export function getSynologyAPI(): SynologyAPI {
 
 export async function handleAPIError(error: unknown): Promise<void> {
   console.error("Synology API Error:", error);
-
-  let message = "An unknown error occurred";
-  if (error instanceof Error) {
-    message = error.message;
-  }
-
-  await showToast({
-    style: Toast.Style.Failure,
-    title: "Synology API Error",
-    message: message,
-  });
+  await showFailureToast(error, { title: "Synology API Error" });
 }
