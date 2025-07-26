@@ -1,5 +1,14 @@
 # Host Switch Changelog
 
+## [Support Brave + Error Handling + Modernize] - {PR_MERGE_DATE}
+
+- Add Support for "Brave Browser"
+- Mark as "macOS" only due to use of `AppleScript`
+- Error handling when not allowed to use `AppleScript`
+- Remove unused `interface` (Preferences)
+- Replace `run-applescript` with Raycast Utils
+- Modernize to use latest Raycast config
+
 ## [Improvements] - 2023-03-08
 
 - Fixed bug with Google Chrome support
