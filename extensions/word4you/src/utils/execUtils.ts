@@ -1,6 +1,9 @@
-import { execSync } from "child_process";
+import { execSync, exec } from "child_process";
+import { promisify } from "util";
 import fs from "fs";
 import { getCliFilepath } from "../config";
+
+const execPromise = promisify(exec);
 
 // Check if a command exists in PATH
 export function commandExistsInPath(command: string): string | null {
@@ -72,23 +75,32 @@ export async function executeCliCommandAsync(
     onStatusUpdate?: (message: string) => void;
   } = {},
 ): Promise<{ success: boolean; output: string; error?: string }> {
-  return new Promise((resolve) => {
-    try {
-      const output = executeCliCommand(executablePath, args, options);
+  try {
+    const escapedPath = escapeExecutablePath(executablePath);
+    const escapedArgs = args.map((arg) => `"${arg.replace(/"/g, '\\"')}"`);
+    const command = `${escapedPath} ${escapedArgs.join(" ")}`;
 
-      if (options.onStatusUpdate) {
-        options.onStatusUpdate(output.trim());
-      }
+    const { stdout, stderr } = await execPromise(command, {
+      encoding: "utf8",
+      timeout: options.timeout || 30000,
+      cwd: options.cwd || process.cwd(),
+      env: options.env || process.env,
+    });
 
-      resolve({ success: true, output: output.trim() });
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const output = stdout.trim();
 
-      if (options.onStatusUpdate) {
-        options.onStatusUpdate(`Error: ${errorMessage}`);
-      }
-
-      resolve({ success: false, output: "", error: errorMessage });
+    if (options.onStatusUpdate) {
+      options.onStatusUpdate(output);
     }
-  });
+
+    return { success: true, output, error: stderr || undefined };
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+
+    if (options.onStatusUpdate) {
+      options.onStatusUpdate(`Error: ${errorMessage}`);
+    }
+
+    return { success: false, output: "", error: errorMessage };
+  }
 }
