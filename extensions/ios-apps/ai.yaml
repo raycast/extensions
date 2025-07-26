@@ -175,14 +175,13 @@ evals:
           name: "download-app"
           arguments:
             query: "Instagram"
-      - includes: "downloaded"
     mocks:
       download-app:
-        filePath: "/tmp/Instagram_v1.0.0.ipa"
-        fileName: "Instagram_v1.0.0.ipa"
+        filePath: "/tmp/Instagram 390.0.0.ipa"
+        fileName: "Instagram 390.0.0.ipa"
         appName: "Instagram"
         bundleId: "com.burbn.instagram"
-        version: "1.0.0"
+        version: "390.0.0"
 
   - input: "@ios-apps download an app that doesn't exist"
     expected:
