@@ -61,7 +61,7 @@ export const Switch: FC = () => {
     }
   };
 
-  if (error) return <Detail markdown={`# ERROR \n\n ${error}`} />;
+  if (error) return <Detail markdown={`# ERROR \n\n ${error.message}`} />;
 
   return (
     <List searchBarPlaceholder="Host Url" isLoading={isLoading} searchText={query} onSearchTextChange={setQuery}>
