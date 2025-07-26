@@ -2,7 +2,7 @@
 
 ## [Support Brave + Error Handling + Modernize] - {PR_MERGE_DATE}
 
-- Add Support for "Brave Browser"
+- Add Support for "Brave Browser" (ref: [Issue #20648](https://github.com/raycast/extensions/issues/20648))
 - Mark as "macOS" only due to use of `AppleScript`
 - Error handling when not allowed to use `AppleScript`
 - Remove unused `interface` (Preferences)
