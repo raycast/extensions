@@ -2,7 +2,7 @@
 import { Detail, Color, Icon } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { AppDetails } from "./types";
-import { formatPrice } from "./utils/paths";
+import { formatPrice } from "./utils/formatting";
 import { renderStarRating, formatDate } from "./utils/common";
 import { AppActionPanel } from "./components/app-action-panel";
 import { useAppDetails, useAppDownload } from "./hooks";

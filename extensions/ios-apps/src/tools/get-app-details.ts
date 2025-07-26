@@ -1,6 +1,6 @@
 import { getAppDetails, searchApps } from "../ipatool";
 import { logger } from "../utils/logger";
-import { formatPrice } from "../utils/paths";
+import { formatPrice } from "../utils/formatting";
 import { formatDate } from "../utils/common";
 import { handleAppSearchError, sanitizeQuery } from "../utils/error-handler";
 import { getAppStoreUrl } from "../utils/constants";

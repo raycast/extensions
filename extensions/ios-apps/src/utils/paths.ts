@@ -1,6 +1,6 @@
 import { homedir } from "os";
-import { existsSync, accessSync, constants, mkdirSync } from "fs";
-import { resolve, normalize } from "path";
+import { existsSync, mkdirSync } from "fs";
+import { resolve, normalize, join } from "path";
 import { getPreferenceValues } from "@raycast/api";
 import { ExtensionPreferences } from "../types";
 
@@ -11,123 +11,159 @@ export const preferences = getPreferenceValues<ExtensionPreferences>();
 export const IPATOOL_PATH =
   preferences.ipatoolPath || (process.arch === "arm64" ? "/opt/homebrew/bin/ipatool" : "/usr/local/bin/ipatool");
 
+// Comprehensive path validation utilities
+
+/**
+ * Check if a path contains directory traversal attempts
+ */
+function containsTraversalAttempts(inputPath: string): boolean {
+  if (!inputPath || typeof inputPath !== "string") {
+    return false;
+  }
+
+  // Check for common traversal patterns
+  const traversalPatterns = [
+    /\.{2}/g, // Basic ..
+    /%2e%2e/gi, // URL encoded ..
+    /%2E%2E/gi, // URL encoded ..
+    /\.{2}%2f/gi, // Mixed encoding
+    /\.{2}%2F/gi, // Mixed encoding
+    /%2e%2e%2f/gi, // Full URL encoded
+    /%2E%2E%2F/gi, // Full URL encoded
+    /\.{2}\//g, // Double dot with forward slash
+    /\.{2}\\/g, // Double dot with backslash
+  ];
+
+  return traversalPatterns.some(pattern => pattern.test(inputPath));
+}
+
+/**
+ * Validate that a path stays within safe directory boundaries
+ */
+export function validateSafePath(inputPath: string): string {
+  if (!inputPath || typeof inputPath !== "string") {
+    throw new Error("Invalid path: must be a non-empty string");
+  }
+
+  // Check for traversal attempts
+  if (containsTraversalAttempts(inputPath)) {
+    throw new Error(`Path contains directory traversal attempt: ${inputPath}`);
+  }
+
+  // Normalize and resolve the path
+  const normalized = normalize(inputPath);
+  const absolute = resolve(normalized);
+
+  // Ensure path stays within safe boundaries
+  const safeRoots = [
+    homedir(),
+    "/tmp",
+    "/var/tmp",
+    "/Users",
+  ];
+
+  const isWithinSafeBoundary = safeRoots.some(root =>
+    absolute.startsWith(resolve(root))
+  );
+
+  if (!isWithinSafeBoundary) {
+    throw new Error(`Path is outside safe boundaries: ${absolute}. Allowed directories: home directory, /tmp, /var/tmp, /Users`);
+  }
+
+  return absolute;
+}
+
+/**
+ * Sanitize filename to prevent path injection
+ */
+export function sanitizeFilename(filename: string): string {
+  if (!filename || typeof filename !== "string") {
+    throw new Error("Invalid filename: must be a non-empty string");
+  }
+
+  return filename
+    .replace(/[<>:"/\\|?*]/g, "") // Remove invalid characters
+    .replace(/\s+/g, " ") // Normalize whitespace
+    .trim()
+    .substring(0, 255); // Limit length
+}
+
+/**
+ * Create a safe directory path by validating each component
+ */
+export function createSafeDirectoryPath(baseDir: string, ...components: string[]): string {
+  const safeBaseDir = validateSafePath(baseDir);
+  const safeComponents = components.map(sanitizeFilename);
+  const fullPath = join(safeBaseDir, ...safeComponents);
+  return validateSafePath(fullPath);
+}
+
+/**
+ * Enhanced path validation with comprehensive security checks
+ */
+export function validatePathSecurity(inputPath: string): string {
+  if (!inputPath || typeof inputPath !== "string") {
+    throw new Error("Invalid path: must be a non-empty string");
+  }
+
+  // Check for directory traversal attempts
+  const dangerousPatterns = [
+    "..", // Basic traversal
+    "%2e%2e", // URL encoded ..
+    "%2E%2E", // URL encoded .. (uppercase)
+    "..%2f", // Mixed encoding
+    "..%2F", // Mixed encoding (uppercase)
+    "%2e%2e%2f", // Full URL encoded ../
+    "%2E%2E%2F", // Full URL encoded ../ (uppercase)
+    "....//", // Double dot variations
+  ];
+
+  const lowerPath = inputPath.toLowerCase();
+  for (const pattern of dangerousPatterns) {
+    if (lowerPath.includes(pattern.toLowerCase())) {
+      throw new Error(`Path contains unsafe directory traversal pattern: ${pattern}`);
+    }
+  }
+
+  // Normalize and resolve the path
+  let downloadPath = inputPath.startsWith("~") ? inputPath.replace("~", homedir()) : inputPath;
+  downloadPath = resolve(normalize(downloadPath));
+
+  // Ensure the resolved path is within safe boundaries
+  const safePaths = [
+    homedir(),
+    "/tmp",
+    "/var/tmp",
+    "/Users",
+  ];
+
+  const isWithinSafePath = safePaths.some((safePath) => {
+    const resolvedSafePath = resolve(safePath);
+    return downloadPath.startsWith(resolvedSafePath);
+  });
+
+  if (!isWithinSafePath) {
+    throw new Error(`Path is outside safe boundaries: ${downloadPath}. Allowed directories: home directory, /tmp, /var/tmp, /Users`);
+  }
+
+  return downloadPath;
+}
+
 // Get the downloads directory path from preferences or default to ~/Downloads
 export function getDownloadsDirectory(): string {
   let downloadPath: string;
 
   if (preferences.downloadPath) {
-    // Comprehensive security validation for directory traversal
-    const rawPath = preferences.downloadPath;
-
-    // Check for various directory traversal patterns
-    const dangerousPatterns = [
-      "..", // Basic traversal
-      "%2e%2e", // URL encoded ..
-      "%2E%2E", // URL encoded .. (uppercase)
-      "..%2f", // Mixed encoding
-      "..%2F", // Mixed encoding (uppercase)
-      "%2e%2e%2f", // Full URL encoded ../
-      "%2E%2E%2F", // Full URL encoded ../ (uppercase)
-      "....//", // Double dot variations
-    ];
-
-    const lowerPath = rawPath.toLowerCase();
-    for (const pattern of dangerousPatterns) {
-      if (lowerPath.includes(pattern.toLowerCase())) {
-        throw new Error(`Download path contains unsafe directory traversal pattern: ${pattern}`);
-      }
-    }
-
-    // Replace ~ with the actual home directory if present
-    downloadPath = rawPath.startsWith("~") ? rawPath.replace("~", homedir()) : rawPath;
-
-    // Normalize and resolve the path to handle any remaining traversal attempts
-    downloadPath = resolve(normalize(downloadPath));
-
-    // Ensure the resolved path is within safe boundaries (user's home directory or common safe locations)
-    const homeDir = homedir();
-    const safePaths = [
-      homeDir,
-      "/tmp",
-      "/var/tmp",
-      "/Users", // macOS users directory
-    ];
-
-    const isWithinSafePath = safePaths.some((safePath) => {
-      const resolvedSafePath = resolve(safePath);
-      return downloadPath.startsWith(resolvedSafePath);
-    });
-
-    if (!isWithinSafePath) {
-      throw new Error(
-        `Download path must be within user home directory or other safe locations. Resolved path: ${downloadPath}`,
-      );
-    }
+    // Use the consolidated path validation
+    downloadPath = validatePathSecurity(preferences.downloadPath);
   } else {
-    downloadPath = `${homedir()}/Downloads`;
+    downloadPath = join(homedir(), "Downloads");
   }
 
-  // Create directory if it doesn't exist, then validate writability
-  try {
-    if (!existsSync(downloadPath)) {
-      mkdirSync(downloadPath, { recursive: true });
-    }
-    accessSync(downloadPath, constants.W_OK);
-    return downloadPath;
-  } catch (error) {
-    throw new Error(`Download directory ${downloadPath} is not accessible or writable: ${error}`);
-  }
-}
-
-// Format price to display "Free" instead of "0" with proper currency symbol
-export function formatPrice(price: string, currency?: string): string {
-  if (price === "0") return "Free";
-
-  // Get the appropriate currency symbol based on the currency code
-  let symbol = "$"; // Default to USD
-  if (currency) {
-    switch (currency) {
-      case "USD":
-        symbol = "$";
-        break;
-      case "EUR":
-        symbol = "€";
-        break;
-      case "GBP":
-        symbol = "£";
-        break;
-      case "JPY":
-        symbol = "¥";
-        break;
-      case "AUD":
-        symbol = "A$";
-        break;
-      case "CAD":
-        symbol = "C$";
-        break;
-      case "CNY":
-        symbol = "¥";
-        break;
-      case "INR":
-        symbol = "₹";
-        break;
-      case "RUB":
-        symbol = "₽";
-        break;
-      case "KRW":
-        symbol = "₩";
-        break;
-      case "BRL":
-        symbol = "R$";
-        break;
-      case "MXN":
-        symbol = "Mex$";
-        break;
-      // Add more currency codes as needed
-      default:
-        symbol = currency; // Use the currency code if no symbol is defined
-    }
+  // Ensure the directory exists
+  if (!existsSync(downloadPath)) {
+    mkdirSync(downloadPath, { recursive: true });
   }
 
-  return `${symbol}${price}`;
+  return downloadPath;
 }
