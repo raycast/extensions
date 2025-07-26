@@ -1,5 +1,9 @@
 # Pomodoro Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+
+- Fixed typo ("cycless" to "cycles") in the `View Pomodoro Stats` command
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [Improvement] - 2025-01-07
