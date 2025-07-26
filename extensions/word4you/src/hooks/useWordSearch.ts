@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Toast, showToast } from "@raycast/api";
 import { WordExplanation } from "../types";
 import { getWordExplanation } from "../services/wordService";
+import { showFailureToast } from "@raycast/utils";
 
 export function useWordSearch(
   savedWordsMap: Map<string, WordExplanation>,
@@ -53,9 +54,8 @@ export function useWordSearch(
           toast.title = "Failed to get explanation";
           setAiResult(null);
         }
-      } catch {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Error occurred";
+      } catch (error) {
+        showFailureToast(error, { title: "Error occurred" });
         setAiResult(null);
       } finally {
         setIsLoading(false);

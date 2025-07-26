@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Toast, showToast } from "@raycast/api";
 import { saveWordToVocabulary } from "../services/wordService";
+import { showFailureToast } from "@raycast/utils";
 
 export function useWordSave(onWordSaved?: () => Promise<void>, onAiResultCleared?: () => void) {
   const [isSaving, setIsSaving] = useState(false);
@@ -36,12 +37,9 @@ export function useWordSave(onWordSaved?: () => Promise<void>, onAiResultCleared
       } else {
         toast.style = Toast.Style.Failure;
         toast.title = "Failed to save word";
-        toast.message = "Please check your configuration";
       }
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Error saving word";
-      toast.message = String(error);
+      showFailureToast(error, { title: "Failed to save word" });
     } finally {
       setIsSaving(false);
     }

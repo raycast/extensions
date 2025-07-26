@@ -1,5 +1,6 @@
 import { Toast, showToast } from "@raycast/api";
 import { deleteWordFromVocabulary } from "../services/wordService";
+import { showFailureToast } from "@raycast/utils";
 
 export function useWordDelete(onWordDeleted?: () => Promise<void>) {
   const handleDelete = async (word: string, timestamp?: string) => {
@@ -23,12 +24,9 @@ export function useWordDelete(onWordDeleted?: () => Promise<void>) {
       } else {
         toast.style = Toast.Style.Failure;
         toast.title = "Failed to delete word";
-        toast.message = "Please check your configuration";
       }
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Error deleting word";
-      toast.message = String(error);
+      showFailureToast(error, { title: "Failed to delete word" });
     }
   };
 

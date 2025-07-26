@@ -1,5 +1,6 @@
 import { Toast, showToast } from "@raycast/api";
 import { getWordExplanation, updateWordInVocabulary } from "../services/wordService";
+import { showFailureToast } from "@raycast/utils";
 
 export function useWordUpdate(onWordUpdated?: () => Promise<void>) {
   const handleUpdate = async (word: string) => {
@@ -38,9 +39,8 @@ export function useWordUpdate(onWordUpdated?: () => Promise<void>) {
         toast.style = Toast.Style.Failure;
         toast.title = "Failed to update word";
       }
-    } catch {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Error updating word";
+    } catch (error) {
+      showFailureToast(error, { title: "Error updating word" });
     }
   };
 
