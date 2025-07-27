@@ -50,7 +50,7 @@ export default function Command() {
       await showToast(Toast.Style.Success, "Tweet published successfully");
     } catch (error) {
       console.error("Failed to publish tweet:", error);
-      await showToast(Toast.Style.Failure, `Failed to publish tweet: ${(error as Error).message}`);
+      showFailureToast(error, { title: "Failed to publish tweet" });
     }
   };
 
