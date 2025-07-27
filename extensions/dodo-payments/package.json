@@ -77,7 +77,7 @@
       "description": "Select the API environment",
       "type": "dropdown",
       "required": true,
-      "default": "test",
+      "default": "live",
       "data": [
         {
           "title": "Test",
