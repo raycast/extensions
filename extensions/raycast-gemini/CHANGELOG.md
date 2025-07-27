@@ -2,7 +2,7 @@
 
 ## [Update Models] - {PR_MERGE_DATE}
 
-- ⬆️ Update Gemini 2.5 series models from preview to production ready versions。
+- ⬆️ Update Gemini 2.5 series models from preview to production ready versions.
 
 ## [Add Safety Settings] - 2025-07-03
 
