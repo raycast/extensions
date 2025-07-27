@@ -1,5 +1,11 @@
 # goodreads Changelog
 
+## [Recent Search Feature] - 2025-07-27
+
+- Add recent search functionality
+- Improve user experience with search history
+- Improve caching and data retrieval logic
+
 ## [UI improvement] - 2023-08-10
 
 - Add histogram visualization for ratings
