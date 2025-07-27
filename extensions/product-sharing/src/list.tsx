@@ -39,7 +39,7 @@ export default function Command() {
       await fetchProducts();
     } catch (error) {
       console.error("Failed to delete product:", error);
-      await showToast(Toast.Style.Failure, `Failed to delete product: ${(error as Error).message}`);
+      showFailureToast(error, { title: "Failed to delete product" });
     }
   };
 
