@@ -17,7 +17,7 @@ export default function Command() {
       setProducts(fetchedProducts);
     } catch (error) {
       console.error("Failed to fetch products:", error);
-      await showToast(Toast.Style.Failure, `Failed to fetch products: ${(error as Error).message}`);
+      showFailureToast(error, { title: "Failed to fetch products" });
     } finally {
       setIsLoading(false);
     }
