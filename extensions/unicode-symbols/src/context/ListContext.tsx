@@ -1,15 +1,20 @@
+import fs from "fs";
 import type { FC, ReactNode } from "react";
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
 
-// import { clearSearchBar } from "@raycast/api";
-import type { Character } from "@/lib/dataset-manager";
+import { environment } from "@raycast/api";
+
 import { getFilteredDataset } from "@/lib/dataset-manager";
 import { useRecentlyUsedItems } from "@/lib/use-recently-used-items";
-import type { CharacterSet } from "@/utils/list";
+import type { Character, CharacterSection } from "@/types";
 import { buildList } from "@/utils/list";
 
+const html = JSON.parse(fs.readFileSync(`${environment.assetsPath}/html.json`, "utf-8")) as {
+  html_entities: { code: number; value: string }[];
+};
+
 interface IListContext {
-  list: CharacterSet[];
+  list: CharacterSection[];
   loading: boolean;
   addToRecentlyUsedItems: (item: Character) => void;
   onSearchTextChange: (text: string) => void;
@@ -18,6 +23,7 @@ interface IListContext {
   isRecentlyUsed: (item: Character) => boolean;
   availableSets: string[];
   setDatasetFilterAnd: (filter: string | null) => void;
+  findHtmlEntity: (code: number) => string | null;
 }
 
 export const ListContext = createContext<IListContext>(null as unknown as IListContext);
@@ -47,13 +53,21 @@ export const ListContextProvider: FC<{ children: ReactNode }> = ({ children }) =
     clearRecentlyUsedItems,
     removeFromRecentlyUsedItems,
   } = useRecentlyUsedItems<Character>({
-    key: "recently-used",
-    comparator: "code",
+    key: "recently-used-v2",
+    comparator: "c",
   });
 
   const isRecentlyUsed = useCallback(
-    (item: Character) => recentlyUsedItems.some((i) => i.code === item.code),
+    (item: Character) => recentlyUsedItems.some((i) => i.c === item.c),
     [recentlyUsedItems],
+  );
+
+  const findHtmlEntity = useCallback(
+    (code: number) => {
+      const entity = html.html_entities.find((e) => e.code === code);
+      return entity ? entity.value : null;
+    },
+    [html],
   );
 
   const list = useMemo(
@@ -64,8 +78,8 @@ export const ListContextProvider: FC<{ children: ReactNode }> = ({ children }) =
   const loading = !addToRecentlyUsedItems || !list.length;
   const availableSets = useMemo(
     () =>
-      list
-        .map((set) => set.sectionTitle)
+      dataset.blocks
+        .map((block) => block.blockName)
         .filter((s) => s !== "Recently Used")
         .sort((a, b) => a.localeCompare(b)),
     [list],
@@ -83,6 +97,7 @@ export const ListContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         removeFromRecentlyUsedItems,
         availableSets,
         setDatasetFilterAnd,
+        findHtmlEntity,
       }}
     >
       {children}

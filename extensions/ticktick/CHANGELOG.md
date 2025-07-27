@@ -1,5 +1,13 @@
 # TickTick Changelog
 
+## [Improve] - 2025-05-12
+
+- support AI Extension
+
+## [Improve] - 2024-11-21
+
+- `Add Task` command support selecting task priority.
+
 ## [Improve] - 2024-04-18
 
 - `Add Task` command support create all-day task

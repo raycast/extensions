@@ -11,7 +11,7 @@ export const textLineStandardOffset = -1;
 export const twRegex = new RegExp(`.{1,${textWidth}}`, "g");
 export const dataTextOffset = 300;
 
-export const titleColor = environment.theme === "light" ? "rgb(0, 0, 0)" : "rgb(255, 255, 255)";
+export const titleColor = environment.appearance === "light" ? "rgb(0, 0, 0)" : "rgb(255, 255, 255)";
 export const headColor = "rgb(251, 1, 91)";
 export const dataColor = `rgb(214, 58, 255)`;
 export const footColor = "rgb(0, 185, 241)";

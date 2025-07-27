@@ -1,7 +1,7 @@
 import { List, Action, ActionPanel, Icon, useNavigation } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { DateTime } from "luxon";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { SearchHistory } from "../searchHistory";
 import { instanceName, LinkBuilder, Sourcegraph } from "../sourcegraph";
@@ -9,6 +9,7 @@ import { instanceName, LinkBuilder, Sourcegraph } from "../sourcegraph";
 import { ColorDefault } from "./colors";
 import ExpandableToast from "./ExpandableToast";
 import { copyShortcut, deleteShortcut, secondaryActionShortcut, tertiaryActionShortcut } from "./shortcuts";
+import { useTelemetry } from "../hooks/telemetry";
 
 const link = new LinkBuilder("search-history");
 
@@ -19,6 +20,9 @@ function getQueryURL(src: Sourcegraph, query: string) {
 const OLD_ITEM_THRESHOLD_MINUTES = 30;
 
 export default function SearchHistoryCommand({ src }: { src: Sourcegraph }) {
+  const { recorder } = useTelemetry(src);
+  useEffect(() => recorder.recordEvent("searchHistory", "start"), []);
+
   const state = usePromise(async (src: Sourcegraph) => SearchHistory.loadHistory(src), [src]);
 
   const { push } = useNavigation();
@@ -27,7 +31,7 @@ export default function SearchHistoryCommand({ src }: { src: Sourcegraph }) {
       push,
       "Unexpected error",
       `Failed to load search history: ${state.error.name}`,
-      `${state.error.message}\n\n${state.error.stack || ""}`
+      `${state.error.message}\n\n${state.error.stack || ""}`,
     ).show();
   }
 

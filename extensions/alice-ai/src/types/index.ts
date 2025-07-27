@@ -18,4 +18,9 @@ export interface History {
   timestamp: number;
   prompt: string;
   result: string;
+  tokens: {
+    input: number;
+    output: number;
+    total: number;
+  };
 }

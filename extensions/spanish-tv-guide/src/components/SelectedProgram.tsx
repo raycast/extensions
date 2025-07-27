@@ -1,26 +1,22 @@
-import React, { useEffect, useState } from "react";
 import { Detail } from "@raycast/api";
 
-import { tvScheduleRepository } from "../modules/tv/repositories/tvScheduleRepository";
 import { ChannelScheduleDto, ProgramDto, ProgramDetailsDto } from "../modules/tv/domain/tvScheduleDto";
 import { getTime } from "../utils/dateUtils";
-import { Maybe } from "../utils/objectUtils";
+import { truncate } from "../utils/stringUtils";
 
-export const SelectedProgram = ({ channel, program }: { channel: ChannelScheduleDto; program: ProgramDto }) => {
-  const [programDetails, setProgramDetails] = useState<Maybe<ProgramDetailsDto>>();
-
-  useEffect(() => void tvScheduleRepository.getProgramDetails(program).then(setProgramDetails), [program]);
+export const SelectedProgram = (props: { channel: ChannelScheduleDto; program: ProgramDto & ProgramDetailsDto }) => {
+  const { channel, program } = props;
 
   return (
-    programDetails && (
+    program && (
       <Detail
         navigationTitle={channel.name}
-        markdown={formattedProgramDetails(programDetails)}
-        isLoading={!programDetails}
+        markdown={formattedProgramDetails(program)}
+        isLoading={!program}
         metadata={
           <Detail.Metadata>
             <Detail.Metadata.Label title={channel.name} icon={channel.icon} />
-            <Detail.Metadata.Label title={program.title} />
+            <Detail.Metadata.Label title={truncate(program.name)} />
           </Detail.Metadata>
         }
       />
@@ -28,12 +24,14 @@ export const SelectedProgram = ({ channel, program }: { channel: ChannelSchedule
   );
 };
 
-const formattedProgramDetails = ({ title, startTime, image, description }: ProgramDetailsDto) => `
-  ### ${getTime(startTime)} ${title}
+type Props = ProgramDetailsDto & { name: string; startTime: Date };
+
+const formattedProgramDetails = ({ name, startTime, imageUrl, description }: Props) => `
+  ### ${getTime(startTime)} ${truncate(name)}
   
   --- 
   
   ${description}
   
-  ![${title}](${image}?raycast-width=125&raycast-height=188)
+  ![${truncate(name)}](${imageUrl})
   `;

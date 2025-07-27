@@ -1,5 +1,9 @@
 # Stickies Changelog
 
+## [Fix Bug] - 2025-04-29
+
+- Fix the problem of commands not taking effect due to keyboard layout.
+
 ## [Search Stickies] - 2024-07-04
 
 - New command : Search Stickies to search Stickies by content.

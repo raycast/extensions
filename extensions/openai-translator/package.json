@@ -7,7 +7,8 @@
   "author": "douo",
   "contributors": [
     "JoyG",
-    "leeonfield"
+    "leeonfield",
+    "ridemountainpig"
   ],
   "categories": [
     "Applications",
@@ -297,74 +298,24 @@
       "default": "gpt-3.5-turbo-0613",
       "description": "Choose an OpenAI API model, which is only available when using the OpenAI provider",
       "data": [
-        {
-          "title": "gpt-3.5-turbo-1106",
-          "value": "gpt-3.5-turbo-1106"
-        },
-        {
-          "title": "gpt-3.5-turbo",
-          "value": "gpt-3.5-turbo"
-        },
-        {
-          "title": "gpt-3.5-turbo-0613",
-          "value": "gpt-3.5-turbo-0613"
-        },
-        {
-          "title": "gpt-3.5-turbo-0301",
-          "value": "gpt-3.5-turbo-0301"
-        },
-        {
-          "title": "gpt-3.5-turbo-16k",
-          "value": "gpt-3.5-turbo-16k"
-        },
-        {
-          "title": "gpt-3.5-turbo-16k-0613",
-          "value": "gpt-3.5-turbo-16k-0613"
-        },
-        {
-          "title": "gpt-4",
-          "value": "gpt-4"
-        },
-        {
-          "title": "gpt-4-turbo-preview",
-          "value": "gpt-4-turbo-preview"
-        },
-        {
-          "title": "gpt-4-0125-preview (recommended)",
-          "value": "gpt-4-0125-preview"
-        },
-        {
-          "title": "gpt-4-1106-preview",
-          "value": "gpt-4-1106-preview"
-        },
-        {
-          "title": "gpt-4-0314",
-          "value": "gpt-4-0314"
-        },
-        {
-          "title": "gpt-4-0613",
-          "value": "gpt-4-0613"
-        },
-        {
-          "title": "gpt-4-32k",
-          "value": "gpt-4-32k"
-        },
-        {
-          "title": "gpt-4-32k-0314",
-          "value": "gpt-4-32k-0314"
-        },
-        {
-          "title": "gpt-4-32k-0613",
-          "value": "gpt-4-32k-0613"
-        },
-        {
-          "title": "gpt-4o",
-          "value": "gpt-4o"
-        },
-        {
-          "title": "gpt-4o-2024-05-13",
-          "value": "gpt-4o-2024-05-13"
-        }
+        { "title": "gpt-4-1106-preview", "value": "gpt-4-1106-preview" },
+        { "title": "chatgpt-4o-latest", "value": "chatgpt-4o-latest" },
+        { "title": "gpt-4-0125-preview", "value": "gpt-4-0125-preview" },
+        { "title": "gpt-3.5-turbo-0125", "value": "gpt-3.5-turbo-0125" },
+        { "title": "gpt-4o-mini", "value": "gpt-4o-mini" },
+        { "title": "gpt-4o-mini-2024-07-18", "value": "gpt-4o-mini-2024-07-18" },
+        { "title": "gpt-4-turbo-preview", "value": "gpt-4-turbo-preview" },
+        { "title": "gpt-3.5-turbo", "value": "gpt-3.5-turbo" },
+        { "title": "gpt-4-turbo", "value": "gpt-4-turbo" },
+        { "title": "gpt-4-turbo-2024-04-09", "value": "gpt-4-turbo-2024-04-09" },
+        { "title": "gpt-4o-2024-08-06", "value": "gpt-4o-2024-08-06" },
+        { "title": "gpt-3.5-turbo-16k", "value": "gpt-3.5-turbo-16k" },
+        { "title": "gpt-3.5-turbo-1106", "value": "gpt-3.5-turbo-1106" },
+        { "title": "gpt-4-0613", "value": "gpt-4-0613" },
+        { "title": "gpt-4", "value": "gpt-4" },
+        { "title": "gpt-3.5-turbo-instruct", "value": "gpt-3.5-turbo-instruct" },
+        { "title": "gpt-4o", "value": "gpt-4o" },
+        { "title": "gpt-4o-2024-05-13", "value": "gpt-4o-2024-05-13" }
       ]
     },
     {
@@ -605,6 +556,38 @@
         {
           "value": "kk",
           "title": "Қазақ"
+        },
+        {
+          "value": "mn",
+          "title": "Монгол хэл"
+        },
+        {
+          "value": "tr",
+          "title": "Türkçe"
+        },
+        {
+          "value": "ug",
+          "title": "ئۇيغۇر تىلى"
+        },
+        {
+          "value": "uk",
+          "title": "Українська"
+        },
+        {
+          "value": "ur",
+          "title": "اردو"
+        },
+        {
+          "value": "vi",
+          "title": "Tiếng Việt"
+        },
+        {
+          "value": "sv",
+          "title": "Svenska"
+        },
+        {
+          "value": "th",
+          "title": "ไทย"
         }
       ],
       "description": "Choice First language"

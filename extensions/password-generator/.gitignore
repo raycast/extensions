@@ -11,3 +11,9 @@ compiled_raycast_swift
 
 # misc
 .DS_Store
+
+raycast-env.d.ts
+
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift

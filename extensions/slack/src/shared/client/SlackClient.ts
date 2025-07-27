@@ -17,6 +17,7 @@ export interface User extends Item {
   statusText: string | undefined;
   statusExpiration: string;
   timezone: string;
+  icon: string | { source: string; mask: Image.Mask };
 }
 
 export type Channel = Item;

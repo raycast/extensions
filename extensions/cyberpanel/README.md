@@ -4,9 +4,17 @@ This is a Raycast extension for [CyberPanel](https://cyberpanel.net/). With this
 
 ## 🚀 Getting Started
 
-1. **Install extension**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/xmok/cyberpanel)
+1. **Install extension**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/xmok/cyberpanel) OR `install` via Raycast Store
 
-2. **Enter your Panel Details**: The first time you use the extension, you'll need to enter the following in Preferences OR at first prompt:
+2. **Enable API Access**: You need to enable API Access in your instance (reference: https://cyberpanel.net/KnowledgeBase/home/cyberpanel-api-access-2/):
+
+    a. `Log In` to your CyberPanel instance
+
+    b. `Navigate` to https://[DOMIAN]:[PORT]/users/apiAccess
+
+    c. `Select` user, `Enable` access and `Save`
+
+3. **Enter your Panel Details**: The first time you use the extension, you'll need to enter the following in Preferences OR at first prompt:
 
     a. The URL of your CyberPanel installation (w/ Port)
 
@@ -14,9 +22,13 @@ This is a Raycast extension for [CyberPanel](https://cyberpanel.net/). With this
 
     c. Admin Password
 
+    d. Token Type - The current build of CyberPanel has changed the way the API Token is saved. IF you are sure your credentials are valid yet you are getting an _Invalid credentials_ error, change the Token Type to "SHA-256".
+
 ## 🗒️ Note
 
-Extension has been tested to work with `CyberPanel Version 2.3 Build 4`.
+Extension has been tested to work with the following versions:
+1. `CyberPanel Version 2.3 Build 4` (uses Base64 Token)
+1. `CyberPanel Version 2.3 Build 7` (uses SHA-256 Token)
 
 ## 🔧 Commands
 

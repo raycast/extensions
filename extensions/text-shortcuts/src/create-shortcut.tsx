@@ -1,5 +1,9 @@
-import React, { useEffect, useState } from "react";
 import { Action, ActionPanel, Color, Form, Icon, LocalStorage, showToast, Toast, useNavigation } from "@raycast/api";
+import React, { useEffect, useState } from "react";
+import { ActionOnTactions } from "./components/action-on-tactions";
+import { ActionOpenPreferences } from "./components/action-open-preferences";
+import { variables } from "./types/types";
+import { shortcutTips } from "./util/constants";
 import {
   cases,
   checkAffix,
@@ -15,10 +19,6 @@ import {
   tags,
   transforms,
 } from "./util/shortcut";
-import { variables } from "./types/types";
-import { shortcutTips } from "./util/constants";
-import { ActionOnTactions } from "./components/action-on-tactions";
-import { ActionOpenPreferences } from "./components/action-open-preferences";
 
 export default function CreateShortcut(props: {
   shortcut: Shortcut | undefined;

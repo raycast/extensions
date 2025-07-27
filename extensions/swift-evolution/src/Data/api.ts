@@ -7,7 +7,6 @@ export type ProposalJson = {
   discussions: { link: string; name: string }[];
   id: string;
   link: string;
-  reviewManager: { link: string; name: string };
   reviewManagers: { link: string; name: string }[];
   sha: string;
   status: {

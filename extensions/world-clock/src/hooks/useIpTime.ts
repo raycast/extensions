@@ -1,5 +1,5 @@
 import axios from "axios";
-import { IP_GEOLOCATION_API } from "../utils/costants";
+import { API_IP_GEOLOCATION } from "../utils/costants";
 import { IPGeolocation } from "../types/types";
 import { isEmpty } from "../utils/common-utils";
 import { isIPv4 } from "net";
@@ -18,7 +18,7 @@ const getIpTime = async (searchContent: string) => {
     //domain
     const res = await axios({
       method: "GET",
-      url: IP_GEOLOCATION_API + searchContent,
+      url: API_IP_GEOLOCATION + searchContent,
       params: {
         fields: "57344",
       },

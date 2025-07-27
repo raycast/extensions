@@ -5,6 +5,10 @@
   "description": "Shows stock market data for individual stocks or your portfolio by using Yahoo Finance.",
   "icon": "extension-icon.png",
   "author": "hmarr",
+  "contributors": [
+    "ericchernuka",
+    "kristoffermelen"
+  ],
   "categories": [
     "Finance"
   ],

@@ -1,5 +1,9 @@
 # Statamic Docs Changelog
 
+## [Update] - 2024-11-26
+
+- Replaced Algolia Docsearch with Meilisearch
+
 ## [Update] - 2023-09-06
 
 - Updated links

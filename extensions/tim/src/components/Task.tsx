@@ -59,7 +59,7 @@ const Task: React.FC<{ id: UUID }> = ({ id }) => {
               shortcut={{ modifiers: ["cmd"], key: "v" }}
             />
             <Action.CopyToClipboard
-              title="Copy Task ID"
+              title="Copy Task Id"
               shortcut={{ modifiers: ["cmd"], key: "i" }}
               content={task.id}
             />

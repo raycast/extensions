@@ -1,0 +1,59 @@
+{
+  "name": "fronius-inverter",
+  "title": "Fronius Inverter",
+  "description": "A Raycast extension to monitor your Fronius Gen24 inverter with a realtime dashboard and background error monitoring.",
+  "icon": "extension-icon.png",
+  "author": "Olli0103",
+  "categories": [
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "dashboard",
+      "title": "Fronius Dashboard",
+      "description": "View realtime inverter and system overview data.",
+      "mode": "view",
+      "command": "src/dashboard.tsx",
+      "shortcut": "cmd+shift+d"
+    },
+    {
+      "name": "watch",
+      "title": "Inverter Watch",
+      "description": "Continuously monitor inverter errors and open the dashboard on click.",
+      "mode": "menu-bar",
+      "command": "src/watch.tsx"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "baseUrl",
+      "title": "Fronius API Base URL",
+      "description": "The base URL of your Fronius inverter (e.g., http://192.168.0.75)",
+      "type": "textfield",
+      "default": "http://192.168.0.75",
+      "required": true
+    }
+  ],
+  "main": "src/dashboard.tsx",
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.17.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  }
+}

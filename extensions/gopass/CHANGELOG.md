@@ -1,5 +1,9 @@
 # pass Changelog
 
+## [New Additions] - 2024-12-28
+
+- Add Sync, Create, Update and Delete support.
+
 ## [New Additions] - 2024-06-15
 
 - Add Nix bin path.

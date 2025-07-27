@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import fetch from "node-fetch";
+import fetch, { AbortError } from "node-fetch";
 import { popToRoot, showToast, Toast, Cache } from "@raycast/api";
 import { EndOfLifeProductsCache } from "../types";
 
@@ -61,6 +61,9 @@ const useEndOfLifeProducts = (): [string[], boolean] => {
           products: data ?? [],
         }));
       } catch (error) {
+        if (error instanceof AbortError) {
+          return;
+        }
         await showToast({
           style: Toast.Style.Failure,
           title: "Error",

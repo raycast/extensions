@@ -3,11 +3,12 @@ import { useEffect, useState } from "react";
 import { gitlab } from "../common";
 import { Project } from "../gitlabapi";
 import { getErrorMessage, showErrorToast } from "../utils";
-import { ProjectListEmptyView, ProjectListItem } from "./project";
+import { ProjectListEmptyView, ProjectListItem, ProjectScope } from "./project";
 
 export function ProjectSearchList(): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
-  const { projects, error, isLoading } = useSearch(searchText);
+  const [scope, setScope] = useState<string>(ProjectScope.membership);
+  const { projects, error, isLoading } = useSearch(searchText, scope);
 
   if (error) {
     showErrorToast(error, "Cannot search Project");
@@ -19,6 +20,12 @@ export function ProjectSearchList(): JSX.Element {
       onSearchTextChange={setSearchText}
       isLoading={isLoading}
       throttle={true}
+      searchBarAccessory={
+        <List.Dropdown tooltip="Scope" onChange={setScope} storeValue>
+          <List.Dropdown.Item title="My Projects" value={ProjectScope.membership} />
+          <List.Dropdown.Item title="All" value={ProjectScope.all} />
+        </List.Dropdown>
+      }
     >
       <List.Section title="Projects" subtitle={`${projects?.length}`}>
         {projects?.map((project) => (
@@ -30,7 +37,10 @@ export function ProjectSearchList(): JSX.Element {
   );
 }
 
-export function useSearch(query: string | undefined): {
+export function useSearch(
+  query: string | undefined,
+  scope: string
+): {
   projects?: Project[];
   error?: string;
   isLoading: boolean;
@@ -53,7 +63,8 @@ export function useSearch(query: string | undefined): {
       setError(undefined);
 
       try {
-        const glProjects = await gitlab.getProjects({ searchText: query || "", searchIn: "title" });
+        const membership = scope === ProjectScope.membership ? "true" : "false";
+        const glProjects = await gitlab.getProjects({ searchText: query || "", searchIn: "title", membership });
 
         if (!didUnmount) {
           setProjects(glProjects);
@@ -74,7 +85,7 @@ export function useSearch(query: string | undefined): {
     return () => {
       didUnmount = true;
     };
-  }, [query]);
+  }, [query, scope]);
 
   return { projects, error, isLoading };
 }

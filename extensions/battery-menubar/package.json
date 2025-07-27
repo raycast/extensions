@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "panrafal",
   "contributors": [
-    "iaroslav_naiden"
+    "iaroslav_naiden",
+    "ViGeng"
   ],
   "categories": [
     "System"
@@ -105,5 +106,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -6,7 +6,8 @@
   "icon": "icon.png",
   "author": "tdwesten",
   "contributors": [
-    "sebduggan"
+    "sebduggan",
+    "dnlfrst"
   ],
   "version": "1.1.2",
   "license": "MIT",
@@ -35,14 +36,31 @@
       "default": "/usr/local/bin/gittower",
       "value": "/usr/local/bin/gittower",
       "required": true
+    },
+    {
+      "name": "defaultTerminal",
+      "title": "Terminal Application",
+      "description": "Open the repository in your default terminal",
+      "type": "appPicker",
+      "default": "Terminal",
+      "required": true,
+      "value": "Terminal"
+    },
+    {
+      "name": "defaultEditor",
+      "title": "Editor Application",
+      "description": "Open the repository in your default editor",
+      "type": "appPicker",
+      "default": "Visual Studio Code",
+      "required": true,
+      "value": "Visual Studio Code"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.58.0",
     "@raycast/utils": "^1.10.1",
     "node-git-current-branch": "^2.0.1",
-    "plist": "^3.0.4",
-    "tildify": "^3.0.0"
+    "plist": "^3.0.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

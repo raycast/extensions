@@ -1,11 +1,91 @@
 # GitHub Changelog
 
+## [Fix repository filtering] - 2025-06-26
+
+- Correct the repository filtering for exclude mode
+
+## [Add repository filtering] - 2025-06-05
+
+- my-issues, my-pull-requests and menu counterparts can now specify repositories to include / exclude
+
+## [Filter recently closed PRs by last update date] - 2025-04-16
+
+- Fixed a bug where active pull requests could be hidden: the `updated` filter is now only applied to closed PRs, so all active PRs are always shown in `My Pull Requests`.
+
+## [Add support for merge queues and auto-merge] - 2025-04-15
+
+- Adds PR actions for repositories that use merge queues
+- Adds the ability to enable auto-merge
+- Fix codegen lint hook
+
+## [Add the ability to search for collaborators in the pull request actions] - 2025-03-19
+
+- Add the ability to search for collaborators in the pull request actions, instead of just showing the first 25.
+
+## [Add repository filtering for menu bar commands] - 2025-03-11
+
+- Add the ability to include or exclude specific repositories from the results for the `My Pull Requests` and `Unread Notifications` Menu Bar commands.
+
+## [Chore] - 2025-03-10
+
+- Fix typo in setting label
+
+## [✨ AI Enhancements] - 2025-02-21
+
+## [Fix base clone path] - 2025-01-19
+
+- Move `baseClonePath` to extension root level
+- Fix `Clone and Open` path
+
+## [Mark notification as done] - 2025-01-09
+
+- Add a new action to mark a notification as done.
+
+## [Change menu bar unread style] - 2024-12-17
+
+- Use a new icon with indicator for unread state
+
+## [Support specifying Git clone protocol] - 2024-12-12
+
+- Added support to specify the Git clone protocol (SSH or HTTPS) in extension preferences.
+- `Copy Clone Command` and `Clone And Open` now respect the clone protocol from the preferences.
+
+## [Update GraphQL generated types] - 2024-12-09
+
+- Updated auto-generated GraphQL codes with the latest schema.
+
+## [Handle notification icon retrieval error] - 2024-11-08
+
+- Unread Notifications Menu Bar: Display a fallback icon when the notification icon retrieval fails.
+
+## [Improved options for My Issues] - 2024-11-04
+
+- My Issues Command + Menu Bar: Add a preference that allows showing or hiding issues opened by the user from searches. On by default.
+
+## [Fix crash when searching visited repositories] - 2024-10-04
+
+The issue causing a crash during the "Search Repositories" feature, when two or more repositories had been visited, has been resolved. This problem originated from changes in [this pull request](https://github.com/raycast/extensions/pull/13684).
+
+## [Fix copy commit tree URL action] - 2024-09-13
+
+- Fix the "Copy Commit Tree URL" action to ensure it correctly copies the commit Tree URL as intended.
+
+## [Clone Repo Fixes] - 2024-08-20
+
+- [#13872](https://github.com/raycast/extensions/issues/13872): Brought back the feature for Raycast to act as a fast brower to open cloned repo.
+- Re-added _Clone Path_ preference without any default value this time. If no value is provided, user will need to specify directory with the form.
+- If a value for _Clone Path_ preference is specified, the old behavior of cloning the repo (or opening if it exists) is enacted.
+
+## [Fix capitalization] - 2024-08-15
+
+- Ensured title-style capitalization in action titles.
+
 ## [My Issues and PRs Improvements] - 2024-08-12
 
 - My Issues Command + Menu Bar: Preferences to specify categories to display. Issues opened by the user will always be displayed.
 - My PRs Command + Menu Bar: Preferences to specify categories to display. PRs created by the user will always be displayed.
 - The categories not being displayed will not invoke extra API calls, reducing throttling.
-- ⚠️My PRs Menu Bar: Removed `includeCount` options to keep things simple (and in-sync) by just displaying the count of PRs in the categories selected.
+- My PRs Menu Bar: Removed `includeCount` options to keep things simple (and in-sync) by just displaying the count of PRs in the categories selected.
 
 ## [Improvements] - 2024-08-12
 

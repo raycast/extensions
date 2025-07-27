@@ -10,9 +10,6 @@ export function useAnthropic(): Anthropic {
 
     return new Anthropic({
       apiKey: apiKey,
-      defaultHeaders: {
-        "anthropic-beta": "max-tokens-3-5-sonnet-2024-07-15",
-      },
     });
   });
 

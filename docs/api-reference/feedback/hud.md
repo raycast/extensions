@@ -32,7 +32,7 @@ export default async function Command() {
 `showHUD` closes the main window when called, so you can use the same options as `closeMainWindow`:
 
 ```typescript
-import { showHUD } from "@raycast/api";
+import { PopToRootType, showHUD } from "@raycast/api";
 
 export default async function Command() {
   await showHUD("Hey there 👋", { clearRootSearch: true, popToRootType: PopToRootType.Immediate });

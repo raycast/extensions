@@ -1,0 +1,17 @@
+export const ERROR_MESSAGES = {
+  FETCH_COMMIT_MESSAGE: "Failed to generate commit message",
+  COMMIT_CHANGES: "Failed to commit changes",
+  FETCH_PR_DESCRIPTION: "Failed to generate PR description",
+  REPO_PATH_MISSING: "No repository path provided",
+  INVALID_REPO: "Invalid Git repository",
+  BRANCH_EXISTS: "Branch already exists",
+  GIT_DIFF_EMPTY: "No changes to commit",
+  CHECKOUT_BRANCH: "Failed to checkout branch",
+  DELETE_BRANCH: "Failed to delete branch",
+  CLEANUP_BRANCHES: "Failed to clean up branches",
+  GET_CURRENT_BRANCH: "Failed to get current branch",
+  GET_BRANCHES: "Failed to get branches",
+  ACTIVE_BRANCH_DELETE: "Cannot delete active branch",
+  AI_MODEL_MISSING: "No AI model provided",
+  AI_MODEL_INVALID: "Invalid AI model",
+};

@@ -1,20 +1,28 @@
-import { ActionPanel, List, showToast, Action, Toast } from "@raycast/api";
-import { useEffect, useMemo, useState } from "react";
+import { ActionPanel, List, Action } from "@raycast/api";
+import { useMemo } from "react";
 import algoliaSearch from "algoliasearch";
 import _ from "lodash";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 
 const APPID = "SM9GAGAUKZ";
 const APIKEY = "1fad8740c0cf75209d11ae25f1f6f55c";
 const INDEX = "alpinejs";
 
-type result = {
+type Hierarchy = {
+  lvl0: string | null;
+  lvl1: string | null;
+  lvl2: string | null;
+  lvl3: string | null;
+  lvl4: string | null;
+  lvl5: string | null;
+  lvl6: string | null;
+};
+type Result = {
   url: string;
   anchor: string;
   body: string;
   objectID: string;
-  hierarchy: {
-    [key: string]: string;
-  };
+  hierarchy: Hierarchy;
   _highlightResult: {
     content:
       | {
@@ -24,13 +32,7 @@ type result = {
           matchedWords: string[];
         }
       | undefined;
-    hierarchy: {
-      [key: string]: {
-        value: string;
-        matchLevel: string;
-        matchedWords: string[];
-      };
-    };
+    hierarchy: Hierarchy;
   };
 };
 
@@ -43,47 +45,48 @@ export default function SearchDocumentation() {
     return algoliaClient.initIndex(INDEX);
   }, [algoliaClient, INDEX]);
 
-  const [searchResults, setSearchResults] = useState<any[] | undefined>();
-  const [isLoading, setIsLoading] = useState(true);
+  const [searchText, setSearchText] = useCachedState("search", "install");
 
-  const search = async (query = "install") => {
-    setIsLoading(true);
-
-    return await algoliaIndex
-      .search(query, {
+  const { isLoading: isLoading, data: searchResults } = useCachedPromise(
+    async (query: string) => {
+      const res = await algoliaIndex.search<Result>(query, {
         hitsPerPage: 15,
-      })
-      .then((res) => {
-        return Object.entries(_.groupBy(res.hits, "hierarchy.lvl1")) || [];
-      })
-      .catch((err) => {
-        showToast(Toast.Style.Failure, "Error searching Alpine.js documentation", err.message);
-        return [];
       });
-  };
-
-  useEffect(() => {
-    (async () => {
-      setSearchResults(await search());
-      setIsLoading(false);
-    })();
-  }, []);
+      return Object.entries(
+        _.groupBy(
+          res.hits.filter((hit) => hit.hierarchy.lvl2),
+          "hierarchy.lvl1"
+        )
+      );
+    },
+    [searchText],
+    {
+      initialData: [],
+      keepPreviousData: true,
+      failureToastOptions: {
+        title: "Error searching Alpine.js documentation",
+      },
+    }
+  );
 
   return (
     <List
       throttle={true}
       isLoading={isLoading}
-      searchBarPlaceholder={"Search Alpine.js Documentation"}
-      onSearchTextChange={async (query) => {
-        setSearchResults(await search(query));
-        setIsLoading(false);
-      }}
+      searchBarPlaceholder="Search Alpine.js Documentation"
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
     >
-      {searchResults?.map(([hitType, hitTypeResults]) => (
-        <List.Section title={hitType} key={hitType}>
-          {hitTypeResults
-            ?.filter((hit: { hierarchy: { lvl2: null } }) => hit.hierarchy.lvl2 != null)
-            .map((hit: result) => (
+      {!isLoading && !searchResults.length ? (
+        <List.EmptyView
+          icon="empty-icon.png"
+          title="Whoops! We did not find any matches for your search."
+          description="Try searching 'x-show'"
+        />
+      ) : (
+        searchResults.map(([hitType, hitTypeResults]) => (
+          <List.Section title={hitType} key={hitType}>
+            {hitTypeResults.map((hit) => (
               <List.Item
                 id={hit.objectID}
                 key={hit.objectID}
@@ -107,9 +110,9 @@ export default function SearchDocumentation() {
                 }
               />
             ))}
-        </List.Section>
-      ))}
-      <List.EmptyView icon="empty-icon.png" title="Whoops! We did not find any matches for your search." />
+          </List.Section>
+        ))
+      )}
     </List>
   );
 }

@@ -13,6 +13,41 @@ import {
 import { Bookmark } from "../types";
 import { getFavicon } from "@raycast/utils";
 import fetch from "node-fetch";
+import { BookmarkForm } from "./BookmarkForm";
+
+function ActionEditBookmark(props: { bookmark: Bookmark; revalidate: () => void }) {
+  const { bookmark, revalidate } = props;
+
+  return (
+    <Action.Push
+      title="Edit Bookmark"
+      shortcut={{ modifiers: ["cmd"], key: "e" }}
+      icon={Icon.Pencil}
+      target={
+        <BookmarkForm
+          mode="edit"
+          bookmarkId={bookmark._id}
+          defaultValues={{
+            link: bookmark.link,
+            title: bookmark.title,
+            collection: bookmark.collection?.$id?.toString() ?? "-1",
+            tags: bookmark.tags,
+          }}
+          onWillSave={() => {
+            showToast(Toast.Style.Animated, "Updating Bookmark...");
+          }}
+          onSaved={() => {
+            showToast(Toast.Style.Success, "Bookmark Updated");
+            revalidate();
+          }}
+          onError={() => {
+            showToast(Toast.Style.Failure, "Error Updating Bookmark");
+          }}
+        />
+      }
+    />
+  );
+}
 
 export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: () => void }) {
   const { bookmark, revalidate } = props;
@@ -96,7 +131,29 @@ export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: ()
   function accessories() {
     const accessories = [];
 
-    bookmark.tags.forEach((tag) => accessories.push({ tag: `#${tag}` }));
+    switch (preferences.displayDate) {
+      case "lastUpdated":
+        accessories.push({ date: lastUpdatedDate, tooltip: lastUpdatedDate.toLocaleString() });
+        break;
+      case "created":
+        accessories.push({ date: createdDate, tooltip: createdDate.toLocaleString() });
+        break;
+    }
+
+    if (preferences.tagsDisplay !== "none") {
+      if (preferences.tagsDisplay === "all") {
+        bookmark.tags.forEach((tag) => accessories.push({ tag: `#${tag}` }));
+      } else {
+        const tagsNumber = bookmark.tags.length - 1;
+        const tagsDisplayNumber = parseInt(preferences.tagsDisplay, 10);
+        const displayedTags = bookmark.tags.slice(0, tagsDisplayNumber).map((tag) => `#${tag}`);
+        accessories.push(...displayedTags.map((tag) => ({ tag })));
+
+        if (tagsNumber > tagsDisplayNumber) {
+          accessories.push({ tag: `+${tagsNumber}`, tooltip: bookmark.tags.join("\n") });
+        }
+      }
+    }
 
     switch (bookmark.type) {
       case "link":
@@ -116,15 +173,6 @@ export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: ()
         break;
       case "document":
         accessories.push({ icon: Icon.Document });
-        break;
-    }
-
-    switch (preferences.displayDate) {
-      case "lastUpdated":
-        accessories.push({ date: lastUpdatedDate, tooltip: lastUpdatedDate.toLocaleString() });
-        break;
-      case "created":
-        accessories.push({ date: createdDate, tooltip: createdDate.toLocaleString() });
         break;
     }
 
@@ -159,6 +207,7 @@ export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: ()
                       title="Open Permanent Copy"
                       url={`https://api.raindrop.io/v1/raindrop/${bookmark._id}/cache`}
                     />
+                    <ActionEditBookmark bookmark={bookmark} revalidate={revalidate} />
                   </ActionPanel>
                 }
                 metadata={
@@ -182,6 +231,7 @@ export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: ()
               />
             }
           />
+          <ActionEditBookmark bookmark={bookmark} revalidate={revalidate} />
           <Action
             onAction={handleDelete}
             title="Delete Bookmark"

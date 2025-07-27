@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "macosicons",
+  "title": "macOSIcons.com",
+  "description": "Raycast extension for browsing and applying icons from macOSicons.com",
+  "icon": "logo.png",
+  "author": "shldk",
+  "contributors": [
+    "bendrucker"
+  ],
+  "categories": [
+    "System",
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-icons",
+      "title": "Search Icons",
+      "description": "Search icons on macOSIcons.com",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "apiKey",
+          "type": "password",
+          "required": true,
+          "title": "API key",
+          "description": "To get your API key go to https://docs.macosicons.com"
+        }
+      ],
+      "icon": "logo.png"
+    },
+    {
+      "name": "manage-icons",
+      "title": "Manage Icons",
+      "description": "Manage your custom icons",
+      "mode": "view",
+      "icon": "logo.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.89.1",
+    "@raycast/utils": "^1.18.1",
+    "fuzzysort": "^3.1.0",
+    "javascript-time-ago": "^2.5.11"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "start": "ray develop",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

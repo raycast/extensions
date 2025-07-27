@@ -1,14 +1,28 @@
-import { Action, ActionPanel, Grid } from "@raycast/api";
+import { Action, ActionPanel, Grid, Color } from "@raycast/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
-type Icon = { [key in Keys]: string };
-type Keys = "name" | "svg" | "tags" | "category" | "url" | "version" | "unicode";
+type Styles = {
+  outline?: { version: string; unicode: string; svg: string };
+  filled?: { version: string; unicode: string; svg: string };
+};
 
-const Raw = "https://raw.githubusercontent.com/tabler/tabler-icons/master/icons/";
+type TablerIcon = {
+  name: string;
+  svg?: string;
+  tags: string[];
+  category: string;
+  url?: string;
+  version?: string;
+  unicode?: string;
+  styles?: Styles;
+};
+
+const Outline = "https://raw.githubusercontent.com/tabler/tabler-icons/master/icons/outline/";
+const Filled = "https://raw.githubusercontent.com/tabler/tabler-icons/master/icons/filled/";
 
 export default function Command() {
-  const [data, setData] = useState<Icon[]>([]);
+  const [data, setData] = useState<TablerIcon[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetcher = async () => {
@@ -25,18 +39,54 @@ export default function Command() {
   return (
     <Grid isLoading={isLoading} inset={Grid.Inset.Large}>
       {!isLoading &&
-        data.map((icon) => (
-          <Grid.Item
-            key={icon.name}
-            title={icon.name}
-            content={Raw + icon.name + ".svg"}
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard title="Copy SVG" content={icon.svg} />
-              </ActionPanel>
-            }
-          />
-        ))}
+        data.map((tablerIcon) => {
+          const outline = tablerIcon.styles?.outline?.svg;
+          const filled = tablerIcon.styles?.filled?.svg;
+          return (
+            <Grid.Item
+              key={tablerIcon.name}
+              title={tablerIcon.name}
+              content={Outline + tablerIcon.name + ".svg"}
+              accessory={
+                filled
+                  ? {
+                      tooltip: "Filled Version Available",
+                      icon: {
+                        source: Filled + tablerIcon.name + ".svg",
+                        tintColor: {
+                          light: Color.SecondaryText,
+                          dark: Color.SecondaryText,
+                        },
+                      },
+                    }
+                  : undefined
+              }
+              actions={
+                <ActionPanel>
+                  {outline && (
+                    <Action.CopyToClipboard
+                      title="Copy Outline SVG"
+                      content={outline}
+                      icon={Outline + tablerIcon.name + ".svg"}
+                    />
+                  )}
+                  {filled && (
+                    <Action.CopyToClipboard
+                      title="Copy Filled SVG"
+                      content={filled}
+                      icon={Filled + tablerIcon.name + ".svg"}
+                    />
+                  )}
+                  <Action.CopyToClipboard
+                    title="Copy Name"
+                    content={tablerIcon.name}
+                    shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
+                  />
+                </ActionPanel>
+              }
+            />
+          );
+        })}
     </Grid>
   );
 }

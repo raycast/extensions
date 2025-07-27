@@ -1,7 +1,7 @@
 import { showToast, Toast, ActionPanel, Clipboard, Action, Form, LaunchProps, popToRoot, Icon } from "@raycast/api";
 import { parseImprovMXResponse } from "./utils";
 import { Account, Alias, Domain } from "./types";
-import { FormValidation, useFetch, useForm } from "@raycast/utils";
+import { FormValidation, getFavicon, useFetch, useForm } from "@raycast/utils";
 import ErrorComponent from "./components/ErrorComponent";
 import { API_HEADERS, API_URL } from "./constants";
 import { useImprovMX } from "./hooks";
@@ -91,7 +91,14 @@ export default function createAlias(props: LaunchProps<{ arguments: DomainArgs }
       <Form.Dropdown title="Domain" placeholder="Select a domain" {...itemProps.domain}>
         {data?.domains
           .filter((domain) => !domain.banned && domain.active)
-          .map((domain) => <Form.Dropdown.Item key={domain.display} value={domain.display} title={domain.display} />)}
+          .map((domain) => (
+            <Form.Dropdown.Item
+              key={domain.display}
+              icon={getFavicon(`https://${domain.display}`)}
+              value={domain.display}
+              title={domain.display}
+            />
+          ))}
       </Form.Dropdown>
 
       <Form.TextField title="Alias (without @domain)" placeholder="Enter an alias" {...itemProps.alias} />

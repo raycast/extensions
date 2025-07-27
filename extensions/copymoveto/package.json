@@ -1,0 +1,106 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "copymoveto",
+  "title": "CopyMoveTo",
+  "description": "Save time moving files between folders. Define destinations once, use quick commands to copy or move files effortlessly",
+  "icon": "extension-icon.png",
+  "author": "Mehdi_Hp",
+  "contributors": [
+    "pernielsentikaer",
+    "snuki",
+    "ridemountainpig"
+  ],
+  "version": "0.0.1",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "packageManager": "npm",
+  "commands": [
+    {
+      "name": "add-new-destination",
+      "title": "Add New Destination",
+      "description": "Create a new destination for copying or moving files",
+      "mode": "view"
+    },
+    {
+      "name": "copy-to",
+      "title": "Copy Selected Files To",
+      "description": "Copy the selected files to a destination",
+      "mode": "view"
+    },
+    {
+      "name": "move-to",
+      "title": "Move Selected Files To",
+      "description": "Move the selected files to a destination",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "fileConflictAction",
+      "title": "What to do if file already exists?",
+      "description": "Action to take when a file with same name exists in destination",
+      "type": "dropdown",
+      "required": false,
+      "default": "prompt",
+      "data": [
+        {
+          "title": "Prompt to overwrite",
+          "value": "prompt"
+        },
+        {
+          "title": "Overwrite",
+          "value": "overwrite"
+        },
+        {
+          "title": "Skip",
+          "value": "skip"
+        },
+        {
+          "title": "Keep Both",
+          "value": "rename"
+        }
+      ]
+    },
+    {
+      "name": "showPath",
+      "label": "Show Path",
+      "title": "Show destination's full path in the list",
+      "description": "Show the full path of the destination in the list",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "showHiddenFolders",
+      "label": "Show Hidden Folders",
+      "title": "Show hidden folders",
+      "description": "Show hidden folders",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.90.0",
+    "@raycast/utils": "^1.17.0",
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

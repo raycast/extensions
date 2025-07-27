@@ -3,7 +3,7 @@ export class Constants {
   public static readonly CW_CW_APP_PREFIX_FOR_LINK: string = "#!rid";
   public static readonly CW_LOGO_NAME: string = "cw-icon.png";
   public static readonly CW_OAUTH_SCOPE: string =
-    "rooms.messages:read rooms.info:read users.tasks.me:read users.profile.me:read users.all:read users.status.me:read";
+    "rooms.messages:read rooms.info:read users.tasks.me:read users.profile.me:read users.all:read users.status.me:read contacts.all:read";
   public static readonly CW_OAUTH_CL_ID: string = "y0PzMLQonNX7r";
   public static readonly CW_OAUTH_PROVIDER_NAME: string = "Chatwork";
   public static readonly CW_OAUTH_DESCRIPTION: string = "Connect your Chatwork account";

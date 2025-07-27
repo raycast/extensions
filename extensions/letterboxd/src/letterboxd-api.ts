@@ -52,7 +52,7 @@ interface ApiResponse<T> {
 }
 
 const LETTERBOXD_URL_BASE = "https://letterboxd.com";
-const SEARCH_URL_BASE = `${LETTERBOXD_URL_BASE}/search`;
+const SEARCH_URL_BASE = `${LETTERBOXD_URL_BASE}/s/search`;
 
 const getSearchPageUrl = (query: string, searchType: SEARCH_TYPE) =>
   `${SEARCH_URL_BASE}/${searchType}/${encodeURIComponent(query)}/`;
@@ -357,6 +357,7 @@ function extractEntitiesFromMovieDetailsPage(
     title,
     description,
     released,
+    runtime,
     director,
     directorDetailsPageUrl,
     genres,
@@ -372,6 +373,17 @@ function extractEntitiesFromMovieDetailsPage(
     },
     released: {
       selector: 'a[href^="/films/year/"]',
+    },
+    runtime: {
+      selector: ".text-link.text-footer",
+      value: (el: Element) => {
+        const $ = load(el);
+        const runtime = $(el)
+          .text()
+          .trim()
+          .match(/^(\d+)\s+mins/)?.[1];
+        return runtime;
+      },
     },
     director: {
       selector: 'a[href^="/director/"]',
@@ -474,6 +486,7 @@ function extractEntitiesFromMovieDetailsPage(
         : "",
     title: title ?? "",
     released: released ?? "",
+    runtime: runtime ? parseInt(runtime) : 0,
     description: description ?? "",
     url: url,
     genres: array(genres),

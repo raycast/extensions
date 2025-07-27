@@ -13,12 +13,25 @@ for i, filename in enumerate(images):
     # load the image
     alpha_mask = Image.open(filename).convert("RGBA")
 
-    # scale the mask to a suitable size
-    alpha_mask = alpha_mask.resize((420, 280), Image.Resampling.BOX)
+    # scale the mask to a suitable size (up to 420x420)
+    max_size = 420
+
+    # calculate the scaling factor
+    aspect_ratio = alpha_mask.width / alpha_mask.height
+    width = height = max_size
+
+    if alpha_mask.width > alpha_mask.height:
+        # Landscape image
+        height = int(max_size / aspect_ratio)
+    else:
+        # Portrait or square image
+        width = int(max_size * aspect_ratio)
+
+    alpha_mask = alpha_mask.resize((width, height), Image.Resampling.BOX)
 
     # create white & black background layers with the same size as the alpha mask
-    whitebg = Image.new('RGBA', (420, 280), color=(255, 255, 255, 255))
-    blackbg = Image.new('RGBA', (420, 280), color=(0, 19, 20, 255))
+    whitebg = Image.new('RGBA', (width, height), color=(255, 255, 255, 255))
+    blackbg = Image.new('RGBA', (width, height), color=(0, 19, 20, 255))
     
 
     border_size = (int((background.width - whitebg.width)/2), int((background.height - whitebg.height)/2))

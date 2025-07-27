@@ -158,6 +158,28 @@ declare global {
       };
     }
 
+    export type SearchVideoResult = Omit<Video, "uri"> & {
+      arcurl: string;
+      like: number;
+      danmaku: number;
+      play: number;
+      duration: string;
+      mid: number;
+      author: string;
+      upic: string;
+    };
+
+    export type SearchResult = {
+      data: Array<SearchVideoResult>;
+      result_type: "video";
+    };
+
+    export interface SearchVideosResponse extends Omit<BaseResponse, "data"> {
+      data: {
+        result: Array<SearchResult>;
+      };
+    }
+
     export type Uploader = {
       mid: number;
       name: string;
@@ -283,6 +305,7 @@ declare global {
       like_num: number;
       model_result: ModelResult;
     }
+
     export interface VideoConclusionResponse extends Omit<BaseResponse, "data"> {
       data: VideoConclusionResponseData;
     }

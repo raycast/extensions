@@ -58,3 +58,7 @@ const includesCaseInsensitive = (str: string, keyword: string): boolean => {
 
   return str.toLocaleLowerCase().includes(keyword.toLocaleLowerCase());
 };
+
+export const formatCommandForClipboard = (command: string): string => {
+  return command.startsWith(":") ? command.slice(1) : command;
+};

@@ -1,18 +1,19 @@
 import {
   Color,
+  getPreferenceValues,
   Icon,
   Image,
+  launchCommand,
   LaunchType,
   MenuBarExtra,
-  Toast,
-  getPreferenceValues,
-  launchCommand,
   open,
   openCommandPreferences,
   openExtensionPreferences,
   showToast,
+  Toast,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { useMemo } from "react";
 
 import { getGitHubClient } from "./api/githubClient";
 import {
@@ -33,11 +34,39 @@ function UnreadNotifications() {
 
   const viewer = useViewer();
 
+  const repositoryListArray = useMemo(() => {
+    if (!preferences.repositoryList) return [];
+    return preferences.repositoryList
+      .split(",")
+      .map((repo) => repo.trim())
+      .filter((repo) => repo.length > 0);
+  }, [preferences.repositoryList]);
+
   const { data, isLoading, mutate } = useCachedPromise(async () => {
     const response = await octokit.activity.listNotificationsForAuthenticatedUser();
+    let notifications = response.data;
+
+    if (preferences.repositoryFilterMode !== "all" && repositoryListArray.length > 0) {
+      if (preferences.repositoryFilterMode === "include") {
+        notifications = notifications.filter((notification) =>
+          repositoryListArray.some((repo) => repo.toLowerCase() === notification.repository.full_name.toLowerCase()),
+        );
+      } else {
+        notifications = notifications.filter(
+          (notification) =>
+            !repositoryListArray.some((repo) => repo.toLowerCase() === notification.repository.full_name.toLowerCase()),
+        );
+      }
+    }
+
     return Promise.all(
-      response.data.map(async (notification: Notification) => {
-        const icon = await getNotificationIcon(notification);
+      notifications.map(async (notification: Notification) => {
+        let icon: { value: Image; tooltip: string };
+        try {
+          icon = await getNotificationIcon(notification);
+        } catch (error) {
+          icon = { value: { source: Icon.Warning, tintColor: Color.Red }, tooltip: "Could not load icon" };
+        }
         return { ...notification, icon };
       }),
     );

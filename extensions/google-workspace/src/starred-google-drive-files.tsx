@@ -1,23 +1,16 @@
-import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { Action, ActionPanel, List } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 
-import { getStarredFilesURL, File } from "./api/getFiles";
+import { getStarredFiles } from "./api/getFiles";
 import FileListItem from "./components/FileListItem";
 import { withGoogleAuth } from "./components/withGoogleAuth";
-import { getOAuthToken, getUserEmail } from "./api/googleAuth";
+import { getUserEmail } from "./api/googleAuth";
 
 function StarredGoogleDriveFiles() {
   const email = getUserEmail();
 
-  const { data, isLoading } = useFetch<{ files: File[] }>(getStarredFilesURL(), {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${getOAuthToken()}`,
-    },
-    onError(error) {
-      console.error(error);
-      showToast({ style: Toast.Style.Failure, title: "Failed to retrieve starred files" });
-    },
+  const { data, isLoading } = useCachedPromise(() => getStarredFiles(), [], {
+    failureToastOptions: { title: "Failed to retrieve starred files" },
   });
 
   return (

@@ -1,19 +1,22 @@
-import { useMemo, useState } from "react";
 import { List } from "@raycast/api";
+import { useMemo, useState } from "react";
 
-import useProjects from "../hooks/useProjects";
-import usePriorities from "../hooks/usePriorities";
+import { ProjectResult } from "../api/getProjects";
+import { getInitiativeIcon } from "../helpers/initiatives";
+import { useInitiatives } from "../hooks/useInitiatives";
 import useMe from "../hooks/useMe";
+import usePriorities from "../hooks/usePriorities";
+import useProjects from "../hooks/useProjects";
 
 import Project from "./Project";
-import { ProjectResult } from "../api/getProjects";
-import { useInitiatives } from "../hooks/useInitiatives";
-import { getInitiativeIcon } from "../helpers/initiatives";
 
 export default function ProjectList() {
   const [initiativeId, setInitiativeId] = useState<string>("");
-
-  const { projects, isLoadingProjects, mutateProjects } = useProjects();
+  const [searchText, setSearchText] = useState<string>("");
+  const { projects, isLoadingProjects, mutateProjects, pagination } = useProjects(undefined, {
+    searchText,
+    pageSize: 20,
+  });
   const { initiatives, isLoadingInitiatives } = useInitiatives();
   const { priorities, isLoadingPriorities } = usePriorities();
   const { me, isLoadingMe } = useMe();
@@ -65,8 +68,12 @@ export default function ProjectList() {
             ),
           }
         : {})}
-      searchBarPlaceholder="Filter by project title, lead, status, or team keys"
       filtering={{ keepSectionOrder: true }}
+      onSearchTextChange={setSearchText}
+      pagination={pagination}
+      searchBarPlaceholder="Filter by project title, lead, status, or team keys"
+      searchText={searchText}
+      throttle={true}
     >
       {filteredProjects?.map((project) => {
         if (!project) {

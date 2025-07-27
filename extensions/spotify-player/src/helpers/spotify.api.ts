@@ -4,6 +4,7 @@
  * DO NOT MODIFY - This file has been generated using oazapfts.
  * See https://www.npmjs.com/package/oazapfts
  */
+// @ts-nocheck
 import * as Oazapfts from "oazapfts/lib/runtime";
 import * as QS from "oazapfts/lib/runtime/query";
 export const defaults: Oazapfts.RequestOpts = {
@@ -5080,5 +5081,43 @@ export function getMeTopTracks(
         ...opts,
       },
     ),
+  );
+}
+/**
+ * Get next page
+ *
+ */
+export function getNext(
+  nextUrl: string,
+  opts?: Oazapfts.RequestOpts,
+) {
+  const url = nextUrl.replace(servers.server1, "");
+  return oazapfts.ok(
+    oazapfts.fetchJson<
+      | {
+          status: 200;
+          data: PagingPlaylistObject;
+        }
+      | {
+          status: 401;
+          data: {
+            error: ErrorObject;
+          };
+        }
+      | {
+          status: 403;
+          data: {
+            error: ErrorObject;
+          };
+        }
+      | {
+          status: 429;
+          data: {
+            error: ErrorObject;
+          };
+        }
+    >(url, {
+      ...opts,
+    }),
   );
 }

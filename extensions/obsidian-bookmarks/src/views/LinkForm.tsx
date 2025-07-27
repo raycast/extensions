@@ -1,44 +1,88 @@
-import { Form, showToast, Toast } from "@raycast/api";
-import { useEffect, useRef } from "react";
+import { Form, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { useCallback, useEffect, useRef, useState } from "react";
 import FormActions from "../actions/FormActions";
+import { findDuplicateBookmark } from "../helpers/url-sanitizer";
+import useFiles from "../hooks/use-files";
 import useLinkForm from "../hooks/use-link-form";
 import useTags from "../hooks/use-tags";
+import * as methods from "../actions/methods";
+import { Preferences } from "../types";
 
 export default function LinkForm() {
-  const { values, onChange, loading: linkLoading } = useLinkForm();
+  const { values, onChange, setValues, loading: linkLoading } = useLinkForm();
   const { tags, loading: tagsLoading } = useTags();
+  const { files, loading: filesLoading } = useFiles();
   const toastRef = useRef<Toast>();
-  const loadingRef = useRef(linkLoading);
+  const [hasShownToast, setHasShownToast] = useState(false);
+  const [isDuplicate, setIsDuplicate] = useState(false);
 
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (loadingRef.current) {
-        showToast({
-          title: "Fetching link details",
-          style: Toast.Style.Animated,
-        }).then((toast) => {
-          toastRef.current = toast;
-        });
+  // Handle URL validation and duplicate checking
+  const validateUrl = useCallback(
+    async (url: string) => {
+      const { checkDuplicates } = getPreferenceValues<Preferences>();
+
+      if (!url || filesLoading || !checkDuplicates) {
+        setIsDuplicate(false);
+        return;
       }
-    }, 150);
 
-    return () => clearTimeout(timeout);
-  }, []);
+      const duplicate = findDuplicateBookmark(url, files);
+      if (duplicate) {
+        setIsDuplicate(true);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Duplicate bookmark found",
+          message: `This URL is already bookmarked as "${duplicate.attributes.title}"`,
+          primaryAction: {
+            title: "View Existing",
+            onAction: () => methods.openObsidianFile(duplicate),
+          },
+        });
+      } else {
+        setIsDuplicate(false);
+      }
+    },
+    [files, filesLoading]
+  );
 
+  // Check for duplicates whenever URL changes
   useEffect(() => {
-    loadingRef.current = linkLoading;
-    if (!linkLoading) {
-      toastRef.current?.hide();
+    validateUrl(values.url);
+  }, [values.url, validateUrl]);
+
+  // Handle loading toast
+  useEffect(() => {
+    if (linkLoading && !hasShownToast) {
+      showToast({
+        title: "Fetching link details",
+        style: Toast.Style.Animated,
+      }).then((toast) => {
+        toastRef.current = toast;
+        setHasShownToast(true);
+      });
+    } else if (!linkLoading && toastRef.current) {
+      toastRef.current.hide();
+      toastRef.current = undefined;
     }
-  }, [linkLoading]);
+
+    return () => {
+      toastRef.current?.hide();
+    };
+  }, [linkLoading, hasShownToast]);
 
   return (
     <Form
       navigationTitle="Save Bookmark"
-      isLoading={tagsLoading || linkLoading}
-      actions={<FormActions values={values} />}
+      isLoading={tagsLoading || linkLoading || filesLoading}
+      actions={<FormActions values={values} setValues={setValues} />}
     >
-      <Form.TextField id="url" title="URL" value={values.url} onChange={onChange("url")} />
+      <Form.TextField
+        id="url"
+        title="URL"
+        value={values.url}
+        onChange={onChange("url")}
+        error={isDuplicate ? "This URL is already bookmarked" : undefined}
+      />
       <Form.TextField id="title" title="Title" value={values.title} onChange={onChange("title")} />
       <Form.TagPicker id="tags" title="Tags" value={values.tags} onChange={onChange("tags")}>
         {tags.map((tag) => (

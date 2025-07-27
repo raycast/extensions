@@ -35,6 +35,14 @@ export function getPullRequestStatus(pullRequest: PullRequestFieldsFragment | Pu
     };
   }
 
+  if (pullRequest.isInMergeQueue) {
+    return {
+      icon: { source: "pull-request-merge-queue.svg", tintColor: Color.Orange },
+      text: "In Merge Queue",
+      color: Color.Orange,
+    };
+  }
+
   return {
     icon: { source: "pull-request-open.svg", tintColor: Color.Green },
     text: "Open",

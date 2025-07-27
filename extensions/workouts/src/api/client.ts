@@ -7,6 +7,7 @@ import {
   StravaStats,
   StravaSummaryClub,
   StravaManualActivity,
+  StravaRoute,
 } from "./types";
 import { OAuth } from "@raycast/api";
 import { getAccessToken, OAuthService } from "@raycast/utils";
@@ -197,6 +198,51 @@ export const getClubActivities = async (clubId: string, page = 1, pageSize = PAG
   }
 };
 
+export const getRoutes = async (page = 1, pageSize = PAGE_SIZE) => {
+  try {
+    const { token } = await getAccessToken();
+    const athleteId = await getAthleteId();
+    const response = await fetch(
+      `https://www.strava.com/api/v3/athletes/${athleteId}/routes?page=${page}&per_page=${pageSize}&access_token=${token}`,
+    );
+    if (!response.ok) {
+      if (response.status === 429) {
+        throw new Error("Rate limit exceeded");
+      }
+      throw new Error("HTTP error " + response.status);
+    }
+    const json = await response.json();
+    if ((json as Error).message) {
+      throw new Error((json as Error).message);
+    }
+    return json as StravaRoute[];
+  } catch (err) {
+    const error = err instanceof Error ? err.message : "An error occurred";
+    console.error("getRoutes Error:", err);
+    throw new Error(error);
+  }
+};
+
+export const exportRoute = async (routeId_str: string, fileType: "gpx" | "tcx") => {
+  try {
+    const { token } = await getAccessToken();
+    const response = await fetch(
+      `https://www.strava.com/api/v3/routes/${routeId_str}/export_${fileType}?access_token=${token}`,
+    );
+    if (!response.ok) {
+      if (response.status === 429) {
+        throw new Error("Rate limit exceeded");
+      }
+      throw new Error("HTTP error " + response.status);
+    }
+    return response.body;
+  } catch (err) {
+    const error = err instanceof Error ? err.message : "An error occurred";
+    console.error("exportRoute Error:", err);
+    throw new Error(error);
+  }
+};
+
 export const createActivity = async (activityValues: StravaManualActivity) => {
   const isTrainer = activityValues.isTrainer ? 1 : 0;
   const isCommute = activityValues.isCommute ? 1 : 0;
@@ -224,7 +270,8 @@ export const createActivity = async (activityValues: StravaManualActivity) => {
     if ((json as Error).message) {
       throw new Error((json as Error).message);
     }
-    return true;
+    const activity = json as StravaActivitySummary;
+    return activity;
   } catch (err) {
     const error = err instanceof Error ? err.message : "An error occurred";
     throw new Error(error);

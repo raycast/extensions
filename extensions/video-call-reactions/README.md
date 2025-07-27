@@ -1,7 +1,7 @@
 # Video Call Reactions Extension for Raycast
 
 ## Overview
-The **Video Call Reactions** extension for Raycast adds a dash of fun to your macOS video calls. With just a few keystrokes, you can trigger visual effects such as hearts, thumbs up/down, balloons, rain, confetti, fireworks, and lasers.
+The **Video Call Reactions** extension for Raycast adds a dash of fun to your macOS video calls. With just a few keystrokes, you can trigger visual effects such as hearts, thumbs up/down, balloons, rain, confetti, fireworks, and lasers. Work only with macOS Sequoia 15.0
 
 ## Features
 - **Instant Access**: Quickly launch reactions with a single Raycast command.
@@ -32,7 +32,6 @@ To utilize the Video Call Reactions extension, ensure you have:
 Encountering issues or have suggestions? Open an issue on our GitHub repository.
 
 ## Example
-
 ![Fireworks Image](./media/fireworks.png)
 
 ## License

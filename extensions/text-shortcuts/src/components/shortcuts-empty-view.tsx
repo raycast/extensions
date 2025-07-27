@@ -1,5 +1,5 @@
-import React from "react";
 import { ActionPanel, getPreferenceValues, Grid, List } from "@raycast/api";
+import React from "react";
 import { Preferences } from "../types/preferences";
 import { ActionOnEmptyView } from "./action-on-empty-view";
 

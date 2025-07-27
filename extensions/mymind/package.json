@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mymind",
+  "title": "mymind",
+  "description": "Manage and add your thoughts to my mind",
+  "icon": "extension-icon.png",
+  "author": "arian",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "search-my-mind",
+      "title": "Search My Mind",
+      "subtitle": "mymind",
+      "description": "Go through past mind entries",
+      "mode": "view"
+    },
+    {
+      "name": "add-a-new-note",
+      "title": "Add a New Note",
+      "subtitle": "mymind",
+      "description": "Adds a new note to mymind",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.91.2",
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^3.3.2",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "jwt",
+      "type": "password",
+      "required": true,
+      "title": "JWT Token",
+      "description": "Your MyMind JWT token value. Go to https://arian.gg/blog/setup for instructions."
+    },
+    {
+      "name": "cid",
+      "type": "password",
+      "required": true,
+      "title": "CID",
+      "description": "Your MyMind CID value. Go to https://arian.gg/blog/setup for instructions."
+    },
+    {
+      "name": "authenticityToken",
+      "type": "password",
+      "required": true,
+      "title": "Authenticity Token",
+      "description": "Your MyMind Authenticity Token value. Go to https://arian.gg/blog/setup for instructions."
+    }
+  ]
+}

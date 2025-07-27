@@ -1,9 +1,9 @@
-import { runAppleScript } from "run-applescript";
 import { PopToRootType, closeMainWindow, popToRoot } from "@raycast/api";
 import { SettingsProfileOpenBehaviour, Tab } from "../types/interfaces";
 import { getApplicationName } from "../utils/appUtils";
 import { geNotInstalledMessage } from "../utils/messageUtils";
 import { DEFAULT_PROFILE_ID } from "../constants";
+import { runAppleScript } from "@raycast/utils";
 
 export async function getOpenTabs(): Promise<Tab[]> {
   await validateAppIsInstalled();
@@ -135,3 +135,13 @@ export const validateAppIsInstalled = async () => {
     throw new Error(geNotInstalledMessage());
   }
 };
+
+export async function getActiveTabUrl(): Promise<string> {
+  await validateAppIsInstalled();
+
+  const activeTabUrl = await runAppleScript(
+    `tell application "${getApplicationName()}" to return URL of active tab of front window`
+  );
+
+  return activeTabUrl;
+}

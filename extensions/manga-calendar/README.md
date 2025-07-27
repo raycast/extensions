@@ -19,4 +19,4 @@ Keep in mind that the original website is managed by a compact and dedicated tea
 
 The prices shown correspond to those at launch. **May not be representative of the current prices.**
 
-_This extension is independently developed and is not officially endorsed by or affiliated with [Mis Comics MX](https://miscomics.com.mx/). Enjoy the convenience of exploring Mexican manga and comics at your fingertips, courtesy of **[Manga Mexico](https://www.raycast.com/mrolivo/manga-calendar)**._
+_This extension is independently developed and is not officially endorsed by or affiliated with [Mis Comics MX](https://miscomics.com.mx/). Enjoy the convenience of exploring Mexican manga and comics at your fingertips, courtesy of **[Manga Mexico](https://www.raycast.com/jueet/manga-calendar)**._

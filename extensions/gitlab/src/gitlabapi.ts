@@ -70,6 +70,7 @@ function userFromJson(data: any): User {
 export function dataToProject(project: any): Project {
   return {
     id: project.id,
+    group_id: project.namespace.kind == "group" ? project.namespace.id : 0,
     name: project.name,
     name_with_namespace: project.name_with_namespace,
     fullPath: project.path_with_namespace,
@@ -142,11 +143,22 @@ export function jsonDataToIssue(issue: any): Issue {
   };
 }
 
-function paramString(params: { [key: string]: string }): string {
+/**
+ * Converts a params object to a query string, supporting arrays and nested keys (e.g., labels[], not[labels][]).
+ * - Arrays are output as multiple key[]=value pairs.
+ * - Nested keys (e.g., not[labels][]) are supported if the key is in the form 'not[labels][]'.
+ */
+function paramString(params: { [key: string]: any }): string {
   const p: string[] = [];
   for (const k in params) {
-    const v = encodeURI(params[k]);
-    p.push(`${k}=${v}`);
+    const v = params[k];
+    if (Array.isArray(v)) {
+      for (const item of v) {
+        p.push(`${encodeURIComponent(k)}=${encodeURIComponent(item)}`);
+      }
+    } else {
+      p.push(`${encodeURIComponent(k)}=${encodeURIComponent(v)}`);
+    }
   }
   let prefix = "";
   if (p.length > 0) {
@@ -301,6 +313,7 @@ export class Todo {
 
 export class Project {
   public id = 0;
+  public group_id = 0;
   public name_with_namespace = "";
   public name = "";
   public fullPath = "";
@@ -388,6 +401,22 @@ export class GitLab {
     this.url = url;
   }
 
+  private getFetcher() {
+    return async (...args: Parameters<typeof fetch>) => {
+      const [fullUrl, options] = args;
+      const agent = getHttpAgent();
+
+      return await fetch(fullUrl, {
+        headers: {
+          "Content-Type": "application/json",
+          "PRIVATE-TOKEN": this.token,
+        },
+        agent: agent,
+        ...options,
+      });
+    };
+  }
+
   public joinUrl(relativeUrl: string): string {
     return new URL(relativeUrl, this.url).href;
   }
@@ -399,14 +428,9 @@ export class GitLab {
       const ps = paramString(pagedParams);
       const fullUrl = this.url + "/api/v4/" + url + ps;
       logAPI(`send GET request: ${fullUrl}`);
-      const agent = getHttpAgent();
-      const response = await fetch(fullUrl, {
+      const fetcher = this.getFetcher();
+      const response = await fetcher(fullUrl, {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "PRIVATE-TOKEN": this.token,
-        },
-        agent: agent,
       });
       return response;
     };
@@ -433,16 +457,17 @@ export class GitLab {
 
   public async downloadFile(url: string, params: { localFilepath: string }): Promise<string> {
     logAPI(`download ${url}`);
-    const response = await fetch(url, {
+    const fetcher = this.getFetcher();
+    const response = await fetcher(url, {
       method: "GET",
-      headers: {
-        "PRIVATE-TOKEN": this.token,
-      },
     });
     if (!response.ok) {
       throw new Error(`unexpected response ${response.statusText}`);
     }
     logAPI(`write ${url} to ${params.localFilepath}`);
+    if (!response.body) {
+      throw new Error(`response body is null for ${url}`);
+    }
     await streamPipeline(response.body, fs.createWriteStream(params.localFilepath));
     return params.localFilepath;
   }
@@ -452,12 +477,9 @@ export class GitLab {
     logAPI(`send POST request: ${fullUrl}`);
     logAPI(params);
     try {
-      const response = await fetch(fullUrl, {
+      const fetcher = this.getFetcher();
+      const response = await fetcher(fullUrl, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "PRIVATE-TOKEN": this.token,
-        },
         body: JSON.stringify(params),
       });
       const s = response.status;
@@ -504,12 +526,9 @@ export class GitLab {
     logAPI(`send PUT request: ${fullUrl}`);
     logAPI(params);
     try {
-      const response = await fetch(fullUrl, {
+      const fetcher = this.getFetcher();
+      const response = await fetcher(fullUrl, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "PRIVATE-TOKEN": this.token,
-        },
         body: JSON.stringify(params),
       });
       await toJsonOrError(response);
@@ -519,11 +538,42 @@ export class GitLab {
     }
   }
 
+  /**
+   * Fetches issues for a project, supporting label inclusion and exclusion.
+   * If params.includeLabels or params.excludeLabels are provided (comma-separated strings),
+   * they are mapped to the correct GitLab API query parameters:
+   *   - labels[] for inclusion
+   *   - not[labels][] for exclusion
+   */
   async getIssues(params: Record<string, any>, project?: Project, all?: boolean): Promise<Issue[]> {
     const projectPrefix = project ? `projects/${project.id}/` : "";
+
+    // Build correct label filter params for GitLab API
+    if (params.includeLabels) {
+      const includeArr = params.includeLabels
+        .split(",")
+        .map((l: string) => l.trim())
+        .filter((l: string) => l.length > 0);
+      if (includeArr.length > 0) {
+        params["labels[]"] = includeArr;
+      }
+      delete params.includeLabels;
+    }
+    if (params.excludeLabels) {
+      const excludeArr = params.excludeLabels
+        .split(",")
+        .map((l: string) => l.trim())
+        .filter((l: string) => l.length > 0);
+      if (excludeArr.length > 0) {
+        params["not[labels][]"] = excludeArr;
+      }
+      delete params.excludeLabels;
+    }
+
     if (!params.with_labels_details) {
       params.with_labels_details = "true";
     }
+
     const issueItems: Issue[] = await this.fetch(`${projectPrefix}issues`, params, all).then((issues) => {
       return issues.map((issue: any) => jsonDataToIssue(issue));
     });
@@ -640,12 +690,13 @@ export class GitLab {
     });
   }
 
-  async getProjects(args = { searchText: "", searchIn: "" }): Promise<Project[]> {
+  async getProjects(args = { searchText: "", searchIn: "", membership: "true" }): Promise<Project[]> {
     const params: { [key: string]: string } = {};
     if (args.searchText) {
       params.search = args.searchText;
       params.in = args.searchIn || "title";
     }
+    params.membership = args.membership;
     const issueItems: Project[] = await this.fetch("projects", params).then((projects) => {
       return projects.map((project: any) => dataToProject(project));
     });

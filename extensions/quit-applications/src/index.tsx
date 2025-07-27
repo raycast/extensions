@@ -1,5 +1,15 @@
-import React from "react";
-import { ActionPanel, List, Action, showToast, Toast, popToRoot, clearSearchBar } from "@raycast/api";
+import React, { useEffect, useState } from "react";
+import {
+  ActionPanel,
+  List,
+  Action,
+  showToast,
+  Toast,
+  clearSearchBar,
+  getPreferenceValues,
+  Icon,
+  popToRoot,
+} from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 
 function applicationNameFromPath(path: string): string {
@@ -9,6 +19,9 @@ function applicationNameFromPath(path: string): string {
 
   const pathParts = path.split("/");
   const appName = pathParts[pathParts.length - 1];
+  if (!appName) {
+    throw new Error("appName not found");
+  }
   return appName.replace(".app", "");
 }
 
@@ -33,7 +46,7 @@ function quitApp(app: string) {
   tell application "${app}" to quit
   on error error_message number error_number
       if error_number is equal to -128 then
-      --Keep Calm and Carry On
+      -- the user cancelled the action. no need to error
       else
           display dialog error_message
       end if
@@ -90,92 +103,152 @@ function getQuickLinkForApp(appName: string, action: string): string {
   return `raycast://extensions/mackopes/quit-applications/index?context=${encodedContext}`;
 }
 
-interface AppListState {
-  apps: {
-    name: string;
-    path: string;
-  }[];
-  isLoading: boolean;
+type CommandProps = {
   launchContext?: { appName: string; action: string /* quit | restart */ };
-}
+};
 
-class AppList extends React.Component<Record<string, never>, AppListState> {
-  constructor(props: Record<string, never>) {
-    super(props);
-
-    this.state = {
-      apps: [],
-      isLoading: true,
-      launchContext: props.launchContext,
-    };
-  }
-
-  componentDidMount() {
-    if (this.state.launchContext && this.state.launchContext.appName && this.state.launchContext.action) {
-      const { appName, action } = this.state.launchContext;
+export default function Command({ launchContext }: CommandProps) {
+  const preferences = getPreferenceValues();
+  const [apps, setApps] = useState<
+    {
+      name: string;
+      path: string;
+    }[]
+  >([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [searchText, setSearchText] = useState("");
+  useEffect(() => {
+    if (launchContext && launchContext.appName && launchContext.action) {
+      const { appName, action } = launchContext;
 
       if (action === "quit") {
         quitAppWithToast(appName);
-        popToRoot().then();
-        return;
-      }
-
-      if (action === "restart") {
+      } else if (action === "restart") {
         restartAppWithToast(appName);
-        popToRoot().then();
-        return;
       }
+      return;
     }
 
     getRunningAppsPaths().then((appCandidatePaths) => {
-      // filter out all apps that do not end with .app
-      const apps = appCandidatePaths.map((path) => ({ name: applicationNameFromPath(path), path }));
+      const mappedApps = appCandidatePaths
+        .filter((path) => path.endsWith(".app"))
+        .map((path) => ({ name: applicationNameFromPath(path), path }));
 
-      this.setState({ apps, isLoading: false });
+      const excludedNames = preferences.excludeApplications
+        ? preferences.excludeApplications.split(",").map((name: string) => name.trim().toLowerCase())
+        : [];
+
+      const filteredApps = mappedApps.filter((app) => !excludedNames.includes(app.name.toLowerCase()));
+
+      const uniqueApps: { name: string; path: string }[] = [];
+      const seenPaths = new Set<string>();
+
+      for (const app of filteredApps) {
+        if (!seenPaths.has(app.path)) {
+          seenPaths.add(app.path);
+          uniqueApps.push(app);
+        }
+      }
+
+      setApps(uniqueApps);
+
+      if (uniqueApps && uniqueApps[0]) {
+        setSelectedId(uniqueApps[0].path);
+      }
+
+      setIsLoading(false);
     });
-  }
+  }, []);
 
-  render() {
-    return (
-      <List isLoading={this.state.isLoading}>
-        {this.state.apps.map((app) => (
-          <List.Item
-            title={app.name}
-            key={app.name}
-            icon={{ fileIcon: app.path }}
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Quit"
-                  onAction={() => {
-                    const success = quitAppWithToast(app.name);
-                    if (success) {
-                      this.setState({ apps: this.state.apps.filter((a) => a.name !== app.name) });
+  return (
+    <List
+      isLoading={isLoading}
+      selectedItemId={selectedId ?? undefined}
+      filtering={true}
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+      onSelectionChange={(id) => setSelectedId(id)}
+    >
+      {preferences.showQuitAllApplications && (
+        <List.Item
+          title="Quit All Applications"
+          icon={Icon.XMarkCircle}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Quit All"
+                onAction={async () => {
+                  let remainingApps = [...apps];
+
+                  for (const app of apps) {
+                    if (
+                      preferences.excludeApplications
+                        .split(",")
+                        .map((name: string) => name.trim())
+                        .includes(app.name)
+                    ) {
+                      continue;
                     }
-                    clearSearchBar();
-                  }}
-                />
-                <Action
-                  title="Restart"
-                  onAction={() => {
-                    restartAppWithToast(app.name);
-                  }}
-                />
-                <Action.CreateQuicklink
-                  title="Create Quit Quicklink"
-                  quicklink={{ link: getQuickLinkForApp(app.name, "quit"), name: `Quit ${app.name}` }}
-                />
-                <Action.CreateQuicklink
-                  title="Create Restart Quicklink"
-                  quicklink={{ link: getQuickLinkForApp(app.name, "restart"), name: `Restart ${app.name}` }}
-                />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List>
-    );
-  }
-}
 
-export default AppList;
+                    const success = await quitAppWithToast(app.name);
+
+                    if (success) {
+                      remainingApps = remainingApps.filter((a) => a.name !== app.name);
+                    }
+                  }
+
+                  setApps(remainingApps);
+
+                  if (searchText) {
+                    clearSearchBar();
+                  }
+
+                  if (remainingApps.length == 0) {
+                    popToRoot({ clearSearchBar: true });
+                  }
+                }}
+              />
+            </ActionPanel>
+          }
+        />
+      )}
+      {apps.map((app) => (
+        <List.Item
+          title={app.name}
+          key={app.name}
+          id={app.path}
+          icon={{ fileIcon: app.path }}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Quit"
+                onAction={() => {
+                  const success = quitAppWithToast(app.name);
+
+                  if (success) {
+                    const removedAppIndex = apps.findIndex((a) => a.name === app.name);
+                    setApps((apps) => apps.toSpliced(removedAppIndex, 1));
+                  }
+
+                  if (searchText) {
+                    clearSearchBar();
+                  }
+                }}
+              />
+              <Action title="Restart" onAction={() => restartAppWithToast(app.name)} />
+              <Action.CreateQuicklink
+                title="Create Quit Quicklink"
+                quicklink={{ link: getQuickLinkForApp(app.name, "quit"), name: `Quit ${app.name}` }}
+              />
+              <Action.CreateQuicklink
+                title="Create Restart Quicklink"
+                quicklink={{ link: getQuickLinkForApp(app.name, "restart"), name: `Restart ${app.name}` }}
+              />
+            </ActionPanel>
+          }
+        />
+      ))}
+    </List>
+  );
+}

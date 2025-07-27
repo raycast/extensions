@@ -5,13 +5,13 @@ import { useSeasons, useTable } from "./hooks";
 export default function Standings() {
   const [currentSeason, seasons, setCurrentSeason] = useSeasons();
   const [table, isLoading] = useTable(currentSeason);
-  const [showDetails, setShowDetails] = useState(false);
+  const [showStats, setshowStats] = useState(false);
 
   return (
     <List
       throttle
       searchBarAccessory={
-        <List.Dropdown tooltip="Filter by Season" value={currentSeason} onChange={setCurrentSeason}>
+        <List.Dropdown tooltip="Select Season" value={currentSeason} onChange={setCurrentSeason}>
           <List.Dropdown.Section>
             {seasons.map((season) => {
               return <List.Dropdown.Item key={season} value={season} title={season} />;
@@ -20,9 +20,9 @@ export default function Standings() {
         </List.Dropdown>
       }
       isLoading={isLoading}
-      isShowingDetail={showDetails}
+      isShowingDetail={showStats}
     >
-      <List.Section>
+      <List.Section title="Club">
         {table.map((entry) => {
           const { team, position, previousPosition } = entry;
 
@@ -58,7 +58,6 @@ export default function Standings() {
                 <List.Item.Detail
                   metadata={
                     <List.Item.Detail.Metadata>
-                      <List.Item.Detail.Metadata.Label title="Stats" />
                       {previousPosition && (
                         <List.Item.Detail.Metadata.Label title="Previous Position" text={previousPosition.toString()} />
                       )}
@@ -76,9 +75,9 @@ export default function Standings() {
               actions={
                 <ActionPanel>
                   <Action
-                    title={showDetails ? "Hide details" : "Show details"}
+                    title={showStats ? "Hide Stats" : "Show Stats"}
                     icon={Icon.Sidebar}
-                    onAction={() => setShowDetails((prev) => !prev)}
+                    onAction={() => setshowStats((prev) => !prev)}
                   />
                 </ActionPanel>
               }

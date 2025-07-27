@@ -1,26 +1,25 @@
-import { AppHistory, execPromise, recentEntry, ToolboxApp } from "../util";
-import { ActionPanel, popToRoot, showHUD, showToast, Toast, open } from "@raycast/api";
+import { AppHistory, execPromise, recentEntry } from "../util";
+import { popToRoot, showHUD, showToast, Toast, open, Action, captureException } from "@raycast/api";
+import React from "react";
+import { entryAppAction } from "../useAppHistory";
 
 interface OpenInJetBrainsAppActionProps {
   tool: AppHistory;
   recent: recentEntry | null;
-  toolboxApp: ToolboxApp;
+  visit: entryAppAction | null;
 }
 
-export function openInApp(tool: AppHistory, recent: recentEntry | null, v2: boolean): () => Promise<Toast | undefined> {
-  const cmd = tool.tool
-    ? `"${tool.tool}" "${recent?.path ?? ""}"`
-    : tool.url
-    ? `open ${tool.url}${recent?.title ?? ""}`
-    : undefined;
+export function openInApp(
+  tool: AppHistory,
+  recent: recentEntry | null,
+  visit: entryAppAction | null
+): () => Promise<Toast | undefined> {
+  const cmd = tool.tool ? `"${tool.tool}" "${recent?.path ?? ""}"` : `open ${tool.url}${recent?.title ?? ""}`;
   const toOpen = tool.app?.path ?? "";
-
   async function isRunning() {
-    const grep = v2
-      ? `ps aux | grep -v "grep" | grep "${tool.app?.path}"`
-      : `ps aux | grep -v "grep" | grep "${tool.id}" | grep "${tool.build}"`;
+    const grep = `ps aux | grep -v "grep" | grep "${tool.app?.path}"`;
     const { stdout } = await execPromise(grep).catch((err) => {
-      // console.error({ err });
+      captureException(err);
       return {
         stdout: "",
       };
@@ -35,18 +34,10 @@ export function openInApp(tool: AppHistory, recent: recentEntry | null, v2: bool
   }
 
   return async function () {
-    if (cmd === undefined) {
-      return showToast(
-        Toast.Style.Failure,
-        "Failed",
-        "No script or url configured, have you enabled shell scripts in JetBrains Toolbox or enabled protocol urls in the extension config"
-      );
-    }
-
     if (toOpen === "" && tool.tool === false) {
       return showToast(Toast.Style.Failure, "Failed", "No app path");
     }
-    let running = await isRunning();
+    let running: boolean = await isRunning();
     if (!running) {
       if (toOpen === "") {
         return showToast(Toast.Style.Failure, "Failed", "No app path");
@@ -54,7 +45,7 @@ export function openInApp(tool: AppHistory, recent: recentEntry | null, v2: bool
       /**
        * WORKAROUND FOR ENVIRONMENT PROBLEMS
        * if the app is not running open it and wait for a bit
-       * using the tool directly opens with the wrong env
+       * using the tool directly opens with the wrong env,
        * and we need to wait so the tool actually does open
        */
       console.log("not-running");
@@ -65,18 +56,19 @@ export function openInApp(tool: AppHistory, recent: recentEntry | null, v2: bool
       } while (!running);
     }
     showHUD(`Opening ${recent ? recent.title : tool.title}`)
+      .then(() => visit && recent && visit(recent, tool))
       .then(() => recent !== null && execPromise(cmd) && null)
       .then(() => popToRoot())
-      .catch((error) => showToast(Toast.Style.Failure, "Failed", error.message).then(() => console.error({ error })));
+      .catch((err) => showToast(Toast.Style.Failure, "Failed", err.message).then(() => captureException(err)));
   };
 }
 
-export function OpenInJetBrainsApp({ tool, recent, toolboxApp }: OpenInJetBrainsAppActionProps): JSX.Element | null {
+export function OpenInJetBrainsApp({ tool, recent, visit }: OpenInJetBrainsAppActionProps): React.JSX.Element | null {
   return (
-    <ActionPanel.Item
+    <Action
       title={`Open ${recent ? "with " : ""}${tool.title}`}
       icon={tool.icon}
-      onAction={openInApp(tool, recent, toolboxApp?.isV2)}
+      onAction={openInApp(tool, recent, visit)}
     />
   );
 }

@@ -1,0 +1,162 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "obsidian-tasks",
+  "title": "Obsidian Tasks",
+  "description": "Manage your Obsidian Tasks through Raycast",
+  "icon": "command-icon.png",
+  "author": "ozencb",
+  "contributors": [
+    "elfitaflores",
+    "xmok"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ozencb/raycast-obsidian-tasks-extension.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ozencb/raycast-obsidian-tasks-extension/issues"
+  },
+  "homepage": "https://github.com/ozencb/raycast-obsidian-tasks-extension#readme",
+  "commands": [
+    {
+      "name": "list-tasks",
+      "title": "List Tasks",
+      "description": "List all Obsidian tasks",
+      "mode": "view",
+      "preferences": [
+        {
+      "name": "showDescriptionInDetails",
+      "title": "Show Description",
+      "description": "Show Description in Details Markdown",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Show description in details panel"
+    }
+      ]
+    },
+    {
+      "name": "add-task",
+      "title": "Add Task",
+      "description": "Add a new task to Obsidian",
+      "mode": "view"
+    },
+    {
+      "name": "edit-task",
+      "title": "Edit Task",
+      "description": "Edit an existing Obsidian task",
+      "mode": "view"
+    },
+    {
+      "name": "mark-done",
+      "title": "Mark Task Done",
+      "description": "Mark an Obsidian task as done",
+      "mode": "view"
+    },
+    {
+      "name": "menubar-item",
+      "title": "Toggle Menubar",
+      "description": "Show the first task in the menubar",
+      "mode": "menu-bar"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "filePath",
+      "title": "Tasks File In Your Vault",
+      "description": "Path to your tasks file in your vault",
+      "type": "file",
+      "required": true
+    },
+    {
+      "name": "showDueDate",
+      "title": "Show Due Date in Menubar",
+      "description": "Display the due date of tasks in the menubar",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "label": "Show due date"
+    },
+    {
+      "name": "menubarTaskCount",
+      "title": "Show Task Count in Menubar",
+      "description": "Show the number of tasks in the menubar",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "label": "Show task count"
+    },
+    {
+      "name": "showIcon",
+      "title": "Show Icon in Menubar",
+      "description": "Show the icon of tasks in the menubar",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "label": "Show icon"
+    },
+    {
+      "name": "sortByPriority",
+      "title": "Sort by Priority",
+      "description": "Sort tasks by priority",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "label": "Sort by priority"
+    },
+    {
+      "name": "showOnlyCurrent",
+      "title": "Show Only Current Tasks",
+      "description": "Show only tasks with a due or scheduled date that is today or earlier",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "label": "Show only current tasks"
+    },
+    {
+      "name": "maxMenubarDescriptionLength",
+      "title": "Max Description Length",
+      "description": "Maximum length of task description to show in menubar",
+      "type": "textfield",
+      "default": "30",
+      "placeholder": "30",
+      "required": true
+    },
+    {
+      "name": "refreshIntervalInMinutes",
+      "title": "Refresh Interval",
+      "description": "Refresh interval in minutes",
+      "type": "textfield",
+      "default": "1",
+      "placeholder": "1",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.3",
+    "date-fns": "^2.30.0",
+    "fs-extra": "^11.1.0",
+    "gray-matter": "^4.0.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/fs-extra": "^9.0.13",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

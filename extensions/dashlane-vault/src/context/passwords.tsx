@@ -1,5 +1,5 @@
 import { Toast, showToast } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { showFailureToast, useFrecencySorting } from "@raycast/utils";
 import { createContext, useContext } from "react";
 
 import { getErrorAction } from "@/helper/error";
@@ -12,12 +12,15 @@ export type PasswordsContextType = {
   isLoading: boolean;
   isInitialLoaded: boolean;
   sync: () => void;
+  visitItem: (item: VaultCredential) => Promise<void>;
+  resetRanking: (item: VaultCredential) => Promise<void>;
 };
 
 const PasswordsContext = createContext<PasswordsContextType | undefined>(undefined);
 
 export function PasswordsProvider({ children }: { children: React.ReactNode }) {
   const { passwords, isLoading, isInitialLoaded, revalidate } = useCachedPasswords();
+  const { data: sortedPasswords, visitItem, resetRanking } = useFrecencySorting(passwords, { namespace: "passwords" });
 
   async function sync() {
     try {
@@ -42,7 +45,9 @@ export function PasswordsProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <PasswordsContext.Provider value={{ passwords, isLoading, isInitialLoaded, sync }}>
+    <PasswordsContext.Provider
+      value={{ passwords: sortedPasswords, isLoading, isInitialLoaded, sync, visitItem, resetRanking }}
+    >
       {children}
     </PasswordsContext.Provider>
   );

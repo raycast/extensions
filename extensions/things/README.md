@@ -18,7 +18,7 @@ If you don't see any of your to-dos in any commands, please make sure Things is 
 ### Quick Add To-do
 
 Raycast AI is used to select the deadline, list, tags etc. If Raycast AI is not accessible or user has selected `Don't use AI`
-preference, all the quickly created to-do(s) will be sent to Inbox, but the title will still be parsed for assigning deadlines 
+preference, all the quickly created to-do(s) will be sent to Inbox, but the title will still be parsed for assigning deadlines
 and list name followed with '#' in title (case-insensitive).
 
 **Examples (with AI):**
@@ -27,4 +27,4 @@ and list name followed with '#' in title (case-insensitive).
 * Buy a new car by the end of the year -> Creates todo with title "Buy a new car" and deadline "20..-12-31".
 
 **Examples (without AI):**
-* Complete project by end of the year #work -> Creates todo with title "Complete project" with deadline "20..-12-31" and list "work".
+* Complete project -> Creates todo with title "Complete project" in "Inbox".

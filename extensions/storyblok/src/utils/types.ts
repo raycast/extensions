@@ -246,3 +246,14 @@ export type ActivityData = {
     active: boolean;
   };
 };
+
+export type apiKey = {
+  id: number;
+  access: "private" | "public";
+  branch_id: number | null;
+  name: string | null;
+  space_id: number;
+  token: string;
+  story_ids: number[];
+  min_cache: number;
+};

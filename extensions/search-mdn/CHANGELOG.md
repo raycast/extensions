@@ -1,5 +1,13 @@
 # Changelog
 
+## Updated - 2024-09-06
+
+- Fixing an issue with Markdown parser not handling `\u` characters properly ([#12921](https://github.com/raycast/extensions/issues/12921))
+
+## Updated - 2024-09-02
+
+- Feature: Support custom preferred action
+
 ## Updated - 2024-06-19
 
 - Updated the command icon and snapshots

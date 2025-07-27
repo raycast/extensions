@@ -1,11 +1,11 @@
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import { getFavicon, MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 
 import { getGitHubClient } from "../api/githubClient";
 import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
 import { getErrorMessage } from "../helpers/errors";
-import { WEB_IDES } from "../helpers/repository";
+import { cloneAndOpen, buildCloneCommand, WEB_IDES } from "../helpers/repository";
 
 import CloneRepositoryForm from "./CloneRepositoryForm";
 import { RepositoryDiscussionList } from "./RepositoryDiscussions";
@@ -29,6 +29,7 @@ export default function RepositoryActions({
   sortTypesData,
 }: RepositoryActionProps & SortActionProps & SortTypesDataProps) {
   const { github } = getGitHubClient();
+  const { baseClonePath, repositoryCloneProtocol } = getPreferenceValues<Preferences.SearchRepositories>();
 
   const updatedAt = new Date(repository.updatedAt);
 
@@ -116,12 +117,22 @@ export default function RepositoryActions({
           ))}
         </ActionPanel.Submenu>
 
-        <Action.Push
-          icon={Icon.Terminal}
-          title="Clone with Options"
-          target={<CloneRepositoryForm repository={repository} />}
-          shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "c" }}
-        />
+        {baseClonePath && (
+          <Action
+            icon={Icon.Terminal}
+            title="Clone and Open"
+            onAction={() => cloneAndOpen(repository)}
+            shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+          />
+        )}
+        {!baseClonePath && (
+          <Action.Push
+            icon={Icon.Terminal}
+            title="Clone with Options"
+            target={<CloneRepositoryForm repository={repository} />}
+            shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "c" }}
+          />
+        )}
         <Action.OpenInBrowser
           icon={{ source: "vscode.svg", tintColor: Color.PrimaryText }}
           title="Clone in VS Code"
@@ -131,7 +142,7 @@ export default function RepositoryActions({
 
         {repository.viewerHasStarred ? (
           <Action
-            title="Remove Star From Repository"
+            title="Remove Star from Repository"
             icon={Icon.StarDisabled}
             onAction={removeStar}
             shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
@@ -223,7 +234,7 @@ export default function RepositoryActions({
         />
 
         <Action.CopyToClipboard
-          content={`git clone ${repository.url}`}
+          content={buildCloneCommand(repository.nameWithOwner, repositoryCloneProtocol)}
           title="Copy Clone Command"
           shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
         />

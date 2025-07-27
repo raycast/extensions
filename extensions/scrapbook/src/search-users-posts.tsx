@@ -19,6 +19,7 @@ export default function SearchUsersPosts(props: LaunchProps) {
   const [directMatch, setDirectMatch] = useState<UserType | null>(null);
   const { isLoading, data: usersData } = useFetch<UserType[]>("https://scrapbook.hackclub.com/api/users", {
     execute: searchText.length > 0,
+    parseResponse: (response) => response.json(),
   });
 
   useEffect(() => {
@@ -92,7 +93,9 @@ export default function SearchUsersPosts(props: LaunchProps) {
 }
 
 function UserPosts({ username }: { username: string }) {
-  const { isLoading, data, revalidate } = useFetch<UserInfo>(`https://scrapbook.hackclub.com/api/users/${username}`);
+  const { isLoading, data, revalidate } = useFetch<UserInfo>(`https://scrapbook.hackclub.com/api/users/${username}`, {
+    parseResponse: (response) => response.json(),
+  });
   const { selectedReaction, setSelectedReaction, filteredData } = useReactionFiltering(data?.posts || []);
 
   return (

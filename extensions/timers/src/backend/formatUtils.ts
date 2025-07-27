@@ -9,7 +9,7 @@ const formatDateTime = (d: Date) => {
   const parsedDate = new Date(d);
   const datevalues = [
     parsedDate.getFullYear().toString(),
-    parsedDate.getMonth().toString().padStart(2, "0"),
+    (parsedDate.getMonth() + 1).toString().padStart(2, "0"),
     parsedDate.getDate().toString().padStart(2, "0"),
   ];
   const timevalues = [parsedDate.getHours(), parsedDate.getMinutes(), parsedDate.getSeconds()].map((x) =>

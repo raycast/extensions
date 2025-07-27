@@ -43,4 +43,5 @@ export const ScriptError = {
 
 export interface Preferences {
   volumeSteps: string;
+  disableHUD: boolean;
 }

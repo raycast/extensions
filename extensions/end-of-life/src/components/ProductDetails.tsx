@@ -10,15 +10,11 @@ function ProductDetails({ product }: { product: string }) {
   return (
     <List isLoading={isLoading} isShowingDetail navigationTitle={product}>
       <EmptyView />
-      <List.Section key="Cycles" title="Product cycles">
+      <List.Section title="Product cycles">
         {cycles.map((cycle: EndOfLifeProductDetails) => (
           <List.Item
-            id={cycle.cycle}
+            id={`${product}-${cycle.cycle}`}
             key={cycle.cycle}
-            //   icon={{
-            //     source: standing.position + ".png",
-            //     tintColor: Color.PrimaryText,
-            //   }}
             title={`${product} ${cycle.cycle}`}
             detail={CycleView(product, cycle)}
             accessories={accessories(cycle)}
@@ -58,7 +54,7 @@ function CycleView(product: string, cycle: EndOfLifeProductDetails) {
     <List.Item.Detail
       metadata={
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title={`${product} ${cycle.cycle}`} />
+          <List.Item.Detail.Metadata.Label key={`${product}-${cycle.cycle}`} title={`${product} ${cycle.cycle}`} />
           <List.Item.Detail.Metadata.Separator />
           {Object.entries(cycle)
             .sort(([key1], [key2]) => key1.localeCompare(key2))
@@ -75,25 +71,25 @@ function PropertyView(cycle: EndOfLifeProductDetails, key: string) {
   if (value === undefined || value === null) {
     return null;
   } else if (typeof value === "number") {
-    return <List.Item.Detail.Metadata.Label title={key} text={value.toString()} />;
+    return <List.Item.Detail.Metadata.Label key={key} title={key} text={value.toString()} />;
   } else if (typeof value === "boolean") {
-    return <List.Item.Detail.Metadata.Label title={key} text={value ? "Yes" : "No"} />;
+    return <List.Item.Detail.Metadata.Label key={key} title={key} text={value ? "Yes" : "No"} />;
   } else if (typeof value === "string") {
     // is it a date?
     if (isValidDate(value)) {
       const dateValue = new Date(value);
-      return <List.Item.Detail.Metadata.Label title={key} text={formatDate(dateValue)} />;
+      return <List.Item.Detail.Metadata.Label key={key} title={key} text={formatDate(dateValue)} />;
     }
     // is it a link?
     if (key === "link") {
-      return <List.Item.Detail.Metadata.Link title={key} target={value} text={value} />;
+      return <List.Item.Detail.Metadata.Link key={key} title={key} target={value} text={value} />;
     }
     // skip the cycle because it's in the heading
     if (key === "cycle") {
       return null;
     }
     // just return the text
-    return <List.Item.Detail.Metadata.Label title={key} text={value} />;
+    return <List.Item.Detail.Metadata.Label key={key} title={key} text={value} />;
   }
 }
 

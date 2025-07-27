@@ -7,7 +7,9 @@
   "icon": "icon.png",
   "author": "pernielsentikaer",
   "contributors": [
-    "nagauta"
+    "nagauta",
+    "xmok",
+    "MatteoGauthier"
   ],
   "license": "MIT",
   "commands": [
@@ -82,7 +84,7 @@
       "data": [
         {
           "title": "Show Environment",
-          "value": "environment" 
+          "value": "environment"
         },
         {
           "title": "Show Path",
@@ -120,21 +122,75 @@
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "connect-database",
+      "title": "Connect to Database",
+      "description": "Connect to TablePlus database"
+    },
+    {
+      "name": "get-databases",
+      "title": "Get Databases",
+      "description": "Get TablePlus databases"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@tableplus connect to test database 1",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-databases"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "connect-database",
+              "arguments": {
+                "id": "3823CB84-BB87-457E-8930-6DB35E210228"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "connect-database": "Opening connection to test database 1",
+          "get-databases": [
+            {
+              "id": "3823CB84-BB87-457E-8930-6DB35E210228",
+              "name": "test database 1",
+              "groupName": "test group 1",
+              "environment": "test environment 1",
+              "driver": "test driver 1"
+            },
+            {
+              "id": "3823CB84-BB87-457E-8930-6DB35E218873",
+              "name": "test database 2",
+              "groupName": "test group 2",
+              "environment": "test environment 2",
+              "driver": "test driver 2"
+            }
+          ]
+        }
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.62.0",
-    "plist": "^3.0.4"
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.18.1",
+    "plist": "^3.0.4",
+    "string-similarity": "^4.0.4"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^1.0.11",
     "@types/expand-tilde": "^2.0.0",
-    "@types/node": "^20.8.10",
     "@types/plist": "^3.0.2",
-    "@types/react": "^18.2.27",
-    "eslint": "^7.32.0",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
     "expand-tilde": "^2.0.2",
-    "prettier": "^3.0.2",
-    "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",

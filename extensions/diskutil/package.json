@@ -5,6 +5,9 @@
   "description": "Create, list and delete Apple File System (APFS) disk volumes",
   "icon": "command-icon.png",
   "author": "stelo",
+  "contributors": [
+    "srikirank"
+  ],
   "categories": [
     "Developer Tools",
     "System",
@@ -26,17 +29,15 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.16.2",
+    "@raycast/api": "^1.81.2",
+    "@raycast/utils": "^1.16.5",
     "plist": "^3.1.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^20.14.11",
+    "@raycast/eslint-config": "^1.0.11",
     "@types/plist": "^3.0.5",
-    "@types/react": "^18.3.3",
     "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
+    "prettier": "^3.3.3",
     "typescript": "^5.5.4"
   },
   "scripts": {

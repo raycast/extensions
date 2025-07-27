@@ -5,8 +5,15 @@
   "description": "Quick Tmux Session Switcher",
   "icon": "command-icon.png",
   "author": "louishuyng",
-  "contributors": ["sxn"],
-  "categories": ["Developer Tools"],
+  "contributors": [
+    "sxn",
+    "jasonshanks",
+    "guide",
+    "janwvjaarsveld"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -34,18 +41,28 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "defaultDirectory",
+      "description": "Default directory for new tmux session",
+      "title": "New Session Default Directory",
+      "placeholder": "Select a directory",
+      "type": "directory",
+      "required": false
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.65.1",
-    "@raycast/utils": "^1.10.1"
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.18.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
+    "@raycast/eslint-config": "1.0.11",
     "@types/node": "^20.8.10",
     "@types/react": "^18.2.27",
-    "eslint": "^7.32.0",
-    "prettier": "^2.8.8",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
     "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",

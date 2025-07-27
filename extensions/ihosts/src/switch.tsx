@@ -2,7 +2,13 @@ import { Color, Icon, LocalStorage, MenuBarExtra, showHUD } from "@raycast/api";
 import { getItemIcon } from "./component";
 import { HostFolderMode, HostInactiveByFolderTip, State, SystemHostHashKey } from "./const";
 import { getHostCommonsCache, saveHostCommons } from "./utils/common";
-import { checkSysHostAccess, getSysHostAccess, getSysHostFileHash, writeSysHostFile } from "./utils/file";
+import {
+  checkSysHostAccess,
+  getContentFromUrl,
+  getSysHostAccess,
+  getSysHostFileHash,
+  writeSysHostFile,
+} from "./utils/file";
 import { useState } from "react";
 
 export default function Command() {
@@ -53,7 +59,11 @@ export default function Command() {
       target.state = target.state === State.Enable ? State.Disable : State.Enable;
       await saveHostCommons(hostCommonsState);
       let hostContents = "# iHost\n";
-      hostCommonsState.forEach((item) => {
+      hostCommonsState.forEach(async (item) => {
+        if (item.isRemote && item.url?.match(/https?:\/\//) && item.state === State.Enable) {
+          item.content = await getContentFromUrl(item.url);
+        }
+
         if (!item.isFolder && item.state === State.Enable) {
           hostContents += `# ${item.name}\n ${item.content}\n\n`;
         }

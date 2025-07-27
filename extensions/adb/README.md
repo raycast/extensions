@@ -17,4 +17,5 @@ Run adb commands
 - `reset display and font` to reset the values to default (disabled by default)
 - `change animation scale` to control the window animation scale (values from 0.0 to 10.0)
 - `restart adb` to restart ADB server and start again
+- `uninstall` to uninstall an app (disabled by default)
 

@@ -10,9 +10,17 @@
     "emilsharier",
     "pernielsentikaer",
     "erich2s",
-    "ridemountainpig"
+    "ridemountainpig",
+    "jor",
+    "garrill",
+    "olafvanmidden",
+    "hyftar"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "search-documentation",
@@ -84,7 +92,59 @@
         "css"
       ],
       "description": "Search Tailwind CSS default color palette",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "defaultAction",
+          "title": "Default Action",
+          "description": "Action to perform when pressing enter",
+          "type": "dropdown",
+          "required": false,
+          "default": "color-name",
+          "data": [
+            {
+              "title": "Copy Color Name",
+              "value": "color-name"
+            },
+            {
+              "title": "Copy HEX",
+              "value": "value-hex"
+            },
+            {
+              "title": "Copy RGB",
+              "value": "value-rgb"
+            },
+            {
+              "title": "Copy HSL",
+              "value": "value-hsl"
+            },
+            {
+              "title": "Copy Background Class",
+              "value": "bg-class"
+            },
+            {
+              "title": "Copy Text Class",
+              "value": "text-class"
+            },
+            {
+              "title": "Copy Border Class",
+              "value": "border-class"
+            },
+            {
+              "title": "Copy Shadow Class",
+              "value": "shadow-class"
+            },
+            {
+              "title": "Copy Ring Class",
+              "value": "ring-class"
+            },
+            {
+              "title": "Copy Outline Class",
+              "value": "outline-class"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "search-components",

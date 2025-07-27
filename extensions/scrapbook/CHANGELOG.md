@@ -1,5 +1,9 @@
 # Scrapbook Changelog
 
+## [Small Fixe] - 2024-08-19
+
+- Fixed issue where data was not being correctly parsed from API
+
 ## [Small Fixes] - 2024-08-06
 
 - Add error handling for when commands are launched when disabled

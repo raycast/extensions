@@ -60,30 +60,52 @@ export default function Command() {
             subtitle="CEP"
             actions={actions(address.cep)}
             icon={Icon.BarCode}
+            keywords={["cep", "address", "endereço"]}
           />
           <List.Item
             title={address.logradouro}
             subtitle="Street"
             actions={actions(address.logradouro)}
             icon={Icon.Geopin}
+            keywords={["street", "rua", "address", "endereço"]}
           />
-          <List.Item title={address.numero} subtitle="Number" actions={actions(address.numero)} icon={Icon.Cd} />
+          <List.Item
+            title={address.numero}
+            subtitle="Number"
+            actions={actions(address.numero)}
+            icon={Icon.Cd}
+            keywords={["number", "numero", "address", "endereço"]}
+          />
           {address.complemento && (
             <List.Item
               title={address.complemento}
               subtitle="Complement"
               actions={actions(address.complemento)}
               icon={Icon.Lowercase}
+              keywords={["complemento", "complement", "address", "endereço"]}
             />
           )}
-          <List.Item title={address.bairro} subtitle="Neighborhood" actions={actions(address.bairro)} icon={Icon.Map} />
+          <List.Item
+            title={address.bairro}
+            subtitle="Neighborhood"
+            actions={actions(address.bairro)}
+            icon={Icon.Map}
+            keywords={["neighborhood", "bairro", "address", "endereço"]}
+          />
           <List.Item
             title={address.localidade}
             subtitle="City"
             actions={actions(address.localidade)}
             icon={Icon.Compass}
+            keywords={["city", "cidade", "address", "endereço"]}
           />
-          <List.Item title={address.uf} subtitle="State" actions={actions(address.uf)} icon={Icon.AirplaneTakeoff} />
+          <List.Item
+            title={address.uf}
+            subtitle="State"
+            actions={actions(address.uf)}
+            icon={Icon.AirplaneTakeoff}
+            keywords={["estado", "state", "uf", "address", "endereço"]}
+          />
         </List.Section>
       </List>
     </>

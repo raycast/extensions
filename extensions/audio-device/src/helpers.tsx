@@ -13,7 +13,7 @@ import {
   Action,
   Keyboard,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   AudioDevice,
   getInputDevices,
@@ -31,9 +31,10 @@ import { usePromise } from "@raycast/utils";
 type DeviceListProps = {
   type: "input" | "output";
   deviceId?: string;
+  deviceName?: string;
 };
 
-export function DeviceList({ type, deviceId }: DeviceListProps) {
+export function DeviceList({ type, deviceId, deviceName }: DeviceListProps) {
   const { isLoading, data } = useAudioDevices(type);
   const { data: hiddenDevices, revalidate: refetchHiddenDevices } = usePromise(getHiddenDevices, []);
   const { data: showHidden, revalidate: refetchShowHidden } = usePromise(async () => {
@@ -41,10 +42,15 @@ export function DeviceList({ type, deviceId }: DeviceListProps) {
   }, []);
 
   useEffect(() => {
-    if (!deviceId || !data?.devices) return;
-    const device = data.devices.find((d) => d.id === deviceId);
+    if ((!deviceId && !deviceName) || !data?.devices) return;
+
+    let device = null;
+    if (deviceId) device = data.devices.find((d) => d.id === deviceId);
+    if (!device && deviceName) device = data.devices.find((d) => d.name === deviceName);
+
     if (!device) {
-      showToast(Toast.Style.Failure, "Error!", `The device with id ${deviceId} was not found.`);
+      const searchCriteria = deviceId ? `id ${deviceId}` : `name "${deviceName}"`;
+      showToast(Toast.Style.Failure, "Error!", `The device with ${searchCriteria} was not found.`);
       return;
     }
 
@@ -63,7 +69,7 @@ export function DeviceList({ type, deviceId }: DeviceListProps) {
         );
       }
     })();
-  }, [deviceId, data, type]);
+  }, [deviceId, deviceName, data, type]);
 
   const DeviceActions = ({ device }: { device: AudioDevice }) => (
     <>
@@ -73,6 +79,7 @@ export function DeviceList({ type, deviceId }: DeviceListProps) {
           name: `Set ${device.isOutput ? "Output" : "Input"} Device to ${device.name}`,
           link: createDeepLink(device.isOutput ? "set-output-device" : "set-input-device", {
             deviceId: device.id,
+            deviceName: device.name,
           }),
         }}
       />
@@ -242,7 +249,42 @@ async function getHiddenDevices() {
   return JSON.parse((await LocalStorage.getItem("hiddenDevices")) || "[]");
 }
 
+function getDeviceIcon(device: AudioDevice): string | null {
+  // Check for AirPlay devices first
+  if (device.transportType === TransportType.Airplay) {
+    return "airplay.png";
+  }
+
+  // Check if it's a Bluetooth device
+  if (device.transportType === TransportType.Bluetooth || device.transportType === TransportType.BluetoothLowEnergy) {
+    const name = device.name.toLowerCase();
+    if (name.includes("airpods max")) {
+      return "airpods-max.png";
+    } else if (name.includes("airpods pro")) {
+      return "airpods-pro.png";
+    } else if (name.includes("airpods")) {
+      return "airpods.png";
+    }
+    // If it's Bluetooth but not AirPods, use the bluetooth speaker icon
+    return "bluetooth-speaker.png";
+  }
+
+  // Not AirPlay or Bluetooth
+  return null;
+}
+
 function getIcon(device: AudioDevice, isCurrent: boolean) {
+  const deviceIcon = getDeviceIcon(device);
+
+  // If it's a special device (AirPods/AirPlay/Bluetooth), show its specific icon
+  if (deviceIcon) {
+    return {
+      source: deviceIcon,
+      tintColor: isCurrent ? Color.Green : Color.SecondaryText,
+    };
+  }
+
+  // For other devices, use the default mic/speaker icons
   return {
     source: device.isInput ? "mic.png" : "speaker.png",
     tintColor: isCurrent ? Color.Green : Color.SecondaryText,

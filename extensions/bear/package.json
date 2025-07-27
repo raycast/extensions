@@ -12,7 +12,8 @@
     "JuanBanchero",
     "ramsay",
     "stelo",
-    "thomaslombart"
+    "thomaslombart",
+    "xmok"
   ],
   "license": "MIT",
   "commands": [
@@ -106,8 +107,95 @@
       "type": "checkbox"
     }
   ],
+  "tools": [
+    {
+      "name": "search-notes",
+      "title": "Search Notes",
+      "description": "Search Bear notes"
+    },
+    {
+      "name": "new-note",
+      "title": "New Note",
+      "description": "Create Note in Bear"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@bear search for note with tag bear/welcome",
+        "mocks": {
+          "search-notes": [
+            {
+              "id": "SFNote2Intro3",
+              "title": "Welcome to Bear 👋",
+              "text": "# Welcome to Bear 👋\n...",
+              "pinned": true,
+              "tags": [
+                "bear/welcome",
+                "bear"
+              ],
+              "formattedTags": "#bear/welcome"
+            },
+            {
+              "id": "78471A46-55B3-417F-AC3F-7D60F581F0F9",
+              "title": "Get started with Bear",
+              "text": "# Get started with Bear \n\n![]...",
+              "pinned": false,
+              "tags": [
+                "bear/welcome",
+                "bear"
+              ],
+              "formattedTags": "#bear/welcome"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "tag": "bear/welcome"
+              },
+              "name": "search-notes"
+            }
+          }
+        ]
+      },
+      {
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "title": {
+                  "includes": "Shopping"
+                },
+                "text": {
+                  "includes": "milk"
+                },
+                "tags": [
+                  {
+                    "includes": "reminder"
+                  },
+                  {
+                    "includes": "shopping"
+                  }
+                ]
+              },
+              "name": "new-note"
+            }
+          },
+          {
+            "meetsCriteria": "milk"
+          }
+        ],
+        "input": "@bear create note about needing to buy milk",
+        "mocks": {
+          "new-note": "Successfully called \"new-note\""
+        }
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.77.3",
+    "@raycast/api": "^1.90.0",
     "commonmark": "^0.31.0",
     "date-fns": "^3.6.0",
     "open": "^8.4.2",

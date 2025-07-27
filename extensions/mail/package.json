@@ -11,7 +11,12 @@
     "fengtianze",
     "tleo19",
     "lukah",
-    "StevenRCE0"
+    "stelo",
+    "StevenRCE0",
+    "ridemountainpig",
+    "ViGeng",
+    "dante",
+    "5z99tsb75z"
   ],
   "categories": [
     "Applications",
@@ -42,7 +47,7 @@
       "name": "saveDirectory",
       "title": "Save Attachments To",
       "description": "Directory to save mail attachments.",
-      "type": "textfield",
+      "type": "directory",
       "default": "~/Downloads",
       "required": false
     },
@@ -63,16 +68,8 @@
           "value": "10"
         },
         {
-          "title": "25",
-          "value": "25"
-        },
-        {
-          "title": "50",
-          "value": "50"
-        },
-        {
-          "title": "100",
-          "value": "100"
+          "title": "20",
+          "value": "20"
         }
       ]
     }
@@ -85,6 +82,15 @@
       "mode": "no-view"
     },
     {
+      "name": "paste-latest-otp-code",
+      "title": "Paste Latest OTP Code",
+      "description": "Paste the latest OTP code from your emails.",
+      "mode": "no-view",
+      "keywords": [
+        "2fa"
+      ]
+    },
+    {
       "name": "compose-new-message",
       "title": "Compose New Message",
       "description": "Compose a new message.",
@@ -94,7 +100,18 @@
       "name": "see-recent-mail",
       "title": "See Recent Mail",
       "description": "See recent unread messages.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "unreadonly",
+          "label": "Only show unread messages",
+          "title": "Unread-Only",
+          "description": "Only show unread messages.",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        }
+      ]
     },
     {
       "name": "see-important-mail",
@@ -132,31 +149,68 @@
       "title": "Mark All as Read",
       "description": "Mark all your emails as read.",
       "mode": "no-view"
+    },
+    {
+      "name": "copy-foreground-mail-deeplink",
+      "title": "Copy Mail Deeplink",
+      "description": "Copy the deeplink of the selected email in Apple Mail.",
+      "mode": "no-view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-emails",
+      "title": "Search Emails",
+      "description": "Search for emails in Apple Mail."
+    },
+    {
+      "name": "read-email",
+      "title": "Read Email",
+      "description": "Read the full content of an email."
+    },
+    {
+      "name": "list-addresses",
+      "title": "List Addresses",
+      "description": "List addresses in Apple Mail."
+    },
+    {
+      "name": "send-email",
+      "title": "Send Email",
+      "description": "Send an email with Apple Mail."
+    },
+    {
+      "name": "copy-email-link",
+      "title": "Copy Email Link",
+      "description": "Copy the local link (URI) of the selected Apple Mail email so you can jump directly to that message. This makes it convenient to locate a specific email for context."
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.63.0",
-    "@raycast/utils": "^1.10.1",
-    "javascript-time-ago": "^2.5.9",
-    "json2md": "^1.12.0",
-    "juice": "^9.0.0",
-    "mailparser": "^3.6.4",
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.1",
+    "execa": "^9.5.2",
+    "got": "^14.4.6",
+    "javascript-time-ago": "^2.5.10",
+    "json2md": "^1.13.0",
+    "juice": "^9.1.0",
+    "mailparser": "^3.7.2",
     "mime-types": "^2.1.35",
-    "turndown": "^7.1.2",
+    "plist": "^3.1.0",
+    "string-strip-html": "^13.4.12",
+    "turndown": "^7.2.0",
     "utf8": "^3.0.0"
   },
   "devDependencies": {
-    "@types/json2md": "^1.5.1",
-    "@types/mailparser": "^3.4.0",
-    "@types/mime-types": "^2.1.1",
-    "@types/turndown": "^5.0.1",
-    "@types/utf8": "^3.0.1",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/got": "^9.6.12",
+    "@types/json2md": "^1.5.4",
+    "@types/mailparser": "^3.4.4",
+    "@types/mime-types": "^2.1.4",
+    "@types/plist": "^3.0.5",
+    "@types/turndown": "^5.0.5",
+    "@types/utf8": "^3.0.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -164,5 +218,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

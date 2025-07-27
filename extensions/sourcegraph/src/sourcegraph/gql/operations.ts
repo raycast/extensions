@@ -5,43 +5,57 @@ export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
+export type Incremental<T> = T | { [P in keyof T]?: P extends " $fragmentName" | "__typename" ? T[P] : never };
 const defaultOptions = {} as const;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
-  ID: string;
-  String: string;
-  Boolean: boolean;
-  Int: number;
-  Float: number;
-  BigInt: any;
-  DateTime: any;
-  GitObjectID: any;
-  JSONCString: any;
-  JSONValue: any;
-  PublishedValue: any;
+  ID: { input: string; output: string };
+  String: { input: string; output: string };
+  Boolean: { input: boolean; output: boolean };
+  Int: { input: number; output: number };
+  Float: { input: number; output: number };
+  BigInt: { input: any; output: any };
+  DateTime: { input: any; output: any };
+  GitObjectID: { input: any; output: any };
+  JSONCString: { input: any; output: any };
+  JSONValue: { input: any; output: any };
+  PublishedValue: { input: any; output: any };
 };
+
+/** Access request status enum */
+export enum AccessRequestStatus {
+  /** Access request was approved */
+  Approved = "APPROVED",
+  /** Access request was canceled */
+  Canceled = "CANCELED",
+  /** Access request is submitted and waiting for actions */
+  Pending = "PENDING",
+  /** Access request was rejected */
+  Rejected = "REJECTED",
+}
 
 /** A new external service. */
 export type AddExternalServiceInput = {
   /** The JSON configuration of the external service. */
-  config: Scalars["String"];
+  config: Scalars["String"]["input"];
   /** The display name of the external service. */
-  displayName: Scalars["String"];
+  displayName: Scalars["String"]["input"];
   /** The kind of the external service. */
   kind: ExternalServiceKind;
   /**
    * The namespace this external service belongs to.
    * This can be used both for a user and an organization.
    */
-  namespace?: InputMaybe<Scalars["ID"]>;
+  namespace?: InputMaybe<Scalars["ID"]["input"]>;
 };
 
 /** Input object for adding insight view to dashboard. */
 export type AddInsightViewToDashboardInput = {
   /** ID of the dashboard. */
-  dashboardId: Scalars["ID"];
+  dashboardId: Scalars["ID"]["input"];
   /** ID of the insight view to attach to the dashboard */
-  insightViewId: Scalars["ID"];
+  insightViewId: Scalars["ID"]["input"];
 };
 
 /** The possible types of alerts (Alert.type values). */
@@ -57,7 +71,7 @@ export enum AnalyticsDateRange {
   Custom = "CUSTOM",
   /** Last month date range. */
   LastMonth = "LAST_MONTH",
-  /** Last 3 monthes date range. */
+  /** Last 3 months date range. */
   LastThreeMonths = "LAST_THREE_MONTHS",
   /** Last week date range. */
   LastWeek = "LAST_WEEK",
@@ -71,12 +85,40 @@ export enum AnalyticsGrouping {
   Weekly = "WEEKLY",
 }
 
+/** AssignOwnerOrTeamInput represents the input for assigning or deleting an owner team or person. */
+export type AssignOwnerOrTeamInput = {
+  /** Path of the file/directory or a root path of the repo, which is assigned for ownership. */
+  absolutePath: Scalars["String"]["input"];
+  /** ID of an assigned owner or team. */
+  assignedOwnerID: Scalars["ID"]["input"];
+  /** ID of a repo, which (or which directory/file) is assigned for ownership. */
+  repoID: Scalars["ID"]["input"];
+};
+
 /** Denotes the type of operation of a given log entry. */
 export enum AuditLogOperation {
   /** Denotes this log entry represents an INSERT query. */
   Create = "CREATE",
   /** Denotes this log entry represents an UPDATE query. */
   Modify = "MODIFY",
+}
+
+/** BackfillQueueOrderBy enumerates the ways a backfill queue list can be ordered. */
+export enum BackfillQueueOrderBy {
+  QueuePosition = "QUEUE_POSITION",
+  State = "STATE",
+}
+
+/** Enum of the possible background routine types */
+export enum BackgroundRoutineType {
+  /** Custom routine */
+  Custom = "CUSTOM",
+  /** DB-backed worker */
+  DbBacked = "DB_BACKED",
+  /** Periodic routine */
+  Periodic = "PERIODIC",
+  /** Periodic routine with metrics set up */
+  PeriodicWithMetrics = "PERIODIC_WITH_METRICS",
 }
 
 /** The state of the batch change. */
@@ -170,12 +212,21 @@ export enum BulkOperationType {
   Comment = "COMMENT",
   /** Bulk detach changesets from a batch change. */
   Detach = "DETACH",
+  /** Export changesets. */
+  Export = "EXPORT",
   /** Bulk merge changesets. */
   Merge = "MERGE",
   /** Bulk publish changesets. */
   Publish = "PUBLISH",
   /** Bulk reenqueue failed changesets. */
   Reenqueue = "REENQUEUE",
+}
+
+/** A status message of a permissions sync job cancellation. */
+export enum CancelPermissionsSyncJobResultMessage {
+  Error = "ERROR",
+  NotFound = "NOT_FOUND",
+  Success = "SUCCESS",
 }
 
 /** The state of checks (e.g., for continuous integration) on a changeset. */
@@ -277,9 +328,9 @@ export enum ChangesetSpecOperation {
  */
 export type ChangesetSpecPublicationStateInput = {
   /** The changeset spec ID. */
-  changesetSpec: Scalars["ID"];
+  changesetSpec: Scalars["ID"]["input"];
   /** The desired publication state. */
-  publicationState: Scalars["PublishedValue"];
+  publicationState: Scalars["PublishedValue"]["input"];
 };
 
 /** The type of the changeset spec. */
@@ -336,6 +387,97 @@ export enum CloneStatus {
   NotCloned = "NOT_CLONED",
 }
 
+/** EXPERIMENTAL: This type may change in a backwards-incompatible way. */
+export type CodeGraphDataFilter = {
+  /**
+   * If this field is not set, then the codeGraphData API
+   * will go through each provenance each provenance one by one
+   * in the order Precise -> Syntactic -> SearchBased
+   * and stop when some data is available.
+   */
+  provenance?: InputMaybe<CodeGraphDataProvenanceComparator>;
+};
+
+/** EXPERIMENTAL: This type may change in a backwards-incompatible way. */
+export enum CodeGraphDataProvenance {
+  /**
+   * Based on a compiler, a type-checker or a similar data source
+   * which doesn't have false positives.
+   * Generally, the results are specific to a particular build configuration,
+   * such as for a specific OS or CPU, which can matter for
+   * codebases having a large amount of platform-specific code.
+   */
+  Precise = "PRECISE",
+  /**
+   * Based on a data source that only does textual analysis, say
+   * using regular expressions.
+   */
+  SearchBased = "SEARCH_BASED",
+  /**
+   * Based on a data source that uses an abstract or concrete syntax
+   * tree, but without access to reliable type information.
+   */
+  Syntactic = "SYNTACTIC",
+}
+
+/** EXPERIMENTAL: This type may change in a backwards-incompatible way. */
+export type CodeGraphDataProvenanceComparator = {
+  /** Checks for exact equality. */
+  equals?: InputMaybe<CodeGraphDataProvenance>;
+};
+
+/** Describes the status of a permissions sync for a given provider (code host). */
+export enum CodeHostStatus {
+  Error = "ERROR",
+  Success = "SUCCESS",
+}
+
+/** CodeownersFileInput represents the input for ingesting codeowners files */
+export type CodeownersFileInput = {
+  /** fileContents is the text of the codeowners file */
+  fileContents: Scalars["String"]["input"];
+  /** The repo ID to ingest the file for. Cannot be set with repositoryName. */
+  repoID?: InputMaybe<Scalars["ID"]["input"]>;
+  /** The repo name to ingest the file for. Cannot be set with repositoryID. */
+  repoName?: InputMaybe<Scalars["String"]["input"]>;
+};
+
+/** The version of the Cody context filters. */
+export enum CodyContextFiltersVersion {
+  /** Rules defining which repositories Cody may use as context in requests to third-party LLMs. */
+  V1 = "V1",
+}
+
+/** A plan for cody subscription. */
+export enum CodySubscriptionPlan {
+  Free = "FREE",
+  Pro = "PRO",
+}
+
+/** A status for cody subscription. */
+export enum CodySubscriptionStatus {
+  Active = "ACTIVE",
+  Canceled = "CANCELED",
+  Other = "OTHER",
+  PastDue = "PAST_DUE",
+  Trialing = "TRIALING",
+  Unpaid = "UNPAID",
+}
+
+/** Input wrapper for completions */
+export type CompletionsInput = {
+  /** Maximum number of tokens to sample */
+  maxTokensToSample: Scalars["Int"]["input"];
+  /** List of conversation messages */
+  messages: Array<Message>;
+  /** Temperature for sampling - higher means more random completions */
+  temperature: Scalars["Float"]["input"];
+  /** Number of highest probability completions to return */
+  topK: Scalars["Int"]["input"];
+  /** Probability threshold for inclusion in results */
+  topP: Scalars["Int"]["input"];
+};
+
 /**
  * DEPRECATED: This type was renamed to SettingsEdit.
  * NOTE: GraphQL does not support @deprecated directives on INPUT_FIELD_DEFINITION (input fields).
@@ -344,32 +486,32 @@ export type ConfigurationEdit = {
   /** DEPRECATED */
   keyPath: Array<KeyPathSegment>;
   /** DEPRECATED */
-  value?: InputMaybe<Scalars["JSONValue"]>;
+  value?: InputMaybe<Scalars["JSONValue"]["input"]>;
   /** DEPRECATED */
-  valueIsJSONCEncodedString?: InputMaybe<Scalars["Boolean"]>;
+  valueIsJSONCEncodedString?: InputMaybe<Scalars["Boolean"]["input"]>;
 };
 
 /** CreateFileBlockInput contains the information necessary to create a file block. */
 export type CreateFileBlockInput = {
   /** Path within the repository, e.g. "client/web/file.tsx". */
-  filePath: Scalars["String"];
+  filePath: Scalars["String"]["input"];
   /** An optional line range. If omitted, we display the entire file. */
   lineRange?: InputMaybe<CreateFileBlockLineRangeInput>;
   /** Name of the repository, e.g. "github.com/sourcegraph/sourcegraph". */
-  repositoryName: Scalars["String"];
+  repositoryName: Scalars["String"]["input"];
   /**
    * An optional revision, e.g. "pr/feature-1", "a9505a2947d3df53558e8c88ff8bcef390fc4e3e".
    * If omitted, we use the latest revision (HEAD).
    */
-  revision?: InputMaybe<Scalars["String"]>;
+  revision?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 /** Input to create a line range for a file block. */
 export type CreateFileBlockLineRangeInput = {
   /** The last line to fetch (0-indexed, exclusive). */
-  endLine: Scalars["Int"];
+  endLine: Scalars["Int"]["input"];
   /** The first line to fetch (0-indexed, inclusive). */
-  startLine: Scalars["Int"];
+  startLine: Scalars["Int"]["input"];
 };
 
 /** Input object for creating a new dashboard. */
@@ -377,7 +519,7 @@ export type CreateInsightsDashboardInput = {
   /** Permissions to grant to the dashboard. */
   grants: InsightsPermissionGrantsInput;
   /** Dashboard title. */
-  title: Scalars["String"];
+  title: Scalars["String"]["input"];
 };
 
 /**
@@ -385,16 +527,14 @@ export type CreateInsightsDashboardInput = {
  * all possible optional inputs with an enum to select the actual block input we want to use.
  */
 export type CreateNotebookBlockInput = {
-  /** Compute input. */
-  computeInput?: InputMaybe<Scalars["String"]>;
   /** File input. */
   fileInput?: InputMaybe<CreateFileBlockInput>;
   /** ID of the block. */
-  id: Scalars["String"];
+  id: Scalars["String"]["input"];
   /** Markdown input. */
-  markdownInput?: InputMaybe<Scalars["String"]>;
+  markdownInput?: InputMaybe<Scalars["String"]["input"]>;
   /** Query input. */
-  queryInput?: InputMaybe<Scalars["String"]>;
+  queryInput?: InputMaybe<Scalars["String"]["input"]>;
   /** Symbol input. */
   symbolInput?: InputMaybe<CreateSymbolBlockInput>;
   /** Block type. */
@@ -404,22 +544,33 @@ export type CreateNotebookBlockInput = {
 /** CreateSymbolBlockInput contains the information necessary to create a symbol block. */
 export type CreateSymbolBlockInput = {
   /** Path within the repository, e.g. "client/web/file.tsx". */
-  filePath: Scalars["String"];
+  filePath: Scalars["String"]["input"];
   /** Number of lines to show before and after the matched symbol line. */
-  lineContext: Scalars["Int"];
+  lineContext: Scalars["Int"]["input"];
   /** Name of the repository, e.g. "github.com/sourcegraph/sourcegraph". */
-  repositoryName: Scalars["String"];
+  repositoryName: Scalars["String"]["input"];
   /**
    * An optional revision, e.g. "pr/feature-1", "a9505a2947d3df53558e8c88ff8bcef390fc4e3e".
    * If omitted, we use the latest revision (HEAD).
    */
-  revision?: InputMaybe<Scalars["String"]>;
+  revision?: InputMaybe<Scalars["String"]["input"]>;
   /** Name of the symbol container. */
-  symbolContainerName: Scalars["String"];
+  symbolContainerName: Scalars["String"]["input"];
   /** The symbol kind. */
   symbolKind: SymbolKind;
   /** The symbol name. */
-  symbolName: Scalars["String"];
+  symbolName: Scalars["String"]["input"];
+};
+
+/**
+ * A repository to pass to the deleteCodeownersFiles mutation. Either repoID or repoName
+ * must be provided.
+ */
+export type DeleteCodeownersFilesInput = {
+  /** The repo ID to ingest the file for. Cannot be set with repositoryName. */
+  repoID?: InputMaybe<Scalars["ID"]["input"]>;
+  /** The repo name to ingest the file for. Cannot be set with repositoryID. */
+  repoName?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 /** Represents the severity level of a diagnostic. */
@@ -443,56 +594,133 @@ export enum DiffHunkLineType {
 /** A description of a user event. */
 export type Event = {
   /** The additional argument information. */
-  argument?: InputMaybe<Scalars["String"]>;
+  argument?: InputMaybe<Scalars["String"]["input"]>;
+  /** The billing ID for the event, used for tagging user events for billing aggregation purposes. */
+  billingEventID?: InputMaybe<Scalars["String"]["input"]>;
+  /** The product category for the event, used for billing purposes. */
+  billingProductCategory?: InputMaybe<Scalars["String"]["input"]>;
+  /** The client that this event is being sent from. */
+  client?: InputMaybe<Scalars["String"]["input"]>;
   /**
    * An optional cohort ID to identify the user as part of a specific A/B test.
    * The cohort ID is expected to be a date in the form YYYY-MM-DD
    */
-  cohortID?: InputMaybe<Scalars["String"]>;
+  cohortID?: InputMaybe<Scalars["String"]["input"]>;
+  /** The site ID that the client was connected to when the event was logged. */
+  connectedSiteID?: InputMaybe<Scalars["String"]["input"]>;
   /** Device ID used for Amplitude analytics. Used on Sourcegraph Cloud only. */
-  deviceID?: InputMaybe<Scalars["String"]>;
+  deviceID?: InputMaybe<Scalars["String"]["input"]>;
   /** Device session ID to identify the user's session for analytics. */
-  deviceSessionID?: InputMaybe<Scalars["String"]>;
+  deviceSessionID?: InputMaybe<Scalars["String"]["input"]>;
   /** The name of the event. */
-  event: Scalars["String"];
+  event: Scalars["String"]["input"];
   /**
    * Event ID used to deduplicate events that occur simultaneously in Amplitude analytics.
    * See https://developers.amplitude.com/docs/http-api-v2#optional-keys. Used on Sourcegraph Cloud only.
    */
-  eventID?: InputMaybe<Scalars["Int"]>;
+  eventID?: InputMaybe<Scalars["Int"]["input"]>;
   /** The first sourcegraph URL visited by the user, stored in a browser cookie. */
-  firstSourceURL?: InputMaybe<Scalars["String"]>;
+  firstSourceURL?: InputMaybe<Scalars["String"]["input"]>;
+  /** The connected site's license key, hashed using sha256. Used for uniquely identifying the site. */
+  hashedLicenseKey?: InputMaybe<Scalars["String"]["input"]>;
   /**
    * Insert ID used to deduplicate events that re-occur in the event of retries or
    * backfills in Amplitude analytics. See https://developers.amplitude.com/docs/http-api-v2#optional-keys.
    * Used on Sourcegraph Cloud only.
    */
-  insertID?: InputMaybe<Scalars["String"]>;
+  insertID?: InputMaybe<Scalars["String"]["input"]>;
   /** The last sourcegraph URL visited by the user, stored in a browser cookie. */
-  lastSourceURL?: InputMaybe<Scalars["String"]>;
+  lastSourceURL?: InputMaybe<Scalars["String"]["input"]>;
+  /** The original referrer for a user */
+  originalReferrer?: InputMaybe<Scalars["String"]["input"]>;
   /**
    * Public argument information. PRIVACY: Do NOT include any potentially private information in this field.
    * These properties get sent to our analytics tools for Cloud, so must not include private information,
    * such as search queries or repository names.
    */
-  publicArgument?: InputMaybe<Scalars["String"]>;
+  publicArgument?: InputMaybe<Scalars["String"]["input"]>;
   /**
    * An optional referrer parameter for the user's current session.
    * Only captured and stored on Sourcegraph Cloud.
    */
-  referrer?: InputMaybe<Scalars["String"]>;
+  referrer?: InputMaybe<Scalars["String"]["input"]>;
+  /** The sessions first url for a user */
+  sessionFirstURL?: InputMaybe<Scalars["String"]["input"]>;
+  /** The session referrer for a user */
+  sessionReferrer?: InputMaybe<Scalars["String"]["input"]>;
   /** The source of the event. */
   source: EventSource;
   /** The URL when the event was logged. */
-  url: Scalars["String"];
+  url: Scalars["String"]["input"];
   /** The randomly generated unique user ID stored in a browser cookie. */
-  userCookieID: Scalars["String"];
+  userCookieID: Scalars["String"]["input"];
 };
+
+/** Billing IDs for events, used for tagging user events for billing aggregation purposes. */
+export enum EventBillingId {
+  /** A billable Cody chat event, including manual chats, recipes, and more. */
+  CodyChat = "CodyChat",
+  /** A billable Cody completion (aka suggestion or autocomplete) event. */
+  CodyCompletion = "CodyCompletion",
+  /** A billable Cody embedding/code graph creation or search event. */
+  CodyEmbedding = "CodyEmbedding",
+}
+
+/** The product categories for events, used for billing purposes. */
+export enum EventBillingProductCategory {
+  /**
+   * Used for all events primarily related to the Code Search product, including file and repo pageviews,
+   * search actions, code navigation, batch changes, code insights, etc.
+   */
+  CodeSearch = "CODE_SEARCH",
+  /**
+   * Used for all events primarily related to the Cody product, including chats, recipes, completions, web
+   * chat views, etc.
+   */
+  Cody = "CODY",
+  /**
+   * Used for all events related to non-billable, non-product usage (e.g. marketing, CTAs, signed out
+   * events, etc.)
+   */
+  NotBillable = "NOT_BILLABLE",
+  /**
+   * Used for all billable but shared user interface events, such as administration, authentication, user
+   * profile and settings, shared landing pages, etc.
+   */
+  Shared = "SHARED",
+}
+
+/**
+ * The product client where events come from.
+ *
+ * Future additions include:
+ * - BITBUCKET_NATIVE_INTEGRATION
+ * - GITLAB_NATIVE_INTEGRATION
+ * - CHROME_SOURCEGRAPH_EXTENSION
+ * - FIREFOX_SOURCEGRAPH_EXTENSION
+ * - EDGE_SOURCEGRAPH_EXTENSION
+ * - VSCODE_SOURCEGRAPH_EXTENSION (for https://marketplace.visualstudio.com/items?itemName=sourcegraph.sourcegraph)
+ * - EMACS_CODY_EXTENSION
+ */
+export enum EventClient {
+  AppBackend = "APP_BACKEND",
+  AppWeb = "APP_WEB",
+  DotcomBackend = "DOTCOM_BACKEND",
+  DotcomWeb = "DOTCOM_WEB",
+  JetbrainsCodyExtension = "JETBRAINS_CODY_EXTENSION",
+  MarketingWeb = "MARKETING_WEB",
+  NeovimCodyExtension = "NEOVIM_CODY_EXTENSION",
+  ServerBackend = "SERVER_BACKEND",
+  ServerWeb = "SERVER_WEB",
+  VscodeCodyExtension = "VSCODE_CODY_EXTENSION",
+}
 
 /** The product sources where events can come from. */
 export enum EventSource {
   Backend = "BACKEND",
   Codehostintegration = "CODEHOSTINTEGRATION",
+  /** DEPRECATED */
+  Cody = "CODY",
   Ideextension = "IDEEXTENSION",
   Staticweb = "STATICWEB",
   Web = "WEB",
@@ -519,11 +747,14 @@ export enum ExecutorCompatibility {
 export enum ExecutorSecretScope {
   /** The secret is meant to be used with Batch Changes execution. */
   Batches = "BATCHES",
+  /** The secret is meant to be used with Auto-indexing. */
+  Codeintel = "CODEINTEL",
 }
 
 /** A specific kind of external service. */
 export enum ExternalServiceKind {
   Awscodecommit = "AWSCODECOMMIT",
+  Azuredevops = "AZUREDEVOPS",
   Bitbucketcloud = "BITBUCKETCLOUD",
   Bitbucketserver = "BITBUCKETSERVER",
   Gerrit = "GERRIT",
@@ -550,9 +781,9 @@ export enum ExternalServiceSyncJobState {
   Canceling = "CANCELING",
   /** Sync finished successfully. */
   Completed = "COMPLETED",
-  /** An error occured while syncing. Will be retried eventually. */
+  /** An error occurred while syncing. Will be retried eventually. */
   Errored = "ERRORED",
-  /** A fatal error occured while syncing. No retries will be made. */
+  /** A fatal error occurred while syncing. No retries will be made. */
   Failed = "FAILED",
   /** Currently syncing. */
   Processing = "PROCESSING",
@@ -566,8 +797,28 @@ export type FetchPermissionsOptions = {
    * Indicate that any caches added for optimization encountered during this permissions
    * sync should be invalidated.
    */
-  invalidateCaches?: InputMaybe<Scalars["Boolean"]>;
+  invalidateCaches?: InputMaybe<Scalars["Boolean"]["input"]>;
 };
+
+/** GitHubAppDomain enumerates the domains in which GitHub Apps can be used. */
+export enum GitHubAppDomain {
+  /** GitHub Apps that are configured for batch changes commit signing. */
+  Batches = "BATCHES",
+  /** GitHub Apps that are configured for repository syncing. */
+  Repos = "REPOS",
+}
+
+/** GitHubAppKind enumerates the domains in which GitHub Apps can be used. */
+export enum GitHubAppKind {
+  /** GitHub Apps that are configured for commit signing. */
+  CommitSigning = "COMMIT_SIGNING",
+  /** GitHub Apps that are configured for repo syncing. */
+  RepoSync = "REPO_SYNC",
+  /** GitHub Apps that are configured for a site's batch changes credential. */
+  SiteCredential = "SITE_CREDENTIAL",
+  /** GitHub Apps that are configured for a user's batch changes credential. */
+  UserCredential = "USER_CREDENTIAL",
+}
 
 /** All possible types of Git objects. */
 export enum GitObjectType {
@@ -581,12 +832,6 @@ export enum GitObjectType {
   GitTree = "GIT_TREE",
   /** A Git object of unknown type. */
   GitUnknown = "GIT_UNKNOWN",
-}
-
-/** Ordering options for Git refs. */
-export enum GitRefOrder {
-  /** By the authored or committed at date, whichever is more recent. */
-  AuthoredOrCommittedAt = "AUTHORED_OR_COMMITTED_AT",
 }
 
 /** All possible types of Git refs. */
@@ -611,9 +856,9 @@ export enum GroupByField {
 /** Input for a happiness feedback submission. */
 export type HappinessFeedbackSubmissionInput = {
   /** The path that the happiness feedback will be submitted from. */
-  currentPath?: InputMaybe<Scalars["String"]>;
+  currentPath?: InputMaybe<Scalars["String"]["input"]>;
   /** The feedback text from the user. */
-  feedback?: InputMaybe<Scalars["String"]>;
+  feedback?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 /** A specific highlighted line range to fetch. */
@@ -622,12 +867,12 @@ export type HighlightLineRange = {
    * The last line to fetch (0-indexed, inclusive). Values outside the bounds of the file will
    * automatically be clamped within the valid range.
    */
-  endLine: Scalars["Int"];
+  endLine: Scalars["Int"]["input"];
   /**
    * The first line to fetch (0-indexed, inclusive). Values outside the bounds of the file will
    * automatically be clamped within the valid range.
    */
-  startLine: Scalars["Int"];
+  startLine: Scalars["Int"]["input"];
 };
 
 /** The format and highlighting to use when requesting highlighting information for a file. */
@@ -640,27 +885,14 @@ export enum HighlightResponseFormat {
   JsonScip = "JSON_SCIP",
 }
 
-/** Denotes the confidence in the correctness of the proposed index target. */
-export enum InferedPreciseSupportLevel {
-  /**
-   * An auto-indexing job configuration was able to be infered for this
-   * directory that has a high likelyhood of being complete enough to result
-   * in an LSIF index.
-   */
-  IndexJobInfered = "INDEX_JOB_INFERED",
-  /**
-   * The language is known to have an LSIF indexer associated with it
-   * but this may not be the directory from which it should be invoked.
-   * Relevant build tool configuration may be available at a parent directory.
-   */
-  LanguageSupported = "LANGUAGE_SUPPORTED",
-  /**
-   * Relevant build tool configuration files were located that indicate
-   * a good possibility of this directory being where an LSIF indexer
-   * could be invoked, however we have or can not infer a potentially complete
-   * auto indexing job configuration.
-   */
-  ProjectStructureSupported = "PROJECT_STRUCTURE_SUPPORTED",
+/** Possible queue states */
+export enum InsightQueueItemState {
+  Completed = "COMPLETED",
+  Failed = "FAILED",
+  New = "NEW",
+  Processing = "PROCESSING",
+  Queued = "QUEUED",
+  Unknown = "UNKNOWN",
 }
 
 /** Input for the default values for filters and aggregates for an insight. */
@@ -674,21 +906,21 @@ export type InsightViewControlsInput = {
 /** Input for the default values by which the insight is filtered. */
 export type InsightViewFiltersInput = {
   /** A regex string for which to exclude repositories in a filter. */
-  excludeRepoRegex?: InputMaybe<Scalars["String"]>;
+  excludeRepoRegex?: InputMaybe<Scalars["String"]["input"]>;
   /** A regex string for which to include repositories in a filter. */
-  includeRepoRegex?: InputMaybe<Scalars["String"]>;
+  includeRepoRegex?: InputMaybe<Scalars["String"]["input"]>;
   /** A list of query based search contexts to include in the filters for the view. */
-  searchContexts?: InputMaybe<Array<Scalars["String"]>>;
+  searchContexts?: InputMaybe<Array<Scalars["String"]["input"]>>;
 };
 
 /** Input object for permissions to grant. */
 export type InsightsPermissionGrantsInput = {
   /** Set global to true to grant global permission. */
-  global?: InputMaybe<Scalars["Boolean"]>;
+  global?: InputMaybe<Scalars["Boolean"]["input"]>;
   /** Organizations to grant permissions to. */
-  organizations?: InputMaybe<Array<Scalars["ID"]>>;
+  organizations?: InputMaybe<Array<Scalars["ID"]["input"]>>;
   /** Specific users to grant permissions to. */
-  users?: InputMaybe<Array<Scalars["ID"]>>;
+  users?: InputMaybe<Array<Scalars["ID"]["input"]>>;
 };
 
 /**
@@ -698,90 +930,61 @@ export type InsightsPermissionGrantsInput = {
  */
 export type KeyPathSegment = {
   /** The index of the array at this location to descend into. */
-  index?: InputMaybe<Scalars["Int"]>;
+  index?: InputMaybe<Scalars["Int"]["input"]>;
   /** The name of the property in the object at this location to descend into. */
-  property?: InputMaybe<Scalars["String"]>;
+  property?: InputMaybe<Scalars["String"]["input"]>;
 };
-
-/** The state an LSIF index can be in. */
-export enum LsifIndexState {
-  /** This index was processed successfully. */
-  Completed = "COMPLETED",
-  /** This index failed to be processed. */
-  Errored = "ERRORED",
-  /** This index is being processed. */
-  Processing = "PROCESSING",
-  /** This index is queued to be processed later. */
-  Queued = "QUEUED",
-}
-
-/** The state an LSIF upload can be in. */
-export enum LsifUploadState {
-  /** This upload was processed successfully. */
-  Completed = "COMPLETED",
-  /**
-   * This upload is deleted and its metadata is reconstructed from existing
-   * audit log entries.
-   */
-  Deleted = "DELETED",
-  /**
-   * This upload is queued for deletion. This upload was previously in the
-   * COMPLETED state and evicted, replaced by a newer upload, or deleted by
-   * a user. This upload is able to answer code intelligence queries until
-   * the commit graph of the upload's repository is next calculated, at which
-   * point the upload will become unreachable.
-   */
-  Deleting = "DELETING",
-  /** This upload failed to be processed. */
-  Errored = "ERRORED",
-  /** This upload is being processed. */
-  Processing = "PROCESSING",
-  /** This upload is queued to be processed later. */
-  Queued = "QUEUED",
-  /** This upload is currently being transferred to Sourcegraph. */
-  Uploading = "UPLOADING",
-}
 
 /** Options for a line chart data series */
 export type LineChartDataSeriesOptionsInput = {
   /** The label for the data series. */
-  label?: InputMaybe<Scalars["String"]>;
+  label?: InputMaybe<Scalars["String"]["input"]>;
   /** The line color for the data series. */
-  lineColor?: InputMaybe<Scalars["String"]>;
+  lineColor?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 /** Options for a line chart */
 export type LineChartOptionsInput = {
   /** The chart title. */
-  title?: InputMaybe<Scalars["String"]>;
+  title?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 /** Input for a line chart search insight data series. */
 export type LineChartSearchInsightDataSeriesInput = {
   /** Whether or not to generate the timeseries results from the query capture groups. Defaults to false if not provided. */
-  generatedFromCaptureGroups?: InputMaybe<Scalars["Boolean"]>;
+  generatedFromCaptureGroups?: InputMaybe<Scalars["Boolean"]["input"]>;
   /** The field to group results by. (For compute powered insights only.) This field is experimental and should be considered unstable in the API. */
   groupBy?: InputMaybe<GroupByField>;
   /** Options for this line chart data series. */
   options: LineChartDataSeriesOptionsInput;
   /** The query string. */
-  query: Scalars["String"];
-  /** The scope of repositories. */
-  repositoryScope: RepositoryScopeInput;
+  query: Scalars["String"]["input"];
+  /**
+   * The scope of repositories. The repository scope can be provided at the LineChartSearchInsightInput level.
+   * If scope is provided here will take priority of any other scope provide at a higher level in the input.
+   */
+  repositoryScope?: InputMaybe<RepositoryScopeInput>;
   /** Unique ID for the series. Omit this field if it's a new series. */
-  seriesId?: InputMaybe<Scalars["String"]>;
-  /** The scope of time. */
-  timeScope: TimeScopeInput;
+  seriesId?: InputMaybe<Scalars["String"]["input"]>;
+  /**
+   * The scope of time. This time scope can also be provided at the LineChartSearchInsightInput level.
+   * If the scope is provided here it will take priority over any other scope provided at a higher level in the input.
+   */
+  timeScope?: InputMaybe<TimeScopeInput>;
 };
 
 /** Input for a line chart search insight. */
 export type LineChartSearchInsightInput = {
   /** The dashboard IDs to associate this insight with once created. */
-  dashboards?: InputMaybe<Array<Scalars["ID"]>>;
+  dashboards?: InputMaybe<Array<Scalars["ID"]["input"]>>;
   /** The list of data series to create (or add) to this insight. */
   dataSeries: Array<LineChartSearchInsightDataSeriesInput>;
   /** The options for this line chart. */
   options: LineChartOptionsInput;
+  /** The scope of repositories for the insight. If provided here it will apply to all series unless overwritten. */
+  repositoryScope?: InputMaybe<RepositoryScopeInput>;
+  /** The scope of time for the insight view. If provided here it will apply to all series unless overwritten. */
+  timeScope?: InputMaybe<TimeScopeInput>;
   /** The default values for filters and aggregates for this line chart. */
   viewControls?: InputMaybe<InsightViewControlsInput>;
 };
@@ -789,7 +992,15 @@ export type LineChartSearchInsightInput = {
 /** Describes options for rendering Markdown. */
 export type MarkdownOptions = {
   /** A dummy null value (empty input types are not allowed yet). */
-  alwaysNil?: InputMaybe<Scalars["String"]>;
+  alwaysNil?: InputMaybe<Scalars["String"]["input"]>;
+};
+
+/** Message to or from the LLM */
+export type Message = {
+  /** Speaker of the message (human/assistant) */
+  speaker: SpeakerType;
+  /** Text content of the message */
+  text: Scalars["String"]["input"];
 };
 
 /** The input required to create an action. */
@@ -819,7 +1030,7 @@ export type MonitorEditEmailInput = {
    * be treated as a new email action and be created
    * rather than updated.
    */
-  id?: InputMaybe<Scalars["ID"]>;
+  id?: InputMaybe<Scalars["ID"]["input"]>;
   /** The desired state after the update. */
   update: MonitorEmailInput;
 };
@@ -827,7 +1038,7 @@ export type MonitorEditEmailInput = {
 /** The input required to edit a code monitor. */
 export type MonitorEditInput = {
   /** The id of the monitor. */
-  id: Scalars["ID"];
+  id: Scalars["ID"]["input"];
   /** The desired state after the udpate. */
   update: MonitorInput;
 };
@@ -839,7 +1050,7 @@ export type MonitorEditSlackWebhookInput = {
    * be treated as a new Slack webhook action and be created
    * rather than updated.
    */
-  id?: InputMaybe<Scalars["ID"]>;
+  id?: InputMaybe<Scalars["ID"]["input"]>;
   /** The desired state after the update. */
   update: MonitorSlackWebhookInput;
 };
@@ -847,7 +1058,7 @@ export type MonitorEditSlackWebhookInput = {
 /** The input required to edit a trigger. */
 export type MonitorEditTriggerInput = {
   /** The id of the Trigger. */
-  id: Scalars["ID"];
+  id: Scalars["ID"]["input"];
   /** The desired state after the udpate. */
   update: MonitorTriggerInput;
 };
@@ -859,7 +1070,7 @@ export type MonitorEditWebhookInput = {
    * be treated as a new webhook action and be created
    * rather than updated.
    */
-  id?: InputMaybe<Scalars["ID"]>;
+  id?: InputMaybe<Scalars["ID"]["input"]>;
   /** The desired state after the update. */
   update: MonitorWebhookInput;
 };
@@ -867,15 +1078,15 @@ export type MonitorEditWebhookInput = {
 /** The input required to create an email action. */
 export type MonitorEmailInput = {
   /** Whether the email action is enabled or not. */
-  enabled: Scalars["Boolean"];
+  enabled: Scalars["Boolean"]["input"];
   /** Use header to automatically approve the message in a read-only or moderated mailing list. */
-  header: Scalars["String"];
+  header: Scalars["String"]["input"];
   /** Whether to include the result contents in the email message */
-  includeResults: Scalars["Boolean"];
+  includeResults: Scalars["Boolean"]["input"];
   /** The priority of the email. */
   priority: MonitorEmailPriority;
   /** A list of users or orgs which will receive the email. */
-  recipients: Array<Scalars["ID"]>;
+  recipients: Array<Scalars["ID"]["input"]>;
 };
 
 /** The priority of an email action. */
@@ -887,43 +1098,43 @@ export enum MonitorEmailPriority {
 /** The input required to create a code monitor. */
 export type MonitorInput = {
   /** A meaningful description of the code monitor. */
-  description: Scalars["String"];
+  description: Scalars["String"]["input"];
   /** Whether the code monitor is enabled or not. */
-  enabled: Scalars["Boolean"];
+  enabled: Scalars["Boolean"]["input"];
   /**
    * The namespace represents the owner of the code monitor.
    * Owners can either be users or organizations.
    */
-  namespace: Scalars["ID"];
+  namespace: Scalars["ID"]["input"];
 };
 
 /** The input required to create a Slack webhook action. */
 export type MonitorSlackWebhookInput = {
   /** Whether the Slack webhook action is enabled or not. */
-  enabled: Scalars["Boolean"];
+  enabled: Scalars["Boolean"]["input"];
   /** Whether to include the result contents in Slack notification message. */
-  includeResults: Scalars["Boolean"];
+  includeResults: Scalars["Boolean"]["input"];
   /** The URL that will receive a payload when the action is triggered. */
-  url: Scalars["String"];
+  url: Scalars["String"]["input"];
 };
 
 /** The input required to create a trigger. */
 export type MonitorTriggerInput = {
   /** The query string. */
-  query: Scalars["String"];
+  query: Scalars["String"]["input"];
 };
 
 /** The input required to create a webhook action. */
 export type MonitorWebhookInput = {
   /** Whether the webhook action is enabled or not. */
-  enabled: Scalars["Boolean"];
+  enabled: Scalars["Boolean"]["input"];
   /** Whether to include the result contents in webhook payload. */
-  includeResults: Scalars["Boolean"];
+  includeResults: Scalars["Boolean"]["input"];
   /** The URL that will receive a payload when the action is triggered. */
-  url: Scalars["String"];
+  url: Scalars["String"]["input"];
 };
 
-/** An enum to describe the reasons why a search aggregations are not available */
+/** An enum to describe the reasons why search aggregations are not available */
 export enum NotAvailableReasonType {
   InvalidAggregationModeForQuery = "INVALID_AGGREGATION_MODE_FOR_QUERY",
   InvalidQuery = "INVALID_QUERY",
@@ -934,7 +1145,6 @@ export enum NotAvailableReasonType {
 
 /** Enum of possible block types. */
 export enum NotebookBlockType {
-  Compute = "COMPUTE",
   File = "FILE",
   Markdown = "MARKDOWN",
   Query = "QUERY",
@@ -949,14 +1159,14 @@ export type NotebookInput = {
    * Notebook namespace (user or org). Controls the visibility of the notebook
    * and who can edit the notebook. Only the notebook creator can update the namespace.
    */
-  namespace: Scalars["ID"];
+  namespace: Scalars["ID"]["input"];
   /**
    * Public property controls the visibility of the notebook. A public notebook is available to
    * any user on the instance. Private notebooks are only available to their creators.
    */
-  public: Scalars["Boolean"];
+  public: Scalars["Boolean"]["input"];
   /** The title of the notebook. */
-  title: Scalars["String"];
+  title: Scalars["String"]["input"];
 };
 
 /** NotebooksOrderBy enumerates the ways notebooks can be ordered. */
@@ -974,16 +1184,209 @@ export enum OrganizationInvitationResponseType {
   Reject = "REJECT",
 }
 
-/** Status types of permissions providers. */
-export enum PermissionsProviderStatus {
-  Error = "ERROR",
-  Success = "SUCCESS",
+/** Input for the createOutboundWebhook mutation. */
+export type OutboundWebhookCreateInput = {
+  /**
+   * The event types the outbound webhook will receive.
+   *
+   * At least one event type must be provided.
+   */
+  eventTypes: Array<OutboundWebhookScopedEventTypeInput>;
+  /** The secret shared with the outbound webhook. */
+  secret: Scalars["String"]["input"];
+  /** The outbound webhook URL. */
+  url: Scalars["String"]["input"];
+};
+
+/** Event type input for the outbound webhook mutations. */
+export type OutboundWebhookScopedEventTypeInput = {
+  /**
+   * The event type, which must match a key returned from
+   * outboundWebhookEventTypes.
+   */
+  eventType: Scalars["String"]["input"];
+  /**
+   * An optional scope for the event type.
+   *
+   * Currently unused.
+   */
+  scope?: InputMaybe<Scalars["String"]["input"]>;
+};
+
+/** Input for the updateOutboundWebhook mutation. */
+export type OutboundWebhookUpdateInput = {
+  /**
+   * The event types the outbound webhook will receive. This list replaces the
+   * event types previously registered on the webhook.
+   *
+   * At least one event type must be provided.
+   */
+  eventTypes: Array<OutboundWebhookScopedEventTypeInput>;
+  /** The outbound webhook URL. */
+  url: Scalars["String"]["input"];
+};
+
+/** OwnSignalConfigurationUpdate represents an update to an OwnSignalConfiguration. */
+export type OwnSignalConfigurationUpdate = {
+  /** Whether or not the signal configuration should be enabled. */
+  enabled: Scalars["Boolean"]["input"];
+  /** A list of repository name patterns to exclude from the signal. */
+  excludedRepoPatterns: Array<Scalars["String"]["input"]>;
+  /** The new name for the signal configuration. */
+  name: Scalars["String"]["input"];
+};
+
+/** The only way we can recognize ownership at this point is through CODEOWNERS file entry. */
+export enum OwnershipReasonType {
+  AssignedOwner = "ASSIGNED_OWNER",
+  CodeownersFileEntry = "CODEOWNERS_FILE_ENTRY",
+  RecentContributorOwnershipSignal = "RECENT_CONTRIBUTOR_OWNERSHIP_SIGNAL",
+  RecentViewOwnershipSignal = "RECENT_VIEW_OWNERSHIP_SIGNAL",
 }
 
-/** Status types of permissions sync jobs. */
-export enum PermissionsSyncJobStatus {
-  Error = "ERROR",
-  Success = "SUCCESS",
+/** Whether a package repo reference filter is part of the allowlist or blocklist */
+export enum PackageMatchBehaviour {
+  /** Allows a package repo reference to be synced. */
+  Allow = "ALLOW",
+  /** Blocks a package repo reference from syncing. */
+  Block = "BLOCK",
+}
+
+/** A package repo reference filter that matches names. */
+export type PackageNameFilterInput = {
+  /** Glob string to match names. */
+  packageGlob: Scalars["String"]["input"];
+};
+
+/**
+ * A kind of package repo reference.
+ * ExternalServiceKind, with a more specific set of values.
+ */
+export enum PackageRepoReferenceKind {
+  Gomodules = "GOMODULES",
+  Jvmpackages = "JVMPACKAGES",
+  Npmpackages = "NPMPACKAGES",
+  Pythonpackages = "PYTHONPACKAGES",
+  Rubypackages = "RUBYPACKAGES",
+  Rustpackages = "RUSTPACKAGES",
+}
+
+/** A package repo reference filter that matches versions for a specific name. */
+export type PackageVersionFilterInput = {
+  /** Exact package name to match. */
+  packageName: Scalars["String"]["input"];
+  /** Glob string to match versions. */
+  versionGlob: Scalars["String"]["input"];
+};
+
+/** A name or version matching filter for. One of either nameFilter or versionFilter must be provided. */
+export type PackageVersionOrNameFilterInput = {
+  /** Optional name-matching filter. */
+  nameFilter?: InputMaybe<PackageNameFilterInput>;
+  /** Optional package-specific version-matching filter. */
+  versionFilter?: InputMaybe<PackageVersionFilterInput>;
+};
+
+/**
+ * A namespace represents a distinct context within which permission policies
+ * are defined and enforced.
+ */
+export enum PermissionNamespace {
+  /** This represents the Batch Changes namespace. */
+  BatchChanges = "BATCH_CHANGES",
+  /** This represents the Cody namespace. */
+  Cody = "CODY",
+  /** Permissions related to exported telemetry. */
+  ExportedTelemetry = "EXPORTED_TELEMETRY",
+  /**
+   * Code ownership namespace used for permitting to assign ownership
+   * within Sourcegraph.
+   */
+  Ownership = "OWNERSHIP",
+  /** ❗ Product subscriptions are only available in Sourcegraph.com */
+  ProductSubscriptions = "PRODUCT_SUBSCRIPTIONS",
+  /**
+   * Repo Metadata namespace used for permitting to edit repository
+   * key-value pair metadata.
+   */
+  RepoMetadata = "REPO_METADATA",
+  /** Permissions related to workspace repo administration. */
+  WorkspaceRepositories = "WORKSPACE_REPOSITORIES",
+}
+
+/**
+ * PermissionSource indicates where a permission originated from.
+ *
+ * REPO_SYNC: The permission was synced from the code host, via repo-centric permission sync.
+ * USER_SYNC: The permission was synced from the code host using user-centric permission sync.
+ * API: The permission was set explicitly via the GraphQL API.
+ */
+export enum PermissionSource {
+  Api = "API",
+  RepoSync = "REPO_SYNC",
+  UserSync = "USER_SYNC",
+}
+
+/** Permission sync job priority. */
+export enum PermissionsSyncJobPriority {
+  High = "HIGH",
+  Low = "LOW",
+  Medium = "MEDIUM",
+}
+
+/** State types of permission sync jobs. */
+export enum PermissionsSyncJobReason {
+  ReasonExternalAccountAdded = "REASON_EXTERNAL_ACCOUNT_ADDED",
+  ReasonExternalAccountDeleted = "REASON_EXTERNAL_ACCOUNT_DELETED",
+  ReasonGithubOrgMemberAddedEvent = "REASON_GITHUB_ORG_MEMBER_ADDED_EVENT",
+  ReasonGithubOrgMemberRemovedEvent = "REASON_GITHUB_ORG_MEMBER_REMOVED_EVENT",
+  ReasonGithubRepoEvent = "REASON_GITHUB_REPO_EVENT",
+  ReasonGithubRepoMadePrivateEvent = "REASON_GITHUB_REPO_MADE_PRIVATE_EVENT",
+  ReasonGithubTeamAddedToRepoEvent = "REASON_GITHUB_TEAM_ADDED_TO_REPO_EVENT",
+  ReasonGithubTeamRemovedFromRepoEvent = "REASON_GITHUB_TEAM_REMOVED_FROM_REPO_EVENT",
+  ReasonGithubUserAddedEvent = "REASON_GITHUB_USER_ADDED_EVENT",
+  ReasonGithubUserEvent = "REASON_GITHUB_USER_EVENT",
+  ReasonGithubUserMembershipAddedEvent = "REASON_GITHUB_USER_MEMBERSHIP_ADDED_EVENT",
+  ReasonGithubUserMembershipRemovedEvent = "REASON_GITHUB_USER_MEMBERSHIP_REMOVED_EVENT",
+  ReasonGithubUserRemovedEvent = "REASON_GITHUB_USER_REMOVED_EVENT",
+  ReasonManualRepoSync = "REASON_MANUAL_REPO_SYNC",
+  ReasonManualUserSync = "REASON_MANUAL_USER_SYNC",
+  ReasonRepoNoPerms = "REASON_REPO_NO_PERMS",
+  ReasonRepoOutdatedPerms = "REASON_REPO_OUTDATED_PERMS",
+  ReasonRepoUpdatedFromCodeHost = "REASON_REPO_UPDATED_FROM_CODE_HOST",
+  ReasonUserAcceptedOrgInvite = "REASON_USER_ACCEPTED_ORG_INVITE",
+  ReasonUserAdded = "REASON_USER_ADDED",
+  ReasonUserAddedToOrg = "REASON_USER_ADDED_TO_ORG",
+  ReasonUserEmailRemoved = "REASON_USER_EMAIL_REMOVED",
+  ReasonUserEmailVerified = "REASON_USER_EMAIL_VERIFIED",
+  ReasonUserNoPerms = "REASON_USER_NO_PERMS",
+  ReasonUserOutdatedPerms = "REASON_USER_OUTDATED_PERMS",
+  ReasonUserRemovedFromOrg = "REASON_USER_REMOVED_FROM_ORG",
+}
+
+/** Sync reason groups of permission sync jobs. */
+export enum PermissionsSyncJobReasonGroup {
+  Manual = "MANUAL",
+  Schedule = "SCHEDULE",
+  Sourcegraph = "SOURCEGRAPH",
+  Unknown = "UNKNOWN",
+  Webhook = "WEBHOOK",
+}
+
+/** State types of permissions sync jobs. */
+export enum PermissionsSyncJobState {
+  Canceled = "CANCELED",
+  Completed = "COMPLETED",
+  Errored = "ERRORED",
+  Failed = "FAILED",
+  Processing = "PROCESSING",
+  Queued = "QUEUED",
+}
+
+/** Type of search for permissions sync jobs: user or repository. */
+export enum PermissionsSyncJobsSearchType {
+  Repository = "REPOSITORY",
+  User = "USER",
 }
 
 /** Options for a pie chart */
@@ -992,55 +1395,177 @@ export type PieChartOptionsInput = {
    * The threshold for which groups fall into the "other category". Only categories with a percentage greater than
    * this value will be separately rendered.
    */
-  otherThreshold: Scalars["Float"];
+  otherThreshold: Scalars["Float"]["input"];
   /** The title for the pie chart. */
-  title: Scalars["String"];
+  title: Scalars["String"]["input"];
 };
 
 /** Input for a pie chart search insight */
 export type PieChartSearchInsightInput = {
   /** The dashboard IDs to associate this insight with once created. */
-  dashboards?: InputMaybe<Array<Scalars["ID"]>>;
+  dashboards?: InputMaybe<Array<Scalars["ID"]["input"]>>;
   /** Options for this pie chart. */
   presentationOptions: PieChartOptionsInput;
   /** The query string. */
-  query: Scalars["String"];
+  query: Scalars["String"]["input"];
   /** The scope of repositories. */
   repositoryScope: RepositoryScopeInput;
 };
 
-/** Ownership level of the recommended precise code-intel indexer. */
-export enum PreciseSupportLevel {
-  /** When the recommended indexer is maintained by us. */
-  Native = "NATIVE",
+/**
+ * Analogous to Position but as an input type.
+ *
+ * EXPERIMENTAL: This type may make backwards-incompatible changes in the future.
+ */
+export type PositionInput = {
+  /** Zero-based UTF-16 code unit offset from preceding newline (\n or \r\n) character. */
+  character: Scalars["Int"]["input"];
+  /** Zero-based count of newline (\n or \r\n) characters before this position. */
+  line: Scalars["Int"]["input"];
+};
+
+/**
+ * Possible states for PreciseIndexes.
+ *
+ * This type would more accurately be called "CodeGraphIndexJobState"
+ * as it covers both precise and syntactic indexing.
+ *
+ * See https://sourcegraph.com/docs/code-search/code-navigation/auto_indexing#lifecycle-of-an-indexing-job
+ * and https://sourcegraph.com/docs/code-search/code-navigation/explanations/uploads#lifecycle-of-an-upload
+ * for details about state transitions.
+ */
+export enum PreciseIndexState {
+  Completed = "COMPLETED",
+  Deleted = "DELETED",
+  Deleting = "DELETING",
+  Indexing = "INDEXING",
+  IndexingCompleted = "INDEXING_COMPLETED",
+  IndexingErrored = "INDEXING_ERRORED",
+  Processing = "PROCESSING",
+  ProcessingErrored = "PROCESSING_ERRORED",
+  QueuedForIndexing = "QUEUED_FOR_INDEXING",
+  QueuedForProcessing = "QUEUED_FOR_PROCESSING",
+  UploadingIndex = "UPLOADING_INDEX",
+}
+
+/** The input that describes a prompt template to create. */
+export type PromptInput = {
+  /** Whether the prompt should be automatically executed in one click. */
+  autoSubmit: Scalars["Boolean"]["input"];
+  /** The prompt template definition. */
+  definitionText: Scalars["String"]["input"];
+  /** The description of the prompt. */
+  description: Scalars["String"]["input"];
+  /** Whether the prompt is a draft. */
+  draft: Scalars["Boolean"]["input"];
+  /** Whether to execute prompt as chat, edit or insert command. */
+  mode: PromptMode;
+  /** The name of the prompt. */
+  name: Scalars["String"]["input"];
+  /** The owner of the prompt, either a user or organization. */
+  owner: Scalars["ID"]["input"];
+  /** Whether the prompt is recommended. */
+  recommended?: InputMaybe<Scalars["Boolean"]["input"]>;
+  /** The visibility state for the prompt. */
+  visibility: PromptVisibility;
+};
+
+/** The mode in which to execute a prompt. */
+export enum PromptMode {
+  /** Execute the prompt in chat mode. */
+  Chat = "CHAT",
+  /** Execute the prompt in edit mode. */
+  Edit = "EDIT",
+  /** Execute the prompt in insert mode. */
+  Insert = "INSERT",
+}
+
+/** The input that describes an edit to a prompt template. */
+export type PromptUpdateInput = {
+  /** Whether the prompt should be automatically executed in one click. */
+  autoSubmit: Scalars["Boolean"]["input"];
+  /** The prompt template definition. */
+  definitionText: Scalars["String"]["input"];
+  /** The description of the prompt. */
+  description: Scalars["String"]["input"];
+  /** Whether the prompt is a draft. */
+  draft: Scalars["Boolean"]["input"];
+  /** Whether to execute prompt as chat, edit or insert command. */
+  mode: PromptMode;
+  /** The name of the prompt. */
+  name: Scalars["String"]["input"];
+  /** Whether the prompt is recommended. */
+  recommended?: InputMaybe<Scalars["Boolean"]["input"]>;
+};
+
+/** The visibility states for a prompt. */
+export enum PromptVisibility {
+  /** The prompt is visible to all users on the instance. */
+  Public = "PUBLIC",
   /**
-   * When the recommended indexer is maintained by a third-party
-   * but is recommended over a native indexer, where one exists.
+   * The prompt is visible only to the owner organization's members (if the owner is an organization)
+   * or the owner user (if the owner is a user).
    */
-  ThirdParty = "THIRD_PARTY",
-  /** When there is no known indexer. */
-  Unknown = "UNKNOWN",
+  Secret = "SECRET",
+}
+
+/** The ways that a list of prompts can be ordered. */
+export enum PromptsOrderBy {
+  PromptNameWithOwner = "PROMPT_NAME_WITH_OWNER",
+  PromptRecommended = "PROMPT_RECOMMENDED",
+  PromptUpdatedAt = "PROMPT_UPDATED_AT",
 }
 
 /**
- * An input type that describes a product license to be generated and signed.
- * FOR INTERNAL USE ONLY.
+ * A range inside a particular blob, describing a usage of a symbol,
+ * which can be used to locate other usages of the same symbol.
+ *
+ * The range must be an *exact match*.
+ *
+ * In general, a single range may correspond to multiple symbols.
+ * A caller can further drill down on a specific symbol using SymbolComparator.
+ *
+ * EXPERIMENTAL: This type may make backwards-incompatible changes in the future.
  */
-export type ProductLicenseInput = {
-  /** The expiration date of this product license, expressed as the number of seconds since the epoch. */
-  expiresAt: Scalars["Int"];
-  /** The tags that indicate which features are activated by this license. */
-  tags: Array<Scalars["String"]>;
-  /** The number of users for which this product subscription is valid. */
-  userCount: Scalars["Int"];
+export type RangeInput = {
+  /** End position of the range (exclusive) */
+  end: PositionInput;
+  /** The path containing the initial usage for the symbol. */
+  path: Scalars["String"]["input"];
+  /** The repository containing the initial usage for a symbol. */
+  repository: Scalars["String"]["input"];
+  /**
+   * The revision containing the initial usage for the symbol.
+   *
+   * Defaults to HEAD of the default branch if not specified.
+   */
+  revision?: InputMaybe<Scalars["String"]["input"]>;
+  /** Start position of the range (inclusive) */
+  start: PositionInput;
 };
 
 /** Input object for adding insight view to dashboard. */
 export type RemoveInsightViewFromDashboardInput = {
   /** ID of the dashboard. */
-  dashboardId: Scalars["ID"];
+  dashboardId: Scalars["ID"]["input"];
   /** ID of the insight view to remove from the dashboard */
-  insightViewId: Scalars["ID"];
+  insightViewId: Scalars["ID"]["input"];
+};
+
+/** State types of repo embedding sync jobs. */
+export enum RepoEmbeddingJobState {
+  Canceled = "CANCELED",
+  Completed = "COMPLETED",
+  Errored = "ERRORED",
+  Failed = "FAILED",
+  Processing = "PROCESSING",
+  Queued = "QUEUED",
+}
+
+/** EXPERIMENTAL: This type may make backwards-incompatible changes in the future. */
+export type RepositoryFilter = {
+  /** Compare the repository by name. */
+  name: StringComparator;
 };
 
 /** RepositoryOrderBy enumerates the ways a repositories list can be ordered. */
@@ -1060,8 +1585,72 @@ export enum RepositoryPermission {
 /** A custom repository scope for an insight data series. */
 export type RepositoryScopeInput = {
   /** The list of repositories included in this scope. */
-  repositories: Array<Scalars["String"]>;
+  repositories: Array<Scalars["String"]["input"]>;
+  /** A search query to select repositories for this scope. */
+  repositoryCriteria?: InputMaybe<Scalars["String"]["input"]>;
 };
+
+/**
+ * All possible types of currently supported repositories, even though they may be stored
+ * as a git repository on disk.
+ */
+export enum RepositoryType {
+  GitRepository = "GIT_REPOSITORY",
+  PerforceDepot = "PERFORCE_DEPOT",
+}
+
+/** Input for saving a new view on an insight. */
+export type SaveInsightAsNewViewInput = {
+  /** The dashboard ID to associate this insight with once created. */
+  dashboard?: InputMaybe<Scalars["ID"]["input"]>;
+  /** The insight view ID we are creating a new view from. */
+  insightViewId: Scalars["ID"]["input"];
+  /** The options for this line chart. */
+  options: LineChartOptionsInput;
+  /** The default values for filters and aggregates for this line chart. */
+  viewControls?: InputMaybe<InsightViewControlsInput>;
+};
+
+/** The input that describes a saved search. */
+export type SavedSearchInput = {
+  /** A description of the saved search. */
+  description: Scalars["String"]["input"];
+  /** Whether the saved search is a draft. */
+  draft: Scalars["Boolean"]["input"];
+  /** The owner of the saved search, either a user or organization. */
+  owner: Scalars["ID"]["input"];
+  /** The search query. */
+  query: Scalars["String"]["input"];
+  /** The visibility state for the saved search. */
+  visibility: SavedSearchVisibility;
+};
+
+/** The input that describes a saved search. */
+export type SavedSearchUpdateInput = {
+  /** A description of the saved search. */
+  description: Scalars["String"]["input"];
+  /** Whether the saved search is a draft. */
+  draft: Scalars["Boolean"]["input"];
+  /** The search query. */
+  query: Scalars["String"]["input"];
+};
+
+/** The visibility states for a saved search. */
+export enum SavedSearchVisibility {
+  /** The saved search is visible to all users on the instance. */
+  Public = "PUBLIC",
+  /**
+   * The saved search is visible only to the owner organization's members (if the owner is an organization)
+   * or the owner user (if the owner is a user).
+   */
+  Secret = "SECRET",
+}
+
+/** The ways that a list of saved searches can be ordered. */
+export enum SavedSearchesOrderBy {
+  SavedSearchDescription = "SAVED_SEARCH_DESCRIPTION",
+  SavedSearchUpdatedAt = "SAVED_SEARCH_UPDATED_AT",
+}
 
 /** Supported aggregation modes for search aggregations */
 export enum SearchAggregationMode {
@@ -1069,30 +1658,20 @@ export enum SearchAggregationMode {
   CaptureGroup = "CAPTURE_GROUP",
   Path = "PATH",
   Repo = "REPO",
-}
-
-/**
- * Tiered list of types of search-based support for a language. This may be expanded as different
- * indexing methods are introduced.
- */
-export enum SearchBasedSupportLevel {
-  /** Universal-ctags is used for indexing this language. */
-  Basic = "BASIC",
-  /** The language has no configured search-based code-intel support. */
-  Unsupported = "UNSUPPORTED",
+  RepoMetadata = "REPO_METADATA",
 }
 
 /** Input for editing an existing search context. */
 export type SearchContextEditInput = {
   /** Search context description. */
-  description: Scalars["String"];
+  description: Scalars["String"]["input"];
   /**
    * Search context name. Not the same as the search context spec. Search context namespace and search context name
    * are used to construct the fully-qualified search context spec.
    * Example mappings from search context spec to search context name: global -> global, @user -> user, @org -> org,
    * @user/ctx1 -> ctx1, @org/ctxs/ctx -> ctxs/ctx.
    */
-  name: Scalars["String"];
+  name: Scalars["String"]["input"];
   /**
    * Public property controls the visibility of the search context. Public search context is available to
    * any user on the instance. If a public search context contains private repositories, those are filtered out
@@ -1100,27 +1679,27 @@ export type SearchContextEditInput = {
    * is available only to the user, private org search context is available only to the members of the org, and private
    * instance-level search contexts are available only to site-admins.
    */
-  public: Scalars["Boolean"];
+  public: Scalars["Boolean"]["input"];
   /**
    * Sourcegraph search query that defines the search context.
    * e.g. "r:^github\.com/org (rev:bar or rev:HEAD) file:^sub/dir"
    */
-  query: Scalars["String"];
+  query: Scalars["String"]["input"];
 };
 
 /** Input for a new search context. */
 export type SearchContextInput = {
   /** Search context description. */
-  description: Scalars["String"];
+  description: Scalars["String"]["input"];
   /**
    * Search context name. Not the same as the search context spec. Search context namespace and search context name
    * are used to construct the fully-qualified search context spec.
    * Example mappings from search context spec to search context name: global -> global, @user -> user, @org -> org,
    * @user/ctx1 -> ctx1, @org/ctxs/ctx -> ctxs/ctx.
    */
-  name: Scalars["String"];
+  name: Scalars["String"]["input"];
   /** Namespace of the search context (user or org). If not set, search context is considered instance-level. */
-  namespace?: InputMaybe<Scalars["ID"]>;
+  namespace?: InputMaybe<Scalars["ID"]["input"]>;
   /**
    * Public property controls the visibility of the search context. Public search context is available to
    * any user on the instance. If a public search context contains private repositories, those are filtered out
@@ -1128,20 +1707,20 @@ export type SearchContextInput = {
    * is available only to the user, private org search context is available only to the members of the org, and private
    * instance-level search contexts are available only to site-admins.
    */
-  public: Scalars["Boolean"];
+  public: Scalars["Boolean"]["input"];
   /**
    * Sourcegraph search query that defines the search context.
    * e.g. "r:^github\.com/org (rev:bar or rev:HEAD) file:^sub/dir"
    */
-  query: Scalars["String"];
+  query: Scalars["String"]["input"];
 };
 
 /** Input for a set of revisions to be searched within a repository. */
 export type SearchContextRepositoryRevisionsInput = {
   /** ID of the repository to be searched. */
-  repositoryID: Scalars["ID"];
+  repositoryID: Scalars["ID"]["input"];
   /** Revisions in the repository to be searched. */
-  revisions: Array<Scalars["String"]>;
+  revisions: Array<Scalars["String"]["input"]>;
 };
 
 /** SearchContextsOrderBy enumerates the ways a search contexts list can be ordered. */
@@ -1153,13 +1732,13 @@ export enum SearchContextsOrderBy {
 /** Required input to generate a time series for a search insight using live preview. */
 export type SearchInsightLivePreviewInput = {
   /** Whether or not to generate the timeseries results from the query capture groups. */
-  generatedFromCaptureGroups: Scalars["Boolean"];
+  generatedFromCaptureGroups: Scalars["Boolean"]["input"];
   /** Use this field to specify a compute insight. Note: this is experimental and should be considered unstable */
   groupBy?: InputMaybe<GroupByField>;
   /** The desired label for the series. Will be overwritten when series are dynamically generated. */
-  label: Scalars["String"];
+  label: Scalars["String"]["input"];
   /** The query string. */
-  query: Scalars["String"];
+  query: Scalars["String"]["input"];
   /** The scope of repositories. */
   repositoryScope: RepositoryScopeInput;
   /** The scope of time. */
@@ -1176,11 +1755,39 @@ export type SearchInsightPreviewInput = {
   timeScope: TimeScopeInput;
 };
 
+/** The state of a search job. */
+export enum SearchJobState {
+  /** The search job was canceled. */
+  Canceled = "CANCELED",
+  /** The search job has completed. */
+  Completed = "COMPLETED",
+  /** The search job had an error. */
+  Errored = "ERRORED",
+  /** The search job has failed. */
+  Failed = "FAILED",
+  /** The search job is being processed. */
+  Processing = "PROCESSING",
+  /** The search job has been created and is waiting to be processed. */
+  Queued = "QUEUED",
+}
+
+/** The order by which search jobs are sorted. */
+export enum SearchJobsOrderBy {
+  /** Sort search jobs by their creation date. */
+  CreatedAt = "CREATED_AT",
+  /** Sort search jobs by their query. */
+  Query = "QUERY",
+  /** Sort search jobs by their state. */
+  State = "STATE",
+}
+
 /** The search pattern type. */
 export enum SearchPatternType {
+  Codycontext = "codycontext",
   Keyword = "keyword",
   Literal = "literal",
   Lucky = "lucky",
+  Nls = "nls",
   Regexp = "regexp",
   Standard = "standard",
   Structural = "structural",
@@ -1221,13 +1828,13 @@ export enum SearchQueryOutputVerbosity {
 /** Required input to generate a live preview for a series. */
 export type SearchSeriesPreviewInput = {
   /** Whether or not to generate the timeseries results from the query capture groups. */
-  generatedFromCaptureGroups: Scalars["Boolean"];
+  generatedFromCaptureGroups: Scalars["Boolean"]["input"];
   /** Use this field to specify a compute insight. Note: this is experimental and should be considered unstable */
   groupBy?: InputMaybe<GroupByField>;
   /** The desired label for the series. Will be overwritten when series are dynamically generated. */
-  label: Scalars["String"];
+  label: Scalars["String"]["input"];
   /** The query string. */
-  query: Scalars["String"];
+  query: Scalars["String"]["input"];
 };
 
 /** The version of the search syntax. */
@@ -1243,7 +1850,9 @@ export enum SearchVersion {
 /** Input type for series display options. */
 export type SeriesDisplayOptionsInput = {
   /** Max number of series to return. */
-  limit?: InputMaybe<Scalars["Int"]>;
+  limit?: InputMaybe<Scalars["Int"]["input"]>;
+  /** Max number of samples to return. */
+  numSamples?: InputMaybe<Scalars["Int"]["input"]>;
   /** Sort options for the series. */
   sortOptions?: InputMaybe<SeriesSortOptionsInput>;
 };
@@ -1284,12 +1893,12 @@ export type SettingsEdit = {
    * When the value is a non-primitive type, it must be specified using a GraphQL variable, not an inline literal,
    * or else the GraphQL parser will return an error.
    */
-  value?: InputMaybe<Scalars["JSONValue"]>;
+  value?: InputMaybe<Scalars["JSONValue"]["input"]>;
   /**
    * Whether to treat the value as a JSONC-encoded string, which makes it possible to perform an edit that
    * preserves (or adds/removes) comments.
    */
-  valueIsJSONCEncodedString?: InputMaybe<Scalars["Boolean"]>;
+  valueIsJSONCEncodedString?: InputMaybe<Scalars["Boolean"]["input"]>;
 };
 
 /**
@@ -1301,9 +1910,9 @@ export type SettingsMutationGroupInput = {
    * The ID of the last-known settings known to the client, or null if there is none. This field is used to
    * prevent race conditions when there are concurrent editors.
    */
-  lastID?: InputMaybe<Scalars["Int"]>;
+  lastID?: InputMaybe<Scalars["Int"]["input"]>;
   /** The subject whose settings to mutate (organization, user, etc.). */
-  subject: Scalars["ID"];
+  subject: Scalars["ID"]["input"];
 };
 
 /** SiteUserOrderBy enumerates the ways a users list can be ordered. */
@@ -1326,36 +1935,56 @@ export enum SiteUserOrderBy {
 /** SiteUsersDateRangeInput argument to filter based on date range or date equals to null */
 export type SiteUsersDateRangeInput = {
   /** Equal to Null */
-  empty?: InputMaybe<Scalars["Boolean"]>;
+  empty?: InputMaybe<Scalars["Boolean"]["input"]>;
   /** Greater than or equal to */
-  gte?: InputMaybe<Scalars["DateTime"]>;
+  gte?: InputMaybe<Scalars["DateTime"]["input"]>;
   /** Less than or equal to */
-  lte?: InputMaybe<Scalars["DateTime"]>;
+  lte?: InputMaybe<Scalars["DateTime"]["input"]>;
   /** Negation */
-  not?: InputMaybe<Scalars["Boolean"]>;
+  not?: InputMaybe<Scalars["Boolean"]["input"]>;
 };
 
 /** SiteUsersNumberRangeInput argument to filter based on the number range */
 export type SiteUsersNumberRangeInput = {
   /** Less than or equal to */
-  gte?: InputMaybe<Scalars["Float"]>;
+  gte?: InputMaybe<Scalars["Float"]["input"]>;
   /** Greater than or equal to */
-  lte?: InputMaybe<Scalars["Float"]>;
+  lte?: InputMaybe<Scalars["Float"]["input"]>;
+};
+
+/** Speaker type, human or assistant */
+export enum SpeakerType {
+  Assistant = "ASSISTANT",
+  Human = "HUMAN",
+}
+
+/** EXPERIMENTAL: This type may make backwards-incompatible changes in the future. */
+export type StringComparator = {
+  /** Checks for exact equality. */
+  equals?: InputMaybe<Scalars["String"]["input"]>;
+};
+
+/** EXPERIMENTAL: This type may make backwards-incompatible changes in the future. */
+export type SurroundingLines = {
+  /** The number of lines after the current line to include. */
+  linesAfter?: InputMaybe<Scalars["Int"]["input"]>;
+  /** The number of lines before the current line to include. */
+  linesBefore?: InputMaybe<Scalars["Int"]["input"]>;
 };
 
 /** Input for a user satisfaction (NPS) survey submission. */
 export type SurveySubmissionInput = {
   /** The answer to "What would make Sourcegraph better?" */
-  better?: InputMaybe<Scalars["String"]>;
+  better?: InputMaybe<Scalars["String"]["input"]>;
   /**
    * User-provided email address, if there is no currently authenticated user. If there is, this value
    * will not be used.
    */
-  email?: InputMaybe<Scalars["String"]>;
+  email?: InputMaybe<Scalars["String"]["input"]>;
   /** The answer to "What do you use Sourcegraph for?". */
-  otherUseCase?: InputMaybe<Scalars["String"]>;
+  otherUseCase?: InputMaybe<Scalars["String"]["input"]>;
   /** User's likelihood of recommending Sourcegraph to a friend, from 0-10. */
-  score: Scalars["Int"];
+  score: Scalars["Int"]["input"];
 };
 
 /** Possible answers to "You use Sourcegraph to..." in the NPS Survey. */
@@ -1366,6 +1995,17 @@ export enum SurveyUseCase {
   ReuseCode = "REUSE_CODE",
   UnderstandNewCode = "UNDERSTAND_NEW_CODE",
 }
+
+/** EXPERIMENTAL: This type may make backwards-incompatible changes in the future. */
+export type SymbolComparator = {
+  /** Describes how the symbol name should be compared. */
+  name: SymbolNameComparator;
+  /**
+   * Describes the provenance of the symbol. This value should be based
+   * on the provenance value obtained from the CodeGraphData type.
+   */
+  provenance: CodeGraphDataProvenanceComparator;
+};
 
 /**
  * All possible kinds of symbols. This set matches that of the Language Server Protocol
@@ -1401,12 +2041,345 @@ export enum SymbolKind {
   Variable = "VARIABLE",
 }
 
+/** EXPERIMENTAL: This type may make backwards-incompatible changes in the future. */
+export type SymbolNameComparator = {
+  /** Checks for exact equality. */
+  equals?: InputMaybe<Scalars["String"]["input"]>;
+};
+
+/** EXPERIMENTAL: This type may change in a backwards-compatible way. */
+export enum SymbolRole {
+  Definition = "DEFINITION",
+  /**
+   * Applicable for forward declarations in languages with header files (C, C++ etc.)
+   * as well as standalone signatures in languages with separate interface files (OCaml etc.).
+   */
+  ForwardDefinition = "FORWARD_DEFINITION",
+  Reference = "REFERENCE",
+}
+
+/**
+ * Categorizes a usage based on its relationship to the symbol of interest.
+ *
+ * This enum may be expanded in the future.
+ *
+ * EXPERIMENTAL: This type may change in a backwards-incompatible way in the future.
+ */
+export enum SymbolUsageKind {
+  /**
+   * Denotes a usage as being a definition.
+   *
+   * interface Animal:
+   *     sound()
+   *
+   * class Dog implements Animal:
+   *     sound() override { ... }
+   *
+   * func makeSounds(animal: Animal, dog: Dog):
+   *     animal.sound()
+   *     //     ^---^ (1)
+   *     dog.sound()
+   *     //  ^---^ (2)
+   *
+   * Here, usagesForSymbol for (1) will return a Definition usage for Animal.sound().
+   * Similarly, usagesForSymbol for (2) will return a Definition usage for Dog.sound().
+   *
+   * In the general case, a symbol may have multiple definitions.
+   * Here are some examples:
+   *
+   * 1. Python allows for multiple inheritance, so the same field can
+   *    be declared in multiple parent classes. In such a situation,
+   *    even Precise results may have multiple definitions.
+   * 2. A function may have different definitions based on the build
+   *    configuration, such as for macOS vs Windows. A precise SCIP indexer
+   *    may unify all such definitions into a single index as SCIP
+   *    currently (as of June 20 2024) doesn't support tracking build
+   *    configuration.
+   * 3. Syntactic or search-based results may not be able to find the
+   *    exact definition, so they may return a superset of the full set
+   *    of definitions.
+   */
+  Definition = "DEFINITION",
+  /**
+   * Denotes a usage as being an 'implementation', generally of a method, interface
+   * or similar (the exact terminology varies across languages - traits, protocols etc.).
+   *
+   * For example, consider the following pseudocode:
+   *
+   * interface Animal:
+   * //        ^----^ (1)
+   *     sound()
+   * //  ^---^ (2)
+   *
+   * class Dog implements Animal:
+   *     sound() override { ... }
+   *
+   * Here, usagesForSymbol for (1) will return an Implementation usage for Dog.
+   * Similarly, usagesForSymbol for (2) will return an Implementation usage for Dog.sound().
+   *
+   * As of June 20 2024, Implementation usages are only supported by
+   * Precise indexers. Syntactic and search-based usagesForSymbol will mark all
+   * such usages as Reference.
+   */
+  Implementation = "IMPLEMENTATION",
+  /**
+   * Denotes a usage as being a reference. References are unified across
+   * the inheritance hierarchy. For example, consider the following pseudocode:
+   *
+   * interface Animal:
+   *     sound()
+   *
+   * class Dog implements Animal:
+   *     sound() override { ... }
+   *
+   * func makeSounds(animal: Animal, dog: Dog):
+   *     animal.sound()
+   *     //     ^---^ (1)
+   *     dog.sound()
+   *     //  ^---^ (2)
+   *
+   * Here, usagesForSymbol for both (1) and (2) will return Reference usages
+   * for both Animal.sound() and Dog.sound().
+   * - For (1), it makes sense to also return reference usages for Dog.sound()
+   *   because 'animal' may actually be a Dog.
+   * - For (2), it makes sense to also return reference usages for Animal.sound()
+   *   because 'dog' value may be up-cast to Animal at some point and the
+   *   and 'sound()' might be called on it after that.
+   */
+  Reference = "REFERENCE",
+  /**
+   * Denotes a usage as being a 'super', generally of a method, type or similar.
+   * The exact terminology varies across languages and the syntax under question -
+   * for functions, it might be 'superclass method', 'interface method', 'trait method' etc.
+   * and for types, it might be 'superclass', 'interface', 'trait' etc.
+   *
+   * For example, consider the following pseudocode:
+   *
+   * interface Animal:
+   *     sound()
+   *
+   * class Dog implements Animal:
+   *     sound() override { ... }
+   *
+   * func bark(dog: Dog):
+   *     //         ^-^ (1)
+   *     dog.sound()
+   *     //  ^---^ (2)
+   *
+   * Here, usagesForSymbol for (1) will return a Super usage for Animal.
+   * Similarly, usagesForSymbol for (2) will return a Super usage for Animal.sound().
+   *
+   * As of June 20 2024, Super usages are only supported by
+   * Precise indexers. Syntactic and search-based usagesForSymbol will mark all
+   * such usages as Reference.
+   *
+   * UI note: Strictly speaking, depending on the exact symbol and language under
+   * consideration, 'Super' usages would be better be grouped under a heading like:
+   *
+   * - Method specification (for methods satisfying the signature of an interface
+   *   method in Go or Java)
+   * - Interface (for types implementing an interface in Go or Java)
+   * - Trait method (for methods satisfying the signature of a trait method in Rust)
+   * - Trait (for types implementing a trait in Rust)
+   *
+   * and so on. Due to this large variation across languages, we've chosen
+   * to group all such usages under 'Super' for now.
+   *
+   * Historical note: This was previously called 'prototype' in the old API.
+   * However, 'prototype' has a specific meaning in C++ different from our usage,
+   * so we recommend avoiding the term 'prototype' in the UI.
+   */
+  Super = "SUPER",
+}
+
+/**
+ * Options to specify a user for team membership. Multiple options can be provided,
+ * with the following precedence order: (Other mismatches will be discarded)
+ * - UserID
+ * - Username
+ * - Email
+ * - External Account fields
+ *
+ * Examples:
+ * - If ID is set and no match, return.
+ * - If ID and username is set, and ID matches but username doesn't, match.
+ */
+export type TeamMemberInput = {
+  /** If the email is associated to a user and verified, the user account will be matched. */
+  email?: InputMaybe<Scalars["String"]["input"]>;
+  /**
+   * If the user has an associated external account, use this.
+   * externalAccountServiceID and externalAccountServiceType must be set and
+   * either of externalAccountAccountID externalAccountLogin are required as well.
+   * Account ID is the unique identifier on the external account platform.
+   */
+  externalAccountAccountID?: InputMaybe<Scalars["String"]["input"]>;
+  /**
+   * If the user has an associated external account, use this.
+   * externalAccountServiceID and externalAccountServiceType must be set and
+   * either of externalAccountAccountID externalAccountLogin are required as well.
+   * Account Login is usually the username on the external account platform.
+   */
+  externalAccountLogin?: InputMaybe<Scalars["String"]["input"]>;
+  /**
+   * If the user has an associated external account, use this.
+   * externalAccountServiceID and externalAccountServiceType must be set and
+   * either of externalAccountAccountID externalAccountLogin are required as well.
+   * Service ID for the GitHub OAuth provider, for example, is https://github.com/.
+   */
+  externalAccountServiceID?: InputMaybe<Scalars["String"]["input"]>;
+  /**
+   * If the user has an associated external account, use this.
+   * externalAccountServiceID and externalAccountServiceType must be set and
+   * either of externalAccountAccountID externalAccountLogin are required as well.
+   * Service Type for the GitHub OAuth provider, for example, is github.
+   */
+  externalAccountServiceType?: InputMaybe<Scalars["String"]["input"]>;
+  /** Explicitly define a user by ID. */
+  userID?: InputMaybe<Scalars["ID"]["input"]>;
+  /** Explicitly define a user by username in Sourcegraph. */
+  username?: InputMaybe<Scalars["String"]["input"]>;
+};
+
+/** Billing-related metadata for a telemetry event. */
+export type TelemetryEventBillingMetadataInput = {
+  /**
+   * Billing category ID the event falls into.
+   *
+   * IDs must come from a static set of values in libraries - it is left as a
+   * string in the API to allow some flexibility.
+   */
+  category: Scalars["String"]["input"];
+  /**
+   * Billing product ID associated with the event.
+   *
+   * IDs must come from a static set of values in libraries - it is left as a
+   * string in the API to allow some flexibility.
+   */
+  product: Scalars["String"]["input"];
+};
+
+/** Properties comprising a telemetry V2 event that can be reported by a client. */
+export type TelemetryEventInput = {
+  /**
+   * Action associated with the event in camelCase, e.g. 'pageView'.
+   *
+   * Action names must come from a static set of values in libraries - it is
+   * left as a string in the API to allow some flexibility.
+   */
+  action: Scalars["String"]["input"];
+  /**
+   * Feature associated with the event in camelCase, e.g. 'myFeature'.
+   *
+   * Feature names must come from a static set of values in libraries - it is
+   * left as a string in the API to allow some flexibility.
+   */
+  feature: Scalars["String"]["input"];
+  /**
+   * Optional marketing campaign tracking parameters.
+   *
+   * 🚨 SECURITY: This metadata is NEVER exported from private Sourcegraph instances,
+   * and is only exported for events tracked in the public Sourcegraph.com instance.
+   */
+  marketingTracking?: InputMaybe<TelemetryEventMarketingTrackingInput>;
+  /** Parameters of the event. */
+  parameters: TelemetryEventParametersInput;
+  /** Information about where this event came from. */
+  source: TelemetryEventSourceInput;
+  /**
+   * Timestamp at which the time was recorded. If not provided, a timestamp is
+   * generated when the server receives the event, but this does not guarantee
+   * consistent ordering or accuracy.
+   *
+   * This parameter is only available in Sourcegraph 5.2.5 and later.
+   */
+  timestamp?: InputMaybe<Scalars["DateTime"]["input"]>;
+};
+
+/**
+ * Marketing campaign tracking parameters for a telemetry V2 event.
+ *
+ * 🚨 SECURITY: This metadata is NEVER exported from private Sourcegraph instances,
+ * and is only exported for events tracked in the public Sourcegraph.com instance.
+ */
+export type TelemetryEventMarketingTrackingInput = {
+  /** Cohort ID to identify the user as part of a specific A/B test. */
+  cohortID?: InputMaybe<Scalars["String"]["input"]>;
+  /** Device session ID to identify the user's session. */
+  deviceSessionID?: InputMaybe<Scalars["String"]["input"]>;
+  /** Initial URL the user landed on. */
+  firstSourceURL?: InputMaybe<Scalars["String"]["input"]>;
+  /** Last source URL visited by the user. */
+  lastSourceURL?: InputMaybe<Scalars["String"]["input"]>;
+  /** Referrer URL that refers the user to Sourcegraph. */
+  referrer?: InputMaybe<Scalars["String"]["input"]>;
+  /** First URL the user visited in their current session. */
+  sessionFirstURL?: InputMaybe<Scalars["String"]["input"]>;
+  /** Session referrer URL for the user. */
+  sessionReferrer?: InputMaybe<Scalars["String"]["input"]>;
+  /** URL the event occurred on. */
+  url?: InputMaybe<Scalars["String"]["input"]>;
+};
+
+/** A single, PII-free metadata item for telemetry V2 events. */
+export type TelemetryEventMetadataInput = {
+  /** The key identifying this metadata entry. */
+  key: Scalars["String"]["input"];
+  /**
+   * Numeric value associated with the key. Enforcing numeric values eliminates
+   * risks of accidentally shipping sensitive or private data.
+   *
+   * The value type in the schema is JSONValue for flexibility, but we ONLY
+   * accept numeric values (integers and floats) - any other value will be
+   * rejected.
+   */
+  value: Scalars["JSONValue"]["input"];
+};
+
+/** Properties of a telemetry V2 event. */
+export type TelemetryEventParametersInput = {
+  /** Billing-related metadata. */
+  billingMetadata?: InputMaybe<TelemetryEventBillingMetadataInput>;
+  /**
+   * Optional interaction ID that can be provided to indicate the interaction
+   * this event belongs to. It overrides the X-Sourcegraph-Interaction-ID header
+   * if one is set on the request recording the event.
+   *
+   * This parameter is only available in Sourcegraph 5.2.4 and later.
+   */
+  interactionID?: InputMaybe<Scalars["String"]["input"]>;
+  /** Strictly typed metadata that must not contain any sensitive data or PII. */
+  metadata?: InputMaybe<Array<TelemetryEventMetadataInput>>;
+  /**
+   * Private metadata in JSON format. Unlike metadata, values can be of any type,
+   * not just numeric.
+   *
+   * 🚨 SECURITY: This metadata is NOT exported from instances by default, as it
+   * can contain arbitrarily-shaped data that may accidentally contain sensitive
+   * or private contents.
+   */
+  privateMetadata?: InputMaybe<Scalars["JSONValue"]["input"]>;
+  /**
+   * Version of the event parameters, used for indicating the "shape" of this
+   * event's metadata.
+   */
+  version: Scalars["Int"]["input"];
+};
+
+/** Properties comprising the source of a telemetry V2 event reported by a client. */
+export type TelemetryEventSourceInput = {
+  /** Source client of the event. */
+  client: Scalars["String"]["input"];
+  /** Version of the source client of the event. */
+  clientVersion?: InputMaybe<Scalars["String"]["input"]>;
+};
+
 /** A time scope defined using a time interval (ex. 5 days) */
 export type TimeIntervalStepInput = {
   /** The time unit for the interval. */
   unit: TimeIntervalStepUnit;
   /** The value for the interval. */
-  value: Scalars["Int"];
+  value: Scalars["Int"]["input"];
 };
 
 /** Time interval units. */
@@ -1427,19 +2400,19 @@ export type TimeScopeInput = {
 /** Fields to update for an existing external service. */
 export type UpdateExternalServiceInput = {
   /** The updated config, if provided. */
-  config?: InputMaybe<Scalars["String"]>;
+  config?: InputMaybe<Scalars["String"]["input"]>;
   /** The updated display name, if provided. */
-  displayName?: InputMaybe<Scalars["String"]>;
+  displayName?: InputMaybe<Scalars["String"]["input"]>;
   /** The id of the external service to update. */
-  id: Scalars["ID"];
+  id: Scalars["ID"]["input"];
 };
 
 /** Input object for update insight series mutation. */
 export type UpdateInsightSeriesInput = {
   /** The desired activity state (enabled or disabled) for the series. */
-  enabled?: InputMaybe<Scalars["Boolean"]>;
+  enabled?: InputMaybe<Scalars["Boolean"]["input"]>;
   /** Unique ID for the series. */
-  seriesId: Scalars["String"];
+  seriesId: Scalars["String"]["input"];
 };
 
 /** Input object for updating a dashboard. */
@@ -1447,7 +2420,7 @@ export type UpdateInsightsDashboardInput = {
   /** Permissions to grant to the dashboard. */
   grants?: InputMaybe<InsightsPermissionGrantsInput>;
   /** Dashboard title. */
-  title?: InputMaybe<Scalars["String"]>;
+  title?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 /** Input for updating a line chart search insight. */
@@ -1456,6 +2429,10 @@ export type UpdateLineChartSearchInsightInput = {
   dataSeries: Array<LineChartSearchInsightDataSeriesInput>;
   /** The presentation options for this line chart. */
   presentationOptions: LineChartOptionsInput;
+  /** The scope of repositories for the insight, this scope will apply to all dataSeries unless another scope is provided by a series. */
+  repositoryScope?: InputMaybe<RepositoryScopeInput>;
+  /** The time scope for this insight, this scope will apply to all dataSeries unless another scope is provided by a series. */
+  timeScope?: InputMaybe<TimeScopeInput>;
   /** The default values for filters and aggregates for this line chart. */
   viewControls: InsightViewControlsInput;
 };
@@ -1465,9 +2442,38 @@ export type UpdatePieChartSearchInsightInput = {
   /** Options for this pie chart. */
   presentationOptions: PieChartOptionsInput;
   /** The query string. */
-  query: Scalars["String"];
+  query: Scalars["String"]["input"];
   /** The scope of repositories. */
   repositoryScope: RepositoryScopeInput;
+};
+
+/** UpdateSignalConfigurationsInput represents the input for updating multiple signal configurations. */
+export type UpdateSignalConfigurationsInput = {
+  /** The signal configuration updates. */
+  configs: Array<OwnSignalConfigurationUpdate>;
+};
+
+/**
+ * An empty filter allows all kinds of usages for all paths in all repositories.
+ *
+ * However, if the symbol used for lookup is a file-local symbol or a
+ * repository-local symbol, then usages will automatically be limited to the
+ * same file or same repository respectively.
+ *
+ * EXPERIMENTAL: This type may make backwards-incompatible changes in the future.
+ */
+export type UsagesFilter = {
+  /**
+   * Negate another UsageFilter. For example, this can be used to find matches
+   * outside of a specific repository.
+   */
+  not?: InputMaybe<UsagesFilter>;
+  /**
+   * Filter for limiting which repositories to find the usages in.
+   * For cross-repository symbols as well as search-based results,
+   * an empty value will find results across the Sourcegraph instance.
+   */
+  repository?: InputMaybe<RepositoryFilter>;
 };
 
 /** A period of time in which a set of users have been active. */
@@ -1511,7 +2517,7 @@ export type UserPermissionInput = {
    * the elements of the list are either all usernames (bindID of "username") or all email
    * addresses (bindID of "email").
    */
-  bindID: Scalars["String"];
+  bindID: Scalars["String"]["input"];
   /** The highest level of repository permission. */
   permission?: InputMaybe<RepositoryPermission>;
 };
@@ -1523,24 +2529,24 @@ export type UserSubRepoPermission = {
    * the elements of the list are either all usernames (bindID of "username") or all email
    * addresses (bindID of "email").
    */
-  bindID: Scalars["String"];
+  bindID: Scalars["String"]["input"];
   /**
    * DEPRECATED
    * An array of paths that the user is not allowed to access, in glob format.
    */
-  pathExcludes?: InputMaybe<Array<Scalars["String"]>>;
+  pathExcludes?: InputMaybe<Array<Scalars["String"]["input"]>>;
   /**
    * DEPRECATED
    * An array of paths that the user is allowed to access, in glob format.
    */
-  pathIncludes?: InputMaybe<Array<Scalars["String"]>>;
+  pathIncludes?: InputMaybe<Array<Scalars["String"]["input"]>>;
   /**
    * An array of paths in glob format. Paths starting with a minus (-)
    * (i.e. "-/dev/private") prevent access, otherwise paths grant access.
    * The last applicable path takes precedence.
    * When paths is set, pathIncludes and pathExcludes are ignored.
    */
-  paths?: InputMaybe<Array<Scalars["String"]>>;
+  paths?: InputMaybe<Array<Scalars["String"]["input"]>>;
 };
 
 /** Possible sort orderings for a workspace connection. */
@@ -1560,8 +2566,8 @@ type ChangesetId_HiddenExternalChangeset_Fragment = { __typename?: "HiddenExtern
 export type ChangesetIdFragment = ChangesetId_ExternalChangeset_Fragment | ChangesetId_HiddenExternalChangeset_Fragment;
 
 export type PublishChangesetMutationVariables = Exact<{
-  batchChange: Scalars["ID"];
-  changeset: Scalars["ID"];
+  batchChange: Scalars["ID"]["input"];
+  changeset: Scalars["ID"]["input"];
 }>;
 
 export type PublishChangesetMutation = {
@@ -1570,7 +2576,7 @@ export type PublishChangesetMutation = {
 };
 
 export type ReenqueueChangesetMutationVariables = Exact<{
-  changeset: Scalars["ID"];
+  changeset: Scalars["ID"]["input"];
 }>;
 
 export type ReenqueueChangesetMutation = {
@@ -1581,9 +2587,9 @@ export type ReenqueueChangesetMutation = {
 };
 
 export type MergeChangesetMutationVariables = Exact<{
-  batchChange: Scalars["ID"];
-  changeset: Scalars["ID"];
-  squash?: InputMaybe<Scalars["Boolean"]>;
+  batchChange: Scalars["ID"]["input"];
+  changeset: Scalars["ID"]["input"];
+  squash?: InputMaybe<Scalars["Boolean"]["input"]>;
 }>;
 
 export type MergeChangesetMutation = {
@@ -1670,8 +2676,8 @@ type Changeset_HiddenExternalChangeset_Fragment = {
 export type ChangesetFragment = Changeset_ExternalChangeset_Fragment | Changeset_HiddenExternalChangeset_Fragment;
 
 export type GetChangesetsQueryVariables = Exact<{
-  namespace: Scalars["ID"];
-  name: Scalars["String"];
+  namespace: Scalars["ID"]["input"];
+  name: Scalars["String"]["input"];
 }>;
 
 export type GetChangesetsQuery = {
@@ -1708,9 +2714,9 @@ export type BlobContentsFragment = {
 };
 
 export type GetFileContentsQueryVariables = Exact<{
-  repo: Scalars["String"];
-  rev: Scalars["String"];
-  path: Scalars["String"];
+  repo: Scalars["String"]["input"];
+  rev: Scalars["String"]["input"];
+  path: Scalars["String"]["input"];
 }>;
 
 export type GetFileContentsQuery = {
@@ -1741,7 +2747,6 @@ export type SearchNotebookFragment = {
     | { __typename?: "User"; namespaceName: string; url: string }
     | null;
   blocks: Array<
-    | { __typename: "ComputeBlock" }
     | {
         __typename: "FileBlock";
         fileInput: { __typename?: "FileBlockInput"; repositoryName: string; filePath: string };
@@ -1763,7 +2768,7 @@ export type SearchNotebookFragment = {
 };
 
 export type GetNotebooksQueryVariables = Exact<{
-  query: Scalars["String"];
+  query: Scalars["String"]["input"];
   orderBy?: InputMaybe<NotebooksOrderBy>;
 }>;
 
@@ -1786,7 +2791,6 @@ export type GetNotebooksQuery = {
         | { __typename?: "User"; namespaceName: string; url: string }
         | null;
       blocks: Array<
-        | { __typename: "ComputeBlock" }
         | {
             __typename: "FileBlock";
             fileInput: { __typename?: "FileBlockInput"; repositoryName: string; filePath: string };
@@ -1806,6 +2810,18 @@ export type GetNotebooksQuery = {
           }
       >;
     }>;
+  };
+};
+
+export type RecordEventsMutationVariables = Exact<{
+  events: Array<TelemetryEventInput> | TelemetryEventInput;
+}>;
+
+export type RecordEventsMutation = {
+  __typename?: "Mutation";
+  telemetry: {
+    __typename?: "TelemetryMutation";
+    recordEvents?: { __typename?: "EmptyResponse"; alwaysNil?: string | null } | null;
   };
 };
 
@@ -1953,12 +2969,12 @@ export type PublishChangesetMutationFn = Apollo.MutationFunction<
  * });
  */
 export function usePublishChangesetMutation(
-  baseOptions?: Apollo.MutationHookOptions<PublishChangesetMutation, PublishChangesetMutationVariables>
+  baseOptions?: Apollo.MutationHookOptions<PublishChangesetMutation, PublishChangesetMutationVariables>,
 ) {
   const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useMutation<PublishChangesetMutation, PublishChangesetMutationVariables>(
     PublishChangesetDocument,
-    options
+    options,
   );
 }
 export type PublishChangesetMutationHookResult = ReturnType<typeof usePublishChangesetMutation>;
@@ -1998,12 +3014,12 @@ export type ReenqueueChangesetMutationFn = Apollo.MutationFunction<
  * });
  */
 export function useReenqueueChangesetMutation(
-  baseOptions?: Apollo.MutationHookOptions<ReenqueueChangesetMutation, ReenqueueChangesetMutationVariables>
+  baseOptions?: Apollo.MutationHookOptions<ReenqueueChangesetMutation, ReenqueueChangesetMutationVariables>,
 ) {
   const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useMutation<ReenqueueChangesetMutation, ReenqueueChangesetMutationVariables>(
     ReenqueueChangesetDocument,
-    options
+    options,
   );
 }
 export type ReenqueueChangesetMutationHookResult = ReturnType<typeof useReenqueueChangesetMutation>;
@@ -2042,7 +3058,7 @@ export type MergeChangesetMutationFn = Apollo.MutationFunction<MergeChangesetMut
  * });
  */
 export function useMergeChangesetMutation(
-  baseOptions?: Apollo.MutationHookOptions<MergeChangesetMutation, MergeChangesetMutationVariables>
+  baseOptions?: Apollo.MutationHookOptions<MergeChangesetMutation, MergeChangesetMutationVariables>,
 ) {
   const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useMutation<MergeChangesetMutation, MergeChangesetMutationVariables>(MergeChangesetDocument, options);
@@ -2080,19 +3096,26 @@ export const GetBatchChangesDocument = gql`
  * });
  */
 export function useGetBatchChangesQuery(
-  baseOptions?: Apollo.QueryHookOptions<GetBatchChangesQuery, GetBatchChangesQueryVariables>
+  baseOptions?: Apollo.QueryHookOptions<GetBatchChangesQuery, GetBatchChangesQueryVariables>,
 ) {
   const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useQuery<GetBatchChangesQuery, GetBatchChangesQueryVariables>(GetBatchChangesDocument, options);
 }
 export function useGetBatchChangesLazyQuery(
-  baseOptions?: Apollo.LazyQueryHookOptions<GetBatchChangesQuery, GetBatchChangesQueryVariables>
+  baseOptions?: Apollo.LazyQueryHookOptions<GetBatchChangesQuery, GetBatchChangesQueryVariables>,
 ) {
   const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useLazyQuery<GetBatchChangesQuery, GetBatchChangesQueryVariables>(GetBatchChangesDocument, options);
 }
+export function useGetBatchChangesSuspenseQuery(
+  baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetBatchChangesQuery, GetBatchChangesQueryVariables>,
+) {
+  const options = baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<GetBatchChangesQuery, GetBatchChangesQueryVariables>(GetBatchChangesDocument, options);
+}
 export type GetBatchChangesQueryHookResult = ReturnType<typeof useGetBatchChangesQuery>;
 export type GetBatchChangesLazyQueryHookResult = ReturnType<typeof useGetBatchChangesLazyQuery>;
+export type GetBatchChangesSuspenseQueryHookResult = ReturnType<typeof useGetBatchChangesSuspenseQuery>;
 export type GetBatchChangesQueryResult = Apollo.QueryResult<GetBatchChangesQuery, GetBatchChangesQueryVariables>;
 export const GetChangesetsDocument = gql`
   query GetChangesets($namespace: ID!, $name: String!) {
@@ -2125,19 +3148,27 @@ export const GetChangesetsDocument = gql`
  * });
  */
 export function useGetChangesetsQuery(
-  baseOptions: Apollo.QueryHookOptions<GetChangesetsQuery, GetChangesetsQueryVariables>
+  baseOptions: Apollo.QueryHookOptions<GetChangesetsQuery, GetChangesetsQueryVariables> &
+    ({ variables: GetChangesetsQueryVariables; skip?: boolean } | { skip: boolean }),
 ) {
   const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useQuery<GetChangesetsQuery, GetChangesetsQueryVariables>(GetChangesetsDocument, options);
 }
 export function useGetChangesetsLazyQuery(
-  baseOptions?: Apollo.LazyQueryHookOptions<GetChangesetsQuery, GetChangesetsQueryVariables>
+  baseOptions?: Apollo.LazyQueryHookOptions<GetChangesetsQuery, GetChangesetsQueryVariables>,
 ) {
   const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useLazyQuery<GetChangesetsQuery, GetChangesetsQueryVariables>(GetChangesetsDocument, options);
 }
+export function useGetChangesetsSuspenseQuery(
+  baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetChangesetsQuery, GetChangesetsQueryVariables>,
+) {
+  const options = baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<GetChangesetsQuery, GetChangesetsQueryVariables>(GetChangesetsDocument, options);
+}
 export type GetChangesetsQueryHookResult = ReturnType<typeof useGetChangesetsQuery>;
 export type GetChangesetsLazyQueryHookResult = ReturnType<typeof useGetChangesetsLazyQuery>;
+export type GetChangesetsSuspenseQueryHookResult = ReturnType<typeof useGetChangesetsSuspenseQuery>;
 export type GetChangesetsQueryResult = Apollo.QueryResult<GetChangesetsQuery, GetChangesetsQueryVariables>;
 export const GetFileContentsDocument = gql`
   query GetFileContents($repo: String!, $rev: String!, $path: String!) {
@@ -2173,19 +3204,27 @@ export const GetFileContentsDocument = gql`
  * });
  */
 export function useGetFileContentsQuery(
-  baseOptions: Apollo.QueryHookOptions<GetFileContentsQuery, GetFileContentsQueryVariables>
+  baseOptions: Apollo.QueryHookOptions<GetFileContentsQuery, GetFileContentsQueryVariables> &
+    ({ variables: GetFileContentsQueryVariables; skip?: boolean } | { skip: boolean }),
 ) {
   const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useQuery<GetFileContentsQuery, GetFileContentsQueryVariables>(GetFileContentsDocument, options);
 }
 export function useGetFileContentsLazyQuery(
-  baseOptions?: Apollo.LazyQueryHookOptions<GetFileContentsQuery, GetFileContentsQueryVariables>
+  baseOptions?: Apollo.LazyQueryHookOptions<GetFileContentsQuery, GetFileContentsQueryVariables>,
 ) {
   const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useLazyQuery<GetFileContentsQuery, GetFileContentsQueryVariables>(GetFileContentsDocument, options);
 }
+export function useGetFileContentsSuspenseQuery(
+  baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetFileContentsQuery, GetFileContentsQueryVariables>,
+) {
+  const options = baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<GetFileContentsQuery, GetFileContentsQueryVariables>(GetFileContentsDocument, options);
+}
 export type GetFileContentsQueryHookResult = ReturnType<typeof useGetFileContentsQuery>;
 export type GetFileContentsLazyQueryHookResult = ReturnType<typeof useGetFileContentsLazyQuery>;
+export type GetFileContentsSuspenseQueryHookResult = ReturnType<typeof useGetFileContentsSuspenseQuery>;
 export type GetFileContentsQueryResult = Apollo.QueryResult<GetFileContentsQuery, GetFileContentsQueryVariables>;
 export const GetNotebooksDocument = gql`
   query GetNotebooks($query: String!, $orderBy: NotebooksOrderBy) {
@@ -2216,20 +3255,68 @@ export const GetNotebooksDocument = gql`
  * });
  */
 export function useGetNotebooksQuery(
-  baseOptions: Apollo.QueryHookOptions<GetNotebooksQuery, GetNotebooksQueryVariables>
+  baseOptions: Apollo.QueryHookOptions<GetNotebooksQuery, GetNotebooksQueryVariables> &
+    ({ variables: GetNotebooksQueryVariables; skip?: boolean } | { skip: boolean }),
 ) {
   const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useQuery<GetNotebooksQuery, GetNotebooksQueryVariables>(GetNotebooksDocument, options);
 }
 export function useGetNotebooksLazyQuery(
-  baseOptions?: Apollo.LazyQueryHookOptions<GetNotebooksQuery, GetNotebooksQueryVariables>
+  baseOptions?: Apollo.LazyQueryHookOptions<GetNotebooksQuery, GetNotebooksQueryVariables>,
 ) {
   const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useLazyQuery<GetNotebooksQuery, GetNotebooksQueryVariables>(GetNotebooksDocument, options);
 }
+export function useGetNotebooksSuspenseQuery(
+  baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetNotebooksQuery, GetNotebooksQueryVariables>,
+) {
+  const options = baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<GetNotebooksQuery, GetNotebooksQueryVariables>(GetNotebooksDocument, options);
+}
 export type GetNotebooksQueryHookResult = ReturnType<typeof useGetNotebooksQuery>;
 export type GetNotebooksLazyQueryHookResult = ReturnType<typeof useGetNotebooksLazyQuery>;
+export type GetNotebooksSuspenseQueryHookResult = ReturnType<typeof useGetNotebooksSuspenseQuery>;
 export type GetNotebooksQueryResult = Apollo.QueryResult<GetNotebooksQuery, GetNotebooksQueryVariables>;
+export const RecordEventsDocument = gql`
+  mutation RecordEvents($events: [TelemetryEventInput!]!) {
+    telemetry {
+      recordEvents(events: $events) {
+        alwaysNil
+      }
+    }
+  }
+`;
+export type RecordEventsMutationFn = Apollo.MutationFunction<RecordEventsMutation, RecordEventsMutationVariables>;
+
+/**
+ * __useRecordEventsMutation__
+ *
+ * To run a mutation, you first call `useRecordEventsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRecordEventsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [recordEventsMutation, { data, loading, error }] = useRecordEventsMutation({
+ *   variables: {
+ *      events: // value for 'events'
+ *   },
+ * });
+ */
+export function useRecordEventsMutation(
+  baseOptions?: Apollo.MutationHookOptions<RecordEventsMutation, RecordEventsMutationVariables>,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<RecordEventsMutation, RecordEventsMutationVariables>(RecordEventsDocument, options);
+}
+export type RecordEventsMutationHookResult = ReturnType<typeof useRecordEventsMutation>;
+export type RecordEventsMutationResult = Apollo.MutationResult<RecordEventsMutation>;
+export type RecordEventsMutationOptions = Apollo.BaseMutationOptions<
+  RecordEventsMutation,
+  RecordEventsMutationVariables
+>;
 
 export interface PossibleTypesResultData {
   possibleTypes: {
@@ -2243,7 +3330,26 @@ const result: PossibleTypesResultData = {
     ChangesetApplyPreview: ["HiddenChangesetApplyPreview", "VisibleChangesetApplyPreview"],
     ChangesetDescription: ["ExistingChangesetReference", "GitBranchChangesetDescription"],
     ChangesetSpec: ["HiddenChangesetSpec", "VisibleChangesetSpec"],
+    CodyContextResult: ["FileChunkContext"],
+    CommitSigningConfiguration: ["GitHubApp"],
+    CommitVerification: ["GitHubCommitVerification"],
     ComputeResult: ["ComputeMatchContext", "ComputeText"],
+    Connection: [
+      "InsightBackfillQueueItemConnection",
+      "NewUsersConnection",
+      "PermissionsInfoRepositoriesConnection",
+      "PermissionsInfoUsersConnection",
+      "PermissionsSyncJobsConnection",
+      "PromptsConnection",
+      "RepoEmbeddingJobsConnection",
+      "SavedSearchesConnection",
+      "SiteConfigurationChangeConnection",
+    ],
+    ExternalServiceAvailability: [
+      "ExternalServiceAvailabilityUnknown",
+      "ExternalServiceAvailable",
+      "ExternalServiceUnavailable",
+    ],
     FeatureFlag: ["FeatureFlagBoolean", "FeatureFlagRollout"],
     File2: ["BatchSpecWorkspaceFile", "GitBlob", "VirtualFile"],
     GenericSearchResultInterface: ["CommitSearchResult", "Repository"],
@@ -2257,19 +3363,25 @@ const result: PossibleTypesResultData = {
     IncompleteDatapointAlert: ["GenericIncompleteDatapointAlert", "TimeoutDatapointAlert"],
     InsightDataSeriesDefinition: ["SearchInsightDataSeriesDefinition"],
     InsightPresentation: ["LineChartInsightViewPresentation", "PieChartInsightViewPresentation"],
+    InsightRepositoryDefinition: ["InsightRepositoryScope", "RepositorySearchScope"],
     InsightTimeScope: ["InsightIntervalTimeScope"],
     MonitorAction: ["MonitorEmail", "MonitorSlackWebhook", "MonitorWebhook"],
     MonitorTrigger: ["MonitorQuery"],
     Namespace: ["Org", "User"],
     Node: [
+      "AccessRequest",
       "AccessToken",
+      "BackgroundJob",
       "BatchChange",
       "BatchChangesCredential",
       "BatchSpec",
       "BatchSpecWorkspaceFile",
       "BulkOperation",
       "ChangesetEvent",
+      "CodeGraphData",
+      "CodeHost",
       "CodeIntelligenceConfigurationPolicy",
+      "CodeownersIngestedFile",
       "Executor",
       "ExecutorSecret",
       "ExecutorSecretAccessLog",
@@ -2278,14 +3390,15 @@ const result: PossibleTypesResultData = {
       "ExternalService",
       "ExternalServiceSyncJob",
       "GitCommit",
+      "GitHubApp",
       "GitRef",
+      "GitserverInstance",
       "HiddenBatchSpecWorkspace",
       "HiddenChangesetSpec",
       "HiddenExternalChangeset",
+      "IndexedSearchInstance",
       "InsightView",
       "InsightsDashboard",
-      "LSIFIndex",
-      "LSIFUpload",
       "Monitor",
       "MonitorActionEvent",
       "MonitorEmail",
@@ -2297,21 +3410,37 @@ const result: PossibleTypesResultData = {
       "Org",
       "OrganizationInvitation",
       "OutOfBandMigration",
+      "OutboundRequest",
+      "OutboundWebhook",
+      "Permission",
       "PermissionsSyncJob",
-      "ProductLicense",
-      "ProductSubscription",
-      "RegistryExtension",
+      "PreciseIndex",
+      "Prompt",
+      "RepoEmbeddingJob",
       "Repository",
+      "Role",
       "SavedSearch",
       "SearchContext",
+      "SearchJob",
+      "SiteConfigurationChange",
+      "Team",
       "User",
       "VisibleBatchSpecWorkspace",
       "VisibleChangesetSpec",
       "Webhook",
       "WebhookLog",
     ],
-    NotebookBlock: ["ComputeBlock", "FileBlock", "MarkdownBlock", "QueryBlock", "SymbolBlock"],
-    RegistryPublisher: ["Org", "User"],
+    NotebookBlock: ["FileBlock", "MarkdownBlock", "QueryBlock", "SymbolBlock"],
+    Ownable: ["GitBlob"],
+    Owner: ["Person", "Team"],
+    OwnershipReason: [
+      "AssignedOwner",
+      "CodeownersFileEntry",
+      "RecentContributorOwnershipSignal",
+      "RecentViewOwnershipSignal",
+    ],
+    PackageRepoOrVersionConnection: ["PackageRepoReferenceConnection", "PackageRepoReferenceVersionConnection"],
+    PermissionsSyncJobSubject: ["Repository", "User"],
     RepositoryComparisonInterface: ["PreviewRepositoryComparison", "RepositoryComparison"],
     RepositoryRedirect: ["Redirect", "Repository"],
     SearchAggregationResult: [
@@ -2321,9 +3450,19 @@ const result: PossibleTypesResultData = {
     ],
     SearchResult: ["CommitSearchResult", "FileMatch", "Repository"],
     SettingsSubject: ["DefaultSettings", "Org", "Site", "User"],
-    StatusMessage: ["CloningProgress", "ExternalServiceSyncError", "IndexingProgress", "SyncError"],
+    StatusMessage: [
+      "CloningProgress",
+      "ExternalServiceSyncError",
+      "GitUpdatesDisabled",
+      "GitserverDiskThresholdReached",
+      "IndexingProgress",
+      "NoRepositoriesDetected",
+      "SyncError",
+    ],
+    TeamMember: ["User"],
     TreeEntry: ["GitBlob", "GitTree"],
     TreeEntryLSIFData: ["GitBlobLSIFData", "GitTreeLSIFData"],
+    Viewer: ["User", "Visitor"],
     VisibleApplyPreviewTargets: [
       "VisibleApplyPreviewTargetsAttach",
       "VisibleApplyPreviewTargetsDetach",

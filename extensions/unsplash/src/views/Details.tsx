@@ -2,6 +2,7 @@ import { Detail, Icon } from "@raycast/api";
 
 // Components
 import Actions from "@/components/Actions";
+import { SearchResult } from "@/types";
 
 export const Details: React.FC<{ result: SearchResult }> = ({ result }) => {
   const image = result.urls?.regular || result.urls?.small || result.urls?.thumb;

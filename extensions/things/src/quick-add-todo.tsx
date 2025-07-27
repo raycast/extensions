@@ -1,8 +1,5 @@
 import { AI, closeMainWindow, environment, getPreferenceValues, LaunchProps, showToast, Toast } from '@raycast/api';
-import { getLists, handleError, silentlyOpenThingsURL } from './api';
-import qs from 'qs';
-import { parse } from 'chrono-node';
-import { format } from 'date-fns';
+import { addTodo, handleError } from './api';
 
 export default async function Command(props: LaunchProps & { arguments: Arguments.QuickAddTodo }) {
   try {
@@ -17,33 +14,8 @@ export default async function Command(props: LaunchProps & { arguments: Argument
 
     if (dontUseAI || !environment.canAccess(AI)) {
       const { text } = props.arguments;
-
-      let deadline, isDateTime, list;
-
-      const dateMatch = parse(text);
-      if (dateMatch && dateMatch.length > 0) {
-        const chronoDate = dateMatch[0].start;
-        isDateTime = chronoDate.isCertain('hour') || chronoDate.isCertain('minute') || chronoDate.isCertain('second');
-        const date = chronoDate.date();
-        deadline = isDateTime ? date.toISOString() : format(date, 'yyyy-MM-dd');
-      }
-
-      const listMatch = text.match(/#(\w+)/);
-      if (listMatch && listMatch.length > 0) {
-        const lists = await getLists();
-        list = lists.find((l) => l.name.toLowerCase() === listMatch[1].toLowerCase())?.name;
-      }
-
-      // Clean all values matching from the text input and previous white space
-      const title = text
-        .replace(listMatch ? listMatch[0] : '', '')
-        .replace(dateMatch && dateMatch.length > 0 ? dateMatch[0].text : '', '')
-        .replace(/\s+/g, ' ')
-        .trim();
-
-      json = { title, ...(deadline && { deadline }), ...(list && { list }) };
-      const formattedDueDate = deadline ? ` due ${format(deadline, `${isDateTime ? 'PPPpp' : 'PPP'}`)}` : '';
-      toastMsg = `Added "${title}" to ${list ?? 'Inbox'}${formattedDueDate}`;
+      json = { title: text };
+      toastMsg = `Added "${text}" to 'Inbox'`;
     } else {
       const result =
         await AI.ask(`Act as a task manager. I'll give you a task in a natural language. Your job is to return me only a parsable and minified JSON object.
@@ -88,7 +60,7 @@ Here's the task: "${props.fallbackText ?? props.arguments.text}"`);
         .join('\n');
     }
 
-    await silentlyOpenThingsURL(`things:///add?${qs.stringify(json)}`);
+    await addTodo(json);
 
     await showToast({
       style: Toast.Style.Success,

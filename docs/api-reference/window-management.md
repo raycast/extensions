@@ -31,10 +31,10 @@ export default async function Command() {
   try {
     const window = await WindowManagement.getActiveWindow();
     if (window.positionable) {
-      WindowManagement.setWindowBounds({ id: window.id, bounds: { position: { x: 100 } } });
+      await WindowManagement.setWindowBounds({ id: window.id, bounds: { position: { x: 100 } } });
     }
   } catch (error) {
-    showToast({ title: "Could not move window", message: error.message, style: Toast.Style.Failure });
+    showToast({ title: `Could not move window: ${error.message}`, style: Toast.Style.Failure });
   }
 }
 ```
@@ -131,10 +131,10 @@ export default async function Command() {
   try {
     const window = await WindowManagement.getActiveWindow();
     if (window.positionable) {
-      WindowManagement.setWindowBounds({ id: window.id, bounds: { position: { x: 100 } } });
+      await WindowManagement.setWindowBounds({ id: window.id, bounds: { position: { x: 100 } } });
     }
   } catch (error) {
-    showToast({ title: "Could not move window", message: error.message, style: Toast.Style.Failure });
+    showToast({ title: `Could not move window: ${error.message}`, style: Toast.Style.Failure });
   }
 }
 ```

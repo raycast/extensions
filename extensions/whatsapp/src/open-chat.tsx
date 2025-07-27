@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Alert, confirmAlert, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Icon, Keyboard, List } from "@raycast/api";
 import { useWhatsAppChats } from "./utils/use-whatsapp-chats";
 import { isGroupChat, isPhoneChat, WhatsAppChat } from "./utils/types";
 import WhatsAppPhoneChatForm from "./add-chat";
@@ -123,7 +123,7 @@ function getChatItemProps(chat: WhatsAppChat) {
       accessoryTitle,
       appUrl: `whatsapp://chat?code=${chat.groupCode}`,
       webUrl: null,
-      icon: Icon.Circle,
+      icon: Icon.TwoPeople,
       keywords: [chat.groupCode, "group"],
       form: <WhatsAppGroupChatForm defaultValue={chat} />,
     };
@@ -145,7 +145,7 @@ function ChatListItem({ chat, onPinAction, onDeleteChat, onOpenChat }: ChatListI
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser
-              title="Open in WhatsApp"
+              title="Open in Whatsapp"
               icon="whatsapp-outline.png"
               url={appUrl}
               onOpen={() => onOpenChat(chat)}
@@ -160,14 +160,14 @@ function ChatListItem({ chat, onPinAction, onDeleteChat, onOpenChat }: ChatListI
             ) : null}
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <ActionPanel.Item
+            <Action
               title={chat.pinned ? "Unpin Chat" : "Pin Chat"}
               shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
               icon={Icon.Pin}
               onAction={() => onPinAction(chat)}
             />
-            <Action.Push title="Edit Chat" icon={Icon.Pencil} target={form} />
-            <ActionPanel.Item
+            <Action.Push title="Edit Chat" icon={Icon.Pencil} target={form} shortcut={Keyboard.Shortcut.Common.Edit} />
+            <Action
               title="Delete Chat"
               icon={Icon.Trash}
               style={Action.Style.Destructive}
@@ -199,6 +199,10 @@ function ChatListItem({ chat, onPinAction, onDeleteChat, onOpenChat }: ChatListI
             ) : (
               <Action.CopyToClipboard content={chat.phone} title="Copy Phone Number" />
             )}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.Push icon={Icon.Person} title="Add Chat" target={<WhatsAppPhoneChatForm />} />
+            <Action.Push icon={Icon.TwoPeople} title="Add Existing Group" target={<WhatsAppGroupChatForm />} />
           </ActionPanel.Section>
         </ActionPanel>
       }

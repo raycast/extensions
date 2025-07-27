@@ -3,14 +3,14 @@ import { LinearIssueNotificationListItem } from "./LinearIssueNotificationListIt
 import { NotificationListItemProps } from "../../../notification";
 
 export function LinearNotificationListItem({ notification, mutate }: NotificationListItemProps) {
-  if (notification.metadata.type !== "Linear") return null;
+  if (notification.source_item.data.type !== "LinearNotification") return null;
 
-  switch (notification.metadata.content.type) {
+  switch (notification.source_item.data.content.type) {
     case "IssueNotification":
       return (
         <LinearIssueNotificationListItem
           notification={notification}
-          linearIssueNotification={notification.metadata.content.content}
+          linearIssueNotification={notification.source_item.data.content.content}
           mutate={mutate}
         />
       );
@@ -18,7 +18,7 @@ export function LinearNotificationListItem({ notification, mutate }: Notificatio
       return (
         <LinearProjectNotificationListItem
           notification={notification}
-          linearProjectNotification={notification.metadata.content.content}
+          linearProjectNotification={notification.source_item.data.content.content}
           mutate={mutate}
         />
       );

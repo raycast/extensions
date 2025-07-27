@@ -1,9 +1,13 @@
-import { Action, ActionPanel, Detail, Icon, Grid } from "@raycast/api";
+import { Action, ActionPanel, Detail, Grid, Icon } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import json2md from "json2md";
-import { useManagers, useSeasons } from "./hooks";
-import { PlayerContent } from "./types";
+import { useState } from "react";
+import { getManagers } from "./api";
+import SearchBarSeason from "./components/searchbar_season";
+import { Player } from "./types";
+import { getProfileImg } from "./utils";
 
-function PlayerProfile(props: PlayerContent) {
+function PlayerProfile(props: Player) {
   return (
     <Detail
       navigationTitle={`${props.name.display} | Profile`}
@@ -11,7 +15,7 @@ function PlayerProfile(props: PlayerContent) {
         { h1: props.name.display },
         {
           img: {
-            source: `https://resources.premierleague.com/premierleague/photos/players/250x250/${props.altIds.opta}.png`,
+            source: getProfileImg(props.altIds.opta),
           },
         },
       ])}
@@ -36,12 +40,22 @@ function PlayerProfile(props: PlayerContent) {
   );
 }
 
-export default function Manager() {
-  const seasons = useSeasons();
-  const managers = useManagers(seasons[0]?.id.toString());
+export default function EPLManager() {
+  const [seasonId, setSeasonId] = useState<string>();
+
+  const { data: managers, isLoading } = usePromise(
+    async (season) => (season ? await getManagers(season) : undefined),
+    [seasonId],
+  );
 
   return (
-    <Grid throttle isLoading={!managers}>
+    <Grid
+      throttle
+      isLoading={isLoading}
+      searchBarAccessory={
+        <SearchBarSeason selected={seasonId} onSelect={setSeasonId} />
+      }
+    >
       {managers?.map((p) => {
         return (
           <Grid.Item
@@ -49,7 +63,7 @@ export default function Manager() {
             title={p.name.display}
             subtitle={p.currentTeam?.name}
             content={{
-              source: `https://resources.premierleague.com/premierleague/photos/players/250x250/${p.altIds.opta}.png`,
+              source: getProfileImg(p.altIds.opta),
               fallback: "player-missing.png",
             }}
             actions={

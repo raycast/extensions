@@ -1,9 +1,9 @@
-import { Cache, environment, getPreferenceValues, open, showInFinder, showToast, Toast } from "@raycast/api";
+import { Cache, environment, open, showInFinder, showToast, Toast } from "@raycast/api";
 import fse from "fs-extra";
 import { homedir } from "os";
-import { Preferences } from "../types/preferences";
 import { RaycastWallpaper } from "../types/types";
 import axios from "axios";
+import { picturesDirectory } from "../types/preferences";
 
 export const cache = new Cache();
 export const cachePath = environment.supportPath;
@@ -23,8 +23,7 @@ export const getThumbnailUrl = (url: string) => {
 };
 
 export const getSavedDirectory = () => {
-  const directoryPreference = getPreferenceValues<Preferences>().picturesDirectory;
-  const actualDirectory = directoryPreference;
+  const actualDirectory = picturesDirectory;
   if (isEmpty(actualDirectory) || !fse.pathExistsSync(actualDirectory)) {
     return homedir() + "/Downloads";
   }
@@ -48,6 +47,8 @@ export async function downloadPicture(wallpaper: { title: string; url: string })
   await showToast(Toast.Style.Animated, "Downloading...");
 
   const picturePath = `${getSavedDirectory()}/${wallpaper.title}.${getFileType(wallpaper.url)}`;
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
   fse.writeFile(picturePath, Buffer.from(await axiosGetImageArrayBuffer(wallpaper.url)), async (error) => {
     if (error != null) {
       await showToast(Toast.Style.Failure, String(error));
@@ -101,4 +102,9 @@ export function deleteCache() {
       fse.removeSync(curPath);
     });
   }
+}
+
+export function capitalizeFirstLetter(word: string): string {
+  if (!word) return "";
+  return word.charAt(0).toUpperCase() + word.slice(1);
 }

@@ -3,8 +3,10 @@ import { FolderForm } from "./types";
 import { customize } from "./utils/customize";
 import { useEffect, useState } from "react";
 import { base64ToFile } from "./utils/saveFile";
+import path from "path";
+import { ReplaceAction } from "./components/replaceAction";
 
-export default function Result({ formValues }: { formValues: FolderForm }) {
+export default function Result({ formValues, fromEmoji }: { formValues: FolderForm; fromEmoji?: boolean }) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [imageResult, setImageResult] = useState<{
     baseImage: string | null;
@@ -21,10 +23,34 @@ export default function Result({ formValues }: { formValues: FolderForm }) {
     outputPath: null,
     name: null,
   });
+  const tmpDirectory = path.resolve("/tmp");
 
   const markdown = `
   ![](${imageResult?.previewImage})
   `;
+
+  const saveFile = async (output: string, variant: "saved" | "applied") => {
+    if (!imageResult?.baseImage) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to save image",
+      });
+      return;
+    }
+    base64ToFile(imageResult?.baseImage, output)?.then(async (res) => {
+      if (res === "success") {
+        await showToast({
+          style: Toast.Style.Success,
+          title: `Image ${variant} successfully`,
+        });
+      } else {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to save image",
+        });
+      }
+    });
+  };
 
   useEffect(() => {
     const fetchImage = async () => {
@@ -57,34 +83,28 @@ export default function Result({ formValues }: { formValues: FolderForm }) {
         outputPath: outputPath,
         name: fileName as string,
       });
+
       setIsLoading(false);
     };
 
-    fetchImage();
+    fetchImage().catch((error) => console.error(error));
   }, [formValues]);
 
   return (
     <Detail
       actions={
         <ActionPanel>
+          {formValues.targetFolderPath && formValues.targetFolderPath.length > 0 && (
+            <ReplaceAction
+              iconPath={`${tmpDirectory}/${imageResult?.name}`}
+              targetFolderPath={formValues?.targetFolderPath?.[0]}
+              onAction={() => saveFile(`${tmpDirectory}/${imageResult?.name}`, "applied")}
+            />
+          )}
           <Action
             title="Save Image"
             onAction={() => {
-              base64ToFile(imageResult?.baseImage, imageResult?.outputPath)
-                ?.then(async (res) => {
-                  if (res === "success") {
-                    await showToast({
-                      style: Toast.Style.Success,
-                      title: "Image saved successfully",
-                    });
-                  } else {
-                    await showToast({
-                      style: Toast.Style.Failure,
-                      title: "Failed to save image",
-                    });
-                  }
-                })
-                .then(() => popToRoot());
+              saveFile(imageResult?.outputPath as string, "saved").then(() => popToRoot());
             }}
             icon={"download-16"}
           />
@@ -92,7 +112,7 @@ export default function Result({ formValues }: { formValues: FolderForm }) {
       }
       isLoading={isLoading}
       markdown={markdown}
-      navigationTitle={`From ${formValues?.file[0]}`}
+      navigationTitle={`From ${fromEmoji ? "emoji" : formValues?.file[0]}`}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Height" text={`${imageResult?.height} px`} />
@@ -101,7 +121,10 @@ export default function Result({ formValues }: { formValues: FolderForm }) {
             <Detail.Metadata.TagList.Item text={`${imageResult?.name}`} color={"#60d0ff"} />
           </Detail.Metadata.TagList>
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Output" text={`${imageResult?.outputPath}`} />
+          {formValues?.targetFolderPath && formValues?.targetFolderPath.length > 0 && (
+            <Detail.Metadata.Label title="Target path" text={`${formValues?.targetFolderPath}`} />
+          )}
+          <Detail.Metadata.Label title="Download path" text={`${imageResult?.outputPath}`} />
         </Detail.Metadata>
       }
     />

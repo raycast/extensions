@@ -5,12 +5,13 @@ import { Clipboard, List, getPreferenceValues } from "@raycast/api";
 import { BookItem } from "@/components/book-item";
 import { EmptyView } from "@/components/empty-view";
 import { searchBooksOnLibgen } from "@/hooks/search-books-on-libgen";
-import type { LibgenPreferences } from "@/types";
+import { type LibgenPreferences, SearchType } from "@/types";
 import { isEmpty } from "@/utils/common";
 
 export default function Command() {
   const [searchContent, setSearchContent] = useState<string>("");
-  const { books, loading } = searchBooksOnLibgen(searchContent);
+  const [searchType, setSearchType] = useState<SearchType>(SearchType.NonFiction);
+  const { books, loading } = searchBooksOnLibgen(searchContent, searchType);
 
   const copyFromClipboard = useCallback(async () => {
     // Get the clipboard content
@@ -44,6 +45,12 @@ export default function Command() {
       onSearchTextChange={setSearchContent}
       throttle={true}
       isShowingDetail={books.length !== 0}
+      searchBarAccessory={
+        <List.Dropdown tooltip="Type" onChange={(type) => setSearchType(Number(type))} storeValue>
+          <List.Dropdown.Item title="Non-fiction" value="1" />
+          <List.Dropdown.Item title="Fiction" value="0" />
+        </List.Dropdown>
+      }
     >
       <EmptyView title={emptyViewTitle()}></EmptyView>
       {books.map((book, index) => (

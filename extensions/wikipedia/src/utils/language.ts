@@ -25,7 +25,16 @@ export type Locale =
   | "zh-tw"
   | "zh-cn"
   | "uk"
-  | "da";
+  | "da"
+  | "ca"
+  | "eu"
+  | "gl"
+  | "oc"
+  | "an"
+  | "ast"
+  | "fi"
+  | "sv"
+  | "no";
 
 export function useLanguage() {
   return useCachedState<Locale>("language", "en");
@@ -53,7 +62,7 @@ export const languages: { icon: string; title: string; value: Locale }[] = [
   { icon: "🇳🇱", title: "Dutch", value: "nl" },
   { icon: "🇹🇷", title: "Turkish", value: "tr" },
   { icon: "🇬🇷", title: "Greek", value: "el" },
-  { icon: "🇺🇦", title: "Ukraine", value: "uk" },
+  { icon: "🇺🇦", title: "Ukrainian", value: "uk" },
   { icon: "🇨🇳", title: "Chinese (Simplified)", value: "zh" },
   { icon: "🇭🇰", title: "Chinese (Hong Kong)", value: "zh-hk" },
   { icon: "🇲🇴", title: "Chinese (Macau)", value: "zh-mo" },
@@ -62,4 +71,13 @@ export const languages: { icon: string; title: string; value: Locale }[] = [
   { icon: "🇹🇼", title: "Chinese (Taiwan)", value: "zh-tw" },
   { icon: "🇨🇳", title: "Chinese (China)", value: "zh-cn" },
   { icon: "🇩🇰", title: "Danish", value: "da" },
+  { icon: "🇫🇮", title: "Finnish", value: "fi" },
+  { icon: "🇸🇪", title: "Swedish", value: "sv" },
+  { icon: "🇳🇴", title: "Norwegian", value: "no" },
+  { icon: "🇦🇩", title: "Catalan", value: "ca" },
+  { icon: "EU", title: "Basque", value: "eu" },
+  { icon: "GL", title: "Galician", value: "gl" },
+  { icon: "OC", title: "Occitan", value: "oc" },
+  { icon: "AN", title: "Aragonese", value: "an" },
+  { icon: "AST", title: "Asturian", value: "ast" },
 ];

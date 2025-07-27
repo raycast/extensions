@@ -26,11 +26,12 @@ export default function Command() {
     revalidateRunningTimeEntry,
     revalidateTimeEntries,
   );
-  const currentTime = useCurrentTime();
+  const { currentTime } = useCurrentTime();
   const runningEntry = runningTimeEntry;
-  const currentDuration = runningEntry
-    ? dayjs.duration(dayjs(currentTime).diff(runningEntry.start), "milliseconds").format("HH:mm:ss")
-    : "";
+
+  const currentDuration = runningEntry ? dayjs.duration(dayjs(currentTime).diff(runningEntry.start)) : undefined;
+  const currentDurationHhMmSs = currentDuration?.format("HH:mm:ss") || "";
+  const currentDurationHhMm = currentDuration?.format("HH:mm") || "";
 
   const preferences = getPreferenceValues<Preferences.MenuBar>();
 
@@ -43,7 +44,7 @@ export default function Command() {
     }
 
     if (preferences.showTimeInMenuBar) {
-      menuBarElements.push(currentDuration);
+      menuBarElements.push(currentDurationHhMm);
     }
 
     if (preferences.showProjectInMenuBar) {
@@ -64,7 +65,7 @@ export default function Command() {
       title={menuBarTitle}
       tooltip={
         runningEntry
-          ? currentDuration +
+          ? currentDurationHhMm +
             " | " +
             (runningEntry.project_name ? runningEntry.project_name + " | " : "") +
             (runningEntry.client_name ?? "")
@@ -82,7 +83,7 @@ export default function Command() {
             }}
             title={runningEntry.description || ""}
             subtitle={
-              currentDuration +
+              currentDurationHhMmSs +
               " | " +
               (runningEntry.project_name ? runningEntry.project_name + " | " : "") +
               (runningEntry.client_name ?? "")

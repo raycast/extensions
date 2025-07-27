@@ -56,18 +56,29 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "title": "Open in Wayback Machine",
+      "description": "Whether to open the overview page instead of the latest snapshot, when opening a page in Wayback Machine",
+      "type": "checkbox",
+      "default": false,
+      "label": "Open Overview instead of the latest snapshot",
+      "name": "openOverview",
+      "required": false
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.72.1",
-    "@raycast/utils": "^1.14.1",
-    "cross-fetch": "^3.1.8"
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.18.1",
+    "cross-fetch": "^4.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
+    "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.12.7",
     "@types/react": "18.2.79",
     "eslint": "^8.51.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.5"
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
   },
   "scripts": {
     "build": "ray build -e dist",

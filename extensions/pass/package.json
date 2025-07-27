@@ -6,6 +6,9 @@
   "description": "An extension to handle the standard unix password manager in a convenient way using Raycast",
   "icon": "command-icon.png",
   "author": "capipo",
+  "contributors": [
+    "camiloaromero23"
+  ],
   "categories": [
     "Security",
     "Productivity"

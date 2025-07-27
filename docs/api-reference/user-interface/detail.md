@@ -48,6 +48,14 @@ You can specify custom image dimensions by adding a `raycast-width` and `raycast
 You can also specify a tint color to apply to an markdown image by adding a `raycast-tint-color` query string. For example: `![Image Title](example.png?raycast-tintColor=blue)`
 {% endhint %}
 
+{% hint style="info" %}
+You can now render [LaTeX](https://www.latex-project.org) in the markdown. We support the following delimiters:
+
+- Inline math: `\(...\)` and `\begin{math}...\end{math}`
+- Display math: `\[...\]`, `$$...$$` and `\begin{equation}...\end{equation}`
+
+{% endhint %}
+
 ### Detail.Metadata
 
 A Metadata view that will be shown in the right-hand-side of the `Detail`.

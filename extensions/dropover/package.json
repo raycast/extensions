@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dropover",
   "title": "Dropover",
-  "description": "Add selected files to DropOver",
+  "description": "Add selected files to Dropover",
   "icon": "command-icon.png",
   "author": "jag-k",
   "categories": [

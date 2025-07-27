@@ -24,11 +24,11 @@ Now click the code button and copy the HTTPS path from the dropdown
 
 **BRANCH**
 
-You can see the branch on the above image, in this example it's `notion-quicklinks`
+You can see the branch on the above image (in this example it’s `notion-quicklinks`)
 
 **EXTENSION_NAME**
 
-Click the `Files Changed` tab and see which directy files is changed in, in this example it's `notion`
+Click the `Files Changed` tab to see in which directory files have been changed (in this example it’s `notion`)
 
 ```
 BRANCH="ext/soundboard"

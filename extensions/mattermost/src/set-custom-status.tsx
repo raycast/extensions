@@ -298,7 +298,7 @@ function SetStatusWithDuration(props: { state: State; index: number }) {
   ];
 
   return (
-    <ActionPanel.Submenu icon={Icon.Clock} title="Set Status with Duration...">
+    <ActionPanel.Submenu icon={Icon.Clock} title="Set Status with Duration">
       {durationPairs.map((duration) => {
         return (
           <Action

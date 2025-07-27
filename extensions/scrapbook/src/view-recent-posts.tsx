@@ -10,7 +10,11 @@ export default function ViewRecentPosts() {
     isLoading: isPostsLoading,
     data: postsData,
     revalidate: postsRevalidate,
-  } = useFetch<PostType[]>("https://scrapbook.hackclub.com/api/posts");
+  } = useFetch<PostType[]>("https://scrapbook.hackclub.com/api/posts", {
+    parseResponse: (response) => {
+      return response.json();
+    },
+  });
 
   const { selectedReaction, setSelectedReaction, filteredData } = useReactionFiltering(postsData || []);
 

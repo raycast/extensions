@@ -94,7 +94,7 @@ export default function Command() {
               }}
             />
             <ReusableAction title="Hey 👋" />
-            <ActionPanel.Submenu title="Open With..." icon={Icon.Globe}>
+            <ActionPanel.Submenu title="Open with…" icon={Icon.Globe}>
               <Action title="Google Chrome" onAction={() => open("https://raycast.com", "'google chrome'")} />
               <Action title="Safari" onAction={() => open("https://raycast.com", "Safari")} />
             </ActionPanel.Submenu>

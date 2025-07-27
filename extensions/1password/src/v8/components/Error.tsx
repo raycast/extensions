@@ -1,13 +1,16 @@
 import { Action, ActionPanel, Detail, Icon, openExtensionPreferences } from "@raycast/api";
 import resetCache from "../../reset-cache";
-import { CLI_PATH, ZSH_PATH } from "../utils";
+import { getCliPath, ZSH_PATH } from "../utils";
 
-const ERROR = `
-${CLI_PATH ? "" : `# 1Password CLI Tool Not Configured or Installed Properly`}
-${ZSH_PATH ? "" : `# Zsh Shell Not Configured or Installed Properly`}
+export function Error() {
+  const cliPath = getCliPath();
+
+  const ERROR = `
+${cliPath ? "" : `# 1Password CLI Tool Not Configured or Installed Properly`}
+${cliPath ? "" : `# Zsh Shell Not Configured or Installed Properly`}
 
 ${
-  CLI_PATH
+  cliPath
     ? ""
     : `
 -  Ensure that the 1Password CLI is installed on your system. You can download it from [official 1Password CLI website](https://developer.1password.com/docs/cli/get-started).
@@ -34,13 +37,13 @@ We're here to help ensure a smooth setup process!
 
 ---`;
 
-export function Error() {
   return (
     <Detail
       markdown={ERROR}
       actions={
         <ActionPanel>
           <Action icon={Icon.Gear} title="Open Extension Preferences" onAction={openExtensionPreferences} />
+          {/* eslint-disable-next-line @raycast/prefer-title-case */}
           <Action.Open title="Open 1Password Settings" target="onepassword://settings" />
           <Action title="Reset Cache" icon={Icon.Trash} onAction={() => resetCache()}></Action>
         </ActionPanel>
