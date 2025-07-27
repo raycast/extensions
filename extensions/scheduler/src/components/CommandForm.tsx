@@ -52,7 +52,11 @@ export function CommandForm({ command, onSave, title, submitButtonTitle }: Comma
   }, [command]);
 
   const showError = async (message: string, title = "Error") => {
-    showFailureToast(new Error(message), { title });
+    await showToast({
+      style: Toast.Style.Failure,
+      title,
+      message,
+    });
   };
 
   const showSuccess = async (title: string, message: string) => {
