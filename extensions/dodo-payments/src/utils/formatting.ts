@@ -107,9 +107,7 @@ export function truncateText(text: string, maxLength: number): string {
 /**
  * Get payment method display name
  */
-export function getPaymentMethodDisplay(
-  method: string | null | undefined,
-): string {
+export function getPaymentMethodDisplay(method: string | null | undefined): string {
   if (!method) return "Unknown";
 
   switch (method.toLowerCase()) {

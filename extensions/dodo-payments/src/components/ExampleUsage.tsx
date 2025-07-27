@@ -7,14 +7,7 @@ import { useAuth } from "../contexts/AuthContext";
  * This demonstrates accessing auth config and making authenticated API calls
  */
 export function ExampleUsage() {
-  const {
-    config,
-    isAuthenticated,
-    isLoading,
-    error,
-    authenticatedFetch,
-    refreshAuth,
-  } = useAuth();
+  const { config, isAuthenticated, isLoading, error, authenticatedFetch, refreshAuth } = useAuth();
 
   if (isLoading) {
     return <Detail markdown="Loading authentication..." />;

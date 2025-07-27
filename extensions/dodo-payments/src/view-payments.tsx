@@ -1,12 +1,4 @@
-import {
-  ActionPanel,
-  Action,
-  List,
-  Icon,
-  Color,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Color, showToast, Toast } from "@raycast/api";
 import React, { useCallback } from "react";
 import { withAuth, useAuth } from "./contexts/AuthContext";
 import { withAuthGuard } from "./hooks/useAuthGuard";
@@ -77,13 +69,7 @@ function PaymentsList() {
   const { config } = useAuth();
   const currentMode = config?.mode || "live";
 
-  const {
-    data: paymentsData,
-    isLoading,
-    error,
-    fetchNextPage,
-    hasNextPage,
-  } = useInfinitePayments({ limit: 50 });
+  const { data: paymentsData, isLoading, error, fetchNextPage, hasNextPage } = useInfinitePayments({ limit: 50 });
 
   // Show toast notifications based on query state
   React.useEffect(() => {
@@ -99,10 +85,7 @@ function PaymentsList() {
         message: error instanceof Error ? error.message : "Unknown error",
       });
     } else if (paymentsData) {
-      const totalItems = paymentsData.pages.reduce(
-        (acc, page) => acc + page.items.length,
-        0,
-      );
+      const totalItems = paymentsData.pages.reduce((acc, page) => acc + page.items.length, 0);
       showToast({
         style: Toast.Style.Success,
         title: `Loaded ${totalItems} payments`,
@@ -116,10 +99,7 @@ function PaymentsList() {
     [paymentsData?.pages],
   );
 
-  const handleFetchNextPage = useCallback(
-    () => fetchNextPage(),
-    [fetchNextPage],
-  );
+  const handleFetchNextPage = useCallback(() => fetchNextPage(), [fetchNextPage]);
 
   if (!isLoading && payments.length === 0) {
     return (
@@ -151,15 +131,10 @@ function PaymentsList() {
             source: Icon.CreditCard,
             tintColor: getPaymentStatusBadgeColor(payment.status || "unknown"),
           }}
-          title={
-            payment.metadata?.description || payment.customer.name || "Payment"
-          }
+          title={payment.metadata?.description || payment.customer.name || "Payment"}
           accessories={[
             {
-              text: formatCurrencyAndAmount(
-                payment.total_amount,
-                payment.currency,
-              ),
+              text: formatCurrencyAndAmount(payment.total_amount, payment.currency),
               icon: Icon.Receipt,
             },
           ]}
@@ -173,14 +148,8 @@ function PaymentsList() {
                     text={payment.customer.email}
                     target={`mailto:${payment.customer.email}`}
                   />
-                  <List.Item.Detail.Metadata.Label
-                    title="Timestamp"
-                    text={formatDateShort(payment.created_at)}
-                  />
-                  <List.Item.Detail.Metadata.Label
-                    title="Organization"
-                    text={payment.customer.name || "—"}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Timestamp" text={formatDateShort(payment.created_at)} />
+                  <List.Item.Detail.Metadata.Label title="Organization" text={payment.customer.name || "—"} />
 
                   {/* Payment Type Badge */}
                   <List.Item.Detail.Metadata.TagList title="Product">
@@ -202,36 +171,22 @@ function PaymentsList() {
                   <List.Item.Detail.Metadata.TagList title="Status">
                     <List.Item.Detail.Metadata.TagList.Item
                       text={getReadableStatus(payment.status)}
-                      color={getPaymentStatusBadgeColor(
-                        payment.status || "unknown",
-                      )}
+                      color={getPaymentStatusBadgeColor(payment.status || "unknown")}
                     />
                   </List.Item.Detail.Metadata.TagList>
 
                   <List.Item.Detail.Metadata.Label
                     title="Amount"
-                    text={formatCurrencyAndAmount(
-                      payment.total_amount,
-                      payment.currency,
-                    )}
+                    text={formatCurrencyAndAmount(payment.total_amount, payment.currency)}
                   />
 
                   <List.Item.Detail.Metadata.Separator />
 
                   {/* Additional Details */}
-                  <List.Item.Detail.Metadata.Label
-                    title="Customer ID"
-                    text={payment.customer.customer_id}
-                  />
-                  <List.Item.Detail.Metadata.Label
-                    title="Payment ID"
-                    text={payment.payment_id}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Customer ID" text={payment.customer.customer_id} />
+                  <List.Item.Detail.Metadata.Label title="Payment ID" text={payment.payment_id} />
                   {payment.subscription_id && (
-                    <List.Item.Detail.Metadata.Label
-                      title="Subscription ID"
-                      text={payment.subscription_id}
-                    />
+                    <List.Item.Detail.Metadata.Label title="Subscription ID" text={payment.subscription_id} />
                   )}
 
                   <List.Item.Detail.Metadata.Separator />
@@ -241,9 +196,7 @@ function PaymentsList() {
                     text={payment.digital_products_delivered ? "Yes" : "No"}
                     icon={{
                       source: Icon.Circle,
-                      tintColor: payment.digital_products_delivered
-                        ? Color.Green
-                        : Color.Red,
+                      tintColor: payment.digital_products_delivered ? Color.Green : Color.Red,
                     }}
                   />
                 </List.Item.Detail.Metadata>
@@ -258,10 +211,7 @@ function PaymentsList() {
                 icon={Icon.Globe}
               />
 
-              <Action.CopyToClipboard
-                title="Copy Payment ID"
-                content={payment.payment_id}
-              />
+              <Action.CopyToClipboard title="Copy Payment ID" content={payment.payment_id} />
 
               <Action.CopyToClipboard
                 title="Copy Invoice Link"

@@ -1,22 +1,10 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  Color,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, showToast, Toast } from "@raycast/api";
 import React, { useCallback } from "react";
 import { withAuth } from "./contexts/AuthContext";
 import { withAuthGuard } from "./hooks/useAuthGuard";
 import { useInfinitePayouts } from "./hooks/useQueries";
 import type { PayoutListResponse } from "dodopayments/resources";
-import {
-  formatCurrencyAndAmount,
-  formatDateShort,
-  getReadableStatus,
-} from "./utils/formatting";
+import { formatCurrencyAndAmount, formatDateShort, getReadableStatus } from "./utils/formatting";
 
 function getStatusBadgeColor(status: PayoutListResponse["status"]): Color {
   switch (status.toLowerCase()) {
@@ -39,13 +27,7 @@ function getStatusBadgeColor(status: PayoutListResponse["status"]): Color {
 }
 
 function PayoutsList() {
-  const {
-    data: payoutsData,
-    isLoading,
-    error,
-    fetchNextPage,
-    hasNextPage,
-  } = useInfinitePayouts({ limit: 50 });
+  const { data: payoutsData, isLoading, error, fetchNextPage, hasNextPage } = useInfinitePayouts({ limit: 50 });
 
   // Show toast notifications based on query state
   React.useEffect(() => {
@@ -61,10 +43,7 @@ function PayoutsList() {
         message: error instanceof Error ? error.message : "Unknown error",
       });
     } else if (payoutsData) {
-      const totalItems = payoutsData.pages.reduce(
-        (acc, page) => acc + page.items.length,
-        0,
-      );
+      const totalItems = payoutsData.pages.reduce((acc, page) => acc + page.items.length, 0);
       showToast({
         style: Toast.Style.Success,
         title: `Loaded ${totalItems} payouts`,
@@ -78,10 +57,7 @@ function PayoutsList() {
     [payoutsData?.pages],
   );
 
-  const handleFetchNextPage = useCallback(
-    () => fetchNextPage(),
-    [fetchNextPage],
-  );
+  const handleFetchNextPage = useCallback(() => fetchNextPage(), [fetchNextPage]);
 
   if (!isLoading && payouts.length === 0) {
     return (
@@ -135,19 +111,10 @@ function PayoutsList() {
 
                   <List.Item.Detail.Metadata.Label
                     title="Amount"
-                    text={formatCurrencyAndAmount(
-                      payout.amount,
-                      payout.currency,
-                    )}
+                    text={formatCurrencyAndAmount(payout.amount, payout.currency)}
                   />
-                  <List.Item.Detail.Metadata.Label
-                    title="Created At"
-                    text={formatDateShort(payout.created_at)}
-                  />
-                  <List.Item.Detail.Metadata.Label
-                    title="Updated At"
-                    text={formatDateShort(payout.updated_at)}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Created At" text={formatDateShort(payout.created_at)} />
+                  <List.Item.Detail.Metadata.Label title="Updated At" text={formatDateShort(payout.updated_at)} />
 
                   {/* Status Badge */}
                   <List.Item.Detail.Metadata.TagList title="Status">
@@ -170,42 +137,24 @@ function PayoutsList() {
                   />
                   <List.Item.Detail.Metadata.Label
                     title="Refunds"
-                    text={formatCurrencyAndAmount(
-                      payout.refunds,
-                      payout.currency,
-                    )}
+                    text={formatCurrencyAndAmount(payout.refunds, payout.currency)}
                   />
                   <List.Item.Detail.Metadata.Label
                     title="Chargebacks"
-                    text={formatCurrencyAndAmount(
-                      payout.chargebacks,
-                      payout.currency,
-                    )}
+                    text={formatCurrencyAndAmount(payout.chargebacks, payout.currency)}
                   />
 
                   <List.Item.Detail.Metadata.Separator />
 
                   {/* Additional Details */}
-                  <List.Item.Detail.Metadata.Label
-                    title="Payment Method"
-                    text={payout.payment_method || "—"}
-                  />
-                  <List.Item.Detail.Metadata.Label
-                    title="Business ID"
-                    text={payout.business_id}
-                  />
-                  <List.Item.Detail.Metadata.Label
-                    title="Payout ID"
-                    text={payout.payout_id}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Payment Method" text={payout.payment_method || "—"} />
+                  <List.Item.Detail.Metadata.Label title="Business ID" text={payout.business_id} />
+                  <List.Item.Detail.Metadata.Label title="Payout ID" text={payout.payout_id} />
 
                   {payout.remarks && (
                     <>
                       <List.Item.Detail.Metadata.Separator />
-                      <List.Item.Detail.Metadata.Label
-                        title="Remarks"
-                        text={payout.remarks}
-                      />
+                      <List.Item.Detail.Metadata.Label title="Remarks" text={payout.remarks} />
                     </>
                   )}
                 </List.Item.Detail.Metadata>
@@ -220,10 +169,7 @@ function PayoutsList() {
                 icon={Icon.Globe}
               />
 
-              <Action.CopyToClipboard
-                title="Copy Payout ID"
-                content={payout.payout_id}
-              />
+              <Action.CopyToClipboard title="Copy Payout ID" content={payout.payout_id} />
 
               <Action.CopyToClipboard
                 title="Copy Business ID"

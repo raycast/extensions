@@ -34,24 +34,15 @@ export {
 };
 
 // Pagination response types
-export type PaymentsPaginatedResponse =
-  DefaultPageNumberPaginationResponse<PaymentListResponse>;
-export type SubscriptionsPaginatedResponse =
-  DefaultPageNumberPaginationResponse<SubscriptionListResponse>;
-export type BrandsPaginatedResponse =
-  DefaultPageNumberPaginationResponse<BrandRetrieveResponse>;
-export type ProductsPaginatedResponse =
-  DefaultPageNumberPaginationResponse<ProductListResponse>;
-export type DiscountsPaginatedResponse =
-  DefaultPageNumberPaginationResponse<Discount>;
-export type LicenseKeysPaginatedResponse =
-  DefaultPageNumberPaginationResponse<LicenseKey>;
-export type DisputesPaginatedResponse =
-  DefaultPageNumberPaginationResponse<DisputeListResponse>;
-export type RefundsPaginatedResponse =
-  DefaultPageNumberPaginationResponse<Refund>;
-export type PayoutsPaginatedResponse =
-  DefaultPageNumberPaginationResponse<PayoutListResponse>;
+export type PaymentsPaginatedResponse = DefaultPageNumberPaginationResponse<PaymentListResponse>;
+export type SubscriptionsPaginatedResponse = DefaultPageNumberPaginationResponse<SubscriptionListResponse>;
+export type BrandsPaginatedResponse = DefaultPageNumberPaginationResponse<BrandRetrieveResponse>;
+export type ProductsPaginatedResponse = DefaultPageNumberPaginationResponse<ProductListResponse>;
+export type DiscountsPaginatedResponse = DefaultPageNumberPaginationResponse<Discount>;
+export type LicenseKeysPaginatedResponse = DefaultPageNumberPaginationResponse<LicenseKey>;
+export type DisputesPaginatedResponse = DefaultPageNumberPaginationResponse<DisputeListResponse>;
+export type RefundsPaginatedResponse = DefaultPageNumberPaginationResponse<Refund>;
+export type PayoutsPaginatedResponse = DefaultPageNumberPaginationResponse<PayoutListResponse>;
 
 export interface ApiError {
   error: {
@@ -69,10 +60,7 @@ export class DodoPaymentsAPI {
     this.config = config;
   }
 
-  private async makeRequest<T>(
-    endpoint: string,
-    options: RequestInit = {},
-  ): Promise<T> {
+  private async makeRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.config.baseUrl}${endpoint}`;
 
     const requestOptions: RequestInit = {
@@ -88,9 +76,7 @@ export class DodoPaymentsAPI {
 
     if (!response.ok) {
       if (response.status === 401) {
-        throw new Error(
-          "Invalid API key. Please check your authentication settings.",
-        );
+        throw new Error("Invalid API key. Please check your authentication settings.");
       }
 
       let errorMessage = `API request failed: ${response.status} ${response.statusText}`;
@@ -111,17 +97,13 @@ export class DodoPaymentsAPI {
   }
 
   // Brands API
-  async listBrands(
-    options: { page?: number; limit?: number } = {},
-  ): Promise<BrandsPaginatedResponse> {
+  async listBrands(options: { page?: number; limit?: number } = {}): Promise<BrandsPaginatedResponse> {
     const params = new URLSearchParams({
       page_number: (options.page || 0).toString(),
       page_size: (options.limit || 20).toString(),
     });
 
-    return this.makeRequest<BrandsPaginatedResponse>(
-      `/brands?${params.toString()}`,
-    );
+    return this.makeRequest<BrandsPaginatedResponse>(`/brands?${params.toString()}`);
   }
 
   async getBrand(brandId: string): Promise<Brand> {
@@ -141,9 +123,7 @@ export class DodoPaymentsAPI {
       params.append("status", options.status);
     }
 
-    return this.makeRequest<PaymentsPaginatedResponse>(
-      `/payments?${params.toString()}`,
-    );
+    return this.makeRequest<PaymentsPaginatedResponse>(`/payments?${params.toString()}`);
   }
 
   async getPayment(paymentId: string): Promise<Payment> {
@@ -163,9 +143,7 @@ export class DodoPaymentsAPI {
       params.append("status", options.status);
     }
 
-    return this.makeRequest<SubscriptionsPaginatedResponse>(
-      `/subscriptions?${params.toString()}`,
-    );
+    return this.makeRequest<SubscriptionsPaginatedResponse>(`/subscriptions?${params.toString()}`);
   }
 
   async getSubscription(subscriptionId: string): Promise<Subscription> {
@@ -177,7 +155,7 @@ export class DodoPaymentsAPI {
     options: { page?: number; limit?: number; email?: string } = {},
   ): Promise<DefaultPageNumberPaginationResponse<Customer>> {
     const params = new URLSearchParams({
-      page_number: (options.page || 1).toString(),
+      page_number: (options.page || 0).toString(),
       page_size: (options.limit || 20).toString(),
     });
 
@@ -185,9 +163,7 @@ export class DodoPaymentsAPI {
       params.append("email", options.email);
     }
 
-    return this.makeRequest<DefaultPageNumberPaginationResponse<Customer>>(
-      `/customers?${params.toString()}`,
-    );
+    return this.makeRequest<DefaultPageNumberPaginationResponse<Customer>>(`/customers?${params.toString()}`);
   }
 
   async getCustomer(customerId: string): Promise<Customer> {
@@ -207,9 +183,7 @@ export class DodoPaymentsAPI {
       params.append("name", options.name);
     }
 
-    return this.makeRequest<ProductsPaginatedResponse>(
-      `/products?${params.toString()}`,
-    );
+    return this.makeRequest<ProductsPaginatedResponse>(`/products?${params.toString()}`);
   }
 
   async getProduct(productId: string): Promise<Product> {
@@ -229,9 +203,7 @@ export class DodoPaymentsAPI {
       params.append("status", options.status);
     }
 
-    return this.makeRequest<DiscountsPaginatedResponse>(
-      `/discounts?${params.toString()}`,
-    );
+    return this.makeRequest<DiscountsPaginatedResponse>(`/discounts?${params.toString()}`);
   }
 
   async getDiscount(discountId: string): Promise<Discount> {
@@ -251,9 +223,7 @@ export class DodoPaymentsAPI {
       params.append("status", options.status);
     }
 
-    return this.makeRequest<LicenseKeysPaginatedResponse>(
-      `/license_keys?${params.toString()}`,
-    );
+    return this.makeRequest<LicenseKeysPaginatedResponse>(`/license_keys?${params.toString()}`);
   }
 
   async getLicenseKey(licenseKeyId: string): Promise<LicenseKey> {
@@ -273,9 +243,7 @@ export class DodoPaymentsAPI {
       params.append("status", options.status);
     }
 
-    return this.makeRequest<DisputesPaginatedResponse>(
-      `/disputes?${params.toString()}`,
-    );
+    return this.makeRequest<DisputesPaginatedResponse>(`/disputes?${params.toString()}`);
   }
 
   async getDispute(disputeId: string): Promise<DisputeRetrieveResponse> {
@@ -295,9 +263,7 @@ export class DodoPaymentsAPI {
       params.append("status", options.status);
     }
 
-    return this.makeRequest<RefundsPaginatedResponse>(
-      `/refunds?${params.toString()}`,
-    );
+    return this.makeRequest<RefundsPaginatedResponse>(`/refunds?${params.toString()}`);
   }
 
   async getRefund(refundId: string): Promise<Refund> {
@@ -305,17 +271,13 @@ export class DodoPaymentsAPI {
   }
 
   // Payouts API
-  async listPayouts(
-    options: { page?: number; limit?: number } = {},
-  ): Promise<PayoutsPaginatedResponse> {
+  async listPayouts(options: { page?: number; limit?: number } = {}): Promise<PayoutsPaginatedResponse> {
     const params = new URLSearchParams({
       page_number: (options.page || 0).toString(),
       page_size: (options.limit || 20).toString(),
     });
 
-    return this.makeRequest<PayoutsPaginatedResponse>(
-      `/payouts?${params.toString()}`,
-    );
+    return this.makeRequest<PayoutsPaginatedResponse>(`/payouts?${params.toString()}`);
   }
 }
 

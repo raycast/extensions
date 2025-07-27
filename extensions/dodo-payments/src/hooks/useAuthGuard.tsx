@@ -14,9 +14,7 @@ interface UseAuthGuardResult {
 export function useAuthGuard(): UseAuthGuardResult {
   const { isAuthenticated, isLoading, error } = useAuth();
 
-  const AuthGuard: React.ComponentType<{ children: React.ReactNode }> = ({
-    children,
-  }) => {
+  const AuthGuard: React.ComponentType<{ children: React.ReactNode }> = ({ children }) => {
     if (isLoading) {
       // Return null or a loading component - Raycast will show its own loading state
       return null;
@@ -39,9 +37,7 @@ export function useAuthGuard(): UseAuthGuardResult {
  * Higher-order component that automatically handles authentication
  * Shows auth error if not authenticated, otherwise renders the wrapped component
  */
-export function withAuthGuard<T extends object>(
-  Component: React.ComponentType<T>,
-): React.ComponentType<T> {
+export function withAuthGuard<T extends object>(Component: React.ComponentType<T>): React.ComponentType<T> {
   return function GuardedComponent(props: T) {
     const { AuthGuard } = useAuthGuard();
 

@@ -1,12 +1,4 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  Color,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, showToast, Toast } from "@raycast/api";
 import React, { useCallback } from "react";
 import { withAuth } from "./contexts/AuthContext";
 import { withAuthGuard } from "./hooks/useAuthGuard";
@@ -18,10 +10,7 @@ function getLicenseKeyStatusBadgeColor(licenseKey: LicenseKey): Color {
   switch (licenseKey.status) {
     case "active":
       // Check if activation limit is reached
-      if (
-        licenseKey.activations_limit &&
-        licenseKey.instances_count >= licenseKey.activations_limit
-      ) {
+      if (licenseKey.activations_limit && licenseKey.instances_count >= licenseKey.activations_limit) {
         return Color.Orange; // Orange for limit reached
       }
       return Color.Green; // Green for active
@@ -37,10 +26,7 @@ function getLicenseKeyStatusBadgeColor(licenseKey: LicenseKey): Color {
 function getLicenseKeyStatus(licenseKey: LicenseKey): string {
   if (licenseKey.status === "active") {
     // Check if activation limit is reached
-    if (
-      licenseKey.activations_limit &&
-      licenseKey.instances_count >= licenseKey.activations_limit
-    ) {
+    if (licenseKey.activations_limit && licenseKey.instances_count >= licenseKey.activations_limit) {
       return "Limit Reached";
     }
     return "Active";
@@ -50,13 +36,7 @@ function getLicenseKeyStatus(licenseKey: LicenseKey): string {
 }
 
 function LicenseKeysList() {
-  const {
-    data: licenseKeysData,
-    isLoading,
-    error,
-    fetchNextPage,
-    hasNextPage,
-  } = useInfiniteLicenseKeys({ limit: 20 });
+  const { data: licenseKeysData, isLoading, error, fetchNextPage, hasNextPage } = useInfiniteLicenseKeys({ limit: 20 });
 
   // Show toast notifications based on query state
   React.useEffect(() => {
@@ -72,10 +52,7 @@ function LicenseKeysList() {
         message: error instanceof Error ? error.message : "Unknown error",
       });
     } else if (licenseKeysData) {
-      const totalItems = licenseKeysData.pages.reduce(
-        (acc, page) => acc + page.items.length,
-        0,
-      );
+      const totalItems = licenseKeysData.pages.reduce((acc, page) => acc + page.items.length, 0);
       showToast({
         style: Toast.Style.Success,
         title: `Loaded ${totalItems} license keys`,
@@ -89,10 +66,7 @@ function LicenseKeysList() {
     [licenseKeysData?.pages],
   );
 
-  const handleFetchNextPage = useCallback(
-    () => fetchNextPage(),
-    [fetchNextPage],
-  );
+  const handleFetchNextPage = useCallback(() => fetchNextPage(), [fetchNextPage]);
 
   if (!isLoading && licenseKeys.length === 0) {
     return (
@@ -135,10 +109,7 @@ function LicenseKeysList() {
             <List.Item.Detail
               metadata={
                 <List.Item.Detail.Metadata>
-                  <List.Item.Detail.Metadata.Label
-                    title="License Key"
-                    text={licenseKey.key}
-                  />
+                  <List.Item.Detail.Metadata.Label title="License Key" text={licenseKey.key} />
 
                   <List.Item.Detail.Metadata.TagList title="Status">
                     <List.Item.Detail.Metadata.TagList.Item
@@ -154,48 +125,26 @@ function LicenseKeysList() {
 
                   <List.Item.Detail.Metadata.Separator />
 
-                  <List.Item.Detail.Metadata.Label
-                    title="Product ID"
-                    text={licenseKey.product_id}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Product ID" text={licenseKey.product_id} />
 
-                  <List.Item.Detail.Metadata.Label
-                    title="Customer ID"
-                    text={licenseKey.customer_id}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Customer ID" text={licenseKey.customer_id} />
 
-                  <List.Item.Detail.Metadata.Label
-                    title="Payment ID"
-                    text={licenseKey.payment_id}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Payment ID" text={licenseKey.payment_id} />
 
                   {licenseKey.subscription_id && (
-                    <List.Item.Detail.Metadata.Label
-                      title="Subscription ID"
-                      text={licenseKey.subscription_id}
-                    />
+                    <List.Item.Detail.Metadata.Label title="Subscription ID" text={licenseKey.subscription_id} />
                   )}
 
                   <List.Item.Detail.Metadata.Separator />
 
                   <List.Item.Detail.Metadata.Label
                     title="Expires"
-                    text={
-                      licenseKey.expires_at
-                        ? formatDateShort(licenseKey.expires_at)
-                        : "Never"
-                    }
+                    text={licenseKey.expires_at ? formatDateShort(licenseKey.expires_at) : "Never"}
                   />
 
-                  <List.Item.Detail.Metadata.Label
-                    title="Created"
-                    text={formatDateShort(licenseKey.created_at)}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Created" text={formatDateShort(licenseKey.created_at)} />
 
-                  <List.Item.Detail.Metadata.Label
-                    title="License Key ID"
-                    text={licenseKey.id}
-                  />
+                  <List.Item.Detail.Metadata.Label title="License Key ID" text={licenseKey.id} />
                 </List.Item.Detail.Metadata>
               }
             />
@@ -208,11 +157,7 @@ function LicenseKeysList() {
                 icon={Icon.Globe}
               />
 
-              <Action.CopyToClipboard
-                title="Copy License Key"
-                content={licenseKey.key}
-                icon={Icon.Clipboard}
-              />
+              <Action.CopyToClipboard title="Copy License Key" content={licenseKey.key} icon={Icon.Clipboard} />
 
               <Action.CopyToClipboard
                 title="Copy License Key ID"

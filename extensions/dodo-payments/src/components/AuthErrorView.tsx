@@ -1,9 +1,4 @@
-import {
-  ActionPanel,
-  Action,
-  Detail,
-  openExtensionPreferences,
-} from "@raycast/api";
+import { ActionPanel, Action, Detail, openExtensionPreferences } from "@raycast/api";
 
 interface AuthErrorViewProps {
   error: string;

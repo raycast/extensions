@@ -17,10 +17,7 @@ export interface AuthConfig {
 export function getAuthConfig(): AuthConfig {
   const preferences = getPreferenceValues<Preferences>();
 
-  const baseUrl =
-    preferences.apiMode === "live"
-      ? "https://live.dodopayments.com"
-      : "https://test.dodopayments.com";
+  const baseUrl = preferences.apiMode === "live" ? "https://live.dodopayments.com" : "https://test.dodopayments.com";
 
   return {
     apiKey: preferences.apiKey,
@@ -39,15 +36,11 @@ export function validateAuth(): { isValid: boolean; error?: string } {
     if (!preferences.apiKey || preferences.apiKey.trim() === "") {
       return {
         isValid: false,
-        error:
-          "API Key is required. Please configure it in extension preferences.",
+        error: "API Key is required. Please configure it in extension preferences.",
       };
     }
 
-    if (
-      !preferences.apiMode ||
-      !["test", "live"].includes(preferences.apiMode)
-    ) {
+    if (!preferences.apiMode || !["test", "live"].includes(preferences.apiMode)) {
       return {
         isValid: false,
         error: "Invalid API mode. Please select either 'test' or 'live'.",

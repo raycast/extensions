@@ -1,22 +1,10 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  Color,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, showToast, Toast } from "@raycast/api";
 import React, { useCallback } from "react";
 import { withAuth } from "./contexts/AuthContext";
 import { withAuthGuard } from "./hooks/useAuthGuard";
 import { useInfiniteSubscriptions } from "./hooks/useQueries";
 import type { SubscriptionListResponse } from "dodopayments/resources";
-import {
-  formatCurrencyAndAmount,
-  formatDateShort,
-  getReadableStatus,
-} from "./utils/formatting";
+import { formatCurrencyAndAmount, formatDateShort, getReadableStatus } from "./utils/formatting";
 
 function getStatusBadgeColor(status: string): Color {
   switch (status.toLowerCase()) {
@@ -49,10 +37,7 @@ function getBillingFrequency(subscription: SubscriptionListResponse): string {
 
   // If we have access to billing interval data, handle it here
   // Example: if subscription has payment_frequency_interval and payment_frequency_count
-  if (
-    subscription.payment_frequency_interval &&
-    subscription.payment_frequency_count
-  ) {
+  if (subscription.payment_frequency_interval && subscription.payment_frequency_count) {
     const count = subscription.payment_frequency_count;
     const interval = subscription.payment_frequency_interval.toLowerCase();
 
@@ -99,9 +84,7 @@ function getBillingFrequency(subscription: SubscriptionListResponse): string {
   return "month";
 }
 
-function getBillingFrequencyForBadge(
-  subscription: SubscriptionListResponse,
-): string {
+function getBillingFrequencyForBadge(subscription: SubscriptionListResponse): string {
   // For badges, use a more compact and capitalized version
   const metadata = subscription.metadata;
   if (metadata?.billing_frequency) {
@@ -109,10 +92,7 @@ function getBillingFrequencyForBadge(
   }
 
   // Handle structured billing interval data
-  if (
-    subscription.payment_frequency_interval &&
-    subscription.payment_frequency_count
-  ) {
+  if (subscription.payment_frequency_interval && subscription.payment_frequency_count) {
     const count = subscription.payment_frequency_count;
     const interval = subscription.payment_frequency_interval.toLowerCase();
 
@@ -159,9 +139,7 @@ function getBillingFrequencyForBadge(
   return "Monthly";
 }
 
-function getBillingFrequencyBadgeColor(
-  subscription: SubscriptionListResponse,
-): Color {
+function getBillingFrequencyBadgeColor(subscription: SubscriptionListResponse): Color {
   // Check metadata first
   const metadata = subscription.metadata;
   if (metadata?.billing_frequency) {
@@ -228,10 +206,7 @@ function SubscriptionsList() {
         message: error instanceof Error ? error.message : "Unknown error",
       });
     } else if (subscriptionsData) {
-      const totalItems = subscriptionsData.pages.reduce(
-        (acc, page) => acc + page.items.length,
-        0,
-      );
+      const totalItems = subscriptionsData.pages.reduce((acc, page) => acc + page.items.length, 0);
       showToast({
         style: Toast.Style.Success,
         title: `Loaded ${totalItems} subscriptions`,
@@ -245,10 +220,7 @@ function SubscriptionsList() {
     [subscriptionsData?.pages],
   );
 
-  const handleFetchNextPage = useCallback(
-    () => fetchNextPage(),
-    [fetchNextPage],
-  );
+  const handleFetchNextPage = useCallback(() => fetchNextPage(), [fetchNextPage]);
 
   if (!isLoading && subscriptions.length === 0) {
     return (
@@ -281,11 +253,7 @@ function SubscriptionsList() {
             source: Icon.Repeat,
             tintColor: getStatusBadgeColor(subscription.status),
           }}
-          title={
-            subscription.metadata?.description ||
-            subscription.customer.name ||
-            "Subscription"
-          }
+          title={subscription.metadata?.description || subscription.customer.name || "Subscription"}
           accessories={[
             {
               text: `${formatCurrencyAndAmount(
@@ -305,19 +273,13 @@ function SubscriptionsList() {
                     text={subscription.customer.email}
                     target={`mailto:${subscription.customer.email}`}
                   />
-                  <List.Item.Detail.Metadata.Label
-                    title="Started At"
-                    text={formatDateShort(subscription.created_at)}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Started At" text={formatDateShort(subscription.created_at)} />
 
                   <List.Item.Detail.Metadata.Label
                     title="Next Billing Date"
                     text={formatDateShort(subscription.next_billing_date)}
                   />
-                  <List.Item.Detail.Metadata.Label
-                    title="Organization"
-                    text={subscription.customer.name || "—"}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Organization" text={subscription.customer.name || "—"} />
 
                   <List.Item.Detail.Metadata.TagList title="Frequency">
                     <List.Item.Detail.Metadata.TagList.Item
@@ -336,27 +298,15 @@ function SubscriptionsList() {
 
                   <List.Item.Detail.Metadata.Label
                     title="Amount"
-                    text={formatCurrencyAndAmount(
-                      subscription.recurring_pre_tax_amount,
-                      subscription.currency,
-                    )}
+                    text={formatCurrencyAndAmount(subscription.recurring_pre_tax_amount, subscription.currency)}
                   />
 
                   <List.Item.Detail.Metadata.Separator />
 
                   {/* Additional Details */}
-                  <List.Item.Detail.Metadata.Label
-                    title="Customer ID"
-                    text={subscription.customer.customer_id}
-                  />
-                  <List.Item.Detail.Metadata.Label
-                    title="Subscription ID"
-                    text={subscription.subscription_id}
-                  />
-                  <List.Item.Detail.Metadata.Label
-                    title="Product ID"
-                    text={subscription.product_id}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Customer ID" text={subscription.customer.customer_id} />
+                  <List.Item.Detail.Metadata.Label title="Subscription ID" text={subscription.subscription_id} />
+                  <List.Item.Detail.Metadata.Label title="Product ID" text={subscription.product_id} />
 
                   <List.Item.Detail.Metadata.Separator />
 
@@ -365,9 +315,7 @@ function SubscriptionsList() {
                     text={subscription.on_demand ? "Yes" : "No"}
                     icon={{
                       source: Icon.Circle,
-                      tintColor: subscription.on_demand
-                        ? Color.Blue
-                        : Color.SecondaryText,
+                      tintColor: subscription.on_demand ? Color.Blue : Color.SecondaryText,
                     }}
                   />
                   {subscription.cancel_at_next_billing_date && (
@@ -389,10 +337,7 @@ function SubscriptionsList() {
                 icon={Icon.Globe}
               />
 
-              <Action.CopyToClipboard
-                title="Copy Subscription ID"
-                content={subscription.subscription_id}
-              />
+              <Action.CopyToClipboard title="Copy Subscription ID" content={subscription.subscription_id} />
 
               <Action.CopyToClipboard
                 title="Copy Customer Email"

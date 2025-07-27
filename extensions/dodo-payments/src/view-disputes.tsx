@@ -1,12 +1,4 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  Color,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, showToast, Toast } from "@raycast/api";
 import React, { useCallback } from "react";
 import { withAuth } from "./contexts/AuthContext";
 import { withAuthGuard } from "./hooks/useAuthGuard";
@@ -78,13 +70,7 @@ function formatCurrency(amount: string, currency: string): string {
 }
 
 function DisputesList() {
-  const {
-    data: disputesData,
-    isLoading,
-    error,
-    fetchNextPage,
-    hasNextPage,
-  } = useInfiniteDisputes({ limit: 50 });
+  const { data: disputesData, isLoading, error, fetchNextPage, hasNextPage } = useInfiniteDisputes({ limit: 50 });
 
   // Show toast notifications based on query state
   React.useEffect(() => {
@@ -100,10 +86,7 @@ function DisputesList() {
         message: error instanceof Error ? error.message : "Unknown error",
       });
     } else if (disputesData) {
-      const totalItems = disputesData.pages.reduce(
-        (acc, page) => acc + page.items.length,
-        0,
-      );
+      const totalItems = disputesData.pages.reduce((acc, page) => acc + page.items.length, 0);
       showToast({
         style: Toast.Style.Success,
         title: `Loaded ${totalItems} disputes`,
@@ -117,10 +100,7 @@ function DisputesList() {
     [disputesData?.pages],
   );
 
-  const handleFetchNextPage = useCallback(
-    () => fetchNextPage(),
-    [fetchNextPage],
-  );
+  const handleFetchNextPage = useCallback(() => fetchNextPage(), [fetchNextPage]);
 
   if (!isLoading && disputes.length === 0) {
     return (
@@ -162,10 +142,7 @@ function DisputesList() {
             <List.Item.Detail
               metadata={
                 <List.Item.Detail.Metadata>
-                  <List.Item.Detail.Metadata.Label
-                    title="Dispute"
-                    text={`Dispute ${dispute.dispute_id.slice(-8)}`}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Dispute" text={`Dispute ${dispute.dispute_id.slice(-8)}`} />
 
                   <List.Item.Detail.Metadata.TagList title="Status">
                     <List.Item.Detail.Metadata.TagList.Item
@@ -174,10 +151,7 @@ function DisputesList() {
                     />
                   </List.Item.Detail.Metadata.TagList>
 
-                  <List.Item.Detail.Metadata.Label
-                    title="Stage"
-                    text={getDisputeStageDisplay(dispute.dispute_stage)}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Stage" text={getDisputeStageDisplay(dispute.dispute_stage)} />
 
                   <List.Item.Detail.Metadata.Label
                     title="Amount"
@@ -186,27 +160,15 @@ function DisputesList() {
 
                   <List.Item.Detail.Metadata.Separator />
 
-                  <List.Item.Detail.Metadata.Label
-                    title="Dispute ID"
-                    text={dispute.dispute_id}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Dispute ID" text={dispute.dispute_id} />
 
-                  <List.Item.Detail.Metadata.Label
-                    title="Payment ID"
-                    text={dispute.payment_id}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Payment ID" text={dispute.payment_id} />
 
                   <List.Item.Detail.Metadata.Separator />
 
-                  <List.Item.Detail.Metadata.Label
-                    title="Business ID"
-                    text={dispute.business_id}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Business ID" text={dispute.business_id} />
 
-                  <List.Item.Detail.Metadata.Label
-                    title="Created"
-                    text={formatDateShort(dispute.created_at)}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Created" text={formatDateShort(dispute.created_at)} />
                 </List.Item.Detail.Metadata>
               }
             />
@@ -218,11 +180,7 @@ function DisputesList() {
                 url={`https://app.dodopayments.com/transctions/disputes/${dispute.dispute_id}?backTo=/transactions/disputes`}
                 icon={Icon.Globe}
               />
-              <Action.CopyToClipboard
-                title="Copy Dispute ID"
-                content={dispute.dispute_id}
-                icon={Icon.Clipboard}
-              />
+              <Action.CopyToClipboard title="Copy Dispute ID" content={dispute.dispute_id} icon={Icon.Clipboard} />
               <Action.CopyToClipboard
                 title="Copy Payment ID"
                 content={dispute.payment_id}

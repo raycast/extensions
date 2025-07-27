@@ -1,11 +1,4 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Icon, showToast, Toast } from "@raycast/api";
 import React, { useCallback } from "react";
 import { withAuth } from "./contexts/AuthContext";
 import { withAuthGuard } from "./hooks/useAuthGuard";
@@ -14,13 +7,7 @@ import type { Customer } from "dodopayments/resources";
 import { formatDateShort } from "./utils/formatting";
 
 function CustomersList() {
-  const {
-    data: customersData,
-    isLoading,
-    error,
-    fetchNextPage,
-    hasNextPage,
-  } = useInfiniteCustomers({ limit: 50 });
+  const { data: customersData, isLoading, error, fetchNextPage, hasNextPage } = useInfiniteCustomers({ limit: 50 });
 
   // Show toast notifications based on query state
   React.useEffect(() => {
@@ -36,10 +23,7 @@ function CustomersList() {
         message: error instanceof Error ? error.message : "Unknown error",
       });
     } else if (customersData) {
-      const totalItems = customersData.pages.reduce(
-        (acc, page) => acc + page.items.length,
-        0,
-      );
+      const totalItems = customersData.pages.reduce((acc, page) => acc + page.items.length, 0);
       showToast({
         style: Toast.Style.Success,
         title: `Loaded ${totalItems} customers`,
@@ -53,10 +37,7 @@ function CustomersList() {
     [customersData?.pages],
   );
 
-  const handleFetchNextPage = useCallback(
-    () => fetchNextPage(),
-    [fetchNextPage],
-  );
+  const handleFetchNextPage = useCallback(() => fetchNextPage(), [fetchNextPage]);
 
   if (!isLoading && customers.length === 0) {
     return (
@@ -96,26 +77,14 @@ function CustomersList() {
                     text={customer.email}
                     target={`mailto:${customer.email}`}
                   />
-                  <List.Item.Detail.Metadata.Label
-                    title="Name"
-                    text={customer.name || "—"}
-                  />
-                  <List.Item.Detail.Metadata.Label
-                    title="Phone"
-                    text={customer.phone_number || "—"}
-                  />
-                  <List.Item.Detail.Metadata.Label
-                    title="Created At"
-                    text={formatDateShort(customer.created_at)}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Name" text={customer.name || "—"} />
+                  <List.Item.Detail.Metadata.Label title="Phone" text={customer.phone_number || "—"} />
+                  <List.Item.Detail.Metadata.Label title="Created At" text={formatDateShort(customer.created_at)} />
 
                   <List.Item.Detail.Metadata.Separator />
 
                   {/* Additional Details */}
-                  <List.Item.Detail.Metadata.Label
-                    title="Customer ID"
-                    text={customer.customer_id}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Customer ID" text={customer.customer_id} />
                 </List.Item.Detail.Metadata>
               }
             />
@@ -128,10 +97,7 @@ function CustomersList() {
                 icon={Icon.Globe}
               />
 
-              <Action.CopyToClipboard
-                title="Copy Customer ID"
-                content={customer.customer_id}
-              />
+              <Action.CopyToClipboard title="Copy Customer ID" content={customer.customer_id} />
 
               <Action.CopyToClipboard
                 title="Copy Email"

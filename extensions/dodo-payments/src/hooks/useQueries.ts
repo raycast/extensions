@@ -1,37 +1,25 @@
-import {
-  useQuery,
-  useQueryClient,
-  useInfiniteQuery,
-} from "@tanstack/react-query";
+import { useQuery, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { useAuth } from "../contexts/AuthContext";
 
 // Query Keys
 export const queryKeys = {
   brands: ["brands"] as const,
   brand: (id: string) => ["brands", id] as const,
-  payments: (filters?: { status?: string; page?: number }) =>
-    ["payments", filters] as const,
+  payments: (filters?: { status?: string; page?: number }) => ["payments", filters] as const,
   payment: (id: string) => ["payments", id] as const,
-  subscriptions: (filters?: { status?: string; page?: number }) =>
-    ["subscriptions", filters] as const,
+  subscriptions: (filters?: { status?: string; page?: number }) => ["subscriptions", filters] as const,
   subscription: (id: string) => ["subscriptions", id] as const,
-  customers: (filters?: { email?: string; page?: number }) =>
-    ["customers", filters] as const,
+  customers: (filters?: { email?: string; page?: number }) => ["customers", filters] as const,
   customer: (id: string) => ["customers", id] as const,
-  products: (filters?: { name?: string; page?: number }) =>
-    ["products", filters] as const,
+  products: (filters?: { name?: string; page?: number }) => ["products", filters] as const,
   product: (id: string) => ["products", id] as const,
-  discounts: (filters?: { status?: string; page?: number }) =>
-    ["discounts", filters] as const,
+  discounts: (filters?: { status?: string; page?: number }) => ["discounts", filters] as const,
   discount: (id: string) => ["discounts", id] as const,
-  licenseKeys: (filters?: { status?: string; page?: number }) =>
-    ["licenseKeys", filters] as const,
+  licenseKeys: (filters?: { status?: string; page?: number }) => ["licenseKeys", filters] as const,
   licenseKey: (id: string) => ["licenseKeys", id] as const,
-  disputes: (filters?: { status?: string; page?: number }) =>
-    ["disputes", filters] as const,
+  disputes: (filters?: { status?: string; page?: number }) => ["disputes", filters] as const,
   dispute: (id: string) => ["disputes", id] as const,
-  refunds: (filters?: { status?: string; page?: number }) =>
-    ["refunds", filters] as const,
+  refunds: (filters?: { status?: string; page?: number }) => ["refunds", filters] as const,
   refund: (id: string) => ["refunds", id] as const,
   payouts: (filters?: { page?: number }) => ["payouts", filters] as const,
 };
@@ -106,15 +94,12 @@ export function useInfinitePayments(
   const { apiClient } = useAuth();
 
   return useInfiniteQuery({
-    queryKey: ["payments", "infinite", options],
+    queryKey: queryKeys.payments(options),
     queryFn: ({ pageParam }) => {
       if (!apiClient) throw new Error("API client not available");
       return apiClient.listPayments({ ...options, page: pageParam });
     },
-    getNextPageParam: (lastPage, pages) =>
-      lastPage.items.length === (options.limit || 50)
-        ? pages.length
-        : undefined,
+    getNextPageParam: (lastPage, pages) => (lastPage.items.length === (options.limit || 50) ? pages.length : undefined),
     initialPageParam: 0,
     enabled: !!apiClient,
   });
@@ -168,10 +153,7 @@ export function useInfiniteSubscriptions(
       if (!apiClient) throw new Error("API client not available");
       return apiClient.listSubscriptions({ ...options, page: pageParam });
     },
-    getNextPageParam: (lastPage, pages) =>
-      lastPage.items.length === (options.limit || 50)
-        ? pages.length
-        : undefined,
+    getNextPageParam: (lastPage, pages) => (lastPage.items.length === (options.limit || 50) ? pages.length : undefined),
     initialPageParam: 0,
     enabled: !!apiClient,
   });
@@ -225,10 +207,7 @@ export function useInfiniteCustomers(
       if (!apiClient) throw new Error("API client not available");
       return apiClient.listCustomers({ ...options, page: pageParam });
     },
-    getNextPageParam: (lastPage, pages) =>
-      lastPage.items.length === (options.limit || 50)
-        ? pages.length
-        : undefined,
+    getNextPageParam: (lastPage, pages) => (lastPage.items.length === (options.limit || 50) ? pages.length : undefined),
     initialPageParam: 0,
     enabled: !!apiClient,
   });
@@ -282,10 +261,7 @@ export function useInfiniteProducts(
       if (!apiClient) throw new Error("API client not available");
       return apiClient.listProducts({ ...options, page: pageParam });
     },
-    getNextPageParam: (lastPage, pages) =>
-      lastPage.items.length === (options.limit || 50)
-        ? pages.length
-        : undefined,
+    getNextPageParam: (lastPage, pages) => (lastPage.items.length === (options.limit || 50) ? pages.length : undefined),
     initialPageParam: 0,
     enabled: !!apiClient,
   });
@@ -303,10 +279,7 @@ export function useAuthVerification() {
         await apiClient.listBrands({ page: 1, limit: 1 });
         return true; // API key is valid
       } catch (error) {
-        if (
-          error instanceof Error &&
-          error.message.includes("Invalid API key")
-        ) {
+        if (error instanceof Error && error.message.includes("Invalid API key")) {
           return false; // API key is invalid
         }
         throw error; // Other errors
@@ -324,26 +297,16 @@ export function useInvalidateQueries() {
 
   return {
     invalidateAll: () => queryClient.invalidateQueries(),
-    invalidateBrands: () =>
-      queryClient.invalidateQueries({ queryKey: queryKeys.brands }),
-    invalidatePayments: () =>
-      queryClient.invalidateQueries({ queryKey: ["payments"] }),
-    invalidateSubscriptions: () =>
-      queryClient.invalidateQueries({ queryKey: ["subscriptions"] }),
-    invalidateCustomers: () =>
-      queryClient.invalidateQueries({ queryKey: ["customers"] }),
-    invalidateProducts: () =>
-      queryClient.invalidateQueries({ queryKey: ["products"] }),
-    invalidateDiscounts: () =>
-      queryClient.invalidateQueries({ queryKey: ["discounts"] }),
-    invalidateLicenseKeys: () =>
-      queryClient.invalidateQueries({ queryKey: ["licenseKeys"] }),
-    invalidateDisputes: () =>
-      queryClient.invalidateQueries({ queryKey: ["disputes"] }),
-    invalidateRefunds: () =>
-      queryClient.invalidateQueries({ queryKey: ["refunds"] }),
-    invalidatePayouts: () =>
-      queryClient.invalidateQueries({ queryKey: ["payouts"] }),
+    invalidateBrands: () => queryClient.invalidateQueries({ queryKey: queryKeys.brands }),
+    invalidatePayments: () => queryClient.invalidateQueries({ queryKey: ["payments"] }),
+    invalidateSubscriptions: () => queryClient.invalidateQueries({ queryKey: ["subscriptions"] }),
+    invalidateCustomers: () => queryClient.invalidateQueries({ queryKey: ["customers"] }),
+    invalidateProducts: () => queryClient.invalidateQueries({ queryKey: ["products"] }),
+    invalidateDiscounts: () => queryClient.invalidateQueries({ queryKey: ["discounts"] }),
+    invalidateLicenseKeys: () => queryClient.invalidateQueries({ queryKey: ["licenseKeys"] }),
+    invalidateDisputes: () => queryClient.invalidateQueries({ queryKey: ["disputes"] }),
+    invalidateRefunds: () => queryClient.invalidateQueries({ queryKey: ["refunds"] }),
+    invalidatePayouts: () => queryClient.invalidateQueries({ queryKey: ["payouts"] }),
   };
 }
 

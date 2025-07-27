@@ -1,15 +1,4 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  Color,
-  showToast,
-  Toast,
-  Form,
-  useNavigation,
-  Clipboard,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, showToast, Toast, Form, useNavigation, Clipboard } from "@raycast/api";
 import React, { useCallback } from "react";
 import { withAuth, useAuth } from "./contexts/AuthContext";
 import { withAuthGuard } from "./hooks/useAuthGuard";
@@ -38,8 +27,7 @@ function getProductFrequencyForBadge(product: ProductListResponse): string {
   // Check if product has price detail with frequency information
   if (product.price_detail && product.price_detail.type === "recurring_price") {
     const count = product.price_detail.payment_frequency_count || 1;
-    const interval =
-      product.price_detail.payment_frequency_interval?.toLowerCase() || "month";
+    const interval = product.price_detail.payment_frequency_interval?.toLowerCase() || "month";
 
     if (count === 1) {
       // Singular forms for badges
@@ -92,8 +80,7 @@ function getProductFrequencyBadgeColor(product: ProductListResponse): Color {
 
   // Check if product has price detail with frequency information
   if (product.price_detail && product.price_detail.type === "recurring_price") {
-    const interval =
-      product.price_detail.payment_frequency_interval?.toLowerCase() || "month";
+    const interval = product.price_detail.payment_frequency_interval?.toLowerCase() || "month";
 
     // Return different colors based on frequency interval
     switch (interval) {
@@ -155,11 +142,7 @@ function getTaxInclusiveText(isInclusive: boolean): string {
   return isInclusive ? "Yes" : "No";
 }
 
-function getCheckoutUrl(
-  productId: string,
-  mode: "live" | "test" = "live",
-  returnUrl?: string,
-): string {
+function getCheckoutUrl(productId: string, mode: "live" | "test" = "live", returnUrl?: string): string {
   let checkoutUrl =
     mode === "live"
       ? `https://checkout.dodopayments.com/buy/${productId}`
@@ -172,13 +155,7 @@ function getCheckoutUrl(
   return checkoutUrl;
 }
 
-function CheckoutUrlWithReturnForm({
-  productId,
-  mode = "live",
-}: {
-  productId: string;
-  mode?: "live" | "test";
-}) {
+function CheckoutUrlWithReturnForm({ productId, mode = "live" }: { productId: string; mode?: "live" | "test" }) {
   const { pop } = useNavigation();
 
   async function handleSubmit(values: { returnUrl: string }) {
@@ -200,10 +177,7 @@ function CheckoutUrlWithReturnForm({
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Copy Checkout URL"
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Copy Checkout URL" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -221,13 +195,7 @@ function ProductsList() {
   const { config } = useAuth();
   const currentMode = config?.mode || "live";
 
-  const {
-    data: productsData,
-    isLoading,
-    error,
-    fetchNextPage,
-    hasNextPage,
-  } = useInfiniteProducts({ limit: 50 });
+  const { data: productsData, isLoading, error, fetchNextPage, hasNextPage } = useInfiniteProducts({ limit: 50 });
 
   // Show toast notifications based on query state
   React.useEffect(() => {
@@ -243,10 +211,7 @@ function ProductsList() {
         message: error instanceof Error ? error.message : "Unknown error",
       });
     } else if (productsData) {
-      const totalItems = productsData.pages.reduce(
-        (acc, page) => acc + page.items.length,
-        0,
-      );
+      const totalItems = productsData.pages.reduce((acc, page) => acc + page.items.length, 0);
       showToast({
         style: Toast.Style.Success,
         title: `Loaded ${totalItems} products`,
@@ -260,10 +225,7 @@ function ProductsList() {
     [productsData?.pages],
   );
 
-  const handleFetchNextPage = useCallback(
-    () => fetchNextPage(),
-    [fetchNextPage],
-  );
+  const handleFetchNextPage = useCallback(() => fetchNextPage(), [fetchNextPage]);
 
   if (!isLoading && products.length === 0) {
     return (
@@ -298,10 +260,7 @@ function ProductsList() {
           title={product.name || "Unnamed Product"}
           accessories={[
             {
-              text: formatCurrencyAndAmount(
-                product.price || 0,
-                product.currency || "USD",
-              ),
+              text: formatCurrencyAndAmount(product.price || 0, product.currency || "USD"),
             },
           ]}
           detail={
@@ -310,29 +269,16 @@ function ProductsList() {
                 <List.Item.Detail.Metadata>
                   {product.image ? (
                     <>
-                      <List.Item.Detail.Metadata.Link
-                        title="Image"
-                        text={product.image}
-                        target={product.image}
-                      />
+                      <List.Item.Detail.Metadata.Link title="Image" text={product.image} target={product.image} />
                       <List.Item.Detail.Metadata.Separator />
                     </>
                   ) : null}
                   {/* Product Information */}
-                  <List.Item.Detail.Metadata.Label
-                    title="Product"
-                    text={product.name || "—"}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Product" text={product.name || "—"} />
 
-                  <List.Item.Detail.Metadata.Label
-                    title="Description"
-                    text={product.description || "—"}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Description" text={product.description || "—"} />
 
-                  <List.Item.Detail.Metadata.Label
-                    title="Created"
-                    text={formatDateShort(product.created_at)}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Created" text={formatDateShort(product.created_at)} />
 
                   {/* Product Type Badge */}
                   <List.Item.Detail.Metadata.TagList title="Type">
@@ -354,23 +300,14 @@ function ProductsList() {
 
                   <List.Item.Detail.Metadata.Label
                     title="Price"
-                    text={formatCurrencyAndAmount(
-                      product.price || 0,
-                      product.currency || "USD",
-                    )}
+                    text={formatCurrencyAndAmount(product.price || 0, product.currency || "USD")}
                   />
 
                   <List.Item.Detail.Metadata.Separator />
 
                   {/* Additional Details */}
-                  <List.Item.Detail.Metadata.Label
-                    title="Product ID"
-                    text={product.product_id}
-                  />
-                  <List.Item.Detail.Metadata.Label
-                    title="Currency"
-                    text={product.currency || "USD"}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Product ID" text={product.product_id} />
+                  <List.Item.Detail.Metadata.Label title="Currency" text={product.currency || "USD"} />
 
                   <List.Item.Detail.Metadata.Separator />
 
@@ -401,12 +338,7 @@ function ProductsList() {
               />
               <Action.Push
                 title="Copy Checkout URL with Return URL"
-                target={
-                  <CheckoutUrlWithReturnForm
-                    productId={product.product_id}
-                    mode={currentMode}
-                  />
-                }
+                target={<CheckoutUrlWithReturnForm productId={product.product_id} mode={currentMode} />}
                 icon={Icon.Clipboard}
               />
 

@@ -1,12 +1,4 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  Color,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, showToast, Toast } from "@raycast/api";
 import React, { useCallback } from "react";
 import { withAuth } from "./contexts/AuthContext";
 import { withAuthGuard } from "./hooks/useAuthGuard";
@@ -44,10 +36,7 @@ function getRefundStatusDisplay(status: string): string {
   }
 }
 
-function formatCurrency(
-  amount?: number | null,
-  currency?: string | null,
-): string {
+function formatCurrency(amount?: number | null, currency?: string | null): string {
   if (!amount || !currency) return "N/A";
 
   return new Intl.NumberFormat("en-US", {
@@ -57,13 +46,7 @@ function formatCurrency(
 }
 
 function RefundsList() {
-  const {
-    data: refundsData,
-    isLoading,
-    error,
-    fetchNextPage,
-    hasNextPage,
-  } = useInfiniteRefunds({ limit: 20 });
+  const { data: refundsData, isLoading, error, fetchNextPage, hasNextPage } = useInfiniteRefunds({ limit: 20 });
 
   // Show toast notifications based on query state
   React.useEffect(() => {
@@ -79,10 +62,7 @@ function RefundsList() {
         message: error instanceof Error ? error.message : "Unknown error",
       });
     } else if (refundsData) {
-      const totalItems = refundsData.pages.reduce(
-        (acc, page) => acc + page.items.length,
-        0,
-      );
+      const totalItems = refundsData.pages.reduce((acc, page) => acc + page.items.length, 0);
       showToast({
         style: Toast.Style.Success,
         title: `Loaded ${totalItems} refunds`,
@@ -96,10 +76,7 @@ function RefundsList() {
     [refundsData?.pages],
   );
 
-  const handleFetchNextPage = useCallback(
-    () => fetchNextPage(),
-    [fetchNextPage],
-  );
+  const handleFetchNextPage = useCallback(() => fetchNextPage(), [fetchNextPage]);
 
   if (!isLoading && refunds.length === 0) {
     return (
@@ -141,10 +118,7 @@ function RefundsList() {
             <List.Item.Detail
               metadata={
                 <List.Item.Detail.Metadata>
-                  <List.Item.Detail.Metadata.Label
-                    title="Refund ID"
-                    text={refund.refund_id}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Refund ID" text={refund.refund_id} />
 
                   <List.Item.Detail.Metadata.TagList title="Status">
                     <List.Item.Detail.Metadata.TagList.Item
@@ -165,29 +139,15 @@ function RefundsList() {
 
                   <List.Item.Detail.Metadata.Separator />
 
-                  <List.Item.Detail.Metadata.Label
-                    title="Payment ID"
-                    text={refund.payment_id}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Payment ID" text={refund.payment_id} />
 
-                  <List.Item.Detail.Metadata.Label
-                    title="Business ID"
-                    text={refund.business_id}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Business ID" text={refund.business_id} />
 
-                  {refund.reason && (
-                    <List.Item.Detail.Metadata.Label
-                      title="Reason"
-                      text={refund.reason}
-                    />
-                  )}
+                  {refund.reason && <List.Item.Detail.Metadata.Label title="Reason" text={refund.reason} />}
 
                   <List.Item.Detail.Metadata.Separator />
 
-                  <List.Item.Detail.Metadata.Label
-                    title="Created"
-                    text={formatDateShort(refund.created_at)}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Created" text={formatDateShort(refund.created_at)} />
                 </List.Item.Detail.Metadata>
               }
             />
@@ -200,11 +160,7 @@ function RefundsList() {
                 icon={Icon.Globe}
               />
 
-              <Action.CopyToClipboard
-                title="Copy Refund ID"
-                content={refund.refund_id}
-                icon={Icon.Clipboard}
-              />
+              <Action.CopyToClipboard title="Copy Refund ID" content={refund.refund_id} icon={Icon.Clipboard} />
 
               <Action.CopyToClipboard
                 title="Copy Payment ID"

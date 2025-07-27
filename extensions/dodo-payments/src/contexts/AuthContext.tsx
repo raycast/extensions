@@ -11,10 +11,7 @@ interface AuthContextType {
   isLoading: boolean;
   error: string | null;
   refreshAuth: () => void;
-  authenticatedFetch: (
-    endpoint: string,
-    options?: RequestInit,
-  ) => Promise<Response>;
+  authenticatedFetch: (endpoint: string, options?: RequestInit) => Promise<Response>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -60,9 +57,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       const preferences = getPreferenceValues<Preferences>();
       const baseUrl =
-        preferences.apiMode === "live"
-          ? "https://live.dodopayments.com"
-          : "https://test.dodopayments.com";
+        preferences.apiMode === "live" ? "https://live.dodopayments.com" : "https://test.dodopayments.com";
 
       const authConfig: AuthConfig = {
         apiKey: preferences.apiKey,
@@ -79,13 +74,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // If we get here, the API key is valid (status 200)
       } catch (error) {
         // Check if it's an authentication error (status 401)
-        if (
-          error instanceof Error &&
-          error.message.includes("Invalid API key")
-        ) {
-          setError(
-            "Invalid API key. Please check your authentication settings.",
-          );
+        if (error instanceof Error && error.message.includes("Invalid API key")) {
+          setError("Invalid API key. Please check your authentication settings.");
           setIsAuthenticated(false);
           setConfig(null);
           setApiClient(null);
@@ -101,10 +91,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setIsAuthenticated(true);
       setError(null);
     } catch (error) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Failed to load authentication configuration";
+      const errorMessage = error instanceof Error ? error.message : "Failed to load authentication configuration";
       setError(errorMessage);
       setIsAuthenticated(false);
       setConfig(null);
@@ -118,10 +105,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     loadAuthConfig();
   };
 
-  const authenticatedFetch = async (
-    endpoint: string,
-    options: RequestInit = {},
-  ): Promise<Response> => {
+  const authenticatedFetch = async (endpoint: string, options: RequestInit = {}): Promise<Response> => {
     if (!config) {
       throw new Error("Authentication not configured");
     }
@@ -156,9 +140,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthContext.Provider value={contextValue}>
-        {children}
-      </AuthContext.Provider>
+      <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
     </QueryClientProvider>
   );
 }
@@ -172,9 +154,7 @@ export function useAuth(): AuthContextType {
 }
 
 // Higher-order component to wrap commands with authentication
-export function withAuth<T extends object>(
-  Component: React.ComponentType<T>,
-): React.ComponentType<T> {
+export function withAuth<T extends object>(Component: React.ComponentType<T>): React.ComponentType<T> {
   return function AuthenticatedComponent(props: T) {
     return (
       <AuthProvider>

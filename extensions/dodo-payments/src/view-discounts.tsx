@@ -1,12 +1,4 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  Color,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, showToast, Toast } from "@raycast/api";
 import React, { useCallback } from "react";
 import { withAuth } from "./contexts/AuthContext";
 import { withAuthGuard } from "./hooks/useAuthGuard";
@@ -65,13 +57,7 @@ function formatDiscountType(type: string): string {
 }
 
 function DiscountsList() {
-  const {
-    data: discountsData,
-    isLoading,
-    error,
-    fetchNextPage,
-    hasNextPage,
-  } = useInfiniteDiscounts({ limit: 20 });
+  const { data: discountsData, isLoading, error, fetchNextPage, hasNextPage } = useInfiniteDiscounts({ limit: 20 });
 
   // Show toast notifications based on query state
   React.useEffect(() => {
@@ -87,10 +73,7 @@ function DiscountsList() {
         message: error instanceof Error ? error.message : "Unknown error",
       });
     } else if (discountsData) {
-      const totalItems = discountsData.pages.reduce(
-        (acc, page) => acc + page.items.length,
-        0,
-      );
+      const totalItems = discountsData.pages.reduce((acc, page) => acc + page.items.length, 0);
       showToast({
         style: Toast.Style.Success,
         title: `Loaded ${totalItems} discount codes`,
@@ -104,10 +87,7 @@ function DiscountsList() {
     [discountsData?.pages],
   );
 
-  const handleFetchNextPage = useCallback(
-    () => fetchNextPage(),
-    [fetchNextPage],
-  );
+  const handleFetchNextPage = useCallback(() => fetchNextPage(), [fetchNextPage]);
 
   if (!isLoading && discounts.length === 0) {
     return (
@@ -151,10 +131,7 @@ function DiscountsList() {
             <List.Item.Detail
               metadata={
                 <List.Item.Detail.Metadata>
-                  <List.Item.Detail.Metadata.Label
-                    title="Discount Code"
-                    text={discount.code}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Discount Code" text={discount.code} />
 
                   <List.Item.Detail.Metadata.TagList title="Status">
                     <List.Item.Detail.Metadata.TagList.Item
@@ -163,48 +140,27 @@ function DiscountsList() {
                     />
                   </List.Item.Detail.Metadata.TagList>
 
-                  <List.Item.Detail.Metadata.Label
-                    title="Type"
-                    text={formatDiscountType(discount.type)}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Type" text={formatDiscountType(discount.type)} />
 
-                  <List.Item.Detail.Metadata.Label
-                    title="Amount"
-                    text={formatDiscountAmount(discount)}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Amount" text={formatDiscountAmount(discount)} />
 
                   <List.Item.Detail.Metadata.Label
                     title="Usage"
                     text={`${discount.times_used}${discount.usage_limit ? ` / ${discount.usage_limit}` : " (unlimited)"}`}
                   />
 
-                  {discount.name && (
-                    <List.Item.Detail.Metadata.Label
-                      title="Name"
-                      text={discount.name}
-                    />
-                  )}
+                  {discount.name && <List.Item.Detail.Metadata.Label title="Name" text={discount.name} />}
 
                   <List.Item.Detail.Metadata.Separator />
 
                   <List.Item.Detail.Metadata.Label
                     title="Expires"
-                    text={
-                      discount.expires_at
-                        ? formatDateShort(discount.expires_at)
-                        : "Never"
-                    }
+                    text={discount.expires_at ? formatDateShort(discount.expires_at) : "Never"}
                   />
 
-                  <List.Item.Detail.Metadata.Label
-                    title="Created"
-                    text={formatDateShort(discount.created_at)}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Created" text={formatDateShort(discount.created_at)} />
 
-                  <List.Item.Detail.Metadata.Label
-                    title="Discount ID"
-                    text={discount.discount_id}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Discount ID" text={discount.discount_id} />
                 </List.Item.Detail.Metadata>
               }
             />
@@ -213,15 +169,11 @@ function DiscountsList() {
             <ActionPanel>
               <Action.OpenInBrowser
                 title="Open in Dodo Payments"
-                url={`https://app.dodopayments.com/sales/discounts/edit?id=${discount.discount_id}?backTo=/sales/discounts`}
+                url={`https://app.dodopayments.com/sales/discounts/edit?id=${discount.discount_id}&backTo=/sales/discounts`}
                 icon={Icon.Globe}
               />
 
-              <Action.CopyToClipboard
-                title="Copy Discount Code"
-                content={discount.code}
-                icon={Icon.Clipboard}
-              />
+              <Action.CopyToClipboard title="Copy Discount Code" content={discount.code} icon={Icon.Clipboard} />
 
               <Action.CopyToClipboard
                 title="Copy Discount ID"
