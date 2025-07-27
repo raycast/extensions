@@ -1,4 +1,4 @@
-// 判断当前时间是否在近一周内
+// Check if current time is within the last week
 export const isRecent = (date: Date) => {
   const now = new Date();
   const target = new Date(date);
