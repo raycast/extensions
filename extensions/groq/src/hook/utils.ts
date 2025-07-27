@@ -2,16 +2,14 @@ import { encode } from "gpt-tokenizer";
 
 export const allModels = [
   { name: "Follow global model", id: "global" },
-  { name: "Llama 4 Scout 131k", id: "meta-llama/llama-4-scout-17b-16e-instruct" },
+  { name: "Kimi K2 Instruct 128K", id: "moonshotai/kimi-k2-instruct" },
+  { name: "Qwen 3 32B 128K", id: "qwen/qwen3-32b" },
   { name: "Llama 4 Maverick 131k", id: "meta-llama/llama-4-maverick-17b-128e-instruct" },
-  { name: "DeepSeek R1 70B 128k", id: "deepseek-r1-distill-llama-70b" },
+  { name: "Llama 4 Scout 131k", id: "meta-llama/llama-4-scout-17b-16e-instruct" },
   { name: "Llama 3.3 70B 128k", id: "llama-3.3-70b-versatile" },
   { name: "Llama 3.1 8B 128k", id: "llama-3.1-8b-instant" },
-  { name: "Llama 3 70B 8k", id: "llama3-70b-8192" },
-  { name: "Llama 3 8B 8k", id: "llama3-8b-8192" },
+  { name: "DeepSeek R1 70B 128k", id: "deepseek-r1-distill-llama-70b" },
   { name: "Gemma2 9B 8k", id: "gemma2-9b-it" },
-  { name: "Qwen 3 32B 128K", id: "qwen/qwen3-32b" },
-  { name: "Kimi K2 Instruct 128K", id: "moonshotai/kimi-k2-instruct" },
 ];
 
 const MODEL_RATES: Record<string, { input: number; output: number }> = {
@@ -19,8 +17,6 @@ const MODEL_RATES: Record<string, { input: number; output: number }> = {
   "meta-llama/llama-4-maverick-17b-128e-instruct": { input: 0.2, output: 0.6 },
   "deepseek-r1-distill-llama-70b": { input: 0.75, output: 0.99 },
   "llama-3.3-70b-versatile": { input: 0.59, output: 0.79 },
-  "llama3-70b-8192": { input: 0.59, output: 0.79 },
-  "llama3-8b-8192": { input: 0.05, output: 0.08 },
   "llama-3.1-8b-instant": { input: 0.05, output: 0.08 },
   "gemma2-9b-it": { input: 0.2, output: 0.2 },
   "qwen/qwen3-32b": { input: 0.29, output: 0.59 },

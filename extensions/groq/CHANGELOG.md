@@ -14,6 +14,8 @@
     - `qwen-2.5-coder-32b`
     - `llama-3.3-70b-specdec`
     - `mistral-saba-24b`
+    - `llama3-70b-8192`
+    - `llama3-8b-8192`
 
 ## [Updated Models] - 2025-07-18
 

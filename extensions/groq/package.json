@@ -55,14 +55,6 @@
               "title": "Llama 3.1 8B 128k"
             },
             {
-              "value": "llama3-70b-8192",
-              "title": "Llama 3 70B 8k"
-            },
-            {
-              "value": "llama3-8b-8192",
-              "title": "Llama 3 8B 8k"
-            },
-            {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
             },
@@ -123,14 +115,6 @@
             {
               "value": "llama-3.1-8b-instant",
               "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "llama3-70b-8192",
-              "title": "Llama 3 70B 8k"
-            },
-            {
-              "value": "llama3-8b-8192",
-              "title": "Llama 3 8B 8k"
             },
             {
               "value": "gemma2-9b-it",
@@ -195,14 +179,6 @@
               "title": "Llama 3.1 8B 128k"
             },
             {
-              "value": "llama3-70b-8192",
-              "title": "Llama 3 70B 8k"
-            },
-            {
-              "value": "llama3-8b-8192",
-              "title": "Llama 3 8B 8k"
-            },
-            {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
             },
@@ -263,14 +239,6 @@
             {
               "value": "llama-3.1-8b-instant",
               "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "llama3-70b-8192",
-              "title": "Llama 3 70B 8k"
-            },
-            {
-              "value": "llama3-8b-8192",
-              "title": "Llama 3 8B 8k"
             },
             {
               "value": "gemma2-9b-it",
@@ -335,14 +303,6 @@
               "title": "Llama 3.1 8B 128k"
             },
             {
-              "value": "llama3-70b-8192",
-              "title": "Llama 3 70B 8k"
-            },
-            {
-              "value": "llama3-8b-8192",
-              "title": "Llama 3 8B 8k"
-            },
-            {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
             },
@@ -403,14 +363,6 @@
             {
               "value": "llama-3.1-8b-instant",
               "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "llama3-70b-8192",
-              "title": "Llama 3 70B 8k"
-            },
-            {
-              "value": "llama3-8b-8192",
-              "title": "Llama 3 8B 8k"
             },
             {
               "value": "gemma2-9b-it",
@@ -489,14 +441,6 @@
             {
               "value": "llama-3.1-8b-instant",
               "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "llama3-70b-8192",
-              "title": "Llama 3 70B 8k"
-            },
-            {
-              "value": "llama3-8b-8192",
-              "title": "Llama 3 8B 8k"
             },
             {
               "value": "gemma2-9b-it",
@@ -578,14 +522,6 @@
               "title": "Llama 3.1 8B 128k"
             },
             {
-              "value": "llama3-70b-8192",
-              "title": "Llama 3 70B 8k"
-            },
-            {
-              "value": "llama3-8b-8192",
-              "title": "Llama 3 8B 8k"
-            },
-            {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
             },
@@ -647,14 +583,6 @@
             {
               "value": "llama-3.1-8b-instant",
               "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "llama3-70b-8192",
-              "title": "Llama 3 70B 8k"
-            },
-            {
-              "value": "llama3-8b-8192",
-              "title": "Llama 3 8B 8k"
             },
             {
               "value": "gemma2-9b-it",
@@ -720,14 +648,6 @@
               "title": "Llama 3.1 8B 128k"
             },
             {
-              "value": "llama3-70b-8192",
-              "title": "Llama 3 70B 8k"
-            },
-            {
-              "value": "llama3-8b-8192",
-              "title": "Llama 3 8B 8k"
-            },
-            {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
             },
@@ -789,14 +709,6 @@
             {
               "value": "llama-3.1-8b-instant",
               "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "llama3-70b-8192",
-              "title": "Llama 3 70B 8k"
-            },
-            {
-              "value": "llama3-8b-8192",
-              "title": "Llama 3 8B 8k"
             },
             {
               "value": "gemma2-9b-it",
@@ -862,14 +774,6 @@
               "title": "Llama 3.1 8B 128k"
             },
             {
-              "value": "llama3-70b-8192",
-              "title": "Llama 3 70B 8k"
-            },
-            {
-              "value": "llama3-8b-8192",
-              "title": "Llama 3 8B 8k"
-            },
-            {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
             },
@@ -931,14 +835,6 @@
             {
               "value": "llama-3.1-8b-instant",
               "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "llama3-70b-8192",
-              "title": "Llama 3 70B 8k"
-            },
-            {
-              "value": "llama3-8b-8192",
-              "title": "Llama 3 8B 8k"
             },
             {
               "value": "gemma2-9b-it",
@@ -1004,14 +900,6 @@
               "title": "Llama 3.1 8B 128k"
             },
             {
-              "value": "llama3-70b-8192",
-              "title": "Llama 3 70B 8k"
-            },
-            {
-              "value": "llama3-8b-8192",
-              "title": "Llama 3 8B 8k"
-            },
-            {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
             },
@@ -1064,14 +952,6 @@
         {
           "value": "llama-3.1-8b-instant",
           "title": "Llama 3.1 8B 128k"
-        },
-        {
-          "value": "llama3-70b-8192",
-          "title": "Llama 3 70B 8k"
-        },
-        {
-          "value": "llama3-8b-8192",
-          "title": "Llama 3 8B 8k"
         },
         {
           "value": "gemma2-9b-it",
