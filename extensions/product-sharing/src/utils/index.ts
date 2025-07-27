@@ -5,7 +5,7 @@ export const isRecent = (date: Date) => {
   return now.getTime() - target.getTime() < 7 * 24 * 60 * 60 * 1000;
 };
 
-// 格式化评分
+// Format score
 export const formatScore = (score: number | undefined) => {
   if (!score) return null;
   const calculatedScore = Math.min(score * 100 * 2, 100);
