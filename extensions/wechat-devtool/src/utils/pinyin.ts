@@ -1,5 +1,4 @@
 import { pinyin } from "pinyin-pro";
-import { Project } from "../types";
 
 export function generateProjectKeywords(project: Project) {
   const keywords: string[] = [];

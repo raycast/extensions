@@ -1,12 +1,12 @@
 import { homedir } from "os";
 import { useState, useEffect } from "react";
 import { showFailureToast } from "@raycast/utils";
-import { List, ActionPanel, Action, Icon, useNavigation, showToast, Toast } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, useNavigation, showToast, Toast, Color } from "@raycast/api";
 
-import { getExtensionConfig, updateProjectLastUsed } from "../utils/config";
+import { getExtensionConfig, updateProjectLastUsedAt } from "../utils/config";
 import { generateProjectKeywords } from "../utils/pinyin";
-import { Project, ExtensionConfig } from "../types";
-import Configure from "../configure";
+import { getRepositoryBranch } from "../utils/command";
+import ConfigureProjects from "../configure-projects";
 import ReadmeView from "../readme-view";
 
 interface ProjectListProps {
@@ -15,6 +15,8 @@ interface ProjectListProps {
   actionPanelExtra?: React.ReactNode;
   actionTitle: string;
 }
+
+type BranchMap = Record<string, string | null>;
 
 export default function ProjectList({
   onProjectAction,
@@ -27,8 +29,9 @@ export default function ProjectList({
   const [config, setConfig] = useState<ExtensionConfig | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [branchMap, setBranchMap] = useState<BranchMap>({});
 
-  function formatPath(projectPath: string): string {
+  function formatPath(projectPath: string) {
     const homeDir = homedir();
     if (projectPath.startsWith(homeDir)) {
       return projectPath.replace(homeDir, "~");
@@ -39,6 +42,22 @@ export default function ProjectList({
   useEffect(() => {
     loadProjects();
   }, [refreshTrigger]);
+
+  useEffect(() => {
+    if (!projects.length) return;
+
+    async function fetchProjectsBranch() {
+      const map: BranchMap = {};
+      await Promise.allSettled(
+        projects.map(async (project) => {
+          const branch = await getRepositoryBranch(project.path, project.repositoryType);
+          map[project.id] = branch;
+        }),
+      );
+      setBranchMap(map);
+    }
+    fetchProjectsBranch();
+  }, [projects]);
 
   async function loadProjects() {
     try {
@@ -81,11 +100,10 @@ export default function ProjectList({
           description="No projects have been configured"
           actions={
             <ActionPanel>
-              <Action
+              <Action.Push
                 title="Go to Configuration"
                 icon={Icon.Gear}
-                onAction={() => push(<Configure onConfigChange={handleConfigChange} />)}
-                shortcut={{ modifiers: ["cmd"], key: "return" }}
+                target={<ConfigureProjects onConfigChange={handleConfigChange} />}
               />
               <Action
                 title="Refresh Project List"
@@ -119,11 +137,10 @@ export default function ProjectList({
           description={`Missing required fields: ${requiredFields.join(", ")}`}
           actions={
             <ActionPanel>
-              <Action
+              <Action.Push
                 title="Go to Configuration"
                 icon={Icon.Gear}
-                onAction={() => push(<Configure onConfigChange={handleConfigChange} />)}
-                shortcut={{ modifiers: ["cmd"], key: "return" }}
+                target={<ConfigureProjects onConfigChange={handleConfigChange} />}
               />
               <Action
                 title="Refresh Project List"
@@ -158,7 +175,16 @@ export default function ProjectList({
           title={project.name}
           keywords={project.keywords}
           subtitle={project.displayPath}
-          accessories={[{ text: new Date(project.lastUsedAt).toLocaleDateString() }]}
+          accessories={[
+            ...(branchMap[project.id]
+              ? [
+                  {
+                    tag: branchMap[project.id],
+                    icon: { source: "branch.svg", tintColor: Color.SecondaryText },
+                  },
+                ]
+              : []),
+          ]}
           actions={
             <ActionPanel>
               <Action
@@ -166,17 +192,15 @@ export default function ProjectList({
                 icon={Icon.Terminal}
                 onAction={() => {
                   if (config) {
-                    updateProjectLastUsed(project.id);
+                    updateProjectLastUsedAt(project.id);
                     onProjectAction(project, config);
                   }
                 }}
-                shortcut={{ modifiers: [], key: "return" }}
               />
-              <Action
+              <Action.Push
                 title="Go to Configuration"
                 icon={Icon.Gear}
-                onAction={() => push(<Configure onConfigChange={handleConfigChange} />)}
-                shortcut={{ modifiers: ["cmd"], key: "return" }}
+                target={<ConfigureProjects onConfigChange={handleConfigChange} />}
               />
               <Action.CopyToClipboard
                 title="Copy Project Path"

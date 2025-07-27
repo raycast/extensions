@@ -5,9 +5,9 @@ import { Form, ActionPanel, Action, Icon, useNavigation, showToast, Toast } from
 import { showFailureToast } from "@raycast/utils";
 
 import ReadmeView from "./readme-view";
-import { WECHAT_DEVTOOL_CLI_PATH } from "./constants";
+import { REPOSITORY_TYPE, WECHAT_DEVTOOL_CLI_PATH } from "./constants";
 import { getExtensionConfig, updateExtensionConfig, createEmptyProject } from "./utils/config";
-import { ExtensionConfig, Project, WechatProjectConfig } from "./types";
+import { detectRepositoryType } from "./utils/command";
 
 interface FormErrors {
   cliPath?: string;
@@ -17,11 +17,11 @@ interface FormErrors {
   }>;
 }
 
-interface ConfigureProps {
+interface ConfigureProjectsProps {
   onConfigChange?: () => void;
 }
 
-export default function Configure({ onConfigChange }: ConfigureProps) {
+export default function ConfigureProjects({ onConfigChange }: ConfigureProjectsProps) {
   const { pop, push } = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
   const [cliPath, setCliPath] = useState(WECHAT_DEVTOOL_CLI_PATH);
@@ -91,7 +91,7 @@ export default function Configure({ onConfigChange }: ConfigureProps) {
   function handleProjectValidationError(index: number, project: Project, errorMessage: string) {
     showFailureToast(new Error(errorMessage), { title: "Invalid Project" });
     showErrors({
-      [`project_${index}_path`]: "Selected path is not a valid WeChat Mini Program project",
+      [`project_${index}_path`]: "Selected path is not a valid WeChat mini program project",
     });
     if (!project.path) {
       updateProject(index, { ...project, path: "" });
@@ -122,7 +122,7 @@ export default function Configure({ onConfigChange }: ConfigureProps) {
     }
 
     if (!(await validateWechatProject(selectedPath))) {
-      handleProjectValidationError(index, project, "Invalid WeChat Mini Program Project");
+      handleProjectValidationError(index, project, "Invalid WeChat mini program Project");
       return;
     }
 
@@ -180,9 +180,15 @@ export default function Configure({ onConfigChange }: ConfigureProps) {
     }
     setIsLoading(true);
     try {
+      const projectsWithRepoType = await Promise.all(
+        projects.map(async (project) => {
+          const repositoryType = await detectRepositoryType(project.path.trim()).catch(() => REPOSITORY_TYPE.UNKNOWN);
+          return { ...project, name: project.name.trim(), path: project.path.trim(), repositoryType };
+        }),
+      );
       const config: ExtensionConfig = {
         cliPath: cliPath.trim(),
-        projects: projects.map((project) => ({ ...project, name: project.name.trim(), path: project.path.trim() })),
+        projects: projectsWithRepoType,
       };
       await updateExtensionConfig(config);
       await showToast({
@@ -239,7 +245,7 @@ export default function Configure({ onConfigChange }: ConfigureProps) {
       navigationTitle="Configure Projects"
       actions={
         <ActionPanel>
-          <Action title="Save" icon={Icon.Check} onAction={handleSubmit} shortcut={{ modifiers: ["cmd"], key: "s" }} />
+          <Action title="Save" icon={Icon.Check} onAction={handleSubmit} />
           <Action title="Cancel" icon={Icon.Xmark} onAction={pop} />
           <Action
             title="Add Project"
@@ -311,7 +317,7 @@ export default function Configure({ onConfigChange }: ConfigureProps) {
               canChooseFiles={false}
               canChooseDirectories
               allowMultipleSelection={false}
-              info="WeChat Mini Program project directory (must contain project.config.json)"
+              info="WeChat mini program project directory (must contain project.config.json)"
               error={errorVisible ? projectError.path : undefined}
             />
             {!isLastProject && <Form.Separator />}
@@ -360,10 +366,10 @@ async function getProjectName(projectPath: string) {
   return null;
 }
 
-function validateProjectPath(selectedPath: string): boolean {
+function validateProjectPath(selectedPath: string) {
   return selectedPath.trim().length > 0;
 }
 
-async function validateWechatProject(selectedPath: string): Promise<boolean> {
+async function validateWechatProject(selectedPath: string) {
   return await isValidWechatMiniprogramDir(selectedPath);
 }
