@@ -12,6 +12,9 @@ import {
   parseRaycastDeeplink,
   validateRaycastDeeplink,
   getCommandDisplayName,
+  processFormValues,
+  createRaycastCommand,
+  createSavedCommand,
 } from "../utils";
 
 interface CommandFormProps {
@@ -47,48 +50,6 @@ export function CommandForm({ command, onSave, title, submitButtonTitle }: Comma
       setParsedCommand(command.command);
     }
   }, [command]);
-
-  const createRaycastCommand = (deeplink: string, runInBackground?: boolean): RaycastCommand => ({
-    deeplink,
-    type: runInBackground ? "background" : "user-initiated",
-    arguments: null,
-  });
-
-  const processFormValues = (values: Record<string, unknown>): FormValues => ({
-    name: (values.name as string) || "",
-    command: (values.command as string) || "",
-    scheduleType: values.scheduleType as ScheduleType,
-    time: (values.time as string) || "",
-    date: values.date instanceof Date ? values.date.toISOString().split("T")[0] : (values.date as string | undefined),
-    dayOfWeek: values.dayOfWeek as string | undefined,
-    dayOfMonth: values.dayOfMonth as string | undefined,
-    runInBackground: (values.runInBackground as boolean) || false,
-  });
-
-  const createSavedCommand = (values: FormValues, raycastCommand: RaycastCommand): ScheduledCommand => {
-    const schedule = buildScheduleFromValues(values);
-    const commandName = values.name.trim() || getCommandDisplayName(raycastCommand);
-
-    if (command) {
-      return {
-        ...command,
-        name: commandName,
-        command: raycastCommand,
-        schedule,
-        updatedAt: new Date().toISOString(),
-      };
-    }
-
-    return {
-      id: generateId(),
-      name: commandName,
-      command: raycastCommand,
-      schedule,
-      enabled: true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-  };
 
   const showError = async (message: string, title = "Error") => {
     showFailureToast(new Error(message), { title });
@@ -126,7 +87,7 @@ export function CommandForm({ command, onSave, title, submitButtonTitle }: Comma
       }
 
       const raycastCommand = createRaycastCommand(processedValues.command, processedValues.runInBackground);
-      const savedCommand = createSavedCommand(processedValues, raycastCommand);
+      const savedCommand = createSavedCommand(processedValues, raycastCommand, command);
 
       await onSave(savedCommand);
       await testCommandPermission(raycastCommand);
@@ -158,7 +119,7 @@ export function CommandForm({ command, onSave, title, submitButtonTitle }: Comma
       }
 
       const raycastCommand = createRaycastCommand(processedValues.command, processedValues.runInBackground);
-      const savedCommand = createSavedCommand(processedValues, raycastCommand);
+      const savedCommand = createSavedCommand(processedValues, raycastCommand, command);
 
       await onSave(savedCommand);
       await showSuccess(

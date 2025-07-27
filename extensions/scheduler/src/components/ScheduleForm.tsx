@@ -28,7 +28,7 @@ export function ScheduleForm({ scheduleType, onScheduleTypeChange, command }: Sc
           title="Date"
           info="Select the date when the command should run"
           defaultValue={command?.schedule.date ? new Date(command.schedule.date) : undefined}
-          min={new Date(new Date().setDate(new Date().getDate() - 1))} // Allow selecting today or later
+          min={new Date(new Date().setDate(new Date().getDate() - 2))} // Allow selecting today or later
           type={Form.DatePicker.Type.Date}
         />
       )}

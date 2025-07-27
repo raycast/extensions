@@ -1,6 +1,7 @@
 import { Icon } from "@raycast/api";
-import { Schedule, ScheduleType, RaycastCommand } from "./types";
+import { Schedule, ScheduleType, RaycastCommand, ScheduledCommand } from "./types";
 import { RAYCAST_DEEPLINK_PREFIX, EXTENSIONS_HOSTNAME, WEEKDAY_NAMES, VALIDATION_MESSAGES } from "./utils/constants";
+import { toLocalYMD } from "./utils/dateTime";
 
 const SCHEDULE_CONFIGS = {
   once: { icon: Icon.Clock, requiresDate: true },
@@ -34,7 +35,7 @@ export function processFormValues(values: Record<string, unknown>): FormValues {
     command: String(values.command || ""),
     scheduleType: values.scheduleType as ScheduleType,
     time: String(values.time || ""),
-    date: values.date instanceof Date ? values.date.toISOString().split("T")[0] : String(values.date || ""),
+    date: values.date instanceof Date ? toLocalYMD(values.date) : String(values.date || ""),
     dayOfWeek: values.dayOfWeek ? String(values.dayOfWeek) : undefined,
     dayOfMonth: values.dayOfMonth ? String(values.dayOfMonth) : undefined,
     runInBackground: Boolean(values.runInBackground),
@@ -203,4 +204,44 @@ export function getCommandDisplayName(command: RaycastCommand): string {
   }
 
   return `${parsed.extensionName} > ${parsed.name}`;
+}
+
+// Create a RaycastCommand object
+export function createRaycastCommand(deeplink: string, runInBackground?: boolean): RaycastCommand {
+  return {
+    deeplink,
+    type: runInBackground ? "background" : "user-initiated",
+    arguments: null,
+  };
+}
+
+// Create a ScheduledCommand object from form values
+export function createSavedCommand(
+  values: FormValues,
+  raycastCommand: RaycastCommand,
+  existingCommand?: ScheduledCommand,
+): ScheduledCommand {
+  const schedule = buildScheduleFromValues(values);
+  const commandName = values.name.trim() || getCommandDisplayName(raycastCommand);
+
+  if (existingCommand) {
+    return {
+      ...existingCommand,
+      name: commandName,
+      command: raycastCommand,
+      schedule,
+      enabled: true, // Always enable when saving through the form
+      updatedAt: new Date().toISOString(),
+    };
+  }
+
+  return {
+    id: generateId(),
+    name: commandName,
+    command: raycastCommand,
+    schedule,
+    enabled: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
 }
