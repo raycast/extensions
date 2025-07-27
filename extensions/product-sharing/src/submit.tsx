@@ -19,7 +19,7 @@ export default function Command({ draftValues, editProduct, onProductChange }: C
     initialValues: editProduct || draftValues,
     onSubmit: async (values) => {
       setSubmitting(true);
-      showToast({
+      await showToast({
         style: Toast.Style.Animated,
         title: editProduct ? "Updating..." : "Submitting...",
         message: "Please wait a moment.",
@@ -34,7 +34,7 @@ export default function Command({ draftValues, editProduct, onProductChange }: C
         } else {
           const { status } = await checkServerProductShareUrl(values.url);
           if (status === 409) {
-            showToast({
+            await showToast({
               style: Toast.Style.Failure,
               title: "Submit Repeat",
               message: "The product already exists.",
@@ -53,7 +53,7 @@ export default function Command({ draftValues, editProduct, onProductChange }: C
         }
         pop();
       } catch (error) {
-        showToast({
+        await showToast({
           style: Toast.Style.Failure,
           title: editProduct ? "Update Failed" : "Submit Failed",
           message: (error as Error).message,
@@ -104,7 +104,7 @@ export default function Command({ draftValues, editProduct, onProductChange }: C
       setValue("cover", data?.image?.url ?? "");
       setValue("description", data?.description ?? "");
     } catch (error) {
-      showToast({
+      await showToast({
         style: Toast.Style.Failure,
         title: "Auto Generate",
         message: (error as Error).message,
