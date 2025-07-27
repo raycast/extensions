@@ -1,11 +1,10 @@
-import { Tool } from "@raycast/api";
+import { Tool, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { scrapeAppStoreScreenshots } from "../utils/app-store-scraper";
 import { downloadAppScreenshots } from "../utils/screenshot-downloader";
 import { getDownloadsDirectory } from "../utils/paths";
-import { showToast, Toast } from "@raycast/api";
 import { filterAndSortApps, isExactMatch, isSignificantlyMorePopular } from "../utils/app-search";
-import { searchITunesApps } from "../utils/itunes-api";
-import { convertITunesResultToAppDetails } from "../utils/itunes-api";
+import { searchITunesApps, convertITunesResultToAppDetails } from "../utils/itunes-api";
 import { logger } from "../utils/logger";
 import type { PlatformType, ITunesResult } from "../types";
 
@@ -123,17 +122,13 @@ export default async function (input: Input) {
       toast.title = "Screenshots Downloaded";
       toast.message = `${screenshots.length} screenshots saved for ${appDetails.name}`;
     } else {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Download Failed";
-      toast.message = "Failed to download screenshots. Check logs for details.";
+      await showFailureToast(new Error("Failed to download screenshots. Check logs for details."), {
+        title: "Download Failed",
+      });
     }
   } catch (error) {
     logger.error(`[download-app-screenshots] Error:`, error);
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Download Error",
-      message: error instanceof Error ? error.message : String(error),
-    });
+    await showFailureToast(error instanceof Error ? error : new Error(String(error)), { title: "Download Error" });
   }
 }
 
@@ -163,9 +158,9 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
 
     // Check if the top app is significantly more popular or an exact match
     const topApp = sortedApps[0];
-    const secondApp = sortedApps[1];
+    const secondApp = sortedApps.length > 1 ? sortedApps[1] : null;
     const exactMatch = isExactMatch(topApp.trackName, input.query);
-    const significantlyMorePopular = isSignificantlyMorePopular(topApp, secondApp);
+    const significantlyMorePopular = secondApp ? isSignificantlyMorePopular(topApp, secondApp) : true;
 
     if (exactMatch || significantlyMorePopular) {
       logger.log(

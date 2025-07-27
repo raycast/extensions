@@ -119,19 +119,8 @@ function validateScreenshotUrl(url: string): boolean {
       return false;
     }
 
-    // Check for Apple domains (App Store screenshots should come from Apple)
-    const allowedDomains = [
-      "is1-ssl.mzstatic.com",
-      "is2-ssl.mzstatic.com",
-      "is3-ssl.mzstatic.com",
-      "is4-ssl.mzstatic.com",
-      "is5-ssl.mzstatic.com",
-      "a1.mzstatic.com",
-      "a2.mzstatic.com",
-      "a3.mzstatic.com",
-      "a4.mzstatic.com",
-      "a5.mzstatic.com",
-    ];
+    // Check for allowed domains (configured in config.ts)
+    const allowedDomains = getConfigValue("allowedScreenshotDomains");
 
     const hostname = parsedUrl.hostname.toLowerCase();
     if (!allowedDomains.includes(hostname)) {
@@ -657,7 +646,7 @@ export async function downloadAppScreenshots(
     for (const platformType of allPlatformTypes) {
       if (!screenshotsByType[platformType]) {
         screenshotsByType[platformType] = [];
-        logger.log(`[Screenshot Downloader] it's still  for platform: ${platformType}`);
+        logger.log(`[Screenshot Downloader] No screenshots found for platform: ${platformType}`);
       }
     }
 
