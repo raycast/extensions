@@ -39,7 +39,15 @@ instructions: |
     - Note: This requires the user to have enabled app downloads in preferences
   - This tool accepts parameters:
     - `query`: The app name or search term (required)
-  
+
+  ## For screenshot downloads:
+  - Use the `download-app-screenshots` tool when:
+    - The user asks to download screenshots for a particular app (e.g., "download Apple Watch screenshots for Spotify")
+    - This tool considers user preferences but can override them if the user requests specific platforms
+  - This tool accepts parameters:
+    - `query`: The app name (required)
+    - `platformOverride`: Forces specific platform screenshots to be downloaded regardless of user preferences (optional)
+
   # Response Guidelines
   - Be concise and informative in your responses
   - Don't include embedded images, icons, or screenshots in your responses
@@ -192,6 +200,17 @@ evals:
     mocks:
       download-app:
         error: "No apps found matching \"an app that doesn't exist\". Please try a different search term or check the exact app name."
+
+  - input: "@ios-apps download the Apple Watch screenshots for Spotify"
+    mocks:
+      download-app-screenshots: "Successfully called \"download-app-screenshots\""
+    expected:
+      - callsTool:
+          name: "download-app-screenshots"
+          arguments:
+            query: "Spotify"
+            platformOverride:
+              - AppleWatch
 
   - input: "@ios-apps search for games with limit 5"
     expected:

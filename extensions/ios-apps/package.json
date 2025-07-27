@@ -82,6 +82,11 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "download-app-screenshots",
+      "title": "Download App Screenshots",
+      "description": "Download the screenshots for an app."
     }
   ],
   "preferences": [

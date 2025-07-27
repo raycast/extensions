@@ -1,5 +1,7 @@
 // App search and ranking utility functions
 import type { ITunesResult, IpaToolSearchApp } from "../types";
+import { searchITunesApps } from "./itunes-api";
+import { logger } from "./logger";
 
 /**
  * Filter iTunes apps based on relevance to the query
@@ -22,6 +24,47 @@ export function filterRelevantApps(apps: ITunesResult[], query: string): ITunesR
       normalizedQuery.includes(name)
     );
   });
+}
+
+/**
+ * Confirm app selection by disambiguating between multiple results
+ */
+export async function confirmAppSelection(query: string, bundleId?: string) {
+  logger.log(`[confirmation utility] Checking for disambiguation for: "${query}"`);
+
+  if (bundleId) {
+    return undefined;
+  }
+
+  try {
+    const searchResults = await searchITunesApps(query, 10);
+
+    if (searchResults.length === 0) {
+      return undefined;
+    }
+
+    const sortedApps = filterAndSortApps(searchResults, query);
+
+    if (sortedApps.length <= 1) {
+      return undefined;
+    }
+
+    logger.log(`[confirmation utility] Multiple popular apps found, requiring confirmation.`);
+
+    const topMatches = sortedApps.slice(0, 6);
+    const bestMatch = topMatches[0];
+
+    return {
+      message: `Found multiple apps matching "${query}". Proceed with "${bestMatch.trackName}" (most popular)?`,
+      info: topMatches.map((app: ITunesResult, index: number) => ({
+        name: `Option ${index + 1}`,
+        value: `${app.trackName} by ${app.artistName}`,
+      })),
+    };
+  } catch (error) {
+    logger.error(`[confirmation utility] Error during disambiguation check: ${error}`);
+    return undefined;
+  }
 }
 
 /**

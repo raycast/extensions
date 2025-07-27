@@ -99,19 +99,6 @@ The shoebox parsing helper is designed to handle changes in Apple's App Store st
 
 ⚠️ **Important Note**: Apple may change the App Store's internal structure at any time. The extension's shoebox parsing logic is designed to be resilient to these changes, but future App Store updates could potentially affect screenshot extraction. The parsing logic includes multiple fallback mechanisms and extensive error handling to minimize disruption.
 
-#### Testing
-
-The shoebox parsing logic is thoroughly tested with real App Store data fixtures. See the test suite at [`__tests__/scraper.test.ts`](__tests__/scraper.test.ts) for comprehensive coverage including:
-
-- Screenshot extraction from multiple apps (Instagram, Microsoft Word, etc.)
-- Platform type mapping validation
-- URL transformation to highest resolution
-- Error handling for malformed data
-- Duplicate detection and removal
-- Sequential index assignment
-
-Test fixtures are maintained in the `tests/fixtures/` directory with real shoebox JSON data from various App Store pages.
-
 ### Apple ID Authentication
 
 This extension requires you to authenticate with your Apple ID in order to search and download apps from the App Store. The authentication process is handled securely through `ipatool`:
@@ -246,4 +233,4 @@ Downloaded apps are saved as IPA files to your specified downloads directory (de
 - [iTunes Search API](https://developer.apple.com/library/archive/documentation/AudioVideo/Conceptual/iTuneSearchAPI/index.html) by Apple
 - [Windsurf](https://windsurf.com/)
 - [Claude 4 Sonnet](https://claude.ai) by Anthropic
-- [Warp](https://warp.dev) 
+- [Warp](https://warp.dev)
