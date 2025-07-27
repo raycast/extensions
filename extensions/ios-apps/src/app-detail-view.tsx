@@ -2,8 +2,8 @@
 import { Detail, Color, Icon } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { AppDetails } from "./types";
-import { formatPrice } from "./utils/formatting";
-import { renderStarRating, formatDate } from "./utils/common";
+import { formatPrice, formatDate } from "./utils/formatting";
+import { renderStarRating } from "./utils/common";
 import { AppActionPanel } from "./components/app-action-panel";
 import { useAppDetails, useAppDownload } from "./hooks";
 import { logger } from "./utils/logger";

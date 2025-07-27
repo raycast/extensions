@@ -2,7 +2,7 @@ import { downloadApp, searchApps } from "../ipatool";
 import path from "path";
 import { logger } from "../utils/logger";
 import { Tool } from "@raycast/api";
-import { handleAppSearchError, handleDownloadError, handleAuthError, sanitizeQuery } from "../utils/error-handler";
+import { handleAppSearchError, handleDownloadError, handleIpatoolError, sanitizeQuery } from "../utils/error-handler";
 import { analyzeIpatoolError } from "../utils/ipatool-error-patterns";
 
 // Constants
@@ -99,32 +99,24 @@ export default async function downloadIosApp(input: Input) {
     } catch (downloadError) {
       logger.error(`[download-app tool] Download error for "${appName}":`, downloadError);
 
-      // Use precise ipatool error analysis with download context
+      // Use the new intelligent error handler with enhanced patterns and suggested actions
+      await handleIpatoolError(
+        downloadError,
+        "download-app tool",
+        undefined, // no stderr available in this context
+        "download", // operation context
+        false, // Don't throw, we want to return gracefully
+      );
+
+      // Analyze the error to determine the return message
       const errorMessage = downloadError instanceof Error ? downloadError.message : String(downloadError);
       const errorInfo = analyzeIpatoolError(errorMessage, undefined, "download");
 
-      logger.log(`[download-app tool] Error analysis:`, {
-        isAuthError: errorInfo.isAuthError,
-        is2FARequired: errorInfo.is2FARequired,
-        errorType: errorInfo.errorType,
-        userMessage: errorInfo.userMessage,
-      });
-
       if (errorInfo.isAuthError) {
-        // Handle authentication errors
-        await handleAuthError(
-          new Error(errorInfo.userMessage),
-          false, // Don't throw, we want to return gracefully
-          true, // Show preferences action
-        );
         return { success: false, message: "Authentication failed" };
       } else if (errorInfo.errorType === "app_not_found") {
-        // Handle app not found errors
-        await handleAppSearchError(new Error(errorInfo.userMessage), input.query, "download-app");
         return { success: false, message: "App not found" };
       } else {
-        // Handle other download errors
-        await handleDownloadError(new Error(errorInfo.userMessage), appName, "download-app");
         return { success: false, message: "Download failed" };
       }
     }

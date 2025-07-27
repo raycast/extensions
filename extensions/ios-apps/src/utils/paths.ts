@@ -34,7 +34,7 @@ function containsTraversalAttempts(inputPath: string): boolean {
     /\.{2}\\/g, // Double dot with backslash
   ];
 
-  return traversalPatterns.some(pattern => pattern.test(inputPath));
+  return traversalPatterns.some((pattern) => pattern.test(inputPath));
 }
 
 /**
@@ -55,19 +55,14 @@ export function validateSafePath(inputPath: string): string {
   const absolute = resolve(normalized);
 
   // Ensure path stays within safe boundaries
-  const safeRoots = [
-    homedir(),
-    "/tmp",
-    "/var/tmp",
-    "/Users",
-  ];
+  const safeRoots = [homedir(), "/tmp", "/var/tmp", "/Users"];
 
-  const isWithinSafeBoundary = safeRoots.some(root =>
-    absolute.startsWith(resolve(root))
-  );
+  const isWithinSafeBoundary = safeRoots.some((root) => absolute.startsWith(resolve(root)));
 
   if (!isWithinSafeBoundary) {
-    throw new Error(`Path is outside safe boundaries: ${absolute}. Allowed directories: home directory, /tmp, /var/tmp, /Users`);
+    throw new Error(
+      `Path is outside safe boundaries: ${absolute}. Allowed directories: home directory, /tmp, /var/tmp, /Users`,
+    );
   }
 
   return absolute;
@@ -130,12 +125,7 @@ export function validatePathSecurity(inputPath: string): string {
   downloadPath = resolve(normalize(downloadPath));
 
   // Ensure the resolved path is within safe boundaries
-  const safePaths = [
-    homedir(),
-    "/tmp",
-    "/var/tmp",
-    "/Users",
-  ];
+  const safePaths = [homedir(), "/tmp", "/var/tmp", "/Users"];
 
   const isWithinSafePath = safePaths.some((safePath) => {
     const resolvedSafePath = resolve(safePath);
@@ -143,7 +133,9 @@ export function validatePathSecurity(inputPath: string): string {
   });
 
   if (!isWithinSafePath) {
-    throw new Error(`Path is outside safe boundaries: ${downloadPath}. Allowed directories: home directory, /tmp, /var/tmp, /Users`);
+    throw new Error(
+      `Path is outside safe boundaries: ${downloadPath}. Allowed directories: home directory, /tmp, /var/tmp, /Users`,
+    );
   }
 
   return downloadPath;

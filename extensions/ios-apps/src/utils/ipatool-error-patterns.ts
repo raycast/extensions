@@ -1,6 +1,19 @@
 /**
  * Precise error pattern matching based on ipatool source code
  * This provides much more reliable error detection than generic pattern matching
+ *
+ * Enhanced with comprehensive error categorization and actionable guidance:
+ * - timeout: Network timeouts with retry suggestions
+ * - stalled: Downloads that stop progressing with retry suggestions
+ * - disk_space: Insufficient storage with disk management actions
+ * - permission_denied: File system permission errors with location change suggestions
+ * - corruption: File corruption during download with retry suggestions
+ *
+ * Each error type includes suggestedAction for toast primaryAction buttons:
+ * - "Retry": For temporary failures that can be retried
+ * - "Open Disk Usage": Opens system storage settings for disk space issues
+ * - "Change Location": Guides user to try different download location
+ * - "Open Preferences": Opens extension preferences for configuration issues
  */
 
 import { sanitizeQuery } from "./error-handler";
@@ -11,7 +24,20 @@ export interface IpatoolErrorInfo {
   isCredentialError: boolean;
   isLicenseRequired: boolean;
   userMessage: string;
-  errorType: "2fa" | "credentials" | "network" | "permission" | "app_not_found" | "license_required" | "generic";
+  suggestedAction?: string;
+  errorType:
+    | "2fa"
+    | "credentials"
+    | "network"
+    | "permission"
+    | "app_not_found"
+    | "license_required"
+    | "timeout"
+    | "stalled"
+    | "disk_space"
+    | "permission_denied"
+    | "corruption"
+    | "generic";
 }
 
 /**
@@ -103,6 +129,103 @@ export function analyzeIpatoolError(
     };
   }
 
+  // Timeout errors - specific handling
+  if (
+    fullMessage.includes("download timed out") ||
+    fullMessage.includes("timed out after") ||
+    fullMessage.includes("timeout") ||
+    fullMessage.includes("connection timeout")
+  ) {
+    return {
+      isAuthError: false,
+      is2FARequired: false,
+      isCredentialError: false,
+      isLicenseRequired: false,
+      userMessage: "Download timed out. This may be due to slow network or server issues.",
+      suggestedAction: "Retry",
+      errorType: "timeout",
+    };
+  }
+
+  // Stalled errors - downloads that stop progressing
+  if (
+    fullMessage.includes("download stalled") ||
+    fullMessage.includes("stalled after") ||
+    fullMessage.includes("no progress") ||
+    fullMessage.includes("download stuck")
+  ) {
+    return {
+      isAuthError: false,
+      is2FARequired: false,
+      isCredentialError: false,
+      isLicenseRequired: false,
+      userMessage: "Download stalled. No progress was made for an extended period.",
+      suggestedAction: "Retry",
+      errorType: "stalled",
+    };
+  }
+
+  // Disk space errors
+  if (
+    fullMessage.includes("no space left") ||
+    fullMessage.includes("disk full") ||
+    fullMessage.includes("insufficient disk space") ||
+    fullMessage.includes("not enough space") ||
+    fullMessage.includes("disk space") ||
+    fullMessage.includes("storage full")
+  ) {
+    return {
+      isAuthError: false,
+      is2FARequired: false,
+      isCredentialError: false,
+      isLicenseRequired: false,
+      userMessage: "Insufficient disk space. Free up at least 500 MB and try again.",
+      suggestedAction: "Open Disk Usage",
+      errorType: "disk_space",
+    };
+  }
+
+  // Permission denied errors
+  if (
+    fullMessage.includes("permission denied") ||
+    fullMessage.includes("access denied") ||
+    fullMessage.includes("operation not permitted") ||
+    fullMessage.includes("failed to write") ||
+    fullMessage.includes("cannot create") ||
+    fullMessage.includes("forbidden")
+  ) {
+    return {
+      isAuthError: false,
+      is2FARequired: false,
+      isCredentialError: false,
+      isLicenseRequired: false,
+      userMessage: "Permission denied. Check file system permissions or try a different download location.",
+      suggestedAction: "Change Location",
+      errorType: "permission_denied",
+    };
+  }
+
+  // File corruption errors
+  if (
+    fullMessage.includes("corrupted") ||
+    fullMessage.includes("corrupt") ||
+    fullMessage.includes("checksum") ||
+    fullMessage.includes("invalid file") ||
+    fullMessage.includes("damaged") ||
+    fullMessage.includes("verification failed") ||
+    fullMessage.includes("hash mismatch")
+  ) {
+    return {
+      isAuthError: false,
+      is2FARequired: false,
+      isCredentialError: false,
+      isLicenseRequired: false,
+      userMessage: "Download corrupted. The file was damaged during download.",
+      suggestedAction: "Retry",
+      errorType: "corruption",
+    };
+  }
+
   // Network errors
   if (
     fullMessage.includes("network") ||
@@ -117,22 +240,6 @@ export function analyzeIpatoolError(
       isLicenseRequired: false,
       userMessage: "Network error occurred. Please check your internet connection.",
       errorType: "network",
-    };
-  }
-
-  // Permission errors
-  if (
-    fullMessage.includes("permission denied") ||
-    fullMessage.includes("access denied") ||
-    fullMessage.includes("failed to write")
-  ) {
-    return {
-      isAuthError: false,
-      is2FARequired: false,
-      isCredentialError: false,
-      isLicenseRequired: false,
-      userMessage: "Permission denied. Please check file system permissions.",
-      errorType: "permission",
     };
   }
 

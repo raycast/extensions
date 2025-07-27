@@ -194,6 +194,45 @@
       "required": false
     },
     {
+      "name": "maxStallTimeout",
+      "title": "Max Stall Timeout (in milliseconds)",
+      "description": "Timeout when no progress is made during downloads",
+      "type": "textfield",
+      "default": "30000",
+      "required": false
+    },
+    {
+      "name": "tempCleanupOnExit",
+      "title": "Cleanup Temporary Files",
+      "description": "Automatically clean up temporary files when the extension exits",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "integrityVerification",
+      "title": "Integrity Verification",
+      "description": "Level of file integrity verification to perform",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Basic",
+          "value": "basic"
+        },
+        {
+          "title": "Checksum",
+          "value": "checksum"
+        },
+        {
+          "title": "Off",
+          "value": "off"
+        }
+      ],
+      "default": "basic",
+      "required": false
+    },
+    {
       "name": "verboseLogging",
       "title": "Verbose Logging",
       "description": "Enable detailed console logging for debugging purposes",
@@ -206,6 +245,7 @@
   "dependencies": {
     "@raycast/api": "^1.93.1",
     "@raycast/utils": "^1.17.0",
+    "adm-zip": "^0.5.16",
     "lodash": "^4.17.21",
     "node-fetch": "^3.3.2",
     "p-limit": "^6.2.0",
@@ -213,6 +253,7 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
+    "@types/adm-zip": "^0.5.5",
     "@types/lodash": "^4.17.16",
     "@types/node": "^20.10.2",
     "@types/p-limit": "^2.1.0",

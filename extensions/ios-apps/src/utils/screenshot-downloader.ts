@@ -7,8 +7,9 @@ import pLimit from "p-limit";
 import { showFailureToast } from "@raycast/utils";
 import { showToast, Toast, showHUD, getPreferenceValues } from "@raycast/api";
 import { AppDetails, PlatformDirectories, PlatformType, ScreenshotInfo } from "../types";
-import { getDownloadsDirectory } from "./paths";
+import { getDownloadsDirectory, validateSafePath, sanitizeFilename } from "./paths";
 import { logger } from "./logger";
+import { getConfigValue } from "../config";
 
 // Promisify fs functions
 const mkdirAsync = promisify(fs.mkdir);
@@ -17,12 +18,285 @@ const writeFileAsync = promisify(fs.writeFile);
 // Configuration constants
 const RATE_LIMIT_DELAY_MS = 100;
 const DEFAULT_DOWNLOAD_TIMEOUT_SECONDS = 90;
-const MIN_DOWNLOAD_TIMEOUT_SECONDS = 30;
+// const MIN_DOWNLOAD_TIMEOUT_SECONDS = 30; // Unused after config module integration
 const DEFAULT_MAX_CONCURRENT_DOWNLOADS = 5;
 const MIN_CONCURRENT_DOWNLOADS = 1;
 const MAX_CONCURRENT_DOWNLOADS = 10;
 const MIN_BATCH_TIMEOUT_MS = 180000; // 3 minutes minimum for batch operations
 const BATCH_TIMEOUT_MULTIPLIER = 2; // Multiply individual timeout by this factor for batch timeout
+
+/**
+ * Validate that a directory path is safe and secure
+ * @param dirPath Directory path to validate
+ * @throws Error if path is unsafe
+ */
+function validateDirectoryPath(dirPath: string): void {
+  try {
+    // Use the centralized path validation
+    validateSafePath(dirPath);
+
+    // Additional checks specific to screenshot directories
+    const resolvedPath = path.resolve(dirPath);
+
+    // Ensure the path doesn't contain dangerous patterns
+    if (resolvedPath.includes("..") || resolvedPath.includes("~")) {
+      throw new Error(`Directory path contains unsafe patterns: ${dirPath}`);
+    }
+
+    // Check if path is within reasonable bounds (not system directories)
+    const systemPaths = ["/bin", "/sbin", "/usr/bin", "/usr/sbin", "/System", "/Library/System"];
+    if (systemPaths.some((sysPath) => resolvedPath.startsWith(sysPath))) {
+      throw new Error(`Directory path targets system directory: ${dirPath}`);
+    }
+
+    logger.log(`[Screenshot Downloader] Directory path validated: ${resolvedPath}`);
+  } catch (error) {
+    logger.error(`[Screenshot Downloader] Directory path validation failed for: ${dirPath}`, error);
+    throw error;
+  }
+}
+
+/**
+ * Validate and create directory with proper permissions
+ * @param dirPath Directory path to create
+ * @returns Promise<void>
+ */
+async function ensureSecureDirectory(dirPath: string): Promise<void> {
+  try {
+    // Validate the directory path first
+    validateDirectoryPath(dirPath);
+
+    // Check if directory already exists
+    if (fs.existsSync(dirPath)) {
+      // Verify it's actually a directory
+      const stats = fs.statSync(dirPath);
+      if (!stats.isDirectory()) {
+        throw new Error(`Path exists but is not a directory: ${dirPath}`);
+      }
+
+      // Check if directory is writable
+      try {
+        fs.accessSync(dirPath, fs.constants.W_OK);
+        logger.log(`[Screenshot Downloader] Directory exists and is writable: ${dirPath}`);
+      } catch (accessError) {
+        throw new Error(`Directory exists but is not writable: ${dirPath}`);
+      }
+    } else {
+      // Create directory with secure permissions
+      await mkdirAsync(dirPath, { recursive: true, mode: 0o755 });
+      logger.log(`[Screenshot Downloader] Created secure directory: ${dirPath}`);
+
+      // Verify the directory was created successfully and is writable
+      if (!fs.existsSync(dirPath)) {
+        throw new Error(`Failed to create directory: ${dirPath}`);
+      }
+
+      try {
+        fs.accessSync(dirPath, fs.constants.W_OK);
+      } catch (accessError) {
+        throw new Error(`Created directory is not writable: ${dirPath}`);
+      }
+    }
+  } catch (error) {
+    logger.error(`[Screenshot Downloader] Failed to ensure secure directory: ${dirPath}`, error);
+    throw error;
+  }
+}
+
+/**
+ * Validate URL for screenshot download
+ * @param url URL to validate
+ * @returns boolean indicating if URL is safe
+ */
+function validateScreenshotUrl(url: string): boolean {
+  try {
+    // Parse URL to validate structure
+    const parsedUrl = new URL(url);
+
+    // Only allow HTTPS for security
+    if (parsedUrl.protocol !== "https:") {
+      logger.warn(`[Screenshot Downloader] Non-HTTPS URL rejected: ${url}`);
+      return false;
+    }
+
+    // Check for Apple domains (App Store screenshots should come from Apple)
+    const allowedDomains = [
+      "is1-ssl.mzstatic.com",
+      "is2-ssl.mzstatic.com",
+      "is3-ssl.mzstatic.com",
+      "is4-ssl.mzstatic.com",
+      "is5-ssl.mzstatic.com",
+      "a1.mzstatic.com",
+      "a2.mzstatic.com",
+      "a3.mzstatic.com",
+      "a4.mzstatic.com",
+      "a5.mzstatic.com",
+    ];
+
+    const hostname = parsedUrl.hostname.toLowerCase();
+    if (!allowedDomains.includes(hostname)) {
+      logger.warn(`[Screenshot Downloader] URL from non-Apple domain rejected: ${hostname}`);
+      return false;
+    }
+
+    // Check that path looks like an image
+    const pathname = parsedUrl.pathname.toLowerCase();
+    if (!pathname.endsWith(".png") && !pathname.endsWith(".jpg") && !pathname.endsWith(".jpeg")) {
+      logger.warn(`[Screenshot Downloader] Non-image URL rejected: ${url}`);
+      return false;
+    }
+
+    logger.log(`[Screenshot Downloader] URL validated: ${url}`);
+    return true;
+  } catch (error) {
+    logger.error(`[Screenshot Downloader] URL validation failed: ${url}`, error);
+    return false;
+  }
+}
+
+/**
+ * Enhanced download function with improved error handling and security
+ * @param url URL to download from
+ * @param filePath Path to save the file to
+ */
+async function downloadFileSecure(url: string, filePath: string): Promise<void> {
+  // Validate URL first
+  if (!validateScreenshotUrl(url)) {
+    throw new Error(`Invalid or unsafe URL: ${url}`);
+  }
+
+  // Validate and sanitize the file path
+  try {
+    validateSafePath(filePath);
+  } catch (pathError) {
+    throw new Error(
+      `Invalid file path: ${filePath} - ${pathError instanceof Error ? pathError.message : String(pathError)}`,
+    );
+  }
+
+  // Ensure the directory exists and is secure
+  const directory = path.dirname(filePath);
+  await ensureSecureDirectory(directory);
+
+  const timeoutMs = getDownloadTimeoutMs();
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    logger.log(`[Screenshot Downloader] Starting secure download: ${url}`);
+
+    // Enhanced fetch with more comprehensive error handling
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+      },
+      redirect: "follow",
+    });
+
+    // Enhanced response validation
+    if (!response.ok) {
+      const errorDetails = {
+        status: response.status,
+        statusText: response.statusText,
+        url: response.url,
+        headers: Object.fromEntries(response.headers.entries()),
+      };
+
+      logger.error(`[Screenshot Downloader] HTTP error for ${url}:`, errorDetails);
+
+      // Provide more specific error messages
+      if (response.status === 404) {
+        throw new Error(`Screenshot not found (404): ${url}`);
+      } else if (response.status === 403) {
+        throw new Error(`Access denied (403): ${url}`);
+      } else if (response.status >= 500) {
+        throw new Error(`Server error (${response.status}): ${url}`);
+      } else {
+        throw new Error(`HTTP ${response.status} ${response.statusText}: ${url}`);
+      }
+    }
+
+    // Validate content type
+    const contentType = response.headers.get("content-type");
+    if (contentType && !contentType.startsWith("image/")) {
+      logger.warn(`[Screenshot Downloader] Unexpected content type: ${contentType} for ${url}`);
+    }
+
+    // Get content length for validation
+    const contentLength = response.headers.get("content-length");
+    if (contentLength) {
+      const size = parseInt(contentLength, 10);
+      if (size > 50 * 1024 * 1024) {
+        // 50MB limit
+        throw new Error(`File too large: ${size} bytes for ${url}`);
+      }
+      if (size < 1024) {
+        // 1KB minimum
+        throw new Error(`File too small: ${size} bytes for ${url}`);
+      }
+    }
+
+    // Download with size validation
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    // Validate downloaded content
+    if (buffer.length < 1024) {
+      throw new Error(`Downloaded file too small: ${buffer.length} bytes`);
+    }
+
+    // Basic image format validation (check for PNG/JPEG magic bytes)
+    if (buffer.length >= 8) {
+      const isPNG = buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e && buffer[3] === 0x47;
+      const isJPEG = buffer[0] === 0xff && buffer[1] === 0xd8;
+
+      if (!isPNG && !isJPEG) {
+        logger.warn(`[Screenshot Downloader] Downloaded file doesn't appear to be a valid image: ${url}`);
+      }
+    }
+
+    // Write file with secure permissions
+    await writeFileAsync(filePath, buffer, { mode: 0o644 });
+
+    // Verify file was written successfully
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`File was not written successfully: ${filePath}`);
+    }
+
+    const stats = fs.statSync(filePath);
+    if (stats.size !== buffer.length) {
+      throw new Error(`File size mismatch: expected ${buffer.length}, got ${stats.size}`);
+    }
+
+    logger.log(`[Screenshot Downloader] Successfully downloaded: ${filePath} (${buffer.length} bytes)`);
+
+    // Add a small delay to avoid rate limiting
+    await new Promise((resolve) => setTimeout(resolve, RATE_LIMIT_DELAY_MS));
+  } catch (error) {
+    // Enhanced error handling with cleanup
+    if (fs.existsSync(filePath)) {
+      try {
+        fs.unlinkSync(filePath);
+        logger.log(`[Screenshot Downloader] Cleaned up partial download: ${filePath}`);
+      } catch (cleanupError) {
+        logger.error(`[Screenshot Downloader] Failed to cleanup partial download: ${filePath}`, cleanupError);
+      }
+    }
+
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new Error(`Download timeout after ${timeoutMs / 1000}s: ${url}`);
+    }
+
+    // Add URL context to error message
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logger.error(`[Screenshot Downloader] Download failed for ${url}:`, error);
+    throw new Error(`Download failed: ${errorMessage}`);
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
 
 /**
  * Platform preferences interface (duplicated for this file to avoid circular dependencies)
@@ -97,15 +371,13 @@ function logPlatformPreferences(): void {
 }
 
 /**
- * Get download timeout from preferences
+ * Get download timeout from config module
  */
 function getDownloadTimeoutMs(): number {
   try {
-    const preferences = getPreferenceValues<PlatformPreferences>();
-    const timeoutSeconds = parseInt(preferences.downloadTimeoutSeconds || String(DEFAULT_DOWNLOAD_TIMEOUT_SECONDS), 10);
-    return Math.max(timeoutSeconds, MIN_DOWNLOAD_TIMEOUT_SECONDS) * 1000;
+    return getConfigValue("maxDownloadTimeout");
   } catch (error) {
-    logger.error(`[Screenshot Downloader] Error reading download timeout preference:`, error);
+    logger.error(`[Screenshot Downloader] Error reading download timeout from config:`, error);
     return DEFAULT_DOWNLOAD_TIMEOUT_SECONDS * 1000;
   }
 }
@@ -121,41 +393,6 @@ function getMaxConcurrentDownloads(): number {
   } catch (error) {
     logger.error(`[Screenshot Downloader] Error reading max concurrent downloads preference:`, error);
     return DEFAULT_MAX_CONCURRENT_DOWNLOADS;
-  }
-}
-
-/**
- * Download a file from a URL with rate limiting and configurable timeout
- * @param url URL to download from
- * @param filePath Path to save the file to
- */
-async function downloadFile(url: string, filePath: string): Promise<void> {
-  const timeoutMs = getDownloadTimeoutMs();
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-
-  try {
-    logger.log(`[Screenshot Downloader] Starting download: ${url}`);
-    const response = await fetch(url, { signal: controller.signal });
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status} ${response.statusText}`);
-    }
-
-    const buffer = await response.arrayBuffer();
-    await writeFileAsync(filePath, Buffer.from(buffer));
-    logger.log(`[Screenshot Downloader] Successfully downloaded: ${filePath}`);
-
-    // Add a small delay to avoid rate limiting
-    await new Promise((resolve) => setTimeout(resolve, RATE_LIMIT_DELAY_MS));
-  } catch (error) {
-    if (error instanceof Error && error.name === "AbortError") {
-      throw new Error(`Download timeout after ${timeoutMs / 1000}s`);
-    }
-    logger.error(`[Screenshot Downloader] Error downloading ${url}:`, error);
-    throw error;
-  } finally {
-    clearTimeout(timeoutId);
   }
 }
 
@@ -237,11 +474,11 @@ async function downloadQueue(
       }
 
       const screenshotNumber = screenshot.index + 1;
-      const filename = `${screenshotNumber}.png`;
+      const filename = sanitizeFilename(`${screenshotNumber}.png`);
       const filePath = path.join(platformDir, filename);
 
       try {
-        await downloadFile(screenshot.url, filePath);
+        await downloadFileSecure(screenshot.url, filePath);
 
         // Update progress counters
         completedCount++;
@@ -381,21 +618,22 @@ export async function downloadAppScreenshots(
     const sampleScreenshots = screenshots.slice(0, 2);
     logger.log(`[Screenshot Downloader] Sample screenshots: ${JSON.stringify(sampleScreenshots)}`);
 
-    // Create a sanitized folder name (prevent directory traversal)
-    const sanitizedAppName = path.basename(
-      app.name
-        .split(":")[0]
-        .trim()
-        .replace(/[/?%*:|"<>]/g, "-"),
-    );
-    const folderName = `${sanitizedAppName} Screenshots`;
+    // Create a sanitized folder name using centralized sanitization
+    const sanitizedAppName = sanitizeFilename(app.name.split(":")[0].trim() || "Unknown App");
+    const folderName = sanitizeFilename(`${sanitizedAppName} Screenshots`);
     const screenshotsDir = path.join(downloadsDir, folderName);
 
-    // Create the directory if it doesn't exist
-    if (!fs.existsSync(screenshotsDir)) {
-      logger.log(`[Screenshot Downloader] Creating screenshots directory: ${screenshotsDir}`);
-      await mkdirAsync(screenshotsDir, { recursive: true });
+    // Validate the final screenshots directory path
+    try {
+      validateDirectoryPath(screenshotsDir);
+    } catch (pathError) {
+      const errorMsg = `Invalid screenshots directory path: ${pathError instanceof Error ? pathError.message : String(pathError)}`;
+      logger.error(`[Screenshot Downloader] ${errorMsg}`);
+      throw new Error(errorMsg);
     }
+
+    // Create the directory using secure method
+    await ensureSecureDirectory(screenshotsDir);
 
     // Create platform-specific directories using the centralized mapping
     const platformDirs = PlatformDirectories(screenshotsDir);

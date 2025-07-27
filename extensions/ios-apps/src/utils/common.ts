@@ -67,22 +67,6 @@ export function renderStarRating(rating: number | undefined): string {
 }
 
 /**
- * Formats a date string to a more readable format
- */
-export function formatDate(dateString: string | undefined): string {
-  if (!dateString) return "Unknown";
-
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return "Invalid Date";
-
-  return date.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-}
-
-/**
  * Truncates text at word boundaries to avoid cutting words in half
  * @param text The text to truncate
  * @param maxLength Maximum length before truncation

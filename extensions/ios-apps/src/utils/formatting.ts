@@ -58,11 +58,11 @@ export function formatPrice(price: string, currency?: string): string {
  */
 export function formatFileSize(bytes: number): string {
   if (bytes === 0) return "0 B";
-  
+
   const k = 1024;
   const sizes = ["B", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  
+
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 }
 
@@ -90,4 +90,20 @@ export function formatAppName(name: string): string {
     .replace(/[^\w\s-]/g, "") // Remove special characters
     .replace(/\s+/g, " ") // Normalize whitespace
     .trim();
+}
+
+/**
+ * Formats a date string to a more readable format
+ */
+export function formatDate(dateString: string | undefined): string {
+  if (!dateString) return "Unknown";
+
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return "Invalid Date";
+
+  return date.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 }
