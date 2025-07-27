@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "recent-files",
   "title": "Recent Files",
-  "description": "Show recent files from a specified directory",
+  "description": "Show recent files from specified directories with image preview support",
   "icon": "command-icon.png",
   "author": "whatasoda",
   "categories": [
@@ -10,6 +10,16 @@
     "System"
   ],
   "license": "MIT",
+  "keywords": [
+    "files",
+    "recent",
+    "finder",
+    "explorer",
+    "browse",
+    "clipboard",
+    "preview",
+    "images"
+  ],
   "commands": [
     {
       "name": "index",

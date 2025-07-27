@@ -9,10 +9,10 @@ A Raycast extension that displays the most recently created files from multiple 
 - **Smart Loading**: Initially shows 30 files with the option to load more as needed
 - **Detailed Metadata**: View file information including name, location, size, and creation date in the detail panel
 - **Quick Actions**:
-  - **Enter**: Copy file path to clipboard (default action)
+  - **Enter**: Copy file to clipboard (default action)
   - **Cmd+Enter**: Open file
   - **Cmd+Shift+F**: Show in Finder
-  - **Cmd+Shift+C**: Copy file name
+  - **Cmd+Shift+C**: Copy file path
   - **Cmd+,**: Open extension preferences
 
 ## Installation
