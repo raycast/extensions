@@ -717,29 +717,31 @@ export async function downloadApp(
           resetStallTimer(); // Initialize stall timer
 
           // Collect stdout data
-          child.stdout.on("data", (data) => {
-            const chunk = data.toString();
-            stdout += chunk;
-            logger.log(`[ipatool] stdout: ${chunk.trim()}`);
+          if (child.stdout) {
+            child.stdout.on("data", (data) => {
+              const chunk = data.toString();
+              stdout += chunk;
+              logger.log(`[ipatool] stdout: ${chunk.trim()}`);
 
-            // Log any authentication or purchase confirmation prompts for debugging
-            if (chunk.includes("password") || chunk.includes("authentication") || chunk.includes("purchase")) {
-              logger.log(`[ipatool] Authentication/Purchase prompt detected: ${chunk.trim()}`);
-            }
-
-            // Try to extract progress information
-            const progressMatch = chunk.match(/downloading\s+(\d+)%/);
-            if (progressMatch?.[1]) {
-              const progress = parseInt(progressMatch[1], 10) / 100;
-              if (progress > lastProgress) {
-                lastProgress = progress;
-                resetStallTimer(); // Reset stall timer on progress
-                showHUD(`Downloading ${appName || bundleId}... ${Math.round(progress * 100)}%`, {
-                  clearRootSearch: true,
-                });
+              // Log any authentication or purchase confirmation prompts for debugging
+              if (chunk.includes("password") || chunk.includes("authentication") || chunk.includes("purchase")) {
+                logger.log(`[ipatool] Authentication/Purchase prompt detected: ${chunk.trim()}`);
               }
-            }
-          });
+
+              // Try to extract progress information
+              const progressMatch = chunk.match(/downloading\s+(\d+)%/);
+              if (progressMatch?.[1]) {
+                const progress = parseInt(progressMatch[1], 10) / 100;
+                if (progress > lastProgress) {
+                  lastProgress = progress;
+                  resetStallTimer(); // Reset stall timer on progress
+                  showHUD(`Downloading ${appName || bundleId}... ${Math.round(progress * 100)}%`, {
+                    clearRootSearch: true,
+                  });
+                }
+              }
+            });
+          }
 
           // Clear stall timer on completion
           const clearAllTimers = () => {
@@ -747,18 +749,20 @@ export async function downloadApp(
           };
 
           // Collect stderr data
-          child.stderr.on("data", (data) => {
-            const chunk = data.toString();
-            stderr += chunk;
-            logger.error(`[ipatool] stderr: ${chunk.trim()}`);
+          if (child.stderr) {
+            child.stderr.on("data", (data) => {
+              const chunk = data.toString();
+              stderr += chunk;
+              logger.error(`[ipatool] stderr: ${chunk.trim()}`);
 
-            // Log specific error types for better debugging
-            if (chunk.includes("network") || chunk.includes("connection") || chunk.includes("tls")) {
-              logger.error(`[ipatool] Network-related error detected: ${chunk.trim()}`);
-            } else if (chunk.includes("authentication") || chunk.includes("login")) {
-              logger.error(`[ipatool] Authentication error detected: ${chunk.trim()}`);
-            }
-          });
+              // Log specific error types for better debugging
+              if (chunk.includes("network") || chunk.includes("connection") || chunk.includes("tls")) {
+                logger.error(`[ipatool] Network-related error detected: ${chunk.trim()}`);
+              } else if (chunk.includes("authentication") || chunk.includes("login")) {
+                logger.error(`[ipatool] Authentication error detected: ${chunk.trim()}`);
+              }
+            });
+          }
 
           // Handle process completion
           child.on("close", async (code) => {
