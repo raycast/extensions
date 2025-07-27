@@ -18,4 +18,8 @@ export const STRINGS = {
   website: "Website",
   twitter: "Twitter",
   rating: "Rating",
+  searchResults: "Search Results",
+  recentSearches: "Recent Searches",
+  removeFromRecent: "Remove from Recent",
+  clearAllRecent: "Clear all Recent Views",
 };
