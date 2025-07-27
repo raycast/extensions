@@ -3,15 +3,10 @@ import { getSelectedFinderItems } from "@raycast/api";
 import { readFileSync, writeFileSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
-import {
-  getCustomApps,
-  getAppSettings,
-  updateAppSettings,
-  addToUsageHistory,
-  getUsageHistory,
-  defaultApps,
-} from "./hooks/apps";
+import { getCustomApps, getAppSettings, updateAppSettings, addToUsageHistory, getUsageHistory } from "./hooks/apps";
+import { defaultApps } from "./types/default-apps";
 import { addCustomApp } from "./utils/custom-app-utils";
+import { validateAndSanitizeFilename, validateSecurePath } from "./utils/file-security";
 import { YAMLSettings, AppSetting } from "./types";
 
 /**
@@ -85,7 +80,7 @@ export async function importSettingsFromYAML(yamlContent: string): Promise<void>
 
       // First pass: identify apps that need to be created
       for (const item of settings.usageHistory) {
-        if (item && typeof item === "object" && item.username && item.app && item.appName) {
+        if (item && typeof item === "object" && item.profile && item.app && item.appName) {
           if (!existingAppValues.has(item.app)) {
             appsToCreate.set(item.app, {
               name: item.appName,
@@ -117,8 +112,8 @@ export async function importSettingsFromYAML(yamlContent: string): Promise<void>
 
       // Second pass: import usage history
       for (const item of [...settings.usageHistory].reverse()) {
-        if (item && typeof item === "object" && item.username && item.app && item.appName) {
-          await addToUsageHistory(item.username, item.app, item.appName);
+        if (item && typeof item === "object" && item.profile && item.app && item.appName) {
+          await addToUsageHistory(item.profile, item.app, item.appName);
         }
       }
     }
@@ -188,8 +183,13 @@ export async function importSettingsFromYAML(yamlContent: string): Promise<void>
 export async function exportSettingsToFile(filename?: string): Promise<string> {
   const yamlContent = await exportSettingsToYAML();
   const defaultFilename = `at-profile-settings-${new Date().toISOString().split("T")[0]}.yaml`;
-  const fileName = filename || defaultFilename;
+
+  // Validate and sanitize filename if provided
+  const fileName = filename ? validateAndSanitizeFilename(filename) : defaultFilename;
   const filePath = join(homedir(), fileName);
+
+  // Validate that the path is secure
+  validateSecurePath(filePath);
 
   try {
     writeFileSync(filePath, yamlContent, "utf8");
@@ -239,19 +239,19 @@ export function generateSampleYAML(): string {
     version: "1.0",
     usageHistory: [
       {
-        username: "johndoe",
+        profile: "johndoe",
         app: "github",
         appName: "GitHub",
         timestamp: Date.now() - 86400000, // 1 day ago
       },
       {
-        username: "janedoe",
+        profile: "janedoe",
         app: "x",
         appName: "X",
         timestamp: Date.now() - 172800000, // 2 days ago
       },
       {
-        username: "example_user",
+        profile: "example_user",
         app: "mastodon",
         appName: "Mastodon",
         timestamp: Date.now() - 259200000, // 3 days ago
@@ -290,4 +290,27 @@ export function generateSampleYAML(): string {
     lineWidth: 120,
     noRefs: true,
   });
+}
+
+/**
+ * Generate and save a sample YAML file to the user's home directory
+ */
+export function generateSampleYAMLFile(filename?: string): string {
+  const yamlContent = generateSampleYAML();
+  const defaultFilename = `at-profile-sample-${new Date().toISOString().split("T")[0]}.yaml`;
+
+  // Validate and sanitize filename if provided
+  const fileName = filename ? validateAndSanitizeFilename(filename) : defaultFilename;
+  const filePath = join(homedir(), fileName);
+
+  // Validate that the path is secure
+  validateSecurePath(filePath);
+
+  try {
+    writeFileSync(filePath, yamlContent, "utf8");
+    return filePath;
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+    throw new Error(`Failed to generate sample YAML file: ${errorMessage}`);
+  }
 }

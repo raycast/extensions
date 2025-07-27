@@ -1,6 +1,7 @@
 import { showToast, Toast, LocalStorage } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { getCustomApps, defaultApps, getAppSettings, updateAppSettings, STORAGE_KEYS } from "../hooks/apps";
+import { getCustomApps, getAppSettings, updateAppSettings, STORAGE_KEYS } from "../hooks/apps";
+import { defaultApps } from "../types/default-apps";
 import { App, CustomAppInput, CustomAppUpdate } from "../types";
 
 /**

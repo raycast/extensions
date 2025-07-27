@@ -35,7 +35,7 @@ export interface AppSetting {
 }
 
 export interface UsageHistoryItem {
-  username: string;
+  profile: string;
   app: string;
   appName: string;
   timestamp: number;
@@ -54,7 +54,7 @@ export interface CustomAppUpdate {
 }
 
 export interface HistoryItem {
-  username: string;
+  profile: string;
   app: string;
   appName: string;
   favicon?: string;

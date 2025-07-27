@@ -70,15 +70,15 @@ export default function HistoryCommand() {
 
     const searchLower = searchText.toLowerCase();
     return (
-      item.username.toLowerCase().includes(searchLower) ||
+      item.profile.toLowerCase().includes(searchLower) ||
       item.appName.toLowerCase().includes(searchLower) ||
       item.app.toLowerCase().includes(searchLower)
     );
   });
 
   // Handle opening a profile from history
-  const handleOpenProfile = async (username: string, appValue: string) => {
-    await openProfile(username, appValue, false); // Don't pop to root to keep history intact
+  const handleOpenProfile = async (profile: string, appValue: string) => {
+    await openProfile(profile, appValue, false); // Don't pop to root to keep history intact
   };
 
   // Filter by specific app
@@ -87,11 +87,11 @@ export default function HistoryCommand() {
   };
 
   // Handle deleting a history item
-  const handleDeleteHistoryItem = async (username: string, app: string) => {
+  const handleDeleteHistoryItem = async (profile: string, app: string) => {
     try {
-      await removeUsageHistoryItem(username, app);
+      await removeUsageHistoryItem(profile, app);
       // Update local state by filtering out the deleted item
-      const filteredHistoryItems = historyItems.filter((item) => !(item.username === username && item.app === app));
+      const filteredHistoryItems = historyItems.filter((item) => !(item.profile === profile && item.app === app));
       setHistoryItems(filteredHistoryItems);
     } catch (error) {
       console.error("Error deleting history item:", error);
@@ -103,11 +103,12 @@ export default function HistoryCommand() {
       isLoading={isLoading}
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search by username or app..."
+      searchBarPlaceholder="Search by profile or app..."
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter by App"
           storeValue={true}
+          value={appFilter}
           onChange={(newValue) => setAppFilter(newValue || "__all__")}
         >
           {uniqueApps.map((app) => (
@@ -122,24 +123,18 @@ export default function HistoryCommand() {
         ) : (
           filteredItems.map((item, index) => (
             <List.Item
-              key={`${item.username}-${item.app}-${item.timestamp}-${index}`}
-              title={`@${item.username}`}
+              key={`${item.profile}-${item.app}-${item.timestamp}-${index}`}
+              title={`@${item.profile}`}
               subtitle={item.appName}
               icon={item.favicon || Icon.Globe}
-              accessories={[
-                formatRelativeDate(item.timestamp),
-                {
-                  text: item.appName,
-                  icon: item.favicon || Icon.Globe,
-                },
-              ]}
+              accessories={[formatRelativeDate(item.timestamp)]}
               actions={
                 <HistoryActionPanels
                   item={{
-                    username: item.username,
+                    profile: item.profile,
                     app: item.app,
                     appName: item.appName,
-                    favicon: typeof item.favicon === 'string' ? item.favicon : undefined,
+                    favicon: typeof item.favicon === "string" ? item.favicon : undefined,
                   }}
                   onOpenProfile={handleOpenProfile}
                   onDeleteHistoryItem={handleDeleteHistoryItem}

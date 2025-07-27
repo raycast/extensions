@@ -1,6 +1,7 @@
 import { LocalStorage, Icon } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { App, AppSetting, UsageHistoryItem } from "../types";
+import { defaultApps } from "../types/default-apps";
 
 /**
  * Get the base domain URL for favicon fetching from a URL template
@@ -27,69 +28,11 @@ export function getAppFavicon(app: App) {
 
 // LocalStorage Schema Keys
 export const STORAGE_KEYS = {
-  USERNAME_HISTORY: "usernameHistory",
+  PROFILE_HISTORY: "profileHistory",
   USAGE_HISTORY: "usageHistory",
   APP_SETTINGS: "appSettings",
   CUSTOM_APPS: "customApps",
 } as const;
-
-export const defaultApps: App[] = [
-  {
-    name: "Bluesky",
-    value: "bluesky",
-    urlTemplate: "https://bsky.app/profile/{profile}",
-  },
-  {
-    name: "Raycast",
-    value: "raycast",
-    urlTemplate: "https://www.raycast.com/{profile}",
-  },
-  {
-    name: "Threads",
-    value: "threads",
-    urlTemplate: "https://www.threads.net/@{profile}",
-  },
-  {
-    name: "X",
-    value: "x",
-    urlTemplate: "https://x.com/{profile}",
-  },
-  {
-    name: "GitHub",
-    value: "github",
-    urlTemplate: "https://github.com/{profile}",
-  },
-  {
-    name: "Facebook",
-    value: "facebook",
-    urlTemplate: "https://www.facebook.com/{profile}",
-  },
-  {
-    name: "Reddit",
-    value: "reddit",
-    urlTemplate: "https://www.reddit.com/user/{profile}",
-  },
-  {
-    name: "YouTube",
-    value: "youtube",
-    urlTemplate: "https://www.youtube.com/user/{profile}",
-  },
-  {
-    name: "Instagram",
-    value: "instagram",
-    urlTemplate: "https://www.instagram.com/{profile}",
-  },
-  {
-    name: "LinkedIn",
-    value: "linkedin",
-    urlTemplate: "https://www.linkedin.com/in/{profile}",
-  },
-  {
-    name: "TikTok",
-    value: "tiktok",
-    urlTemplate: "https://www.tiktok.com/@{profile}",
-  },
-];
 
 export async function getAllApps(): Promise<App[]> {
   const customApps = await getCustomApps();
@@ -109,45 +52,54 @@ export async function getAllApps(): Promise<App[]> {
   });
 }
 
+/**
+ * Get all apps without filtering by enabled status
+ * Used for Quick Open where we want to bypass manage apps settings
+ */
+export async function getAllAppsUnfiltered(): Promise<App[]> {
+  const customApps = await getCustomApps();
+  return [...defaultApps, ...customApps];
+}
+
 // Get custom apps
 export async function getCustomApps(): Promise<App[]> {
   const customAppsJson = await LocalStorage.getItem<string>(STORAGE_KEYS.CUSTOM_APPS);
   return customAppsJson ? JSON.parse(customAppsJson) : [];
 }
 
-// Username History functions (legacy - kept for backwards compatibility)
-export async function getUsernameHistory(): Promise<string[]> {
-  const historyJson = await LocalStorage.getItem<string>(STORAGE_KEYS.USERNAME_HISTORY);
+// Profile History functions (legacy - kept for backwards compatibility)
+export async function getProfileHistory(): Promise<string[]> {
+  const historyJson = await LocalStorage.getItem<string>(STORAGE_KEYS.PROFILE_HISTORY);
   return historyJson ? JSON.parse(historyJson) : [];
 }
 
-export async function addToUsernameHistory(username: string): Promise<void> {
-  const history = await getUsernameHistory();
+export async function addToProfileHistory(profile: string): Promise<void> {
+  const history = await getProfileHistory();
 
   // Remove if already exists to avoid duplicates
-  const filtered = history.filter((u) => u !== username);
+  const filtered = history.filter((p) => p !== profile);
 
   // Add to beginning of array
-  const updated = [username, ...filtered].slice(0, 20); // Keep max 20 items
+  const updated = [profile, ...filtered].slice(0, 20); // Keep max 20 items
 
-  await LocalStorage.setItem(STORAGE_KEYS.USERNAME_HISTORY, JSON.stringify(updated));
+  await LocalStorage.setItem(STORAGE_KEYS.PROFILE_HISTORY, JSON.stringify(updated));
 }
 
-// Usage History functions (tracks username + app combinations)
+// Usage History functions (tracks profile + app combinations)
 export async function getUsageHistory(): Promise<UsageHistoryItem[]> {
   const historyJson = await LocalStorage.getItem<string>(STORAGE_KEYS.USAGE_HISTORY);
   return historyJson ? JSON.parse(historyJson) : [];
 }
 
-export async function addToUsageHistory(username: string, app: string, appName: string): Promise<void> {
+export async function addToUsageHistory(profile: string, app: string, appName: string): Promise<void> {
   const history = await getUsageHistory();
 
   // Remove if already exists to avoid duplicates
-  const filtered = history.filter((item) => !(item.username === username && item.app === app));
+  const filtered = history.filter((item) => !(item.profile === profile && item.app === app));
 
   // Add new entry to beginning of array
   const newItem: UsageHistoryItem = {
-    username,
+    profile,
     app,
     appName,
     timestamp: Date.now(),
@@ -157,11 +109,11 @@ export async function addToUsageHistory(username: string, app: string, appName: 
   await LocalStorage.setItem(STORAGE_KEYS.USAGE_HISTORY, JSON.stringify(updated));
 }
 
-export async function removeUsageHistoryItem(username: string, app: string): Promise<void> {
+export async function removeUsageHistoryItem(profile: string, app: string): Promise<void> {
   const history = await getUsageHistory();
 
   // Filter out the matching record
-  const filtered = history.filter((item) => !(item.username === username && item.app === app));
+  const filtered = history.filter((item) => !(item.profile === profile && item.app === app));
 
   // Write back the updated list
   await LocalStorage.setItem(STORAGE_KEYS.USAGE_HISTORY, JSON.stringify(filtered));

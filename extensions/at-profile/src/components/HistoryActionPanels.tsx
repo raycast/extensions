@@ -1,11 +1,10 @@
-import { ActionPanel, Action, Icon, popToRoot, LaunchType } from "@raycast/api";
+import { ActionPanel, Action, Icon, LaunchType } from "@raycast/api";
 import { HistoryItem } from "../types";
-
 
 interface HistoryActionPanelsProps {
   item: HistoryItem;
-  onOpenProfile: (username: string, app: string) => void;
-  onDeleteHistoryItem: (username: string, app: string) => void;
+  onOpenProfile: (profile: string, app: string) => void;
+  onDeleteHistoryItem: (profile: string, app: string) => void;
   onSetSearchText: (text: string) => void;
   onSetAppFilter: (filter: string) => void;
   onFilterByApp: (app: string) => void;
@@ -24,40 +23,36 @@ export function HistoryActionPanels({
   return (
     <ActionPanel>
       <Action
-        title={`Open @${item.username} on ${item.appName}`}
+        title={`Open @${item.profile} on ${item.appName}`}
         icon={Icon.Globe}
-        onAction={() => onOpenProfile(item.username, item.app)}
+        onAction={() => onOpenProfile(item.profile, item.app)}
       />
       <Action.Push
-        title={`Open Profile on Other App`}
+        // eslint-disable-next-line @raycast/prefer-title-case
+        title={`Open @${item.profile} on…`}
         icon={Icon.Terminal}
-        target={
-          <OpenProfileCommand
-            arguments={{ profile: item.username }}
-            launchType={LaunchType.UserInitiated}
-          />
-        }
+        target={<OpenProfileCommand arguments={{ profile: item.profile }} launchType={LaunchType.UserInitiated} />}
         shortcut={{ modifiers: ["cmd"], key: "o" }}
       />
       <Action
         title="Delete History Item"
         icon={Icon.Trash}
         style={Action.Style.Destructive}
-        onAction={() => onDeleteHistoryItem(item.username, item.app)}
+        onAction={() => onDeleteHistoryItem(item.profile, item.app)}
         shortcut={{ modifiers: ["ctrl"], key: "x" }}
       />
       <ActionPanel.Section>
         <Action
-          title={`Show Other Items for @${item.username}`}
+          title={`Show All @${item.profile}`}
           icon={Icon.MagnifyingGlass}
           onAction={() => {
-            onSetSearchText(item.username);
+            onSetSearchText(item.profile);
             onSetAppFilter("__all__");
           }}
           shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
         />
         <Action
-          title={`Filter by ${item.appName}`}
+          title={`Show Only ${item.appName}`}
           icon={item.favicon || Icon.Globe}
           onAction={() => onFilterByApp(item.app)}
           shortcut={{ modifiers: ["cmd"], key: "f" }}

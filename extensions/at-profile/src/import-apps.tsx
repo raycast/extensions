@@ -93,11 +93,7 @@ export default function ImportAppsCommand() {
         title: "Import Failed",
         description: error,
         actions: (
-          <ImportActionPanels
-            state="error"
-            onSelectFile={handleSelectFile}
-            onOpenDocumentation={openDocumentation}
-          />
+          <ImportActionPanels state="error" onSelectFile={handleSelectFile} onOpenDocumentation={openDocumentation} />
         ),
       };
     }
@@ -108,11 +104,7 @@ export default function ImportAppsCommand() {
       description:
         "Select a YAML file to import apps. You can also select a YAML file in Finder before running this command.",
       actions: (
-        <ImportActionPanels
-          state="initial"
-          onSelectFile={handleSelectFile}
-          onOpenDocumentation={openDocumentation}
-        />
+        <ImportActionPanels state="initial" onSelectFile={handleSelectFile} onOpenDocumentation={openDocumentation} />
       ),
     };
   };

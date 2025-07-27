@@ -20,7 +20,7 @@
   "commands": [
     {
       "name": "open-profile",
-      "title": "Open Profile",
+      "title": "Open Profile…",
       "subtitle": "@ Profile",
       "description": "Open a profile on a social app",
       "mode": "view"
@@ -45,10 +45,7 @@
           "required": true,
           "data": [
             { "title": "Bluesky", "value": "bluesky" },
-            {
-              "title": "Facebook",
-              "value": "facebook"
-            },
+            { "title": "Facebook", "value": "facebook" },
             { "title": "GitHub", "value": "github" },
             { "title": "Instagram", "value": "instagram" },
             { "title": "LinkedIn", "value": "linkedin" },
@@ -67,15 +64,7 @@
       "title": "Manage Apps",
       "subtitle": "@ Profile",
       "description": "Enable, disable, or add custom apps",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "action",
-          "placeholder": "action (optional)",
-          "type": "text",
-          "required": false
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "history",
@@ -88,14 +77,14 @@
       "name": "export-apps",
       "title": "Export Apps",
       "subtitle": "@ Profile",
-      "description": "Export all Apps to a YAML file",
+      "description": "Export apps and history to a YAML file",
       "mode": "view"
     },
     {
       "name": "import-apps",
       "title": "Import Apps",
       "subtitle": "@ Profile",
-      "description": "Import Apps from a YAML file",
+      "description": "Import apps and history from a YAML file",
       "mode": "view"
     }
   ],

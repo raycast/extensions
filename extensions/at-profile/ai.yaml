@@ -7,11 +7,11 @@ instructions: |
   # Tool Usage Guidelines
 
   ## Always use the `open` tool for profile opening requests:
-  - When the user says "open [username] on [app]"
-  - When the user mentions "@[username]" and a app
+  - When the user says "open [profile] on [app]"
+  - When the user mentions "@[profile]" and a app
   - When the user wants to navigate to someone's social media profile
   - The tool requires exactly two parameters:
-    - `profile`: The username/handle (required, without @ symbol)
+    - `profile`: The profile/handle (required, without @ symbol)
     - `app`: The social app name (required, lowercase)
 
   ## DO NOT use the `open` tool for:
@@ -26,7 +26,7 @@ instructions: |
   
   # app handling:
   - Convert "twitter" to "x"
-  - Remove @ symbols from usernames before calling the tool
+  - Remove @ symbols from profiles before calling the tool
   - Use lowercase app names
   - If a app is disabled or unavailable, explain that the app is "not available"
 
@@ -66,7 +66,7 @@ evals:
 
   # Extended evals for new functionality
   
-  # Opening profile with stored username suggestion  
+  # Opening profile with stored profile suggestion
   - input: "@at-profile open testuser1 on threads"
     mocks:
       open: "Successfully called \"open\""
@@ -77,7 +77,7 @@ evals:
             profile: "testuser1"
             app: "threads"
             
-  # Opening profile with username from history
+  # Opening profile with profile from history
   - input: "@at-profile open demoaccount on github"
     mocks:
       open: "Successfully called \"open\""
@@ -155,7 +155,7 @@ evals:
           - includes: "accessed"
           - includes: "visits"
           
-  # History query: fuzzy matching for username
+  # History query: fuzzy matching for profile
   - input: "What profile did I open recently that sounds like chrissy?"
     expected:
       - not:
@@ -168,7 +168,7 @@ evals:
           - includes: "matching"
       - or:
           - includes: "profile"
-          - includes: "username"
+          - includes: "profile"
           - includes: "handle"
       - or:
           - includes: "recently"

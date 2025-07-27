@@ -50,18 +50,18 @@ export default function OpenProfileForm({ initialProfile, initialApp }: OpenProf
     loadApps();
   }, [initialApp]);
 
-  const handleFormSubmit = async (values: { username: string; app: string }) => {
+  const handleFormSubmit = async (values: { profile: string; app: string }) => {
     if (apps.length === 0) {
       await showFailureToast("Please enable apps in Manage Apps first", { title: "No apps enabled" });
       return;
     }
 
-    if (!values.username.trim() || !values.app) {
-      await showFailureToast("Please enter a username and select an app", { title: "Invalid input" });
+    if (!values.profile.trim() || !values.app) {
+      await showFailureToast("Please enter a profile and select an app", { title: "Invalid input" });
       return;
     }
 
-    await openProfile(values.username, values.app);
+    await openProfile(values.profile, values.app);
   };
 
   return (
@@ -74,10 +74,10 @@ export default function OpenProfileForm({ initialProfile, initialApp }: OpenProf
       }
     >
       <Form.TextField
-        id="username"
-        title="Username"
-        placeholder="Enter username (with or without @)"
-        info="The username or profile name to open (@ symbol is optional)"
+        id="profile"
+        title="Profile"
+        placeholder="Enter profile (with or without @)"
+        info="The profile name to open (@ symbol is optional)"
         defaultValue={initialProfile || ""}
       />
 
@@ -94,16 +94,6 @@ export default function OpenProfileForm({ initialProfile, initialApp }: OpenProf
           ))}
         </Form.Dropdown>
       )}
-
-      <Form.Separator />
-      <Form.Description
-        title="Dynamic Apps"
-        text={
-          apps.length === 0
-            ? 'No apps enabled. Use "Manage Apps" to enable apps.'
-            : `${apps.length} apps available including custom apps`
-        }
-      />
     </Form>
   );
 }

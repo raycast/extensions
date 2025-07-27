@@ -8,22 +8,18 @@ interface ImportActionPanelsProps {
   onTryAgain?: () => void;
 }
 
-export function ImportActionPanels({ 
-  state, 
-  onSelectFile, 
-  onImportAgain, 
-  onOpenDocumentation, 
-  onTryAgain 
+export function ImportActionPanels({
+  state,
+  onSelectFile,
+  onImportAgain,
+  onOpenDocumentation,
+  onTryAgain,
 }: ImportActionPanelsProps) {
   switch (state) {
     case "success":
       return (
         <ActionPanel>
-          <Action
-            title="Import Again"
-            icon={Icon.Document}
-            onAction={onImportAgain || onSelectFile}
-          />
+          <Action title="Import Again" icon={Icon.Document} onAction={onImportAgain || onSelectFile} />
           <Action title="Open Documentation" icon={Icon.Book} onAction={onOpenDocumentation} />
         </ActionPanel>
       );

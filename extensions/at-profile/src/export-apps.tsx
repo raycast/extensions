@@ -46,13 +46,7 @@ export default function ExportAppsCommand() {
         icon: Icon.CheckCircle,
         title: "Export Complete",
         description: "Your app settings have been exported successfully.",
-        actions: (
-          <ExportActionPanels
-            state="success"
-            onExport={handleExport}
-            onShowInFinder={showInFinder}
-          />
-        ),
+        actions: <ExportActionPanels state="success" onExport={handleExport} onShowInFinder={showInFinder} />,
       };
     }
 
@@ -61,12 +55,7 @@ export default function ExportAppsCommand() {
         icon: Icon.XMarkCircle,
         title: "Export Failed",
         description: error,
-        actions: (
-          <ExportActionPanels
-            state="error"
-            onExport={handleExport}
-          />
-        ),
+        actions: <ExportActionPanels state="error" onExport={handleExport} />,
       };
     }
 
@@ -74,12 +63,7 @@ export default function ExportAppsCommand() {
       icon: { source: "at-icon@128px.png" },
       title: "Export Apps",
       description: "Export your Apps and Profile history to a YAML file.",
-      actions: (
-        <ExportActionPanels
-          state="initial"
-          onExport={handleExport}
-        />
-      ),
+      actions: <ExportActionPanels state="initial" onExport={handleExport} />,
     };
   };
 

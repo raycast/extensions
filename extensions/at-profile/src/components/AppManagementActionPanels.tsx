@@ -22,11 +22,7 @@ export function AppManagementActionPanels({
   if (type === "empty") {
     return (
       <ActionPanel>
-        <Action.Push
-          title="Add Custom Social App"
-          icon={Icon.Plus}
-          target={<CustomAppForm onSave={onSave} />}
-        />
+        <Action.Push title="Add Custom Social App" icon={Icon.Plus} target={<CustomAppForm onSave={onSave} />} />
       </ActionPanel>
     );
   }
@@ -38,6 +34,12 @@ export function AppManagementActionPanels({
           title={app.enabled ? "Disable" : "Enable"}
           icon={app.enabled ? Icon.XMarkCircle : Icon.CheckCircle}
           onAction={() => onToggleEnabled?.(app.id, !app.enabled)}
+        />
+        <Action
+          title={`Open Profile on ${app.name}…`}
+          icon={Icon.MagnifyingGlass}
+          onAction={() => onOpenQuickProfileSearch?.(app.value || "")}
+          shortcut={{ modifiers: ["cmd"], key: "o" }}
         />
         <ActionPanel.Section>
           <Action.Push
@@ -84,18 +86,18 @@ export function AppManagementActionPanels({
           icon={app.enabled ? Icon.XMarkCircle : Icon.CheckCircle}
           onAction={() => onToggleEnabled?.(app.id, !app.enabled)}
         />
+        <Action
+          title={`Open Profile on ${app.name}…`}
+          icon={Icon.MagnifyingGlass}
+          onAction={() => onOpenQuickProfileSearch?.(app.value || "")}
+          shortcut={{ modifiers: ["cmd"], key: "o" }}
+        />
         <ActionPanel.Section>
           <Action.Push
             title="Add Custom Social App"
             icon={Icon.Plus}
             target={<CustomAppForm onSave={onSave} />}
             shortcut={{ modifiers: ["cmd"], key: "n" }}
-          />
-          <Action
-            title="Open Quick Profile Search"
-            icon={Icon.MagnifyingGlass}
-            onAction={() => onOpenQuickProfileSearch?.(app.value || "")}
-            shortcut={{ modifiers: ["cmd"], key: "o" }}
           />
         </ActionPanel.Section>
       </ActionPanel>

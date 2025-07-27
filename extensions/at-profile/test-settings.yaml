@@ -1,5 +1,5 @@
 version: "1.0"
-usernameHistory:
+profileHistory:
   - testuser1
   - testuser2
   - demoaccount

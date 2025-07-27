@@ -6,8 +6,8 @@ This document describes the LocalStorage schema used by the @-profile extension,
 
 The extension uses three primary LocalStorage keys to store user data:
 
-### 1. `usernameHistory`: `string[]`
-Stores a list of previously used usernames for autocomplete and quick access.
+### 1. `profileHistory`: `string[]`
+Stores a list of previously used profiles for autocomplete and quick access.
 
 - **Type**: Array of strings
 - **Max Length**: 20 items (automatically truncated)
@@ -51,7 +51,7 @@ The following constants are defined in `src/apps.ts`:
 
 ```typescript
 export const STORAGE_KEYS = {
-  USERNAME_HISTORY: 'usernameHistory',
+  PROFILE_HISTORY: 'profileHistory',
   USAGE_HISTORY: 'usageHistory',
   APP_SETTINGS: 'appSettings',
   CUSTOM_APPS: 'customApps'
@@ -65,7 +65,7 @@ export const STORAGE_KEYS = {
 ### Version History
 
 - **v1**: Initial version with only `customApps` key
-- **v2**: Added `usernameHistory` and `appSettings`, improved custom app storage and handling
+- **v2**: Added `profileHistory` and `appSettings`, improved custom app storage and handling
 
 ## Migration Strategy
 
@@ -108,9 +108,9 @@ if (!customAppsJson) {
 
 The following functions are available for interacting with LocalStorage:
 
-### Username History
-- `getUsernameHistory(): Promise<string[]>`
-- `addToUsernameHistory(username: string): Promise<void>`
+### Profile History
+- `getProfileHistory(): Promise<string[]>`
+- `addToProfileHistory(profile: string): Promise<void>`
 
 ### App Settings
 - `getAppSettings(): Promise<AppSetting[]>`

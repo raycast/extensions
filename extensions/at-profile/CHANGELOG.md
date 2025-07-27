@@ -6,7 +6,11 @@
 
 - **New "Profile History" Command**: Displays a list of recently opened profiles
 - **New "Custom Apps" Command**: Allows users to add custom apps to the extension
+- **Import/Export**: Allows users to import and export their settings, history, and profile opens
 
+### Changed
+
+- **New "Open Profile" Command**: Allows users to open profiles from a dynamic list
 
 ## [Enhanced Platform Management] - 2025-01-07
 

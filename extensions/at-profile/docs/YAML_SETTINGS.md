@@ -4,7 +4,7 @@ The @ Profile extension supports importing and exporting settings through YAML f
 
 ## Features
 
-- **Export Settings**: Save all your settings (username history, platform preferences, custom apps) to a YAML file
+- **Export Settings**: Save all your settings (profile history, platform preferences, custom apps) to a YAML file
 - **Import Settings**: Load settings from a YAML file to restore or sync your configuration
 - **Sample YAML**: Generate a template YAML file for reference
 
@@ -44,7 +44,7 @@ The YAML settings file contains the following sections:
 
 ```yaml
 version: "1.0"
-usernameHistory:
+profileHistory:
   - johndoe
   - janedoe
   - example_user
@@ -73,7 +73,7 @@ customApps:
 ### Field Descriptions
 
 - **version**: File format version (currently "1.0")
-- **usernameHistory**: Array of previously searched usernames
+- **profileHistory**: Array of previously searched profiles
 - **platformSettings**: Object mapping platform IDs to enabled/disabled state
 - **customApps**: Array of custom social platforms
 
@@ -100,7 +100,7 @@ Create YAML files programmatically or edit them in a text editor for bulk change
 
 ## Notes
 
-- Importing settings will merge with existing data (usernames are added to history, platforms are updated)
+- Importing settings will merge with existing data (profiles are added to history, platforms are updated)
 - Custom apps with duplicate `value` fields may cause conflicts during import
 - The export file is saved to your home directory by default
 - File selection for import can be done through Finder selection or by specifying a file path

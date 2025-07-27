@@ -1,5 +1,5 @@
 import { open } from "@raycast/api";
-import { getAllApps, addToUsernameHistory } from "../hooks/apps";
+import { getAllApps, addToProfileHistory } from "../hooks/apps";
 import { showFailureToast } from "@raycast/utils";
 import { Input } from "../types";
 
@@ -18,8 +18,8 @@ const tool = async (input: Input) => {
   const url = selectedApp.urlTemplate.replace("{profile}", normalizedProfile);
   try {
     await open(url);
-    // Add username to history after successful open
-    await addToUsernameHistory(normalizedProfile);
+    // Add profile to history after successful open
+    await addToProfileHistory(normalizedProfile);
   } catch (error) {
     showFailureToast(`Failed to open ${app} profile: ${profile}`, { title: "Failed to open URL" });
   }

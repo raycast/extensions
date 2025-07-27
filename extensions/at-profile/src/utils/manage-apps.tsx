@@ -1,29 +1,17 @@
-import {
-  List,
-  showToast,
-  Toast,
-  Icon,
-  confirmAlert,
-  Alert,
-  Color,
-  Clipboard,
-  LaunchProps,
-  open,
-} from "@raycast/api";
+import { List, showToast, Toast, Icon, confirmAlert, Alert, Color, Clipboard, LaunchProps, open } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { showFailureToast } from "@raycast/utils";
-import { defaultApps, getCustomApps, getAppSettings, updateAppSettings, getAppFavicon } from "../hooks/apps";
+import { getCustomApps, getAppSettings, updateAppSettings, getAppFavicon } from "../hooks/apps";
+import { defaultApps } from "../types/default-apps";
 import { removeCustomApp } from "./custom-app-utils";
 import { AppManagementActionPanels, UtilityActionPanels } from "../components";
-import { exportSettingsToFile, importSettingsFromFile, generateSampleYAML } from "../yaml-settings";
+import { exportSettingsToFile, importSettingsFromFile, generateSampleYAMLFile } from "../yaml-settings";
 import { AppItem, ManageAppsArguments, App } from "../types";
 
 export default function ManageAppsCommand(props: LaunchProps<{ arguments: ManageAppsArguments }>) {
   const { action } = props.arguments;
   const [apps, setApps] = useState<AppItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
-
 
   const loadApps = async () => {
     try {
@@ -158,8 +146,8 @@ export default function ManageAppsCommand(props: LaunchProps<{ arguments: Manage
 
   const openQuickProfileSearch = async (appValue: string) => {
     try {
-      // Use raycast:// deep link to open the Open Profile command with the specific app
-      const url = `raycast://extensions/chrismessina/at-profile/quick-open?arguments=${encodeURIComponent(
+      // Use raycast:// deep link to open the Open Profile command with the specific app pre-selected
+      const url = `raycast://extensions/chrismessina/at-profile/open-profile?arguments=${encodeURIComponent(
         JSON.stringify({ app: appValue }),
       )}`;
 
@@ -177,8 +165,8 @@ export default function ManageAppsCommand(props: LaunchProps<{ arguments: Manage
     }
   };
 
-  const defaultAppList = apps.filter((p) => p.isDefault);
-  const customAppList = apps.filter((p) => !p.isDefault);
+  const defaultAppList = apps.filter((p) => p.isDefault).sort((a, b) => a.name.localeCompare(b.name));
+  const customAppList = apps.filter((p) => !p.isDefault).sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search social apps...">
@@ -221,12 +209,7 @@ export default function ManageAppsCommand(props: LaunchProps<{ arguments: Manage
             title="No Custom Social Apps"
             subtitle="Add custom social apps to extend the available options"
             icon={Icon.Info}
-            actions={
-              <AppManagementActionPanels
-                type="empty"
-                onSave={loadApps}
-              />
-            }
+            actions={<AppManagementActionPanels type="empty" onSave={loadApps} />}
           />
         ) : (
           customAppList.map((app) => (
@@ -270,7 +253,7 @@ export default function ManageAppsCommand(props: LaunchProps<{ arguments: Manage
             <UtilityActionPanels
               type="export-management"
               onExportApps={handleExportApps}
-              onGenerateSampleYAML={async () => generateSampleYAML()}
+              onGenerateSampleYAMLFile={() => generateSampleYAMLFile()}
             />
           }
         />
@@ -278,12 +261,7 @@ export default function ManageAppsCommand(props: LaunchProps<{ arguments: Manage
           title="Import Apps"
           subtitle="Import app settings and custom apps from YAML file"
           icon={Icon.Upload}
-          actions={
-            <UtilityActionPanels
-              type="import-management"
-              onImportApps={handleImportApps}
-            />
-          }
+          actions={<UtilityActionPanels type="import-management" onImportApps={handleImportApps} />}
         />
       </List.Section>
     </List>

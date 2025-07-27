@@ -1,27 +1,34 @@
 import { Action, ActionPanel, Icon, Clipboard, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 interface UtilityActionPanelsProps {
   type: "export-management" | "import-management";
   onExportApps?: () => void;
   onImportApps?: () => void;
-  onGenerateSampleYAML?: () => Promise<string>;
+  onGenerateSampleYAMLFile?: () => string;
 }
 
 export function UtilityActionPanels({
   type,
   onExportApps,
   onImportApps,
-  onGenerateSampleYAML,
+  onGenerateSampleYAMLFile,
 }: UtilityActionPanelsProps) {
   const handleGenerateSampleYAML = async () => {
-    if (onGenerateSampleYAML) {
-      const sampleYAML = await onGenerateSampleYAML();
-      await Clipboard.copy(sampleYAML);
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Sample YAML Copied",
-        message: "Sample YAML content copied to clipboard",
-      });
+    if (onGenerateSampleYAMLFile) {
+      try {
+        const filePath = onGenerateSampleYAMLFile();
+        await Clipboard.copy(filePath);
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Sample YAML Generated",
+          message: "File path copied to clipboard",
+        });
+      } catch (error) {
+        await showFailureToast(error instanceof Error ? error.message : "Unknown error", {
+          title: "Generation Failed",
+        });
+      }
     }
   };
 
@@ -29,11 +36,7 @@ export function UtilityActionPanels({
     return (
       <ActionPanel>
         <Action title="Export Apps" icon={Icon.Download} onAction={onExportApps} />
-        <Action
-          title="Generate Sample Yaml"
-          icon={Icon.Document}
-          onAction={handleGenerateSampleYAML}
-        />
+        <Action title="Generate Sample Yaml" icon={Icon.Document} onAction={handleGenerateSampleYAML} />
       </ActionPanel>
     );
   }

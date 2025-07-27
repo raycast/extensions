@@ -50,7 +50,7 @@ export default function CustomAppForm({ app, onSave }: CustomAppFormProps) {
     >
       <Form.TextField
         id="name"
-        title="Social App Name"
+        title="Name"
         placeholder="e.g., Custom Social Network"
         defaultValue={app?.name || ""}
         error={nameError}
@@ -60,7 +60,7 @@ export default function CustomAppForm({ app, onSave }: CustomAppFormProps) {
         id="url"
         title="URL Template"
         placeholder="https://example.com/{profile}"
-        info="Use {profile} as a placeholder for the username"
+        info="Use {profile} as a placeholder for the profile name"
         defaultValue={app?.urlTemplate || ""}
         error={urlError}
         onChange={() => setUrlError(undefined)}
@@ -68,17 +68,8 @@ export default function CustomAppForm({ app, onSave }: CustomAppFormProps) {
       <Form.Checkbox
         id="enabled"
         title="Enabled"
-        label="Include this social app in the profile search"
+        label="Enable"
         defaultValue={app?.enabled ?? true}
-      />
-      <Form.Separator />
-      <Form.Description
-        title="URL Template Help"
-        text="The {profile} placeholder will be replaced with the actual username when opening a profile. For example: https://example.com/{profile} becomes https://example.com/username"
-      />
-      <Form.Description
-        title="Icon"
-        text="The app icon will be automatically fetched from the website's favicon using the URL template you provide."
       />
     </Form>
   );
