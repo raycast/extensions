@@ -7,7 +7,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import React from "react";
+import React, { useCallback } from "react";
 import { withAuth } from "./contexts/AuthContext";
 import { withAuthGuard } from "./hooks/useAuthGuard";
 import { useInfiniteSubscriptions } from "./hooks/useQueries";
@@ -212,7 +212,6 @@ function SubscriptionsList() {
     error,
     fetchNextPage,
     hasNextPage,
-    isFetchingNextPage,
   } = useInfiniteSubscriptions({ limit: 20 });
 
   // Show toast notifications based on query state
@@ -241,8 +240,15 @@ function SubscriptionsList() {
   }, [isLoading, error, subscriptionsData]);
 
   // Flatten all pages into a single array
-  const subscriptions: SubscriptionListResponse[] =
-    subscriptionsData?.pages.flatMap((page) => page.items) || [];
+  const subscriptions: SubscriptionListResponse[] = React.useMemo(
+    () => subscriptionsData?.pages.flatMap((page) => page.items) || [],
+    [subscriptionsData?.pages],
+  );
+
+  const handleFetchNextPage = useCallback(
+    () => fetchNextPage(),
+    [fetchNextPage],
+  );
 
   if (!isLoading && subscriptions.length === 0) {
     return (
@@ -260,6 +266,11 @@ function SubscriptionsList() {
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search subscriptions..."
+      pagination={{
+        hasMore: hasNextPage,
+        pageSize: 20,
+        onLoadMore: handleFetchNextPage,
+      }}
       isShowingDetail
     >
       {subscriptions.map((subscription) => (
@@ -398,25 +409,6 @@ function SubscriptionsList() {
           }
         />
       ))}
-
-      {/* Load More Item */}
-      {(hasNextPage || isFetchingNextPage) && (
-        <List.Item
-          title={
-            isFetchingNextPage ? "Loading more..." : "Load more subscriptions"
-          }
-          icon={isFetchingNextPage ? Icon.Clock : Icon.ChevronDown}
-          actions={
-            <ActionPanel>
-              <Action
-                title="Load More"
-                onAction={() => fetchNextPage()}
-                icon={Icon.ChevronDown}
-              />
-            </ActionPanel>
-          }
-        />
-      )}
     </List>
   );
 }

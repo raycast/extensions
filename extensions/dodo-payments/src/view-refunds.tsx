@@ -7,7 +7,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import React from "react";
+import React, { useCallback } from "react";
 import { withAuth } from "./contexts/AuthContext";
 import { withAuthGuard } from "./hooks/useAuthGuard";
 import { useInfiniteRefunds } from "./hooks/useQueries";
@@ -63,7 +63,6 @@ function RefundsList() {
     error,
     fetchNextPage,
     hasNextPage,
-    isFetchingNextPage,
   } = useInfiniteRefunds({ limit: 20 });
 
   // Show toast notifications based on query state
@@ -92,8 +91,15 @@ function RefundsList() {
   }, [isLoading, error, refundsData]);
 
   // Flatten all pages into a single array
-  const refunds: Refund[] =
-    refundsData?.pages.flatMap((page) => page.items) || [];
+  const refunds: Refund[] = React.useMemo(
+    () => refundsData?.pages.flatMap((page) => page.items) || [],
+    [refundsData?.pages],
+  );
+
+  const handleFetchNextPage = useCallback(
+    () => fetchNextPage(),
+    [fetchNextPage],
+  );
 
   if (!isLoading && refunds.length === 0) {
     return (
@@ -111,6 +117,11 @@ function RefundsList() {
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search refunds..."
+      pagination={{
+        hasMore: hasNextPage,
+        pageSize: 20,
+        onLoadMore: handleFetchNextPage,
+      }}
       isShowingDetail
     >
       {refunds.map((refund) => (
@@ -205,23 +216,6 @@ function RefundsList() {
           }
         />
       ))}
-
-      {/* Load More Item */}
-      {(hasNextPage || isFetchingNextPage) && (
-        <List.Item
-          title={isFetchingNextPage ? "Loading more..." : "Load more refunds"}
-          icon={isFetchingNextPage ? Icon.Clock : Icon.ChevronDown}
-          actions={
-            <ActionPanel>
-              <Action
-                title="Load More"
-                onAction={() => fetchNextPage()}
-                icon={Icon.ChevronDown}
-              />
-            </ActionPanel>
-          }
-        />
-      )}
     </List>
   );
 }

@@ -10,7 +10,7 @@ import {
   useNavigation,
   Clipboard,
 } from "@raycast/api";
-import React from "react";
+import React, { useCallback } from "react";
 import { withAuth, useAuth } from "./contexts/AuthContext";
 import { withAuthGuard } from "./hooks/useAuthGuard";
 import { useInfiniteProducts } from "./hooks/useQueries";
@@ -227,8 +227,7 @@ function ProductsList() {
     error,
     fetchNextPage,
     hasNextPage,
-    isFetchingNextPage,
-  } = useInfiniteProducts({ limit: 20 });
+  } = useInfiniteProducts({ limit: 50 });
 
   // Show toast notifications based on query state
   React.useEffect(() => {
@@ -256,8 +255,15 @@ function ProductsList() {
   }, [isLoading, error, productsData]);
 
   // Flatten all pages into a single array
-  const products: ProductListResponse[] =
-    productsData?.pages.flatMap((page) => page.items) || [];
+  const products: ProductListResponse[] = React.useMemo(
+    () => productsData?.pages.flatMap((page) => page.items) || [],
+    [productsData?.pages],
+  );
+
+  const handleFetchNextPage = useCallback(
+    () => fetchNextPage(),
+    [fetchNextPage],
+  );
 
   if (!isLoading && products.length === 0) {
     return (
@@ -275,6 +281,11 @@ function ProductsList() {
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search products..."
+      pagination={{
+        hasMore: hasNextPage,
+        pageSize: 50,
+        onLoadMore: handleFetchNextPage,
+      }}
       isShowingDetail
     >
       {products.map((product) => (
@@ -426,23 +437,6 @@ function ProductsList() {
           }
         />
       ))}
-
-      {/* Load More Item */}
-      {(hasNextPage || isFetchingNextPage) && (
-        <List.Item
-          title={isFetchingNextPage ? "Loading more..." : "Load more products"}
-          icon={isFetchingNextPage ? Icon.Clock : Icon.ChevronDown}
-          actions={
-            <ActionPanel>
-              <Action
-                title="Load More"
-                onAction={() => fetchNextPage()}
-                icon={Icon.ChevronDown}
-              />
-            </ActionPanel>
-          }
-        />
-      )}
     </List>
   );
 }

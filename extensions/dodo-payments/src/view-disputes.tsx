@@ -7,7 +7,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import React from "react";
+import React, { useCallback } from "react";
 import { withAuth } from "./contexts/AuthContext";
 import { withAuthGuard } from "./hooks/useAuthGuard";
 import { useInfiniteDisputes } from "./hooks/useQueries";
@@ -84,8 +84,7 @@ function DisputesList() {
     error,
     fetchNextPage,
     hasNextPage,
-    isFetchingNextPage,
-  } = useInfiniteDisputes({ limit: 20 });
+  } = useInfiniteDisputes({ limit: 50 });
 
   // Show toast notifications based on query state
   React.useEffect(() => {
@@ -113,8 +112,15 @@ function DisputesList() {
   }, [isLoading, error, disputesData]);
 
   // Flatten all pages into a single array
-  const disputes: DisputeListResponse[] =
-    disputesData?.pages.flatMap((page) => page.items) || [];
+  const disputes: DisputeListResponse[] = React.useMemo(
+    () => disputesData?.pages.flatMap((page) => page.items) || [],
+    [disputesData?.pages],
+  );
+
+  const handleFetchNextPage = useCallback(
+    () => fetchNextPage(),
+    [fetchNextPage],
+  );
 
   if (!isLoading && disputes.length === 0) {
     return (
@@ -132,6 +138,11 @@ function DisputesList() {
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search disputes..."
+      pagination={{
+        hasMore: hasNextPage,
+        pageSize: 50,
+        onLoadMore: handleFetchNextPage,
+      }}
       isShowingDetail
     >
       {disputes.map((dispute) => (
@@ -222,23 +233,6 @@ function DisputesList() {
           }
         />
       ))}
-
-      {/* Load More Item */}
-      {(hasNextPage || isFetchingNextPage) && (
-        <List.Item
-          title={isFetchingNextPage ? "Loading more..." : "Load more disputes"}
-          icon={isFetchingNextPage ? Icon.Clock : Icon.ChevronDown}
-          actions={
-            <ActionPanel>
-              <Action
-                title="Load More"
-                onAction={() => fetchNextPage()}
-                icon={Icon.ChevronDown}
-              />
-            </ActionPanel>
-          }
-        />
-      )}
     </List>
   );
 }

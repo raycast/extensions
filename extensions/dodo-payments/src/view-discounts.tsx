@@ -7,7 +7,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import React from "react";
+import React, { useCallback } from "react";
 import { withAuth } from "./contexts/AuthContext";
 import { withAuthGuard } from "./hooks/useAuthGuard";
 import { useInfiniteDiscounts } from "./hooks/useQueries";
@@ -71,7 +71,6 @@ function DiscountsList() {
     error,
     fetchNextPage,
     hasNextPage,
-    isFetchingNextPage,
   } = useInfiniteDiscounts({ limit: 20 });
 
   // Show toast notifications based on query state
@@ -100,8 +99,15 @@ function DiscountsList() {
   }, [isLoading, error, discountsData]);
 
   // Flatten all pages into a single array
-  const discounts: Discount[] =
-    discountsData?.pages.flatMap((page) => page.items) || [];
+  const discounts: Discount[] = React.useMemo(
+    () => discountsData?.pages.flatMap((page) => page.items) || [],
+    [discountsData?.pages],
+  );
+
+  const handleFetchNextPage = useCallback(
+    () => fetchNextPage(),
+    [fetchNextPage],
+  );
 
   if (!isLoading && discounts.length === 0) {
     return (
@@ -119,6 +125,11 @@ function DiscountsList() {
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search discount codes..."
+      pagination={{
+        hasMore: hasNextPage,
+        pageSize: 20,
+        onLoadMore: handleFetchNextPage,
+      }}
       isShowingDetail
     >
       {discounts.map((discount) => (
@@ -222,25 +233,6 @@ function DiscountsList() {
           }
         />
       ))}
-
-      {/* Load More Item */}
-      {(hasNextPage || isFetchingNextPage) && (
-        <List.Item
-          title={
-            isFetchingNextPage ? "Loading more..." : "Load more discount codes"
-          }
-          icon={isFetchingNextPage ? Icon.Clock : Icon.ChevronDown}
-          actions={
-            <ActionPanel>
-              <Action
-                title="Load More"
-                onAction={() => fetchNextPage()}
-                icon={Icon.ChevronDown}
-              />
-            </ActionPanel>
-          }
-        />
-      )}
     </List>
   );
 }

@@ -6,7 +6,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import React from "react";
+import React, { useCallback } from "react";
 import { withAuth } from "./contexts/AuthContext";
 import { withAuthGuard } from "./hooks/useAuthGuard";
 import { useInfiniteCustomers } from "./hooks/useQueries";
@@ -20,8 +20,7 @@ function CustomersList() {
     error,
     fetchNextPage,
     hasNextPage,
-    isFetchingNextPage,
-  } = useInfiniteCustomers({ limit: 20 });
+  } = useInfiniteCustomers({ limit: 50 });
 
   // Show toast notifications based on query state
   React.useEffect(() => {
@@ -49,8 +48,15 @@ function CustomersList() {
   }, [isLoading, error, customersData]);
 
   // Flatten all pages into a single array
-  const customers: Customer[] =
-    customersData?.pages.flatMap((page) => page.items) || [];
+  const customers: Customer[] = React.useMemo(
+    () => customersData?.pages.flatMap((page) => page.items) || [],
+    [customersData?.pages],
+  );
+
+  const handleFetchNextPage = useCallback(
+    () => fetchNextPage(),
+    [fetchNextPage],
+  );
 
   if (!isLoading && customers.length === 0) {
     return (
@@ -68,6 +74,11 @@ function CustomersList() {
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search customers..."
+      pagination={{
+        hasMore: hasNextPage,
+        pageSize: 50,
+        onLoadMore: handleFetchNextPage,
+      }}
       isShowingDetail
     >
       {customers.map((customer) => (
@@ -144,23 +155,6 @@ function CustomersList() {
           }
         />
       ))}
-
-      {/* Load More Item */}
-      {(hasNextPage || isFetchingNextPage) && (
-        <List.Item
-          title={isFetchingNextPage ? "Loading more..." : "Load more customers"}
-          icon={isFetchingNextPage ? Icon.Clock : Icon.ChevronDown}
-          actions={
-            <ActionPanel>
-              <Action
-                title="Load More"
-                onAction={() => fetchNextPage()}
-                icon={Icon.ChevronDown}
-              />
-            </ActionPanel>
-          }
-        />
-      )}
     </List>
   );
 }

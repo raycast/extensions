@@ -7,7 +7,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import React from "react";
+import React, { useCallback } from "react";
 import { withAuth } from "./contexts/AuthContext";
 import { withAuthGuard } from "./hooks/useAuthGuard";
 import { useInfiniteLicenseKeys } from "./hooks/useQueries";
@@ -56,7 +56,6 @@ function LicenseKeysList() {
     error,
     fetchNextPage,
     hasNextPage,
-    isFetchingNextPage,
   } = useInfiniteLicenseKeys({ limit: 20 });
 
   // Show toast notifications based on query state
@@ -85,8 +84,15 @@ function LicenseKeysList() {
   }, [isLoading, error, licenseKeysData]);
 
   // Flatten all pages into a single array
-  const licenseKeys: LicenseKey[] =
-    licenseKeysData?.pages.flatMap((page) => page.items) || [];
+  const licenseKeys: LicenseKey[] = React.useMemo(
+    () => licenseKeysData?.pages.flatMap((page) => page.items) || [],
+    [licenseKeysData?.pages],
+  );
+
+  const handleFetchNextPage = useCallback(
+    () => fetchNextPage(),
+    [fetchNextPage],
+  );
 
   if (!isLoading && licenseKeys.length === 0) {
     return (
@@ -104,6 +110,11 @@ function LicenseKeysList() {
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search license keys..."
+      pagination={{
+        hasMore: hasNextPage,
+        pageSize: 20,
+        onLoadMore: handleFetchNextPage,
+      }}
       isShowingDetail
     >
       {licenseKeys.map((licenseKey) => (
@@ -225,25 +236,6 @@ function LicenseKeysList() {
           }
         />
       ))}
-
-      {/* Load More Item */}
-      {(hasNextPage || isFetchingNextPage) && (
-        <List.Item
-          title={
-            isFetchingNextPage ? "Loading more..." : "Load more license keys"
-          }
-          icon={isFetchingNextPage ? Icon.Clock : Icon.ChevronDown}
-          actions={
-            <ActionPanel>
-              <Action
-                title="Load More"
-                onAction={() => fetchNextPage()}
-                icon={Icon.ChevronDown}
-              />
-            </ActionPanel>
-          }
-        />
-      )}
     </List>
   );
 }

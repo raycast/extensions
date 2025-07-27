@@ -7,7 +7,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import React from "react";
+import React, { useCallback } from "react";
 import { withAuth } from "./contexts/AuthContext";
 import { withAuthGuard } from "./hooks/useAuthGuard";
 import { useInfinitePayouts } from "./hooks/useQueries";
@@ -45,8 +45,7 @@ function PayoutsList() {
     error,
     fetchNextPage,
     hasNextPage,
-    isFetchingNextPage,
-  } = useInfinitePayouts({ limit: 20 });
+  } = useInfinitePayouts({ limit: 50 });
 
   // Show toast notifications based on query state
   React.useEffect(() => {
@@ -74,8 +73,15 @@ function PayoutsList() {
   }, [isLoading, error, payoutsData]);
 
   // Flatten all pages into a single array
-  const payouts: PayoutListResponse[] =
-    payoutsData?.pages.flatMap((page) => page.items) || [];
+  const payouts: PayoutListResponse[] = React.useMemo(
+    () => payoutsData?.pages.flatMap((page) => page.items) || [],
+    [payoutsData?.pages],
+  );
+
+  const handleFetchNextPage = useCallback(
+    () => fetchNextPage(),
+    [fetchNextPage],
+  );
 
   if (!isLoading && payouts.length === 0) {
     return (
@@ -93,6 +99,11 @@ function PayoutsList() {
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search payouts..."
+      pagination={{
+        hasMore: hasNextPage,
+        pageSize: 20,
+        onLoadMore: handleFetchNextPage,
+      }}
       isShowingDetail
     >
       {payouts.map((payout) => (
@@ -240,23 +251,6 @@ function PayoutsList() {
           }
         />
       ))}
-
-      {/* Load More Item */}
-      {(hasNextPage || isFetchingNextPage) && (
-        <List.Item
-          title={isFetchingNextPage ? "Loading more..." : "Load more payouts"}
-          icon={isFetchingNextPage ? Icon.Clock : Icon.ChevronDown}
-          actions={
-            <ActionPanel>
-              <Action
-                title="Load More"
-                onAction={() => fetchNextPage()}
-                icon={Icon.ChevronDown}
-              />
-            </ActionPanel>
-          }
-        />
-      )}
     </List>
   );
 }
