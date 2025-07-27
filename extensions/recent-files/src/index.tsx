@@ -7,6 +7,8 @@ import {
   getPreferenceValues,
   Icon,
   openExtensionPreferences,
+  Clipboard,
+  closeMainWindow,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { promises as fs } from "fs";
@@ -53,7 +55,7 @@ async function getRecentFiles(directories: string[]): Promise<FileInfo[]> {
 
 async function getFilesFromDirectory(directory: string): Promise<FileInfo[]> {
   try {
-    // ディレクトリが存在するか確認
+    // Check if directory exists and is accessible
     try {
       await fs.access(directory, fs.constants.R_OK);
     } catch (error) {
@@ -74,7 +76,7 @@ async function getFilesFromDirectory(directory: string): Promise<FileInfo[]> {
     const fileInfos: FileInfo[] = [];
 
     for (const file of files) {
-      // 隠しファイルをスキップ
+      // Skip hidden files
       if (file.startsWith(".")) continue;
 
       const filePath = path.join(directory, file);
@@ -89,7 +91,7 @@ async function getFilesFromDirectory(directory: string): Promise<FileInfo[]> {
           parentDirectory: directory,
         });
       } catch (error) {
-        // ファイルへのアクセスができない場合はスキップ
+        // Skip files that cannot be accessed
         console.error(`Cannot access file: ${filePath}`, error);
       }
     }
@@ -206,7 +208,28 @@ export default function Command() {
             }
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard title="Copy Path to Clipboard" content={file.path} />
+                <Action
+                  title="Copy File to Clipboard"
+                  onAction={async () => {
+                    try {
+                      await Clipboard.copy({ file: file.path });
+                      await showToast({
+                        style: Toast.Style.Success,
+                        title: "Copied File",
+                        message: file.name,
+                      });
+                      await closeMainWindow();
+                    } catch (error) {
+                      await showToast({
+                        style: Toast.Style.Failure,
+                        title: "Failed to copy file",
+                        message: String(error),
+                      });
+                    }
+                  }}
+                  icon={Icon.Clipboard}
+                  shortcut={{ modifiers: [], key: "return" }}
+                />
                 <Action.Open title="Open File" target={file.path} shortcut={{ modifiers: ["cmd"], key: "return" }} />
                 <Action.ShowInFinder
                   title="Show in Finder"
@@ -214,16 +237,11 @@ export default function Command() {
                   shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
                 />
                 <Action.CopyToClipboard
-                  title="Copy File Name"
-                  content={file.name}
+                  title="Copy File Path"
+                  content={file.path}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                 />
-                <Action
-                  title="Open Extension Preferences"
-                  onAction={openExtensionPreferences}
-                  icon={Icon.Gear}
-                  shortcut={{ modifiers: ["cmd"], key: "," }}
-                />
+                <Action title="Open Extension Preferences" onAction={openExtensionPreferences} icon={Icon.Gear} />
               </ActionPanel>
             }
           />
