@@ -168,7 +168,6 @@ evals:
           - includes: "matching"
       - or:
           - includes: "profile"
-          - includes: "profile"
           - includes: "handle"
       - or:
           - includes: "recently"

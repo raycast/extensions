@@ -32,20 +32,30 @@ export async function openProfile(
       throw new Error(errorMessage);
     }
 
-    // Normalize profile (remove leading @ if present)
-    const normalizedProfile = profile.startsWith("@") ? profile.slice(1) : profile;
+    // Smart '@' handling: Check if platform's URL template requires '@' symbol
+    const requiresAtSymbol = selectedApp.urlTemplate.includes("@{profile}");
+    
+    let profileToUse: string;
+    if (requiresAtSymbol) {
+      // Platform needs '@' - ensure it's present
+      profileToUse = profile.startsWith("@") ? profile : `@${profile}`;
+    } else {
+      // Platform doesn't need '@' - remove it if present
+      profileToUse = profile.startsWith("@") ? profile.slice(1) : profile;
+    }
 
-    const url = selectedApp.urlTemplate.replace("{profile}", normalizedProfile);
+    const url = selectedApp.urlTemplate.replace("{profile}", profileToUse);
     await open(url);
 
-    // Add to both legacy profile history and new usage history
-    await addToProfileHistory(normalizedProfile);
-    await addToUsageHistory(normalizedProfile, selectedApp.value, selectedApp.name);
+    // Add to both legacy profile history and new usage history (always store without '@' for consistency)
+    const historyProfile = profile.startsWith("@") ? profile.slice(1) : profile;
+    await addToProfileHistory(historyProfile);
+    await addToUsageHistory(historyProfile, selectedApp.value, selectedApp.name);
 
     await showToast({
       style: Toast.Style.Success,
       title: "Profile opened",
-      message: `Opened ${normalizedProfile} on ${selectedApp.name}`,
+      message: `Opened ${historyProfile} on ${selectedApp.name}`,
     });
 
     if (shouldPopToRoot) {

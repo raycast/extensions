@@ -8,20 +8,54 @@ import { App, CustomAppInput, CustomAppUpdate } from "../types";
  * Validates that a value is slug-safe (only contains lowercase letters, numbers, and hyphens)
  */
 function isSlugSafe(value: string): boolean {
-  return /^[a-z0-9-]+$/.test(value);
+  return /^[a-z0-9-]+$/.test(value) && !value.startsWith("-") && !value.endsWith("-");
 }
 
 /**
- * Generates a slug-safe value from a name
+ * Validates that a name contains enough valid characters for slug generation
+ */
+function hasValidCharacters(name: string): boolean {
+  // Check if there are at least some alphanumeric characters
+  return /[a-zA-Z0-9]/.test(name);
+}
+
+/**
+ * Generates a slug-safe value from a name with enhanced validation
  */
 function generateSlugFromName(name: string): string {
-  return name
+  if (!name || typeof name !== 'string') {
+    return "";
+  }
+
+  // Normalize unicode characters and handle different character sets
+  const normalized = name
+    .normalize('NFD') // Decompose accented characters
+    .replace(/[\u0300-\u036f]/g, '') // Remove accent marks
     .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\s-]/g, "") // Remove special characters except spaces and hyphens
-    .replace(/\s+/g, "-") // Replace spaces with hyphens
-    .replace(/-+/g, "-") // Replace multiple hyphens with single hyphen
-    .replace(/^-+|-+$/g, ""); // Remove leading/trailing hyphens
+    .trim();
+
+  // Handle special cases for common patterns
+  let processed = normalized
+    .replace(/[&+]/g, '-and-') // Replace & and + with "-and-"
+    .replace(/[@#$%^*()]/g, '') // Remove special characters
+    .replace(/['"]/g, '') // Remove quotes
+    .replace(/[.,;:!?]/g, '') // Remove punctuation
+    .replace(/[^a-z0-9\s-]/g, '') // Remove any remaining special characters except spaces and hyphens
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+    .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+
+  // If result is empty or too short, try a more permissive approach
+  if (!processed || processed.length < 2) {
+    // Try preserving more characters
+    processed = normalized
+      .replace(/[^a-z0-9\s-]/g, '') // Only remove non-alphanumeric characters (except spaces and hyphens)
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+
+  return processed;
 }
 
 /**
