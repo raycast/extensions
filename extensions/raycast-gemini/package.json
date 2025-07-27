@@ -1159,7 +1159,7 @@
       "title": "Model",
       "type": "dropdown",
       "required": false,
-      "default": "gemini-2.0-flash",
+      "default": "gemini-2.5-flash",
       "data": [
         {
           "title": "Gemini 1.5 Flash (Deprecated Sep25)",
