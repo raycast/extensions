@@ -8,6 +8,10 @@
   "owner": "flashnet",
   "access": "public",
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Web",
     "Finance",
@@ -30,7 +34,7 @@
       "description": "The default network to use",
       "type": "dropdown",
       "required": false,
-      "default": "mainnet",
+      "default": "MAINNET",
       "data": [
         {
           "title": "Mainnet",
@@ -50,6 +54,15 @@
       "required": false,
       "placeholder": "25",
       "default": "25"
+    },
+    {
+      "name": "defaultDetails",
+      "title": "Default Details",
+      "label": "Show Details",
+      "description": "Whether to show details by default in the latest transactions list",
+      "type": "checkbox",
+      "required": false,
+      "default": false
     }
   ],
   "commands": [
@@ -72,12 +85,20 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "get-stats",
+      "title": "Get Spark Network Statistics",
+      "description": "Get the latest statistics for the Spark network"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.101.1",
     "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
+    "@sparkscan/api-types": "^0.1.6",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",

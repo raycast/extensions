@@ -1,70 +1,17 @@
-import { Action, ActionPanel, List, getPreferenceValues, Icon } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
+
+import type { GetLatestTransactionsV1TxLatestGetQuery, LatestNetworkTransactionItem } from "@sparkscan/api-types";
 import { useState } from "react";
+
+import { BASE_HEADERS } from "./lib/constants";
+import type { Preferences } from "./lib/preferences";
+import { addRaycastUTM } from "./lib/url";
 import { capitalize, formatTimestamp, getTypeLabel, truncateKey } from "./lib/utils";
 
-interface Preferences {
-  transactionLimit: string;
-  defaultNetwork: "MAINNET" | "REGTEST";
-}
+type Result = GetLatestTransactionsV1TxLatestGetQuery["Response"] | GetLatestTransactionsV1TxLatestGetQuery["Errors"];
 
-type Tx = {
-  id: string;
-  type: string;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-  amountSats: number;
-  tokenAmount: number;
-  tokenMetadata: {
-    tokenIdentifier: string;
-    tokenAddress: string;
-    name: string;
-    ticker: string;
-    decimals: number;
-    issuerPublicKey: string;
-    maxSupply: number;
-    isFreezable: true;
-  };
-  multiIoDetails: {
-    inputs: [
-      {
-        address: string;
-        pubkey: string;
-        amount: number;
-      },
-    ];
-    outputs: [
-      {
-        address: string;
-        pubkey: string;
-        amount: number;
-      },
-    ];
-    totalInputAmount: number;
-    totalOutputAmount: number;
-  };
-  from: {
-    type: string;
-    identifier: string;
-    pubkey: string;
-  };
-  to: {
-    type: string;
-    identifier: string;
-    pubkey: string;
-  };
-  bitcoinTxid: string;
-  valueUsd: number;
-};
-
-type Result =
-  | Array<Tx>
-  | {
-      detail: unknown[];
-    };
-
-function getSenderAndRecipientAddresses(tx: Tx): string[] {
+function getSenderAndRecipientAddresses(tx: LatestNetworkTransactionItem): string[] {
   const keywords = [];
 
   if (tx.from?.pubkey || tx.from?.identifier) {
@@ -78,7 +25,7 @@ function getSenderAndRecipientAddresses(tx: Tx): string[] {
   return keywords;
 }
 
-function getTokenSenderAndRecipientKeywords(tx: Tx): string[] {
+function getTokenSenderAndRecipientKeywords(tx: LatestNetworkTransactionItem): string[] {
   if (tx.type === "token_multi_transfer" && tx.multiIoDetails) {
     const { inputs = [], outputs = [] } = tx.multiIoDetails as {
       inputs: Array<{ address?: string }>;
@@ -100,7 +47,7 @@ function getTokenSenderAndRecipientKeywords(tx: Tx): string[] {
 // Produce a human-readable label for either the sender (isSender = true)
 // or recipient (isSender = false) based on transaction details. Mirrors
 // the logic used in the Sparkscan web app but simplified for Raycast.
-const getAddressLabel = (tx: Tx, isSender: boolean): string => {
+const getAddressLabel = (tx: LatestNetworkTransactionItem, isSender: boolean): string => {
   // Handle token_multi_transfer separately – potentially many inputs/outputs
   if (tx.type === "token_multi_transfer" && tx.multiIoDetails) {
     const { inputs = [], outputs = [] } = tx.multiIoDetails as {
@@ -156,10 +103,10 @@ const getMempoolBaseUrl = (network: string) => {
 };
 
 // Remove hyphens from Spark transaction IDs so they match Sparkscan routing
-const removeHyphens = (id: string) => id.replace(/-/g, "");
+const removeHyphens = (id: string) => id.replaceAll("-", "");
 
 // Build the URL that should be opened when the user selects a transaction
-const getTransactionUrl = (tx: Tx, network: string) => {
+const getTransactionUrl = (tx: LatestNetworkTransactionItem, network: string) => {
   // For on-chain Bitcoin transactions we want to open Mempool
   if (tx.type === "bitcoin_deposit" || tx.type === "bitcoin_withdrawal") {
     // Fallback to Sparkscan if, for some reason, there is no Bitcoin txid
@@ -177,6 +124,7 @@ export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
 
   const [network, setNetwork] = useState<"MAINNET" | "REGTEST">(preferences.defaultNetwork);
+  const [details, setDetails] = useState<boolean>(preferences.defaultDetails);
 
   const { data, pagination, isLoading } = useFetch(
     (options) =>
@@ -187,16 +135,20 @@ export default function Command() {
       })}`,
     {
       headers: {
-        "User-Agent": "sparkscan-raycast-extension",
+        ...BASE_HEADERS,
       },
       mapResult(res: Result) {
         // If the API returns an error shape, surface it immediately
-        if ("detail" in res) throw new Error("Failed to fetch latest transactions");
+        if ("detail" in res) {
+          console.error("Failed to fetch latest transactions", res.detail);
+          throw new Error("Failed to fetch latest transactions");
+        }
+        const data = res as GetLatestTransactionsV1TxLatestGetQuery["Response"];
 
         // Expose the raw array through the `data` field expected by Raycast's `useFetch`
         return {
-          data: res,
-          hasMore: res.length === Number(preferences.transactionLimit),
+          data,
+          hasMore: data.length === Number(preferences.transactionLimit),
         };
       },
       keepPreviousData: true,
@@ -207,7 +159,7 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
-      isShowingDetail={true}
+      isShowingDetail={details}
       navigationTitle="Latest transactions"
       searchBarPlaceholder="Search by Address / Transaction ID / Token"
       searchBarAccessory={
@@ -237,10 +189,18 @@ export default function Command() {
             keywords={[...getSenderAndRecipientAddresses(item), item.id, ...getTokenSenderAndRecipientKeywords(item)]}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser url={getTransactionUrl(item, network.toUpperCase())} />
+                <Action.OpenInBrowser
+                  url={addRaycastUTM(getTransactionUrl(item, network.toUpperCase()), "latest-transactions")}
+                />
                 <Action.CopyToClipboard
                   shortcut={{ modifiers: ["cmd"], key: "c" }}
-                  content={getTransactionUrl(item, network.toUpperCase())}
+                  content={addRaycastUTM(getTransactionUrl(item, network.toUpperCase()), "latest-transactions")}
+                />
+                <Action
+                  title={details ? "Hide Details" : "Show Details"}
+                  shortcut={{ modifiers: ["cmd"], key: "d" }}
+                  icon={Icon.Info}
+                  onAction={() => setDetails(!details)}
                 />
               </ActionPanel>
             }
@@ -260,7 +220,7 @@ export default function Command() {
                     />
                     <List.Item.Detail.Metadata.Label
                       title="Timestamp"
-                      text={formatTimestamp(item.createdAt)}
+                      text={formatTimestamp(item.createdAt || undefined)}
                       icon={Icon.Clock}
                     />
                     <List.Item.Detail.Metadata.Label
