@@ -29,17 +29,10 @@ export function ViewLogs() {
   }
 
   async function clearLogs() {
-    await showToast({
-      style: Toast.Style.Animated,
-      title: "Clearing logs...",
-    });
-    
-    await LocalStorage.removeItem("executionLogs");
-    setLogs([]);
-
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Logs cleared",
+    const confirmed = await showToast({
+      style: Toast.Style.Failure,
+      title: "Clear All Logs",
+      message: "Are you sure you want to clear all execution logs?",
     });
 
     if (confirmed) {
