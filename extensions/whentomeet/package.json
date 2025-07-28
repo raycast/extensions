@@ -22,7 +22,6 @@
     {
       "name": "create-event",
       "title": "Create Whentomeet Event Using AI",
-      "subtitle": "WhenToMeet",
       "description": "Create a WhenToMeet event using natural language. Describe your event and get a pre-filled URL with time slots.",
       "mode": "view",
       "keywords": [
