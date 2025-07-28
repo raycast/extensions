@@ -47,6 +47,55 @@
       "description": "Creates a new WhenToMeet event with the specified title, description, time slots, and duration"
     }
   ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@whentomeet Create a team standup meeting for tomorrow at 9am and 10am for 30 minutes",
+        "mocks": {
+          "create-whentomeet-event": {
+            "message": "Successfully created WhenToMeet event \"Team Standup\" with 2 time slot(s)",
+            "slotCount": 2,
+            "slotLength": 30,
+            "title": "Team Standup",
+            "url": "https://whentomeet.io/events/new?title=Team+Standup&slotLength=30&slots=2025-07-29T09%3A00%3A00%2C2025-07-29T09%3A30%3A00&slots=2025-07-29T10%3A00%3A00%2C2025-07-29T10%3A30%3A00"
+          },
+          "get-current-time": {
+            "currentTime": "2025-07-28T20:43:03.617Z",
+            "day": 28,
+            "dayOfWeek": 1,
+            "hour": 22,
+            "minute": 43,
+            "month": 7,
+            "timezone": "Europe/Berlin",
+            "year": 2025
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-current-time"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "slotLength": 30,
+                "slots": {
+                  "eq": [
+                    "2025-07-29T09:00:00,2025-07-29T09:30:00",
+                    "2025-07-29T10:00:00,2025-07-29T10:30:00"
+                  ]
+                },
+                "title": "Team Standup"
+              },
+              "name": "create-whentomeet-event"
+            }
+          }
+        ]
+      }
+    ]
+  },
   "preferences": [],
   "dependencies": {
     "@raycast/api": "^1.101.1",
