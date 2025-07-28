@@ -1,19 +1,18 @@
-
 # OpenProject Raycast Extension (Unofficial)
 
 An **unofficial** Raycast extension for managing your OpenProject tickets directly from Raycast.
 
-> **⚠️ Important Notice**: This extension is **not officially** developed or supported by OpenProject GmbH. This is a community project that uses the public OpenProject API.
+**⚠️ Important Notice**: This extension is **not officially** developed or supported by OpenProject GmbH. This is a community project that uses the public OpenProject API.
 
 ## Features
 
-- **Create Tickets**: Create new tickets with all essential fields
-- **Search Tickets**: Search through your tickets by title
-- **Update Tickets**: Edit existing tickets with a two-step process
-- **Project Integration**: Work with all your OpenProject projects
-- **User Assignment**: Assign tickets directly to team members
-- **Priority Management**: Set and update ticket priorities
-- **Status Updates**: Change ticket status (New → In Progress → Closed, etc.)
+- Create Tickets: Create new tickets with all essential fields
+- Search Tickets: Search through your tickets by title
+- Update Tickets: Edit existing tickets with a two-step process
+- Project Integration: Work with all your OpenProject projects
+- User Assignment: Assign tickets directly to team members
+- Priority Management: Set and update ticket priorities
+- Status Updates: Change ticket status (New → In Progress → Closed, etc.)
 
 ## Installation
 
@@ -83,7 +82,6 @@ npm run fix-lint
 src/
 ├── api.ts              # OpenProject API client
 ├── create-ticket.tsx   # Create ticket command
-├── search-tickets.tsx  # Search tickets command
 └── update-ticket.tsx   # Update ticket command
 ```
 
