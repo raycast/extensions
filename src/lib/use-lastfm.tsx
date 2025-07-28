@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import {
   AlbumResponse,
@@ -93,36 +93,52 @@ async function fetchLastFmData<T>(method: LastFmMethod, params?: LastFmParams): 
 }
 
 export function useLastFm<T>(method: LastFmMethod, params?: LastFmParams): UseLastFmResult<T> {
-  const { username, apikey, limit, view, period } = getPreferenceValues<ExtensionPreferences>();
+  const { username, apikey, limit, period } = getPreferenceValues<ExtensionPreferences>();
 
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [timestamp, setTimestamp] = useState(Date.now());
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const fetchData = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await fetchLastFmData<T>(method, params);
-      setData(result);
-    } catch (err: unknown) {
-      let errorMessage = "An unknown error occurred.";
-      if (err instanceof Error) {
-        errorMessage = err.message;
-      } else if (typeof err === "string") {
-        errorMessage = err;
-      }
-      setError(errorMessage);
-      setData(null);
-    } finally {
-      setLoading(false);
+  const fetchData = useCallback(async () => {
+    // Clear any existing timer
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
     }
-  };
+
+    // Debounce API calls by 500ms to prevent rapid successive requests
+    debounceTimer.current = setTimeout(async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const result = await fetchLastFmData<T>(method, params);
+        setData(result);
+      } catch (err: unknown) {
+        let errorMessage = "An unknown error occurred.";
+        if (err instanceof Error) {
+          errorMessage = err.message;
+        } else if (typeof err === "string") {
+          errorMessage = err;
+        }
+        setError(errorMessage);
+        setData(null);
+      } finally {
+        setLoading(false);
+      }
+    }, 500);
+  }, [method, params]);
 
   useEffect(() => {
     fetchData();
-  }, [method, username, apikey, period, limit, view, timestamp, params]);
+
+    // Cleanup timer on unmount
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+    };
+  }, [method, username, apikey, period, limit, timestamp, fetchData]);
 
   const revalidate = () => {
     setTimestamp(Date.now());
