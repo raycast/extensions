@@ -41,6 +41,7 @@ export default async function tool(input: Input) {
   const data = result as GetNetworkStatsV1StatsSummaryGetQuery["Response"];
 
   return {
+    network,
     totalValueLockedSats: data?.totalValueLockedSats,
     totalValueLockedUsd: data?.totalValueLockedUsd,
     activeAccounts: data?.activeAccounts,

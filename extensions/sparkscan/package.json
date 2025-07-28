@@ -83,6 +83,13 @@
       "title": "View Latest Transactions",
       "description": "View the latest transactions on the selected network",
       "mode": "view"
+    },
+    {
+      "name": "menu-bar-stats-and-status",
+      "title": "Stats & Status",
+      "description": "View statistics and status of the Spark network",
+      "mode": "menu-bar",
+      "interval": "10m"
     }
   ],
   "tools": [
@@ -90,6 +97,11 @@
       "name": "get-stats",
       "title": "Get Spark Network Statistics",
       "description": "Get the latest statistics for the Spark network"
+    },
+    {
+      "name": "get-status",
+      "title": "Get Sparkscan Status",
+      "description": "Get the status of the Sparkscan API"
     }
   ],
   "dependencies": {
