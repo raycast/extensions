@@ -48,6 +48,15 @@ This project uses **husky** to run checks before each commit. The `pre-commit` h
 skips when only Markdown files or comment changes are staged. Otherwise it runs
 `npm run lint` followed by the test script in `run-tests.tsx`.
 
+#### See Also
+
+- https://developers.raycast.com/basics/prepare-an-extension-for-store
+- https://developers.raycast.com/basics/publish-an-extension
+- https://developers.raycast.com/basics/prepare-an-extension-for-store#metadata-and-configuration
+
+**Key Terms:**  
+**Related Topics:**
+
 ## License
 
 [MIT](https://opensource.org/licenses/MIT)
