@@ -2,6 +2,18 @@ import type { Grid, List } from "@raycast/api";
 
 export type periodTypes = "7day" | "1month" | "3month" | "6month" | "12month" | "overall";
 
+/**
+ * ActionPanel component type
+ *
+ * Using `any` here is intentional and necessary due to React type conflicts:
+ * - Project uses @types/react@^19.1.4
+ * - Raycast API uses @types/react@19.0.10
+ * - These versions have incompatible ReactNode definitions
+ * - ActionPanel JSX elements work correctly at runtime
+ * - This represents ActionPanel components passed to List.Item and Grid.Item actions prop
+ */
+export type ActionPanelComponent = any;
+
 export interface ExtensionPreferences {
   username: string;
   apikey: string;
@@ -113,7 +125,7 @@ export interface ItemProps {
   subtitle?: string;
   accessories?: List.Item.Accessory[];
   accessory?: Grid.Item.Accessory;
-  actions?: React.ReactNode;
+  actions?: ActionPanelComponent;
 }
 
 export interface ResultItemProps {

@@ -18,7 +18,7 @@ interface Props {
 const useTopAlbums = (props: Props) => {
   try {
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<any>(null);
+    const [error, setError] = useState<Error | null>(null);
     const [albums, setAlbums] = useState<Album[]>([]);
 
     const fetcher = (url: string) => fetch(url).then((r) => r.json() as Promise<AlbumResponse>);
@@ -40,7 +40,8 @@ const useTopAlbums = (props: Props) => {
           }
         },
         onError: (err: unknown) => {
-          setError(err);
+          const error = err instanceof Error ? err : new Error("An unknown error occurred");
+          setError(error);
           setLoading(false);
         },
       }
@@ -52,9 +53,10 @@ const useTopAlbums = (props: Props) => {
       albums,
     };
   } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
     return {
       loading: false,
-      error: (err as any)?.mesage || null,
+      error: errorMessage,
       albums: [],
     };
   }

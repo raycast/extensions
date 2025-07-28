@@ -42,7 +42,9 @@ const Command: React.FC = () => {
         return;
       }
 
-      setToken(tokenResponse.data!);
+      if (tokenResponse.data) {
+        setToken(tokenResponse.data);
+      }
       setIsLoading(false);
     }
 
@@ -86,8 +88,8 @@ const Command: React.FC = () => {
                   setIsAuthenticated(false);
                   setToken(null);
                   const tokenResponse = await getAuthToken();
-                  if (tokenResponse.success) {
-                    setToken(tokenResponse.data!);
+                  if (tokenResponse.success && tokenResponse.data) {
+                    setToken(tokenResponse.data);
                   }
                 }}
               />
@@ -136,8 +138,10 @@ const Command: React.FC = () => {
                 }
 
                 try {
-                  await storeSessionKey(sessionResponse.data!);
-                  setIsAuthenticated(true);
+                  if (sessionResponse.data) {
+                    await storeSessionKey(sessionResponse.data);
+                    setIsAuthenticated(true);
+                  }
                   await showToast(
                     ToastStyle.Success,
                     "Authentication Successful",

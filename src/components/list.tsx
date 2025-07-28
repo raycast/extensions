@@ -1,4 +1,16 @@
+import React from "react";
 import { List } from "@raycast/api";
+
+/**
+ * ActionPanel component type
+ *
+ * Using `any` here is intentional and necessary due to React type conflicts:
+ * - Project uses @types/react@^19.1.4
+ * - Raycast API uses @types/react@19.0.10
+ * - These versions have incompatible ReactNode definitions
+ * - ActionPanel JSX elements work correctly at runtime
+ */
+type ActionPanelComponent = any;
 
 interface ListItemProps {
   key: string;
@@ -6,7 +18,7 @@ interface ListItemProps {
   subtitle?: string;
   icon?: string;
   accessories?: Array<{ text: string | null }>;
-  actions?: any;
+  actions?: ActionPanelComponent;
 }
 
 interface ListResultsProps {

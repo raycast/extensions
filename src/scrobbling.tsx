@@ -1,15 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  List,
-  showToast,
-  Toast,
-  Icon,
-  Color,
-  useNavigation,
-  LocalStorage,
-} from "@raycast/api";
+import { Action, ActionPanel, List, showToast, Toast, Icon, Color, LocalStorage } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { getCurrentPlayerState } from "./functions/applescript/index";
 import { getQueueStats, clearQueue, processQueue } from "./functions/scrobble/index";

@@ -1,4 +1,4 @@
-import { LaunchProps, showToast, Toast, getPreferenceValues, LocalStorage } from "@raycast/api";
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { getCurrentPlayerState } from "./functions/applescript/index";
 import { updateNowPlaying, scrobbleTracks, processQueue } from "./functions/scrobble/index";
 import type { TrackInfo, PlayerState } from "./functions/applescript/types";
@@ -58,7 +58,7 @@ async function saveState(state: ScrobbleState): Promise<void> {
 /**
  * Log messages with timestamp for debugging
  */
-function log(message: string, data?: any) {
+function log(message: string, data?: unknown) {
   const timestamp = new Date().toLocaleTimeString();
   if (data) {
     console.log(`[${timestamp}] Background: ${message}`, data);
@@ -88,7 +88,7 @@ function isSameTrack(track1: TrackInfo | null, track2: TrackInfo | null): boolea
 /**
  * Handle track change or new track detection
  */
-async function handleTrackChange(track: TrackInfo, playerName: string, state: ScrobbleState): Promise<ScrobbleState> {
+async function handleTrackChange(track: TrackInfo, playerName: string): Promise<ScrobbleState> {
   log(`New track detected: "${track.name}" by ${track.artist}`, {
     duration: track.duration,
     album: track.album,
@@ -211,7 +211,7 @@ async function processBackground(): Promise<void> {
         await scrobbleTrackOnEnd(currentState.lastTrack, currentState);
       }
 
-      currentState = await handleTrackChange(track, playerName, currentState);
+      currentState = await handleTrackChange(track, playerName);
       await saveState(currentState);
       return;
     }
@@ -252,7 +252,7 @@ async function processQueuedScrobbles() {
 /**
  * Background command entry point
  */
-export default async function Command(props: LaunchProps) {
+export default async function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const interval = parseInt(preferences.scrobbleInterval) || 30; // Default 30 seconds
 

@@ -7,7 +7,7 @@ import { GridResults } from "./components/grid";
 
 const RecentTracks: React.FC = () => {
   const { view } = getPreferenceValues();
-  const { loading, error, songs, revalidate } = useRecentTracks();
+  const { loading, error, songs } = useRecentTracks();
 
   if (error !== null) {
     showToast(Toast.Style.Failure, "Something went wrong.", String(error));
