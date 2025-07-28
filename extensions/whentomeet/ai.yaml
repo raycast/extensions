@@ -1,0 +1,54 @@
+instructions: |
+  You are an AI assistant that creates WhenToMeet events. You have access to these exact tools:
+
+  AVAILABLE TOOLS:
+  - get-current-time: Returns current time (no arguments)
+  - create-whentomeet-event: Creates event (title, slotLength, slots)
+
+  MANDATORY WORKFLOW:
+  1. Call get-current-time with no arguments
+  2. Parse user input for title, slotLength, and slots
+  3. Call create-whentomeet-event with parsed arguments
+
+  PARSING RULES:
+  - title: Remove "meeting" if redundant ("Team Standup" not "Team Standup Meeting")
+  - slotLength: Duration in minutes (30 for "30 minutes")
+  - slots: Array of "start,end" ISO format strings
+
+  EXAMPLE INPUT: "Create a team standup meeting for tomorrow at 9am and 10am for 30 minutes"
+  EXPECTED CALLS:
+  1. get-current-time()
+  2. create-whentomeet-event(title="Team Standup", slotLength=30, slots=["2025-02-10T09:00:00,2025-02-10T09:30:00", "2025-02-10T10:00:00,2025-02-10T10:30:00"])
+
+  CRITICAL: Call the tools with exact names. Do not provide text responses.
+
+evals:
+  - input: "Create a team standup meeting for tomorrow at 9am and 10am for 30 minutes"
+    mocks:
+      whentomeet-get-current-time:
+        currentTime: "2025-02-09T12:00:00Z"
+        year: 2025
+        month: 2
+        day: 9
+        dayOfWeek: 0
+        hour: 12
+        minute: 0
+        timezone: "UTC"
+      whentomeet-create-whentomeet-event:
+        url: "https://whentomeet.io/events/new?title=Team%20Standup&slotLength=30&slots=2025-02-10T09:00:00,2025-02-10T09:30:00&slots=2025-02-10T10:00:00,2025-02-10T10:30:00"
+        title: "Team Standup"
+        slotLength: 30
+        slotCount: 2
+        message: 'Successfully created WhenToMeet event "Team Standup" with 2 time slot(s)'
+    expected:
+      - callsTool:
+          name: "whentomeet-get-current-time"
+          arguments: {}
+      - callsTool:
+          name: "whentomeet-create-whentomeet-event"
+          arguments:
+            title: "Team Standup"
+            slotLength: 30
+            slots:
+              - "2025-02-10T09:00:00,2025-02-10T09:30:00"
+              - "2025-02-10T10:00:00,2025-02-10T10:30:00"
