@@ -131,7 +131,7 @@ export default function Command() {
           output = await runArtisan("route:list --json", projectRoot);
         } catch {
           // Fallback to regular format if JSON not supported
-          console.warn("JSON format not supported, falling back to table format:", jsonError);
+          console.warn("JSON format not supported, falling back to table format");
           output = await runArtisan("route:list", projectRoot);
         }
 

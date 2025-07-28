@@ -113,7 +113,7 @@ export default function RunArtisanCommand() {
       await showToast({
         style: Toast.Style.Success,
         title: "Command Completed",
-        message: `php artisan ${values.command} in ${formatProjectInfo(projectRoot)}`,
+        message: `php artisan ${values.command} in ${formatProjectInfo(cwd)}`,
       });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);

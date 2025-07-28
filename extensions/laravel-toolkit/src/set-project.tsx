@@ -74,7 +74,7 @@ export default function Command() {
         <List.EmptyView
           title="No Projects Found"
           description="Use 'Laravel: Add Project' to add your first project"
-          icon={Icon.FolderOpen}
+          icon={Icon.Folder}
         />
       )}
     </List>

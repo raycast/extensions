@@ -28,8 +28,8 @@ export default function TailLaravelLog() {
 
       await showToast({ style: Toast.Style.Animated, title: "Tailing Laravel Log…" });
       tailProcess = spawn("tail", ["-n", "50", "-F", logPath]);
-      tailProcess.stdout.setEncoding("utf8");
-      tailProcess.stdout.on("data", (data: Buffer) => {
+      tailProcess.stdout?.setEncoding("utf8");
+      tailProcess.stdout?.on("data", (data: Buffer) => {
         const newLines = data
           .toString()
           .split("\n")

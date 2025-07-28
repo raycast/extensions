@@ -75,41 +75,39 @@ export default function ProjectList() {
   const projectEntries = Object.entries(projects);
 
   return (
-    <List
-      searchBarPlaceholder="Search Laravel projects..."
-      isLoading={isLoading}
-      emptyView={
+    <List searchBarPlaceholder="Search Laravel projects..." isLoading={isLoading}>
+      {projectEntries.length === 0 && !isLoading ? (
         <List.EmptyView
           title="No Laravel Projects"
           description="Use 'Laravel: Add Project' to add your first project"
-          icon={Icon.FolderOpen}
+          icon={Icon.Folder}
         />
-      }
-    >
-      {projectEntries.map(([name, path]) => (
-        <List.Item
-          key={name}
-          title={name}
-          subtitle={path}
-          icon={activeProject === path ? Icon.CheckCircle : Icon.Circle}
-          accessories={activeProject === path ? [{ text: "Active", icon: Icon.Star }] : undefined}
-          actions={
-            <ActionPanel>
-              <Action
-                title="Set as Active Project"
-                icon={Icon.CheckCircle}
-                onAction={() => handleSetActive(name, path)}
-              />
-              <Action
-                title="Remove Project"
-                icon={Icon.Trash}
-                style={Action.Style.Destructive}
-                onAction={() => handleRemoveProject(name, path)}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+      ) : (
+        projectEntries.map(([name, path]) => (
+          <List.Item
+            key={name}
+            title={name}
+            subtitle={path}
+            icon={activeProject === path ? Icon.CheckCircle : Icon.Circle}
+            accessories={activeProject === path ? [{ text: "Active", icon: Icon.Star }] : undefined}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Set as Active Project"
+                  icon={Icon.CheckCircle}
+                  onAction={() => handleSetActive(name, path)}
+                />
+                <Action
+                  title="Remove Project"
+                  icon={Icon.Trash}
+                  style={Action.Style.Destructive}
+                  onAction={() => handleRemoveProject(name, path)}
+                />
+              </ActionPanel>
+            }
+          />
+        ))
+      )}
     </List>
   );
 }
