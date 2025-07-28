@@ -1,17 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  DuckDuckGoImage,
-  imageNextSearch,
-  imageSearch,
-  ImageSearchResult,
-} from "./search";
-import {
-  DEFAULT_RETRIES,
-  DEFAULT_SLEEP,
-  HEADERS,
-  ImageLayouts,
-  ImageLicenses,
-} from "./consts";
+import { DuckDuckGoImage, imageNextSearch, imageSearch, ImageSearchResult } from "./search";
+import { DEFAULT_RETRIES, DEFAULT_SLEEP, HEADERS, ImageLayouts, ImageLicenses } from "./consts";
 import { getCachedImagePath, setCachedImagePath } from "./cache";
 import axios from "axios";
 import { tmpdir } from "os";
@@ -38,12 +27,7 @@ interface SearchImageParams {
   layout?: ImageLayouts;
 }
 
-export async function searchImage({
-  query,
-  cursor,
-  signal,
-  layout,
-}: SearchImageParams): Promise<ImageSearchResult> {
+export async function searchImage({ query, cursor, signal, layout }: SearchImageParams): Promise<ImageSearchResult> {
   if (!query) {
     return emptyResult;
   }
@@ -60,13 +44,7 @@ export async function searchImage({
 
   try {
     if (cursor) {
-      return await imageNextSearch(
-        cursor.next,
-        cursor.vqd,
-        retries,
-        sleep,
-        signal,
-      );
+      return await imageNextSearch(cursor.next, cursor.vqd, retries, sleep, signal);
     }
     return await imageSearch(
       query,
@@ -119,10 +97,7 @@ export async function downloadImage(
   const contentType = response.headers["content-type"];
   const extension = mime.extension(contentType);
 
-  filePath = path.join(
-    tmpdir(),
-    image_token + (extension ? `.${extension}` : ""),
-  );
+  filePath = path.join(tmpdir(), image_token + (extension ? `.${extension}` : ""));
 
   await fs.promises.writeFile(filePath, response.data);
   setCachedImagePath(image_token, filePath);
