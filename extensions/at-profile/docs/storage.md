@@ -7,6 +7,7 @@ This document describes the LocalStorage schema used by the @-profile extension,
 The extension uses three primary LocalStorage keys to store user data:
 
 ### 1. `profileHistory`: `string[]`
+
 Stores a list of previously used profiles for autocomplete and quick access.
 
 - **Type**: Array of strings
@@ -15,11 +16,13 @@ Stores a list of previously used profiles for autocomplete and quick access.
 - **Example**: `["johndoe", "jane_smith", "developer123"]`
 
 ### 2. `appSettings`: `AppSetting[]`
+
 Stores user preferences for each app (enabled/disabled state).
 
 - **Type**: Array of objects with `{ value: string; enabled: boolean }`
 - **Purpose**: Allows users to enable/disable specific platforms
 - **Example**:
+
   ```json
   [
     { "value": "github", "enabled": true },
@@ -29,12 +32,14 @@ Stores user preferences for each app (enabled/disabled state).
   ```
 
 ### 3. `customApps`: `Site[]`
+
 Stores user-defined custom apps with the same shape as default platforms.
 
 - **Type**: Array of `Site` objects
 - **Schema**: `{ name: string; value: string; urlTemplate: string }`
 - **Purpose**: Allows users to add custom social platforms
 - **Example**:
+
   ```json
   [
     {
@@ -52,7 +57,6 @@ The following constants are defined in `src/apps.ts`:
 ```typescript
 export const STORAGE_KEYS = {
   PROFILE_HISTORY: 'profileHistory',
-  USAGE_HISTORY: 'usageHistory',
   APP_SETTINGS: 'appSettings',
   CUSTOM_APPS: 'customApps'
 } as const;
@@ -67,56 +71,22 @@ export const STORAGE_KEYS = {
 - **v1**: Initial version with only `customApps` key
 - **v2**: Added `profileHistory` and `appSettings`, improved custom app storage and handling
 
-## Migration Strategy
-
-### v1 → v2 Migration
-
-The migration from v1 to v2 is handled automatically and transparently:
-
-1. **Preserves existing custom apps**: Data from the legacy `customApps` key is migrated to `customApps`
-2. **Automatic migration**: Occurs on first access to custom apps after upgrade
-3. **Clean up**: Legacy key is removed after successful migration
-4. **Non-destructive**: If migration fails, original data remains intact
-
-#### Migration Process
-
-```typescript
-// Check new key first
-let customAppsJson = await LocalStorage.getItem<string>(STORAGE_KEYS.CUSTOM_PLATFORMS);
-
-// If not found, try legacy key and migrate
-if (!customAppsJson) {
-  const legacycustomAppsJson = await LocalStorage.getItem<string>('customApps');
-  if (legacycustomAppsJson) {
-    // Migrate from v1 to v2
-    await LocalStorage.setItem(STORAGE_KEYS.CUSTOM_PLATFORMS, legacycustomAppsJson);
-    await LocalStorage.removeItem('customApps');
-    customAppsJson = legacycustomAppsJson;
-  }
-}
-```
-
-### Future Migration Considerations
-
-- **Backward Compatibility**: Always maintain compatibility with at least one previous version
-- **Data Preservation**: Ensure no user data is lost during migrations
-- **Versioning Strategy**: Consider adding a schema version key for more complex future migrations
-- **Error Handling**: Implement robust error handling and fallback mechanisms
-- **Testing**: Thoroughly test migrations with various data states
-
 ## API Functions
 
 The following functions are available for interacting with LocalStorage:
 
 ### Profile History
+
 - `getProfileHistory(): Promise<string[]>`
 - `addToProfileHistory(profile: string): Promise<void>`
 
 ### App Settings
+
 - `getAppSettings(): Promise<AppSetting[]>`
 - `updateAppSettings(settings: AppSetting[]): Promise<void>`
 
 ### Custom Apps
+
 - `getCustomApps(): Promise<App[]>`
 - `addCustomApp(app: App): Promise<void>`
 - `removeCustomApp(value: string): Promise<void>`
@@ -127,4 +97,3 @@ The following functions are available for interacting with LocalStorage:
 2. **Handle JSON parsing errors** gracefully with try-catch blocks
 3. **Validate data structure** before storing to prevent corruption
 4. **Keep data size reasonable** to avoid performance issues
-5. **Test migrations thoroughly** before releasing schema changes

@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, LaunchType } from "@raycast/api";
+import { ActionPanel, Action, Icon } from "@raycast/api";
 import { HistoryItem } from "../types";
 
 interface HistoryActionPanelsProps {
@@ -8,7 +8,7 @@ interface HistoryActionPanelsProps {
   onSetSearchText: (text: string) => void;
   onSetAppFilter: (filter: string) => void;
   onFilterByApp: (app: string) => void;
-  OpenProfileCommand: React.ComponentType<{ arguments: { profile: string }; launchType: LaunchType }>;
+  OpenProfileCommand: React.ComponentType<{ arguments: { profile: string } }>;
 }
 
 export function HistoryActionPanels({
@@ -31,7 +31,7 @@ export function HistoryActionPanels({
         // eslint-disable-next-line @raycast/prefer-title-case
         title={`Open @${item.profile} on…`}
         icon={Icon.Terminal}
-        target={<OpenProfileCommand arguments={{ profile: item.profile }} launchType={LaunchType.UserInitiated} />}
+        target={<OpenProfileCommand arguments={{ profile: item.profile }} />}
         shortcut={{ modifiers: ["cmd"], key: "o" }}
       />
       <Action
