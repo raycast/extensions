@@ -28,7 +28,7 @@ const { apikey: API_KEY, apisecret: API_SECRET } = getPreferenceValues();
 function generateApiSignature(params: Record<string, string>): string {
   // Create a new object without format and callback parameters
   const filteredParams = Object.fromEntries(
-    Object.entries(params).filter(([key]) => key !== "format" && key !== "callback")
+    Object.entries(params).filter(([key]) => key !== "format" && key !== "callback"),
   );
 
   // Sort parameters alphabetically by key

@@ -145,7 +145,7 @@ const Command: React.FC = () => {
                   await showToast(
                     ToastStyle.Success,
                     "Authentication Successful",
-                    "You can now use scrobbling features!"
+                    "You can now use scrobbling features!",
                   );
                 } catch (error) {
                   await showToast(ToastStyle.Failure, "Storage Error", "Failed to store authentication data");

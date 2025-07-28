@@ -25,7 +25,7 @@ const createTrackActions = (track: TopTrack) => (
 export const useTopSongs = (tracks: TopTrack[]) => {
   const processedData = useMemo(() => {
     const { view } = getPreferenceValues();
-    
+
     return tracks.map((track, idx) => {
       const image = track.image?.find((img) => img.size === "large")?.["#text"] || "";
 

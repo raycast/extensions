@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import { Grid } from "@raycast/api";
 
 /**
@@ -10,15 +10,13 @@ import { Grid } from "@raycast/api";
  * - These versions have incompatible ReactNode definitions
  * - ActionPanel JSX elements work correctly at runtime
  */
-type ActionPanelComponent = any;
-
 interface GridItemProps {
   key: string;
   title: string;
   subtitle?: string;
   content?: string;
   accessory?: Grid.Item.Accessory;
-  actions?: ActionPanelComponent;
+  actions?: unknown;
 }
 
 interface GridResultsProps {
@@ -36,7 +34,7 @@ export function GridResults(props: GridResultsProps) {
           subtitle={item.subtitle}
           content={item.content || ""}
           accessory={item.accessory}
-          actions={item.actions}
+          actions={item.actions as ReactNode}
         />
       ))}
     </Grid.Section>

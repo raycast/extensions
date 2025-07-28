@@ -44,7 +44,7 @@ const useTopArtists = (props: Props) => {
           setError(error);
           setLoading(false);
         },
-      }
+      },
     );
 
     return {

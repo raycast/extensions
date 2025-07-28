@@ -44,7 +44,7 @@ const useTopAlbums = (props: Props) => {
           setError(error);
           setLoading(false);
         },
-      }
+      },
     );
 
     return {

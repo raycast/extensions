@@ -5,7 +5,6 @@ import { useTopArtists } from "./lib/use-lastfm";
 import { PeriodDropdown } from "./components/period";
 import { ListResults } from "./components/list";
 
-
 // Memoized action panel component
 const ArtistActionPanel = React.memo(({ artist }: { artist: Artist }) => (
   <ActionPanel>
@@ -67,7 +66,7 @@ const TopArtists: React.FC = () => {
   // Memoized search bar accessory
   const searchBarAccessory = useMemo(
     () => <PeriodDropdown selectedPeriod={period} onPeriodChange={onPeriodChange} />,
-    [period, onPeriodChange]
+    [period, onPeriodChange],
   );
 
   return (

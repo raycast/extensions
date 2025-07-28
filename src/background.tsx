@@ -126,7 +126,7 @@ async function handleTrackChange(track: TrackInfo, playerName: string): Promise<
 async function checkScrobbleThreshold(
   track: TrackInfo,
   playedDuration: number,
-  state: ScrobbleState
+  state: ScrobbleState,
 ): Promise<ScrobbleState> {
   if (state.readyToScrobble) return state;
 
@@ -223,8 +223,8 @@ async function processBackground(): Promise<void> {
 
       log(
         `Track progress: ${playedDuration}s / ${track.duration}s (${Math.round(
-          (playedDuration / track.duration) * 100
-        )}%)`
+          (playedDuration / track.duration) * 100,
+        )}%)`,
       );
 
       currentState = await checkScrobbleThreshold(track, playedDuration, currentState);
