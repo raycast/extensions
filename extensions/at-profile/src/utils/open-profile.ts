@@ -34,7 +34,7 @@ export async function openProfile(
 
     // Smart '@' handling: Check if platform's URL template requires '@' symbol
     const requiresAtSymbol = selectedApp.urlTemplate.includes("@{profile}");
-    
+
     let profileToUse: string;
     if (requiresAtSymbol) {
       // Platform needs '@' - ensure it's present

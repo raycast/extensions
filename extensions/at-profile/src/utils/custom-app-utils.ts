@@ -12,50 +12,56 @@ function isSlugSafe(value: string): boolean {
 }
 
 /**
- * Validates that a name contains enough valid characters for slug generation
+ * Generates a stable value from a URL template
+ * This approach is more reliable than name-based slugs since URL templates are unique
  */
-function hasValidCharacters(name: string): boolean {
-  // Check if there are at least some alphanumeric characters
-  return /[a-zA-Z0-9]/.test(name);
-}
-
-/**
- * Generates a slug-safe value from a name with enhanced validation
- */
-function generateSlugFromName(name: string): string {
-  if (!name || typeof name !== 'string') {
+function generateValueFromUrlTemplate(urlTemplate: string): string {
+  if (!urlTemplate || typeof urlTemplate !== "string") {
     return "";
   }
 
-  // Normalize unicode characters and handle different character sets
-  const normalized = name
-    .normalize('NFD') // Decompose accented characters
-    .replace(/[\u0300-\u036f]/g, '') // Remove accent marks
-    .toLowerCase()
-    .trim();
+  try {
+    // Remove {profile} placeholder and create a URL to extract domain
+    const testUrl = urlTemplate.replace(/{profile}/g, "test");
+    const url = new URL(testUrl);
 
-  // Handle special cases for common patterns
-  let processed = normalized
-    .replace(/[&+]/g, '-and-') // Replace & and + with "-and-"
-    .replace(/[@#$%^*()]/g, '') // Remove special characters
-    .replace(/['"]/g, '') // Remove quotes
-    .replace(/[.,;:!?]/g, '') // Remove punctuation
-    .replace(/[^a-z0-9\s-]/g, '') // Remove any remaining special characters except spaces and hyphens
-    .replace(/\s+/g, '-') // Replace spaces with hyphens
-    .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
-    .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+    // Extract domain and remove common prefixes, but keep TLD to avoid collisions
+    let domain = url.hostname
+      .replace(/^www\./i, "") // Remove www.
+      .replace(/^m\./i, "") // Remove m. (mobile)
+      .replace(/^app\./i, ""); // Remove app.
 
-  // If result is empty or too short, try a more permissive approach
-  if (!processed || processed.length < 2) {
-    // Try preserving more characters
-    processed = normalized
-      .replace(/[^a-z0-9\s-]/g, '') // Only remove non-alphanumeric characters (except spaces and hyphens)
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-+|-+$/g, '');
+    // Replace dots with hyphens to make it slug-safe (e.g., mastodon.social → mastodon-social)
+    domain = domain.replace(/\./g, "-");
+
+    // Handle special cases for subdomains or paths
+    if (url.pathname && url.pathname !== "/" && url.pathname !== "/test") {
+      const pathPart = url.pathname
+        .replace(/\/test$/i, "") // Remove our test placeholder
+        .replace(/^\//i, "") // Remove leading slash
+        .split("/")[0] // Take first path segment
+        .replace(/[^a-z0-9]/gi, ""); // Clean up
+
+      if (pathPart && pathPart.length > 0) {
+        domain = `${domain}-${pathPart}`;
+      }
+    }
+
+    // Clean and return
+    return domain
+      .toLowerCase()
+      .replace(/[^a-z0-9-]/g, "") // Only allow alphanumeric and hyphens
+      .replace(/-+/g, "-") // Replace multiple hyphens
+      .replace(/^-+|-+$/g, ""); // Remove leading/trailing hyphens
+  } catch (error) {
+    // Fallback: create a hash-like identifier from the URL template
+    return urlTemplate
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .substring(0, 20); // Limit length
   }
-
-  return processed;
 }
 
 /**
@@ -96,18 +102,18 @@ async function validateCustomAppInput(
     errors.push("URL template must contain {profile} placeholder");
   }
 
-  // Generate and validate slug
-  if (input.name?.trim()) {
-    const slug = generateSlugFromName(input.name);
+  // Generate and validate value from URL template
+  if (input.urlTemplate?.trim()) {
+    const value = generateValueFromUrlTemplate(input.urlTemplate);
 
-    if (!slug) {
-      errors.push("App name must contain at least one alphanumeric character");
-    } else if (!isSlugSafe(slug)) {
-      errors.push("App name generates invalid slug (must only contain lowercase letters, numbers, and hyphens)");
+    if (!value) {
+      errors.push("URL template must generate a valid identifier");
+    } else if (!isSlugSafe(value)) {
+      errors.push("App URL generated invalid identifier (must only contain lowercase letters, numbers, and hyphens)");
     } else {
-      const isUnique = await isValueUnique(slug, excludeValue);
+      const isUnique = await isValueUnique(value, excludeValue);
       if (!isUnique) {
-        errors.push("A social app with this name already exists (or generates the same slug)");
+        errors.push("An app with this identifier already exists");
       }
     }
   }
@@ -130,8 +136,8 @@ export async function addCustomApp(input: CustomAppInput): Promise<{ success: bo
       return { success: false };
     }
 
-    // Generate slug-safe value
-    const value = generateSlugFromName(input.name);
+    // Generate stable value from URL template
+    const value = generateValueFromUrlTemplate(input.urlTemplate);
 
     // Create the app
     const newApp: App = {
@@ -168,6 +174,61 @@ export async function addCustomApp(input: CustomAppInput): Promise<{ success: bo
 }
 
 /**
+ * Adds a custom app during import process without showing error toasts for duplicates
+ * Returns detailed result information for import summary
+ */
+export async function addCustomAppForImport(
+  input: CustomAppInput,
+): Promise<{ success: boolean; value?: string; isDuplicate?: boolean; error?: string }> {
+  try {
+    // Validate input
+    if (!input.name?.trim()) {
+      return { success: false, error: "App name is required" };
+    }
+    if (!input.urlTemplate?.trim()) {
+      return { success: false, error: "URL template is required" };
+    }
+    if (!input.urlTemplate.includes("{profile}")) {
+      return { success: false, error: "URL template must contain {profile} placeholder" };
+    }
+
+    // Generate value from URL template
+    const value = generateValueFromUrlTemplate(input.urlTemplate.trim());
+
+    // Check for duplicates
+    const customApps = await getCustomApps();
+    const isDuplicate = customApps.some((app) => app.value === value);
+
+    if (isDuplicate) {
+      return { success: false, isDuplicate: true, value };
+    }
+
+    // Create new app
+    const newApp: App = {
+      name: input.name.trim(),
+      value,
+      urlTemplate: input.urlTemplate.trim(),
+    };
+
+    // Add to custom apps
+    const updatedApps = [...customApps, newApp];
+    await LocalStorage.setItem(STORAGE_KEYS.CUSTOM_APPS, JSON.stringify(updatedApps));
+
+    // Handle app settings if not enabled by default
+    if (input.enabled === false) {
+      const currentSettings = await getAppSettings();
+      const updatedSettings = [...currentSettings, { value, enabled: false }];
+      await updateAppSettings(updatedSettings);
+    }
+
+    return { success: true, value };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+    return { success: false, error: errorMessage };
+  }
+}
+
+/**
  * Updates an existing custom app with validation and toast feedback
  */
 export async function updateCustomApp(
@@ -199,8 +260,8 @@ export async function updateCustomApp(
       return { success: false };
     }
 
-    // Generate new value if name changed
-    const newValue = generateSlugFromName(updatedInput.name);
+    // Generate new value if URL template changed
+    const newValue = generateValueFromUrlTemplate(updatedInput.urlTemplate);
     const valueChanged = newValue !== currentValue;
 
     // Update the app

@@ -1,11 +1,11 @@
 import * as yaml from "js-yaml";
-import { getSelectedFinderItems } from "@raycast/api";
+import { getSelectedFinderItems, showToast, Toast } from "@raycast/api";
 import { readFileSync, writeFileSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
 import { getCustomApps, getAppSettings, updateAppSettings, addToUsageHistory, getUsageHistory } from "./hooks/apps";
 import { defaultApps } from "./types/default-apps";
-import { addCustomApp } from "./utils/custom-app-utils";
+import { addCustomApp, addCustomAppForImport } from "./utils/custom-app-utils";
 import { validateAndSanitizeFilename, validateSecurePath } from "./utils/file-security";
 import { YAMLSettings, AppSetting } from "./types";
 
@@ -21,26 +21,36 @@ export async function exportSettingsToYAML(): Promise<string> {
     // Convert app settings to a more readable format
     const appSettingsMap: Record<string, boolean> = {};
 
+    // Create a set of custom app values to exclude from appSettings
+    const customAppValues = new Set(customApps.map((app) => app.value));
+
     // Add all default apps to settings map with current enabled status
     for (const app of defaultApps) {
       appSettingsMap[app.value] = true; // Default to enabled
     }
 
-    // Override with actual stored settings
+    // Override with actual stored settings, but exclude custom apps
+    // (custom apps will be handled in the customApps section with their enabled state)
     appSettings.forEach((setting) => {
-      appSettingsMap[setting.value] = setting.enabled;
+      if (!customAppValues.has(setting.value)) {
+        appSettingsMap[setting.value] = setting.enabled;
+      }
     });
 
     const yamlSettings: YAMLSettings = {
       version: "1.0",
       usageHistory,
       appSettings: appSettingsMap,
-      customApps: customApps.map((app) => ({
-        name: app.name,
-        value: app.value,
-        urlTemplate: app.urlTemplate,
-        enabled: true, // Custom apps are enabled by default
-      })),
+      customApps: customApps.map((app) => {
+        // Find the actual enabled state from app settings
+        const appSetting = appSettings.find((setting) => setting.value === app.value);
+        return {
+          name: app.name,
+          value: app.value,
+          urlTemplate: app.urlTemplate,
+          enabled: appSetting ? appSetting.enabled : true, // Use actual state or default to enabled
+        };
+      }),
     };
 
     return yaml.dump(yamlSettings, {
@@ -136,7 +146,12 @@ export async function importSettingsFromYAML(yamlContent: string): Promise<void>
 
     // Import custom apps with duplicate checking
     if (settings.customApps && Array.isArray(settings.customApps)) {
-      const importResults = {
+      const importResults: {
+        imported: number;
+        skipped: number;
+        failed: number;
+        firstError?: string;
+      } = {
         imported: 0,
         skipped: 0,
         failed: 0,
@@ -147,21 +162,25 @@ export async function importSettingsFromYAML(yamlContent: string): Promise<void>
           const customAppInput = {
             name: app.name.trim(),
             urlTemplate: app.urlTemplate.trim(),
-            enabled: true, // Default to enabled for imported apps
+            enabled: typeof app.enabled === "boolean" ? app.enabled : true, // Use imported enabled state
           };
 
-          try {
-            const result = await addCustomApp(customAppInput);
-            if (result.success) {
-              importResults.imported++;
-              console.log(`Successfully imported custom app: ${app.name}`);
-            } else {
-              importResults.skipped++;
-              console.log(`Skipped duplicate custom app: ${app.name}`);
-            }
-          } catch (error) {
+          const result = await addCustomAppForImport(customAppInput);
+
+          if (result.success) {
+            importResults.imported++;
+            console.log(`Successfully imported custom app: ${app.name}`);
+          } else if (result.isDuplicate) {
+            importResults.skipped++;
+            console.log(`Skipped duplicate custom app: ${app.name} (already exists)`);
+          } else {
             importResults.failed++;
-            console.warn(`Failed to import custom app ${app.name}:`, error);
+            const errorMessage = result.error || "Unknown error";
+            console.error(`Failed to import custom app "${app.name}" (value: ${app.value}):`, errorMessage);
+            // Store first error for user feedback
+            if (importResults.failed === 1) {
+              importResults.firstError = `Failed to import "${app.name}": ${errorMessage}`;
+            }
           }
         }
       }
@@ -169,6 +188,32 @@ export async function importSettingsFromYAML(yamlContent: string): Promise<void>
       console.log(
         `Import summary - Imported: ${importResults.imported}, Skipped: ${importResults.skipped}, Failed: ${importResults.failed}`,
       );
+
+      // Show comprehensive import summary toast
+      const totalApps = importResults.imported + importResults.skipped + importResults.failed;
+      if (totalApps > 0) {
+        let summaryMessage = `${importResults.imported} imported`;
+        if (importResults.skipped > 0) {
+          summaryMessage += `, ${importResults.skipped} skipped (duplicates)`;
+        }
+        if (importResults.failed > 0) {
+          summaryMessage += `, ${importResults.failed} failed`;
+        }
+
+        const toastStyle = importResults.failed > 0 ? Toast.Style.Failure : Toast.Style.Success;
+        const toastTitle = importResults.failed > 0 ? "Import Completed with Issues" : "Import Completed";
+
+        await showToast({
+          style: toastStyle,
+          title: toastTitle,
+          message: summaryMessage,
+        });
+
+        // If there were failures, still throw an error but after showing the summary
+        if (importResults.failed > 0 && importResults.firstError) {
+          throw new Error(importResults.firstError);
+        }
+      }
     }
   } catch (error) {
     console.error("Error importing settings from YAML:", error);
@@ -211,8 +256,11 @@ export async function importSettingsFromFile(filePath?: string): Promise<void> {
     if (!targetPath) {
       try {
         const finderItems = await getSelectedFinderItems();
-        if (finderItems.length > 0 && finderItems[0].path.endsWith(".yaml")) {
-          targetPath = finderItems[0].path;
+        if (finderItems.length > 0) {
+          const selectedFile = finderItems[0].path;
+          if (selectedFile.toLowerCase().endsWith(".yaml") || selectedFile.toLowerCase().endsWith(".yml")) {
+            targetPath = selectedFile;
+          }
         }
       } catch {
         // Finder selection failed, continue without it

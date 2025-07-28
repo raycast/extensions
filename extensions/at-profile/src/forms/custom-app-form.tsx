@@ -65,12 +65,7 @@ export default function CustomAppForm({ app, onSave }: CustomAppFormProps) {
         error={urlError}
         onChange={() => setUrlError(undefined)}
       />
-      <Form.Checkbox
-        id="enabled"
-        title="Enabled"
-        label="Enable"
-        defaultValue={app?.enabled ?? true}
-      />
+      <Form.Checkbox id="enabled" title="Enabled" label="Enable" defaultValue={app?.enabled ?? true} />
     </Form>
   );
 }

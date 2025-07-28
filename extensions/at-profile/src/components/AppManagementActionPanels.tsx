@@ -31,8 +31,8 @@ export function AppManagementActionPanels({
     return (
       <ActionPanel>
         <Action
-          title={app.enabled ? "Disable" : "Enable"}
-          icon={app.enabled ? Icon.XMarkCircle : Icon.CheckCircle}
+          title={app.enabled ? "Hide" : "Show"}
+          icon={app.enabled ? Icon.EyeDisabled : Icon.Eye}
           onAction={() => onToggleEnabled?.(app.id, !app.enabled)}
         />
         <Action
@@ -82,8 +82,8 @@ export function AppManagementActionPanels({
     return (
       <ActionPanel>
         <Action
-          title={app.enabled ? "Disable" : "Enable"}
-          icon={app.enabled ? Icon.XMarkCircle : Icon.CheckCircle}
+          title={app.enabled ? "Hide" : "Show"}
+          icon={app.enabled ? Icon.EyeDisabled : Icon.Eye}
           onAction={() => onToggleEnabled?.(app.id, !app.enabled)}
         />
         <Action

@@ -5,7 +5,7 @@ import { getCustomApps, getAppSettings, updateAppSettings, getAppFavicon } from 
 import { defaultApps } from "../types/default-apps";
 import { removeCustomApp } from "./custom-app-utils";
 import { AppManagementActionPanels, UtilityActionPanels } from "../components";
-import { exportSettingsToFile, importSettingsFromFile, generateSampleYAMLFile } from "../yaml-settings";
+import { exportSettingsToFile, importSettingsFromFile } from "../yaml-settings";
 import { AppItem, ManageAppsArguments, App } from "../types";
 
 export default function ManageAppsCommand(props: LaunchProps<{ arguments: ManageAppsArguments }>) {
@@ -111,8 +111,8 @@ export default function ManageAppsCommand(props: LaunchProps<{ arguments: Manage
 
       await showToast({
         style: Toast.Style.Success,
-        title: enabled ? "Social App Enabled" : "Social App Disabled",
-        message: `${apps.find((p) => p.id === appId)?.name} has been ${enabled ? "enabled" : "disabled"}`,
+        title: enabled ? "Social App Shown" : "Social App Hidden",
+        message: `${apps.find((p) => p.id === appId)?.name} is now ${enabled ? "shown" : "hidden"} in Open Profile`,
       });
     } catch (error) {
       await showFailureToast((error as Error).message, { title: "Failed to Update Social App" });
@@ -146,6 +146,28 @@ export default function ManageAppsCommand(props: LaunchProps<{ arguments: Manage
 
   const openQuickProfileSearch = async (appValue: string) => {
     try {
+      // Verify the app exists before creating the deep link
+      const { getAllAppsUnfiltered } = await import("../hooks/apps");
+      const allApps = await getAllAppsUnfiltered();
+      const targetApp = allApps.find((app) => app.value === appValue);
+
+      if (!targetApp) {
+        throw new Error(`App with value "${appValue}" not found`);
+      }
+
+      // Check if the app is currently hidden and show it implicitly
+      const currentApp = apps.find((app) => app.value === appValue);
+      if (currentApp && !currentApp.enabled) {
+        // Implicitly show the app since user is directly opening it
+        await toggleAppEnabled(appValue, true);
+
+        await showToast({
+          style: Toast.Style.Success,
+          title: "App Shown",
+          message: `${targetApp.name} is now shown in Open Profile`,
+        });
+      }
+
       // Use raycast:// deep link to open the Open Profile command with the specific app pre-selected
       const url = `raycast://extensions/chrismessina/at-profile/open-profile?arguments=${encodeURIComponent(
         JSON.stringify({ app: appValue }),
@@ -156,7 +178,7 @@ export default function ManageAppsCommand(props: LaunchProps<{ arguments: Manage
       await showToast({
         style: Toast.Style.Success,
         title: "Opening Profile Search",
-        message: `Opening with ${apps.find((app) => app.value === appValue)?.name || appValue} selected`,
+        message: `Opening with ${targetApp.name} selected`,
       });
     } catch (error) {
       await showFailureToast(error instanceof Error ? error.message : "Unknown error", {
@@ -187,7 +209,7 @@ export default function ManageAppsCommand(props: LaunchProps<{ arguments: Manage
                   source: app.enabled ? Icon.CheckCircle : Icon.Circle,
                   tintColor: app.enabled ? Color.Green : Color.SecondaryText,
                 },
-                tooltip: app.enabled ? "Enabled" : "Disabled",
+                tooltip: app.enabled ? "Shown" : "Hidden",
               },
             ]}
             actions={
@@ -228,7 +250,7 @@ export default function ManageAppsCommand(props: LaunchProps<{ arguments: Manage
                     source: app.enabled ? Icon.CheckCircle : Icon.Circle,
                     tintColor: app.enabled ? Color.Green : Color.SecondaryText,
                   },
-                  tooltip: app.enabled ? "Enabled" : "Disabled",
+                  tooltip: app.enabled ? "Shown" : "Hidden",
                 },
               ]}
               actions={
@@ -249,19 +271,13 @@ export default function ManageAppsCommand(props: LaunchProps<{ arguments: Manage
           title="Export Apps"
           subtitle="Export all app settings and custom apps to YAML file"
           icon={Icon.Download}
-          actions={
-            <UtilityActionPanels
-              type="export-management"
-              onExportApps={handleExportApps}
-              onGenerateSampleYAMLFile={() => generateSampleYAMLFile()}
-            />
-          }
+          actions={<UtilityActionPanels type="export-management" />}
         />
         <List.Item
           title="Import Apps"
           subtitle="Import app settings and custom apps from YAML file"
           icon={Icon.Upload}
-          actions={<UtilityActionPanels type="import-management" onImportApps={handleImportApps} />}
+          actions={<UtilityActionPanels type="import-management" />}
         />
       </List.Section>
     </List>
