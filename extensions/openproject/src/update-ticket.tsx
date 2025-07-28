@@ -1,4 +1,4 @@
-// @ts-nocheck
+// @ts-nocheck - Required due to Raycast API JSX component type incompatibility
 // src/update-ticket.tsx
 import { useState, useEffect } from "react";
 import {
@@ -28,35 +28,17 @@ interface UpdateTicketArguments {
   ticketId?: string;
 }
 
-export default function UpdateTicket(
-  props: LaunchProps<{ arguments: UpdateTicketArguments }>,
-) {
+export default function UpdateTicket(props: LaunchProps<{ arguments: UpdateTicketArguments }>) {
   const { pop } = useNavigation();
   const [searchText, setSearchText] = useState("");
   const [tickets, setTickets] = useState<WorkPackage[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [selectedTicket, setSelectedTicket] = useState<WorkPackage | null>(
-    null,
-  );
+  const [selectedTicket, setSelectedTicket] = useState<WorkPackage | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [priorities, setPriorities] = useState<any[]>([]);
   const [statuses, setStatuses] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [api, setApi] = useState<OpenProjectAPI | null>(null);
-
-  // TypeScript Problem umgehen
-  const ListComponent = List as any;
-  const ListItem = List.Item as any;
-  const ListEmptyView = List.EmptyView as any;
-  const ActionPanelComponent = ActionPanel as any;
-  const ActionComponent = Action as any;
-  const FormComponent = Form as any;
-  const FormTextField = Form.TextField as any;
-  const FormTextArea = Form.TextArea as any;
-  const FormDropdown = Form.Dropdown as any;
-  const FormDropdownItem = Form.Dropdown.Item as any;
-  const FormDescription = Form.Description as any;
-  const SubmitFormAction = Action.SubmitForm as any;
 
   useEffect(() => {
     async function initializeAPI() {
@@ -78,9 +60,7 @@ export default function UpdateTicket(
         // Wenn Ticket-ID als Argument übergeben wurde
         if (props.arguments?.ticketId) {
           try {
-            const ticket = await apiInstance.getWorkPackage(
-              parseInt(props.arguments.ticketId),
-            );
+            const ticket = await apiInstance.getWorkPackage(parseInt(props.arguments.ticketId));
             setSelectedTicket(ticket);
           } catch (error) {
             showToast({
@@ -174,18 +154,9 @@ export default function UpdateTicket(
         id: selectedTicket.id,
         subject: values.subject?.trim(),
         description: values.description?.trim(),
-        assigneeId:
-          values.assignee && values.assignee !== ""
-            ? parseInt(values.assignee)
-            : 0,
-        priorityId:
-          values.priority && values.priority !== ""
-            ? parseInt(values.priority)
-            : undefined,
-        statusId:
-          values.status && values.status !== ""
-            ? parseInt(values.status)
-            : undefined,
+        assigneeId: values.assignee && values.assignee !== "" ? parseInt(values.assignee) : 0,
+        priorityId: values.priority && values.priority !== "" ? parseInt(values.priority) : undefined,
+        statusId: values.status && values.status !== "" ? parseInt(values.status) : undefined,
       };
 
       console.log("Update data:", updateData);
@@ -203,14 +174,9 @@ export default function UpdateTicket(
       console.error("Update error:", err);
 
       if (err.message?.includes("422")) {
-        errorMessage =
-          "Invalid data format. Please check all fields are filled correctly.";
-      } else if (
-        err.message?.includes("Conflict") ||
-        err.message?.includes("409")
-      ) {
-        errorMessage =
-          "Ticket was modified by someone else. Please select the ticket again to get the latest version.";
+        errorMessage = "Invalid data format. Please check all fields are filled correctly.";
+      } else if (err.message?.includes("Conflict") || err.message?.includes("409")) {
+        errorMessage = "Ticket was modified by someone else. Please select the ticket again to get the latest version.";
         setSelectedTicket(null);
       } else {
         errorMessage = err.message || "Unknown error";
@@ -233,24 +199,22 @@ export default function UpdateTicket(
   // Wenn noch kein Ticket ausgewählt wurde, zeige Suchinterface
   if (!selectedTicket) {
     return (
-      <ListComponent
+      <List
         isLoading={isSearching}
         searchText={searchText}
         onSearchTextChange={setSearchText}
         searchBarPlaceholder="Search for ticket to update..."
         throttle={true}
       >
-        {tickets.length === 0 &&
-        searchText.trim().length > 0 &&
-        !isSearching ? (
-          <ListEmptyView
+        {tickets.length === 0 && searchText.trim().length > 0 && !isSearching ? (
+          <List.EmptyView
             icon={Icon.MagnifyingGlass}
             title="No tickets found"
             description={`No tickets found matching "${searchText}"`}
           />
         ) : (
           tickets.map((ticket) => (
-            <ListItem
+            <List.Item
               key={ticket.id}
               icon={Icon.Document}
               title={`#${ticket.id} ${ticket.subject}`}
@@ -267,108 +231,85 @@ export default function UpdateTicket(
                 },
               ]}
               actions={
-                <ActionPanelComponent>
-                  <ActionComponent
-                    title="Select Ticket"
-                    onAction={() => selectTicket(ticket)}
-                    icon={Icon.Pencil}
-                  />
-                </ActionPanelComponent>
+                <ActionPanel>
+                  <Action title="Select Ticket" onAction={() => selectTicket(ticket)} icon={Icon.Pencil} />
+                </ActionPanel>
               }
             />
           ))
         )}
-      </ListComponent>
+      </List>
     );
   }
 
   // Ticket ausgewählt - zeige Update-Formular
   return (
-    <FormComponent
+    <Form
       isLoading={isLoading}
       actions={
-        <ActionPanelComponent>
-          <SubmitFormAction
-            onSubmit={handleSubmit}
-            title="Update Ticket"
-            icon={Icon.Check}
-          />
-          <ActionComponent
+        <ActionPanel>
+          <Action.SubmitForm onSubmit={handleSubmit} title="Update Ticket" icon={Icon.Check} />
+          <Action
             title="Select Different Ticket"
             onAction={() => setSelectedTicket(null)}
             icon={Icon.ArrowLeft}
             shortcut={{ modifiers: ["cmd"], key: "b" }}
           />
-        </ActionPanelComponent>
+        </ActionPanel>
       }
     >
-      <FormDescription
+      <Form.Description
         title="Updating Ticket"
         text={`#${selectedTicket.id} in ${selectedTicket.project?.name || "Unknown Project"}`}
       />
 
-      <FormTextField
+      <Form.TextField
         id="subject"
         title="Subject"
         placeholder="Enter ticket subject"
         defaultValue={selectedTicket.subject}
       />
 
-      <FormTextArea
+      <Form.TextArea
         id="description"
         title="Description"
         placeholder="Enter ticket description"
         defaultValue={selectedTicket.description?.raw || ""}
       />
 
-      <FormDropdown
+      <Form.Dropdown
         id="assignee"
         title="Assignee"
         placeholder="Select assignee"
         defaultValue={selectedTicket.assignee?.id.toString() || ""}
       >
-        <FormDropdownItem value="" title="Unassigned" icon="👤" />
+        <Form.Dropdown.Item value="" title="Unassigned" icon="👤" />
         {users.map((user) => (
-          <FormDropdownItem
-            key={user.id}
-            value={user.id.toString()}
-            title={user.name}
-            icon="👤"
-          />
+          <Form.Dropdown.Item key={user.id} value={user.id.toString()} title={user.name} icon="👤" />
         ))}
-      </FormDropdown>
+      </Form.Dropdown>
 
-      <FormDropdown
+      <Form.Dropdown
         id="priority"
         title="Priority"
         placeholder="Select priority"
         defaultValue={selectedTicket.priority?.id.toString() || ""}
       >
         {priorities.map((priority) => (
-          <FormDropdownItem
-            key={priority.id}
-            value={priority.id.toString()}
-            title={priority.name}
-            icon="🔥"
-          />
+          <Form.Dropdown.Item key={priority.id} value={priority.id.toString()} title={priority.name} icon="🔥" />
         ))}
-      </FormDropdown>
+      </Form.Dropdown>
 
-      <FormDropdown
+      <Form.Dropdown
         id="status"
         title="Status"
         placeholder="Select status"
         defaultValue={selectedTicket.status?.id.toString() || ""}
       >
         {statuses.map((status) => (
-          <FormDropdownItem
-            key={status.id}
-            value={status.id.toString()}
-            title={status.name}
-            icon="⚫"
-          />
+          <Form.Dropdown.Item key={status.id} value={status.id.toString()} title={status.name} icon="⚫" />
         ))}
-      </FormDropdown>
-    </FormComponent>
+      </Form.Dropdown>
+    </Form>
   );
 }

@@ -4,7 +4,8 @@
     "lib": ["ES2020"],
     "module": "commonjs",
     "skipLibCheck": true,
-    "strict": false,
+    "strict": true,
+    "strictNullChecks": false,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node",
@@ -13,7 +14,10 @@
     "jsx": "react-jsx",
     "incremental": true,
     "allowSyntheticDefaultImports": true,
-    "noImplicitAny": false
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noUncheckedIndexedAccess": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

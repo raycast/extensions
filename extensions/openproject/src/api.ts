@@ -94,10 +94,7 @@ class OpenProjectAPI {
     return this._baseURL;
   }
 
-  private async makeRequest(
-    endpoint: string,
-    options: RequestInit = {},
-  ): Promise<any> {
+  private async makeRequest(endpoint: string, options: RequestInit = {}): Promise<any> {
     const url = `${this._baseURL}/api/v3${endpoint}`;
 
     const response = (await fetch(url, {
@@ -115,8 +112,7 @@ class OpenProjectAPI {
 
       // Spezielle Behandlung für 409 Conflicts
       if (response.status === 409) {
-        errorMessage =
-          "Conflict: Ticket was modified by someone else or is locked";
+        errorMessage = "Conflict: Ticket was modified by someone else or is locked";
       }
 
       // Versuche JSON Error Details zu parsen
@@ -155,9 +151,7 @@ class OpenProjectAPI {
     return response._embedded?.elements || [];
   }
 
-  async updateWorkPackage(
-    data: UpdateWorkPackageRequest,
-  ): Promise<WorkPackage> {
+  async updateWorkPackage(data: UpdateWorkPackageRequest): Promise<WorkPackage> {
     // Erst aktuelles Ticket laden für lockVersion
     const currentTicket = await this.getWorkPackage(data.id);
 
@@ -168,10 +162,7 @@ class OpenProjectAPI {
     if (data.subject && data.subject !== currentTicket.subject) {
       payload.subject = data.subject;
     }
-    if (
-      data.description &&
-      data.description !== currentTicket.description?.raw
-    ) {
+    if (data.description && data.description !== currentTicket.description?.raw) {
       payload.description = { raw: data.description };
     }
 
@@ -207,9 +198,7 @@ class OpenProjectAPI {
       });
     } catch (error: any) {
       if (error.message?.includes("409")) {
-        throw new Error(
-          "Ticket was modified by someone else. Please try again.",
-        );
+        throw new Error("Ticket was modified by someone else. Please try again.");
       }
       throw error;
     }
@@ -220,9 +209,7 @@ class OpenProjectAPI {
     return response._embedded?.elements || [];
   }
 
-  async createWorkPackage(
-    data: CreateWorkPackageRequest,
-  ): Promise<WorkPackage> {
+  async createWorkPackage(data: CreateWorkPackageRequest): Promise<WorkPackage> {
     const payload = {
       subject: data.subject,
       description: {

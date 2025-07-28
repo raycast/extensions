@@ -1,192 +1,175 @@
-// src/search-tickets.tsx
+// @ts-nocheck - Required due to Raycast API JSX component type incompatibility
+// src/create-ticket.tsx
+import { Action, ActionPanel, Form, showToast, Toast, useNavigation, LaunchProps } from "@raycast/api";
 import { useState, useEffect } from "react";
-import {
-  List,
-  ActionPanel,
-  Action,
-  showToast,
-  Toast,
-  Icon,
-  Color,
-  getPreferenceValues,
-} from "@raycast/api";
-import OpenProjectAPI, { WorkPackage } from "./api";
+import OpenProjectAPI, { Project, WorkPackageType, User } from "./api";
 
-interface Preferences {
-  apiUrl: string;
-  apiKey: string;
+interface FormValues {
+  subject: string;
+  description: string;
+  project: string;
+  type: string;
+  assignee: string;
+  priority: string;
 }
 
-function SearchTickets() {
-  const [searchText, setSearchText] = useState("");
-  const [tickets, setTickets] = useState<WorkPackage[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [api, setApi] = useState<OpenProjectAPI | null>(null);
+export default function CreateTicket(props: LaunchProps<{ arguments: CreateTicketArguments }>) {
+  const { pop } = useNavigation();
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [types, setTypes] = useState<WorkPackageType[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [priorities, setPriorities] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const api = new OpenProjectAPI();
 
   useEffect(() => {
-    try {
-      const apiInstance = new OpenProjectAPI();
-      setApi(apiInstance);
-    } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Configuration Error",
-        message: "Please check your OpenProject settings",
-      });
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!api || searchText.trim().length === 0) {
-      setTickets([]);
-      return;
-    }
-
-    const timeoutId = setTimeout(async () => {
+    async function loadData() {
       try {
         setIsLoading(true);
-        const results = await api.searchWorkPackages(searchText);
-        setTickets(results);
-      } catch (error) {
+        setError(null);
+
+        // Test connection first
+        const connectionOk = await api.testConnection();
+        if (!connectionOk) {
+          throw new Error("Failed to connect to OpenProject. Please check your API URL and key.");
+        }
+
+        const [projectsData, typesData, usersData, prioritiesData] = await Promise.all([
+          api.getProjects(),
+          api.getWorkPackageTypes(),
+          api.getUsers(),
+          api.getPriorities(),
+        ]);
+
+        setProjects(projectsData);
+        setTypes(typesData);
+        setUsers(usersData);
+        setPriorities(prioritiesData);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred");
         showToast({
           style: Toast.Style.Failure,
-          title: "Search failed",
-          message: error instanceof Error ? error.message : "Unknown error",
+          title: "Error loading data",
+          message: err instanceof Error ? err.message : "Unknown error",
         });
       } finally {
         setIsLoading(false);
       }
-    }, 500);
-
-    return () => clearTimeout(timeoutId);
-  }, [searchText, api]);
-
-  const getStatusColor = (statusName: string) => {
-    switch (statusName?.toLowerCase()) {
-      case "new":
-      case "open":
-        return Color.Blue;
-      case "in progress":
-      case "in development":
-        return Color.Yellow;
-      case "resolved":
-      case "closed":
-        return Color.Green;
-      case "rejected":
-        return Color.Red;
-      default:
-        return Color.SecondaryText;
     }
-  };
 
-  const getTypeIcon = (typeName: string) => {
-    switch (typeName?.toLowerCase()) {
-      case "bug":
-        return Icon.Bug;
-      case "feature":
-        return Icon.Plus;
-      case "task":
-        return Icon.CheckCircle;
-      case "support":
-        return Icon.QuestionMark;
-      default:
-        return Icon.Document;
-    }
-  };
+    loadData();
+  }, []);
 
-  const formatDate = (dateString: string) => {
+  async function handleSubmit(values: FormValues) {
     try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString();
-    } catch {
-      return "Unknown";
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Creating ticket...",
+      });
+
+      const workPackage = await api.createWorkPackage({
+        subject: values.subject,
+        description: values.description,
+        projectId: parseInt(values.project),
+        typeId: parseInt(values.type),
+        assigneeId: values.assignee ? parseInt(values.assignee) : undefined,
+        priorityId: values.priority ? parseInt(values.priority) : undefined,
+      });
+
+      toast.style = Toast.Style.Success;
+      toast.title = "Ticket created successfully";
+      toast.message = `#${workPackage.id}: ${workPackage.subject}`;
+
+      pop();
+    } catch (err) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Error creating ticket",
+        message: err instanceof Error ? err.message : "Unknown error",
+      });
     }
-  };
+  }
 
-  const getBaseURL = () => {
-    try {
-      const preferences = getPreferenceValues<Preferences>();
-      return preferences.apiUrl.replace(/\/$/, "");
-    } catch {
-      return "";
-    }
-  };
-
-  // TypeScript Problem umgehen mit any
-  const ListComponent = List as any;
-  const ListItem = List.Item as any;
-  const ListEmptyView = List.EmptyView as any;
-  const ActionPanelComponent = ActionPanel as any;
-  const OpenInBrowserAction = Action.OpenInBrowser as any;
-  const CopyToClipboardAction = Action.CopyToClipboard as any;
-
-  if (!api) {
+  if (error) {
     return (
-      <ListComponent>
-        <ListEmptyView
-          icon={Icon.ExclamationMark}
-          title="Configuration Error"
-          description="Please check your OpenProject settings in Raycast preferences"
+      <Form
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser title="Open Raycast Preferences" url="raycast://extensions/openproject" />
+            <Action.OpenInBrowser title="Visit Openproject Website" url="https://www.openproject.org" />
+          </ActionPanel>
+        }
+      >
+        <Form.Description text={`Error: ${error}`} />
+        <Form.Description text="Please check your OpenProject settings in Raycast preferences." />
+        <Form.Separator />
+        <Form.Description
+          title="ℹ️ Disclaimer"
+          text="This is an unofficial community extension. Not affiliated with OpenProject GmbH."
         />
-      </ListComponent>
+      </Form>
     );
   }
 
-  const ticketItems = tickets.map((ticket) => (
-    <ListItem
-      key={ticket.id}
-      icon={getTypeIcon(ticket.type?.name || "unknown")}
-      title={`#${ticket.id} ${ticket.subject}`}
-      subtitle={ticket.project?.name || "Unknown Project"}
-      accessories={[
-        {
-          tag: {
-            value: ticket.status?.name || "Unknown",
-            color: getStatusColor(ticket.status?.name || ""),
-          },
-        },
-        {
-          text: formatDate(ticket.updatedAt),
-        },
-      ]}
-      actions={
-        <ActionPanelComponent>
-          <OpenInBrowserAction
-            title="Open in OpenProject"
-            url={`${getBaseURL()}/work_packages/${ticket.id}`}
-          />
-          <CopyToClipboardAction
-            title="Copy URL"
-            content={`${getBaseURL()}/work_packages/${ticket.id}`}
-          />
-          <CopyToClipboardAction
-            title="Copy ID"
-            content={ticket.id.toString()}
-          />
-        </ActionPanelComponent>
-      }
-    />
-  ));
-
   return (
-    <ListComponent
+    <Form
       isLoading={isLoading}
-      searchText={searchText}
-      onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search tickets by subject..."
-      throttle={true}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm onSubmit={handleSubmit} title="Create Ticket" />
+        </ActionPanel>
+      }
     >
-      {tickets.length === 0 && searchText.trim().length > 0 && !isLoading ? (
-        <ListEmptyView
-          icon={Icon.MagnifyingGlass}
-          title="No tickets found"
-          description={`No tickets found matching "${searchText}"`}
-        />
-      ) : (
-        ticketItems
-      )}
-    </ListComponent>
+      <Form.TextField
+        id="subject"
+        title="Subject"
+        placeholder="Enter ticket subject"
+        defaultValue={props.arguments?.subject || ""}
+      />
+
+      <Form.TextArea
+        id="description"
+        title="Description"
+        placeholder="Enter ticket description (optional)"
+        defaultValue={props.arguments?.description || ""}
+      />
+
+      <Form.Dropdown id="project" title="Project" placeholder="Select project">
+        {projects.map((project) => (
+          <Form.Dropdown.Item key={project.id} value={project.id.toString()} title={project.name} icon="📁" />
+        ))}
+      </Form.Dropdown>
+
+      <Form.Dropdown id="type" title="Type" placeholder="Select type">
+        {types.map((type) => (
+          <Form.Dropdown.Item
+            key={type.id}
+            value={type.id.toString()}
+            title={type.name}
+            icon={{ source: "⚫", tintColor: type.color }}
+          />
+        ))}
+      </Form.Dropdown>
+
+      <Form.Dropdown id="assignee" title="Assignee" placeholder="Select assignee (optional)">
+        <Form.Dropdown.Item value="" title="Unassigned" icon="👤" />
+        {users.map((user) => (
+          <Form.Dropdown.Item key={user.id} value={user.id.toString()} title={user.name} icon="👤" />
+        ))}
+      </Form.Dropdown>
+
+      <Form.Dropdown id="priority" title="Priority" placeholder="Select priority (optional)">
+        {priorities.map((priority) => (
+          <Form.Dropdown.Item key={priority.id} value={priority.id.toString()} title={priority.name} icon="🔥" />
+        ))}
+      </Form.Dropdown>
+    </Form>
   );
 }
 
-export default SearchTickets;
+export interface CreateTicketArguments {
+  subject?: string;
+  description?: string;
+}

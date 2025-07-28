@@ -1,4 +1,4 @@
-```markdown
+
 # OpenProject Raycast Extension (Unofficial)
 
 An **unofficial** Raycast extension for managing your OpenProject tickets directly from Raycast.
@@ -159,4 +159,3 @@ Contributions are welcome! Please feel free to submit issues, feature requests, 
 - Real-time ticket search with debouncing
 - Form validation and error handling
 - Intuitive two-step ticket updating process
-```
