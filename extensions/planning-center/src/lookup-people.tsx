@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Clipboard, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useCachedPromise } from "@raycast/utils";
+import { useState } from "react";
 
 interface Person {
   id: string;
@@ -36,15 +37,10 @@ interface EmailsResponse {
   data: Email[];
 }
 
-interface Preferences {
-  app_id: string;
-  app_secret: string;
-}
-
 const API_BASE_URL = "https://api.planningcenteronline.com";
 
 function getAuthHeader(): string {
-  const { app_id, app_secret } = getPreferenceValues<Preferences>();
+  const { app_id, app_secret } = getPreferenceValues();
   const credentials = Buffer.from(`${app_id}:${app_secret}`).toString("base64");
   return `Basic ${credentials}`;
 }
@@ -108,27 +104,15 @@ async function fetchEmail(personId: string): Promise<string> {
 
 export default function Command() {
   const [query, setQuery] = useState("");
-  const [people, setPeople] = useState<Person[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!query) {
-      setPeople([]);
-      setError(null);
-      return;
-    }
-    setIsLoading(true);
-    setError(null);
-    fetchPeople(query)
-      .then(setPeople)
-      .catch((e) => setError(e.message))
-      .finally(() => setIsLoading(false));
-  }, [query]);
+  const {
+    isLoading,
+    data: people = [],
+    error,
+  } = useCachedPromise(async (query: string) => fetchPeople(query), [query]);
 
   let listContent = null;
   if (error) {
-    listContent = <List.EmptyView title="Error" description={error} />;
+    listContent = <List.EmptyView title="Error" description={error.message} />;
   } else if (people.length === 0 && query) {
     listContent = <List.EmptyView title="No Results" description={`No people matching '${query}'`} />;
   } else {
