@@ -37,7 +37,7 @@ Install this extension through the Raycast Store.
 3. Select Your Preferred Language.
 4. Run the "Fetch YouTube Transcript" command
 5. Paste the YouTube video URL
-   - Provide the full YouTube video URL (e.g., <https://www.youtube.com/watch?v=exampleID> or <https://youtu.be/exampleID>)
+   - Provide the full YouTube video URL (e.g., https://www.youtube.com/watch?v=exampleID or https://youtu.be/exampleID)
 6. **It will automatically fetch the transcript and save it to the downloads folder.**
 7. You can change your preferred download folder and preferred language in Raycast extension settings.
 
