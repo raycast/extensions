@@ -33,6 +33,7 @@ A handy Raycast extension that brings common Laravel tasks to your fingertips. A
 
 ## Usage
 
+
 Open Raycast and search for any command starting with `Laravel:`. When prompted to pick a project, use **Add Project** first. Manage existing projects from **Project List** or scan for new ones with **Discover Projects**. Swap between projects with **Set Active Project**, then run your migrations, tests, or any custom artisan command directly from Raycast.
 
 ## Development Tips

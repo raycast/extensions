@@ -10,7 +10,7 @@ interface FormValues {
 export default function DiscoverProjects() {
   const [isScanning, setIsScanning] = useState(false);
   const [discoveredProjects, setDiscoveredProjects] = useState<DiscoveredProject[]>([]);
-  const [selectedProjects, setSelectedProjects] = useState<Set<string>>(new Set());
+  const [selectedProjects, setSelectedProjects] = useState(new Set<string>());
   const [scanCompleted, setScanCompleted] = useState(false);
 
   async function handleScan(values: FormValues) {
