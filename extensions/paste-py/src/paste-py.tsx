@@ -1,5 +1,5 @@
 import { Form, ActionPanel, Action, showToast, Toast, open } from "@raycast/api";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
 interface FormValues {
   content: string;
@@ -17,7 +17,6 @@ export default function Command() {
   const [extensionOptions, setExtensionOptions] = useState<string[]>([]);
   const [content, setContent] = useState("");
   const [extension, setExtension] = useState("txt");
-  const formRef = useRef<Form>(null);
 
   useEffect(() => {
     async function fetchLanguages() {
@@ -109,7 +108,6 @@ export default function Command() {
 
   return (
     <Form
-      ref={formRef}
       isLoading={isLoading}
       actions={
         <ActionPanel>
