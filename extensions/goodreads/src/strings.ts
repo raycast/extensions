@@ -19,7 +19,7 @@ export const STRINGS = {
   twitter: "Twitter",
   rating: "Rating",
   searchResults: "Search Results",
-  recentSearches: "Recent Searches",
+  recentBooks: "Recent Books",
   removeFromRecent: "Remove from Recent",
   clearAllRecent: "Clear all Recent Views",
 };

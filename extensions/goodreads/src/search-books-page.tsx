@@ -26,10 +26,10 @@ export default function SearchBooksPage(props: SearchBooksPageProps) {
   let books = data?.data;
   let sectionTitle = STRINGS.searchResults;
 
-  // If searchQuery is empty, show recent searches as ZeroQuery suggestions
+  // If searchQuery is empty, show recently viewed books as ZeroQuery suggestions
   if (mode === "recent") {
     books = recentlyViewedBooks;
-    sectionTitle = STRINGS.recentSearches;
+    sectionTitle = STRINGS.recentBooks;
   }
 
   return (

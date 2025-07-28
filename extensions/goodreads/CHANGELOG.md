@@ -1,9 +1,8 @@
 # goodreads Changelog
 
-## [Recent Search Feature] - 2025-07-27
+## [Recently Viewed Feature] - {PR_MERGE_DATE}
 
-- Add recent search functionality
-- Improve user experience with search history
+- Add recently viewed book functionality
 - Improve caching and data retrieval logic
 
 ## [UI improvement] - 2023-08-10
