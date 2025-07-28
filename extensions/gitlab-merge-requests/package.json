@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gitlab-merge-requests",
+  "title": "Gitlab Merge Requests",
+  "description": "Browse GitLab merge requests across different projects",
+  "icon": "gitlab.png",
+  "author": "qasim_shaikh",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-mrs",
+      "title": "Browse Merge Requests",
+      "description": "Browse GitLab projects and view their merge requests",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "gitlabToken",
+      "type": "password",
+      "required": true,
+      "title": "GitLab Personal Access Token",
+      "description": "Your GitLab personal access token with API access"
+    },
+    {
+      "name": "gitlabUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "GitLab URL",
+      "description": "Your GitLab instance URL (e.g., https://gitlab.com)",
+      "default": "https://gitlab.com"
+    },
+    {
+      "name": "projectIds",
+      "type": "textfield",
+      "required": true,
+      "title": "Project IDs",
+      "description": "Comma-separated GitLab project IDs (e.g., 123,456,789). Find project IDs on your GitLab project overview page.",
+      "placeholder": "Project IDs..."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.8",
+    "@raycast/utils": "^1.5.2",
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.19.120",
+    "@types/react": "^18.3.23",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.0.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist --skip-types",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
