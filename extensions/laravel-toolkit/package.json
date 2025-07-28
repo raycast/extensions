@@ -152,7 +152,11 @@
     "prettier": "^3.5.3",
     "typescript": "^5.8.2",
     "husky": "^8.0.0",
-    "ts-node": "^10.9.1"
+    "ts-node": "^10.9.1",
+    "is-ci": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=22.14.0"
   },
   "scripts": {
     "build": "ray build",
@@ -161,6 +165,6 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish",
-    "prepare": "husky install"
+    "prepare": "is-ci || husky install"
   }
 }
