@@ -2,7 +2,7 @@ import { existsSync, accessSync, constants } from "fs";
 import { spawnSync, spawn, ChildProcess } from "child_process";
 import { showToast, Toast, open } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { IPATOOL_PATH, validateSafePath } from "./paths";
+import { IPATOOL_PATH, validateExecutablePath } from "./paths";
 import { logger } from "./logger";
 
 // Constants
@@ -26,7 +26,7 @@ export async function validateIpatoolInstallation(): Promise<boolean> {
 
     // Validate the ipatool path is safe and secure
     try {
-      validateSafePath(IPATOOL_PATH);
+      validateExecutablePath(IPATOOL_PATH);
     } catch (pathError) {
       logger.error(`[ipatool] Unsafe ipatool path: ${IPATOOL_PATH}`, pathError);
       await showIpatoolSecurityError(pathError);
@@ -201,7 +201,7 @@ export function findIpatoolPath(): string | null {
     if (existsSync(candidatePath)) {
       try {
         // Validate path security before testing
-        validateSafePath(candidatePath);
+        validateExecutablePath(candidatePath);
 
         // Check permissions
         accessSync(candidatePath, constants.F_OK | constants.X_OK);
@@ -238,7 +238,7 @@ export function findIpatoolPath(): string | null {
       if (pathResult && existsSync(pathResult)) {
         try {
           // Validate the found path
-          validateSafePath(pathResult);
+          validateExecutablePath(pathResult);
           accessSync(pathResult, constants.F_OK | constants.X_OK);
           logger.log(`[ipatool] Found ipatool in PATH: ${pathResult}`);
           return pathResult;
@@ -303,7 +303,7 @@ export async function executeIpatoolCommand(
 
     // Validate path security
     try {
-      validateSafePath(IPATOOL_PATH);
+      validateExecutablePath(IPATOOL_PATH);
     } catch (pathError) {
       return {
         success: false,
@@ -431,7 +431,7 @@ function validateAndSanitizeArgs(args: string[], allowedCommands: readonly strin
     if (arg.includes("/") || arg.includes("\\\\")) {
       try {
         // Validate file paths
-        const sanitizedPath = validateSafePath(arg);
+        const sanitizedPath = validateExecutablePath(arg);
         sanitizedArgs.push(sanitizedPath);
       } catch {
         // If path validation fails, treat as regular string but sanitize
@@ -503,7 +503,7 @@ export function createSecureIpatoolProcess(
       }
 
       // Validate ipatool path
-      validateSafePath(IPATOOL_PATH);
+      validateExecutablePath(IPATOOL_PATH);
 
       logger.log(`[ipatool] Creating secure process: ${IPATOOL_PATH} ${sanitizedArgs.join(" ")}`);
 

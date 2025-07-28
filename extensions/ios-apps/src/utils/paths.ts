@@ -39,6 +39,7 @@ function containsTraversalAttempts(inputPath: string): boolean {
 
 /**
  * Validate that a path stays within safe directory boundaries
+ * This is for user-provided paths like download directories
  */
 export function validateSafePath(inputPath: string): string {
   if (!inputPath || typeof inputPath !== "string") {
@@ -62,6 +63,50 @@ export function validateSafePath(inputPath: string): string {
   if (!isWithinSafeBoundary) {
     throw new Error(
       `Path is outside safe boundaries: ${absolute}. Allowed directories: home directory, /tmp, /var/tmp, /Users`,
+    );
+  }
+
+  return absolute;
+}
+
+/**
+ * Validate executable paths (like Homebrew binaries)
+ * Allows standard system binary locations while preventing directory traversal
+ */
+export function validateExecutablePath(inputPath: string): string {
+  if (!inputPath || typeof inputPath !== "string") {
+    throw new Error("Invalid executable path: must be a non-empty string");
+  }
+
+  // Check for traversal attempts
+  if (containsTraversalAttempts(inputPath)) {
+    throw new Error(`Executable path contains directory traversal attempt: ${inputPath}`);
+  }
+
+  // Normalize and resolve the path
+  const normalized = normalize(inputPath);
+  const absolute = resolve(normalized);
+
+  // Allow standard system binary locations plus user directories
+  const allowedRoots = [
+    homedir(), // User's home directory
+    "/tmp", // Temporary directories
+    "/var/tmp",
+    "/Users", // macOS users directory
+    "/usr/local/bin", // Standard local binaries
+    "/usr/bin", // System binaries
+    "/bin", // Essential binaries
+    "/opt/homebrew/bin", // Homebrew ARM64 binaries
+    "/opt/local/bin", // MacPorts binaries
+    "/usr/local", // Local installations
+    "/opt", // Optional software
+  ];
+
+  const isWithinAllowedBoundary = allowedRoots.some((root) => absolute.startsWith(resolve(root)));
+
+  if (!isWithinAllowedBoundary) {
+    throw new Error(
+      `Executable path is outside allowed boundaries: ${absolute}. Allowed directories: ${allowedRoots.join(", ")}`,
     );
   }
 
