@@ -1,6 +1,6 @@
 # Lega Serie A Changelog
 
-## [Maintenance] - [PR_MERGE_DATE]
+## [Maintenance] - {PR_MERGE_DATE}
 
 - Cleanup unused gitignore records
 
