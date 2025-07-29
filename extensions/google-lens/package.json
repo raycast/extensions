@@ -2,20 +2,20 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-lens",
   "title": "Google Lens",
-  "description": "Search the image using Google Lens",
+  "description": "Search images with Google Lens",
   "icon": "extension-icon.png",
   "author": "ridemountainpig",
   "license": "MIT",
   "commands": [
     {
-      "name": "search-with-screenshot",
-      "title": "Search with Screenshot",
-      "description": "Search the screenshot image using Google Lens",
+      "name": "take-screenshot-and-search",
+      "title": "Take Screenshot and Search",
+      "description": "Take a screenshot and search the image using Google Lens",
       "mode": "no-view"
     },
     {
-      "name": "search-finder-image",
-      "title": "Search Finder Image",
+      "name": "search-selected-image",
+      "title": "Search Selected Image",
       "description": "Search the selected image in Finder using Google Lens",
       "mode": "no-view"
     }
