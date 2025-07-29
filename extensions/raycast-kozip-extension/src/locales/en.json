@@ -1,0 +1,17 @@
+{
+  "searchPlaceholder": "Search addresses...",
+  "resultsTitle": "Results",
+  "copyKoreanAddress": "Copy Korean Address",
+  "copyEnglishAddress": "Copy English Address",
+  "copyKoreanLotAddress": "Copy Korean Jibun Address",
+  "copyEnglishLotAddress": "Copy English Jibun Address",
+  "openInKakaoMap": "Open in Kakao Map",
+  "openInNaverMap": "Open in Naver Map",
+  "copyAddressSection": "Copy Address",
+  "mapSection": "Map",
+  "noAddressInfo": "No address info",
+  "switchToJibun": "Switch to Jibun Address",
+  "switchToRoad": "Switch to Road Address",
+  "roadAddressType": "Road",
+  "jibunAddressType": "Jibun"
+}

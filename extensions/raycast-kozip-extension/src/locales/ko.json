@@ -1,0 +1,17 @@
+{
+  "searchPlaceholder": "주소를 검색하세요...",
+  "resultsTitle": "검색 결과",
+  "copyKoreanAddress": "한국 주소 복사",
+  "copyEnglishAddress": "영어 주소 복사",
+  "copyKoreanLotAddress": "한국 지번 주소 복사",
+  "copyEnglishLotAddress": "영어 지번 주소 복사",
+  "openInKakaoMap": "카카오맵에서 열기",
+  "openInNaverMap": "네이버 지도에서 열기",
+  "copyAddressSection": "주소 복사",
+  "mapSection": "지도",
+  "noAddressInfo": "주소 정보 없음",
+  "switchToJibun": "지번 주소로 전환",
+  "switchToRoad": "도로명 주소로 전환",
+  "roadAddressType": "도로명",
+  "jibunAddressType": "지번"
+}
