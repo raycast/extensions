@@ -61,3 +61,4 @@ clipmate
 send-ai
 kaleidoscope
 exa
+pieces-raycast
