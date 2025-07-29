@@ -1,5 +1,12 @@
 # Brand Icons Changelog
 
+## [Bugfix & Enhancement] - 2025-07-29
+
+- Fix a bug which cannot update icon packs
+- Add a field `file` to cross-extension callback values
+- Add a new preference option for loading history versions
+- Bump all dependencies to the latest
+
 ## [Maintenance] - 2025-07-15
 
 - Use [pacote](https://npmjs.com/pacote) for downloading and extracting icons
