@@ -1,6 +1,6 @@
  # Changelog
 
-## [0.1.2] - {PR_MERGE_DATE}
+## [0.1.2] - 2025-07-29
 
 ### Fixed
 - Fixed an issue where if the window was closed during model download, the download would not complete yet the model would still be set as active and throw an error when trying to transcribe
