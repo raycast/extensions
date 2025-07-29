@@ -16,7 +16,7 @@ export default function Search() {
       <List onSearchTextChange={setSearchText} isLoading={isLoading}>
         <List.EmptyView
           title="Type Query to Search"
-          description="Search for apps by name, developer, or bundle Id."
+          description="Search for apps by name, developer, or bundle Id. Authentication is now handled with easy in-UI forms!"
           icon="no-view.png"
         />
       </List>

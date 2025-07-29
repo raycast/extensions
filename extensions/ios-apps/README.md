@@ -105,6 +105,7 @@ This extension requires you to authenticate with your Apple ID in order to searc
 
 - Your Apple ID credentials are never stored within the Raycast extension
 - Authentication is handled directly by ipatool, which securely stores credentials in your system's keychain
+- **NEW**: Authentication can now be completed directly within the Raycast UI with dedicated forms for both standard login and two-factor authentication
 
 ## Configuration
 
@@ -161,8 +162,13 @@ This extension:
 
 - Two-factor authentication is fully supported
 - The extension automatically detects if you're already authenticated
+- **NEW**: In-UI authentication forms provide a seamless experience without leaving Raycast
+  - Dedicated login form for entering Apple ID credentials
+  - Two-factor authentication form with automatic code detection
+  - Real-time validation and error feedback
+  - Secure credential handling with no storage in the extension
 
-When you first attempt to search or download an app, you'll be prompted to authenticate if needed. After successful authentication, you shouldn't have to re-authenticate for future operations.
+When you first attempt to search or download an app, you'll be prompted to authenticate if needed. The new in-UI forms make this process quick and intuitive. After successful authentication, you shouldn't have to re-authenticate for future operations.
 
 ## About Raycast AI Tools
 
