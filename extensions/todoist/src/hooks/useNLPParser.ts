@@ -232,7 +232,7 @@ export function useNLPParser(content: string, projects?: Project[], allLabels?: 
       parsedDeadline,
       labels,
     };
-  }, [content, projects]);
+  }, [content, projects, allLabels]);
 }
 
 /**
