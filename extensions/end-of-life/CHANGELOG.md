@@ -1,6 +1,6 @@
 # End Of Life Changelog
 
-## [Use official API] - {PR_MERGE_DATE}
+## [Use official API] - 2025-07-29
 
 - **Major Refactor**: Migrated to use the official endoflife.date API
 - **Dependencies**: Updated and bumped package dependencies
