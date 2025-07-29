@@ -1,7 +1,3 @@
 node_modules/
 dist/
 build/
-*.js
-!eslint.config.js
-!src/**/*.ts
-!src/**/*.tsx
