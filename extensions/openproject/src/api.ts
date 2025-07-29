@@ -1,82 +1,19 @@
-// src/api.ts
 import { getPreferenceValues } from "@raycast/api";
 import fetch, { RequestInit, Response } from "node-fetch";
+import {
+  Project,
+  WorkPackageType,
+  User,
+  Priority,
+  Status,
+  WorkPackage,
+  CreateWorkPackageRequest,
+  UpdateWorkPackageRequest,
+} from "./types";
 
 interface Preferences {
   apiUrl: string;
   apiKey: string;
-}
-
-export interface Project {
-  id: number;
-  name: string;
-  identifier: string;
-  description?: string;
-  status: string;
-}
-
-export interface WorkPackageType {
-  id: number;
-  name: string;
-  color: string;
-  position: number;
-}
-
-export interface User {
-  id: number;
-  name: string;
-  login: string;
-  mail: string;
-}
-
-export interface WorkPackage {
-  id: number;
-  subject: string;
-  description?: {
-    raw: string;
-    html: string;
-  };
-  project: {
-    id: number;
-    name: string;
-  };
-  type: {
-    id: number;
-    name: string;
-  };
-  status: {
-    id: number;
-    name: string;
-  };
-  assignee?: {
-    id: number;
-    name: string;
-  };
-  priority: {
-    id: number;
-    name: string;
-  };
-  createdAt: string;
-  updatedAt: string;
-  lockVersion?: number; // Wichtig für Updates
-}
-
-export interface UpdateWorkPackageRequest {
-  id: number;
-  subject?: string;
-  description?: string;
-  assigneeId?: number;
-  priorityId?: number;
-  statusId?: number;
-}
-
-export interface CreateWorkPackageRequest {
-  subject: string;
-  description?: string;
-  projectId: number;
-  typeId: number;
-  assigneeId?: number;
-  priorityId?: number;
 }
 
 class OpenProjectAPI {
@@ -146,7 +83,7 @@ class OpenProjectAPI {
     return response._embedded?.elements || [];
   }
 
-  async getPriorities(): Promise<any[]> {
+  async getPriorities(): Promise<Priority[]> {
     const response: any = await this.makeRequest("/priorities");
     return response._embedded?.elements || [];
   }
@@ -204,7 +141,7 @@ class OpenProjectAPI {
     }
   }
 
-  async getStatuses(): Promise<any[]> {
+  async getStatuses(): Promise<Status[]> {
     const response: any = await this.makeRequest("/statuses");
     return response._embedded?.elements || [];
   }

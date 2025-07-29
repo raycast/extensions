@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "openproject",
-  "title": "OpenProject",
+  "title": "Openproject",
   "description": "Unofficial extension to manage your OpenProject tasks and tickets directly from Raycast",
   "icon": "openproject-icon.png",
   "author": "alexander_sattler",
@@ -32,16 +32,14 @@
       "title": "Create Ticket",
       "subtitle": "OpenProject",
       "description": "Create a new ticket in OpenProject",
-      "mode": "view",
-      "icon": "create-ticket.png"
+      "mode": "view"
     },
     {
       "name": "update-ticket",
-      "title": "Update Ticket",
+      "title": "Update Ticket", 
       "subtitle": "OpenProject",
       "description": "Update an existing ticket in OpenProject",
-      "mode": "view",
-      "icon": "update-ticket.png"
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -62,19 +60,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.62.0",
-    "@raycast/utils": "^1.10.0",
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.1",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.8.10",
-    "@types/react": "18.0.38",
+    "@types/react": "19.0.12",
     "eslint": "^8.57.1",
     "eslint-plugin-react": "^7.37.5",
     "globals": "^16.3.0",
     "prettier": "^3.0.3",
-    "typescript": "^5.2.2",
+    "typescript": "^5.8.2",
     "typescript-eslint": "^8.38.0"
   },
   "scripts": {
