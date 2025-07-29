@@ -1,6 +1,8 @@
 import { exec } from "child_process";
 import { promisify } from "util";
+
 import { REPOSITORY_TYPE, COMMAND } from "../constants";
+import { RepositoryType } from "../types";
 
 const execAsync = promisify(exec);
 

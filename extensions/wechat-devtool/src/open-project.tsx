@@ -3,6 +3,7 @@ import { useNavigation, showToast, Toast, showHUD } from "@raycast/api";
 
 import ProjectList from "./components/project-list";
 import { openProject } from "./utils/command";
+import { ExtensionConfig, Project } from "./types";
 
 export default function OpenProject() {
   const { pop } = useNavigation();

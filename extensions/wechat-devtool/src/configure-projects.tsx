@@ -8,6 +8,7 @@ import ReadmeView from "./readme-view";
 import { REPOSITORY_TYPE, WECHAT_DEVTOOL_CLI_PATH } from "./constants";
 import { getExtensionConfig, updateExtensionConfig, createEmptyProject } from "./utils/config";
 import { detectRepositoryType } from "./utils/command";
+import { ExtensionConfig, Project, WechatProjectConfig } from "./types";
 
 interface FormErrors {
   cliPath?: string;
@@ -122,7 +123,7 @@ export default function ConfigureProjects({ onConfigChange }: ConfigureProjectsP
     }
 
     if (!(await validateWechatProject(selectedPath))) {
-      handleProjectValidationError(index, project, "Invalid WeChat mini program Project");
+      handleProjectValidationError(index, project, "Invalid WeChat mini program project");
       return;
     }
 

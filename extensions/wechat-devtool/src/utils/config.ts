@@ -1,9 +1,10 @@
 import path from "path";
 import { randomUUID } from "crypto";
 import { readFile, writeFile, access, mkdir } from "fs/promises";
-
 import { environment } from "@raycast/api";
+
 import { REPOSITORY_TYPE, WECHAT_DEVTOOL_CLI_PATH } from "../constants";
+import { ExtensionConfig, Project } from "../types";
 
 const CONFIG_DIR = environment.supportPath;
 const CONFIG_PATH = path.resolve(CONFIG_DIR, "config-v2.json");

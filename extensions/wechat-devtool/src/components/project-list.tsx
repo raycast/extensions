@@ -8,6 +8,7 @@ import { generateProjectKeywords } from "../utils/pinyin";
 import { getRepositoryBranch } from "../utils/command";
 import ConfigureProjects from "../configure-projects";
 import ReadmeView from "../readme-view";
+import { ExtensionConfig, Project } from "../types";
 
 interface ProjectListProps {
   onProjectAction: (project: Project, config: ExtensionConfig) => void;
@@ -168,57 +169,54 @@ export default function ProjectList({
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search projects...">
-      {sortedProjects.map((project) => (
-        <List.Item
-          key={project.id}
-          icon={Icon.Folder}
-          title={project.name}
-          keywords={project.keywords}
-          subtitle={project.displayPath}
-          accessories={[
-            ...(branchMap[project.id]
-              ? [
-                  {
-                    tag: branchMap[project.id],
-                    icon: { source: "branch.svg", tintColor: Color.SecondaryText },
-                  },
-                ]
-              : []),
-          ]}
-          actions={
-            <ActionPanel>
-              <Action
-                title={actionTitle}
-                icon={Icon.Terminal}
-                onAction={() => {
-                  if (config) {
-                    updateProjectLastUsedAt(project.id);
-                    onProjectAction(project, config);
-                  }
-                }}
-              />
-              <Action.Push
-                title="Go to Configuration"
-                icon={Icon.Gear}
-                target={<ConfigureProjects onConfigChange={handleConfigChange} />}
-              />
-              <Action.CopyToClipboard
-                title="Copy Project Path"
-                content={project.path}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
-              />
-              <Action
-                title="Refresh Project List"
-                icon={Icon.ArrowClockwise}
-                onAction={handleRefresh}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-              />
-              <Action title="About This Extension" icon={Icon.Book} onAction={() => push(<ReadmeView />)} />
-              {actionPanelExtra}
-            </ActionPanel>
-          }
-        />
-      ))}
+      {sortedProjects.map((project) => {
+        const accessories = branchMap[project.id]
+          ? [{ tag: branchMap[project.id], icon: { source: "branch.svg", tintColor: Color.SecondaryText } }]
+          : [];
+
+        return (
+          <List.Item
+            key={project.id}
+            icon={Icon.Folder}
+            title={project.name}
+            keywords={project.keywords}
+            subtitle={project.displayPath}
+            accessories={accessories}
+            actions={
+              <ActionPanel>
+                <Action
+                  title={actionTitle}
+                  icon={Icon.Terminal}
+                  onAction={() => {
+                    if (config) {
+                      updateProjectLastUsedAt(project.id);
+                      onProjectAction(project, config);
+                    }
+                  }}
+                />
+                <Action.Push
+                  title="Go to Configuration"
+                  icon={Icon.Gear}
+                  target={<ConfigureProjects onConfigChange={handleConfigChange} />}
+                />
+                <Action.CopyToClipboard
+                  title="Copy Project Path"
+                  content={project.path}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+                />
+                <Action
+                  title="Refresh Project List"
+                  icon={Icon.ArrowClockwise}
+                  onAction={handleRefresh}
+                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                />
+                <Action title="About This Extension" icon={Icon.Book} onAction={() => push(<ReadmeView />)} />
+                {actionPanelExtra}
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 }

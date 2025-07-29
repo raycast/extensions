@@ -6,8 +6,8 @@
 
 Added support for displaying branches in both Git and Mercurial projects.
 
-> ⚠️ Notice
-> After updating to v1.2.0, please open "Configure Projects" and Save once (no changes needed) to record the repository type for each project.
+> ⚠️ Notice\
+> After updating to v1.2.0, please open "Configure Projects" and Save once (no changes needed) to record the repository type for each project.\
 > This step is required to enable accurate branch display.
 
 ## [v1.1.0] - 2025-07-16
