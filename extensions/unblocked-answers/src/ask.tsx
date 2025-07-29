@@ -33,25 +33,33 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Ask }>
   async function insertQuestion(uuid: string, question: string) {
     const questionsString = await LocalStorage.getItem<string>("question-uuids");
     const questions: { uuid: string; question: string }[] = questionsString ? JSON.parse(questionsString) : [];
-    questions.push({ uuid, question });
+    questions.unshift({ uuid, question });
     await LocalStorage.setItem("question-uuids", JSON.stringify(questions));
   }
 
   async function askQuestion() {
-    const uuid = uuidv4();
-    const insertedQuestion = insertQuestion(uuid, question);
-    // const request = fetch(`https://getunblocked.com/api/v1/answers/${uuid}`, {
-    //   method: "PUT",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //     Authorization: `Bearer ${apiKey}`,
-    //   },
-    //   body: JSON.stringify({ question }),
-    // });
-    const request = Promise.resolve();
-    await Promise.all([insertedQuestion, request]);
-    console.log(`Question asked with UUID: ${uuid}`);
-    return uuid;
+    try {
+      const uuid = uuidv4();
+      controller.current = new AbortController();
+      const signal = controller.current.signal;
+      await fetch(`https://getunblocked.com/api/v1/answers/${uuid}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        signal,
+        body: JSON.stringify({ question }),
+      });
+      await insertQuestion(uuid, question);
+      return uuid;
+    } catch (error) {
+      if (!(error instanceof Error) || (error instanceof Error && error.name !== "AbortError")) {
+        setIsLoading(false);
+        setError(`Error asking question: ${error instanceof Error ? error.message : String(error)}`);
+      }
+      throw error;
+    }
   }
 
   async function fetchAnswer(uuid: string) {
@@ -74,8 +82,10 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Ask }>
       }
       return data.state === "complete";
     } catch (error) {
-      setIsLoading(false);
-      setError(`Error fetching answer: ${error instanceof Error ? error.message : String(error)}`);
+      if (!(error instanceof Error) || (error instanceof Error && error.name !== "AbortError")) {
+         setIsLoading(false);
+         setError(`Error fetching answer: ${error instanceof Error ? error.message : String(error)}`);
+       }
     }
   }
 
@@ -92,10 +102,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Ask }>
       .then((uuid) => {
         pollAnswer(uuid);
       })
-      .catch((error) => {
-        console.error("Error asking question:", error);
-        setIsLoading(false);
-      });
+      .catch(() => {}); // askquestion and fetchAnswer handle errors internally
     return () => {
       if (controller.current) {
         controller.current.abort();

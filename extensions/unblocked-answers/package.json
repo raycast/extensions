@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "unblocked",
-  "title": "Unblocked",
-  "description": "Ask questions and receive answers from the Unblocked Answers API",
+  "name": "unblocked-answers",
+  "title": "Unblocked Answers",
+  "description": "Ask questions and receive answers from the Unblocked Answers API, and review past questions and answers.",
   "icon": "extension-icon.png",
   "author": "TetraTsunami",
   "license": "MIT",
@@ -10,13 +10,15 @@
     {
       "name": "view",
       "title": "Past Questions",
+      "subtitle": "unblocked past",
       "description": "View your past questions and their answers",
       "mode": "view"
     },
     {
       "name": "ask",
       "title": "Ask Unblocked",
-      "description": "Ask a question to the Unblocked API and receive an answer",
+      "subtitle": "unblocked question",
+      "description": "Ask a question to the Unblocked Answers API and receive an answer",
       "arguments": [
         {
           "name": "question",
@@ -27,6 +29,10 @@
       ],
       "mode": "view"
     }
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
   ],
   "preferences": [
     {
