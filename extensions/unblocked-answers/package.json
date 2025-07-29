@@ -10,14 +10,12 @@
     {
       "name": "view",
       "title": "Past Questions",
-      "subtitle": "unblocked past",
       "description": "View your past questions and their answers",
       "mode": "view"
     },
     {
       "name": "ask",
       "title": "Ask Unblocked",
-      "subtitle": "unblocked question",
       "description": "Ask a question to the Unblocked Answers API and receive an answer",
       "arguments": [
         {
