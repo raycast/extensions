@@ -6,6 +6,8 @@
   "description": "Pieces for Developers Raycast Extension",
   "icon": "piecesVector.png",
   "author": "pieces_dev",
+  "owner": "pieces",
+  "access": "public",
   "license": "MIT",
   "categories": [
     "Developer Tools",

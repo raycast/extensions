@@ -4,6 +4,7 @@
 
 - Update compatibility with PiecesOS 12.0.0
 - Ensure users are signed in to use the commands
+- Transfer extension to organization
 
 ## [0.4.0] - 2025-03-24
 
