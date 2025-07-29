@@ -3,7 +3,7 @@
   "name": "open-in-cursor",
   "title": "Open in Cursor",
   "description": "Open current Finder directory, selected folder or file in Cursor.",
-  "icon": "icon.png",
+  "icon": "extension-icon.png",
   "author": "mjoosuf",
   "categories": [
     "Developer Tools",
@@ -12,28 +12,13 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "open-in-cursor",
       "title": "Open in Cursor",
-      "description": "Open current Finder directory, selected folder or file in Cursor.",
+      "description": "Opens the open finder window in Cursor",
       "mode": "no-view"
     }
   ],
-  "preferences": [
-    {
-      "name": "CursorVariant",
-      "description": "Cursor variant to open the selected finder into.",
-      "type": "dropdown",
-      "title": "Cursor Variant",
-      "required": false,
-      "default": "Cursor",
-      "data": [
-        {
-          "title": "Cursor",
-          "value": "com.todesktop.230313mzl4w4u92"
-        }
-      ]
-    }
-  ],
+
   "dependencies": {
     "@raycast/api": "^1.39.1"
   },
