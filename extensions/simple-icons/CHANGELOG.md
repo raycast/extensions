@@ -1,6 +1,6 @@
 # Brand Icons Changelog
 
-## [Bugfix & Enhancement] - {PR_MERGE_DATE}
+## [Bugfix & Enhancement] - 2025-07-29
 
 - Fix a bug which cannot update icon packs
 - Add a field `file` to cross-extension callback values

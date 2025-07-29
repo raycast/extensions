@@ -1,6 +1,6 @@
 # Badges Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2025-07-29
 
 - Add support for using base64 encoded SVG for logo
 - Bump all dependencies to the latest
