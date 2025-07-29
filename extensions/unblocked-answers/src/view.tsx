@@ -6,58 +6,13 @@ interface Preferences {
   apiKey: string;
 }
 
-function QuestionDetail({ question }: { question: { uuid: string; question: string } }) {
-  const [answer, setAnswer] = useState<{ answer: string; references: object[] } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const controller = useRef<AbortController | null>(null);
-
-  async function fetchAnswer(uuid: string) {
-    controller.current = new AbortController();
-    const signal = controller.current.signal;
-
-    return await fetch(`https://getunblocked.com/api/v1/answers/${uuid}`, {
-      headers: {
-        Authorization: `Bearer ${getPreferenceValues<Preferences>().apiKey}`,
-      },
-      signal,
-    }).then(async (response) => (await response.json()) as UnblockedAnswerResponse);
-  }
-
-  useEffect(() => {
-    setIsLoading(true);
-    fetchAnswer(question.uuid)
-      .then((data) => {
-        if (data.state === "complete") {
-          setAnswer({ answer: data.answer, references: data.references });
-        } else {
-          setAnswer({ answer: "Still processing...", references: [] });
-        }
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        if (!(error instanceof Error) || (error instanceof Error && error.name !== "AbortError")) {
-          setAnswer({ answer: "Error fetching answer", references: [] });
-          setIsLoading(false);
-        }
-      });
-    return () => {
-      if (controller.current) {
-        controller.current.abort();
-      }
-    };
-  }, [question.uuid]);
-
-  return (
-    <List.Item.Detail
-      isLoading={isLoading}
-      markdown={`# ${question.question} ${answer ? "\n\n" + answer.answer : ""}`}
-    />
-  );
-}
-
 export default function Command() {
   const [questions, setQuestions] = useState<{ uuid: string; question: string }[]>([]);
+  const [answers, setAnswers] = useState<Record<string, { answer: string; references: object[]; isLoading: boolean }>>(
+    {},
+  );
   const [isLoading, setIsLoading] = useState(true);
+  const controller = useRef<AbortController | null>(null);
   const { apiKey } = getPreferenceValues<Preferences>();
 
   if (!apiKey) {
@@ -75,16 +30,67 @@ export default function Command() {
   async function fetchQuestions() {
     setIsLoading(() => true);
     const questionsString = await LocalStorage.getItem<string>("question-uuids");
-    const questions: { uuid: string; question: string }[] = questionsString ? JSON.parse(questionsString) : [];
+    let questions: { uuid: string; question: string }[] = [];
+    if (questionsString) {
+      try {
+        questions = JSON.parse(questionsString);
+      } catch {
+        await LocalStorage.removeItem("question-uuids");
+      }
+    }
     setQuestions(questions);
     setIsLoading(() => false);
   }
 
-  async function deleteQuestions() {
-    setIsLoading(() => true);
+  async function fetchAnswer(uuid: string) {
+    controller.current = new AbortController();
+    const signal = controller.current.signal;
+
+    return await fetch(`https://getunblocked.com/api/v1/answers/${uuid}`, {
+      headers: {
+        Authorization: `Bearer ${getPreferenceValues<Preferences>().apiKey}`,
+      },
+      signal,
+    }).then(async (response) => (await response.json()) as UnblockedAnswerResponse);
+  }
+
+  async function clearQuestions() {
     await LocalStorage.removeItem("question-uuids");
     setQuestions([]);
-    setIsLoading(() => false);
+  }
+
+  function handleSelectionChange(uuid: string | null) {
+    if (!uuid) return;
+    if (controller.current) {
+      controller.current.abort();
+    }
+    if (answers[uuid] && !answers[uuid].isLoading) return;
+    setAnswers((prev) => ({
+      ...prev,
+      [uuid]: { answer: "", references: [], isLoading: true },
+    }));
+    fetchAnswer(uuid)
+      .then((data) => {
+        if (data.state === "complete") {
+          setAnswers((prev) => ({
+            ...prev,
+            [uuid]: { answer: data.answer, references: data.references, isLoading: false },
+          }));
+        } else {
+          setAnswers((prev) => ({
+            ...prev,
+            [uuid]: { answer: "Still processing...", references: [], isLoading: false },
+          }));
+        }
+      })
+      .catch((error) => {
+        if (!(error instanceof Error) || (error instanceof Error && error.name !== "AbortError")) {
+          setAnswers((prev) => ({
+            ...prev,
+            [uuid]: { answer: "Error fetching answer", references: [], isLoading: false },
+          }));
+        }
+      });
   }
 
   useEffect(() => {
@@ -92,15 +98,26 @@ export default function Command() {
   }, []);
 
   return (
-    <List isLoading={isLoading} isShowingDetail>
+    <List isLoading={isLoading} isShowingDetail onSelectionChange={handleSelectionChange}>
       {questions.map((question) => (
         <List.Item
           key={question.uuid}
+          id={question.uuid}
           title={question.question}
-          detail={<QuestionDetail question={question} />}
+          detail={
+            <List.Item.Detail
+              isLoading={answers[question.uuid] ? answers[question.uuid].isLoading : true}
+              markdown={`# ${question.question} ${answers[question.uuid]?.answer ? "\n\n" + answers[question.uuid]?.answer : ""}`}
+            />
+          }
           actions={
             <ActionPanel>
-              <Action icon={Icon.Trash} title="Clear Question History" onAction={() => deleteQuestions()} />
+              <Action.CopyToClipboard
+                title="Copy Answer"
+                content={answers[question.uuid]?.answer || ""}
+                shortcut={{ modifiers: ["cmd"], key: "c" }}
+              />
+              <Action icon={Icon.Trash} title="Clear Question History" onAction={() => clearQuestions()} />
             </ActionPanel>
           }
         />

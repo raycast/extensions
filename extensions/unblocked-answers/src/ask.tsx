@@ -32,7 +32,14 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Ask }>
 
   async function insertQuestion(uuid: string, question: string) {
     const questionsString = await LocalStorage.getItem<string>("question-uuids");
-    const questions: { uuid: string; question: string }[] = questionsString ? JSON.parse(questionsString) : [];
+    let questions: { uuid: string; question: string }[] = [];
+    if (questionsString) {
+      try {
+        questions = JSON.parse(questionsString);
+      } catch {
+        await LocalStorage.removeItem("question-uuids");
+      }
+    }
     questions.unshift({ uuid, question });
     await LocalStorage.setItem("question-uuids", JSON.stringify(questions));
   }
@@ -86,6 +93,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Ask }>
         setIsLoading(false);
         setError(`Error fetching answer: ${error instanceof Error ? error.message : String(error)}`);
       }
+      return false;
     }
   }
 
