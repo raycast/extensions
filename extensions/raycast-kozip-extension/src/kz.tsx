@@ -3,6 +3,25 @@ import { useFetch, useLocalStorage } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { getLocalizedStrings, type LocaleStrings } from "./locales";
 
+// API Response interfaces
+interface ApiResult {
+  postcode5: string;
+  postcode6: string;
+  ko_common: string;
+  ko_doro: string;
+  ko_jibeon: string;
+  en_common: string;
+  en_doro: string;
+  en_jibeon: string;
+  building_name?: string;
+}
+
+interface ApiResponse {
+  error?: string;
+  count: number;
+  results: ApiResult[];
+}
+
 // Cache interface
 interface CacheEntry {
   data: AddressResult[];
@@ -62,7 +81,7 @@ export default function Command() {
         // Save to cache
         const cacheKey = debouncedSearchText.normalize("NFC").toLowerCase();
         const cacheEntry: CacheEntry = {
-          data,
+          data: data as AddressResult[],
           timestamp: Date.now(),
           expiresAt: Date.now() + CACHE_DURATION,
         };
@@ -85,7 +104,7 @@ export default function Command() {
       throttle
     >
       <List.Section title={strings.resultsTitle} subtitle={data?.length + ""}>
-        {data?.map((searchResult) => (
+        {data?.map((searchResult: AddressResult) => (
           <SearchListItem
             key={searchResult.id}
             searchResult={searchResult}
@@ -162,29 +181,13 @@ function SearchListItem({
 }
 
 async function parseFetchResponse(response: Response): Promise<AddressResult[]> {
-  const json = (await response.json()) as
-    | {
-        error?: string;
-        count: number;
-        results: {
-          postcode5: string;
-          postcode6: string;
-          ko_common: string;
-          ko_doro: string;
-          ko_jibeon: string;
-          en_common: string;
-          en_doro: string;
-          en_jibeon: string;
-          building_name?: string;
-        }[];
-      }
-    | { error: string };
+  const json = (await response.json()) as ApiResponse | { error: string };
 
   if (!response.ok || json.error) {
     throw new Error(json.error || response.statusText);
   }
 
-  return json.results.map((result, index) => {
+  return (json as ApiResponse).results.map((result: ApiResult, index: number) => {
     const buildingName = result.building_name ? ` (${result.building_name})` : "";
     return {
       id: `${result.postcode5}-${index}`,

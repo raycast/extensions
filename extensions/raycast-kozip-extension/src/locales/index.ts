@@ -4,7 +4,7 @@ import enStrings from "./en.json";
 type LocaleStrings = typeof enStrings;
 
 export function getLocalizedStrings(): LocaleStrings {
-  const locale = environment.locale || "en";
+  const locale = (environment as { locale?: string }).locale || "en";
   const languageCode = locale.split("-")[0];
 
   try {
