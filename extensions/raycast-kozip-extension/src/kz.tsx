@@ -70,18 +70,16 @@ export default function Command() {
 
   const shouldFetch = debouncedSearchText.length > 0 && cachedData === null;
 
-  const { data: fetchedData, isLoading } = useFetch(
-    shouldFetch
-      ? `https://api.poesis.kr/post/search.php?q=${encodeURIComponent(debouncedSearchText.normalize("NFC"))}`
-      : null,
+  const { data: fetchedData, isLoading } = useFetch<AddressResult[]>(
+    `https://api.poesis.kr/post/search.php?q=${encodeURIComponent(debouncedSearchText.normalize("NFC"))}`,
     {
       parseResponse: parseFetchResponse,
       execute: shouldFetch,
-      onData: (data) => {
+      onData: (data: AddressResult[]) => {
         // Save to cache
         const cacheKey = debouncedSearchText.normalize("NFC").toLowerCase();
         const cacheEntry: CacheEntry = {
-          data: data as AddressResult[],
+          data,
           timestamp: Date.now(),
           expiresAt: Date.now() + CACHE_DURATION,
         };
@@ -94,7 +92,7 @@ export default function Command() {
     },
   );
 
-  const data = cachedData || fetchedData || [];
+  const data: AddressResult[] = cachedData || fetchedData || [];
 
   return (
     <List
