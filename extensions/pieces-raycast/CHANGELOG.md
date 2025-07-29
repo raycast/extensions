@@ -1,6 +1,6 @@
 # Pieces for Raycast Changelog
 
-## [0.5.0] - {PR_MERGE_DATE}
+## [0.5.0] - 2025-07-29
 
 - Update compatibility with PiecesOS 12.0.0
 - Ensure users are signed in to use the commands
