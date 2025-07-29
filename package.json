@@ -3,7 +3,7 @@
   "name": "terminal-cheat-sheet",
   "title": "Terminal Cheat Sheet",
   "description": "Quick reference for essential bash keyboard shortcuts and terminal commands",
-  "icon": "extension-icon.png",
+  "icon": "extension-icon-new.png",
   "author": "asaf_ofer",
   "keywords": [
     "terminal",
@@ -16,7 +16,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "view-cheet-sheet",
+      "name": "view-cheat-sheet",
       "title": "View Cheat Sheet",
       "description": "Browse terminal keyboard shortcuts and commands",
       "mode": "view"
