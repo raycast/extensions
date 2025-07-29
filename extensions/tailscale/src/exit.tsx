@@ -1,5 +1,6 @@
 import { ActionPanel, List, Action, popToRoot, closeMainWindow, Image, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { flag } from "country-emoji";
 import {
   StatusResponse,
   getStatus,
@@ -73,11 +74,12 @@ export default function ExitNodeList() {
           )}
           {exitNodes?.map((exitNode) => {
             const isMullvad = exitNode.tags?.includes(MULLVAD_DEVICE_TAG) && exitNode.location;
+            const countryFlag = isMullvad && exitNode.location ? flag(exitNode.location.CountryCode) : undefined;
             const title = exitNode.name;
             const subtitle =
               isMullvad && exitNode.location
-                ? `Mullvad Exit Node | ${exitNode.location.City}, ${exitNode.location.Country}`
-                : `${exitNode.ipv4}${exitNode.os ? ` | ${exitNode.os}` : ""}`;
+                ? `Mullvad Exit Node - ${exitNode.location.City}, ${exitNode.location.Country} ${countryFlag ? ` ${countryFlag}` : ""}`
+                : `${exitNode.ipv4}${exitNode.os ? ` - ${exitNode.os}` : ""}`;
 
             return (
               <List.Item
