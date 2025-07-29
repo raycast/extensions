@@ -3,6 +3,8 @@ import { showToast, Toast, showHUD } from "@raycast/api";
 import { downloadApp } from "../ipatool";
 import { handleDownloadError, handleAuthError } from "../utils/error-handler";
 import { analyzeIpatoolError } from "../utils/ipatool-error-patterns";
+import { AuthNavigationHelpers } from "./useAuthNavigation";
+import { NeedsLoginError, Needs2FAError, ensureAuthenticated } from "../utils/auth";
 
 // Global download state to prevent concurrent downloads across all hook instances
 const globalDownloadState = {
@@ -12,9 +14,10 @@ const globalDownloadState = {
 
 /**
  * Hook for downloading an app
+ * @param authNavigation Optional auth navigation helpers for form redirects
  * @returns Object with download function and loading state
  */
-export function useAppDownload() {
+export function useAppDownload(authNavigation?: AuthNavigationHelpers) {
   const [isLoading, setIsLoading] = useState(globalDownloadState.isDownloading);
   const [currentDownload, setCurrentDownload] = useState<string | null>(globalDownloadState.currentApp);
 
@@ -92,9 +95,66 @@ export function useAppDownload() {
         return undefined;
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      // Check if this is a specific authentication error that should be handled by the form flow
+      if (error instanceof NeedsLoginError || error instanceof Needs2FAError) {
+        // Don't show failure toast for authentication errors
+        // The form flow will handle these
+        if (showHudMessages) {
+          await showHUD("Authentication Required", { clearRootSearch: true });
+        }
 
-      // Use precise ipatool error analysis instead of generic pattern matching
+        // Store download parameters for retry after successful auth
+        const downloadParams = { bundleId, name, version, price };
+
+        if (authNavigation) {
+          // Let the form flow handle authentication
+          if (error instanceof NeedsLoginError) {
+            authNavigation.pushLoginForm?.(async () => {
+              // After successful login, resume download
+              try {
+                await ensureAuthenticated();
+                await showToast({ style: Toast.Style.Animated, title: "Resuming download..." });
+                await handleDownload(
+                  downloadParams.bundleId,
+                  downloadParams.name,
+                  downloadParams.version,
+                  downloadParams.price,
+                  showHudMessages,
+                );
+              } catch (authError) {
+                // If auth still fails, let it propagate
+                console.error("Authentication failed after login:", authError);
+              }
+            });
+          } else if (error instanceof Needs2FAError) {
+            authNavigation.push2FAForm?.("session-token", async () => {
+              // After successful 2FA, resume download
+              try {
+                await ensureAuthenticated();
+                await showToast({ style: Toast.Style.Animated, title: "Resuming download..." });
+                await handleDownload(
+                  downloadParams.bundleId,
+                  downloadParams.name,
+                  downloadParams.version,
+                  downloadParams.price,
+                  showHudMessages,
+                );
+              } catch (authError) {
+                // If auth still fails, let it propagate
+                console.error("Authentication failed after 2FA:", authError);
+              }
+            });
+          }
+        } else {
+          // No navigation available, show preferences option
+          await handleAuthError(error, false, true);
+        }
+
+        return undefined;
+      }
+
+      // For other errors, use the existing error analysis
+      const errorMessage = error instanceof Error ? error.message : String(error);
       const errorAnalysis = analyzeIpatoolError(errorMessage);
 
       if (showHudMessages) {
@@ -108,9 +168,31 @@ export function useAppDownload() {
         await showHUD(hudMessage, { clearRootSearch: true });
       }
 
-      if (errorAnalysis.isAuthError) {
-        // Handle authentication errors with preferences redirect
-        await handleAuthError(new Error(errorAnalysis.userMessage), false);
+      // For non-specific auth errors, use the existing handler
+      if (errorAnalysis.isAuthError && !(error instanceof NeedsLoginError) && !(error instanceof Needs2FAError)) {
+        // Store download parameters for retry after successful auth
+        const downloadParams = { bundleId, name, version, price };
+
+        // Handle authentication errors with form redirect if available
+        await handleAuthError(
+          new Error(errorAnalysis.userMessage),
+          false,
+          !authNavigation, // Only show preferences if no navigation available
+          undefined,
+          authNavigation?.pushLoginForm,
+          authNavigation?.push2FAForm,
+          async () => {
+            // Resume download after successful authentication
+            await showToast({ style: Toast.Style.Animated, title: "Resuming download..." });
+            await handleDownload(
+              downloadParams.bundleId,
+              downloadParams.name,
+              downloadParams.version,
+              downloadParams.price,
+              showHudMessages,
+            );
+          },
+        );
       } else {
         // Handle general download errors with specific user message
         await handleDownloadError(new Error(errorAnalysis.userMessage), "download app", "download");

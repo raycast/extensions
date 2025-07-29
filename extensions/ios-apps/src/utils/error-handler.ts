@@ -3,6 +3,7 @@ import { showToast, Toast, openExtensionPreferences, open } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { logger } from "./logger";
 import { analyzeIpatoolError } from "./ipatool-error-patterns";
+import { loginToAppleId, NeedsLoginError, Needs2FAError } from "./auth";
 
 /**
  * Sanitize query strings to remove potentially sensitive information before logging
@@ -188,33 +189,75 @@ export async function handleAuthError(
   shouldThrow: boolean = true,
   showPreferencesAction: boolean = true,
   redirectToAuthForm?: (initialError?: string) => void,
+  pushLoginForm?: (onSuccess?: () => void) => void,
+  push2FAForm?: (sessionToken: string, onSuccess?: () => void) => void,
+  onAuthSuccess?: () => void,
 ): Promise<void> {
   const errorMessage = error instanceof Error ? error.message : String(error);
 
   // Log the error with context
   logger.error(`[authentication] Error: ${errorMessage}`);
 
-  // Detect specific authentication error types
+  // Check if error is a specific custom error type
+  const isNeedsLoginError = error instanceof NeedsLoginError;
+  const isNeeds2FAError = error instanceof Needs2FAError;
+
+  // Detect specific authentication error types from message
   const lowerErrorMessage = errorMessage.toLowerCase();
   const isCredentialError =
+    isNeedsLoginError ||
     lowerErrorMessage.includes("authentication failed") ||
     lowerErrorMessage.includes("invalid credentials") ||
-    lowerErrorMessage.includes("login failed");
+    lowerErrorMessage.includes("login failed") ||
+    lowerErrorMessage.includes("please provide apple id");
 
   const is2FARequired =
+    isNeeds2FAError ||
     lowerErrorMessage.includes("two-factor") ||
     lowerErrorMessage.includes("2fa") ||
     lowerErrorMessage.includes("verification code");
 
-  let userMessage = "Authentication failed";
-  let toastTitle = "Authentication Error";
+  const userMessage = "Authentication failed";
+  const toastTitle = "Authentication Error";
 
-  if (is2FARequired) {
-    userMessage = "Two-factor authentication required";
-    toastTitle = "2FA Required";
-  } else if (isCredentialError) {
-    userMessage = "Invalid Apple ID credentials";
-    toastTitle = "Login Failed";
+  if (isCredentialError && pushLoginForm) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Login Failed",
+      message: "Redirecting to login form...",
+    });
+    pushLoginForm(async () => {
+      try {
+        await loginToAppleId();
+        await showToast({ style: Toast.Style.Success, title: "Logged in successfully" });
+        // Call the success callback to resume the original operation
+        if (onAuthSuccess) {
+          onAuthSuccess();
+        }
+      } catch (loginError) {
+        await handleAuthError(loginError, true, true, undefined, pushLoginForm, push2FAForm, onAuthSuccess);
+      }
+    });
+    return;
+  } else if (is2FARequired && push2FAForm) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "2FA Required",
+      message: "Redirecting to 2FA form...",
+    });
+    push2FAForm("session-token-placeholder", async () => {
+      try {
+        await loginToAppleId();
+        await showToast({ style: Toast.Style.Success, title: "2FA successful" });
+        // Call the success callback to resume the original operation
+        if (onAuthSuccess) {
+          onAuthSuccess();
+        }
+      } catch (loginError) {
+        await handleAuthError(loginError, true, true, undefined, pushLoginForm, push2FAForm, onAuthSuccess);
+      }
+    });
+    return;
   }
 
   // Show user-friendly toast with specific guidance

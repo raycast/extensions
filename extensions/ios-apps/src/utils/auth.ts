@@ -1,9 +1,62 @@
-import { preferences } from "./paths";
+import { LocalStorage, getPassword, setPassword, deletePassword } from "@raycast/api";
 import { logger } from "./logger";
 import { validateIpatoolInstallation, executeIpatoolCommand } from "./ipatool-validator";
 import { handleAuthError } from "./error-handler";
 import { analyzeIpatoolError } from "./ipatool-error-patterns";
 import { handleProcessErrorCleanup } from "./temp-file-manager";
+
+/**
+ * Custom error types for authentication flow
+ */
+export class NeedsLoginError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "NeedsLoginError";
+  }
+}
+
+export class Needs2FAError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "Needs2FAError";
+  }
+}
+
+/**
+ * Securely retrieve Apple ID from local storage
+ */
+async function getAppleIdFromStorage(): Promise<string | undefined> {
+  return await LocalStorage.getItem<string>("appleId");
+}
+
+/**
+ * Securely retrieve password from secure storage
+ */
+async function getPasswordFromStorage(): Promise<string | undefined> {
+  return await getPassword({ service: "ios-apps-apple-password" });
+}
+
+/**
+ * Store Apple ID in local storage
+ */
+export async function storeAppleId(appleId: string): Promise<void> {
+  await LocalStorage.setItem("appleId", appleId);
+}
+
+/**
+ * Store password in secure storage
+ */
+export async function storePassword(password: string): Promise<void> {
+  await setPassword({ service: "ios-apps-apple-password", password });
+}
+
+/**
+ * Clear stored credentials from storage
+ */
+export async function clearStoredCredentials(): Promise<void> {
+  await LocalStorage.removeItem("appleId");
+  await deletePassword({ service: "ios-apps-apple-password" });
+}
 
 /**
  * Secure wrapper for executing ipatool commands with error handling
@@ -31,17 +84,15 @@ async function executeSecureIpatoolCommand(args: string[]): Promise<{ stdout: st
  * @param twoFactorCode Optional 2FA code for two-factor authentication
  */
 export async function loginToAppleId(appleId?: string, password?: string, twoFactorCode?: string): Promise<void> {
-  const args = [
-    "auth",
-    "login",
-    "-e",
-    appleId || preferences.appleId,
-    "-p",
-    password || preferences.password,
-    "--format",
-    "json",
-    "--non-interactive",
-  ];
+  // Get credentials from parameters or secure storage
+  const email = appleId || (await getAppleIdFromStorage());
+  const pass = password || (await getPasswordFromStorage());
+
+  if (!email || !pass) {
+    throw new NeedsLoginError("Apple ID and password are required for authentication");
+  }
+
+  const args = ["auth", "login", "-e", email, "-p", pass, "--format", "json", "--non-interactive"];
 
   // Add 2FA code if provided
   if (twoFactorCode) {
@@ -59,6 +110,16 @@ export async function loginToAppleId(appleId?: string, password?: string, twoFac
     // Use precise ipatool error analysis with auth context
     const errorAnalysis = analyzeIpatoolError(errorMessage, undefined, "auth");
 
+    // Check if it's a 2FA error
+    if (
+      errorAnalysis.userMessage.includes("Two-factor") ||
+      errorAnalysis.userMessage.includes("2FA") ||
+      errorMessage.includes("two-factor") ||
+      errorMessage.includes("2FA")
+    ) {
+      throw new Needs2FAError("Two-factor authentication code required");
+    }
+
     // Throw specific error based on analysis
     throw new Error(errorAnalysis.userMessage);
   }
@@ -66,9 +127,13 @@ export async function loginToAppleId(appleId?: string, password?: string, twoFac
 
 /**
  * Ensures the user is authenticated with Apple ID
- * @param twoFactorCode Optional 2FA code for two-factor authentication
+ * @param options Optional authentication credentials
  */
-export async function ensureAuthenticated(twoFactorCode?: string): Promise<boolean> {
+export async function ensureAuthenticated(options?: {
+  email?: string;
+  password?: string;
+  code?: string;
+}): Promise<boolean> {
   // First validate that ipatool is installed and accessible
   const isIpatoolValid = await validateIpatoolInstallation();
   if (!isIpatoolValid) {
@@ -77,7 +142,7 @@ export async function ensureAuthenticated(twoFactorCode?: string): Promise<boole
 
   try {
     // Check if we're already authenticated (skip if we have a 2FA code to submit)
-    if (!twoFactorCode) {
+    if (!options?.code) {
       const { stdout } = await executeSecureIpatoolCommand(["auth", "info", "--format", "json", "--non-interactive"]);
 
       try {
@@ -95,13 +160,31 @@ export async function ensureAuthenticated(twoFactorCode?: string): Promise<boole
       }
     }
 
-    // Attempt to login (with or without 2FA code)
-    await loginToAppleId(twoFactorCode);
+    // Check if we need to throw specific errors for missing credentials
+    const storedEmail = await getAppleIdFromStorage();
+    const storedPassword = await getPasswordFromStorage();
+
+    // If no credentials provided and no stored credentials, throw NeedsLoginError
+    if (!options?.email && !storedEmail) {
+      throw new NeedsLoginError("Please provide Apple ID credentials");
+    }
+
+    if (!options?.password && !storedPassword) {
+      throw new NeedsLoginError("Please provide Apple ID password");
+    }
+
+    // Attempt to login with provided or stored credentials
+    await loginToAppleId(options?.email, options?.password, options?.code);
     return true;
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
 
     logger.error("Authentication check failed", { error: errorMessage });
+
+    // Re-throw NeedsLoginError and Needs2FAError as-is
+    if (error instanceof NeedsLoginError || error instanceof Needs2FAError) {
+      throw error;
+    }
 
     // Use precise ipatool error analysis with auth context
     const errorAnalysis = analyzeIpatoolError(errorMessage, undefined, "auth");
