@@ -12,10 +12,6 @@ type CachedInstancesStatus = {
 }
 type InstanceWithOnline = Instance & { online: boolean }
 
-function getCustomApiKey(): string | undefined {
-  return undefined
-}
-
 async function checkInstancesOnline(instances: Instance[]): Promise<InstanceWithOnline[]> {
   return await Promise.all(
     instances.map(async (instance) => {
@@ -116,7 +112,7 @@ export default function Command() {
               id: "custom",
               name: cobaltInstanceUrl,
               api: cobaltInstanceUrl,
-              apiKey: cobaltInstanceUseApiKey ? getCustomApiKey() : undefined,
+              apiKey: cobaltInstanceUseApiKey ? cobaltInstanceUseApiKey : undefined,
             },
           ])
           customInst = customResult[0]
