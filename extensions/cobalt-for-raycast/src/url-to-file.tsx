@@ -318,9 +318,7 @@ export default function Command() {
                 cobaltInstanceUrl &&
                 (instance.id === "custom" || instance.api === cobaltInstanceUrl || instance.frontend === instance.api)
               ) &&
-              Number.isNaN(Number(sourceMinScore))
-                ? instance.score === undefined || instance.score >= 50
-                : instance.score !== undefined && instance.score >= Number(sourceMinScore),
+              Number.isNaN(Number(sourceMinScore)) ? 50 : Number(sourceMinScore),
             )
             .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
             .map((instance, idx) => (
