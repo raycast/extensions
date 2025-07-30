@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cobalt-for-raycast",
   "title": "Cobalt for Raycast",
-  "description": "Cobalt for Raycast",
+  "description": "Download videos and audio from popular social media platforms using cobalt.tools API.",
   "icon": "icon.png",
   "author": "Baldy",
   "license": "MIT",
