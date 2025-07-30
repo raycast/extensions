@@ -133,7 +133,37 @@ function getCursorGlobalDataDir(): string {
 }
 
 /**
- * Execute a SQLite query safely with timeout
+ * Escape single quotes for SQLite string literals
+ */
+function escapeSqliteString(value: string): string {
+  if (typeof value !== "string") {
+    throw new Error("Value must be a string");
+  }
+  // Replace single quotes with two single quotes (SQLite standard)
+  return value.replace(/'/g, "''");
+}
+
+/**
+ * Validate that a string contains only safe characters for database keys
+ */
+function validateDatabaseKey(key: string): boolean {
+  // Allow alphanumeric characters, colons, hyphens, underscores, and dots
+  // This covers Cursor's session and bubble ID formats
+  const safeKeyPattern = /^[a-zA-Z0-9:._-]+$/;
+  return safeKeyPattern.test(key) && key.length > 0 && key.length < 500;
+}
+
+/**
+ * Validate session or bubble ID format
+ */
+function validateId(id: string): boolean {
+  // More specific validation for IDs - alphanumeric, hyphens, and underscores only
+  const idPattern = /^[a-zA-Z0-9_-]+$/;
+  return idPattern.test(id) && id.length > 0 && id.length < 200;
+}
+
+/**
+ * Execute a SQLite query safely with timeout and input validation
  */
 function queryDatabase(dbPath: string, query: string): string {
   try {
@@ -642,11 +672,29 @@ async function getSessionDetails(session: ChatSession): Promise<ChatData> {
   const dbPath = join(globalDataDir, "state.vscdb");
 
   if (session.sessionKey.startsWith("composerData:")) {
+    // Validate session key for security
+    if (!validateDatabaseKey(session.sessionKey)) {
+      return {
+        ...session,
+        content: "Invalid session key",
+      };
+    }
+
     // Extract detailed content for global session
     const sessionId = session.sessionKey.replace("composerData:", "");
+
+    // Validate session ID
+    if (!validateId(sessionId)) {
+      return {
+        ...session,
+        content: "Invalid session ID format",
+      };
+    }
+
+    const escapedSessionKey = escapeSqliteString(session.sessionKey);
     const sessionDataResult = queryDatabase(
       dbPath,
-      `SELECT value FROM cursorDiskKV WHERE [key] = '${session.sessionKey}';`,
+      `SELECT value FROM cursorDiskKV WHERE [key] = '${escapedSessionKey}';`,
     );
 
     if (sessionDataResult) {
@@ -657,8 +705,23 @@ async function getSessionDetails(session: ChatSession): Promise<ChatData> {
       if (sessionData.fullConversationHeadersOnly && Array.isArray(sessionData.fullConversationHeadersOnly)) {
         for (const header of sessionData.fullConversationHeadersOnly) {
           if (header && header.bubbleId) {
+            // Validate bubble ID format
+            if (!validateId(header.bubbleId)) {
+              continue; // Skip invalid bubble IDs
+            }
+
             const bubbleKey = `bubbleId:${sessionId}:${header.bubbleId}`;
-            const bubbleResult = queryDatabase(dbPath, `SELECT value FROM cursorDiskKV WHERE [key] = '${bubbleKey}';`);
+
+            // Validate complete bubble key for security
+            if (!validateDatabaseKey(bubbleKey)) {
+              continue; // Skip invalid bubble keys
+            }
+
+            const escapedBubbleKey = escapeSqliteString(bubbleKey);
+            const bubbleResult = queryDatabase(
+              dbPath,
+              `SELECT value FROM cursorDiskKV WHERE [key] = '${escapedBubbleKey}';`,
+            );
 
             if (bubbleResult) {
               const bubbleData = parseValueWithMultipleStrategies(bubbleResult);
