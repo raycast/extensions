@@ -36,7 +36,7 @@ export default async () => {
       !(await confirmAlert({
         title: "Are you sure upload image?",
         message:
-          "This action will upload the image to Google Lens. Please ensure that the image does not contain sensitive information. (You can turn off this alert in the extension preferences settings)",
+          "The image will be uploaded to a third-party server to generate a public URL, which is then sent to Google Lens. Please avoid uploading sensitive or private content. (You can disable this warning in the extension preferences)",
       }))
     ) {
       return;
