@@ -8,16 +8,21 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "take-screenshot-and-search",
-      "title": "Take Screenshot and Search",
-      "description": "Take a screenshot and search the image using Google Lens",
-      "mode": "no-view"
-    },
-    {
-      "name": "search-selected-image",
-      "title": "Search Selected Image",
-      "description": "Search the selected image in Finder using Google Lens",
-      "mode": "no-view"
+      "name": "search-image-with-google-lens",
+      "title": "Search Image with Google Lens",
+      "description": "Search Image with Google Lens by taking a screenshot or selecting an image in Finder",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "turnOffUploadAlert",
+          "label": "Turn off upload alert",
+          "type": "checkbox",
+          "required": false,
+          "title": "Upload Image Alert",
+          "description": "Turn off the upload alert when uploading an image to Google Lens",
+          "default": false
+        }
+      ]
     }
   ],
   "categories": [
