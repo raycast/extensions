@@ -5,6 +5,7 @@
   "description": "List and manage go links from trot.to",
   "icon": "extension-icon.png",
   "author": "samstephenson",
+  "owner": "granola",
   "license": "MIT",
   "access": "public",
   "categories": [
