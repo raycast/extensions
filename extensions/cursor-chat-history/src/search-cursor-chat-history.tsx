@@ -142,8 +142,7 @@ function queryDatabase(dbPath: string, query: string): string {
       timeout: QUERY_TIMEOUT,
     });
     return result.trim();
-  } catch (error) {
-    console.warn(`Database query failed: ${error}`);
+  } catch {
     return "";
   }
 }
@@ -238,7 +237,6 @@ async function extractGlobalSessions(): Promise<ChatSession[]> {
   const dbPath = join(globalDataDir, "state.vscdb");
 
   if (!existsSync(dbPath)) {
-    console.log("Global storage database not found:", dbPath);
     return [];
   }
 
@@ -283,8 +281,8 @@ async function extractGlobalSessions(): Promise<ChatSession[]> {
           sessionKey: key,
         });
       }
-    } catch (error) {
-      console.warn(`Failed to process session ${sessionId}:`, error);
+    } catch {
+      // Skip sessions that fail to process
     }
   }
 
@@ -406,8 +404,7 @@ function extractTextFromRichText(richTextStr: string): string {
       return extractFromRichTextNodes(richTextData.root.children);
     }
     return "";
-  } catch (error) {
-    console.warn("Failed to parse RichText:", error);
+  } catch {
     return "";
   }
 }
