@@ -96,11 +96,7 @@ export default function Command() {
         });
       }
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Upload failed",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
-      });
+      showFailureToast(error, { title: "Upload failed" });
     } finally {
       setIsLoading(false);
     }
