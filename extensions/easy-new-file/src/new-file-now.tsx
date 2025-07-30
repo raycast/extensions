@@ -23,7 +23,6 @@ export default async (props: LaunchProps<{ arguments: NewFileWithTextArguments }
   await showCustomHUD({ title: "Creating...", style: Style.Animated });
 
   try {
-    const curFinderPath = await getFinderPath();
     let autoContent = "";
     switch (defaultFileContent) {
       case "empty": {
@@ -55,6 +54,7 @@ export default async (props: LaunchProps<{ arguments: NewFileWithTextArguments }
           : fileName
         : inputText.replaceAll(".", "_").substring(0, 10);
     }
+    const curFinderPath = await getFinderPath();
     const createdFile = await createNewFileWithText(ext, curFinderPath, content, name);
     switch (createdAction) {
       case "no": {

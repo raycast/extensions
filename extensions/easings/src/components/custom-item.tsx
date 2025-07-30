@@ -1,34 +1,42 @@
 import { Action, ActionPanel, Grid, Icon } from "@raycast/api";
 
 import { capitalize } from "../utils/capitalize";
-import { CUSTOM_CSS, CUSTOM_FIGMA, CUSTOM_FRAMER } from "../utils/constants";
+import { CUSTOM_CSS, CUSTOM_FIGMA, CUSTOM_MOTION } from "../utils/constants";
+import { SpringValues } from "../utils/types";
 
 export const customGridItem = (
   id: string,
   name: string,
   type: string,
-  value: string,
+  value: string | SpringValues,
   onDelete: (index: string) => void,
 ) => {
-  const parseType = type.split("-");
-  const typeName = `${capitalize(parseType[0]) + (parseType[1] ? " " + capitalize(parseType[1]) : "") + (parseType[2] ? " " + capitalize(parseType[2]) : "")}`;
+  const getTypeName = (type: string) => {
+    if (type === "spring") return "Spring";
+    if (type === "in-out") return "In Out";
+    if (type === "in") return "In";
+    if (type === "out") return "Out";
+    return type.split("-").map(capitalize).join(" ");
+  };
+
+  const typeName = getTypeName(type);
 
   return (
     <Grid.Item
       title={name}
       subtitle={`Ease ${typeName}`}
-      content={`custom-ease-${type}.svg`}
+      content={type === "spring" ? "custom-spring.svg" : `custom-ease-${type}.svg`}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy Cubic Bezier Value" content={CUSTOM_CSS(value)} />
+          <Action.CopyToClipboard title="Copy CSS Value" content={CUSTOM_CSS(value, type)} />
           <Action.CopyToClipboard
-            title="Copy Figma Easing Value"
-            content={CUSTOM_FIGMA(value)}
+            title="Copy Figma Value"
+            content={CUSTOM_FIGMA(value, type)}
             shortcut={{ modifiers: ["cmd"], key: "f" }}
           />
           <Action.CopyToClipboard
-            title="Copy Framer Motion Value"
-            content={CUSTOM_FRAMER(value)}
+            title="Copy Motion Value"
+            content={CUSTOM_MOTION(value, type)}
             shortcut={{ modifiers: ["cmd"], key: "c" }}
           />
           <Action

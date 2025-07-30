@@ -47,6 +47,11 @@ export const executeJxa = async (script: string) => {
       language: 'JavaScript',
     });
 
+    // Some calls only update data and don't return anything
+    if (!result) {
+      return;
+    }
+
     // JXA's non-human-readable output is similar to JSON, but is actually a JSON-like representation of the JavaScript object.
     // While values should not be `undefined`, JXA will include {"key": undefined} in its output if they are.
     // This is not valid JSON, so we replace those values with `null` to make it valid JSON.

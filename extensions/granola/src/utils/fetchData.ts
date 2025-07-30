@@ -92,6 +92,7 @@ export async function getTranscript(docId: string): Promise<string> {
 
 export async function getFolders(): Promise<FoldersResponse> {
   const url = `https://api.granola.ai/v1/get-document-lists-metadata`;
+
   try {
     const token = await getAccessToken();
     const requestBody = {
@@ -119,7 +120,8 @@ export async function getFolders(): Promise<FoldersResponse> {
       throw new Error(`API request failed with status ${response.status}: ${errorText}`);
     }
 
-    return (await response.json()) as FoldersResponse;
+    const result = (await response.json()) as FoldersResponse;
+    return result;
   } catch (error) {
     showFailureToast({ title: "Failed to Fetch Folders", message: String(error) });
     throw error;

@@ -104,10 +104,14 @@ export class ZiplineAPI {
     const formData = new FormData();
     const fileBuffer = fs.readFileSync(filePath);
 
-    // Determine MIME type based on file extension
-    let mimeType = "text/plain";
-    if (options.fileExtension) {
+    // Determine MIME type from filename or file extension
+    let mimeType = "application/octet-stream";
+    const fileExtension =
+      options.fileExtension || fileName.split(".").pop()?.toLowerCase();
+
+    if (fileExtension) {
       const mimeTypes: Record<string, string> = {
+        // Text files
         txt: "text/plain",
         md: "text/markdown",
         js: "text/javascript",
@@ -118,8 +122,56 @@ export class ZiplineAPI {
         py: "text/x-python",
         sql: "text/x-sql",
         xml: "text/xml",
+
+        // Image files
+        png: "image/png",
+        jpg: "image/jpeg",
+        jpeg: "image/jpeg",
+        gif: "image/gif",
+        webp: "image/webp",
+        svg: "image/svg+xml",
+        bmp: "image/bmp",
+        ico: "image/x-icon",
+
+        // Audio files
+        mp3: "audio/mpeg",
+        wav: "audio/wav",
+        ogg: "audio/ogg",
+        m4a: "audio/mp4",
+        flac: "audio/flac",
+
+        // Video files
+        mp4: "video/mp4",
+        webm: "video/webm",
+        avi: "video/x-msvideo",
+        mov: "video/quicktime",
+        wmv: "video/x-ms-wmv",
+        flv: "video/x-flv",
+
+        // Document files
+        pdf: "application/pdf",
+        doc: "application/msword",
+        docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        xls: "application/vnd.ms-excel",
+        xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        ppt: "application/vnd.ms-powerpoint",
+        pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+
+        // Archive files
+        zip: "application/zip",
+        rar: "application/x-rar-compressed",
+        "7z": "application/x-7z-compressed",
+        tar: "application/x-tar",
+        gz: "application/gzip",
+
+        // Other common types
+        epub: "application/epub+zip",
+        exe: "application/octet-stream",
+        deb: "application/x-deb",
+        dmg: "application/x-apple-diskimage",
+        iso: "application/x-iso9660-image",
       };
-      mimeType = mimeTypes[options.fileExtension] || "text/plain";
+      mimeType = mimeTypes[fileExtension] || "application/octet-stream";
     }
 
     formData.append("file", fileBuffer, {

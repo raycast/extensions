@@ -15,7 +15,8 @@ export const allModels = [
   { name: "Mistral Saba 24B 32K", id: "mistral-saba-24b" },
   { name: "Qwen 2.5 32B 128K", id: "qwen-2.5-32b" },
   { name: "Qwen 2.5 Coder 32B 128K", id: "qwen-2.5-coder-32b" },
-  { name: "Qwen QWQ 32B 128K", id: "qwen-qwq-32b" },
+  { name: "Qwen 3 32B 128K", id: "qwen/qwen3-32b" },
+  { name: "Kimi K2 Instruct 128K", id: "moonshotai/kimi-k2-instruct" },
 ];
 
 // format: Wednesday, April 24, 2024 at 5:14:26 PM GMT+2.
@@ -69,8 +70,11 @@ export function estimatePrice(prompt_token: number, output_token: number, model:
     case "qwen-2.5-coder-32b":
       price = ((prompt_token * 0.79) / 1_000_000 + (output_token * 0.79) / 1_000_000) * 100;
       break;
-    case "qwen-qwq-32b":
-      price = ((prompt_token * 0.29) / 1_000_000 + (output_token * 0.39) / 1_000_000) * 100;
+    case "qwen/qwen3-32b":
+      price = ((prompt_token * 0.29) / 1_000_000 + (output_token * 0.59) / 1_000_000) * 100;
+      break;
+    case "moonshotai/kimi-k2-instruct":
+      price = ((prompt_token * 1.0) / 1_000_000 + (output_token * 3.0) / 1_000_000) * 100;
       break;
   }
   return naiveRound(price, 5);

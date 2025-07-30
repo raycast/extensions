@@ -6,7 +6,8 @@
   "icon": "groq.png",
   "author": "ilian",
   "contributors": [
-    "dez_dezsson"
+    "dez_dezsson",
+    "g3ge"
   ],
   "categories": [
     "Productivity",
@@ -86,8 +87,12 @@
               "title": "Qwen 2.5 Coder 32B 128K"
             },
             {
-              "value": "qwen-qwq-32b",
-              "title": "Qwen QWQ 32B 128K"
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 128K"
             }
           ]
         }
@@ -172,8 +177,12 @@
               "title": "Qwen 2.5 Coder 32B 128K"
             },
             {
-              "value": "qwen-qwq-32b",
-              "title": "Qwen QWQ 32B 128K"
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 128K"
             }
           ]
         }
@@ -258,8 +267,12 @@
               "title": "Qwen 2.5 Coder 32B 128K"
             },
             {
-              "value": "qwen-qwq-32b",
-              "title": "Qwen QWQ 32B 128K"
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 128K"
             }
           ]
         }
@@ -344,8 +357,12 @@
               "title": "Qwen 2.5 Coder 32B 128K"
             },
             {
-              "value": "qwen-qwq-32b",
-              "title": "Qwen QWQ 32B 128K"
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 128K"
             }
           ]
         }
@@ -430,8 +447,12 @@
               "title": "Qwen 2.5 Coder 32B 128K"
             },
             {
-              "value": "qwen-qwq-32b",
-              "title": "Qwen QWQ 32B 128K"
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 128K"
             }
           ]
         }
@@ -516,8 +537,12 @@
               "title": "Qwen 2.5 Coder 32B 128K"
             },
             {
-              "value": "qwen-qwq-32b",
-              "title": "Qwen QWQ 32B 128K"
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 128K"
             }
           ]
         }
@@ -618,8 +643,12 @@
               "title": "Qwen 2.5 Coder 32B 128K"
             },
             {
-              "value": "qwen-qwq-32b",
-              "title": "Qwen QWQ 32B 128K"
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 128K"
             }
           ]
         }
@@ -721,8 +750,12 @@
               "title": "Qwen 2.5 Coder 32B 128K"
             },
             {
-              "value": "qwen-qwq-32b",
-              "title": "Qwen QWQ 32B 128K"
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 128K"
             }
           ]
         }
@@ -808,8 +841,12 @@
               "title": "Qwen 2.5 Coder 32B 128K"
             },
             {
-              "value": "qwen-qwq-32b",
-              "title": "Qwen QWQ 32B 128K"
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 128K"
             }
           ]
         }
@@ -895,8 +932,12 @@
               "title": "Qwen 2.5 Coder 32B 128K"
             },
             {
-              "value": "qwen-qwq-32b",
-              "title": "Qwen QWQ 32B 128K"
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 128K"
             }
           ]
         }
@@ -982,8 +1023,12 @@
               "title": "Qwen 2.5 Coder 32B 128K"
             },
             {
-              "value": "qwen-qwq-32b",
-              "title": "Qwen QWQ 32B 128K"
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 128K"
             }
           ]
         }
@@ -1069,8 +1114,12 @@
               "title": "Qwen 2.5 Coder 32B 128K"
             },
             {
-              "value": "qwen-qwq-32b",
-              "title": "Qwen QWQ 32B 128K"
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 128K"
             }
           ]
         }
@@ -1156,8 +1205,12 @@
               "title": "Qwen 2.5 Coder 32B 128K"
             },
             {
-              "value": "qwen-qwq-32b",
-              "title": "Qwen QWQ 32B 128K"
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 128K"
             }
           ]
         }
@@ -1243,8 +1296,12 @@
               "title": "Qwen 2.5 Coder 32B 128K"
             },
             {
-              "value": "qwen-qwq-32b",
-              "title": "Qwen QWQ 32B 128K"
+              "value": "qwen/qwen3-32b",
+              "title": "Qwen 3 32B 128K"
+            },
+            {
+              "value": "moonshotai/kimi-k2-instruct",
+              "title": "Kimi K2 Instruct 128K"
             }
           ]
         }
@@ -1321,8 +1378,12 @@
           "title": "Qwen 2.5 Coder 32B 128K"
         },
         {
-          "value": "qwen-qwq-32b",
-          "title": "Qwen QWQ 32B 128K"
+          "value": "qwen/qwen3-32b",
+          "title": "Qwen 3 32B 128K"
+        },
+        {
+          "value": "moonshotai/kimi-k2-instruct",
+          "title": "Kimi K2 Instruct 128K"
         }
       ]
     },

@@ -11,14 +11,20 @@ type API = {
 };
 
 export default async ({ github, context }: API) => {
-  if (context.payload.action === "ready_for_review" && context.payload.pull_request.draft === false) {
-    await github.rest.issues.addAssignees({
-      owner: context.repo.owner,
-      repo: context.repo.repo,
-      issue_number: context.issue.number,
-      assignees: ["pernielsentikaer"]
-    });
-    return;
+  const assignReadyForReviewTo = "andreaselia";
+
+  if (context.payload.action === "ready_for_review" && !context.payload.pull_request.draft) {
+    try {
+      await github.rest.issues.addAssignees({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        issue_number: context.issue.number,
+        assignees: [assignReadyForReviewTo]
+      });
+      console.log(`Successfully assigned PR to ${assignReadyForReviewTo}`);
+    } catch (error) {
+      console.error(`Failed to assign PR to ${assignReadyForReviewTo}:`, error);
+    }
   }
 
   console.log("changed extensions", process.env.CHANGED_EXTENSIONS);
@@ -39,8 +45,8 @@ export default async ({ github, context }: API) => {
     return;
   }
 
-  // Due to our current reduced availability, the initial review may take up to 10-15 business days.
-  const expectations = "You can expect an initial review within five business days.";
+  // You can expect an initial review within five business days.
+  const expectations = "Due to our current reduced availability during summer, the initial review may take up to 10-15 business days.";
 
   const codeowners = await getCodeOwners({ github, context });
 
@@ -68,9 +74,12 @@ export default async ({ github, context }: API) => {
   for (const extensionFolder of touchedExtensions) {
     const owners = codeowners[`/extensions/${extensionFolder}`];
 
+    let aiFilesOrToolsExist = false;
+
     if (!owners) {
       // it's a new extension
       console.log(`cannot find existing extension ${extensionFolder}`);
+
       await github.rest.issues.addLabels({
         issue_number: context.issue.number,
         owner: context.repo.owner,
@@ -79,9 +88,11 @@ export default async ({ github, context }: API) => {
       });
 
       // because it's a new extension, let's check for AI stuff in the PR diff
-      const aiFilesOrToolsExist = await checkForAiInPullRequestDiff(extensionFolder, { github, context });
+      aiFilesOrToolsExist = await checkForAiInPullRequestDiff(extensionFolder, { github, context });
 
       if (aiFilesOrToolsExist) {
+        console.log(`adding AI Extension label because ai files or tools exist for ${extensionFolder}`);
+
         await github.rest.issues.addLabels({
           issue_number: context.issue.number,
           owner: context.repo.owner,
@@ -106,43 +117,49 @@ export default async ({ github, context }: API) => {
       labels: ["extension fix / improvement", await extensionLabel(extensionFolder, { github, context })],
     });
 
-    // Auto-label AI Extensions
-    let aiExtensionJson: string | undefined;
-    let aiExtensionYaml: string | undefined;
-    let aiExtensionJson5: string | undefined;
-    let tools: any;
-
     // Check package.json tools first
     try {
       const packageJson = await getGitHubFile(`extensions/${extensionFolder}/package.json`, { github, context });
       const packageJsonObj = JSON.parse(packageJson);
-      tools = packageJsonObj.tools;
+
+      aiFilesOrToolsExist = !!packageJsonObj.tools;
     } catch {
-      console.log(`no package.json tools for ${extensionFolder}`);
+      console.log(`No package.json tools for ${extensionFolder}`);
     }
 
     // Only check AI files if no tools found in package.json
-    if (!tools) {
+    if (!aiFilesOrToolsExist) {
       try {
-        aiExtensionJson = await getGitHubFile(`extensions/${extensionFolder}/ai.json`, { github, context });
+        await getGitHubFile(`extensions/${extensionFolder}/ai.json`, { github, context });
+
+        aiFilesOrToolsExist = true;
       } catch {
-        console.log(`no ai.json for ${extensionFolder}`);
+        console.log(`No ai.json for ${extensionFolder}`);
       }
 
       try {
-        aiExtensionYaml = await getGitHubFile(`extensions/${extensionFolder}/ai.yaml`, { github, context });
+        await getGitHubFile(`extensions/${extensionFolder}/ai.yaml`, { github, context });
+
+        aiFilesOrToolsExist = true;
       } catch {
-        console.log(`no ai.yaml for ${extensionFolder}`);
+        console.log(`No ai.yaml for ${extensionFolder}`);
       }
 
       try {
-        aiExtensionJson5 = await getGitHubFile(`extensions/${extensionFolder}/ai.json5`, { github, context });
+        await getGitHubFile(`extensions/${extensionFolder}/ai.json5`, { github, context });
+
+        aiFilesOrToolsExist = true;
       } catch {
-        console.log(`no ai.json5 for ${extensionFolder}`);
+        console.log(`No ai.json5 for ${extensionFolder}`);
       }
     }
 
-    if (aiExtensionJson || aiExtensionYaml || aiExtensionJson5 || tools) {
+    if (!aiFilesOrToolsExist) {
+      // If we didn't find any AI files or tools in the package.json, let's check the PR diff
+      aiFilesOrToolsExist = await checkForAiInPullRequestDiff(extensionFolder, { github, context });
+    }
+
+    if (aiFilesOrToolsExist) {
       await github.rest.issues.addLabels({
         issue_number: context.issue.number,
         owner: context.repo.owner,
