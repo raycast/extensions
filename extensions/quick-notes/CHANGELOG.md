@@ -1,5 +1,9 @@
 # Quick Notes Changelog
 
+## [New Command] - 2025-06-26
+
+-  Open Note Externally
+
 ## [New Commands] - 2025-04-08
 
 - 3 new commands to use outside of `View Notes`: `Create Note`, `Create Tag`, `Search Notes`

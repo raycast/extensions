@@ -30,27 +30,27 @@ export function estimatePrice(input_token: number, output_token: number, model: 
   let price = 0;
 
   if (model == "gpt-4o") {
-    price = (input_token * 5 + output_token * 15) / 1000000;
+    price = (input_token * 2.5 + output_token * 10) / 10000;
   } else if (model == "gpt-4o-mini") {
-    price = (input_token * 0.15 + output_token * 0.6) / 1000000;
+    price = (input_token * 0.15 + output_token * 0.6) / 10000;
   } else if (model == "gpt-4.1") {
-    price = (input_token * 30 + output_token * 60) / 1000000;
+    price = (input_token * 2 + output_token * 8) / 10000;
   } else if (model == "gpt-4.1-mini") {
-    price = (input_token * 3 + output_token * 6) / 1000000;
+    price = (input_token * 0.4 + output_token * 1.6) / 10000;
   } else if (model == "gpt-4.1-nano") {
-    price = (input_token * 0.3 + output_token * 0.6) / 1000000;
+    price = (input_token * 0.1 + output_token * 0.4) / 10000;
   } else if (model == "o1") {
-    price = (input_token * 15 + output_token * 60) / 1000000;
+    price = (input_token * 15 + output_token * 60) / 10000;
   } else if (model == "o1-mini") {
-    price = (input_token * 3 + output_token * 12) / 1000000;
+    price = (input_token * 1.1 + output_token * 4.4) / 10000;
   } else if (model == "o1-pro") {
-    price = (input_token * 60 + output_token * 240) / 1000000;
+    price = (input_token * 150 + output_token * 600) / 10000;
   } else if (model == "o3") {
-    price = (input_token * 40 + output_token * 160) / 1000000;
+    price = (input_token * 2 + output_token * 8) / 10000;
   } else if (model == "o3-mini") {
-    price = (input_token * 1 + output_token * 4) / 1000000;
+    price = (input_token * 1.1 + output_token * 4.4) / 10000;
   } else if (model == "o4-mini") {
-    price = (input_token * 0.5 + output_token * 2) / 1000000;
+    price = (input_token * 1.1 + output_token * 4.4) / 10000;
   } else {
     return -1;
   }

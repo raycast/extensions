@@ -1,5 +1,11 @@
 # Resend Changelog
 
+## [Update Icons] - 2025-07-04
+
+- Update Icons to reflect Resend's new Brand ([Brand Kit](https://resend.com/brand))
+- Modernize extension to use latest Raycast config
+- chore: remove `node-fetch`, `cross-fetch`
+
 ## [Added Region] - 2025-03-10
 
 Added support for Tokyo region

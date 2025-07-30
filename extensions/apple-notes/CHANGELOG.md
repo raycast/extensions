@@ -1,5 +1,13 @@
 # Apple Notes Changelog
 
+## [View Random Note command] - 2025-06-30
+
+Add a new command for viewing a random note from a user's note library.
+
+## [Add Chinese Pinyin input match] - 2025-06-30
+
+When using the Chinese Pinyin input method, the note title, folder name, and snippet are now matched using Pinyin.
+
 ## [Bug Fix Update] - 2025-05-22
 
 Add a preference for choosing the maximum number of notes to allow AI to use to prevent issues with running out of memory loading all notes.

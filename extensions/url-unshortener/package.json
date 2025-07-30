@@ -4,7 +4,7 @@
   "title": "URL Unshortener",
   "description": "Unshorten/expand those pesky short links in your clipboard or text selection, enhancing your privacy and security.",
   "icon": "icon.png",
-  "author": "SebDanielsson",
+  "author": "sebdanielsson",
   "contributors": [
     "pernielsentikaer",
     "omarshahine"
@@ -28,22 +28,30 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.62.2",
+    "@raycast/api": "~1.100.3",
+    "@raycast/utils": "^2.2.0",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^20.10.0",
-    "@types/react": "^18.2.39",
-    "eslint": "^8.54.0",
-    "prettier": "^3.1.0",
-    "typescript": "^5.3.2"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.15.34",
+    "@types/react": "^19.1.8",
+    "eslint": "^9.31.0",
+    "prettier": "^3.6.2",
+    "react-devtools": "^6.1.1",
+    "typescript": "~5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prettier": "prettier --write .",
+    "prettier:check": "prettier --check .",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

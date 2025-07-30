@@ -1,8 +1,4 @@
-import { Resend } from "resend";
-import { API_KEY } from "../utils/constants";
-import "cross-fetch/polyfill";
-
-const resend = new Resend(API_KEY);
+import { resend } from "../lib/resend";
 
 const tool = async () => {
   return await resend.audiences.list();

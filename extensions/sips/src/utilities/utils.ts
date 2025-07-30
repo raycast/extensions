@@ -282,7 +282,7 @@ export const execSIPSCommandOnWebP = async (command: string, webpPath: string): 
   const [dwebpPath, cwebpPath] = await getWebPBinaryPath();
 
   execSync(
-    `${dwebpPath} ${preferences.useLosslessConversion ? "-lossless" : ""} "${webpPath}" -o "${tmpFile.path}" && ${command} "${tmpFile.path}" && ${cwebpPath} ${preferences.useLosslessConversion ? "-lossless" : ""} "${tmpFile.path}" -o "${newPath}"`,
+    `${dwebpPath} "${webpPath}" -o "${tmpFile.path}" && ${command} "${tmpFile.path}" && ${cwebpPath} ${preferences.useLosslessConversion ? "-lossless" : ""} "${tmpFile.path}" -o "${newPath}"`,
   );
   return newPath;
 };

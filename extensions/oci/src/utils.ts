@@ -1,3 +1,6 @@
+import { showFailureToast } from "@raycast/utils";
+import * as common from "oci-common";
+
 const KEYS: Record<string, string> = {
   ocpus: "OCPUs",
   gpus: "GPUs",
@@ -25,3 +28,10 @@ ${Object.entries(obj)
   .map(([key, val]) => `| ${KEYS[key] ?? key} | ${typeof val === "string" ? val : JSON.stringify(val)} |`)
   .join(`\n`)}`;
 }
+
+export const onError = async (error: Error) => {
+  const err = error.message as string | common.OciError;
+  const title = "ERROR";
+  const message = err instanceof common.OciError ? err.message : err;
+  await showFailureToast(message, { title });
+};

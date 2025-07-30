@@ -1,5 +1,10 @@
 # GitLab Changelog
 
+## [Group milestones in MRs and Issues] - 2025-06-27
+
+- Add group milestones to the issue create form
+- Add group milestones to the MR create form
+
 ## [Add label filter on issues menu bar] - 2025-06-19
 
 Add label filter on issues menu bar

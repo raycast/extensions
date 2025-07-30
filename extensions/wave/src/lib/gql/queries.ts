@@ -75,4 +75,19 @@ export const QUERIES = {
             }
         }
     }`,
+  getCurrencies: `
+        query {
+            currencies {
+                ${OBJECTS.Currency}
+            }
+        }
+    `,
+  getCountries: `
+        query {
+            countries {
+                code
+                name
+            }
+        }
+    `,
 };

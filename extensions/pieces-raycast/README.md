@@ -4,7 +4,7 @@
 
 Welcome to the Pieces for Developers Raycast Extension! This extension brings powerful features to your fingertips, allowing you to streamline your workflow and boost productivity.
 
-In order to use the Pieces Raycast Extension, you must have <a target="blank" href="https://docs.pieces.app/installation-getting-started/what-am-i-installing">PiecesOS.</a> We recommend also using the Pieces for Developers desktop app.
+In order to use the Pieces Raycast Extension, you must have [PiecesOS](https://docs.pieces.app/products/meet-pieces). We recommend also using the Pieces for Developers desktop app.
 
 Pieces for Developers is an AI powered productivity tool tailored for developers. We have many features that horizontally integrate across the developer toolchain including a streamlined snippet-saving experience that helps you organize your reusable code while automatically augmenting it with useful metadata, as well as our Copilot which is an AI chat that is highly tailored to your specific context as a developer. Here’s a breakdown of the features available in this extension:
 

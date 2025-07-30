@@ -8,10 +8,29 @@ import {
   INPUT_AUDIO_EXTENSIONS,
   INPUT_VIDEO_EXTENSIONS,
 } from "../utils/converter";
-import { isFFmpegInstalled } from "../utils/ffmpeg";
-import { getFullPath } from "../utils/get-full-path";
+import { findFFmpegPath } from "../utils/ffmpeg";
 import { Tool } from "@raycast/api";
 import path from "path";
+import os from "os";
+import fs from "fs";
+
+async function getFullPath(inputPath: string | undefined) {
+  // Validate that we actually received an input path. Safeguards against runtime errors such as
+  // "Cannot read properties of undefined (reading 'replace')" when the tool is invoked without
+  // an argument.
+  if (!inputPath) {
+    throw new Error("Input path is required but was not provided.");
+  }
+
+  const normalizedPath = path.normalize(inputPath.replace(/^~/, os.homedir()));
+  const fullPath = path.resolve(normalizedPath);
+
+  if (!fs.existsSync(fullPath)) {
+    throw new Error(`The file does not exist at ${fullPath}`);
+  }
+
+  return fullPath;
+}
 
 function getMediaType(filePath: string): "image" | "audio" | "video" | null {
   const extension = path.extname(filePath).toLowerCase();
@@ -50,7 +69,7 @@ type Input = {
 };
 
 export default async function ConvertMedia({ inputPath, outputFileType, quality }: Input) {
-  const installed = await isFFmpegInstalled();
+  const installed = await findFFmpegPath();
   if (!installed) {
     return {
       type: "error",
@@ -58,13 +77,24 @@ export default async function ConvertMedia({ inputPath, outputFileType, quality 
     };
   }
 
-  const fullPath = await getFullPath(inputPath);
-  const mediaType = getMediaType(fullPath);
+  let fullPath: string;
+  let mediaType: "image" | "audio" | "video" | null;
 
-  if (!mediaType) {
+  try {
+    fullPath = await getFullPath(inputPath);
+    mediaType = getMediaType(fullPath);
+
+    if (!mediaType) {
+      return {
+        type: "error",
+        message: `Unsupported input file type for path: ${fullPath}`,
+      };
+    }
+  } catch (error) {
+    // Handle missing / invalid input path errors thrown by getFullPath
     return {
       type: "error",
-      message: `Unsupported input file type for path: ${fullPath}`,
+      message: String(error),
     };
   }
 
@@ -97,20 +127,28 @@ export default async function ConvertMedia({ inputPath, outputFileType, quality 
 }
 
 export const confirmation: Tool.Confirmation<Input> = async ({ inputPath, outputFileType, quality }: Input) => {
-  const fullPath = await getFullPath(inputPath);
-  const mediaType = getMediaType(fullPath);
-  const message = "This will create a new file in the same directory.";
-  const info = [
-    { name: "Input Path", value: fullPath },
-    { name: "Input Media Type", value: mediaType || "Unknown" },
-    { name: "Output File Type", value: outputFileType },
-  ];
-  if (quality) {
-    info.push({ name: "Quality", value: quality });
-  }
+  try {
+    const fullPath = await getFullPath(inputPath);
+    const mediaType = getMediaType(fullPath);
+    const message = "This will create a new file in the same directory.";
+    const info = [
+      { name: "Input Path", value: fullPath },
+      { name: "Input Media Type", value: mediaType || "Unknown" },
+      { name: "Output File Type", value: outputFileType },
+    ];
+    if (quality) {
+      info.push({ name: "Quality", value: quality });
+    }
 
-  return {
-    message,
-    info,
-  };
+    return {
+      message,
+      info,
+    };
+  } catch (error) {
+    // If the path is invalid or missing, surface a clear explanation instead of throwing
+    return {
+      message: String(error),
+      info: [],
+    };
+  }
 };

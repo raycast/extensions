@@ -27,6 +27,17 @@
       "mode": "no-view"
     }
   ],
+  "preferences": [
+    {
+      "name": "open-in",
+      "title": "Open directories in",
+      "description": "Choose the application to open directories with.",
+      "type": "appPicker",
+      "required": true,
+      "default": "Finder",
+      "placeholder": "Select an application"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.97.0",
     "@raycast/utils": "^1.19.1"

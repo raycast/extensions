@@ -18,6 +18,7 @@ import {
   setTodoProperty,
   deleteTodo,
   updateTodo,
+  updateProject,
   handleError,
   List as TList,
   TodoParams,
@@ -56,7 +57,11 @@ export default function TodoListItemActions({
 
   async function updateAction(args: TodoParams, successToastOptions: Toast.Options) {
     try {
-      await updateTodo(todo.id, args);
+      if (todo.isProject) {
+        await updateProject(todo.id, args);
+      } else {
+        await updateTodo(todo.id, args);
+      }
       await showToast({
         style: Toast.Style.Success,
         title: successToastOptions.title,

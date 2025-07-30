@@ -86,7 +86,7 @@ function getYoudaoWebCookie(): Promise<string | undefined> {
  */
 export function requestYoudaoWebDictionary(
   queryWordInfo: QueryWordInfo,
-  queryType?: QueryType
+  queryType?: QueryType,
 ): Promise<QueryTypeResult> {
   console.log(`---> start requestYoudaoWebDictionary`);
 
@@ -196,7 +196,7 @@ export function downloadYoudaoAudio(
   queryWordInfo: QueryWordInfo,
   enableYoudaoWebAudio = true,
   callback?: () => void,
-  forceDownload = false
+  forceDownload = false,
 ) {
   // For most English words, it seems that Youdao web audio is better than Youdao tts, but not all words have web audio.
   if (queryWordInfo.speechUrl) {
@@ -209,7 +209,7 @@ export function downloadYoudaoAudio(
     downloadYoudaoEnglishWordAudio(queryWordInfo.word, callback, (forceDownload = false));
   } else {
     console.log(`use say command to play derectly`);
-    callback && callback();
+    callback?.();
   }
 }
 

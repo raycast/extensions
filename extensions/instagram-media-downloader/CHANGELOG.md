@@ -1,5 +1,9 @@
 # Instagram Media Downloader Changelog
 
+## [Update] - 2025-07-13
+
+- Update the URL for obtaining the Instagram story.
+
 ## [New Commands] - 2025-06-16
 
 - Added command for downloading Instagram stories.

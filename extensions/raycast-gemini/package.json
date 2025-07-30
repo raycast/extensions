@@ -1213,6 +1213,32 @@
       "description": "Custom model in case you use a special model that is not listed in the dropdown. It will override the default model. Keep this empty if you don't have a custom model.",
       "type": "textfield",
       "required": false
+    },
+    {
+      "name": "safetyThreshold",
+      "title": "Safety Threshold",
+      "description": "Control how strictly Gemini filters potentially harmful content. BLOCK_NONE allows all content, while higher levels increase filtering.",
+      "type": "dropdown",
+      "required": false,
+      "default": "BLOCK_ONLY_HIGH",
+      "data": [
+        {
+          "title": "Block None (Allow All Content)",
+          "value": "BLOCK_NONE"
+        },
+        {
+          "title": "Block Only High Risk Content",
+          "value": "BLOCK_ONLY_HIGH"
+        },
+        {
+          "title": "Block Medium and High Risk Content",
+          "value": "BLOCK_MEDIUM_AND_ABOVE"
+        },
+        {
+          "title": "Block Low, Medium and High Risk Content",
+          "value": "BLOCK_LOW_AND_ABOVE"
+        }
+      ]
     }
   ],
   "dependencies": {

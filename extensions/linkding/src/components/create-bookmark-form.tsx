@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, getPreferenceValues, popToRoot } from "@raycast/api";
 import { useForm } from "@raycast/utils";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import useBookmarks from "../hooks/use-bookmarks";
 import useUrlMetadata from "../hooks/use-url-metadata";
 import { CreateLinkdingBookmarkFormValues } from "../types/linkding-types";
@@ -15,6 +15,7 @@ interface Props {
 export const CreateBookmarkForm = ({ url, isLoading }: Props) => {
   const { createBookmarksAsUnread } = getPreferenceValues<Preferences>();
   const { createBookmark } = useBookmarks();
+  const [didSetMetadata, setDidSetMetadata] = useState(false);
 
   const { handleSubmit, itemProps, setValue, values } = useForm<CreateLinkdingBookmarkFormValues>({
     onSubmit: async (values) => {
@@ -38,15 +39,20 @@ export const CreateBookmarkForm = ({ url, isLoading }: Props) => {
   });
 
   useEffect(() => {
+    if (values.title || values.description) setDidSetMetadata(true);
+  }, [values.title, values.description, setDidSetMetadata]);
+
+  useEffect(() => {
     if (url) setValue("url", url);
   }, [url, setValue]);
 
   const metadata = useUrlMetadata(values.url);
   useEffect(() => {
     if (!metadata) return;
-    if (!values.title) setValue("title", metadata.title);
-    if (!values.description && metadata.description) setValue("description", metadata.description);
-  }, [metadata, setValue, values]);
+    if (didSetMetadata) return;
+    setValue("title", metadata.title);
+    if (metadata.description) setValue("description", metadata.description);
+  }, [metadata, didSetMetadata, setValue]);
 
   return (
     <Form

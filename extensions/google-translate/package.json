@@ -19,7 +19,8 @@
     "rasitayaz",
     "popalay",
     "litomore",
-    "ChanningKuo"
+    "ChanningKuo",
+    "likid"
   ],
   "license": "MIT",
   "commands": [
@@ -43,6 +44,27 @@
       "subtitle": "Google Translate",
       "description": "Quickly translate to multiple languages",
       "mode": "view"
+    },
+    {
+      "name": "instant-translate-copy",
+      "title": "Instant Translate Copy",
+      "subtitle": "Google Translate",
+      "description": "Instantly translate selected text and copy to clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "instant-translate-paste",
+      "title": "Instant Translate Paste",
+      "subtitle": "Google Translate",
+      "description": "Instantly translate selected text and paste to active app",
+      "mode": "no-view"
+    },
+    {
+      "name": "instant-translate-view",
+      "title": "Instant Translate View",
+      "subtitle": "Google Translate",
+      "description": "Instantly translate selected text with HUD display",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -2101,7 +2123,8 @@
     "undici": "^5.12.0",
     "@raycast/api": "^1.47.3",
     "@raycast/utils": "^1.4.16",
-    "google-tts-api": "^2.0.2"
+    "google-tts-api": "^2.0.2",
+    "https-proxy-agent": "^7.0.6"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

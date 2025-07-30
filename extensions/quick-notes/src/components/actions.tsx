@@ -1,4 +1,5 @@
-import { ActionPanel, Action, Icon, Clipboard, showToast, Toast, environment, AI } from "@raycast/api";
+import { ActionPanel, Action, Icon, Clipboard, showToast, Toast, environment, open, AI } from "@raycast/api";
+import { preferences } from "../services/config";
 import CreateEditNoteForm from "./createEditNoteForm";
 import CreateTag from "./createTag";
 import DeleteNoteAction from "./deleteNoteAction";
@@ -72,6 +73,14 @@ const Actions = ({
                 Clipboard.copy(note ?? "").then(() => {
                   showToast({ style: Toast.Style.Success, title: "Note Copied" });
                 });
+              }}
+            />
+            <Action
+              title="Open Note Externally"
+              icon={{ source: Icon.Folder, tintColor: getTintColor("turquoise") }}
+              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              onAction={() => {
+                open(`${preferences.fileLocation}/${title}.md`);
               }}
             />
           </>

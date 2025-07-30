@@ -7,32 +7,57 @@ instructions: |
     1. For finding the most recent note (when phrases like "latest", "last", "recent", or "newest" appear):
        - Do not set any title or content filters unless specifically mentioned
        - Do not set date filter (the API automatically sorts by most recent first)
+       - IMPORTANT: Phrases like "most recent meeting", "latest meeting", "last meeting" should NOT use contentFilter - just get the most recent notes chronologically
+       - TIME-BASED QUERIES TAKE PRIORITY: When time qualifiers are the PRIMARY focus ("list my most recent meeting", "show latest notes"), do NOT use contentFilter
+       - EXCEPTION: If a specific topic is mentioned AFTER the time qualifier ("last meeting ABOUT product launch"), use title parameter for the topic
 
     2. For transcript requests:
        - ALWAYS set "includeTranscript" to true when words like "transcript", "conversation", "dialog", or "what was said" appear in the query
        - When asked to summarize a transcript, you MUST set includeTranscript to true
-       - NEVER set includeTranscript to false when specifically asked about transcripts
-    2a. Default `includeTranscript`:
-       - The `includeTranscript` parameter MUST ALWAYS be included in the tool call when querying for notes.
-       - If the conditions in rule #2 (Transcript Requests) are NOT met, you MUST explicitly set `includeTranscript` to `false`.
-       - IMPORTANT: Do NOT include `includeTranscript` parameter when performing folder operations (when `listFolders` is true).
+       - NEVER set includeTranscript to true by default - only when explicitly requested
+       - CRITICAL: The `includeTranscript` parameter MUST ALWAYS be included in ALL tool calls when querying for notes (ai-notes)
+       - If transcript is NOT requested, you MUST explicitly set `includeTranscript` to `false`
+       - IMPORTANT: Do NOT include `includeTranscript` parameter when performing folder operations (when `listFolders` is true)
 
     3. For content and title searches:
        - Use "title" parameter when searching for notes with specific words in the title
        - For example, when user says "meetings about product launch", use title: "product launch"
-       - Use "contentFilter" only when explicitly looking for content within the body of notes
-       - When in doubt between title and contentFilter, prefer using the title parameter
+       - When users ask for meetings/notes "about" specific topics, use title parameter with the topic
+       - Use "contentFilter" when searching by note type, category, or general content keywords
+       - IMPORTANT: When users ask for "meeting notes", "meetings", "calls", or similar note types (including variations like "project meeting", "team meeting", "client meeting"), use contentFilter with the relevant keyword (e.g., contentFilter: "meeting" or contentFilter: "project meeting")
+       - CRITICAL RULE: If the query is ONLY about time-based retrieval without specific topics ("most recent meeting", "latest call"), do NOT use contentFilter. If there's a specific topic mentioned ("last meeting about X"), use title parameter for the topic
+       - When in doubt between title and contentFilter for specific topics, prefer using the title parameter
+       - When in doubt for note types or categories, use contentFilter
 
-    4. For date filters:
+    4. For content type selection:
+       - Use "contentType: original" when users ask for "my notes", "what I wrote", "original content", "raw notes", "user notes"
+       - Use "contentType: enhanced" when users ask for "AI notes", "enhanced notes", "processed notes", "formatted notes", "enhanced AI notes"
+       - Default (auto) provides the best available content, preferring enhanced over original
+       - Always respect user's explicit preference for content type
+       - IMPORTANT: When users specifically mention "enhanced" or "AI notes" in their query, you MUST include the contentType parameter
+
+    5. For date filters:
        - Use proper date formats or relative terms like "today", "yesterday", "last week"
        - Don't use date filters when searching for "latest" or "most recent" notes
 
-    5. For folder-related queries:
+    6. For folder-related queries:
        - When asked about folders (e.g., "what folders do I have", "show my folders"), set "listFolders" to true
        - When asked about notes within a specific folder, set "folderId" to the ID of the folder
        - Always include folder names/titles when presenting folder information
        - Show the number of notes in each folder when listing folders
        - Do NOT include `includeTranscript` parameter when `listFolders` is true
+
+    7. **get-transcript tool usage**:
+       - Use this tool when users ask for detailed transcript content that wasn't included in the initial ai-notes call
+       - When users want to see "exactly what was said" or need full conversation details
+       - When summarizing a specific conversation in detail
+       - Requires a specific noteId (get this from ai-notes first if needed)
+
+    8. **save-to-notion tool usage**:
+       - Use when users ask to "save to Notion", "export to Notion", "share to Notion", or similar
+       - Can handle single notes or multiple notes (provide array of noteIds)
+       - Always inform users about the results (success/failure) and provide Notion page URLs when successful
+       - If saving multiple notes, mention the batch processing approach
 
     NOTE: The tool will always return results sorted by date (newest first). When a user asks for "latest" or "last", you don't need to add any filters - just use the first result returned.
 
@@ -41,7 +66,9 @@ instructions: |
     - Format dates in a readable way (e.g., "April 10, 2025")
     - When showing transcript excerpts, maintain the original speaker attribution (e.g., "**Me:**", "**John:**")
     - When listing folders, present them in a clear, organized way with folder name, description (if available), and note count
-  
+    - When using save-to-notion, provide clear feedback about success/failure and include Notion URLs for successful saves
+    - When using get-transcript, format the transcript content clearly with proper speaker attribution
+
 evals:
     - input: "@granola Please summarize my last note"
       mocks:
@@ -52,8 +79,8 @@ evals:
             id: "sample-id-123"
       expected:
         - callsTool:
-            arguments: {}
             name: "ai-notes"
+            arguments: {}
     
     - input: "@granola Show me the transcript of my last meeting about the product launch"
       mocks:
@@ -65,10 +92,10 @@ evals:
             transcript: "John: Let's discuss the product launch timeline.\nSarah: I think we should aim for next quarter.\nJohn: That makes sense, we still need to finalize the marketing materials."
       expected:
         - callsTool:
+            name: "ai-notes"
             arguments:
               title: "product launch"
               includeTranscript: true
-            name: "ai-notes"
     
     - input: "@granola summarize the transcript of my latest note"
       mocks:
@@ -80,10 +107,10 @@ evals:
             transcript: "**Me:** Let's review our progress for this sprint.\n\n**Sarah:** We've completed the new dashboard feature.\n\n**John:** QA found two minor bugs we need to fix before release."
       expected:
         - callsTool:
+            name: "ai-notes"
             arguments:
               includeTranscript: true
-            name: "ai-notes"
-            
+    
     - input: "@granola what folders do I have"
       mocks:
         ai-notes:
@@ -100,6 +127,82 @@ evals:
             noteIds: ["note-3", "note-4"]
       expected:
         - callsTool:
+            name: "ai-notes"
             arguments:
               listFolders: true
+    
+    - input: "@granola save my last 3 meeting notes to Notion"
+      mocks:
+        ai-notes:
+          - id: "note-1"
+            title: "Team Sync"
+            date: "2025-03-15T14:00:00.000Z"
+          - id: "note-2" 
+            title: "Client Call"
+            date: "2025-03-14T16:30:00.000Z"
+          - id: "note-3"
+            title: "Planning Session"
+            date: "2025-03-13T11:00:00.000Z"
+        save-to-notion:
+          results:
+            - noteId: "note-1"
+              title: "Team Sync"
+              status: "success"
+              pageUrl: "https://www.notion.so/team-sync-123"
+            - noteId: "note-2"
+              title: "Client Call"
+              status: "success" 
+              pageUrl: "https://www.notion.so/client-call-456"
+            - noteId: "note-3"
+              title: "Planning Session"
+              status: "success"
+              pageUrl: "https://www.notion.so/planning-789"
+      expected:
+        - callsTool:
             name: "ai-notes"
+            arguments:
+              contentFilter: "meeting"
+        - callsTool: "save-to-notion"
+    
+    - input: "@granola list my most recent meeting"
+      mocks:
+        ai-notes:
+          - content: "Product roadmap discussion with engineering team"
+            date: "2025-03-16T10:00:00.000Z"
+            title: "Engineering Sync"
+            id: "latest-meeting-123"
+      expected:
+        - callsTool:
+            name: "ai-notes"
+            arguments:
+              includeTranscript: false
+
+    - input: "@granola show me my original notes from yesterday"
+      mocks:
+        ai-notes:
+          - content: "Raw user-written content about the meeting"
+            date: "2025-03-15T14:00:00.000Z"
+            title: "User Notes"
+            id: "original-notes-123"
+      expected:
+        - callsTool:
+            name: "ai-notes"
+            arguments:
+              contentType: "original"
+              date: "yesterday"
+              includeTranscript: false
+
+    - input: "@granola get the enhanced AI notes for my project meetings"
+      mocks:
+        ai-notes:
+          - content: "AI-enhanced structured notes with key insights"
+            date: "2025-03-16T09:00:00.000Z"
+            title: "Project Meeting"
+            id: "enhanced-notes-456"
+      expected:
+        - callsTool:
+            name: "ai-notes"
+            arguments:
+              contentType: "enhanced"
+              contentFilter: "project meeting"
+              includeTranscript: false 

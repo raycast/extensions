@@ -1,6 +1,6 @@
 # yopass Changelog
 
-## [Update dependency version] - {PR_MERGE_DATE}
+## [Update dependency version] - 2025-05-23
 
 - Update openpgp library version to 6.1.1, due to a vulnerability report on version below 5.11.3
 

@@ -51,7 +51,7 @@ export default async function piecesHealthCheck(): Promise<boolean> {
  * @param {number} [maxPollingMs=8000] - The maximum duration (in milliseconds) to poll for a connection before timing out.
  * @returns {Promise<boolean>} - A promise that resolves to `true` if the connection is established within the polling duration, or `false` if it times out.
  */
-export function pollForConnection(maxPollingMs = 8e3): Promise<boolean> {
+export function pollForConnection(maxPollingMs = 10e3): Promise<boolean> {
   return new Promise<boolean>((res) => {
     const intervalId = setInterval(async () => {
       const ok = await ConnectorSingleton.getInstance()

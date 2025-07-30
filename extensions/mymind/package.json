@@ -10,6 +10,10 @@
     "Productivity"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "search-my-mind",

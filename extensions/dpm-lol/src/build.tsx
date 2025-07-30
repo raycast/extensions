@@ -8,7 +8,7 @@ export default function Command() {
     isLoading,
     data,
     error: fetchError,
-  } = useFetch<ChampionResponse>("https://ddragon.leagueoflegends.com/cdn/15.7.1/data/en_US/champion.json", {
+  } = useFetch<ChampionResponse>("https://ddragon.leagueoflegends.com/cdn/15.14.1/data/en_US/champion.json", {
     headers: {
       "User-Agent": "Raycast",
       Accept: "application/json",
@@ -35,7 +35,7 @@ export default function Command() {
           <List.Item
             key={champion.id}
             title={champion.name}
-            icon={`https://ddragon.leagueoflegends.com/cdn/15.7.1/img/champion/${champion.image}`}
+            icon={`https://ddragon.leagueoflegends.com/cdn/15.14.1/img/champion/${champion.image}`}
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser url={`https://dpm.lol/champions/${champion.id}/build`} />

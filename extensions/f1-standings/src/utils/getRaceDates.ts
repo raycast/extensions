@@ -18,6 +18,9 @@ const getRaceDates = (race: Race) => {
   if (race.Qualifying && race.Qualifying.date && race.Qualifying.time) {
     parts.push(["Qualifying", new Date(race.Qualifying.date + "T" + race.Qualifying.time)]);
   }
+  if (race.SprintQualifying && race.SprintQualifying.date && race.SprintQualifying.time) {
+    parts.push(["Sprint Qualifying", new Date(race.SprintQualifying.date + "T" + race.SprintQualifying.time)]);
+  }
   if (race.Sprint && race.Sprint.date && race.Sprint.time) {
     parts.push(["Sprint", new Date(race.Sprint.date + "T" + race.Sprint.time)]);
   }

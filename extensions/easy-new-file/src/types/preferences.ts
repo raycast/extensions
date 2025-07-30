@@ -13,6 +13,7 @@ interface Preferences {
   nullArgumentsAction: string;
   defaultFileType: string;
   defaultFileContent: string;
+  defaultDirectory: string;
 }
 export const {
   showTips,
@@ -26,4 +27,5 @@ export const {
   nullArgumentsAction,
   defaultFileType,
   defaultFileContent,
+  defaultDirectory,
 } = getPreferenceValues<Preferences>();

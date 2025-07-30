@@ -73,7 +73,7 @@ export async function getInstagramMediaURLByGraphQL(shortcode: string) {
 
 export async function getInstagramStoryURL(username: string): Promise<string[]> {
   try {
-    const response = await axios.get(`https://content.mollygram.com/?url=${username}&method=allstories`);
+    const response = await axios.get(`https://media.mollygram.com/?url=${username}&method=allstories`);
     const $ = cheerio.load(response.data["html"]);
 
     const downloadUrls: string[] = [];
@@ -94,7 +94,7 @@ export async function getInstagramStoryURL(username: string): Promise<string[]> 
 
 export async function getInstagramHighlightStoryURL(url: string) {
   try {
-    const response = await axios.get(`https://content.mollygram.com/?url=${url}`);
+    const response = await axios.get(`https://media.mollygram.com/?url=${url}`);
     const $ = cheerio.load(response.data["html"]);
 
     const highlightUrls: { img: string; url: string }[] = [];

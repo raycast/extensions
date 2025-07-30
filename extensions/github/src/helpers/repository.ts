@@ -199,6 +199,6 @@ export function getRepositoryFilter(
   return filterMode === "all"
     ? ""
     : filterMode === "exclude"
-      ? list.map((repo) => `repo:-${repo}`).join(" ")
+      ? list.map((repo) => `-repo:${repo}`).join(" ")
       : list.map((repo) => `repo:${repo}`).join(" ");
 }

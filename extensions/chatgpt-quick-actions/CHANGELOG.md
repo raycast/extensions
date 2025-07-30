@@ -1,5 +1,9 @@
 # ChatGPT Quick Actions Changelog
 
+## [API Pricing] - 2025-06-26
+
+- Updated [API pricing information](https://platform.openai.com/docs/pricing) and conversion fix
+
 ## [Models Update and Consolidation] - 2025-06-11
 
 - Add latest OpenAI models: GPT-4.1, GPT-4.1 mini, GPT-4.1 nano, o1, o1-mini, o1-pro, o3, o3-mini, o4-mini

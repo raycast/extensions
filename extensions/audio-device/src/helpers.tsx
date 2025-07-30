@@ -31,9 +31,10 @@ import { usePromise } from "@raycast/utils";
 type DeviceListProps = {
   type: "input" | "output";
   deviceId?: string;
+  deviceName?: string;
 };
 
-export function DeviceList({ type, deviceId }: DeviceListProps) {
+export function DeviceList({ type, deviceId, deviceName }: DeviceListProps) {
   const { isLoading, data } = useAudioDevices(type);
   const { data: hiddenDevices, revalidate: refetchHiddenDevices } = usePromise(getHiddenDevices, []);
   const { data: showHidden, revalidate: refetchShowHidden } = usePromise(async () => {
@@ -41,10 +42,15 @@ export function DeviceList({ type, deviceId }: DeviceListProps) {
   }, []);
 
   useEffect(() => {
-    if (!deviceId || !data?.devices) return;
-    const device = data.devices.find((d) => d.id === deviceId);
+    if ((!deviceId && !deviceName) || !data?.devices) return;
+
+    let device = null;
+    if (deviceId) device = data.devices.find((d) => d.id === deviceId);
+    if (!device && deviceName) device = data.devices.find((d) => d.name === deviceName);
+
     if (!device) {
-      showToast(Toast.Style.Failure, "Error!", `The device with id ${deviceId} was not found.`);
+      const searchCriteria = deviceId ? `id ${deviceId}` : `name "${deviceName}"`;
+      showToast(Toast.Style.Failure, "Error!", `The device with ${searchCriteria} was not found.`);
       return;
     }
 
@@ -63,7 +69,7 @@ export function DeviceList({ type, deviceId }: DeviceListProps) {
         );
       }
     })();
-  }, [deviceId, data, type]);
+  }, [deviceId, deviceName, data, type]);
 
   const DeviceActions = ({ device }: { device: AudioDevice }) => (
     <>
@@ -73,6 +79,7 @@ export function DeviceList({ type, deviceId }: DeviceListProps) {
           name: `Set ${device.isOutput ? "Output" : "Input"} Device to ${device.name}`,
           link: createDeepLink(device.isOutput ? "set-output-device" : "set-input-device", {
             deviceId: device.id,
+            deviceName: device.name,
           }),
         }}
       />

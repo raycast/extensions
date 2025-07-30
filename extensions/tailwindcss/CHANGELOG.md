@@ -1,5 +1,9 @@
 # Tailwind CSS Changelog
 
+## [Add default action preference for Search Colors] - 2025-06-24
+- Add preference to configure the default action when selecting a color
+- Add more copy-to-clipboard actions
+
 ## [Add Dropdown for Version Selection in UI] - 2025-04-04
 
 - Add dropdown in the `Search Documentation` UI to select different Tailwind CSS versions.

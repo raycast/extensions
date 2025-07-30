@@ -3,6 +3,16 @@ import { execSync } from "node:child_process";
 
 export const MULLVAD_DEVICE_TAG = "tag:mullvad-exit-node";
 
+export type Location = {
+  Country: string;
+  CountryCode: string;
+  City: string;
+  CityCode: string;
+  Latitude: number;
+  Longitude: number;
+  Priority: number;
+};
+
 export interface Device {
   self: boolean;
   key: string;
@@ -17,6 +27,7 @@ export interface Device {
   exitnode: boolean;
   exitnodeoption: boolean;
   tags?: string[];
+  location?: Location;
 }
 
 export class InvalidPathError extends Error {}
@@ -38,6 +49,7 @@ export type StatusDevice = {
   UserID: number;
   HostName: string;
   Tags?: string[];
+  Location?: Location;
 };
 
 /**
@@ -169,6 +181,7 @@ export function getDevices(status: StatusResponse) {
       exitnode: peer.ExitNode,
       exitnodeoption: peer.ExitNodeOption,
       tags: peer.Tags,
+      location: peer.Location,
     };
     devices.push(device);
   }

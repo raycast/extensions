@@ -34,17 +34,17 @@
     }
   ],
   "dependencies": {
-    "@neondatabase/api-client": "^1.11.4",
-    "@raycast/api": "^1.91.0",
-    "@raycast/utils": "^1.18.1"
+    "@neondatabase/api-client": "^2.1.0",
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.2.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build",

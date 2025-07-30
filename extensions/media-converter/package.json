@@ -11,7 +11,13 @@
     "sacha_crispin"
   ],
   "categories": [
-    "Productivity"
+    "Productivity",
+    "Design Tools",
+    "Media"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "license": "MIT",
   "commands": [
@@ -80,8 +86,9 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.94.0",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.100.2",
+    "@raycast/utils": "^2.0.1",
+    "axios": "^1.10.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
@@ -100,5 +107,15 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "preferences": [
+    {
+      "name": "ffmpeg_path",
+      "type": "textfield",
+      "placeholder": "path/to/ffmpeg/binary",
+      "required": false,
+      "title": "Custom FFmpeg Path (Advanced)",
+      "description": "OPTIONAL - If left empty, the extension will look for a valid FFmpeg binary executable at common paths. If not found (expected for most users), you will be prompted to download a lightweight FFmpeg binary only available to this extension."
+    }
+  ]
 }

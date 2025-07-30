@@ -8,14 +8,14 @@ import {
   Toast,
   LaunchProps,
   Color,
-  Detail,
   environment,
   AI,
 } from '@raycast/api';
 import { FormValidation, useCachedPromise, useForm } from '@raycast/utils';
 
-import { addTodo, CommandListName, getLists, getTags, thingsNotRunningError } from './api';
+import { addTodo, CommandListName, getLists, getTags } from './api';
 import TodoList from './components/TodoList';
+import ErrorView from './components/ErrorView';
 import { getChecklistItemsWithAI, listItems } from './helpers';
 import { getDateString } from './utils';
 
@@ -39,8 +39,8 @@ type AddNewTodoProps = {
 
 export function AddNewTodo({ title, commandListName, draftValues }: AddNewTodoProps) {
   const { push } = useNavigation();
-  const { data: tags, isLoading: isLoadingTags } = useCachedPromise(getTags);
-  const { data: lists, isLoading: isLoadingLists } = useCachedPromise(getLists);
+  const { data: tags, isLoading: isLoadingTags, error: tagsError } = useCachedPromise(getTags);
+  const { data: lists, isLoading: isLoadingLists, error: listsError } = useCachedPromise(getLists);
   const { handleSubmit, itemProps, values, reset, focus, setValue } = useForm<FormValues>({
     async onSubmit() {
       const json = {
@@ -123,8 +123,11 @@ export function AddNewTodo({ title, commandListName, draftValues }: AddNewTodoPr
   }
 
   const isLoading = isLoadingTags || isLoadingLists;
+  const error = tagsError || listsError;
 
-  if (!tags && !isLoading) return <Detail markdown={thingsNotRunningError} />;
+  if (error) {
+    return <ErrorView error={error} />;
+  }
 
   const now = new Date();
 

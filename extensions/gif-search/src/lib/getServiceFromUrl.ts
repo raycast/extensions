@@ -6,7 +6,8 @@ export function getServiceFromUrl(gif: IGif): ServiceName | null {
 
   if (gifUrl.includes("giphy.com/gifs")) return "giphy";
   if (gifUrl.includes("giphy.com/clips")) return "giphy-clips";
-  if (gifUrl.includes("tenor.com/view")) return "tenor";
+  if (gifUrl.includes("tenor.com") || gifUrl.includes("c.tenor.com") || gifUrl.includes("media.tenor.com"))
+    return "tenor";
   if (gifUrl.includes("finergifs")) return "finergifs";
 
   return null;

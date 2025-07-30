@@ -10,7 +10,8 @@
     "jylamont",
     "pernielsentikaer",
     "tm.wrnr",
-    "true-real-michael"
+    "true-real-michael",
+    "xmorse"
   ],
   "categories": [
     "Developer Tools"
@@ -55,6 +56,10 @@
         {
           "value": "Zed Preview",
           "title": "Zed Preview"
+        },
+        {
+          "value": "Zed Dev",
+          "title": "Zed Dev"
         }
       ]
     },

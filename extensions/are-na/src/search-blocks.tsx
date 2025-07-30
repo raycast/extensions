@@ -7,11 +7,7 @@ import { usePromise } from "@raycast/utils";
 import { BlockActions } from "./components/BlockActions";
 import { getIconSource } from "./utils/icons";
 
-interface SearchArguments {
-  query: string;
-}
-
-export default function Command(props: LaunchProps<{ arguments: SearchArguments }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.SearchBlocks }>) {
   const abortable = useRef<AbortController | null>(null);
   const arena = useArena();
   const { query } = props.arguments;

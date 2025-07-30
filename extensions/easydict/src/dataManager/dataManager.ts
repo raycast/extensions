@@ -27,9 +27,11 @@ import { appleTranslate } from "../scripts";
 import { requestBaiduTextTranslate } from "../translation/baidu/baiduAPI";
 import { requestCaiyunTextTranslate } from "../translation/caiyun";
 import { requestDeepLTranslate } from "../translation/deepL";
+import { requestDeepLXTranslate } from "../translation/deepLX";
 import { requestGoogleTranslate } from "../translation/google";
 import { requestWebBingTranslate } from "../translation/microsoft/bing";
 import { requestOpenAIStreamTranslate } from "../translation/openAI/chat";
+import { requestGeminiTranslate } from "../translation/gemini";
 import { requestTencentTranslate } from "../translation/tencent";
 import { requestVolcanoTranslate } from "../translation/volcano/volcanoAPI";
 import {
@@ -156,6 +158,7 @@ export class DataManager {
     this.queryVolcanoTranslate(queryWordInfo);
     this.queryCaiyunTranslate(queryWordInfo);
     this.queryOpenAITranslate(queryWordInfo);
+    this.queryGeminiTranslate(queryWordInfo);
 
     this.delayQuery(queryWordInfo);
 
@@ -178,6 +181,10 @@ export class DataManager {
 
       if (myPreferences.enableDeepLTranslate && !myPreferences.enableLingueeDictionary) {
         this.queryDeepLTranslate(queryWordInfo);
+      }
+
+      if (myPreferences.enableDeepLXTranslate) {
+        this.queryDeepLXTranslate(queryWordInfo);
       }
 
       // We need to pass a abort signal, because google translate is used "got" to request, not axios.
@@ -296,7 +303,7 @@ export class DataManager {
 
     detectLanguage(text).then((detectedLanguage) => {
       console.log(
-        `---> final confirmed: ${detectedLanguage.confirmed}, type: ${detectedLanguage.type}, detectLanguage: ${detectedLanguage.youdaoLangCode}`
+        `---> final confirmed: ${detectedLanguage.confirmed}, type: ${detectedLanguage.type}, detectLanguage: ${detectedLanguage.youdaoLangCode}`,
       );
 
       // * It takes time to detect the language, in the meantime, user may have cancelled the query.
@@ -406,6 +413,10 @@ export class DataManager {
 
       this.delayQueryWithProxy(() => {
         this.queryDeepLTranslate(queryWordInfo);
+
+        if (myPreferences.enableDeepLXTranslate) {
+          this.queryDeepLXTranslate(queryWordInfo);
+        }
       });
     }
   }
@@ -429,6 +440,30 @@ export class DataManager {
         if (!myPreferences.enableDeepLTranslate) {
           return;
         }
+        showErrorToast(error);
+      })
+      .finally(() => {
+        this.removeQueryFromRecordList(type);
+      });
+  }
+
+  /**
+   * Query DeepLX translate. Free DeepL translation service.
+   */
+  private queryDeepLXTranslate(queryWordInfo: QueryWordInfo) {
+    const type = TranslationType.DeepLX;
+    this.addQueryToRecordList(type);
+
+    requestDeepLXTranslate(queryWordInfo)
+      .then((deepLXTypeResult) => {
+        const queryResult: QueryResult = {
+          type: type,
+          sourceResult: deepLXTypeResult,
+        };
+        this.updateTranslationDisplay(queryResult);
+      })
+      .catch((error) => {
+        showErrorToast(error);
         showErrorToast(error);
       })
       .finally(() => {
@@ -795,6 +830,31 @@ export class DataManager {
         })
         .finally(() => {
           // move to onFinish
+        });
+    }
+  }
+
+  /**
+   * Query Gemini translate.
+   */
+  private queryGeminiTranslate(queryWordInfo: QueryWordInfo) {
+    if (myPreferences.enableGeminiTranslate) {
+      const type = TranslationType.Gemini;
+      this.addQueryToRecordList(type);
+
+      requestGeminiTranslate(queryWordInfo)
+        .then((geminiTypeResult) => {
+          const queryResult: QueryResult = {
+            type: type,
+            sourceResult: geminiTypeResult,
+          };
+          this.updateTranslationDisplay(queryResult);
+        })
+        .catch((error) => {
+          showErrorToast(error);
+        })
+        .finally(() => {
+          this.removeQueryFromRecordList(type);
         });
     }
   }

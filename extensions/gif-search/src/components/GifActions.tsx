@@ -174,7 +174,7 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
       <Action
         icon={Icon.Star}
         key="toggleFav"
-        title="Remove From Favorites"
+        title="Remove from Favorites"
         onAction={removeFav}
         shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
       />
@@ -193,7 +193,7 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
     <Action
       icon={Icon.Clock}
       key="removeRecent"
-      title="Remove From Recents"
+      title="Remove from Recents"
       onAction={removeFromRecents}
       shortcut={{ modifiers: ["ctrl", "shift"], key: "r" }}
     />

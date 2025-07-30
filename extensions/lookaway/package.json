@@ -16,6 +16,18 @@
     "license": "MIT",
     "commands": [
         {
+            "name": "startLookaway",
+            "title": "Start Lookaway",
+            "description": "Starts the Lookaway application.",
+            "mode": "no-view"
+        },
+        {
+            "name": "stopLookaway",
+            "title": "Stop Lookaway",
+            "description": "Stops the Lookaway application.",
+            "mode": "no-view"
+        },
+        {
             "name": "startNextBreak",
             "title": "Start Next Break",
             "description": "Starts the next scheduled break immediately.",

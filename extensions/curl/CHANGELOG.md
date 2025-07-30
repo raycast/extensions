@@ -1,5 +1,9 @@
 # cURL Changelog
 
+## [Enhancement] - 2025-07-07
+
+- Enhanced the request form to allow users to select and modify parameters for their requests
+
 ## [Enhancement] - 2025-05-20
 
 - Enhanced the detail of the request error message displayed in the toast

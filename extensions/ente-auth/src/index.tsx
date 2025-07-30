@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List, getPreferenceValues } from "@raycast/api";
-import { getFavicon, getProgressIcon, useFrecencySorting } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { getFavicon, getProgressIcon, useFrecencySorting, usePromise } from "@raycast/utils";
+import { useEffect } from "react";
 import { getJsonFormatFromStore } from "./helpers";
 import { JsonFormat } from "./helpers/types";
 
@@ -12,34 +12,26 @@ const getProgressColor = (remainingTime: number) => {
 const RERENDER_INTERVAL = 1000;
 
 export default function Command() {
-  const [secrets, setSecrets] = useState<JsonFormat[]>([]);
+  const { data, isLoading, revalidate } = usePromise(() => getJsonFormatFromStore());
+  const secrets = data ?? [];
+  const firstLoad = isLoading && data === undefined;
   const { visitItem, resetRanking } = useFrecencySorting<JsonFormat>(secrets, {
     key: (item) => item.service_name,
   });
 
   useEffect(() => {
-    if (secrets.length === 0) {
-      getJsonFormatFromStore().then((data) => setSecrets(data));
-    }
-
     /**
      * Set up an interval to re-fetch the data from the store every second.
      * This is necessary because the data in the store can change at any time.
      */
-    const interval = setInterval(() => {
-      getJsonFormatFromStore().then((data) => setSecrets(data));
-    }, RERENDER_INTERVAL);
-
-    return () => {
-      setSecrets([]);
-      clearInterval(interval);
-    };
+    const interval = setInterval(revalidate, RERENDER_INTERVAL);
+    return () => clearInterval(interval);
   }, []);
 
-  if (secrets.length === 0) {
+  if (!firstLoad && secrets.length === 0) {
     return (
       <List>
-        <List.Item title={"No Secrets found"} />
+        <List.EmptyView title="No secrets found" description={'You may need to run "Import Secrets" first.'} />
       </List>
     );
   }
@@ -51,7 +43,7 @@ export default function Command() {
   const PreferredAction = getPreferenceValues().primaryAction;
 
   return (
-    <List navigationTitle="Get TOTP" searchBarPlaceholder="Search..." isShowingDetail>
+    <List navigationTitle="Get TOTP" isLoading={firstLoad} searchBarPlaceholder="Search..." isShowingDetail>
       {secrets.map((item, index) => {
         const userActions = [
           <Action.CopyToClipboard

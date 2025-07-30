@@ -1,5 +1,11 @@
 # Polar Changelog
 
+## [BYOK + View Products] - 2025-07-01
+
+- View Products and their Media
+- Set an optional "Access Token" in Preferences to BYOK
+- Remove `node-fetch`
+
 ## [Update] - 2025-04-09
 
 - Update Polar SDK version

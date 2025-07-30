@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 import { Color, LaunchType, environment, open } from "@raycast/api";
 import { crossLaunchCommand } from "raycast-cross-extension";
 import { commandConfig } from "./constants.js";
@@ -31,3 +32,9 @@ export const pickColor = async ({ field }: { field: string }) =>
       },
     },
   ).catch(() => open("raycast://extensions/thomas/color-picker"));
+
+export const getSvgFromFile = async (file: string, color?: string) => {
+  let svg = await readFile(file, "utf8");
+  if (color) svg = svg.replace("<svg ", `<svg fill="#${color}" `);
+  return svg;
+};

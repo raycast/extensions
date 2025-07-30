@@ -2,11 +2,12 @@ import { List, Detail } from '@raycast/api';
 import { useCachedPromise } from '@raycast/utils';
 import { useState } from 'react';
 
-import { CommandListName, Todo, getListTodos, getLists, getTags, thingsNotRunningError } from '../api';
+import { CommandListName, Todo, getListTodos, getLists, getTags } from '../api';
 import { plural } from '../utils';
 
 import TodoListEmptyView from './TodoListEmptyView';
 import TodoListItem from './TodoListItem';
+import ErrorView from './ErrorView';
 
 type TodoListProps = {
   commandListName: CommandListName;
@@ -19,9 +20,17 @@ export default function TodoList({ commandListName, displayActivationDates }: To
 
   const [searchText, setSearchText] = useState('');
 
-  const { data: todos, isLoading, mutate } = useCachedPromise((name) => getListTodos(name), [commandListName]);
+  const { data: todos, isLoading, error, mutate } = useCachedPromise((name) => getListTodos(name), [commandListName]);
 
-  if (!todos && !isLoading) return <Detail markdown={thingsNotRunningError} />;
+  if (error) {
+    return <ErrorView error={error} onRetry={() => mutate()} />;
+  }
+
+  if (!todos && !isLoading) {
+    return (
+      <Detail markdown="## No Data\n\nNo todos found and no error occurred. This might indicate an issue with the Things connection." />
+    );
+  }
 
   const sections =
     todos?.reduce(

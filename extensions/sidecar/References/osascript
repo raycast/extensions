@@ -1,0 +1,59 @@
+do shell script "open -b com.apple.systempreferences /System/Library/PreferencePanes/Displays.prefPane"
+
+set device to (system attribute "Device_Name")
+set mirrorSectionName to (system attribute "Mirror_Section_Name")
+
+tell application "System Events"
+	repeat until (exists window 1 of application process "System Settings")
+		delay 0.1
+	end repeat
+
+	tell process "System Settings"
+		set popUpButton to pop up button 1 of group 1 of group 2 of splitter group 1 of group 1 of window 1
+
+		repeat until exists popUpButton
+			delay 0.1
+		end repeat
+
+		click popUpButton
+
+		repeat until exists menu 1 of popUpButton
+			delay 0.1
+		end repeat
+
+		tell menu 1 of popUpButton
+			-- Loop through the menu items and find the index that satisfies the condition
+			set menuItemIndex to 0
+			set mirrorFound to false
+			repeat with i from 1 to count of menu items
+				set currentItem to menu item i
+				if mirrorFound then
+					if name of currentItem contains device then
+						set menuItemIndex to i
+						exit repeat
+					end if
+				else
+					if name of currentItem contains mirrorSectionName then
+						set mirrorFound to true
+					end if
+				end if
+			end repeat
+
+			-- If a matching menu item was found, click it
+			if menuItemIndex is not 0 then
+				click menu item menuItemIndex
+			else
+				display dialog "No matching menu item containing '" & device & "' was found. Please, check your settings." buttons {"OK"} default button "OK"
+			end if
+
+			-- Wait until the menu is no longer visible
+			repeat while exists menu 1 of popUpButton
+				delay 0.1
+			end repeat
+		end tell
+
+
+	end tell
+end tell
+
+tell application "System Settings" to quit

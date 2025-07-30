@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Fix repository filtering] - 2025-06-26
+
+- Correct the repository filtering for exclude mode
+
 ## [Add repository filtering] - 2025-06-05
 
 - my-issues, my-pull-requests and menu counterparts can now specify repositories to include / exclude

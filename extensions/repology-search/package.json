@@ -4,7 +4,7 @@
   "title": "Repology Search",
   "description": "Search packages from repology.org",
   "icon": "icon.png",
-  "author": "SebDanielsson",
+  "author": "sebdanielsson",
   "categories": [
     "Developer Tools",
     "Web"
@@ -20,16 +20,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.61.2",
-    "@raycast/utils": "^1.10.1"
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.2.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "18.18.9",
-    "@types/react": "18.2.37",
-    "eslint": "^8.53.0",
-    "prettier": "^3.1.0",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.15.35",
+    "@types/react": "^19.1.8",
+    "eslint": "^9.30.1",
+    "prettier": "^3.6.2",
+    "react-devtools": "^6.1.1",
+    "typescript": "~5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -37,5 +38,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

@@ -1,0 +1,199 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "paste-to-markdown",
+  "title": "Paste to Markdown",
+  "description": "A Raycast Extension that instantly pastes rich text or HTML content into Markdown.",
+  "icon": "extension-icon.png",
+  "author": "weicodes",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "paste-to-markdown",
+      "title": "Paste to Markdown",
+      "description": "Paste rich text or HTML content into Markdown.",
+      "mode": "no-view",
+      "alias": "pmd"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "headingStyle",
+      "title": "Heading Style",
+      "description": "Choose the style for headings in the converted Markdown",
+      "type": "dropdown",
+      "required": false,
+      "default": "atx",
+      "data": [
+        {
+          "title": "ATX (## Heading)",
+          "value": "atx"
+        },
+        {
+          "title": "Setext (Heading\\n---)",
+          "value": "setext"
+        }
+      ]
+    },
+    {
+      "name": "hr",
+      "title": "Horizontal Rule",
+      "description": "Choose the style for horizontal rules (thematic breaks)",
+      "type": "textfield",
+      "required": false,
+      "default": "---"
+    },
+    {
+      "name": "bulletListMarker",
+      "title": "Bullet List Marker",
+      "description": "Choose the marker for bullet lists",
+      "type": "dropdown",
+      "required": false,
+      "default": "-",
+      "data": [
+        {
+          "title": "Asterisk (*)",
+          "value": "*"
+        },
+        {
+          "title": "Hyphen (-)",
+          "value": "-"
+        },
+        {
+          "title": "Plus (+)",
+          "value": "+"
+        }
+      ]
+    },
+    {
+      "name": "codeBlockStyle",
+      "title": "Code Block Style",
+      "description": "Choose the style for code blocks",
+      "type": "dropdown",
+      "required": false,
+      "default": "fenced",
+      "data": [
+        {
+          "title": "Fenced (```)",
+          "value": "fenced"
+        },
+        {
+          "title": "Indented (4 spaces)",
+          "value": "indented"
+        }
+      ]
+    },
+    {
+      "name": "fence",
+      "title": "Code Fence Style",
+      "description": "Choose the fence style for fenced code blocks",
+      "type": "dropdown",
+      "required": false,
+      "default": "```",
+      "data": [
+        {
+          "title": "Backticks (```)",
+          "value": "```"
+        },
+        {
+          "title": "Tildes (~~~)",
+          "value": "~~~"
+        }
+      ]
+    },
+    {
+      "name": "emDelimiter",
+      "title": "Emphasis Delimiter",
+      "description": "Choose the delimiter for emphasis (italic text)",
+      "type": "dropdown",
+      "required": false,
+      "default": "_",
+      "data": [
+        {
+          "title": "Underscore (_)",
+          "value": "_"
+        },
+        {
+          "title": "Asterisk (*)",
+          "value": "*"
+        }
+      ]
+    },
+    {
+      "name": "strongDelimiter",
+      "title": "Strong Delimiter",
+      "description": "Choose the delimiter for strong (bold text)",
+      "type": "dropdown",
+      "required": false,
+      "default": "**",
+      "data": [
+        {
+          "title": "Double Asterisk (**)",
+          "value": "**"
+        },
+        {
+          "title": "Double Underscore (__)",
+          "value": "__"
+        }
+      ]
+    },
+    {
+      "name": "linkStyle",
+      "title": "Link Style",
+      "description": "Choose the style for links",
+      "type": "dropdown",
+      "required": false,
+      "default": "inlined",
+      "data": [
+        {
+          "title": "Inline ([text](url))",
+          "value": "inlined"
+        },
+        {
+          "title": "Referenced ([text][ref])",
+          "value": "referenced"
+        }
+      ]
+    },
+    {
+      "name": "linkReferenceStyle",
+      "title": "Link Reference Style",
+      "description": "Choose the style for referenced links",
+      "type": "dropdown",
+      "required": false,
+      "default": "full",
+      "data": [
+        {
+          "title": "Full ([text][ref])",
+          "value": "full"
+        },
+        {
+          "title": "Collapsed ([text][])",
+          "value": "collapsed"
+        },
+        {
+          "title": "Shortcut ([text])",
+          "value": "shortcut"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "turndown": "^7.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/turndown": "^5.0.5",
+    "eslint": "^9.29.0",
+    "prettier": "^3.6.0",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

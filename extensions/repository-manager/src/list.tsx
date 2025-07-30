@@ -1,105 +1,137 @@
-import React, { useState, useEffect } from 'react'
+import React, { useMemo } from 'react'
 import { List, Icon } from '@raycast/api'
-import { fetchPrimaryDirectories, fetchProjects, preferences } from './helpers'
+import { useCachedPromise } from '@raycast/utils'
 import { homedir } from 'os'
-import { DirectoriesDropdown, Directory, useDirectory } from './components/DirectoriesDropdown'
+
+import { fetchPrimaryDirectories, fetchProjects, preferences } from './helpers'
+import { DirectoriesDropdown, useDirectory } from './components/DirectoriesDropdown'
 import ProjectListItem from './components/ProjectListItem'
 import { groupByDirectory, GroupedProjectList, Project, ProjectList, sortGroupedProjectsByFavorite } from './project'
 
 export default function Command() {
-    const [projects, setProjects] = useState<ProjectList | GroupedProjectList | null>(null)
-    const [directories, setDirectories] = useState<Directory[] | null>(null)
-    const [userHasFavoritedProjects, setUserHasFavoritedProjects] = useState<boolean>(false)
     const { directory } = useDirectory()
 
-    useEffect(() => {
-        async function fetchData() {
-            let fetchedProjects: ProjectList | GroupedProjectList = await fetchProjects()
+    const {
+        data: rawProjects,
+        isLoading: isLoadingProjects,
+        revalidate,
+    } = useCachedPromise(fetchProjects, [], {
+        keepPreviousData: true,
+        initialData: [],
+    })
 
-            const fetchedDirectories = fetchPrimaryDirectories(fetchedProjects as ProjectList)
-            setDirectories(fetchedDirectories)
+    const directories = useMemo(() => {
+        if (!rawProjects?.length) return []
+        return fetchPrimaryDirectories(rawProjects)
+    }, [rawProjects])
 
-            if (directory) {
-                fetchedProjects = (fetchedProjects as ProjectList).filter((project: Project) => {
-                    if (directory === 'all') {
-                        return true
+    const filteredProjects = useMemo(() => {
+        if (!rawProjects?.length) return []
+
+        return rawProjects.filter((project: Project) => {
+            if (!directory || directory === 'all') return true
+            if (directory === 'favorites') return project.isFavorite
+            return project.primaryDirectory.name === directory
+        })
+    }, [rawProjects, directory])
+
+    const processedProjects = useMemo(() => {
+        if (!filteredProjects.length) return null
+
+        const projectsGroupingEnabled = preferences.enableProjectsGrouping
+
+        if (projectsGroupingEnabled) {
+            const grouped = groupByDirectory(filteredProjects)
+
+            // When "all" is selected, create a special "Favorites" group at the top
+            if (!directory || directory === 'all') {
+                const favoritesFromAllGroups: Project[] = []
+                const groupsWithoutFavorites: GroupedProjectList = {}
+
+                // Extract favorites from all groups
+                Object.entries(grouped).forEach(([dirName, projects]) => {
+                    const favorites = projects.filter((p) => p.isFavorite)
+                    const nonFavorites = projects.filter((p) => !p.isFavorite)
+
+                    favoritesFromAllGroups.push(...favorites)
+
+                    if (nonFavorites.length > 0) {
+                        groupsWithoutFavorites[dirName] = nonFavorites.sort((a, b) => a.name.localeCompare(b.name))
                     }
-
-                    if (directory === 'favorites') {
-                        return project.isFavorite
-                    }
-
-                    return project.primaryDirectory.name === directory
                 })
-            }
 
-            const projectsGroupingEnabled = preferences.enableProjectsGrouping
-            if (projectsGroupingEnabled) {
-                fetchedProjects = groupByDirectory(fetchedProjects as ProjectList)
-                fetchedProjects = sortGroupedProjectsByFavorite(fetchedProjects as GroupedProjectList)
+                // Create the final grouped structure
+                const result: GroupedProjectList = {}
+
+                // Add Favorites group first if there are any favorites
+                if (favoritesFromAllGroups.length > 0) {
+                    result['Favorites'] = favoritesFromAllGroups.sort((a, b) => a.name.localeCompare(b.name))
+                }
+
+                // Add other groups sorted alphabetically
+                const sortedGroupNames = Object.keys(groupsWithoutFavorites).sort()
+                sortedGroupNames.forEach((groupName) => {
+                    result[groupName] = groupsWithoutFavorites[groupName]
+                })
+
+                return result
             } else {
-                fetchedProjects = (fetchedProjects as ProjectList).sort((a, b) => {
-                    if (a.isFavorite === b.isFavorite) {
-                        return a.name.localeCompare(b.name)
-                    }
-
-                    return a.isFavorite ? -1 : 1
-                })
+                // When a specific folder is selected, show favorites at the top of that group
+                return sortGroupedProjectsByFavorite(grouped)
             }
-
-            setProjects(fetchedProjects)
-            setUserHasFavoritedProjects(false)
         }
 
-        fetchData()
-    }, [directory, userHasFavoritedProjects])
+        return [...filteredProjects].sort((a, b) => {
+            if (a.isFavorite === b.isFavorite) {
+                return a.name.localeCompare(b.name)
+            }
+            return a.isFavorite ? -1 : 1
+        })
+    }, [filteredProjects, directory])
 
-    if (!projects) {
-        return <List isLoading={true} />
+    const isGrouped = preferences.enableProjectsGrouping
+    const showEmptyView = !isLoadingProjects && (!processedProjects || (Array.isArray(processedProjects) && processedProjects.length === 0))
+
+    const handleFavoriteChange = () => {
+        revalidate()
     }
-
-    const projectsGroupingEnabled = preferences.enableProjectsGrouping
 
     return (
         <List
-            isLoading={!projects}
-            searchBarAccessory={directories && <DirectoriesDropdown directories={directories} />}
+            isLoading={isLoadingProjects || !processedProjects}
+            searchBarAccessory={directories.length > 0 ? <DirectoriesDropdown directories={directories} /> : undefined}
         >
-            <List.EmptyView
-                icon={Icon.MagnifyingGlass}
-                title={`No project found in directory ${preferences.projectsPath.replace(homedir(), '~')}`}
-            />
-            {projectsGroupingEnabled
-                ? Object.entries(projects as GroupedProjectList).map(([directory, projects], index) => {
-                      return (
-                          <List.Section
-                              title={directory}
-                              subtitle={projects.length.toString()}
-                              key={directory + index}
-                          >
-                              {projects.map((project: Project, i) => {
-                                  return (
-                                      <ProjectListItem
-                                          key={project.name + i}
-                                          project={project}
-                                          directories={directories as Directory[]}
-                                          onFavoriteChange={() => setUserHasFavoritedProjects(true)}
-                                      />
-                                  )
-                              })}
-                          </List.Section>
-                      )
-                  })
-                : (projects as ProjectList).map((project: Project, i) => {
-                      return (
-                          <ProjectListItem
-                              key={project.name + i}
-                              project={project}
-                              directories={directories as Directory[]}
-                              onFavoriteChange={() => setUserHasFavoritedProjects(true)}
-                          />
-                      )
-                  })}
+            {showEmptyView && (
+                <List.EmptyView
+                    icon={Icon.MagnifyingGlass}
+                    title={`No project found in directory ${preferences.projectsPath.replace(homedir(), '~')}`}
+                />
+            )}
+            {processedProjects && isGrouped
+                ? Object.entries(processedProjects as GroupedProjectList).map(([directoryName, projects]) => (
+                      <List.Section
+                          title={directoryName}
+                          subtitle={projects.length.toString()}
+                          key={directoryName}
+                      >
+                          {projects.map((project: Project) => (
+                              <ProjectListItem
+                                  key={`${project.fullPath}-${project.name}`}
+                                  project={project}
+                                  directories={directories}
+                                  onFavoriteChange={handleFavoriteChange}
+                              />
+                          ))}
+                      </List.Section>
+                  ))
+                : (processedProjects as ProjectList)?.map((project: Project) => (
+                      <ProjectListItem
+                          key={`${project.fullPath}-${project.name}`}
+                          project={project}
+                          directories={directories}
+                          onFavoriteChange={handleFavoriteChange}
+                      />
+                  ))}
         </List>
     )
 }

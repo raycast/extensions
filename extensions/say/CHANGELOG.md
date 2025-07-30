@@ -1,5 +1,10 @@
 # Say - Text to Speech Changelog
 
+## [Bugfix & Maintenance] - 2025-07-07
+
+- Bump mac-say@0.3.2 to fix the possibly duplicate lines in Configure Say command
+- Bump all dependencies to the latest
+
 ## [Routine Maintenance] - 2025-05-19
 
 - Add icon to the Say action

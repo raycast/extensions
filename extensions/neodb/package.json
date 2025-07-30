@@ -6,7 +6,12 @@
   "icon": "command-icon.png",
   "author": "SevicheCC",
   "contributors": [
-    "xmok"
+    "xmok",
+    "litomore"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "categories": [
     "Web",
@@ -14,33 +19,33 @@
   ],
   "license": "MIT",
   "preferences": [
+    {
+      "name": "lang",
+      "title": "Preferred Language",
+      "type": "dropdown",
+      "required": false,
+      "description": "Results will be shown in Preferred Language (if they exist)",
+      "data": [
         {
-          "name": "lang",
-          "title": "Preferred Language",
-          "type": "dropdown",
-          "required": false,
-          "description": "Results will be shown in Preferred Language (if they exist)",
-          "data": [
-            {
-              "title": "Default",
-              "value": "default"
-            },
-            {
-              "title": "English (en)",
-              "value": "en"
-            },
-            {
-              "title": "Chinese (PRC)",
-              "value": "zh-cn"
-            },
-            {
-              "title": "Chinese (Taiwan)",
-              "value": "zh-tw"
-            }
-          ],
-          "default": "default"
+          "title": "Default",
+          "value": "default"
+        },
+        {
+          "title": "English (en)",
+          "value": "en"
+        },
+        {
+          "title": "Chinese (PRC)",
+          "value": "zh-cn"
+        },
+        {
+          "title": "Chinese (Taiwan)",
+          "value": "zh-tw"
         }
       ],
+      "default": "default"
+    }
+  ],
   "commands": [
     {
       "name": "search",
@@ -69,17 +74,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.18.0"
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.2.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.3.3",
-    "eslint": "^7.32.0",
-    "prettier": "^2.8.8",
-    "react": "^18.2.0",
-    "typescript": "^4.9.5"
+    "@raycast/eslint-config": "2.0.4",
+    "@types/node": "^24.0.14",
+    "@types/react": "^19.1.8",
+    "eslint": "^9.31.0",
+    "prettier": "^3.6.2",
+    "react": "^19.1.0",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import React, { useState } from "react";
 import { searchMavenArtifact } from "./hooks/hooks";
 import { actionIcons, buildDependency, dependencyTypes, isEmpty } from "./utils/common-utils";
@@ -7,6 +7,7 @@ import { ActionToAdvancedSearchOptions } from "./components/action-to-advanced-s
 import { ActionToPexels } from "./components/action-to-pexels";
 import { MavenEmptyView } from "./components/maven-empty-view";
 import { getAvatarIcon } from "@raycast/utils";
+import KeyEquivalent = Keyboard.KeyEquivalent;
 
 interface MavenCentralRepositorySearchProps {
   repository: string;
@@ -75,11 +76,13 @@ export default function SearchMavenCentralRepository(props: { arguments: MavenCe
               </ActionPanel.Section>
               <ActionPanel.Section title={"Copy Dependency"}>
                 {dependencyTypes.map((dependenceType, index) => {
+                  const keyIndex = index + 1 === 10 ? 0 : index + 1;
                   return (
                     <Action.CopyToClipboard
                       key={dependenceType}
                       icon={{ source: actionIcons[index] }}
                       title={`${dependenceType}`}
+                      shortcut={{ modifiers: ["shift", "cmd"], key: keyIndex.toString() as KeyEquivalent }}
                       content={buildDependency(value, dependenceType)}
                     />
                   );

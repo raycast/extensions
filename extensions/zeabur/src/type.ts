@@ -66,7 +66,7 @@ export interface ProjectInfo {
       icon: string;
       name: string;
       __typename: string;
-    };
+    } | null;
     name: string;
     id: string;
     country: string;

@@ -27,6 +27,10 @@ export default function Databases() {
             keywords={[database.$id]}
             icon={Icon.Coin}
             title={database.name}
+            accessories={[
+              { icon: Icon.Plus, date: new Date(database.$createdAt), tooltip: `Created: ${database.$createdAt}` },
+              { icon: Icon.Pencil, date: new Date(database.$updatedAt), tooltip: `Updated: ${database.$updatedAt}` },
+            ]}
             actions={
               <ActionPanel>
                 <Action.Push icon={Icon.Box} title="Collections" target={<Collections databaseId={database.$id} />} />

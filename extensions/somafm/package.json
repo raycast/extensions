@@ -1,0 +1,118 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "somafm",
+  "title": "SomaFM",
+  "description": "Browse and play SomaFM internet radio stations with smart player detection, favorites, and now playing information",
+  "icon": "extension-icon.png",
+  "author": "mwarger",
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "contributors": [],
+  "commands": [
+    {
+      "name": "browse-stations",
+      "title": "Browse SomaFM Stations",
+      "description": "Browse all SomaFM radio stations with search, favorites, and genre filtering",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showStationImages",
+          "type": "checkbox",
+          "default": true,
+          "title": "Appearance",
+          "label": "Show Station Artwork",
+          "description": "Display station artwork in grid and list views",
+          "required": false
+        },
+        {
+          "name": "defaultView",
+          "type": "dropdown",
+          "default": "grid",
+          "title": "Default View",
+          "description": "Choose the default view mode",
+          "data": [
+            {
+              "title": "Grid View",
+              "value": "grid"
+            },
+            {
+              "title": "List View",
+              "value": "list"
+            }
+          ],
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "menu-bar-player",
+      "title": "Somafm Menu Bar Player",
+      "description": "Control playback and access favorite stations from the menu bar",
+      "mode": "menu-bar",
+      "interval": "10m",
+      "disabledByDefault": true
+    }
+  ],
+  "preferences": [
+    {
+      "name": "audioPlayer",
+      "title": "Audio Player",
+      "description": "Select your preferred audio player",
+      "type": "dropdown",
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto-detect",
+          "value": "auto"
+        },
+        {
+          "title": "IINA",
+          "value": "iina"
+        },
+        {
+          "title": "VLC",
+          "value": "vlc"
+        },
+        {
+          "title": "Music.app",
+          "value": "music"
+        },
+        {
+          "title": "Default Browser",
+          "value": "browser"
+        }
+      ],
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@vitest/ui": "^3.2.4",
+    "eslint": "^9.22.0",
+    "jsdom": "^26.1.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^3.2.4"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

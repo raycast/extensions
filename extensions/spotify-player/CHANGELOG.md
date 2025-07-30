@@ -1,5 +1,22 @@
 # Spotify Player Changelog
 
+## [Add toggle to filter song name in menu bar] - 2025-07-08
+
+- Added new toggle for removing extra info like remix titles or versions from the song name in the menubar
+
+## [Fix Search Feature] - 2025-07-03
+
+- Fixed an issue with the search functionality.
+
+## [Fix Noises and Additional data in Find Lyrics Function] - 2025-07-02
+
+- Fixed Noises in retrieved lyrics in Find Lyrics Function,now clean lyrics is extracted without any additional noise or data like contributors count and numbers 
+
+## [Add Option to View the Lyrics of the Song playing] - 2025-06-30
+
+- Add new command 'Find Lyrics'.
+- Add an option that allows users to See the current song’s Lyrics, artist and title.
+
 ## [Add Option to Copy the Current Song’s Artist and Title] - 2025-05-26
 
 - Add new command 'Copy Artist And Title'.

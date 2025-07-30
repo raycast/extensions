@@ -4,6 +4,8 @@ import * as changeCase from "change-case";
 import { spongeCase as spongeCaseLib } from "sponge-case";
 import { swapCase as swapCaseLib } from "swap-case";
 
+const preferences = getPreferenceValues<Preferences>();
+
 function isAlphabetic(char: string) {
   return /\p{L}/u.test(char);
 }
@@ -14,8 +16,12 @@ export const spongeCase = (input: string, _options?: changeCase.Options) => spon
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const swapCase = (input: string, _options?: changeCase.Options) => swapCaseLib(input);
 
-export const lowerCase = (input: string, options?: changeCase.Options) =>
-  changeCase.noCase(input, options).toLowerCase();
+export const lowerCase = (input: string, options?: changeCase.Options) => {
+  if (preferences.preservePunctuation) {
+    return input.toLowerCase();
+  }
+  return changeCase.noCase(input, options).toLowerCase();
+};
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const lowerFirst = (input: string, _options?: changeCase.Options) => {
@@ -60,8 +66,12 @@ export const sentenceCase = (input: string, options?: changeCase.Options) =>
 export const titleCase = (input: string, options?: changeCase.Options) =>
   handleSmallWordsTitleCase(input, false, options);
 
-export const upperCase = (input: string, options?: changeCase.Options) =>
-  changeCase.noCase(input, options).toUpperCase();
+export const upperCase = (input: string, options?: changeCase.Options) => {
+  if (preferences.preservePunctuation) {
+    return input.toUpperCase();
+  }
+  return changeCase.noCase(input, options).toUpperCase();
+};
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const upperFirst = (input: string, _options?: changeCase.Options) => {

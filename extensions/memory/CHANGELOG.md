@@ -1,6 +1,6 @@
 # Memory Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-03-13
 
 Added Memory! Powered by a Knowledge Graph, Raycast Memory can help you record anything you need to remember, throughout chats.
 

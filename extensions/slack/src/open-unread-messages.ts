@@ -27,42 +27,35 @@ public class User32 {
 }
 "@
 
-function Set-ForegroundWindow($processName) {
-    $proc = Get-Process -Name $processName -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -ne 0 }
-    if (-not $proc) {
-        Write-Host "Process '$processName' not found or has no main window."
-        return $false
-    }
+$processName = "slack"
 
-    $hwnd = $proc.MainWindowHandle
-
-    if ([User32]::IsIconic($hwnd)) {
-        # Restore if minimized
-        [User32]::ShowWindowAsync($hwnd, 9) | Out-Null
-    }
-
-    # Attach input threads if needed
-    $foregroundThreadId = [User32]::GetCurrentThreadId()
-    $targetThreadId = [User32]::GetWindowThreadProcessId($hwnd, [ref]0)
-    [User32]::AttachThreadInput($foregroundThreadId, $targetThreadId, $true)
-
-    # Bring to foreground
-    [User32]::SetForegroundWindow($hwnd) | Out-Null
-
-    # Detach threads
-    [User32]::AttachThreadInput($foregroundThreadId, $targetThreadId, $false)
-
-    return $true
+$proc = Get-Process -Name $processName -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -ne 0 }
+if (-not $proc) {
+    Write-Host "Process '$processName' not found or has no main window."
+    return $false
 }
 
-# Bring Slack to foreground
-if (Set-ForegroundWindow "slack") {
-    Start-Sleep -Milliseconds 300
-    Add-Type -AssemblyName System.Windows.Forms
-    [System.Windows.Forms.SendKeys]::SendWait("^(+A)")  # Ctrl+Shift+A
-} else {
-    Write-Host "Could not bring Slack to the foreground."
+$hwnd = $proc.MainWindowHandle
+
+if ([User32]::IsIconic($hwnd)) {
+    # Restore if minimized
+    [User32]::ShowWindowAsync($hwnd, 9) | Out-Null
 }
+
+# Attach input threads if needed
+$foregroundThreadId = [User32]::GetCurrentThreadId()
+$targetThreadId = [User32]::GetWindowThreadProcessId($hwnd, [ref]0)
+[User32]::AttachThreadInput($foregroundThreadId, $targetThreadId, $true)
+
+# Bring to foreground
+[User32]::SetForegroundWindow($hwnd) | Out-Null
+
+# Detach threads
+[User32]::AttachThreadInput($foregroundThreadId, $targetThreadId, $false)
+
+Start-Sleep -Milliseconds 300
+Add-Type -AssemblyName System.Windows.Forms
+[System.Windows.Forms.SendKeys]::SendWait("^(+A)")  # Ctrl+Shift+A
 `,
     );
   } else {

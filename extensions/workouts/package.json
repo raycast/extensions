@@ -18,6 +18,10 @@
     "dianne_mcewan",
     "stphstph"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Data"
   ],

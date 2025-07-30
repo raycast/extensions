@@ -18,7 +18,7 @@
       "name": "add",
       "title": "Add Custom Easing",
       "subtitle": "Easings",
-      "description": "Add your own easing",
+      "description": "Add your own easing(s)",
       "mode": "view"
     }
   ],

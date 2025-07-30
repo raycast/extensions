@@ -1,6 +1,6 @@
 # Esports Pass Changelog
 
-## [Windows] - {PR_MERGE_DATE}
+## [Windows] - 2025-05-02
 
 - Make Available on Windows
 

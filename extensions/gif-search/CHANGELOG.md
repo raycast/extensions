@@ -1,5 +1,9 @@
 # GIF Search Changelog
 
+## [Fix] - 2025-07-10
+
+- Expanded Tenor URL detection in ⁠getServiceFromUrl.ts to ensure GIFs from ⁠tenor.com, ⁠c.tenor.com, and ⁠media.tenor.com are added to the "Recent" list in GIF Search.
+
 ## [Refactor] - 2025-04-14
 
 - Refactored `copyFileToClipboard` to use Raycast APIs instead of relying on AppleScript.

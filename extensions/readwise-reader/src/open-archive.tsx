@@ -1,6 +1,6 @@
 import { open } from "@raycast/api";
-import { BASE_URL } from "./utils";
+import { getOpenUrl } from "./utils";
 
 export default async function Archive() {
-  await open(BASE_URL + "archive");
+  await open(getOpenUrl("archive"));
 }
