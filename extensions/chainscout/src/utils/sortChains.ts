@@ -30,15 +30,15 @@ const sortChains = (featuredChains: Array<string>) => (chainA: ChainInfo, chainB
   }
 
   // Handle NaN values - sort them to the end
-  if (Object.is(chainA.chainId, NaN) && Object.is(chainB.chainId, NaN)) {
+  if (Object.is(chainIdA, NaN) && Object.is(chainIdB, NaN)) {
     return 0;
   }
 
-  if (Object.is(chainA.chainId, NaN)) {
+  if (Object.is(chainIdA, NaN)) {
     return 1;
   }
 
-  if (Object.is(chainB.chainId, NaN)) {
+  if (Object.is(chainIdB, NaN)) {
     return -1;
   }
 
