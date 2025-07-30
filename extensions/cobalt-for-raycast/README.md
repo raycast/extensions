@@ -2,7 +2,7 @@
 
 Cobalt extension to use [cobalt.tools](https://cobalt.tools) through Raycast.
 
-Here is all the commands:
+Here are all the commands:
 
 - **List Instances**: A view that shows a paginated list of all the instances you can use.
 - **Convert URL to File**: Download media from multiple supported services (depending on the instance) using an url.
