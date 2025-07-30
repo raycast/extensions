@@ -1,13 +1,13 @@
 # WhenToMeet Raycast Extension
 
-Create WhenToMeet scheduling events using natural language with AI assistance. Describe your event and get a pre-filled WhenToMeet URL instantly.
+Create [WhenToMeet](https://whentomeet.io) scheduling events from the raycast interface or using AI. This extension is using the WhenToMeets [event creation URLs](https://whentomeet.io/docs/event-creation-url) to create events.
 
 ## Features
 
+- **Create events from the raycast interface**: Fill out the form and create an event
 - **AI-Powered Event Creation**: Use natural language to describe your events
-- **Context-Aware Suggestions**: AI considers event type when suggesting time slots (business hours for work meetings, evenings for social events)
 - **Multiple Time Slots**: Automatically creates multiple time slot options to increase availability
-- **Instant URL Generation**: Opens WhenToMeet event creation page with pre-filled details
+- **Open the event in your browser**: The event page will automatically open in your browser
 
 ## Usage
 

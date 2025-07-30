@@ -1,4 +1,5 @@
 import { showToast, Toast, open } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 type Input = {
   /**
@@ -25,6 +26,8 @@ type Input = {
 };
 
 export default async (input: Input) => {
+  console.log("create-whentomeet-event tool called with input:", input);
+
   try {
     // Validate input
     if (!input.title || input.title.trim() === "") {
@@ -47,12 +50,15 @@ export default async (input: Input) => {
     }
     urlParams.append("slotLength", slotLength.toString());
 
-    // Add slots
-    input.slots.forEach((slot) => {
-      urlParams.append("slots", slot);
-    });
+    // Build URL manually to avoid encoding time slots
+    let finalUrl = `${baseUrl}?${urlParams.toString()}`;
 
-    const finalUrl = `${baseUrl}?${urlParams.toString()}`;
+    // Add slots without URL encoding
+    if (input.slots.length > 0) {
+      const slotsParams = input.slots.map((slot) => `slots=${slot}`).join("&");
+      finalUrl += `&${slotsParams}`;
+    }
+    console.log("Generated URL:", finalUrl);
 
     // Check URL length and warn if approaching limits
     const URL_LENGTH_WARNING = 1500;
@@ -73,6 +79,7 @@ export default async (input: Input) => {
     }
 
     // Open the URL
+    console.log("Opening URL in browser:", finalUrl);
     await open(finalUrl);
 
     await showToast({
@@ -81,16 +88,19 @@ export default async (input: Input) => {
       message: `"${input.title}" event opened in browser`,
     });
 
-    return {
+    const result = {
       url: finalUrl,
       title: input.title,
       slotLength,
       slotCount: input.slots.length,
       message: `Successfully created WhenToMeet event "${input.title}" with ${input.slots.length} time slot(s)`,
     };
+
+    console.log("create-whentomeet-event tool returning:", result);
+    return result;
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
+    console.log("create-whentomeet-event tool error:", error);
+    await showFailureToast({
       title: "Error Creating Event",
       message: error instanceof Error ? error.message : "Unknown error",
     });

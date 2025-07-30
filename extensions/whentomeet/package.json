@@ -21,8 +21,8 @@
   "commands": [
     {
       "name": "create-event",
-      "title": "Create Whentomeet Event Using AI",
-      "description": "Create a WhenToMeet event using natural language. Describe your event and get a pre-filled URL with time slots.",
+      "title": "Create Whentomeet Event",
+      "description": "Create a WhenToMeet event from the Raycast UI.",
       "mode": "view",
       "keywords": [
         "create",
