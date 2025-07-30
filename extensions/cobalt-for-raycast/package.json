@@ -1,0 +1,123 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cobalt-for-raycast",
+  "title": "Cobalt for Raycast",
+  "description": "Cobalt for Raycast",
+  "icon": "icon.png",
+  "author": "Baldy",
+  "license": "MIT",
+  "contributors": [],
+  "categories": [
+    "Productivity",
+    "Data",
+    "Productivity"
+  ],
+  "keywords": [
+    "video",
+    "audio",
+    "downloader",
+    "youtube",
+    "twitch",
+    "soundcloud",
+    "cobalt"
+  ],
+  "commands": [
+    {
+      "name": "about",
+      "title": "About",
+      "description": "Cobalt for Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "url-to-file",
+      "title": "Convert URL to File",
+      "subtitle": "Cobalt for Raycast",
+      "description": "Convert URL to File",
+      "mode": "view"
+    },
+    {
+      "name": "instances",
+      "title": "Instances List",
+      "description": "Cobalt Instances",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "enableCustomInstance",
+      "title": "Enable Custom Instance",
+      "description": "Enable Custom Instance",
+      "type": "checkbox",
+      "required": false,
+      "label": "Enable"
+    },
+    {
+      "name": "cobaltInstanceUrl",
+      "title": "Cobalt Instance URL",
+      "description": "Cobalt Instance URL",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "cobaltInstanceUseApiKey",
+      "title": "Use Cobalt Instance API Key",
+      "description": "Use Cobalt Instance API Key",
+      "type": "checkbox",
+      "required": false,
+      "label": "Use"
+    },
+    {
+      "name": "cobaltInstanceApiKey",
+      "title": "Cobalt Instance API Key",
+      "description": "Cobalt Instance API Key",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "instancesSourceUrl",
+      "title": "Instances Source URL",
+      "description": "Instances Source URL",
+      "default": "https://instances.cobalt.best/instances.json",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "sourceMinScore",
+      "title": "Source Min Score",
+      "description": "Source Min Score",
+      "default": "50",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "platforms": [
+    "Windows"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.19.0",
+    "@typescript-eslint/eslint-plugin": "^8.38.0",
+    "react": "^19.1.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.32.0",
+    "@raycast/eslint-config": "1.0.11",
+    "@types/node": "22.13.9",
+    "@types/react": "^18.3.18",
+    "eslint": "^8.57.1",
+    "eslint-plugin-react": "^7.37.5",
+    "globals": "^16.3.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.38.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "prepare": "npm run fix-lint",
+    "lint": "ray lint",
+    "pull": "ray pull-contributions",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
