@@ -151,7 +151,7 @@ export default function Command() {
     // eslint-disable-next-line
   }, [instancesSourceUrl, cobaltInstanceUrl, cobaltInstanceUseApiKey, enableCustomInstance])
 
-  // 2) Refresh périodique (toutes les 5 minutes, utilise le cache si pas expiré)
+  // 2) Periodic refresh (every 5 minutes, uses cache if not expired)
   useEffect(() => {
     const timer = setInterval(() => fetchAllInstancesWithOnline(), CACHE_TTL)
     return () => {
