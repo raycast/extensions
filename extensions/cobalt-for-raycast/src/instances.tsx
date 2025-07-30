@@ -148,7 +148,7 @@ export default function Command() {
     setIsLoading(false)
   }
 
-  // 1) Fetch forcé à l'ouverture (toujours, même si cache)
+  // 1) Force fetch on opening (always, even if cached)
   useEffect(() => {
     fetchAllInstancesWithOnline(true) // lancement systématique en force !
     // Pas de timer ici : un seul appel au tout début
