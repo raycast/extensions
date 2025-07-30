@@ -37,7 +37,7 @@ interface ConversationMessage {
 interface ParsedValue {
   parseError?: boolean;
   reason?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface BubbleData {
@@ -45,12 +45,12 @@ interface BubbleData {
   text?: string;
   thinking?: { text?: string };
   richText?: string;
-  intermediateChunks?: any[];
-  toolResults?: any[];
+  intermediateChunks?: unknown[];
+  toolResults?: unknown[];
   toolFormerData?: { result?: string };
-  codeBlocks?: any[];
-  suggestedCodeBlocks?: any[];
-  attachedCodeChunks?: any[];
+  codeBlocks?: unknown[];
+  suggestedCodeBlocks?: unknown[];
+  attachedCodeChunks?: unknown[];
 }
 
 interface RichTextNode {
@@ -63,6 +63,58 @@ interface RichTextNode {
 
 interface RichTextData {
   root?: { children?: RichTextNode[] };
+}
+
+interface SessionData {
+  createdAt?: number;
+  lastUpdatedAt?: number;
+  status?: string;
+  name?: string;
+  text?: string;
+  fullConversationHeadersOnly?: Array<{ bubbleId?: string }>;
+  parseError?: boolean;
+  [key: string]: unknown;
+}
+
+interface CodeBlock {
+  code?: string;
+  content?: string;
+  language?: string;
+  languageId?: string;
+  lang?: string;
+  fileExtension?: string;
+}
+
+interface ChunkData {
+  text?: string;
+  content?: string;
+  value?: string;
+}
+
+interface ToolResult {
+  output?: string;
+  result?: string;
+  text?: string;
+}
+
+interface DiffChunk {
+  diffString?: string;
+}
+
+interface ParsedToolResult {
+  diff?: { chunks?: DiffChunk[] };
+  codeResults?: unknown[];
+  output?: string;
+}
+
+interface CodeResult {
+  codeBlock?: {
+    relativeWorkspacePath?: string;
+    range?: {
+      start: { line: number };
+      end: { line: number };
+    };
+  };
 }
 
 /**
@@ -133,7 +185,7 @@ function parseValueWithMultipleStrategies(value: string): ParsedValue {
 /**
  * Determine session status based on timestamps
  */
-function determineSessionStatus(sessionData: any): "active" | "recent" | "completed" {
+function determineSessionStatus(sessionData: SessionData): "active" | "recent" | "completed" {
   const now = Date.now();
   const createdAt = sessionData.createdAt || now;
   const lastUpdated = sessionData.lastUpdatedAt || createdAt;
@@ -149,7 +201,7 @@ function determineSessionStatus(sessionData: any): "active" | "recent" | "comple
 /**
  * Generate a meaningful title from session data
  */
-function generateSessionTitle(sessionData: any, sessionId: string): string {
+function generateSessionTitle(sessionData: SessionData, sessionId: string): string {
   if (sessionData.name && sessionData.name.trim()) {
     return sessionData.name.trim();
   }
@@ -165,7 +217,7 @@ function generateSessionTitle(sessionData: any, sessionId: string): string {
 /**
  * Check if session has meaningful content
  */
-function hasValidContent(sessionData: any, title: string): boolean {
+function hasValidContent(sessionData: SessionData, title: string): boolean {
   if (title !== "Untitled Session" && !title.startsWith("Session ")) {
     return true;
   }
@@ -210,7 +262,7 @@ async function extractGlobalSessions(): Promise<ChatSession[]> {
     const sessionId = key.replace("composerData:", "");
 
     try {
-      const sessionData = parseValueWithMultipleStrategies(value);
+      const sessionData = parseValueWithMultipleStrategies(value) as SessionData;
 
       if (sessionData && !sessionData.parseError) {
         const title = generateSessionTitle(sessionData, sessionId);
@@ -257,7 +309,7 @@ async function getAllSessions(): Promise<ChatSession[]> {
       if (b.status === "recent" && a.status === "completed") return 1;
       return b.timestamp - a.timestamp;
     });
-  } catch (error) {
+  } catch {
     showToast({
       style: Toast.Style.Failure,
       title: "Error Loading Sessions",
@@ -285,11 +337,12 @@ function extractFromRichTextNodes(nodes: RichTextNode[]): string {
       case "paragraph":
         text += extractNodeContent(node) + "\n\n";
         break;
-      case "heading":
+      case "heading": {
         const level = node.attrs?.level || 1;
         const prefix = "#".repeat(level) + " ";
         text += prefix + extractNodeContent(node) + "\n\n";
         break;
+      }
       case "codeblock":
       case "code":
       case "codeBlock":
@@ -375,12 +428,14 @@ function processCodeBlocks(bubbleData: BubbleData): string[] {
     const blocks = bubbleData[source.field];
     if (Array.isArray(blocks) && blocks.length > 0) {
       const codeContent = blocks
-        .map((codeBlock: any) => {
-          const code = codeBlock.code || codeBlock.content;
-          if (code) {
-            const language =
-              codeBlock.language || codeBlock.languageId || codeBlock.lang || codeBlock.fileExtension || "plaintext";
-            return `\`\`\`${language}\n${code}\n\`\`\``;
+        .map((codeBlock: unknown) => {
+          if (typeof codeBlock === "object" && codeBlock !== null) {
+            const block = codeBlock as CodeBlock;
+            const code = block.code || block.content;
+            if (code) {
+              const language = block.language || block.languageId || block.lang || block.fileExtension || "plaintext";
+              return `\`\`\`${language}\n${code}\n\`\`\``;
+            }
           }
           return "";
         })
@@ -409,9 +464,13 @@ function processToolResults(bubbleData: BubbleData): string[] {
     bubbleData.intermediateChunks.length > 0
   ) {
     const chunksText = bubbleData.intermediateChunks
-      .map((chunk: any) => {
+      .map((chunk: unknown) => {
         if (typeof chunk === "string") return chunk;
-        return chunk.text || chunk.content || chunk.value || "";
+        if (typeof chunk === "object" && chunk !== null) {
+          const chunkData = chunk as ChunkData;
+          return chunkData.text || chunkData.content || chunkData.value || "";
+        }
+        return "";
       })
       .filter((text) => text.trim())
       .join("\n");
@@ -424,9 +483,13 @@ function processToolResults(bubbleData: BubbleData): string[] {
   // Process tool results
   if (bubbleData.toolResults && Array.isArray(bubbleData.toolResults) && bubbleData.toolResults.length > 0) {
     const toolText = bubbleData.toolResults
-      .map((result: any) => {
+      .map((result: unknown) => {
         if (typeof result === "string") return result;
-        return result.output || result.result || result.text || "";
+        if (typeof result === "object" && result !== null) {
+          const toolResult = result as ToolResult;
+          return toolResult.output || toolResult.result || toolResult.text || "";
+        }
+        return "";
       })
       .filter((text) => text.trim())
       .join("\n");
@@ -454,10 +517,10 @@ function formatToolFormerResult(result: string): string | null {
   if (typeof result !== "string" || !result.trim()) return null;
 
   try {
-    const parsed = JSON.parse(result);
+    const parsed = JSON.parse(result) as ParsedToolResult;
 
     if (parsed.diff && parsed.diff.chunks) {
-      const diffContent = parsed.diff.chunks.map((chunk: any) => chunk.diffString || "").join("\n");
+      const diffContent = parsed.diff.chunks.map((chunk: DiffChunk) => chunk.diffString || "").join("\n");
       if (diffContent.trim()) {
         return `**Code Changes:**\n\n\`\`\`diff\n${diffContent}\n\`\`\``;
       }
@@ -479,17 +542,21 @@ function formatToolFormerResult(result: string): string | null {
 /**
  * Format code search results into a readable summary
  */
-function formatCodeSearchResults(codeResults: any[]): string {
+function formatCodeSearchResults(codeResults: unknown[]): string {
   const summary =
     `Found ${codeResults.length} code references across the project:\n\n` +
     codeResults
       .slice(0, 5)
-      .map((result: any, index: number) => {
-        const path = result.codeBlock?.relativeWorkspacePath || "unknown file";
-        const lines = result.codeBlock?.range
-          ? `lines ${result.codeBlock.range.start.line}-${result.codeBlock.range.end.line}`
-          : "unknown range";
-        return `${index + 1}. \`${path}\` (${lines})`;
+      .map((result: unknown, index: number) => {
+        if (typeof result === "object" && result !== null) {
+          const codeResult = result as CodeResult;
+          const path = codeResult.codeBlock?.relativeWorkspacePath || "unknown file";
+          const lines = codeResult.codeBlock?.range
+            ? `lines ${codeResult.codeBlock.range.start.line}-${codeResult.codeBlock.range.end.line}`
+            : "unknown range";
+          return `${index + 1}. \`${path}\` (${lines})`;
+        }
+        return `${index + 1}. unknown file`;
       })
       .join("\n") +
     (codeResults.length > 5 ? `\n... and ${codeResults.length - 5} more files` : "");
@@ -497,16 +564,30 @@ function formatCodeSearchResults(codeResults: any[]): string {
   return `**Code Analysis Results:**\n\n${summary}`;
 }
 
+interface ProcessedBubbleData {
+  type?: number;
+  text?: string;
+  thinking?: { text?: string };
+  richText?: string;
+  parseError?: boolean;
+}
+
 /**
  * Process conversation bubble data into a readable message
  */
-function processBubbleData(bubbleData: any): { role: "user" | "assistant"; content: string } | null {
-  if (!bubbleData || bubbleData.parseError) return null;
+function processBubbleData(bubbleData: unknown): { role: "user" | "assistant"; content: string } | null {
+  if (
+    !bubbleData ||
+    (typeof bubbleData === "object" && bubbleData !== null && (bubbleData as { parseError?: boolean }).parseError)
+  )
+    return null;
+
+  const processedData = bubbleData as ProcessedBubbleData;
 
   let role: "user" | "assistant";
-  if (bubbleData.type === 1) {
+  if (processedData.type === 1) {
     role = "user";
-  } else if (bubbleData.type === 2) {
+  } else if (processedData.type === 2) {
     role = "assistant";
   } else {
     return null;
@@ -515,36 +596,36 @@ function processBubbleData(bubbleData: any): { role: "user" | "assistant"; conte
   const contentParts: string[] = [];
 
   // Primary text content
-  if (bubbleData.text && typeof bubbleData.text === "string" && bubbleData.text.trim()) {
-    contentParts.push(bubbleData.text.trim());
+  if (processedData.text && typeof processedData.text === "string" && processedData.text.trim()) {
+    contentParts.push(processedData.text.trim());
   }
 
   // Thinking content (for assistant messages)
   if (
     role === "assistant" &&
-    bubbleData.thinking &&
-    bubbleData.thinking.text &&
-    typeof bubbleData.thinking.text === "string"
+    processedData.thinking &&
+    processedData.thinking.text &&
+    typeof processedData.thinking.text === "string"
   ) {
-    const thinkingText = bubbleData.thinking.text.trim();
+    const thinkingText = processedData.thinking.text.trim();
     if (thinkingText && !contentParts.includes(thinkingText)) {
       contentParts.push(`**Thinking Process:**\n\n${thinkingText}`);
     }
   }
 
   // RichText content (only if no primary text exists)
-  if (!contentParts.length && bubbleData.richText && typeof bubbleData.richText === "string") {
-    const richTextContent = extractTextFromRichText(bubbleData.richText);
+  if (!contentParts.length && processedData.richText && typeof processedData.richText === "string") {
+    const richTextContent = extractTextFromRichText(processedData.richText);
     if (richTextContent && richTextContent.trim()) {
       contentParts.push(richTextContent.trim());
     }
   }
 
   // Add tool results and code blocks
-  contentParts.push(...processToolResults(bubbleData));
-  contentParts.push(...processCodeBlocks(bubbleData));
+  contentParts.push(...processToolResults(bubbleData as BubbleData));
+  contentParts.push(...processCodeBlocks(bubbleData as BubbleData));
 
-  let content = contentParts.join("\n\n---\n\n");
+  const content = contentParts.join("\n\n---\n\n");
 
   if (!content || content.trim().length === 0) {
     return null;
@@ -572,7 +653,7 @@ async function getSessionDetails(session: ChatSession): Promise<ChatData> {
     );
 
     if (sessionDataResult) {
-      const sessionData = parseValueWithMultipleStrategies(sessionDataResult);
+      const sessionData = parseValueWithMultipleStrategies(sessionDataResult) as SessionData;
       const messages: ConversationMessage[] = [];
 
       // Process bubbles to get detailed content
@@ -660,7 +741,7 @@ function ChatDetail({ session, onBack }: { session: ChatSession; onBack: () => v
       try {
         const details = await getSessionDetails(session);
         setChatData(details);
-      } catch (error) {
+      } catch {
         setChatData({
           ...session,
           content: "Error loading content",
@@ -676,7 +757,6 @@ function ChatDetail({ session, onBack }: { session: ChatSession; onBack: () => v
   // Show loading immediately when component mounts
   if (isLoading) {
     return (
-      // @ts-ignore - Raycast API type issue
       <Detail
         isLoading={true}
         markdown={`# ${session.title}\n\n**Date:** ${formatDate(session.timestamp)}\n\n---\n\nLoading session details...`}
@@ -686,7 +766,6 @@ function ChatDetail({ session, onBack }: { session: ChatSession; onBack: () => v
 
   if (!chatData) {
     return (
-      // @ts-ignore - Raycast API type issue
       <Detail
         markdown={`# ${session.title}\n\n**Date:** ${formatDate(session.timestamp)}\n\n---\n\nError: Unable to load session details`}
       />
@@ -704,21 +783,16 @@ ${chatData.content || "No content available"}
   `;
 
   return (
-    // @ts-ignore - Raycast API type issue
     <Detail
       markdown={markdown}
       actions={
-        // @ts-ignore - Raycast API type issue
         <ActionPanel>
-          {/* @ts-ignore - Raycast API type issue */}
           <Action title="Back to List" onAction={onBack} shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }} />
-          {/* @ts-ignore - Raycast API type issue */}
           <Action.CopyToClipboard
             title="Copy Content"
             content={chatData.content}
             shortcut={{ modifiers: ["cmd"], key: "c" }}
           />
-          {/* @ts-ignore - Raycast API type issue */}
           <Action.CopyToClipboard
             title="Copy Title"
             content={chatData.title}
@@ -772,7 +846,6 @@ export default function SearchCursorChatHistory(): ReactElement {
   }
 
   return (
-    // @ts-ignore - Raycast API type issue
     <List
       isLoading={isLoading}
       onSearchTextChange={setSearchText}
@@ -780,7 +853,6 @@ export default function SearchCursorChatHistory(): ReactElement {
       throttle
     >
       {filteredSessions.length === 0 && !isLoading ? (
-        // @ts-ignore - Raycast API type issue
         <List.EmptyView
           title="No chat sessions found"
           description={searchText ? "Try changing your search criteria" : "Start using Cursor to see chat history here"}
@@ -788,15 +860,12 @@ export default function SearchCursorChatHistory(): ReactElement {
       ) : (
         filteredSessions.map((session) => {
           return (
-            // @ts-ignore - Raycast API type issue
             <List.Item
               key={session.id}
               title={session.title}
               accessories={[{ text: formatDate(session.timestamp) }]}
               actions={
-                // @ts-ignore - Raycast API type issue
                 <ActionPanel>
-                  {/* @ts-ignore - Raycast API type issue */}
                   <Action
                     title="Show Details"
                     onAction={() => {
@@ -807,7 +876,6 @@ export default function SearchCursorChatHistory(): ReactElement {
                       }, 1000);
                     }}
                   />
-                  {/* @ts-ignore - Raycast API type issue */}
                   <Action.CopyToClipboard
                     title="Copy Title"
                     content={session.title}
