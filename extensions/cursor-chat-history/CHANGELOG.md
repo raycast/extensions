@@ -1,6 +1,6 @@
 # Cursor Chat History Search Changelog
 
-## [Initial Version] - 2025-07-25
+## [Initial Version] - {PR_MERGE_DATE}
 
 🎉 **First release of Cursor Chat History Search extension for Raycast!**
 
