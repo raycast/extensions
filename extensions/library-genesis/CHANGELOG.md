@@ -1,6 +1,6 @@
 # Library Genesis Changelog
 
-## [Fix Search + Modernize] - {PR_MERGE_DATE}
+## [Fix Search + Modernize] - 2025-07-30
 
 - fix: search was not working due to site changes (ref: [Issue #20481](https://github.com/raycast/extensions/issues/20481))
 - ⚠️ only downloads from default gateway
