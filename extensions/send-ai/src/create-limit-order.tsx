@@ -97,9 +97,11 @@ function CreateLimitOrder() {
         {
           inputMint: tokenAddress,
         },
-        true,
+        false,
         1000 * 60,
       );
+
+      console.log("tokenInfo", tokenInfo);
 
       setSecondaryTokenInfo(tokenInfo);
 
