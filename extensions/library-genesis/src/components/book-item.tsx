@@ -1,6 +1,6 @@
 import { memo } from "react";
 
-import { List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 
 import type { BookEntry } from "@/types";
 
@@ -10,15 +10,15 @@ interface BookItemProps {
   book: BookEntry;
 }
 
-function BookItemF({ book }: BookItemProps, key: number) {
-  const markdown = `<img src="${book.coverUrl}" alt="cover" height="180"/>`;
+function BookItemF({ book }: BookItemProps) {
+  const markdown = book.coverUrl === "N/A" ? "## Cover N/A" : `<img src="${book.coverUrl}" alt="cover" height="180"/>`;
 
   return (
     <List.Item
-      key={key}
       title={book.title}
       icon={{
         source: book.coverUrl,
+        fallback: Icon.Book,
       }}
       actions={<BookActionPanel book={book}></BookActionPanel>}
       detail={
