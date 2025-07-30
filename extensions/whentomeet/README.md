@@ -1,6 +1,6 @@
 # WhenToMeet Raycast Extension
 
-Create [WhenToMeet](https://whentomeet.io) scheduling events from the raycast interface or using AI. This extension is using the WhenToMeets [event creation URLs](https://whentomeet.io/docs/event-creation-url) to create events.
+Create [WhenToMeet](https://whentomeet.io) scheduling events from the raycast interface or using AI. This extension is using the WhenToMeets [event creation URLs](https://whentomeet.io/docs/event-creation-urls) to create events.
 
 ## Features
 
