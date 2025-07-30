@@ -101,8 +101,6 @@ function CreateLimitOrder() {
         1000 * 60,
       );
 
-      console.log("tokenInfo", tokenInfo);
-
       setSecondaryTokenInfo(tokenInfo);
 
       const tokenPriceInSol = await convertUsdAmountToSol({ usdAmount: tokenInfo?.price ?? 0 });
