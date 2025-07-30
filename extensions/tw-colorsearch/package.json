@@ -35,6 +35,7 @@
     "@types/react": "^19.1.9",
     "eslint": "^9.32.0",
     "prettier": "^3.6.2",
+    "react": "^19.1.1",
     "react-devtools": "^6.1.1",
     "typescript": "~5.8.3"
   },
