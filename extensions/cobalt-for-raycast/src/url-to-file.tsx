@@ -10,39 +10,39 @@ import {
   open,
   popToRoot,
   Icon,
-} from "@raycast/api"
-import { useForm, FormValidation, useFetch } from "@raycast/utils"
-import { useEffect } from "react"
+} from "@raycast/api";
+import { useForm, FormValidation, useFetch, showFailureToast } from "@raycast/utils";
+import { useEffect } from "react";
 
-import * as Errors from "./utils/Error.json"
-import { CobaltError, FormValues, Instance } from "./utils/Types"
+import * as Errors from "./utils/Error.json";
+import { CobaltError, FormValues, Instance } from "./utils/Types";
 
-type ErrorKey = keyof typeof Errors
+type ErrorKey = keyof typeof Errors;
 
 function getErrorMessage(key: ErrorKey) {
-  return Errors[key]
+  return Errors[key];
 }
 
 function getCobaltError(error: CobaltError) {
-  let errorMessage = getErrorMessage(error.code as ErrorKey)
+  let errorMessage = getErrorMessage(error.code as ErrorKey);
   if (error.context) {
     errorMessage = Object.keys(error.context).reduce((acc, key) => {
-      const k = key as keyof typeof error.context
-      const regex = new RegExp(`{{\\s*${k}\\s*}}`, "g")
-      return acc.replace(regex, error.context[k])
-    }, errorMessage)
+      const k = key as keyof typeof error.context;
+      const regex = new RegExp(`{{\\s*${k}\\s*}}`, "g");
+      return acc.replace(regex, error.context[k]);
+    }, errorMessage);
   }
-  return errorMessage
+  return errorMessage;
 }
 
 function fixProtocol(url: string, protocol: string) {
   if (/^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(url)) {
-    return url
+    return url;
   }
   if (!protocol.endsWith("://")) {
-    protocol += "://"
+    protocol += "://";
   }
-  return protocol + url
+  return protocol + url;
 }
 
 async function download(
@@ -51,23 +51,23 @@ async function download(
     | Instance
     | undefined
     | {
-        id: string
-        name: string
-        api: string
-        apiKey: string
-        protocol?: string
+        id: string;
+        name: string;
+        api: string;
+        apiKey: string;
+        protocol?: string;
       },
 ) {
-  const apiUrl = instance?.api
-  const apiKey = instance?.apiKey
+  const apiUrl = instance?.api;
+  const apiKey = instance?.apiKey;
 
   await showToast({
     style: Toast.Style.Animated,
     title: "Processing",
-  })
+  });
 
   if (apiUrl) {
-    const url = fixProtocol(apiUrl, instance?.protocol ?? "https")
+    const url = fixProtocol(apiUrl, instance?.protocol ?? "https");
     await fetch(url, {
       method: "POST",
       headers: {
@@ -84,11 +84,11 @@ async function download(
       signal: AbortSignal.timeout(2500),
     })
       .then(async (response) => {
-        const resJson = await response.json()
+        const resJson = await response.json();
         if (!response.ok) {
-          throw resJson
+          throw resJson;
         }
-        return resJson
+        return resJson;
       })
       .then(async (data) => {
         if (data && data.status === "redirect") {
@@ -96,7 +96,7 @@ async function download(
             style: Toast.Style.Animated,
             title: "Redirecting",
             message: `Redirecting to ${data.url}`,
-          })
+          });
           await confirmAlert({
             title: `Open ${data?.filename} ?`,
             primaryAction: {
@@ -105,28 +105,28 @@ async function download(
                 await showToast({
                   style: Toast.Style.Success,
                   title: "Download started",
-                })
-                await popToRoot()
-                await open(data.url)
+                });
+                await popToRoot();
+                await open(data.url);
               },
             },
             dismissAction: {
               title: "Cancel",
               onAction: async () => {
-                await showToast({
-                  style: Toast.Style.Failure,
+                await showFailureToast({
                   title: "Download canceled",
-                })
+                  message: "",
+                });
               },
             },
-          })
+          });
         }
         if (data && data.status === "tunnel") {
           await showToast({
             style: Toast.Style.Animated,
             title: "Tunnel created",
             message: `Tunnel ${new URL(data.url).searchParams.get("id")} created.`,
-          })
+          });
           await confirmAlert({
             title: `Download ${data?.filename} ?`,
             primaryAction: {
@@ -135,55 +135,51 @@ async function download(
                 await showToast({
                   style: Toast.Style.Success,
                   title: "Download started",
-                })
-                await popToRoot()
-                await open(data.url)
+                });
+                await popToRoot();
+                await open(data.url);
               },
             },
             dismissAction: {
               title: "Cancel",
               onAction: async () => {
-                await showToast({
-                  style: Toast.Style.Failure,
+                await showFailureToast({
                   title: "Download canceled",
-                })
+                  message: "",
+                });
               },
             },
-          })
+          });
         }
       })
       .catch(async (error) => {
         if (error?.status === "error") {
-          await showToast({
-            style: Toast.Style.Failure,
+          await showFailureToast(error, {
             title: "Failed to download",
             message: error?.message ?? getCobaltError(error?.error),
-          })
-          return
+          });
+          return;
         }
         if (error?.name) {
-          await showToast({
-            style: Toast.Style.Failure,
+          await showFailureToast(error, {
             title: "Failed to download",
             message: error?.message ?? getCobaltError(error?.error),
-          })
-          return
+          });
+          return;
         }
         console.error({
           name: error.name,
-        })
-        await showToast({
-          style: Toast.Style.Failure,
+        });
+        await showFailureToast(error, {
           title: error?.name || "Failed to download",
           message: getErrorMessage(error?.message),
-        })
-      })
+        });
+      });
   } else {
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast({
       title: "Failed to download",
       message: "API URL not found",
-    })
+    });
   }
 }
 
@@ -195,7 +191,7 @@ export default function Command() {
     cobaltInstanceApiKey,
     instancesSourceUrl = "https://instances.cobalt.best/instances.json",
     sourceMinScore = 50,
-  } = getPreferenceValues()
+  } = getPreferenceValues();
 
   // Fetch
   const { data, revalidate } = useFetch<Instance[]>(instancesSourceUrl, {
@@ -203,30 +199,30 @@ export default function Command() {
       "User-Agent": "MonsPropre/cobalt-for-raycast",
     },
     keepPreviousData: true,
-  })
+  });
 
   // Parse initiale
-  let instances: Instance[] = []
+  let instances: Instance[] = [];
   if (typeof data === "string") {
     try {
-      instances = JSON.parse(data)
+      instances = JSON.parse(data);
     } catch (error) {
-      instances = []
-      console.error("Failed to parse instances JSON:", error)
+      instances = [];
+      console.error("Failed to parse instances JSON:", error);
     }
   } else if (Array.isArray(data)) {
-    instances = data
+    instances = data;
   }
 
   if (enableCustomInstance && cobaltInstanceUrl) {
-    const exists = instances.some((inst) => inst.id === "custom" || (inst.api && inst.api === cobaltInstanceUrl))
+    const exists = instances.some((inst) => inst.id === "custom" || (inst.api && inst.api === cobaltInstanceUrl));
     if (!exists) {
       instances.unshift({
         id: "custom",
         name: "Custom",
         api: cobaltInstanceUrl,
         apiKey: cobaltInstanceUseApiKey ? cobaltInstanceApiKey : undefined,
-      })
+      });
     }
   }
 
@@ -235,42 +231,42 @@ export default function Command() {
       await download(
         values,
         instances.find((instance) => instance.api === values.instance || instance.id === values.instance),
-      )
+      );
     },
     validation: {
       url: (value) => {
         try {
-          const url = new URL(value as string)
+          const url = new URL(value as string);
           if (url.protocol !== "http:" && url.protocol !== "https:") {
-            return "Invalid protocol"
+            return "Invalid protocol";
           }
-          return
+          return;
         } catch (_) {
-          return "Invalid URL"
+          return "Invalid URL";
         }
       },
       downloadMode: FormValidation.Required,
     },
-  })
+  });
 
   useEffect(() => {
-    ;(async () => {
-      const text = await Clipboard.readText()
+    (async () => {
+      const text = await Clipboard.readText();
       try {
-        const url = new URL(text as string)
+        const url = new URL(text as string);
         if (url.protocol === "http:" || url.protocol === "https:") {
           await showToast({
             style: Toast.Style.Success,
             title: "Loaded URL from Clipboard",
             message: text,
-          })
-          reset({ url: text, downloadMode: "auto" })
+          });
+          reset({ url: text, downloadMode: "auto" });
         }
       } catch (_) {
         // Do nothing
       }
-    })()
-  }, [reset])
+    })();
+  }, [reset]);
 
   return (
     <Form
@@ -283,9 +279,9 @@ export default function Command() {
               const toast = await showToast({
                 style: Toast.Style.Animated,
                 title: "Reloading instances",
-              })
-              revalidate()
-              setTimeout(async () => await toast.hide(), 50)
+              });
+              revalidate();
+              setTimeout(async () => await toast.hide(), 50);
             }}
             icon={Icon.RotateClockwise}
           />
@@ -318,7 +314,9 @@ export default function Command() {
                 cobaltInstanceUrl &&
                 (instance.id === "custom" || instance.api === cobaltInstanceUrl || instance.frontend === instance.api)
               ) &&
-              Number.isNaN(Number(sourceMinScore)) ? 50 : Number(sourceMinScore),
+              Number.isNaN(Number(sourceMinScore))
+                ? 50
+                : Number(sourceMinScore),
             )
             .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
             .map((instance, idx) => (
@@ -345,5 +343,5 @@ export default function Command() {
         <Form.Dropdown.Item value="mute" title="Mute" icon="🔇" />
       </Form.Dropdown>
     </Form>
-  )
+  );
 }
