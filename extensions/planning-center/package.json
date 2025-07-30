@@ -33,14 +33,14 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.101.1",
+    "@raycast/api": "^1.102.2",
     "@raycast/utils": "^2.2.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "24.0.14",
-    "@types/react": "19.1.8",
-    "eslint": "^9.31.0",
+    "@types/node": "24.1.0",
+    "@types/react": "19.1.9",
+    "eslint": "^9.32.0",
     "prettier": "^3.6.2",
     "typescript": "^5.8.3"
   },

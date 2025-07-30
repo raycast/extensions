@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
@@ -40,7 +40,7 @@ interface EmailsResponse {
 const API_BASE_URL = "https://api.planningcenteronline.com";
 
 function getAuthHeader(): string {
-  const { app_id, app_secret } = getPreferenceValues();
+  const { app_id, app_secret } = getPreferenceValues<Preferences>();
   const credentials = Buffer.from(`${app_id}:${app_secret}`).toString("base64");
   return `Basic ${credentials}`;
 }
@@ -119,6 +119,7 @@ export default function Command() {
     listContent = people.map((person) => (
       <List.Item
         key={person.id}
+        icon={Icon.Person}
         title={person.attributes.name}
         subtitle="View in Planning Center"
         actions={
