@@ -82,11 +82,8 @@ export default function PromptForm({ prompt, onSave }: PromptFormProps) {
       onSave?.();
       pop();
     } catch (error) {
-      showToast(
-        Toast.Style.Failure,
-        `Failed to ${isEditing ? "update" : "save"} prompt`,
-      );
-      console.error("Save error:", error);
+      showFailureToast(error, { title: `Failed to ${isEditing ? "update" : "save"} prompt` });
+    } finally {
     } finally {
       setIsLoading(false);
     }
