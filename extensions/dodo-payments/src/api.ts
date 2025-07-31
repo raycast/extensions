@@ -1,7 +1,7 @@
 import DodoPayments from "dodopayments";
 import { AuthConfig } from "./utils/auth";
 import type {
-  BrandRetrieveResponse,
+  Brand,
   Payment,
   PaymentListResponse,
   Subscription,
@@ -12,15 +12,15 @@ import type {
   Discount,
   LicenseKey,
   DisputeListResponse,
-  DisputeRetrieveResponse,
+  Dispute,
   Refund,
   PayoutListResponse,
 } from "dodopayments/resources";
 import type { DefaultPageNumberPaginationResponse } from "dodopayments/pagination";
 
 // Re-export types for convenience
-export type Brand = BrandRetrieveResponse;
 export {
+  Brand,
   Payment,
   Subscription,
   Customer,
@@ -29,7 +29,7 @@ export {
   Discount,
   LicenseKey,
   DisputeListResponse,
-  DisputeRetrieveResponse,
+  Dispute,
   Refund,
   PayoutListResponse,
 };
@@ -37,7 +37,7 @@ export {
 // Pagination response types
 export type PaymentsPaginatedResponse = DefaultPageNumberPaginationResponse<PaymentListResponse>;
 export type SubscriptionsPaginatedResponse = DefaultPageNumberPaginationResponse<SubscriptionListResponse>;
-export type BrandsPaginatedResponse = DefaultPageNumberPaginationResponse<BrandRetrieveResponse>;
+export type BrandsPaginatedResponse = DefaultPageNumberPaginationResponse<Brand>;
 export type ProductsPaginatedResponse = DefaultPageNumberPaginationResponse<ProductListResponse>;
 export type DiscountsPaginatedResponse = DefaultPageNumberPaginationResponse<Discount>;
 export type LicenseKeysPaginatedResponse = DefaultPageNumberPaginationResponse<LicenseKey>;
@@ -258,7 +258,7 @@ export class DodoPaymentsAPI {
     }
   }
 
-  async getDispute(disputeId: string): Promise<DisputeRetrieveResponse> {
+  async getDispute(disputeId: string): Promise<Dispute> {
     try {
       return await this.client.disputes.retrieve(disputeId);
     } catch (error) {
