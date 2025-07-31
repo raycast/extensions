@@ -52,7 +52,7 @@ export default function AmpCommand() {
       await closeMainWindow();
       showToast(Toast.Style.Success, "Command pasted!");
     } catch (error) {
-      showToast(Toast.Style.Failure, "Failed to paste command");
+      showFailureToast(error, { title: "Failed to paste command" });
     }
   }
 
