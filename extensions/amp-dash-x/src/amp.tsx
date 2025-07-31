@@ -62,7 +62,7 @@ export default function AmpCommand() {
       await Clipboard.copy(command);
       showToast(Toast.Style.Success, "Command copied to clipboard!");
     } catch (error) {
-      showToast(Toast.Style.Failure, "Failed to copy command");
+      showFailureToast(error, { title: "Failed to copy command" });
     }
   }
 
