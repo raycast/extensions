@@ -18,8 +18,8 @@ Your very own Dodo Payments dashboard, just a few keystrokes away.
 4. Click "Open Extension Preferences" or use `Cmd + ,`
 5. Enter your API key in the "API Key" field
 6. Select your preferred API mode:
-   - **Test**: For development and testing 
-   - **Live**: For production 
+   - **Test**: For development and testing
+   - **Live**: For production
 7. Save the settings
 
 ## Contributing

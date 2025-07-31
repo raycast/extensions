@@ -21,11 +21,11 @@ Provides centralized authentication state management:
 
 ```typescript
 interface AuthContextType {
-  config: AuthConfig | null;           // Current auth configuration
-  isAuthenticated: boolean;            // Authentication status
-  isLoading: boolean;                  // Loading state
-  error: string | null;                // Error message if any
-  refreshAuth: () => void;             // Reload authentication
+  config: AuthConfig | null; // Current auth configuration
+  isAuthenticated: boolean; // Authentication status
+  isLoading: boolean; // Loading state
+  error: string | null; // Error message if any
+  refreshAuth: () => void; // Reload authentication
   authenticatedFetch: (endpoint, options) => Promise<Response>; // Pre-configured fetch
 }
 ```
@@ -40,6 +40,7 @@ Provides components and hooks for handling authentication UI:
 ### 4. Authentication Error UI (`src/components/AuthErrorView.tsx`)
 
 User-friendly error screen that:
+
 - Explains the authentication requirement
 - Provides step-by-step setup instructions
 - Includes a direct link to extension preferences
@@ -47,6 +48,7 @@ User-friendly error screen that:
 ### 5. Utility Functions (`src/utils/auth.ts`)
 
 Core authentication utilities:
+
 - `validateAuth()`: Validates current authentication configuration
 - `getAuthConfig()`: Retrieves current auth configuration
 - `getAuthHeaders()`: Generates authorization headers
@@ -61,15 +63,15 @@ import { useAuth } from "./contexts/AuthContext";
 
 function MyComponent() {
   const { config, authenticatedFetch, isAuthenticated } = useAuth();
-  
+
   const fetchData = async () => {
     if (!isAuthenticated) return;
-    
+
     const response = await authenticatedFetch("/api/endpoint");
     const data = await response.json();
     return data;
   };
-  
+
   return <div>Mode: {config?.mode}</div>;
 }
 ```
@@ -95,7 +97,7 @@ import { useAuthGuard } from "./hooks/useAuthGuard";
 
 function MyComponent() {
   const { isReady, AuthGuard } = useAuthGuard();
-  
+
   return (
     <AuthGuard>
       {/* This content only shows when authenticated */}
