@@ -92,7 +92,7 @@ export default function AmpCommand() {
         await loadPrompts();
         showToast(Toast.Style.Success, "Prompt deleted successfully");
       } catch (error) {
-        showToast(Toast.Style.Failure, "Failed to delete prompt");
+        showFailureToast(error, { title: "Failed to delete prompt" });
       }
     }
   }
