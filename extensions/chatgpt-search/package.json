@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chatgpt-search",
-  "title": "ChatGPT search",
+  "title": "ChatGPT Search",
   "description": "Initiate ChatGPT Search (aka SearchGPT) from within Raycast. \nhttps://openai.com/index/introducing-chatgpt-search/",
   "icon": "chatgpt-logo.png",
   "author": "kopach",

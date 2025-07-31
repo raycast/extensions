@@ -8,10 +8,11 @@ export default function Command(props: LaunchProps<{ arguments: Props }>) {
   const { handleSubmit, itemProps } = useChatGptSearch(preferences);
 
   if (props.arguments.query) {
-    handleSubmit({
-      query: props.arguments.query,
-    });
-    return null;
+    return (
+      handleSubmit({
+        query: props.arguments.query,
+      }) && null
+    );
   }
 
   return (
