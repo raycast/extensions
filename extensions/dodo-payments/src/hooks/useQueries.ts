@@ -21,7 +21,7 @@ export const queryKeys = {
   dispute: (id: string) => ["disputes", id] as const,
   refunds: (filters?: { status?: string; page?: number }) => ["refunds", filters] as const,
   refund: (id: string) => ["refunds", id] as const,
-  payouts: (filters?: { page?: number }) => ["payouts", filters] as const,
+  payouts: (filters?: { limit?: number }) => ["payouts", filters] as const,
 };
 
 // Brands Queries
