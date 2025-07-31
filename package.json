@@ -11,43 +11,43 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "shuffle-music-supabase",
-      "title": "Looma.fm Music",
+      "name": "shuffle-music-simple",
+      "title": "Play Music",
       "description": "Shuffle and play Adi Goldstein's relaxing music",
-      "mode": "view",
+      "mode": "no-view",
       "icon": "command-icon.png"
     },
     {
       "name": "pause-music",
-      "title": "Pause Looma.fm",
+      "title": "Pause Music",
       "description": "Pause or resume the currently playing track",
       "mode": "no-view",
       "icon": "command-icon.png"
     },
     {
       "name": "reshuffle-music",
-      "title": "Reshuffle Looma.fm",
+      "title": "Shuffle Music",
       "description": "Reshuffle and play a new random track",
       "mode": "no-view",
       "icon": "command-icon.png"
     },
     {
       "name": "stop-music",
-      "title": "Stop Looma.fm",
+      "title": "Stop Music",
       "description": "Stop the currently playing music",
       "mode": "no-view",
       "icon": "command-icon.png"
     },
     {
       "name": "short-meditation",
-      "title": "Short Meditation",
+      "title": "Start Meditation",
       "description": "Start a single meditation session from Adi Goldstein",
       "mode": "no-view",
       "icon": "command-icon.png"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.54.0",
+    "@raycast/api": "^1.100.3",
     "@supabase/supabase-js": "^2.45.0",
     "node-fetch": "^3.3.2",
     "react": "^18.0.0"

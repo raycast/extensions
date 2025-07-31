@@ -17,7 +17,7 @@ declare module "@raycast/api" {
     children?: ReactNode;
     title: string;
     subtitle?: string;
-    icon?: any;
+    icon?: string;
     accessories?: Array<{ text: string }>;
     actions?: ReactNode;
   }
@@ -28,7 +28,7 @@ declare module "@raycast/api" {
   
   interface ActionProps {
     title: string;
-    icon?: any;
+    icon?: string;
     onAction?: () => void;
     shortcut?: { modifiers: string[]; key: string };
   }
@@ -36,6 +36,6 @@ declare module "@raycast/api" {
   interface EmptyViewProps {
     title: string;
     description?: string;
-    icon?: any;
+    icon?: string;
   }
 }

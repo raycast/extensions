@@ -13,8 +13,8 @@ type ExtensionPreferences = {}
 declare type Preferences = ExtensionPreferences
 
 declare namespace Preferences {
-  /** Preferences accessible in the `shuffle-music-supabase` command */
-  export type ShuffleMusicSupabase = ExtensionPreferences & {}
+  /** Preferences accessible in the `shuffle-music-simple` command */
+  export type ShuffleMusicSimple = ExtensionPreferences & {}
   /** Preferences accessible in the `pause-music` command */
   export type PauseMusic = ExtensionPreferences & {}
   /** Preferences accessible in the `reshuffle-music` command */
@@ -26,8 +26,8 @@ declare namespace Preferences {
 }
 
 declare namespace Arguments {
-  /** Arguments passed to the `shuffle-music-supabase` command */
-  export type ShuffleMusicSupabase = {}
+  /** Arguments passed to the `shuffle-music-simple` command */
+  export type ShuffleMusicSimple = {}
   /** Arguments passed to the `pause-music` command */
   export type PauseMusic = {}
   /** Arguments passed to the `reshuffle-music` command */
@@ -37,4 +37,3 @@ declare namespace Arguments {
   /** Arguments passed to the `short-meditation` command */
   export type ShortMeditation = {}
 }
-

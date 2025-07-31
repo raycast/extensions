@@ -1,6 +1,1 @@
-import React from "react";
-import ShuffleMusic from "./shuffle-music-supabase";
-
-export default function Command() {
-  return React.createElement(ShuffleMusic);
-}
+export { default } from "./shuffle-music-simple";
