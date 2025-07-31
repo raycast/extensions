@@ -1,0 +1,13 @@
+node_modules
+.env
+.env.local
+
+# Build Outputs
+.next/
+out/
+build
+dist
+
+# Misc
+.DS_Store
+.swarm
