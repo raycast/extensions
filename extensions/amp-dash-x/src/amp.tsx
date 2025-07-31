@@ -39,7 +39,7 @@ export default function AmpCommand() {
         stored.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()),
       );
     } catch (error) {
-      showToast(Toast.Style.Failure, "Failed to load prompts");
+      showFailureToast(error, { title: "Failed to load prompts" });
     } finally {
       setIsLoading(false);
     }
