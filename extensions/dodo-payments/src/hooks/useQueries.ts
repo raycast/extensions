@@ -99,7 +99,7 @@ export function useInfinitePayments(
       if (!apiClient) throw new Error("API client not available");
       return apiClient.listPayments({ ...options, page: pageParam });
     },
-    getNextPageParam: (lastPage, pages) => (lastPage.items.length === (options.limit || 50) ? pages.length : undefined),
+    getNextPageParam: (lastPage, pages) => (lastPage.items.length === (options.limit || 20) ? pages.length : undefined),
     initialPageParam: 0,
     enabled: !!apiClient,
   });
@@ -148,12 +148,12 @@ export function useInfiniteSubscriptions(
   const { apiClient } = useAuth();
 
   return useInfiniteQuery({
-    queryKey: ["subscriptions", "infinite", options],
+    queryKey: queryKeys.subscriptions(options),
     queryFn: ({ pageParam }) => {
       if (!apiClient) throw new Error("API client not available");
       return apiClient.listSubscriptions({ ...options, page: pageParam });
     },
-    getNextPageParam: (lastPage, pages) => (lastPage.items.length === (options.limit || 50) ? pages.length : undefined),
+    getNextPageParam: (lastPage, pages) => (lastPage.items.length === (options.limit || 20) ? pages.length : undefined),
     initialPageParam: 0,
     enabled: !!apiClient,
   });
@@ -202,12 +202,12 @@ export function useInfiniteCustomers(
   const { apiClient } = useAuth();
 
   return useInfiniteQuery({
-    queryKey: ["customers", "infinite", options],
+    queryKey: queryKeys.customers(options),
     queryFn: ({ pageParam }) => {
       if (!apiClient) throw new Error("API client not available");
       return apiClient.listCustomers({ ...options, page: pageParam });
     },
-    getNextPageParam: (lastPage, pages) => (lastPage.items.length === (options.limit || 50) ? pages.length : undefined),
+    getNextPageParam: (lastPage, pages) => (lastPage.items.length === (options.limit || 20) ? pages.length : undefined),
     initialPageParam: 0,
     enabled: !!apiClient,
   });
@@ -256,7 +256,7 @@ export function useInfiniteProducts(
   const { apiClient } = useAuth();
 
   return useInfiniteQuery({
-    queryKey: ["products", "infinite", options],
+    queryKey: queryKeys.products(options),
     queryFn: ({ pageParam }) => {
       if (!apiClient) throw new Error("API client not available");
       return apiClient.listProducts({ ...options, page: pageParam });
@@ -581,7 +581,7 @@ export function useInfinitePayouts(
   const { apiClient } = useAuth();
 
   return useInfiniteQuery({
-    queryKey: ["payouts", "infinite", options],
+    queryKey: queryKeys.payouts(options),
     queryFn: ({ pageParam = 0 }) => {
       if (!apiClient) throw new Error("API client not available");
       return apiClient.listPayouts({
