@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "looma-fm",
+  "title": "Looma.fm",
+  "description": "Shuffle and play amazing and relaxing music by Adi Goldstein",
+  "icon": "command-icon.png",
+  "author": "adigold1",
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "shuffle-music-simple",
+      "title": "Play Music",
+      "description": "Shuffle and play Adi Goldstein's relaxing music",
+      "mode": "no-view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "pause-music",
+      "title": "Pause Music",
+      "description": "Pause or resume the currently playing track",
+      "mode": "no-view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "reshuffle-music",
+      "title": "Shuffle Music",
+      "description": "Reshuffle and play a new random track",
+      "mode": "no-view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "stop-music",
+      "title": "Stop Music",
+      "description": "Stop the currently playing music",
+      "mode": "no-view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "short-meditation",
+      "title": "Start Meditation",
+      "description": "Start a single meditation session from Adi Goldstein",
+      "mode": "no-view",
+      "icon": "command-icon.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@supabase/supabase-js": "^2.45.0",
+    "node-fetch": "^3.3.2",
+    "react": "^18.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "^18.0.0",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
