@@ -8,7 +8,12 @@ import {
   Icon,
 } from "@raycast/api";
 import React, { useState, useEffect } from "react";
-import { getPrompts, deletePrompt, Prompt } from "../lib/storage";
+import {
+  getPrompts,
+  deletePrompt,
+  Prompt,
+  initializeDefaults,
+} from "../lib/storage";
 import PromptForm from "./PromptForm";
 
 interface PromptListProps {
@@ -31,7 +36,7 @@ export default function PromptList({
   const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
-    loadPrompts();
+    initializeDefaults().then(() => loadPrompts());
   }, []);
 
   async function loadPrompts() {

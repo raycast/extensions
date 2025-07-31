@@ -11,6 +11,7 @@ export interface Prompt {
 
 const STORAGE_KEY = "prompts";
 const CATEGORIES_KEY = "categories";
+const INITIALIZED_KEY = "initialized";
 
 export async function getPrompts(): Promise<Prompt[]> {
   try {
@@ -162,4 +163,110 @@ export async function updateCategory(
   await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(updatedPrompts));
   await LocalStorage.setItem(CATEGORIES_KEY, JSON.stringify(updated.sort()));
   return true;
+}
+
+// Default data for first-time users
+const DEFAULT_CATEGORIES = [
+  "Project Setup",
+  "Git Operations",
+  "Documentation",
+  "Code Quality",
+  "General",
+];
+
+const DEFAULT_PROMPTS: Omit<Prompt, "id" | "updatedAt">[] = [
+  {
+    title: "Create README",
+    prompt:
+      "Create a comprehensive README.md for this project including installation, usage, and contribution guidelines",
+    category: "Project Setup",
+    description: "Generate project documentation",
+  },
+  {
+    title: "Add MIT License",
+    prompt: "Add a standard MIT license file to this project",
+    category: "Project Setup",
+    description: "Add MIT license file",
+  },
+  {
+    title: "Commit All Changes",
+    prompt:
+      "Review all changes and create a descriptive commit message, then commit all staged and unstaged changes",
+    category: "Git Operations",
+    description: "Smart commit with descriptive message",
+  },
+  {
+    title: "Create .gitignore",
+    prompt:
+      "Create an appropriate .gitignore file for this project based on the technology stack",
+    category: "Project Setup",
+    description: "Generate technology-appropriate .gitignore",
+  },
+  {
+    title: "Add Documentation",
+    prompt:
+      "Add comprehensive documentation comments to the selected code or current file",
+    category: "Documentation",
+    description: "Generate code comments and docs",
+  },
+  {
+    title: "Fix Linting Issues",
+    prompt:
+      "Identify and fix all linting/formatting issues in the current file or project",
+    category: "Code Quality",
+    description: "Auto-fix common lint problems",
+  },
+  {
+    title: "Write Tests",
+    prompt:
+      "Generate comprehensive test files for the current code following best practices",
+    category: "Code Quality",
+    description: "Generate test files for code",
+  },
+  {
+    title: "Create Pull Request",
+    prompt:
+      "Generate a detailed pull request description including changes made, testing done, and impact analysis",
+    category: "Git Operations",
+    description: "Generate PR description",
+  },
+  {
+    title: "Explain Code",
+    prompt:
+      "Provide a clear explanation of what the selected code does and how it works",
+    category: "General",
+    description: "Explain selected code functionality",
+  },
+  {
+    title: "Optimize Performance",
+    prompt: "Analyze the code for performance issues and suggest optimizations",
+    category: "Code Quality",
+    description: "Suggest performance improvements",
+  },
+];
+
+// Initialize defaults for first-time users
+export async function initializeDefaults(): Promise<void> {
+  try {
+    const isInitialized = await LocalStorage.getItem<string>(INITIALIZED_KEY);
+    if (isInitialized) return;
+
+    // Set up default categories
+    await LocalStorage.setItem(
+      CATEGORIES_KEY,
+      JSON.stringify(DEFAULT_CATEGORIES),
+    );
+
+    // Set up default prompts
+    const defaultPrompts: Prompt[] = DEFAULT_PROMPTS.map((prompt) => ({
+      ...prompt,
+      id: Math.random().toString(36).substring(2) + Date.now().toString(36),
+      updatedAt: new Date(),
+    }));
+
+    await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(defaultPrompts));
+    await LocalStorage.setItem(INITIALIZED_KEY, "true");
+  } catch (error) {
+    console.error("Failed to initialize defaults:", error);
+  }
 }

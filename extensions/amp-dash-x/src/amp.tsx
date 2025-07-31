@@ -13,7 +13,12 @@ import {
   useNavigation,
 } from "@raycast/api";
 import React, { useState, useEffect } from "react";
-import { getPrompts, Prompt, deletePrompt } from "./lib/storage";
+import {
+  getPrompts,
+  Prompt,
+  deletePrompt,
+  initializeDefaults,
+} from "./lib/storage";
 import PromptForm from "./components/PromptForm";
 
 export default function AmpCommand() {
@@ -23,7 +28,7 @@ export default function AmpCommand() {
   const { push } = useNavigation();
 
   useEffect(() => {
-    loadPrompts();
+    initializeDefaults().then(() => loadPrompts());
   }, []);
 
   async function loadPrompts() {
