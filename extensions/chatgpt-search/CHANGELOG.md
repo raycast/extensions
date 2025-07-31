@@ -2,7 +2,7 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
-Introducing ChatGPT search functionality to Rycast.
+Introducing ChatGPT search functionality to Raycast.
 
 - ask ChatGPT to search the web for you right from Rycast
 - get answers to your questions from the web
