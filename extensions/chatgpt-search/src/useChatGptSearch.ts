@@ -11,7 +11,7 @@ export function useChatGptSearch({ useChatgptApp, useTemporaryChat }: ExtensionP
       const params = new URLSearchParams({
         q: query,
         hints: "search",
-        ref: "rycast-chatgpt-search",
+        ref: "raycast-chatgpt-search",
         ...(useTemporaryChat ? { "temporary-chat": "true" } : {}),
       });
 
