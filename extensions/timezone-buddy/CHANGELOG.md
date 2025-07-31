@@ -1,6 +1,6 @@
 # Timezone Buddy Changelog
 
-## [1.0.1] - 2025-07-31
+## [1.0.1] - {PR_MERGE_DATE}
 
 - Added time offset functionality to view times in the future or past
 
