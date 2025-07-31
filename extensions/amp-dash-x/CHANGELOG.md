@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced AGENT.md with additional architecture and development workflow documentation
 - Updated package.json metadata for Raycast store preparation
 
-## [1.0.0] - 2025-01-26
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 - Initial release of Amp Dash X Raycast extension
