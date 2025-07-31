@@ -33,11 +33,13 @@ export default function Command() {
       p: parallelismChirho, // Parallelism (threads)
       dkLen: derivedKeyLengthChirho, // Derived key length (hash length)
     });
-
     // Convert to base64 for display (similar to Django format)
-    const hashBase64Chirho = Buffer.from(hashBytesChirho).toString("base64");
-    const saltBase64Chirho = saltChirho.toString("base64");
-
+    const hashBase64Chirho = Buffer.from(hashBytesChirho)
+      .toString("base64")
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/g, "");
+    const saltBase64Chirho = saltChirho.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
     return `$argon2id$v=19$m=${memoryCostChirho},t=${timeCostChirho},p=${parallelismChirho}$${saltBase64Chirho}$${hashBase64Chirho}`;
   };
 
