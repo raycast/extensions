@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { getPreferenceValues } from "@raycast/api";
 import { Preferences, AuthConfig, validateAuth } from "../utils/auth";
-import { DodoPaymentsAPI, createAPIClient } from "../api";
+import { DodoPaymentsAPI, createAPIClient, DodoPayments } from "../api";
 
 interface AuthContextType {
   config: AuthConfig | null;
@@ -70,11 +70,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       // Test authentication by fetching brands (minimal request)
       try {
-        await client.listBrands({ page: 1, limit: 1 });
+        await client.listBrands();
         // If we get here, the API key is valid (status 200)
       } catch (error) {
         // Check if it's an authentication error (status 401)
-        if (error instanceof Error && error.message.includes("Invalid API key")) {
+        if (error instanceof DodoPayments.APIError && error.status === 401) {
+          setError("Invalid API key. Please check your authentication settings.");
+          setIsAuthenticated(false);
+          setConfig(null);
+          setApiClient(null);
+          setIsLoading(false);
+          return;
+        } else if (error instanceof Error && error.message.includes("Invalid API key")) {
           setError("Invalid API key. Please check your authentication settings.");
           setIsAuthenticated(false);
           setConfig(null);

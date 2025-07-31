@@ -1,3 +1,4 @@
+import DodoPayments from "dodopayments";
 import { AuthConfig } from "./utils/auth";
 import type {
   BrandRetrieveResponse,
@@ -44,240 +45,264 @@ export type DisputesPaginatedResponse = DefaultPageNumberPaginationResponse<Disp
 export type RefundsPaginatedResponse = DefaultPageNumberPaginationResponse<Refund>;
 export type PayoutsPaginatedResponse = DefaultPageNumberPaginationResponse<PayoutListResponse>;
 
-export interface ApiError {
-  error: {
-    type: string;
-    message: string;
-    code?: string;
-  };
-}
-
-// API Client Class
+// API Client Wrapper for Dodo Payments SDK
 export class DodoPaymentsAPI {
+  private client: DodoPayments;
   private config: AuthConfig;
 
   constructor(config: AuthConfig) {
     this.config = config;
+    this.client = new DodoPayments({
+      bearerToken: config.apiKey,
+      environment: config.mode === "live" ? "live_mode" : "test_mode",
+    });
   }
 
-  private async makeRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const url = `${this.config.baseUrl}${endpoint}`;
-
-    const requestOptions: RequestInit = {
-      ...options,
-      headers: {
-        Authorization: `Bearer ${this.config.apiKey}`,
-        "Content-Type": "application/json",
-        ...options.headers,
-      },
-    };
-
-    const response = await fetch(url, requestOptions);
-
-    if (!response.ok) {
-      if (response.status === 401) {
+  private handleError(error: unknown): never {
+    if (error instanceof DodoPayments.APIError) {
+      if (error.status === 401) {
         throw new Error("Invalid API key. Please check your authentication settings.");
       }
-
-      let errorMessage = `API request failed: ${response.status} ${response.statusText}`;
-
-      try {
-        const errorData = (await response.json()) as ApiError;
-        if (errorData.error?.message) {
-          errorMessage = errorData.error.message;
-        }
-      } catch {
-        // If we can't parse the error response, use the default message
-      }
-
-      throw new Error(errorMessage);
+      throw new Error(error.message || `API request failed: ${error.status}`);
     }
 
-    return response.json() as Promise<T>;
+    if (error instanceof Error) {
+      throw error;
+    }
+
+    throw new Error("An unexpected error occurred");
   }
 
   // Brands API
-  async listBrands(options: { page?: number; limit?: number } = {}): Promise<BrandsPaginatedResponse> {
-    const params = new URLSearchParams({
-      page_number: (options.page || 0).toString(),
-      page_size: (options.limit || 20).toString(),
-    });
-
-    return this.makeRequest<BrandsPaginatedResponse>(`/brands?${params.toString()}`);
+  async listBrands(): Promise<BrandsPaginatedResponse> {
+    try {
+      const response = await this.client.brands.list();
+      return response as BrandsPaginatedResponse;
+    } catch (error) {
+      this.handleError(error);
+    }
   }
 
   async getBrand(brandId: string): Promise<Brand> {
-    return this.makeRequest<Brand>(`/brands/${brandId}`);
+    try {
+      return await this.client.brands.retrieve(brandId);
+    } catch (error) {
+      this.handleError(error);
+    }
   }
 
   // Payments API
   async listPayments(
     options: { page?: number; limit?: number; status?: string } = {},
   ): Promise<PaymentsPaginatedResponse> {
-    const params = new URLSearchParams({
-      page_number: (options.page || 0).toString(),
-      page_size: (options.limit || 20).toString(),
-    });
+    try {
+      const params: Record<string, unknown> = {};
+      if (options.page) params.page_number = options.page;
+      if (options.limit) params.page_size = options.limit;
+      if (options.status) params.status = options.status;
 
-    if (options.status) {
-      params.append("status", options.status);
+      const response = await this.client.payments.list(params);
+      return response as PaymentsPaginatedResponse;
+    } catch (error) {
+      this.handleError(error);
     }
-
-    return this.makeRequest<PaymentsPaginatedResponse>(`/payments?${params.toString()}`);
   }
 
   async getPayment(paymentId: string): Promise<Payment> {
-    return this.makeRequest<Payment>(`/payments/${paymentId}`);
+    try {
+      return await this.client.payments.retrieve(paymentId);
+    } catch (error) {
+      this.handleError(error);
+    }
   }
 
   // Subscriptions API
   async listSubscriptions(
     options: { page?: number; limit?: number; status?: string } = {},
   ): Promise<SubscriptionsPaginatedResponse> {
-    const params = new URLSearchParams({
-      page_number: (options.page || 0).toString(),
-      page_size: (options.limit || 20).toString(),
-    });
+    try {
+      const params: Record<string, unknown> = {};
+      if (options.page) params.page_number = options.page;
+      if (options.limit) params.page_size = options.limit;
+      if (options.status) params.status = options.status;
 
-    if (options.status) {
-      params.append("status", options.status);
+      const response = await this.client.subscriptions.list(params);
+      return response as SubscriptionsPaginatedResponse;
+    } catch (error) {
+      this.handleError(error);
     }
-
-    return this.makeRequest<SubscriptionsPaginatedResponse>(`/subscriptions?${params.toString()}`);
   }
 
   async getSubscription(subscriptionId: string): Promise<Subscription> {
-    return this.makeRequest<Subscription>(`/subscriptions/${subscriptionId}`);
+    try {
+      return await this.client.subscriptions.retrieve(subscriptionId);
+    } catch (error) {
+      this.handleError(error);
+    }
   }
 
   // Customers API
   async listCustomers(
     options: { page?: number; limit?: number; email?: string } = {},
   ): Promise<DefaultPageNumberPaginationResponse<Customer>> {
-    const params = new URLSearchParams({
-      page_number: (options.page || 0).toString(),
-      page_size: (options.limit || 20).toString(),
-    });
+    try {
+      const params: Record<string, unknown> = {};
+      if (options.page) params.page_number = options.page;
+      if (options.limit) params.page_size = options.limit;
+      if (options.email) params.email = options.email;
 
-    if (options.email) {
-      params.append("email", options.email);
+      const response = await this.client.customers.list(params);
+      return response as DefaultPageNumberPaginationResponse<Customer>;
+    } catch (error) {
+      this.handleError(error);
     }
-
-    return this.makeRequest<DefaultPageNumberPaginationResponse<Customer>>(`/customers?${params.toString()}`);
   }
 
   async getCustomer(customerId: string): Promise<Customer> {
-    return this.makeRequest<Customer>(`/customers/${customerId}`);
+    try {
+      return await this.client.customers.retrieve(customerId);
+    } catch (error) {
+      this.handleError(error);
+    }
   }
 
   // Products API
   async listProducts(
     options: { page?: number; limit?: number; name?: string } = {},
   ): Promise<ProductsPaginatedResponse> {
-    const params = new URLSearchParams({
-      page_number: (options.page || 0).toString(),
-      page_size: (options.limit || 20).toString(),
-    });
+    try {
+      const params: Record<string, unknown> = {};
+      if (options.page) params.page_number = options.page;
+      if (options.limit) params.page_size = options.limit;
+      if (options.name) params.name = options.name;
 
-    if (options.name) {
-      params.append("name", options.name);
+      const response = await this.client.products.list(params);
+      return response as ProductsPaginatedResponse;
+    } catch (error) {
+      this.handleError(error);
     }
-
-    return this.makeRequest<ProductsPaginatedResponse>(`/products?${params.toString()}`);
   }
 
   async getProduct(productId: string): Promise<Product> {
-    return this.makeRequest<Product>(`/products/${productId}`);
+    try {
+      return await this.client.products.retrieve(productId);
+    } catch (error) {
+      this.handleError(error);
+    }
   }
 
   // Discounts API
   async listDiscounts(
     options: { page?: number; limit?: number; status?: string } = {},
   ): Promise<DiscountsPaginatedResponse> {
-    const params = new URLSearchParams({
-      page_number: (options.page || 0).toString(),
-      page_size: (options.limit || 20).toString(),
-    });
+    try {
+      const params: Record<string, unknown> = {};
+      if (options.page) params.page_number = options.page;
+      if (options.limit) params.page_size = options.limit;
+      if (options.status) params.status = options.status;
 
-    if (options.status) {
-      params.append("status", options.status);
+      const response = await this.client.discounts.list(params);
+      return response as DiscountsPaginatedResponse;
+    } catch (error) {
+      this.handleError(error);
     }
-
-    return this.makeRequest<DiscountsPaginatedResponse>(`/discounts?${params.toString()}`);
   }
 
   async getDiscount(discountId: string): Promise<Discount> {
-    return this.makeRequest<Discount>(`/discounts/${discountId}`);
+    try {
+      return await this.client.discounts.retrieve(discountId);
+    } catch (error) {
+      this.handleError(error);
+    }
   }
 
   // License Keys API
   async listLicenseKeys(
     options: { page?: number; limit?: number; status?: string } = {},
   ): Promise<LicenseKeysPaginatedResponse> {
-    const params = new URLSearchParams({
-      page_number: (options.page || 0).toString(),
-      page_size: (options.limit || 20).toString(),
-    });
+    try {
+      const params: Record<string, unknown> = {};
+      if (options.page) params.page_number = options.page;
+      if (options.limit) params.page_size = options.limit;
+      if (options.status) params.status = options.status;
 
-    if (options.status) {
-      params.append("status", options.status);
+      const response = await this.client.licenseKeys.list(params);
+      return response as LicenseKeysPaginatedResponse;
+    } catch (error) {
+      this.handleError(error);
     }
-
-    return this.makeRequest<LicenseKeysPaginatedResponse>(`/license_keys?${params.toString()}`);
   }
 
   async getLicenseKey(licenseKeyId: string): Promise<LicenseKey> {
-    return this.makeRequest<LicenseKey>(`/license_keys/${licenseKeyId}`);
+    try {
+      return await this.client.licenseKeys.retrieve(licenseKeyId);
+    } catch (error) {
+      this.handleError(error);
+    }
   }
 
   // Disputes API
   async listDisputes(
     options: { page?: number; limit?: number; status?: string } = {},
   ): Promise<DisputesPaginatedResponse> {
-    const params = new URLSearchParams({
-      page_number: (options.page || 0).toString(),
-      page_size: (options.limit || 20).toString(),
-    });
+    try {
+      const params: Record<string, unknown> = {};
+      if (options.page) params.page_number = options.page;
+      if (options.limit) params.page_size = options.limit;
+      if (options.status) params.status = options.status;
 
-    if (options.status) {
-      params.append("status", options.status);
+      const response = await this.client.disputes.list(params);
+      return response as DisputesPaginatedResponse;
+    } catch (error) {
+      this.handleError(error);
     }
-
-    return this.makeRequest<DisputesPaginatedResponse>(`/disputes?${params.toString()}`);
   }
 
   async getDispute(disputeId: string): Promise<DisputeRetrieveResponse> {
-    return this.makeRequest<DisputeRetrieveResponse>(`/disputes/${disputeId}`);
+    try {
+      return await this.client.disputes.retrieve(disputeId);
+    } catch (error) {
+      this.handleError(error);
+    }
   }
 
   // Refunds API
   async listRefunds(
     options: { page?: number; limit?: number; status?: string } = {},
   ): Promise<RefundsPaginatedResponse> {
-    const params = new URLSearchParams({
-      page_number: (options.page || 0).toString(),
-      page_size: (options.limit || 20).toString(),
-    });
+    try {
+      const params: Record<string, unknown> = {};
+      if (options.page) params.page_number = options.page;
+      if (options.limit) params.page_size = options.limit;
+      if (options.status) params.status = options.status;
 
-    if (options.status) {
-      params.append("status", options.status);
+      const response = await this.client.refunds.list(params);
+      return response as RefundsPaginatedResponse;
+    } catch (error) {
+      this.handleError(error);
     }
-
-    return this.makeRequest<RefundsPaginatedResponse>(`/refunds?${params.toString()}`);
   }
 
   async getRefund(refundId: string): Promise<Refund> {
-    return this.makeRequest<Refund>(`/refunds/${refundId}`);
+    try {
+      return await this.client.refunds.retrieve(refundId);
+    } catch (error) {
+      this.handleError(error);
+    }
   }
 
   // Payouts API
   async listPayouts(options: { page?: number; limit?: number } = {}): Promise<PayoutsPaginatedResponse> {
-    const params = new URLSearchParams({
-      page_number: (options.page || 0).toString(),
-      page_size: (options.limit || 20).toString(),
-    });
+    try {
+      const params: Record<string, unknown> = {};
+      if (options.page) params.page_number = options.page;
+      if (options.limit) params.page_size = options.limit;
 
-    return this.makeRequest<PayoutsPaginatedResponse>(`/payouts?${params.toString()}`);
+      const response = await this.client.payouts.list(params);
+      return response as PayoutsPaginatedResponse;
+    } catch (error) {
+      this.handleError(error);
+    }
   }
 }
 
@@ -285,3 +310,6 @@ export class DodoPaymentsAPI {
 export function createAPIClient(config: AuthConfig): DodoPaymentsAPI {
   return new DodoPaymentsAPI(config);
 }
+
+// Export DodoPayments for error handling
+export { DodoPayments };

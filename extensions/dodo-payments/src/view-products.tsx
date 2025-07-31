@@ -303,6 +303,15 @@ function ProductsList() {
                     text={formatCurrencyAndAmount(product.price || 0, product.currency || "USD")}
                   />
 
+                  {product.price_detail?.type === "recurring_price" && !!product.price_detail?.trial_period_days && (
+                    <List.Item.Detail.Metadata.TagList title="Trial Period">
+                      <List.Item.Detail.Metadata.TagList.Item
+                        text={`${product.price_detail.trial_period_days} Days`}
+                        color={Color.Green}
+                      />
+                    </List.Item.Detail.Metadata.TagList>
+                  )}
+
                   <List.Item.Detail.Metadata.Separator />
 
                   {/* Additional Details */}

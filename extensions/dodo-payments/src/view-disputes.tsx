@@ -177,7 +177,7 @@ function DisputesList() {
             <ActionPanel>
               <Action.OpenInBrowser
                 title="Open in Dodo Payments"
-                url={`https://app.dodopayments.com/transctions/disputes/${dispute.dispute_id}?backTo=/transactions/disputes`}
+                url={`https://app.dodopayments.com/transactions/disputes/${dispute.dispute_id}?backTo=/transactions/disputes`}
                 icon={Icon.Globe}
               />
               <Action.CopyToClipboard title="Copy Dispute ID" content={dispute.dispute_id} icon={Icon.Clipboard} />

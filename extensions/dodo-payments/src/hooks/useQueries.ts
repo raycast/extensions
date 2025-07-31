@@ -25,14 +25,14 @@ export const queryKeys = {
 };
 
 // Brands Queries
-export function useBrands(options: { page?: number; limit?: number } = {}) {
+export function useBrands() {
   const { apiClient } = useAuth();
 
   return useQuery({
     queryKey: queryKeys.brands,
     queryFn: () => {
       if (!apiClient) throw new Error("API client not available");
-      return apiClient.listBrands(options);
+      return apiClient.listBrands();
     },
     enabled: !!apiClient,
   });
@@ -276,7 +276,7 @@ export function useAuthVerification() {
     queryFn: async () => {
       if (!apiClient) throw new Error("API client not available");
       try {
-        await apiClient.listBrands({ page: 1, limit: 1 });
+        await apiClient.listBrands();
         return true; // API key is valid
       } catch (error) {
         if (error instanceof Error && error.message.includes("Invalid API key")) {
