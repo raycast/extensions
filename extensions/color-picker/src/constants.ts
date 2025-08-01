@@ -31,7 +31,7 @@ export const CLEAR_FORM_VALUES: PaletteFormFields = {
   name: DEFAULT_NAME,
   /** Default empty description */
   description: DEFAULT_DESCRIPTION,
-  /** Default unselected mode (user must choose light/dark) */
+  /** Default mode set to light */
   mode: DEFAULT_MODE,
   /** Default empty keywords array */
   keywords: DEFAULT_KEYWORDS,
