@@ -23,12 +23,11 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { ErrorResponse, Monitor, NewMonitor } from "./types";
+import { ErrorResponse, Monitor, MonitorType, NewMonitor } from "./types";
 import { useEffect, useState } from "react";
-import useUptimeRobot from "./lib/hooks/use-uptime-robot";
 import unixToDate from "./lib/utils/unix-to-date";
 import { hasDayPassed } from "./lib/utils/has-day-passed";
-import { deleteMonitor } from "./lib/api";
+import { createMonitor, deleteMonitor } from "./lib/api";
 
 type Pagination = {
   offset: number;
@@ -134,6 +133,7 @@ export default function Monitors() {
         <List.Item
           key={monitor.id}
           title={monitor.friendly_name}
+          subtitle={MonitorType[monitor.type]}
           icon={MONITOR_ICONS[monitor.status]}
           accessories={[
             {
@@ -177,40 +177,45 @@ type AddNewMonitorProps = {
 };
 function AddNewMonitor({ onMonitorAdded }: AddNewMonitorProps) {
   const { pop } = useNavigation();
-  const [execute, setExecute] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { itemProps, handleSubmit, values } = useForm<NewMonitor>({
-    onSubmit() {
-      setExecute(true);
+    async onSubmit(values) {
+      setIsLoading(true);
+      const toast = await showToast(Toast.Style.Animated, "Creating monitor", values.friendly_name);
+      try {
+        const body = {...values};
+        if (values.type==="PING") delete body.interval;
+        await createMonitor(body);
+        toast.style = Toast.Style.Success;
+        toast.title = "Created monitor";
+        onMonitorAdded();
+        pop();
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.message = `${error}`;
+        toast.title = "Could not create";
+      } finally {
+        setIsLoading(false);
+      }
     },
     initialValues: {
-      url: "https://",
+      type: "1",
       timeout: "30",
     },
     validation: {
       friendly_name: FormValidation.Required,
       url(value) {
         if (!value) return "The item is required";
-        else {
+        else if(values.type==="HTTP") {
           try {
             new URL(value);
-          } catch (_) {
+          } catch {
             return "The item must be a valid URL";
           }
         }
       },
       type: FormValidation.Required,
     },
-  });
-
-  const { isLoading } = useUptimeRobot<Monitor, "monitor">("newMonitor", values, {
-    onData() {
-      onMonitorAdded();
-      pop();
-    },
-    onError() {
-      setExecute(false);
-    },
-    execute,
   });
 
   return (
@@ -227,15 +232,15 @@ function AddNewMonitor({ onMonitorAdded }: AddNewMonitorProps) {
           <Form.Dropdown.Item key={type} title={title} value={type} />
         ))}
       </Form.Dropdown>
-      <Form.Description text={MONITOR_TYPES[values.type]?.info || ""} />
+      <Form.Description text={MONITOR_TYPES[values.type].info} />
 
       <Form.TextField
-        title="URL to monitor"
-        placeholder="https://example.com or http://80.75.11.12"
+        title={MONITOR_TYPES[values.type].url.title}
+        placeholder={MONITOR_TYPES[values.type].url.placeholder}
         {...itemProps.url}
       />
       <Form.TextField title="Friendly name of monitor" placeholder="blog" {...itemProps.friendly_name} />
-      <Form.Dropdown
+      {values.type==="HTTP" && <Form.Dropdown
         title="Monitor interval"
         {...itemProps.interval}
         info="We recommend to use at least 1-minute checks"
@@ -243,7 +248,7 @@ function AddNewMonitor({ onMonitorAdded }: AddNewMonitorProps) {
         {Object.entries(MONITOR_INTERVALS).map(([interval, title]) => (
           <Form.Dropdown.Item key={interval} title={title} value={interval} />
         ))}
-      </Form.Dropdown>
+      </Form.Dropdown>}
 
       <Form.Separator />
       <Form.Description text="Advanced Settings" />
