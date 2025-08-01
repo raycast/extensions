@@ -133,10 +133,10 @@ class AgentScanner {
       }
 
       const id = relativePath ? `${relativePath}/${filename}` : filename;
-      const name = metadata.name || filename;
-      const description = metadata.description || "";
+      const name = (metadata.name as string) || filename;
+      const description = (metadata.description as string) || "";
       const tools = metadata.tools || [];
-      const color = metadata.color || "blue";
+      const color = (metadata.color as string) || "blue";
 
       return {
         id,
@@ -299,7 +299,7 @@ export default function UserAgentsManager() {
     (agent) =>
       agent.name.toLowerCase().includes(searchText.toLowerCase()) ||
       agent.description.toLowerCase().includes(searchText.toLowerCase()) ||
-      (agent.tools && agent.tools.some((tool) => tool.toLowerCase().includes(searchText.toLowerCase()))),
+      agent.tools?.some((tool) => tool.toLowerCase().includes(searchText.toLowerCase())),
   );
 
   const handleDeleteAgent = async (agent: Agent) => {
@@ -451,7 +451,7 @@ function AgentForm({ agent, scanner, onSave }: { agent?: Agent; scanner: AgentSc
 
     try {
       const agentsDir = join(homedir(), ".claude", "agents");
-      const fileType = isEditing ? agent!.fileType : values.fileType || "md";
+      const fileType = isEditing ? agent?.fileType || "md" : values.fileType || "md";
       const fileName = `${values.name}.${fileType}`;
       const filePath = join(agentsDir, fileName);
 

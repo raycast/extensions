@@ -108,9 +108,9 @@ class CommandScanner {
       }
 
       const id = relativePath ? `${relativePath}/${filename}` : filename;
-      const name = metadata.name || filename;
-      const title = metadata.title || name;
-      const description = metadata.description || "";
+      const name = (metadata.name as string) || filename;
+      const title = (metadata.title as string) || name;
+      const description = (metadata.description as string) || "";
 
       return {
         id,
@@ -119,7 +119,7 @@ class CommandScanner {
         description,
         filePath,
         fileType: ext === ".md" ? "md" : ext === ".yaml" ? "yaml" : "yml",
-        allowedTools: metadata["allowed-tools"] || metadata.allowedTools || [],
+        allowedTools: (metadata["allowed-tools"] as string[]) || (metadata.allowedTools as string[]) || [],
         content: bodyContent,
         metadata,
       };
@@ -415,7 +415,7 @@ function CommandForm({ command, scanner, onSave }: { command?: Command; scanner:
 
     try {
       const commandsDir = join(homedir(), ".claude", "commands");
-      const fileType = isEditing ? command!.fileType : values.fileType || "md";
+      const fileType = isEditing ? command?.fileType || "md" : values.fileType || "md";
       const fileName = `${values.name}.${fileType}`;
       const filePath = join(commandsDir, fileName);
 
