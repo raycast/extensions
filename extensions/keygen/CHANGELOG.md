@@ -1,5 +1,10 @@
 # Keygen Changelog
 
+## [List Users + API Usage] - {PR_MERGE_DATE}
+
+- List Users and Create new ones
+- View API Usage
+
 ## [List & Add Products + License Enhancements] - 2025-07-07
 
 - List Products and Create new ones

@@ -10,6 +10,10 @@ This is a Raycast extension for [Keygen](https://keygen.sh/) - Open, enterprise-
     - Create License
 - View Policies
     - Create Policy
+- View Products
+    - Create Product
+- View Users
+    - Create User
 
 ## 🚀 Getting Started
 
