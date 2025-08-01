@@ -2,11 +2,18 @@ import { LaunchProps, List } from "@raycast/api";
 import { Arguments } from "./types";
 import { useCliSetup } from "./hooks/useCliSetup";
 import { InstallationView } from "./views/InstallationView";
-import { WordListView } from "./views/WordListView";
+import { MdDefinitionListView } from "./views/MdDefinitionListView";
+import { ProviderSetupView } from "./views/ProviderSetupView";
+import { isProviderConfigured } from "./config";
 
 export default function Word4YouCommand(props: LaunchProps<{ arguments: Arguments }>) {
-  const { word: argWord } = props.arguments;
+  const { text: argText } = props.arguments;
   const { cliInstalled } = useCliSetup();
+
+  // Show provider setup view if user hasn't configured their AI provider and API key
+  if (!isProviderConfigured()) {
+    return <ProviderSetupView />;
+  }
 
   if (cliInstalled === undefined) {
     return <List isLoading={true} />;
@@ -16,5 +23,5 @@ export default function Word4YouCommand(props: LaunchProps<{ arguments: Argument
     return <InstallationView />;
   }
 
-  return <WordListView initialWord={argWord} />;
+  return <MdDefinitionListView initialText={argText} />;
 }

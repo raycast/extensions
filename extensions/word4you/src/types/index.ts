@@ -1,9 +1,9 @@
 export interface Arguments {
-  word: string;
+  text: string;
 }
 
-export interface WordExplanation {
-  word: string;
+export interface MdDefinition {
+  text: string;
   pronunciation: string;
   definition: string;
   chinese: string;
@@ -11,5 +11,5 @@ export interface WordExplanation {
   example_zh: string;
   tip: string;
   raw_output: string;
-  timestamp?: string;
+  timestamp: string;
 }

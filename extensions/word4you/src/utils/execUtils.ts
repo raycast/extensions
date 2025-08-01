@@ -1,45 +1,14 @@
-import { execSync, exec } from "child_process";
-import { promisify } from "util";
-import fs from "fs";
-import { getCliFilepath } from "../config";
-
-const execPromise = promisify(exec);
-
-// Check if a command exists in PATH
-export function commandExistsInPath(command: string): string | null {
-  try {
-    const pathOutput = execSync(`which ${command}`, { encoding: "utf8" }).trim();
-    if (pathOutput && fs.existsSync(pathOutput)) {
-      return pathOutput;
-    }
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-// Get the best available executable path for word4you CLI
-export function getAvailableExecutablePath(): string | null {
-  // Check if our downloaded version exists
-  const downloadedCli = getCliFilepath();
-  if (fs.existsSync(downloadedCli)) {
-    return downloadedCli;
-  }
-
-  // Check if it's available in PATH
-  const pathCli = commandExistsInPath("word4you");
-  if (pathCli) {
-    return pathCli;
-  }
-
-  return null;
-}
+import { execSync, spawn } from "child_process";
 
 // Escape executable path for shell execution
 export function escapeExecutablePath(executablePath: string): string {
   return executablePath.includes(" ") || executablePath.includes("(")
     ? `'${executablePath.replace(/'/g, "'\\''")}'`
     : executablePath;
+}
+
+function escapeArgs(args: string[]): string[] {
+  return args.map((arg) => `"${arg.replace(/"/g, '\\"')}"`);
 }
 
 // Execute a CLI command with proper error handling
@@ -53,7 +22,7 @@ export function executeCliCommand(
   } = {},
 ): string {
   const escapedPath = escapeExecutablePath(executablePath);
-  const escapedArgs = args.map((arg) => `"${arg.replace(/"/g, '\\"')}"`);
+  const escapedArgs = escapeArgs(args);
   const command = `${escapedPath} ${escapedArgs.join(" ")}`;
 
   return execSync(command, {
@@ -64,43 +33,58 @@ export function executeCliCommand(
   });
 }
 
-// Execute a CLI command with promise-based error handling
-export async function executeCliCommandAsync(
+// Execute a CLI command with streaming output via callback and promise completion
+export function executeCliWithStatusUpdate(
   executablePath: string,
   args: string[],
   options: {
     cwd?: string;
     env?: NodeJS.ProcessEnv;
-    timeout?: number;
     onStatusUpdate?: (message: string) => void;
   } = {},
-): Promise<{ success: boolean; output: string; error?: string }> {
-  try {
-    const escapedPath = escapeExecutablePath(executablePath);
-    const escapedArgs = args.map((arg) => `"${arg.replace(/"/g, '\\"')}"`);
-    const command = `${escapedPath} ${escapedArgs.join(" ")}`;
-
-    const { stdout, stderr } = await execPromise(command, {
-      encoding: "utf8",
-      timeout: options.timeout || 30000,
+): Promise<boolean> {
+  return new Promise((resolve) => {
+    // Use spawn for better control over arguments and streaming
+    const childProcess = spawn(executablePath, args, {
       cwd: options.cwd || process.cwd(),
       env: options.env || process.env,
+      stdio: ["pipe", "pipe", "pipe"], // Enable piping for all streams
     });
 
-    const output = stdout.trim();
+    // Stream stdout data as it comes
+    childProcess.stdout.on("data", (data: Buffer) => {
+      const chunk = data.toString("utf8");
 
-    if (options.onStatusUpdate) {
-      options.onStatusUpdate(output);
-    }
+      if (options.onStatusUpdate) {
+        // Send each line as it comes, trimming whitespace
+        const lines = chunk.split("\n").filter((line) => line.trim());
+        lines.forEach((line) => options.onStatusUpdate!(line.trim()));
+      }
+    });
 
-    return { success: true, output, error: stderr || undefined };
-  } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    // Stream stderr data as it comes
+    childProcess.stderr.on("data", (data: Buffer) => {
+      const chunk = data.toString("utf8");
 
-    if (options.onStatusUpdate) {
-      options.onStatusUpdate(`Error: ${errorMessage}`);
-    }
+      if (options.onStatusUpdate) {
+        // Send error lines as they come
+        const lines = chunk.split("\n").filter((line) => line.trim());
+        lines.forEach((line) => options.onStatusUpdate!(`Error: ${line.trim()}`));
+      }
+    });
 
-    return { success: false, output: "", error: errorMessage };
-  }
+    // Handle process completion
+    childProcess.on("close", (code) => {
+      resolve(code === 0);
+    });
+
+    // Handle process errors
+    childProcess.on("error", (error) => {
+      if (options.onStatusUpdate) {
+        options.onStatusUpdate(`Error: ${error.message}`);
+      }
+
+      resolve(false);
+    });
+  });
 }

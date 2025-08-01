@@ -6,7 +6,7 @@ export function InstallationView() {
       <List.EmptyView
         title="Word4You CLI Not Found"
         icon={Icon.Warning}
-        description="Download and setup the CLI, then configure the full path in the extension preference"
+        description="The Word4You CLI tool needs to be downloaded."
         actions={
           <ActionPanel>
             <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />

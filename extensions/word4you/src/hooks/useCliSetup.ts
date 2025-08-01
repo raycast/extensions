@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Toast, showToast } from "@raycast/api";
-import { isCliInstalled, ensureCLI } from "../services/cliManager";
-import { showFailureToast } from "@raycast/utils";
+import { isRequiredCliInstalled, ensureCLI } from "../services/cliManager";
 
 export function useCliSetup() {
   const [cliInstalled, setCliInstalled] = useState<boolean | undefined>();
@@ -15,7 +14,7 @@ export function useCliSetup() {
     hasChecked.current = true;
 
     const checkCliInstallation = async () => {
-      const installed = isCliInstalled();
+      const installed = await isRequiredCliInstalled();
       setCliInstalled(installed);
 
       if (!installed) {
@@ -28,10 +27,12 @@ export function useCliSetup() {
           // Try to download the CLI
           await ensureCLI();
           toast.style = Toast.Style.Success;
-          toast.title = "Word4You CLI downloaded successfully";
+          toast.title = "Word4You CLI downloaded";
           setCliInstalled(true);
         } catch (error) {
-          showFailureToast(error, { title: "Failed to download Word4You CLI" });
+          toast.style = Toast.Style.Failure;
+          toast.title = "Failed to download Word4You CLI";
+          console.error("Error downloading Word4You CLI:", error);
           setCliInstalled(false);
         }
       }
