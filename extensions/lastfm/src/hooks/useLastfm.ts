@@ -1,12 +1,8 @@
-import { useState } from "react";
-import fetch from "node-fetch";
-import useSWR from "swr";
-
-// Functions
+import { useState, useEffect } from "react";
 import { getErrorMessage } from "../functions/getErrorMessage";
 
 // Types
-import type { SongResponse, Track, TopTrack } from "@/types/SongResponse";
+import type { SongResponse, Track, TopTrack } from "../types/SongResponse";
 
 interface Props {
   username: string;
@@ -17,52 +13,50 @@ interface Props {
 }
 
 const useLastFm = (props: Props) => {
-  try {
-    const method = props.method === "top" ? "gettoptracks" : "getrecenttracks";
+  const [songs, setSongs] = useState<Track[] | TopTrack[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-    const [songs, setSongs] = useState<Track[] | TopTrack[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<any>(null);
+  const handleError = (err: unknown) => {
+    setError(err instanceof Error ? err.message : "Unknown error");
+    setLoading(false);
+  };
 
-    const handleError = (err: unknown) => {
-      setError(err);
-      setLoading(false);
-    };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-    const fetcher = (url: string) => fetch(url).then((r) => r.json() as Promise<SongResponse>);
-    useSWR(
-      `https://ws.audioscrobbler.com/2.0/?method=user.${method}&user=${props.username}&api_key=${
-        props.apikey
-      }&format=json&period=${props.period}&limit=${props.limit || 24}`,
-      fetcher,
-      {
-        onSuccess: (data) => {
-          if (data.error) {
-            const message = getErrorMessage(data.error);
-            handleError(new Error(message));
-          } else {
-            const tracks = data.recenttracks?.track || data.toptracks?.track || [];
+        const method = props.method === "top" ? "gettoptracks" : "getrecenttracks";
+        const url = `https://ws.audioscrobbler.com/2.0/?method=user.${method}&user=${props.username}&api_key=${
+          props.apikey
+        }&format=json&period=${props.period}&limit=${props.limit || 24}`;
 
-            setSongs(tracks);
-            setLoading(false);
-          }
-        },
-        onError: handleError,
+        const response = await fetch(url);
+        const data = (await response.json()) as SongResponse;
+
+        if (data.error) {
+          const message = getErrorMessage(data.error);
+          handleError(new Error(message));
+        } else {
+          const tracks = data.recenttracks?.track || data.toptracks?.track || [];
+          setSongs(tracks);
+          setLoading(false);
+        }
+      } catch (err) {
+        handleError(err);
       }
-    );
+    };
 
-    return {
-      loading,
-      error: error?.message || null,
-      songs,
-    };
-  } catch (err: unknown) {
-    return {
-      loading: false,
-      error: (err as any)?.mesage || null,
-      songs: [],
-    };
-  }
+    fetchData();
+  }, [props.username, props.apikey, props.period, props.limit, props.method]);
+
+  return {
+    loading,
+    error,
+    songs,
+  };
 };
 
 export default useLastFm;

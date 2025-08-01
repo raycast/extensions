@@ -5,6 +5,10 @@
   "description": "Display your favourite, recently played tracks, your top albums and artists and more from Last.fm on Raycast!",
   "icon": "command-icon.png",
   "author": "eggsy",
+  "contributors": [
+    "pato",
+    "c0b41"
+  ],
   "license": "MIT",
   "keywords": [
     "lastfm",
@@ -15,6 +19,28 @@
     "music"
   ],
   "commands": [
+    {
+      "name": "background",
+      "title": "Background Scrobbling",
+      "subtitle": "Last.fm",
+      "description": "Automatically scrobble music in the background",
+      "mode": "no-view",
+      "interval": "30s"
+    },
+    {
+      "name": "scrobbling",
+      "title": "Scrobbling Dashboard",
+      "subtitle": "Last.fm",
+      "description": "View scrobbling status and manage queue",
+      "mode": "view"
+    },
+    {
+      "name": "auth",
+      "title": "Setup Scrobbling",
+      "subtitle": "Last.fm",
+      "description": "Authenticate for scrobbling functionality",
+      "mode": "view"
+    },
     {
       "name": "combined",
       "title": "Top & Recent Songs",
@@ -61,6 +87,14 @@
       "title": "API key"
     },
     {
+      "type": "password",
+      "name": "apisecret",
+      "description": "Your Last.fm API secret (needed for scrobbling)",
+      "placeholder": "Your Last.fm API secret",
+      "required": false,
+      "title": "API Secret"
+    },
+    {
       "type": "textfield",
       "name": "username",
       "description": "Your Last.fm username, can be found on your profile page",
@@ -104,28 +138,86 @@
         {
           "title": "12 months",
           "value": "12month"
+        },
+        {
+          "title": "All Time",
+          "value": "overall"
         }
       ]
+    },
+    {
+      "type": "dropdown",
+      "title": "Listing View",
+      "name": "view",
+      "required": true,
+      "default": "list",
+      "description": "Select the view type to display results.",
+      "data": [
+        {
+          "title": "List",
+          "value": "list"
+        },
+        {
+          "title": "Grid",
+          "value": "grid"
+        }
+      ]
+    },
+    {
+      "type": "dropdown",
+      "title": "Scrobble Interval",
+      "name": "scrobbleInterval",
+      "required": false,
+      "default": "30",
+      "description": "How often to check for music changes (in seconds)",
+      "data": [
+        {
+          "title": "15 seconds",
+          "value": "15"
+        },
+        {
+          "title": "30 seconds",
+          "value": "30"
+        },
+        {
+          "title": "60 seconds",
+          "value": "60"
+        }
+      ]
+    },
+    {
+      "type": "textfield",
+      "title": "Minimum Play Duration",
+      "name": "minPlayDuration",
+      "required": false,
+      "default": "30",
+      "description": "Minimum seconds a track must play before scrobbling (Last.fm requirement: 30s)",
+      "placeholder": "30"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.3",
+    "@raycast/api": "^1.98.5",
     "node-fetch": "^3.1.0",
+    "run-applescript": "^7.0.0",
     "swr": "^1.1.2"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/node": "^18.0.0",
+    "@types/react": "^19.1.4",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
+    "prettier": "^3.6.2",
+    "react-devtools": "6.1.1",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

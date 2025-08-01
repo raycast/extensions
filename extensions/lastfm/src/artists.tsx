@@ -1,56 +1,79 @@
-import React from "react";
-import {
-  ActionPanel,
-  showToast,
-  ToastStyle,
-  getPreferenceValues,
-  List,
-  OpenInBrowserAction,
-  CopyToClipboardAction,
-  Icon,
-} from "@raycast/api";
+import React, { useState, useMemo, useCallback } from "react";
+import { ActionPanel, showToast, Toast, getPreferenceValues, List, Action, Icon } from "@raycast/api";
+import { periodTypes, Artist } from "./types";
+import { useTopArtists } from "./lib/use-lastfm";
+import { PeriodDropdown } from "./components/period";
+import { ListResults } from "./components/list";
 
-// Hooks
-import useTopArtists from "./hooks/useTopArtists";
+// Memoized action panel component
+const ArtistActionPanel = React.memo(({ artist }: { artist: Artist }) => (
+  <ActionPanel>
+    <ActionPanel.Section title="Open And Search">
+      <Action.OpenInBrowser url={artist.url} title="Open on Last.fm" />
+      <Action.OpenInBrowser
+        url={`https://open.spotify.com/search/${encodeURIComponent(artist.name)}`}
+        title="Search on Spotify"
+      />
+      <Action.OpenInBrowser
+        url={`https://music.apple.com/search?term=${encodeURIComponent(artist.name)}`}
+        title="Search on Apple Music"
+      />
+    </ActionPanel.Section>
+    <ActionPanel.Section title="Copy">
+      <Action.CopyToClipboard title="Copy URL to Clipboard" content={artist.url} />
+      <Action.CopyToClipboard title="Copy Name to Clipboard" content={artist.name} />
+    </ActionPanel.Section>
+  </ActionPanel>
+));
 
-// Types
-import type { Artist } from "@/types/ArtistResponse";
+ArtistActionPanel.displayName = "ArtistActionPanel";
 
-const LastFm: React.FC = () => {
-  const { username, apikey, period, limit } = getPreferenceValues();
-  const { loading, error, artists } = useTopArtists({ username, apikey, period, limit });
+const TopArtists: React.FC = () => {
+  const preferences = getPreferenceValues();
+  const { period: defaultPeriod } = preferences;
+  const [period, setPeriod] = useState<periodTypes>(defaultPeriod);
+  const { loading, error, artists } = useTopArtists({ period });
+
+  // Memoized period change handler
+  const onPeriodChange = useCallback((value: string) => {
+    setPeriod(value as periodTypes);
+  }, []);
+
+  // Memoized data processing
+  const processedData = useMemo(() => {
+    return artists.map((artist, idx) => {
+      return {
+        key: `${artist.name}-${idx}`,
+        title: artist.name,
+        subtitle: undefined,
+        icon: Icon.Person,
+        accessories: [{ text: artist.playcount ? `${artist.playcount} plays` : null }],
+        accessory: artist.playcount ? { tooltip: artist.playcount } : undefined,
+        actions: <ArtistActionPanel artist={artist as Artist} />,
+      };
+    });
+  }, [artists]);
 
   if (error !== null) {
-    showToast(ToastStyle.Failure, "Something went wrong.", String(error));
+    showToast(Toast.Style.Failure, "Something went wrong.", String(error));
+    return (
+      <List isLoading={false}>
+        <List.EmptyView title="Something went wrong" description={String(error)} />
+      </List>
+    );
   }
 
-  return (
-    <List isLoading={loading} searchBarPlaceholder="Search songs...">
-      <List.Section title="Results">
-        {artists.map((a, idx) => {
-          const artist = a as Artist;
-          const image = artist.image.find((image) => image.size === "large")?.["#text"];
+  // Memoized search bar accessory
+  const searchBarAccessory = useMemo(
+    () => <PeriodDropdown selectedPeriod={period} onPeriodChange={onPeriodChange} />,
+    [period, onPeriodChange],
+  );
 
-          return (
-            <List.Item
-              key={`${artist.name}-${idx}`}
-              icon={image}
-              title={artist.name}
-              accessoryTitle={artist.playcount ? `${artist.playcount} plays` : undefined}
-              accessoryIcon={artist.playcount ? Icon.Star : undefined}
-              actions={
-                <ActionPanel>
-                  <OpenInBrowserAction url={artist.url} title="Open on Last.fm" />
-                  <CopyToClipboardAction title="Copy URL to Clipboard" content={artist.url} />
-                  <CopyToClipboardAction title="Copy Name to Clipboard" content={artist.name} />
-                </ActionPanel>
-              }
-            />
-          );
-        })}
-      </List.Section>
+  return (
+    <List isLoading={loading} searchBarPlaceholder="Search artists..." searchBarAccessory={searchBarAccessory}>
+      <ListResults items={processedData} />
     </List>
   );
 };
 
-export default LastFm;
+export default TopArtists;
