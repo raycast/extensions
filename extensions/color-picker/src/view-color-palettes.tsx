@@ -43,7 +43,7 @@ export default function Command() {
             key={palette.id}
             icon={{
               source: palette.mode === "dark" ? Icon.Moon : Icon.Sun,
-              tintColor: palette.mode === "dark" ? "#000000" : "#ffffff",
+              tintColor: "#ffffff",
             }}
             title={palette.name}
             keywords={palette.keywords || []}
