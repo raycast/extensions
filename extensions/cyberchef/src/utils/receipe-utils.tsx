@@ -1,6 +1,8 @@
-import { Clipboard, open, getSelectedText, Toast, showToast, popToRoot } from "@raycast/api";
+import { Clipboard, open, getSelectedText, getPreferenceValues, Toast, showToast, popToRoot } from "@raycast/api";
 import queryString from "query-string";
 import { Props } from "./types";
+
+export const CYBERCHEF_URL = getPreferenceValues<ExtensionPreferences>().cyberChefUrl;
 
 export const runCyberchefRecipe = async ({ recipe }: Props) => {
   const text = await getText();
@@ -11,7 +13,7 @@ export const runCyberchefRecipe = async ({ recipe }: Props) => {
       recipe,
       input,
     });
-    open(`https://gchq.github.io/CyberChef/#${queryParams}`);
+    open(`${CYBERCHEF_URL}/#${queryParams}`);
     popToRoot({ clearSearchBar: true });
   } else {
     showToast({
@@ -40,6 +42,5 @@ export const buildUrl = (recipe: string, args: string | undefined, data: string)
     input,
     args: args || "()",
   });
-
-  return `https://gchq.github.io/CyberChef/#${queryParams}`;
+  return `${CYBERCHEF_URL}/#${queryParams}`;
 };
