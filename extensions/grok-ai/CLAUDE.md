@@ -40,6 +40,9 @@ This is a Raycast extension for integrating xAI's Grok API. The codebase follows
 ### API Configuration
 - Default model: `grok-3-mini-fast-beta`
 - Authentication via Bearer token from user preferences
+- Dynamic model fetching from xAI API at `/v1/models` endpoint
+- Automatic fallback to hardcoded models if API fails
+- 1-hour cache for fetched models to reduce API calls
 - Supports custom model creation and management
 
 ### Dependencies
