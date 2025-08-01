@@ -83,8 +83,8 @@ export function FormKeywordsFields({ data, form, actions }: FormKeywordsFieldsPr
         info="Pick one or more Keywords. Keywords will be used to search and filter Color Palettes. If the Keywords list is empty, add them through the Update Keywords field. To remove a keyword from the Keywords list, enter !keyword-to-remove in the Update Keywords field."
         {...actions.focus("keywords")}
       >
-        {availableKeywords.map((keyword, idx) => (
-          <Form.TagPicker.Item key={idx} value={keyword} title={keyword} />
+        {availableKeywords.map((keyword) => (
+          <Form.TagPicker.Item key={keyword} value={keyword} title={keyword} />
         ))}
       </Form.TagPicker>
 
