@@ -54,7 +54,7 @@ runTest("Valid keywords are accepted", () => {
   assert(isValidKeyword("web-design"), "Should accept multiple hyphens");
   assert(isValidKeyword("aa"), "Should accept minimum length");
   assert(isValidKeyword("a".repeat(20)), "Should accept maximum length");
-  assert(isValidKeyword("123"), "Should accept numbers only (valid according to rules)");
+  assert(isValidKeyword("123"), "Should accept numbers");
   assert(isValidKeyword("HTML5"), "Should accept alphanumeric mix");
 });
 
