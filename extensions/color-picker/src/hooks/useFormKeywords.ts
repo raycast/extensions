@@ -1,6 +1,6 @@
 import { useLocalStorage } from "@raycast/utils";
 import { PaletteFormFields, UpdateKeywordsPromiseResult, UseFormKeywordsObject } from "../types";
-import { filterValidKeywords } from "../utils/keywordValidation";
+import { filterValidKeywords, isValidKeyword } from "../utils/keywordValidation";
 
 type UseFormKeywordsReturn = {
   keywords: UseFormKeywordsObject;
@@ -33,7 +33,7 @@ export function useFormKeywords(initialValues?: PaletteFormFields): UseFormKeywo
 
     // Validate add keywords
     const validAddKeywords = filterValidKeywords(addKeywords);
-    const invalidAddKeywords = addKeywords.filter((k) => !filterValidKeywords([k]).length);
+    const invalidAddKeywords = addKeywords.filter((k) => !isValidKeyword(k));
 
     let newKeywords = [...(keywords ?? [])];
     const actuallyRemoved: string[] = [];
