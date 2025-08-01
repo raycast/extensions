@@ -20,9 +20,15 @@ async function loadHistory(): Promise<Chat[]> {
       const storedHistory = await LocalStorage.getItem<string>("history");
 
       if (storedHistory) {
-        const parsed = JSON.parse(storedHistory);
-        historyCache = parsed;
-        return parsed;
+        try {
+          const parsed = JSON.parse(storedHistory);
+          historyCache = parsed;
+          return parsed;
+        } catch (error) {
+          console.log("[DEBUG] Failed to parse stored history, using empty array", error);
+          historyCache = [];
+          return [];
+        }
       }
 
       historyCache = [];

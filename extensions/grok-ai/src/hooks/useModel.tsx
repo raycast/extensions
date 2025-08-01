@@ -112,8 +112,13 @@ export function useModel(): ModelHook {
 
         if (cachedModels && cacheTTL && now < parseInt(cacheTTL)) {
           debugLog("Using cached API models");
-          apiModels = JSON.parse(cachedModels);
-          needsFetch = false;
+          try {
+            apiModels = JSON.parse(cachedModels);
+            needsFetch = false;
+          } catch (error) {
+            debugLog("Failed to parse cached models, will fetch fresh", error);
+            needsFetch = true;
+          }
         }
 
         if (needsFetch && apiKey) {
@@ -142,9 +147,13 @@ export function useModel(): ModelHook {
         }
 
         // Load user's custom models
-        const storedModels: Model[] | Record<string, Model> = JSON.parse(
-          (await LocalStorage.getItem<string>("models")) || "{}",
-        );
+        let storedModels: Model[] | Record<string, Model> = {};
+        try {
+          storedModels = JSON.parse((await LocalStorage.getItem<string>("models")) || "{}");
+        } catch (error) {
+          debugLog("Failed to parse stored models, using empty object", error);
+          storedModels = {};
+        }
 
         let customModels: Record<string, Model> = {};
         if (Array.isArray(storedModels)) {

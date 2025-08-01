@@ -17,7 +17,7 @@ function debugLog<T>(message: string, data?: T) {
 }
 
 async function callGrokAPINonStreaming(
-  params: { model: string; messages: string[]; stream: boolean },
+  params: { model: string; messages: Array<{ role: string; content: string }>; stream: boolean },
   options: { signal: AbortSignal; onRetry?: (attempt: number) => void },
 ) {
   const apiKey = getPreferenceValues<{ apiKey: string }>().apiKey;
@@ -38,12 +38,12 @@ async function callGrokAPINonStreaming(
   const recoveryManager = new StreamRecoveryManager({
     maxRetries: 3,
     enablePartialRecovery: false,
+    onRetry: options.onRetry,
   });
 
-  let lastError: any;
+  let lastError: Error | null = null;
 
-  const maxRetries = 3;
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+  while (true) {
     try {
       const response = await fetch(endpoint, {
         method: "POST",
@@ -57,36 +57,35 @@ async function callGrokAPINonStreaming(
       if (!response.ok) {
         const errorText = await response.text();
         debugLog("API Error Response", { errorText });
-        lastError = { statusCode: response.status, message: errorText || response.statusText };
+        const error = new Error(`HTTP ${response.status}: ${errorText || response.statusText}`) as Error & {
+          statusCode: number;
+        };
+        error.statusCode = response.status;
 
-        const streamError = recoveryManager.classifyError(lastError);
+        const streamError = recoveryManager.classifyError(error);
         if (await recoveryManager.shouldRetry(streamError)) {
-          options.onRetry?.(attempt + 1);
           await recoveryManager.prepareRetry(streamError);
           continue;
         }
-        throw new Error(`HTTP ${response.status}: ${errorText || response.statusText}`);
+        throw error;
       }
 
       const json = await response.json();
       debugLog("API Non-Streaming Response", json);
       return json;
     } catch (error) {
-      lastError = error;
+      lastError = error instanceof Error ? error : new Error(String(error));
       const streamError = recoveryManager.classifyError(error);
 
-      if ((await recoveryManager.shouldRetry(streamError)) && attempt < maxRetries) {
-        options.onRetry?.(attempt + 1);
+      if (await recoveryManager.shouldRetry(streamError)) {
         await recoveryManager.prepareRetry(streamError);
         continue;
       }
 
-      debugLog("API Call Failed", { error: String(error), stack: error instanceof Error ? error.stack : undefined });
-      throw error;
+      debugLog("API Call Failed", { error: String(error), stack: lastError.stack });
+      throw lastError;
     }
   }
-
-  throw lastError;
 }
 
 function getErrorMessage(error: any): string {
@@ -213,20 +212,20 @@ export function useEnhancedChat<T extends Chat>(props: T[]): ChatHook {
           },
           body: JSON.stringify({
             model: model.option || DEFAULT_MODEL.id,
-            messages: messages as unknown as string[],
+            messages: messages,
             stream: true,
           }),
           signal: abortSignal,
         });
 
-        chat.answer = currentChatRef.current?.answer || robustStreaming.data;
+        chat.answer = currentChatRef.current?.answer || robustStreaming.data || "";
         currentChatRef.current = null;
         setStreamData(undefined);
       } else {
         const response = await callGrokAPINonStreaming(
           {
             model: model.option || DEFAULT_MODEL.id,
-            messages: messages as unknown as string[],
+            messages: messages,
             stream: false,
           },
           {

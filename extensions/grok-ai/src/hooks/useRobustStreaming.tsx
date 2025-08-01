@@ -132,7 +132,9 @@ export function useRobustStreaming(hookOptions: UseRobustStreamingOptions = {}) 
         });
 
         if (!response.ok) {
-          throw { statusCode: response.status, message: `HTTP ${response.status}` };
+          const error = new Error(`HTTP ${response.status}`) as Error & { statusCode: number };
+          error.statusCode = response.status;
+          throw error;
         }
 
         if (!response.body) {
