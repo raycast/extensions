@@ -1,5 +1,10 @@
 # Color Picker Changelog
 
+## [Color Palette Management] - {PR_MERGE_DATE}
+
+- Add `save-color-palette` command to create and save color palettes
+- Add `view-color-palettes` command to browse, search, and manage saved palettes (edit, duplicate, delete existing palettes), including multi-format palette copy system (JSON, CSS Classes, CSS Variables, Plain Text)
+
 ## [Bugfix] - 2025-06-05
 
 - Add a new callback return value `formattedColor` to return the color in the user's preferred format

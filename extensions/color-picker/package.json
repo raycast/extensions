@@ -16,7 +16,8 @@
     "samuelkraft",
     "ridemountainpig",
     "xilopaint",
-    "anwarulislam"
+    "anwarulislam",
+    "elibattistoni"
   ],
   "categories": [
     "Design Tools"
@@ -144,6 +145,20 @@
           "placeholder": "#FF6363"
         }
       ]
+    },
+    {
+      "name": "save-color-palette",
+      "title": "Save Color Palette",
+      "subtitle": "Color Palette Form",
+      "description": "Create and save color palettes with selected colors",
+      "mode": "view"
+    },
+    {
+      "name": "view-color-palettes",
+      "title": "View Color Palettes",
+      "subtitle": "List of Saved Color Palettes",
+      "description": "View and manage saved color palettes",
+      "mode": "view"
     }
   ],
   "preferences": [

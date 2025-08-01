@@ -13,16 +13,31 @@ import {
   showToast,
 } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
+import { useMemo } from "react";
 import CopyAsSubmenu from "./components/CopyAsSubmenu";
 import { EditTitle } from "./components/EditTitle";
 import { useHistory } from "./history";
-import { HistoryItem } from "./types";
+import { useColorsSelection } from "./hooks/useColorsSelection";
+import { ColorItem, OrganizeColorsActionsProps } from "./types";
 import { getFormattedColor, getPreviewColor } from "./utils";
 
 const preferences: Preferences.OrganizeColors = getPreferenceValues();
 
 export default function Command() {
   const { history } = useHistory();
+
+  // Memoize ColorItems creation to avoid recreation on every render
+  const colorItems: ColorItem[] | undefined = useMemo(() => {
+    return history?.map((historyItem) => {
+      const formattedColor = getFormattedColor(historyItem.color);
+      return {
+        id: `${historyItem.date}-${formattedColor}`,
+        color: formattedColor,
+      };
+    });
+  }, [history]);
+
+  const { selection } = useColorsSelection(colorItems);
 
   return (
     <Grid>
@@ -51,21 +66,40 @@ export default function Command() {
           </ActionPanel>
         }
       />
-      {history?.map((historyItem) => {
-        const formattedColor = getFormattedColor(historyItem.color);
+      {history?.map((historyItem, index) => {
+        const colorItem = colorItems?.[index];
+
+        // Skip if colorItem is undefined (shouldn't happen with proper mapping)
+        if (!colorItem) {
+          return null;
+        }
+
+        const formattedColor = colorItem.color;
         const previewColor = getPreviewColor(historyItem.color);
-        const color = { light: previewColor, dark: previewColor, adjustContrast: false };
+
+        const isSelected = selection.helpers.getIsItemSelected(colorItem);
+        const content = isSelected
+          ? { source: Icon.CircleFilled, tintColor: { light: previewColor, dark: previewColor, adjustContrast: true } }
+          : { color: previewColor };
 
         return (
           <Grid.Item
-            key={formattedColor}
-            content={historyItem.title ? { value: { color }, tooltip: historyItem.title } : { color }}
-            title={`${formattedColor} ${historyItem.title ?? ""}`}
+            key={colorItem.id}
+            content={content}
+            title={`${isSelected ? "✓ " : ""}${formattedColor} ${historyItem.title ?? ""}`}
             subtitle={new Date(historyItem.date).toLocaleString(undefined, {
               dateStyle: "medium",
               timeStyle: "short",
             })}
-            actions={<Actions historyItem={historyItem} />}
+            actions={
+              <Actions
+                historyItem={historyItem}
+                colorItem={colorItem}
+                formattedColor={formattedColor}
+                isSelected={isSelected}
+                selection={selection}
+              />
+            }
           />
         );
       })}
@@ -73,15 +107,19 @@ export default function Command() {
   );
 }
 
-function Actions({ historyItem }: { historyItem: HistoryItem }) {
+function Actions({ historyItem, colorItem, formattedColor, isSelected, selection }: OrganizeColorsActionsProps) {
   const { remove, clear, edit } = useHistory();
   const { data: frontmostApp } = usePromise(getFrontmostApplication, []);
 
+  const { toggleSelection, selectAll, clearSelection } = selection.actions;
+  const { anySelected, allSelected, selectedItems, countSelected } = selection.selected;
+
+  // Use the pre-computed values - no redundant calculations!
   const color = historyItem.color;
-  const formattedColor = getFormattedColor(color);
+
   return (
     <ActionPanel>
-      <ActionPanel.Section>
+      <ActionPanel.Section title={`Color ${formattedColor}`}>
         {preferences.primaryAction === "copy" ? (
           <>
             <Action.CopyToClipboard content={formattedColor} />
@@ -109,6 +147,51 @@ function Actions({ historyItem }: { historyItem: HistoryItem }) {
           shortcut={Keyboard.Shortcut.Common.Edit}
         />
       </ActionPanel.Section>
+
+      <ActionPanel.Section title="Save Color Palette">
+        {countSelected > 0 && (
+          <Action
+            icon={Icon.AppWindowGrid3x3}
+            title={`Save ${countSelected} Color${countSelected > 1 ? "s" : ""} as Palette`}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+            onAction={async () => {
+              const selectedColorsArray = Array.from(selectedItems);
+              try {
+                await launchCommand({
+                  name: "save-color-palette",
+                  type: LaunchType.UserInitiated,
+                  context: { selectedColors: selectedColorsArray },
+                });
+              } catch (e) {
+                await showFailureToast(e);
+              }
+            }}
+          />
+        )}
+        <Action
+          icon={isSelected ? Icon.Checkmark : Icon.Circle}
+          title={isSelected ? `Deselect Color ${formattedColor}` : `Select Color ${formattedColor}`}
+          shortcut={{ modifiers: ["cmd"], key: "s" }}
+          onAction={() => toggleSelection(colorItem)}
+        />
+        {!allSelected && (
+          <Action
+            icon={Icon.Checkmark}
+            title="Select All Colors"
+            shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+            onAction={selectAll}
+          />
+        )}
+        {anySelected && (
+          <Action
+            icon={Icon.XMarkCircle}
+            title="Clear Selection"
+            shortcut={{ modifiers: ["cmd", "shift"], key: "z" }}
+            onAction={clearSelection}
+          />
+        )}
+      </ActionPanel.Section>
+
       <ActionPanel.Section>
         <Action
           icon={Icon.Trash}
