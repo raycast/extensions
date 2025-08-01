@@ -7,25 +7,28 @@
 
 import { PaletteFormFields } from "./types";
 
-/**
- * Default form values for palette creation form initialization.
- *
- * Used when creating a new palette or resetting the form to its initial state.
- * Provides a clean starting point with one empty color field and empty metadata.
- *
- * @example
- * ```typescript
- * // Reset form to initial state
- * reset(CLEAR_FORM_VALUES);
- * ```
- */
-
+/** Default name value. */
 export const DEFAULT_NAME = "";
+
+/** Default description value. */
 export const DEFAULT_DESCRIPTION = "";
+
+/** Default display mode. */
 export const DEFAULT_MODE = "light";
+
+/** Default keywords array. */
 export const DEFAULT_KEYWORDS: string[] = [];
+
+/** Default color value. */
 export const DEFAULT_COLOR = "";
 
+/** Maximum length of name form field. */
+export const NAME_FIELD_MAXLENGTH = 30;
+
+/** Maximum length of description form field. */
+export const DESCRIPTION_FIELD_MAXLENGTH = 200;
+
+/** Default form values. */
 export const CLEAR_FORM_VALUES: PaletteFormFields = {
   /** Default empty name */
   name: DEFAULT_NAME,

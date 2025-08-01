@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { CLEAR_FORM_VALUES } from "../constants";
+import { CLEAR_FORM_VALUES, NAME_FIELD_MAXLENGTH } from "../constants";
 import { ColorItem, PaletteFormFields } from "../types";
 
 type UseFormSetupReturn = {
@@ -37,7 +37,7 @@ export function useFormSetup({
     // 2. Selected colors
     if (selectedColors.length > 0) {
       if (AIprompt) {
-        if (AIprompt.length <= 30) {
+        if (AIprompt.length <= NAME_FIELD_MAXLENGTH) {
           values.name = AIprompt;
         } else {
           values.description = AIprompt;

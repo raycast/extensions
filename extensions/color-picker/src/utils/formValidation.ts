@@ -1,25 +1,26 @@
 import { FormValidation } from "@raycast/utils";
+import { DESCRIPTION_FIELD_MAXLENGTH, NAME_FIELD_MAXLENGTH } from "../constants";
 import { isValidHexColor } from "./isValidHexColor";
 
 /** Creates validation rules for palette form fields. */
 export function formValidation(colorCount: number) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const rules: Record<string, any> = {
-    /** Name: required, max 30 characters */
+    /** Name: required, max ... characters */
     name: (value: string) => {
       if (!value) {
         return FormValidation.Required;
       }
-      if (value.length > 30) {
-        return "Limit exceeded: keep it under 30 characters";
+      if (value.length > NAME_FIELD_MAXLENGTH) {
+        return `Limit exceeded: keep it under ${NAME_FIELD_MAXLENGTH} characters`;
       }
     },
     /** Mode: required selection */
     mode: FormValidation.Required,
-    /** Description: optional, max 200 characters */
+    /** Description: optional, max ... characters */
     description: (value: string) => {
-      if (value && value.length > 200) {
-        return "Limit exceeded: keep it under 200 characters";
+      if (value && value.length > DESCRIPTION_FIELD_MAXLENGTH) {
+        return `Limit exceeded: keep it under ${DESCRIPTION_FIELD_MAXLENGTH} characters`;
       }
     },
   };

@@ -2,6 +2,7 @@ import { Form, Icon } from "@raycast/api";
 import { FormColorsFields } from "./components/palette/FormColorsFields";
 import { FormKeywordsFields } from "./components/palette/FormKeywordsFields";
 import { SavePaletteActions } from "./components/palette/SavePaletteActions";
+import { DESCRIPTION_FIELD_MAXLENGTH, NAME_FIELD_MAXLENGTH } from "./constants";
 import { useFormActions } from "./hooks/useFormActions";
 import { useFormColors } from "./hooks/useFormColors";
 import { useFormFocus } from "./hooks/useFormFocus";
@@ -45,13 +46,13 @@ export default function Command(props: SavePaletteFormProps) {
       <Form.TextField
         {...form.items.name}
         title="Name*"
-        info="Insert the name of your Color Palette (max 30 characters)"
+        info={`Insert the name of your Color Palette (max ${NAME_FIELD_MAXLENGTH} characters)`}
         {...focus.create("name")}
       />
       <Form.TextArea
         {...form.items.description}
         title="Description"
-        info="Insert a short description (optional, max 200 characters)."
+        info={`Insert a short description (optional, max ${DESCRIPTION_FIELD_MAXLENGTH} characters).`}
         {...focus.create("description")}
       />
       <Form.Dropdown {...form.items.mode} title="Mode*" {...focus.create("mode")}>
