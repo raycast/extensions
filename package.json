@@ -5,7 +5,7 @@
   "description": "This is a IPScan",
   "icon": "extension-icon.png",
   "categories": ["Other"],
-  "author": "lodolog",
+  "author": "lfazioli",
   "license": "MIT",
   "commands": [
     {
