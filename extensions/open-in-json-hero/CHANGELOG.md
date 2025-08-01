@@ -1,6 +1,6 @@
 # Open in JSON Hero Changelog
 
-## [QoL Enhancements + Modernize] - {PR_MERGE_DATE}
+## [QoL Enhancements + Modernize] - 2025-08-01
 
 - See more `Toast`s so you know what's happening
 - If there is no domain in `Preferences`, automatically use the default
