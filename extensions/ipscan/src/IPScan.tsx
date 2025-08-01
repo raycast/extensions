@@ -35,7 +35,7 @@ export default function PortScanner() {
   async function handleSubmit(values: { ip: string }) {
     setLoading(true);
     setOpenPorts(null);
-    await showToast({ title: "Scansione in corso...", style: Toast.Style.Animated });
+    await showToast({ title: "Scanning in progress...", style: Toast.Style.Animated });
 
     const portsToScan = Array.from({ length: 1024 }, (_, i) => i + 1);
     const results = await Promise.all(
@@ -47,11 +47,11 @@ export default function PortScanner() {
     setLoading(false);
 
     if (found.length === 0) {
-      await showToast({ title: "Nessuna porta aperta trovata", style: Toast.Style.Failure });
+      await showToast({ title: "No open ports found", style: Toast.Style.Failure });
     } else {
       await showToast({
-        title: "Scansione completata",
-        message: `${found.length} porte aperte`,
+        title: "Scan completed",
+        message: `${found.length} open ports`,
         style: Toast.Style.Success,
       });
     }
