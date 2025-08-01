@@ -1,4 +1,6 @@
 import { getSelectedFinderItems, showToast, Toast, Clipboard } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import { lstat } from "fs/promises";
 import {
   executeInTerminal,
   showTerminalSuccessToast,
@@ -11,11 +13,11 @@ interface FileSystemItem {
 }
 
 /**
- * 智能选择最适合的项目
- * 优先级: 目录 > 文件
- * 如果多个文件在同一目录，选择父目录
+ * Intelligently select the best project
+ * Priority: Directory > File
+ * If multiple files are in the same directory, select the parent directory
  */
-function selectBestItem(items: FileSystemItem[]): FileSystemItem {
+async function selectBestItem(items: FileSystemItem[]): Promise<FileSystemItem> {
   if (items.length === 0) {
     throw new Error("No items selected");
   }
@@ -24,59 +26,83 @@ function selectBestItem(items: FileSystemItem[]): FileSystemItem {
     return items[0];
   }
 
-  // 分离目录和文件
-  const directories = items.filter((item) => !item.path.split("/").pop()?.includes("."));
-  const files = items.filter((item) => item.path.split("/").pop()?.includes("."));
+  // Separate directories and files using filesystem checks
+  const directories: FileSystemItem[] = [];
+  const files: FileSystemItem[] = [];
 
-  // 优先返回目录
+  for (const item of items) {
+    try {
+      const stats = await lstat(item.path);
+      if (stats.isDirectory()) {
+        directories.push(item);
+      } else {
+        files.push(item);
+      }
+    } catch (error) {
+      // If we can't stat the file, treat it as a file by default
+      console.warn(`Failed to stat ${item.path}:`, error);
+      files.push(item);
+    }
+  }
+
+  // Prioritize directories
   if (directories.length > 0) {
     return directories[0];
   }
 
-  // 检查是否所有文件都在同一目录
+  // Check if all files are in the same directory
   if (files.length > 1) {
     const firstFileDir = files[0].path.split("/").slice(0, -1).join("/");
     const allInSameDir = files.every((file) => file.path.split("/").slice(0, -1).join("/") === firstFileDir);
 
     if (allInSameDir) {
-      // 返回父目录
+      // Return parent directory
       return { path: firstFileDir };
     }
   }
 
-  // 默认返回第一个文件
+  // Default to first file
   return files[0];
 }
 
 /**
- * 构建 Claude Code 命令
+ * Build Claude Code command
  */
-function buildClaudeCommand(item: FileSystemItem): { command: string; targetDir: string; fileName: string } {
+async function buildClaudeCommand(
+  item: FileSystemItem,
+): Promise<{ command: string; targetDir: string; fileName: string }> {
   const fileName = item.path.split("/").pop() || item.path;
-  const isFile = fileName.includes(".");
 
-  // 确定目标目录
+  let isFile = false;
+  try {
+    const stats = await lstat(item.path);
+    isFile = !stats.isDirectory();
+  } catch (error) {
+    // If we can't stat the item, fall back to filename-based detection as a last resort
+    console.warn(`Failed to stat ${item.path}:`, error);
+    isFile = fileName.includes(".");
+  }
+
+  // Determine target directory
   const targetDir = isFile ? item.path.split("/").slice(0, -1).join("/") : item.path;
 
-  // 构建命令
+  // Build command
   const command = `cd "${targetDir}" && claude --add-dir "${item.path}"`;
 
   return { command, targetDir, fileName };
 }
 
 /**
- * 主函数 - no-view 模式入口
+ * Main function - no-view mode entry point
  */
 export default async function main() {
   try {
-    // 显示启动提示
     await showToast({
       style: Toast.Style.Animated,
       title: "Launching Claude Code...",
       message: "Getting Finder selection",
     });
 
-    // 1. 获取 Finder 选中项
     let items: FileSystemItem[];
     try {
       items = await getSelectedFinderItems();
@@ -90,13 +116,10 @@ export default async function main() {
       throw new Error("No items selected in Finder. Please select a file or directory first.");
     }
 
-    // 2. 智能选择最适合的项目
-    const targetItem = selectBestItem(items);
+    const targetItem = await selectBestItem(items);
 
-    // 3. 构建命令
-    const { command, fileName } = buildClaudeCommand(targetItem);
+    const { command, fileName } = await buildClaudeCommand(targetItem);
 
-    // 4. 执行命令
     await showToast({
       style: Toast.Style.Animated,
       title: "Launching Claude Code",
@@ -105,20 +128,18 @@ export default async function main() {
 
     const result = await executeInTerminal(command);
 
-    // 5. 处理结果
+    // 5. Handle result
     if (result.success) {
       await showTerminalSuccessToast(result.terminalUsed, fileName);
     } else {
-      // 复制手动命令到剪贴板
+      // Copy manual command to clipboard
       const manualCommand = getManualCommand(command);
       await Clipboard.copy(manualCommand);
 
       await showTerminalErrorToast(manualCommand, fileName);
 
-      await showToast({
-        style: Toast.Style.Failure,
+      showFailureToast(new Error("Check if Claude Code is installed. Command copied to clipboard."), {
         title: "Launch Failed",
-        message: "Check if Claude Code is installed. Command copied to clipboard.",
       });
     }
   } catch (error) {
@@ -126,20 +147,19 @@ export default async function main() {
 
     const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
 
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to Launch Claude Code",
-      message: errorMessage,
-    });
+    showFailureToast(new Error(errorMessage), { title: "Failed to Launch Claude Code" });
 
-    // 如果是选择相关的错误，提供使用指导
     if (errorMessage.includes("Finder") || errorMessage.includes("select")) {
       setTimeout(async () => {
-        await showToast({
-          style: Toast.Style.Success,
-          title: "How to Use",
-          message: "1. Select file/folder in Finder 2. Run this command",
-        });
+        try {
+          await showToast({
+            style: Toast.Style.Success,
+            title: "How to Use",
+            message: "1. Select file/folder in Finder 2. Run this command",
+          });
+        } catch (error) {
+          console.error("Error showing usage toast:", error);
+        }
       }, 2000);
     }
   }

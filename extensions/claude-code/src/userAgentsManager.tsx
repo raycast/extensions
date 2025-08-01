@@ -10,8 +10,9 @@ import {
   useNavigation,
   Icon,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
-import { readFileSync, writeFileSync, readdirSync, statSync, unlinkSync, mkdirSync } from "fs";
+import { readFileSync, writeFileSync, readdirSync, statSync, unlinkSync, mkdirSync, existsSync } from "fs";
 import { join, dirname, extname, basename } from "path";
 import { homedir } from "os";
 
@@ -266,6 +267,28 @@ class AgentScanner {
       throw error;
     }
   }
+
+  renameAgent(oldFilePath: string, newFilePath: string): void {
+    try {
+      // Read the old file content
+      const content = readFileSync(oldFilePath, "utf8");
+
+      // Write to new location
+      const dir = dirname(newFilePath);
+      mkdirSync(dir, { recursive: true });
+      writeFileSync(newFilePath, content, "utf8");
+
+      // Delete old file
+      unlinkSync(oldFilePath);
+    } catch (error) {
+      console.error("Error renaming agent:", error);
+      throw error;
+    }
+  }
+
+  fileExists(filePath: string): boolean {
+    return existsSync(filePath);
+  }
 }
 
 // Main Component
@@ -285,11 +308,7 @@ export default function UserAgentsManager() {
       const scannedAgents = scanner.scanAgents();
       setAgents(scannedAgents);
     } catch {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: "Failed to load agents",
-      });
+      showFailureToast(new Error("Failed to load agents"), { title: "Failed to load agents" });
     } finally {
       setIsLoading(false);
     }
@@ -322,11 +341,7 @@ export default function UserAgentsManager() {
           message: `Deleted agent "${agent.name}"`,
         });
       } catch {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Error",
-          message: "Failed to delete agent",
-        });
+        showFailureToast(new Error("Failed to delete agent"), { title: "Failed to delete agent" });
       }
     }
   };
@@ -452,8 +467,60 @@ function AgentForm({ agent, scanner, onSave }: { agent?: Agent; scanner: AgentSc
     try {
       const agentsDir = join(homedir(), ".claude", "agents");
       const fileType = isEditing ? agent?.fileType || "md" : values.fileType || "md";
-      const fileName = `${values.name}.${fileType}`;
-      const filePath = join(agentsDir, fileName);
+
+      // Determine the final file path
+      let finalFilePath: string;
+      let needsRename = false;
+
+      if (isEditing && agent) {
+        // For editing, check if name changed
+        const newFileName = `${values.name}.${fileType}`;
+        const newFilePath = join(agentsDir, newFileName);
+        const originalName = basename(agent.filePath, `.${agent.fileType}`);
+
+        if (values.name !== originalName) {
+          // Name changed, check for collisions
+          if (scanner.fileExists(newFilePath)) {
+            const confirmed = await confirmAlert({
+              title: "File Already Exists",
+              message: `An agent named "${values.name}" already exists. This will overwrite the existing file.`,
+              primaryAction: {
+                title: "Overwrite",
+                style: Alert.ActionStyle.Destructive,
+              },
+            });
+
+            if (!confirmed) {
+              return;
+            }
+          }
+
+          finalFilePath = newFilePath;
+          needsRename = true;
+        } else {
+          // Name didn't change, keep original path
+          finalFilePath = agent.filePath;
+        }
+      } else {
+        // For new agents, create the path and check for collisions
+        const fileName = `${values.name}.${fileType}`;
+        finalFilePath = join(agentsDir, fileName);
+
+        if (scanner.fileExists(finalFilePath)) {
+          const confirmed = await confirmAlert({
+            title: "File Already Exists",
+            message: `An agent named "${values.name}" already exists. This will overwrite the existing file.`,
+            primaryAction: {
+              title: "Overwrite",
+              style: Alert.ActionStyle.Destructive,
+            },
+          });
+
+          if (!confirmed) {
+            return;
+          }
+        }
+      }
 
       // Parse custom parameters
       const customParams: Record<string, unknown> = {};
@@ -474,10 +541,8 @@ function AgentForm({ agent, scanner, onSave }: { agent?: Agent; scanner: AgentSc
             }
           }
         } catch {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Error",
-            message: "Invalid custom parameters format",
+          showFailureToast(new Error("Invalid custom parameters format"), {
+            title: "Invalid custom parameters format",
           });
           return;
         }
@@ -494,7 +559,7 @@ function AgentForm({ agent, scanner, onSave }: { agent?: Agent; scanner: AgentSc
               .filter(Boolean)
           : [],
         color: values.color || "blue",
-        filePath: agent?.filePath || filePath,
+        filePath: finalFilePath,
         fileType,
         content: values.content,
         metadata: {
@@ -511,7 +576,16 @@ function AgentForm({ agent, scanner, onSave }: { agent?: Agent; scanner: AgentSc
         },
       };
 
-      scanner.saveAgent(newAgent);
+      // Handle file operations
+      if (isEditing && agent && needsRename) {
+        // Rename the file (this will also save the new content)
+        scanner.renameAgent(agent.filePath, finalFilePath);
+        // Now update the content with the new values
+        scanner.saveAgent(newAgent);
+      } else {
+        // Normal save operation
+        scanner.saveAgent(newAgent);
+      }
 
       await showToast({
         style: Toast.Style.Success,
@@ -522,10 +596,8 @@ function AgentForm({ agent, scanner, onSave }: { agent?: Agent; scanner: AgentSc
       onSave();
       pop();
     } catch {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: `Failed to ${isEditing ? "update" : "create"} agent`,
+      showFailureToast(new Error(`Failed to ${isEditing ? "update" : "create"} agent`), {
+        title: `Failed to ${isEditing ? "update" : "create"} agent`,
       });
     }
   };

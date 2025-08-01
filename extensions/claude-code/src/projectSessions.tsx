@@ -1,4 +1,5 @@
 import { List, ActionPanel, Action, showToast, Toast, Icon, confirmAlert, Alert } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { readdir, readFile, stat, unlink } from "fs/promises";
 import { join, basename } from "path";
@@ -410,10 +411,8 @@ export default function ProjectSessions({ projectDirectory, projectName, encoded
     } catch (error) {
       console.error("Error deleting session file:", error);
 
-      await showToast({
-        style: Toast.Style.Failure,
+      showFailureToast(error instanceof Error ? error : new Error("Failed to delete session file"), {
         title: "Delete Failed",
-        message: error instanceof Error ? error.message : "Failed to delete session file",
       });
 
       return false;
@@ -503,11 +502,15 @@ export default function ProjectSessions({ projectDirectory, projectName, encoded
               <Action
                 title="Show Full Description"
                 onAction={async () => {
-                  await showToast({
-                    style: Toast.Style.Animated,
-                    title: "Session Description",
-                    message: session.description,
-                  });
+                  try {
+                    await showToast({
+                      style: Toast.Style.Animated,
+                      title: "Session Description",
+                      message: session.description,
+                    });
+                  } catch (error) {
+                    console.error("Error showing description toast:", error);
+                  }
                 }}
                 shortcut={{ modifiers: ["cmd"], key: "i" }}
               />
@@ -533,18 +536,25 @@ function ResumeSessionAction({ session }: { session: Session }) {
     <Action
       title="Resume Session"
       onAction={async () => {
-        const result = await executeInTerminal(resumeCommand);
+        try {
+          const result = await executeInTerminal(resumeCommand);
 
-        if (result.success) {
-          await showTerminalSuccessToast(
-            result.terminalUsed,
-            `Claude Code session in ${getProjectName(session.directory)}`,
-          );
-        } else {
-          await showTerminalErrorToast(
-            getManualCommand(resumeCommand),
-            `Claude Code session in ${getProjectName(session.directory)}`,
-          );
+          if (result.success) {
+            await showTerminalSuccessToast(
+              result.terminalUsed,
+              `Claude Code session in ${getProjectName(session.directory)}`,
+            );
+          } else {
+            await showTerminalErrorToast(
+              getManualCommand(resumeCommand),
+              `Claude Code session in ${getProjectName(session.directory)}`,
+            );
+          }
+        } catch (error) {
+          console.error("Error resuming session:", error);
+          showFailureToast(error instanceof Error ? error : new Error("Failed to resume session"), {
+            title: "Resume Failed",
+          });
         }
       }}
       icon={Icon.Play}

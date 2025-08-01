@@ -12,10 +12,9 @@ Claude Code for Raycast is a powerful extension that seamlessly connects Raycast
 - **⚙️ User Command Manager** - Custom command creation and management system
 - **🤖 User Agents Manager** - Claude Code subagent creation and management
 
-
 ### Prerequisites
 
-- [Claude Code CLI](https://claude.ai/code) installed and configured
+Ensure the [Claude Code CLI](https://claude.ai/code) is installed and properly configured. If you haven't set it up yet, follow [this official installation guide](https://www.anthropic.com/claude-code).
 
 ## Commands
 
@@ -42,3 +41,12 @@ The extension integrates with Claude Code CLI through multiple command patterns:
 - Context launching: `claude --add-dir "{path}"`
 - Project launching with proper path resolution and escaping
 
+## How it Works? / Privacy
+
+How does this extension work? This extension reads local data from your `~/.claude` directory (macOS/Linux). It retrieves your Claude Code (Anthropic) CLI configuration and session data from these locations. When accessing AI sessions or projects, the extension interacts directly with the Claude Code CLI, using your local credentials and configuration—just as if you were running commands in your own terminal. If your authentication expires, simply re-authenticate via the Claude Code CLI to restore access.
+
+What data does this extension collect? This extension does not collect or transmit any user data. It only reads from your local Claude Code (Anthropic) configuration and session files, and interacts with the Claude Code CLI in the same way you would manually.
+
+## Support
+
+This plugin is an independent project and is not affiliated with, endorsed by, or in any way officially connected to Anthropic Inc. All trademarks and copyrights related to Claude Code and Anthropic are the property of their respective owners.
