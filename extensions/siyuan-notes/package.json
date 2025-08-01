@@ -1,0 +1,120 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "siyuan-notes",
+  "version": "1.0.0",
+  "title": "Siyuan Notes",
+  "description": "思源笔记扩展，支持搜索、创建笔记和每日记录。",
+  "icon": "icon.png",
+  "author": "carpediem",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-notes",
+      "title": "Search Notes",
+      "description": "快速搜索思源笔记文档和块内容",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "输入搜索关键词",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "path",
+          "placeholder": "输入路径关键词筛选",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "create-note",
+      "title": "Create Note",
+      "description": "在指定笔记本中创建新的思源笔记文档",
+      "mode": "view"
+    },
+    {
+      "name": "add-to-daily-note",
+      "title": "Add to Daily Note",
+      "description": "快速添加内容到今天的每日笔记中",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "content",
+          "placeholder": "请输入记录内容",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "recent-notes",
+      "title": "Recent Notes",
+      "description": "查看和访问最近修改的思源笔记文档",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "siyuanUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "思源笔记服务器地址",
+      "description": "思源笔记服务器地址 (e.g., http://127.0.0.1:6806)",
+      "default": "http://127.0.0.1:6806"
+    },
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": false,
+      "title": "API Token",
+      "description": "思源笔记 API token (如果启用了身份验证)"
+    },
+    {
+      "name": "notebookId",
+      "type": "textfield",
+      "required": false,
+      "title": "默认笔记本ID",
+      "description": "创建新笔记的默认笔记本ID"
+    },
+    {
+      "name": "dailyNotePath",
+      "type": "textfield",
+      "required": false,
+      "title": "每日笔记路径模板",
+      "description": "每日笔记路径模板 (e.g., 笔记本名称/daily/{{date}})",
+      "default": "/daily note/{{date}}"
+    },
+    {
+      "name": "workspacePath",
+      "type": "textfield",
+      "required": true,
+      "title": "工作空间路径",
+      "description": "思源笔记工作区路径"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.70.0",
+    "@raycast/utils": "^1.12.5",
+    "axios": "^1.6.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "update-notebooks": "node scripts/update-notebooks.js"
+  }
+}
