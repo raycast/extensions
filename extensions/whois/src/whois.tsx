@@ -1,15 +1,10 @@
-import type { LaunchProps } from "@raycast/api";
-import { Detail } from "@raycast/api";
+import { Detail, LaunchProps } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import useDomainOrIp from "@/hooks/use-domain-or-ip";
 import useWhoisData from "@/hooks/use-whois-data";
 
-interface QueryProps {
-  input: string;
-}
-
-const WHOIS = (props: LaunchProps<{ arguments: QueryProps }>) => {
-  const input = props.arguments.input; // Get the input directly from props
+export default function Whois(props: LaunchProps<{ arguments: Arguments.Whois }>) {
+  const { input } = props.arguments;
 
   const { data: domainOrIp, isLoading: domainLoading } = useDomainOrIp(input);
   const { data: whoisData, isLoading: whoisLoading } = useWhoisData(domainOrIp, domainOrIp !== null);
@@ -27,6 +22,4 @@ const WHOIS = (props: LaunchProps<{ arguments: QueryProps }>) => {
   }
 
   return <Detail markdown={whoisData} isLoading={domainLoading || whoisLoading} />;
-};
-
-export default WHOIS;
+}
