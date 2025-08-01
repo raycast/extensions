@@ -1,5 +1,5 @@
 /**
- * Simple test runner for palette copy console.log("🧪 Running Copy Palette Tests");onsole.log("🧪 Running Copy Palette Tests");unctionality
+ * Simple test runner for palette copy functionality
  * Run with: npx ts-node src/__tests__/simple-copy-tests.ts
  */
 
