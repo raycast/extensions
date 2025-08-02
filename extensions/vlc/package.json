@@ -10,90 +10,105 @@
     {
       "name": "play",
       "title": "Play",
+      "subtitle": "Resume media playback",
       "description": "Play playback",
       "mode": "no-view"
     },
     {
       "name": "stop",
       "title": "Stop",
+      "subtitle": "Stop media playback",
       "description": "Stop playback",
       "mode": "no-view"
     },
     {
       "name": "next",
       "title": "Next",
+      "subtitle": "Skip to next track",
       "description": "Play the next track in the playlist.",
       "mode": "no-view"
     },
     {
       "name": "previous",
       "title": "Previous",
+      "subtitle": "Go to previous track",
       "description": "Previous track",
       "mode": "no-view"
     },
     {
       "name": "volume-up",
       "title": "Volume Up",
+      "subtitle": "Increase audio volume",
       "description": "Increase volume",
       "mode": "no-view"
     },
     {
       "name": "volume-down",
       "title": "Volume Down",
+      "subtitle": "Decrease audio volume",
       "description": "Decrease volume",
       "mode": "no-view"
     },
     {
       "name": "mute",
       "title": "Mute",
+      "subtitle": "Silence audio output",
       "description": "Mute the audio output.",
       "mode": "no-view"
     },
     {
       "name": "unmute",
       "title": "Unmute/Reset Volume",
+      "subtitle": "Restore audio output",
       "description": "Unmute the audio output / Reset the volume.",
       "mode": "no-view"
     },
     {
       "name": "seek-forward",
       "title": "Seek Forward",
+      "subtitle": "Jump ahead 10 seconds",
       "description": "Seek forward in playback",
       "mode": "no-view"
     },
     {
       "name": "seek-backward",
       "title": "Seek Backward",
+      "subtitle": "Jump back 10 seconds",
       "description": "Seek backward in playback",
       "mode": "no-view"
     },
     {
       "name": "toggle-fullscreen",
       "title": "Toggle Fullscreen",
+      "subtitle": "Switch between fullscreen and windowed",
       "description": "Toggle fullscreen mode",
       "mode": "no-view"
     },
     {
       "name": "toggle-loop",
       "title": "Toggle Loop",
+      "subtitle": "Enable or disable repeat playback",
       "description": "Toggle loop mode",
       "mode": "no-view"
     },
     {
       "name": "toggle-random",
       "title": "Toggle Random",
+      "subtitle": "Enable or disable shuffle mode",
       "description": "Toggle random/shuffle mode",
       "mode": "no-view"
     },
     {
       "name": "eject",
       "title": "Eject",
+      "subtitle": "Remove current media",
       "description": "Eject the current media from VLC.",
       "mode": "no-view"
     },
     {
       "name": "open",
       "title": "Open",
+      "subtitle": "Load media file with optional subtitles",
       "description": "Open a video in VLC, optionally with a subtitle file.",
       "mode": "view",
       "src": "src/open.tsx"
@@ -101,6 +116,7 @@
     {
       "name": "open-vlsub",
       "title": "Open VLsub",
+      "subtitle": "Launch subtitle download extension",
       "description": "Trigger the VLsub extension in VLC.",
       "mode": "no-view",
       "src": "src/open-vlsub.ts"
@@ -108,6 +124,7 @@
     {
       "name": "set-volume",
       "title": "Set Volume",
+      "subtitle": "Set audio volume to specific percentage",
       "description": "Set VLC volume to a specific percentage (0-125%).",
       "mode": "no-view",
       "src": "src/set-volume.tsx",

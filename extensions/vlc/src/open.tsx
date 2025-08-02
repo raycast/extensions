@@ -8,7 +8,7 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="Open in VLC"
+            title="Open in Vlc"
             onSubmit={async ({ video: [video], subtitle }) => {
               if (!video) {
                 await showHUD("Please select a video file");

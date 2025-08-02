@@ -1,15 +1,11 @@
-import { getPreferenceValues, showHUD } from "@raycast/api";
-import { VLC_REMOTE_URL } from "./constants";
+import { showHUD } from "@raycast/api";
+import { makeVLCRequest, handleVLCError } from "./utils";
 
 export default async function main() {
-  const { vlc_password } = getPreferenceValues();
-  const url = `${VLC_REMOTE_URL}?command=pl_loop`;
-  const auth = Buffer.from(`:${vlc_password}`).toString("base64");
   try {
-    const res = await fetch(url, { headers: { Authorization: `Basic ${auth}` } });
-    if (!res.ok) throw new Error("Request failed");
+    await makeVLCRequest({ command: "pl_loop" });
     await showHUD("🔁 Toggle Loop");
-  } catch {
-    await showHUD("Failed to toggle loop");
+  } catch (error) {
+    await handleVLCError(error, "toggle loop");
   }
 }

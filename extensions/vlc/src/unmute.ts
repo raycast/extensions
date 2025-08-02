@@ -1,16 +1,11 @@
-import { getPreferenceValues, showHUD } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
-import { VLC_REMOTE_URL } from "./constants";
+import { showHUD } from "@raycast/api";
+import { makeVLCRequest, handleVLCError } from "./utils";
 
 export default async function main() {
-  const { vlc_password } = getPreferenceValues();
-  const url = `${VLC_REMOTE_URL}?command=volume&val=256`;
-  const auth = Buffer.from(`:${vlc_password}`).toString("base64");
   try {
-    const res = await fetch(url, { headers: { Authorization: `Basic ${auth}` } });
-    if (!res.ok) throw new Error("Request failed");
+    await makeVLCRequest({ command: "volume", parameters: { val: "256" } });
     await showHUD("🔊 Unmuted");
   } catch (error) {
-    await showFailureToast(error, { title: "Failed to unmute" });
+    await handleVLCError(error, "unmute");
   }
 }
