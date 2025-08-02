@@ -31,6 +31,13 @@ export enum MonitorType {
   HTTP=1,
   PING=3
 }
+export enum MonitorStatus {
+  "Paused"=0,
+  "Preparing"=1,
+  "Up"=2,
+  ""=8,
+  "Down"=9,
+}
 export type Monitor = {
   id: number;
   friendly_name: string;
@@ -45,7 +52,7 @@ export type Monitor = {
   port: string;
   interval: number;
   timeout: number;
-  status: number;
+  status: MonitorStatus;
   create_datetime: number;
   logs: MonitorLog[];
 };

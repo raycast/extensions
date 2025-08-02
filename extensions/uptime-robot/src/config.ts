@@ -1,4 +1,5 @@
 import { Color, getPreferenceValues, Icon, Image } from "@raycast/api";
+import { MonitorStatus } from "./types";
 
 export const API_URL = "https://api.uptimerobot.com/v2/";
 const API_KEY = getPreferenceValues<Preferences>().main_api_key;
@@ -44,10 +45,10 @@ export const MONITOR = {
     60: "60 seconds",
   },
 };
-export const MONITOR_ICONS: Record<number, Image.ImageLike> = {
+export const MONITOR_ICONS: Record<MonitorStatus, Image.ImageLike> = {
   0: { source: Icon.Pause, tintColor: Color.Yellow },
   1: { source: Icon.CircleFilled, tintColor: "#72839E" },
-  2: { source: Icon.Play, tintColor: Color.Green },
+  2: { source: Icon.ArrowUpCircleFilled, tintColor: Color.Green },
   8: { source: Icon.ArrowDown, tintColor: Color.Orange },
-  9: { source: Icon.Stop, tintColor: Color.Red },
+  9: { source: Icon.ArrowDownCircleFilled, tintColor: Color.Red },
 };

@@ -23,7 +23,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { ErrorResponse, Monitor, MonitorType, NewMonitor } from "./types";
+import { ErrorResponse, Monitor, MonitorStatus, MonitorType, NewMonitor } from "./types";
 import { useEffect, useState } from "react";
 import unixToDate from "./lib/utils/unix-to-date";
 import { hasDayPassed } from "./lib/utils/has-day-passed";
@@ -134,7 +134,7 @@ export default function Monitors() {
           key={monitor.id}
           title={monitor.friendly_name}
           subtitle={MonitorType[monitor.type]}
-          icon={MONITOR_ICONS[monitor.status]}
+          icon={{value: MONITOR_ICONS[monitor.status], tooltip: MonitorStatus[monitor.status]}}
           accessories={[
             {
               icon: Icon.Redo,
@@ -199,14 +199,14 @@ function AddNewMonitor({ onMonitorAdded }: AddNewMonitorProps) {
       }
     },
     initialValues: {
-      type: "1",
+      type: MonitorType.HTTP.toString(),
       timeout: "30",
     },
     validation: {
       friendly_name: FormValidation.Required,
       url(value) {
         if (!value) return "The item is required";
-        else if(values.type==="HTTP") {
+        if (values.type===MonitorType.HTTP.toString()) {
           try {
             new URL(value);
           } catch {

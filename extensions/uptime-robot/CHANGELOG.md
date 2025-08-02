@@ -1,10 +1,11 @@
 # UptimeRobot Changelog
 
-## [] - {PR_MERGE_DATE}
+## [Creeat Ping Monitor] - {PR_MERGE_DATE}
 
-- monitor type in monitors
-- create PINg
-- update deps
+- Create Ping Monitors
+- Show monitor type in **Monitors**
+- Update monitor icon & add tooltip in **Monitors**
+- Modernize to use latest Raycast config
 
 ## [Delete Monitor + Open in Browser] - 2025-03-04
 
