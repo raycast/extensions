@@ -500,7 +500,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "@apify/actors-mcp-server"],
       env: {
-        APIFY_API_TOKEN: "YOUR_API_TOKEN_HERE",
+        APIFY_TOKEN: "YOUR_API_TOKEN_HERE",
       },
     },
   },
