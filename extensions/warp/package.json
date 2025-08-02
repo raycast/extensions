@@ -10,7 +10,8 @@
     "hakob_nersesian",
     "kamil_drzastwa",
     "chrismessina",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "sebdanielsson"
   ],
   "pastContributors": [
     "danulqua"
@@ -50,7 +51,7 @@
     {
       "name": "open-selected-finder-item",
       "title": "Open in Warp",
-      "description": "Open selected Finder items in Warp.",
+      "description": "Open selected file browser items in Warp.",
       "mode": "no-view"
     }
   ],
@@ -75,21 +76,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.4.8",
-    "node-spotlight": "^1.0.0",
-    "yaml": "^2.2.1"
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "yaml": "^2.8.2"
   },
   "devDependencies": {
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.3.3",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^24.10.4",
+    "@types/react": "^19.2.7",
+    "eslint": "^9.30.2",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.7.4",
+    "react": "^19.2.3",
+    "typescript": "~5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -99,6 +98,7 @@
     "publish": "ray publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

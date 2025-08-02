@@ -1,5 +1,3 @@
-import os from "node:os";
-import spotlight from "node-spotlight";
 import { useRef, useState } from "react";
 import { ActionPanel, Action, List, Icon, showToast, Toast, Keyboard } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
@@ -7,44 +5,69 @@ import { Category, SearchResult } from "./types";
 import useLocalStorage from "./hooks/useLocalStorage";
 import { getNewTabUri, getNewWindowUri } from "./uri";
 import { getAppName } from "./constants";
+import { searchDirectories } from "./utils/directorySearch";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [category, setCategory] = useState<Category>(Category.ALL);
   const [results, setResults] = useState<SearchResult[]>([]);
   const { data: pins, setData: setPins, isLoading: isPinsLoading } = useLocalStorage<SearchResult[]>("pinnedDirs", []);
-  const abortable = useRef<AbortController>();
+  const abortable = useRef<AbortController>(new AbortController());
 
   const maxResults = 250;
 
   const { isLoading: isSearchResultsLoading } = usePromise(
-    async (query) => {
-      if (searchText === "") {
+    async (query: string) => {
+      if (!query || query.trim() === "") {
         setResults([]);
         return [];
       }
 
-      const results = await spotlight(query);
-
+      // Reset previous search
       setResults([]);
-
       let resultsCount = 0;
+      const batchSize = 10; // Add results in batches for better UX
+      let batch: SearchResult[] = [];
+      const seenPaths = new Set<string>(); // Track seen paths to avoid duplicates
 
-      for await (const result of results) {
-        setResults((state) => [...state, { name: result.path.replace(os.homedir(), "~"), path: result.path }]);
+      try {
+        // Use our improved priority-based search function
+        for await (const result of searchDirectories(query.trim(), maxResults)) {
+          // Skip if we've already seen this path
+          if (seenPaths.has(result.path)) {
+            continue;
+          }
 
-        resultsCount++;
+          seenPaths.add(result.path);
+          batch.push(result);
+          resultsCount++;
 
-        if (resultsCount >= maxResults) {
-          abortable?.current?.abort();
-          break;
+          // Update UI in batches for better performance
+          if (batch.length >= batchSize || resultsCount >= maxResults) {
+            setResults((state) => [...state, ...batch]);
+            batch = [];
+          }
+
+          if (resultsCount >= maxResults) {
+            break;
+          }
         }
+
+        // Add any remaining results in the batch
+        if (batch.length > 0) {
+          setResults((state) => [...state, ...batch]);
+        }
+      } catch (error) {
+        // Handle any errors gracefully
+        console.warn("Search error:", error);
       }
+
+      return [];
     },
-    [`kind:folders ${searchText}`],
+    [searchText],
     {
       abortable,
-    }
+    },
   );
 
   function onCategoryChange(newValue: Category) {
@@ -86,7 +109,7 @@ export default function Command() {
   }
 
   const filteredResults =
-    category === Category.ALL ? results.filter((result) => !pins.find((pinned) => pinned.path === result.path)) : [];
+    category === Category.ALL ? results.filter((result) => !pins.some((pinned) => pinned.path === result.path)) : [];
 
   const filteredPins = searchText
     ? pins.filter((pinned) => pinned.name.toLowerCase().includes(searchText.toLowerCase()))
@@ -110,9 +133,9 @@ export default function Command() {
         />
       )}
       <List.Section title={Category.PINNED}>
-        {filteredPins.map((searchResult) => (
+        {filteredPins.map((searchResult, index) => (
           <SearchListItem
-            key={searchResult.path}
+            key={`pinned-${searchResult.path}-${index}`}
             searchResult={searchResult}
             isPinned={true}
             validRearrangeDirections={getValidRearrangeDirections(searchResult)}
@@ -122,9 +145,9 @@ export default function Command() {
         ))}
       </List.Section>
       <List.Section title="Results">
-        {filteredResults.map((searchResult) => (
+        {filteredResults.map((searchResult, index) => (
           <SearchListItem
-            key={searchResult.path}
+            key={`result-${searchResult.path}-${index}`}
             searchResult={searchResult}
             isPinned={false}
             onPin={() => onPin(searchResult)}
@@ -158,7 +181,6 @@ function SearchListItem(props: {
   return (
     <List.Item
       title={searchResult.name}
-      key={searchResult.path}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -199,7 +221,7 @@ function SearchListItem(props: {
               <>
                 {validRearrangeDirections?.up && (
                   <Action
-                    title="Move Up in Pinned"
+                    title="Move up in Pinned"
                     icon={Icon.ArrowUp}
                     shortcut={Keyboard.Shortcut.Common.MoveUp}
                     onAction={() => onRearrange(searchResult, "up")}
