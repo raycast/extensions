@@ -65,7 +65,7 @@ export default function TimeUntil() {
             <Detail.Metadata.Label title="Days Left" text={timeLeft.totalDays.toString()} />
             <Detail.Metadata.Label
               title="Hours Left"
-              text={(timeLeft.totalDays * 24 - (24 - timeLeft.hours)).toString()}
+              text={bigDay.diff(now, "hours").toString()}
             />
             <Detail.Metadata.Label title="Minutes Left" text={bigDay.diff(now, "minutes").toLocaleString()} />
           </Detail.Metadata>
