@@ -7,7 +7,6 @@
 1. Open Raycast and type `Big Day`.
 2. Set the date and name of your big day in the preferences window.
 3. Type `Big Day` again to view the time remaining until your big day.
-4. Stay motivated and inspired with daily quotes and focus points.
 
 ## Screenshots
 
@@ -22,7 +21,7 @@
 
 ## 📝 License
 
-This project is licensed under the MIT License. See the [LICENSE](https://chat.openai.com/LICENSE) file for details.
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/MuhaddiMu/Time-Until-I-Do-Raycast-Extension/blob/main/LICENSE) file for details.
 
 ---
 
