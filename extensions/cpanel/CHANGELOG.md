@@ -1,5 +1,13 @@
 # cPanel Changelog
 
+## [] - {PR_MERGE_DATE}
+
+- show data in zone
+- delete zone
+- view zone data
+- format API Token date
+- fix throw in new func
+
 ## [Modernize + Manage API Tokens] - 2025-05-19
 
 - View API Tokens

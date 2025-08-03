@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, List, showToast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Form, Icon, List, showToast, useNavigation } from "@raycast/api";
 import { FormValidation, getAvatarIcon, getFavicon, useForm } from "@raycast/utils";
 import { useListDomains, useParsedDNSZone, useUAPI } from "./lib/hooks";
 import { DEFAULT_ICON } from "./lib/constants";
@@ -6,6 +6,7 @@ import { DNSZoneRecord } from "./lib/types";
 import { useMemo, useState } from "react";
 import { isInvalidUrl } from "./lib/utils";
 import InvalidUrl from "./lib/components/invalid-url";
+import { deleteDNSZoneRecord } from "./lib/api";
 
 export default function Domains() {
   if (isInvalidUrl()) return <InvalidUrl />;
@@ -74,7 +75,7 @@ function ViewDNSZone({ zone }: { zone: string }) {
   );
 
   return (
-    <List
+    <List isShowingDetail
       isLoading={isLoading}
       searchBarPlaceholder="Search dns zone"
       searchBarAccessory={
@@ -95,13 +96,28 @@ function ViewDNSZone({ zone }: { zone: string }) {
     >
       <List.Section title={`Domains / ${zone} / DNS Zone`} subtitle={`${filteredRecords.length} records`}>
         {filteredRecords.map((zoneItem) => {
-          const subtitle = zoneItem.dname.includes(zone) ? undefined : `.${zone}.`;
+          let markdown = "";
+          switch (zoneItem.record_type) {
+            case "MX":
+              markdown = `**Priority**: ${zoneItem.data[0]}\n\n`;
+              markdown += `**Destination**: ${zoneItem.data[1]}\n\n`;
+              break;
+            case "SRV":
+              markdown = `**Priority**: ${zoneItem.data[0]}\n\n`;
+              markdown += `**Weight**: ${zoneItem.data[1]}\n\n`;
+              markdown += `**Port**: ${zoneItem.data[2]}\n\n`;
+              markdown += `**Target**: ${zoneItem.data[3]}\n\n`;
+              break;
+            default:
+              markdown = zoneItem.data.join(`\n\n`);
+              break;
+          }
           return (
             <List.Item
               key={zoneItem.line_index}
               title={zoneItem.dname}
-              subtitle={subtitle}
               accessories={[{ tag: zoneItem.record_type }]}
+              detail={<List.Item.Detail markdown={markdown} />}
               actions={
                 <ActionPanel>
                   <Action.Push
@@ -116,10 +132,24 @@ function ViewDNSZone({ zone }: { zone: string }) {
                       />
                     }
                   />
+                  {/* eslint-disable-next-line @raycast/prefer-title-case */}
+                  <Action icon={Icon.Trash} title="Delete DNS Zone Record" onAction={() => confirmAlert({
+                    icon: {source: Icon.Trash, tintColor: Color.Red},
+                    title: "Delete DNS Record",
+                    message: zoneItem.line_index.toString(),
+                    primaryAction: {
+                      style: Alert.ActionStyle.Destructive,
+                      title: "Delete",
+                      onAction() {
+                        const soa = data.find((record) => record.record_type === "SOA") as SOARecord;
+                        deleteDNSZoneRecord(soa.data[2], zone, zoneItem.line_index).then(revalidate);
+                      },
+                    }
+                  })} style={Action.Style.Destructive} />
                 </ActionPanel>
               }
             />
-          );
+          )
         })}
       </List.Section>
     </List>
