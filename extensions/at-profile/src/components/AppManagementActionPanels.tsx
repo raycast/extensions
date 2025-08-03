@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Icon } from "@raycast/api";
 import CustomAppForm from "../forms/custom-app-form";
+import OpenProfileForm from "../forms/open-profile-form";
 import { AppItem } from "../types";
 
 interface AppManagementActionPanelsProps {
@@ -7,7 +8,6 @@ interface AppManagementActionPanelsProps {
   app?: AppItem;
   onToggleEnabled?: (id: string, enabled: boolean) => void;
   onDeleteCustomApp?: (app: AppItem) => void;
-  onOpenQuickProfileSearch?: (value: string) => void;
   onSave: () => void;
 }
 
@@ -16,7 +16,6 @@ export function AppManagementActionPanels({
   app,
   onToggleEnabled,
   onDeleteCustomApp,
-  onOpenQuickProfileSearch,
   onSave,
 }: AppManagementActionPanelsProps) {
   if (type === "empty") {
@@ -35,10 +34,10 @@ export function AppManagementActionPanels({
           icon={app.enabled ? Icon.EyeDisabled : Icon.Eye}
           onAction={() => onToggleEnabled?.(app.id, !app.enabled)}
         />
-        <Action
+        <Action.Push
           title={`Open Profile on ${app.name}…`}
           icon={Icon.MagnifyingGlass}
-          onAction={() => onOpenQuickProfileSearch?.(app.value || "")}
+          target={<OpenProfileForm initialApp={app.value} />}
           shortcut={{ modifiers: ["cmd"], key: "o" }}
         />
         <ActionPanel.Section>
@@ -86,10 +85,10 @@ export function AppManagementActionPanels({
           icon={app.enabled ? Icon.EyeDisabled : Icon.Eye}
           onAction={() => onToggleEnabled?.(app.id, !app.enabled)}
         />
-        <Action
+        <Action.Push
           title={`Open Profile on ${app.name}…`}
           icon={Icon.MagnifyingGlass}
-          onAction={() => onOpenQuickProfileSearch?.(app.value || "")}
+          target={<OpenProfileForm initialApp={app.value} />}
           shortcut={{ modifiers: ["cmd"], key: "o" }}
         />
         <ActionPanel.Section>

@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon } from "@raycast/api";
+import { ActionPanel, Action, Icon, Clipboard, showToast, Toast } from "@raycast/api";
 import { HistoryItem } from "../types";
 
 interface HistoryActionPanelsProps {
@@ -35,6 +35,21 @@ export function HistoryActionPanels({
         shortcut={{ modifiers: ["cmd"], key: "o" }}
       />
       <Action
+        // eslint-disable-next-line @raycast/prefer-title-case
+        title={`Copy Profile URL`}
+        icon={Icon.Clipboard}
+        onAction={async () => {
+          try {
+            const url = item.url.toString();
+            await Clipboard.copy(url);
+            await showToast(Toast.Style.Success, "Copied to Clipboard", url);
+          } catch (error) {
+            await showToast(Toast.Style.Failure, "Error", (error as Error).message);
+          }
+        }}
+        shortcut={{ modifiers: ["cmd"], key: "c" }}
+      />
+      <Action
         title="Delete History Item"
         icon={Icon.Trash}
         style={Action.Style.Destructive}
@@ -43,8 +58,8 @@ export function HistoryActionPanels({
       />
       <ActionPanel.Section>
         <Action
-          title={`Show All @${item.profile}`}
-          icon={Icon.MagnifyingGlass}
+          title={`Show Only @${item.profile}`}
+          icon={Icon.Filter}
           onAction={() => {
             onSetSearchText(item.profile);
             onSetAppFilter("__all__");
@@ -53,7 +68,7 @@ export function HistoryActionPanels({
         />
         <Action
           title={`Show Only ${item.appName}`}
-          icon={item.favicon || Icon.Globe}
+          icon={item.favicon || Icon.Filter}
           onAction={() => onFilterByApp(item.app)}
           shortcut={{ modifiers: ["cmd"], key: "f" }}
         />

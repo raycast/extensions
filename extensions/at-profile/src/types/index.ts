@@ -54,6 +54,7 @@ export interface CustomAppUpdate {
 }
 
 export interface HistoryItem {
+  url: string | URL;
   profile: string;
   app: string;
   appName: string;
@@ -62,6 +63,7 @@ export interface HistoryItem {
 
 export interface HistoryItemWithFavicon extends UsageHistoryItem {
   favicon?: Image.ImageLike;
+  url?: string;
 }
 
 export interface OpenProfileArguments {

@@ -18,16 +18,16 @@ Includes support for major social apps:
 
 ### Quickly Open Profile
 
-1. Use the "Open Profile" command
-2. Enter the profile identifier
+1. Use the "Quick Open" command
+2. Enter a Profile identifier
 3. Select your desired app from the dropdown
 4. Press Enter to open the profile in your browser
 
 ### Open Profile
 
 1. Use the "Open Profile" command
-2. Enter the profile identifier
-3. Select your desired app from the dropdown
+2. Enter a Profile identifier
+3. Select your desired app from the __dynamic dropdown
 4. Press Enter to open the profile in your browser
 
 ## Managing Apps

@@ -4,17 +4,19 @@
 
 ### Added
 
-- **New "Profile History" Command**: Displays a list of recently opened profiles
-- **New "Custom Apps" Command**: Allows users to add custom apps to the extension
-- **Import/Export**: Allows users to import and export their settings, history, and profile opens
+- **New "Open Profile" Command**: Open a profile from a dynamic list of Apps, or choose from a handy list of recent profiles
+- **New "History" Command**: Displays a list of recently opened profiles filterable by App
+- **New "Manage Apps" Command**: Allows users to enable and disable apps or add custom apps
+- **Import/Export**: Allows users to import and export their settings, history, and profile history
 
 ### Changed
 
-- **New "Open Profile" Command**: Allows users to open profiles from a dynamic list
+- Updated "Quick Profile" Command to use editable list of Apps in `./src/types/default-apps.ts`
 
 ## [Enhanced Platform Management] - 2025-01-07
 
 ### Added
+
 - **New "Manage Apps" Command**: Renamed and enhanced platform management interface
 - Dynamic platform loading - no more hardcoded dropdown values
 - Real-time platform status updates with enable/disable functionality
@@ -22,6 +24,7 @@
 - Enhanced documentation with screenshots and feature explanations
 
 ### Changed
+
 - Improved app management interface with better organization
 - Improved user interface with clearer section titles
 - Updated README with comprehensive feature documentation

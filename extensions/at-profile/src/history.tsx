@@ -19,12 +19,27 @@ export default function HistoryCommand() {
       setIsLoading(true);
       const usageHistory = await getUsageHistory();
 
-      // Load favicons for each history item
+      // Load favicons for each history item and generate URLs
       const itemsWithFavicons = await Promise.all(
         usageHistory.map(async (item) => {
           const app = await getAppByValue(item.app);
           const favicon = app ? getAppFavicon(app) : Icon.Globe;
-          return { ...item, favicon };
+
+          // Generate URL for the history item
+          let url = "";
+          if (app) {
+            const requiresAtSymbol = app.urlTemplate.includes("@{profile}");
+            const profileToUse = requiresAtSymbol
+              ? item.profile.startsWith("@")
+                ? item.profile
+                : `@${item.profile}`
+              : item.profile.startsWith("@")
+                ? item.profile.slice(1)
+                : item.profile;
+            url = app.urlTemplate.replace("{profile}", profileToUse);
+          }
+
+          return { ...item, favicon, url };
         }),
       );
 
@@ -78,7 +93,8 @@ export default function HistoryCommand() {
 
   // Handle opening a profile from history
   const handleOpenProfile = async (profile: string, appValue: string) => {
-    await openProfile(profile, appValue, false); // Don't pop to root to keep history intact
+    // Don't pop to root to keep history intact, and bypass app settings since this is a direct action from history
+    await openProfile(profile, appValue, false, true);
   };
 
   // Filter by specific app
@@ -135,6 +151,7 @@ export default function HistoryCommand() {
                     app: item.app,
                     appName: item.appName,
                     favicon: typeof item.favicon === "string" ? item.favicon : undefined,
+                    url: item.url || "",
                   }}
                   onOpenProfile={handleOpenProfile}
                   onDeleteHistoryItem={handleDeleteHistoryItem}

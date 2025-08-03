@@ -87,15 +87,19 @@ customApps:
 ## Use Cases
 
 ### Backup and Restore
+
 Export your settings before making major changes, then import them to restore if needed.
 
 ### Sync Between Devices
+
 Export settings from one device and import them on another to keep your configuration synchronized.
 
 ### Team Sharing
+
 Share custom apps and preferred settings with team members.
 
 ### Bulk Configuration
+
 Create YAML files programmatically or edit them in a text editor for bulk changes.
 
 ## Notes
@@ -108,14 +112,17 @@ Create YAML files programmatically or edit them in a text editor for bulk change
 ## Troubleshooting
 
 ### Import Fails
+
 - Ensure the YAML file is properly formatted
 - Check that the `version` field is present
 - Verify that custom apps have all required fields (`name`, `value`, `urlTemplate`)
 
 ### Export Fails
+
 - Check that you have write permissions to your home directory
 - Ensure there's sufficient disk space
 
 ### File Not Found
+
 - Make sure the YAML file exists and is accessible
 - Try selecting the file in Finder before running the import command

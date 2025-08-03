@@ -1,14 +1,18 @@
-import { ActionPanel, Action, Form, Icon } from "@raycast/api";
+import { Form } from "@raycast/api";
+import { useState, useEffect } from "react";
 import { showFailureToast } from "@raycast/utils";
-import { getAllApps, getAppFavicon } from "../hooks/apps";
+import { getAllApps, getProfileHistory, getAppFavicon } from "../hooks/apps";
 import { openProfile } from "../utils/open-profile";
-import { useEffect, useState } from "react";
 import { App, OpenProfileFormProps } from "../types";
+import OpenActionPanels from "../components/OpenActionPanels";
 
 export default function OpenProfileForm({ initialProfile, initialApp }: OpenProfileFormProps) {
   const [apps, setApps] = useState<App[]>([]);
-  const [selectedApp, setSelectedApp] = useState<string>("");
+  const [selectedApp, setSelectedApp] = useState<string>(initialApp || "");
   const [isLoadingApps, setIsLoadingApps] = useState(true);
+  const [profileHistory, setProfileHistory] = useState<string[]>([]);
+  const [profileValue, setProfileValue] = useState<string>(initialProfile || "");
+  const [selectedRecentProfile, setSelectedRecentProfile] = useState<string>("");
 
   useEffect(() => {
     async function loadApps() {
@@ -16,6 +20,10 @@ export default function OpenProfileForm({ initialProfile, initialApp }: OpenProf
       try {
         const allApps = await getAllApps();
         setApps(allApps);
+
+        // Load profile history for autocomplete
+        const history = await getProfileHistory();
+        setProfileHistory(history);
 
         if (allApps.length === 0) {
           await showFailureToast("No apps are enabled. Please enable apps in Manage Apps first.", {
@@ -50,27 +58,41 @@ export default function OpenProfileForm({ initialProfile, initialApp }: OpenProf
     loadApps();
   }, [initialApp]);
 
+  // Separate effect to handle initialApp changes after apps are loaded
+  useEffect(() => {
+    if (initialApp && apps.length > 0) {
+      const foundApp = apps.find(
+        (app) =>
+          app.value.toLowerCase() === initialApp.toLowerCase() || app.name.toLowerCase() === initialApp.toLowerCase(),
+      );
+      if (foundApp) {
+        setSelectedApp(foundApp.value);
+      }
+    }
+  }, [initialApp, apps]);
+
   const handleFormSubmit = async (values: { profile: string; app: string }) => {
     if (apps.length === 0) {
       await showFailureToast("Please enable apps in Manage Apps first", { title: "No apps enabled" });
       return;
     }
 
-    if (!values.profile.trim() || !values.app) {
+    // Use the controlled profile value instead of form value
+    const profileToUse = profileValue.trim() || values.profile.trim();
+
+    if (!profileToUse || !values.app) {
       await showFailureToast("Please enter a profile and select an app", { title: "Invalid input" });
       return;
     }
 
-    await openProfile(values.profile, values.app);
+    await openProfile(profileToUse, values.app);
   };
 
   return (
     <Form
       isLoading={isLoadingApps}
       actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Open Profile" icon={Icon.Globe} onSubmit={handleFormSubmit} />
-        </ActionPanel>
+        <OpenActionPanels onSubmit={handleFormSubmit} />
       }
     >
       <Form.TextField
@@ -78,8 +100,51 @@ export default function OpenProfileForm({ initialProfile, initialApp }: OpenProf
         title="Profile"
         placeholder="Enter profile (with or without @)"
         info="The profile name to open (@ symbol is optional)"
-        defaultValue={initialProfile || ""}
+        value={profileValue}
+        onChange={(newValue) => {
+          setProfileValue(newValue);
+          // Check if the new value matches a recent profile
+          const matchingProfile = profileHistory.find(
+            (profile) => profile.toLowerCase() === newValue.toLowerCase()
+          );
+          setSelectedRecentProfile(matchingProfile || "");
+        }}
+        onBlur={() => {
+          // If profile is empty and we have history, auto-select the first profile
+          if (!profileValue.trim() && profileHistory.length > 0) {
+            const firstProfile = profileHistory[0];
+            setProfileValue(firstProfile);
+            setSelectedRecentProfile(firstProfile);
+          }
+        }}
       />
+
+      {profileHistory.length > 0 && (
+        <Form.Dropdown
+          id="recentProfile"
+          title="Recent Profiles"
+          value={selectedRecentProfile}
+          onChange={(selectedProfile) => {
+            if (selectedProfile) {
+              setProfileValue(selectedProfile);
+              setSelectedRecentProfile(selectedProfile);
+            } else {
+              // User selected the "Select a recent profile..." option
+              setSelectedRecentProfile("");
+            }
+          }}
+          info="Select from recently used profiles or use ↑/↓ to navigate"
+        >
+          <Form.Dropdown.Item value="" title="Select a recent profile..." />
+          {profileHistory.slice(0, 10).map((profile, index) => (
+            <Form.Dropdown.Item
+              key={`${profile}-${index}`}
+              value={profile}
+              title={profile.startsWith("@") ? profile : `@${profile}`}
+            />
+          ))}
+        </Form.Dropdown>
+      )}
 
       {apps.length > 0 && (
         <Form.Dropdown

@@ -65,3 +65,31 @@ export async function openProfile(
     await showFailureToast((error as Error).message, { title: "Failed to open profile" });
   }
 }
+
+/**
+ * Generate a profile URL from app identifier and profile
+ * @param profile The profile to generate URL for
+ * @param appValue The app identifier (e.g., "github", "twitter")
+ * @returns Promise<string> The generated URL
+ */
+export async function getProfileUrl(profile: string, appValue: string): Promise<string> {
+  // Get all apps (including disabled ones) to find the app
+  const apps = await getAllAppsUnfiltered();
+  const selectedApp = apps.find((app) => app.value === appValue);
+
+  if (!selectedApp) {
+    throw new Error(`App "${appValue}" not found`);
+  }
+
+  // Smart '@' handling: Check if platform's URL template requires '@' symbol
+  const requiresAtSymbol = selectedApp.urlTemplate.includes("@{profile}");
+  const profileToUse = requiresAtSymbol
+    ? profile.startsWith("@")
+      ? profile
+      : `@${profile}`
+    : profile.startsWith("@")
+      ? profile.slice(1)
+      : profile;
+
+  return selectedApp.urlTemplate.replace("{profile}", profileToUse);
+}

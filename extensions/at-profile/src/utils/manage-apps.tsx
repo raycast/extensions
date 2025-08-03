@@ -1,4 +1,4 @@
-import { List, showToast, Toast, Icon, confirmAlert, Alert, Color, Clipboard, LaunchProps, open } from "@raycast/api";
+import { List, showToast, Toast, Icon, confirmAlert, Alert, Color, Clipboard, LaunchProps } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { showFailureToast } from "@raycast/utils";
 import { getCustomApps, getAppSettings, updateAppSettings, getAppFavicon } from "../hooks/apps";
@@ -144,49 +144,6 @@ export default function ManageAppsCommand(props: LaunchProps<{ arguments: Manage
     }
   };
 
-  const openQuickProfileSearch = async (appValue: string) => {
-    try {
-      // Verify the app exists before creating the deep link
-      const { getAllAppsUnfiltered } = await import("../hooks/apps");
-      const allApps = await getAllAppsUnfiltered();
-      const targetApp = allApps.find((app) => app.value === appValue);
-
-      if (!targetApp) {
-        throw new Error(`App with value "${appValue}" not found`);
-      }
-
-      // Check if the app is currently hidden and show it implicitly
-      const currentApp = apps.find((app) => app.value === appValue);
-      if (currentApp && !currentApp.enabled) {
-        // Implicitly show the app since user is directly opening it
-        await toggleAppEnabled(appValue, true);
-
-        await showToast({
-          style: Toast.Style.Success,
-          title: "App Shown",
-          message: `${targetApp.name} is now shown in Open Profile`,
-        });
-      }
-
-      // Use raycast:// deep link to open the Open Profile command with the specific app pre-selected
-      const url = `raycast://extensions/chrismessina/at-profile/open-profile?arguments=${encodeURIComponent(
-        JSON.stringify({ app: appValue }),
-      )}`;
-
-      await open(url);
-
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Opening Profile Search",
-        message: `Opening with ${targetApp.name} selected`,
-      });
-    } catch (error) {
-      await showFailureToast(error instanceof Error ? error.message : "Unknown error", {
-        title: "Failed to Open Profile Search",
-      });
-    }
-  };
-
   const defaultAppList = apps.filter((p) => p.isDefault).sort((a, b) => a.name.localeCompare(b.name));
   const customAppList = apps.filter((p) => !p.isDefault).sort((a, b) => a.name.localeCompare(b.name));
 
@@ -217,7 +174,6 @@ export default function ManageAppsCommand(props: LaunchProps<{ arguments: Manage
                 type="default"
                 app={app}
                 onToggleEnabled={toggleAppEnabled}
-                onOpenQuickProfileSearch={openQuickProfileSearch}
                 onSave={loadApps}
               />
             }
