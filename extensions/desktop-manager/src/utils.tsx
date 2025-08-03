@@ -95,7 +95,7 @@ export async function deleteFileOrFolder(filePath: string) {
   }
 
   try {
-    rm(filePath, { recursive: true, force: true });
+    await rm(filePath, { recursive: true, force: true });
     await showToast({ style: Toast.Style.Success, title: "Item Deleted" });
   } catch (error) {
     if (error instanceof Error) {
@@ -107,7 +107,6 @@ export async function deleteFileOrFolder(filePath: string) {
 export const withAccessToDesktopFolder = <P extends object>(Component: ComponentType<P>) => {
   return (props: P) => {
     if (hasAccessToDesktopFolder()) {
-      accessSync(preferences.desktopFolder, constants.R_OK);
       return <Component {...props} />;
     } else {
       const markdown = `## Permission Required\n\nThe Desktop Manager extension requires access to your Desktop folder. Please grant permission to use it.\n\n![Grant Permission](permission.png)`;
