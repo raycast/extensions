@@ -1,5 +1,11 @@
 # Vercast Changelog
 
+## [2.11] - {PR_MERGE_DATE}
+
+- Bump deps to latest
+- Upgrade eslint config to new flat format
+- Make available on Windows
+
 ## [2.10] - 2025-04-09
 
 - Added `Check Domain Availability` command and AI tool to check if a domain is available

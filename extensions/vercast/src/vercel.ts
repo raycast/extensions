@@ -1,5 +1,4 @@
 import { environment, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import fetch, { Headers } from "node-fetch";
 import type {
   Team,
   Deployment,
@@ -14,11 +13,11 @@ import type {
 } from "./types";
 
 export const token = getPreferenceValues().accessToken;
-const headers = new Headers({
+const headers = {
   Authorization: "Bearer " + token,
-});
+};
 
-export const FetchHeaders = [...headers];
+export const FetchHeaders = Object.entries(headers);
 
 const apiURL = "https://api.vercel.com/";
 

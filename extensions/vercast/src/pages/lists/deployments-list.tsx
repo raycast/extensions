@@ -1,7 +1,7 @@
 import { Icon, Color, List, ActionPanel, Action } from "@raycast/api";
 import useVercel from "../../hooks/use-vercel-info";
 import fromNow from "../../utils/time";
-import { Deployment, DeploymentState } from "../../types";
+import { Deployment, DeploymentState, Team } from "../../types";
 import InspectDeployment from "../inspect-deployment";
 import SearchBarAccessory from "../search-projects/team-switch-search-accessory";
 import { FetchHeaders, getDeploymentURL, getFetchDeploymentsURL } from "../../vercel";
@@ -29,7 +29,7 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
     revalidate();
   };
 
-  const team = teams?.find((team) => team.id === selectedTeam);
+  const team = teams?.find((team: Team) => team.id === selectedTeam);
   return (
     <List
       throttle

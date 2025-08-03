@@ -1,5 +1,5 @@
 import { ActionPanel, open, Icon, List, useNavigation, Action, showToast, Toast } from "@raycast/api";
-import { Project } from "../../types";
+import { Project, Team } from "../../types";
 import fromNow from "../../utils/time";
 import SearchBarAccessory from "../search-projects/team-switch-search-accessory";
 import useVercel from "../../hooks/use-vercel-info";
@@ -65,7 +65,7 @@ const ProjectListSection = () => {
                         username={user?.username}
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         deployment={project.latestDeployments[0] as any}
-                        selectedTeam={teams?.find((team) => team.id === selectedTeam)}
+                        selectedTeam={teams?.find((team: Team) => team.id === selectedTeam)}
                       />,
                     );
                   } else {
