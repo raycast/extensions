@@ -1,5 +1,5 @@
 import { Form, ActionPanel, Action, showToast, Toast, useNavigation, Icon } from "@raycast/api";
-import { useForm, FormValidation } from "@raycast/utils";
+import { useForm, FormValidation, showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { ZendeskInstance } from "../../utils/preferences";
 import { createUser } from "../../api/zendesk";
@@ -20,7 +20,7 @@ export default function CreateUserForm({ instance }: CreateUserFormProps) {
   const { handleSubmit, itemProps } = useForm<CreateUserFormValues>({
     onSubmit: async (values) => {
       if (!instance) {
-        showToast(Toast.Style.Failure, "Configuration Error", "No Zendesk instances configured.");
+        showFailureToast(new Error("No Zendesk instances configured."), { title: "Configuration Error" });
         return;
       }
 
@@ -34,11 +34,7 @@ export default function CreateUserForm({ instance }: CreateUserFormProps) {
         });
         pop(); // Close the form on success
       } catch (error) {
-        showToast(
-          Toast.Style.Failure,
-          "Failed to Create User",
-          error instanceof Error ? error.message : "An unknown error occurred.",
-        );
+        showFailureToast(error, { title: "Failed to Create User" });
       } finally {
         setIsLoading(false);
       }
@@ -63,15 +59,7 @@ export default function CreateUserForm({ instance }: CreateUserFormProps) {
       navigationTitle={`Create User in ${instance?.name}`}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Create User"
-            icon={Icon.AddPerson}
-            onSubmit={handleSubmit}
-            shortcut={{
-              macOS: { modifiers: ["cmd"], key: "enter" },
-              windows: { modifiers: ["ctrl"], key: "enter" },
-            }}
-          />
+          <Action.SubmitForm title="Create User" icon={Icon.AddPerson} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >

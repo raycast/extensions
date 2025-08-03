@@ -1,4 +1,5 @@
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 export interface ZendeskInstance {
   name: string;
@@ -94,11 +95,7 @@ export function getZendeskInstances(): ZendeskInstance[] {
   // Validate preferences
   const validation = validatePreferences(preferences);
   if (!validation.isValid) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Configuration Error",
-      message: validation.error || "Invalid configuration",
-    });
+    showFailureToast(new Error(validation.error || "Invalid configuration"), { title: "Configuration Error" });
     return [];
   }
 

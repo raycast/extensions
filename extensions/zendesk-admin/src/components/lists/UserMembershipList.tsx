@@ -54,7 +54,6 @@ export default function UserMembershipList({ entityId, entityName, entityType, i
           onPage(enrichedMemberships);
         } catch (userError) {
           // If user data fetch fails, still show memberships with just IDs
-          console.warn("Failed to fetch user data:", userError);
           onPage(membershipData);
         }
       } else if (entityType === "role") {
@@ -64,7 +63,6 @@ export default function UserMembershipList({ entityId, entityName, entityType, i
           const usersWithMembership = users.map((user) => ({ ...user, membership: undefined }));
           onPage(usersWithMembership);
         } catch (error) {
-          console.warn("Failed to fetch role users:", error);
           onPage([]);
         }
       }

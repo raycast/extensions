@@ -1,4 +1,5 @@
-import { Icon, List, showToast, Toast } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { ZendeskInstance } from "../../utils/preferences";
 import { searchZendeskTickets, ZendeskTicket } from "../../api/zendesk";
@@ -32,7 +33,7 @@ export default function EntityTicketsList({ entityType, entityId, entityEmail, i
 
   async function performSearch() {
     if (!instance) {
-      showToast(Toast.Style.Failure, "Configuration Error", "No Zendesk instances configured.");
+      showFailureToast(new Error("No Zendesk instances configured."), { title: "Configuration Error" });
       setIsLoading(false);
       return;
     }
@@ -51,11 +52,7 @@ export default function EntityTicketsList({ entityType, entityId, entityEmail, i
       const sortedTickets = sortTickets(fetchedTickets, sortOrder);
       setTickets(sortedTickets);
     } catch (error: unknown) {
-      let errorMessage = "An unknown error occurred.";
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      showToast(Toast.Style.Failure, "Search Failed", errorMessage);
+      showFailureToast(error, { title: "Search Failed" });
       setTickets([]);
     } finally {
       setIsLoading(false);

@@ -1,4 +1,5 @@
 import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { ZendeskInstance } from "../utils/preferences";
 
 /**
@@ -8,7 +9,7 @@ export async function handleZendeskApiError(response: Response, operation: strin
   const errorMessage = errorText || (await response.text());
   const fullError = `Failed to ${operation}: ${response.status} - ${errorMessage}`;
 
-  showToast(Toast.Style.Failure, "Zendesk API Error", fullError);
+  await showFailureToast(new Error(fullError), { title: "Zendesk API Error" });
   throw new Error(`Zendesk API Error: ${fullError}`);
 }
 

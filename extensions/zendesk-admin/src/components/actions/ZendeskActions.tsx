@@ -443,7 +443,7 @@ export function ZendeskActions({
             8: "8",
             9: "9",
           };
-          const key = index < 9 ? keyMap[index + 1] : keyMap[0];
+          const key = index < 9 ? keyMap[index + 1] : undefined;
 
           return (
             <Action
@@ -451,10 +451,14 @@ export function ZendeskActions({
               title={`${inst.subdomain}`}
               icon={instance?.subdomain === inst.subdomain ? { source: Icon.Dot, tintColor: Color.Green } : undefined}
               onAction={() => onInstanceChange(inst)}
-              shortcut={{
-                macOS: { modifiers: ["cmd"], key },
-                windows: { modifiers: ["ctrl"], key },
-              }}
+              shortcut={
+                key
+                  ? {
+                      macOS: { modifiers: ["cmd"], key },
+                      windows: { modifiers: ["ctrl"], key },
+                    }
+                  : undefined
+              }
             />
           );
         })}

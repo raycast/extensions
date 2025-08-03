@@ -1,4 +1,5 @@
-import { List, showToast, Toast } from "@raycast/api";
+import { List } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { SearchTypeSelector, SearchType } from "./components/common/SearchTypeSelector";
 
 import { useState, useEffect } from "react";
@@ -218,7 +219,7 @@ export default function SearchZendesk() {
 
   async function performSearch() {
     if (!currentInstance) {
-      showToast(Toast.Style.Failure, "Configuration Error", "No Zendesk instances configured.");
+      showFailureToast(new Error("No Zendesk instances configured."), { title: "Configuration Error" });
       return;
     }
 
@@ -381,11 +382,7 @@ export default function SearchZendesk() {
         setIsLoading(false);
       }
     } catch (error: unknown) {
-      let errorMessage = "An unknown error occurred.";
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      showToast(Toast.Style.Failure, "Search Failed", errorMessage);
+      showFailureToast(error, { title: "Search Failed" });
       setResults([]);
       setIsLoading(false);
     }

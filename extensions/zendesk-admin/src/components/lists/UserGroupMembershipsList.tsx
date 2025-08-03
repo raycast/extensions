@@ -1,4 +1,5 @@
-import { List, showToast, Toast, Color, Icon } from "@raycast/api";
+import { List, Color, Icon } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { getDefaultStatusColor, getBooleanIcon } from "../../utils/colors";
 import { TimestampMetadata } from "../common/MetadataHelpers";
 import { useState, useEffect } from "react";
@@ -36,7 +37,7 @@ export default function UserGroupMembershipsList({ userId, userName, instance }:
 
   async function performSearch() {
     if (!instance) {
-      showToast(Toast.Style.Failure, "Configuration Error", "No Zendesk instances configured.");
+      showFailureToast(new Error("No Zendesk instances configured."), { title: "Configuration Error" });
       setIsLoading(false);
       return;
     }
@@ -62,15 +63,10 @@ export default function UserGroupMembershipsList({ userId, userName, instance }:
         setMemberships(enrichedMemberships);
       } catch (groupError) {
         // If group data fetch fails, still show memberships with just IDs
-        console.warn("Failed to fetch group data:", groupError);
         setMemberships(membershipData);
       }
     } catch (error: unknown) {
-      let errorMessage = "An unknown error occurred.";
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      showToast(Toast.Style.Failure, "Search Failed", errorMessage);
+      showFailureToast(error, { title: "Search Failed" });
       setMemberships([]);
     } finally {
       setIsLoading(false);
