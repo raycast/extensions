@@ -44,7 +44,7 @@ export async function openHistoryTab(url: string): Promise<boolean | string> {
 export async function setActiveTab(tab: Tab): Promise<void> {
   const preferences = getPreferenceValues<Preferences>();
   const browserApp = preferences.browserApp || "Firefox";
-  
+
   // Instead of trying to find and activate the existing tab,
   // just open the URL which is more reliable and simpler
   const command = `open -a "${browserApp}" "${tab.url}"`;
