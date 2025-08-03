@@ -20,7 +20,9 @@ export async function openNewTab(queryText: string | null | undefined): Promise<
             ? `keystroke "l" using {command down}
            keystroke "a" using {command down}
            key code 51
-           keystroke "${SEARCH_ENGINE[getPreferenceValues<Preferences>().searchEngine.toLowerCase()]}${queryText}"
+           keystroke "${
+             SEARCH_ENGINE[getPreferenceValues<Preferences>().searchEngine.toLowerCase()] || SEARCH_ENGINE.google
+           }${queryText}"
            key code 36`
             : ""
         }

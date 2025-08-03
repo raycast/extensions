@@ -6,20 +6,21 @@ export interface Preferences {
   readonly searchEngine: string;
 }
 
-export class Tab {
-  constructor(public readonly title: string, public readonly url: string) {}
+export interface Tab {
+  readonly title: string;
+  readonly url: string;
+}
 
-  static parse(entry: { url: string; title: string }): Tab {
-    return new Tab(entry.title, entry.url);
-  }
+export function parseTab(entry: { url: string; title: string }): Tab {
+  return { title: entry.title, url: entry.url };
+}
 
-  urlWithoutScheme(): string {
-    return this.url.replace(/(^\w+:|^)\/\//, "").replace("www.", "");
-  }
+export function getUrlWithoutScheme(tab: Tab): string {
+  return tab.url.replace(/(^\w+:|^)\/\//, "").replace("www.", "");
+}
 
-  googleFavicon(): Image.ImageLike {
-    return getFavicon(this.url);
-  }
+export function getTabFavicon(tab: Tab): Image.ImageLike {
+  return getFavicon(tab.url);
 }
 
 export interface HistoryEntry {
