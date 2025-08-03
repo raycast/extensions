@@ -1,6 +1,7 @@
 # Naver Search Changelog
 
 ## [Add Feature] - {PR_MERGE_DATE}
+
 * Search Selected Word: Search for the selected word on the [Naver](https://naver.com).
 
 ## [Bugfix] - 2024-05-17

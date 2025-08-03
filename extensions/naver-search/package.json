@@ -23,6 +23,7 @@
     {
       "name": "naver-search-selected",
       "title": "Naver Search Selected Text",
+      "subtitle": "Naver Search",
       "description": "Naver search with the selected text",
       "mode": "no-view"
     },
@@ -63,6 +64,14 @@
       "default": true,
       "label": "Remember Search History",
       "description": "Enable this checkbox to locally store Naver search history."
+    },
+    {
+      "name": "useClipboardFallback",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Use Clipboard Fallback",
+      "description": "Enable this checkbox to use clipboard fallback when the selected text is empty."
     }
   ],
   "dependencies": {

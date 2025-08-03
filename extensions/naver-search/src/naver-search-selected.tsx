@@ -1,26 +1,53 @@
-import { Clipboard, closeMainWindow, getSelectedText, open, popToRoot, showToast, Toast } from "@raycast/api";
+import {
+  Clipboard,
+  closeMainWindow,
+  getPreferenceValues,
+  getSelectedText,
+  open,
+  popToRoot,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { getStaticResult } from "./naver/handleResults";
+import { Preferences } from "./naver/types";
 
 export default async function Command() {
-  try {
-    let textToSearch: string;
+  const { useClipboardFallback } = getPreferenceValues<Preferences>();
+
+  const getSelectedTextOrFallbackToClipboard = async () => {
     try {
-      textToSearch = await getSelectedText();
+      return await getSelectedText();
     } catch {
-      const textInClipboard = await Clipboard.readText();
-      if (!textInClipboard) throw new Error("No text selected and clipboard is empty.");
-      textToSearch = textInClipboard;
+      if (!useClipboardFallback) {
+        throw new Error("No text selected.");
+      }
     }
 
+    let textInClipboard: string | undefined;
+    try {
+      textInClipboard = await Clipboard.readText();
+    } catch {
+      throw new Error("No text selected and clipboard is empty.");
+    }
+
+    if (!textInClipboard) {
+      throw new Error("No text selected and clipboard is empty.");
+    }
+
+    return textInClipboard;
+  };
+
+  try {
+    const textToSearch = await getSelectedTextOrFallbackToClipboard();
     const searchResult = getStaticResult(textToSearch, "GENERAL")[0];
+
     await open(searchResult.url);
     await closeMainWindow();
     await popToRoot({ clearSearchBar: true });
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "No text available",
-      message: String(error),
+      title: String(error),
     });
   }
 }
