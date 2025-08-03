@@ -25,7 +25,7 @@ export interface SeverityIndicator {
 export function getErrorSeverity(
   errorCount: number,
   warningThreshold: number,
-  criticalThreshold: number
+  criticalThreshold: number,
 ): ErrorSeverity {
   if (errorCount === 0) return ErrorSeverity.NONE;
   if (errorCount >= criticalThreshold) return ErrorSeverity.CRITICAL;
@@ -154,7 +154,7 @@ export function generateErrorSummary(errors: Array<{ msg?: string; error?: { msg
 } {
   const categories: Record<string, number> = {};
 
-  errors.forEach(error => {
+  errors.forEach((error) => {
     const message = error.msg || error.error?.msg || "Unknown error";
     const category = categorizeError(message);
     categories[category] = (categories[category] || 0) + 1;

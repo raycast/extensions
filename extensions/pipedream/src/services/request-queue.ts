@@ -34,7 +34,7 @@ class RequestQueue {
       };
 
       // Remove any existing request with the same ID
-      this.queue = this.queue.filter(r => r.id !== id);
+      this.queue = this.queue.filter((r) => r.id !== id);
 
       // Add to queue sorted by priority (higher priority first)
       this.queue.push(request);

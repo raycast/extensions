@@ -41,13 +41,13 @@ export function groupErrorsByDay(errors: WorkflowError[]): DayErrorCount[] {
   }
 
   // Group errors by day
-  const recentErrors = errors.filter(error => error.indexed_at_ms >= sevenDaysAgo.getTime());
+  const recentErrors = errors.filter((error) => error.indexed_at_ms >= sevenDaysAgo.getTime());
 
-  recentErrors.forEach(error => {
+  recentErrors.forEach((error) => {
     const errorDate = new Date(error.indexed_at_ms);
     const errorDateStr = errorDate.toISOString().split("T")[0] || "";
 
-    const dayIndex = days.findIndex(day => day.date === errorDateStr);
+    const dayIndex = days.findIndex((day) => day.date === errorDateStr);
     if (dayIndex !== -1) {
       days[dayIndex]!.count++;
       days[dayIndex]!.errors.push(error);
@@ -72,7 +72,7 @@ export function groupErrorsByDayWithCoverage(errors: WorkflowError[]): {
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
   // Filter to recent errors
-  const recentErrors = errors.filter(error => error.indexed_at_ms >= sevenDaysAgo.getTime());
+  const recentErrors = errors.filter((error) => error.indexed_at_ms >= sevenDaysAgo.getTime());
 
   if (recentErrors.length === 0) {
     return {
@@ -86,7 +86,7 @@ export function groupErrorsByDayWithCoverage(errors: WorkflowError[]): {
 
   // Find the oldest error date to determine coverage
   const oldestError = recentErrors.reduce((oldest, current) =>
-    current.indexed_at_ms < oldest.indexed_at_ms ? current : oldest
+    current.indexed_at_ms < oldest.indexed_at_ms ? current : oldest,
   );
 
   const oldestErrorDate = new Date(oldestError.indexed_at_ms);
@@ -98,7 +98,7 @@ export function groupErrorsByDayWithCoverage(errors: WorkflowError[]): {
 
   // Create a map to store errors by day
   const errorsByDay = new Map<string, WorkflowError[]>();
-  recentErrors.forEach(error => {
+  recentErrors.forEach((error) => {
     const errorDateStr = new Date(error.indexed_at_ms).toISOString().split("T")[0] || "";
     if (!errorsByDay.has(errorDateStr)) {
       errorsByDay.set(errorDateStr, []);
@@ -240,13 +240,13 @@ export function formatDateForDisplay(dateStr: string): string {
  * Generates a text-based bar chart for error counts
  */
 export function generateTextBarChart(dailyCounts: DayErrorCount[]): string {
-  const maxCount = Math.max(...dailyCounts.map(day => day.count));
+  const maxCount = Math.max(...dailyCounts.map((day) => day.count));
   if (maxCount === 0) return "No errors in the past 7 days";
 
   const maxBarLength = 20;
 
   return dailyCounts
-    .map(day => {
+    .map((day) => {
       const barLength = Math.round((day.count / maxCount) * maxBarLength);
       const bar = "█".repeat(barLength) + "░".repeat(maxBarLength - barLength);
       const dateLabel = formatDateForDisplay(day.date).padEnd(9);

@@ -7,7 +7,7 @@ interface EditWorkflowPropertyProps {
   label: string;
   property: "name" | "folder";
   currentValue: string;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   onSave: (_newValue: string) => Promise<void>;
 }
 
@@ -16,7 +16,7 @@ export function EditWorkflowProperty({ label, property, currentValue, onSave }: 
   const { workflows } = useSavedWorkflows();
   const existingFolders = getExistingFolders(workflows);
   const [folderChoice, setFolderChoice] = useState<string>(
-    currentValue && existingFolders.includes(currentValue) ? currentValue : currentValue ? "__custom__" : ""
+    currentValue && existingFolders.includes(currentValue) ? currentValue : currentValue ? "__custom__" : "",
   );
   const [customFolder, setCustomFolder] = useState(folderChoice === "__custom__" ? currentValue : "");
 
@@ -43,7 +43,7 @@ export function EditWorkflowProperty({ label, property, currentValue, onSave }: 
         <>
           <Form.Dropdown id="folder" title="Folder" value={folderChoice} onChange={setFolderChoice}>
             <Form.Dropdown.Item value="" title="None" />
-            {existingFolders.map(f => (
+            {existingFolders.map((f) => (
               <Form.Dropdown.Item key={f} value={f} title={f} />
             ))}
             <Form.Dropdown.Item value="__custom__" title="Add Folder..." />

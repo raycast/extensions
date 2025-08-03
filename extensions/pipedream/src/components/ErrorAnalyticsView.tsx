@@ -72,7 +72,7 @@ export function ErrorAnalyticsView({ workflow, errors }: ErrorAnalyticsViewProps
                       try {
                         const enhancedErrors = await fetchWorkflowErrorsForTrending(workflow.id, orgId || "");
                         push(<ErrorTrendingView workflow={workflow} errors={enhancedErrors.data} />);
-                      } catch (error) {
+                      } catch {
                         push(<ErrorTrendingView workflow={workflow} errors={errors} />);
                       }
                     }}
@@ -90,7 +90,7 @@ export function ErrorAnalyticsView({ workflow, errors }: ErrorAnalyticsViewProps
                 return (
                   <List.Item
                     key={category}
-                    title={category.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
+                    title={category.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}
                     subtitle={`${count} errors (${percentage}% of total)`}
                     accessories={[{ text: `${count}` }]}
                     icon={Icon.Tag}
@@ -108,9 +108,9 @@ export function ErrorAnalyticsView({ workflow, errors }: ErrorAnalyticsViewProps
               accessories={[
                 {
                   text: `${
-                    errors.filter(error => {
+                    errors.filter((error) => {
                       const category = categorizeError(error);
-                      const categoryErrors = errors.filter(e => categorizeError(e) === category);
+                      const categoryErrors = errors.filter((e) => categorizeError(e) === category);
                       return determineSeverity(error, categoryErrors.length) === "critical";
                     }).length
                   }`,
@@ -124,9 +124,9 @@ export function ErrorAnalyticsView({ workflow, errors }: ErrorAnalyticsViewProps
               accessories={[
                 {
                   text: `${
-                    errors.filter(error => {
+                    errors.filter((error) => {
                       const category = categorizeError(error);
-                      const categoryErrors = errors.filter(e => categorizeError(e) === category);
+                      const categoryErrors = errors.filter((e) => categorizeError(e) === category);
                       return determineSeverity(error, categoryErrors.length) === "high";
                     }).length
                   }`,
@@ -140,9 +140,9 @@ export function ErrorAnalyticsView({ workflow, errors }: ErrorAnalyticsViewProps
               accessories={[
                 {
                   text: `${
-                    errors.filter(error => {
+                    errors.filter((error) => {
                       const category = categorizeError(error);
-                      const categoryErrors = errors.filter(e => categorizeError(e) === category);
+                      const categoryErrors = errors.filter((e) => categorizeError(e) === category);
                       const severity = determineSeverity(error, categoryErrors.length);
                       return severity === "medium" || severity === "low";
                     }).length
@@ -155,9 +155,9 @@ export function ErrorAnalyticsView({ workflow, errors }: ErrorAnalyticsViewProps
 
           {/* Recent Error Events */}
           <List.Section title="Recent Error Events">
-            {errors.slice(0, 10).map(error => {
+            {errors.slice(0, 10).map((error) => {
               const category = categorizeError(error);
-              const categoryErrors = errors.filter(e => categorizeError(e) === category);
+              const categoryErrors = errors.filter((e) => categorizeError(e) === category);
               const severity = determineSeverity(error, categoryErrors.length);
               const errorAge = getErrorAge(error);
 

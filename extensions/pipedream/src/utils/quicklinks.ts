@@ -71,9 +71,9 @@ export function generateErrorAnalyticsQuicklink(workflowId?: string): QuickLink 
  * Generate quicklinks for frequently used workflows
  */
 export function generateFrequentWorkflowQuicklinks(
-  workflows: { id: string; customName: string; url: string }[]
+  workflows: { id: string; customName: string; url: string }[],
 ): QuickLink[] {
-  return workflows.map(workflow => ({
+  return workflows.map((workflow) => ({
     name: `Open: ${workflow.customName}`,
     link: workflow.url,
     description: `Direct link to ${workflow.customName} in Pipedream`,
@@ -84,7 +84,7 @@ export function generateFrequentWorkflowQuicklinks(
  * Generate a collection of all available quicklinks
  */
 export function generateAllQuicklinks(
-  frequentWorkflows?: { id: string; customName: string; url: string }[]
+  frequentWorkflows?: { id: string; customName: string; url: string }[],
 ): QuickLink[] {
   const quicklinks: QuickLink[] = [
     generateManageWorkflowsQuicklink(),
@@ -104,7 +104,7 @@ export function generateAllQuicklinks(
  */
 export function formatQuicklinksForClipboard(quicklinks: QuickLink[]): string {
   return quicklinks
-    .map(link => `${link.name}: ${link.link}${link.description ? ` - ${link.description}` : ""}`)
+    .map((link) => `${link.name}: ${link.link}${link.description ? ` - ${link.description}` : ""}`)
     .join("\n");
 }
 

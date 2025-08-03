@@ -14,7 +14,7 @@ export default function MenuBarWorkflows() {
   const { toggleMenuBarVisibility, markWorkflowAsFixed, unmarkWorkflowAsFixed } = useWorkflowActions();
   const { orgId } = useUserInfo();
   const [workflowErrors, setWorkflowErrors] = useState<Record<string, { errorCount: number; errors: WorkflowError[] }>>(
-    {}
+    {},
   );
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
 
@@ -26,18 +26,18 @@ export default function MenuBarWorkflows() {
         workflows,
         orgId,
         (workflowId: string, errorCount: number, errors: WorkflowError[]) => {
-          setWorkflowErrors(prev => ({
+          setWorkflowErrors((prev) => ({
             ...prev,
             [workflowId]: {
               errorCount,
               errors,
             },
           }));
-        }
+        },
       );
 
       setLastRefresh(new Date());
-    } catch (error) {
+    } catch {
       showToast({
         title: "Error",
         message: "Failed to refresh error data",
@@ -123,9 +123,9 @@ export default function MenuBarWorkflows() {
 
   return (
     <MenuBarExtra title="Pipedream">
-      {sortedFolderNames.map(folder => (
+      {sortedFolderNames.map((folder) => (
         <MenuBarExtra.Section key={folder} title={folder}>
-          {workflowsByFolder[folder]?.map(workflow => {
+          {workflowsByFolder[folder]?.map((workflow) => {
             const errorInfo = workflowErrors[workflow.id];
             const errorCount = errorInfo?.errorCount || 0;
             const currentErrors = errorInfo?.errors || [];

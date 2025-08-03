@@ -1,27 +1,18 @@
-import fetch, { RequestInit, Response } from "node-fetch";
 import { getPreferenceValues } from "@raycast/api";
 import { WorkflowErrorResponse, UserInfo, WorkflowDetails, EventHistory } from "../types";
 import { API_ENDPOINT } from "../utils/constants";
 import { DEMO_ERRORS } from "../utils/demo-data";
 
-/**
- * Retrieve preferences dynamically so that updates to the API key are reflected
- * without restarting the extension.
- */
-function getPreferences() {
-  return getPreferenceValues();
-}
-
 function isDemo(): boolean {
-  return getPreferences().PIPEDREAM_API_KEY === "demo";
+  return getPreferenceValues<Preferences>().PIPEDREAM_API_KEY === "demo";
 }
 
 class APIError extends Error {
   constructor(
     public status: number,
     public statusText: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    public body: string
+
+    public body: string,
   ) {
     super(`API Error: ${status} ${statusText}`);
     this.name = "APIError";
@@ -29,7 +20,7 @@ class APIError extends Error {
 }
 
 async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Response> {
-  const { PIPEDREAM_API_KEY } = getPreferences();
+  const { PIPEDREAM_API_KEY } = getPreferenceValues<Preferences>();
   const headers: Record<string, string> = {
     ...(options.headers as Record<string, string>),
     Authorization: `Bearer ${PIPEDREAM_API_KEY}`,
@@ -66,11 +57,11 @@ function handleAPIError(error: unknown, operation: string): Error {
       case 401:
       case 403:
         return new Error(
-          `${operation} failed. The API key is invalid or has insufficient permissions. Please check your API key in the "Configure Extension".`
+          `${operation} failed. The API key is invalid or has insufficient permissions. Please check your API key in the "Configure Extension".`,
         );
       case 404:
         return new Error(
-          `${operation} failed. The requested resource was not found. Please check the workflow ID and try again.`
+          `${operation} failed. The requested resource was not found. Please check the workflow ID and try again.`,
         );
       case 500:
       case 502:
@@ -96,7 +87,11 @@ export async function fetchWorkflowDetails(workflowId: string, orgId: string): P
   }
   try {
     const response = await fetchWithAuth(`${API_ENDPOINT}/workflows/${workflowId}?org_id=${orgId}`);
-    const data = await response.json();
+    const data = (await response.json()) as {
+      name?: string;
+      triggers?: unknown[];
+      steps?: unknown[];
+    };
 
     const triggers = data.triggers || [];
     return {
@@ -113,7 +108,7 @@ export async function fetchWorkflowDetails(workflowId: string, orgId: string): P
 export async function toggleWorkflowStatus(
   workflowId: string,
   orgId: string,
-  active: boolean
+  active: boolean,
 ): Promise<WorkflowDetails> {
   if (isDemo()) {
     return Promise.resolve({ id: workflowId, name: `Demo ${workflowId}`, triggers: [], steps: [] });
@@ -123,7 +118,7 @@ export async function toggleWorkflowStatus(
       method: "PUT",
       body: JSON.stringify({ active, org_id: orgId }), // keep sending 'active' to backend, but don't expect it in response
     });
-    return response.json();
+    return response.json() as Promise<WorkflowDetails>;
   } catch (error) {
     throw handleAPIError(error, "Toggling workflow status");
   }
@@ -150,7 +145,7 @@ export async function fetchUserInfo(): Promise<UserInfo> {
   }
   try {
     const response = await fetchWithAuth(`${API_ENDPOINT}/users/me`);
-    return response.json();
+    return response.json() as Promise<UserInfo>;
   } catch (error) {
     throw handleAPIError(error, "Fetching user info");
   }
@@ -159,7 +154,7 @@ export async function fetchUserInfo(): Promise<UserInfo> {
 export async function fetchWorkflowErrors(
   workflowId: string,
   orgId: string,
-  limit = 100
+  limit = 100,
 ): Promise<WorkflowErrorResponse> {
   if (isDemo()) {
     const data = DEMO_ERRORS[workflowId] ?? [];
@@ -170,9 +165,9 @@ export async function fetchWorkflowErrors(
   }
   try {
     const response = await fetchWithAuth(
-      `${API_ENDPOINT}/workflows/${workflowId}/$errors/event_summaries?expand=event&limit=${limit}&org_id=${orgId}`
+      `${API_ENDPOINT}/workflows/${workflowId}/$errors/event_summaries?expand=event&limit=${limit}&org_id=${orgId}`,
     );
-    return response.json();
+    return response.json() as Promise<WorkflowErrorResponse>;
   } catch (error) {
     throw handleAPIError(error, "Fetching workflow errors");
   }
@@ -184,7 +179,7 @@ export async function fetchWorkflowErrors(
  */
 export async function fetchWorkflowErrorsForTrending(
   workflowId: string,
-  orgId: string
+  orgId: string,
 ): Promise<WorkflowErrorResponse> {
   // Try to get more errors for better trending analysis
   // Start with 500 errors which should cover most 7-day periods
@@ -215,9 +210,17 @@ export async function fetchWorkflowEventHistory(workflowId: string, orgId: strin
   try {
     // Use the error endpoint to get recent events (errors)
     const response = await fetchWithAuth(
-      `${API_ENDPOINT}/workflows/${workflowId}/$errors/event_summaries?expand=event&limit=${limit}&org_id=${orgId}`
+      `${API_ENDPOINT}/workflows/${workflowId}/$errors/event_summaries?expand=event&limit=${limit}&org_id=${orgId}`,
     );
-    const errorData = await response.json();
+    const errorData = (await response.json()) as {
+      data?: unknown[];
+      page_info?: {
+        start_cursor?: string;
+        total_count?: number;
+        end_cursor?: string;
+        count?: number;
+      };
+    };
 
     // Convert error data to event format
     const events =

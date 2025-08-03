@@ -14,8 +14,8 @@ export function calculateBasicAnalytics(events: WorkflowEvent[]) {
   }
 
   const totalEvents = events.length;
-  const successEvents = events.filter(e => e.status === "success");
-  const errorEvents = events.filter(e => e.status === "error");
+  const successEvents = events.filter((e) => e.status === "success");
+  const errorEvents = events.filter((e) => e.status === "error");
   const successRate = (successEvents.length / totalEvents) * 100;
   const averageExecutionTime = events.reduce((sum, e) => sum + e.execution_time_ms, 0) / totalEvents;
 
@@ -34,9 +34,9 @@ export function getStepPerformance(events: WorkflowEvent[]) {
   const stepPerformance: Record<string, { avgExecutionTime: number; successRate: number; errorCount: number }> = {};
 
   // Filter events once and reuse
-  const filteredEvents = events.filter(e => e.status === "success" || e.status === "error");
+  const filteredEvents = events.filter((e) => e.status === "success" || e.status === "error");
 
-  filteredEvents.forEach(event => {
+  filteredEvents.forEach((event) => {
     // For now, we'll use the overall execution time since step-specific data isn't available
     const stepName = "overall";
     if (!stepPerformance[stepName]) {
@@ -50,10 +50,10 @@ export function getStepPerformance(events: WorkflowEvent[]) {
   });
 
   // Calculate averages
-  Object.keys(stepPerformance).forEach(stepName => {
+  Object.keys(stepPerformance).forEach((stepName) => {
     if (filteredEvents.length > 0 && stepPerformance[stepName]) {
-      const successEvents = filteredEvents.filter(e => e.status === "success");
-      const errorEvents = filteredEvents.filter(e => e.status === "error");
+      const successEvents = filteredEvents.filter((e) => e.status === "success");
+      const errorEvents = filteredEvents.filter((e) => e.status === "error");
 
       stepPerformance[stepName]!.avgExecutionTime /= filteredEvents.length;
       stepPerformance[stepName]!.successRate = (successEvents.length / filteredEvents.length) * 100;

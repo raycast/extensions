@@ -140,7 +140,7 @@ export function groupErrorsByCategory(errors: WorkflowError[]): Record<ErrorCate
     unknown: [],
   };
 
-  errors.forEach(error => {
+  errors.forEach((error) => {
     const category = categorizeError(error);
     grouped[category].push(error);
   });
@@ -160,7 +160,7 @@ export function getErrorStatistics(errors: WorkflowError[]) {
     critical: 0,
   };
 
-  errors.forEach(error => {
+  errors.forEach((error) => {
     const category = categorizeError(error);
     const errorCount = categories[category].length;
     const severity = determineSeverity(error, errorCount);
@@ -184,10 +184,10 @@ export function getErrorStatistics(errors: WorkflowError[]) {
     severityBreakdown: severityCounts,
     categoryBreakdown,
     mostCommonCategory: Object.entries(categoryBreakdown).reduce((a, b) =>
-      categoryBreakdown[a[0] as ErrorCategory] > categoryBreakdown[b[0] as ErrorCategory] ? a : b
+      categoryBreakdown[a[0] as ErrorCategory] > categoryBreakdown[b[0] as ErrorCategory] ? a : b,
     )[0] as ErrorCategory,
     mostCommonSeverity: Object.entries(severityCounts).reduce((a, b) =>
-      severityCounts[a[0] as ErrorSeverity] > severityCounts[b[0] as ErrorSeverity] ? a : b
+      severityCounts[a[0] as ErrorSeverity] > severityCounts[b[0] as ErrorSeverity] ? a : b,
     )[0] as ErrorSeverity,
   };
 }

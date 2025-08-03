@@ -7,7 +7,7 @@ const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: "bas
  */
 export function getExistingFolders(workflows: SavedWorkflow[]): string[] {
   const folders = new Set<string>();
-  workflows.forEach(workflow => {
+  workflows.forEach((workflow) => {
     if (workflow.folder) {
       folders.add(workflow.folder);
     }
@@ -19,7 +19,7 @@ export function getExistingFolders(workflows: SavedWorkflow[]): string[] {
  * Groups workflows by folder
  */
 export function groupWorkflowsByFolder<T extends { folder?: string; customName: string }>(
-  workflows: T[]
+  workflows: T[],
 ): Record<string, T[]> {
   const groups = workflows.reduce<Record<string, T[]>>((acc, wf) => {
     const folder = wf.folder ?? "";
@@ -28,7 +28,7 @@ export function groupWorkflowsByFolder<T extends { folder?: string; customName: 
     return acc;
   }, {});
 
-  Object.keys(groups).forEach(key => {
+  Object.keys(groups).forEach((key) => {
     if (groups[key]) {
       groups[key]!.sort((a, b) => collator.compare(a.customName, b.customName));
     }
@@ -59,7 +59,7 @@ export function sortWorkflows(
   workflows: SavedWorkflow[],
   sortBy: "name" | "errors" | "triggers" | "steps",
   sortOrder: "asc" | "desc",
-  errorCounts: Record<string, number>
+  errorCounts: Record<string, number>,
 ) {
   return [...workflows].sort((a, b) => {
     let comparison = 0;
@@ -91,15 +91,15 @@ export function sortWorkflows(
 export function filterWorkflows(
   workflows: SavedWorkflow[],
   filterBy: "all" | "menuBar" | "notMenuBar" | "errors",
-  errorCounts: Record<string, number>
+  errorCounts: Record<string, number>,
 ) {
   switch (filterBy) {
     case "menuBar":
-      return workflows.filter(w => w.showInMenuBar);
+      return workflows.filter((w) => w.showInMenuBar);
     case "notMenuBar":
-      return workflows.filter(w => !w.showInMenuBar);
+      return workflows.filter((w) => !w.showInMenuBar);
     case "errors":
-      return workflows.filter(w => (errorCounts[w.id] ?? 0) > 0);
+      return workflows.filter((w) => (errorCounts[w.id] ?? 0) > 0);
     case "all":
       return workflows;
     default: {

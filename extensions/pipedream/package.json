@@ -1,5 +1,6 @@
 {
   "name": "pipedream",
+  "type": "module",
   "version": "3.0.0",
   "title": "Pipedream",
   "description": "Manage Pipedream workflows with AI-powered error analysis. Connect, monitor, and optimize your workflows directly from Raycast.",
@@ -59,6 +60,7 @@
       "required": false,
       "title": "Default Sort Order",
       "description": "Choose how workflows are sorted by default",
+      "placeholder": "Select sort order",
       "data": [
         {
           "title": "Name",
@@ -85,6 +87,7 @@
       "required": false,
       "title": "Default Filter",
       "description": "Choose the initial filter view for workflows",
+      "placeholder": "Select filter",
       "data": [
         {
           "title": "All Workflows",
@@ -107,6 +110,7 @@
       "required": false,
       "title": "Refresh Interval",
       "description": "How often to update error counts in the background",
+      "placeholder": "Select refresh interval",
       "data": [
         {
           "title": "5 minutes",
@@ -137,6 +141,7 @@
       "required": false,
       "title": "Critical Error Threshold",
       "description": "Number of errors that trigger critical severity indicator",
+      "placeholder": "Select error threshold",
       "data": [
         {
           "title": "5 errors",
@@ -165,8 +170,9 @@
       "name": "WARNING_ERROR_THRESHOLD",
       "type": "dropdown",
       "required": false,
-      "title": "Warning Error Threshold", 
+      "title": "Warning Error Threshold",
       "description": "Number of errors that trigger warning severity indicator",
+      "placeholder": "Select warning threshold",
       "data": [
         {
           "title": "1 error",
@@ -193,36 +199,37 @@
       "required": false,
       "title": "Show New Error Badges",
       "description": "Display badges for workflows with new errors after being marked as fixed",
+      "placeholder": "Enable new error badges",
       "default": true,
       "label": "Show 'NEW' badges for recently fixed workflows with new errors"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.16.2",
-    "node-fetch": "^2.7.0",
-    "react": "^18.3.1"
+    "@raycast/api": "^1.102.3",
+    "@raycast/utils": "^2.2.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "~18.8.3",
-    "@types/node-fetch": "^2.6.11",
-    "@types/react": "^18.0.9",
-    "@types/jest": "^29.5.4",
-    "@typescript-eslint/eslint-plugin": "^6.8.0",
-    "@typescript-eslint/parser": "^6.8.0",
-    "eslint": "^8.51.0",
-    "eslint-config-prettier": "^9.0.0",
-    "prettier": "^3.0.3",
-    "ts-jest": "^29.1.1",
-    "jest": "^29.6.2",
-    "@testing-library/react": "^14.0.0",
-    "typescript": "^5.2.2"
+    "@eslint/eslintrc": "^3.3.1",
+    "@raycast/eslint-config": "^2.0.4",
+    "@testing-library/react": "^16.3.0",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.1.0",
+    "@types/react": "^19.1.9",
+    "@typescript-eslint/eslint-plugin": "^8.38.0",
+    "@typescript-eslint/parser": "^8.38.0",
+    "eslint": "^9.32.0",
+    "jest": "^30.0.5",
+    "prettier": "^3.6.2",
+    "ts-jest": "^29.4.0",
+    "typescript": "5.8.3"
   },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
-    "lint": "ray lint",
+    "lint": "PATH=$(npm bin):$PATH ray lint",
+    "lint:fix": "PATH=$(npm bin):$PATH ray lint --fix",
     "publish": "raycast-scripts publish",
     "test": "jest",
     "type-check": "tsc --noEmit"

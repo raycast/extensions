@@ -1,4 +1,15 @@
-import { List, ActionPanel, Action, Icon, showToast, Toast, getPreferenceValues, open } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  Icon,
+  showToast,
+  Toast,
+  getPreferenceValues,
+  launchCommand,
+  LaunchType,
+  open,
+} from "@raycast/api";
 import { useSavedWorkflows, useWorkflowActions } from "../hooks/useSavedWorkflows";
 import { useUserInfo } from "../hooks/useUserInfo";
 import { useWorkflowErrors } from "../hooks/useWorkflowErrors";
@@ -39,7 +50,7 @@ export function WorkflowList({
   const { errorInfo, refreshErrorInfo } = useWorkflowErrors(
     workflows,
     orgId ?? undefined,
-    prefs.REFRESH_INTERVAL_SECONDS ? parseInt(prefs.REFRESH_INTERVAL_SECONDS) * 1000 : 0
+    prefs.REFRESH_INTERVAL_SECONDS ? parseInt(prefs.REFRESH_INTERVAL_SECONDS) * 1000 : 0,
   );
 
   const errorCounts: Record<string, number> = useMemo(() => {
@@ -61,12 +72,12 @@ export function WorkflowList({
 
   const workflowsByFolder = useMemo(
     () => groupWorkflowsByFolder(filteredAndSortedWorkflows),
-    [filteredAndSortedWorkflows]
+    [filteredAndSortedWorkflows],
   );
 
   const sortedFolderNames = useMemo(() => {
     return Object.keys(workflowsByFolder)
-      .filter(f => f !== "")
+      .filter((f) => f !== "")
       .sort((a, b) => collator.compare(a ?? "", b ?? ""));
   }, [workflowsByFolder]);
 
@@ -84,7 +95,7 @@ export function WorkflowList({
     const autoUnmarkWorkflows = async () => {
       const workflowsToUnmark: string[] = [];
 
-      workflows.forEach(workflow => {
+      workflows.forEach((workflow) => {
         if (workflow.errorResolution) {
           const currentErrors = errorInfo[workflow.id]?.errors || [];
           if (shouldAutoUnmarkAsFixed(workflow, currentErrors)) {
@@ -94,10 +105,10 @@ export function WorkflowList({
       });
 
       if (workflowsToUnmark.length > 0) {
-        await Promise.all(workflowsToUnmark.map(workflowId => unmarkWorkflowAsFixed(workflowId)));
+        await Promise.all(workflowsToUnmark.map((workflowId) => unmarkWorkflowAsFixed(workflowId)));
 
         if (workflowsToUnmark.length === 1) {
-          const workflow = workflows.find(w => w.id === workflowsToUnmark[0]);
+          const workflow = workflows.find((w) => w.id === workflowsToUnmark[0]);
           showToast({
             title: "Auto-unmarked",
             message: `${workflow?.customName || workflow?.id} has new errors`,
@@ -141,7 +152,7 @@ export function WorkflowList({
               <Action
                 title="Open Connect Workflow"
                 icon={Icon.Plus}
-                onAction={() => open("raycast://extensions/olekristianbe/pipedream/connect-workflow")}
+                onAction={() => launchCommand({ name: "connect-workflow", type: LaunchType.UserInitiated })}
               />
             </ActionPanel>
           }
@@ -156,7 +167,7 @@ export function WorkflowList({
         <List.Dropdown
           tooltip="Sort and Filter Options"
           storeValue={true}
-          onChange={newValue => {
+          onChange={(newValue) => {
             const [action, value] = newValue.split("-");
             if (action === "sort") {
               setSortBy(value as SortOption);
@@ -193,9 +204,9 @@ export function WorkflowList({
         </ActionPanel>
       }
     >
-      {sortedFolderNames.map(fld => (
+      {sortedFolderNames.map((fld) => (
         <List.Section key={fld} title={fld}>
-          {workflowsByFolder[fld]?.map(workflow => (
+          {workflowsByFolder[fld]?.map((workflow) => (
             <WorkflowItem
               key={workflow.id}
               workflow={workflow}
@@ -210,7 +221,7 @@ export function WorkflowList({
       ))}
       {workflowsByFolder[""] && (
         <List.Section key="no-folder" title="No Folder">
-          {workflowsByFolder[""]?.map(workflow => (
+          {workflowsByFolder[""]?.map((workflow) => (
             <WorkflowItem
               key={workflow.id}
               workflow={workflow}

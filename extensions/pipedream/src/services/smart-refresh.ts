@@ -92,15 +92,15 @@ class SmartRefreshManager {
   async smartRefresh(
     workflows: SavedWorkflow[],
     orgId: string,
-    onUpdate: (workflowId: string, errorCount: number, errors: WorkflowError[]) => void
+    onUpdate: (workflowId: string, errorCount: number, errors: WorkflowError[]) => void,
   ): Promise<void> {
     if (this.isRefreshing) return;
 
     this.isRefreshing = true;
 
     try {
-      const menuBarWorkflows = workflows.filter(w => w.showInMenuBar);
-      const workflowsToRefresh = menuBarWorkflows.filter(w => this.shouldRefresh(w.id));
+      const menuBarWorkflows = workflows.filter((w) => w.showInMenuBar);
+      const workflowsToRefresh = menuBarWorkflows.filter((w) => this.shouldRefresh(w.id));
 
       if (workflowsToRefresh.length === 0) {
         return;
@@ -114,7 +114,7 @@ class SmartRefreshManager {
       });
 
       // Queue requests with appropriate priority
-      const promises = workflowsToRefresh.map(workflow => {
+      const promises = workflowsToRefresh.map((workflow) => {
         const activity = this.activityMap.get(workflow.id);
         const priority = activity?.priority || 0;
 
@@ -124,7 +124,7 @@ class SmartRefreshManager {
             try {
               const errorResponse = await fetchWorkflowErrors(workflow.id, orgId);
               const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-              const recentErrors = errorResponse.data.filter(error => error.indexed_at_ms > sevenDaysAgo);
+              const recentErrors = errorResponse.data.filter((error) => error.indexed_at_ms > sevenDaysAgo);
 
               // Update activity tracking
               const lastErrorTime = recentErrors.length > 0 ? recentErrors[0]?.indexed_at_ms || 0 : 0;
@@ -138,7 +138,7 @@ class SmartRefreshManager {
                 errorCount: recentErrors.length,
                 errors: recentErrors.slice(0, 5),
               };
-            } catch (error) {
+            } catch {
               // Update activity even on error
               this.updateActivity(workflow.id, 0);
 
@@ -150,7 +150,7 @@ class SmartRefreshManager {
             }
           },
           priority,
-          2 // Max 2 retries for error fetching
+          2, // Max 2 retries for error fetching
         );
       });
 

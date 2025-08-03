@@ -174,7 +174,7 @@ export function WorkflowDetailView({
             actions={
               <ActionPanel>
                 <Action
-                  title={workflow.showInMenuBar ? "Remove From Menu Bar" : "Add to Menu Bar"}
+                  title={workflow.showInMenuBar ? "Remove from Menu Bar" : "Add to Menu Bar"}
                   icon={workflow.showInMenuBar ? Icon.EyeSlash : Icon.Eye}
                   onAction={async () => {
                     if (onToggleMenuBar) {

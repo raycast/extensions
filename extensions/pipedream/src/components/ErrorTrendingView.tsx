@@ -91,7 +91,7 @@ export function ErrorTrendingView({ workflow, errors }: ErrorTrendingViewProps) 
       </List.Section>
 
       <List.Section title="Daily Breakdown">
-        {coverage.dailyCounts.map(day => (
+        {coverage.dailyCounts.map((day) => (
           <List.Item
             key={day.date}
             title={formatDateForDisplay(day.date)}
@@ -111,8 +111,8 @@ export function ErrorTrendingView({ workflow, errors }: ErrorTrendingViewProps) 
                     title="Copy Error Details"
                     content={day.errors
                       .map(
-                        error =>
-                          `${new Date(error.indexed_at_ms).toLocaleTimeString()}: ${error.event?.error?.msg || "Unknown error"}`
+                        (error) =>
+                          `${new Date(error.indexed_at_ms).toLocaleTimeString()}: ${error.event?.error?.msg || "Unknown error"}`,
                       )
                       .join("\n")}
                   />
@@ -127,7 +127,7 @@ export function ErrorTrendingView({ workflow, errors }: ErrorTrendingViewProps) 
         <List.Item
           title="Text Chart"
           subtitle="7-day error distribution"
-          accessories={[{ text: `Max: ${Math.max(...summary.dailyCounts.map(d => d.count))}` }]}
+          accessories={[{ text: `Max: ${Math.max(...summary.dailyCounts.map((d) => d.count))}` }]}
           actions={
             <ActionPanel>
               <Action.CopyToClipboard

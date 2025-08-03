@@ -11,7 +11,7 @@ export async function generateAIErrorSummary(errors: WorkflowError[], prompt: st
 
     // Format error data for AI analysis
     const errorLogs = errors
-      .map(error => {
+      .map((error) => {
         const timestamp = new Date(error.indexed_at_ms).toISOString();
         const errorMessage = error.event?.error?.msg || "Unknown error";
         return `[${timestamp}] ${errorMessage}`;

@@ -41,7 +41,7 @@ Keep the response concise, well-formatted with markdown, and focus on practical 
   // Generate relevant links based on error types
   function generateRelevantLinks(errors: WorkflowError[]): string {
     const errorMessages = errors
-      .map(e => e.event?.error?.msg || "")
+      .map((e) => e.event?.error?.msg || "")
       .join(" ")
       .toLowerCase();
 
@@ -63,7 +63,7 @@ Keep the response concise, well-formatted with markdown, and focus on practical 
       links.push("[Step Configuration](https://pipedream.com/docs/steps)");
     }
 
-    return links.map(link => `- ${link}`).join("\n");
+    return links.map((link) => `- ${link}`).join("\n");
   }
 
   // Post-process AI output to fix bullet formatting

@@ -52,7 +52,7 @@ export function useUserInfo(): UseUserInfoReturn {
     {
       keepPreviousData: true,
       initialData: { data: { orgs: [{ id: cache.get(ORG_ID_CACHE_KEY) }] } } as UserInfo,
-    }
+    },
   );
 
   return {

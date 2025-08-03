@@ -21,7 +21,7 @@ export default function ManageWorkflows() {
       <WorkflowForm
         workflow={workflow}
         workflows={workflows}
-        onSubmit={async values => {
+        onSubmit={async (values) => {
           try {
             await updateWorkflow({ ...workflow, ...values });
             showToast({ title: "Success", message: "Workflow updated", style: Toast.Style.Success });
@@ -35,7 +35,7 @@ export default function ManageWorkflows() {
             });
           }
         }}
-      />
+      />,
     );
   };
 
@@ -71,12 +71,12 @@ export default function ManageWorkflows() {
         onDeactivate={() => handleDeactivate(workflow.id)}
         onMarkAsFixed={() => handleMarkAsFixed(workflow.id)}
         onUnmarkAsFixed={() => handleUnmarkAsFixed(workflow.id)}
-      />
+      />,
     );
   };
 
   const handleDelete = async (workflowId: string) => {
-    const workflow = workflows.find(w => w.id === workflowId);
+    const workflow = workflows.find((w) => w.id === workflowId);
     if (!workflow) return;
 
     const options: Alert.Options = {
@@ -101,7 +101,7 @@ export default function ManageWorkflows() {
 
   const handleActivate = async (workflowId: string) => {
     if (!orgId) return;
-    const workflow = workflows.find(w => w.id === workflowId);
+    const workflow = workflows.find((w) => w.id === workflowId);
     if (!workflow) return;
 
     try {
@@ -122,7 +122,7 @@ export default function ManageWorkflows() {
 
   const handleDeactivate = async (workflowId: string) => {
     if (!orgId) return;
-    const workflow = workflows.find(w => w.id === workflowId);
+    const workflow = workflows.find((w) => w.id === workflowId);
     if (!workflow) return;
 
     try {
@@ -142,7 +142,7 @@ export default function ManageWorkflows() {
   };
 
   const handleMarkAsFixed = async (workflowId: string) => {
-    const workflow = workflows.find(w => w.id === workflowId);
+    const workflow = workflows.find((w) => w.id === workflowId);
     if (!workflow) return;
 
     const currentErrors = errorInfo[workflowId]?.errors || [];

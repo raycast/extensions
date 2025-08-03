@@ -17,7 +17,9 @@ export function hasNewErrorsSinceFix(workflow: SavedWorkflow, currentErrors: Wor
 
   // Check if there are any errors newer than when marked as fixed
   if (errorResolution.lastKnownErrorTimestamp) {
-    const hasNewerErrors = currentErrors.some(error => error.indexed_at_ms > errorResolution.lastKnownErrorTimestamp!);
+    const hasNewerErrors = currentErrors.some(
+      (error) => error.indexed_at_ms > errorResolution.lastKnownErrorTimestamp!,
+    );
     return hasNewerErrors;
   }
 
@@ -29,7 +31,7 @@ export function hasNewErrorsSinceFix(workflow: SavedWorkflow, currentErrors: Wor
  */
 export function createErrorResolution(
   currentErrors: WorkflowError[],
-  previousResolution?: SavedWorkflow["errorResolution"]
+  previousResolution?: SavedWorkflow["errorResolution"],
 ): SavedWorkflow["errorResolution"] {
   const latestError =
     currentErrors.length > 0
@@ -46,7 +48,7 @@ export function createErrorResolution(
 
   // Generate error categories summary
   const errorCategories: Record<string, number> = {};
-  currentErrors.forEach(error => {
+  currentErrors.forEach((error) => {
     const message = error.event?.error?.msg || "Unknown error";
     const category = categorizeError(message);
     errorCategories[category] = (errorCategories[category] || 0) + 1;
@@ -107,7 +109,7 @@ export function shouldAutoUnmarkAsFixed(workflow: SavedWorkflow, currentErrors: 
  */
 export function getErrorResolutionStatus(
   workflow: SavedWorkflow,
-  currentErrors: WorkflowError[]
+  currentErrors: WorkflowError[],
 ): {
   isMarkedAsFixed: boolean;
   hasNewErrors: boolean;

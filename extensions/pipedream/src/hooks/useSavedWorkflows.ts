@@ -13,7 +13,7 @@ const WORKFLOW_DETAILS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 // Migration function to update workflow URLs to the correct format
 const migrateWorkflowUrls = (workflows: SavedWorkflow[]): SavedWorkflow[] => {
-  return workflows.map(workflow => {
+  return workflows.map((workflow) => {
     const correctUrl = `${PIPEDREAM_BASE_URL}${workflow.id}`;
     // If the URL is not exactly correct, fix it
     if (workflow.url !== correctUrl) {
@@ -62,7 +62,7 @@ export function useSavedWorkflows(): UseSavedWorkflowsReturn {
     }
 
     const updatedWorkflows = await Promise.all(
-      savedWorkflows.map(async workflow => {
+      savedWorkflows.map(async (workflow) => {
         const cacheKey = `workflow_details_${workflow.id}`;
         const cachedDetails = cache.get(cacheKey);
         if (cachedDetails) {
@@ -83,7 +83,7 @@ export function useSavedWorkflows(): UseSavedWorkflowsReturn {
           triggerCount: details.triggers?.length ?? 0,
           stepCount: details.steps?.length ?? 0,
         };
-      })
+      }),
     );
 
     await LocalStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(updatedWorkflows));
@@ -125,17 +125,16 @@ export function useWorkflowActions(): UseWorkflowActionsReturn {
       await LocalStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(updatedWorkflows));
       refreshWorkflows();
     },
-    [refreshWorkflows]
+    [refreshWorkflows],
   );
 
   const addWorkflow = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async (newWorkflow: SavedWorkflow) => {
       // Check against actual localStorage data to avoid race conditions
       const savedWorkflowsJson = await LocalStorage.getItem<string>(LOCALSTORAGE_KEY);
       const savedWorkflows: SavedWorkflow[] = savedWorkflowsJson ? JSON.parse(savedWorkflowsJson) : [];
 
-      const existingWorkflow = savedWorkflows.find(w => w.id === newWorkflow.id);
+      const existingWorkflow = savedWorkflows.find((w) => w.id === newWorkflow.id);
       if (existingWorkflow) {
         return existingWorkflow;
       }
@@ -144,38 +143,35 @@ export function useWorkflowActions(): UseWorkflowActionsReturn {
       await updateLocalStorage(updatedWorkflows);
       return undefined; // Return undefined to indicate new workflow was added
     },
-    [updateLocalStorage]
+    [updateLocalStorage],
   );
 
   const updateWorkflow = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async (updatedWorkflow: SavedWorkflow) => {
-      const updatedWorkflows = workflows.map(workflow =>
-        workflow.id === updatedWorkflow.id ? updatedWorkflow : workflow
+      const updatedWorkflows = workflows.map((workflow) =>
+        workflow.id === updatedWorkflow.id ? updatedWorkflow : workflow,
       );
       await updateLocalStorage(updatedWorkflows);
     },
-    [workflows, updateLocalStorage]
+    [workflows, updateLocalStorage],
   );
 
   const removeWorkflow = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async (workflowId: string) => {
-      const updatedWorkflows = workflows.filter(workflow => workflow.id !== workflowId);
+      const updatedWorkflows = workflows.filter((workflow) => workflow.id !== workflowId);
       await updateLocalStorage(updatedWorkflows);
     },
-    [workflows, updateLocalStorage]
+    [workflows, updateLocalStorage],
   );
 
   const toggleMenuBarVisibility = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async (workflowId: string) => {
-      const updatedWorkflows = workflows.map(workflow =>
-        workflow.id === workflowId ? { ...workflow, showInMenuBar: !workflow.showInMenuBar } : workflow
+      const updatedWorkflows = workflows.map((workflow) =>
+        workflow.id === workflowId ? { ...workflow, showInMenuBar: !workflow.showInMenuBar } : workflow,
       );
       await updateLocalStorage(updatedWorkflows);
     },
-    [workflows, updateLocalStorage]
+    [workflows, updateLocalStorage],
   );
 
   const removeAllWorkflows = useCallback(async () => {
@@ -184,24 +180,24 @@ export function useWorkflowActions(): UseWorkflowActionsReturn {
 
   const markWorkflowAsFixed = useCallback(
     async (workflowId: string, currentErrors: WorkflowError[]) => {
-      const updatedWorkflows = workflows.map(workflow =>
+      const updatedWorkflows = workflows.map((workflow) =>
         workflow.id === workflowId
           ? { ...workflow, errorResolution: createErrorResolution(currentErrors, workflow.errorResolution) }
-          : workflow
+          : workflow,
       );
       await updateLocalStorage(updatedWorkflows);
     },
-    [workflows, updateLocalStorage]
+    [workflows, updateLocalStorage],
   );
 
   const unmarkWorkflowAsFixed = useCallback(
     async (workflowId: string) => {
-      const updatedWorkflows = workflows.map(workflow =>
-        workflow.id === workflowId ? { ...workflow, errorResolution: undefined } : workflow
+      const updatedWorkflows = workflows.map((workflow) =>
+        workflow.id === workflowId ? { ...workflow, errorResolution: undefined } : workflow,
       );
       await updateLocalStorage(updatedWorkflows);
     },
-    [workflows, updateLocalStorage]
+    [workflows, updateLocalStorage],
   );
 
   return {

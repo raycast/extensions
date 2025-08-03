@@ -5,15 +5,15 @@ import { showFailureToast } from "@raycast/utils";
 
 export function useOptimisticToggle(
   workflows: SavedWorkflow[],
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   updateWorkflow: (w: SavedWorkflow) => Promise<void>,
   refresh: () => Promise<void>,
-  orgId?: string
+  orgId?: string,
 ) {
   return useCallback(
     async (workflowId: string, newStatus: boolean) => {
       if (!orgId || !workflows) return;
-      const original = workflows.find(w => w.id === workflowId);
+      const original = workflows.find((w) => w.id === workflowId);
       if (!original) return;
 
       // optimistic update
@@ -28,6 +28,6 @@ export function useOptimisticToggle(
         await refresh();
       }
     },
-    [orgId, workflows, updateWorkflow, refresh]
+    [orgId, workflows, updateWorkflow, refresh],
   );
 }

@@ -3,24 +3,33 @@ import { SavedWorkflow } from "../types";
 import { getExistingFolders } from "../utils/workflow";
 import { useState } from "react";
 
-// Form values are handled dynamically with any type for flexibility
+export interface WorkflowFormValues {
+  workflowId: string;
+  customName: string;
+  folder: string;
+  showInMenuBar: boolean;
+}
 
 interface WorkflowFormProps {
   workflow?: SavedWorkflow;
   workflows: SavedWorkflow[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onSubmit: (values: any) => void;
+  onSubmit: (values: WorkflowFormValues) => void;
   isConnecting?: boolean;
+  itemProps?: {
+    workflowId?: Partial<Form.TextField.Props>;
+    customName?: Partial<Form.TextField.Props>;
+    folder?: Partial<Form.Dropdown.Props>;
+    showInMenuBar?: Partial<Form.Checkbox.Props>;
+  };
 }
 
-export function WorkflowForm({ workflow, workflows, onSubmit, isConnecting = false }: WorkflowFormProps) {
+export function WorkflowForm({ workflow, workflows, onSubmit, isConnecting = false, itemProps }: WorkflowFormProps) {
   const existingFolders = getExistingFolders(workflows);
   const [folderChoice, setFolderChoice] = useState<string>(workflow?.folder || "");
   const [customFolder, setCustomFolder] = useState("");
   const [addToMenuBar, setAddToMenuBar] = useState(workflow?.showInMenuBar ?? true);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleSubmit = (values: any) => {
+  const handleSubmit = (values: WorkflowFormValues) => {
     const finalFolder = folderChoice === "__custom__" ? customFolder : folderChoice;
     const finalValues = {
       ...values,
@@ -40,6 +49,7 @@ export function WorkflowForm({ workflow, workflows, onSubmit, isConnecting = fal
     >
       {isConnecting && (
         <Form.TextField
+          {...(itemProps?.workflowId || {})}
           id="workflowId"
           title="Workflow ID"
           placeholder="p_abc123"
@@ -48,6 +58,7 @@ export function WorkflowForm({ workflow, workflows, onSubmit, isConnecting = fal
         />
       )}
       <Form.TextField
+        {...(itemProps?.customName || {})}
         id="customName"
         title="Custom Name"
         placeholder="My Workflow"
@@ -62,7 +73,7 @@ export function WorkflowForm({ workflow, workflows, onSubmit, isConnecting = fal
         info="Optional: Organize workflows into folders for better organization."
       >
         <Form.Dropdown.Item value="" title="None" />
-        {existingFolders.map(f => (
+        {existingFolders.map((f) => (
           <Form.Dropdown.Item key={f} value={f} title={f} />
         ))}
         <Form.Dropdown.Item value="__custom__" title="Add Folder..." />
