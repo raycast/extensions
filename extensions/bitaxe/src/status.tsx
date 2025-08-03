@@ -28,7 +28,7 @@ export default function Command() {
     setLoadingMap(Object.fromEntries(ipList.map((ip) => [ip, true])));
     setErrorMap(Object.fromEntries(ipList.map((ip) => [ip, null])));
     ipList.forEach((ip) => {
-      fetchInfo(ip).then();
+      fetchInfo(ip);
     });
     async function fetchInfo(ip: string) {
       setLoadingMap((prev) => ({ ...prev, [ip]: true }));
