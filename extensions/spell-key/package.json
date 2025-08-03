@@ -18,6 +18,13 @@
       "mode": "view"
     }
   ],
+  "keywords": [
+    "spellcheck",
+    "spelling",
+    "spell",
+    "spell-check",
+    "spell-key"
+  ],
   "dependencies": {
     "@raycast/api": "^1.101.1",
     "@raycast/utils": "^2.2.0"
