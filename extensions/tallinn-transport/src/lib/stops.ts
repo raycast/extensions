@@ -11,7 +11,7 @@ export type Stop = {
 
 const normalizeStops = (rawStops: StopRaw[]) => {
   return rawStops.map((rawStop, i) => {
-    if (!rawStop.Name) {
+    if (!rawStop.Name && i > 0) {
       rawStop.Name = rawStops[i - 1].Name;
     }
     return rawStop;

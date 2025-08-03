@@ -1,5 +1,5 @@
 # Tallinn Transport Changelog
 
-## [Added extension] - 2025-08-03
+## [Added extension] - {PR_MERGE_DATE}
 
 Initial version code

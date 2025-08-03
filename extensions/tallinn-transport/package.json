@@ -13,18 +13,21 @@
     {
       "name": "search-upcoming-times",
       "title": "Search Upcoming Times",
+      "subtitle": "Tallinn Transport",
       "description": "Search upcoming times for buses and trams",
       "mode": "view"
     },
     {
       "name": "search-stop-departures",
       "title": "Search Departures for a Stop",
+      "subtitle": "Tallinn Transport",
       "description": "Search and view real-time upcoming departures for a selected stop",
       "mode": "view"
     },
     {
       "name": "view-announcements",
       "title": "View Announcements",
+      "subtitle": "Tallinn Transport",
       "description": "View public transport announcements for Tallinn",
       "mode": "view"
     }

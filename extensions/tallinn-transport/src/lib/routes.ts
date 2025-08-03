@@ -29,10 +29,10 @@ const normalizeRoutes = (rawRoutes: RouteRaw[]) => {
       continue;
     }
 
-    if (!rawRoute.RouteNum) {
+    if (!rawRoute.RouteNum && normalizedRoutes.length > 0) {
       rawRoute.RouteNum = normalizedRoutes[normalizedRoutes.length - 1].RouteNum;
     }
-    if (!rawRoute.Transport) {
+    if (!rawRoute.Transport && normalizedRoutes.length > 0) {
       rawRoute.Transport = normalizedRoutes[normalizedRoutes.length - 1].Transport;
     }
 

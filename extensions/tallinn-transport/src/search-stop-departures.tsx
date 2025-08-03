@@ -75,7 +75,7 @@ function DeparturesList({ stop }: { stop: Stop }) {
     >
       {data?.map((departure) => (
         <List.Item
-          key={departure.routeNumber}
+          key={`${departure.routeNumber}-${departure.expectedIn.getTime()}`}
           title={`${departure.routeNumber}`}
           subtitle={`in ${formatDistanceToNow(departure.expectedIn)} at ${format(departure.expectedIn, "HH:mm")}`}
           accessories={[
