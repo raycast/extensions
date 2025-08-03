@@ -14,6 +14,7 @@
     {
       "name": "manage-desktop",
       "title": "Manage Desktop",
+      "subtitle": "File Manager",
       "description": "Search and organize your desktop files",
       "mode": "view",
       "preferences": [

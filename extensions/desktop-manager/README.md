@@ -2,11 +2,12 @@
 
 A Raycast extension to search and organize your desktop files.
 
+Inspired by the [Downloads Manager](https://www.raycast.com/thomas/downloads-manager) extension.
+
 ## Features
 
-- **Manage Desktop**: Browse, search, and organize all files on your desktop
+- **Manage Desktop**: Browse and organize all files on your desktop
 - **Quick Actions**: Fast access to your most recent desktop files
-- **Multiple Sorting Options**: Sort by modified time, created time, or added time
 - **File Operations**: Open, copy, delete, and show files in Finder
 - **Configurable**: Customize desktop folder path and deletion behavior
 
@@ -16,7 +17,6 @@ A Raycast extension to search and organize your desktop files.
 Browse and organize all files on your desktop with a clean interface. Features:
 - File list with icons and last modified dates
 - Quick actions (open, copy, delete, show in Finder)
-- Bulk operations for desktop cleanup
 - Keyboard shortcuts for efficient navigation
 
 ### Quick Actions
@@ -32,7 +32,7 @@ Access preferences to customize:
 - **Desktop Folder**: Set custom desktop folder path (default: ~/Desktop)
 - **Latest File Order**: Choose how to determine the "latest" file (modified, created, added, or birth time)
 - **Deletion Behavior**: Choose between moving to trash or permanent deletion
-- **Show Hidden Files**: Toggle visibility of hidden files
+- **Show Hidden Files**: Toggle visibility of hidden files (via command preferences)
 
 ## Installation
 
@@ -52,7 +52,7 @@ Access preferences to customize:
 - **⌘ + O**: Open with specific application
 - **⌘ + Y**: Toggle Quick Look
 - **Ctrl + X**: Delete file
-- **Ctrl + Shift + X**: Delete all files
+- **Ctrl + Shift + X**: Delete all desktop files
 
 ## Requirements
 
