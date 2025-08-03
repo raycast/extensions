@@ -71,7 +71,7 @@ JSON colors:`,
                     >
                       <Action.CopyToClipboard
                         title="Copy to Organize Colors"
-                        content={selection.selected.selectedItems.join(";")}
+                        content={selection.selected.selectedItems.map((item) => getFormattedColor(item)).join(";")}
                         onCopy={() => selection.selected.selectedItems.map((i) => addToHistory(i))}
                       />
                       {COPY_FORMATS.map(({ format, title, icon }) => (

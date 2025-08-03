@@ -132,7 +132,10 @@ function Actions({ item, selection }: { item: HistoryItem; selection: UseColorsS
             icon={Icon.CopyClipboard}
             shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
           >
-            <Action.CopyToClipboard title="Copy to Clipboard" content={selection.selected.selectedItems.join(";")} />
+            <Action.CopyToClipboard
+              title="Copy to Clipboard"
+              content={selection.selected.selectedItems.map((item) => getFormattedColor(item.color)).join(";")}
+            />
             {COPY_FORMATS.map(({ format, title, icon }) => (
               <Action.CopyToClipboard
                 key={format}
