@@ -19,9 +19,7 @@ export function useColorsSelection<T = string | HistoryItem>(items: T[]): UseSel
   };
 
   const selectAll = () => {
-    if (items) {
-      setSelectedItems([...items]);
-    }
+    setSelectedItems([...items]);
   };
 
   const clearSelection = () => {
