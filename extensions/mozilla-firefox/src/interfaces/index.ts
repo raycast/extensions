@@ -4,6 +4,7 @@ import { ReactElement } from "react";
 
 export interface Preferences {
   readonly searchEngine: string;
+  readonly browserApp: string;
 }
 
 export interface Tab {
