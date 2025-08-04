@@ -2,7 +2,11 @@
 
 A powerful Raycast extension to scan your local network, detect assigned IP addresses, and get smart recommendations for available addresses to prevent IP conflicts.
 
+![IP Finder Main Interface](docs/main-screenshot.svg)
+
 ## Features
+
+![Key Features](docs/features.svg)
 
 - **🔍 Network Discovery**: Automatically detect your local network and scan for assigned IPs
 - **📊 IP Recommendations**: Get intelligent recommendations for available IP addresses
@@ -13,6 +17,10 @@ A powerful Raycast extension to scan your local network, detect assigned IP addr
 - **🔌 Port Scanning**: Detect open ports with service identification
 - **📈 Scan History**: Keep track of previous scans and results
 - **📋 Export Results**: Copy IP lists or export detailed reports
+
+## Quick Start
+
+![Quick Start Guide](docs/usage.svg)
 
 ## Commands
 

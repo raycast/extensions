@@ -1,0 +1,28 @@
+
+<svg width="600" height="300" xmlns="http://www.w3.org/2000/svg">
+  <rect width="600" height="300" fill="#f5f5f5"/>
+  <rect x="30" y="30" width="540" height="240" fill="white" stroke="#ddd" stroke-width="2"/>
+  
+  <!-- Title -->
+  <text x="50" y="60" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#333">Quick Start</text>
+  
+  <!-- Step 1 -->
+  <circle cx="50" cy="90" r="15" fill="#007AFF"/>
+  <text x="45" y="95" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">1</text>
+  <text x="80" y="95" font-family="Arial, sans-serif" font-size="14" fill="#333">Open Raycast and search "Scan Network"</text>
+  
+  <!-- Step 2 -->
+  <circle cx="50" cy="130" r="15" fill="#28a745"/>
+  <text x="45" y="135" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">2</text>
+  <text x="80" y="135" font-family="Arial, sans-serif" font-size="14" fill="#333">Click "Start Network Scan"</text>
+  
+  <!-- Step 3 -->
+  <circle cx="50" cy="170" r="15" fill="#ffc107"/>
+  <text x="45" y="175" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">3</text>
+  <text x="80" y="175" font-family="Arial, sans-serif" font-size="14" fill="#333">View results and recommendations</text>
+  
+  <!-- Step 4 -->
+  <circle cx="50" cy="210" r="15" fill="#dc3545"/>
+  <text x="45" y="215" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">4</text>
+  <text x="80" y="215" font-family="Arial, sans-serif" font-size="14" fill="#333">Copy IPs or export results</text>
+</svg>
