@@ -65,6 +65,7 @@
     {
       "name": "install-extension",
       "title": "Install Extension",
+      "subtitle": "Kiro",
       "description": "Install Extensions from the Kiro Marketplace",
       "mode": "view"
     }
