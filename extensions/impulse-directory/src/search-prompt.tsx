@@ -17,7 +17,7 @@ export default function Command() {
     <List isLoading={isLoading} onSearchTextChange={setSearchText} searchBarPlaceholder="Search prompts..." throttle>
       <List.Section title="Prompt Results" subtitle={`${data?.length || 0} prompts found`}>
         {data?.map((searchResult: SearchResult) => (
-          <SearchListItem key={searchResult.name} searchResult={searchResult} />
+          <SearchListItem key={searchResult.id} searchResult={searchResult} />
         ))}
       </List.Section>
     </List>
