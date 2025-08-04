@@ -15,7 +15,7 @@ export async function openNewTab(queryText: string | null | undefined): Promise<
 
   if (queryText) {
     const searchEngine = preferences.searchEngine?.toLowerCase() || "google";
-    const searchUrl = SEARCH_ENGINE[searchEngine] || SEARCH_ENGINE.google;
+    const searchUrl = SEARCH_ENGINE[searchEngine] || SEARCH_ENGINE["google"];
     const fullUrl = `${searchUrl}${encodeURIComponent(queryText)}`;
     const command = `open -a "${browserApp}" "${fullUrl}"`;
 
