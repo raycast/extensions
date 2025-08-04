@@ -1201,6 +1201,7 @@
 /extensions/network-diagnostics                                     @hmarr @3e9b
 /extensions/network-drive                                           @SuoweiHu
 /extensions/network-menubar-monitor                                 @yarnaid
+/extensions/network-proxy                                           @wuyuxiangX
 /extensions/network-speed                                           @koinzhang
 /extensions/neurooo-translate                                       @depsimon
 /extensions/new-relic                                               @cirne
