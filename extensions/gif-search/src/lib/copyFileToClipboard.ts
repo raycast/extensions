@@ -7,7 +7,20 @@ import { getHideFilename } from "../preferences";
 
 export default async function copyFileToClipboard(url: string, name?: string, isFavorite?: boolean) {
   const hideFilename = getHideFilename();
-  const fileName = hideFilename ? "gif.gif" : name || path.basename(url);
+  let fileName = hideFilename ? "gif.gif" : name || path.basename(url);
+  
+  // Ensure the file has a .gif extension
+  if (!fileName.toLowerCase().endsWith('.gif')) {
+    // If the filename doesn't have an extension or has a different extension, add .gif
+    const hasExtension = path.extname(fileName);
+    if (hasExtension) {
+      // Replace the existing extension with .gif
+      fileName = path.basename(fileName, hasExtension) + '.gif';
+    } else {
+      // Add .gif extension
+      fileName = fileName + '.gif';
+    }
+  }
 
   // Check if the file exists in the cache - if so use it directly
   const cachedFile = await getGifFromCache(fileName);
