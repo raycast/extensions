@@ -1,6 +1,6 @@
 # tabler Changelog
 
-## [Copy HTML Char Actions + Modernize] - {PR_MERGE_DATE}
+## [Copy HTML Char Actions + Modernize] - 2025-08-04
 
 - Added 'Copy ... HTML Char' actions when available (ref: [Issue #20572](https://github.com/raycast/extensions/issues/20572))
 - Replaced `axios` with `useFetch` 
