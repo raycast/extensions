@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Updated Apify] - {PR_MERGE_DATE}
+## [Updated Apify] - 2025-08-04
 
 Updated Apify MCP server configuration from `APIFY_API_TOKEN` to `APIFY_TOKEN`
 
