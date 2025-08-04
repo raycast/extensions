@@ -23,7 +23,7 @@
 - All new features marked with ✨ NEW badges for easy identification
 - Updated data structure to include latest Claude Code functionality
 
-## [Initial Version] {PR_MERGE_DATE}
+## [Initial Version] 2025-06-24
 
 - Added the initial version of the Claude Code Cheatsheet.
 - Browse and search for commands, options, and keywords.
