@@ -121,7 +121,7 @@
       "description": "Skip Google authentication for Vertex (e.g. when using an LLM gateway).",
       "usage": "export CLAUDE_CODE_SKIP_VERTEX_AUTH=\"true\"",
       "category": "environment",
-      "tags": ["auth", "gcp", "gateway", "vertex"]
+      "tags": ["auth", "gateway", "gcp", "vertex"]
     },
     {
       "id": "env-claude-code-disable-nonessential-traffic",
@@ -242,6 +242,74 @@
       "usage": "export MAX_MCP_OUTPUT_TOKENS=\"25000\"",
       "category": "environment",
       "tags": ["limit", "mcp", "tokens"]
+    },
+    {
+      "id": "env-vertex-region-claude-3-5-haiku",
+      "name": "VERTEX_REGION_CLAUDE_3_5_HAIKU",
+      "description": "Override the default region for Claude 3.5 Haiku model on Google Vertex AI.",
+      "usage": "export VERTEX_REGION_CLAUDE_3_5_HAIKU=\"<region>\"",
+      "example": "export VERTEX_REGION_CLAUDE_3_5_HAIKU=\"us-east5\"",
+      "isNew": true,
+      "category": "environment",
+      "tags": ["gcp", "haiku", "region", "vertex"]
+    },
+    {
+      "id": "env-vertex-region-claude-3-5-sonnet",
+      "name": "VERTEX_REGION_CLAUDE_3_5_SONNET",
+      "description": "Override the default region for Claude 3.5 Sonnet model on Google Vertex AI.",
+      "usage": "export VERTEX_REGION_CLAUDE_3_5_SONNET=\"<region>\"",
+      "example": "export VERTEX_REGION_CLAUDE_3_5_SONNET=\"us-east5\"",
+      "isNew": true,
+      "category": "environment",
+      "tags": ["gcp", "region", "sonnet", "vertex"]
+    },
+    {
+      "id": "env-vertex-region-claude-3-7-sonnet",
+      "name": "VERTEX_REGION_CLAUDE_3_7_SONNET",
+      "description": "Override the default region for Claude 3.7 Sonnet model on Google Vertex AI.",
+      "usage": "export VERTEX_REGION_CLAUDE_3_7_SONNET=\"<region>\"",
+      "example": "export VERTEX_REGION_CLAUDE_3_7_SONNET=\"us-east5\"",
+      "isNew": true,
+      "category": "environment",
+      "tags": ["gcp", "region", "sonnet", "vertex"]
+    },
+    {
+      "id": "env-vertex-region-claude-4-0-opus",
+      "name": "VERTEX_REGION_CLAUDE_4_0_OPUS",
+      "description": "Override the default region for Claude 4.0 Opus model on Google Vertex AI.",
+      "usage": "export VERTEX_REGION_CLAUDE_4_0_OPUS=\"<region>\"",
+      "example": "export VERTEX_REGION_CLAUDE_4_0_OPUS=\"us-east5\"",
+      "isNew": true,
+      "category": "environment",
+      "tags": ["gcp", "opus", "region", "vertex"]
+    },
+    {
+      "id": "env-vertex-region-claude-4-0-sonnet",
+      "name": "VERTEX_REGION_CLAUDE_4_0_SONNET",
+      "description": "Override the default region for Claude 4.0 Sonnet model on Google Vertex AI.",
+      "usage": "export VERTEX_REGION_CLAUDE_4_0_SONNET=\"<region>\"",
+      "example": "export VERTEX_REGION_CLAUDE_4_0_SONNET=\"us-east5\"",
+      "isNew": true,
+      "category": "environment",
+      "tags": ["gcp", "region", "sonnet", "vertex"]
+    },
+    {
+      "id": "env-aws-bearer-token-bedrock",
+      "name": "AWS_BEARER_TOKEN_BEDROCK",
+      "description": "Bedrock API key for authentication.",
+      "usage": "export AWS_BEARER_TOKEN_BEDROCK=\"your_bedrock_token_here\"",
+      "isNew": true,
+      "category": "environment",
+      "tags": ["auth", "aws", "bedrock", "token"]
+    },
+    {
+      "id": "env-anthropic-small-fast-model-aws-region",
+      "name": "ANTHROPIC_SMALL_FAST_MODEL_AWS_REGION",
+      "description": "Override AWS region for the small/fast model when using Bedrock.",
+      "usage": "export ANTHROPIC_SMALL_FAST_MODEL_AWS_REGION=\"us-east-1\"",
+      "isNew": true,
+      "category": "environment",
+      "tags": ["aws", "bedrock", "haiku", "region"]
     }
   ]
 }
