@@ -1,6 +1,6 @@
 # Hypersonic Changelog
 
-## [2.1.1] - {PR_MERGE_DATE}
+## [2.1.1] - 2025-08-04
 
 #### New
 
