@@ -7,6 +7,7 @@ import util from "util";
 
 import { getZedDbName } from "./zed";
 
+const MAX_PATH_COUNT = 100;
 const preferences = getPreferenceValues<Preferences>();
 const zedBuild = preferences.build;
 
@@ -53,13 +54,72 @@ interface ZedRecentWorkspaces {
   removeAllEntries: () => Promise<void>;
 }
 
-function processLocalWorkspace(workspace: LocalWorkspace): ZedEntry {
-  const pathStart = workspace.local_paths.indexOf("/");
-  const path = workspace.local_paths.substring(pathStart);
+/**
+ * Parse Zed local workspace path data
+ *
+ * Zed stores local paths in binary format containing:
+ * - 8 bytes: vector length (number of paths)
+ * - For each path:
+ *   - 8 bytes: string length
+ *   - N bytes: UTF-8 encoded path string
+ *
+ * @param str - Binary path data from Zed database (as string)
+ * @returns Array of parsed paths, or null if parsing fails
+ */
+function parseLocalPaths(str: string): string[] | null {
+  if (!str) return null;
+
+  try {
+    const buffer = Buffer.from(str, "utf8");
+    let offset = 0;
+
+    // Read number of paths (8 bytes, little-endian)
+    const count = Number(buffer.readBigUInt64LE(offset));
+    offset += 8;
+
+    if (count < 0 || count > MAX_PATH_COUNT) return null; // Sanity check
+
+    const paths: string[] = [];
+    for (let i = 0; i < count; i++) {
+      // Read string length (8 bytes, little-endian)
+      const length = Number(buffer.readBigUInt64LE(offset));
+      offset += 8;
+
+      if (length < 0 || offset + length > buffer.length) return null;
+
+      // Read string data
+      paths.push(buffer.subarray(offset, offset + length).toString("utf8"));
+      offset += length;
+    }
+
+    return paths;
+  } catch (error) {
+    showFailureToast(error, {
+      title: "Failed to parse Zed workspace paths",
+      message: "Some workspace entries may not be displayed",
+    });
+    return null;
+  }
+}
+
+function processLocalWorkspace(workspace: LocalWorkspace): ZedEntry | undefined {
+  const paths = parseLocalPaths(workspace.local_paths);
+  // TODO: Only support single path workspaces for now
+  if (!paths || paths.length !== 1) {
+    return undefined;
+  }
+
+  const path = paths[0];
+  // Path validation
+  if (!path || path.trim() === "" || path.includes("\0")) {
+    return undefined;
+  }
+
+  const cleanPath = path.trim();
   return {
     id: workspace.id,
-    path,
-    uri: "file://" + path.replace(/\/$/, ""),
+    path: cleanPath,
+    uri: "file://" + cleanPath.replace(/\/$/, ""),
     lastOpened: new Date(workspace.timestamp).getTime(),
   };
 }
