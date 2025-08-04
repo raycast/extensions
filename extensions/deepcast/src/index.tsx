@@ -263,9 +263,12 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
           </Form.Dropdown>
         </>
       )}
-      <Form.TextArea id="translation" value={translation} onChange={() => {}} />
+      <Form.TextArea id="translation" value={translation} />
       {(showTransliteration == "always" || (showTransliteration == "whenProvided" && transliteration.length > 0)) && (
-        <Form.Description title="Transliteration" text={transliteration} />
+        <>
+          <Form.TextArea id="translation" value={translation} />
+          <Form.Description title="Transliteration" text={transliteration} />
+        </>
       )}
     </Form>
   );
