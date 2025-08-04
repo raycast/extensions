@@ -1,6 +1,6 @@
 # End Of Life Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2025-08-04
 
 - Added support for Windows
 
