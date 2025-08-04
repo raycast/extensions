@@ -32,7 +32,7 @@ export default function TimeUntil() {
 
     if (!timeLeft) {
       return `# 🎉 ${bigDayName}\n\n**Event Date:** ${bigDay.format(
-        "MMMM Do, YYYY"
+        "MMMM Do, YYYY",
       )}\n\n✨ The day has arrived or passed!`;
     }
 
