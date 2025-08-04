@@ -1,6 +1,6 @@
 # Claude Code Cheatsheet Changelog
 
-## [1.1.0] {PR_MERGE_DATE}
+## [1.1.0] 2025-08-04
 
 ### Added
 - Claude Code v1.0.51-v1.0.54+ support with complete feature coverage
