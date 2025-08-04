@@ -1,6 +1,6 @@
 # Dokploy Changelog
 
-## [Create & Delete Destinations] - {PR_MERGE_DATE}
+## [Create & Delete Destinations] - 2025-08-04
 
 - Inner Views now have updated `navigationTitle`s
 - Show "name" in **Users**
