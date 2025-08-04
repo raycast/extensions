@@ -1,0 +1,24 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" rx="128" fill="#5E5CE6"/>
+  
+  <!-- Clock icon (representing "recent") -->
+  <circle cx="256" cy="200" r="80" fill="none" stroke="white" stroke-width="16"/>
+  <path d="M256 160 L256 200 L290 230" stroke="white" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- File icons -->
+  <g transform="translate(120, 280)">
+    <rect x="0" y="0" width="80" height="100" rx="8" fill="white" opacity="0.9"/>
+    <rect x="0" y="0" width="60" height="20" rx="4" fill="#5E5CE6"/>
+  </g>
+  
+  <g transform="translate(216, 300)">
+    <rect x="0" y="0" width="80" height="100" rx="8" fill="white"/>
+    <rect x="0" y="0" width="60" height="20" rx="4" fill="#5E5CE6"/>
+  </g>
+  
+  <g transform="translate(312, 280)">
+    <rect x="0" y="0" width="80" height="100" rx="8" fill="white" opacity="0.9"/>
+    <rect x="0" y="0" width="60" height="20" rx="4" fill="#5E5CE6"/>
+  </g>
+</svg>
