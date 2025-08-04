@@ -144,7 +144,7 @@ export function sleep(ms: number) {
 
 export async function waitForFileExists(filename: string, timeoutMs = 2000) {
   const start = new Date();
-  while (start.getTime() > 0) {
+  while (true) {
     await sleep(10);
     if (await fileExists(filename)) {
       return true;
