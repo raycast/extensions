@@ -1,6 +1,6 @@
 # Brand Icons Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2025-08-04
 
 - Handle error when reading a non-existent file in `makeCopyToDownload`
 - Fix `titleToSlug` logics for legacy Simple Icons versions
