@@ -1,5 +1,7 @@
 # Model Context Protocol Registry Changelog
 
+## [Updated Apify param] - {PR_MERGE_DATE}
+
 ## [Update Google Drive Homepage URL] - 2025-07-23
 
 Update Google Drive Homepage URL to the correct one.
