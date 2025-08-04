@@ -1,18 +1,16 @@
-import { Action, ActionPanel, Form, getPreferenceValues, LaunchProps } from "@raycast/api";
-import { useChatGptSearch } from "./useChatGptSearch";
+import { Action, ActionPanel, Form, LaunchProps } from "@raycast/api";
 import { Props } from "./Props";
-import { ExtensionPreferences } from "./ExtensionPreferences";
+import { useState } from "react";
+import { useChatGptSearchForm } from "./useChatGptSearchForm";
 
 export default function Command(props: LaunchProps<{ arguments: Props }>) {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
-  const { handleSubmit, itemProps } = useChatGptSearch(preferences);
+  const { itemProps, handleSubmit } = useChatGptSearchForm();
+  const [isOpenExecuted, setIsOpenExecuted] = useState(false);
 
-  if (props.arguments.query) {
-    return (
-      handleSubmit({
-        query: props.arguments.query,
-      }) && null
-    );
+  if (props.arguments.query && !isOpenExecuted) {
+    handleSubmit({ query: props.arguments.query });
+    setIsOpenExecuted(true);
+    return null;
   }
 
   return (
