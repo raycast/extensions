@@ -9,7 +9,7 @@ import {
   getPreferenceValues,
   Clipboard,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Formality,
   SUPPORTED_FORMALITY_LANGUAGES,
@@ -70,21 +70,21 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
   const [targetLanguage, setTargetLanguage] = useState<TargetLanguage>(defaultTargetLanguage);
   const [detectedSourceLanguage, setDetectedSourceLanguage] = useState<SourceLanguage>();
   const [formality, setFormality] = useState<Formality>(defaultFormality ?? "default");
+  const hasInitialized = useRef(false);
 
   // set the source text to the selected text if no fallback text is provided
   // if there is no selected text, then just leave the source text empty
   useEffect(() => {
-    if (props.fallbackText) return;
+    if (props.fallbackText || hasInitialized.current) return;
+    hasInitialized.current = true;
 
     getSelection().then((content) => {
-      const newText = content ?? "";
-      setSourceText(newText);
-      setTranslation(""); // Always clear previous translation
-
-      // Auto-translate if we have content
-      if (newText.trim()) {
+      const cleanText = (content ?? "").trim();
+      setSourceText(cleanText);
+      // Auto-translate only if opened with selected text (i.e., via shortcut)
+      if (cleanText) {
         submit({
-          text: newText,
+          text: cleanText,
           to: targetLanguage,
           from: sourceLanguage,
           formality: formality,
@@ -263,12 +263,9 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
           </Form.Dropdown>
         </>
       )}
-      <Form.TextArea id="translation" value={translation} />
+      <Form.TextArea id="translation" value={translation} onChange={() => {}} />
       {(showTransliteration == "always" || (showTransliteration == "whenProvided" && transliteration.length > 0)) && (
-        <>
-          <Form.TextArea id="translation" value={translation} />
-          <Form.Description title="Transliteration" text={transliteration} />
-        </>
+        <Form.Description title="Transliteration" text={transliteration} />
       )}
     </Form>
   );
