@@ -1,0 +1,5 @@
+# Copyright © 2025
+# All rights reserved.
+
+# No external dependencies required - uses only Python standard library
+# This file is included for consistency and future extensibility 

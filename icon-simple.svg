@@ -1,0 +1,47 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" rx="128" fill="#007AFF"/>
+  
+  <!-- Network grid pattern -->
+  <g opacity="0.9">
+    <!-- Horizontal lines -->
+    <line x1="128" y1="160" x2="384" y2="160" stroke="white" stroke-width="4" opacity="0.8"/>
+    <line x1="128" y1="240" x2="384" y2="240" stroke="white" stroke-width="4" opacity="0.8"/>
+    <line x1="128" y1="320" x2="384" y2="320" stroke="white" stroke-width="4" opacity="0.8"/>
+    
+    <!-- Vertical lines -->
+    <line x1="160" y1="128" x2="160" y2="384" stroke="white" stroke-width="4" opacity="0.8"/>
+    <line x1="240" y1="128" x2="240" y2="384" stroke="white" stroke-width="4" opacity="0.8"/>
+    <line x1="320" y1="128" x2="320" y2="384" stroke="white" stroke-width="4" opacity="0.8"/>
+    
+    <!-- Connection nodes -->
+    <circle cx="160" cy="160" r="8" fill="white"/>
+    <circle cx="240" cy="160" r="8" fill="white"/>
+    <circle cx="320" cy="160" r="8" fill="white"/>
+    <circle cx="160" cy="240" r="8" fill="white"/>
+    <circle cx="240" cy="240" r="8" fill="white"/>
+    <circle cx="320" cy="240" r="8" fill="white"/>
+    <circle cx="160" cy="320" r="8" fill="white"/>
+    <circle cx="240" cy="320" r="8" fill="white"/>
+    <circle cx="320" cy="320" r="8" fill="white"/>
+  </g>
+  
+  <!-- Scanning indicator -->
+  <circle cx="256" cy="256" r="60" fill="none" stroke="white" stroke-width="6" opacity="0.9"/>
+  <circle cx="256" cy="256" r="40" fill="none" stroke="white" stroke-width="4" opacity="0.7"/>
+  
+  <!-- Scanning line -->
+  <line x1="256" y1="256" x2="316" y2="256" stroke="white" stroke-width="6" opacity="0.9">
+    <animateTransform
+      attributeName="transform"
+      type="rotate"
+      from="0 256 256"
+      to="360 256 256"
+      dur="1.5s"
+      repeatCount="indefinite"/>
+  </line>
+  
+  <!-- IP indicator -->
+  <rect x="200" y="380" width="112" height="32" rx="16" fill="white" opacity="0.9"/>
+  <text x="256" y="400" text-anchor="middle" fill="#007AFF" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600">IP FINDER</text>
+</svg> 
