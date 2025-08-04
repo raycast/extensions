@@ -1,6 +1,6 @@
 # Apple Music Changelog
 
-## [New Command] - {PR_MERGE_DATE}
+## [New Command] - 2025-08-04
 
 - Added a new command that removes the currently playing track from the Library.
 
