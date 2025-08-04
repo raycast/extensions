@@ -1,0 +1,54 @@
+{
+  "name": "isows",
+  "description": "Isomorphic WebSocket",
+  "version": "1.0.7",
+  "browser": "./_esm/native.js",
+  "main": "./_cjs/index.js",
+  "module": "./_esm/index.js",
+  "types": "./_types/native.d.ts",
+  "typings": "./_types/native.d.ts",
+  "sideEffects": false,
+  "files": [
+    "*",
+    "!**/*.tsbuildinfo",
+    "!**/*.test.ts",
+    "!**/*.test.ts.snap",
+    "!**/*.test-d.ts",
+    "!**/*.bench.ts",
+    "!tsconfig.build.json"
+  ],
+  "exports": {
+    ".": {
+      "types": "./_types/native.d.ts",
+      "bun": "./_esm/native.js",
+      "browser": "./_esm/native.js",
+      "deno": "./_esm/native.js",
+      "workerd": "./_esm/native.js",
+      "react-native": "./_esm/native.js",
+      "import": "./_esm/index.js",
+      "default": "./_cjs/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "peerDependencies": {
+    "ws": "*"
+  },
+  "license": "MIT",
+  "repository": "wevm/isows",
+  "authors": [
+    "jxom.eth"
+  ],
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/wevm"
+    }
+  ],
+  "keywords": [
+    "isomorphic",
+    "websocket",
+    "ws",
+    "node",
+    "browser"
+  ]
+}
