@@ -1,13 +1,13 @@
 # Changelog
 
-## [1.1.0] - Add Recent Projects Section - {PR_MERGE_DATE}
+## [1.1.0] - Add Recent Projects Section - 2025-08-04
 
 - Add recent projects section sorted by usage frequency
 - Add usage tracking for projects
 - Add max recent projects preference setting
 - Recent projects section shows keyboard shortcuts (⌘1, ⌘2, ⌘3)
 
-## [1.0.0] - Initial Version - {PR_MERGE_DATE}
+## [1.0.0] - Initial Version - 2025-08-04
 
 - Add project management with customizable colors
 - Add link organization within projects
