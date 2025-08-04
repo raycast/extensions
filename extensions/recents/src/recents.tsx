@@ -16,7 +16,7 @@ interface RecentsPreferences {
 }
 
 const queryScopesSharedQueryPart = (excludeFolders: boolean) =>
-  `(kMDItemLastUsedDate = "*") && ((kMDItemContentTypeTree = public.content) || (kMDItemContentTypeTree = "com.microsoft.*"cdw) || (kMDItemContentTypeTree = public.archive) ${
+  `(kMDItemLastUsedDate = "*") && ((kMDItemContentTypeTree = public.content) || (kMDItemContentTypeTree = "com.microsoft.*") || (kMDItemContentTypeTree = public.archive) || (kMDItemContentTypeTree = public.image) ${
     !excludeFolders ? `|| (kMDItemContentTypeTree = public.folder)` : ""
   }) && (kMDItemSupportFileType != MDSystemFile)`;
 
