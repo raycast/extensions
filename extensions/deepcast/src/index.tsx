@@ -75,12 +75,16 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
   // if there is no selected text, then just leave the source text empty
   useEffect(() => {
     if (props.fallbackText) return;
+
     getSelection().then((content) => {
-      setSourceText(content ?? "");
+      const newText = content ?? "";
+      setSourceText(newText);
+      setTranslation(""); // Always clear previous translation
+
       // Auto-translate if we have content
-      if (content && content.trim()) {
+      if (newText.trim()) {
         submit({
-          text: content,
+          text: newText,
           to: targetLanguage,
           from: sourceLanguage,
           formality: formality,
