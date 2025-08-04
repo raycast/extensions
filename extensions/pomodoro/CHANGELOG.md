@@ -1,6 +1,6 @@
 # Pomodoro Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2025-08-04
 
 - Fixed typo ("cycless" to "cycles") in the `View Pomodoro Stats` command
 
