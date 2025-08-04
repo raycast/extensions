@@ -10,9 +10,7 @@
 
 ## Screenshots
 
-![Screenshot 1](https://github.com/MuhaddiMu/Time-Until-I-Do-Raycast-Extension/blob/main/metadata/time-until-i-do-1.png?raw=true)
-![Screenshot 2](https://github.com/MuhaddiMu/Time-Until-I-Do-Raycast-Extension/blob/main/metadata/time-until-i-do-2.png?raw=true)
-![Screenshot 3](https://github.com/MuhaddiMu/Time-Until-I-Do-Raycast-Extension/blob/main/metadata/time-until-i-do-3.png?raw=true)
+![Screenshot 1](https://raw.githubusercontent.com/raycast/extensions/9990bcee87a860f70e582b408312e73dfd515415/extensions/time-until-i-do/metadata/time-until-i-do-1.png?raw=true)
 
 ## Preferences
 
