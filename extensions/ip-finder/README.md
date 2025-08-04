@@ -46,7 +46,7 @@ The main command that provides a comprehensive interface for network scanning:
 3. View results showing assigned IPs and recommendations
 
 ### Custom Subnet Scan
-1. Use "Custom Network Scan" to specify a different subnet
+1. Use "Scan Network" command and select custom scanning options
 2. Enter subnet in CIDR notation (e.g., `192.168.1.0/24`)
 3. Configure timeout and thread settings
 4. Start the scan and view results
