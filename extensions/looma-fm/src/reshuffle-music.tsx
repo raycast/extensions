@@ -1,10 +1,14 @@
-import { showToast, Toast } from "@raycast/api";
+import { showToast, Toast, environment } from "@raycast/api";
 import { createClient } from "@supabase/supabase-js";
 import { spawn } from "child_process";
 import fetch from "node-fetch";
-import { writeFileSync, unlinkSync, existsSync } from "fs";
-import { tmpdir } from "os";
+import { writeFileSync, unlinkSync, existsSync, mkdirSync } from "fs";
 import { join } from "path";
+import {
+  loadPlaybackState,
+  clearPlaybackState,
+  savePlaybackState,
+} from "./shared-state";
 
 interface MusicTrack {
   name: string;
@@ -15,8 +19,21 @@ interface MusicTrack {
 
 export default async function Command() {
   try {
-    // First stop any currently playing music
-    spawn("pkill", ["-f", "afplay"]);
+    // First stop any currently playing music using stored PID or fallback
+    const currentState = loadPlaybackState();
+    if (currentState && currentState.isPlaying && currentState.pid) {
+      try {
+        process.kill(currentState.pid, "SIGTERM");
+      } catch (error) {
+        console.error(
+          "Failed to stop previous track using PID, falling back to generic stop.",
+        );
+        spawn("pkill", ["-f", "afplay"]);
+      }
+    } else {
+      spawn("pkill", ["-f", "afplay"]);
+    }
+    clearPlaybackState();
 
     showToast({
       style: Toast.Style.Animated,
@@ -77,13 +94,26 @@ export default async function Command() {
       const arrayBuffer = await response.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
-      // Save to temp file
+      // Save to support directory with proper cleanup
+      const supportDir = join(environment.supportPath, "audio-cache");
+      if (!existsSync(supportDir)) {
+        mkdirSync(supportDir, { recursive: true });
+      }
       const tempFileName = `looma_reshuffle_${Date.now()}.mp3`;
-      const tempFilePath = join(tmpdir(), tempFileName);
+      const tempFilePath = join(supportDir, tempFileName);
       writeFileSync(tempFilePath, new Uint8Array(buffer));
 
       // Play the audio file using macOS afplay
       const audioProcess = spawn("afplay", [tempFilePath]);
+
+      // Save current playback state for other commands including PID for targeted killing
+      savePlaybackState({
+        currentTrack: track,
+        isPlaying: true,
+        isPaused: false,
+        tempFilePath,
+        pid: audioProcess.pid,
+      });
 
       audioProcess.on("close", () => {
         // Clean up temp file when done
@@ -94,6 +124,7 @@ export default async function Command() {
             console.log("Could not delete temp file:", e);
           }
         }
+        clearPlaybackState();
       });
 
       audioProcess.on("error", (err) => {
@@ -103,6 +134,7 @@ export default async function Command() {
           title: "Playback Error",
           message: `Cannot play ${track.name}`,
         });
+        clearPlaybackState();
       });
 
       showToast({

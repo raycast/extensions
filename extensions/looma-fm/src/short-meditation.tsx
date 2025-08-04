@@ -1,10 +1,14 @@
-import { showToast, Toast } from "@raycast/api";
+import { showToast, Toast, environment } from "@raycast/api";
 import { createClient } from "@supabase/supabase-js";
 import { spawn } from "child_process";
 import fetch from "node-fetch";
-import { writeFileSync, unlinkSync, existsSync } from "fs";
-import { tmpdir } from "os";
+import { writeFileSync, unlinkSync, existsSync, mkdirSync } from "fs";
 import { join } from "path";
+import {
+  loadPlaybackState,
+  clearPlaybackState,
+  savePlaybackState,
+} from "./shared-state";
 
 interface MeditationTrack {
   name: string;
@@ -15,8 +19,21 @@ interface MeditationTrack {
 
 export default async function Command() {
   try {
-    // First stop any currently playing music/meditation
-    spawn("pkill", ["-f", "afplay"]);
+    // First stop any currently playing music/meditation using stored PID or fallback
+    const existingState = loadPlaybackState();
+    if (existingState && existingState.isPlaying && existingState.pid) {
+      try {
+        process.kill(existingState.pid, "SIGTERM");
+      } catch (error) {
+        console.error(
+          "Failed to stop previous audio using PID, falling back to generic stop.",
+        );
+        spawn("pkill", ["-f", "afplay"]);
+      }
+    } else {
+      spawn("pkill", ["-f", "afplay"]);
+    }
+    clearPlaybackState();
 
     showToast({
       style: Toast.Style.Animated,
@@ -82,13 +99,26 @@ export default async function Command() {
       const arrayBuffer = await response.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
-      // Save to temp file
+      // Save to support directory with proper cleanup
+      const supportDir = join(environment.supportPath, "audio-cache");
+      if (!existsSync(supportDir)) {
+        mkdirSync(supportDir, { recursive: true });
+      }
       const tempFileName = `meditation_${Date.now()}.mp3`;
-      const tempFilePath = join(tmpdir(), tempFileName);
+      const tempFilePath = join(supportDir, tempFileName);
       writeFileSync(tempFilePath, new Uint8Array(buffer));
 
       // Play the meditation session using macOS afplay
       const audioProcess = spawn("afplay", [tempFilePath]);
+
+      // Save current playback state for other commands including PID for targeted killing
+      savePlaybackState({
+        currentTrack: track,
+        isPlaying: true,
+        isPaused: false,
+        tempFilePath,
+        pid: audioProcess.pid,
+      });
 
       audioProcess.on("close", (code) => {
         // Clean up temp file when meditation session ends
@@ -99,6 +129,9 @@ export default async function Command() {
             // Ignore cleanup errors
           }
         }
+
+        // Clear playback state
+        clearPlaybackState();
 
         if (code === 0) {
           // Meditation session completed successfully
@@ -111,6 +144,7 @@ export default async function Command() {
       });
 
       audioProcess.on("error", () => {
+        clearPlaybackState();
         showToast({
           style: Toast.Style.Failure,
           title: "Playback Error",

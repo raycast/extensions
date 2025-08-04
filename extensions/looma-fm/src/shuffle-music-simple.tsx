@@ -1,11 +1,14 @@
-import { showToast, Toast } from "@raycast/api";
+import { showToast, Toast, environment } from "@raycast/api";
 import { createClient } from "@supabase/supabase-js";
 import { spawn } from "child_process";
 import fetch from "node-fetch";
-import { writeFileSync, unlinkSync, existsSync } from "fs";
-import { tmpdir } from "os";
+import { writeFileSync, unlinkSync, existsSync, mkdirSync } from "fs";
 import { join } from "path";
-import { savePlaybackState, clearPlaybackState } from "./shared-state";
+import {
+  savePlaybackState,
+  clearPlaybackState,
+  loadPlaybackState,
+} from "./shared-state";
 
 interface MusicTrack {
   name: string;
@@ -16,8 +19,20 @@ interface MusicTrack {
 
 export default async function Command() {
   try {
-    // First stop any currently playing music
-    spawn("pkill", ["-f", "afplay"]);
+    // First stop any currently playing music using stored PID or fallback
+    const existingState = loadPlaybackState();
+    if (existingState && existingState.isPlaying && existingState.pid) {
+      try {
+        process.kill(existingState.pid, "SIGTERM");
+      } catch (error) {
+        console.error(
+          "Failed to stop previous track using PID, falling back to generic stop.",
+        );
+        spawn("pkill", ["-f", "afplay"]);
+      }
+    } else {
+      spawn("pkill", ["-f", "afplay"]);
+    }
 
     showToast({
       style: Toast.Style.Animated,
@@ -94,9 +109,13 @@ export default async function Command() {
       const arrayBuffer = await response.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
-      // Save to temp file (exactly like reshuffle)
+      // Save to support directory with proper cleanup
+      const supportDir = join(environment.supportPath, "audio-cache");
+      if (!existsSync(supportDir)) {
+        mkdirSync(supportDir, { recursive: true });
+      }
       const tempFileName = `looma_${Date.now()}.mp3`;
-      const tempFilePath = join(tmpdir(), tempFileName);
+      const tempFilePath = join(supportDir, tempFileName);
       writeFileSync(tempFilePath, new Uint8Array(buffer));
 
       // Play the audio file using macOS afplay (exactly like reshuffle)

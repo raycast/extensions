@@ -1,55 +1,82 @@
-import { showToast, Toast } from "@raycast/api";
+import { showToast, Toast, environment } from "@raycast/api";
 import { spawn } from "child_process";
 import { unlinkSync, readdirSync } from "fs";
-import { tmpdir } from "os";
 import { join } from "path";
+import { loadPlaybackState, clearPlaybackState } from "./shared-state";
 
 export default async function Command() {
   try {
-    // Kill all afplay processes to stop music
-    const killProcess = spawn("pkill", ["-f", "afplay"]);
+    const currentState = loadPlaybackState();
 
-    killProcess.on("close", (code) => {
-      // Clean up any temporary Looma.FM files
+    // Stop music using stored PID if available, otherwise fallback to pkill
+    if (currentState && currentState.pid) {
       try {
-        const tempDir = tmpdir();
-        const files = readdirSync(tempDir);
-        const loomaFiles = files.filter((file) => file.startsWith("looma_"));
-
-        loomaFiles.forEach((file) => {
-          try {
-            unlinkSync(join(tempDir, file));
-          } catch (e) {
-            console.log("Could not delete temp file:", file, e);
-          }
-        });
-      } catch (e) {
-        console.log("Could not clean up temp files:", e);
-      }
-
-      if (code === 0) {
+        process.kill(currentState.pid, "SIGTERM");
         showToast({
           style: Toast.Style.Success,
           title: "⏹ Stopped",
           message: "Looma.FM music stopped",
         });
-      } else {
-        showToast({
-          style: Toast.Style.Success,
-          title: "⏹ Stopped",
-          message: "No music was playing",
+      } catch (error) {
+        // PID might be stale, fallback to generic pkill
+        const killProcess = spawn("pkill", ["-f", "afplay"]);
+        killProcess.on("close", () => {
+          showToast({
+            style: Toast.Style.Success,
+            title: "⏹ Stopped",
+            message: "Music stopped",
+          });
         });
       }
-    });
-
-    killProcess.on("error", (err) => {
-      console.error("Stop error:", err);
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Stop Error",
-        message: "Could not stop music",
+    } else {
+      // No stored state, use generic pkill as fallback
+      const killProcess = spawn("pkill", ["-f", "afplay"]);
+      killProcess.on("close", (code) => {
+        if (code === 0) {
+          showToast({
+            style: Toast.Style.Success,
+            title: "⏹ Stopped",
+            message: "Music stopped",
+          });
+        } else {
+          showToast({
+            style: Toast.Style.Success,
+            title: "⏹ Stopped",
+            message: "No music was playing",
+          });
+        }
       });
-    });
+      killProcess.on("error", (err) => {
+        console.error("Stop error:", err);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Stop Error",
+          message: "Could not stop music",
+        });
+      });
+    }
+
+    // Clean up temporary Looma.FM files from support directory
+    try {
+      const supportDir = join(environment.supportPath, "audio-cache");
+      const files = readdirSync(supportDir);
+      const loomaFiles = files.filter(
+        (file) => file.startsWith("looma_") || file.startsWith("meditation_"),
+      );
+
+      loomaFiles.forEach((file) => {
+        try {
+          unlinkSync(join(supportDir, file));
+        } catch (e) {
+          console.log("Could not delete temp file:", file, e);
+        }
+      });
+    } catch (e) {
+      console.log("Could not clean up temp files:", e);
+    }
+
+    // Clear the playback state
+    clearPlaybackState();
   } catch (error) {
     console.error("Command error:", error);
     showToast({

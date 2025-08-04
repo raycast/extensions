@@ -1,8 +1,8 @@
 import { writeFileSync, readFileSync, existsSync, unlinkSync } from "fs";
-import { tmpdir } from "os";
 import { join } from "path";
+import { environment } from "@raycast/api";
 
-const STATE_FILE = join(tmpdir(), "looma-fm-state.json");
+const STATE_FILE = join(environment.supportPath, "looma-fm-state.json");
 
 export interface PlaybackState {
   currentTrack?: {
