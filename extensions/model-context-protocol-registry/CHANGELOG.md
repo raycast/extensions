@@ -1,6 +1,8 @@
 # Model Context Protocol Registry Changelog
 
-## [Updated Apify param] - {PR_MERGE_DATE}
+## [Updated Apify] - {PR_MERGE_DATE}
+
+Updated Apify MCP server configuration from `APIFY_API_TOKEN` to `APIFY_TOKEN`
 
 ## [Update Google Drive Homepage URL] - 2025-07-23
 
