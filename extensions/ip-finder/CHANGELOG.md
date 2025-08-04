@@ -1,6 +1,6 @@
 # IP Finder Changelog
 
-## [1.0.0] - 2025-01-27
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 - Initial release of IP Finder Network Scanner
