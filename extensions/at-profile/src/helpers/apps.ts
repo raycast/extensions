@@ -44,7 +44,7 @@ export async function getAllApps(): Promise<App[]> {
     settingsMap.set(setting.value, setting);
   });
 
-  // Filter sites based on visible flag (default to visible when no settings entry)
+  // Filter apps based on visible flag (default to visible when no settings entry)
   const allApps = [...defaultApps, ...customApps];
   return allApps.filter((app) => {
     const setting = settingsMap.get(app.value);

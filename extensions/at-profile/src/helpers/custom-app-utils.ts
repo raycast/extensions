@@ -422,7 +422,7 @@ export const removeCustomApp = withErrorHandling(
  */
 export async function appExists(value: string): Promise<boolean> {
   const customApps = await getCustomApps();
-  const defaultExists = defaultApps.some((site) => site.value === value);
+  const defaultExists = defaultApps.some((app) => app.value === value);
   const customExists = customApps.some((app) => app.value === value);
   return defaultExists || customExists;
 }
@@ -431,10 +431,10 @@ export async function appExists(value: string): Promise<boolean> {
  * Helper function to get an app by value (from both default and custom)
  */
 export async function getAppByValue(value: string): Promise<App | null> {
-  // Check default sites first
-  const defaultSite = defaultApps.find((site) => site.value === value);
-  if (defaultSite) {
-    return defaultSite;
+  // Check default apps first
+  const defaultApp = defaultApps.find((app) => app.value === value);
+  if (defaultApp) {
+    return defaultApp;
   }
 
   // Check custom apps

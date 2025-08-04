@@ -61,7 +61,7 @@ export interface OpenProfileArguments {
 
 export interface QuickOpenArguments {
   profile: string;
-  site: string;
+  app: string;
 }
 
 export interface ManageAppsArguments {

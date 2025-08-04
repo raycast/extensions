@@ -39,7 +39,7 @@
           "required": true
         },
         {
-          "name": "site",
+          "name": "app",
           "placeholder": "Platform",
           "type": "dropdown",
           "required": true,
