@@ -1,6 +1,6 @@
 # Raindrop.io Extension Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2025-08-04
 
 - Add support for Zen Browser.
 
