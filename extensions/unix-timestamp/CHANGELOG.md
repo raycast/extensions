@@ -1,6 +1,6 @@
 # Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2025-08-04
 
 - Make available on Windows
 - Upgrade eslint config + tsconfig
