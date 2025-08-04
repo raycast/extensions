@@ -1,6 +1,6 @@
 # Raynab Changelog
 
-## [Fixed Currency Format Validation in Transaction Forms] - {PR_MERGE_DATE}
+## [Fixed Currency Format Validation in Transaction Forms] - 2025-08-04
 
 ### 🐞 Bug Fixes
 - Fixed transaction amount validation to properly handle different currency formats (e.g., European "1.234,56" vs US "1,234.56")
