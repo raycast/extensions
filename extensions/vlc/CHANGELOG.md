@@ -1,6 +1,6 @@
 # VLC Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-08-04
 
 - Initial release of VLC Raycast extension.
 - Control VLC Media Player directly from Raycast.
