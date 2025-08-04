@@ -43,7 +43,15 @@
       "title": "Get Source",
       "subtitle": "Sefaria",
       "description": "Get Hebrew and English text for a specific reference",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "reference",
+          "placeholder": "e.g., Exod. 17:15, Exodus 17:15, Shemot 17:15, Berakhot 14b, Rashi on Genesis 1:1",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {

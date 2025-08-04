@@ -1,48 +1,19 @@
-import React, { useState } from "react";
-import { Form, ActionPanel, Action } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import React from "react";
+import { LaunchProps } from "@raycast/api";
 import { SourceDetail } from "./lib/components/SourceDetail";
 
 /**
- * Form values interface
+ * Arguments interface for get-source command
  */
-interface FormValues {
+interface Arguments {
   reference: string;
 }
 
 /**
  * Main get source command component
  */
-export default function GetSourceCommand() {
-  const [submittedReference, setSubmittedReference] = useState("");
+export default function GetSourceCommand(props: LaunchProps<{ arguments: Arguments }>) {
+  const { reference } = props.arguments;
 
-  const handleSubmit = (values: FormValues) => {
-    if (!values.reference.trim()) {
-      showFailureToast("Reference Required");
-      return;
-    }
-    setSubmittedReference(values.reference);
-  };
-
-  if (submittedReference) {
-    return <SourceDetail reference={submittedReference} />;
-  }
-
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Get Source" onSubmit={handleSubmit} />
-        </ActionPanel>
-      }
-    >
-      <Form.TextField
-        id="reference"
-        title="Reference"
-        placeholder="e.g., Exod. 17:15, Exodus 17:15, Shemot 17:15, Berakhot 14b, Rashi on Genesis 1:1"
-        info="Enter a biblical reference, Talmudic reference, or commentary reference"
-        autoFocus={true}
-      />
-    </Form>
-  );
+  return <SourceDetail reference={reference} />;
 }
