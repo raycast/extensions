@@ -1,27 +1,28 @@
-import { List, showToast, Toast, Icon, confirmAlert, Alert, Color, Clipboard, LaunchProps } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { showFailureToast } from "@raycast/utils";
-import { getCustomApps, getAppSettings, updateAppSettings, getAppFavicon } from "../hooks/apps";
-import { defaultApps } from "../types/default-apps";
-import { removeCustomApp } from "./custom-app-utils";
+import { List, Icon, confirmAlert, Alert, Color, Clipboard, LaunchProps } from "@raycast/api";
+import { useEffect } from "react";
+import { useCachedPromise } from "@raycast/utils";
+import { showSuccess, withErrorHandling, safeAsyncOperation } from "../utils/errors";
+import { getCustomApps, getAppSettings, updateAppSettings, getAppFavicon } from "../helpers/apps";
+import { defaultApps } from "../utils/default-apps";
+import { removeCustomApp } from "../helpers/custom-app-utils";
 import { AppManagementActionPanels, UtilityActionPanels } from "../components";
 import { exportSettingsToFile, importSettingsFromFile } from "../yaml-settings";
 import { AppItem, ManageAppsArguments, App } from "../types";
 
 export default function ManageAppsCommand(props: LaunchProps<{ arguments: ManageAppsArguments }>) {
   const { action } = props.arguments;
-  const [apps, setApps] = useState<AppItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const loadApps = async () => {
-    try {
-      setIsLoading(true);
+  const {
+    data: apps,
+    isLoading,
+    revalidate,
+  } = useCachedPromise(
+    async () => {
       const [customApps, appSettings] = await Promise.all([getCustomApps(), getAppSettings()]);
 
       // Convert app settings to a map for quick lookup
       const settingsMap = new Map<string, boolean>();
       appSettings.forEach((setting) => {
-        settingsMap.set(setting.value, setting.enabled);
+        settingsMap.set(setting.value, setting.visible);
       });
 
       // Combine default and custom apps
@@ -33,7 +34,7 @@ export default function ManageAppsCommand(props: LaunchProps<{ arguments: Manage
           value: app.value,
           url: app.urlTemplate,
           urlTemplate: app.urlTemplate,
-          enabled: settingsMap.get(app.value) ?? true, // Default to enabled
+          visible: settingsMap.get(app.value) ?? true, // Default to visible
           isDefault: true,
           icon: getAppFavicon(app),
         })),
@@ -44,46 +45,40 @@ export default function ManageAppsCommand(props: LaunchProps<{ arguments: Manage
           value: app.value,
           url: app.urlTemplate,
           urlTemplate: app.urlTemplate,
-          enabled: settingsMap.get(app.value) ?? true, // Default to enabled
+          visible: settingsMap.get(app.value) ?? true, // Default to visible
           isDefault: false,
           icon: getAppFavicon(app),
         })),
       ];
 
-      setApps(allApps);
-    } catch (error) {
-      await showFailureToast((error as Error).message, { title: "Failed to Load Social Apps" });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      return allApps;
+    },
+    [],
+    { keepPreviousData: true },
+  );
 
-  const handleExportApps = async () => {
-    try {
+  const handleExportApps = withErrorHandling(
+    async () => {
       const filePath = await exportSettingsToFile();
       await Clipboard.copy(filePath);
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Apps Exported",
-        message: "File path copied to clipboard",
-      });
-    } catch (error) {
-      await showFailureToast(error instanceof Error ? error.message : "Unknown error", { title: "Export Failed" });
-    }
-  };
+      await showSuccess("Apps Exported", "File path copied to clipboard");
+    },
+    "exporting apps",
+    true,
+    "Export Failed",
+  );
 
-  const handleImportApps = async () => {
-    try {
+  const handleImportApps = withErrorHandling(
+    async () => {
       await importSettingsFromFile();
-      await loadApps(); // Reload the apps after import
-    } catch (error) {
-      await showFailureToast(error instanceof Error ? error.message : "Unknown error", { title: "Import Failed" });
-    }
-  };
+      await revalidate(); // Reload the apps after import
+    },
+    "importing apps",
+    true,
+    "Import Failed",
+  );
 
   useEffect(() => {
-    loadApps();
-
     // Handle command line arguments for import/export
     if (action === "import") {
       handleImportApps();
@@ -92,38 +87,38 @@ export default function ManageAppsCommand(props: LaunchProps<{ arguments: Manage
     }
   }, [action]);
 
-  const toggleAppEnabled = async (appId: string, enabled: boolean) => {
-    try {
+  const toggleAppVisible = withErrorHandling(
+    async (appId: string, visible: boolean) => {
       const currentSettings = await getAppSettings();
 
       // Update or add app setting
       const existingSettingIndex = currentSettings.findIndex((s) => s.value === appId);
       if (existingSettingIndex >= 0) {
-        currentSettings[existingSettingIndex].enabled = enabled;
+        currentSettings[existingSettingIndex].visible = visible;
       } else {
-        currentSettings.push({ value: appId, enabled });
+        currentSettings.push({ value: appId, visible });
       }
 
       await updateAppSettings(currentSettings);
 
-      // Update local state
-      setApps((prev) => prev.map((app) => (app.id === appId ? { ...app, enabled } : app)));
+      // Refresh list after update
+      await revalidate();
 
-      await showToast({
-        style: Toast.Style.Success,
-        title: enabled ? "Social App Shown" : "Social App Hidden",
-        message: `${apps.find((p) => p.id === appId)?.name} is now ${enabled ? "shown" : "hidden"} in Open Profile`,
-      });
-    } catch (error) {
-      await showFailureToast((error as Error).message, { title: "Failed to Update Social App" });
-    }
-  };
+      await showSuccess(
+        visible ? "App Shown" : "App Hidden",
+        `${(apps ?? []).find((p) => p.id === appId)?.name} is now ${visible ? "shown" : "hidden"} in Open Profile`,
+      );
+    },
+    "updating app visibility",
+    true,
+    "Failed to Update App",
+  );
 
   const handleDeleteCustomApp = async (app: AppItem) => {
     if (app.isDefault) return; // Safety check
 
     const confirmed = await confirmAlert({
-      title: "Delete Custom Social App",
+      title: "Delete Custom App",
       message: `Are you sure you want to delete "${app.name}"? This action cannot be undone.`,
       primaryAction: {
         title: "Delete",
@@ -133,23 +128,27 @@ export default function ManageAppsCommand(props: LaunchProps<{ arguments: Manage
 
     if (!confirmed) return;
 
-    try {
-      const result = await removeCustomApp(app.id);
-      if (result.success) {
-        setApps((prev) => prev.filter((p) => p.id !== app.id));
-      }
-    } catch (error) {
-      // Error handling and toasts are managed by the utility functions
-      console.error("Error deleting app:", error);
-    }
+    await safeAsyncOperation(
+      async () => {
+        const result = await removeCustomApp(app.id);
+        if (result?.success) {
+          await revalidate();
+        }
+      },
+      "deleting custom app",
+      {
+        showToastOnError: false, // removeCustomApp already shows toasts
+        rethrow: false,
+      },
+    );
   };
 
-  const defaultAppList = apps.filter((p) => p.isDefault).sort((a, b) => a.name.localeCompare(b.name));
-  const customAppList = apps.filter((p) => !p.isDefault).sort((a, b) => a.name.localeCompare(b.name));
+  const defaultAppList = (apps ?? []).filter((p) => p.isDefault).sort((a, b) => a.name.localeCompare(b.name));
+  const customAppList = (apps ?? []).filter((p) => !p.isDefault).sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search social apps...">
-      <List.Section title="Default Social Apps">
+      <List.Section title="Default Apps">
         {defaultAppList.map((app) => (
           <List.Item
             key={app.id}
@@ -163,31 +162,31 @@ export default function ManageAppsCommand(props: LaunchProps<{ arguments: Manage
             accessories={[
               {
                 icon: {
-                  source: app.enabled ? Icon.CheckCircle : Icon.Circle,
-                  tintColor: app.enabled ? Color.Green : Color.SecondaryText,
+                  source: app.visible ? Icon.CheckCircle : Icon.Circle,
+                  tintColor: app.visible ? Color.Green : Color.SecondaryText,
                 },
-                tooltip: app.enabled ? "Shown" : "Hidden",
+                tooltip: app.visible ? "Shown" : "Hidden",
               },
             ]}
             actions={
               <AppManagementActionPanels
                 type="default"
                 app={app}
-                onToggleEnabled={toggleAppEnabled}
-                onSave={loadApps}
+                onToggleVisible={toggleAppVisible}
+                onSave={revalidate}
               />
             }
           />
         ))}
       </List.Section>
 
-      <List.Section title="Custom Social Apps">
+      <List.Section title="Custom Apps">
         {customAppList.length === 0 ? (
           <List.Item
-            title="No Custom Social Apps"
+            title="No Custom Apps"
             subtitle="Add custom social apps to extend the available options"
             icon={Icon.Info}
-            actions={<AppManagementActionPanels type="empty" onSave={loadApps} />}
+            actions={<AppManagementActionPanels type="empty" onSave={revalidate} />}
           />
         ) : (
           customAppList.map((app) => (
@@ -203,19 +202,19 @@ export default function ManageAppsCommand(props: LaunchProps<{ arguments: Manage
               accessories={[
                 {
                   icon: {
-                    source: app.enabled ? Icon.CheckCircle : Icon.Circle,
-                    tintColor: app.enabled ? Color.Green : Color.SecondaryText,
+                    source: app.visible ? Icon.CheckCircle : Icon.Circle,
+                    tintColor: app.visible ? Color.Green : Color.SecondaryText,
                   },
-                  tooltip: app.enabled ? "Shown" : "Hidden",
+                  tooltip: app.visible ? "Shown" : "Hidden",
                 },
               ]}
               actions={
                 <AppManagementActionPanels
                   type="custom"
                   app={app}
-                  onToggleEnabled={toggleAppEnabled}
+                  onToggleVisible={toggleAppVisible}
                   onDeleteCustomApp={handleDeleteCustomApp}
-                  onSave={loadApps}
+                  onSave={revalidate}
                 />
               }
             />

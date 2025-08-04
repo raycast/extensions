@@ -1,22 +1,21 @@
+import React from "react";
 import { List, Icon } from "@raycast/api";
+import { useCachedPromise, useLocalStorage } from "@raycast/utils";
 import { HistoryActionPanels } from "./components";
-import React, { useEffect, useState } from "react";
-import { getUsageHistory, getAppFavicon, removeUsageHistoryItem } from "./hooks/apps";
-import { openProfile } from "./utils/open-profile";
-import { getAppByValue } from "./utils/custom-app-utils";
-import { formatRelativeDate } from "../utils/date";
+import { getUsageHistory, getAppFavicon, removeUsageHistoryItem } from "./helpers/apps";
+import { openProfile } from "./helpers/open-profile";
+import { getAppByValue } from "./helpers/custom-app-utils";
+import { safeAsyncOperation } from "./utils/errors";
+import { formatRelativeDate } from "./utils/date";
 import OpenProfileCommand from "./open-profile";
-import { HistoryItemWithFavicon } from "./types";
 
 export default function HistoryCommand() {
-  const [historyItems, setHistoryItems] = useState<HistoryItemWithFavicon[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [searchText, setSearchText] = useState("");
-  const [appFilter, setAppFilter] = useState<string>("__all__");
-
-  const loadHistoryData = async () => {
-    try {
-      setIsLoading(true);
+  const {
+    data: historyItems,
+    isLoading,
+    revalidate,
+  } = useCachedPromise(
+    async () => {
       const usageHistory = await getUsageHistory();
 
       // Load favicons for each history item and generate URLs
@@ -43,23 +42,24 @@ export default function HistoryCommand() {
         }),
       );
 
-      setHistoryItems(itemsWithFavicons);
-    } catch (error) {
-      console.error("Error loading history:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      return itemsWithFavicons;
+    },
+    [],
+    { keepPreviousData: true },
+  );
 
-  useEffect(() => {
-    loadHistoryData();
-  }, []);
+  const { value: searchText = "", setValue: setSearchText } = useLocalStorage<string>("history-search-text", "");
+  const { value: appFilter = "__all__", setValue: setAppFilter } = useLocalStorage<string>(
+    "history-app-filter",
+    "__all__",
+  );
 
   // Compute unique apps from historyItems (including "Show All")
   const uniqueApps = React.useMemo(() => {
-    const appSet = new Set(historyItems.map((item) => item.app));
+    const items = historyItems ?? [];
+    const appSet = new Set(items.map((item) => item.app));
     const apps = Array.from(appSet).map((appValue) => {
-      const item = historyItems.find((h) => h.app === appValue);
+      const item = items.find((h) => h.app === appValue);
       return {
         value: appValue,
         name: item?.appName || appValue,
@@ -72,7 +72,7 @@ export default function HistoryCommand() {
   }, [historyItems]);
 
   // Filter items - first by appFilter (unless "all"), then by searchText
-  const filteredItems = historyItems.filter((item) => {
+  const filteredItems = (historyItems ?? []).filter((item) => {
     // First filter by app
     if (appFilter !== "__all__" && item.app !== appFilter) {
       return false;
@@ -104,14 +104,18 @@ export default function HistoryCommand() {
 
   // Handle deleting a history item
   const handleDeleteHistoryItem = async (profile: string, app: string) => {
-    try {
-      await removeUsageHistoryItem(profile, app);
-      // Update local state by filtering out the deleted item
-      const filteredHistoryItems = historyItems.filter((item) => !(item.profile === profile && item.app === app));
-      setHistoryItems(filteredHistoryItems);
-    } catch (error) {
-      console.error("Error deleting history item:", error);
-    }
+    await safeAsyncOperation(
+      async () => {
+        await removeUsageHistoryItem(profile, app);
+        // Refresh cached history after deletion
+        await revalidate();
+      },
+      "deleting history item",
+      {
+        showToastOnError: true,
+        rethrow: false,
+      },
+    );
   };
 
   return (
@@ -143,7 +147,7 @@ export default function HistoryCommand() {
               title={`@${item.profile}`}
               subtitle={item.appName}
               icon={item.favicon || Icon.Globe}
-              accessories={[formatRelativeDate(item.timestamp)]}
+              accessories={[{ text: formatRelativeDate(item.timestamp) }]}
               actions={
                 <HistoryActionPanels
                   item={{
@@ -152,12 +156,14 @@ export default function HistoryCommand() {
                     appName: item.appName,
                     favicon: typeof item.favicon === "string" ? item.favicon : undefined,
                     url: item.url || "",
+                    timestamp: item.timestamp,
                   }}
                   onOpenProfile={handleOpenProfile}
                   onDeleteHistoryItem={handleDeleteHistoryItem}
                   onSetSearchText={setSearchText}
                   onSetAppFilter={setAppFilter}
                   onFilterByApp={filterByApp}
+                  onRefreshHistory={revalidate}
                   OpenProfileCommand={OpenProfileCommand}
                 />
               }

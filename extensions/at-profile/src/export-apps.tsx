@@ -1,43 +1,76 @@
 import { Icon, List, showHUD } from "@raycast/api";
 import { ExportActionPanels } from "./components";
-import { showFailureToast } from "@raycast/utils";
+import { safeAsyncOperation } from "./utils/errors";
 import { exportSettingsToFile } from "./yaml-settings";
-import { useState } from "react";
+import { useReducer } from "react";
 import { exec } from "child_process";
 import { promisify } from "util";
 
 const execAsync = promisify(exec);
 
+type State = {
+  isLoading: boolean;
+  exportedFilePath: string | null;
+  error: string | null;
+};
+
+type Action =
+  | { type: "start" }
+  | { type: "success"; filePath: string }
+  | { type: "failure"; message: string }
+  | { type: "reset" };
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "start":
+      return { ...state, isLoading: true, error: null };
+    case "success":
+      return { isLoading: false, exportedFilePath: action.filePath, error: null };
+    case "failure":
+      return { ...state, isLoading: false, error: action.message };
+    case "reset":
+      return { isLoading: false, exportedFilePath: null, error: null };
+    default:
+      return state;
+  }
+}
+
 export default function ExportAppsCommand() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [exportedFilePath, setExportedFilePath] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [{ isLoading, exportedFilePath, error }, dispatch] = useReducer(reducer, {
+    isLoading: false,
+    exportedFilePath: null,
+    error: null,
+  });
 
   const handleExport = async () => {
-    setIsLoading(true);
-    setError(null);
+    dispatch({ type: "start" });
 
-    try {
-      const filePath = await exportSettingsToFile();
-      setExportedFilePath(filePath);
-      await showHUD("Apps Exported Successfully");
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown error";
-      setError(errorMessage);
-      await showFailureToast(errorMessage, { title: "Export Failed" });
-    } finally {
-      setIsLoading(false);
+    const result = await safeAsyncOperation(
+      async () => {
+        const filePath = await exportSettingsToFile();
+        dispatch({ type: "success", filePath });
+        await showHUD("Apps Exported Successfully");
+        return filePath;
+      },
+      "Export settings",
+      { toastTitle: "Export Failed" },
+    );
+
+    if (!result) {
+      dispatch({ type: "failure", message: "Export failed" });
     }
   };
 
   const showInFinder = async () => {
     if (!exportedFilePath) return;
 
-    try {
-      await execAsync(`open -R "${exportedFilePath}"`);
-    } catch (err) {
-      await showFailureToast("Failed to show file in Finder", { title: "Error" });
-    }
+    await safeAsyncOperation(
+      async () => {
+        await execAsync(`open -R "${exportedFilePath}"`);
+      },
+      "Show file in Finder",
+      { toastTitle: "Error" },
+    );
   };
 
   const getEmptyStateProps = () => {

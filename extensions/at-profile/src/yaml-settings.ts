@@ -1,12 +1,14 @@
 import * as yaml from "js-yaml";
-import { getSelectedFinderItems, showToast, Toast } from "@raycast/api";
+import { getSelectedFinderItems } from "@raycast/api";
+import { showError, showSuccess } from "./utils/errors";
 import { readFileSync, writeFileSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
-import { getCustomApps, getAppSettings, updateAppSettings, addToUsageHistory, getUsageHistory } from "./hooks/apps";
-import { defaultApps } from "./types/default-apps";
-import { addCustomApp, addCustomAppForImport } from "./utils/custom-app-utils";
+import { getCustomApps, getAppSettings, updateAppSettings, addToUsageHistory, getUsageHistory } from "./helpers/apps";
+import { defaultApps } from "./utils/default-apps";
+import { addCustomApp, addCustomAppForImport } from "./helpers/custom-app-utils";
 import { validateAndSanitizeFilename, validateSecurePath } from "./utils/file-security";
+import { parseYaml } from "./utils/yaml";
 import { YAMLSettings, AppSetting } from "./types";
 
 /**
@@ -24,31 +26,31 @@ export async function exportSettingsToYAML(): Promise<string> {
     // Create a set of custom app values to exclude from appSettings
     const customAppValues = new Set(customApps.map((app) => app.value));
 
-    // Add all default apps to settings map with current enabled status
+    // Add all default apps to settings map with current visible status
     for (const app of defaultApps) {
-      appSettingsMap[app.value] = true; // Default to enabled
+      appSettingsMap[app.value] = true; // Default to visible
     }
 
     // Override with actual stored settings, but exclude custom apps
-    // (custom apps will be handled in the customApps section with their enabled state)
+    // (custom apps will be handled in the customApps section with their visible state)
     appSettings.forEach((setting) => {
       if (!customAppValues.has(setting.value)) {
-        appSettingsMap[setting.value] = setting.enabled;
+        appSettingsMap[setting.value] = setting.visible;
       }
     });
 
     const yamlSettings: YAMLSettings = {
       version: "1.0",
       usageHistory,
-      appSettings: appSettingsMap,
+      visible: appSettingsMap,
       customApps: customApps.map((app) => {
-        // Find the actual enabled state from app settings
+        // Find the actual visible state from app settings
         const appSetting = appSettings.find((setting) => setting.value === app.value);
         return {
           name: app.name,
           value: app.value,
           urlTemplate: app.urlTemplate,
-          enabled: appSetting ? appSetting.enabled : true, // Use actual state or default to enabled
+          visible: appSetting ? appSetting.visible : true, // Use actual state or default to visible
         };
       }),
     };
@@ -69,7 +71,7 @@ export async function exportSettingsToYAML(): Promise<string> {
  */
 export async function importSettingsFromYAML(yamlContent: string): Promise<void> {
   try {
-    const settings = yaml.load(yamlContent) as YAMLSettings;
+    const settings = parseYaml(yamlContent) as YAMLSettings;
 
     if (!settings || typeof settings !== "object") {
       throw new Error("Invalid YAML format");
@@ -110,7 +112,7 @@ export async function importSettingsFromYAML(yamlContent: string): Promise<void>
 
         try {
           const result = await addCustomApp(customAppInput);
-          if (result.success) {
+          if (result?.success) {
             console.log(`Created custom app for imported usage history: ${appInfo.name}`);
           } else {
             console.log(`Custom app already exists for usage history: ${appInfo.name}`);
@@ -129,14 +131,14 @@ export async function importSettingsFromYAML(yamlContent: string): Promise<void>
     }
 
     // Import app settings
-    if (settings.appSettings && typeof settings.appSettings === "object") {
+    if (settings.visible && typeof settings.visible === "object") {
       const appSettings: AppSetting[] = [];
 
-      for (const [appValue, enabled] of Object.entries(settings.appSettings)) {
-        if (typeof enabled === "boolean") {
+      for (const [appValue, visible] of Object.entries(settings.visible)) {
+        if (typeof visible === "boolean") {
           appSettings.push({
             value: appValue,
-            enabled,
+            visible,
           });
         }
       }
@@ -159,23 +161,30 @@ export async function importSettingsFromYAML(yamlContent: string): Promise<void>
 
       for (const app of settings.customApps) {
         if (app && typeof app === "object" && app.name && app.value && app.urlTemplate) {
+          // Support both new 'visible' and legacy 'enabled' properties
+          const appWithLegacy = app as typeof app & { enabled?: boolean };
           const customAppInput = {
             name: app.name.trim(),
             urlTemplate: app.urlTemplate.trim(),
-            enabled: typeof app.enabled === "boolean" ? app.enabled : true, // Use imported enabled state
+            visible:
+              typeof app.visible === "boolean"
+                ? app.visible
+                : typeof appWithLegacy.enabled === "boolean"
+                  ? appWithLegacy.enabled
+                  : true,
           };
 
           const result = await addCustomAppForImport(customAppInput);
 
-          if (result.success) {
+          if (result?.success) {
             importResults.imported++;
             console.log(`Successfully imported custom app: ${app.name}`);
-          } else if (result.isDuplicate) {
+          } else if (result?.isDuplicate) {
             importResults.skipped++;
             console.log(`Skipped duplicate custom app: ${app.name} (already exists)`);
           } else {
             importResults.failed++;
-            const errorMessage = result.error || "Unknown error";
+            const errorMessage = result?.error || "Unknown error";
             console.error(`Failed to import custom app "${app.name}" (value: ${app.value}):`, errorMessage);
             // Store first error for user feedback
             if (importResults.failed === 1) {
@@ -200,14 +209,12 @@ export async function importSettingsFromYAML(yamlContent: string): Promise<void>
           summaryMessage += `, ${importResults.failed} failed`;
         }
 
-        const toastStyle = importResults.failed > 0 ? Toast.Style.Failure : Toast.Style.Success;
         const toastTitle = importResults.failed > 0 ? "Import Completed with Issues" : "Import Completed";
-
-        await showToast({
-          style: toastStyle,
-          title: toastTitle,
-          message: summaryMessage,
-        });
+        if (importResults.failed > 0) {
+          await showError(summaryMessage, toastTitle);
+        } else {
+          await showSuccess(toastTitle, summaryMessage);
+        }
 
         // If there were failures, still throw an error but after showing the summary
         if (importResults.failed > 0 && importResults.firstError) {
@@ -276,89 +283,5 @@ export async function importSettingsFromFile(filePath?: string): Promise<void> {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
     throw new Error(errorMessage);
-  }
-}
-
-/**
- * Generate a sample YAML settings file content for reference
- */
-export function generateSampleYAML(): string {
-  const sampleSettings: YAMLSettings = {
-    version: "1.0",
-    usageHistory: [
-      {
-        profile: "johndoe",
-        app: "github",
-        appName: "GitHub",
-        timestamp: Date.now() - 86400000, // 1 day ago
-      },
-      {
-        profile: "janedoe",
-        app: "x",
-        appName: "X",
-        timestamp: Date.now() - 172800000, // 2 days ago
-      },
-      {
-        profile: "example_user",
-        app: "mastodon",
-        appName: "Mastodon",
-        timestamp: Date.now() - 259200000, // 3 days ago
-      },
-    ],
-    appSettings: {
-      x: true,
-      instagram: true,
-      github: true,
-      linkedin: false,
-      facebook: false,
-      reddit: true,
-      youtube: true,
-      tiktok: false,
-      threads: true,
-      raycast: true,
-    },
-    customApps: [
-      {
-        name: "Mastodon",
-        value: "mastodon",
-        urlTemplate: "https://mastodon.social/@{profile}",
-        enabled: true,
-      },
-      {
-        name: "Dribbble",
-        value: "dribbble",
-        urlTemplate: "https://dribbble.com/{profile}",
-        enabled: true,
-      },
-    ],
-  };
-
-  return yaml.dump(sampleSettings, {
-    indent: 2,
-    lineWidth: 120,
-    noRefs: true,
-  });
-}
-
-/**
- * Generate and save a sample YAML file to the user's home directory
- */
-export function generateSampleYAMLFile(filename?: string): string {
-  const yamlContent = generateSampleYAML();
-  const defaultFilename = `at-profile-sample-${new Date().toISOString().split("T")[0]}.yaml`;
-
-  // Validate and sanitize filename if provided
-  const fileName = filename ? validateAndSanitizeFilename(filename) : defaultFilename;
-  const filePath = join(homedir(), fileName);
-
-  // Validate that the path is secure
-  validateSecurePath(filePath);
-
-  try {
-    writeFileSync(filePath, yamlContent, "utf8");
-    return filePath;
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-    throw new Error(`Failed to generate sample YAML file: ${errorMessage}`);
   }
 }

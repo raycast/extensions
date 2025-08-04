@@ -93,6 +93,11 @@
       "name": "open",
       "title": "Open Profile",
       "description": "Quickly open a profile on a social app"
+    },
+    {
+      "name": "history",
+      "title": "Get Profile History",
+      "description": "Get recently opened profiles, optionally filtered by app"
     }
   ],
   "dependencies": {

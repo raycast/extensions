@@ -1,7 +1,8 @@
 import { LaunchProps } from "@raycast/api";
-import { openProfile } from "./utils/open-profile";
+import { openProfile } from "./helpers/open-profile";
+import { QuickOpenArguments } from "./types";
 
-export default async function QuickOpenCommand(props: LaunchProps<{ arguments: Arguments.QuickOpen }>) {
+export default async function QuickOpenCommand(props: LaunchProps<{ arguments: QuickOpenArguments }>) {
   const { profile, site } = props.arguments;
 
   // Open the profile with the selected site, bypassing manage apps settings

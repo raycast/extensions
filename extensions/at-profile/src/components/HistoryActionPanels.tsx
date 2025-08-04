@@ -1,5 +1,7 @@
-import { ActionPanel, Action, Icon, Clipboard, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, Icon, Clipboard } from "@raycast/api";
 import { HistoryItem } from "../types";
+import { EditProfileForm } from "./EditProfile";
+import { safeAsyncOperation, showSuccess } from "../utils/errors";
 
 interface HistoryActionPanelsProps {
   item: HistoryItem;
@@ -8,6 +10,7 @@ interface HistoryActionPanelsProps {
   onSetSearchText: (text: string) => void;
   onSetAppFilter: (filter: string) => void;
   onFilterByApp: (app: string) => void;
+  onRefreshHistory: () => void;
   OpenProfileCommand: React.ComponentType<{ arguments: { profile: string } }>;
 }
 
@@ -18,6 +21,7 @@ export function HistoryActionPanels({
   onSetSearchText,
   onSetAppFilter,
   onFilterByApp,
+  onRefreshHistory,
   OpenProfileCommand,
 }: HistoryActionPanelsProps) {
   return (
@@ -26,6 +30,19 @@ export function HistoryActionPanels({
         title={`Open @${item.profile} on ${item.appName}`}
         icon={Icon.Globe}
         onAction={() => onOpenProfile(item.profile, item.app)}
+      />
+      <Action.Push
+        title={`Edit @${item.profile}`}
+        icon={Icon.Pencil}
+        target={
+          <EditProfileForm
+            originalProfile={item.profile}
+            app={item.app}
+            appName={item.appName}
+            onUpdate={onRefreshHistory}
+          />
+        }
+        shortcut={{ modifiers: ["cmd"], key: "e" }}
       />
       <Action.Push
         // eslint-disable-next-line @raycast/prefer-title-case
@@ -39,13 +56,15 @@ export function HistoryActionPanels({
         title={`Copy Profile URL`}
         icon={Icon.Clipboard}
         onAction={async () => {
-          try {
-            const url = item.url.toString();
-            await Clipboard.copy(url);
-            await showToast(Toast.Style.Success, "Copied to Clipboard", url);
-          } catch (error) {
-            await showToast(Toast.Style.Failure, "Error", (error as Error).message);
-          }
+          await safeAsyncOperation(
+            async () => {
+              const url = item.url.toString();
+              await Clipboard.copy(url);
+              await showSuccess("Copied to Clipboard", url);
+            },
+            "Copy profile URL to clipboard",
+            { toastTitle: "Error" },
+          );
         }}
         shortcut={{ modifiers: ["cmd"], key: "c" }}
       />

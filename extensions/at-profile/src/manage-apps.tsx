@@ -1,1 +1,1 @@
-export { default } from "./utils/manage-apps";
+export { default } from "./components/ManageApps";

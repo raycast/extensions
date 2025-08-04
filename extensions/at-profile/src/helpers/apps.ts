@@ -1,7 +1,7 @@
 import { LocalStorage, Icon } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { App, AppSetting, UsageHistoryItem } from "../types";
-import { defaultApps } from "../types/default-apps";
+import { defaultApps } from "../utils/default-apps";
 
 /**
  * Get the base domain URL for favicon fetching from a URL template
@@ -44,11 +44,11 @@ export async function getAllApps(): Promise<App[]> {
     settingsMap.set(setting.value, setting);
   });
 
-  // Filter sites based on enabled flag (default to enabled when no settings entry)
+  // Filter sites based on visible flag (default to visible when no settings entry)
   const allApps = [...defaultApps, ...customApps];
   return allApps.filter((app) => {
     const setting = settingsMap.get(app.value);
-    return setting ? setting.enabled : true; // Default to enabled when no settings entry
+    return setting ? setting.visible : true; // Default to visible when no settings entry
   });
 }
 
@@ -117,6 +117,21 @@ export async function removeUsageHistoryItem(profile: string, app: string): Prom
 
   // Write back the updated list
   await LocalStorage.setItem(STORAGE_KEYS.USAGE_HISTORY, JSON.stringify(filtered));
+}
+
+export async function updateUsageHistoryItem(oldProfile: string, oldApp: string, newProfile: string): Promise<void> {
+  const history = await getUsageHistory();
+
+  // Find and update the matching record
+  const updated = history.map((item) => {
+    if (item.profile === oldProfile && item.app === oldApp) {
+      return { ...item, profile: newProfile, timestamp: Date.now() };
+    }
+    return item;
+  });
+
+  // Write back the updated list
+  await LocalStorage.setItem(STORAGE_KEYS.USAGE_HISTORY, JSON.stringify(updated));
 }
 
 // App Settings functions

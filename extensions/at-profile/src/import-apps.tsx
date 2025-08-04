@@ -1,13 +1,39 @@
 import { Icon, List, open, showHUD } from "@raycast/api";
 import { ImportActionPanels } from "./components";
-import { showFailureToast, runAppleScript } from "@raycast/utils";
+import { runAppleScript } from "@raycast/utils";
+import { safeAsyncOperation } from "./utils/errors";
 import { importSettingsFromFile } from "./yaml-settings";
-import { useState, useEffect } from "react";
+import { useEffect, useReducer } from "react";
+
+type State = {
+  isLoading: boolean;
+  importSuccess: boolean;
+  error: string | null;
+};
+
+type Action = { type: "start" } | { type: "success" } | { type: "failure"; message: string } | { type: "reset" };
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "start":
+      return { ...state, isLoading: true, error: null };
+    case "success":
+      return { isLoading: false, importSuccess: true, error: null };
+    case "failure":
+      return { ...state, isLoading: false, error: action.message };
+    case "reset":
+      return { isLoading: false, importSuccess: false, error: null };
+    default:
+      return state;
+  }
+}
 
 export default function ImportAppsCommand() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [importSuccess, setImportSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [{ isLoading, importSuccess, error }, dispatch] = useReducer(reducer, {
+    isLoading: false,
+    importSuccess: false,
+    error: null,
+  });
 
   // Proactively check for YAML files selected in Finder when command starts
   useEffect(() => {
@@ -37,20 +63,24 @@ export default function ImportAppsCommand() {
           const selectedFile = result.trim();
           if (selectedFile.toLowerCase().endsWith(".yaml") || selectedFile.toLowerCase().endsWith(".yml")) {
             console.log("Found YAML file selected in Finder:", selectedFile);
-            setIsLoading(true);
-            try {
-              await importSettingsFromFile(selectedFile);
-              setImportSuccess(true);
-              await showHUD("Apps Imported Successfully (from Finder selection)");
-            } catch (importErr) {
-              console.error("Failed to import from Finder selection:", importErr);
-              const errorMessage = importErr instanceof Error ? importErr.message : "Unknown error";
-              setError(`Import failed: ${errorMessage}`);
-              await showFailureToast(`Failed to import from Finder selection: ${errorMessage}`, {
-                title: "Import Failed",
-              });
-            } finally {
-              setIsLoading(false);
+            dispatch({ type: "start" });
+            const result = await safeAsyncOperation(
+              async () => {
+                await importSettingsFromFile(selectedFile);
+                dispatch({ type: "success" });
+                await showHUD("Apps Imported Successfully (from Finder selection)");
+                return true;
+              },
+              "importing from Finder selection",
+              {
+                showToastOnError: true,
+                rethrow: false,
+                fallbackValue: false,
+              },
+            );
+
+            if (!result) {
+              dispatch({ type: "failure", message: "Import failed" });
             }
             return;
           } else {
@@ -71,8 +101,7 @@ export default function ImportAppsCommand() {
   }, []);
 
   const handleSelectFile = async () => {
-    setIsLoading(true);
-    setError(null);
+    dispatch({ type: "start" });
 
     try {
       // Use Raycast's runAppleScript utility for better compatibility
@@ -96,7 +125,7 @@ return POSIX path of theFile`,
 
       console.log("Selected file path:", result);
       await importSettingsFromFile(result);
-      setImportSuccess(true);
+      dispatch({ type: "success" });
       await showHUD("Apps Imported Successfully");
     } catch (err) {
       console.error("File selection error:", err);
@@ -110,29 +139,41 @@ return POSIX path of theFile`,
         (err instanceof Error && err.message.includes("execution error"))
       ) {
         console.log("User cancelled file selection");
-        setIsLoading(false);
+        dispatch({ type: "failure", message: "" });
         return; // User cancelled, don't show error
       }
 
       // Check for permission or system-level errors
       if (errorMessage.includes("permission") || errorMessage.includes("not allowed")) {
-        setError(
-          "Permission denied. Please grant Raycast permission to access files in System Preferences > Security & Privacy > Privacy > Files and Folders.",
+        dispatch({
+          type: "failure",
+          message:
+            "Permission denied. Please grant Raycast permission to access files in System Preferences > Security & Privacy > Privacy > Files and Folders.",
+        });
+        await safeAsyncOperation(
+          async () => {
+            throw new Error("Permission denied. Please check system permissions.");
+          },
+          "Import permission error",
+          { toastTitle: "Import Failed" },
         );
-        await showFailureToast("Permission denied. Please check system permissions.", { title: "Import Failed" });
-        setIsLoading(false);
         return;
       }
 
       // Try fallback: get file from Finder selection
-      try {
-        console.log("Trying Finder selection fallback...");
-        await importSettingsFromFile(); // This will try to get from Finder selection
-        setImportSuccess(true);
-        await showHUD("Apps Imported Successfully (via Finder selection)");
+      const fallbackResult = await safeAsyncOperation(
+        async () => {
+          await importSettingsFromFile(); // This will try to get from Finder selection
+          dispatch({ type: "success" });
+          await showHUD("Apps Imported Successfully (via Finder selection)");
+          return true;
+        },
+        "Finder selection fallback",
+        { showToastOnError: false },
+      );
+
+      if (fallbackResult) {
         return;
-      } catch (finderErr) {
-        console.log("Finder selection fallback failed:", finderErr);
       }
 
       // Show user-friendly error message
@@ -140,15 +181,19 @@ return POSIX path of theFile`,
         ? errorMessage
         : "File picker failed. Please select a YAML file in Finder, then try the Import command again.";
 
-      setError(friendlyMessage);
-      await showFailureToast(friendlyMessage, { title: "Import Failed" });
-    } finally {
-      setIsLoading(false);
+      dispatch({ type: "failure", message: friendlyMessage });
+      await safeAsyncOperation(
+        async () => {
+          throw new Error(friendlyMessage);
+        },
+        "Import file selection error",
+        { toastTitle: "Import Failed" },
+      );
     }
   };
 
   const openDocumentation = async () => {
-    await open("https://github.com/raycast/extensions/tree/main/extensions/at-profile#export-format");
+    await open("https://github.com/raycast/extensions/tree/main/extensions/at-profile/docs/YAML_SETTINGS.md");
   };
 
   const getEmptyStateProps = () => {
@@ -162,8 +207,7 @@ return POSIX path of theFile`,
             state="success"
             onSelectFile={handleSelectFile}
             onImportAgain={() => {
-              setImportSuccess(false);
-              setError(null);
+              dispatch({ type: "reset" });
               handleSelectFile();
             }}
             onOpenDocumentation={openDocumentation}

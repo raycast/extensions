@@ -1,6 +1,7 @@
 import { ActionPanel, Action, Form, useNavigation, Icon } from "@raycast/api";
 import { useState } from "react";
-import { addCustomApp, updateCustomApp } from "../utils/custom-app-utils";
+import { addCustomApp, updateCustomApp } from "../helpers/custom-app-utils";
+import { safeAsyncOperation } from "../utils/errors";
 import { CustomAppFormProps, CustomAppInput } from "../types";
 
 export default function CustomAppForm({ app, onSave }: CustomAppFormProps) {
@@ -10,30 +11,54 @@ export default function CustomAppForm({ app, onSave }: CustomAppFormProps) {
 
   const isEditing = !!app;
 
-  const handleSubmit = async (values: { name: string; url: string; enabled: boolean }) => {
+  const validateUrlTemplate = (urlTemplate: string): string | undefined => {
+    if (!urlTemplate.trim()) {
+      return undefined; // Don't show error for empty field
+    }
+
+    if (!urlTemplate.includes("{profile}")) {
+      return "URL template must contain {profile} placeholder";
+    }
+
+    try {
+      const testUrl = urlTemplate.replace(/{profile}/g, "testuser");
+      const parsedUrl = new URL(testUrl);
+
+      if (!["http:", "https:"].includes(parsedUrl.protocol)) {
+        return "URL template must use http:// or https:// protocol";
+      }
+    } catch (error) {
+      return "URL template must be a valid URL format (e.g., https://example.com/{profile})";
+    }
+
+    return undefined;
+  };
+
+  const handleSubmit = async (values: { name: string; url: string; visible: boolean }) => {
     const input: CustomAppInput = {
       name: values.name,
       urlTemplate: values.url,
-      enabled: values.enabled,
+      visible: values.visible,
     };
 
-    try {
-      let result;
+    await safeAsyncOperation(
+      async () => {
+        let result;
 
-      if (isEditing && app) {
-        result = await updateCustomApp(app.id, input);
-      } else {
-        result = await addCustomApp(input);
-      }
+        if (isEditing && app) {
+          result = await updateCustomApp(app.id, input);
+        } else {
+          result = await addCustomApp(input);
+        }
 
-      if (result.success) {
-        onSave?.();
-        pop();
-      }
-    } catch (error) {
-      // Error handling and toasts are managed by the utility functions
-      console.error("Error in form submission:", error);
-    }
+        if (result?.success) {
+          onSave?.();
+          pop();
+        }
+      },
+      "Custom app form submission",
+      { showToastOnError: false }, // addCustomApp/updateCustomApp handle their own error toasts
+    );
   };
 
   return (
@@ -41,7 +66,7 @@ export default function CustomAppForm({ app, onSave }: CustomAppFormProps) {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={isEditing ? "Update Social App" : "Add Social App"}
+            title={isEditing ? "Update App" : "Add App"}
             icon={isEditing ? Icon.Pencil : Icon.Plus}
             onSubmit={handleSubmit}
           />
@@ -60,12 +85,14 @@ export default function CustomAppForm({ app, onSave }: CustomAppFormProps) {
         id="url"
         title="URL Template"
         placeholder="https://example.com/{profile}"
-        info="Use {profile} as a placeholder for the profile name"
         defaultValue={app?.urlTemplate || ""}
         error={urlError}
-        onChange={() => setUrlError(undefined)}
+        onChange={(newValue) => {
+          const error = validateUrlTemplate(newValue);
+          setUrlError(error);
+        }}
       />
-      <Form.Checkbox id="enabled" title="Enabled" label="Enable" defaultValue={app?.enabled ?? true} />
+      <Form.Description text="Use {profile} as the placeholder for the username." />
     </Form>
   );
 }

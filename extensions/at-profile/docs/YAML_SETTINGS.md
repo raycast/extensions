@@ -1,10 +1,10 @@
 # YAML Settings Import/Export
 
-The @ Profile extension supports importing and exporting settings through YAML files, making it easy to backup your configuration, share settings between devices, or bulk-manage your platform preferences.
+The @ Profile extension supports importing and exporting settings through YAML files, making it easy to backup your configuration, share settings between devices, or bulk-manage your app preferences.
 
 ## Features
 
-- **Export Settings**: Save all your settings (profile history, platform preferences, custom apps) to a YAML file
+- **Export Settings**: Save all your settings (profile history, app preferences, custom apps) to a YAML file
 - **Import Settings**: Load settings from a YAML file to restore or sync your configuration
 - **Sample YAML**: Generate a template YAML file for reference
 
@@ -44,11 +44,20 @@ The YAML settings file contains the following sections:
 
 ```yaml
 version: "1.0"
-profileHistory:
-  - johndoe
-  - janedoe
-  - example_user
-platformSettings:
+usageHistory:
+  - profile: johndoe
+    app: github
+    appName: GitHub
+    timestamp: 1704067200000
+  - profile: janedoe
+    app: x
+    appName: X
+    timestamp: 1703980800000
+  - profile: example_user
+    app: mastodon
+    appName: Mastodon
+    timestamp: 1703894400000
+visible:
   x: true
   instagram: true
   github: true
@@ -63,26 +72,33 @@ customApps:
   - name: Mastodon
     value: mastodon
     urlTemplate: https://mastodon.social/@{profile}
-    enabled: true
+    visible: true
   - name: Dribbble
     value: dribbble
     urlTemplate: https://dribbble.com/{profile}
-    enabled: true
+    visible: true
 ```
 
 ### Field Descriptions
 
 - **version**: File format version (currently "1.0")
-- **profileHistory**: Array of previously searched profiles
-- **platformSettings**: Object mapping platform IDs to enabled/disabled state
+- **usageHistory**: Array of profile usage history with timestamps
+- **visible**: Object mapping platform IDs to visible/hidden state
 - **customApps**: Array of custom social platforms
+
+#### Usage History Fields
+
+- **profile**: The username/profile that was searched
+- **app**: The platform identifier (value) that was used
+- **appName**: The display name of the platform
+- **timestamp**: Unix timestamp of when the profile was accessed
 
 #### Custom Platform Fields
 
 - **name**: Display name of the platform
 - **value**: Unique identifier for the platform
 - **urlTemplate**: URL pattern with `{profile}` placeholder
-- **enabled**: Whether the platform is enabled (optional, defaults to true)
+- **visible**: Whether the platform is shown in the dropdown (optional, defaults to true)
 
 ## Use Cases
 

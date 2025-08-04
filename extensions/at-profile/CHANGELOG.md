@@ -11,7 +11,7 @@
 
 ### Changed
 
-- Updated "Quick Profile" Command to use editable list of Apps in `./src/types/default-apps.ts`
+- Updated "Quick Profile" Command to use editable list of Apps in `./src/utils/default-apps.ts`
 
 ## [Enhanced Platform Management] - 2025-01-07
 

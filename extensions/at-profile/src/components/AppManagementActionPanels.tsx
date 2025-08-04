@@ -6,7 +6,7 @@ import { AppItem } from "../types";
 interface AppManagementActionPanelsProps {
   type: "default" | "custom" | "empty";
   app?: AppItem;
-  onToggleEnabled?: (id: string, enabled: boolean) => void;
+  onToggleVisible?: (id: string, visible: boolean) => void;
   onDeleteCustomApp?: (app: AppItem) => void;
   onSave: () => void;
 }
@@ -14,14 +14,14 @@ interface AppManagementActionPanelsProps {
 export function AppManagementActionPanels({
   type,
   app,
-  onToggleEnabled,
+  onToggleVisible,
   onDeleteCustomApp,
   onSave,
 }: AppManagementActionPanelsProps) {
   if (type === "empty") {
     return (
       <ActionPanel>
-        <Action.Push title="Add Custom Social App" icon={Icon.Plus} target={<CustomAppForm onSave={onSave} />} />
+        <Action.Push title="Add Custom App" icon={Icon.Plus} target={<CustomAppForm onSave={onSave} />} />
       </ActionPanel>
     );
   }
@@ -30,9 +30,9 @@ export function AppManagementActionPanels({
     return (
       <ActionPanel>
         <Action
-          title={app.enabled ? "Hide" : "Show"}
-          icon={app.enabled ? Icon.EyeDisabled : Icon.Eye}
-          onAction={() => onToggleEnabled?.(app.id, !app.enabled)}
+          title={app.visible ? "Hide" : "Show"}
+          icon={app.visible ? Icon.EyeDisabled : Icon.Eye}
+          onAction={() => onToggleVisible?.(app.id, !app.visible)}
         />
         <Action.Push
           title={`Open Profile on ${app.name}…`}
@@ -50,7 +50,7 @@ export function AppManagementActionPanels({
                   id: app.id,
                   name: app.name,
                   urlTemplate: app.urlTemplate,
-                  enabled: app.enabled,
+                  visible: app.visible,
                 }}
                 onSave={onSave}
               />
@@ -62,12 +62,12 @@ export function AppManagementActionPanels({
             icon={Icon.Trash}
             style={Action.Style.Destructive}
             onAction={() => onDeleteCustomApp?.(app)}
-            shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+            shortcut={{ modifiers: ["ctrl"], key: "x" }}
           />
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.Push
-            title="Add Custom Social App"
+            title="Add Custom App"
             icon={Icon.Plus}
             target={<CustomAppForm onSave={onSave} />}
             shortcut={{ modifiers: ["cmd"], key: "n" }}
@@ -81,9 +81,9 @@ export function AppManagementActionPanels({
     return (
       <ActionPanel>
         <Action
-          title={app.enabled ? "Hide" : "Show"}
-          icon={app.enabled ? Icon.EyeDisabled : Icon.Eye}
-          onAction={() => onToggleEnabled?.(app.id, !app.enabled)}
+          title={app.visible ? "Hide" : "Show"}
+          icon={app.visible ? Icon.EyeDisabled : Icon.Eye}
+          onAction={() => onToggleVisible?.(app.id, !app.visible)}
         />
         <Action.Push
           title={`Open Profile on ${app.name}…`}
@@ -93,7 +93,7 @@ export function AppManagementActionPanels({
         />
         <ActionPanel.Section>
           <Action.Push
-            title="Add Custom Social App"
+            title="Add Custom App"
             icon={Icon.Plus}
             target={<CustomAppForm onSave={onSave} />}
             shortcut={{ modifiers: ["cmd"], key: "n" }}
