@@ -2,6 +2,9 @@
   "name": "trakt-manager",
   "description": "Control your Trakt account directly from Raycast",
   "author": "thesobercoder",
+  "contributors": [
+    "kud"
+  ],
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "categories": [
     "Media",
