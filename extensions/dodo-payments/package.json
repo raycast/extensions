@@ -10,54 +10,63 @@
     {
       "name": "view-payments",
       "title": "View Payments",
+      "subtitle": "Dodo Payments",
       "description": "View and manage your Dodo Payments transactions",
       "mode": "view"
     },
     {
       "name": "view-subscriptions",
       "title": "View Subscriptions",
+      "subtitle": "Dodo Payments",
       "description": "View and manage your recurring subscriptions",
       "mode": "view"
     },
     {
       "name": "view-customers",
       "title": "View Customers",
+      "subtitle": "Dodo Payments",
       "description": "View and manage your customer database",
       "mode": "view"
     },
     {
       "name": "view-products",
       "title": "View Products",
+      "subtitle": "Dodo Payments",
       "description": "View and manage your product catalog",
       "mode": "view"
     },
     {
       "name": "view-discounts",
       "title": "View Discount Codes",
+      "subtitle": "Dodo Payments",
       "description": "View and manage your discount codes",
       "mode": "view"
     },
     {
       "name": "view-license-keys",
       "title": "View License Keys",
+      "subtitle": "Dodo Payments",
       "description": "View and manage your license keys",
       "mode": "view"
     },
     {
       "name": "view-disputes",
       "title": "View Disputes",
+      "subtitle": "Dodo Payments",
       "description": "View and manage payment disputes",
       "mode": "view"
     },
     {
       "name": "view-refunds",
       "title": "View Refunds",
+      "subtitle": "Dodo Payments",
       "description": "View and manage payment refunds",
       "mode": "view"
     },
     {
       "name": "view-payouts",
       "title": "View Payouts",
+      "subtitle": "Dodo Payments",
       "description": "View and manage your payouts",
       "mode": "view"
     }
