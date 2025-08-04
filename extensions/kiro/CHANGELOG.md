@@ -1,6 +1,6 @@
 # Kiro Changelog
 
-## [1.0.0] - 04-08-2025
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Features Added
 - **Search Recent Projects**: Browse and open recent projects from Kiro
