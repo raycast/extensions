@@ -6,6 +6,7 @@ import {
   getSelectedFinderItems,
   getFrontmostApplication,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { runAppleScript } from "@raycast/utils";
 import { getCurrentFinderPath } from "./utils/apple-scripts";
 
@@ -22,11 +23,12 @@ const getSelectedPathFinderItems = async () => {
   `;
 
   const paths = await runAppleScript(script);
-  // AppleScript returns lists as space-separated by default
-  // Split by spaces and filter out empty strings
+  // AppleScript typically returns lists as comma-separated, not space-separated
+  // Split by commas and filter out empty strings
   return paths
     .trim()
-    .split(/\s+/)
+    .split(",")
+    .map((path) => path.trim())
     .filter((path) => path.length > 0);
 };
 
@@ -54,10 +56,8 @@ export default async function main() {
 
     await closeMainWindow();
   } catch (error) {
-    await showToast({
+    await showFailureToast(error, {
       title: "Failed opening selected Finder or Path Finder item",
-      style: Toast.Style.Failure,
-      message: error instanceof Error ? error.message : String(error),
     });
   }
 }

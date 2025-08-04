@@ -1,6 +1,4 @@
-import { getPreferenceValues } from "@raycast/api";
-
-import { Application } from "@raycast/api";
+import { getPreferenceValues, Application } from "@raycast/api";
 
 interface ExtensionPreferences {
   layout: "list" | "grid";

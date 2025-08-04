@@ -1,5 +1,6 @@
 import { createContext, useContext, ReactNode } from "react";
-import { open, showHUD } from "@raycast/api";
+import { open } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { run } from "../integrations/kiro-directory";
 import { runAppleScriptSync } from "run-applescript";
 import { LaunchContext } from "../integrations/types";
@@ -44,12 +45,12 @@ export function ProjectProvider({
       if (callbackLaunchOptions) {
         callbackLaunchCommand(callbackLaunchOptions, {
           // TODO should be determined what we want to expose
-          projectPath: uri.split("file://").slice(1).join("/"),
+          projectPath: new URL(uri).pathname,
         });
       }
     } catch (error) {
       console.error("Error opening project:", error);
-      await showHUD("Failed to open project");
+      showFailureToast(error, { title: "Failed to open project" });
     }
   };
 

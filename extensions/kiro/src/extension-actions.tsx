@@ -8,6 +8,7 @@ import {
   Alert,
   showHUD,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { getKiroCLI } from "./lib/kiro";
 import { getErrorMessage } from "./utils";
 
@@ -31,11 +32,7 @@ export function InstallExtensionByIDAction(props: {
         props.afterInstall();
       }
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: getErrorMessage(error),
-      });
+      showFailureToast(error, { title: "Error" });
     }
   };
   return (
@@ -78,11 +75,7 @@ export function UninstallExtensionByIDAction(props: {
         }
       }
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: getErrorMessage(error),
-      });
+      showFailureToast(error, { title: "Error" });
     }
   };
   return (

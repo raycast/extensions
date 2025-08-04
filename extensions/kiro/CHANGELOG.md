@@ -1,6 +1,16 @@
 # Kiro Changelog
 
-## [1.1.0] - {PR_MERGE_DATE}
+## [1.1.1] - 2025-08-05
+
+### Improvements & Fixes
+- Fixed grid navigation logic in pinned.tsx for correct 'down' movement
+- Improved error handling: replaced manual showToast with showFailureToast in multiple files
+- Fixed AppleScript path parsing in open-with-kiro.ts to handle spaces correctly
+- Corrected typo: extensionsManifestFilename in lib/kiro.ts
+- Combined Raycast API imports in preferences.ts for clarity
+- Improved refresh logic in extensions.tsx for reliable data re-fetch
+
+## [1.1.0] - 2025-07-XX
 
 ### Bug Fixes
 - Fixed SQL injection vulnerability in database operations

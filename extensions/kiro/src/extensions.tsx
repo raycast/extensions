@@ -1,11 +1,5 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, List, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { getErrorMessage } from "./utils";
 import type { Extension } from "./lib/kiro";
@@ -89,7 +83,7 @@ function ExtensionListItem(props: {
 export default function ExtensionsRootCommand(): JSX.Element {
   const { extensions, isLoading, error, refresh } = useLocalExtensions();
   if (error) {
-    showToast({ style: Toast.Style.Failure, title: "Error", message: error });
+    showFailureToast(error, { title: "Error" });
   }
   const extensionsSorted = extensions?.sort((a, b) =>
     a.name < b.name ? -1 : a.name > b.name ? 1 : 0
@@ -124,9 +118,10 @@ export function useLocalExtensions(): {
   const [isLoading, setIsLoading] = useState(true);
   const [extensions, setExtensions] = useState<Extension[]>();
   const [error, setError] = useState<string>();
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const refresh = () => {
-    // Trigger re-fetch by updating loading state
-    setIsLoading(true);
+    // Trigger re-fetch by updating refresh trigger
+    setRefreshTrigger((prev) => prev + 1);
   };
 
   useEffect(() => {
@@ -156,7 +151,7 @@ export function useLocalExtensions(): {
     return () => {
       didUnmount = true;
     };
-  }, []);
+  }, [refreshTrigger]);
 
   return { extensions: extensions, isLoading, error, refresh };
 }

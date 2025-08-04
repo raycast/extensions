@@ -139,12 +139,12 @@ async function getPackageJSONInfo(
 
 export async function getLocalExtensions(): Promise<Extension[] | undefined> {
   const extensionsRootFolder = path.join(os.homedir(), ".kiro/extensions");
-  const extensionsManifrestFilename = path.join(
+  const extensionsManifestFilename = path.join(
     extensionsRootFolder,
     "extensions.json"
   );
-  if (await fileExists(extensionsManifrestFilename)) {
-    const data = await afs.readFile(extensionsManifrestFilename, {
+  if (await fileExists(extensionsManifestFilename)) {
+    const data = await afs.readFile(extensionsManifestFilename, {
       encoding: "utf-8",
     });
     const extensions = JSON.parse(data) as ExtensionMetaRoot[] | undefined;

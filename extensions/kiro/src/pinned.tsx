@@ -20,10 +20,7 @@ function getAllowedMovements(
       movements.push("up");
     }
 
-    if (
-      index < Math.floor(entries.length / GRID_COLUMNS) * GRID_COLUMNS &&
-      (index + 1) % GRID_COLUMNS === 0
-    ) {
+    if (index + GRID_COLUMNS < entries.length) {
       movements.push("down");
     }
 
