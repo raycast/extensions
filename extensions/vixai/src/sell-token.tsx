@@ -1,6 +1,6 @@
 import { ActionPanel, Action, Form, LaunchProps } from "@raycast/api";
 import { useState } from "react";
-import { showFailureToast, withAccessToken, useForm } from "@raycast/utils";
+import { withAccessToken, useForm } from "@raycast/utils";
 import { toastError, toastSuccess } from "./utils/toast";
 import { TokensDropdown } from "./components/TokensDropdown";
 import { provider } from "./auth/provider";
@@ -31,23 +31,6 @@ function SellToken(props: LaunchProps<{ arguments: SellTokenProps }>) {
         setIsLoading(true);
         const inputAmount = parseFloat(values.inputAmount);
 
-        // Validation (should be redundant with useForm validation, but kept for safety)
-        if (isNaN(inputAmount) || inputAmount <= 0) {
-          await toastError({
-            title: "Invalid amount",
-            message: "Please enter a valid amount greater than 0",
-          });
-          return;
-        }
-
-        if (!values.inputMint || values.inputMint.trim() === "") {
-          await toastError({
-            title: "Invalid token address",
-            message: "Please enter a valid token mint address",
-          });
-          return;
-        }
-
         const result = await TradingAPI.swap({
           input_mint: values.inputMint,
           output_mint: SolMint,
@@ -63,7 +46,7 @@ function SellToken(props: LaunchProps<{ arguments: SellTokenProps }>) {
         });
         reset();
       } catch (error) {
-        await showFailureToast(error, { title: "Error executing token sale" });
+        await toastError(error, { title: "Error", message: "Error executing token sale" });
       } finally {
         setIsLoading(false);
       }

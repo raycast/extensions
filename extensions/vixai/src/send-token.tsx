@@ -66,8 +66,7 @@ function SendToken() {
 
       setTxSignature(result.tx_signature);
     } catch (error) {
-      console.log("Error transferring token:", error);
-      await toastError({
+      await toastError(error, {
         title: "Error",
         message: "Failed to transfer token",
       });

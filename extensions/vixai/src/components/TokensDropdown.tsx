@@ -31,10 +31,9 @@ export function TokensDropdown({
     try {
       setIsLoading(true);
       const data = await WalletAPI.getPortfolio();
-      setTokens(excludeSol ? data.tokens.filter((token) => token.address != SolMint) : data.tokens);
+      setTokens(excludeSol ? data.tokens.filter((token) => token.address !== SolMint) : data.tokens);
     } catch (error) {
-      console.error("Error loading portfolio:", error);
-      await toastError({
+      await toastError(error, {
         title: "Error",
         message: "Failed to load portfolio data",
       });
@@ -48,7 +47,7 @@ export function TokensDropdown({
     if (itemProps.value && tokens.length > 0) {
       const token = tokens.find((token) => token.address === itemProps.value);
       if (!token) {
-        toastError({
+        toastError(new Error("insufficient token balance"), {
           title: "Insufficient token balance",
           message: "Not enough token balance to swap",
         });

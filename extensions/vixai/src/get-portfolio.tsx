@@ -23,8 +23,7 @@ function GetPortfolio() {
       const data = await WalletAPI.getPortfolio();
       setPortfolio(data);
     } catch (error) {
-      console.error("Error loading portfolio:", error);
-      await toastError({
+      await toastError(error, {
         title: "Error",
         message: "Failed to load portfolio",
       });

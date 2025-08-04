@@ -33,12 +33,14 @@ export const provider = {
           await client.setTokens(tokens);
           return await login(tokens.id_token || "");
         } catch (error) {
-          console.error("Failed to refresh tokens:", error);
           await client.removeTokens();
+          // If refresh fails, throw error to trigger re-authorization
+          throw error;
         }
       }
     }
 
+    // If not, start the authorization flow
     const authRequest = await client.authorizationRequest({
       endpoint: "https://accounts.google.com/o/oauth2/v2/auth",
       clientId: GOOGLE_CLIENT_ID,

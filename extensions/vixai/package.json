@@ -10,12 +10,14 @@
         {
             "name": "my-wallet",
             "title": "My Wallet",
+            "subtitle": "Vixai",
             "description": "Get wallet info",
             "mode": "view"
         },
         {
             "name": "buy-token",
             "title": "Buy Token",
+            "subtitle": "Vixai",
             "description": "Buy token using SOL",
             "mode": "view",
             "arguments": [
@@ -38,6 +40,7 @@
         {
             "name": "sell-token",
             "title": "Sell Token",
+            "subtitle": "Vixai",
             "description": "Sell a token",
             "mode": "view",
             "arguments": [
@@ -58,12 +61,14 @@
         {
             "name": "get-portfolio",
             "title": "Wallet Portfolio",
+            "subtitle": "Vixai",
             "description": "Get wallet portfolio",
             "mode": "view"
         },
         {
             "name": "send-token",
             "title": "Send Token",
+            "subtitle": "Vixai",
             "description": "Send token to another wallet address.",
             "mode": "view"
         }

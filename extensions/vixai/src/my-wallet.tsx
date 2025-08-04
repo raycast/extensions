@@ -6,6 +6,7 @@ import UserAPI from "./api/user";
 import { useSolana } from "./hooks/solana";
 import { Address } from "@solana/kit";
 import GetPortfolio from "./get-portfolio";
+import { toastError } from "./utils/toast";
 
 function MyWallet() {
   const { pop } = useNavigation();
@@ -60,9 +61,7 @@ function MyWallet() {
       });
       pop();
     } catch (error) {
-      console.error(error);
-      await showToast({
-        style: Toast.Style.Failure,
+      await toastError(error, {
         title: "Error",
         message: error instanceof Error ? error.message : "Failed to sign out",
       });

@@ -28,14 +28,13 @@ function BuyToken(props: LaunchProps<{ arguments: BuyTokenFormValues }>) {
     if (isLoading) {
       return;
     }
-    setIsLoading(true);
 
     try {
       const inputAmount = parseFloat(values.inputAmount);
 
       // Validation
       if (isNaN(inputAmount) || inputAmount <= 0) {
-        await toastError({
+        await toastError(new Error("invalid input amount"), {
           title: "Invalid amount",
           message: "amount must be a number greater than 0",
         });
@@ -43,12 +42,14 @@ function BuyToken(props: LaunchProps<{ arguments: BuyTokenFormValues }>) {
       }
 
       if (!isAddress(values.tokenMint)) {
-        await toastError({
+        await toastError(new Error("invalid token mint"), {
           title: "Invalid token",
           message: "token must be a valid address",
         });
         return;
       }
+
+      setIsLoading(true);
 
       // Execute transaction
       const result = await TradingAPI.swap({
@@ -62,11 +63,10 @@ function BuyToken(props: LaunchProps<{ arguments: BuyTokenFormValues }>) {
 
       await toastSuccess({
         title: "Success",
-        message: `Bought token${txSignature ? ` - ${txSignature}` : ""}`,
+        message: `Bought token${result.tx_signature ? ` - ${result.tx_signature}` : ""}`,
       });
     } catch (error) {
-      console.log(error);
-      await toastError({
+      await toastError(error, {
         title: "Error",
         message: "Failed to buy token",
       });
