@@ -12,7 +12,7 @@ export default function Docker() {
   });
 
   return (
-    <List isLoading={isLoading}>
+    <List navigationTitle="Docker" isLoading={isLoading}>
       {containers.map((container) => (
         <List.Item
           key={container.containerId}
@@ -42,6 +42,7 @@ function DockerConfig({ container }: { container: DockerContainer }) {
 
   return (
     <Detail
+      navigationTitle="Docker"
       isLoading={isLoading}
       markdown={
         `${container.name} (${container.containerId})\n` +

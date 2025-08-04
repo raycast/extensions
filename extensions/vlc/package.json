@@ -1,0 +1,171 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "vlc",
+  "title": "VLC",
+  "description": "Seamlessly control VLC Media Player from Raycast. Play, pause, skip tracks, adjust volume, seek, toggle fullscreen, and more—all from your keyboard. Requires VLC's HTTP interface enabled.",
+  "icon": "extension-icon.png",
+  "author": "kud",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "play",
+      "title": "Play",
+      "subtitle": "Resume media playback",
+      "description": "Play playback",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop",
+      "title": "Stop",
+      "subtitle": "Stop media playback",
+      "description": "Stop playback",
+      "mode": "no-view"
+    },
+    {
+      "name": "next",
+      "title": "Next",
+      "subtitle": "Skip to next track",
+      "description": "Play the next track in the playlist.",
+      "mode": "no-view"
+    },
+    {
+      "name": "previous",
+      "title": "Previous",
+      "subtitle": "Go to previous track",
+      "description": "Previous track",
+      "mode": "no-view"
+    },
+    {
+      "name": "volume-up",
+      "title": "Volume Up",
+      "subtitle": "Increase audio volume",
+      "description": "Increase volume",
+      "mode": "no-view"
+    },
+    {
+      "name": "volume-down",
+      "title": "Volume Down",
+      "subtitle": "Decrease audio volume",
+      "description": "Decrease volume",
+      "mode": "no-view"
+    },
+    {
+      "name": "mute",
+      "title": "Mute",
+      "subtitle": "Silence audio output",
+      "description": "Mute the audio output.",
+      "mode": "no-view"
+    },
+    {
+      "name": "unmute",
+      "title": "Unmute/Reset Volume",
+      "subtitle": "Restore audio output",
+      "description": "Unmute the audio output / Reset the volume.",
+      "mode": "no-view"
+    },
+    {
+      "name": "seek-forward",
+      "title": "Seek Forward",
+      "subtitle": "Jump ahead 10 seconds",
+      "description": "Seek forward in playback",
+      "mode": "no-view"
+    },
+    {
+      "name": "seek-backward",
+      "title": "Seek Backward",
+      "subtitle": "Jump back 10 seconds",
+      "description": "Seek backward in playback",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-fullscreen",
+      "title": "Toggle Fullscreen",
+      "subtitle": "Switch between fullscreen and windowed",
+      "description": "Toggle fullscreen mode",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-loop",
+      "title": "Toggle Loop",
+      "subtitle": "Enable or disable repeat playback",
+      "description": "Toggle loop mode",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-random",
+      "title": "Toggle Random",
+      "subtitle": "Enable or disable shuffle mode",
+      "description": "Toggle random/shuffle mode",
+      "mode": "no-view"
+    },
+    {
+      "name": "eject",
+      "title": "Eject",
+      "subtitle": "Remove current media",
+      "description": "Eject the current media from VLC.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open",
+      "title": "Open",
+      "subtitle": "Load media file with optional subtitles",
+      "description": "Open a video in VLC, optionally with a subtitle file.",
+      "mode": "view",
+      "src": "src/open.tsx"
+    },
+    {
+      "name": "open-vlsub",
+      "title": "Open VLsub",
+      "subtitle": "Launch subtitle download extension",
+      "description": "Trigger the VLsub extension in VLC.",
+      "mode": "no-view",
+      "src": "src/open-vlsub.ts"
+    },
+    {
+      "name": "set-volume",
+      "title": "Set Volume",
+      "subtitle": "Set audio volume to specific percentage",
+      "description": "Set VLC volume to a specific percentage (0-125%).",
+      "mode": "no-view",
+      "src": "src/set-volume.tsx",
+      "arguments": [
+        {
+          "name": "percentage",
+          "type": "text",
+          "placeholder": "0-125",
+          "required": true,
+          "title": "Volume (%)"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "vlc_password",
+      "type": "password",
+      "title": "VLC HTTP Password",
+      "description": "Password for VLC remote HTTP interface.",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.101.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
