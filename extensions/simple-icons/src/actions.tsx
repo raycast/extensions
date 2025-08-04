@@ -18,7 +18,7 @@ export const OpenWith = ({ icon, version }: ActionProps) => {
   useEffect(() => {
     (async () => {
       const path = await makeCopyToDownload({ version, icon, slug: getIconSlug(icon) });
-      setDestinationPath(path);
+      if (path) setDestinationPath(path);
     })();
   }, []);
   return destinationPath ? <Action.OpenWith path={destinationPath} /> : null;

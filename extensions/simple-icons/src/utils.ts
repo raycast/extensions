@@ -178,18 +178,18 @@ export const makeCopyToDownload = async ({
   icon: IconData;
   slug: string;
 }) => {
-  const { svg, path: savedPath, withBrandColor } = await loadSvg({ version, icon, slug });
-  const tmpPath = path.join(os.tmpdir(), `${slug}.svg`);
   try {
+    const { svg, path: savedPath, withBrandColor } = await loadSvg({ version, icon, slug });
+    const tmpPath = path.join(os.tmpdir(), `${slug}.svg`);
     if (withBrandColor) {
       await fs.writeFile(tmpPath, svg, "utf8");
     } else {
       await fs.copyFile(savedPath, tmpPath);
     }
+    return tmpPath;
   } catch (error) {
     showFailureToast(error, { title: "Failed to copy file" });
   }
-  return tmpPath;
 };
 
 export const getAliases = (icon: IconData) => {

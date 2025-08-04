@@ -126,14 +126,16 @@
     "got": "^14.4.7",
     "lodash": "^4.17.21",
     "pacote": "^21.0.0",
-    "raycast-cross-extension": "^0.2.3"
+    "raycast-cross-extension": "^0.2.3",
+    "semver": "^7.7.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@types/lodash": "^4.17.20",
     "@types/pacote": "^11.1.8",
-    "@types/react": "^19.1.8",
-    "eslint": "^9.31.0",
+    "@types/react": "^19.1.9",
+    "@types/semver": "^7.7.0",
+    "eslint": "^9.32.0",
     "prettier": "^3.6.2",
     "typescript": "^5.8.3"
   }
