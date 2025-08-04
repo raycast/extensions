@@ -1,6 +1,6 @@
 # Deepcast Changelog
 
-## [Auto-Translation for Main Command] - 2025-08-04
+## [Auto-Translation for Main Command] - {PR_MERGE_DATE}
 
 - Enhanced main "Translate" command to automatically translate selected text when opened
 
