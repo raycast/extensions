@@ -1,6 +1,6 @@
 # Quick Notes Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2025-08-04
 
 - Fix note opening externally if note title contains space
 
