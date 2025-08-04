@@ -1,6 +1,6 @@
 # NUSMods Changelog
 
-## [Better Prereq Rendering] - {PR_MERGE_DATE}
+## [Better Prereq Rendering] - 2025-08-04
 
 - Improved rendering logic for module prerequisites
 
