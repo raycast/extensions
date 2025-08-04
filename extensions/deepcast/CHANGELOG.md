@@ -1,5 +1,9 @@
 # Deepcast Changelog
 
+## [Auto-Translation for Main Command] - 2025-08-04
+
+- Enhanced main "Translate" command to automatically translate selected text when opened
+
 ## [Default Formality Configuration] - 2025-06-07
 
 - Added new "Default Formality" preference option to set a global formality level for all supported languages

@@ -77,6 +77,15 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
     if (props.fallbackText) return;
     getSelection().then((content) => {
       setSourceText(content ?? "");
+      // Auto-translate if we have content
+      if (content && content.trim()) {
+        submit({
+          text: content,
+          to: targetLanguage,
+          from: sourceLanguage,
+          formality: formality,
+        });
+      }
     });
   }, []);
 
