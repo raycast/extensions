@@ -55,7 +55,7 @@ export function isWorkspaceEntry(entry: EntryLike): entry is WorkspaceEntry {
   try {
     const configUrl = new URL(workspace.configPath);
     return (
-      existsSync(configUrl) &&
+      existsSync(configUrl.pathname) &&
       workspace.configPath.indexOf(".code-workspace") !== -1
     );
   } catch (error) {
