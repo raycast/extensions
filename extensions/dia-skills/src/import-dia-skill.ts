@@ -1,10 +1,6 @@
 import { getPreferenceValues, showToast, Toast, open, popToRoot, closeMainWindow } from "@raycast/api";
 import { URLSearchParams } from "url";
 
-interface Arguments {
-  skillUrl: string;
-}
-
 interface RaySoPrompt {
   creativity: string;
   highlightEdits: boolean;
@@ -19,7 +15,7 @@ const extractWithRegex = (html: string, regex: RegExp): string => {
   return match?.[1]?.trim() ?? "";
 };
 
-export default async function Command(props: { arguments: Arguments }) {
+export default async function Command(props: { arguments: Arguments.ImportDiaSkill }) {
   const { skillUrl } = props.arguments;
 
   if (!skillUrl) {

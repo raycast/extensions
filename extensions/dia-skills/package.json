@@ -5,6 +5,9 @@
   "description": "Import your favorite Dia skills into Raycast, so you can have the freedom to use whatever LLM you want, wherever you want, however you want.",
   "icon": "extension-icon.png",
   "author": "Visual-Studio-Coder",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "keywords": [
     "raycast",
