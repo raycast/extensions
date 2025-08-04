@@ -58,7 +58,7 @@ export default function Command(
   if (error) {
     console.log(error);
 
-    showToast(Toast.Style.Failure, "Failed to load recent projects");
+    showFailureToast(error, { title: "Failed to load recent projects" });
   }
 
   return (
