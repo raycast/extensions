@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Show the Artist name when liking a song] - {PR_MERGE_DATE}
+## [Show the Artist name when liking a song] - 2025-08-04
 
 - Added the artist name into the message in the HUD when liking a new song
 - Added the artist name into the message in the HUD attempting to like an already liked song
