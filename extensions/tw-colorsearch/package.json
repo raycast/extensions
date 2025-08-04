@@ -25,7 +25,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "~1.101.1",
+    "@raycast/api": "^1.101.1",
     "culori": "^4.0.2"
   },
   "devDependencies": {
@@ -36,7 +36,6 @@
     "eslint": "^9.32.0",
     "prettier": "^3.6.2",
     "react": "^19.1.1",
-    "react-devtools": "^6.1.1",
     "typescript": "~5.8.3"
   },
   "scripts": {
