@@ -1,16 +1,18 @@
 # IP Finder - Network Scanner
 
-A powerful Raycast extension to scan your local network, detect assigned IP addresses, and get recommendations for available addresses to prevent IP conflicts.
+A powerful Raycast extension to scan your local network, detect assigned IP addresses, and get smart recommendations for available addresses to prevent IP conflicts.
 
 ## Features
 
-- **Network Scanning**: Automatically detect your local network and scan for assigned IPs
-- **IP Recommendations**: Get smart recommendations for available IP addresses
-- **Custom Subnet Scanning**: Scan specific subnets or IP ranges
-- **Quick Scan**: Fast network scanning with minimal configuration
-- **Cross-Platform**: Works on macOS, Windows, and Linux
-- **Scan History**: Keep track of previous scans and results
-- **Export Results**: Copy IP lists or export as JSON
+- **🔍 Network Discovery**: Automatically detect your local network and scan for assigned IPs
+- **📊 IP Recommendations**: Get intelligent recommendations for available IP addresses
+- **🎯 Custom Scanning**: Scan specific subnets or IP ranges with CIDR notation
+- **⚡ Fast Performance**: Concurrent scanning with configurable thread limits
+- **🖥️ Cross-Platform**: Works seamlessly on macOS, Windows, and Linux
+- **📱 Device Information**: Gather MAC addresses, hostnames, and manufacturer details
+- **🔌 Port Scanning**: Detect open ports with service identification
+- **📈 Scan History**: Keep track of previous scans and results
+- **📋 Export Results**: Copy IP lists or export detailed reports
 
 ## Commands
 
@@ -41,7 +43,11 @@ The main command that provides a comprehensive interface for network scanning:
 3. Configure timeout and thread settings
 4. Start the scan and view results
 
-
+### Device Information
+- View MAC addresses, hostnames, and manufacturer details
+- See open ports with service names (HTTP, SSH, etc.)
+- Copy device information to clipboard
+- Open devices in browser
 
 ## Configuration
 
@@ -53,14 +59,8 @@ The extension includes several preferences you can configure:
 - **Auto-scan on Open**: Automatically start scanning when opening
 - **Show Progress Bar**: Display scanning progress
 - **Scan Common Ranges**: Focus on common IP ranges for faster scanning
-
-## Technical Details
-
-- Uses system `ping` commands for cross-platform compatibility
-- Supports CIDR notation for subnet specification
-- Implements concurrent scanning with configurable thread limits
-- Stores scan history locally using Raycast's LocalStorage
-- Provides both view and no-view command modes
+- **Gather Device Information**: Get MAC addresses and device details
+- **Scan Open Ports**: Check for open ports on discovered devices
 
 ## Common Use Cases
 
@@ -68,6 +68,7 @@ The extension includes several preferences you can configure:
 - **IP Conflict Prevention**: Find available IPs before assigning static addresses
 - **Network Troubleshooting**: Detect connectivity issues and missing devices
 - **Home Network Management**: Keep track of connected devices
+- **Network Security**: Identify unknown devices and open ports
 
 ## Examples
 
@@ -79,9 +80,9 @@ The extension includes several preferences you can configure:
 ### Sample Results
 ```
 Assigned IPs:
-- 192.168.1.1 (Router)
-- 192.168.1.5 (Your Device)
-- 192.168.1.10 (Printer)
+- 192.168.1.1 (Router) - MAC: AA:BB:CC:DD:EE:FF
+- 192.168.1.5 (Your Device) - MAC: 11:22:33:44:55:66
+- 192.168.1.10 (Printer) - Ports: 80 (HTTP), 631 (IPP)
 
 Recommended Available IPs:
 - 192.168.1.2
@@ -91,10 +92,20 @@ Recommended Available IPs:
 
 ## Privacy & Security
 
-- All scanning is performed locally on your machine
-- No network data is sent to external servers
-- Scan history is stored locally using Raycast's secure storage
-- Uses standard ping commands with no elevated privileges required
+- **Local Operation**: All scanning is performed locally on your machine
+- **No External Calls**: No network data is sent to external servers
+- **Secure Storage**: Scan history is stored locally using Raycast's secure storage
+- **Standard Commands**: Uses standard ping commands with no elevated privileges required
+- **No Keychain Access**: Does not require or request keychain access
+
+## Technical Details
+
+This extension is built with:
+- **TypeScript** and **React** for robust development
+- **Raycast API** for seamless integration
+- **Node.js child_process** for cross-platform ping commands
+- **LocalStorage** for secure data persistence
+- **Concurrent scanning** with configurable thread limits
 
 ## Support
 
@@ -102,13 +113,12 @@ If you encounter any issues or have questions:
 1. Check that your network allows ICMP ping packets
 2. Ensure you have proper network permissions
 3. Try adjusting timeout and thread settings for your network
+4. Verify your firewall settings allow local network communication
 
 ## Development
 
-This extension is built with:
-- TypeScript and React
-- Raycast API
-- Node.js child_process for ping commands
-- Cross-platform compatibility
+This extension is open source and contributions are welcome. The codebase follows Raycast development guidelines and best practices.
 
---- 
+---
+
+**Note**: This extension requires network access to perform scanning operations. Make sure your network configuration allows ICMP ping packets for optimal functionality. 

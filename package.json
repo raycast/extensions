@@ -1,10 +1,10 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ip-finder",
-  "title": "Ip Finder - Network Scanner",
+  "title": "IP Finder - Network Scanner",
   "description": "Scan your local network to find assigned IPs and get recommendations for available addresses",
   "icon": "store-icon.png",
-  "author": "swayam",
+  "author": "swayam_mehta",
   "license": "MIT",
   "commands": [
     {
@@ -90,8 +90,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.64.4",
-    "sharp": "^0.34.3"
+    "@raycast/api": "^1.64.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
@@ -115,7 +114,9 @@
     "network-tools",
     "ip-conflict",
     "ping",
-    "subnet"
+    "subnet",
+    "network-discovery",
+    "ip-management"
   ],
   "categories": [
     "Developer Tools",

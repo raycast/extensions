@@ -1,4 +1,4 @@
-//Copyright © 2025 Swayam Mehta
+//Copyright © 2025 Sam Analytic Solutions
 //All rights reserved.
 
 // @ts-nocheck
@@ -185,13 +185,13 @@ export default function Command() {
       const isWindows = platform() === "win32";
       const command = isWindows ? "arp -a" : "arp -n";
       const { stdout } = await execAsync(command);
-      
-      const lines = stdout.split('\n');
+
+      const lines = stdout.split("\n");
       for (const line of lines) {
         const match = line.match(/(\d+\.\d+\.\d+\.\d+)\s+([0-9a-fA-F-:]+)/);
         if (match) {
           const ip = match[1];
-          const mac = match[2].replace(/-/g, ':').toUpperCase();
+          const mac = match[2].replace(/-/g, ":").toUpperCase();
           arpMap.set(ip, mac);
         }
       }
@@ -203,18 +203,16 @@ export default function Command() {
 
   const getManufacturer = async (mac: string): Promise<string | undefined> => {
     try {
-      const oui = mac.replace(/:/g, '').substring(0, 6).toUpperCase();
-      
       // Add timeout to prevent hanging
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
-      
+
       const response = await fetch(`https://api.macvendors.com/${mac}`, {
-        signal: controller.signal
+        signal: controller.signal,
       });
-      
+
       clearTimeout(timeoutId);
-      
+
       if (response.ok) {
         return await response.text();
       }
@@ -228,11 +226,14 @@ export default function Command() {
     try {
       // Add timeout to prevent hanging
       const hostnamePromise = dns.reverse(ip);
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('DNS timeout')), 2000)
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("DNS timeout")), 2000),
       );
-      
-      const [hostname] = await Promise.race([hostnamePromise, timeoutPromise]) as [string];
+
+      const [hostname] = (await Promise.race([
+        hostnamePromise,
+        timeoutPromise,
+      ])) as [string];
       return hostname;
     } catch (error) {
       return undefined;
@@ -241,25 +242,25 @@ export default function Command() {
 
   const getPortService = (port: number): string => {
     const portServices: { [key: number]: string } = {
-      21: 'FTP',
-      22: 'SSH',
-      23: 'Telnet',
-      25: 'SMTP',
-      53: 'DNS',
-      80: 'HTTP',
-      110: 'POP3',
-      143: 'IMAP',
-      443: 'HTTPS',
-      993: 'IMAPS',
-      995: 'POP3S',
-      8080: 'HTTP-Alt',
-      8443: 'HTTPS-Alt',
-      3306: 'MySQL',
-      5432: 'PostgreSQL',
-      27017: 'MongoDB',
-      6379: 'Redis',
-      9200: 'Elasticsearch',
-      11211: 'Memcached'
+      21: "FTP",
+      22: "SSH",
+      23: "Telnet",
+      25: "SMTP",
+      53: "DNS",
+      80: "HTTP",
+      110: "POP3",
+      143: "IMAP",
+      443: "HTTPS",
+      993: "IMAPS",
+      995: "POP3S",
+      8080: "HTTP-Alt",
+      8443: "HTTPS-Alt",
+      3306: "MySQL",
+      5432: "PostgreSQL",
+      27017: "MongoDB",
+      6379: "Redis",
+      9200: "Elasticsearch",
+      11211: "Memcached",
     };
     return portServices[port] || `Port ${port}`;
   };
@@ -268,18 +269,19 @@ export default function Command() {
     const openPorts: number[] = [];
     const isWindows = platform() === "win32";
     const isMac = platform() === "darwin";
-    
+
     // Common ports to scan
-    const commonPorts = ports.length > 0 ? ports : [
-      21, 22, 23, 25, 53, 80, 110, 143, 443, 993, 995, 8080, 8443
-    ];
-    
+    const commonPorts =
+      ports.length > 0
+        ? ports
+        : [21, 22, 23, 25, 53, 80, 110, 143, 443, 993, 995, 8080, 8443];
+
     // Try multiple methods for port scanning
     for (const port of commonPorts) {
       try {
         let command: string;
         let success = false;
-        
+
         // Method 1: Platform-specific commands
         if (isWindows) {
           command = `powershell -Command "Test-NetConnection -ComputerName ${ip} -Port ${port} -InformationLevel Quiet"`;
@@ -288,7 +290,7 @@ export default function Command() {
         } else {
           command = `nc -z -w 1 ${ip} ${port}`;
         }
-        
+
         try {
           await execAsync(command, { timeout: 2000 });
           success = true;
@@ -299,7 +301,7 @@ export default function Command() {
           } else {
             command = `timeout 2 bash -c "</dev/tcp/${ip}/${port}"`;
           }
-          
+
           try {
             await execAsync(command, { timeout: 2000 });
             success = true;
@@ -314,7 +316,7 @@ export default function Command() {
             }
           }
         }
-        
+
         if (success) {
           openPorts.push(port);
         }
@@ -322,7 +324,7 @@ export default function Command() {
         // Port is closed
       }
     }
-    
+
     return openPorts;
   };
 
@@ -437,10 +439,10 @@ export default function Command() {
 
       // Get device information for assigned IPs (if enabled)
       if (preferences.gatherDeviceInfo && assignedIPs.length > 0) {
-        const message = preferences.scanPorts 
+        const message = preferences.scanPorts
           ? "Getting MAC addresses, device details, and scanning ports..."
           : "Getting MAC addresses and device details...";
-        
+
         showToast({
           style: Toast.Style.Animated,
           title: "Gathering Device Info",
@@ -448,30 +450,38 @@ export default function Command() {
         });
 
         const arpTable = await getARPTable();
-        
+
         // Process device info in parallel with timeout
         const devicePromises = assignedIPs.map(async (ip) => {
           try {
             const mac = arpTable.get(ip);
-            
+
             // Get manufacturer, hostname, and ports in parallel with timeout
-            const [manufacturer, hostname, openPorts] = await Promise.allSettled([
-              mac ? getManufacturer(mac) : Promise.resolve(undefined),
-              getHostname(ip),
-              preferences.scanPorts ? scanPorts(ip, []) : Promise.resolve([])
-            ]);
-            
+            const [manufacturer, hostname, openPorts] =
+              await Promise.allSettled([
+                mac ? getManufacturer(mac) : Promise.resolve(undefined),
+                getHostname(ip),
+                preferences.scanPorts ? scanPorts(ip, []) : Promise.resolve([]),
+              ]);
+
             // Debug logging for port scanning
-            if (preferences.scanPorts && openPorts.status === 'fulfilled') {
-              console.log(`Port scan for ${ip}: ${openPorts.value.length} ports found - ${openPorts.value.join(', ')}`);
+            if (preferences.scanPorts && openPorts.status === "fulfilled") {
+              console.log(
+                `Port scan for ${ip}: ${openPorts.value.length} ports found - ${openPorts.value.join(", ")}`,
+              );
             }
-            
+
             return {
               ip,
               mac,
-              manufacturer: manufacturer.status === 'fulfilled' ? manufacturer.value : undefined,
-              hostname: hostname.status === 'fulfilled' ? hostname.value : undefined,
-              openPorts: openPorts.status === 'fulfilled' ? openPorts.value : undefined,
+              manufacturer:
+                manufacturer.status === "fulfilled"
+                  ? manufacturer.value
+                  : undefined,
+              hostname:
+                hostname.status === "fulfilled" ? hostname.value : undefined,
+              openPorts:
+                openPorts.status === "fulfilled" ? openPorts.value : undefined,
               isOnline: true,
               lastSeen: new Date(),
             };
@@ -488,24 +498,29 @@ export default function Command() {
             };
           }
         });
-        
+
         // Wait for all device info with a timeout
         const deviceResults = await Promise.allSettled(devicePromises);
-        devices.push(...deviceResults
-          .filter(result => result.status === 'fulfilled')
-          .map(result => (result as PromiseFulfilledResult<DeviceInfo>).value)
+        devices.push(
+          ...deviceResults
+            .filter((result) => result.status === "fulfilled")
+            .map(
+              (result) => (result as PromiseFulfilledResult<DeviceInfo>).value,
+            ),
         );
       } else {
         // Create basic device info without detailed lookup
-        devices.push(...assignedIPs.map(ip => ({
-          ip,
-          mac: undefined,
-          manufacturer: undefined,
-          hostname: undefined,
-          openPorts: undefined,
-          isOnline: true,
-          lastSeen: new Date(),
-        })));
+        devices.push(
+          ...assignedIPs.map((ip) => ({
+            ip,
+            mac: undefined,
+            manufacturer: undefined,
+            hostname: undefined,
+            openPorts: undefined,
+            isOnline: true,
+            lastSeen: new Date(),
+          })),
+        );
       }
 
       const recommendedIPs = generateRecommendations(
@@ -619,7 +634,12 @@ export default function Command() {
     maxThreads: number,
   ) => {
     const recommendations = parseInt(preferences.defaultRecommendations) || 10;
-    await scanNetworkWithRecommendations(subnet, timeout, maxThreads, recommendations);
+    await scanNetworkWithRecommendations(
+      subnet,
+      timeout,
+      maxThreads,
+      recommendations,
+    );
   };
 
   const handleScan = () => {
@@ -665,7 +685,12 @@ export default function Command() {
     pop();
 
     setTimeout(() => {
-      scanNetworkWithRecommendations(subnet, timeout, maxThreads, recommendations);
+      scanNetworkWithRecommendations(
+        subnet,
+        timeout,
+        maxThreads,
+        recommendations,
+      );
     }, 100);
   };
 
@@ -773,14 +798,18 @@ ${info.lastScanTime ? `- **Last Scan**: ${info.lastScanTime.toLocaleString()}` :
 ## Network Devices
 ${
   info.devices.length > 0
-    ? info.devices.map((device) => `### ${device.ip}
-- **MAC Address**: ${device.mac || 'Unknown'}
-- **Hostname**: ${device.hostname || 'Unknown'}
-- **Manufacturer**: ${device.manufacturer || 'Unknown'}
-- **Open Ports**: ${device.openPorts && device.openPorts.length > 0 ? device.openPorts.map(port => `${port} (${getPortService(port)})`).join(', ') : 'None detected'}
+    ? info.devices
+        .map(
+          (device) => `### ${device.ip}
+- **MAC Address**: ${device.mac || "Unknown"}
+- **Hostname**: ${device.hostname || "Unknown"}
+- **Manufacturer**: ${device.manufacturer || "Unknown"}
+- **Open Ports**: ${device.openPorts && device.openPorts.length > 0 ? device.openPorts.map((port) => `${port} (${getPortService(port)})`).join(", ") : "None detected"}
 - **Status**: Online
 - **Last Seen**: ${device.lastSeen.toLocaleString()}
-`).join("\n")
+`,
+        )
+        .join("\n")
     : "No devices found"
 }
 
@@ -1011,13 +1040,23 @@ ${
             <List.Item
               key={device.ip}
               title={device.ip}
-              subtitle={device.hostname || device.manufacturer || "Unknown device"}
+              subtitle={
+                device.hostname || device.manufacturer || "Unknown device"
+              }
               icon={Icon.Circle}
               accessories={[
                 { text: "Active", icon: Icon.Check },
-                device.mac ? { text: device.mac, icon: Icon.Network } : undefined,
-                device.openPorts && device.openPorts.length > 0 ? 
-                  { text: `${device.openPorts.length} ports`, icon: Icon.Gear } : undefined,
+                device.mac
+                  ? { text: device.mac, icon: Icon.Network }
+                  : undefined,
+                device.openPorts && device.openPorts.length > 0
+                  ? {
+                      text: device.openPorts
+                        .map((port) => `${port} (${getPortService(port)})`)
+                        .join(", "),
+                      icon: Icon.Gear,
+                    }
+                  : undefined,
               ].filter(Boolean)}
               actions={
                 <ActionPanel>
@@ -1027,7 +1066,7 @@ ${
                   />
                   <Action.CopyToClipboard
                     title="Copy Device Info"
-                    content={`IP: ${device.ip}\nMAC: ${device.mac || 'Unknown'}\nHostname: ${device.hostname || 'Unknown'}\nManufacturer: ${device.manufacturer || 'Unknown'}\nOpen Ports: ${device.openPorts && device.openPorts.length > 0 ? device.openPorts.map(port => `${port} (${getPortService(port)})`).join(', ') : 'None detected'}`}
+                    content={`IP: ${device.ip}\nMAC: ${device.mac || "Unknown"}\nHostname: ${device.hostname || "Unknown"}\nManufacturer: ${device.manufacturer || "Unknown"}\nOpen Ports: ${device.openPorts && device.openPorts.length > 0 ? device.openPorts.map((port) => `${port} (${getPortService(port)})`).join(", ") : "None detected"}`}
                   />
                   <Action.OpenInBrowser
                     title="Open in Browser"
@@ -1043,12 +1082,12 @@ ${
                         prev
                           ? {
                               ...prev,
-                                                          subnet: ipRange,
-                            assignedIPs: [],
-                            recommendedIPs: [],
-                            devices: [],
-                            isScanning: false,
-                            scanProgress: 0,
+                              subnet: ipRange,
+                              assignedIPs: [],
+                              recommendedIPs: [],
+                              devices: [],
+                              isScanning: false,
+                              scanProgress: 0,
                             }
                           : null,
                       );
@@ -1083,9 +1122,13 @@ ${
                           message: `Checking ports on ${device.ip}...`,
                         });
                         const openPorts = await scanPorts(device.ip, []);
-                        const portServices = openPorts.map(port => `${port} (${getPortService(port)})`);
+                        const portServices = openPorts.map(
+                          (port) => `${port} (${getPortService(port)})`,
+                        );
                         if (openPorts.length > 0) {
-                          showHUD(`Found ${openPorts.length} open ports: ${portServices.join(', ')}`);
+                          showHUD(
+                            `Found ${openPorts.length} open ports: ${portServices.join(", ")}`,
+                          );
                         } else {
                           showHUD(`No open ports found on ${device.ip}`);
                         }
