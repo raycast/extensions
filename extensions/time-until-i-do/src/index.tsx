@@ -2,11 +2,6 @@ import { Action, ActionPanel, Detail, getPreferenceValues, openExtensionPreferen
 import moment from "moment";
 import { useState, useEffect, useMemo } from "react";
 
-interface Preferences {
-  bigDayDate: string;
-  bigDayName: string;
-}
-
 export default function TimeUntil() {
   const { bigDayDate, bigDayName } = getPreferenceValues<Preferences>();
   const [now, setNow] = useState(moment());
