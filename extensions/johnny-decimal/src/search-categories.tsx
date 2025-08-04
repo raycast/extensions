@@ -1,7 +1,7 @@
-import { List, ActionPanel, Action, getPreferenceValues, open } from "@raycast/api";
+import { List, ActionPanel, Action, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect } from "react";
 import path from "path";
-import { Preferences, getDirectories, searchJohnnyDecimal } from "./utils";
+import { Preferences, getDirectories, searchJohnnyDecimal, openInObsidian } from "./utils";
 
 export default function Command() {
   const [searchResults, setSearchResults] = useState<string[]>([]);
@@ -25,7 +25,7 @@ export default function Command() {
             title={path.basename(result)}
             actions={
               <ActionPanel>
-                <Action title="Open in Finder" onAction={() => open(result)} />
+                <Action title="Open in Finder" onAction={() => openInObsidian(result, rootFolder)} />
               </ActionPanel>
             }
           />

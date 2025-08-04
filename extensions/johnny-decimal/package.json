@@ -5,6 +5,9 @@
   "description": "Search and manage Johnny.Decimal system.",
   "icon": "logo.png",
   "author": "x0ba",
+  "contributors": [
+    "user_b3dfccdd8312cf25f0f7"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -49,6 +52,13 @@
       "required": false,
       "title": "Index File Path",
       "description": "The full path to the index file (defaults to 'index.md' in the Johnny.Decimal folder if not specified)"
+    },
+    {
+      "name": "includeHiddenFiles",
+      "type": "checkbox",
+      "required": false,
+      "label": "Include hidden files?",
+      "description": "Hidden files like .env and directories like .git are not included by default. Enabling this option will include them in Johnny.Decimal searches/indexes"
     }
   ],
   "dependencies": {
