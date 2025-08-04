@@ -65,7 +65,7 @@ export function UninstallExtensionByIDAction(props: {
       ) {
         await showToast({
           style: Toast.Style.Animated,
-          title: "Install Extension",
+          title: "Uninstall Extension",
         });
         const cli = getKiroCLI();
         cli.uninstallExtensionByIDSync(props.extensionID);
