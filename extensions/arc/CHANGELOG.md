@@ -1,6 +1,6 @@
 # Arc Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-08-04
 
 - Added preferences to order the tabs in the search results for the `Search Arc` command.
 
