@@ -5,6 +5,7 @@
 - **Stay in Raycast longer**: Pressing Enter now shows beautiful detail pages instead of opening your browser
 - **Rich content previews**: See movie posters, episode screenshots, and season artwork directly in Raycast
 - **Recent searches**: See your recent searches when you start typing - no need to retype what you've searched before
+- **Improved search performance**: Smart debouncing prevents searches on every keystroke - now waits for you to finish typing
 - **Quick access to Trakt**: Use ⌘+O when you do want to open something in your browser
 - **Cleaner information**: Removed confusing "Unknown" labels and invalid ratings for a tidier experience
 - **Better image sizing**: Pictures now display at the perfect size without taking up too much space
