@@ -17,6 +17,7 @@ We ask that all users read our [legal disclaimer](https://github.com/simple-icon
 - Open file with a specific application
 - View brand aliases, aka-names, and localizations
 - View brand guidelines, sources, and licenses
+- Browse history versions of Simple Icons
 - Keep updating every week
 - Expose launch API for other extensions
 - Searching icons through AI (requires [Raycast Pro](https://raycast.com/pro))

@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { access, constants, copyFile, readdir, readFile, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import pacote from "pacote";
+import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import {
   AI,
   Cache,
@@ -15,11 +14,12 @@ import {
   showHUD,
   showToast,
 } from "@raycast/api";
-import { useAI } from "@raycast/utils";
+import { showFailureToast, useAI } from "@raycast/utils";
 import { Searcher } from "fast-fuzzy";
 import got from "got";
+import pacote from "pacote";
 import { getIconSlug } from "./vender/simple-icons-sdk.js";
-import { IconData, JsDelivrNpmResponse, LaunchContext, Release } from "./types.js";
+import { IconData, LaunchContext, Release } from "./types.js";
 
 const cache = new Cache();
 
@@ -31,6 +31,7 @@ export const {
   displaySimpleIconsFontFeatures,
   enableAiSearch,
   githubToken,
+  releaseVersion,
 } = getPreferenceValues<ExtensionPreferences>();
 
 export const hasAccessToAi = environment.canAccess(AI);
@@ -45,13 +46,13 @@ export const pacoteAssetPack = async (version: string) => {
     style: Toast.Style.Animated,
     title: "Downloading asset pack",
   });
-  await pacote.extract(`simple-icons@${version}`, join(environment.assetsPath, "pack", `simple-icons-${version}`));
+  await pacote.extract(releaseVersion, path.join(environment.assetsPath, "pack", version));
 };
 
 export const cacheAssetPack = async (version: string) => {
-  const destination = join(environment.assetsPath, `pack`);
+  const destination = path.join(environment.assetsPath, "pack", version);
   try {
-    await access(destination, constants.R_OK | constants.W_OK);
+    await fs.access(destination, fs.constants.R_OK | fs.constants.W_OK);
   } catch {
     cache.set("cached-version", "");
     await cleanAssetPack();
@@ -61,19 +62,15 @@ export const cacheAssetPack = async (version: string) => {
 };
 
 export const loadCachedJson = async (version: string) => {
-  const [major] = version.split(".");
-  const isNewFormat = Number(major) >= 14;
-  const isNewDataFolder = Number(major) >= 15;
-  const jsonPath = join(
-    environment.assetsPath,
-    "pack",
-    `simple-icons-${version}`,
-    isNewDataFolder ? "data" : "_data",
-    "simple-icons.json",
+  const legacyJsonPath = path.join(environment.assetsPath, "pack", version, "_data", "simple-icons.json");
+  const newJsonPath = path.join(environment.assetsPath, "pack", version, "data", "simple-icons.json");
+  const extremeJsonPath = path.join(environment.assetsPath, "pack", version, "distribution", "icons.json");
+  const [newJsonFile, legacyJsonFile, extremeJsonFile] = await Promise.all(
+    [newJsonPath, legacyJsonPath, extremeJsonPath].map((p) => fs.readFile(p, "utf8").catch(() => "")),
   );
-  const jsonFile = await readFile(jsonPath, "utf8");
+  const jsonFile = newJsonFile || legacyJsonFile || extremeJsonFile || "[]";
   const json = JSON.parse(jsonFile);
-  const icons = isNewFormat ? (json as IconData[]) : (json.icons as IconData[]);
+  const icons = (json.icons ? json.icons : json) as IconData[];
   return icons.map((icon, i) => ({ ...icon, code: fontUnicodeStart + i }));
 };
 
@@ -86,8 +83,18 @@ export const loadLatestVersion = async () => {
     style: Toast.Style.Animated,
     title: "Checking latest version",
   });
-  const json = await got.get("https://data.jsdelivr.com/v1/packages/npm/simple-icons").json<JsDelivrNpmResponse>();
-  return json.tags.latest;
+
+  const [left, right] = releaseVersion.split(":");
+  if (right && left !== "npm") {
+    throw new Error(
+      [
+        `Unsupported version format "${releaseVersion}".`,
+        "Please refer to the preference description to learn how to specify release version.",
+      ].join(" "),
+    );
+  }
+  const { name, version } = await pacote.manifest(releaseVersion);
+  return `${name}@${version}`;
 };
 
 export const loadRecentReleases = async () =>
@@ -105,29 +112,33 @@ export const useVersion = ({ launchContext }: { launchContext?: LaunchContext })
   const cachedVersion = loadCachedVersion();
   const [version, setVersion] = useState(cachedVersion);
   useEffect(() => {
-    loadLatestVersion().then(async (latestVersion) => {
-      if (cachedVersion !== latestVersion) {
-        if (cachedVersion) {
-          cache.set("cached-version", "");
-          const confirmed = await confirmAlert({
-            title: "New version available",
-            message: "Do you want to reload the command to apply updates?",
-          });
-          if (confirmed) {
-            open("raycast://extensions/litomore/simple-icons/index" + buildDeeplinkParameters(launchContext));
+    loadLatestVersion()
+      .then(async (latestVersion) => {
+        if (cachedVersion !== latestVersion) {
+          if (cachedVersion) {
+            cache.set("cached-version", "");
+            const confirmed = await confirmAlert({
+              title: "New version available",
+              message: "Do you want to reload the command to apply updates?",
+            });
+            if (confirmed) {
+              open("raycast://extensions/litomore/simple-icons/index" + buildDeeplinkParameters(launchContext));
+            }
+          } else {
+            setVersion(latestVersion);
           }
-        } else {
-          setVersion(latestVersion);
         }
-      }
-    });
+      })
+      .catch((error) => {
+        showFailureToast(error, { title: "Failed to load latest version" });
+      });
   }, []);
   return version;
 };
 
 export const loadSvg = async ({ version, icon, slug }: { version: string; icon: IconData; slug: string }) => {
-  const svgPath = join(environment.assetsPath, "pack", `simple-icons-${version}`, "icons", `${slug}.svg`);
-  let svg = await readFile(svgPath, "utf8");
+  const svgPath = path.join(environment.assetsPath, "pack", version, "icons", `${slug}.svg`);
+  let svg = await fs.readFile(svgPath, "utf8");
   const withBrandColor = defaultLoadSvgAction === "WithBrandColor";
   if (withBrandColor) svg = svg.replace("<svg ", `<svg fill="#${icon.hex}" `);
   return { svg, path: svgPath, withBrandColor };
@@ -150,11 +161,11 @@ export const copySvg = async ({ version, icon, pathOnly }: { version: string; ic
 };
 
 export const cleanAssetPack = async () => {
-  const directories = await readdir(environment.assetsPath);
+  const directories = await fs.readdir(environment.assetsPath);
   await Promise.all(
     directories
       .filter((d) => d.startsWith("pack"))
-      .map((d) => rm(join(environment.assetsPath, d), { recursive: true, force: true })),
+      .map((d) => fs.rm(path.join(environment.assetsPath, d), { recursive: true, force: true })),
   );
 };
 
@@ -168,15 +179,15 @@ export const makeCopyToDownload = async ({
   slug: string;
 }) => {
   const { svg, path: savedPath, withBrandColor } = await loadSvg({ version, icon, slug });
-  const tmpPath = join(tmpdir(), `${slug}.svg`);
+  const tmpPath = path.join(os.tmpdir(), `${slug}.svg`);
   try {
     if (withBrandColor) {
-      await writeFile(tmpPath, svg, "utf8");
+      await fs.writeFile(tmpPath, svg, "utf8");
     } else {
-      await copyFile(savedPath, tmpPath);
+      await fs.copyFile(savedPath, tmpPath);
     }
-  } catch {
-    console.error("Failed to copy file");
+  } catch (error) {
+    showFailureToast(error, { title: "Failed to copy file" });
   }
   return tmpPath;
 };
@@ -187,6 +198,8 @@ export const getAliases = (icon: IconData) => {
   const loc = Object.values(icon.aliases?.loc ?? {});
   return [...new Set([...aka, ...dup, ...loc])];
 };
+
+export const getFileLink = (slug: string, version: string) => `pack/${version}/icons/${slug}.svg`;
 
 export const getKeywords = (icon: IconData) =>
   [

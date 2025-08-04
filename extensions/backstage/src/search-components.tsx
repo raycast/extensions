@@ -19,6 +19,7 @@ type Preferences = {
   raycastOAuthClientId: string;
   backstageUrl: string;
   backstageStaticToken: string;
+  backstageApiUrl: string;
 };
 
 const preferences: Preferences = getPreferenceValues();
@@ -88,12 +89,13 @@ async function getAuthTokenIfNeeded() {
 }
 
 async function fetchBackstage() {
-  const idToken = await getAuthTokenIfNeeded();
+  const authToken = await getAuthTokenIfNeeded();
+  const url = preferences.backstageApiUrl || preferences.backstageUrl;
 
-  const res = await fetch(`${preferences.backstageUrl}/api/catalog/entities?filter=kind=component`, {
-    headers: idToken
+  const res = await fetch(`${url}/api/catalog/entities?filter=kind=component`, {
+    headers: authToken
       ? {
-          Authorization: `Bearer ${idToken}`,
+          Authorization: `Bearer ${authToken}`,
         }
       : undefined,
   });
