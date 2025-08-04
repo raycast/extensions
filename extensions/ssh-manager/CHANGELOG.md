@@ -1,6 +1,6 @@
 # SSH Manager Changelog
 
-## [Select SSH Config File] - {PR_MERGE_DATE}
+## [Select SSH Config File] - 2025-08-04
 
 - Select SSH Config File (ref: [Issue #19941](https://github.com/raycast/extensions/issues/19941))
 - Replace `useEffect` with `usePromise`
