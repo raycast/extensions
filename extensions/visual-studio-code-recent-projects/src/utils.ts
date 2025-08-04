@@ -162,3 +162,6 @@ export async function openURIinVSCode(uri: string) {
 export function isValidHexColor(color: string): boolean {
   return /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(color);
 }
+
+export const isWin = process.platform === "win32";
+export const isMacOs = process.platform === "darwin";

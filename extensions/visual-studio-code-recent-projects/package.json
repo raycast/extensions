@@ -189,12 +189,11 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.10.0",
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.2.0",
     "cache-func": "^1.0.2",
     "lodash.get": "^4.4.2",
     "prettier": "^2.8.1",
-    "run-applescript": "^6.1.0",
     "tildify": "^3.0.0"
   },
   "devDependencies": {
@@ -205,7 +204,7 @@
     "@types/sql.js": "^1.4.3",
     "eslint": "^7.32.0",
     "eslint-plugin-react": "^7.26.1",
-    "react": "^18.2.0",
+    "react": "^19.1.0",
     "typescript": "^4.4.3"
   },
   "scripts": {
@@ -216,6 +215,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

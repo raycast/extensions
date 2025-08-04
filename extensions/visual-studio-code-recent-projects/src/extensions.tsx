@@ -6,7 +6,7 @@ import {
   UninstallExtensionByIDAction,
 } from "./extension-actions";
 import { Extension, getLocalExtensions } from "./lib/vscode";
-import { getErrorMessage } from "./utils";
+import { getErrorMessage, isWin } from "./utils";
 
 function OpenExtensionInVSCodeAction(props: { extension: Extension }): JSX.Element {
   return <OpenExtensionByIDInVSCodeAction extensionID={props.extension.id} />;
@@ -51,7 +51,7 @@ function ExtensionListItem(props: { extension: Extension; reloadExtension: () =>
               />
             )}
             <Action.Open
-              title="Open in Finder"
+              title={isWin ? `Show in File Explorer` : `Open in Finder`}
               target={e.fsPath}
               shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
             />

@@ -3,7 +3,7 @@ import * as child_process from "child_process";
 import * as afs from "fs/promises";
 import * as os from "os";
 import path from "path";
-import { fileExists } from "../utils";
+import { fileExists, isWin, isMacOs } from "../utils";
 
 interface ExtensionMetaRoot {
   identifier: ExtensionIdentifier;
@@ -65,36 +65,143 @@ function getNLSVariable(text: string | undefined): string | undefined {
     return m[1];
   }
 }
-const cliPaths: Record<string, string> = {
-  Code: "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code",
-  "Code - Insiders": "/Applications/Visual Studio Code - Insiders.app/Contents/Resources/app/bin/code",
-  Cursor: "/Applications/Cursor.app/Contents/Resources/app/bin/cursor", // it also has code, which is an alias
-  Positron: "/Applications/Positron.app/Contents/Resources/app/bin/code",
-  Trae: "/Applications/Trae.app/Contents/Resources/app/bin/marscode",
-  "Trae CN": "/Applications/Trae CN.app/Contents/Resources/app/bin/marscode",
-  VSCodium: "/Applications/VSCodium.app/Contents/Resources/app/bin/codium",
-  "VSCodium - Insiders": "/Applications/VSCodium - Insiders.app/Contents/Resources/app/bin/codium-insiders",
-  Windsurf: "/Applications/Windsurf.app/Contents/Resources/app/bin/windsurf",
-};
+
+function cliPaths(): Record<string, string> {
+  let cliPaths: Record<string, string> = {};
+
+  if (isWin) {
+    cliPaths = {
+      Code: path.join(os.homedir(), "AppData", "Local", "Programs", "Microsoft VS Code", "bin", "code.cmd"),
+      "Code - Insiders": path.join(
+        os.homedir(),
+        "AppData",
+        "Local",
+        "Programs",
+        "Microsoft VS Code Insiders",
+        "bin",
+        "code-insiders.cmd"
+      ),
+      Cursor: path.join(
+        os.homedir(),
+        "AppData",
+        "Local",
+        "Programs",
+        "cursor",
+        "resources",
+        "app",
+        "bin",
+        "cursor.cmd"
+      ), // it also has code, which is an alias
+      Positron: path.join(process.env.ProgramFiles ?? "C:Program Files", "Positron", "bin", "positron.cmd"),
+      Trae: "/Applications/Trae.app/Contents/Resources/app/bin/marscode",
+      "Trae CN": "/Applications/Trae CN.app/Contents/Resources/app/bin/marscode",
+      VSCodium: "/Applications/VSCodium.app/Contents/Resources/app/bin/codium",
+      "VSCodium - Insiders": "/Applications/VSCodium - Insiders.app/Contents/Resources/app/bin/codium-insiders",
+      Windsurf: "/Applications/Windsurf.app/Contents/Resources/app/bin/windsurf",
+    };
+  }
+
+  if (isMacOs) {
+    cliPaths = {
+      Code: "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code",
+      "Code - Insiders": "/Applications/Visual Studio Code - Insiders.app/Contents/Resources/app/bin/code",
+      Cursor: "/Applications/Cursor.app/Contents/Resources/app/bin/cursor", // it also has code, which is an alias
+      Positron: "/Applications/Positron.app/Contents/Resources/app/bin/code",
+      Trae: "/Applications/Trae.app/Contents/Resources/app/bin/marscode",
+      "Trae CN": "/Applications/Trae CN.app/Contents/Resources/app/bin/marscode",
+      VSCodium: "/Applications/VSCodium.app/Contents/Resources/app/bin/codium",
+      "VSCodium - Insiders": "/Applications/VSCodium - Insiders.app/Contents/Resources/app/bin/codium-insiders",
+      Windsurf: "/Applications/Windsurf.app/Contents/Resources/app/bin/windsurf",
+    };
+  }
+
+  return cliPaths;
+}
 
 export function getVSCodeCLIFilename(): string {
-  const name = cliPaths[getBuildNamePreference()];
+  let paths: Record<string, string> = cliPaths();
+
+  const name = paths[getBuildNamePreference()];
   if (!name || name.length <= 0) {
-    return cliPaths.Code;
+    return paths.Code;
   }
   return name;
 }
 
+// https://code.visualstudio.com/docs/configure/command-line#_core-cli-options
 export class VSCodeCLI {
   private cliFilename: string;
   constructor(cliFilename: string) {
     this.cliFilename = cliFilename;
   }
+
+  openPath(targetPath: string, newWindow = false) {
+    const args: string[] = [targetPath];
+    if (newWindow) {
+      args.unshift("--new-window");
+    }
+
+    if (isWin) {
+      const commandForCmdExe = `"${this.cliFilename}" ${newWindow ? "--new-window " : ""} "${targetPath}"`;
+      try {
+        child_process.execFileSync("cmd.exe", ["/c", commandForCmdExe], {
+          encoding: "utf8",
+          shell: true,
+        });
+      } catch (error: any) {
+        throw new Error(`Failed to open path "${targetPath}" with VS Code CLI: ${error.message || error}`);
+      }
+    } else {
+      try {
+        child_process.execFileSync(this.cliFilename, args, { encoding: "utf8" });
+      } catch (error: any) {
+        throw new Error(`Failed to open path "${targetPath}" with VS Code CLI: ${error.message || error}`);
+      }
+    }
+  }
+
   installExtensionByIDSync(id: string) {
+    if (isWin) {
+      const commandForCmdExe = `"${this.cliFilename}" --install-extension ${id} --force`;
+      child_process.execFileSync("cmd.exe", ["/c", commandForCmdExe], {
+        encoding: "utf8",
+        shell: true,
+      });
+      return;
+    }
     child_process.execFileSync(this.cliFilename, ["--install-extension", id, "--force"]);
   }
+
   uninstallExtensionByIDSync(id: string) {
+    if (isWin) {
+      try {
+        const commandForCmdExe = `"${this.cliFilename}" --uninstall-extension ${id} --force`;
+        child_process.execFileSync("cmd.exe", ["/c", commandForCmdExe], {
+          encoding: "utf8",
+          shell: true,
+        });
+      } catch (error) {
+        console.log(error);
+      }
+      return;
+    }
     child_process.execFileSync(this.cliFilename, ["--uninstall-extension", id, "--force"]);
+  }
+
+  newWindow() {
+    if (isWin) {
+      try {
+        const commandForCmdExe = `"${this.cliFilename}" --new-window`;
+        child_process.execFileSync("cmd.exe", ["/c", commandForCmdExe], {
+          encoding: "utf8",
+          shell: true,
+        });
+      } catch (error) {
+        console.log(error);
+      }
+      return;
+    }
+    child_process.execFileSync(this.cliFilename, ["--new-window"]);
   }
 }
 
@@ -137,6 +244,7 @@ async function getPackageJSONInfo(filename: string): Promise<PackageJSONInfo | u
   } catch (error) {
     //
   }
+  return undefined;
 }
 
 export async function getLocalExtensions(): Promise<Extension[] | undefined> {
