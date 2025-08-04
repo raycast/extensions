@@ -108,7 +108,7 @@ export default function useUrlParser({ cache }: useUrlParserProps): UrlParserSta
     const firstPart = parts[0].trim();
     const thirdPart = parts.length > 1 ? parts[parts.length - 1].trim() : undefined;
     const secondPart =
-      parts.length > 2 ? parts.slice(1, -1).join(",").trim() : parts.length === 2 ? parts[1] : undefined;
+      parts.length > 2 ? parts.slice(1, -1).join(",").trim() : parts.length === 2 ? parts[1].trim() : undefined;
 
     let description: string | undefined;
     let body: string | undefined;
