@@ -39,7 +39,7 @@ export function isFolderEntry(entry: EntryLike): entry is FolderEntry {
 
   try {
     const folderUrl = new URL(folderUri);
-    return existsSync(folderUrl);
+    return existsSync(folderUrl.pathname);
   } catch (error) {
     return false;
   }
