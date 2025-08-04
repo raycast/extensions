@@ -2,11 +2,14 @@ import { getErrorMessage } from "../helpers/getError";
 import { SimplifiedTrackObject } from "../helpers/spotify.api";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 
-export async function getPlaylistTracks(playlistId: string, limit: number) {
+export async function getPlaylistTracks(playlistId: string, limit: number, offset?: number) {
   const { spotifyClient } = getSpotifyClient();
 
   try {
-    const response = await spotifyClient.getPlaylistsByPlaylistIdTracks(playlistId, { limit });
+    const response = await spotifyClient.getPlaylistsByPlaylistIdTracks(playlistId, {
+      limit,
+      ...(offset !== undefined && { offset }),
+    });
 
     // Normalize the response to match the SimplifiedTrackObject type
     // because the Spotify API returns a SavedTrackObject type
