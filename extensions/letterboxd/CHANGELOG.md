@@ -1,6 +1,6 @@
 # letterboxd Changelog
 
-## [Fix show movie details not working] - {PR_MERGE_DATE}
+## [Fix show movie details not working] - 2025-08-04
 
 - Fix the issue with the movie details not working
 
