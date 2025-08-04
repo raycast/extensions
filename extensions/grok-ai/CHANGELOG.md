@@ -5,13 +5,15 @@
 - Implemented automatic discovery of new models without extension updates
 - Added 1-hour cache for fetched models to reduce API calls
 - Added automatic fallback to hardcoded models if API is unavailable
+
+## [Streaming Reliability & Testing] - 2025-07-31
 - Implemented robust error recovery for streaming with automatic retry logic
 - Added comprehensive test suite with Vitest
 - Fixed history persistence issue with singleton pattern
 - Removed duplicate conversation.tsx file
 - Added CI/CD pipeline with GitHub Actions
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2025-05-30
 - Query xAI's Grok API directly from Raycast
 - Real-time streaming responses for faster replies
 - Conversation history with search functionality
