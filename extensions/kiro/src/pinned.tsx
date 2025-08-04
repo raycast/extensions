@@ -68,13 +68,14 @@ export function usePinnedEntries() {
     moveUp: (entry: EntryLike) =>
       setEntries((previousEntries) => {
         const i = previousEntries.findIndex((e) => isDeepStrictEqual(e, entry));
-        previousEntries.splice(
+        const newEntries = [...previousEntries];
+        newEntries.splice(
           i - 1,
           2,
-          previousEntries[i],
-          previousEntries[i - 1]
+          newEntries[i],
+          newEntries[i - 1]
         );
-        return previousEntries;
+        return newEntries;
       }),
     moveDown: (entry: EntryLike) =>
       setEntries((previousEntries) => {
