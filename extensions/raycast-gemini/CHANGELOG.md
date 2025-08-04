@@ -1,6 +1,6 @@
 # Google Gemini Changelog
 
-## [Update Models] - {PR_MERGE_DATE}
+## [Update Models] - 2025-08-04
 
 - ⬆️ Update Gemini 2.5 series models from preview to production ready versions.
 
