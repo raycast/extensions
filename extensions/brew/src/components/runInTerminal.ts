@@ -65,12 +65,15 @@ const appleScripts: { [key in TerminalApp]: (c: string) => string } = {
     end tell
     `,
   kitty: (c: string) => runCommandInTermAppleScript(c, names.kitty),
-  terminal: (c: string) => useNewTerminalSession ? `
+  terminal: (c: string) =>
+    useNewTerminalSession
+      ? `
     tell application "Terminal"
       do shell script "open -a 'Terminal'"
       set newWindow to do script "echo ; ${c} ; bash -c 'read -n 1 -s -r -p \\"Press any key to exit - will not quit\\"' ; exit"
     end tell
-  ` : `
+  `
+      : `
     tell application "Terminal"
       do shell script "open -a 'Terminal'"
       do script "echo ; ${c} ; bash -c 'read -n 1 -s -r -p \\"Press any key to exit - will not quit\\"' ; exit" in selected tab of the front window
