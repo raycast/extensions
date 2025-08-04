@@ -5,6 +5,7 @@ import { setMaxListeners } from "node:events";
 import { setTimeout } from "node:timers/promises";
 import { useCallback, useRef, useState } from "react";
 import { GenericGrid } from "./components/generic-grid";
+import { MovieDetail } from "./components/movie-detail";
 import { initTraktClient } from "./lib/client";
 import { APP_MAX_LISTENERS, IMDB_APP_URL, TRAKT_APP_URL } from "./lib/constants";
 import { getIMDbUrl, getPosterUrl, getTraktUrl } from "./lib/helper";
@@ -141,18 +142,17 @@ export default function Command() {
       actions={(item) => (
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser
-              icon={getFavicon(TRAKT_APP_URL)}
-              title="Open in Trakt"
-              url={getTraktUrl("movies", item.movie.ids.slug)}
+            <Action.Push
+              icon={Icon.Eye}
+              title="View Details"
+              target={
+                <MovieDetail
+                  movie={item}
+                  onAddToWatchlist={(movie) => handleAction(movie, addMovieToWatchlist, "Movie added to watchlist")}
+                  onAddToHistory={(movie) => handleAction(movie, addMovieToHistory, "Movie added to history")}
+                />
+              }
             />
-            <Action.OpenInBrowser
-              icon={getFavicon(IMDB_APP_URL)}
-              title="Open in IMDb"
-              url={getIMDbUrl(item.movie.ids.imdb)}
-            />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
             <Action
               title="Add to Watchlist"
               icon={Icon.Bookmark}
@@ -160,10 +160,23 @@ export default function Command() {
               onAction={() => handleAction(item, addMovieToWatchlist, "Movie added to watchlist")}
             />
             <Action
-              title="Add to History"
-              icon={Icon.Clock}
-              shortcut={Keyboard.Shortcut.Common.Duplicate}
+              title="Mark as Watched"
+              icon={Icon.Checkmark}
+              shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
               onAction={() => handleAction(item, addMovieToHistory, "Movie added to history")}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.OpenInBrowser
+              icon={getFavicon(TRAKT_APP_URL)}
+              title="Open in Trakt"
+              shortcut={Keyboard.Shortcut.Common.Open}
+              url={getTraktUrl("movies", item.movie.ids.slug)}
+            />
+            <Action.OpenInBrowser
+              icon={getFavicon(IMDB_APP_URL)}
+              title="Open in Imdb"
+              url={getIMDbUrl(item.movie.ids.imdb)}
             />
           </ActionPanel.Section>
         </ActionPanel>

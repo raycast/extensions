@@ -4,7 +4,9 @@ import { PaginationOptions } from "@raycast/utils/dist/types";
 import { setMaxListeners } from "node:events";
 import { setTimeout } from "node:timers/promises";
 import { useCallback, useRef, useState } from "react";
+import { EpisodeDetail } from "./components/episode-detail";
 import { GenericGrid } from "./components/generic-grid";
+import { MovieDetail } from "./components/movie-detail";
 import { SeasonGrid } from "./components/season-grid";
 import { initTraktClient } from "./lib/client";
 import { APP_MAX_LISTENERS, IMDB_APP_URL, TRAKT_APP_URL } from "./lib/constants";
@@ -229,23 +231,40 @@ export default function Command() {
       actions={(item) => (
         <ActionPanel>
           <ActionPanel.Section>
+            <Action.Push
+              icon={Icon.Eye}
+              title="View Details"
+              target={
+                <MovieDetail
+                  movie={{
+                    ...item,
+                    score: 0,
+                    plays: undefined,
+                    last_watched_at: item.watched_at,
+                    last_updated_at: undefined,
+                    type: "movie",
+                  }}
+                />
+              }
+            />
+            <Action
+              title="Remove from History"
+              icon={Icon.Trash}
+              shortcut={Keyboard.Shortcut.Common.Edit}
+              onAction={() => handleMovieAction(item, removeMovieFromHistory, "Movie removed from history")}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
             <Action.OpenInBrowser
               icon={getFavicon(TRAKT_APP_URL)}
               title="Open in Trakt"
+              shortcut={Keyboard.Shortcut.Common.Open}
               url={getTraktUrl("movies", item.movie.ids.slug)}
             />
             <Action.OpenInBrowser
               icon={getFavicon(IMDB_APP_URL)}
-              title="Open in IMDb"
+              title="Open in Imdb"
               url={getIMDbUrl(item.movie.ids.imdb)}
-            />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            <Action
-              title="Remove from History"
-              icon={Icon.Trash}
-              shortcut={Keyboard.Shortcut.Common.Remove}
-              onAction={() => handleMovieAction(item, removeMovieFromHistory, "Movie removed from history")}
             />
           </ActionPanel.Section>
         </ActionPanel>
@@ -277,29 +296,31 @@ export default function Command() {
       actions={(item) => (
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser
-              icon={getFavicon(TRAKT_APP_URL)}
-              title="Open in Trakt"
-              url={getTraktUrl("episode", item.show.ids.slug, item.episode.season, item.episode.number)}
-            />
-            <Action.OpenInBrowser
-              icon={getFavicon(IMDB_APP_URL)}
-              title="Open in IMDb"
-              url={getIMDbUrl(item.episode.ids.imdb)}
-            />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
+            <Action.Push icon={Icon.Eye} title="View Details" target={<EpisodeDetail episode={item} />} />
             <Action.Push
               icon={Icon.Switch}
               title="Browse Seasons"
-              shortcut={Keyboard.Shortcut.Common.Open}
+              shortcut={Keyboard.Shortcut.Common.Edit}
               target={<SeasonGrid showId={item.show.ids.trakt} slug={item.show.ids.slug} imdbId={item.show.ids.imdb} />}
             />
             <Action
               title="Remove from History"
               icon={Icon.Trash}
-              shortcut={Keyboard.Shortcut.Common.Remove}
+              shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
               onAction={() => handleShowAction(item, removeEpisodeFromHistory, "Episode removed from history")}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.OpenInBrowser
+              icon={getFavicon(TRAKT_APP_URL)}
+              title="Open in Trakt"
+              shortcut={Keyboard.Shortcut.Common.Open}
+              url={getTraktUrl("episode", item.show.ids.slug, item.episode.season, item.episode.number)}
+            />
+            <Action.OpenInBrowser
+              icon={getFavicon(IMDB_APP_URL)}
+              title="Open in Imdb"
+              url={getIMDbUrl(item.episode.ids.imdb)}
             />
           </ActionPanel.Section>
         </ActionPanel>

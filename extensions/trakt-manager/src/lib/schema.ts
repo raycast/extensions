@@ -154,7 +154,7 @@ export const TraktSeasonListItem = z.object({
   title: z.string(),
   overview: z.string().optional(),
   first_aired: z.string().optional(),
-  udpated_at: z.string(),
+  updated_at: z.string(),
   network: z.string(),
   images: TraktImageListItem.optional(),
 });

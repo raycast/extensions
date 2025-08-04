@@ -8,6 +8,7 @@ import { getIMDbUrl, getPosterUrl, getTraktUrl } from "../lib/helper";
 import { TraktSeasonListItem } from "../lib/schema";
 import { EpisodeGrid } from "./episode-grid";
 import { GenericGrid } from "./generic-grid";
+import { SeasonDetail } from "./season-detail";
 
 export const SeasonGrid = ({ showId, slug, imdbId }: { showId: number; slug: string; imdbId: string }) => {
   const abortable = useRef<AbortController>();
@@ -100,26 +101,40 @@ export const SeasonGrid = ({ showId, slug, imdbId }: { showId: number; slug: str
       actions={(item) => (
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser
-              icon={getFavicon(TRAKT_APP_URL)}
-              title="Open in Trakt"
-              url={getTraktUrl("season", slug, item.number)}
+            <Action.Push
+              icon={Icon.Eye}
+              title="View Details"
+              target={
+                <SeasonDetail
+                  season={item}
+                  showId={showId}
+                  slug={slug}
+                  imdbId={imdbId}
+                  onAddToHistory={(season) => handleAction(season, addSeasonToHistory, "Season added to history")}
+                />
+              }
             />
-            <Action.OpenInBrowser icon={getFavicon(IMDB_APP_URL)} title="Open in IMDb" url={getIMDbUrl(imdbId)} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
             <Action.Push
               icon={Icon.Switch}
               title="Browse Episodes"
-              shortcut={Keyboard.Shortcut.Common.Open}
+              shortcut={Keyboard.Shortcut.Common.Edit}
               target={<EpisodeGrid showId={showId} seasonNumber={item.number} slug={slug} />}
             />
             <Action
-              title="Add to History"
+              title="Mark as Watched"
               icon={Icon.Clock}
-              shortcut={Keyboard.Shortcut.Common.Duplicate}
+              shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
               onAction={() => handleAction(item, addSeasonToHistory, "Season added to history")}
             />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.OpenInBrowser
+              icon={getFavicon(TRAKT_APP_URL)}
+              title="Open in Trakt"
+              shortcut={Keyboard.Shortcut.Common.Open}
+              url={getTraktUrl("season", slug, item.number)}
+            />
+            <Action.OpenInBrowser icon={getFavicon(IMDB_APP_URL)} title="Open in Imdb" url={getIMDbUrl(imdbId)} />
           </ActionPanel.Section>
         </ActionPanel>
       )}

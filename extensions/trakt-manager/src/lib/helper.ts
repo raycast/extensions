@@ -26,16 +26,38 @@ export const getFileCache = async (key: string) => {
 };
 
 export const getPosterUrl = (images: ImagesResponse | undefined, fallback: "poster.png") => {
-  if (images && images.poster && images.poster.length > 0) {
-    return `https://${images.poster[0]}`;
+  if (images) {
+    // Try poster first
+    if (images.poster && images.poster.length > 0) {
+      return `https://${images.poster[0]}`;
+    }
+    // Fallback to fanart
+    if (images.fanart && images.fanart.length > 0) {
+      return `https://${images.fanart[0]}`;
+    }
+    // Fallback to thumb
+    if (images.thumb && images.thumb.length > 0) {
+      return `https://${images.thumb[0]}`;
+    }
   }
 
   return fallback;
 };
 
 export const getScreenshotUrl = (images: ImagesResponse | undefined, fallback: "episode.png") => {
-  if (images && images.screenshot && images.screenshot.length > 0) {
-    return `https://${images.screenshot[0]}`;
+  if (images) {
+    // Try screenshot first
+    if (images.screenshot && images.screenshot.length > 0) {
+      return `https://${images.screenshot[0]}`;
+    }
+    // Fallback to thumb
+    if (images.thumb && images.thumb.length > 0) {
+      return `https://${images.thumb[0]}`;
+    }
+    // Fallback to fanart
+    if (images.fanart && images.fanart.length > 0) {
+      return `https://${images.fanart[0]}`;
+    }
   }
 
   return fallback;

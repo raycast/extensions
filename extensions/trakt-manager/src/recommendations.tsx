@@ -171,24 +171,6 @@ export default function Command() {
     });
   }, []);
 
-  const addShowToHistory = useCallback(async (show: TraktShowBaseItem) => {
-    await traktClient.shows.addShowToHistory({
-      body: {
-        shows: [
-          {
-            ids: {
-              trakt: show.ids.trakt,
-            },
-            watched_at: new Date().toISOString(),
-          },
-        ],
-      },
-      fetchOptions: {
-        signal: abortable.current?.signal,
-      },
-    });
-  }, []);
-
   const checkInFirstEpisodeToHistory = useCallback(async (show: TraktShowBaseItem) => {
     const response = await traktClient.shows.getEpisode({
       params: {
@@ -289,29 +271,29 @@ export default function Command() {
       actions={(item) => (
         <ActionPanel>
           <ActionPanel.Section>
+            <Action
+              title="Add to Watchlist"
+              icon={Icon.Bookmark}
+              onAction={() => handleMovieAction(item, addMovieToWatchlist, "Movie added to watchlist")}
+            />
+            <Action
+              title="Mark as Watched"
+              icon={Icon.Checkmark}
+              shortcut={Keyboard.Shortcut.Common.Edit}
+              onAction={() => handleMovieAction(item, addMovieToHistory, "Movie added to history")}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
             <Action.OpenInBrowser
               icon={getFavicon(TRAKT_APP_URL)}
               title="Open in Trakt"
+              shortcut={Keyboard.Shortcut.Common.Open}
               url={getTraktUrl("movies", item.ids.slug)}
             />
             <Action.OpenInBrowser
               icon={getFavicon(IMDB_APP_URL)}
-              title="Open in IMDb"
+              title="Open in Imdb"
               url={getIMDbUrl(item.ids.imdb)}
-            />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            <Action
-              title="Add to Watchlist"
-              icon={Icon.Bookmark}
-              shortcut={Keyboard.Shortcut.Common.Edit}
-              onAction={() => handleMovieAction(item, addMovieToWatchlist, "Movie added to watchlist")}
-            />
-            <Action
-              title="Add to History"
-              icon={Icon.Clock}
-              shortcut={Keyboard.Shortcut.Common.Duplicate}
-              onAction={() => handleMovieAction(item, addMovieToHistory, "Movie added to history")}
             />
           </ActionPanel.Section>
         </ActionPanel>
@@ -338,23 +320,16 @@ export default function Command() {
       actions={(item) => (
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser
-              icon={getFavicon(TRAKT_APP_URL)}
-              title="Open in Trakt"
-              url={getTraktUrl("shows", item.ids.slug)}
-            />
-            <Action.OpenInBrowser
-              icon={getFavicon(IMDB_APP_URL)}
-              title="Open in IMDb"
-              url={getIMDbUrl(item.ids.imdb)}
-            />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
             <Action.Push
               icon={Icon.Switch}
               title="Browse Seasons"
-              shortcut={Keyboard.Shortcut.Common.Open}
               target={<SeasonGrid showId={item.ids.trakt} slug={item.ids.slug} imdbId={item.ids.imdb} />}
+            />
+            <Action
+              title="Add to Watchlist"
+              icon={Icon.Bookmark}
+              shortcut={Keyboard.Shortcut.Common.Edit}
+              onAction={() => handleShowAction(item, addShowToWatchlist, "Show added to watchlist")}
             />
             <Action
               title="Check-in"
@@ -364,17 +339,16 @@ export default function Command() {
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <Action
-              title="Add to Watchlist"
-              icon={Icon.Bookmark}
-              shortcut={Keyboard.Shortcut.Common.Edit}
-              onAction={() => handleShowAction(item, addShowToWatchlist, "Show added to watchlist")}
+            <Action.OpenInBrowser
+              icon={getFavicon(TRAKT_APP_URL)}
+              title="Open in Trakt"
+              shortcut={Keyboard.Shortcut.Common.Open}
+              url={getTraktUrl("shows", item.ids.slug)}
             />
-            <Action
-              title="Add to History"
-              icon={Icon.Clock}
-              shortcut={Keyboard.Shortcut.Common.Duplicate}
-              onAction={() => handleShowAction(item, addShowToHistory, "Show added to history")}
+            <Action.OpenInBrowser
+              icon={getFavicon(IMDB_APP_URL)}
+              title="Open in Imdb"
+              url={getIMDbUrl(item.ids.imdb)}
             />
           </ActionPanel.Section>
         </ActionPanel>
