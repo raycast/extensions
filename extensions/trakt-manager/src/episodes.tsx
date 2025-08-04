@@ -1,36 +1,60 @@
-import { Action, ActionPanel, Grid, Icon, Keyboard, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Grid, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { getFavicon, useCachedPromise } from "@raycast/utils";
 import { PaginationOptions } from "@raycast/utils/dist/types";
 import { setMaxListeners } from "node:events";
-import { setTimeout } from "node:timers/promises";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { EpisodeDetail } from "./components/episode-detail";
 import { GenericGrid } from "./components/generic-grid";
 import { initTraktClient } from "./lib/client";
 import { APP_MAX_LISTENERS, IMDB_APP_URL, TRAKT_APP_URL } from "./lib/constants";
 import { getIMDbUrl, getPosterUrl, getTraktUrl } from "./lib/helper";
+import { addRecentSearch, getRecentSearches } from "./lib/recent-searches";
 import { TraktShowHistoryListItem, withPagination } from "./lib/schema";
 
 export default function Command() {
   const abortable = useRef<AbortController>();
   const [searchText, setSearchText] = useState<string>("");
+  const [debouncedSearchText, setDebouncedSearchText] = useState<string>("");
   const [actionLoading, setActionLoading] = useState(false);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const traktClient = initTraktClient();
+
+  useEffect(() => {
+    getRecentSearches("episode").then(setRecentSearches);
+  }, []);
+
+  // Debounce search text
+  useEffect(() => {
+    // Use longer delay when transitioning from empty search to results (1000ms)
+    // Use shorter delay when already searching and refining (350ms)
+    const delay = debouncedSearchText === "" ? 1000 : 350;
+
+    const timer = global.setTimeout(() => {
+      setDebouncedSearchText(searchText);
+    }, delay);
+
+    return () => global.clearTimeout(timer);
+  }, [searchText, debouncedSearchText]);
+
   const {
     isLoading,
     data: episodes,
     pagination,
   } = useCachedPromise(
-    (searchText: string) => async (options: PaginationOptions) => {
-      if (!searchText) return { data: [], hasMore: false };
-      await setTimeout(100);
+    (debouncedSearchText: string) => async (options: PaginationOptions) => {
+      if (!debouncedSearchText) {
+        return { data: [], hasMore: false };
+      }
+
+      // Add to recent searches when performing a search
+      await addRecentSearch(debouncedSearchText, "episode");
 
       abortable.current = new AbortController();
       setMaxListeners(APP_MAX_LISTENERS, abortable.current?.signal);
 
       const response = await traktClient.shows.searchEpisodes({
         query: {
-          query: searchText,
+          query: debouncedSearchText,
           page: options.page + 1,
           limit: 10,
           fields: "title",
@@ -50,7 +74,7 @@ export default function Command() {
           paginatedResponse.pagination["x-pagination-page"] < paginatedResponse.pagination["x-pagination-page-count"],
       };
     },
-    [searchText],
+    [debouncedSearchText],
     {
       initialData: undefined,
       keepPreviousData: true,
@@ -129,12 +153,40 @@ export default function Command() {
     [],
   );
 
+  // Show recent searches when no search text
+  if (!searchText && recentSearches.length > 0) {
+    return (
+      <List
+        searchBarPlaceholder="Search for episodes"
+        onSearchTextChange={handleSearchTextChange}
+        searchText={searchText}
+      >
+        <List.Section title="Recent Searches">
+          {recentSearches.map((query, index) => (
+            <List.Item
+              key={index}
+              title={query}
+              subtitle="Recent search"
+              icon={Icon.MagnifyingGlass}
+              actions={
+                <ActionPanel>
+                  <Action title="Search" icon={Icon.MagnifyingGlass} onAction={() => handleSearchTextChange(query)} />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      </List>
+    );
+  }
+
   return (
     <GenericGrid
       isLoading={isLoading || actionLoading}
       emptyViewTitle="Search for episodes"
       searchBarPlaceholder="Search for episodes"
       onSearchTextChange={handleSearchTextChange}
+      searchText={searchText}
       pagination={pagination}
       items={episodes}
       aspectRatio="9/16"

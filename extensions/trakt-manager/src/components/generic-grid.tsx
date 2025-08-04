@@ -14,6 +14,7 @@ export const GenericGrid = <T,>({
   poster,
   searchBarAccessory,
   searchBarPlaceholder,
+  searchText,
   subtitle,
   throttle,
   title,
@@ -31,6 +32,7 @@ export const GenericGrid = <T,>({
   poster: (item: T) => Grid.Item.Props["content"];
   searchBarAccessory?: Grid.Props["searchBarAccessory"];
   searchBarPlaceholder: Grid.Props["searchBarPlaceholder"];
+  searchText?: string;
   subtitle?: (show: T) => string;
   throttle?: Grid.Props["throttle"];
   title: (item: T) => string;
@@ -43,6 +45,7 @@ export const GenericGrid = <T,>({
       fit={fit}
       searchBarPlaceholder={searchBarPlaceholder}
       onSearchTextChange={onSearchTextChange}
+      searchText={searchText}
       searchBarAccessory={searchBarAccessory}
       throttle={throttle}
       pagination={pagination}
