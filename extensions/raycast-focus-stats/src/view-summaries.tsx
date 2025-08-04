@@ -95,6 +95,10 @@ function SummaryListItem(props: SummaryListItemProps): JSX.Element {
   const { title, sessions, displayGoal = false } = props;
   const totalDuration = sessions.reduce((acc, session) => acc + (session.duration ?? 0), 0);
 
+  const tagListTitle = (session: Session) => {
+    return displayGoal ? `${session.goal}  ${formatTime(session.start)}` : formatTime(session.start);
+  };
+
   return (
     <List.Item
       key={title}
@@ -111,13 +115,7 @@ function SummaryListItem(props: SummaryListItemProps): JSX.Element {
               <List.Item.Detail.Metadata.Label title="Session Breakdown" />
               <List.Item.Detail.Metadata.Separator />
               {sessions.map((session) => (
-                <List.Item.Detail.Metadata.TagList key={session.start.toISOString()} title={formatTime(session.start)}>
-                  {displayGoal && (
-                    <List.Item.Detail.Metadata.TagList.Item
-                      text={session.goal}
-                      key={`taglistitemtext-${session.goal}`}
-                    />
-                  )}
+                <List.Item.Detail.Metadata.TagList key={session.start.toISOString()} title={tagListTitle(session)}>
                   <List.Item.Detail.Metadata.TagList.Item
                     text={durationString(session.duration || 0)}
                     key={`taglistitemduration-${session.goal}`}
