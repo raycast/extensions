@@ -13,6 +13,7 @@ export interface PlaybackState {
   isPlaying: boolean;
   isPaused: boolean;
   tempFilePath?: string;
+  pid?: number;
 }
 
 export function savePlaybackState(state: PlaybackState): void {
