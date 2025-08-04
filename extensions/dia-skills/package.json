@@ -22,7 +22,6 @@
     {
       "name": "import-dia-skill",
       "title": "Import Dia Skill",
-      "subtitle": "Input Dia Skill URL",
       "description": "Input Dia Skill URL and import it to Raycast as an AI command.",
       "mode": "no-view",
       "arguments": [
