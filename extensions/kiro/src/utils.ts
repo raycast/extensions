@@ -24,7 +24,7 @@ export function isFileEntry(entry: EntryLike): entry is FileEntry {
 
   try {
     const fileUrl = new URL(fileUri);
-    return existsSync(fileUrl) && fileUri.indexOf(".code-workspace") === -1;
+    return existsSync(fileUrl.pathname) && fileUri.indexOf(".code-workspace") === -1;
   } catch (error) {
     return false;
   }
