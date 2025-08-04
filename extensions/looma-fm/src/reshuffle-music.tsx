@@ -80,12 +80,12 @@ export default async function Command() {
       // Save to temp file
       const tempFileName = `looma_reshuffle_${Date.now()}.mp3`;
       const tempFilePath = join(tmpdir(), tempFileName);
-      writeFileSync(tempFilePath, buffer);
+      writeFileSync(tempFilePath, new Uint8Array(buffer));
 
       // Play the audio file using macOS afplay
       const audioProcess = spawn("afplay", [tempFilePath]);
 
-      audioProcess.on("close", (code) => {
+      audioProcess.on("close", () => {
         // Clean up temp file when done
         if (existsSync(tempFilePath)) {
           try {
@@ -118,7 +118,7 @@ export default async function Command() {
     showToast({
       style: Toast.Style.Failure,
       title: "Reshuffle Error",
-      message: `Cannot reshuffle: ${error.message || "Unknown error"}`,
+      message: `Cannot reshuffle: ${error instanceof Error ? error.message : "Unknown error"}`,
     });
   }
 }

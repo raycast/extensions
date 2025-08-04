@@ -85,7 +85,7 @@ export default async function Command() {
       // Save to temp file
       const tempFileName = `meditation_${Date.now()}.mp3`;
       const tempFilePath = join(tmpdir(), tempFileName);
-      writeFileSync(tempFilePath, buffer);
+      writeFileSync(tempFilePath, new Uint8Array(buffer));
 
       // Play the meditation session using macOS afplay
       const audioProcess = spawn("afplay", [tempFilePath]);
@@ -110,7 +110,7 @@ export default async function Command() {
         }
       });
 
-      audioProcess.on("error", (err) => {
+      audioProcess.on("error", () => {
         showToast({
           style: Toast.Style.Failure,
           title: "Playback Error",
@@ -132,7 +132,7 @@ export default async function Command() {
     showToast({
       style: Toast.Style.Failure,
       title: "Meditation Error",
-      message: `Cannot start session: ${error.message || "Unknown error"}`,
+      message: `Cannot start session: ${error instanceof Error ? error.message : "Unknown error"}`,
     });
   }
 }

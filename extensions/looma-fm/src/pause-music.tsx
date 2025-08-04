@@ -11,7 +11,7 @@ export default async function Command() {
         // Pause the music
         const killProcess = spawn("pkill", ["-f", "afplay"]);
 
-        killProcess.on("close", (code) => {
+        killProcess.on("close", () => {
           // Update state to paused regardless of pkill result
           savePlaybackState({
             ...currentState,
@@ -28,7 +28,7 @@ export default async function Command() {
           });
         });
 
-        killProcess.on("error", (err) => {
+        killProcess.on("error", () => {
           showToast({
             style: Toast.Style.Failure,
             title: "Pause Error",
@@ -59,7 +59,7 @@ export default async function Command() {
       // No saved state, just kill any processes
       const killProcess = spawn("pkill", ["-f", "afplay"]);
 
-      killProcess.on("close", (code) => {
+      killProcess.on("close", () => {
         showToast({
           style: Toast.Style.Animated,
           title: "No Music Playing",
@@ -67,7 +67,7 @@ export default async function Command() {
         });
       });
 
-      killProcess.on("error", (err) => {
+      killProcess.on("error", () => {
         showToast({
           style: Toast.Style.Animated,
           title: "No Music Playing",

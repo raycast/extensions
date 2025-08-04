@@ -5,10 +5,7 @@ import fetch from "node-fetch";
 import { writeFileSync, unlinkSync, existsSync } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
-import {
-  savePlaybackState,
-  clearPlaybackState,
-} from "./shared-state";
+import { savePlaybackState, clearPlaybackState } from "./shared-state";
 
 interface MusicTrack {
   name: string;
@@ -100,7 +97,7 @@ export default async function Command() {
       // Save to temp file (exactly like reshuffle)
       const tempFileName = `looma_${Date.now()}.mp3`;
       const tempFilePath = join(tmpdir(), tempFileName);
-      writeFileSync(tempFilePath, buffer);
+      writeFileSync(tempFilePath, new Uint8Array(buffer));
 
       // Play the audio file using macOS afplay (exactly like reshuffle)
       const audioProcess = spawn("afplay", [tempFilePath]);
@@ -155,7 +152,8 @@ export default async function Command() {
       throw new Error("No tracks found in music library");
     }
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
     console.error("Looma.FM error:", error);
     showToast({
       style: Toast.Style.Failure,

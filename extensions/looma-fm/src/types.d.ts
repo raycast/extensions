@@ -7,12 +7,12 @@ declare module "@raycast/api" {
     searchBarPlaceholder?: string;
     isLoading?: boolean;
   }
-  
+
   interface ListSectionProps {
     children?: ReactNode;
     title?: string;
   }
-  
+
   interface ListItemProps {
     children?: ReactNode;
     title: string;
@@ -21,18 +21,18 @@ declare module "@raycast/api" {
     accessories?: Array<{ text: string }>;
     actions?: ReactNode;
   }
-  
+
   interface ActionPanelProps {
     children?: ReactNode;
   }
-  
+
   interface ActionProps {
     title: string;
     icon?: string;
     onAction?: () => void;
     shortcut?: { modifiers: string[]; key: string };
   }
-  
+
   interface EmptyViewProps {
     title: string;
     description?: string;
