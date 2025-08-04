@@ -119,6 +119,15 @@
       "description": "The terminal application/emulator to use when using any Run in Terminal action."
     },
     {
+      "name": "useNewTerminalSession",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Terminal Session",
+      "label": "Always use new terminal session",
+      "description": "When enabled, each command will run in a new terminal window/session. When disabled, commands may reuse existing terminal tabs/sessions."
+    },
+    {
       "name": "greedyUpgrades",
       "type": "checkbox",
       "required": false,
