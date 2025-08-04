@@ -1,6 +1,6 @@
 # HestiaCP Admin Changelog
 
-## [View, Create Cron Jobs + Modernize] - {PR_MERGE_DATE}
+## [View, Create Cron Jobs + Modernize] - 2025-08-04
 
 - View Cron Jobs (List Users > Cron Jobs)
 - Add Cron Jobs (List Users > Cron Jobs > Add)
