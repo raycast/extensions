@@ -13,6 +13,7 @@
     {
       "name": "shuffle-music-simple",
       "title": "Play Music",
+      "subtitle": "Looma.fm",
       "description": "Shuffle and play Adi Goldstein's relaxing music",
       "mode": "no-view",
       "icon": "command-icon.png"
@@ -20,6 +21,7 @@
     {
       "name": "pause-music",
       "title": "Pause Music",
+      "subtitle": "Looma.fm",
       "description": "Pause or resume the currently playing track",
       "mode": "no-view",
       "icon": "command-icon.png"
@@ -27,6 +29,7 @@
     {
       "name": "reshuffle-music",
       "title": "Shuffle Music",
+      "subtitle": "Looma.fm",
       "description": "Reshuffle and play a new random track",
       "mode": "no-view",
       "icon": "command-icon.png"
@@ -34,6 +37,7 @@
     {
       "name": "stop-music",
       "title": "Stop Music",
+      "subtitle": "Looma.fm",
       "description": "Stop the currently playing music",
       "mode": "no-view",
       "icon": "command-icon.png"
@@ -41,6 +45,7 @@
     {
       "name": "short-meditation",
       "title": "Start Meditation",
+      "subtitle": "Looma.fm",
       "description": "Start a single meditation session from Adi Goldstein",
       "mode": "no-view",
       "icon": "command-icon.png"

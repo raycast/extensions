@@ -102,12 +102,13 @@ export default async function Command() {
       // Play the audio file using macOS afplay (exactly like reshuffle)
       const audioProcess = spawn("afplay", [tempFilePath]);
 
-      // Save current playback state for other commands
+      // Save current playback state for other commands including PID for targeted killing
       savePlaybackState({
         currentTrack: track,
         isPlaying: true,
         isPaused: false,
         tempFilePath,
+        pid: audioProcess.pid,
       });
 
       audioProcess.on("close", (code) => {
