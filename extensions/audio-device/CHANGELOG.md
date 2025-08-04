@@ -1,6 +1,6 @@
 # Audio Device Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-08-04
 
 - Added frecency sorting to the devices list
 
