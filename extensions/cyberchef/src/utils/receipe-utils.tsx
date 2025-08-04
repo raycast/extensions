@@ -2,7 +2,14 @@ import { Clipboard, open, getSelectedText, getPreferenceValues, Toast, showToast
 import queryString from "query-string";
 import { Props } from "./types";
 
-export const CYBERCHEF_URL = getPreferenceValues<ExtensionPreferences>().cyberChefUrl;
+const getCyberChefUrl = (): string => {
+  try {
+    return getPreferenceValues<ExtensionPreferences>().cyberChefUrl;
+  } catch (error) {
+    console.error("Failed to get CyberChef URL preference:", error);
+    return "https://gchq.github.io/CyberChef"; // fallback URL
+  }
+};
 
 export const runCyberchefRecipe = async ({ recipe }: Props) => {
   const text = await getText();
@@ -13,7 +20,7 @@ export const runCyberchefRecipe = async ({ recipe }: Props) => {
       recipe,
       input,
     });
-    open(`${CYBERCHEF_URL}/#${queryParams}`);
+    open(`${getCyberChefUrl()}/#${queryParams}`);
     popToRoot({ clearSearchBar: true });
   } else {
     showToast({
@@ -42,5 +49,5 @@ export const buildUrl = (recipe: string, args: string | undefined, data: string)
     input,
     args: args || "()",
   });
-  return `${CYBERCHEF_URL}/#${queryParams}`;
+  return `${getCyberChefUrl()}/#${queryParams}`;
 };
