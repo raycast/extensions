@@ -1,6 +1,6 @@
 # Grok AI Changelog
 
-## [Enhanced Reliability & Dynamic Models] - {PR_MERGE_DATE}
+## [Enhanced Reliability & Dynamic Models] - 2025-08-04
 - Added dynamic model fetching from xAI's `/v1/models` API endpoint
 - Implemented automatic discovery of new models without extension updates
 - Added 1-hour cache for fetched models to reduce API calls
