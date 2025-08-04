@@ -1,5 +1,6 @@
 import { Form, ActionPanel, closeMainWindow, open, showToast, Action, Toast, Color } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
+import { encodeForRayso } from "./utils";
 
 interface Values {
   title: string;
@@ -47,10 +48,11 @@ export default function CreateSnippet() {
     }
 
     const parsedTitle = values.title ? values.title.replace(/ /g, "%20") : defaultTitle;
+    const encodedCode = encodeForRayso(values.snippet);
 
     const url = `https://ray.so/#theme=${values.color}&background=${values.background}&darkMode=${values.darkMode}&padding=${
       values.padding
-    }&title=${parsedTitle}&code=${Buffer.from(values.snippet, "utf8").toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "")}&language=${values.language}`;
+    }&title=${parsedTitle}&code=${encodedCode}&language=${values.language}`;
 
     await open(url);
     closeMainWindow();
