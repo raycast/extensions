@@ -1,16 +1,27 @@
 # Amazon AWS Changelog
 
+## [Amplify command] - {PR_MERGE_DATE}
+
+- Add AWS Amplify command to manage Amplify apps and branches
+- View app details including platform, repository, and update times
+- Navigate to app branches with auto-build status and deployment information
+- Quick actions to open apps/branches in browser and AWS Console
+
 ## [Fixes] - 2025-06-18
+
 - Fix local development crashing without AWS Vault.
 
 ## [Console command] - 2025-06-13
+
 - Add AWS Audit Manager service to console command
 - Fix Amazon Bedrock service details (previously had incorrect AWS Audit Manager information)
 
 ## [Console command] - 2025-05-23
+
 - Fix full URLs (e.g. `https://quicksight.aws.amazon.com`) routing correctly to the console
 
 ## [Console command] - 2025-04-25
+
 - Update WAF & Shield path to '/wafv2/homev2/home' for WAFv2 migration
 - Update AWS Firewall Manager path to '/wafv2/fmsv2/home' for Firewall Manager v2
 - Add common abbreviations 'cfn' for CloudFormation and 'sfn' for Step Functions
