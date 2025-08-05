@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "include": ["src/**/*", "raycast-env.d.ts"],
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "es2020",
     "target": "es2020",
     "lib": ["es2020", "dom"],
     "strict": true,
