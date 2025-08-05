@@ -93,8 +93,7 @@ export default function ShowMonitors() {
                       },
                       method: "POST",
                     });
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                  } catch (error) {
+                  } catch {
                     toast.style = Toast.Style.Failure;
                     toast.title = "Could not Trigger Run";
                   }

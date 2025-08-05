@@ -57,8 +57,7 @@ export default function ShowIncidents() {
       );
       toast.style = Toast.Style.Success;
       toast.title = action === "acknowledge" ? "Acknowledged" : "Resolved";
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
+    } catch {
       toast.style = Toast.Style.Failure;
       toast.title = action === "acknowledge" ? "Could not acknowledge" : "Could not resolve";
     }
