@@ -2,7 +2,7 @@ import { ActionPanel, Form, Action, showToast, Toast, Icon, List } from "@raycas
 import { useNavigation } from "@raycast/api";
 import { useProjects } from "../hooks/useProjects";
 import { useState, useEffect } from "react";
-import type { ChatSummary, Response as AssignProjectResponse } from "../types";
+import type { ChatSummary, AssignProjectResponse } from "../types";
 import CreateProjectForm from "./CreateProjectForm";
 import { useActiveProfile } from "../hooks/useActiveProfile";
 import { v0ApiFetcher, V0ApiError } from "../lib/v0-api-utils";
@@ -60,7 +60,7 @@ export default function AssignProjectForm({ chat, revalidateChats }: AssignProje
       if (result.assigned) {
         toast.style = Toast.Style.Success;
         toast.title = "Project Assigned";
-        toast.message = `Project successfully assigned to "${chat.title || "Untitled Chat"}".`;
+        toast.message = `Project successfully assigned to "${chat.name || "Untitled Chat"}".`;
         revalidateChats(); // Revalidate chats to show the assigned project
         pop(); // Go back to the chat list
       } else {

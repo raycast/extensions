@@ -171,7 +171,7 @@ export default function Command(props: { scopeId?: string; projectId?: string })
 
       toast.style = Toast.Style.Success;
       toast.title = "Chat Forked";
-      toast.message = `"${chat.title}" has been forked successfully!`;
+      toast.message = `"${chat.name}" has been forked successfully!`;
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Fork Failed";
@@ -322,12 +322,12 @@ export default function Command(props: { scopeId?: string; projectId?: string })
                     onAction={async () => {
                       if (
                         await confirmAlert({
-                          title: `Delete "${chat.name || chat.title || "Untitled Chat"}"?`,
+                          title: `Delete "${chat.name || "Untitled Chat"}"?`,
                           message:
                             "The chat will be deleted and removed from your chat history. This action cannot be undone.",
                         })
                       ) {
-                        deleteChat(chat.id, chat.name || chat.title || "Untitled Chat");
+                        deleteChat(chat.id, chat.name || "Untitled Chat");
                       }
                     }}
                     shortcut={{ modifiers: ["cmd"], key: "d" }}

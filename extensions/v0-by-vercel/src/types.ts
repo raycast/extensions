@@ -326,3 +326,9 @@ export interface ChatCompletionResponse {
     finish_reason: string | null;
   }>;
 }
+
+export interface AssignProjectResponse {
+  object: string;
+  id: string;
+  assigned: boolean;
+}

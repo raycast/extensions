@@ -112,7 +112,7 @@ export default function ChatDetail({ chatId, scopeId }: { chatId: string; scopeI
 
   return (
     <List
-      navigationTitle={data?.title || "Untitled Chat"}
+      navigationTitle={data?.name || "Untitled Chat"}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Select Message Type"
@@ -213,20 +213,16 @@ export default function ChatDetail({ chatId, scopeId }: { chatId: string; scopeI
                 <Action.Push
                   title="Add Message"
                   target={
-                    <AddMessage
-                      chatId={chatId}
-                      revalidateChats={mutate}
-                      chatTitle={data?.name || data?.title || "Untitled Chat"}
-                    />
+                    <AddMessage chatId={chatId} revalidateChats={mutate} chatTitle={data?.name || "Untitled Chat"} />
                   }
                   icon={Icon.Plus}
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
                 />
-                {data?.demo && (
+                {data?.latestVersion?.demoUrl && (
                   <Action.OpenInBrowser
                     title="View Demo"
-                    url={data.demo}
                     icon={Icon.Play}
+                    url={data.latestVersion.demoUrl}
                     shortcut={{ modifiers: ["cmd"], key: "d" }}
                   />
                 )}
