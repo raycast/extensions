@@ -1,6 +1,6 @@
 import * as yaml from "js-yaml";
 import { getSelectedFinderItems } from "@raycast/api";
-import { showError, showSuccess } from "./utils/errors";
+import { showError, showSuccess, handleError, safeAsyncOperation } from "./utils/errors";
 import { readFileSync, writeFileSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
@@ -115,22 +115,27 @@ export async function importSettingsFromYAML(yamlContent: string): Promise<void>
           enabled: true,
         };
 
-        try {
-          const result = await addCustomApp(customAppInput);
-          if (result?.success) {
-            console.log(`Created custom app for imported usage history: ${appInfo.name}`);
-          } else {
-            console.log(`Custom app already exists for usage history: ${appInfo.name}`);
-          }
-        } catch (error) {
-          console.warn(`Failed to create custom app ${appInfo.name}:`, error);
+        const result = await safeAsyncOperation(
+          () => addCustomApp(customAppInput),
+          `Create custom app for usage history: ${appInfo.name}`,
+          { showToastOnError: false }, // Don't show toast for individual items
+        );
+
+        if (result?.success) {
+          console.log(`Created custom app for imported usage history: ${appInfo.name}`);
+        } else if (result) {
+          console.log(`Custom app already exists for usage history: ${appInfo.name}`);
         }
       }
 
       // Second pass: import usage history
       for (const item of [...settings.usageHistory].reverse()) {
         if (item && typeof item === "object" && item.profile && item.app && item.appName) {
-          await addToUsageHistory(item.profile, item.app, item.appName);
+          await safeAsyncOperation(
+            () => addToUsageHistory(item.profile, item.app, item.appName),
+            `Import usage history for ${item.profile} on ${item.appName}`,
+            { showToastOnError: false }, // Don't show toast for individual items
+          );
         }
       }
     }
@@ -148,7 +153,15 @@ export async function importSettingsFromYAML(yamlContent: string): Promise<void>
         }
       }
 
-      await updateAppSettings(appSettings);
+      const settingsResult = await safeAsyncOperation(
+        () => updateAppSettings(appSettings),
+        "Update app visibility settings",
+        { rethrow: true },
+      );
+
+      if (settingsResult === undefined) {
+        throw new Error("Failed to update app visibility settings");
+      }
     }
 
     // Import custom apps with duplicate checking
@@ -228,9 +241,8 @@ export async function importSettingsFromYAML(yamlContent: string): Promise<void>
       }
     }
   } catch (error) {
-    console.error("Error importing settings from YAML:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-    throw new Error(errorMessage);
+    await handleError(error, "YAML Settings Import", true, "Import Failed");
+    throw error;
   }
 }
 
