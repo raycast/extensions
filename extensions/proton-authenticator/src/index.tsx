@@ -31,9 +31,15 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [authTimestamp, setAuthTimestamp] = useCachedState<number | null>("auth-timestamp", null);
+  const [authEnabled, setAuthEnabled] = useCachedState<boolean>("auth-enabled", true);
+  const [authTimeout, setAuthTimeout] = useCachedState<number>("auth-timeout", 10 * 60 * 1000); // 10 minutes default
   const [searchText, setSearchText] = useState("");
 
-  const AUTH_INTERVAL = 1 * 60 * 1000; // 10 minutes
+  const AUTH_TIMEOUT_OPTIONS = {
+    "10 minutes": 10 * 60 * 1000,
+    "30 minutes": 30 * 60 * 1000,
+    "1 hour": 60 * 60 * 1000,
+  };
   const Metadata = List.Item.Detail.Metadata;
   const Label = Metadata.Label;
   const Separator = Metadata.Separator;
@@ -55,11 +61,12 @@ export default function Command() {
     return fuse.search(searchText).map((result) => result.item);
   }, [accounts, searchText, fuse]);
 
-  // check if authentication is still valid (expires after 10 minutes)
+  // check if authentication is still valid or disabled
   const isAuthenticated = useMemo(() => {
+    if (!authEnabled) return true; // skip auth if disabled
     if (!authTimestamp) return false;
-    return Date.now() - authTimestamp < AUTH_INTERVAL;
-  }, [authTimestamp]);
+    return Date.now() - authTimestamp < authTimeout;
+  }, [authTimestamp, authEnabled, authTimeout]);
 
   const handleCopyCode = async (code: string) => {
     await Clipboard.copy(code);
@@ -105,6 +112,28 @@ export default function Command() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleToggleAuth = async () => {
+    const newAuthState = !authEnabled;
+    setAuthEnabled(newAuthState);
+
+    if (newAuthState) {
+      showToast(Toast.Style.Success, "Touch ID Enabled");
+    } else {
+      setAuthTimestamp(null); // clear auth when disabled
+      showToast(Toast.Style.Success, "Touch ID Disabled");
+    }
+  };
+
+  const handleSetAuthTimeout = async (label: string, timeoutMs: number) => {
+    setAuthTimeout(timeoutMs);
+    showToast(Toast.Style.Success, `Auth timeout set to ${label}`);
+  };
+
+  const handleClearAuth = async () => {
+    setAuthTimestamp(null);
+    showToast(Toast.Style.Success, "Authentication cleared");
   };
 
   useEffect(() => {
@@ -165,7 +194,7 @@ export default function Command() {
     return <SetupForm onAccountsLoaded={handleAccountsLoaded} />;
   }
 
-  if (!isLoading && !isAuthenticated) {
+  if (!isLoading && !isAuthenticated && authEnabled) {
     return (
       <List>
         <List.EmptyView
@@ -271,6 +300,38 @@ export default function Command() {
                     content={nextCode}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
                   />
+                </ActionPanel.Section>
+                <ActionPanel.Section title="Authentication">
+                  <Action
+                    title={authEnabled ? "Disable Touch ID" : "Enable Touch ID"}
+                    icon={authEnabled ? Icon.LockDisabled : Icon.Lock}
+                    shortcut={{ modifiers: ["cmd"], key: "t" }}
+                    onAction={handleToggleAuth}
+                  />
+                  {authEnabled && (
+                    <>
+                      <ActionPanel.Submenu
+                        title={"Set Timeout"}
+                        icon={Icon.Clock}
+                        shortcut={{ modifiers: ["cmd"], key: "d" }}
+                      >
+                        {Object.entries(AUTH_TIMEOUT_OPTIONS).map(([label, timeout]) => (
+                          <Action
+                            key={label}
+                            title={label}
+                            onAction={() => handleSetAuthTimeout(label, timeout)}
+                            icon={authTimeout === timeout ? Icon.Check : undefined}
+                          />
+                        ))}
+                      </ActionPanel.Submenu>
+                      <Action
+                        title="Clear Authentication"
+                        icon={Icon.RotateClockwise}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                        onAction={handleClearAuth}
+                      />
+                    </>
+                  )}
                 </ActionPanel.Section>
                 <ActionPanel.Section title="Settings">
                   <Action
