@@ -19,6 +19,20 @@ URL shortener service based on Cloudflare Workers and D1 database.
   - Support partial matching
   - Case-insensitive search
   - Unicode character support
+- Pin important links
+  - Pinned links stay at the top
+  - Reorder pinned links with keyboard shortcuts
+  - Pinned links are excluded from filtering and sorting
+- Flexible sorting options
+  - Sort by creation time (newest/oldest first)
+  - Sort by last visited time
+  - Sort by visit count
+  - Sorting preferences are remembered
+- Quick filtering
+  - Filter all links
+  - Show only active links
+  - Show only disabled links
+  - Filter selection persists across sessions
 
 ## How to use?
 
@@ -58,7 +72,10 @@ URL shortener service based on Cloudflare Workers and D1 database.
 │   │   │   │   ├── links.ts  # Links API endpoints
 │   │   │   │   └── slugs.ts  # Slugs API endpoints
 │   │   │   └── index.ts      # API exports
+│   │   ├── filter.ts         # Link filtering logic
+│   │   ├── pin.ts           # Pin management
 │   │   ├── search.ts         # Search utilities
+│   │   ├── sort.ts          # Sorting logic
 │   │   └── validation/
 │   │       ├── slug/
 │   │       │   ├── cache.ts  # Slug cache management
@@ -99,6 +116,53 @@ const results = searchLinks(links, "github");
 // - URL: "https://github.com/..."
 // - Description: "My GitHub repository"
 ```
+
+### Keyboard Shortcuts
+
+#### General Actions
+- `⌘ Enter` - Copy short link to clipboard
+- `⌘ E` - Edit link details
+- `⌘ ⌫` - Delete link
+
+#### Pin Management
+- `⌘ ⇧ P` - Pin/Unpin link
+- `⌘ ⇧ ↑` - Move pinned link up (only for pinned links)
+- `⌘ ⇧ ↓` - Move pinned link down (only for pinned links)
+
+#### Sorting
+- `⌘ ⇧ C` - Sort by creation time
+- `⌘ ⇧ L` - Sort by last visited time
+- `⌘ ⇧ N` - Sort by visit count
+
+#### Filtering
+- `⌘ P` - Open filter dropdown
+
+### Link Organization
+
+The extension provides powerful organization features:
+
+1. **Pinning System**
+   - Pin important links to keep them always at the top
+   - Pinned links maintain their order across sessions
+   - Reorder pinned links with keyboard shortcuts
+   - Pinned links are excluded from sorting and filtering
+
+2. **Smart Sorting**
+   - Multiple sorting options available through the Actions menu
+   - Your sorting preference is saved automatically
+   - Sorting only applies to unpinned links
+
+3. **Quick Filtering**
+   - Use the dropdown (⌘ P) to quickly filter links
+   - Filter options: All, Active only, or Disabled only
+   - Filter selection persists between sessions
+
+4. **Data Processing Pipeline**
+   ```
+   Original Links → Filter → Sort → Search → Display
+   ```
+   - Pinned links bypass filtering and sorting
+   - Search applies to all links (including pinned)
 
 ### Caching Mechanisms
 
