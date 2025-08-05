@@ -107,6 +107,5 @@ export default function PortScanner() {
         error={error}
       />
     </Form>
-  
   );
 }
