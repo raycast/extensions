@@ -31,11 +31,11 @@ Stores user preferences for each app (enabled/disabled state).
   ]
   ```
 
-### 3. `customApps`: `Site[]`
+### 3. `customApps`: `App[]`
 
 Stores user-defined custom apps with the same shape as default platforms.
 
-- **Type**: Array of `Site` objects
+- **Type**: Array of `App` objects
 - **Schema**: `{ name: string; value: string; urlTemplate: string }`
 - **Purpose**: Allows users to add custom social platforms
 - **Example**:

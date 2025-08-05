@@ -82,6 +82,11 @@ export async function importSettingsFromYAML(yamlContent: string): Promise<void>
       throw new Error("Missing version field in YAML settings");
     }
 
+    // Check version compatibility
+    if (settings.version !== "1.0") {
+      console.warn(`Unknown settings version: ${settings.version}, attempting import anyway...`);
+    }
+
     // Import usage history and create missing apps
     if (settings.usageHistory && Array.isArray(settings.usageHistory)) {
       // Get existing apps to check against
