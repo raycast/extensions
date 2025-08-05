@@ -7,30 +7,21 @@ function isValidIpInput(value: string) {
 }
 
 function isValidIpFormat(value: string) {
-  const parts = value.split(".");
-  if (parts.length !== 4) return false;
-  return parts.every((part) => {
-    const n = Number(part);
-    return n >= 0 && n <= 255 && part === n.toString();
-  });
+  return /^(\d{1,3}\.){3}\d{1,3}$/.test(value);
 }
 
-async function scanPort(ip: string, port: number, timeout = 300): Promise<boolean> {
-  return new Promise((resolve) => {
+async function scanPort(ip: string, port: number, timeout = 300) {
+  return new Promise<boolean>((resolve) => {
     const socket = new net.Socket();
     let isOpen = false;
-
     socket.setTimeout(timeout);
-
     socket.once("connect", () => {
       isOpen = true;
       socket.destroy();
     });
-
     socket.once("timeout", () => socket.destroy());
     socket.once("error", () => socket.destroy());
     socket.once("close", () => resolve(isOpen));
-
     socket.connect(port, ip);
   });
 }
@@ -42,16 +33,9 @@ export default function PortScanner() {
   const [error, setError] = useState<string | undefined>();
 
   async function handleSubmit(values: { ip: string }) {
-    if (!isValidIpFormat(values.ip)) {
-      setError("Please enter a valid IP address (e.g., 192.168.1.1)");
-      return;
-    }
-
     setLoading(true);
     setOpenPorts(null);
-    setError(undefined);
-
-    await showToast({ title: "Scanning in progress...", style: Toast.Style.Animated });
+    await showToast({ title: "Scansione in corso...", style: Toast.Style.Animated });
 
     const portsToScan = Array.from({ length: 1024 }, (_, i) => i + 1);
     const results = await Promise.all(
@@ -63,11 +47,11 @@ export default function PortScanner() {
     setLoading(false);
 
     if (found.length === 0) {
-      await showToast({ title: "No open ports found", style: Toast.Style.Failure });
+      await showToast({ title: "Nessuna porta aperta trovata", style: Toast.Style.Failure });
     } else {
       await showToast({
-        title: "Scan completed",
-        message: `${found.length} open ports found`,
+        title: "Scansione completata",
+        message: `${found.length} porte aperte`,
         style: Toast.Style.Success,
       });
     }
@@ -75,9 +59,9 @@ export default function PortScanner() {
 
   if (openPorts) {
     return (
-      <List isLoading={loading} navigationTitle="Open Ports">
+      <List isLoading={loading} navigationTitle="Porte Aperte">
         {openPorts.map((port) => (
-          <List.Item key={port} title={`Port ${port}`} />
+          <List.Item key={port} title={`Porta ${port}`} />
         ))}
       </List>
     );
@@ -85,28 +69,27 @@ export default function PortScanner() {
 
   return (
     <Form
-      navigationTitle="Port Scanner"
+      navigationTitle="Scanner Porte"
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Scan" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Scansiona" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.TextField
         id="ip"
-        title="IP Address"
+        title="Indirizzo IP"
         placeholder="192.168.1.1"
         value={ip}
         onChange={(value) => {
           if (!isValidIpInput(value)) return;
           setIp(value);
           if (value.length === 0) setError(undefined);
-          else if (!isValidIpFormat(value)) setError("Please enter a valid IP (only numbers and dots)");
+          else if (!isValidIpFormat(value)) setError("Inserisci un IP valido (solo numeri e punti)");
           else setError(undefined);
         }}
         error={error}
       />
     </Form>
-    //ciao
   );
 }
