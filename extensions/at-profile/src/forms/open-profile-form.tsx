@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Form } from "@raycast/api";
 import { useCachedPromise, useLocalStorage } from "@raycast/utils";
-import { getProfileHistory, getAppFavicon } from "../helpers/apps";
+import { getUsageHistory, getAppFavicon } from "../helpers/apps";
 import { openProfile } from "../helpers/open-profile";
 import { useApps } from "../hooks/useApps";
 import { showError } from "../utils/errors";
@@ -11,9 +11,19 @@ import OpenActionPanels from "../components/OpenActionPanels";
 export default function OpenProfileForm({ initialProfile, initialApp }: OpenProfileFormProps) {
   const { apps, isLoading: isLoadingApps, revalidate } = useApps();
 
-  const { data: profileHistory = [], isLoading: isLoadingHistory } = useCachedPromise(getProfileHistory, [], {
+  const { data: usageHistory = [], isLoading: isLoadingHistory } = useCachedPromise(getUsageHistory, [], {
     keepPreviousData: true,
   });
+
+  // Extract unique profiles from usage history, sorted by most recent
+  const profileHistory = usageHistory
+    .sort((a, b) => b.timestamp - a.timestamp)
+    .reduce((unique: string[], item) => {
+      if (!unique.includes(item.profile)) {
+        unique.push(item.profile);
+      }
+      return unique;
+    }, []);
 
   const { value: profileValue, setValue: setProfileValue } = useLocalStorage<string>(
     "lastProfile",
@@ -81,7 +91,9 @@ export default function OpenProfileForm({ initialProfile, initialApp }: OpenProf
         onChange={(newValue) => {
           void setProfileValue(newValue);
           // Check if the new value matches a recent profile
-          const matchingProfile = profileHistory.find((profile) => profile.toLowerCase() === newValue.toLowerCase());
+          const matchingProfile = profileHistory.find(
+            (profile: string) => profile.toLowerCase() === newValue.toLowerCase(),
+          );
           setSelectedRecentProfile(matchingProfile || "");
         }}
         onBlur={() => {
@@ -111,7 +123,7 @@ export default function OpenProfileForm({ initialProfile, initialApp }: OpenProf
           info="Select from recently used profiles or use ↑/↓ to navigate"
         >
           <Form.Dropdown.Item value="" title="Select a recent profile..." />
-          {profileHistory.slice(0, 10).map((profile, index) => (
+          {profileHistory.slice(0, 10).map((profile: string, index: number) => (
             <Form.Dropdown.Item
               key={`${profile}-${index}`}
               value={profile}

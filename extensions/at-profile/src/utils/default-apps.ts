@@ -79,15 +79,3 @@ export const defaultApps: App[] = [
     placeholder: "username",
   },
 ];
-
-export function getAllApps(): App[] {
-  // Get custom apps from storage and merge with defaults
-  // Implementation from existing hooks/apps.ts
-  return defaultApps; // Simplified for now
-}
-
-export function getVisibleApps(): App[] {
-  // Filter enabled apps based on preferences
-  // Implementation from existing code
-  return getAllApps(); // Simplified for now
-}

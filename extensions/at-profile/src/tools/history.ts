@@ -3,13 +3,22 @@ import { getAppByValue } from "../helpers/custom-app-utils";
 import { formatRelativeDate } from "../utils/date";
 import { safeAsyncOperation } from "../utils/errors";
 
+/**
+ * Arguments for the history tool
+ */
 interface HistoryToolArgs {
+  /** Optional app filter - only show profiles opened on this app */
   app?: string;
+  /** Maximum number of history items to return (default: 10) */
   limit?: number;
 }
 
 /**
  * Get recently opened profiles, optionally filtered by app
+ * @param args - Optional arguments for filtering and limiting results
+ * @param args.app - Filter results to only show profiles opened on this app
+ * @param args.limit - Maximum number of results to return (default: 10)
+ * @returns Promise<string> Formatted string of recent profile history
  */
 export default async function getProfileHistory(args: HistoryToolArgs = {}): Promise<string> {
   const { app, limit = 10 } = args;

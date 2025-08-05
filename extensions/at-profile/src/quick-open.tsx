@@ -2,6 +2,11 @@ import { LaunchProps } from "@raycast/api";
 import { openProfile } from "./helpers/open-profile";
 import { QuickOpenArguments } from "./types";
 
+/**
+ * Quick open command that directly opens a profile on a specified app
+ * Bypasses manage apps settings since it uses a hardcoded list
+ * @param props - Launch props containing profile and app arguments
+ */
 export default async function QuickOpenCommand(props: LaunchProps<{ arguments: QuickOpenArguments }>) {
   const { profile, app } = props.arguments;
 
