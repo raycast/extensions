@@ -320,6 +320,7 @@
 /extensions/colorify                                                @EvanZhouDev
 /extensions/colorslurp                                              @Jordan-Ellis
 /extensions/commercequest                                           @skrollme
+/extensions/commit-issue-parser                                     @JulesJuul
 /extensions/commit-message-formatter                                @zrr1999
 /extensions/commit-message-generator                                @rokartur @dphelan
 /extensions/commitlint                                              @lardissone
