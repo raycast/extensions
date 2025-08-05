@@ -1,5 +1,11 @@
 # Pick Your Wallpaper Changelog
 
+## [1.0.7] - {PR_MERGE_DATE}
+
+- Added "Open Wallpaper Folder" command to easily open the configured wallpaper folder in Finder
+- Moved wallpaper folder preference to extension level for better sharing between commands
+- Fixed thumbnail creation issues with file paths containing spaces and special characters
+
 ## [1.0.6] - 2025-01-12
 
 - Create small thumbnails for faster loading times when using high resolution wallpaper images.

@@ -5,6 +5,9 @@
   "description": "Lets you pick a wallpaper from a folder of finder.",
   "icon": "command-icon.png",
   "author": "hugomarfani",
+  "contributors": [
+    "heytommy"
+  ],
   "pastContributors": [
     "danulqua",
     "marcjulian"
@@ -13,6 +16,15 @@
     "System"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "wallpaperFolder",
+      "title": "Wallpaper Folder Directory",
+      "description": "The directory where your wallpapers are stored",
+      "type": "directory",
+      "required": true
+    }
+  ],
   "commands": [
     {
       "name": "choose-wallpaper",
@@ -20,13 +32,6 @@
       "description": "Pick a wallpaper from a folder of finder.",
       "mode": "view",
       "preferences": [
-        {
-          "name": "wallpaperFolder",
-          "title": "Wallpaper Folder Directory",
-          "description": "The directory where your wallpapers are stored",
-          "type": "directory",
-          "required": true
-        },
         {
           "name": "displaySize",
           "title": "Display Size",
@@ -64,6 +69,12 @@
       "name": "set-as-wallpaper",
       "title": "Set as Wallpaper",
       "description": "Set selected picture as a desktop wallpaper.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-wallpaper-folder",
+      "title": "Open Wallpaper Folder",
+      "description": "Open the wallpaper folder in Finder.",
       "mode": "no-view"
     }
   ],

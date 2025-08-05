@@ -60,8 +60,8 @@ async function createThumbnail(filePath: string, specificThumbDir: string): Prom
       await stat(thumbnailPath);
       return thumbnailPath;
     } catch {
-      await fs.promises.copyFile(filePath, thumbnailPath);
-      await execPromise(`sips -Z 300 "${thumbnailPath}"`);
+      // Use sips to create thumbnail directly from source file
+      await execPromise(`sips -Z 300 -s format jpeg --out "${thumbnailPath}" "${filePath}"`);
       return thumbnailPath;
     }
   } catch (error) {
