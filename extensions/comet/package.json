@@ -3,7 +3,7 @@
   "name": "comet",
   "title": "Comet",
   "description": "Manage Comet browser tabs, history, and bookmarks from Raycast.",
-  "icon": "extension-icon.png",
+  "icon": "icon.png",
   "author": "estejpg",
   "license": "MIT",
   "commands": [
