@@ -29,13 +29,15 @@ export function fetchPocketNames(): string[] {
       readdirSync(filePath);
       fileStats = lstatSync(filePath);
     } catch (e) {
-      if (getPreferenceValues<Preferences>().suppressReadErrors) return;
-      showToast({
-        style: Toast.Style.Failure,
-        title: `${filePath} could not be read`,
-        message: "Suppress this error in extension preferences.",
-      });
-
+      // Try to continue even if we can't read the directory
+      // This allows the extension to work with directories that have special characters
+      if (!getPreferenceValues<Preferences>().suppressReadErrors) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: `${filePath} could not be read`,
+          message: "Directory may contain special characters. Suppress this error in extension preferences.",
+        });
+      }
       return;
     }
 
@@ -65,69 +67,81 @@ async function loadPocketCards(dir: string): Promise<Card[]> {
   const cardArr: Card[] = [];
   const items = readdirSync(dir);
 
+  // Define supported file extensions
+  const videoExts = [".mov", ".mp4", ".m4v", ".mts", ".3gp", ".m2ts", ".m2v", ".mpeg", ".mpg", ".mts", ".vob"];
+  const imageExts = [
+    ".png",
+    ".jpg",
+    "jpeg",
+    ".bmp",
+    ".dds",
+    ".exr",
+    ".gif",
+    ".hdr",
+    ".ico",
+    ".jpe",
+    ".pbm",
+    ".pfm",
+    ".pgm",
+    ".pict",
+    ".ppm",
+    ".psd",
+    ".sgi",
+    ".svg",
+    ".tga",
+    ".tiff",
+    ".webp",
+    ".cr2",
+    ".dng",
+    ".heic",
+    ".heif",
+    ".jp2",
+    ".nef",
+    ".orf",
+    ".raf",
+    ".rw2",
+  ];
+
   await Promise.all(
     items.map(async (item) => {
       if (item.startsWith(".")) return;
 
       const filePath = `${dir}/${item}`;
+      const fileExt = extname(filePath).toLowerCase();
+      const fileName = basename(filePath, fileExt);
       let fileStats;
 
       try {
         fileStats = lstatSync(filePath);
       } catch (e) {
-        if (getPreferenceValues<Preferences>().suppressReadErrors) return;
-        showToast({
-          style: Toast.Style.Failure,
-          title: `${filePath} could not be read`,
-          message: "Suppress this error in extension preferences.",
-        });
+        // If we can't read the file stats, try to still include it if it's an image
+        // If it's an image file, include it even if we can't get stats
+        if (imageExts.includes(fileExt)) {
+          cardArr.push({ name: fileName, path: filePath, preview: filePath });
+          return;
+        }
 
-        return [];
+        // For non-image files, show error if not suppressed
+        if (!getPreferenceValues<Preferences>().suppressReadErrors) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: `${filePath} could not be read`,
+            message: "File may contain special characters. Suppress this error in extension preferences.",
+          });
+        }
+
+        return;
       }
 
-      const fileExt = extname(filePath).toLowerCase();
-      const fileName = basename(filePath, fileExt);
-
       if (fileStats.isDirectory()) return;
-
-      const videoExts = [".mov", ".mp4", ".m4v", ".mts", ".3gp", ".m2ts", ".m2v", ".mpeg", ".mpg", ".mts", ".vob"];
-      const imageExts = [
-        ".png",
-        ".jpg",
-        "jpeg",
-        ".bmp",
-        ".dds",
-        ".exr",
-        ".gif",
-        ".hdr",
-        ".ico",
-        ".jpe",
-        ".pbm",
-        ".pfm",
-        ".pgm",
-        ".pict",
-        ".ppm",
-        ".psd",
-        ".sgi",
-        ".svg",
-        ".tga",
-        ".tiff",
-        ".webp",
-        ".cr2",
-        ".dng",
-        ".heic",
-        ".heif",
-        ".jp2",
-        ".nef",
-        ".orf",
-        ".raf",
-        ".rw2",
-      ];
       let previewPath: string | undefined = undefined;
 
       if (videoExts.includes(fileExt) && getPreferenceValues<Preferences>().videoPreviews) {
         if (!existsSync(PREVIEW_DIR)) mkdirSync(PREVIEW_DIR);
-        previewPath = `${PREVIEW_DIR}/${dir.replaceAll("/", "-")}-${item}.tiff`;
+        // Sanitize the path to create a valid filename
+        const sanitizedPath = dir.replaceAll("/", "-").replace(/[^a-zA-Z0-9\-_]/g, "_");
+        const sanitizedItem = item.replace(/[^a-zA-Z0-9\-_.]/g, "_");
+        previewPath = `${PREVIEW_DIR}/${sanitizedPath}-${sanitizedItem}.tiff`;
 
         if (!existsSync(previewPath)) await generateVideoPreview(filePath, previewPath);
       } else if (imageExts.includes(fileExt)) {

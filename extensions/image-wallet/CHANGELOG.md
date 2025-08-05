@@ -1,5 +1,12 @@
 # Image Wallet Changelog
 
+## [New Features] - {PR_MERGE_DATE}
+
+- Added "Show in Finder" action with ⌘O shortcut for individual images
+- Improved handling of files with special characters in paths
+- Enhanced error messages for better user experience
+- SVG files now display properly even with special characters in file paths
+
 ## [Bug Fixes] - 2024-06-12
 
 - Added 'Suppress Read Errors' option

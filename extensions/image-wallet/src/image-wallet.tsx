@@ -123,6 +123,7 @@ export default function Command() {
           <Action.Paste content={{ file: item.path }} />
           <Action.CopyToClipboard content={{ file: item.path }} />
           <Action.ToggleQuickLook shortcut={{ modifiers: ["cmd"], key: "y" }} />
+          <Action.ShowInFinder path={item.path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
         </ActionPanel.Section>
         {loadGenericActionNodes()}
       </ActionPanel>
