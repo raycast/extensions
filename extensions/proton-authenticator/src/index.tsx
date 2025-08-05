@@ -11,7 +11,7 @@ import {
   Clipboard,
   closeMainWindow,
 } from "@raycast/api";
-import { useCachedState, getProgressIcon } from "@raycast/utils";
+import { useCachedState, getProgressIcon, showFailureToast } from "@raycast/utils";
 import { useState, useEffect, useMemo } from "react";
 import Fuse from "fuse.js";
 
@@ -28,12 +28,12 @@ export default function Command() {
   const [codes, setCodes] = useState<Map<string, string>>(new Map());
   const [nextCodes, setNextCodes] = useState<Map<string, string>>(new Map());
   const [timeRemaining, setTimeRemaining] = useState(getTimeRemaining());
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [authTimestamp, setAuthTimestamp] = useCachedState<number | null>("auth-timestamp", null);
   const [searchText, setSearchText] = useState("");
 
-  const AUTH_INTERVAL = 30 * 60 * 1000; // 30 minutes
+  const AUTH_INTERVAL = 1 * 60 * 1000; // 10 minutes
   const Metadata = List.Item.Detail.Metadata;
   const Label = Metadata.Label;
   const Separator = Metadata.Separator;
@@ -96,12 +96,12 @@ export default function Command() {
         showToast(Toast.Style.Success, "Authentication Successful");
       } else {
         setError("Authentication failed. Please try again.");
-        showToast(Toast.Style.Failure, "Authentication Failed", "Touch ID authentication was unsuccessful");
+        showFailureToast("Touch ID authentication was unsuccessful", { title: "Authentication Failed" });
       }
     } catch (error) {
       console.error("Authentication error:", error);
       setError("Authentication failed");
-      showToast(Toast.Style.Failure, "Authentication Error", "An error occurred during authentication");
+      showFailureToast("An error occurred during authentication");
     } finally {
       setIsLoading(false);
     }
@@ -109,8 +109,6 @@ export default function Command() {
 
   useEffect(() => {
     const loadAccounts = async () => {
-      if (!isAuthenticated) return;
-
       setIsLoading(true);
       try {
         const loadedAccounts = await loadAccountsFromStorage();
@@ -130,7 +128,7 @@ export default function Command() {
     };
 
     loadAccounts();
-  }, [isAuthenticated]);
+  }, []);
 
   useEffect(() => {
     if (accounts.length === 0) return;
@@ -167,9 +165,9 @@ export default function Command() {
     return <SetupForm onAccountsLoaded={handleAccountsLoaded} />;
   }
 
-  if (!isAuthenticated) {
+  if (!isLoading && !isAuthenticated) {
     return (
-      <List isLoading={isLoading}>
+      <List>
         <List.EmptyView
           title="Authentication Required"
           description="Touch ID authentication is required to access your TOTP codes"
@@ -184,26 +182,29 @@ export default function Command() {
     );
   }
 
-  if (error) {
+  if (!isLoading && error) {
     return (
-      <List isLoading={isLoading}>
+      <List>
         <List.EmptyView title="Error Loading Accounts" description={error} icon="⚠️" />
       </List>
     );
   }
 
-  if (accounts.length === 0) {
+  if (!isLoading && accounts.length === 0) {
     return (
-      <List isLoading={isLoading}>
+      <List>
         <List.EmptyView title="No TOTP Accounts Found" icon="🔐" />
       </List>
     );
   }
 
+  if (isLoading) {
+    return <List isLoading={true} />;
+  }
+
   return (
     <List
       navigationTitle="Proton TOTP Codes"
-      isLoading={isLoading}
       searchBarPlaceholder="Search accounts..."
       onSearchTextChange={setSearchText}
       isShowingDetail
@@ -294,7 +295,7 @@ export default function Command() {
                           setNeedsSetup(true);
                           showToast(Toast.Style.Success, "Reset Complete");
                         } catch {
-                          showToast(Toast.Style.Failure, "Reset Failed", "Could not clear stored data");
+                          showFailureToast("Failed to reset authenticator data");
                         }
                       }
                     }}

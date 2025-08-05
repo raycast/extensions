@@ -13,12 +13,12 @@ export async function authenticateWithTouchID(): Promise<boolean> {
       return;
     }
 
-    authenticate("Authentication required to access TOTP codes", (err: Error | null) => {
+    authenticate("access TOTP codes", (err: Error | null) => {
       try {
         // this is a workaround to reopen Raycast after authentication
         execSync('open -a "Raycast"');
       } catch (error) {
-        console.log("Could not reopen Raycast:", error);
+        console.error("Could not reopen Raycast:", error);
       }
 
       if (err) {

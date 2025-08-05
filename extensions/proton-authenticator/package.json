@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "proton-authenticator",
   "title": "Proton Authenticator",
-  "description": "Easy access to TOPT codes",
+  "description": "Quick access to TOTP codes",
   "icon": "proton-icon.png",
   "author": "Fared",
   "categories": [

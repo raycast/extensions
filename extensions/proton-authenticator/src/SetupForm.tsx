@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Form, showToast, Toast, Icon } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { saveAccountsToStorage } from "./lib/storage";
 import { TOTPAccount } from "./types";
@@ -13,7 +14,7 @@ export default function SetupForm({ onAccountsLoaded }: SetupFormProps) {
 
   const handleSubmit = async () => {
     if (selectedFiles.length === 0) {
-      showToast(Toast.Style.Failure, "Error", "Please select a JSON file");
+      showFailureToast("Please select a JSON file", { title: "Error" });
       return;
     }
 
@@ -26,7 +27,7 @@ export default function SetupForm({ onAccountsLoaded }: SetupFormProps) {
       onAccountsLoaded(accounts);
     } catch (error) {
       console.error("Failed to load JSON file:", error);
-      showToast(Toast.Style.Failure, "Failed to load file", "Invalid JSON file or format");
+      showFailureToast("Invalid JSON file or format", { title: "Failed to load file" });
     } finally {
       setIsLoading(false);
     }

@@ -1,4 +1,4 @@
-import { readFileSync } from "fs";
+import { readFile } from "fs/promises";
 import { LocalStorage } from "@raycast/api";
 import { ProtonExport, TOTPAccount } from "../types";
 import { parseOtpAuthUri } from "./parser";
@@ -20,7 +20,7 @@ export async function loadAccountsFromStorage(): Promise<TOTPAccount[]> {
 
 export async function saveAccountsToStorage(filePath: string): Promise<TOTPAccount[]> {
   try {
-    const fileContent = readFileSync(filePath, "utf8");
+    const fileContent = await readFile(filePath, "utf8");
     const exportData: ProtonExport = JSON.parse(fileContent);
 
     if (!validateProtonExport(exportData)) {
