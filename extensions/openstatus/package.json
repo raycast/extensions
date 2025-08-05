@@ -200,8 +200,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.94.0",
-    "@raycast/utils": "^1.19.1",
+    "@raycast/api": "^1.102.3",
+    "@raycast/utils": "^2.2.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {
