@@ -1,6 +1,6 @@
 # Commit Issue Parser Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-08-05
 
 - Added the `Parse Issue Url` command! 🎉
 - Jira, GitHub and GitLab issue URLs are supported
