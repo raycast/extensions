@@ -1,6 +1,6 @@
 # System Monitor Changelog
 
-## [New Additions] - {PR_MERGE_DATE}
+## [New Additions] - 2025-08-05
 
 - Add a new preference option for the `Menubar System Monitor` command to customize the menu bar icon.
 
