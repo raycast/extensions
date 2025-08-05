@@ -1,6 +1,6 @@
 # Mermaid to Image Changelog
 
-## [Add selected text support] - {PR_MERGE_DATE}
+## [Add selected text support] - 2025-08-05
 ### Added
 - **Selected text support**: Extension now prioritizes selected text over clipboard content when generating diagrams
 - Users can now select Mermaid code in any application and run the extension to generate diagrams
