@@ -97,7 +97,14 @@ function BusinessInvoices({ business }: { business: Business }) {
               const markdown = `# ${title}
 | ${invoice.itemTitle} | ${invoice.unitTitle} | ${invoice.priceTitle} | ${invoice.amountTitle} |
 |----------------------|----------------------|-----------------------|------------------------|
-${invoice.items.map((item) => `| ${item.product.name} | ${item.quantity} | ${item.price} | ${item.subtotal.currency.symbol}${item.subtotal.value}`).join(`\n`)}`;
+${invoice.items.map((item) => `| ${item.product.name} | ${item.quantity} | ${item.price} | ${item.subtotal.currency.symbol}${item.subtotal.value}`).join(`\n`)}
+
+|  |  | Total | ${invoice.total.currency.symbol}${invoice.total.value} |
+|--|--|-------|--------------------------------------------------------|
+| | | Paid | ${invoice.amountPaid.currency.symbol}${invoice.amountPaid.value} |
+
+|  |  | Amount Due (${invoice.amountDue.currency.code}) | ${invoice.amountDue.currency.symbol}${invoice.amountDue.value} |
+|--|--|-------|--------------------------------------------------------|`;
 
               return (
                 <List.Item

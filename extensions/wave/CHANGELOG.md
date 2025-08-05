@@ -1,5 +1,9 @@
 # Wave Changelog
 
+## [Enhance Invoice] - {PR_MERGE_DATE}
+
+- Enhance `Invoice` to show amounts due and paid
+
 ## [Add & Remove Customers] - 2025-07-02
 
 - Add new customers through a detailed `Form`
