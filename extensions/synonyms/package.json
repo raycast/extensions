@@ -1,0 +1,126 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "synonyms",
+  "title": "Synonyms",
+  "description": "Find synonyms for words and translate if necessary",
+  "icon": "./image.png",
+  "author": "xmorse",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "find-synonyms",
+      "title": "Find Synonyms",
+      "description": "Find word Synonyms",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "title": "LLM Provider",
+      "label": "Choose your LLM provider",
+      "name": "llmProvider",
+      "type": "dropdown",
+      "data": [
+        {
+          "value": "raycast",
+          "title": "Raycast AI"
+        },
+        {
+          "value": "fireworks",
+          "title": "Fireworks.ai"
+        },
+        {
+          "value": "openai",
+          "title": "OpenAI"
+        },
+        {
+          "value": "together",
+          "title": "Together.ai"
+        },
+        {
+          "value": "anthropic",
+          "title": "Anthropic"
+        },
+        {
+          "value": "groq",
+          "title": "Groq"
+        }
+      ],
+      "required": true,
+      "description": "Select the LLM provider you want to use"
+    },
+    {
+      "title": "OpenAI API Key",
+      "label": "",
+      "name": "openaiApiKey",
+      "type": "password",
+      "required": false,
+      "description": "API Key for OpenAI"
+    },
+    {
+      "title": "Fireworks.ai API Key",
+      "label": "",
+      "name": "fireworksApiKey",
+      "type": "password",
+      "required": false,
+      "description": "API Key for Fireworks.ai"
+    },
+    {
+      "title": "Anthropic API Key",
+      "label": "",
+      "name": "anthropicApiKey",
+      "type": "password",
+      "required": false,
+      "description": "API Key for Anthropic"
+    },
+    {
+      "title": "Together.ai API Key",
+      "label": "",
+      "name": "togetherApiKey",
+      "type": "password",
+      "required": false,
+      "description": "API Key for Together.ai"
+    },
+    {
+      "title": "Groq API Key",
+      "label": "",
+      "name": "groqApiKey",
+      "type": "password",
+      "required": false,
+      "description": "API Key for Groq"
+    }
+  ],
+  "dependencies": {
+    "@ai-sdk/anthropic": "^1.0.5",
+    "@ai-sdk/openai": "^1.0.8",
+    "@raycast/api": "^1.87.5",
+    "@raycast/utils": "^1.18.1",
+    "@types/play-sound": "^1.1.2",
+    "ai": "^4.0.17",
+    "dedent": "^1.5.3",
+    "openai": "^4.76.2",
+    "partial-json": "^0.1.7",
+    "play-sound": "^1.1.6",
+    "undici": "^7.1.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.10.2",
+    "@types/react": "18",
+    "eslint": "^8",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint --fix",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

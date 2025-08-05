@@ -1,0 +1,221 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "visual-studio-code",
+  "title": "Visual Studio Code",
+  "description": "Control VS Code and compatible editors directly from Raycast",
+  "icon": "icon.png",
+  "author": "thomas",
+  "contributors": [
+    "iainsimmons",
+    "macbookandrew",
+    "cy-98",
+    "immint023",
+    "pernielsentikaer",
+    "vimtor",
+    "tonka3000",
+    "fazle_rabbi",
+    "oilbeater",
+    "QIanGua",
+    "hakob_nersesian",
+    "erics118",
+    "tm.wrnr",
+    "tleo19",
+    "lin",
+    "yug2005",
+    "vatsalsanjay",
+    "Tarocch1",
+    "jonas_list",
+    "xilopaint",
+    "lachero",
+    "pascal_burkhard"
+  ],
+  "keywords": [
+    "vscode",
+    "cursor",
+    "codium",
+    "positron",
+    "windsurf",
+    "trae",
+    "trae-cn"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Recent Projects",
+      "description": "Search and open recent projects from VS Code",
+      "mode": "view"
+    },
+    {
+      "name": "open-with-vscode",
+      "title": "Open with Visual Studio Code",
+      "description": "Open the currently selected Finder item with VS Code",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-new-window",
+      "title": "Open New Window",
+      "description": "Open a new VS Code window",
+      "mode": "no-view"
+    },
+    {
+      "name": "extensions",
+      "title": "Show Installed Extensions",
+      "description": "Manage installed extensions",
+      "mode": "view"
+    },
+    {
+      "name": "install-extension",
+      "title": "Install Extension",
+      "description": "Install extensions from Visual Studio Marketplace",
+      "mode": "view"
+    },
+    {
+      "name": "commandpalette",
+      "title": "Commands",
+      "description": "Show commands of the VS Code Command Palette",
+      "disabledByDefault": true,
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "build",
+      "type": "dropdown",
+      "required": false,
+      "title": "Build",
+      "default": "Code",
+      "description": "Select which build of Visual Studio Code to use when searching for recent projects",
+      "data": [
+        {
+          "title": "Cursor",
+          "value": "Cursor"
+        },
+        {
+          "title": "Positron",
+          "value": "Positron"
+        },
+        {
+          "title": "Trae",
+          "value": "Trae"
+        },
+        {
+          "title": "Trae CN",
+          "value": "Trae CN"
+        },
+        {
+          "title": "VSCodium",
+          "value": "VSCodium"
+        },
+        {
+          "title": "VSCodium - Insiders",
+          "value": "VSCodium - Insiders"
+        },
+        {
+          "title": "Visual Studio Code",
+          "value": "Code"
+        },
+        {
+          "title": "Visual Studio Code - Insiders",
+          "value": "Code - Insiders"
+        },
+        {
+          "title": "Windsurf",
+          "value": "Windsurf"
+        }
+      ]
+    },
+    {
+      "name": "layout",
+      "title": "View Layout",
+      "type": "dropdown",
+      "required": false,
+      "default": "list",
+      "description": "Select the layout of the view",
+      "data": [
+        {
+          "value": "list",
+          "title": "List"
+        },
+        {
+          "value": "grid",
+          "title": "Grid"
+        }
+      ]
+    },
+    {
+      "name": "keepSectionOrder",
+      "type": "checkbox",
+      "title": "Advanced",
+      "required": false,
+      "label": "Keep Section Order",
+      "default": false,
+      "description": "Keep the order of the sections while searching folders, files, etc."
+    },
+    {
+      "name": "closeOtherWindows",
+      "type": "checkbox",
+      "title": "Usability",
+      "required": false,
+      "label": "Close Other VS Code Windows",
+      "default": false,
+      "description": "Close other VS Code windows when opening a project"
+    },
+    {
+      "name": "terminalApp",
+      "type": "appPicker",
+      "default": "com.apple.Terminal",
+      "required": false,
+      "title": "Terminal App",
+      "description": "Select which Terminal App to use when opening with a terminal"
+    },
+    {
+      "name": "showGitBranch",
+      "type": "checkbox",
+      "title": "Git Integration",
+      "required": false,
+      "label": "Show Git Branch",
+      "default": true,
+      "description": "Display the current Git branch for files and folders in Git repositories"
+    },
+    {
+      "name": "gitBranchColor",
+      "type": "textfield",
+      "title": "Git Integration Color",
+      "required": false,
+      "label": "Git Branch Color",
+      "default": "",
+      "description": "Hexadecimal color code for Git branch tag (e.g., #00FF00). Leave empty to use default green"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.10.0",
+    "cache-func": "^1.0.2",
+    "lodash.get": "^4.4.2",
+    "prettier": "^2.8.1",
+    "run-applescript": "^6.1.0",
+    "tildify": "^3.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/lodash.get": "^4.4.7",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "@types/sql.js": "^1.4.3",
+    "eslint": "^7.32.0",
+    "eslint-plugin-react": "^7.26.1",
+    "react": "^18.2.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

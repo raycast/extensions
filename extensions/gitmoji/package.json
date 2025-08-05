@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gitmoji",
+  "title": "Gitmoji Search",
+  "description": "Gitmoji is an emoji guide for your commit messages",
+  "icon": "icon.png",
+  "author": "ricoberger",
+  "contributors": [
+    "joshmedeski"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "gitmoji",
+      "title": "Gitmoji",
+      "description": "Search your Gitmoji",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "copy",
+      "type": "dropdown",
+      "required": false,
+      "title": "Copy",
+      "data": [
+        {
+          "title": "Emoji ✨",
+          "value": "emoji"
+        },
+        {
+          "title": "Code :sparkles:",
+          "value": "code"
+        },
+        {
+          "title": "Description + Emoji ✨",
+          "value": "description-emoji"
+        },
+        {
+          "title": "Description + Code :sparkles:",
+          "value": "description-code"
+        }
+      ],
+      "description": "Copy the emoji, copy the code or copy description",
+      "default": "emoji"
+    },
+    {
+      "name": "action",
+      "type": "dropdown",
+      "required": false,
+      "title": "Primary Action",
+      "data": [
+        {
+          "title": "Copy",
+          "value": "copy"
+        },
+        {
+          "title": "Paste",
+          "value": "paste"
+        }
+      ],
+      "description": "Primary action of the extension",
+      "default": "paste"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.97.1",
+    "@raycast/utils": "^1.19.1",
+    "gitmojis": "^3.15.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.15.11",
+    "eslint": "^9.26.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

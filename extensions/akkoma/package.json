@@ -1,0 +1,122 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "akkoma",
+  "title": "Akkoma",
+  "description": "Publish status from Raycast to Akkoma or Pleroma, and view your bookmarked status",
+  "icon": "akkoma-icon.png",
+  "author": "SevicheCC",
+  "contributors": [
+    "litomore"
+  ],
+  "categories": [
+    "Communication",
+    "News",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "simple-status",
+      "title": "Add Simple Status",
+      "description": "Publish simple text status",
+      "mode": "view"
+    },
+    {
+      "name": "status",
+      "title": "Add Status",
+      "description": "Publish status with attenchments, or scheduled status",
+      "mode": "view"
+    },
+    {
+      "name": "bookmark",
+      "title": "View Bookmarks",
+      "description": "View your bookmarked statuses",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "bookmarkLimit",
+          "type": "textfield",
+          "required": false,
+          "title": "Maximum number of bookmarks",
+          "description": "Maximum number of bookmarks,Will be ignored if it's more than 40",
+          "placeholder": "default value : 20"
+        }
+      ]
+    },
+    {
+      "name": "my-status",
+      "title": "View My Status",
+      "description": "View your statuses",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "statusLimit",
+          "type": "textfield",
+          "required": false,
+          "title": "Maximum number of statuses",
+          "description": "Maximum number of statuses to be show, Will be ignored if it's more than 40",
+          "placeholder": "default value : 20"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "instance",
+      "type": "textfield",
+      "required": true,
+      "title": "Instance's URL",
+      "description": "Your Akkoma / Pleroma  instance's URL",
+      "placeholder": "such as: example.dev"
+    },
+    {
+      "name": "defaultVisibility",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Visiblity",
+      "description": "Status default visiblity",
+      "data": [
+        {
+          "title": "🌎 Public",
+          "value": "public"
+        },
+        {
+          "title": "🙈 Unlisted",
+          "value": "unlisted"
+        },
+        {
+          "title": "👥 Followers-only",
+          "value": "private"
+        },
+        {
+          "title": "✉️ Direct",
+          "value": "direct"
+        },
+        {
+          "title": "📍 Local-only",
+          "value": "local"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.2",
+    "node-fetch": "^3.3.2",
+    "node-html-markdown": "^1.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.0.4",
+    "@types/node": "24.0.3",
+    "@types/react": "19.1.8",
+    "eslint": "^9.29.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

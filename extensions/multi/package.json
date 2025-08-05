@@ -1,0 +1,152 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "multi",
+  "title": "Multi",
+  "description": "See rooms & teammates, join sessions, control devices and more",
+  "icon": "multi-icon.png",
+  "author": "fernando_barbat",
+  "contributors": [
+    "artlasovsky",
+    "pernielsentikaer"
+  ],
+  "access": "public",
+  "owner": "multi",
+  "categories": [
+    "Applications",
+    "Communication",
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "type": "dropdown",
+      "title": "Target AppleScript Application",
+      "required": true,
+      "placeholder": "Multi",
+      "name": "targetAppleScriptApplication",
+      "description": "This extension uses AppleScript to control Multi. To target a specific build of Multi, adjust this preference as needed.",
+      "default": "Multi",
+      "data": [
+        {
+          "title": "Multi",
+          "value": "Multi"
+        },
+        {
+          "title": "Multi Alpha",
+          "value": "Multi Alpha"
+        },
+        {
+          "title": "Multi Dev",
+          "value": "MultiDev"
+        },
+        {
+          "title": "Multi Dev Personal",
+          "value": "MultiDevPersonal"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "startNewSession",
+      "title": "Start New Session",
+      "subtitle": "Multi",
+      "keywords": ["new", "session", "call", "start"],
+      "description": "Start a new session and copy join link to clipboard.",
+      "mode": "no-view"
+    },
+    {
+      "name": "copySessionLink",
+      "title": "Copy Session Link",
+      "subtitle": "Multi",
+      "keywords": ["copy", "link", "session", "call"],
+      "description": "If in a session, it copies a link to it. Otherwise, it will copy a link to a new session.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggleMic",
+      "title": "Toggle Microphone",
+      "subtitle": "Multi",
+      "keywords": ["mic", "toggle", "microphone"],
+      "description": "Toggle your microphone during a session.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggleCamera",
+      "title": "Toggle Camera",
+      "subtitle": "Multi",
+      "keywords": ["cam", "toggle", "camera"],
+      "description": "Toggle your camera during a session.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggleSharingContent",
+      "title": "Toggle Screen Sharing",
+      "subtitle": "Multi",
+      "keywords": ["screen", "sharing", "toggle"],
+      "description": "Start or stop screen share during a session.",
+      "mode": "no-view"
+    },
+    {
+      "name": "joinRoom",
+      "title": "Join Room",
+      "subtitle": "Multi",
+      "keywords": ["room", "join", "invite", "call", "start", "session"],
+      "description": "Search and join rooms on your team.",
+      "mode": "view"
+    },
+    {
+      "name": "inviteUser",
+      "title": "Call Teammate",
+      "subtitle": "Multi",
+      "keywords": ["teammate", "join", "invite", "call", "start", "session"],
+      "description": "Search teammates and start a Multi session with them.",
+      "mode": "view"
+    },
+    {
+      "name": "joinCallFromLink",
+      "title": "Join Session Via Link",
+      "subtitle": "Multi",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "https://call.multi.app/...",
+          "required": true,
+          "type": "text"
+        }
+      ],
+      "keywords": ["https://call.multi.app", "https", "call", "multi", "link", "url", "join", "session"],
+      "description": "Join a Multi session from a given link.",
+      "mode": "no-view"
+    },
+    {
+      "name": "leaveSession",
+      "title": "Leave Session",
+      "subtitle": "Multi",
+      "keywords": ["leave", "session", "call"],
+      "description": "Leave the current session.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.70.2",
+    "@raycast/utils": "^1.13.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.11.30",
+    "@types/react": "18.2.72",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "pull-contributions": "npx @raycast/api@latest pull-contributions"
+  }
+}

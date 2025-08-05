@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tyme-3-time-tracker",
+  "title": "Tyme 3 Time Tracker",
+  "description": "Interact with Tyme 3 to track your time",
+  "icon": "extension_icon.png",
+  "author": "melkstam",
+  "contributors": [
+    "medienbaecker"
+  ],
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "start-task-tracking",
+      "title": "Start Task",
+      "subtitle": "Tyme 3 Time Tracker",
+      "description": "This command will let you search for any uncompleted task or subtask in Tyme 3 and start the time tracker for that task.",
+      "mode": "view"
+    },
+    {
+      "name": "stop-task-tracking",
+      "title": "Stop Task",
+      "subtitle": "Tyme 3 Time Tracker",
+      "description": "This command will let you stop tracking the current task in Tyme.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "stopRunningTimers",
+      "type": "checkbox",
+      "label": "Single Timer Mode",
+      "description": "Automatically stop any running timers when starting a new task.",
+      "default": false,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.57.2",
+    "@raycast/utils": "^1.9.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/node": "^18.8.3",
+    "@types/react": "^18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

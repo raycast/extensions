@@ -1,0 +1,29 @@
+{
+  "root": true,
+  "extends": ["airbnb", "@raycast"],
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["unused-imports", "simple-import-sort", "import"],
+  "rules": {
+    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "unused-imports/no-unused-imports": "error",
+    "simple-import-sort/exports": "error",
+    "simple-import-sort/imports": "error",
+    "import/extensions": "off",
+    "import/no-duplicates": "error",
+    "import/no-extraneous-dependencies": "off",
+    "import/no-unresolved": "off",
+    "import/prefer-default-export": "off",
+    "react/jsx-filename-extension": "off",
+    "react/react-in-jsx-scope": "off",
+    "react/jsx-props-no-spreading": "off",
+    "arrow-body-style": ["error", "as-needed"],
+    "arrow-parens": ["error", "as-needed"],
+    "comma-dangle": ["error", "only-multiline"],
+    "func-names": ["error", "as-needed"],
+    "quotes": ["error", "single", { "allowTemplateLiterals": false, "avoidEscape": true }],
+    "max-len": ["error", { "code": 180, "ignoreStrings": true }],
+    "no-console": ["error", { "allow": ["warn", "error"] }],
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "consistent-return": "off"
+  }
+}

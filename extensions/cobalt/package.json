@@ -1,0 +1,161 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cobalt",
+  "title": "Cobalt",
+  "description": "Download videos and audio from popular social media platforms with ease.",
+  "icon": "command-icon.png",
+  "author": "aelew",
+  "contributors": [
+    "ripgrim"
+  ],
+  "categories": [
+    "Applications",
+    "Data",
+    "Media",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Download Media",
+      "subtitle": "Cobalt",
+      "description": "Download video and/or audio from social media with customizable settings.",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "Download History",
+      "subtitle": "Cobalt",
+      "description": "View your previously downloaded media.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "downloadDirectory",
+      "title": "Download Directory",
+      "description": "Where Cobalt should save downloaded files.",
+      "default": "~/Downloads",
+      "type": "directory",
+      "required": true
+    },
+    {
+      "name": "apiInstanceUrl",
+      "title": "API Instance URL",
+      "description": "Want to use a different Cobalt API instance? Set your instance URL here!",
+      "placeholder": "https://cobalt.aelew.dev",
+      "default": "https://cobalt.aelew.dev",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "apiInstanceKey",
+      "title": "API Instance Key",
+      "description": "If the instance you are using requires an API key, enter it here.",
+      "placeholder": "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "filenameStyle",
+      "title": "File Name Style",
+      "description": "How downloaded files should be named.\n\nClassic: Default file name pattern.\nBasic: Title and basic info in brackets.\nPretty: Title and info in brackets.\nNerdy: Title and all info in brackets.\n\nSome services don't support rich file names and will always use the classic style.",
+      "type": "dropdown",
+      "required": false,
+      "default": "classic",
+      "data": [
+        {
+          "title": "Classic",
+          "value": "classic"
+        },
+        {
+          "title": "Basic",
+          "value": "basic"
+        },
+        {
+          "title": "Pretty",
+          "value": "pretty"
+        },
+        {
+          "title": "Nerdy",
+          "value": "nerdy"
+        }
+      ]
+    },
+    {
+      "name": "notifyOnDownload",
+      "label": "Notify on Successful Download",
+      "description": "Sends you a notification when your download is complete.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "alwaysProxy",
+      "label": "Always Proxy",
+      "description": "Tunnels all downloads through the processing server, even when not necessary.",
+      "type": "checkbox",
+      "required": false
+    },
+    {
+      "name": "disableMetadata",
+      "label": "Disable Metadata",
+      "description": "Disables the addition of file metadata.",
+      "type": "checkbox",
+      "required": false
+    },
+    {
+      "name": "youtubeHLS",
+      "label": "YouTube: Use HLS",
+      "description": "Whether to use HLS when downloading video or audio from YouTube.",
+      "type": "checkbox",
+      "required": false
+    },
+    {
+      "name": "twitterGif",
+      "label": "Twitter: Convert GIFs to .gif",
+      "description": "Changes whether Twitter GIFs are converted to .gif or not. May reduce quality and increase file size.",
+      "type": "checkbox",
+      "required": false
+    },
+    {
+      "name": "tiktokFullAudio",
+      "label": "TikTok: Use Original Audio",
+      "description": "Downloads the original sound used in the TikTok video without any additional changes by the post's author.",
+      "type": "checkbox",
+      "required": false
+    },
+    {
+      "name": "tiktokH265",
+      "label": "TikTok: Prefer H.265/HEVC Videos",
+      "description": "Downloads 1080p videos from TikTok in H.265/HEVC format when available.",
+      "type": "checkbox",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.0.1",
+    "content-disposition": "^0.5.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/content-disposition": "^0.5.9",
+    "@types/node": "^22.15.33",
+    "@types/react": "^19.1.8",
+    "eslint": "^9.29.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

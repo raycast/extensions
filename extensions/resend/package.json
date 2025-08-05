@@ -1,0 +1,219 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "resend",
+  "title": "Resend",
+  "description": "Manage API Keys and Domains, and Send Emails using Resend",
+  "icon": "resend-extension_icon.png",
+  "access": "public",
+  "owner": "resend",
+  "author": "xmok",
+  "contributors": [
+    "alexs",
+    "peduarte",
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Communication",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "api_key",
+      "title": "API Key",
+      "type": "password",
+      "placeholder": "re_123456789",
+      "description": "API Key From Resend Dashboard",
+      "required": true
+    },
+    {
+      "name": "sender_name",
+      "title": "Sender Name",
+      "type": "textfield",
+      "placeholder": "John Doe",
+      "description": "Your name to use as the default sender",
+      "required": true
+    },
+    {
+      "name": "sender_email",
+      "title": "Sender Email",
+      "type": "textfield",
+      "placeholder": "john@example.com",
+      "description": "Your email address to use as the default sender",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "api_keys",
+      "title": "API Keys",
+      "subtitle": "Resend",
+      "description": "Create, View and Delete API Keys in Resend.",
+      "mode": "view"
+    },
+    {
+      "name": "domains",
+      "title": "Domains",
+      "subtitle": "Resend",
+      "description": "Add, View, Remove and Verify Domains in Resend",
+      "mode": "view"
+    },
+    {
+      "name": "emails",
+      "title": "Emails",
+      "subtitle": "Resend",
+      "description": "View Logged Emails and Send A New Email",
+      "mode": "view"
+    },
+    {
+      "name": "contacts",
+      "title": "Contacts",
+      "subtitle": "Resend",
+      "description": "View, create, update and delete contacts from your audiences.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "send-email",
+      "title": "Send Email",
+      "description": "Send an email using natural language"
+    },
+    {
+      "name": "retrieve-email",
+      "title": "Retrieve Email",
+      "description": "Get details about a specific email by ID"
+    },
+    {
+      "name": "cancel-email",
+      "title": "Cancel Email",
+      "description": "Cancel a scheduled email that hasn't been sent yet"
+    },
+    {
+      "name": "list-audiences",
+      "title": "List Audiences",
+      "description": "List all audiences"
+    },
+    {
+      "name": "create-contact",
+      "title": "Create Contact",
+      "description": "Create a contact in an audience"
+    },
+    {
+      "name": "list-contacts",
+      "title": "List Contacts",
+      "description": "List all contacts in an audience"
+    },
+    {
+      "name": "update-contact",
+      "title": "Update Contact",
+      "description": "Update an existing contact in an audience"
+    },
+    {
+      "name": "remove-contact",
+      "title": "Remove Contact",
+      "description": "Delete a contact from an audience"
+    },
+    {
+      "name": "list-api-keys",
+      "title": "List API Keys",
+      "description": "List all API keys in your Resend account"
+    },
+    {
+      "name": "create-api-key",
+      "title": "Create API Key",
+      "description": "Create a new API key with specified permissions"
+    },
+    {
+      "name": "remove-api-key",
+      "title": "Remove API Key",
+      "description": "Delete an API key from your Resend account"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@resend Remind laura@acme.app to check us in at the hotel"
+      },
+      {
+        "input": "@resend Add bruno@acme.app to my General audience",
+        "mocks": {
+          "create-contact": {
+            "data": {
+              "id": "bca7c383-3ada-49eb-8b8b-7d598017203e",
+              "object": "contact"
+            },
+            "error": null
+          },
+          "list-audiences": {
+            "data": {
+              "data": [
+                {
+                  "created_at": "2024-11-27 15:11:12.377216+00",
+                  "id": "44479043-4b94-49a0-aa57-dc73532a0a5a",
+                  "name": "Monthly Newsletter"
+                },
+                {
+                  "created_at": "2024-11-27 14:49:27.73494+00",
+                  "id": "f662d68f-c2fd-4945-9577-ff2b31247a50",
+                  "name": "Test List"
+                },
+                {
+                  "created_at": "2023-11-07 15:51:03.473326+00",
+                  "id": "65d0862b-6213-4c59-8421-1e04e7683bfa",
+                  "name": "General"
+                }
+              ],
+              "object": "list"
+            },
+            "error": null
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "list-audiences"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "audienceId": "65d0862b-6213-4c59-8421-1e04e7683bfa",
+                "audienceName": "General",
+                "email": "bruno@acme.app",
+                "firstName": "Bruno",
+                "lastName": "Unknown"
+              },
+              "name": "create-contact"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@resend Email Bruno with the selected file in @finder"
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.0.1",
+    "resend": "^4.6.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

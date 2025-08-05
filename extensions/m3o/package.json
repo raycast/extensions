@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "m3o",
+  "title": "M3O",
+  "description": "Explore, discover and consume public APIs as simpler programmable building blocks.",
+  "icon": "command-icon.png",
+  "author": "andreaselia",
+  "categories": [
+    "Data",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "avatar",
+      "title": "Generate an Avatar",
+      "subtitle": "M3O",
+      "description": "Customise the output of a generated avatar via gender and format.",
+      "mode": "view"
+    },
+    {
+      "name": "dns",
+      "title": "Get DNS for Domain",
+      "subtitle": "M3O",
+      "description": "Retrieve DNS over HTTPS (DoH) information for a given domain.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "You can find this API Key in the M3O dashboard."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.38.3",
+    "axios": "^0.26.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

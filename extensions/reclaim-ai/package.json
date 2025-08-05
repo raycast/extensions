@@ -1,0 +1,144 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "reclaim-ai",
+  "title": "Reclaim",
+  "description": "AI scheduling for Google & Outlook Calendar – quickly create Tasks, join meetings, share Scheduling Links, & manage your calendar",
+  "icon": "command-icon.png",
+  "author": "lightbody",
+  "contributors": [
+    "aaron_johnson",
+    "greg_reclaim",
+    "clayton_knapp",
+    "scottfseely",
+    "sandy_gifford",
+    "dmkato"
+  ],
+  "pastContributors": [
+    "ridemountainpig"
+  ],
+  "owner": "reclaim-ai",
+  "access": "public",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "reclaim.ai",
+    "reclaim ai",
+    "scheduling",
+    "calendar",
+    "google calendar",
+    "gmail",
+    "ai",
+    "task",
+    "schedule",
+    "productivity",
+    "planner",
+    "meet"
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "title": "Reclaim.ai API key",
+      "description": "Your API key from Reclaim.ai",
+      "type": "textfield",
+      "default": "",
+      "placeholder": "Ex: 1234567890-ABCDEFG-1234567890",
+      "required": true
+    },
+    {
+      "name": "apiUrl",
+      "title": "Reclaim.ai API URL",
+      "description": "Your API URL",
+      "type": "textfield",
+      "default": "https://api.app.reclaim.ai/api",
+      "placeholder": "Ex: https://api.app.reclaim.ai/api",
+      "required": true
+    },
+    {
+      "name": "upcomingEventsCount",
+      "title": "Number of Upcoming Events",
+      "description": "The number of events Reclaim will show in your menu bar",
+      "type": "textfield",
+      "default": "5",
+      "placeholder": "Ex: 5, 10, 12, 42..",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "notifications",
+      "title": "Calendar Menu Bar",
+      "description": "Quickly view upcoming events, join meetings, & manage your schedule",
+      "mode": "menu-bar",
+      "subtitle": "Reclaim",
+      "icon": "command-icon.png",
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "showNowEvent",
+          "title": "Show Now Event in Menu Bar",
+          "label": "Always show now event in the menu bar",
+          "description": "Always show now events in the menu bar",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "quick-task",
+      "title": "Quick Task",
+      "description": "Quickly create a new Task to auto-schedule in your calendar",
+      "mode": "view"
+    },
+    {
+      "name": "my-calendar",
+      "title": "My Calendar",
+      "description": "View & manage your upcoming calendar events for the day",
+      "mode": "view"
+    },
+    {
+      "name": "task-form",
+      "title": "Create Task",
+      "description": "Quickly create a new Task (with a few more details) to auto-schedule in your calendar",
+      "mode": "view"
+    },
+    {
+      "name": "scheduling-links",
+      "title": "Scheduling Links",
+      "description": "Quickly grab your Scheduling Links & create one-off custom links",
+      "mode": "view"
+    },
+    {
+      "name": "list-tasks",
+      "title": "Search Tasks",
+      "description": "View & manage your Tasks",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.19.1",
+    "date-fns": "^2.30.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@sentry/node": "^8.33.0",
+    "@types/node": "18.8.3",
+    "@types/node-fetch": "^2.6.11",
+    "@types/react": "^19.1.0",
+    "eslint": "^9.23.0",
+    "prettier": "^2.8.8",
+    "react-error-boundary": "^4.0.13",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

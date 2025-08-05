@@ -1,0 +1,253 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dungeons-dragons",
+  "title": "Dungeons & Dragons",
+  "description": "All things DND 5e",
+  "icon": "command-icon.png",
+  "author": "Rob",
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "monsters",
+      "title": "Monster Compendium",
+      "description": "Get all monsters and their stats in DND 5e",
+      "mode": "view"
+    },
+    {
+      "name": "diceRoll",
+      "title": "Roll Dice",
+      "description": "Select preset or roll Times(d)Sides (ex: 2d6)",
+      "mode": "view"
+    },
+    {
+      "name": "randomEncounter",
+      "title": "Random Encounter",
+      "description": "Roll a random encounter for your DND campaign",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "challengeLevel",
+          "placeholder": "level: 0.25-20",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "location",
+          "placeholder": "location",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "tone",
+          "type": "dropdown",
+          "placeholder": "tone",
+          "required": false,
+          "data": [
+            {
+                "title": "Combat-heavy",
+                "value": "combat-heavy"
+            },
+            {
+                "title": "Comedy",
+                "value": "comedy"
+            },
+            {
+                "title": "Easy-going",
+                "value": "easy-going"
+            },
+            {
+                "title": "Exploration",
+                "value": "exploration"
+            },
+            {
+                "title": "Horror",
+                "value": "horror"
+            },
+            {
+                "title": "Lore-heavy",
+                "value": "lore-heavy"
+            },
+            {
+                "title": "Mystery",
+                "value": "mystery"
+            },
+            {
+                "title": "Serious",
+                "value": "serious"
+            }
+          ]
+        }        
+      ]
+    },
+    {
+      "name": "rules",
+      "title": "Rules Lookup",
+      "description": "Get rules for DND 5e by section",
+      "mode": "view"
+    },
+    {
+      "name": "spells",
+      "title": "Spell Lookup",
+      "description": "Get a list of spells with optional filtering",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "level",
+          "placeholder": "Level",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "title": "1",
+              "value": "1"
+            },
+            {
+              "title": "2",
+              "value": "2"
+            },
+            {
+              "title": "3",
+              "value": "3"
+            },
+            {
+              "title": "4",
+              "value": "4"
+            },
+            {
+              "title": "5",
+              "value": "5"
+            },
+            {
+              "title": "6",
+              "value": "6"
+            },
+            {
+              "title": "7",
+              "value": "7"
+            },
+            {
+              "title": "8",
+              "value": "8"
+            },
+            {
+              "title": "9",
+              "value": "9"
+            },
+            {
+              "title": "10",
+              "value": "10"
+            },
+            {
+              "title": "11",
+              "value": "11"
+            },
+            {
+              "title": "12",
+              "value": "12"
+            },
+            {
+              "title": "13",
+              "value": "13"
+            },
+            {
+              "title": "14",
+              "value": "14"
+            },
+            {
+              "title": "15",
+              "value": "15"
+            },
+            {
+              "title": "16",
+              "value": "16"
+            },
+            {
+              "title": "17",
+              "value": "17"
+            },
+            {
+              "title": "18",
+              "value": "18"
+            },
+            {
+              "title": "19",
+              "value": "19"
+            },
+            {
+              "title": "20",
+              "value": "20"
+            }
+          ]
+        },
+        {
+          "name": "school",
+          "placeholder": "School of Magic",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "title": "Abjuration",
+              "value": "abjuration"
+            },
+            {
+              "title": "Conjuration",
+              "value": "conjuration"
+            },
+            {
+              "title": "Divination",
+              "value": "divination"
+            },
+            {
+              "title": "Enchantment",
+              "value": "enchantment"
+            },
+            {
+              "title": "Evocation",
+              "value": "evocation"
+            },
+            {
+              "title": "Illusion",
+              "value": "illusion"
+            },
+            {
+              "title": "Necromancy",
+              "value": "necromancy"
+            },
+            {
+              "title": "Transmutation",
+              "value": "transmutation"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "gameMechanics",
+      "title": "Game Mechanics",
+      "description": "Get rules for DND 5e by section",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/utils": "^1.10.1",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

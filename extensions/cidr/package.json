@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cidr",
+  "title": "CIDR Conversion",
+  "description": "CIDR to IPv4 Conversion",
+  "icon": "command-icon.png",
+  "author": "Gnosnay",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "cidr-to-ip-range",
+      "title": "Convert CIDR to IP Range",
+      "description": "CIDR to IPv4 Conversion",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "cidrStr",
+          "placeholder": "One valid CIDR string",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "ip-range-to-cidr",
+      "title": "Convert IP Range to CIDR",
+      "description": "IPv4 to CIDR Conversion",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.47.3",
+    "ts-results-es": "^3.6.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/jest": "^29.5.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^7.32.0",
+    "jest": "^29.5.0",
+    "prettier": "^2.8.8",
+    "ts-jest": "^29.1.0",
+    "typescript": "^4.9.5"
+  },
+  "scripts": {
+    "test": "jest",
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

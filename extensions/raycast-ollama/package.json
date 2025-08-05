@@ -1,0 +1,265 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-ollama",
+  "title": "Ollama AI",
+  "description": "Perform Local Inference with Ollama",
+  "icon": "icon.png",
+  "author": "massimiliano_pasquini",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MassimilianoPasquini97/raycast_ollama.git"
+  },
+  "preferences": [
+    {
+      "name": "ollamaResultViewInput",
+      "description": "Choose preferred input source",
+      "type": "dropdown",
+      "required": false,
+      "title": "Input Source",
+      "data": [
+        {
+          "title": "Selected Text",
+          "value": "SelectedText"
+        },
+        {
+          "title": "Clipboard",
+          "value": "Clipboard"
+        }
+      ],
+      "default": "SelectedText"
+    },
+    {
+      "name": "ollamaResultViewInputFallback",
+      "description": "If there isn't text on main input source enable this option permit to fallback to other input source",
+      "type": "checkbox",
+      "required": false,
+      "title": "Enable Input Source Fallback",
+      "label": "Check for enable input fallback"
+    },
+    {
+      "name": "ollamaChatHistoryMessagesNumber",
+      "description": "Number of last messages to use as memory",
+      "type": "textfield",
+      "required": false,
+      "title": "Chat Memory Messages",
+      "default": "20"
+    },
+    {
+      "name": "ollamaCertificateValidation",
+      "description": "Uncheck for Disable Certificate Validation",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Certificate Validation Enabled"
+    }
+  ],
+  "commands": [
+    {
+      "name": "ollama-chat",
+      "title": "Chat with Ollama",
+      "subtitle": "Ollama",
+      "description": "Chat with Ollama",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-browser-summarize",
+      "title": "Summarize Website",
+      "subtitle": "Ollama",
+      "description": "Summarize content from current Website.",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-casual",
+      "title": "Change Tone to Casual",
+      "subtitle": "Ollama",
+      "description": "Make selected text more casual",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-code-explain",
+      "title": "Explain Code Step by Step",
+      "subtitle": "Ollama",
+      "description": "Explain the selected code step by step",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-confident",
+      "title": "Change Tone to Confident",
+      "subtitle": "Ollama",
+      "description": "Make selected text more confident",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-explain",
+      "title": "Explain This in Simple Terms",
+      "subtitle": "Ollama",
+      "description": "Explain selected text in simple terms",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-fix-spelling-grammar",
+      "title": "Fix Spelling and Grammar",
+      "subtitle": "Ollama",
+      "description": "Fix selected text from spelling and grammar error",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-friendly",
+      "title": "Change Tone to Friendly",
+      "subtitle": "Ollama",
+      "description": "Make selected text more friendly",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-image-describe",
+      "title": "Describe Content of Image",
+      "subtitle": "Ollama",
+      "description": "Describe content of the image on the clipboard or selected from finder",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-image-to-text",
+      "title": "Get Text from Image",
+      "subtitle": "Ollama",
+      "description": "Get text from image on the clipboard or selected from finder",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-improve-writing",
+      "title": "Improve Writing",
+      "subtitle": "Ollama",
+      "description": "Improve writing of selected text",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-longer",
+      "title": "Make Longer",
+      "subtitle": "Ollama",
+      "description": "Make selected text longer",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-professional",
+      "title": "Change Tone to Professional",
+      "subtitle": "Ollama",
+      "description": "Make selected text more professional",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-shorter",
+      "title": "Make Shorter",
+      "subtitle": "Ollama",
+      "description": "Make selected text shorter",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-translate",
+      "title": "Translate",
+      "subtitle": "Ollama",
+      "description": "Translate selected text",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "language",
+          "placeholder": "To Language",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "ollama-tweet",
+      "title": "Rephrase as Tweet",
+      "subtitle": "Ollama",
+      "description": "Rephrase selected text as Tweet",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-models",
+      "title": "Manage Models",
+      "subtitle": "Ollama",
+      "description": "Manage installed models",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-ps",
+      "title": "Loaded Models",
+      "subtitle": "Ollama",
+      "description": "Show models loaded on ram",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-custom-create",
+      "title": "Create Custom Command",
+      "subtitle": "Ollama",
+      "description": "Create a custom command",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-custom-command",
+      "title": "Custom Command",
+      "subtitle": "Ollama",
+      "description": "Create a custom command using a quicklinks",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "placeholder": "Prompt",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "model",
+          "placeholder": "Model",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "parameters",
+          "placeholder": "Parameters",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "ollama-mcp-server",
+      "title": "Manage Mcp Server",
+      "subtitle": "Ollama",
+      "description": "Manage configured Mcp Server",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@langchain/community": "^0.2.0",
+    "@modelcontextprotocol/sdk": "^1.8.0",
+    "@raycast/api": "^1.55.2",
+    "@raycast/utils": "^1.9.0",
+    "file-type": "^19.0.0",
+    "langchain": "^0.2.0",
+    "mammoth": "^1.7.2",
+    "mime-types": "^2.1.35",
+    "node-fetch": "^3.3.2",
+    "pdf-parse": "^1.1.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/mime-types": "^2.1.4",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.27",
+    "eslint": "^7.32.0",
+    "prettier": "^2.8.8",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

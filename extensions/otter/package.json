@@ -1,0 +1,124 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "otter",
+  "title": "Otter Bookmarks",
+  "description": "Companion bookmarking utility for Otter bookmarks",
+  "subtitle": "Otter",
+  "icon": "command-icon.png",
+  "author": "mrmartineau",
+  "license": "MIT",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Bookmarks",
+      "subtitle": "Otter",
+      "description": "Search Otter",
+      "mode": "view",
+      "interval": "10m"
+    },
+    {
+      "name": "recent",
+      "title": "Recent Bookmarks",
+      "subtitle": "Otter",
+      "description": "View recent Otter items",
+      "mode": "view",
+      "interval": "10m"
+    },
+    {
+      "name": "add",
+      "title": "Add Bookmark",
+      "subtitle": "Otter",
+      "description": "Add new bookmark",
+      "mode": "view"
+    },
+    {
+      "name": "menubar",
+      "title": "View Recent Bookmarks",
+      "description": "View recent Otter items",
+      "mode": "menu-bar",
+      "interval": "5m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "loginEmail",
+      "type": "textfield",
+      "required": true,
+      "title": "Email",
+      "description": "Your email on otter.zander.wtf",
+      "placeholder": "joe@doe.com"
+    },
+    {
+      "name": "loginPassword",
+      "type": "password",
+      "required": true,
+      "title": "Password",
+      "description": "Your password on otter.zander.wtf",
+      "placeholder": "********"
+    },
+    {
+      "name": "otterBasePath",
+      "type": "textfield",
+      "title": "Otter Instance URL",
+      "description": "e.g. https://otter.zander.wtf",
+      "required": true,
+      "default": "https://otter.zander.wtf"
+    },
+    {
+      "name": "supabaseUrl",
+      "type": "textfield",
+      "title": "Supabase Project URL",
+      "description": "Find this in your Supabase project API settings. e.g. https://ffpbylcvwtyozyrplqic.supabase.co",
+      "required": true,
+      "default": ""
+    },
+    {
+      "name": "supabaseAnonKey",
+      "type": "textfield",
+      "title": "Supabase Anon API Key",
+      "description": "Find this in your Supabase project API settings",
+      "required": true,
+      "default": ""
+    },
+    {
+      "name": "showDetailView",
+      "type": "checkbox",
+      "label": "Show detail view",
+      "title": "Show Detail View to Side or List View",
+      "description": "Show detail view to side or list view",
+      "required": true,
+      "default": true
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "lint:fix": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.68.1",
+    "@raycast/utils": "^1.10.0",
+    "@supabase/supabase-js": "^2.39.2",
+    "node-fetch": "^3.3.2",
+    "proper-url-join": "^2.1.1",
+    "run-applescript": "^6.1.0",
+    "tiny-relative-date": "^1.3.0",
+    "title": "^3.5.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^20.8.5",
+    "@types/proper-url-join": "^2.1.2",
+    "@types/react": "^18.2.28",
+    "@types/title": "^3.4.1",
+    "eslint": "^8.51.0",
+    "react-devtools": "^4.28.4",
+    "typescript": "^5.2.2"
+  }
+}

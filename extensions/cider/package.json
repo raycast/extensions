@@ -1,0 +1,171 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cider",
+  "title": "Cider",
+  "description": "Interact with Cider through Raycast",
+  "icon": "icon.png",
+  "author": "feyli",
+  "categories": [
+    "Applications",
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "now-playing",
+      "icon": "now-playing.png",
+      "title": "Now Playing",
+      "subtitle": "Cider",
+      "description": "Shows information about the current track",
+      "mode": "view"
+    },
+    {
+      "name": "next-track",
+      "icon": "next-track.png",
+      "title": "Next Track",
+      "subtitle": "Cider",
+      "description": "Skips to the next track",
+      "mode": "no-view"
+    },
+    {
+      "name": "previous-track",
+      "icon": "previous-track.png",
+      "title": "Previous Track",
+      "subtitle": "Cider",
+      "description": "Goes back to the previous track",
+      "mode": "no-view"
+    },
+    {
+      "name": "adjust-volume",
+      "icon": "adjust-volume.png",
+      "title": "Adjust Volume",
+      "subtitle": "Cider",
+      "description": "Adjusts Cider's volume",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "volume",
+          "type": "text",
+          "placeholder": "Volume (0-100)",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "toggle-autoplay",
+      "icon": "toggle-autoplay.png",
+      "title": "Toggle Autoplay",
+      "subtitle": "Cider",
+      "description": "Toggles autoplay in Cider",
+      "mode": "no-view"
+    },
+    {
+      "name": "add-to-library",
+      "icon": "add-to-library.png",
+      "title": "Add to Library",
+      "subtitle": "Cider",
+      "description": "Adds the current playing track to the library",
+      "mode": "no-view"
+    },
+    {
+      "name": "favorite-track",
+      "icon": "favorite-track.png",
+      "title": "Favorite Track",
+      "subtitle": "Cider",
+      "description": "Favorites the currently playing track",
+      "mode": "no-view"
+    },
+    {
+      "name": "play-pause",
+      "icon": "play-pause.png",
+      "title": "Play/Pause",
+      "subtitle": "Cider",
+      "description": "Alternates between play and pause in Cider",
+      "mode": "no-view"
+    },
+    {
+      "name": "seek",
+      "icon": "seek.png",
+      "title": "Seek",
+      "subtitle": "Cider",
+      "description": "Seeks to a certain timestamp in Cider",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "timestamp",
+          "type": "text",
+          "placeholder": "Timestamp (mm:ss)",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "stop-playback",
+      "icon": "stop-playback.png",
+      "title": "Stop Playback",
+      "subtitle": "Cider",
+      "description": "Completely stops playing anything in Cider",
+      "mode": "no-view"
+    },
+    {
+      "name": "show-queue",
+      "icon": "show-queue.png",
+      "title": "Queue",
+      "subtitle": "Cider",
+      "description": "Shows the current queue in Cider",
+      "mode": "view"
+    },
+    {
+      "name": "synced-lyrics",
+      "icon": "synced-lyrics.png",
+      "title": "Synced Lyrics",
+      "subtitle": "Cider",
+      "description": "Shows synced lyrics for the current track",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "title": "Cider Token",
+      "description": "This can be generated from the Cider connectivity settings",
+      "type": "textfield",
+      "label": "Your Cider token",
+      "required": false
+    },
+    {
+      "name": "exitOnSuccess",
+      "title": "Options",
+      "description": "Closes Raycast when a command succeeds",
+      "type": "checkbox",
+      "defaultValue": true,
+      "label": "Exit on success",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.60.1",
+    "@raycast/utils": "^1.9.0",
+    "cross-fetch": "^4.0.0",
+    "socket.io-client": "^4.8.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

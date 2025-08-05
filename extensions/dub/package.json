@@ -1,0 +1,187 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dub",
+  "title": "Dub",
+  "description": "Dub is the open-source link management platform for modern marketing teams. This extension allows you to shorten and retrieve your Dub links directly inside Raycast.",
+  "icon": "command-icon.png",
+  "author": "quuu",
+  "owner": "dubinc",
+  "access": "public",
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Data",
+    "Applications",
+    "Web"
+  ],
+  "contributors": [
+    "stelo",
+    "steventey",
+    "devkiran",
+    "alexs",
+    "JoshuaRileyDev"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "shorten-link",
+      "title": "Shorten Link",
+      "description": "Shorten links from arguments, clipboard or selection with dub.co using workspaces, custom domains, tags etc.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text"
+        },
+        {
+          "name": "key",
+          "placeholder": "Key",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "search-links",
+      "title": "Search Links",
+      "description": "Search shortened links with dub.co in different workspaces",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "getAllShortLinks",
+      "title": "Get All Short Links",
+      "description": "Get all shortened links from dub.co"
+    },
+    {
+      "name": "getAllDomains",
+      "title": "Get All Domains",
+      "description": "Get all domains from dub.co"
+    },
+    {
+      "name": "createShortLink",
+      "title": "Create Short Link",
+      "description": "Create a new shortened link with dub.co"
+    },
+    {
+      "name": "deleteShortLink",
+      "title": "Delete Short Link",
+      "description": "Delete a shortened link from dub.co"
+    },
+    {
+      "name": "getAllTags",
+      "title": "Get All Tags",
+      "description": "Get all tags from dub.co"
+    },
+    {
+      "name": "getShortLinksCount",
+      "title": "Get Short Links Count",
+      "description": "Get the number of shortened links in dub.co"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@dub what are all my short links",
+        "mocks": {
+          "getAllShortLinks": [
+            {
+              "android": null,
+              "archived": false,
+              "clicks": 1,
+              "comments": null,
+              "createdAt": "2023-12-01T11:12:05.279Z",
+              "description": "No description",
+              "doIndex": false,
+              "domain": "dub.sh",
+              "expiredUrl": null,
+              "expiresAt": null,
+              "externalId": null,
+              "geo": null,
+              "id": "cl",
+              "image": null,
+              "ios": null,
+              "key": "w0",
+              "lastClicked": "2023-12-01T11:12:08.000Z",
+              "leads": 0,
+              "partnerId": null,
+              "password": null,
+              "programId": null,
+              "projectId": "cl",
+              "proxy": false,
+              "publicStats": false,
+              "rewrite": false,
+              "saleAmount": 0,
+              "sales": 0,
+              "tagId": null,
+              "tags": [],
+              "tenantId": null,
+              "title": "",
+              "trackConversion": false,
+              "updatedAt": "2024-10-04T16:37:35.064Z",
+              "url": "",
+              "userId": "cl_",
+              "utmCampaign": null,
+              "utmContent": null,
+              "utmMedium": null,
+              "utmSource": null,
+              "utmTerm": null,
+              "video": null,
+              "webhookIds": [],
+              "workspaceId": "ws_"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "getAllShortLinks"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@dub create shortlink for raycast.com/blog and raycast.com/store",
+        "mocks": {
+          "createShortLink": {}
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "originalUrl": {
+                  "includes": "raycast.com/store"
+                }
+              },
+              "name": "createShortLink"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.16.0",
+    "dub": "^0.61.5",
+    "undici": "^6.19.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "react-devtools": "^6.1.1",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
