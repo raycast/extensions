@@ -1,5 +1,30 @@
 # Jira Search Self Hosted Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+### Added
+- New "Create Issue" command with full form interface
+  - Project selection with searchable dropdown
+  - Issue type selection with icons
+  - Priority selection with proper project-specific priorities
+  - Support for all required fields based on project and issue type
+  - Default settings for frequently used project, issue type and priority
+
+### Improved
+- Updated Raycast API to version 1.69.0 (from 1.36.0)
+- Added @raycast/utils 1.19.0 for improved utilities and hooks
+- Updated node-fetch to version 3.3.2
+- Updated TypeScript and React type definitions
+- Modular code structure for better maintainability
+- Optimized API calls with smart fallback strategy
+- Enhanced UX with reduced UI flickering during data loading
+- Better error handling and validation
+
+### Fixed
+- Issue type icons display and "Unexpected icon path" warnings
+- Dynamic fields rendering and validation
+- Priority scheme handling for different project configurations
+
 ## [Fixed typo] - 2024-04-30
 
 ## [Update] - 2024-02-02

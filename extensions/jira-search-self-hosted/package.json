@@ -42,6 +42,13 @@
       "subtitle": "Jira Search (Self-Hosted)",
       "description": "Search Jira projects by title",
       "mode": "view"
+    },
+    {
+      "name": "create-issue",
+      "title": "Create Issue",
+      "subtitle": "Jira Search (Self-Hosted)",
+      "description": "Create new Jira issue",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -71,7 +78,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.57.0",
+    "@raycast/api": "^1.69.0",
+    "@raycast/utils": "^1.19.0",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
@@ -82,7 +90,7 @@
     "eslint": "^8.48.0",
     "eslint-config-prettier": "^9.0.0",
     "prettier": "^3.0.3",
-    "react-devtools": "^4.28.0",
+    "react-devtools": "^6.1.1",
     "typescript": "^5.2.2"
   },
   "scripts": {
