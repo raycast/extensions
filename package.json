@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ipscan",
-  "title": "IPScan",
-  "description": "This is a IPScan",
+  "title": "Ipscan",
+  "description": "This is a Ipscan",
   "icon": "extension-icon.png",
   "categories": ["Other"],
   "author": "lfazioli",
@@ -10,7 +10,7 @@
   "commands": [
     {
       "name": "ipscan",
-      "title": "IPScan",
+      "title": "Ipscan",
       "description": "Scans IP addresses and ports directly from Raycast. Fast, simple, and scriptable.",
       "mode": "view"
     }
