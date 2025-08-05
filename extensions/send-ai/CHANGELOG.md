@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.0.4] - {PR_MERGE_DATE}
+## [0.0.4] - 2025-08-05
 
 - Auto logout and redirect to login page if token is expired
 
