@@ -26,7 +26,7 @@
 - Registered the AI tool as a `no-view` command, enabling it to be invoked directly by Raycast AI in the background.
 - **Added AI Evals:** Implemented evaluation test cases (`evals` in `package.json`) to verify AI interaction with the tool and provide users with example prompts for generating diagrams via AI.
 
-## [Initial Version] - 2024-03-14
+## [Initial Version] - 2025-03-14
 ### Added
 - Initial release of mermaid-to-image extension
 - Automatic conversion of clipboard Mermaid code to images
