@@ -1,10 +1,7 @@
 import { COMMIT_TYPES } from "../constant/commitType";
 import { CommitMessage } from "../models/commitMessage";
 import { CommitType } from "../models/commitType";
-import { ContentFormat } from "../models/contentFormat";
 import { Issue } from "../models/issue";
-import { Preferences } from "../models/preferences";
-import { TypeMode } from "../models/typeMode";
 
 type CommitMessageProps = {
   preferences: Preferences;
@@ -20,9 +17,9 @@ export default function useCommitMessages({ preferences, issue }: CommitMessageP
     const scope = issue.id ?? issue.url;
     const description = issue.description ?? "";
     if (!scope) {
-      return preferences.typeMode === TypeMode.TEXT ? `${type.label}: ${description}` : `${type.emoji} ${description}`;
+      return preferences.typeMode === "text" ? `${type.label}: ${description}` : `${type.emoji} ${description}`;
     }
-    return preferences.typeMode === TypeMode.TEXT
+    return preferences.typeMode === "text"
       ? `${type.label}(${scope}): ${description}`
       : `${type.emoji} ${scope} ${description}`;
   };
@@ -42,9 +39,9 @@ export default function useCommitMessages({ preferences, issue }: CommitMessageP
 
     const contentFormat = preferences.contentFormat;
     const contentAction =
-      contentFormat === ContentFormat.LAZYGIT
+      contentFormat === "lazygit"
         ? `${message}${body ? `\n${body}` : ""}`
-        : contentFormat === ContentFormat.GIT
+        : contentFormat === "git"
           ? `git commit -m ${JSON.stringify(message)}${body ? ` -m ${JSON.stringify(body)}` : ""}`
           : message;
 

@@ -1,9 +1,8 @@
 import { Clipboard, Keyboard, Action as RCAction } from "@raycast/api";
-import { ActionType } from "../models/actionType";
 
 type CustomActionProps = {
   content: string;
-  type: ActionType;
+  type: Preferences["primaryAction"];
   title?: string;
   shortcut?: Keyboard.Shortcut;
 };
@@ -11,11 +10,11 @@ type CustomActionProps = {
 export default function CustomAction({ type, content, title, shortcut }: CustomActionProps) {
   const props = { content, title, shortcut };
 
-  if (type === ActionType.PASTE) {
+  if (type === "paste") {
     return <RCAction.Paste {...props} />;
-  } else if (type === ActionType.COPY) {
+  } else if (type === "copy") {
     return <RCAction.CopyToClipboard {...props} />;
-  } else if (type === ActionType.COPY_AND_PASTE) {
+  } else if (type === "copy-and-paste") {
     return <RCAction.Paste onPaste={Clipboard.copy} {...props} />;
   }
 

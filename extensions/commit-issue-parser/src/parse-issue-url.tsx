@@ -2,8 +2,6 @@ import { Cache, Color, getPreferenceValues, List } from "@raycast/api";
 import CustomActionPanel from "./components/customActionPanel";
 import useCommitMessages from "./hooks/commitMessages";
 import useUrlParser from "./hooks/urlParser";
-import { Preferences } from "./models/preferences";
-import { TypeMode } from "./models/typeMode";
 
 const cache = new Cache();
 
@@ -25,7 +23,7 @@ export default function Command() {
           key={commit.label}
           title={commit.message}
           accessories={
-            preferences.typeMode === TypeMode.GITMOJI
+            preferences.typeMode === "gitmoji"
               ? [{ tag: { value: commit.label, color: Color.SecondaryText } }]
               : [{ icon: commit.accessoryIcon, tooltip: index < 9 ? `⌘+${index + 1}` : undefined }]
           }
