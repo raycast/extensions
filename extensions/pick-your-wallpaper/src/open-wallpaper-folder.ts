@@ -8,12 +8,8 @@ const execPromise = promisify(exec);
 
 export default async function Command() {
   try {
-    console.log("Getting preferences...");
     const preferences = getPreferenceValues<Preferences>();
-    console.log("All preferences:", preferences);
-
     const wallpaperFolder = preferences.wallpaperFolder;
-    console.log("Wallpaper folder path:", wallpaperFolder);
 
     if (!wallpaperFolder) {
       await showHUD("❌ No wallpaper folder configured");
@@ -27,7 +23,6 @@ export default async function Command() {
     }
 
     // Open the wallpaper folder in Finder
-    console.log("Opening folder:", wallpaperFolder);
     await execPromise(`open "${wallpaperFolder}"`);
     await showHUD("✅ Opened wallpaper folder in Finder");
   } catch (error) {
