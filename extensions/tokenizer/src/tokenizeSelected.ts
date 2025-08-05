@@ -1,43 +1,12 @@
-import { getPreferenceValues, getSelectedText, showToast, Toast, environment } from "@raycast/api";
-import { TiktokenEncoding } from "@dqbd/tiktoken";
-import { get_encoding, init } from "@dqbd/tiktoken/init";
-import { promises as fs } from "fs";
-import path from "path";
-
-const wasmURL = "https://github.com/ashleymavericks/tokenizer-raycast/releases/download/binary/tiktoken_bg.wasm";
+import { getPreferenceValues, getSelectedText, showToast, Toast } from "@raycast/api";
+import { TiktokenEncoding } from "tiktoken";
+import { get_encoding, init } from "tiktoken/init";
+import wasm from "tiktoken/tiktoken_bg.wasm?module";
 
 let initialized = false;
 async function initialize() {
   if (initialized) {
     return;
-  }
-
-  const wasmPath = path.join(environment.supportPath, "tiktoken_bg.wasm");
-  let wasm: Buffer;
-
-  try {
-    wasm = await fs.readFile(wasmPath);
-  } catch {
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Downloading Tokenizer..." });
-
-    try {
-      const response = await fetch(wasmURL);
-      if (!response.ok) {
-        throw new Error(`Failed to download WASM module: ${response.statusText}`);
-      }
-      const arrayBuffer = await response.arrayBuffer();
-      wasm = Buffer.from(arrayBuffer);
-      await fs.mkdir(path.dirname(wasmPath), { recursive: true });
-      await fs.writeFile(wasmPath, wasm);
-
-      toast.style = Toast.Style.Success;
-      toast.title = "Tokenizer Ready";
-    } catch (downloadError) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to download tokenizer";
-      toast.message = downloadError instanceof Error ? downloadError.message : String(downloadError);
-      throw downloadError;
-    }
   }
 
   await init((imports) => WebAssembly.instantiate(wasm, imports));

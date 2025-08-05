@@ -6,7 +6,9 @@
   "icon": "extension-icon.png",
   "author": "ashleymavericks",
   "license": "MIT",
-  "categories": ["Developer Tools"],
+  "categories": [
+    "Developer Tools"
+  ],
   "commands": [
     {
       "name": "tokenizeSelected",
@@ -70,9 +72,9 @@
     }
   ],
   "dependencies": {
-    "@dqbd/tiktoken": "^1.0.21",
     "@raycast/api": "^1.101.0",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^1.17.0",
+    "tiktoken": "^1.0.21"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
