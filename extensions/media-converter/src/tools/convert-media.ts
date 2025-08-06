@@ -1,8 +1,5 @@
 import { convertMedia } from "../utils/converter";
 import {
-  INPUT_IMAGE_EXTENSIONS,
-  INPUT_AUDIO_EXTENSIONS,
-  INPUT_VIDEO_EXTENSIONS,
   type QualitySettings,
   type QualityLevel,
   type OutputImageExtension,
@@ -12,7 +9,8 @@ import {
   type ImageQuality,
   type AudioQuality,
   type VideoQuality,
-  DEFAULT_QUALITIES,
+  getMediaType,
+  getQualitySettingsFromSimple,
 } from "../types/media";
 import { findFFmpegPath } from "../utils/ffmpeg";
 import { Tool } from "@raycast/api";
@@ -35,120 +33,6 @@ async function getFullPath(inputPath: string | undefined) {
   }
 
   return fullPath;
-}
-
-function getMediaType(filePath: string): "image" | "audio" | "video" | null {
-  const extension = path.extname(filePath).toLowerCase();
-  if (INPUT_IMAGE_EXTENSIONS.includes(extension as (typeof INPUT_IMAGE_EXTENSIONS)[number])) return "image";
-  if (INPUT_AUDIO_EXTENSIONS.includes(extension as (typeof INPUT_AUDIO_EXTENSIONS)[number])) return "audio";
-  if (INPUT_VIDEO_EXTENSIONS.includes(extension as (typeof INPUT_VIDEO_EXTENSIONS)[number])) return "video";
-  return null;
-}
-
-function getQualitySettings(outputFormat: string, qualityLevel: QualityLevel): QualitySettings {
-  // For most formats, we'll use presets based on quality level
-  switch (outputFormat) {
-    // Image formats
-    case ".jpg":
-    case ".heic":
-    case ".avif":
-      return {
-        [outputFormat]: qualityLevel === "low" ? 60 : qualityLevel === "medium" ? 80 : 95,
-      } as unknown as ImageQuality;
-
-    case ".webp":
-      if (qualityLevel === "lossless") {
-        return { ".webp": "lossless" } as ImageQuality;
-      }
-      return { ".webp": qualityLevel === "low" ? 60 : qualityLevel === "medium" ? 80 : 95 } as ImageQuality;
-
-    case ".png":
-      return { ".png": "png-24" } as ImageQuality;
-
-    case ".tiff":
-      return { ".tiff": "deflate" } as ImageQuality;
-
-    // Audio formats
-    case ".mp3":
-      return {
-        ".mp3": { bitrate: qualityLevel === "low" ? "128" : qualityLevel === "medium" ? "192" : "320", vbr: true },
-      } as AudioQuality;
-
-    case ".aac":
-    case ".m4a":
-      return {
-        [outputFormat]: {
-          bitrate: qualityLevel === "low" ? "128" : qualityLevel === "medium" ? "192" : "320",
-          profile: "aac_low",
-        },
-      } as unknown as AudioQuality;
-
-    case ".wav":
-      return {
-        ".wav": {
-          sampleRate: qualityLevel === "lossless" ? "48000" : "44100",
-          bitDepth: qualityLevel === "lossless" ? "24" : "16",
-        },
-      } as AudioQuality;
-
-    case ".flac":
-      return {
-        ".flac": {
-          compressionLevel: qualityLevel === "low" ? "3" : qualityLevel === "medium" ? "5" : "8",
-          sampleRate: qualityLevel === "lossless" ? "48000" : "44100",
-          bitDepth: qualityLevel === "lossless" ? "24" : "16",
-        },
-      } as AudioQuality;
-
-    // Video formats
-    case ".mp4":
-      return {
-        ".mp4": {
-          encodingMode: "crf",
-          crf: qualityLevel === "low" ? 28 : qualityLevel === "medium" ? 23 : 18,
-          preset: qualityLevel === "low" ? "fast" : qualityLevel === "medium" ? "medium" : "slow",
-        },
-      } as VideoQuality;
-
-    case ".mkv":
-      return {
-        ".mkv": {
-          encodingMode: "crf",
-          crf: qualityLevel === "low" ? 28 : qualityLevel === "medium" ? 23 : 18,
-          preset: qualityLevel === "low" ? "fast" : qualityLevel === "medium" ? "medium" : "slow",
-        },
-      } as VideoQuality;
-
-    case ".avi":
-      return {
-        ".avi": { encodingMode: "crf", crf: qualityLevel === "low" ? 28 : qualityLevel === "medium" ? 23 : 18 },
-      } as VideoQuality;
-
-    case ".mov":
-      return {
-        ".mov": { variant: qualityLevel === "low" ? "proxy" : qualityLevel === "medium" ? "standard" : "hq" },
-      } as VideoQuality;
-
-    case ".mpg":
-      return {
-        ".mpg": { encodingMode: "crf", crf: qualityLevel === "low" ? 28 : qualityLevel === "medium" ? 23 : 18 },
-      } as VideoQuality;
-
-    case ".webm":
-      return {
-        ".webm": {
-          encodingMode: "crf",
-          crf: qualityLevel === "low" ? 35 : qualityLevel === "medium" ? 30 : 25,
-          quality: qualityLevel === "high" ? "best" : "good",
-        },
-      } as VideoQuality;
-
-    default:
-      // Fallback to default quality from the constants
-      return {
-        [outputFormat]: DEFAULT_QUALITIES[outputFormat as keyof typeof DEFAULT_QUALITIES],
-      } as unknown as QualitySettings;
-  }
 }
 
 type Input = {
@@ -194,7 +78,7 @@ export default async function ConvertMedia({ inputPath, outputFileType, quality 
 
   try {
     fullPath = await getFullPath(inputPath);
-    mediaType = getMediaType(fullPath);
+    mediaType = getMediaType(path.extname(fullPath));
 
     if (!mediaType) {
       return {
@@ -212,7 +96,9 @@ export default async function ConvertMedia({ inputPath, outputFileType, quality 
 
   try {
     let outputPath: string;
-    const qualitySettings = getQualitySettings(outputFileType, quality);
+    const qualitySettings = {
+      [outputFileType]: getQualitySettingsFromSimple(outputFileType, quality),
+    } as QualitySettings;
 
     if (mediaType === "image") {
       outputPath = await convertMedia(
@@ -255,7 +141,7 @@ export default async function ConvertMedia({ inputPath, outputFileType, quality 
 export const confirmation: Tool.Confirmation<Input> = async ({ inputPath, outputFileType, quality }: Input) => {
   try {
     const fullPath = await getFullPath(inputPath);
-    const mediaType = getMediaType(fullPath);
+    const mediaType = getMediaType(path.extname(fullPath));
     const message = "This will create a new file in the same directory.";
     const info = [
       { name: "Input Path", value: fullPath },

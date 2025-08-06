@@ -12,10 +12,15 @@ type Range<
 // =============================================================================
 
 // Simple range type for percentages (0-100)
-type Percentage = Range<0, 100>;
+export type Percentage = Range<0, 100>;
 
 // Quality level presets (user-friendly)
-export type QualityLevel = "low" | "medium" | "high" | "lossless";
+export type QualityLevel = "lowest" | "low" | "medium" | "high" | "highest";
+
+// Simple quality settings type for basic mode
+export type SimpleQualitySettings = {
+  [K in AllOutputExtension]: QualityLevel;
+};
 
 // Basic format extensions
 export const INPUT_VIDEO_EXTENSIONS = [
@@ -261,6 +266,96 @@ export type QualitySettings = ImageQuality | AudioQuality | VideoQuality;
 export type AllControlType = VideoControlType | AudioControlType | "qualityLevel";
 
 // =============================================================================
+// Simple Quality Level Mappings
+// =============================================================================
+
+export const SIMPLE_QUALITY_MAPPINGS = {
+  // Audio quality mappings
+  ".mp3": {
+    lowest: { bitrate: "96", vbr: false },
+    low: { bitrate: "128", vbr: false },
+    medium: { bitrate: "192", vbr: true },
+    high: { bitrate: "256", vbr: true },
+    highest: { bitrate: "320", vbr: true },
+  },
+  ".aac": {
+    lowest: { bitrate: "96", profile: "aac_low" },
+    low: { bitrate: "128", profile: "aac_low" },
+    medium: { bitrate: "192", profile: "aac_low" },
+    high: { bitrate: "256", profile: "aac_low" },
+    highest: { bitrate: "320", profile: "aac_low" },
+  },
+  ".m4a": {
+    lowest: { bitrate: "96", profile: "aac_low" },
+    low: { bitrate: "128", profile: "aac_low" },
+    medium: { bitrate: "192", profile: "aac_low" },
+    high: { bitrate: "256", profile: "aac_low" },
+    highest: { bitrate: "320", profile: "aac_low" },
+  },
+  ".wav": {
+    lowest: { sampleRate: "22050", bitDepth: "16" },
+    low: { sampleRate: "44100", bitDepth: "16" },
+    medium: { sampleRate: "44100", bitDepth: "16" },
+    high: { sampleRate: "48000", bitDepth: "24" },
+    highest: { sampleRate: "96000", bitDepth: "24" },
+  },
+  ".flac": {
+    lowest: { compressionLevel: "8", sampleRate: "44100", bitDepth: "16" },
+    low: { compressionLevel: "5", sampleRate: "44100", bitDepth: "16" },
+    medium: { compressionLevel: "5", sampleRate: "44100", bitDepth: "16" },
+    high: { compressionLevel: "3", sampleRate: "48000", bitDepth: "24" },
+    highest: { compressionLevel: "0", sampleRate: "96000", bitDepth: "24" },
+  },
+
+  // Video quality mappings
+  ".mp4": {
+    lowest: { encodingMode: "crf", crf: 30, preset: "fast" },
+    low: { encodingMode: "crf", crf: 50, preset: "medium" },
+    medium: { encodingMode: "crf", crf: 75, preset: "medium" },
+    high: { encodingMode: "crf", crf: 85, preset: "slow" },
+    highest: { encodingMode: "crf", crf: 95, preset: "slower" },
+  },
+  ".avi": {
+    lowest: { encodingMode: "crf", crf: 30 },
+    low: { encodingMode: "crf", crf: 50 },
+    medium: { encodingMode: "crf", crf: 75 },
+    high: { encodingMode: "crf", crf: 85 },
+    highest: { encodingMode: "crf", crf: 95 },
+  },
+  ".mov": {
+    lowest: { variant: "proxy" },
+    low: { variant: "lt" },
+    medium: { variant: "standard" },
+    high: { variant: "hq" },
+    highest: { variant: "4444" },
+  },
+  ".mkv": {
+    lowest: { encodingMode: "crf", crf: 30, preset: "fast" },
+    low: { encodingMode: "crf", crf: 50, preset: "medium" },
+    medium: { encodingMode: "crf", crf: 75, preset: "medium" },
+    high: { encodingMode: "crf", crf: 85, preset: "slow" },
+    highest: { encodingMode: "crf", crf: 95, preset: "slower" },
+  },
+  ".mpg": {
+    lowest: { encodingMode: "crf", crf: 30 },
+    low: { encodingMode: "crf", crf: 50 },
+    medium: { encodingMode: "crf", crf: 75 },
+    high: { encodingMode: "crf", crf: 85 },
+    highest: { encodingMode: "crf", crf: 95 },
+  },
+  ".webm": {
+    lowest: { encodingMode: "crf", crf: 30, quality: "realtime" },
+    low: { encodingMode: "crf", crf: 50, quality: "good" },
+    medium: { encodingMode: "crf", crf: 60, quality: "good" },
+    high: { encodingMode: "crf", crf: 75, quality: "good" },
+    highest: { encodingMode: "crf", crf: 90, quality: "best" },
+  },
+} as const;
+
+// Default simple quality level
+export const DEFAULT_SIMPLE_QUALITY: QualityLevel = "high";
+
+// =============================================================================
 // Default Quality Settings
 // =============================================================================
 
@@ -312,4 +407,12 @@ export function getMediaType(extension: string): MediaType | null {
   if (INPUT_AUDIO_EXTENSIONS.includes(ext as InputAudioExtension)) return "audio";
   if (INPUT_VIDEO_EXTENSIONS.includes(ext as InputVideoExtension)) return "video";
   return null;
+}
+
+// Helper function to convert simple quality to actual settings
+// F this, I'm using any types. Everything is type-safe. No risks taken here.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function getQualitySettingsFromSimple(format: AllOutputExtension, quality: QualityLevel): any {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (SIMPLE_QUALITY_MAPPINGS as any)[format][quality];
 }

@@ -13,9 +13,10 @@ import {
   AudioQuality,
   VideoQuality,
   getMediaType,
+  Percentage,
 } from "../types/media";
 
-function convertQualityToCrf(qualityPercentage: number): number {
+function convertQualityToCrf(qualityPercentage: Percentage): number {
   // Map 100% quality to CRF 0, and 0% quality to CRF 51
   // Using a linear mapping for simplicity
   return Math.round(51 - (qualityPercentage / 100) * 51);

@@ -1,4 +1,14 @@
-import { Form, ActionPanel, Action, showToast, Toast, showInFinder, Icon, openCommandPreferences } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  showToast,
+  Toast,
+  showInFinder,
+  Icon,
+  openCommandPreferences,
+  getPreferenceValues,
+} from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { convertMedia } from "../utils/converter";
@@ -40,22 +50,34 @@ import {
   VideoControlType,
   VideoMaxBitrate,
   VIDEO_MAX_BITRATE,
+  type QualityLevel,
+  DEFAULT_SIMPLE_QUALITY,
+  getQualitySettingsFromSimple,
 } from "../types/media";
 import path from "path";
 import { execPromise } from "../utils/exec";
 
 export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }) {
+  const preferences = getPreferenceValues<Preferences>();
   const [selectedFileType, setSelectedFileType] = useState<MediaType | null>(null);
   const [currentFiles, setCurrentFiles] = useState<string[]>(initialFiles || []);
   const [outputFormat, setOutputFormat] = useState<AllOutputExtension | null>(null);
   const [currentQualitySetting, setCurrentQualitySetting] = useState<QualitySettings | null>(null);
+  const [simpleQuality, setSimpleQuality] = useState<QualityLevel>(DEFAULT_SIMPLE_QUALITY);
   const [isLoading, setIsLoading] = useState(true);
 
   // Helper function to get default quality settings for a format
   const getDefaultQuality = (format: AllOutputExtension): QualitySettings => {
-    return {
-      [format]: DEFAULT_QUALITIES[format as keyof typeof DEFAULT_QUALITIES],
-    } as MediaType extends "image" ? ImageQuality : MediaType extends "audio" ? AudioQuality : VideoQuality;
+    if (preferences.moreConversionSettings) {
+      return {
+        [format]: DEFAULT_QUALITIES[format as keyof typeof DEFAULT_QUALITIES],
+      } as MediaType extends "image" ? ImageQuality : MediaType extends "audio" ? AudioQuality : VideoQuality;
+    } else {
+      // For simple mode, return the quality settings for the default simple quality level
+      return {
+        [format]: getQualitySettingsFromSimple(format, DEFAULT_SIMPLE_QUALITY),
+      } as QualitySettings;
+    }
   };
 
   useEffect(() => {
@@ -141,7 +163,14 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
             : (".mp4" as const);
 
       setOutputFormat(defaultFormat);
-      setCurrentQualitySetting(getDefaultQuality(defaultFormat));
+
+      if (preferences.moreConversionSettings || primaryFileType === "image") {
+        setCurrentQualitySetting(getDefaultQuality(defaultFormat));
+      } else {
+        setCurrentQualitySetting({
+          [defaultFormat]: getQualitySettingsFromSimple(defaultFormat, DEFAULT_SIMPLE_QUALITY),
+        } as QualitySettings);
+      }
     } catch (error) {
       const errorMessage = String(error);
       showToast({
@@ -251,7 +280,14 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
           onChange={(newFormat) => {
             const format = newFormat as AllOutputExtension;
             setOutputFormat(format);
-            setCurrentQualitySetting(getDefaultQuality(format));
+            if (preferences.moreConversionSettings || selectedFileType === "image") {
+              setCurrentQualitySetting(getDefaultQuality(format));
+            } else {
+              // Update quality settings based on current simple quality level
+              setCurrentQualitySetting({
+                [format]: getQualitySettingsFromSimple(format, simpleQuality),
+              } as QualitySettings);
+            }
           }}
         >
           <Form.Dropdown.Section>
@@ -273,11 +309,35 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
       )}
       {/* Quality Settings */}
       {selectedFileType && outputFormat && currentQualitySetting && (
-        <QualitySettingsComponent
-          outputFormat={outputFormat}
-          currentQuality={currentQualitySetting}
-          onQualityChange={setCurrentQualitySetting}
-        />
+        <>
+          {preferences.moreConversionSettings || selectedFileType === "image" ? (
+            <QualitySettingsComponent
+              outputFormat={outputFormat}
+              currentQuality={currentQualitySetting}
+              onQualityChange={setCurrentQualitySetting}
+            />
+          ) : (
+            <Form.Dropdown
+              id="simpleQuality"
+              title="Quality"
+              value={simpleQuality}
+              onChange={(newQuality) => {
+                const quality = newQuality as QualityLevel;
+                setSimpleQuality(quality);
+                setCurrentQualitySetting({
+                  [outputFormat]: getQualitySettingsFromSimple(outputFormat, quality),
+                } as QualitySettings);
+              }}
+              info="Choose the quality level for your converted file"
+            >
+              <Form.Dropdown.Item value="lowest" title="Lowest (smallest file size)" />
+              <Form.Dropdown.Item value="low" title="Low" />
+              <Form.Dropdown.Item value="medium" title="Medium" />
+              <Form.Dropdown.Item value="high" title="High (recommended)" />
+              <Form.Dropdown.Item value="highest" title="Highest (largest file size)" />
+            </Form.Dropdown>
+          )}
+        </>
       )}
     </Form>
   );
