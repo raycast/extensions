@@ -206,12 +206,10 @@ export async function createBankTransactionExplanation(
   accessToken: string,
   explanationData: BankTransactionExplanationCreateData,
 ): Promise<BankTransactionExplanation> {
-  console.log("Creating bank transaction explanation with data:", explanationData);
   const data = await makeRequest<BankTransactionExplanationResponse>("/bank_transaction_explanations", accessToken, {
     method: "POST",
     body: JSON.stringify({ bank_transaction_explanation: explanationData }),
   });
-  console.log("Bank transaction explanation created:", data);
   return data.bank_transaction_explanation;
 }
 
