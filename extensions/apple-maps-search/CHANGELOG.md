@@ -1,5 +1,12 @@
 # Apple Maps Search Changelog
 
+## [Windows Support] - {PR_MERGE_DATE}
+
+- Added support for Windows users to open Apple Maps links in the browser
+- Update dependencies to latest versions
+- Update eslint configuration to latest recommended settings
+- Update tsconfig to latest recommended settings
+
 ## [Fix] - 2023-08-08
 
 - Fixed so the extension work correctly in fallback searches
