@@ -1,139 +1,54 @@
 import { Form, ActionPanel, Action, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { authorizedWithFreeagent } from "./oauth";
-import { getAccessToken } from "@raycast/utils";
-
-interface Preferences {
-  default_payment_terms_in_days: string;
-}
-
-interface Contact {
-  url: string;
-  first_name?: string;
-  last_name?: string;
-  organisation_name?: string;
-  email?: string;
-  phone_number?: string;
-  contact_name_on_invoices: boolean;
-  status: string;
-  created_at: string;
-  updated_at: string;
-}
-
-type InvoiceFormValues = {
-  contact: string;
-  dated_on: Date;
-  payment_terms_in_days: string;
-  reference?: string;
-  send_new_invoice_emails: boolean;
-};
+import { Contact, Preferences, InvoiceFormValues } from "./types";
+import { fetchContacts, createInvoice } from "./services/freeagent";
+import { getContactDisplayName } from "./utils/formatting";
+import { useFreeAgent } from "./hooks/useFreeAgent";
 
 const CreateNewInvoice = function Command() {
   const [contacts, setContacts] = useState<Contact[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
+  const { isLoading, isAuthenticated, accessToken, handleError } = useFreeAgent();
   const preferences = getPreferenceValues<Preferences>();
 
   useEffect(() => {
-    async function checkAuth() {
+    async function loadContacts() {
+      if (!isAuthenticated || !accessToken) return;
+
       try {
-        const { token } = getAccessToken();
-        if (token) {
-          await fetchContacts(token);
-        } else {
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Not authenticated",
-            message: "Please authenticate with FreeAgent to create invoices.",
-          });
-          return;
-        }
+        const contactList = await fetchContacts(accessToken, "active");
+        setContacts(contactList);
       } catch (error) {
-        console.error("Auth check failed:", error);
-      } finally {
-        setIsLoading(false);
+        handleError(error, "Failed to fetch contacts");
       }
     }
 
-    checkAuth();
-  }, []);
-
-  async function fetchContacts(accessToken: string) {
-    try {
-      const response = await fetch("https://api.freeagent.com/v2/contacts?view=active", {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "User-Agent": "Raycast FreeAgent Extension",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = (await response.json()) as { contacts: Contact[] };
-      setContacts(data.contacts || []);
-    } catch (error) {
-      console.error("Failed to fetch contacts:", error);
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to fetch contacts",
-        message: String(error),
-      });
-    }
-  }
-
-  function getContactDisplayName(contact: Contact): string {
-    if (contact.organisation_name) {
-      return contact.organisation_name;
-    }
-    const firstName = contact.first_name || "";
-    const lastName = contact.last_name || "";
-    return `${firstName} ${lastName}`.trim() || "Unknown Contact";
-  }
+    loadContacts();
+  }, [isAuthenticated, accessToken]);
 
   async function handleSubmit(values: InvoiceFormValues) {
-    try {
-      const { token } = getAccessToken();
-      if (!token) {
-        throw new Error("No access token available");
-      }
+    if (!accessToken) {
+      handleError(new Error("No access token available"), "Failed to create invoice");
+      return;
+    }
 
+    try {
       const invoiceData = {
-        invoice: {
-          contact: values.contact,
-          dated_on: values.dated_on?.toISOString().split("T")[0],
-          payment_terms_in_days: parseFloat(values.payment_terms_in_days) || 30,
-          send_new_invoice_emails: values.send_new_invoice_emails || false,
-          ...(values.reference && { reference: values.reference }),
-        },
+        contact: values.contact,
+        dated_on: values.dated_on?.toISOString().split("T")[0] || new Date().toISOString().split("T")[0],
+        payment_terms_in_days: parseFloat(values.payment_terms_in_days) || 30,
+        send_new_invoice_emails: values.send_new_invoice_emails || false,
+        ...(values.reference && { reference: values.reference }),
       };
 
-      const response = await fetch("https://api.freeagent.com/v2/invoices", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "User-Agent": "Raycast FreeAgent Extension",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(invoiceData),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      await createInvoice(accessToken, invoiceData);
 
       showToast({
         style: Toast.Style.Success,
         title: "Invoice created successfully",
       });
     } catch (error) {
-      console.error("Failed to create invoice:", error);
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to create invoice",
-        message: String(error),
-      });
+      handleError(error, "Failed to create invoice");
     }
   }
 

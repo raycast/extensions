@@ -14,9 +14,39 @@
       "mode": "view"
     },
     {
+      "name": "list-timeline",
+      "title": "List Tax Timeline",
+      "description": "List tax timeline items from freeagent",
+      "mode": "view"
+    },
+    {
+      "name": "list-timeslips",
+      "title": "List Timeslips",
+      "description": "List timeslips from freeagent",
+      "mode": "view"
+    },
+    {
       "name": "create-new-invoice",
       "title": "Create New Invoice",
       "description": "Create an invoice in Freeagent",
+      "mode": "view"
+    },
+    {
+      "name": "create-timeslip",
+      "title": "Create Timeslip",
+      "description": "Create a timeslip in Freeagent",
+      "mode": "view"
+    },
+    {
+      "name": "list-bank-transactions",
+      "title": "List Bank Transactions",
+      "description": "List all bank transactions from freeagent",
+      "mode": "view"
+    },
+    {
+      "name": "list-unexplained-transactions",
+      "title": "List Unexplained Transactions",
+      "description": "List unexplained bank transactions that need attention",
       "mode": "view"
     }
   ],
@@ -45,7 +75,7 @@
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
-    "fix-lint": "ray lint --fix",
+    "lint:fix": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
