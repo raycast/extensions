@@ -1,5 +1,9 @@
 # Raindrop.io Extension Changelog
 
+## [Enhancements] - 2025-08-06
+
+- Use Browser Extension API when available for retrieving URL and title
+
 ## [Enhancements] - 2025-08-04
 
 - Add support for Zen Browser.
