@@ -1,8 +1,8 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { useGetBusinesses, useGetBusinessInvoices, useGetBusinessProductsAndServices } from "./lib/wave";
+import { Action, ActionPanel, Form, Icon, List } from "@raycast/api";
+import { useGetBusinesses, useGetBusinessInvoices, useGetBusinessProductsAndServices, useGetValidIncomeAccounts } from "./lib/wave";
 import { Business, InvoiceStatus } from "./lib/types";
 import { getInvoiceStatusColor } from "./lib/utils";
-import { useCachedState, withAccessToken } from "@raycast/utils";
+import { FormValidation, useCachedState, useForm, withAccessToken } from "@raycast/utils";
 import { HELP_LINKS, INVOICE_STATUSES } from "./lib/config";
 import { provider } from "./lib/oauth";
 import OpenInWave from "./lib/components/open-in-wave";
@@ -173,7 +173,7 @@ ${invoice.items.map((item) => `| ${item.product.name} | ${item.quantity} | ${ite
 
 function BusinessProductsAndServices({ business }: { business: Business }) {
   const [isShowingSubtitle, setIsShowingSubtitle] = useCachedState("show-products-subtitle", false);
-  const { isLoading, data: products } = useGetBusinessProductsAndServices(business.id);
+  const { isLoading, data: products, revalidate } = useGetBusinessProductsAndServices(business.id);
   const isEmpty = !isLoading && !products.length;
 
   return (
@@ -203,6 +203,7 @@ function BusinessProductsAndServices({ business }: { business: Business }) {
                     title="Toggle Subtitle"
                     onAction={() => setIsShowingSubtitle((prev) => !prev)}
                   />
+                  <Action.Push icon={Icon.Plus} title="Add a Product or Service" target={<AddProductOrService businessId={business.id} onCreate={revalidate} />} />
                 </ActionPanel>
               }
             />
@@ -211,4 +212,40 @@ function BusinessProductsAndServices({ business }: { business: Business }) {
       )}
     </List>
   );
+}
+
+function AddProductOrService({ businessId, onCreate }: { businessId: string; onCreate: () => void }) {
+  const {isLoading: isLoadingValidBusinessAccounts} = useGetValidIncomeAccounts(businessId, ["INCOME", "DISCOUNTS", "OTHER_INCOME"]);
+
+  type FormValues = {
+    name: string;
+    description: string;
+    unitPrice: string;
+  }
+  const {handleSubmit, itemProps} = useForm<FormValues>({
+    onSubmit(values) {
+      
+    },
+    initialValues: {
+      unitPrice: "0.00"
+    },
+    validation: {
+      name: FormValidation.Required,
+      unitPrice(value) {
+        if (value) {
+          if (value.length>25) return "Max 25 characters";
+          if (value!="0.00" && !Number(value)) return "The item must be a number";
+            const parts = value.split('.');
+            if (parts[1]?.length>5) return "Max of 5 decimal places";
+        }
+      },
+    }
+  })
+  return <Form isLoading={isLoadingValidBusinessAccounts} actions={<ActionPanel><Action.SubmitForm icon={Icon.Plus} title="Save" onSubmit={handleSubmit} /></ActionPanel>}>
+    <Form.Description text="Products and services that you buy from vendors are used as items on Bills to record those purchases, and the ones that you sell to customers are used as items on Invoices to record those sales." />
+    <Form.TextField title="Name *" {...itemProps.name} />
+    <Form.Separator />
+    <Form.TextArea title="Description" {...itemProps.description} />
+    <Form.TextField title="Price" {...itemProps.unitPrice} />
+  </Form>
 }
