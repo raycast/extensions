@@ -159,7 +159,7 @@ export function optimizeMarkdownText(text: string, baseUrl?: string): string {
       }
     } catch (error) {
       // eslint-disable-line '@typescript-eslint/no-unused-vars'
-      // ignore errors
+      // ignore errors // eslint-disable-line '@typescript-eslint/no-unused-vars'
     }
   }
 
