@@ -110,8 +110,7 @@ export function fileExistsSync(filename: string): boolean {
   try {
     fsSync.accessSync(filename, constants.F_OK);
     return true;
-  } catch (e) {
-    // eslint-disable-line '@typescript-eslint/no-unused-vars'
+  } catch (e) { // eslint-disable-line @typescript-eslint/no-unused-vars
     return false;
   }
 }
@@ -157,9 +156,8 @@ export function optimizeMarkdownText(text: string, baseUrl?: string): string {
           }
         }
       }
-    } catch (error) {
-      // eslint-disable-line '@typescript-eslint/no-unused-vars'
-      // ignore errors // eslint-disable-line '@typescript-eslint/no-unused-vars'
+    } catch (error) { // eslint-disable-line @typescript-eslint/no-unused-vars
+      // ignore errors // eslint-disable-line @typescript-eslint/no-unused-vars
     }
   }
 
