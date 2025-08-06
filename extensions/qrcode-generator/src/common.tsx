@@ -5,24 +5,24 @@ import fs from "fs";
 
 export default function Common({ from }: { from: "clipboard" | "selection" }) {
   const [qrData, setQrData] = useState<string>();
-  const [clipboardText, setClipboardText] = useState<string>("");
+  const [sourceText, setSourceText] = useState<string>("");
 
   useEffect(() => {
     (async () => {
-      const clipboard = from === "clipboard" ? await Clipboard.readText() : await getSelectedText();
+      const currentText = from === "clipboard" ? await Clipboard.readText() : await getSelectedText();
 
-      setClipboardText(clipboard || "");
+      setSourceText(currentText || "");
 
-      if (!clipboard?.trim()) {
+      if (!currentText?.trim()) {
         await showToast(Toast.Style.Failure, "Failed", "No text found");
         return;
       }
 
-      const qrData = await generateQRCode({ URL: clipboard, preview: true });
+      const qrData = await generateQRCode({ URL: currentText, preview: true });
       setQrData(qrData);
 
       // show origin text in Toast message
-      showToast(Toast.Style.Success, "Create Success", clipboard);
+      showToast(Toast.Style.Success, "Create Success", currentText);
     })();
   }, []);
 
@@ -32,7 +32,7 @@ export default function Common({ from }: { from: "clipboard" | "selection" }) {
       // qrData is a data URL: data:image/png;base64,...
       const base64 = qrData.split(",")[1];
       const buffer = Buffer.from(base64, "base64");
-      const filePath = getQRCodePath(clipboardText, "png");
+      const filePath = getQRCodePath(sourceText, "png");
       fs.writeFileSync(filePath, buffer);
       await showToast(Toast.Style.Success, "Saved to Downloads", filePath);
     } catch (error) {

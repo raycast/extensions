@@ -1,6 +1,6 @@
 # QR Code Generator Changelog
 
-## [Better Visibility in Raycast UI] - 2025-08-07
+## [Better Visibility in Raycast UI] - {PR_MERGE_DATE}
 
 - Added [Generate QR Code from Selection] Command
 
