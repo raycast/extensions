@@ -3,15 +3,13 @@ import { useEffect, useState } from "react";
 import { generateQRCode, getQRCodePath } from "./utils";
 import fs from "fs";
 
-
 export default function Common({ from }: { from: "clipboard" | "selection" }) {
   const [qrData, setQrData] = useState<string>();
   const [clipboardText, setClipboardText] = useState<string>("");
 
-
   useEffect(() => {
     (async () => {
-      const clipboard = from === 'clipboard' ? await Clipboard.readText() : await getSelectedText();
+      const clipboard = from === "clipboard" ? await Clipboard.readText() : await getSelectedText();
 
       setClipboardText(clipboard || "");
 
@@ -23,11 +21,10 @@ export default function Common({ from }: { from: "clipboard" | "selection" }) {
       const qrData = await generateQRCode({ URL: clipboard, preview: true });
       setQrData(qrData);
 
-      // show origin text in Toast message 
-      showToast(Toast.Style.Success, "Success", clipboard);
+      // show origin text in Toast message
+      showToast(Toast.Style.Success, "Create Success", clipboard);
     })();
   }, []);
-
 
   async function handleSave() {
     if (!qrData) return;
@@ -42,8 +39,6 @@ export default function Common({ from }: { from: "clipboard" | "selection" }) {
       await showToast(Toast.Style.Failure, "Failed to Save", error instanceof Error ? error.message : String(error));
     }
   }
-
-
 
   return (
     <Detail
