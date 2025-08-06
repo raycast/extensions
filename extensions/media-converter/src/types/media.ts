@@ -374,7 +374,7 @@ export const DEFAULT_QUALITIES = {
   ".m4a": { bitrate: "192", profile: "aac_low" },
   ".wav": { sampleRate: "44100", bitDepth: "16" },
   ".flac": {
-    compressionLevel: 5,
+    compressionLevel: "5",
     sampleRate: "44100",
     bitDepth: "16",
   },

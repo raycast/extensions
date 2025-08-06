@@ -7,7 +7,7 @@
 
 - Convert videos, images, and audio files with a simple interface
 - Support for all popular media formats
-- Simple customization of the quality of the output file; precise control by enabling it extension preferences
+- Simple customization of the quality of the output file; precise control by enabling it in extension preferences
 - Smart file naming to prevent conflicts
 - Automatic FFmpeg installation and management
 

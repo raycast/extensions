@@ -164,8 +164,7 @@ export function HelloPage({ onContinue, lostFFmpegMessage }: HelloPageProps) {
       }
     } catch (error) {
       console.error("Error during FFmpeg installation:", error);
-      await showFailureToast({
-        error: String(error),
+      await showFailureToast(String(error), {
         title: "Installation failed",
         message: "Could not install FFmpeg. Please try again or specify a custom path.",
       });
