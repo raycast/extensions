@@ -1,4 +1,5 @@
-import { BrowserExtension, environment, showToast, Toast } from "@raycast/api";
+import { BrowserExtension, environment } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import fetch from "node-fetch";
 import { CollectionCreationResponse, FormValues } from "../types";
 
@@ -108,7 +109,7 @@ export async function getLinkTitle(link: string) {
     const title = match ? match[1] : "";
     return title;
   } catch (error) {
-    await showToast(Toast.Style.Failure, "Failed to fetch title", String(error));
+    await showFailureToast(error, { title: "Failed to fetch title" });
     return "";
   }
 }
