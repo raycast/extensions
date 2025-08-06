@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { Monitor } from "../api/schema";
+import { monitorSchema } from "../api/schema";
 
 export default async function () {
   const { access_token } = getPreferenceValues<Preferences>();
@@ -10,5 +10,5 @@ export default async function () {
   });
   if (!response.ok) throw new Error(response.statusText);
   const result = await response.json();
-  return result as Monitor;
+  return monitorSchema.array().parse(result);
 }

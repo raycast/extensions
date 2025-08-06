@@ -24,7 +24,7 @@ export default async function (input: Input) {
     body: JSON.stringify({
       ...input,
       pageId: +input.pageId,
-      date: new Date(input.date ?? "").toISOString(),
+      date: new Date(input.date || Date.now()).toISOString(),
     }),
   });
   if (!response.ok) throw new Error("Failed to create status report");

@@ -22,7 +22,7 @@ export default async function (input: Input) {
     method: "POST",
     body: JSON.stringify({
       ...input,
-      date: new Date(input.date ?? "").toISOString(),
+      date: new Date(input.date || Date.now()).toISOString(),
     }),
   });
 

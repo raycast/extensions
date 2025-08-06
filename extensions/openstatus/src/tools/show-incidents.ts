@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { Incident } from "../api/schema";
+import { incidentSchema } from "../api/schema";
 
 export default async function () {
   const { access_token } = getPreferenceValues<Preferences>();
@@ -10,5 +10,5 @@ export default async function () {
   });
   if (!response.ok) throw new Error(response.statusText);
   const result = await response.json();
-  return result as Incident;
+  return incidentSchema.array().parse(result);
 }
