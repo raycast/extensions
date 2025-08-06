@@ -1,5 +1,9 @@
 # Visual Studio Code Changelog
 
+## [Update] - 2025-08-04
+
+- Added support for Kiro.
+
 ## [Update] - 2025-03-05
 
 - Added support for Trae CN.

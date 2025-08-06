@@ -4,7 +4,7 @@ export const useZoxide = (command: string, options?: object) => {
   options = {
     shell: true,
     env: {
-      PATH: "/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin:/opt/homebrew/sbin",
+      PATH: "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin",
     },
     ...options,
   };

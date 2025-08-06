@@ -1,11 +1,13 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "version": "0.3.0",
+  "version": "0.5.0",
   "name": "pieces-raycast",
   "title": "Pieces for Raycast",
   "description": "Pieces for Developers Raycast Extension",
   "icon": "piecesVector.png",
   "author": "pieces_dev",
+  "owner": "pieces",
+  "access": "public",
   "license": "MIT",
   "categories": [
     "Developer Tools",
@@ -22,14 +24,14 @@
     },
     {
       "name": "signin",
-      "title": "Sign In to Pieces",
+      "title": "Sign in to Pieces",
       "mode": "no-view",
       "description": "Sign in to Pieces",
       "icon": "piecesVector.png"
     },
     {
       "name": "signout",
-      "title": "Sign Out of Pieces",
+      "title": "Sign out of Pieces",
       "mode": "no-view",
       "description": "Sign out of Pieces",
       "icon": "piecesVector.png"
@@ -126,7 +128,7 @@
   ],
   "tools": [],
   "dependencies": {
-    "@pieces.app/pieces-os-client": "^4.0.0",
+    "@pieces.app/pieces-os-client": "^4.1.0",
     "@raycast/api": "^1.76.0",
     "@raycast/utils": "^1.16.0",
     "node-fetch": "^3.3.2",
