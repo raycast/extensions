@@ -76,17 +76,18 @@ function NewUser({ onNew }: { onNew: () => void }) {
       };
 
       try {
-        const response = await fetch(API_URL + "licenses", {
+        const response = await fetch(API_URL + "users", {
           method: "POST",
           headers,
           body: JSON.stringify(body),
         });
         await parseResponse(response);
         toast.style = Toast.Style.Success;
-        toast.title = "Created License";
+        toast.title = "Created User";
         onNew();
         pop();
       } catch (error) {
+        console.log(error)
         toast.style = Toast.Style.Failure;
         toast.title = "Could not create";
         toast.message = `${error}`;

@@ -4,6 +4,7 @@
 
 - List Users and Create new ones
 - View API Usage
+- Fix type in command title: "Voew Licenses" -> "View Licenses"
 
 ## [List & Add Products + License Enhancements] - 2025-07-07
 
