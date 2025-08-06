@@ -39,7 +39,7 @@ export function ProjectSearchList(): JSX.Element {
 
 export function useSearch(
   query: string | undefined,
-  scope: string
+  scope: string,
 ): {
   projects?: Project[];
   error?: string;

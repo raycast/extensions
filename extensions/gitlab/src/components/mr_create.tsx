@@ -59,7 +59,7 @@ export function IssueMRCreateForm({
   const [project, setProject] = useState<Project>();
 
   useEffect(() => {
-    projectID && getProjectBranches(projectID).then((data) => (setProject(data?.project), setBranches(data?.branches)));
+    projectID && getProjectBranches(projectID).then((data) => (setProject(data?.project), setBranches(data?.branches))); // eslint-disable-line @typescript-eslint/no-unused-expressions
   }, [projectID]);
 
   async function submit(values: { source_branch: string; target_branch: string }) {
@@ -103,7 +103,7 @@ export function IssueMRCreateForm({
 
 export function MRCreateForm(props: { project?: Project | undefined; branch?: string | undefined }): JSX.Element {
   const [selectedProject, setSelectedProject] = useState<string | undefined>(
-    props.project ? props.project.id.toString() : undefined
+    props.project ? props.project.id.toString() : undefined,
   );
   const {
     data: projects,
@@ -117,7 +117,7 @@ export function MRCreateForm(props: { project?: Project | undefined; branch?: st
     },
     {
       deps: [],
-    }
+    },
   );
   const { projectinfo, errorProjectInfo, isLoadingProjectInfo } = useProjectMR(selectedProject);
   const members = projectinfo?.members || [];
@@ -153,7 +153,7 @@ export function MRCreateForm(props: { project?: Project | undefined; branch?: st
       if (selectedTemplateName === NO_TEMPLATE) return undefined;
       return await gitlab.getProjectMergeRequestTemplate(project?.id || 0, selectedTemplateName);
     },
-    { deps: [selectedTemplateName] }
+    { deps: [selectedTemplateName] },
   );
 
   useEffect(() => {

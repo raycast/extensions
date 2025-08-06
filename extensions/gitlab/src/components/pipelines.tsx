@@ -10,7 +10,7 @@ import { GitLabOpenInBrowserAction } from "./actions";
 import { GitLabIcons } from "../icons";
 import { Pipeline } from "../gitlabapi";
 
-/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 const GET_PIPELINES = gql`
   query GetProjectPipeplines($fullPath: ID!) {
@@ -171,7 +171,7 @@ export function PipelineList(props: { projectFullPath: string; navigationTitle?:
 
 export function useSearch(
   query: string | undefined,
-  projectFullPath: string
+  projectFullPath: string,
 ): {
   pipelines: any[];
   error?: string;

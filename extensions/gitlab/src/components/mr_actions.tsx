@@ -7,7 +7,7 @@ import { getErrorMessage, showErrorToast } from "../utils";
 import { ProjectCommitList } from "./commits/list";
 import { LabelList } from "./label";
 
-/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 async function createNote(mr: MergeRequest, body: string): Promise<any> {
   return await gitlab.post(`projects/${mr.project_id}/merge_requests/${mr.iid}/notes`, { body: body });
@@ -26,7 +26,7 @@ export function CloseMRAction(props: { mr: MergeRequest; finished?: () => void }
       showErrorToast(getErrorMessage(error), "Failed to close Merge Request");
     }
   }
-  return <Action title="Close MR" icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }} onAction={handleAction} />;
+  return <Action title="Close Mr" icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }} onAction={handleAction} />;
 }
 
 export function ReopenMRAction(props: { mr: MergeRequest; finished?: () => void }): JSX.Element {
@@ -42,7 +42,7 @@ export function ReopenMRAction(props: { mr: MergeRequest; finished?: () => void 
       showErrorToast(getErrorMessage(error), "Failed to reopen Merge Request");
     }
   }
-  return <Action title="Reopen MR" icon={{ source: Icon.ExclamationMark }} onAction={handleAction} />;
+  return <Action title="Reopen Mr" icon={{ source: Icon.ExclamationMark }} onAction={handleAction} />;
 }
 
 export function RebaseMRAction(props: { mr: MergeRequest; shortcut?: Keyboard.Shortcut }): JSX.Element {
@@ -104,7 +104,7 @@ export function CreateTodoMRAction(props: { mr: MergeRequest; shortcut?: Keyboar
   if (mr.state === "opened") {
     return (
       <Action
-        title="Add a To Do"
+        title="Add a to Do"
         shortcut={props.shortcut}
         icon={{ source: GitLabIcons.todo, tintColor: Color.PrimaryText }}
         onAction={handleAction}

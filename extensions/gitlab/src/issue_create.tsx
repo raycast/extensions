@@ -48,7 +48,7 @@ function IssueForm() {
     },
     {
       deps: [],
-    }
+    },
   );
   const { projectinfo, errorProjectInfo, isLoadingProjectInfo } = useProject(selectedProject);
   const members = projectinfo?.members || [];

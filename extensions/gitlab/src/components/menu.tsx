@@ -31,7 +31,7 @@ export function MenuBarRoot(props: {
 }): JSX.Element {
   const error = props.error;
   const reloadMenu = async () => {
-    environment.commandName;
+    //environment.commandName;
     try {
       await launchCommand({ name: environment.commandName, type: LaunchType.UserInitiated });
     } catch (error) {
@@ -102,7 +102,7 @@ export function MenuBarSection(props: {
 }): JSX.Element | null {
   const title = joinNonEmpty(
     [props.title, props.subtitle].filter((e) => e),
-    " "
+    " ",
   );
   const { shown, hidden } = shownElements(props.children, props.maxChildren);
   return (
@@ -122,7 +122,7 @@ export function MenuBarSubmenu(props: {
   const title =
     joinNonEmpty(
       [props.title, props.subtitle].filter((e) => e),
-      " "
+      " ",
     ) || "";
   return (
     <MenuBarExtra.Submenu title={title} icon={props.icon}>

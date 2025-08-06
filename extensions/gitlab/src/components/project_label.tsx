@@ -21,7 +21,7 @@ export function ProjectLabelList(props: { project: Project; navigationTitle?: st
           limit: 50,
         });
       },
-    }
+    },
   );
 
   if (error) {

@@ -65,7 +65,7 @@ export function CloneProjectInVSCodeAction(props: {
   if (code && (pro.http_url_to_repo || pro.ssh_url_to_repo)) {
     return (
       <Action.Push
-        title="Clone in VSCode"
+        title="Clone in VS Code"
         icon={{ fileIcon: code }}
         shortcut={props.shortcut}
         target={<CloneInVSCodeList project={pro} />}
@@ -152,7 +152,7 @@ function CloneUrlList(props: { project: Project }): JSX.Element {
         icon={{ source: Icon.Link, tintColor: Color.PrimaryText }}
         actions={
           <ActionPanel>
-            <Action.CopyToClipboard title="HTTP" content={props.project.http_url_to_repo || ""} />
+            <Action.CopyToClipboard title="Http" content={props.project.http_url_to_repo || ""} />
           </ActionPanel>
         }
       />
@@ -161,7 +161,7 @@ function CloneUrlList(props: { project: Project }): JSX.Element {
         icon={{ source: Icon.Link, tintColor: Color.PrimaryText }}
         actions={
           <ActionPanel>
-            <Action.CopyToClipboard title="SSH" content={props.project.ssh_url_to_repo || ""} />
+            <Action.CopyToClipboard title="Ssh" content={props.project.ssh_url_to_repo || ""} />
           </ActionPanel>
         }
       />

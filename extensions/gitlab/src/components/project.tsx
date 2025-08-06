@@ -125,7 +125,7 @@ export function ProjectList({ membership = true, starred = false }: ProjectListP
         });
       },
       secondsToInvalid: daysInSeconds(7),
-    }
+    },
   );
 
   if (error) {
@@ -176,7 +176,7 @@ export function useMyProjects(): { projects: Project[] | undefined; error?: stri
     {
       deps: [],
       secondsToInvalid: daysInSeconds(7),
-    }
+    },
   );
   return { projects, error, isLoading };
 }

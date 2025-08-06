@@ -17,7 +17,7 @@ export function CreateEpicTodoAction(props: { epic: Epic; shortcut?: Keyboard.Sh
   if (epic.state === "opened") {
     return (
       <Action
-        title="Add a To Do"
+        title="Add a to Do"
         shortcut={props.shortcut}
         icon={{ source: GitLabIcons.todo, tintColor: Color.PrimaryText }}
         onAction={handleAction}

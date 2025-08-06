@@ -173,7 +173,7 @@ export function JobList(props: {
     "",
     props.projectFullPath,
     props.pipelineID,
-    props.pipelineIID
+    props.pipelineIID,
   );
   useInterval(() => {
     refresh();
@@ -210,7 +210,7 @@ export function useSearch(
   query: string | undefined,
   projectFullPath: string,
   pipelineID: number,
-  pipelineIID?: string | undefined
+  pipelineIID?: string | undefined,
 ): {
   stages?: Record<string, Job[]>;
   error?: string;
@@ -356,7 +356,7 @@ export function PipelineJobsListByCommit(props: { project: Project; sha: string 
 
 function useCommit(
   projectID: number,
-  sha: string
+  sha: string,
 ): {
   commit?: Commit;
   error?: string;

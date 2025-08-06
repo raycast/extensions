@@ -6,7 +6,7 @@ import { Group, Project } from "../gitlabapi";
 import { getErrorMessage, getIdFromGqlId, showErrorToast } from "../utils";
 import { GitLabOpenInBrowserAction } from "./actions";
 
-/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 const GET_MILESTONES = gql`
   query GetProjectMilestones($fullPath: ID!) {
@@ -96,7 +96,7 @@ export function MilestoneList(props: { project?: Project; group?: Group; navigat
 export function useSearch(
   query: string | undefined,
   projectFullPath: string,
-  isGroup: boolean
+  isGroup: boolean,
 ): {
   milestones: any[];
   error?: string;

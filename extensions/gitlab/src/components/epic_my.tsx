@@ -56,7 +56,7 @@ export function MyEpicList(props: { scope: EpicScope; state: EpicState }): JSX.E
       onFilter: async (epics) => {
         return searchData<Epic>(epics, { search: searchText || "", keys: ["title"], limit: 50 });
       },
-    }
+    },
   );
 
   if (error) {

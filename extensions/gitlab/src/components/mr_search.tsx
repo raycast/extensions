@@ -28,7 +28,7 @@ export function SearchMyMergeRequests(): JSX.Element {
       deps: [scope, state, search],
       secondsToRefetch: 1,
       secondsToInvalid: daysInSeconds(7),
-    }
+    },
   );
   if (error) {
     showErrorToast(getErrorMessage(error), "Could not fetch Merge Requests");

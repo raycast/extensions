@@ -13,7 +13,7 @@ import { emojiSymbol } from "./components/status/utils";
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
 
-/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types,no-useless-escape */
+/* eslint-disable @typescript-eslint/no-explicit-any,no-useless-escape */
 
 export function projectIconUrl(project: Project): string | undefined {
   let result: string | undefined;
@@ -111,6 +111,7 @@ export function fileExistsSync(filename: string): boolean {
     fsSync.accessSync(filename, constants.F_OK);
     return true;
   } catch (e) {
+    // eslint-disable-line '@typescript-eslint/no-unused-vars'
     return false;
   }
 }
@@ -157,6 +158,7 @@ export function optimizeMarkdownText(text: string, baseUrl?: string): string {
         }
       }
     } catch (error) {
+      // eslint-disable-line '@typescript-eslint/no-unused-vars'
       // ignore errors
     }
   }

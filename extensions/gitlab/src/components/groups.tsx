@@ -13,7 +13,7 @@ import { MilestoneList } from "./milestones";
 import { MRList, MRScope, MRState } from "./mr";
 import { ProjectListItem } from "./project";
 
-/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 function groupIconUrl(group: any): string | undefined {
   let result: string | undefined;
@@ -184,7 +184,7 @@ export function useMyGroups(args?: { query?: string; parentGroupID?: number; top
     {
       secondsToInvalid: 900,
       deps: [parentGroupID],
-    }
+    },
   );
   useEffect(() => {
     setGroupsInfo(data);

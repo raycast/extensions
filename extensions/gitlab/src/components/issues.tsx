@@ -19,7 +19,7 @@ import { GitLabOpenInBrowserAction } from "./actions";
 import { userIcon } from "./users";
 import { CacheActionPanelSection } from "./cache_actions";
 
-/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export enum IssueScope {
   created_by_me = "created_by_me",
@@ -330,7 +330,7 @@ export function injectQueryNamedParameters(
   requestParams: Record<string, any>,
   query: Query,
   scope: IssueScope,
-  isNegative: boolean
+  isNegative: boolean,
 ) {
   const namedParams = isNegative ? query.negativeNamed : query.named;
   for (const extraParam of Object.keys(namedParams)) {
@@ -380,7 +380,7 @@ export function useSearch(
   scope: IssueScope,
   state: IssueState,
   project?: Project,
-  group?: Group
+  group?: Group,
 ): {
   issues?: Issue[];
   error?: string;
@@ -454,7 +454,7 @@ export function useSearch(
 
 export function useIssue(
   projectID: number,
-  issueID: number
+  issueID: number,
 ): {
   issue?: Issue;
   error?: string;

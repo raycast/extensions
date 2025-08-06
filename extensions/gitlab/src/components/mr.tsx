@@ -24,7 +24,7 @@ import { userIcon } from "./users";
 import { useCachedState } from "@raycast/utils";
 import { CacheActionPanelSection } from "./cache_actions";
 
-/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export enum MRScope {
   created_by_me = "created_by_me",
@@ -415,7 +415,7 @@ export function MRListItem(props: {
     accessories.push(
       { icon: mr.has_conflicts ? "⚠️" : undefined, tooltip: mr.has_conflicts ? "Has Conflict" : undefined },
       { tag: mr.milestone?.title ?? "", tooltip: mr.milestone ? `Milestone: ${mr.milestone?.title}` : "" },
-      { date: new Date(mr.updated_at), tooltip: `Updated: ${toLongDateString(mr.updated_at)}` }
+      { date: new Date(mr.updated_at), tooltip: `Updated: ${toLongDateString(mr.updated_at)}` },
     );
   }
   accessories.push({ icon: accessoryIcon, tooltip: mr.author ? `Author: ${mr.author.name}` : undefined });
@@ -494,7 +494,7 @@ export function injectMRQueryNamedParameters(
   requestParams: Record<string, any>,
   query: Query,
   scope: MRScope,
-  isNegative: boolean
+  isNegative: boolean,
 ) {
   const namedParams = isNegative ? query.negativeNamed : query.named;
   for (const extraParam of Object.keys(namedParams)) {
@@ -560,7 +560,7 @@ export function useSearch(
   scope: MRScope,
   state: MRState,
   project?: Project,
-  group?: Group
+  group?: Group,
 ): {
   mrs: MergeRequest[];
   error?: string;
@@ -634,7 +634,7 @@ export function useSearch(
 
 export function useMR(
   projectID: number,
-  mrID: number
+  mrID: number,
 ): {
   mr?: MergeRequest;
   error?: string;
@@ -717,7 +717,7 @@ export function useMRPipelines(mr: MergeRequest): {
       deps: [mr],
       secondsToRefetch: 10,
       secondsToInvalid: daysInSeconds(7),
-    }
+    },
   );
   return { mrpipelines, isLoading, error, performRefetch };
 }

@@ -10,7 +10,7 @@ import { CacheActionPanelSection } from "./cache_actions";
 import { IssueDetailFetch } from "./issues";
 import { MRDetailFetch } from "./mr";
 
-/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export interface PushData {
   commit_count: number;
@@ -54,7 +54,7 @@ export function EventListItem(props: { event: Event }): JSX.Element {
       deps: [ev.project_id],
       secondsToRefetch: 15 * 60,
       secondsToInvalid: daysInSeconds(7),
-    }
+    },
   );
   let title = "";
   let icon: Image.ImageLike | undefined;
@@ -452,7 +452,7 @@ export function EventList(): JSX.Element {
           limit: 50,
         });
       },
-    }
+    },
   );
   if (error) {
     showErrorToast(error, "Cannot search Events");

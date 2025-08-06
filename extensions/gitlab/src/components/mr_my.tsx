@@ -90,7 +90,7 @@ export function useMyMergeRequests(
   scope: MRScope,
   state: MRState,
   project: Project | undefined,
-  labels: string[] | undefined = undefined
+  labels: string[] | undefined = undefined,
 ): {
   mrs: MergeRequest[] | undefined;
   isLoading: boolean;
@@ -111,7 +111,7 @@ export function useMyMergeRequests(
       deps: [project, scope, state, labels],
       secondsToRefetch: 10,
       secondsToInvalid: daysInSeconds(7),
-    }
+    },
   );
   return { mrs, isLoading, error, performRefetch };
 }

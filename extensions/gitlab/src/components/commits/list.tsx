@@ -27,7 +27,7 @@ function EventCommitListItem(props: { event: Event }): JSX.Element {
     {
       deps: [e.project_id],
       secondsToRefetch: 15 * 60,
-    }
+    },
   );
   const { commitStatus: status } = useCommitStatus(e.project_id, commit);
   const webAction = (): JSX.Element | undefined => {
@@ -98,7 +98,7 @@ export function RecentCommitsList(): JSX.Element {
     {
       deps: [],
       secondsToRefetch: 5,
-    }
+    },
   );
   if (error) {
     showErrorToast(error, "Could not fetch Events");
@@ -170,7 +170,7 @@ export function ProjectCommitList(props: {
     {
       deps: [projectID, refName],
       secondsToRefetch: 60,
-    }
+    },
   );
   if (error) {
     showErrorToast(error, "Could not fetch commits from Project");

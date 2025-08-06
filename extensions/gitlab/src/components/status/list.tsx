@@ -29,7 +29,7 @@ export default function StatusList(): JSX.Element {
       deps: [],
       secondsToRefetch: 0,
       secondsToInvalid: 0,
-    }
+    },
   );
   if (error) {
     showErrorToast(getErrorMessage(error), "Could not fetch Status");
