@@ -1,5 +1,7 @@
 # GitLab Changelog
 
+## [Added support for Windows] - {PR_MERGE_DATE}
+
 ## [Group milestones in MRs and Issues] - 2025-06-27
 
 - Add group milestones to the issue create form
