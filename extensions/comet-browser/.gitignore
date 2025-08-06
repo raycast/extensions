@@ -33,7 +33,6 @@ Thumbs.db
 *.tsbuildinfo
 
 # Package manager files
-package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
