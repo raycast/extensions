@@ -6,7 +6,7 @@ Quickly count tokens in selected text or clipboard content using popular AI mode
 
 - **Count Tokens in Selection**: Tokenize any selected text
 - **Count Tokens from Clipboard**: Tokenize clipboard content
-- **Multiple Encodings**: Support for GPT-4o, GPT-3.5/4, and GPT-3 tokenizers
+- **Multiple Encodings**: Support for o-series, GPT-4o, GPT-4.1, GPT-3.5/4, and GPT-3 model tokenizers
 - **Instant Results**: Clean, non-intrusive notifications
 - **Hotkey Support**: Works seamlessly with keyboard shortcuts
 
@@ -18,17 +18,6 @@ Quickly count tokens in selected text or clipboard content using popular AI mode
 
 ## Supported Encodings
 
-- **o200k_base**: GPT-4o models
+- **o200k_base**: GPT-4o, GPT-4.1, o-series (o3, o3-mini, o4-mini) models
 - **cl100k_base**: GPT-3.5 and GPT-4 models  
 - **p50k_base**: GPT-3 models
-
-## Technical Notes
-
-This extension uses the `@dqbd/tiktoken` library for tokenization, which requires a WebAssembly (WASM) binary.
-
-To comply with the Raycast Store's repository size limits and avoid issues with Git LFS on public forks, the `tiktoken_bg.wasm` binary is not included directly in this repository. Instead, it is downloaded at runtime from a [GitHub Release](https://github.com/ashleymavericks/tokenizer-raycast/releases/download/binary/tiktoken_bg.wasm) and cached locally on the user's machine.
-
-**WASM Binary Details:**
-- **Source Package**: `@dqbd/tiktoken@1.0.21`
-- **Original Build Source**: [dqbd/tiktoken](https://github.com/dqbd/tiktoken) (an official fork of OpenAI's tiktoken)
-- **License**: MIT
