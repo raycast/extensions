@@ -1,0 +1,190 @@
+{
+    "Digit1": {
+        "lower": "ຢ",
+        "upper": "1"
+    },
+    "Digit2": {
+        "lower": "ຟ",
+        "upper": "2"
+    },
+    "Digit3": {
+        "lower": "ໂ",
+        "upper": "3"
+    },
+    "Digit4": {
+        "lower": "ຖ",
+        "upper": "4"
+    },
+    "Digit5": {
+        "lower": "ຸ",
+        "upper": "໌"
+    },
+    "Digit6": {
+        "lower": "ູ",
+        "upper": "ຼ"
+    },
+    "Digit7": {
+        "lower": "ຄ",
+        "upper": "5"
+    },
+    "Digit8": {
+        "lower": "ຕ",
+        "upper": "6"
+    },
+    "Digit9": {
+        "lower": "ຈ",
+        "upper": "7"
+    },
+    "Digit0": {
+        "lower": "ຂ",
+        "upper": "8"
+    },
+    "Minus": {
+        "lower": "ຊ",
+        "upper": "9"
+    },
+    "Equal": {
+        "lower": "ໍ",
+        "upper": "ໍ່"
+    },
+    "KeyQ": {
+        "lower": "ົ",
+        "upper": "ົ້"
+    },
+    "KeyW": {
+        "lower": "ໄ",
+        "upper": "0"
+    },
+    "KeyE": {
+        "lower": "ຳ",
+        "upper": "*"
+    },
+    "KeyR": {
+        "lower": "ພ",
+        "upper": "_"
+    },
+    "KeyT": {
+        "lower": "ະ",
+        "upper": "+"
+    },
+    "KeyY": {
+        "lower": "ິ",
+        "upper": "ິ້"
+    },
+    "KeyU": {
+        "lower": "ີ",
+        "upper": "ີ້"
+    },
+    "KeyI": {
+        "lower": "ຮ",
+        "upper": "ຣ"
+    },
+    "KeyO": {
+        "lower": "ນ",
+        "upper": "ໜ"
+    },
+    "KeyP": {
+        "lower": "ຍ",
+        "upper": "ຽ"
+    },
+    "BracketLeft": {
+        "lower": "ບ",
+        "upper": "-"
+    },
+    "BracketRight": {
+        "lower": "ລ",
+        "upper": "ຫຼ"
+    },
+    "KeyA": {
+        "lower": "ັ",
+        "upper": "ັ້"
+    },
+    "KeyS": {
+        "lower": "ຫ",
+        "upper": ";"
+    },
+    "KeyD": {
+        "lower": "ກ",
+        "upper": "."
+    },
+    "KeyF": {
+        "lower": "ດ",
+        "upper": ","
+    },
+    "KeyG": {
+        "lower": "ເ",
+        "upper": ":"
+    },
+    "KeyH": {
+        "lower": "້",
+        "upper": "໊"
+    },
+    "KeyJ": {
+        "lower": "່",
+        "upper": "໋"
+    },
+    "KeyK": {
+        "lower": "າ",
+        "upper": "!"
+    },
+    "KeyL": {
+        "lower": "ສ",
+        "upper": "?"
+    },
+    "Semicolon": {
+        "lower": "ວ",
+        "upper": "%"
+    },
+    "Quote": {
+        "lower": "ງ",
+        "upper": "="
+    },
+    "Backquote": {
+        "lower": "\"",
+        "upper": "'"
+    },
+    "Backslash": {
+        "lower": "/",
+        "upper": "\\"
+    },
+    "KeyZ": {
+        "lower": "ຜ",
+        "upper": "₭"
+    },
+    "KeyX": {
+        "lower": "ປ",
+        "upper": "("
+    },
+    "KeyC": {
+        "lower": "ແ",
+        "upper": "ຯ"
+    },
+    "KeyV": {
+        "lower": "ອ",
+        "upper": "x"
+    },
+    "KeyB": {
+        "lower": "ຶ",
+        "upper": "ຶ້"
+    },
+    "KeyN": {
+        "lower": "ື",
+        "upper": "ື້"
+    },
+    "KeyM": {
+        "lower": "ທ",
+        "upper": "ໆ"
+    },
+    "Comma": {
+        "lower": "ມ",
+        "upper": "ໝ"
+    },
+    "Period": {
+        "lower": "ໃ",
+        "upper": "$"
+    },
+    "Slash": {
+        "lower": "ຝ",
+        "upper": ")"
+    }
+}
