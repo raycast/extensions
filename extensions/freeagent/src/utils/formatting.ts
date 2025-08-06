@@ -28,7 +28,7 @@ export function getInvoiceUrl(invoice: Invoice, companyInfo: CompanyInfo): strin
 }
 
 export function getContactUrl(contactUrl: string, companyInfo: CompanyInfo): string {
-  const id = contactUrl.split("/").pop();
+  const id = contactUrl.split("/").pop() || "";
   return `https://${companyInfo.subdomain}.freeagent.com/contacts/${id}`;
 }
 
