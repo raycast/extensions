@@ -1,6 +1,6 @@
 # Proton Authenticator for Raycast
 
-A Raycast extension to quicly access your TOTP codes from Proton Pass authenticator exports.
+A Raycast extension to quickly access your TOTP codes from Proton Authenticator.
 
 ## Features
 
@@ -58,9 +58,9 @@ Wish to import a different JSON file? Reset your data (**Warning: this action ca
 1. Export your authenticator data from Proton Pass
 2. Upload the JSON file to the tool as prompted
 
-## Notes
+## Compatibility
 
-- This extension is compatible with only machines running Apple Silicon with a Touch ID.
+Apple Silicon Macs with Touch ID
 
 ## Credits
 
