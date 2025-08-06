@@ -135,9 +135,8 @@ const ListUnexplainedTransactions = function Command() {
                     accessories={[
                       { text: formatCurrencyAmount(companyInfo?.currency || "GBP", transaction.amount) },
                       { date: parseDate(transaction.dated_on) },
-                      {
-                        tooltip: "For Approval",
-                      },
+                      { text: formatCurrencyAmount(companyInfo?.currency || "GBP", transaction.amount) },
+                      { date: parseDate(transaction.dated_on) },
                       ...(unexplainedAmount > 0
                         ? [
                             {
