@@ -63,7 +63,7 @@ export function formatUriAsName(uri: string): string {
   return `${resourceType.charAt(0).toUpperCase() + resourceType.slice(1)} ${id}`;
 }
 
-export function formatCurrencyAmount(amount: number | string, currency: string): string {
+export function formatCurrencyAmount(currency: string, amount: number | string): string {
   const formatter = new Intl.NumberFormat("en-GB", {
     style: "currency",
     currency,
