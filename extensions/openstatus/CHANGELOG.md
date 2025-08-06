@@ -1,6 +1,6 @@
 # OpenStatus Changelog
 
-## [✨ AI Enhancements] - {PR_MERGE_DATE}
+## [✨ AI Enhancements] - 2025-08-06
 
 - Add various AI Tools 
 - Modernize extension - chore: remove `node-fetch`
