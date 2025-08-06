@@ -22,14 +22,8 @@ export function useCometTabs() {
     {
       keepPreviousData: true,
       initialData: [],
-      failureRetryCount: 2,
       // Optimized caching strategy for better performance
-      revalidateOnFocus: true,
-      revalidateOnReconnect: true,
       // Cache for 30 seconds for better performance
-      revalidateAfterSeconds: 30,
-      // Enable stale-while-revalidate for instant responses
-      staleTime: 10000, // 10 seconds stale time
     },
   );
 

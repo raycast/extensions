@@ -1,8 +1,8 @@
-import Fuse from "fuse.js";
+import Fuse, { IFuseOptions } from "fuse.js";
 import { CometTab, CometHistoryEntry, SearchResult } from "./types";
 
 export class SearchEngine {
-  private fuseOptions: Fuse.IFuseOptions<SearchResult> = {
+  private fuseOptions: IFuseOptions<SearchResult> = {
     keys: [
       { name: "data.title", weight: 0.4 },
       { name: "data.url", weight: 0.6 },
@@ -24,7 +24,9 @@ export class SearchEngine {
     if (this.searchCache.size >= this.maxCacheSize) {
       // Remove oldest entry
       const firstKey = this.searchCache.keys().next().value;
-      this.searchCache.delete(firstKey);
+      if (firstKey !== undefined) {
+        this.searchCache.delete(firstKey);
+      }
     }
     this.searchCache.set(query, results);
   }
@@ -86,7 +88,7 @@ export class SearchEngine {
       return tabs;
     }
 
-    const fuseOptions: Fuse.IFuseOptions<CometTab> = {
+    const fuseOptions: IFuseOptions<CometTab> = {
       keys: [
         { name: "title", weight: 0.4 },
         { name: "url", weight: 0.6 },
@@ -108,7 +110,7 @@ export class SearchEngine {
       return history.slice(0, 50); // Limit initial results for performance
     }
 
-    const fuseOptions: Fuse.IFuseOptions<CometHistoryEntry> = {
+    const fuseOptions: IFuseOptions<CometHistoryEntry> = {
       keys: [
         { name: "title", weight: 0.4 },
         { name: "url", weight: 0.6 },
