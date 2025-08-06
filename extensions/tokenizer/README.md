@@ -6,7 +6,7 @@ Quickly count tokens in selected text or clipboard content using popular AI mode
 
 - **Count Tokens in Selection**: Tokenize any selected text
 - **Count Tokens from Clipboard**: Tokenize clipboard content
-- **Multiple Encodings**: Support for o-series, GPT-4o, GPT-4.1, GPT-3.5/4, and GPT-3 model tokenizers
+- **Multiple Encodings**: Support for o3, o3-mini, o4-mini, GPT-4.1, GPT-4o, GPT-3.5/4, and GPT-3 model tokenizers
 - **Instant Results**: Clean, non-intrusive notifications
 - **Hotkey Support**: Works seamlessly with keyboard shortcuts
 
