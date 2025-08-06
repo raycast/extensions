@@ -1,5 +1,5 @@
 import Common from "./common";
 
 export default function Command() {
-  return <Common from="clipboard" />;
+  return <Common from="selection" />;
 }
