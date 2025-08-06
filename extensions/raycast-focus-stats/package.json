@@ -5,6 +5,9 @@
   "description": "View Raycast's Focus session statistics.",
   "icon": "icon.png",
   "author": "dinocosta",
+  "contributor": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Productivity"
   ],
