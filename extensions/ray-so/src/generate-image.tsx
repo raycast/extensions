@@ -1,4 +1,5 @@
 import { getSelectedText, open, showToast, showHUD, getPreferenceValues, Toast } from "@raycast/api";
+import { encodeForRayso } from "./utils";
 
 interface Preferences {
   theme: string;
@@ -20,11 +21,7 @@ export default async () => {
     return;
   }
 
-  const base64Text = Buffer.from(selectedText, "utf8")
-    .toString("base64")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=/g, "");
+  const base64Text = encodeForRayso(selectedText);
 
   await showToast({
     style: Toast.Style.Animated,
