@@ -65,6 +65,20 @@
             "mode": "no-view"
         },
         {
+            "name": "enable-dock-follows-active-window",
+            "title": "Enable Dock Follows Active Window",
+            "subtitle": "Let the Dock follow your active window",
+            "description": "Activates DockLock Plus automation to move the Dock to the screen where your active window is located",
+            "mode": "no-view"
+        },
+        {
+            "name": "disable-dock-follows-active-window",
+            "title": "Disable Dock Follows Active Window",
+            "subtitle": "Stop the Dock from following the active window",
+            "description": "Disables the DockLock Plus feature that follows the active window to relocate the Dock",
+            "mode": "no-view"
+        },
+        {
             "name": "move-to-display-by-name",
             "title": "Move Dock to Display by Name",
             "subtitle": "Move the Dock to a specific display by Name",
