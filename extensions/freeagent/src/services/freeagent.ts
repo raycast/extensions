@@ -63,7 +63,8 @@ async function makeRequest<T>(endpoint: string, accessToken: string, options?: R
   });
 
   if (!response.ok) {
-    console.log("Error response:", await response.json());
+    // Optionally log error status, but do not log full response body to avoid exposing sensitive data
+    // console.error(`HTTP error! status: ${response.status} - ${response.statusText}`);
     throw new FreeAgentError(`HTTP error! status: ${response.status}`, response.status);
   }
 
