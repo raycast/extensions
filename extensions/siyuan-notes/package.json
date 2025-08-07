@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "siyuan-notes",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "title": "Siyuan Notes",
   "description": "思源笔记扩展，支持搜索、创建笔记和每日记录。",
   "icon": "icon.png",
@@ -55,6 +55,32 @@
       "title": "Recent Notes",
       "description": "查看和访问最近修改的思源笔记文档",
       "mode": "view"
+    },
+    {
+      "name": "note-roaming",
+      "title": "Note Roaming",
+      "description": "笔记漫游功能：支持随机漫游、标签主题漫游和年老笔记回顾",
+      "mode": "view"
+    },
+    {
+      "name": "find-assets",
+      "title": "Find Assets",
+      "description": "快速查找和管理 SiYuan assets 文件夹中的附件文件",
+      "mode": "view"
+    },
+    {
+      "name": "quick-add-note",
+      "title": "Quick Add Note",
+      "description": "快速添加剪贴板内容到最近编辑的思源笔记文档中",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "content",
+          "placeholder": "要添加的内容",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [
@@ -85,8 +111,8 @@
       "type": "textfield",
       "required": false,
       "title": "每日笔记路径模板",
-      "description": "每日笔记路径模板 (e.g., 笔记本名称/daily/{{date}})",
-      "default": "/daily note/{{date}}"
+      "description": "每日笔记路径模板，格式：笔记本名称/文档路径 (e.g., 收集箱/daily note/{{year}}/{{month}}/{{date}})",
+      "default": "收集箱/daily note/{{year}}/{{month}}/{{date}}"
     },
     {
       "name": "workspacePath",

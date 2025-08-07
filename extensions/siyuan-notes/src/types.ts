@@ -84,3 +84,30 @@ export interface SiYuanApiResponse<T = unknown> {
   msg: string;
   data: T;
 }
+
+// Assets 附件相关类型定义
+export interface AssetFileInfo {
+  name: string;
+  path: string;
+  size?: number;
+  created?: string;
+  updated?: string;
+  isDir: boolean;
+}
+
+export interface AssetFile {
+  name: string;
+  path: string;
+  size: number;
+  modTime: string;
+  isDir: boolean;
+  isAsset: boolean;
+  extension: string;
+  type: "image" | "document" | "archive" | "video" | "audio" | "other";
+  fullPath: string;
+  // 引用信息
+  referencedBy?: string | null;
+  referencedByPath?: string | null;
+  referencedByDocId?: string | null;
+  lastReferencedTime?: string | null;
+}
