@@ -47,7 +47,7 @@
       ]
     },
     {
-      "name": "ff-rew-seconds",
+      "name": "ffRewSeconds",
       "title": "Number of seconds to fast forward or rewind.",
       "default": "10",
       "type": "textfield",
@@ -56,6 +56,24 @@
     }
   ],
   "commands": [
+    {
+      "name": "now-playing",
+      "title": "Now Playing",
+      "subtitle": "YouTube Music",
+      "description": "Shows the currently playing track information with controls.",
+      "mode": "view",
+      "required": false,
+      "preferences": [
+        {
+          "name": "renderInterval",
+          "title": "Now Playing Refresh Interval (ms)",
+          "description": "Interval in milliseconds for refreshing the Now Playing panel. Lower values will update the panel more frequently, but may increase CPU usage.",
+          "type": "textfield",
+          "default": "300",
+          "required": false
+        }
+      ]
+    },
     {
       "name": "play-pause",
       "title": "Toggle Play/Pause",
@@ -132,7 +150,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.35.1",
+    "@raycast/api": "1.38",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {

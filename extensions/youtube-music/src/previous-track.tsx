@@ -1,7 +1,7 @@
 import { closeMainWindow, showHUD } from "@raycast/api";
 import { runJSInYouTubeMusicTab } from "./utils";
 
-export default async () => {
+export default async (closeWindow = true) => {
   try {
     const result = await runJSInYouTubeMusicTab(`
       (function () {
@@ -31,29 +31,31 @@ export default async () => {
       })();
     `);
 
-    // Feedback je nach Result
-    switch (result) {
-      case "ytmusic-prev":
-        await showHUD("⏮️ Previous Song (YT Music)");
-        break;
-      case "youtube-restart":
-        await showHUD("🔁 Restarted Video");
-        break;
-      case "youtube-back":
-        await showHUD("⬅️ Back to Previous Video");
-        break;
-      case "ytmusic-fail":
-        await showHUD("❌ No previous button found (YT Music)");
-        break;
-      case "no-video":
-        await showHUD("❌ No video element found");
-        break;
-      default:
-        await showHUD("❌ Unknown state");
+    if (closeWindow) {
+      switch (result) {
+        case "ytmusic-prev":
+          await showHUD("⏮️ Previous Song (YT Music)");
+          break;
+        case "youtube-restart":
+          await showHUD("🔁 Restarted Video");
+          break;
+        case "youtube-back":
+          await showHUD("⬅️ Back to Previous Video");
+          break;
+        case "ytmusic-fail":
+          await showHUD("❌ No previous button found (YT Music)");
+          break;
+        case "no-video":
+          await showHUD("❌ No video element found");
+          break;
+        default:
+          await showHUD("❌ Unknown state");
+      }
+      await closeMainWindow();
     }
-
-    await closeMainWindow();
   } catch (error) {
-    await showHUD("❌ Failed to run previous command");
+    if (closeWindow) {
+      await showHUD("❌ Failed to run previous command");
+    }
   }
 };
