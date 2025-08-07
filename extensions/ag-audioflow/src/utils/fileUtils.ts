@@ -1,4 +1,5 @@
-import { getSelectedFinderItems } from "@raycast/api";
+import { getSelectedFinderItems, showToast, Toast, launchCommand, LaunchType } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import path from "path";
 
 export interface AudioFileInfo {
@@ -10,6 +11,31 @@ export interface AudioFileInfo {
  * Audio file extensions supported by the application
  */
 export const AUDIO_EXTENSIONS = [".mp3", ".wav", ".aac", ".flac", ".ogg", ".m4a", ".wma"];
+
+/**
+ * Checks if FFmpeg is available and launches setup command if not
+ * @returns Promise<boolean> - True if FFmpeg is available, false if not
+ */
+export async function checkFFmpegAndNotify(): Promise<boolean> {
+  const { AudioProcessor } = await import("./audioProcessor");
+  const ffmpegAvailable = await AudioProcessor.checkFFmpegAvailability();
+
+  if (!ffmpegAvailable) {
+    try {
+      await launchCommand({
+        name: "setup-ffmpeg",
+        type: LaunchType.UserInitiated,
+      });
+    } catch (error) {
+      // Fallback to toast if launchCommand fails
+      await showFailureToast(error, {
+        title: "Failed to launch Setup FFmpeg",
+      });
+    }
+  }
+
+  return ffmpegAvailable;
+}
 
 /**
  * Loads the first selected audio file from Finder

@@ -1,7 +1,8 @@
 import { ActionPanel, Action, Form, showToast, Toast, showInFinder, popToRoot } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { AudioProcessor } from "./utils/audioProcessor";
-import { loadSelectedAudioFiles } from "./utils/fileUtils";
+import { loadSelectedAudioFiles, checkFFmpegAndNotify } from "./utils/fileUtils";
+import { useCachedState } from "@raycast/utils";
 import { SUPPORTED_AUDIO_FORMATS, AUDIO_BITRATES } from "./types";
 import path from "path";
 
@@ -31,11 +32,21 @@ interface ProcessingProgress {
 
 export default function BatchProcess() {
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [progress, setProgress] = useState<ProcessingProgress | null>(null);
+  const [ffmpegAvailable, setFFmpegAvailable] = useCachedState<boolean | null>("ffmpegAvailable", null);
 
   useEffect(() => {
-    loadSelectedFiles();
+    async function initialize() {
+      // Check FFmpeg availability first
+      const available = await checkFFmpegAndNotify();
+      setFFmpegAvailable(available);
+
+      // Then load selected files
+      await loadSelectedFiles();
+      setIsLoading(false);
+    }
+    initialize();
   }, []);
 
   async function loadSelectedFiles() {
@@ -80,16 +91,6 @@ export default function BatchProcess() {
     const results: { success: boolean; file: string; error?: string }[] = [];
 
     try {
-      const ffmpegAvailable = await AudioProcessor.checkFFmpegAvailability();
-      if (!ffmpegAvailable) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "FFmpeg Not Available",
-          message: "Please install FFmpeg to use audio processing features",
-        });
-        return;
-      }
-
       for (const inputFile of values.inputFiles) {
         setProgress({
           current: processedFiles + 1,

@@ -1,8 +1,9 @@
 import { ActionPanel, Action, Form, showToast, Toast, showInFinder, popToRoot } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { AudioProcessor, AudioInfo } from "./utils/audioProcessor";
-import { loadSelectedAudioFile } from "./utils/fileUtils";
+import { loadSelectedAudioFile, checkFFmpegAndNotify } from "./utils/fileUtils";
 import path from "path";
+import { useCachedState } from "@raycast/utils";
 
 interface FormValues {
   inputFile: string[];
@@ -14,18 +15,25 @@ interface FormValues {
 
 export default function AdjustVolume() {
   const [selectedFile, setSelectedFile] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [audioInfo, setAudioInfo] = useState<AudioInfo | null>(null);
+  const [ffmpegAvailable, setFFmpegAvailable] = useCachedState<boolean | null>("ffmpegAvailable", null);
 
   useEffect(() => {
-    async function loadSelectedFile() {
+    async function initialize() {
+      // Check FFmpeg availability first
+      const available = await checkFFmpegAndNotify();
+      setFFmpegAvailable(available);
+
+      // Then load selected file
       const audioFile = await loadSelectedAudioFile();
       if (audioFile) {
         setSelectedFile(audioFile.path);
         loadAudioInfo(audioFile.path);
       }
+      setIsLoading(false);
     }
-    loadSelectedFile();
+    initialize();
   }, []);
 
   async function loadAudioInfo(filePath: string) {
@@ -78,16 +86,6 @@ export default function AdjustVolume() {
     setIsLoading(true);
 
     try {
-      const ffmpegAvailable = await AudioProcessor.checkFFmpegAvailability();
-      if (!ffmpegAvailable) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "FFmpeg Not Available",
-          message: "Please install FFmpeg to use audio processing features",
-        });
-        return;
-      }
-
       const inputPath = values.inputFile[0];
       const outputDir = values.outputDirectory?.[0] || path.dirname(inputPath);
       const suffix = volumeChange >= 0 ? `volume_plus${volumeChange}dB` : `volume_minus${Math.abs(volumeChange)}dB`;
