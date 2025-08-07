@@ -1,10 +1,8 @@
-import { getSelectedFinderItems, showToast, Toast, showHUD, Clipboard } from "@raycast/api";
+import { getSelectedFinderItems, showToast, Toast, showHUD, Clipboard, getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { promises as fs } from "fs";
 import path from "path";
 import { generateSlugFilename } from "./utils/slugify";
-
-// Slugify extension for Raycast - converts file/folder names to URL-friendly format
 
 interface RenameResult {
   success: boolean;
@@ -46,13 +44,13 @@ async function generateUniqueFilename(dirPath: string, baseSlugName: string): Pr
 /**
  * Renames a single file or directory
  */
-async function renameItem(itemPath: string): Promise<RenameResult> {
+async function renameItem(itemPath: string, useGermanTranslation: boolean): Promise<RenameResult> {
   try {
     const dirPath = path.dirname(itemPath);
     const originalName = path.basename(itemPath);
 
     // Generate slugified name
-    const slugifiedName = generateSlugFilename(originalName);
+    const slugifiedName = generateSlugFilename(originalName, true, useGermanTranslation);
 
     // If the name is already slugified, skip
     if (originalName === slugifiedName) {
@@ -89,6 +87,9 @@ async function renameItem(itemPath: string): Promise<RenameResult> {
  */
 export default async function Command() {
   try {
+    // Get preferences
+    const preferences = getPreferenceValues<Preferences>();
+
     // Show initial loading toast
     const loadingToast = await showToast({
       style: Toast.Style.Animated,
@@ -114,7 +115,7 @@ export default async function Command() {
     // Process each selected item
     const results: RenameResult[] = [];
     for (const item of selectedItems) {
-      const result = await renameItem(item.path);
+      const result = await renameItem(item.path, preferences.enableGermanTranslation);
       results.push(result);
     }
 

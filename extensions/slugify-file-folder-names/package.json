@@ -2,11 +2,23 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "slugify-file-folder-names",
   "title": "Slugify File / Folder Names",
-  "description": "Rename selected files and folders in Finder to URL-friendly slug format with international character support",
+  "description": "Rename selected files and folders in Finder to URL-friendly slug format with international character support and optional German umlaut transliteration",
+  "version": "1.1.0",
   "icon": "extension-icon.png",
   "author": "tarikkavaz",
   "categories": ["Productivity", "System", "Other"],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "enableGermanTranslation",
+      "type": "checkbox",
+      "title": "Transliterate German Umlauts",
+      "label": "Enable German umlaut translation (ä→ae, ö→oe, ü→ue, ß→ss)",
+      "description": "When enabled, German umlauts will be converted to their proper transliterations instead of single characters (ä→ae, ö→oe, ü→ue, ß→ss)",
+      "default": false,
+      "required": false
+    }
+  ],
   "commands": [
     {
       "name": "slug",
