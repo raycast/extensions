@@ -1,6 +1,6 @@
 # Amazon AWS Changelog
 
-## [Amplify command] - {PR_MERGE_DATE}
+## [Amplify command] - 2025-08-07
 
 - Add AWS Amplify command to manage Amplify apps and branches
 - View app details including platform, repository, and update times
