@@ -7,4 +7,5 @@ export { PreferenceUtils } from "./preference-utils";
 export { TreeParser } from "./tree-parser";
 export { TreeCreator } from "./tree-creator";
 export { ClipboardDetector } from "./clipboard-detector";
+export { MarkdownParser } from "./markdown-parser";
 export type { ClipboardTreeItem } from "./clipboard-detector";

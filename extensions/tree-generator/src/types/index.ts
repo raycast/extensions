@@ -98,6 +98,8 @@ export interface TreeCreationOptions {
   overwriteExisting: boolean;
   /** Project/folder name to create (optional, if provided, creates a new folder) */
   projectName?: string;
+  /** Whether to create only directories, not files */
+  directoriesOnly?: boolean;
 }
 
 /**

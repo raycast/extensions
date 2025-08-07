@@ -62,7 +62,8 @@ export class TreeCreator {
           if (node.children.length > 0) {
             await this.createNodes(node.children, itemPath);
           }
-        } else {
+        } else if (!this.options.directoriesOnly) {
+          // Only create files if directoriesOnly option is false
           await this.createFile(itemPath);
         }
       } catch (error) {
@@ -160,12 +161,12 @@ export class TreeCreator {
         const currentPath = path ? `${path}/${node.name}` : node.name;
 
         // Check for invalid characters in names
-        if (this.hasInvalidPathCharacters(node.name)) {
+        if (TreeCreator.hasInvalidPathCharacters(node.name)) {
           errors.push(`Invalid characters in name: ${currentPath}`);
         }
 
         // Check for reserved names (Windows)
-        if (this.isReservedName(node.name)) {
+        if (TreeCreator.isReservedName(node.name)) {
           errors.push(`Reserved name not allowed: ${currentPath}`);
         }
 
@@ -252,7 +253,8 @@ export class TreeCreator {
           existingPaths.push(itemPath);
         } else if (node.isDirectory) {
           directoriesToCreate.push(itemPath);
-        } else {
+        } else if (!this.options.directoriesOnly) {
+          // Only include files in preview if directoriesOnly option is false
           filesToCreate.push(itemPath);
         }
 

@@ -21,6 +21,7 @@ export default function CreateFromTreeCommand() {
     return {
       rootPath: "",
       overwriteExisting: false,
+      directoriesOnly: false,
     };
   };
 
@@ -31,16 +32,16 @@ export default function CreateFromTreeCommand() {
     const initializeDirectory = async () => {
       try {
         const currentDir = await DirectoryUtils.getCurrentDirectorySilent();
-        setCurrentOptions({
-          ...currentOptions,
+        setCurrentOptions((prev) => ({
+          ...prev,
           rootPath: currentDir,
-        });
+        }));
       } catch {
         // Fallback to home directory
-        setCurrentOptions({
-          ...currentOptions,
+        setCurrentOptions((prev) => ({
+          ...prev,
           rootPath: homedir(),
-        });
+        }));
       }
     };
 

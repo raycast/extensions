@@ -93,14 +93,16 @@ export class ClipboardDetector {
   }
 
   /**
-   * Count total nodes in parsed tree
+   * Generic function to count nodes based on a predicate
    */
-  private static countNodes(nodes: ParsedTreeNode[]): number {
+  private static countNodesByPredicate(nodes: ParsedTreeNode[], predicate: (node: ParsedTreeNode) => boolean): number {
     let count = 0;
 
     function countRecursive(nodeList: ParsedTreeNode[]): void {
       for (const node of nodeList) {
-        count++;
+        if (predicate(node)) {
+          count++;
+        }
         if (node.children && node.children.length > 0) {
           countRecursive(node.children);
         }
@@ -109,48 +111,27 @@ export class ClipboardDetector {
 
     countRecursive(nodes);
     return count;
+  }
+
+  /**
+   * Count total nodes in parsed tree
+   */
+  private static countNodes(nodes: ParsedTreeNode[]): number {
+    return this.countNodesByPredicate(nodes, () => true);
   }
 
   /**
    * Count files in parsed tree
    */
   private static countFiles(nodes: ParsedTreeNode[]): number {
-    let count = 0;
-
-    function countRecursive(nodeList: ParsedTreeNode[]): void {
-      for (const node of nodeList) {
-        if (!node.isDirectory) {
-          count++;
-        }
-        if (node.children && node.children.length > 0) {
-          countRecursive(node.children);
-        }
-      }
-    }
-
-    countRecursive(nodes);
-    return count;
+    return this.countNodesByPredicate(nodes, (node) => !node.isDirectory);
   }
 
   /**
    * Count directories in parsed tree
    */
   private static countDirectories(nodes: ParsedTreeNode[]): number {
-    let count = 0;
-
-    function countRecursive(nodeList: ParsedTreeNode[]): void {
-      for (const node of nodeList) {
-        if (node.isDirectory) {
-          count++;
-        }
-        if (node.children && node.children.length > 0) {
-          countRecursive(node.children);
-        }
-      }
-    }
-
-    countRecursive(nodes);
-    return count;
+    return this.countNodesByPredicate(nodes, (node) => node.isDirectory);
   }
 
   /**

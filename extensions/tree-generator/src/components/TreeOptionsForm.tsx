@@ -102,7 +102,11 @@ export function TreeOptionsForm({ initialOptions, onSubmit, isInitializing = fal
         value={DirectoryUtils.formatPathForDisplay(options.rootPath)}
         onChange={(value) => {
           // Expand ~ to home directory if needed
-          const expandedPath = value.startsWith("~") ? value.replace("~", homedir()) : value;
+          const expandedPath = value.startsWith("~/")
+            ? value.replace("~", homedir())
+            : value === "~"
+              ? homedir()
+              : value;
           setOptions((prev) => ({ ...prev, rootPath: expandedPath }));
         }}
         info="The directory to generate the tree from. Use Cmd+Shift+R to refresh current directory."

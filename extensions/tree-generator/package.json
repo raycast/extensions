@@ -24,6 +24,12 @@
       "title": "Create Files from Tree",
       "description": "Create directory structure and files from a tree representation",
       "mode": "view"
+    },
+    {
+      "name": "convert-markdown-to-tree",
+      "title": "Convert Markdown List to Tree",
+      "description": "Convert markdown list structure to directory tree format",
+      "mode": "view"
     }
   ],
   "preferences": [

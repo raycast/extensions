@@ -57,30 +57,34 @@ export class TreeParser {
   private static parseLine(line: string): { name: string; depth: number; isDirectory: boolean } | null {
     if (!line.trim()) return null;
 
-    // Remove leading whitespace
-    const trimmedLine = line.trimStart();
-    let cleanLine = trimmedLine;
+    const originalLine = line;
+    let cleanLine = line.trimStart();
 
     // Calculate depth based on tree structure
     let depth = 0;
 
-    // Count depth by analyzing the tree structure
-    // Look for patterns like "│   ", "├── ", "└── ", etc.
-    const depthMatch = line.match(/^(\s*(?:[│\s]*(?:├|└)[─\s]*)*)/);
-    if (depthMatch) {
-      const prefix = depthMatch[1];
-      // Count the number of tree levels by counting ├ or └ characters
-      const treeChars = (prefix.match(/[├└]/g) || []).length;
-      if (treeChars > 0) {
-        depth = treeChars - 1; // The current item is at this depth
-      } else {
-        // Fallback: count pipe characters (│) which indicate continuation lines
-        const pipeCount = (prefix.match(/[│]/g) || []).length;
-        depth = pipeCount;
+    // For root level items (no tree chars), depth is 0
+    if (!cleanLine.match(/^[│\s]*[├└]/)) {
+      depth = 0;
+    } else {
+      // Count the depth by analyzing the structure
+      // Each "│   " or similar spacing represents one level
+      // Each "├──" or "└──" represents the current level
+      const matches = originalLine.match(/^(\s*)((?:[│\s]+)*)(├|└)/);
+      if (matches) {
+        const pipeSection = matches[2];
+
+        // Count pipe characters (│) which indicate parent levels
+        const pipeCount = (pipeSection.match(/[│]/g) || []).length;
+        depth = pipeCount + 1; // Current level is one more than pipe count
       }
     }
 
-    // Remove tree drawing characters
+    // Remove tree drawing characters step by step
+    // First remove leading pipes and spaces
+    cleanLine = cleanLine.replace(/^[│\s]+/, "");
+
+    // Then remove the tree connector characters
     for (const char of this.TREE_CHARS) {
       if (cleanLine.startsWith(char)) {
         cleanLine = cleanLine.substring(char.length).trim();
@@ -88,8 +92,10 @@ export class TreeParser {
       }
     }
 
-    // Handle cases where tree chars are preceded by spaces/pipes
-    cleanLine = cleanLine.replace(/^[│\s]*/, "").trim();
+    if (!cleanLine) return null;
+
+    // Remove statistics info like "(2 files, 0 dirs)" if present
+    cleanLine = cleanLine.replace(/\s*\([^)]*\)\s*$/, "");
 
     if (!cleanLine) return null;
 

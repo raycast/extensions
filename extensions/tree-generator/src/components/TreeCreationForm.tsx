@@ -15,6 +15,7 @@ export function TreeCreationForm({ initialOptions, onSubmit }: TreeCreationFormP
   const [rootPath, setRootPath] = useState<string[]>(initialOptions.rootPath ? [initialOptions.rootPath] : []);
   const [treeString, setTreeString] = useState("");
   const [overwriteExisting, setOverwriteExisting] = useState(initialOptions.overwriteExisting);
+  const [directoriesOnly, setDirectoriesOnly] = useState(initialOptions.directoriesOnly || false);
   const [projectName, setProjectName] = useState(initialOptions.projectName || "");
   const [showPreview, setShowPreview] = useState(false);
   const [clipboardTrees, setClipboardTrees] = useState<ClipboardTreeItem[]>([]);
@@ -96,6 +97,7 @@ export function TreeCreationForm({ initialOptions, onSubmit }: TreeCreationFormP
     const options: TreeCreationOptions = {
       rootPath: selectedPath,
       overwriteExisting,
+      directoriesOnly,
       projectName: projectName.trim() || undefined,
     };
 
@@ -198,6 +200,15 @@ project/
       />
 
       <Form.Checkbox
+        id="directoriesOnly"
+        title="Directories Only"
+        label="Create only directories, skip files"
+        value={directoriesOnly}
+        onChange={setDirectoriesOnly}
+        info="If checked, only directories will be created. Files in the tree structure will be ignored."
+      />
+
+      <Form.Checkbox
         id="overwriteExisting"
         title="Overwrite Existing Files"
         label="Overwrite files that already exist"
@@ -227,7 +238,7 @@ function TreePreview({ treeString, rootPath, onBack, onConfirm }: TreePreviewPro
     errors: string[];
   } | null>(null);
 
-  useState(() => {
+  useEffect(() => {
     const generatePreview = async () => {
       try {
         const nodes = TreeParser.parseTreeString(treeString);
@@ -266,7 +277,7 @@ function TreePreview({ treeString, rootPath, onBack, onConfirm }: TreePreviewPro
     };
 
     generatePreview();
-  });
+  }, [treeString, rootPath]);
 
   const generateMarkdown = (): string => {
     if (!previewData) {
