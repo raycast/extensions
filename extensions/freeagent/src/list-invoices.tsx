@@ -27,32 +27,36 @@ const ListInvoices = function Command() {
 
   return (
     <List isLoading={isLoading}>
-      {invoices.map((invoice) => (
-        <List.Item
-          key={invoice.url}
-          icon={Icon.Document}
-          title={invoice.reference}
-          subtitle={invoice.contact_name}
-          accessories={[
-            { text: formatCurrencyAmount(invoice.currency, invoice.net_value) },
-            { text: { value: invoice.status, color: mapStatusColor(invoice.status) } },
-            { date: parseDate(invoice.dated_on) },
-          ]}
-          actions={
-            companyInfo ? (
-              <ActionPanel>
-                <Action.OpenInBrowser url={getInvoiceUrl(invoice, companyInfo)} />
-                <Action.OpenInBrowser
-                  title="View Contact"
-                  url={getContactUrl(invoice.contact, companyInfo)}
-                  icon={Icon.Person}
-                />
-                <Action.CopyToClipboard title="Copy Invoice Reference" content={invoice.reference} />
-              </ActionPanel>
-            ) : undefined
-          }
-        />
-      ))}
+      {invoices.length === 0 && !isLoading ? (
+        <List.EmptyView title="No invoices found" description="You don't have any invoices yet." />
+      ) : (
+        invoices.map((invoice) => (
+          <List.Item
+            key={invoice.url}
+            icon={Icon.Document}
+            title={invoice.reference}
+            subtitle={invoice.contact_name}
+            accessories={[
+              { text: formatCurrencyAmount(invoice.currency, invoice.net_value) },
+              { text: { value: invoice.status, color: mapStatusColor(invoice.status) } },
+              { date: parseDate(invoice.dated_on) },
+            ]}
+            actions={
+              companyInfo ? (
+                <ActionPanel>
+                  <Action.OpenInBrowser url={getInvoiceUrl(invoice, companyInfo)} />
+                  <Action.OpenInBrowser
+                    title="View Contact"
+                    url={getContactUrl(invoice.contact, companyInfo)}
+                    icon={Icon.Person}
+                  />
+                  <Action.CopyToClipboard title="Copy Invoice Reference" content={invoice.reference} />
+                </ActionPanel>
+              ) : undefined
+            }
+          />
+        ))
+      )}
     </List>
   );
 };

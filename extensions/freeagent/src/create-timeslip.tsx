@@ -4,6 +4,7 @@ import { authorizedWithFreeAgent } from "./oauth";
 import { Project, Task, TimeslipFormValues, User } from "./types";
 import { fetchProjects, fetchTasks, createTimeslip, getCurrentUser } from "./services/freeagent";
 import { useFreeAgent } from "./hooks/useFreeAgent";
+import { showFailureToast } from "@raycast/utils";
 
 const CreateTimeslip = function Command() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -86,7 +87,7 @@ const CreateTimeslip = function Command() {
         title: "Timeslip created successfully",
       });
     } catch (error) {
-      handleError(error, "Failed to create timeslip");
+      showFailureToast(error, { title: "Failed to create timeslip" });
     }
   }
 

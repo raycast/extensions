@@ -32,7 +32,7 @@ const ListUnexplainedTransactions = function Command() {
     }
 
     loadBankAccounts();
-  }, [isAuthenticated, accessToken]);
+  }, [isAuthenticated, accessToken, handleError]);
 
   // Load unexplained transactions when bank account is selected
   useEffect(() => {

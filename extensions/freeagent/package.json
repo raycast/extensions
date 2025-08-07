@@ -6,6 +6,7 @@
   "icon": "icon.png",
   "author": "SteveEdson",
   "license": "MIT",
+  "categories": ["Finance", "Productivity"],
   "commands": [
     {
       "name": "list-invoices",
@@ -61,7 +62,7 @@
     {
       "name": "default_payment_terms_in_days",
       "title": "Default Payment Terms (in days)",
-      "description": "The default payment terms for new invoices (in days)",
+      "description": "The default payment terms for new invoices (In Days)",
       "type": "textfield",
       "required": true,
       "default": "30"

@@ -128,12 +128,10 @@ export async function fetchBankTransactions(
   }
 
   const data = await makeRequest<BankTransactionsResponse>(endpoint, accessToken);
-  return (
-    data.bank_transactions.map((x) => ({
-      ...x,
-      status: view,
-    })) || []
-  );
+  return data.bank_transactions.map((x) => ({
+    ...x,
+    status: view,
+  }));
 }
 
 export async function fetchTimeslips(

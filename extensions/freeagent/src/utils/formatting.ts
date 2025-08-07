@@ -39,8 +39,6 @@ export function getBankTransactionUrl(
 ): string {
   const transactionId = transactionUrl.split("/").pop() || "";
   const accountId = bankAccountUrl.split("/").pop() || "";
-  // The format should be: https://:subdomain.FreeAgent.com/bank_accounts/:account_id/bank_account_entries/:entry_id/edit?bank_transaction_id=:id
-  // However, we need to construct the entry_id. For now, we'll use the transaction_id as both entry_id and bank_transaction_id
   return `https://${companyInfo.subdomain}.FreeAgent.com/bank_accounts/${accountId}/bank_account_entries/${transactionId}/edit?bank_transaction_id=${transactionId}`;
 }
 
