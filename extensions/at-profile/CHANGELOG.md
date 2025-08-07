@@ -1,6 +1,6 @@
 # @ Profile Changelog
 
-## [Profile History and Custom Apps] - {PR_MERGE_DATE}
+## [Profile History and Custom Apps] - 2025-08-07
 
 ### Added
 
