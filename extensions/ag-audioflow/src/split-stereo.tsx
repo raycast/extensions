@@ -2,10 +2,10 @@ import { ActionPanel, Action, Form, showToast, Toast, showInFinder, popToRoot } 
 import { useState, useEffect } from "react";
 import { AudioProcessor, AudioInfo } from "./utils/audioProcessor";
 import { loadSelectedAudioFile } from "./utils/fileUtils";
+import path from "path";
 
 interface FormValues {
   inputFile: string[];
-  outputDirectory: string[];
   outputBaseName: string;
 }
 
@@ -44,15 +44,6 @@ export default function SplitStereo() {
       return;
     }
 
-    if (!values.outputDirectory?.[0]) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "No Output Directory",
-        message: "Please select an output directory for the split files",
-      });
-      return;
-    }
-
     if (audioInfo && audioInfo.channels !== 2) {
       showToast({
         style: Toast.Style.Failure,
@@ -77,7 +68,7 @@ export default function SplitStereo() {
 
       await AudioProcessor.splitStereoToMono({
         inputPath: values.inputFile[0],
-        outputDirectory: values.outputDirectory[0],
+        outputDirectory: path.dirname(values.inputFile[0]),
         outputBaseName: values.outputBaseName || undefined,
       });
 
@@ -87,7 +78,7 @@ export default function SplitStereo() {
         message: "Left and right channels saved successfully",
         primaryAction: {
           title: "Show Output Folder",
-          onAction: () => showInFinder(values.outputDirectory[0]),
+          onAction: () => showInFinder(path.dirname(values.inputFile[0])),
         },
       });
 
@@ -132,19 +123,11 @@ export default function SplitStereo() {
         />
       )}
 
-      <Form.FilePicker
-        id="outputDirectory"
-        title="Output Directory"
-        allowMultipleSelection={false}
-        canChooseDirectories={true}
-        canChooseFiles={false}
-      />
-
       <Form.TextField
         id="outputBaseName"
         title="Output Base Name (Optional)"
         placeholder="Leave empty to use original filename"
-        info="Base name for output files. Will create [basename]_left.ext and [basename]_right.ext"
+        info="Base name for output files. Will create [basename]_left.ext and [basename]_right.ext in the same directory as the input file"
       />
 
       <Form.Description text="Split a stereo audio file into two separate mono files - one for the left channel and one for the right channel. This is useful for separating stereo recordings, isolating instruments, or preparing audio for specific mixing applications. The input file must be stereo (2 channels)." />
