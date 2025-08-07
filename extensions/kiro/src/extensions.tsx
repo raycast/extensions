@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, List, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, List } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { getErrorMessage } from "./utils";

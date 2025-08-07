@@ -111,7 +111,7 @@ function GalleryExtensionListItem(props: {
       return undefined;
     }
     const files = e.versions[0].files;
-    const file = files.find((f) => f.assetType === "Kiro.IDE.Services.Icons.Default");
+    const file = files.find((f) => f.assetType === "Microsoft.VisualStudio.Services.Icons.Default");
     if (file) {
       return file.source;
     }
@@ -254,7 +254,7 @@ function useGalleryQuery(searchText: string): {
   error: string | undefined;
   isLoading: boolean;
 } {
-  const url = "https://marketplace.kiro.dev/_apis/public/gallery/extensionquery?api-version=3.0-preview.1";
+  const url = "https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery?api-version=3.0-preview.1";
   const headers = {
     "content-type": "application/json",
     "accept-encoding": "gzip",
@@ -274,7 +274,7 @@ function useGalleryQuery(searchText: string): {
         criteria: [
           {
             filterType: FilterType.Target,
-            value: "Kiro.IDE",
+            value: "Microsoft.VisualStudio.Code",
           },
           {
             filterType: FilterType.SearchText,

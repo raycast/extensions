@@ -66,7 +66,7 @@ function getNLSVariable(text: string | undefined): string | undefined {
 }
 
 export function getKiroCLIFilename(): string {
-  return "/Applications/Kiro.app/Contents/Resources/app/bin/kiro";
+  return "/Applications/Kiro.app/Contents/Resources/app/bin/code";
 }
 
 export class KiroCLI {

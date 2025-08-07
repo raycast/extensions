@@ -2,9 +2,9 @@
 
 Control Kiro directly from Raycast.
 
-![Kiro screenshot 1](./metadata/kiro-1.jpeg)
-![Kiro screenshot 2](./metadata/kiro-2.jpeg)
-![Kiro screenshot 3](./metadata/kiro-3.jpeg)
+![Kiro screenshot 1](./readme-assets/kiro-1.png)
+![Kiro screenshot 2](./readme-assets/kiro-2.png)
+![Kiro screenshot 3](./readme-assets/kiro-3.png)
 
 ## Features
 

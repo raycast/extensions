@@ -11,7 +11,7 @@ function getAllowedMovements(entries: EntryLike[], entry: EntryLike): PinnedMove
   if (layout === "grid") {
     const index = entries.findIndex((e: EntryLike) => isDeepStrictEqual(e, entry));
 
-    if (index >= GRID_COLUMNS) {
+    if (index >= GRID_COLUMNS && index % GRID_COLUMNS === 0) {
       movements.push("up");
     }
 

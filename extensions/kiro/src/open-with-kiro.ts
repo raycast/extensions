@@ -1,4 +1,4 @@
-import { showToast, Toast, open, closeMainWindow, getSelectedFinderItems, getFrontmostApplication } from "@raycast/api";
+import { open, closeMainWindow, getSelectedFinderItems, getFrontmostApplication } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { runAppleScript } from "@raycast/utils";
 import { getCurrentFinderPath } from "./utils/apple-scripts";
