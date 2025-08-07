@@ -1,12 +1,12 @@
 import { ActionPanel, Action, List, popToRoot, showToast, Toast, getPreferenceValues } from "@raycast/api";
-import { AFSPreferences, StateItem } from "./models/models";
+import { StateItem } from "./models/models";
 import User from "./services/user";
 import States from "./services/states";
 import { useEffect, useState } from "react";
 import { HttpFunctionResult } from "./services/http";
 import { LoginResponseDTO } from "./dto/auth.dto";
 
-let afsPreferences: AFSPreferences;
+let afsPreferences: ExtensionPreferences;
 let states: States;
 
 async function handleItemSelect(item: StateItem) {
@@ -29,7 +29,7 @@ export default function Command() {
 
   useEffect(() => {
     const loadData = async () => {
-      afsPreferences = getPreferenceValues<AFSPreferences>();
+      afsPreferences = getPreferenceValues<ExtensionPreferences>();
       states = new States(afsPreferences);
       const user: User = new User(afsPreferences);
 

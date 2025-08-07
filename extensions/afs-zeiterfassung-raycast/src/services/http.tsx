@@ -1,7 +1,6 @@
 /* eslint-disable no-async-promise-executor */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosInstance, AxiosResponse } from "axios";
-import { AFSPreferences } from "../models/models";
 import User from "./user";
 import { LocalStorage, showToast, Toast } from "@raycast/api";
 import https from "https";
@@ -17,7 +16,7 @@ export default class Http {
   static ticketsystemServer: string = "";
   axiosInstance: AxiosInstance = axios.create();
 
-  constructor(public afsPreferences: AFSPreferences) {
+  constructor(public afsPreferences: ExtensionPreferences) {
     const httpsAgent = new https.Agent({
       rejectUnauthorized: false,
     });

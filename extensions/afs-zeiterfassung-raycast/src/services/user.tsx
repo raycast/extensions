@@ -1,12 +1,11 @@
 import { LocalStorage } from "@raycast/api";
 import Http, { HttpFunctionResult } from "./http";
-import { AFSPreferences } from "../models/models";
 import { LoginRequestDTO, LoginResponseDTO } from "../dto/auth.dto";
 
 export default class User {
   private http: Http;
 
-  constructor(public afsPreferences: AFSPreferences) {
+  constructor(public afsPreferences: ExtensionPreferences) {
     this.http = new Http(afsPreferences);
   }
 

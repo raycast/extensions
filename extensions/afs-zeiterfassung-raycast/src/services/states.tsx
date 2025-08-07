@@ -1,6 +1,6 @@
 import { StateRequestDTO } from "../dto/state.dto";
 import Http, { HttpFunctionResult } from "./http";
-import { AFSPreferences, StateItem } from "../models/models";
+import { StateItem } from "../models/models";
 
 export interface StateItemDTO {
   id: number;
@@ -10,7 +10,7 @@ export interface StateItemDTO {
 export default class States {
   private http: Http;
 
-  constructor(public afsPreferences: AFSPreferences) {
+  constructor(public afsPreferences: ExtensionPreferences) {
     this.http = new Http(afsPreferences);
   }
 
