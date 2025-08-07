@@ -30,7 +30,7 @@ export default async function Command() {
   let encoder: ReturnType<typeof get_encoding> | undefined;
   try {
     await initialize();
-    const { tokenizer }: Preferences = getPreferenceValues();
+    const { tokenizer }: Preferences.TokenizeSelected = getPreferenceValues();
     encoder = get_encoding(tokenizer);
 
     const selectedText = await getSelectedText();

@@ -30,7 +30,7 @@ export default async function Command() {
   let encoder: ReturnType<typeof get_encoding> | undefined;
   try {
     await initialize();
-    const { tokenizer }: Preferences = getPreferenceValues();
+    const { tokenizer }: Preferences.TokenizeClipboard = getPreferenceValues();
     encoder = get_encoding(tokenizer);
 
     const clipboardText = await Clipboard.readText();
