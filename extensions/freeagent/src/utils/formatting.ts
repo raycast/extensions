@@ -94,5 +94,5 @@ export function getUserDisplayName(user: string | User): string {
   }
   const firstName = user.first_name || "";
   const lastName = user.last_name || "";
-  return `${firstName} ${lastName}`.trim() || "Unknown User";
+  return [firstName, lastName].filter(Boolean).join(' ') || "Unknown User";
 }
