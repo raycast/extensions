@@ -1,6 +1,6 @@
 # Tokenizer Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-08-07
 
 - Add "Count Tokens in Selection" command
 - Add "Count Tokens from Clipboard" command  
