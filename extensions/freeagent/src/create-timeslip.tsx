@@ -2,7 +2,7 @@ import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { authorizedWithFreeAgent } from "./oauth";
 import { Project, Task, TimeslipFormValues, User } from "./types";
-import { fetchProjects, fetchTasks, createTimeslip, getCurrentUser } from "./services/FreeAgent";
+import { fetchProjects, fetchTasks, createTimeslip, getCurrentUser } from "./services/freeagent";
 import { useFreeAgent } from "./hooks/useFreeAgent";
 
 const CreateTimeslip = function Command() {

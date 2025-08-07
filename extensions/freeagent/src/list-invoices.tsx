@@ -2,7 +2,7 @@ import { ActionPanel, Action, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { authorizedWithFreeAgent } from "./oauth";
 import { Invoice } from "./types";
-import { fetchInvoices } from "./services/FreeAgent";
+import { fetchInvoices } from "./services/freeagent";
 import { formatCurrencyAmount, parseDate, mapStatusColor, getInvoiceUrl, getContactUrl } from "./utils/formatting";
 import { useFreeAgent } from "./hooks/useFreeAgent";
 

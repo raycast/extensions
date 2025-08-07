@@ -2,7 +2,7 @@ import { ActionPanel, Action, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { authorizedWithFreeAgent } from "./oauth";
 import { Timeslip } from "./types";
-import { fetchTimeslips } from "./services/FreeAgent";
+import { fetchTimeslips } from "./services/freeagent";
 import { parseDate, formatUriAsName } from "./utils/formatting";
 import { useFreeAgent } from "./hooks/useFreeAgent";
 

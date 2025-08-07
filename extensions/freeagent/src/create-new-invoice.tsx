@@ -2,7 +2,7 @@ import { Form, ActionPanel, Action, showToast, Toast, getPreferenceValues } from
 import { useEffect, useState } from "react";
 import { authorizedWithFreeAgent } from "./oauth";
 import { Contact, Preferences, InvoiceFormValues } from "./types";
-import { fetchContacts, createInvoice } from "./services/FreeAgent";
+import { fetchContacts, createInvoice } from "./services/freeagent";
 import { getContactDisplayName } from "./utils/formatting";
 import { useFreeAgent } from "./hooks/useFreeAgent";
 

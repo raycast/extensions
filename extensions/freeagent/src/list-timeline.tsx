@@ -2,7 +2,7 @@ import { Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { authorizedWithFreeAgent } from "./oauth";
 import { TimelineItem } from "./types";
-import { fetchTimelineItems } from "./services/FreeAgent";
+import { fetchTimelineItems } from "./services/freeagent";
 import { formatCurrencyAmount, parseDate } from "./utils/formatting";
 import { useFreeAgent } from "./hooks/useFreeAgent";
 

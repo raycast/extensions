@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { showToast, Toast } from "@raycast/api";
 import { getAccessToken, showFailureToast } from "@raycast/utils";
 import { CompanyInfo } from "../types";
-import { getCompanyInfo, FreeAgentError } from "../services/FreeAgent";
+import { getCompanyInfo, FreeAgentError } from "../services/freeagent";
 
 interface UseFreeAgentState {
   isLoading: boolean;

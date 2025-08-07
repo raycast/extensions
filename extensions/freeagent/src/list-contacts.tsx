@@ -2,7 +2,7 @@ import { ActionPanel, Action, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { authorizedWithFreeAgent } from "./oauth";
 import { Contact } from "./types";
-import { fetchContacts } from "./services/FreeAgent";
+import { fetchContacts } from "./services/freeagent";
 import { parseDate, getContactUrl, getContactDisplayName } from "./utils/formatting";
 import { useFreeAgent } from "./hooks/useFreeAgent";
 

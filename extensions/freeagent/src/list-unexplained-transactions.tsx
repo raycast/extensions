@@ -2,7 +2,7 @@ import { ActionPanel, Action, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { authorizedWithFreeAgent } from "./oauth";
 import { BankAccount, BankTransaction } from "./types";
-import { fetchBankAccounts, fetchBankTransactions } from "./services/FreeAgent";
+import { fetchBankAccounts, fetchBankTransactions } from "./services/freeagent";
 import { formatCurrencyAmount, parseDate, getBankTransactionUrl } from "./utils/formatting";
 import { useFreeAgent } from "./hooks/useFreeAgent";
 
