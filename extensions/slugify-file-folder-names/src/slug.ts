@@ -4,12 +4,6 @@ import { promises as fs } from "fs";
 import path from "path";
 import { generateSlugFilename } from "./utils/slugify";
 
-// Slugify extension for Raycast - converts file/folder names to URL-friendly format
-
-interface Preferences {
-  enableGermanTranslation: boolean;
-}
-
 interface RenameResult {
   success: boolean;
   originalPath: string;
