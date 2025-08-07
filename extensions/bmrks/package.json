@@ -10,20 +10,30 @@
   "icon": "icon.png",
   "author": "rauno",
   "contributors": [
-    "peduarte"
+    "peduarte",
+    "almoce"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "create-bookmark",
       "title": "Create Bookmark",
+      "subtitle": "(Basic) Bookmarks",
       "description": "Create a new bookmark",
       "mode": "view"
     },
     {
       "name": "search-bookmarks",
       "title": "Search Bookmarks",
+      "subtitle": "(Basic) Bookmarks",
       "description": "Search your bookmarks",
+      "mode": "view"
+    },
+    {
+      "name": "manage-groups",
+      "title": "Manage Groups",
+      "subtitle": "(Basic) Bookmarks",
+      "description": "Manage groups of bookmarks",
       "mode": "view"
     }
   ],
