@@ -24,7 +24,7 @@ npm run build
 npm run lint
 
 # Fix linting issues
-npm run fix-lint
+npm run lint:fix
 
 # Publish to Raycast Store
 npm run publish

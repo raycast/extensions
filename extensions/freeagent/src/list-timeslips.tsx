@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { authorizedWithFreeAgent } from "./oauth";
 import { Timeslip } from "./types";
 import { fetchTimeslips } from "./services/freeagent";
-import { parseDate, formatUriAsName } from "./utils/formatting";
+import { parseDate, getProjectDisplayName, getTaskDisplayName, getUserDisplayName } from "./utils/formatting";
 import { useFreeAgent } from "./hooks/useFreeAgent";
 
 const ListTimeslips = function Command() {
@@ -15,7 +15,7 @@ const ListTimeslips = function Command() {
       if (!isAuthenticated || !accessToken) return;
 
       try {
-        const timeslipList = await fetchTimeslips(accessToken);
+        const timeslipList = await fetchTimeslips(accessToken, "all", true);
         setTimeslips(timeslipList);
       } catch (error) {
         handleError(error, "Failed to fetch timeslips");
@@ -30,26 +30,35 @@ const ListTimeslips = function Command() {
       {timeslips.length === 0 && !isLoading ? (
         <List.EmptyView title="No timeslips found" description="You don't have any timeslips yet." />
       ) : (
-        timeslips.map((timeslip) => (
-          <List.Item
-            key={timeslip.url}
-            icon={Icon.Clock}
-            title={formatUriAsName(timeslip.project)}
-            subtitle={`${formatUriAsName(timeslip.task)} • ${formatUriAsName(timeslip.user)}`}
-            accessories={[{ text: `${timeslip.hours}h` }, { date: parseDate(timeslip.dated_on) }]}
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard title="Copy Project Uri" content={timeslip.project} />
-                <Action.CopyToClipboard title="Copy Task Uri" content={timeslip.task} icon={Icon.CheckList} />
-                <Action.CopyToClipboard title="Copy User Uri" content={timeslip.user} icon={Icon.Person} />
-                <Action.CopyToClipboard title="Copy Hours" content={timeslip.hours} icon={Icon.Clock} />
-                {timeslip.comment && (
-                  <Action.CopyToClipboard title="Copy Comment" content={timeslip.comment} icon={Icon.Text} />
-                )}
-              </ActionPanel>
-            }
-          />
-        ))
+        timeslips.map((timeslip) => {
+          const projectName = getProjectDisplayName(timeslip.project);
+          const taskName = getTaskDisplayName(timeslip.task);
+          const userName = getUserDisplayName(timeslip.user);
+          const projectUrl = typeof timeslip.project === "string" ? timeslip.project : timeslip.project.url;
+          const taskUrl = typeof timeslip.task === "string" ? timeslip.task : timeslip.task.url;
+          const userUrl = typeof timeslip.user === "string" ? timeslip.user : timeslip.user.url;
+
+          return (
+            <List.Item
+              key={timeslip.url}
+              icon={Icon.Clock}
+              title={taskName}
+              subtitle={`${projectName} • ${userName}${timeslip.comment ? ` • ${timeslip.comment}` : ""}`}
+              accessories={[{ text: `${timeslip.hours}h` }, { date: parseDate(timeslip.dated_on) }]}
+              actions={
+                <ActionPanel>
+                  <Action.CopyToClipboard title="Copy Project Uri" content={projectUrl} />
+                  <Action.CopyToClipboard title="Copy Task Uri" content={taskUrl} icon={Icon.CheckList} />
+                  <Action.CopyToClipboard title="Copy User Uri" content={userUrl} icon={Icon.Person} />
+                  <Action.CopyToClipboard title="Copy Hours" content={timeslip.hours} icon={Icon.Clock} />
+                  {timeslip.comment && (
+                    <Action.CopyToClipboard title="Copy Comment" content={timeslip.comment} icon={Icon.Text} />
+                  )}
+                </ActionPanel>
+              }
+            />
+          );
+        })
       )}
     </List>
   );
