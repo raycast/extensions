@@ -1,5 +1,9 @@
 # Vercast Changelog
 
+## [2.11] - {PR_MERGE_DATE}
+
+- Avoid broken links by removeing personal account from team switcher following Vercel's [personal team change](https://vercel.com/changelog/2024-01-account-changes).
+
 ## [2.10] - 2025-04-09
 
 - Added `Check Domain Availability` command and AI tool to check if a domain is available
