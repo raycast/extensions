@@ -13,10 +13,6 @@ async function initialize() {
   initialized = true;
 }
 
-interface Preferences {
-  tokenizer: TiktokenEncoding;
-}
-
 const getModelInfo = (encoding: TiktokenEncoding): string => {
   switch (encoding) {
     case "o200k_base":
