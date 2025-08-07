@@ -8,7 +8,7 @@ import { showFailureToast } from "@raycast/utils";
 export interface AudioConversionOptions {
   inputPath: string;
   outputPath: string;
-  format: "mp3" | "aac" | "wav" | "flac" | "ogg";
+  format: "mp3" | "aac" | "wav" | "flac" | "ogg" | "m4a" | "wma";
   bitrate?: string;
   sampleRate?: number;
   channels?: number;
@@ -84,10 +84,8 @@ export class AudioProcessor {
       try {
         execSync(`${ffmpegPath} -version`, { stdio: "pipe" });
         return ffmpegPath;
-      } catch (error) {
-        showFailureToast(error, {
-          title: "Failed to find FFmpeg",
-        });
+      } catch {
+        // Silently continue to next path - don't show error for each failed attempt
         continue;
       }
     }

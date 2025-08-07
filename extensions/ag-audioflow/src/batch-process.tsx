@@ -2,7 +2,6 @@ import { ActionPanel, Action, Form, showToast, Toast, showInFinder, popToRoot } 
 import { useState, useEffect } from "react";
 import { AudioProcessor } from "./utils/audioProcessor";
 import { loadSelectedAudioFiles, checkFFmpegAndNotify } from "./utils/fileUtils";
-import { useCachedState } from "@raycast/utils";
 import { SUPPORTED_AUDIO_FORMATS, AUDIO_BITRATES } from "./types";
 import path from "path";
 
@@ -34,13 +33,11 @@ export default function BatchProcess() {
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [progress, setProgress] = useState<ProcessingProgress | null>(null);
-  const [ffmpegAvailable, setFFmpegAvailable] = useCachedState<boolean | null>("ffmpegAvailable", null);
 
   useEffect(() => {
     async function initialize() {
       // Check FFmpeg availability first
-      const available = await checkFFmpegAndNotify();
-      setFFmpegAvailable(available);
+      await checkFFmpegAndNotify();
 
       // Then load selected files
       await loadSelectedFiles();

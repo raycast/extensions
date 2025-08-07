@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { AudioProcessor, AudioInfo } from "./utils/audioProcessor";
 import { loadSelectedAudioFile, checkFFmpegAndNotify } from "./utils/fileUtils";
 import path from "path";
-import { useCachedState } from "@raycast/utils";
 
 interface FormValues {
   inputFile: string[];
@@ -16,13 +15,11 @@ export default function AddFade() {
   const [selectedFile, setSelectedFile] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const [audioInfo, setAudioInfo] = useState<AudioInfo | null>(null);
-  const [ffmpegAvailable, setFFmpegAvailable] = useCachedState<boolean | null>("ffmpegAvailable", null);
 
   useEffect(() => {
     async function initialize() {
       // Check FFmpeg availability first
-      const available = await checkFFmpegAndNotify();
-      setFFmpegAvailable(available);
+      await checkFFmpegAndNotify();
 
       // Then load selected file
       const audioFile = await loadSelectedAudioFile();

@@ -2,7 +2,6 @@ import { ActionPanel, Action, Form, showToast, Toast, showInFinder, popToRoot } 
 import { useState, useEffect } from "react";
 import { AudioProcessor } from "./utils/audioProcessor";
 import { loadSelectedAudioFile, checkFFmpegAndNotify } from "./utils/fileUtils";
-import { useCachedState } from "@raycast/utils";
 import { SUPPORTED_AUDIO_FORMATS, AUDIO_BITRATES, SAMPLE_RATES, AudioFormat, AudioBitrate, SampleRate } from "./types";
 import path from "path";
 
@@ -18,13 +17,11 @@ interface FormValues {
 export default function ConvertAudio() {
   const [selectedFile, setSelectedFile] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
-  const [ffmpegAvailable, setFFmpegAvailable] = useCachedState<boolean | null>("ffmpegAvailable", null);
 
   useEffect(() => {
     async function initialize() {
       // Check FFmpeg availability first
-      const available = await checkFFmpegAndNotify();
-      setFFmpegAvailable(available);
+      await checkFFmpegAndNotify();
 
       // Then load selected file
       const audioFile = await loadSelectedAudioFile();

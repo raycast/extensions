@@ -1,6 +1,7 @@
-import { getSelectedFinderItems, showToast, Toast, launchCommand, LaunchType } from "@raycast/api";
+import { getSelectedFinderItems, launchCommand, LaunchType } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import path from "path";
+import { SUPPORTED_AUDIO_FORMATS } from "../types";
 
 export interface AudioFileInfo {
   path: string;
@@ -10,7 +11,7 @@ export interface AudioFileInfo {
 /**
  * Audio file extensions supported by the application
  */
-export const AUDIO_EXTENSIONS = [".mp3", ".wav", ".aac", ".flac", ".ogg", ".m4a", ".wma"];
+export const AUDIO_EXTENSIONS = SUPPORTED_AUDIO_FORMATS.map((format) => `.${format}`);
 
 /**
  * Checks if FFmpeg is available and launches setup command if not

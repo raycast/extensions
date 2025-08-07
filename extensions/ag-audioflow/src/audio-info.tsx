@@ -1,7 +1,7 @@
 import { ActionPanel, Action, List, showToast, Toast, Clipboard } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { AudioProcessor } from "./utils/audioProcessor";
-import { loadSelectedAudioFiles } from "./utils/fileUtils";
+import { loadSelectedAudioFiles, checkFFmpegAndNotify } from "./utils/fileUtils";
 import path from "path";
 import { showFailureToast } from "@raycast/utils";
 
@@ -13,10 +13,17 @@ interface AudioInfoItem {
 
 export default function AudioInfo() {
   const [audioInfoItems, setAudioInfoItems] = useState<AudioInfoItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadSelectedFiles();
+    async function initialize() {
+      // Check FFmpeg availability first (for consistency, even though not strictly needed)
+      await checkFFmpegAndNotify();
+
+      // Then load selected files
+      await loadSelectedFiles();
+    }
+    initialize();
   }, []);
 
   async function loadSelectedFiles() {

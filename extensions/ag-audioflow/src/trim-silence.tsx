@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { AudioProcessor } from "./utils/audioProcessor";
 import { loadSelectedAudioFile, checkFFmpegAndNotify } from "./utils/fileUtils";
 import path from "path";
-import { useCachedState } from "@raycast/utils";
 
 interface FormValues {
   inputFile: string[];
@@ -15,13 +14,11 @@ interface FormValues {
 export default function TrimSilence() {
   const [selectedFile, setSelectedFile] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
-  const [ffmpegAvailable, setFFmpegAvailable] = useCachedState<boolean | null>("ffmpegAvailable", null);
 
   useEffect(() => {
     async function initialize() {
       // Check FFmpeg availability first
-      const available = await checkFFmpegAndNotify();
-      setFFmpegAvailable(available);
+      await checkFFmpegAndNotify();
 
       // Then load selected file
       const audioFile = await loadSelectedAudioFile();
