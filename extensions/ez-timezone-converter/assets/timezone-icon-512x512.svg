@@ -1,0 +1,54 @@
+<svg width="512" height="512" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bgGradient512" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#8B5CF6"/>
+          <stop offset="50%" stop-color="#A855F7"/>
+          <stop offset="100%" stop-color="#6366F1"/>
+        </linearGradient>
+        <linearGradient id="worldGradient512" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.9"/>
+          <stop offset="100%" stop-color="#F3F4F6" stop-opacity="0.8"/>
+        </linearGradient>
+        <linearGradient id="clockGradient512" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#FBBF24"/>
+          <stop offset="100%" stop-color="#F59E0B"/>
+        </linearGradient>
+        <filter id="shadow512" x="-50%" y="-50%" width="200%" height="200%">
+          <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000000" flood-opacity="0.1"/>
+        </filter>
+      </defs>
+      
+      <circle cx="32" cy="32" r="30" fill="url(#bgGradient512)" filter="url(#shadow512)"/>
+      
+      <circle cx="32" cy="32" r="22" fill="url(#worldGradient512)" stroke="#FFFFFF" stroke-width="1" opacity="0.9"/>
+      
+      <g fill="#8B5CF6" opacity="0.6">
+        <path d="M15 20 Q18 18 22 20 Q25 22 23 26 Q20 28 16 26 Q13 24 15 20 Z"/>
+        <path d="M28 18 Q32 16 35 18 Q38 20 36 24 Q34 26 30 24 Q26 22 28 18 Z"/>
+        <path d="M40 22 Q44 20 48 22 Q50 24 48 28 Q45 30 41 28 Q38 26 40 22 Z"/>
+        <path d="M42 38 Q45 36 48 38 Q50 40 48 42 Q45 44 42 42 Q40 40 42 38 Z"/>
+        <path d="M20 35 Q23 33 26 35 Q28 37 26 41 Q23 43 20 41 Q18 39 20 35 Z"/>
+      </g>
+      
+      <g stroke="#FFFFFF" stroke-width="0.5" opacity="0.4">
+        <line x1="32" y1="10" x2="32" y2="54"/>
+        <line x1="20" y1="15" x2="44" y2="49"/>
+        <line x1="44" y1="15" x2="20" y2="49"/>
+      </g>
+      
+      <g transform="translate(44, 44)">
+        <circle cx="0" cy="0" r="8" fill="url(#clockGradient512)" stroke="#FFFFFF" stroke-width="1"/>
+        <circle cx="0" cy="0" r="1" fill="#FFFFFF"/>
+        <line x1="0" y1="0" x2="0" y2="-4" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="0" y1="0" x2="3" y2="0" stroke="#FFFFFF" stroke-width="1" stroke-linecap="round"/>
+      </g>
+      
+      <g transform="translate(20, 20)">
+        <circle cx="0" cy="0" r="6" fill="url(#clockGradient512)" stroke="#FFFFFF" stroke-width="1"/>
+        <circle cx="0" cy="0" r="0.5" fill="#FFFFFF"/>
+        <line x1="0" y1="0" x2="2" y2="-2" stroke="#FFFFFF" stroke-width="1" stroke-linecap="round"/>
+        <line x1="0" y1="0" x2="2" y2="2" stroke="#FFFFFF" stroke-width="1" stroke-linecap="round"/>
+      </g>
+      
+      <circle cx="26" cy="26" r="6" fill="none" stroke="#FFFFFF" stroke-width="0.5" opacity="0.3"/>
+    </svg>
