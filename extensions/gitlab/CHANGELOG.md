@@ -1,6 +1,6 @@
 # GitLab Changelog
 
-## [Added support for Windows] - 2025-08-06
+## [Added support for Windows] - {PR_MERGE_DATE}
 
 ## [Group milestones in MRs and Issues] - 2025-06-27
 
