@@ -1,6 +1,6 @@
 # Sefaria Changelog
 
-## [0.1] - {PR_MERGE_DATE}
+## [0.1] - 2025-08-07
 
 ### Added
 
