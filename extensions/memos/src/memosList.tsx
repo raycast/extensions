@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react";
 import { List, ActionPanel, Action, Icon, confirmAlert, Alert, showToast, Toast } from "@raycast/api";
-import { archiveMemo, deleteMemo, getAllMemos, getMe, getRequestUrl, getResourceBinToBase64, restoreMemo } from "./api";
+import {
+  archiveMemo,
+  deleteMemo,
+  getAllMemos,
+  getMe,
+  getRequestUrl,
+  getAttachmentBinToBase64,
+  restoreMemo,
+} from "./api";
 import { MemoInfoResponse, ROW_STATUS } from "./types";
 
 export default function MemosListCommand(): JSX.Element {
@@ -8,7 +16,10 @@ export default function MemosListCommand(): JSX.Element {
   const [currentUserId, setCurrentUserId] = useState<number>();
   const [state, setState] = useState(ROW_STATUS.NORMAL);
   const { isLoading, data, revalidate, pagination } = getAllMemos(currentUserId, { state });
-  const { isLoading: isLoadingUser, data: user } = getMe();
+  const {
+    isLoading: isLoadingUser,
+    data: { user },
+  } = getMe();
   const [filterList, setFilterList] = useState<MemoInfoResponse[]>([]);
 
   useEffect(() => {
@@ -32,7 +43,7 @@ export default function MemosListCommand(): JSX.Element {
         .filter((item) => item.content.includes(searchText))
         .map((item) => {
           item.markdown = item.content;
-          if (item.resources.length > 0) {
+          if (item.attachments.length > 0) {
             getItemMarkdown(item);
           }
           return item;
@@ -46,7 +57,7 @@ export default function MemosListCommand(): JSX.Element {
       dataList.map((item) => {
         item.markdown = item.content;
 
-        if (item.resources.length > 0) {
+        if (item.attachments.length > 0) {
           getItemMarkdown(item);
         }
 
@@ -62,17 +73,17 @@ export default function MemosListCommand(): JSX.Element {
   }
 
   async function getItemMarkdown(item: MemoInfoResponse) {
-    const { content, resources } = item;
+    const { content, attachments } = item;
     let markdown = content;
 
-    const resourceMarkdowns = await Promise.all(
-      resources.map(async (resource) => {
-        const resourceBlobUrl = await getResourceBinToBase64(resource.name, resource.filename);
-        return `\n\n![${resource.filename}](${resourceBlobUrl})`;
+    const attachmentMarkdowns = await Promise.all(
+      attachments.map(async (attachment) => {
+        const attachmentBlobUrl = await getAttachmentBinToBase64(attachment.name, attachment.filename);
+        return `\n\n![${attachment.filename}](${attachmentBlobUrl})`;
       }),
     );
 
-    markdown += resourceMarkdowns.join("");
+    markdown += attachmentMarkdowns.join("");
 
     setFilterList((prevList) => {
       const updatedList = prevList.map((prevItem) => {
