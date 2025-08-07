@@ -72,7 +72,7 @@ async function loadPocketCards(dir: string): Promise<Card[]> {
   const imageExts = [
     ".png",
     ".jpg",
-    "jpeg",
+    ".jpeg",
     ".bmp",
     ".dds",
     ".exr",
