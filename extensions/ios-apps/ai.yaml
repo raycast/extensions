@@ -1,0 +1,361 @@
+instructions: |
+  You are an AI assistant for iOS Apps, a Raycast extension for searching, exploring, and managing iOS applications from the App Store.
+  
+  When a user asks a question or makes a request about iOS apps, follow these guidelines:
+  
+  # Tool Selection Guidelines
+  Choose the appropriate tool based on the query type:
+  
+  ## For app discovery and search:
+  - Use the `search-apps` tool when:
+    - The user is looking for apps by name (e.g., "search for Twitter")
+    - The user wants to find apps in a specific category (e.g., "find games")
+    - The user wants to browse apps with specific criteria (e.g., "free productivity apps")
+  - This tool accepts parameters:
+    - `query`: The search term (required) - use the EXACT query as provided by the user (e.g., "productivity apps" not just "productivity")
+    - `limit`: Maximum number of results to return (optional, default: 10, max: 20)
+  
+  ## For detailed app information:
+  - Use the `get-app-details` tool when:
+    - The user asks about a specific app and wants comprehensive details
+    - The user wants detailed information like ratings, description, or screenshots
+    - The user needs technical details like app size, ratings, or full app information
+  - This tool accepts parameters:
+    - `query`: The app name or search term (required)
+    - `bundleId`: Optional bundle ID if known (will skip search step)
+  
+  ## For app version information:
+  - Use the `get-current-version` tool when:
+    - The user specifically asks for just the version number of an app (e.g., "what version is Instagram?")
+    - The user wants to check the current version without other details
+    - The user asks "what's the latest version of [app]?"
+  - This tool accepts parameters:
+    - `query`: The app name or search term (required)
+    - `bundleId`: Optional bundle ID if known (will skip search step)
+  
+  ## For app downloads:
+  - Use the `download-app` tool when:
+    - The user explicitly asks to download an app (e.g., "download Spotify")
+    - Note: This requires the user to have enabled app downloads in preferences
+  - This tool accepts parameters:
+    - `query`: The app name or search term (required)
+
+  ## For screenshot downloads:
+  - Use the `download-app-screenshots` tool when:
+    - The user asks to download screenshots for a particular app (e.g., "download Apple Watch screenshots for Spotify")
+    - This tool considers user preferences but can override them if the user requests specific platforms
+  - This tool accepts parameters:
+    - `query`: The app name (required)
+    - `platformOverride`: Forces specific platform screenshots to be downloaded regardless of user preferences (optional)
+
+  # Response Guidelines
+  - Be concise and informative in your responses
+  - Don't include embedded images, icons, or screenshots in your responses
+  - Format app information in a clear, readable way using markdown
+  - Include relevant details like developer, category, price, and ratings
+  - For search results, present options in a list format
+  - For detailed app information, organize content with appropriate headings
+  - When suggesting downloads, mention installation options if relevant
+  - Always cite the App Store as the source of information
+
+evals:
+  - input: "@ios-apps search for Raycast"
+    expected:
+      - callsTool:
+          name: "search-apps"
+          arguments:
+            query: "Raycast"
+    mocks:
+      search-apps: |
+        Here are some iOS apps related to "Raycast" found on the App Store:
+
+        1. **Raycast: AI, Notes and more**
+          - **Version**: 1.0.7
+          - **Price**: Free
+          - **Developer**: Raycast Technologies Inc
+          - **Rating**: 4.37
+          - **Description**: Your all-in-one productivity toolkit with AI, notes, and more.
+
+        2. **Write For Me ™ AI Essay Writer**
+          - **Version**: 6.9.7
+          - **Price**: Free
+          - **Developer**: Empires Mobile LLC
+          - **Rating**: 4.69
+          - **Description**: Quickly generate AI-driven compositions.
+
+        3. **EveryGen - AI-in-One Generator**
+          - **Version**: 1.3
+          - **Price**: Free
+          - **Developer**: HOOZA VIET NAM COMPANY LIMITED
+          - **Rating**: 4.45
+          - **Description**: Generate any content with AI.
+
+        4. **MuseList：Playlist-Ready Player**
+          - **Version**: 1.3.7
+          - **Price**: Free
+          - **Developer**: 炜东 黄
+          - **Rating**: 4.83
+          - **Description**: A playlist app in a vintage cassette player style.
+
+        5. **Vending Machine Tycoon**
+          - **Version**: 1.0
+          - **Price**: Free
+          - **Developer**: Raycast Ventures Sdn. Bhd.
+          - **Rating**: Not yet rated
+          - **Description**: Manage and expand your vending machine empire.
+
+        These apps are available on the App Store for download.
+
+  - input: "@ios-apps what's the latest version of Raycast?"
+    expected:
+      - callsTool:
+          name: "get-current-version"
+          arguments:
+            query: "Raycast"
+    mocks:
+      get-current-version: |
+        The latest version of Raycast available on iOS is version 1.0.7. 
+
+  - input: "@ios-apps tell me about Raycast"
+    expected:
+      - callsTool:
+          name: "get-app-details"
+          arguments:
+            query: "Raycast"
+    mocks:
+      get-app-details: |
+        ### Raycast: AI, Notes and more
+
+        -  **Version:** 1.0.7
+        -  **Developer:** [Raycast Technologies Inc](https://apps.apple.com/us/developer/raycast-technologies/id1735916299?uo=4)
+        -  **Price:** Free
+        -  **Rating:** 4.37 (97 ratings)
+        -  **Size:** 293.3 MB
+        -  **Content Rating:** 4+
+        -  **Release Date:** April 30, 2025
+        -  **Last Updated:** July 2, 2025
+        -  **Genres:** Productivity
+
+        #### Description
+        Introducing Raycast for iOS: Your all-in-one productivity toolkit with AI, notes, and more – now on mobile as the perfect companion to the macOS app.
+
+        The app brings your favorite productivity tools from the Mac into your pocket. With Raycast for iOS, you can:
+        -  Chat with dozens of AI models from leading providers to get the perfect answers for any task
+        -  Capture, organize, and access your thoughts to never lose an important idea again
+        -  Save and open Quicklinks for instant access to your most important resources
+        -  Store and reuse code snippets and templates to save time on repetitive workflows
+        -  Enjoy seamless cloud sync to keep all your content updated across devices
+
+        Whether you're a long-time Mac user or just discovering Raycast on iOS, you'll have your essential productivity tools always at hand. Raycast for iOS seamlessly extends your desktop workflow to mobile, ensuring you stay productive and organized wherever life takes you.
+
+        Please note: Raycast for iOS requires a free Raycast account. Premium features available with a Raycast Pro subscription.
+
+        -  [Terms of Service](https://www.raycast.com/terms-of-service)
+        -  [App Store Link](https://apps.apple.com/us/app/raycast-ai-notes-and-more/id6503428327?uo=4)
+
+        _Source: App Store_
+
+  - input: "@ios-apps download Raycast"
+    expected:
+      - callsTool:
+          name: "download-app"
+          arguments:
+            query: "Raycast"
+    mocks:
+      download-app: |
+        The app **Raycast: AI, Notes and more** has been downloaded successfully. 
+        You can find the file named `Raycast 1.0.7.ipa` in your downloads folder.
+
+  - input: "@ios-apps download a non-existent app like 'SuperFakeApp12345'"
+    expected:
+      - callsTool:
+          name: "download-app"
+          arguments:
+            query: "SuperFakeApp12345"
+    mocks:
+      download-app:
+        error: "No apps found matching \"SuperFakeApp12345\". Please try a different search term or check the exact app name."
+
+  # Test download with confirmation (user will see confirmation dialog)
+  - input: "@ios-apps download Instagram"
+    expected:
+      - callsTool:
+          name: "download-app"
+          arguments:
+            query: "Instagram"
+    mocks:
+      download-app:
+        filePath: "/tmp/Instagram 390.0.0.ipa"
+        fileName: "Instagram 390.0.0.ipa"
+        appName: "Instagram"
+        bundleId: "com.burbn.instagram"
+        version: "390.0.0"
+
+  - input: "@ios-apps download an app that doesn't exist"
+    expected:
+      - callsTool:
+          name: "download-app"
+          arguments:
+            query: "an app that doesn't exist"
+    mocks:
+      download-app:
+        error: "No apps found matching \"an app that doesn't exist\". Please try a different search term or check the exact app name."
+
+  - input: "@ios-apps download the Apple Watch screenshots for Spotify"
+    mocks:
+      download-app-screenshots: "Successfully called \"download-app-screenshots\""
+    expected:
+      - callsTool:
+          name: "download-app-screenshots"
+          arguments:
+            query: "Spotify"
+            platformOverride:
+              - AppleWatch
+
+  - input: "@ios-apps search for games with limit 5"
+    expected:
+      - callsTool:
+          name: "search-apps"
+          arguments:
+            query: "games"
+            limit: 5
+    mocks:
+      search-apps: |
+        Here are 5 games available on the App Store:
+
+        | Name | Developer | Rating | Description |
+        |:---|:---|:---|:---|
+        | Magic Tiles 3: Piano Game | Amanotes Pte Ltd | 4.52 | Music rhythm game with hit songs |
+        | Trivia Crack : Fun Quiz Games | Etermax | 4.60 | Trivia game with questions across categories |
+        | Sniper 3D: Gun Shooting Games | Wildlife Studios | 4.75 | Action-packed sniper shooting game |
+        | Township | PLR Worldwide | 4.76 | City-building and farming game |
+        | Block Blast! | ARETIS LIMITED | 4.88 | Endless block puzzle game |
+
+  # Additional comprehensive test cases
+  - input: "@ios-apps find productivity apps"
+    expected:
+      - callsTool:
+          name: "search-apps"
+          arguments:
+            query: "productivity apps"
+    mocks:
+      search-apps: |
+        Here are some productivity apps found on the App Store:
+
+        1. **Notion**
+          - **Version**: 2.25.1
+          - **Price**: Free
+          - **Developer**: Notion Labs, Inc.
+          - **Rating**: 4.8
+          - **Description**: Write, plan, organize, play. Turn ideas into action.
+
+        2. **Todoist**
+          - **Version**: 8.9.2
+          - **Price**: Free
+          - **Developer**: Doist Inc.
+          - **Rating**: 4.7
+          - **Description**: The to-do list to organize work & life.
+
+  - input: "@ios-apps show me details for Instagram"
+    expected:
+      - callsTool:
+          name: "get-app-details"
+          arguments:
+            query: "Instagram"
+    mocks:
+      get-app-details: |
+        ### Instagram
+
+        - **Version:** 312.0
+        - **Developer:** Instagram, Inc.
+        - **Price:** Free
+        - **Rating:** 4.3 (2.1M ratings)
+        - **Size:** 165.2 MB
+        - **Content Rating:** 12+
+        - **Genres:** Photo & Video, Social Networking
+
+        #### Description
+        Bringing you closer to the people and things you love.
+
+        _Source: App Store_
+
+  - input: "@ios-apps get WhatsApp"
+    expected:
+      - callsTool:
+          name: "get-app-details"
+          arguments:
+            query: "WhatsApp"
+    mocks:
+      get-app-details: |
+        ### WhatsApp Messenger
+
+        - **Version:** 24.1.78
+        - **Developer:** WhatsApp Inc.
+        - **Price:** Free
+        - **Rating:** 4.6 (5.2M ratings)
+        - **Size:** 285.4 MB
+        - **Content Rating:** 4+
+        - **Genres:** Social Networking
+
+        #### Description
+        Simple. Reliable. Private. WhatsApp from Meta.
+
+        _Source: App Store_
+
+  - input: "@ios-apps search for free games limit 3"
+    expected:
+      - callsTool:
+          name: "search-apps"
+          arguments:
+            query: "free games"
+            limit: 3
+    mocks:
+      search-apps: |
+        Here are 3 free games available on the App Store:
+
+        | Name | Developer | Rating | Description |
+        |:---|:---|:---|:---|
+        | Subway Surfers | SYBO Games | 4.5 | Endless running game |
+        | Candy Crush Saga | King | 4.4 | Match-three puzzle game |
+        | Among Us! | InnerSloth LLC | 4.2 | Social deduction game |
+
+  - input: "@ios-apps what version is TikTok?"
+    expected:
+      - callsTool:
+          name: "get-current-version"
+          arguments:
+            query: "TikTok"
+    mocks:
+      get-current-version: |
+        The current version of TikTok available on iOS is version 32.8.0.
+
+  - input: "@ios-apps check Instagram version"
+    expected:
+      - callsTool:
+          name: "get-current-version"
+          arguments:
+            query: "Instagram"
+    mocks:
+      get-current-version: |
+        The current version of Instagram available on iOS is version 312.0.
+
+  - input: "@ios-apps what's the current version of WhatsApp?"
+    expected:
+      - callsTool:
+          name: "get-current-version"
+          arguments:
+            query: "WhatsApp"
+    mocks:
+      get-current-version: |
+        The current version of WhatsApp Messenger available on iOS is version 24.1.78.
+
+  - input: "@ios-apps install Spotify"
+    expected:
+      - callsTool:
+          name: "download-app"
+          arguments:
+            query: "Spotify"
+    mocks:
+      download-app: |
+        The app Spotify: Music and Podcasts has been downloaded successfully.
+        You can find the file named Spotify 8.8.96.ipa in your downloads folder.
