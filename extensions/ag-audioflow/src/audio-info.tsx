@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { AudioProcessor } from "./utils/audioProcessor";
 import { loadSelectedAudioFiles } from "./utils/fileUtils";
 import path from "path";
+import { showFailureToast } from "@raycast/utils";
 
 interface AudioInfoItem {
   title: string;
@@ -35,10 +36,8 @@ export default function AudioInfo() {
 
       await loadAudioInfo(audioFiles);
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: "Failed to load selected files",
+      showFailureToast(error, {
+        title: "Failed to load selected files",
       });
     }
     setIsLoading(false);

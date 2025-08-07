@@ -3,6 +3,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import { showToast, Toast, Clipboard } from "@raycast/api";
 import { execSync } from "child_process";
+import { showFailureToast } from "@raycast/utils";
 
 export interface AudioConversionOptions {
   inputPath: string;
@@ -84,6 +85,9 @@ export class AudioProcessor {
         execSync(`${ffmpegPath} -version`, { stdio: "pipe" });
         return ffmpegPath;
       } catch (error) {
+        showFailureToast(error, {
+          title: "Failed to find FFmpeg",
+        });
         continue;
       }
     }
@@ -112,6 +116,9 @@ export class AudioProcessor {
         });
       });
     } catch (error) {
+      showFailureToast(error, {
+        title: "Failed to check FFmpeg availability",
+      });
       return false;
     }
   }
