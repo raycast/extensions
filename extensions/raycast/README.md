@@ -20,13 +20,12 @@ You'll need to obtain an API key from your tweet posting service. This extension
 2. Press `⌘ + ,` or use the "Open Extension Preferences" action
 3. Fill in the required fields:
    - **API Key**: Your service's API key (stored securely)
-   - **API URL**: The base URL for your tweet posting service (e.g., `https://api.yourservice.com`)
    - **Confirm Before Posting**: Whether to show a confirmation dialog before posting (optional)
 
 ## Usage
 
 1. Open Raycast and search for "Yap"
-2. Type your tweet content in the text area
+2. Type your post content in the text area
 3. Press `Enter` or click "Post Tweet" to publish
 
 ### Features
@@ -40,8 +39,9 @@ You'll need to obtain an API key from your tweet posting service. This extension
 ### Keyboard Shortcuts
 
 - `⌘ + Enter` - Post tweet
-- `⌘ + K` - Clear content
-- `⌘ + ,` - Open extension preferences
+- `⌘ + Shift + C` - Clear content
+- `⌘ + Shift + P` - Open extension preferences
+- `⌘ + F` - Leave Feedback for the extension
 
 ## API Requirements
 
