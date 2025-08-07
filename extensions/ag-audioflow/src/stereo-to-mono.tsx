@@ -1,15 +1,7 @@
-import {
-  ActionPanel,
-  Action,
-  Form,
-  showToast,
-  Toast,
-  getSelectedFinderItems,
-  showInFinder,
-  popToRoot,
-} from "@raycast/api";
+import { ActionPanel, Action, Form, showToast, Toast, showInFinder, popToRoot } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { AudioProcessor, AudioInfo } from "./utils/audioProcessor";
+import { loadSelectedAudioFile } from "./utils/fileUtils";
 import path from "path";
 
 interface FormValues {
@@ -25,30 +17,10 @@ export default function StereoToMono() {
 
   useEffect(() => {
     async function loadSelectedFile() {
-      try {
-        const selectedItems = await getSelectedFinderItems();
-        if (selectedItems.length > 0) {
-          const audioExtensions = [
-            ".mp3",
-            ".wav",
-            ".aac",
-            ".flac",
-            ".ogg",
-            ".m4a",
-            ".wma",
-          ];
-          const audioFile = selectedItems.find((item) =>
-            audioExtensions.some((ext) =>
-              item.path.toLowerCase().endsWith(ext),
-            ),
-          );
-          if (audioFile) {
-            setSelectedFile(audioFile.path);
-            loadAudioInfo(audioFile.path);
-          }
-        }
-      } catch (error) {
-        console.error("Error loading selected file:", error);
+      const audioFile = await loadSelectedAudioFile();
+      if (audioFile) {
+        setSelectedFile(audioFile.path);
+        loadAudioInfo(audioFile.path);
       }
     }
     loadSelectedFile();
@@ -97,12 +69,8 @@ export default function StereoToMono() {
 
       const inputPath = values.inputFile[0];
       const outputDir = values.outputDirectory?.[0] || path.dirname(inputPath);
-      const methodSuffix =
-        values.mixMethod === "mix" ? "mono" : `mono_${values.mixMethod}`;
-      const outputPath = AudioProcessor.generateOutputPath(
-        inputPath,
-        methodSuffix,
-      );
+      const methodSuffix = values.mixMethod === "mix" ? "mono" : `mono_${values.mixMethod}`;
+      const outputPath = AudioProcessor.generateOutputPath(inputPath, methodSuffix);
 
       const finalOutputPath = values.outputDirectory?.[0]
         ? path.join(outputDir, path.basename(outputPath))
@@ -129,8 +97,7 @@ export default function StereoToMono() {
       showToast({
         style: Toast.Style.Failure,
         title: "Conversion Failed",
-        message:
-          error instanceof Error ? error.message : "Unknown error occurred",
+        message: error instanceof Error ? error.message : "Unknown error occurred",
       });
     } finally {
       setIsLoading(false);
@@ -166,22 +133,10 @@ export default function StereoToMono() {
         />
       )}
 
-      <Form.Dropdown
-        id="mixMethod"
-        title="Conversion Method"
-        defaultValue="mix"
-      >
+      <Form.Dropdown id="mixMethod" title="Conversion Method" defaultValue="mix">
         <Form.Dropdown.Item value="mix" title="Mix Both Channels" icon="🔀" />
-        <Form.Dropdown.Item
-          value="left"
-          title="Use Left Channel Only"
-          icon="⬅️"
-        />
-        <Form.Dropdown.Item
-          value="right"
-          title="Use Right Channel Only"
-          icon="➡️"
-        />
+        <Form.Dropdown.Item value="left" title="Use Left Channel Only" icon="⬅️" />
+        <Form.Dropdown.Item value="right" title="Use Right Channel Only" icon="➡️" />
       </Form.Dropdown>
 
       <Form.FilePicker

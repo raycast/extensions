@@ -1,15 +1,7 @@
-import {
-  ActionPanel,
-  Action,
-  Form,
-  showToast,
-  Toast,
-  getSelectedFinderItems,
-  showInFinder,
-  popToRoot,
-} from "@raycast/api";
+import { ActionPanel, Action, Form, showToast, Toast, showInFinder, popToRoot } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { AudioProcessor } from "./utils/audioProcessor";
+import { loadSelectedAudioFile } from "./utils/fileUtils";
 import path from "path";
 
 interface FormValues {
@@ -25,29 +17,9 @@ export default function TrimSilence() {
 
   useEffect(() => {
     async function loadSelectedFile() {
-      try {
-        const selectedItems = await getSelectedFinderItems();
-        if (selectedItems.length > 0) {
-          const audioExtensions = [
-            ".mp3",
-            ".wav",
-            ".aac",
-            ".flac",
-            ".ogg",
-            ".m4a",
-            ".wma",
-          ];
-          const audioFile = selectedItems.find((item) =>
-            audioExtensions.some((ext) =>
-              item.path.toLowerCase().endsWith(ext),
-            ),
-          );
-          if (audioFile) {
-            setSelectedFile(audioFile.path);
-          }
-        }
-      } catch (error) {
-        console.error("Error loading selected file:", error);
+      const audioFile = await loadSelectedAudioFile();
+      if (audioFile) {
+        setSelectedFile(audioFile.path);
       }
     }
     loadSelectedFile();
@@ -78,10 +50,7 @@ export default function TrimSilence() {
 
       const inputPath = values.inputFile[0];
       const outputDir = values.outputDirectory?.[0] || path.dirname(inputPath);
-      const outputPath = AudioProcessor.generateOutputPath(
-        inputPath,
-        "trimmed",
-      );
+      const outputPath = AudioProcessor.generateOutputPath(inputPath, "trimmed");
 
       const finalOutputPath = values.outputDirectory?.[0]
         ? path.join(outputDir, path.basename(outputPath))
@@ -90,9 +59,7 @@ export default function TrimSilence() {
       await AudioProcessor.trimSilence({
         inputPath,
         outputPath: finalOutputPath,
-        startThreshold: values.startThreshold
-          ? Number(values.startThreshold)
-          : -50,
+        startThreshold: values.startThreshold ? Number(values.startThreshold) : -50,
         endThreshold: values.endThreshold ? Number(values.endThreshold) : -50,
       });
 
@@ -111,8 +78,7 @@ export default function TrimSilence() {
       showToast({
         style: Toast.Style.Failure,
         title: "Trimming Failed",
-        message:
-          error instanceof Error ? error.message : "Unknown error occurred",
+        message: error instanceof Error ? error.message : "Unknown error occurred",
       });
     } finally {
       setIsLoading(false);

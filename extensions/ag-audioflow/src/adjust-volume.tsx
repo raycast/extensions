@@ -1,20 +1,13 @@
-import {
-  ActionPanel,
-  Action,
-  Form,
-  showToast,
-  Toast,
-  getSelectedFinderItems,
-  showInFinder,
-  popToRoot,
-} from "@raycast/api";
+import { ActionPanel, Action, Form, showToast, Toast, showInFinder, popToRoot } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { AudioProcessor, AudioInfo } from "./utils/audioProcessor";
+import { loadSelectedAudioFile } from "./utils/fileUtils";
 import path from "path";
 
 interface FormValues {
   inputFile: string[];
-  volumeChange: string;
+  presetVolumeChange: string;
+  customVolumeChange: string;
   useGain: boolean;
   outputDirectory: string[];
 }
@@ -26,30 +19,10 @@ export default function AdjustVolume() {
 
   useEffect(() => {
     async function loadSelectedFile() {
-      try {
-        const selectedItems = await getSelectedFinderItems();
-        if (selectedItems.length > 0) {
-          const audioExtensions = [
-            ".mp3",
-            ".wav",
-            ".aac",
-            ".flac",
-            ".ogg",
-            ".m4a",
-            ".wma",
-          ];
-          const audioFile = selectedItems.find((item) =>
-            audioExtensions.some((ext) =>
-              item.path.toLowerCase().endsWith(ext),
-            ),
-          );
-          if (audioFile) {
-            setSelectedFile(audioFile.path);
-            loadAudioInfo(audioFile.path);
-          }
-        }
-      } catch (error) {
-        console.error("Error loading selected file:", error);
+      const audioFile = await loadSelectedAudioFile();
+      if (audioFile) {
+        setSelectedFile(audioFile.path);
+        loadAudioInfo(audioFile.path);
       }
     }
     loadSelectedFile();
@@ -74,7 +47,16 @@ export default function AdjustVolume() {
       return;
     }
 
-    const volumeChange = parseFloat(values.volumeChange);
+    // Determine which volume change value to use
+    let volumeChange: number;
+    if (values.customVolumeChange && values.customVolumeChange.trim() !== "") {
+      // Use custom value if provided
+      volumeChange = parseFloat(values.customVolumeChange);
+    } else {
+      // Use preset value
+      volumeChange = parseFloat(values.presetVolumeChange);
+    }
+
     if (isNaN(volumeChange)) {
       showToast({
         style: Toast.Style.Failure,
@@ -108,10 +90,7 @@ export default function AdjustVolume() {
 
       const inputPath = values.inputFile[0];
       const outputDir = values.outputDirectory?.[0] || path.dirname(inputPath);
-      const suffix =
-        volumeChange >= 0
-          ? `volume_plus${volumeChange}dB`
-          : `volume_minus${Math.abs(volumeChange)}dB`;
+      const suffix = volumeChange >= 0 ? `volume_plus${volumeChange}dB` : `volume_minus${Math.abs(volumeChange)}dB`;
       const outputPath = AudioProcessor.generateOutputPath(inputPath, suffix);
 
       const finalOutputPath = values.outputDirectory?.[0]
@@ -140,8 +119,7 @@ export default function AdjustVolume() {
       showToast({
         style: Toast.Style.Failure,
         title: "Volume Adjustment Failed",
-        message:
-          error instanceof Error ? error.message : "Unknown error occurred",
+        message: error instanceof Error ? error.message : "Unknown error occurred",
       });
     } finally {
       setIsLoading(false);
@@ -177,11 +155,7 @@ export default function AdjustVolume() {
         />
       )}
 
-      <Form.Dropdown
-        id="volumeChange"
-        title="Volume Adjustment"
-        defaultValue="0"
-      >
+      <Form.Dropdown id="presetVolumeChange" title="Volume Adjustment (Preset)" defaultValue="0">
         <Form.Dropdown.Item value="-30" title="-30dB (Much Quieter)" />
         <Form.Dropdown.Item value="-20" title="-20dB (Significantly Quieter)" />
         <Form.Dropdown.Item value="-12" title="-12dB (Noticeably Quieter)" />
@@ -195,7 +169,7 @@ export default function AdjustVolume() {
       </Form.Dropdown>
 
       <Form.TextField
-        id="volumeChange"
+        id="customVolumeChange"
         title="Custom Volume Change (dB)"
         placeholder="Enter custom value (-60 to +60)"
         info="Enter a custom volume change in decibels. Positive values increase volume, negative values decrease it. Range: -60dB to +60dB"

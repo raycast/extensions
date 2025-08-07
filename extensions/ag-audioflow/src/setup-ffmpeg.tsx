@@ -1,11 +1,4 @@
-import {
-  ActionPanel,
-  Action,
-  Detail,
-  showToast,
-  Toast,
-  Clipboard,
-} from "@raycast/api";
+import { ActionPanel, Action, Detail, showToast, Toast, Clipboard } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { AudioProcessor } from "./utils/audioProcessor";
 
@@ -87,9 +80,7 @@ sudo port install ffmpeg
 - PATH issues: Restart Terminal after installation`;
 
   if (isLoading) {
-    return (
-      <Detail isLoading={true} markdown="Checking FFmpeg installation..." />
-    );
+    return <Detail isLoading={true} markdown="Checking FFmpeg installation..." />;
   }
 
   return (
@@ -100,14 +91,8 @@ sudo port install ffmpeg
           <Action title="Refresh Status" onAction={checkFFmpegStatus} />
           {!ffmpegAvailable && (
             <>
-              <Action
-                title="Copy Install Command"
-                onAction={copyInstallCommand}
-              />
-              <Action.OpenInBrowser
-                title="Visit Ffmpeg Website"
-                url="https://ffmpeg.org/download.html"
-              />
+              <Action title="Copy Install Command" onAction={copyInstallCommand} />
+              <Action.OpenInBrowser title="Visit Ffmpeg Website" url="https://ffmpeg.org/download.html" />
             </>
           )}
         </ActionPanel>

@@ -1,15 +1,7 @@
-import {
-  ActionPanel,
-  Action,
-  Form,
-  showToast,
-  Toast,
-  getSelectedFinderItems,
-  showInFinder,
-  popToRoot,
-} from "@raycast/api";
+import { ActionPanel, Action, Form, showToast, Toast, showInFinder, popToRoot } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { AudioProcessor, AudioInfo } from "./utils/audioProcessor";
+import { loadSelectedAudioFile } from "./utils/fileUtils";
 import path from "path";
 
 interface FormValues {
@@ -27,30 +19,10 @@ export default function AdjustSpeed() {
 
   useEffect(() => {
     async function loadSelectedFile() {
-      try {
-        const selectedItems = await getSelectedFinderItems();
-        if (selectedItems.length > 0) {
-          const audioExtensions = [
-            ".mp3",
-            ".wav",
-            ".aac",
-            ".flac",
-            ".ogg",
-            ".m4a",
-            ".wma",
-          ];
-          const audioFile = selectedItems.find((item) =>
-            audioExtensions.some((ext) =>
-              item.path.toLowerCase().endsWith(ext),
-            ),
-          );
-          if (audioFile) {
-            setSelectedFile(audioFile.path);
-            loadAudioInfo(audioFile.path);
-          }
-        }
-      } catch (error) {
-        console.error("Error loading selected file:", error);
+      const audioFile = await loadSelectedAudioFile();
+      if (audioFile) {
+        setSelectedFile(audioFile.path);
+        loadAudioInfo(audioFile.path);
       }
     }
     loadSelectedFile();
@@ -76,9 +48,7 @@ export default function AdjustSpeed() {
     }
 
     // Use custom speed if provided, otherwise use dropdown selection
-    const speedPercentage = values.customSpeed
-      ? parseFloat(values.customSpeed)
-      : parseFloat(values.speedPercentage);
+    const speedPercentage = values.customSpeed ? parseFloat(values.customSpeed) : parseFloat(values.speedPercentage);
 
     if (isNaN(speedPercentage) || speedPercentage <= 0) {
       showToast({
@@ -114,10 +84,7 @@ export default function AdjustSpeed() {
       const inputPath = values.inputFile[0];
       const outputDir = values.outputDirectory?.[0] || path.dirname(inputPath);
       const speedSuffix = `speed_${speedPercentage}percent${values.preservePitch ? "_pitched" : ""}`;
-      const outputPath = AudioProcessor.generateOutputPath(
-        inputPath,
-        speedSuffix,
-      );
+      const outputPath = AudioProcessor.generateOutputPath(inputPath, speedSuffix);
 
       const finalOutputPath = values.outputDirectory?.[0]
         ? path.join(outputDir, path.basename(outputPath))
@@ -145,8 +112,7 @@ export default function AdjustSpeed() {
       showToast({
         style: Toast.Style.Failure,
         title: "Speed Adjustment Failed",
-        message:
-          error instanceof Error ? error.message : "Unknown error occurred",
+        message: error instanceof Error ? error.message : "Unknown error occurred",
       });
     } finally {
       setIsLoading(false);
@@ -182,11 +148,7 @@ export default function AdjustSpeed() {
         />
       )}
 
-      <Form.Dropdown
-        id="speedPercentage"
-        title="Speed Preset"
-        defaultValue="100"
-      >
+      <Form.Dropdown id="speedPercentage" title="Speed Preset" defaultValue="100">
         <Form.Dropdown.Item value="25" title="25% (Very Slow)" />
         <Form.Dropdown.Item value="50" title="50% (Half Speed)" />
         <Form.Dropdown.Item value="75" title="75% (Slower)" />

@@ -127,8 +127,7 @@ export class AudioProcessor {
           showToast({
             style: Toast.Style.Animated,
             title: "FFmpeg Installation",
-            message:
-              "macOS: Run 'brew install ffmpeg' in Terminal\nOr visit ffmpeg.org for manual installation",
+            message: "macOS: Run 'brew install ffmpeg' in Terminal\nOr visit ffmpeg.org for manual installation",
           });
         },
       },
@@ -257,9 +256,7 @@ export class AudioProcessor {
 
       if (options.fadeOutDuration && options.fadeOutDuration > 0) {
         const startTime = audioInfo.duration - options.fadeOutDuration;
-        filters.push(
-          `afade=t=out:st=${startTime}:d=${options.fadeOutDuration}`,
-        );
+        filters.push(`afade=t=out:st=${startTime}:d=${options.fadeOutDuration}`);
       }
 
       if (filters.length === 0) {
@@ -341,9 +338,7 @@ export class AudioProcessor {
           return;
         }
 
-        const audioStream = metadata.streams.find(
-          (stream) => stream.codec_type === "audio",
-        );
+        const audioStream = metadata.streams.find((stream) => stream.codec_type === "audio");
         if (!audioStream) {
           reject(new Error("No audio stream found"));
           return;
@@ -351,9 +346,7 @@ export class AudioProcessor {
 
         resolve({
           duration: metadata.format.duration || 0,
-          bitrate: metadata.format.bit_rate
-            ? metadata.format.bit_rate.toString()
-            : "Unknown",
+          bitrate: metadata.format.bit_rate ? metadata.format.bit_rate.toString() : "Unknown",
           sampleRate: audioStream.sample_rate || 0,
           channels: audioStream.channels || 0,
           format: metadata.format.format_name || "Unknown",
@@ -365,15 +358,10 @@ export class AudioProcessor {
 
   static async adjustVolume(options: VolumeOptions): Promise<void> {
     return new Promise((resolve, reject) => {
-      const volumeChangeStr =
-        options.volumeChange >= 0
-          ? `+${options.volumeChange}dB`
-          : `${options.volumeChange}dB`;
+      const volumeChangeStr = options.volumeChange >= 0 ? `+${options.volumeChange}dB` : `${options.volumeChange}dB`;
 
-      // Use volume filter for general volume adjustment or gain filter for more precise control
-      const filter = options.useGain
-        ? `volume=${Math.pow(10, options.volumeChange / 20)}` // Convert dB to linear scale for gain
-        : `volume=${volumeChangeStr}`;
+      // FIXED: Use correct volume filter syntax
+      const filter = `volume=${volumeChangeStr}`;
 
       ffmpeg(options.inputPath)
         .audioFilters([filter])
@@ -414,26 +402,17 @@ export class AudioProcessor {
     });
   }
 
-  static async splitStereoToMono(
-    options: StereoSplitOptions,
-  ): Promise<{ leftPath: string; rightPath: string }> {
+  static async splitStereoToMono(options: StereoSplitOptions): Promise<{ leftPath: string; rightPath: string }> {
     const inputInfo = await this.getAudioInfo(options.inputPath);
 
     if (inputInfo.channels !== 2) {
       throw new Error("Input file must be stereo (2 channels) to split");
     }
 
-    const baseName =
-      options.outputBaseName || path.parse(options.inputPath).name;
+    const baseName = options.outputBaseName || path.parse(options.inputPath).name;
     const extension = path.extname(options.inputPath);
-    const leftPath = path.join(
-      options.outputDirectory,
-      `${baseName}_left${extension}`,
-    );
-    const rightPath = path.join(
-      options.outputDirectory,
-      `${baseName}_right${extension}`,
-    );
+    const leftPath = path.join(options.outputDirectory, `${baseName}_left${extension}`);
+    const rightPath = path.join(options.outputDirectory, `${baseName}_right${extension}`);
 
     return new Promise((resolve, reject) => {
       let completedCount = 0;
@@ -455,9 +434,9 @@ export class AudioProcessor {
         }
       };
 
-      // Extract left channel
+      // Extract left channel - FIXED: Use correct channel extraction
       ffmpeg(options.inputPath)
-        .audioFilters(["pan=mono|c0=0.5*c0+0.5*c1"])
+        .audioFilters(["pan=mono|c0=c0"]) // Extract only left channel (c0)
         .audioChannels(1)
         .on("start", () => {
           showToast({
@@ -473,9 +452,9 @@ export class AudioProcessor {
         })
         .save(leftPath);
 
-      // Extract right channel
+      // Extract right channel - FIXED: Use correct channel extraction
       ffmpeg(options.inputPath)
-        .audioFilters(["pan=mono|c0=0.5*c1+0.5*c0"])
+        .audioFilters(["pan=mono|c0=c1"]) // Extract only right channel (c1)
         .audioChannels(1)
         .on("end", checkCompletion)
         .on("error", (err) => {
@@ -486,15 +465,11 @@ export class AudioProcessor {
     });
   }
 
-  static async convertStereoToMono(
-    options: StereoToMonoOptions,
-  ): Promise<void> {
+  static async convertStereoToMono(options: StereoToMonoOptions): Promise<void> {
     const inputInfo = await this.getAudioInfo(options.inputPath);
 
     if (inputInfo.channels !== 2) {
-      throw new Error(
-        "Input file must be stereo (2 channels) to convert to mono",
-      );
+      throw new Error("Input file must be stereo (2 channels) to convert to mono");
     }
 
     return new Promise((resolve, reject) => {
@@ -557,10 +532,14 @@ export class AudioProcessor {
       throw new Error("Speed percentage must be greater than 0");
     }
 
+    // FIXED: Get actual sample rate from input file
+    const inputInfo = await this.getAudioInfo(options.inputPath);
+    const sampleRate = inputInfo.sampleRate;
+
     return new Promise((resolve, reject) => {
       const speedFactor = options.speedPercentage / 100;
 
-      // Use atempo filter for speed adjustment
+      // FIXED: Improved speed adjustment with better atempo chaining
       const audioFilters: string[] = [];
 
       if (options.preservePitch) {
@@ -568,25 +547,32 @@ export class AudioProcessor {
         if (speedFactor >= 0.5 && speedFactor <= 2.0) {
           audioFilters.push(`atempo=${speedFactor}`);
         } else {
-          // For extreme speed changes, chain multiple atempo filters
+          // FIXED: More efficient atempo chaining with proper limits
           let currentFactor = speedFactor;
+          const atempoFilters: string[] = [];
+
+          // Handle speeds > 2.0x
           while (currentFactor > 2.0) {
-            audioFilters.push("atempo=2.0");
+            atempoFilters.push("atempo=2.0");
             currentFactor /= 2.0;
           }
+
+          // Handle speeds < 0.5x
           while (currentFactor < 0.5) {
-            audioFilters.push("atempo=0.5");
+            atempoFilters.push("atempo=0.5");
             currentFactor /= 0.5;
           }
-          if (currentFactor !== 1.0) {
-            audioFilters.push(`atempo=${currentFactor}`);
+
+          // Add final factor if not 1.0
+          if (Math.abs(currentFactor - 1.0) > 0.001) {
+            atempoFilters.push(`atempo=${currentFactor.toFixed(3)}`);
           }
+
+          audioFilters.push(...atempoFilters);
         }
       } else {
-        // Use asetrate and aresample for speed change that affects pitch
-        audioFilters.push(
-          `asetrate=${Math.round(44100 * speedFactor)},aresample=44100`,
-        );
+        // FIXED: Use dynamic sample rate instead of hardcoded 44100
+        audioFilters.push(`asetrate=${Math.round(sampleRate * speedFactor)},aresample=${sampleRate}`);
       }
 
       ffmpeg(options.inputPath)
@@ -632,17 +618,10 @@ export class AudioProcessor {
     });
   }
 
-  static generateOutputPath(
-    inputPath: string,
-    suffix: string,
-    newExtension?: string,
-  ): string {
+  static generateOutputPath(inputPath: string, suffix: string, newExtension?: string): string {
     const parsedPath = path.parse(inputPath);
     const extension = newExtension || parsedPath.ext;
-    return path.join(
-      parsedPath.dir,
-      `${parsedPath.name}_${suffix}${extension}`,
-    );
+    return path.join(parsedPath.dir, `${parsedPath.name}_${suffix}${extension}`);
   }
 
   static formatFileSize(bytes: number): string {

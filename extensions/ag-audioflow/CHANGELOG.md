@@ -1,13 +1,9 @@
-# Changelog
+# AG AudioFlow Changelog
 
-All notable changes to AG AudioFlow will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-## [1.0.0] - 2024-01-XX
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
+
 - **Convert Audio Format** - Convert between MP3, WAV, AAC, FLAC, OGG formats with quality control
 - **Trim Silence** - Remove silence from beginning and end of audio files with adjustable thresholds
 - **Add Fade Effects** - Add professional fade-in and fade-out effects with custom durations
@@ -21,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Setup FFmpeg** - Automated FFmpeg detection and installation guidance
 
 ### Features
+
 - Automatic FFmpeg path detection for Apple Silicon and Intel Macs
 - Professional audio processing using FFmpeg backend
 - Intelligent file selection from Finder
@@ -30,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Professional UI with custom branding
 
 ### Technical
+
 - Built with TypeScript and React
 - Raycast API integration
 - Support for multiple audio formats

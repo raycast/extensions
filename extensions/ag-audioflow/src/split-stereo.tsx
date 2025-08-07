@@ -1,15 +1,7 @@
-import {
-  ActionPanel,
-  Action,
-  Form,
-  showToast,
-  Toast,
-  getSelectedFinderItems,
-  showInFinder,
-  popToRoot,
-} from "@raycast/api";
+import { ActionPanel, Action, Form, showToast, Toast, showInFinder, popToRoot } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { AudioProcessor, AudioInfo } from "./utils/audioProcessor";
+import { loadSelectedAudioFile } from "./utils/fileUtils";
 
 interface FormValues {
   inputFile: string[];
@@ -24,30 +16,10 @@ export default function SplitStereo() {
 
   useEffect(() => {
     async function loadSelectedFile() {
-      try {
-        const selectedItems = await getSelectedFinderItems();
-        if (selectedItems.length > 0) {
-          const audioExtensions = [
-            ".mp3",
-            ".wav",
-            ".aac",
-            ".flac",
-            ".ogg",
-            ".m4a",
-            ".wma",
-          ];
-          const audioFile = selectedItems.find((item) =>
-            audioExtensions.some((ext) =>
-              item.path.toLowerCase().endsWith(ext),
-            ),
-          );
-          if (audioFile) {
-            setSelectedFile(audioFile.path);
-            loadAudioInfo(audioFile.path);
-          }
-        }
-      } catch (error) {
-        console.error("Error loading selected file:", error);
+      const audioFile = await loadSelectedAudioFile();
+      if (audioFile) {
+        setSelectedFile(audioFile.path);
+        loadAudioInfo(audioFile.path);
       }
     }
     loadSelectedFile();
@@ -124,8 +96,7 @@ export default function SplitStereo() {
       showToast({
         style: Toast.Style.Failure,
         title: "Stereo Split Failed",
-        message:
-          error instanceof Error ? error.message : "Unknown error occurred",
+        message: error instanceof Error ? error.message : "Unknown error occurred",
       });
     } finally {
       setIsLoading(false);

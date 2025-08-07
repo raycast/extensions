@@ -1,23 +1,8 @@
-import {
-  ActionPanel,
-  Action,
-  Form,
-  showToast,
-  Toast,
-  getSelectedFinderItems,
-  showInFinder,
-  popToRoot,
-} from "@raycast/api";
+import { ActionPanel, Action, Form, showToast, Toast, showInFinder, popToRoot } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { AudioProcessor } from "./utils/audioProcessor";
-import {
-  SUPPORTED_AUDIO_FORMATS,
-  AUDIO_BITRATES,
-  SAMPLE_RATES,
-  AudioFormat,
-  AudioBitrate,
-  SampleRate,
-} from "./types";
+import { loadSelectedAudioFile } from "./utils/fileUtils";
+import { SUPPORTED_AUDIO_FORMATS, AUDIO_BITRATES, SAMPLE_RATES, AudioFormat, AudioBitrate, SampleRate } from "./types";
 import path from "path";
 
 interface FormValues {
@@ -35,29 +20,9 @@ export default function ConvertAudio() {
 
   useEffect(() => {
     async function loadSelectedFile() {
-      try {
-        const selectedItems = await getSelectedFinderItems();
-        if (selectedItems.length > 0) {
-          const audioExtensions = [
-            ".mp3",
-            ".wav",
-            ".aac",
-            ".flac",
-            ".ogg",
-            ".m4a",
-            ".wma",
-          ];
-          const audioFile = selectedItems.find((item) =>
-            audioExtensions.some((ext) =>
-              item.path.toLowerCase().endsWith(ext),
-            ),
-          );
-          if (audioFile) {
-            setSelectedFile(audioFile.path);
-          }
-        }
-      } catch (error) {
-        console.error("Error loading selected file:", error);
+      const audioFile = await loadSelectedAudioFile();
+      if (audioFile) {
+        setSelectedFile(audioFile.path);
       }
     }
     loadSelectedFile();
@@ -86,10 +51,7 @@ export default function ConvertAudio() {
       const inputPath = inputFile;
       const outputDir = values.outputDirectory?.[0] || path.dirname(inputPath);
       const inputName = path.parse(inputPath).name;
-      const outputPath = path.join(
-        outputDir,
-        `${inputName}_converted.${values.outputFormat}`,
-      );
+      const outputPath = path.join(outputDir, `${inputName}_converted.${values.outputFormat}`);
 
       await AudioProcessor.convertAudio({
         inputPath,
@@ -115,8 +77,7 @@ export default function ConvertAudio() {
       showToast({
         style: Toast.Style.Failure,
         title: "Conversion Failed",
-        message:
-          error instanceof Error ? error.message : "Unknown error occurred",
+        message: error instanceof Error ? error.message : "Unknown error occurred",
       });
     } finally {
       setIsLoading(false);
@@ -145,11 +106,7 @@ export default function ConvertAudio() {
 
       <Form.Dropdown id="outputFormat" title="Output Format" defaultValue="mp3">
         {SUPPORTED_AUDIO_FORMATS.map((format) => (
-          <Form.Dropdown.Item
-            key={format}
-            value={format}
-            title={format.toUpperCase()}
-          />
+          <Form.Dropdown.Item key={format} value={format} title={format.toUpperCase()} />
         ))}
       </Form.Dropdown>
 
@@ -161,11 +118,7 @@ export default function ConvertAudio() {
 
       <Form.Dropdown id="sampleRate" title="Sample Rate" defaultValue="44100">
         {SAMPLE_RATES.map((rate) => (
-          <Form.Dropdown.Item
-            key={rate}
-            value={rate.toString()}
-            title={`${rate} Hz`}
-          />
+          <Form.Dropdown.Item key={rate} value={rate.toString()} title={`${rate} Hz`} />
         ))}
       </Form.Dropdown>
 

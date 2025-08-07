@@ -19,27 +19,11 @@ export interface BatchProcessingOptions {
   options: Record<string, unknown>;
 }
 
-export const SUPPORTED_AUDIO_FORMATS = [
-  "mp3",
-  "wav",
-  "aac",
-  "flac",
-  "ogg",
-] as const;
+export const SUPPORTED_AUDIO_FORMATS = ["mp3", "wav", "aac", "flac", "ogg"] as const;
 
-export const AUDIO_BITRATES = [
-  "64k",
-  "96k",
-  "128k",
-  "160k",
-  "192k",
-  "256k",
-  "320k",
-] as const;
+export const AUDIO_BITRATES = ["64k", "96k", "128k", "160k", "192k", "256k", "320k"] as const;
 
-export const SAMPLE_RATES = [
-  8000, 11025, 22050, 44100, 48000, 88200, 96000,
-] as const;
+export const SAMPLE_RATES = [8000, 11025, 22050, 44100, 48000, 88200, 96000] as const;
 
 export type AudioFormat = (typeof SUPPORTED_AUDIO_FORMATS)[number];
 export type AudioBitrate = (typeof AUDIO_BITRATES)[number];

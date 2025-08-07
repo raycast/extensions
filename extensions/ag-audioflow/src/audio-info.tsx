@@ -1,14 +1,7 @@
-import {
-  ActionPanel,
-  Action,
-  List,
-  showToast,
-  Toast,
-  getSelectedFinderItems,
-  Clipboard,
-} from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, Clipboard } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { AudioProcessor } from "./utils/audioProcessor";
+import { loadSelectedAudioFiles } from "./utils/fileUtils";
 import path from "path";
 
 interface AudioInfoItem {
@@ -28,28 +21,13 @@ export default function AudioInfo() {
   async function loadSelectedFiles() {
     setIsLoading(true);
     try {
-      const selectedItems = await getSelectedFinderItems();
-      const audioExtensions = [
-        ".mp3",
-        ".wav",
-        ".aac",
-        ".flac",
-        ".ogg",
-        ".m4a",
-        ".wma",
-      ];
-      const audioFiles = selectedItems
-        .filter((item) =>
-          audioExtensions.some((ext) => item.path.toLowerCase().endsWith(ext)),
-        )
-        .map((item) => item.path);
+      const audioFiles = await loadSelectedAudioFiles();
 
       if (audioFiles.length === 0) {
         showToast({
           style: Toast.Style.Failure,
           title: "No Audio Files",
-          message:
-            "Please select audio files in Finder and run this command again",
+          message: "Please select audio files in Finder and run this command again",
         });
         setIsLoading(false);
         return;
@@ -90,10 +68,7 @@ export default function AudioInfo() {
           },
           {
             title: "📊 Bitrate",
-            subtitle:
-              typeof info.bitrate === "string"
-                ? info.bitrate
-                : `${info.bitrate} bps`,
+            subtitle: typeof info.bitrate === "string" ? info.bitrate : `${info.bitrate} bps`,
           },
           {
             title: "🔊 Sample Rate",
@@ -101,12 +76,7 @@ export default function AudioInfo() {
           },
           {
             title: "🎛️ Channels",
-            subtitle:
-              info.channels === 1
-                ? "Mono"
-                : info.channels === 2
-                  ? "Stereo"
-                  : `${info.channels} channels`,
+            subtitle: info.channels === 1 ? "Mono" : info.channels === 2 ? "Stereo" : `${info.channels} channels`,
             accessories: [{ text: `${info.channels}` }],
           },
           {
@@ -148,10 +118,7 @@ export default function AudioInfo() {
   }
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search audio file information..."
-    >
+    <List isLoading={isLoading} searchBarPlaceholder="Search audio file information...">
       {audioInfoItems.map((item, index) => (
         <List.Item
           key={index}
@@ -160,10 +127,7 @@ export default function AudioInfo() {
           accessories={item.accessories}
           actions={
             <ActionPanel>
-              <Action
-                title="Copy All Info to Clipboard"
-                onAction={copyToClipboard}
-              />
+              <Action title="Copy All Info to Clipboard" onAction={copyToClipboard} />
               <Action title="Refresh" onAction={loadSelectedFiles} />
             </ActionPanel>
           }

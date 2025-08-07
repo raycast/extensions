@@ -1,15 +1,7 @@
-import {
-  ActionPanel,
-  Action,
-  Form,
-  showToast,
-  Toast,
-  getSelectedFinderItems,
-  showInFinder,
-  popToRoot,
-} from "@raycast/api";
+import { ActionPanel, Action, Form, showToast, Toast, showInFinder, popToRoot } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { AudioProcessor } from "./utils/audioProcessor";
+import { loadSelectedAudioFiles } from "./utils/fileUtils";
 import { SUPPORTED_AUDIO_FORMATS, AUDIO_BITRATES } from "./types";
 import path from "path";
 
@@ -48,30 +40,14 @@ export default function BatchProcess() {
 
   async function loadSelectedFiles() {
     try {
-      const selectedItems = await getSelectedFinderItems();
-      const audioExtensions = [
-        ".mp3",
-        ".wav",
-        ".aac",
-        ".flac",
-        ".ogg",
-        ".m4a",
-        ".wma",
-      ];
-      const audioFiles = selectedItems
-        .filter((item) =>
-          audioExtensions.some((ext) => item.path.toLowerCase().endsWith(ext)),
-        )
-        .map((item) => item.path);
-
+      const audioFiles = await loadSelectedAudioFiles();
       setSelectedFiles(audioFiles);
 
       if (audioFiles.length === 0) {
         showToast({
           style: Toast.Style.Failure,
           title: "No Audio Files",
-          message:
-            "Please select audio files in Finder before using batch processing",
+          message: "Please select audio files in Finder before using batch processing",
         });
       }
     } catch (error) {
@@ -129,24 +105,13 @@ export default function BatchProcess() {
           switch (values.operation) {
             case "convert": {
               suffix = `converted`;
-              const extension = values.outputFormat
-                ? `.${values.outputFormat}`
-                : path.extname(inputFile);
-              outputPath = path.join(
-                values.outputDirectory[0],
-                `${fileName}_${suffix}${extension}`,
-              );
+              const extension = values.outputFormat ? `.${values.outputFormat}` : path.extname(inputFile);
+              outputPath = path.join(values.outputDirectory[0], `${fileName}_${suffix}${extension}`);
 
               await AudioProcessor.convertAudio({
                 inputPath: inputFile,
                 outputPath,
-                format:
-                  (values.outputFormat as
-                    | "mp3"
-                    | "aac"
-                    | "wav"
-                    | "flac"
-                    | "ogg") || "mp3",
+                format: (values.outputFormat as "mp3" | "aac" | "wav" | "flac" | "ogg") || "mp3",
                 bitrate: values.bitrate,
               });
               break;
@@ -154,74 +119,47 @@ export default function BatchProcess() {
 
             case "trim": {
               suffix = "trimmed";
-              outputPath = path.join(
-                values.outputDirectory[0],
-                `${fileName}_${suffix}${path.extname(inputFile)}`,
-              );
+              outputPath = path.join(values.outputDirectory[0], `${fileName}_${suffix}${path.extname(inputFile)}`);
 
               await AudioProcessor.trimSilence({
                 inputPath: inputFile,
                 outputPath,
-                startThreshold: values.startThreshold
-                  ? Number(values.startThreshold)
-                  : -50,
-                endThreshold: values.endThreshold
-                  ? Number(values.endThreshold)
-                  : -50,
+                startThreshold: values.startThreshold ? Number(values.startThreshold) : -50,
+                endThreshold: values.endThreshold ? Number(values.endThreshold) : -50,
               });
               break;
             }
 
             case "fade": {
               suffix = "faded";
-              outputPath = path.join(
-                values.outputDirectory[0],
-                `${fileName}_${suffix}${path.extname(inputFile)}`,
-              );
+              outputPath = path.join(values.outputDirectory[0], `${fileName}_${suffix}${path.extname(inputFile)}`);
 
               await AudioProcessor.addFadeEffects({
                 inputPath: inputFile,
                 outputPath,
-                fadeInDuration: values.fadeInDuration
-                  ? Number(values.fadeInDuration)
-                  : undefined,
-                fadeOutDuration: values.fadeOutDuration
-                  ? Number(values.fadeOutDuration)
-                  : undefined,
+                fadeInDuration: values.fadeInDuration ? Number(values.fadeInDuration) : undefined,
+                fadeOutDuration: values.fadeOutDuration ? Number(values.fadeOutDuration) : undefined,
               });
               break;
             }
 
             case "normalize": {
               suffix = "normalized";
-              outputPath = path.join(
-                values.outputDirectory[0],
-                `${fileName}_${suffix}${path.extname(inputFile)}`,
-              );
+              outputPath = path.join(values.outputDirectory[0], `${fileName}_${suffix}${path.extname(inputFile)}`);
 
               await AudioProcessor.normalizeAudio({
                 inputPath: inputFile,
                 outputPath,
-                targetLevel: values.targetLevel
-                  ? Number(values.targetLevel)
-                  : -23,
+                targetLevel: values.targetLevel ? Number(values.targetLevel) : -23,
               });
               break;
             }
 
             case "volume": {
-              const volumeChange = values.volumeChange
-                ? Number(values.volumeChange)
-                : 0;
-              const volumeSuffix =
-                volumeChange >= 0
-                  ? `plus${volumeChange}dB`
-                  : `minus${Math.abs(volumeChange)}dB`;
+              const volumeChange = values.volumeChange ? Number(values.volumeChange) : 0;
+              const volumeSuffix = volumeChange >= 0 ? `plus${volumeChange}dB` : `minus${Math.abs(volumeChange)}dB`;
               suffix = `volume_${volumeSuffix}`;
-              outputPath = path.join(
-                values.outputDirectory[0],
-                `${fileName}_${suffix}${path.extname(inputFile)}`,
-              );
+              outputPath = path.join(values.outputDirectory[0], `${fileName}_${suffix}${path.extname(inputFile)}`);
 
               await AudioProcessor.adjustVolume({
                 inputPath: inputFile,
@@ -233,15 +171,9 @@ export default function BatchProcess() {
             }
 
             case "stereo-to-mono": {
-              const methodSuffix =
-                values.mixMethod === "mix"
-                  ? "mono"
-                  : `mono_${values.mixMethod}`;
+              const methodSuffix = values.mixMethod === "mix" ? "mono" : `mono_${values.mixMethod}`;
               suffix = methodSuffix;
-              outputPath = path.join(
-                values.outputDirectory[0],
-                `${fileName}_${suffix}${path.extname(inputFile)}`,
-              );
+              outputPath = path.join(values.outputDirectory[0], `${fileName}_${suffix}${path.extname(inputFile)}`);
 
               await AudioProcessor.convertStereoToMono({
                 inputPath: inputFile,
@@ -252,15 +184,10 @@ export default function BatchProcess() {
             }
 
             case "speed": {
-              const speedPercentage = values.speedPercentage
-                ? Number(values.speedPercentage)
-                : 100;
+              const speedPercentage = values.speedPercentage ? Number(values.speedPercentage) : 100;
               const speedSuffix = `speed_${speedPercentage}percent${values.preservePitch ? "_pitched" : ""}`;
               suffix = speedSuffix;
-              outputPath = path.join(
-                values.outputDirectory[0],
-                `${fileName}_${suffix}${path.extname(inputFile)}`,
-              );
+              outputPath = path.join(values.outputDirectory[0], `${fileName}_${suffix}${path.extname(inputFile)}`);
 
               await AudioProcessor.adjustSpeed({
                 inputPath: inputFile,
@@ -291,10 +218,7 @@ export default function BatchProcess() {
       const failureCount = results.filter((r) => !r.success).length;
 
       showToast({
-        style:
-          successCount === totalFiles
-            ? Toast.Style.Success
-            : Toast.Style.Failure,
+        style: successCount === totalFiles ? Toast.Style.Success : Toast.Style.Failure,
         title: "Batch Processing Complete",
         message: `${successCount} succeeded, ${failureCount} failed`,
         primaryAction: {
@@ -313,8 +237,7 @@ export default function BatchProcess() {
       showToast({
         style: Toast.Style.Failure,
         title: "Batch Processing Failed",
-        message:
-          error instanceof Error ? error.message : "Unknown error occurred",
+        message: error instanceof Error ? error.message : "Unknown error occurred",
       });
     } finally {
       setIsLoading(false);
@@ -327,18 +250,13 @@ export default function BatchProcess() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Start Batch Processing"
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Start Batch Processing" onSubmit={handleSubmit} />
           <Action title="Refresh Selected Files" onAction={loadSelectedFiles} />
         </ActionPanel>
       }
     >
       {progress && (
-        <Form.Description
-          text={`Processing ${progress.current} of ${progress.total}: ${progress.currentFile}`}
-        />
+        <Form.Description text={`Processing ${progress.current} of ${progress.total}: ${progress.currentFile}`} />
       )}
 
       <Form.TextArea
@@ -348,86 +266,43 @@ export default function BatchProcess() {
         onChange={() => {}}
       />
 
-      <Form.Dropdown
-        id="operation"
-        title="Processing Operation"
-        defaultValue="convert"
-      >
+      <Form.Dropdown id="operation" title="Processing Operation" defaultValue="convert">
         <Form.Dropdown.Item value="convert" title="Convert Format" />
         <Form.Dropdown.Item value="trim" title="Trim Silence" />
         <Form.Dropdown.Item value="fade" title="Add Fade Effects" />
         <Form.Dropdown.Item value="normalize" title="Normalize Audio" />
         <Form.Dropdown.Item value="volume" title="Adjust Volume/Gain" />
-        <Form.Dropdown.Item
-          value="stereo-to-mono"
-          title="Convert Stereo to Mono"
-        />
+        <Form.Dropdown.Item value="stereo-to-mono" title="Convert Stereo to Mono" />
         <Form.Dropdown.Item value="speed" title="Adjust Audio Speed" />
       </Form.Dropdown>
 
-      <Form.Dropdown
-        id="outputFormat"
-        title="Output Format (for conversion)"
-        defaultValue="mp3"
-      >
+      <Form.Dropdown id="outputFormat" title="Output Format (for conversion)" defaultValue="mp3">
         {SUPPORTED_AUDIO_FORMATS.map((format) => (
-          <Form.Dropdown.Item
-            key={format}
-            value={format}
-            title={format.toUpperCase()}
-          />
+          <Form.Dropdown.Item key={format} value={format} title={format.toUpperCase()} />
         ))}
       </Form.Dropdown>
 
-      <Form.Dropdown
-        id="bitrate"
-        title="Bitrate (for conversion)"
-        defaultValue="192k"
-      >
+      <Form.Dropdown id="bitrate" title="Bitrate (for conversion)" defaultValue="192k">
         {AUDIO_BITRATES.map((bitrate) => (
           <Form.Dropdown.Item key={bitrate} value={bitrate} title={bitrate} />
         ))}
       </Form.Dropdown>
 
-      <Form.TextField
-        id="startThreshold"
-        title="Start Silence Threshold (for trimming)"
-        placeholder="-50"
-      />
+      <Form.TextField id="startThreshold" title="Start Silence Threshold (for trimming)" placeholder="-50" />
 
-      <Form.TextField
-        id="endThreshold"
-        title="End Silence Threshold (for trimming)"
-        placeholder="-50"
-      />
+      <Form.TextField id="endThreshold" title="End Silence Threshold (for trimming)" placeholder="-50" />
 
-      <Form.TextField
-        id="fadeInDuration"
-        title="Fade In Duration (for fade effects)"
-        placeholder="2"
-      />
+      <Form.TextField id="fadeInDuration" title="Fade In Duration (for fade effects)" placeholder="2" />
 
-      <Form.TextField
-        id="fadeOutDuration"
-        title="Fade Out Duration (for fade effects)"
-        placeholder="2"
-      />
+      <Form.TextField id="fadeOutDuration" title="Fade Out Duration (for fade effects)" placeholder="2" />
 
-      <Form.Dropdown
-        id="targetLevel"
-        title="Target Level (for normalization)"
-        defaultValue="-23"
-      >
+      <Form.Dropdown id="targetLevel" title="Target Level (for normalization)" defaultValue="-23">
         <Form.Dropdown.Item value="-16" title="-16 LUFS (Streaming)" />
         <Form.Dropdown.Item value="-23" title="-23 LUFS (Broadcast)" />
         <Form.Dropdown.Item value="-14" title="-14 LUFS (Spotify)" />
       </Form.Dropdown>
 
-      <Form.Dropdown
-        id="volumeChange"
-        title="Volume Change (for volume adjustment)"
-        defaultValue="0"
-      >
+      <Form.Dropdown id="volumeChange" title="Volume Change (for volume adjustment)" defaultValue="0">
         <Form.Dropdown.Item value="-12" title="-12dB (Quieter)" />
         <Form.Dropdown.Item value="-6" title="-6dB (Moderately Quieter)" />
         <Form.Dropdown.Item value="-3" title="-3dB (Slightly Quieter)" />
@@ -444,21 +319,13 @@ export default function BatchProcess() {
         defaultValue={false}
       />
 
-      <Form.Dropdown
-        id="mixMethod"
-        title="Mix Method (for stereo to mono)"
-        defaultValue="mix"
-      >
+      <Form.Dropdown id="mixMethod" title="Mix Method (for stereo to mono)" defaultValue="mix">
         <Form.Dropdown.Item value="mix" title="Mix Both Channels" />
         <Form.Dropdown.Item value="left" title="Use Left Channel Only" />
         <Form.Dropdown.Item value="right" title="Use Right Channel Only" />
       </Form.Dropdown>
 
-      <Form.Dropdown
-        id="speedPercentage"
-        title="Speed (for speed adjustment)"
-        defaultValue="100"
-      >
+      <Form.Dropdown id="speedPercentage" title="Speed (for speed adjustment)" defaultValue="100">
         <Form.Dropdown.Item value="50" title="50% (Half Speed)" />
         <Form.Dropdown.Item value="75" title="75% (Slower)" />
         <Form.Dropdown.Item value="100" title="100% (Normal)" />
