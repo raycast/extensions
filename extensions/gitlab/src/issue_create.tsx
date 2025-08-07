@@ -24,7 +24,7 @@ async function submit(values: IssueFormValues) {
     if (values.title === "") {
       throw Error("Please enter a title");
     }
-    const val = toFormValues(values);
+    const val = toFormValues(values as unknown as Record<string, unknown>);
     console.log(val);
     await gitlab.createIssue(values.project_id, val);
     await showToast(Toast.Style.Success, "Issue created", "Issue creation successful");
