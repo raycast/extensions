@@ -26,7 +26,7 @@
 - Improved user interface with clearer section titles
 - Updated README with comprehensive feature documentation
 
-## Fixed - {PR_MERGE_DATE}
+## [Fixes] - {PR_MERGE_DATE}
 
 - Fixed Twitter and X to lead to X [#18534](https://github.com/raycast/extensions/issues/18534)
 
