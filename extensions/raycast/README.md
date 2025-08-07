@@ -8,11 +8,7 @@ Before using this extension, you'll need to configure your API credentials:
 
 ### 1. Get Your API Key
 
-You'll need to obtain an API key from your tweet posting service. This extension expects your service to provide:
-
-- An API endpoint for posting tweets
-- Bearer token authentication
-- Standard HTTP POST requests with JSON payloads
+You'll need to obtain an API key from https://yap.ac
 
 ### 2. Configure Extension Preferences
 
@@ -42,22 +38,6 @@ You'll need to obtain an API key from your tweet posting service. This extension
 - `⌘ + Shift + C` - Clear content
 - `⌘ + Shift + P` - Open extension preferences
 - `⌘ + F` - Leave Feedback for the extension
-
-## API Requirements
-
-Your tweet posting service should accept requests in the following format:
-
-```http
-POST /tweet
-Authorization: Bearer YOUR_API_KEY
-Content-Type: application/json
-User-Agent: Raycast Yap Extension
-
-{
-  "content": "Your tweet content here",
-  "timestamp": "2024-01-01T12:00:00.000Z"
-}
-```
 
 ### Expected Responses
 
