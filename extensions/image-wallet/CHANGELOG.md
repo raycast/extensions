@@ -2,10 +2,14 @@
 
 ## [New Features] - {PR_MERGE_DATE}
 
-- Added "Show in Finder" action with ⌘O shortcut for individual images
-- Improved handling of files with special characters in paths
+- Added 'Show in Finder' action with ⌘O shortcut for individual images
+- Added symbolic link support
 - Enhanced error messages for better user experience
+- Hid Photo Library read errors regardless of preference
+- Improved handling of files with special characters in paths
 - SVG files now display properly even with special characters in file paths
+- Fixed file extensions appearing when not in all lowercase
+- Fixed Pocket names showing a colon instead of a forward slash
 
 ## [Bug Fixes] - 2024-06-12
 
