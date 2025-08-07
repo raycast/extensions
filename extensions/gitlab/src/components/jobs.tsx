@@ -134,7 +134,7 @@ function getStatusText(status: string, allowFailure: boolean) {
   }
 }
 
-export function JobListItem(props: { job: Job; projectFullPath: string; onRefreshJobs: () => void }): JSX.Element {
+export function JobListItem(props: { job: Job; projectFullPath: string; onRefreshJobs: () => void }) {
   const job = props.job;
   const icon = getCIJobStatusIcon(job.status, job.allowFailure);
   const subtitle = "#" + getIdFromGqlId(job.id);
@@ -168,7 +168,7 @@ export function JobList(props: {
   pipelineID: number;
   pipelineIID?: string | undefined;
   navigationTitle?: string;
-}): JSX.Element {
+}) {
   const { stages, error, isLoading, refresh } = useSearch(
     "",
     props.projectFullPath,
@@ -330,7 +330,7 @@ interface Commit {
   last_pipeline?: Pipeline;
 }
 
-export function PipelineJobsListByCommit(props: { project: Project; sha: string }): JSX.Element {
+export function PipelineJobsListByCommit(props: { project: Project; sha: string }) {
   const { commit, isLoading, error } = useCommit(props.project.id, props.sha);
   if (error) {
     showErrorToast(error, "Could not fetch Commit Details");

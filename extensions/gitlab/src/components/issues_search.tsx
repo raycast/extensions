@@ -15,7 +15,7 @@ import {
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-export function SearchMyIssues(): JSX.Element {
+export function SearchMyIssues() {
   const [scope, setScope] = useState<string>(IssueScope.created_by_me);
   const state = IssueState.all;
   const [search, setSearch] = useState<string>();

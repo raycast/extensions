@@ -19,7 +19,7 @@ import {
   StatusSetCustomAction,
 } from "./actions";
 
-export default function StatusList(): JSX.Element {
+export default function StatusList() {
   const { data, error, isLoading } = useCache<Status | undefined>(
     "userstatus",
     async () => {
@@ -74,7 +74,7 @@ function StatusCurrentListItem(props: {
   presets: Status[];
   setPresets: React.Dispatch<React.SetStateAction<Status[]>>;
   setCurrentStatus: React.Dispatch<React.SetStateAction<Status | undefined>>;
-}): JSX.Element {
+}) {
   const status = props.status;
   const presets = props.presets;
   const setPresets = props.setPresets;
@@ -129,7 +129,7 @@ export function StatusPresetListItem(props: {
   setPresets: React.Dispatch<React.SetStateAction<Status[]>>;
   setCurrentStatus: React.Dispatch<React.SetStateAction<Status | undefined>>;
   setSelectedId: React.Dispatch<React.SetStateAction<string | undefined>>;
-}): JSX.Element {
+}) {
   const s = props.status;
   const presets = props.presets || [];
   return (

@@ -42,11 +42,11 @@ const GET_ISSUE_DETAIL = gql`
   }
 `;
 
-export function IssueListEmptyView(): JSX.Element {
+export function IssueListEmptyView() {
   return <List.EmptyView title="No Issues" icon={{ source: "issues.svg", tintColor: Color.PrimaryText }} />;
 }
 
-export function IssueDetailFetch(props: { project: Project; issueId: number }): JSX.Element {
+export function IssueDetailFetch(props: { project: Project; issueId: number }) {
   const { issue, isLoading, error } = useIssue(props.project.id, props.issueId);
   if (error) {
     showErrorToast(error, "Could not fetch Issue Details");
@@ -67,7 +67,7 @@ function stateColor(state: string): Color.ColorLike {
   return state === "closed" ? "red" : "green";
 }
 
-export function IssueDetail(props: { issue: Issue }): JSX.Element {
+export function IssueDetail(props: { issue: Issue }) {
   const issue = props.issue;
   const { issueDetail, error, isLoading } = useDetail(props.issue.id);
   if (error) {
@@ -191,7 +191,7 @@ function useDetail(issueID: number): {
   return { issueDetail, error, isLoading };
 }
 
-export function IssueListItem(props: { issue: Issue; refreshData: () => void }): JSX.Element {
+export function IssueListItem(props: { issue: Issue; refreshData: () => void }) {
   const issue = props.issue;
   const tintColor = issue.state === "opened" ? Color.Green : Color.Red;
   return (
@@ -263,7 +263,7 @@ export function IssueList({
   state = IssueState.all,
   project = undefined,
   group = undefined,
-}: IssueListProps): JSX.Element {
+}: IssueListProps) {
   const [searchText, setSearchText] = useState<string>();
   const [searchState, setSearchState] = useState<IssueState>(state);
   const { issues, error, isLoading, refresh } = useSearch(searchText, scope, searchState, project, group);

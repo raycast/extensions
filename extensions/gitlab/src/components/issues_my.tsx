@@ -27,7 +27,7 @@ function MyIssueList(props: {
     | React.ReactElement<List.Dropdown.Props, string | React.JSXElementConstructor<any>>
     | null
     | undefined;
-}): JSX.Element {
+}) {
   const issues = props.issues;
 
   const refresh = () => {
@@ -51,7 +51,7 @@ function MyIssueList(props: {
   );
 }
 
-export function MyIssues(props: { scope: IssueScope; state: IssueState }): JSX.Element {
+export function MyIssues(props: { scope: IssueScope; state: IssueState }) {
   const scope = props.scope;
   const state = props.state;
   const [project, setProject] = useState<Project>();

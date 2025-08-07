@@ -28,7 +28,7 @@ export function MenuBarRoot(props: {
   title?: string;
   tooltip?: string;
   error?: string | undefined;
-}): JSX.Element {
+}) {
   const error = props.error;
   const reloadMenu = async () => {
     //environment.commandName;
@@ -56,7 +56,7 @@ export function MenuBarItem(props: {
   shortcut?: Keyboard.Shortcut | undefined;
   onAction?: ((event: object) => void) | undefined;
   tooltip?: string;
-}): JSX.Element {
+}) {
   return (
     <MenuBarExtra.Item
       title={props.title ? clipText(props.title) : "?"}
@@ -76,7 +76,7 @@ function shownElements(elements?: ReactNode, maxElements?: number): { shown?: Re
   if (React.isValidElement(elements)) {
     return { shown: [elements], hidden: 0 };
   }
-  const els = elements as JSX.Element[] | undefined;
+  const els = elements as React.ReactElement[] | undefined;
   if (!els || els.length <= 0) {
     return { shown: undefined, hidden: 0 };
   }
@@ -98,8 +98,8 @@ export function MenuBarSection(props: {
   subtitle?: string;
   maxChildren?: number;
   children?: ReactNode;
-  moreElement?: (hidden: number) => JSX.Element | null;
-}): JSX.Element | null {
+  moreElement?: (hidden: number) => React.ReactNode | null;
+}) {
   const title = joinNonEmpty(
     [props.title, props.subtitle].filter((e) => e),
     " ",
@@ -118,7 +118,7 @@ export function MenuBarSubmenu(props: {
   subtitle?: string;
   icon?: Image.ImageLike | undefined;
   children?: ReactNode;
-}): JSX.Element {
+}) {
   const title =
     joinNonEmpty(
       [props.title, props.subtitle].filter((e) => e),
@@ -131,7 +131,7 @@ export function MenuBarSubmenu(props: {
   );
 }
 
-export function MenuBarItemConfigureCommand(): JSX.Element {
+export function MenuBarItemConfigureCommand() {
   return (
     <MenuBarExtra.Item
       title="Configure Command"

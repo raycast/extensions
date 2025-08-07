@@ -50,7 +50,7 @@ const GET_GROUP_MILESTONES = gql`
   }
 `;
 
-export function MilestoneListItem(props: { milestone: any }): JSX.Element {
+export function MilestoneListItem(props: { milestone: any }) {
   const milestone = props.milestone;
   const issueCounter = `${milestone.closedIssuesCount}/${milestone.totalIssuesCount}`;
   let subtitle = "";
@@ -72,7 +72,7 @@ export function MilestoneListItem(props: { milestone: any }): JSX.Element {
   );
 }
 
-export function MilestoneList(props: { project?: Project; group?: Group; navigationTitle?: string }): JSX.Element {
+export function MilestoneList(props: { project?: Project; group?: Group; navigationTitle?: string }) {
   const isGroup = !!props.group;
   let fullPath = props.project ? props.project.fullPath : "";
   if (fullPath.length <= 0) {

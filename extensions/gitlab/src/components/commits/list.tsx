@@ -13,7 +13,7 @@ import { MyProjectsDropdown } from "../project";
 import { CommitListItem } from "./item";
 import { useCommitStatus } from "./utils";
 
-function EventCommitListItem(props: { event: Event }): JSX.Element {
+function EventCommitListItem(props: { event: Event }) {
   const e = props.event;
   const commit = e.push_data?.commit_to;
   const ref = e.push_data?.ref;
@@ -30,7 +30,7 @@ function EventCommitListItem(props: { event: Event }): JSX.Element {
     },
   );
   const { commitStatus: status } = useCommitStatus(e.project_id, commit);
-  const webAction = (): JSX.Element | undefined => {
+  const webAction = (): React.ReactNode | undefined => {
     if (project) {
       const proUrl = project.web_url;
       if (proUrl && commit) {
@@ -41,7 +41,7 @@ function EventCommitListItem(props: { event: Event }): JSX.Element {
     return undefined;
   };
 
-  const action = (): JSX.Element | undefined | null => {
+  const action = (): React.ReactNode | undefined | null => {
     if (project && commit && status?.status) {
       return (
         <Action.Push
@@ -79,11 +79,11 @@ function EventCommitListItem(props: { event: Event }): JSX.Element {
   );
 }
 
-function RecentCommitsListEmptyView(): JSX.Element {
+function RecentCommitsListEmptyView() {
   return <List.EmptyView title="No Commits" icon={{ source: GitLabIcons.commit, tintColor: Color.PrimaryText }} />;
 }
 
-export function RecentCommitsList(): JSX.Element {
+export function RecentCommitsList() {
   const [project, setProject] = useState<Project>();
   const { data, error, isLoading } = useCache<Event[]>(
     "events_pushed",
@@ -151,11 +151,7 @@ async function getProjectCommits(projectID: number, refName?: string): Promise<C
   return commits;
 }
 
-export function ProjectCommitList(props: {
-  projectID: number;
-  refName?: string;
-  navigationTitle?: string;
-}): JSX.Element {
+export function ProjectCommitList(props: { projectID: number; refName?: string; navigationTitle?: string }) {
   const projectID = props.projectID;
   const refName = props.refName;
   let cacheKey = `project_commits_${projectID}`;

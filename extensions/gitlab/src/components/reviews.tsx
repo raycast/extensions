@@ -9,11 +9,11 @@ import { MRListItem } from "./mr";
 import { useCachedState } from "@raycast/utils";
 import { GitLabIcons } from "../icons";
 
-function ReviewListEmptyView(): JSX.Element {
+function ReviewListEmptyView() {
   return <List.EmptyView title="No Reviews" icon={{ source: GitLabIcons.review, tintColor: Color.PrimaryText }} />;
 }
 
-export function ReviewList(): JSX.Element {
+export function ReviewList() {
   const [project, setProject] = useState<Project>();
   const { mrs, error, isLoading, performRefetch } = useMyReviews(project);
 

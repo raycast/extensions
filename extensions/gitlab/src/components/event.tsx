@@ -42,7 +42,7 @@ export interface Event {
   author?: User;
 }
 
-export function EventListItem(props: { event: Event }): JSX.Element {
+export function EventListItem(props: { event: Event }) {
   const ev = props.event;
   const { data: project, error } = useCache<Project | undefined>(
     `event_project_${ev.project_id}`,
@@ -59,7 +59,7 @@ export function EventListItem(props: { event: Event }): JSX.Element {
   let title = "";
   let icon: Image.ImageLike | undefined;
   const action_name = ev.action_name;
-  let actionElement: JSX.Element | undefined;
+  let actionElement: React.ReactNode | undefined;
   switch (action_name) {
     case "updated":
       {
@@ -423,11 +423,11 @@ function EventListDropdown(props: { onChange: (text: string) => void }) {
   );
 }
 
-function EventListEmptyView(): JSX.Element {
+function EventListEmptyView() {
   return <List.EmptyView title="No Activity" icon={{ source: GitLabIcons.activity, tintColor: Color.PrimaryText }} />;
 }
 
-export function EventList(): JSX.Element {
+export function EventList() {
   const [scope, setScope] = useState<string>(ScopeType.MyActivities);
   const [searchText, setSearchText] = useState<string>();
   const params: Record<string, any> = {};

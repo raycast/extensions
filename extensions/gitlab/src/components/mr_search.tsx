@@ -9,7 +9,7 @@ import { MRScope, MRState, MRListItem, getMRQuery, injectMRQueryNamedParameters,
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-export function SearchMyMergeRequests(): JSX.Element {
+export function SearchMyMergeRequests() {
   const [scope, setScope] = useState<string>(MRScope.created_by_me);
   const state = MRState.all;
   const [search, setSearch] = useState<string>();

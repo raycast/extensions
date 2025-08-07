@@ -29,7 +29,7 @@ async function submit(values: MRFormValues) {
     if (values.source_branch === "") {
       throw Error("Please select a source branch");
     }
-    const val = toFormValues(values);
+    const val = toFormValues(values as unknown as Record<string, unknown>);
     console.log(val);
     await gitlab.createMR(values.project_id, val);
     await showToast(Toast.Style.Success, "Merge Request created", "Merge Request creation successful");
@@ -45,15 +45,7 @@ async function getProjectBranches(projectID: number) {
   return { branches, project };
 }
 
-export function IssueMRCreateForm({
-  issue,
-  projectID,
-  title,
-}: {
-  issue: Issue;
-  projectID: number;
-  title: string;
-}): JSX.Element {
+export function IssueMRCreateForm({ issue, projectID, title }: { issue: Issue; projectID: number; title: string }) {
   const branchName = `${issue.iid}-${stringToSlug(issue.title)}`;
   const [branches, setBranches] = useState<Branch[]>();
   const [project, setProject] = useState<Project>();
@@ -101,7 +93,7 @@ export function IssueMRCreateForm({
   );
 }
 
-export function MRCreateForm(props: { project?: Project | undefined; branch?: string | undefined }): JSX.Element {
+export function MRCreateForm(props: { project?: Project | undefined; branch?: string | undefined }) {
   const [selectedProject, setSelectedProject] = useState<string | undefined>(
     props.project ? props.project.id.toString() : undefined,
   );

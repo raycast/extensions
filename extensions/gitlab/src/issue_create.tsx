@@ -15,7 +15,7 @@ interface IssueFormValues {
   milestone_id: number;
 }
 
-export default function CreateIssueFormRoot(): JSX.Element {
+export default function CreateIssueFormRoot() {
   return <IssueForm />;
 }
 

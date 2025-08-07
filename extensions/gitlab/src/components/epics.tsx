@@ -35,7 +35,7 @@ function getEpicGroupName(epic: any): string | undefined {
   }
 }
 
-function ActionToggleGroupName(props: { show?: boolean; callback?: (newValue: boolean) => void }): JSX.Element | null {
+function ActionToggleGroupName(props: { show?: boolean; callback?: (newValue: boolean) => void }) {
   if (!props.callback) {
     return null;
   }

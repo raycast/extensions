@@ -4,7 +4,7 @@ import { Epic } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { getErrorMessage, showErrorToast } from "../utils";
 
-export function CreateEpicTodoAction(props: { epic: Epic; shortcut?: Keyboard.Shortcut }): JSX.Element | null {
+export function CreateEpicTodoAction(props: { epic: Epic; shortcut?: Keyboard.Shortcut }) {
   const epic = props.epic;
   async function handleAction() {
     try {
