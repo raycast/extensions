@@ -1,5 +1,4 @@
-import { Toast, Detail } from "@raycast/api";
-import { ReactNode } from "react";
+import { Toast, Detail, useNavigation } from "@raycast/api";
 import { bold } from "../markdown";
 
 /**
@@ -10,7 +9,7 @@ import { bold } from "../markdown";
  * The style default to Failure, but can be set before .show().
  */
 export default function ExpandableToast(
-  push: (details: ReactNode) => void,
+  push: ReturnType<typeof useNavigation>["push"],
   navigationTitle: string,
   title: string,
   description: string,

@@ -1,5 +1,5 @@
 import { ActionPanel, List, Action, Icon, Detail, useNavigation } from "@raycast/api";
-import { useState, Fragment, useMemo, useEffect } from "react";
+import React, { useState, Fragment, useMemo, useEffect } from "react";
 import { DateTime } from "luxon";
 import { nanoid } from "nanoid";
 

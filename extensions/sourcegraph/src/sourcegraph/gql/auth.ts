@@ -56,9 +56,10 @@ async function doGQLRequest<T>(abort: AbortSignal, src: Sourcegraph, body: strin
 }
 
 /**
- * DEPRECATED - use apollo instead for making API requests.
+ * In the extension, use Apollo queries instead. Only use this for non-React
+ * contexts like AI tools.
  */
-async function doQuery<T>(abort: AbortSignal, src: Sourcegraph, name: string, query: string): Promise<T> {
+export async function doQuery<T>(abort: AbortSignal, src: Sourcegraph, name: string, query: string): Promise<T> {
   return doGQLRequest<T>(abort, src, JSON.stringify({ query: `query raycastSourcegraph${name} ${query}` }));
 }
 

@@ -1,3 +1,4 @@
+import React from "react";
 import {
   ActionPanel,
   List,
@@ -200,31 +201,11 @@ export default function SearchCommand({ src, props }: { src: Sourcegraph; props?
  */
 function SearchDropdown({ setPatternType }: { setPatternType: (pt: PatternType) => void }) {
   const patternTypes: { type: PatternType; name: string; icon: Image.ImageLike }[] = [
-    {
-      type: "standard",
-      name: "Standard",
-      icon: Icon.MagnifyingGlass,
-    },
-    {
-      type: "literal",
-      name: "Literal",
-      icon: Icon.QuotationMarks,
-    },
-    {
-      type: "regexp",
-      name: "RegExp",
-      icon: Icon.Code,
-    },
-    {
-      type: "keyword",
-      name: "Keyword",
-      icon: Icon.Text,
-    },
-    {
-      type: "structural",
-      name: "Structural",
-      icon: Icon.Terminal,
-    },
+    { type: "standard", name: "Standard", icon: Icon.MagnifyingGlass },
+    { type: "literal", name: "Literal", icon: Icon.QuotationMarks },
+    { type: "regexp", name: "RegExp", icon: Icon.Code },
+    { type: "keyword", name: "Keyword", icon: Icon.Text },
+    { type: "structural", name: "Structural", icon: Icon.Terminal },
   ];
   return (
     <List.Dropdown
@@ -241,12 +222,12 @@ function SearchDropdown({ setPatternType }: { setPatternType: (pt: PatternType) 
 }
 
 interface CustomResultActions {
-  openAction?: JSX.Element;
-  extraActions?: JSX.Element[];
+  openAction?: React.JSX.Element;
+  extraActions?: React.JSX.Element[];
 }
 
 function resultActions(url: string, customActions?: CustomResultActions) {
-  const actions: JSX.Element[] = [];
+  const actions: React.JSX.Element[] = [];
   if (customActions?.openAction) {
     actions.push(customActions.openAction);
   }
@@ -375,10 +356,7 @@ function SearchResultItem({
   let repoAccessory: List.Item.Accessory = { text: "", tooltip: "" };
   if ("repository" in match) {
     repoAccessory = firstRevision
-      ? {
-          text: `${match.repository}@${firstRevision}`,
-          tooltip: `${match.repository}@${firstRevision}`,
-        }
+      ? { text: `${match.repository}@${firstRevision}`, tooltip: `${match.repository}@${firstRevision}` }
       : { text: match.repository, tooltip: match.repository };
   }
   // Additional accessories denoting details about this result.
@@ -458,11 +436,7 @@ function SearchResultItem({
     case "path": {
       icon.source = Icon.Document;
       title = match.path;
-      const actionOpts = {
-        repository: match.repository,
-        path: match.path,
-        revision: firstRevision,
-      };
+      const actionOpts = { repository: match.repository, path: match.path, revision: firstRevision };
       drilldownAction = makeDrilldownAction("Search File", setSearchText, actionOpts);
       fileActions = makeFileActions(src, actionOpts);
       break;
@@ -488,11 +462,7 @@ function SearchResultItem({
         matchDetails.push(count(match.lineMatches.length, "match", "matches"));
       }
 
-      const actionOpts = {
-        repository: match.repository,
-        path: match.path,
-        revision: firstRevision,
-      };
+      const actionOpts = { repository: match.repository, path: match.path, revision: firstRevision };
       drilldownAction = makeDrilldownAction("Search File", setSearchText, actionOpts);
       fileActions = makeFileActions(src, actionOpts);
       break;
@@ -504,11 +474,7 @@ function SearchResultItem({
       subtitle = match.path;
       matchDetails.push(count(match.symbols.length, "match", "matches"));
 
-      const actionOpts = {
-        repository: match.repository,
-        path: match.path,
-        revision: firstRevision,
-      };
+      const actionOpts = { repository: match.repository, path: match.path, revision: firstRevision };
       drilldownAction = makeDrilldownAction("Search File", setSearchText, actionOpts);
       fileActions = makeFileActions(src, actionOpts);
       break;
@@ -520,10 +486,7 @@ function SearchResultItem({
       title = sentenceCase(match.type);
       subtitle = `${JSON.stringify(match)}`;
       accessories.push({
-        icon: {
-          source: Icon.QuestionMark,
-          tintColor: ColorError,
-        },
+        icon: { source: Icon.QuestionMark, tintColor: ColorError },
         tooltip: "Sorry! This result type is unknown to this extension.",
       });
   }
@@ -765,13 +728,7 @@ function ResultView({
         );
       }
       if (!fileContents.called) {
-        getFileContents({
-          variables: {
-            repo: match.repository,
-            rev: match.branches?.[0] || "",
-            path: "README.md",
-          },
-        });
+        getFileContents({ variables: { repo: match.repository, rev: match.branches?.[0] || "", path: "README.md" } });
       } else if (fileContents.data) {
         const blob = fileContents.data.repository?.commit?.blob;
         markdownContent += `\n\n---\n\n${renderBlob(blob)}`;
@@ -784,13 +741,7 @@ function ResultView({
       );
       markdownContent = `${bold(match.path)}\n\n---\n\n`;
       if (!fileContents.called) {
-        getFileContents({
-          variables: {
-            repo: match.repository,
-            rev: match.commit || "",
-            path: match.path,
-          },
-        });
+        getFileContents({ variables: { repo: match.repository, rev: match.commit || "", path: match.path } });
       } else if (fileContents.data) {
         const blob = fileContents.data.repository?.commit?.blob;
         markdownContent += renderBlob(blob);
