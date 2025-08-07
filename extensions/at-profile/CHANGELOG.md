@@ -29,7 +29,7 @@
 - Improved user interface with clearer section titles
 - Updated README with comprehensive feature documentation
 
-## Fixed - 2025-05-12
+## [Fixes] - 2025-05-12
 
 - Fixed Twitter and X to lead to X [#18534](https://github.com/raycast/extensions/issues/18534)
 
