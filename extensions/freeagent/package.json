@@ -61,7 +61,7 @@
   "preferences": [
     {
       "name": "default_payment_terms_in_days",
-      "title": "Default Payment Terms (in days)",
+      "title": "Default Payment Terms (In Days)",
       "description": "The default payment terms for new invoices (In Days)",
       "type": "textfield",
       "required": true,
