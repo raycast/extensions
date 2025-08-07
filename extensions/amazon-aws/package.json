@@ -22,7 +22,8 @@
     "b0lle",
     "2357gi",
     "davzoku",
-    "marco_deleu"
+    "marco_deleu",
+    "espenbye"
   ],
   "pastContributors": [
     "JonathanWbn"
@@ -149,9 +150,16 @@
       "title": "Step Functions",
       "description": "Find and open a State Machine",
       "mode": "view"
+    },
+    {
+      "name": "amplify",
+      "title": "Amplify",
+      "description": "Manage Amplify apps and branches",
+      "mode": "view"
     }
   ],
   "dependencies": {
+    "@aws-sdk/client-amplify": "^3.859.0",
     "@aws-sdk/client-cloudformation": "^3.216.0",
     "@aws-sdk/client-cloudwatch-logs": "^3.226.0",
     "@aws-sdk/client-codeartifact": "^3.664.0",
