@@ -1,6 +1,6 @@
 # Amazon AWS Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-08-08
 
 - Fix missing console link generation for AWS Amplify apps in resourceToConsoleLink utility
 
