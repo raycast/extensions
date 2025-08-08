@@ -1,6 +1,6 @@
 # Myna UI Icons
 
-1180+ beautifully crafted open source icons for your next project.
+1300+ beautifully crafted open source icons for your next project.
 
 - Line and Solid Variants
 - MIT Licensed
