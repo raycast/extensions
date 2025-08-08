@@ -1,0 +1,33 @@
+
+<svg width="600" height="400" xmlns="http://www.w3.org/2000/svg">
+  <rect width="600" height="400" fill="#f5f5f5"/>
+  <rect x="30" y="30" width="540" height="340" fill="white" stroke="#ddd" stroke-width="2"/>
+  
+  <!-- Title -->
+  <text x="50" y="60" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#333">Key Features</text>
+  
+  <!-- Feature 1 -->
+  <circle cx="70" cy="100" r="8" fill="#007AFF"/>
+  <text x="90" y="105" font-family="Arial, sans-serif" font-size="14" fill="#333">Network Discovery</text>
+  <text x="90" y="120" font-family="Arial, sans-serif" font-size="12" fill="#666">Automatic subnet detection and scanning</text>
+  
+  <!-- Feature 2 -->
+  <circle cx="70" cy="150" r="8" fill="#28a745"/>
+  <text x="90" y="155" font-family="Arial, sans-serif" font-size="14" fill="#333">IP Recommendations</text>
+  <text x="90" y="170" font-family="Arial, sans-serif" font-size="12" fill="#666">Smart suggestions for available addresses</text>
+  
+  <!-- Feature 3 -->
+  <circle cx="70" cy="200" r="8" fill="#ffc107"/>
+  <text x="90" y="205" font-family="Arial, sans-serif" font-size="14" fill="#333">Device Information</text>
+  <text x="90" y="220" font-family="Arial, sans-serif" font-size="12" fill="#666">MAC addresses, hostnames, and details</text>
+  
+  <!-- Feature 4 -->
+  <circle cx="70" cy="250" r="8" fill="#dc3545"/>
+  <text x="90" y="255" font-family="Arial, sans-serif" font-size="14" fill="#333">Port Scanning</text>
+  <text x="90" y="270" font-family="Arial, sans-serif" font-size="12" fill="#666">Detect open ports with service names</text>
+  
+  <!-- Feature 5 -->
+  <circle cx="70" cy="300" r="8" fill="#6f42c1"/>
+  <text x="90" y="305" font-family="Arial, sans-serif" font-size="14" fill="#333">Cross-Platform</text>
+  <text x="90" y="320" font-family="Arial, sans-serif" font-size="12" fill="#666">Works on macOS, Windows, and Linux</text>
+</svg>
