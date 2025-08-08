@@ -1,5 +1,9 @@
 # Amazon AWS Changelog
 
+## [Fix] - 2025-08-08
+
+- Fix missing console link generation for AWS Amplify apps in resourceToConsoleLink utility
+
 ## [Amplify command] - 2025-08-07
 
 - Add AWS Amplify command to manage Amplify apps and branches
