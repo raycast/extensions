@@ -17,3 +17,7 @@
 - Enhance the "New Tab" section
 - Bug fix and minor refactoring
 - Migration to a newer version of the API
+
+## [Refactor] - {PR_MERGE_DATE}
+
+- Refactor the extension to use the new `open-profile` and `open-profile-url` commands.
