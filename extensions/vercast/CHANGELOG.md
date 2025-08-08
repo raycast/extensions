@@ -2,7 +2,7 @@
 
 ## [2.11] - {PR_MERGE_DATE}
 
-- Avoid broken links by removeing personal account from team switcher following Vercel's [personal team change](https://vercel.com/changelog/2024-01-account-changes).
+- Avoid broken links by removing personal account from the team switcher following Vercel's [personal team change](https://vercel.com/changelog/2024-01-account-changes).
 
 ## [2.10] - 2025-04-09
 
