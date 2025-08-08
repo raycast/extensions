@@ -135,6 +135,7 @@ export const consoleProducts: ConsoleProduct[] = [
   { name: "Capacity Planner", toUrl: (projectId) => `https://console.cloud.google.com/capacity?project=${projectId}` },
   { name: "App Hub", toUrl: (projectId) => `https://console.cloud.google.com/apphub?project=${projectId}` },
   { name: "Security", toUrl: (projectId) => `https://console.cloud.google.com/security?project=${projectId}` },
+  { name: "Secret Manager", toUrl: (projectId) => `https://console.cloud.google.com/security/secret-manager?project=${projectId}` },
   { name: "Compliance", toUrl: (projectId) => `https://console.cloud.google.com/compliance?project=${projectId}` },
   { name: "Cloud Build", toUrl: (projectId) => `https://console.cloud.google.com/cloud-build?project=${projectId}` },
   { name: "Container Registry", toUrl: (projectId) => `https://console.cloud.google.com/gcr?project=${projectId}` },
