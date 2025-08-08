@@ -2,7 +2,7 @@
 
 Quickly visit social profiles. Access a history of the profiles you visit and add your favorite social apps.
 
-![@ Profile Extension](metadata/social-profile-1.png)
+![@ Profile Extension](metadata/at-profile-1.png)
 
 ## Features
 
