@@ -1,0 +1,75 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "open-directory",
+  "title": "Directory Browser",
+  "description": "Browse and navigate directories with a split-view interface showing file details",
+  "icon": "extension-icon.png",
+  "author": "ruifeng_zhang",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open",
+      "title": "Open Directory",
+      "description": "Browse and open directories with customizable interface",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "directory",
+          "type": "text",
+          "required": false,
+          "placeholder": "~"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultDirectory",
+      "title": "Default Directory",
+      "description": "The default directory path to use when opening the extension",
+      "type": "textfield",
+      "required": false,
+      "default": "~"
+    },
+    {
+      "name": "commandTitle",
+      "title": "Command Title",
+      "description": "Customize how the command appears in Raycast (e.g., 'Open Directory', 'Browse Files', 'Directory Explorer')",
+      "type": "textfield",
+      "required": false,
+      "default": "Open Directory"
+    },
+    {
+      "name": "showHiddenFiles",
+      "title": "Show Hidden Files",
+      "description": "Show files and folders that start with a dot (hidden files)",
+      "type": "checkbox",
+      "label": "Show Hidden Files",
+      "required": false,
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.98.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
