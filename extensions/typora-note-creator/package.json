@@ -13,10 +13,6 @@
       "title": "Create Note",
       "description": "Create a new note in Typora",
       "mode": "view",
-      "shortcut": {
-        "key": "n",
-        "modifiers": ["cmd", "shift"]
-      }
     }
   ],
   "preferences": [
