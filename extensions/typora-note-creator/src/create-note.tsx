@@ -73,10 +73,7 @@ export default function CreateNoteCommand() {
     const openCmd = `open -a "${noteApp}" "${filePath}"`;
     console.log("openCmd:", openCmd);
     exec(openCmd, (err) => {
-      if (err) {
-        showToast({ style: Toast.Style.Failure, title: "Failed to open the app", message: err.message });
-      }
-    });
+showFailureToast(err, { title: "Failed to open the app" });
 
     await showToast({ style: Toast.Style.Success, title: `Created note: ${folderName}` });
     popToRoot();
