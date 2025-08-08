@@ -9,7 +9,6 @@
     "Developer Tools",
     "Productivity"
   ],
-  "main": "src/view-chats.tsx",
   "preferences": [
     {
       "name": "apiKey",
