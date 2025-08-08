@@ -139,7 +139,7 @@ export function GameView({
   // Check for milestone achievements
   useEffect(() => {
     if (Math.floor(safeGameState.currency) > Math.floor(lastPoints)) {
-      const milestone = getMilestoneMessage(safeGameState.currency);
+      const milestone = getMilestoneMessage(lastPoints, safeGameState.currency);
       if (milestone) {
         setMilestoneMessage(milestone);
         setShowMilestone(true);

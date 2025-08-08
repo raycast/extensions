@@ -355,8 +355,7 @@ export function useGameState(): UseGameStateReturn {
         }
 
         // Persist immediately so purchases aren't lost if the command closes
-        void saveGameState(newState);
-        // Persist immediately so prestige upgrades aren't lost on close
+        // Persist immediately so purchases aren't lost if the command closes
         void saveGameState(newState);
         return calculateDerivedState(newState);
       });

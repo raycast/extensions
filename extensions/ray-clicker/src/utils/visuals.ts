@@ -25,7 +25,7 @@ export const getRandomEmoji = (): string => {
   return emojis[Math.floor(Math.random() * emojis.length)];
 };
 
-export const getMilestoneMessage = (points: number): string | null => {
+export const getMilestoneMessage = (prevPoints: number, points: number): string | null => {
   const milestones = [
     { threshold: 10, message: "First steps!" },
     { threshold: 100, message: "100 points!" },
@@ -35,6 +35,7 @@ export const getMilestoneMessage = (points: number): string | null => {
     { threshold: 1000000, message: "1M points!" },
   ];
 
-  const milestone = milestones.find((m) => points >= m.threshold && points - m.threshold < 1);
+  // Detect threshold crossings to avoid missing milestones when increments are large
+  const milestone = milestones.find((m) => prevPoints < m.threshold && points >= m.threshold);
   return milestone ? milestone.message : null;
 };
