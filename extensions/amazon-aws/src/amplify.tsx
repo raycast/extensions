@@ -195,7 +195,7 @@ function AmplifyBranch({ branch, app, webhooks }: { branch: Branch; app: App; we
           <Action.CopyToClipboard title="Copy Branch URL" content={branchUrl} />
           {branchWebhooks.length > 0 && (
             <ActionPanel.Submenu title="Webhooks" icon={Icon.Link}>
-              {branchWebhooks.map((webhook) => [
+              {branchWebhooks.flatMap((webhook) => [
                 <Action
                   key={`trigger-${webhook.webhookId}`}
                   title={`Trigger: ${webhook.description || `Webhook ${webhook.webhookId}`}`}
@@ -482,7 +482,7 @@ function AmplifyBuildHistory({ app, branch }: { app: App; branch: Branch }) {
   }
 
   async function handleRetryBuild(job: JobSummary) {
-    await startAmplifyBuild(app.appId!, branch.branchName!, undefined, job.commitId!, job.commitMessage!);
+    await startAmplifyBuild(app.appId!, branch.branchName!, undefined, job.commitId, job.commitMessage);
     revalidate();
   }
 
