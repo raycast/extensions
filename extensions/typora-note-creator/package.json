@@ -26,8 +26,7 @@
       "description": "The directory where notes are stored",
       "type": "directory",
       "required": true,
-      "placeholder": "Select the directory to store notes",
-      "default": "~/Documents/Notes"
+      "placeholder": "Select the directory to store notes"
     },
     {
       "name": "appPath",
