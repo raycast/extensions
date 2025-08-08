@@ -12,7 +12,7 @@ export default async function Command(): Promise<void> {
   }
   try {
     await execAsync('open "docklockplus://moveDockDown"');
-    showToast(Toast.Style.Success, "Dock moved down. The Dock was moved to the display below");
+    showToast(Toast.Style.Success, "The Dock was moved to the display below");
   } catch (error) {
     await showFailureToast(error, { title: "Failed to move Dock down. Could not communicate with DockLock Plus" });
   }

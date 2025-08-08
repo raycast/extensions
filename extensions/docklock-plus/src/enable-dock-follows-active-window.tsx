@@ -12,7 +12,7 @@ export default async function Command(): Promise<void> {
   }
   try {
     await execAsync('open "docklockplus://enableDockFollowsActiveWindow"');
-    showToast(Toast.Style.Success, "Dock follows active window enabled. The Dock will now follow your cursor");
+    showToast(Toast.Style.Success, "Dock follows active window enabled. The Dock will now follow your active window");
   } catch (error) {
     await showFailureToast(error, {
       title: "Failed to enable 'Dock Follows Active Window'. Could not communicate with DockLock Plus",
