@@ -1,0 +1,164 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "desktop-manager",
+  "type": "module",
+  "title": "Desktop Manager",
+  "description": "Search and organize your desktop files",
+  "icon": "icon.png",
+  "author": "tykid",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-desktop",
+      "title": "Manage Desktop",
+      "subtitle": "File Manager",
+      "description": "Search and organize your desktop files",
+      "mode": "view",
+      "preferences": [
+        {
+          "type": "checkbox",
+          "name": "showHiddenFiles",
+          "label": "Show Hidden Files",
+          "title": "Show Hidden Files",
+          "description": "Show hidden files on the desktop",
+          "required": false,
+          "default": false
+        },
+        {
+          "type": "dropdown",
+          "name": "fileOrder",
+          "label": "File Order",
+          "title": "File Order",
+          "description": "The order of the files on the desktop",
+          "required": false,
+          "default": "modifiedTime",
+          "data": [
+            {
+              "title": "Modified Time",
+              "value": "modifiedTime"
+            },
+            {
+              "title": "Add Time",
+              "value": "addTime"
+            },
+            {
+              "title": "Create Time",
+              "value": "createTime"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "open-latest-desktop",
+      "title": "Open Latest Desktop File",
+      "description": "Opens the last modified file on the desktop",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-latest-desktop",
+      "title": "Copy Latest Desktop File",
+      "description": "Copies the last modified file on the desktop",
+      "mode": "no-view"
+    },
+    {
+      "name": "paste-latest-desktop",
+      "title": "Paste Latest Desktop File",
+      "description": "Pastes the last modified desktop file to the foremost active app",
+      "mode": "no-view"
+    },
+    {
+      "name": "show-latest-desktop",
+      "title": "Show Latest Desktop File",
+      "description": "Show the last modified desktop file in Finder",
+      "mode": "no-view"
+    },
+    {
+      "name": "delete-latest-desktop",
+      "title": "Delete Latest Desktop File",
+      "description": "Delete the last modified desktop file",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "type": "directory",
+      "name": "desktopFolder",
+      "title": "Desktop Folder",
+      "description": "The folder where your desktop files are stored",
+      "default": "~/Desktop",
+      "required": true
+    },
+    {
+      "type": "dropdown",
+      "name": "latestDesktopOrder",
+      "label": "Latest Desktop Order",
+      "title": "Latest Desktop Order",
+      "description": "The order of the latest desktop file",
+      "required": false,
+      "default": "modifiedTime",
+      "data": [
+        {
+          "title": "Modified Time",
+          "value": "modifiedTime"
+        },
+        {
+          "title": "Add Time",
+          "value": "addTime"
+        },
+        {
+          "title": "Create Time",
+          "value": "createTime"
+        },
+        {
+          "title": "Birth Time",
+          "value": "birthTime"
+        }
+      ]
+    },
+    {
+      "type": "dropdown",
+      "name": "deletionBehavior",
+      "label": "Deletion Behavior",
+      "title": "Deletion Behavior",
+      "description": "Whether to trash or permanently delete",
+      "required": false,
+      "default": "trash",
+      "data": [
+        {
+          "title": "Trash",
+          "value": "trash"
+        },
+        {
+          "title": "Permanently Delete",
+          "value": "permaDel"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.3",
+    "@raycast/utils": "^1.17.0",
+    "untildify": "^4.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
