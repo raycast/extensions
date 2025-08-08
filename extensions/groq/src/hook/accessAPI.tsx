@@ -2,15 +2,9 @@ import { getSelectedText, Detail, ActionPanel, Action, showToast, Toast, Icon } 
 import { useEffect, useState } from "react";
 import { global_model, enable_streaming, openai, show_metadata } from "./configAPI";
 import { Stream } from "openai/streaming";
-import { allModels as changeModels, currentDate, countToken, estimatePrice } from "./utils";
+import { allModels as changeModels, currentDate, countToken, estimatePrice, formatUserMessage } from "./utils";
 import { ResultViewProps } from "./ResultView.types";
 import { OpenAIError } from "openai";
-
-const formatUserMessage = (message: string): string =>
-  message
-    .split("\n")
-    .map((line) => `>${line}`)
-    .join("\n");
 
 export default function ResultView(props: ResultViewProps) {
   const { sys_prompt, selected_text, user_extra_msg, model_override, toast_title, temperature } = props;
@@ -26,8 +20,8 @@ export default function ResultView(props: ResultViewProps) {
   });
 
   async function getChatResponse(sysPrompt: string, selectedText: string, model: string, temp: number) {
-    const fullSysPrompt = `Current date: ${currentDate}.\n\n${sysPrompt}`;
-    const userPrompt = `${user_extra_msg ? `${user_extra_msg.trim()}\n\n` : ""}${selectedText ? `The following is the text:\n"${selectedText.trim()}"` : ""}`;
+    const fullSysPrompt = `You are an LLM provided by Groq.\nCurrent date: ${currentDate}.\n<goal>\n${sysPrompt}\n</goal>`;
+    const userPrompt = `${user_extra_msg ? `<user_query>\n${user_extra_msg.trim()}\n</user_query>\n\n` : ""}${selectedText ? `Selected text by the user:\n<selected_text>\n${selectedText.trim()}\n</selected_text>\n\n` : ""}`;
     try {
       const response = await openai.chat.completions.create({
         model,
@@ -119,28 +113,32 @@ export default function ResultView(props: ResultViewProps) {
     getResult();
   }, []);
 
-  const markdownSegments = [];
+  const segments: string[] = [];
   if (user_extra_msg) {
-    markdownSegments.push(formatUserMessage(user_extra_msg) + "\n\n");
+    segments.push(formatUserMessage(user_extra_msg) + "\n\n");
   }
-  if (metrics.model.includes("deepseek") || metrics.model.includes("qwen-qwq")) {
-    const splitResponse = response.split("</think>");
-    const thinkSegment = splitResponse[0].replace("<think>", "");
-    markdownSegments.push("Thinking:\n ```" + thinkSegment + "```");
-    markdownSegments.push(splitResponse[1]);
+  const isThinking =
+    metrics.model.includes("deepseek-r1-distill-llama-70b") || metrics.model.includes("qwen/qwen3-32b");
+  if (isThinking) {
+    const [thinkRaw, rest] = response.split("</think>");
+    const thinkText = thinkRaw.replace("<think>", "");
+    segments.push(`\`\`\`${thinkText}\`\`\``);
+    segments.push(rest);
   } else {
-    markdownSegments.push(response);
+    segments.push(response);
   }
+  const markdown = segments.join("");
+  const copyContent = (isThinking ? response.split("</think>")[1] ?? response : response).trim();
 
   return (
     <Detail
       isLoading={loading}
-      markdown={markdownSegments.join("")}
+      markdown={markdown}
       actions={
         !loading && (
           <ActionPanel title="Actions">
-            <Action.CopyToClipboard title="Copy Results" content={response} />
-            <Action.Paste title="Paste Results" content={response} />
+            <Action.CopyToClipboard title="Copy Results" content={copyContent} />
+            <Action.Paste title="Paste Results" content={copyContent} />
             <Action
               title="Retry"
               icon={Icon.Repeat}
