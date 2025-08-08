@@ -87,12 +87,12 @@ export default function Command() {
 
   function loadPocketNodes(pocket: Pocket, config?: { hideTitle?: boolean }) {
     return (
-      <Grid.Section title={config?.hideTitle ? undefined : pocket.name || undefined} key={pocket.name || ".unsorted"}>
+      <Grid.Section title={config?.hideTitle ? undefined : pocket?.name?.replaceAll(":", "/") || undefined} key={pocket.name || ".unsorted"}>
         {pocket.cards.map((card) => (
           <Grid.Item
             key={card.path}
             content={card.preview ?? { fileIcon: card.path }}
-            title={card.name.replace(":", "/")}
+            title={card.name.replaceAll(":", "/")}
             keywords={[card.name]}
             actions={loadCardActionNodes(card)}
             quickLook={{ name: card.name, path: card.path }}
@@ -110,7 +110,7 @@ export default function Command() {
       <Grid.Dropdown.Item title="Unsorted" value=".unsorted" key=".unsorted" icon={Icon.Filter} />,
       <Grid.Dropdown.Section title="Pockets" key="Section">
         {pocketNames.map((name) => (
-          <Grid.Dropdown.Item title={name} value={name} key={name} />
+          <Grid.Dropdown.Item title={name.replaceAll(":", "/")} value={name} key={name} />
         ))}
       </Grid.Dropdown.Section>,
     ];
