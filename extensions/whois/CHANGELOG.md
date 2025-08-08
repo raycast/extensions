@@ -1,5 +1,10 @@
 # Whois Changelog
 
+## [Windows Support] - {PR_MERGE_DATE}
+
+- Added support for Windows
+- Updated dependencies
+
 ## [Refactoring] - 2024-07-26
 
 - Updated dependencies, removed axios
