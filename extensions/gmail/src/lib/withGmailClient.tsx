@@ -31,8 +31,10 @@ export function withGmailClient(component: JSX.Element) {
       return <Detail isLoading />;
     } else if (environment.commandMode === "menu-bar") {
       return <MenuBarExtra isLoading />;
+    } else if (environment.commandMode === "no-view") {
+      return null;
     } else {
-      console.error("`withGmailClient` is only supported in `view` and `menu-bar` mode");
+      console.error("`withGmailClient` is only supported in `view`, `no-view` and `menu-bar` mode");
       return null;
     }
   }

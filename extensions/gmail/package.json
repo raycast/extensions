@@ -5,6 +5,9 @@
   "description": "Raycast Extension to manage Gmail",
   "icon": "gmail.png",
   "author": "tonka3000",
+  "contributors": [
+    "micha_van_eijk"
+  ],
   "categories": [
     "Communication"
   ],
@@ -92,6 +95,13 @@
           "default": true
         }
       ]
+    },
+    {
+      "name": "otp",
+      "title": "Get latest OTP from Gmail",
+      "subtitle": "Gmail",
+      "description": "Get the latest OTP code from Gmail",
+      "mode": "no-view"
     }
   ],
   "preferences": [
