@@ -24,7 +24,7 @@ import { userIcon } from "./users";
 import { useCachedState } from "@raycast/utils";
 import { CacheActionPanelSection } from "./cache_actions";
 
-/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export enum MRScope {
   created_by_me = "created_by_me",
@@ -51,7 +51,7 @@ const GET_MR_DETAIL = gql`
   }
 `;
 
-export function MRDetailFetch(props: { project: Project; mrId: number }): JSX.Element {
+export function MRDetailFetch(props: { project: Project; mrId: number }) {
   const { mr, isLoading, error } = useMR(props.project.id, props.mrId);
   if (error) {
     showErrorToast(error, "Could not fetch Merge Request Details");
@@ -96,7 +96,7 @@ function MRSourceBranchTagList({ mr }: { mr: MergeRequest }) {
   );
 }
 
-export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
+export function MRDetail(props: { mr: MergeRequest }) {
   const mr = props.mr;
   const { mrdetail, error, isLoading } = useDetail(props.mr.id);
   if (error) {
@@ -166,7 +166,7 @@ export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
   );
 }
 
-export function MRListDetail(props: { mr: MergeRequest; subtitle: string; expandDetails: boolean }): JSX.Element {
+export function MRListDetail(props: { mr: MergeRequest; subtitle: string; expandDetails: boolean }) {
   const mr = props.mr;
   const { mrdetail, error, isLoading } = useDetail(props.mr.id);
   if (error) {
@@ -217,7 +217,7 @@ export function MRListDetail(props: { mr: MergeRequest; subtitle: string; expand
   );
 }
 
-function UserMetadataLabel(props: { users: User[]; singular: string; plural: string }): JSX.Element | null {
+function UserMetadataLabel(props: { users: User[]; singular: string; plural: string }): React.ReactElement | null {
   const users = props.users;
   const numUsers = users.length;
   if (numUsers <= 0) {
@@ -315,7 +315,7 @@ export function MRList({
   project = undefined,
   group = undefined,
   searchBarAccessory = undefined,
-}: MRListProps): JSX.Element {
+}: MRListProps) {
   const [searchText, setSearchText] = useState<string>();
   const { mrs, error, isLoading, refresh } = useSearch(searchText, scope, state, project, group);
 
@@ -351,7 +351,7 @@ export function MRList({
   );
 }
 
-export function MRListEmptyView(): JSX.Element {
+export function MRListEmptyView() {
   return (
     <List.EmptyView
       title="No Merge Requests"
@@ -363,11 +363,11 @@ export function MRListEmptyView(): JSX.Element {
 export function MRListItem(props: {
   mr: MergeRequest;
   refreshData: () => void;
-  action?: JSX.Element;
+  action?: React.ReactNode | undefined;
   showCIStatus?: boolean;
   expandDetails: boolean;
   onToggleDetails: () => void;
-}): JSX.Element {
+}) {
   const mr = props.mr;
 
   const getIcon = (): List.Item.Props["icon"] => {
@@ -415,7 +415,7 @@ export function MRListItem(props: {
     accessories.push(
       { icon: mr.has_conflicts ? "⚠️" : undefined, tooltip: mr.has_conflicts ? "Has Conflict" : undefined },
       { tag: mr.milestone?.title ?? "", tooltip: mr.milestone ? `Milestone: ${mr.milestone?.title}` : "" },
-      { date: new Date(mr.updated_at), tooltip: `Updated: ${toLongDateString(mr.updated_at)}` }
+      { date: new Date(mr.updated_at), tooltip: `Updated: ${toLongDateString(mr.updated_at)}` },
     );
   }
   accessories.push({ icon: accessoryIcon, tooltip: mr.author ? `Author: ${mr.author.name}` : undefined });
@@ -494,7 +494,7 @@ export function injectMRQueryNamedParameters(
   requestParams: Record<string, any>,
   query: Query,
   scope: MRScope,
-  isNegative: boolean
+  isNegative: boolean,
 ) {
   const namedParams = isNegative ? query.negativeNamed : query.named;
   for (const extraParam of Object.keys(namedParams)) {
@@ -560,7 +560,7 @@ export function useSearch(
   scope: MRScope,
   state: MRState,
   project?: Project,
-  group?: Group
+  group?: Group,
 ): {
   mrs: MergeRequest[];
   error?: string;
@@ -634,7 +634,7 @@ export function useSearch(
 
 export function useMR(
   projectID: number,
-  mrID: number
+  mrID: number,
 ): {
   mr?: MergeRequest;
   error?: string;
@@ -717,7 +717,7 @@ export function useMRPipelines(mr: MergeRequest): {
       deps: [mr],
       secondsToRefetch: 10,
       secondsToInvalid: daysInSeconds(7),
-    }
+    },
   );
   return { mrpipelines, isLoading, error, performRefetch };
 }

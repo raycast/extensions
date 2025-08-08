@@ -1,11 +1,10 @@
 import { useEffect } from "react";
 import { Buffer } from "node:buffer";
-import { Color as Colour, Detail, Icon, LaunchType, open, useNavigation } from "@raycast/api";
-import { crossLaunchCommand } from "raycast-cross-extension";
+import { Color as Colour, Detail, Icon, useNavigation } from "@raycast/api";
 import { badgeSizes, badgeStyles, dynamicBadgeTypes } from "../constants.js";
 import { Input } from "./input.js";
 import { Badge, FieldName, OnBadgeChange, ParameterProps } from "../types.js";
-import { ellipsis, getSvgFromFile, getTagColor, pickColor } from "../utils.js";
+import { ellipsis, getSvgFromFile, getTagColor, pickColor, pickLogo } from "../utils.js";
 
 export const EditButton = ({
   fieldName,
@@ -208,33 +207,7 @@ export const Logo = ({ badge, onChange }: ParameterProps) => {
             }}
           />
         )}
-        <Detail.Metadata.TagList.Item
-          icon={Icon.Pencil}
-          text="edit"
-          color={Colour.SecondaryText}
-          onAction={async () => {
-            try {
-              await crossLaunchCommand(
-                {
-                  name: "index",
-                  type: LaunchType.UserInitiated,
-                  extensionName: "simple-icons",
-                  ownerOrAuthorName: "litomore",
-                  context: {
-                    launchFromExtensionTitle: "Badges - shields.io",
-                  },
-                },
-                {
-                  context: {
-                    launchFromExtensionName: "simple-icons",
-                  },
-                },
-              );
-            } catch {
-              open("raycast://extensions/litomore/simple-icons");
-            }
-          }}
-        />
+        <Detail.Metadata.TagList.Item icon={Icon.Pencil} text="edit" color={Colour.SecondaryText} onAction={pickLogo} />
       </Detail.Metadata.TagList>
       {$icon && (
         <>
