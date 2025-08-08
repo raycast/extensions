@@ -71,7 +71,7 @@ export default function CreateNoteCommand() {
     // 使用用户选择的应用路径
     const noteApp = resolveNoteApp();
     const openCmd = `open -a "${noteApp}" "${filePath}"`;
-    console.log("openCmd:", openCmd);
+    const openCmd = `open -a "${noteApp}" "${filePath}";
     exec(openCmd, (err) => {
 showFailureToast(err, { title: "Failed to open the app" });
 
