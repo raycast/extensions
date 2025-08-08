@@ -2,8 +2,7 @@
 
 ## [1.0.7] - {PR_MERGE_DATE}
 
-- Added "Open Wallpaper Folder" command to easily open the configured wallpaper folder in Finder
-- Moved wallpaper folder preference to extension level for better sharing between commands
+- Added "Open Wallpaper Folder" action to easily open the configured wallpaper folder in Finder
 - Fixed thumbnail creation issues with file paths containing spaces and special characters
 
 ## [1.0.6] - 2025-01-12
