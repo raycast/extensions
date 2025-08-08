@@ -1,6 +1,6 @@
 # @ Profile Changelog
 
-## [Prevent Infinite Loop in Open Profile and add Screenshots] - {PR_MERGE_DATE}
+## [Prevent Infinite Loop in Open Profile and add Screenshots] - 2025-08-08
 
 ### Added
 
