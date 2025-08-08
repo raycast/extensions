@@ -1,0 +1,35 @@
+formatVersion:3
+osVersion:15.5.0
+raycastVersion:1.100.3
+processRunning:true
+processState:PID STAT      TIME  SL  RE PAGEIN      VSZ    RSS   LIM     TSIZ  %CPU %MEM COMMAND
+73988 S      0:00.17   0   0      0 412156864  13024     -        0   0.0  0.2 Raycast Helper (Extensions)
+node:22.14.0,env:production
+connectionState:initialized
+rpcState:running
+devSession:inactive
+proxySettings:
+certificateSettings:
+time:2025-07-12T15:58:21Z
+
+loaded:0
+
+backgroundRefresh:0
+
+menuBarCommand:0
+
+events:13
+time:2025-07-12T15:55:36Z,type:wake,
+time:2025-07-12T15:47:15Z,type:sleep,
+time:2025-07-12T15:43:08Z,type:connected,env:production
+time:2025-07-12T15:43:08Z,type:terminated,status:9
+time:2025-07-12T15:34:03Z,type:devStopped,ext:logggai
+time:2025-07-12T15:33:20Z,type:cmdUnloading,ext:logggai,cmd:create-logggai-post,dev:true,mode:default,launchType:userInitiated
+time:2025-07-12T15:33:20Z,type:exception,key:extension_logggai.create-logggai-post__dev,message:TypeError: Cannot read properties of null (reading 'useState')
+time:2025-07-12T15:33:20Z,type:cmdLoading,ext:logggai,cmd:create-logggai-post,dev:true,mode:default,launchType:userInitiated
+time:2025-07-12T15:33:18Z,type:devStarted,ext:logggai
+time:2025-07-12T15:28:58Z,type:cmdUnloading,ext:logggai,cmd:create-logggai-post,dev:true,mode:default,launchType:userInitiated
+time:2025-07-12T15:28:58Z,type:exception,key:extension_logggai.create-logggai-post__dev,message:TypeError: Cannot read properties of null (reading 'useState')
+time:2025-07-12T15:28:57Z,type:cmdLoading,ext:logggai,cmd:create-logggai-post,dev:true,mode:default,launchType:userInitiated
+time:2025-07-12T15:28:57Z,type:connected,env:development
+
