@@ -18,6 +18,16 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "mozilla-vpn-control",
+      "title": "Mozilla VPN Control",
+      "description": "Ai Enablement of the extension Mozilla VPN Connect."
+    }
+  ],
+  "ai": {
+    "tools": ["mozilla-vpn-control"]
+  },
   "dependencies": {
     "@raycast/api": "^1.99.4",
     "@raycast/utils": "^2.0.0",
