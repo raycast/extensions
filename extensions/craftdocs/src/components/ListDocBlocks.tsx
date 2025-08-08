@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Color, List } from "@raycast/api";
+import React from "react";
 import { DocBlock } from "../hooks/useDocumentSearch";
 import CreateDocumentItem from "./CreateDocumentItem";
 import Config from "../Config";
@@ -9,7 +10,7 @@ type ListDocBlocksParams = {
   results: DocBlock[];
   query: string;
   config: Config | null;
-  searchBarAccessory?: any; // Raycast-specific dropdown type, using any to avoid complex type issues
+  searchBarAccessory?: any; // Necessary due to Raycast API type conflicts. Keep it that way.
 };
 
 export default function ListDocBlocks({

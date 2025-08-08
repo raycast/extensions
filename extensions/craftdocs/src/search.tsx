@@ -5,39 +5,28 @@ import useAppExists, { UseAppExists } from "./hooks/useAppExists";
 import useConfig, { UseConfig } from "./hooks/useConfig";
 import useDB, { UseDB } from "./hooks/useDB";
 import { CACHE_KEYS, APP_CONSTANTS } from "./constants";
-import {
-  Action,
-  ActionPanel,
-  getPreferenceValues,
-  List,
-  showToast,
-  Toast,
-  openExtensionPreferences,
-  Cache,
-} from "@raycast/api";
+import { Action, ActionPanel, List, showToast, Toast, openExtensionPreferences, Cache } from "@raycast/api";
+import { getSearchPreferences } from "./preferences";
 import useDocumentSearch from "./hooks/useDocumentSearch";
 import ListDocBlocks from "./components/ListDocBlocks";
 import Style = Toast.Style;
 
 const cache = new Cache();
 
-function SpaceDropdown({
-  value,
-  spaces,
-  onSpaceChange,
-}: {
+interface SpaceOption {
+  id: string;
+  title: string;
+}
+
+interface SpaceDropdownProps {
   value: string;
-  spaces: Array<{ id: string; title: string }>;
+  spaces: SpaceOption[];
   onSpaceChange: (newValue: string) => void;
-}) {
+}
+
+function SpaceDropdown({ value, spaces, onSpaceChange }: SpaceDropdownProps) {
   return (
-    <List.Dropdown
-      value={value}
-      tooltip="Select Space"
-      onChange={(newValue) => {
-        onSpaceChange(newValue);
-      }}
-    >
+    <List.Dropdown value={value} tooltip="Select Space" onChange={onSpaceChange}>
       <List.Dropdown.Section title="Spaces">
         <List.Dropdown.Item key="all" title="All spaces" value="all" />
         {spaces.map((space) => (
@@ -48,7 +37,7 @@ function SpaceDropdown({
   );
 }
 
-const { useDetailedView } = getPreferenceValues();
+const { useDetailedView } = getSearchPreferences();
 
 // noinspection JSUnusedGlobalSymbols
 export default function search() {
@@ -121,7 +110,7 @@ const handleListView = ({ appExists, db, query, setQuery, config, selectedSpace,
       searchBarAccessory={
         showSpaceDropdown ? (
           <SpaceDropdown spaces={spaces} onSpaceChange={handleSpaceChange} value={selectedSpace} />
-        ) : null
+        ) : undefined
       }
     />
   );
@@ -161,7 +150,7 @@ const handleDetailedView = ({
       searchBarAccessory={
         showSpaceDropdown ? (
           <SpaceDropdown spaces={spaces} onSpaceChange={handleSpaceChange} value={selectedSpace} />
-        ) : null
+        ) : undefined
       }
     />
   );

@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import React from "react";
 import { Block } from "../hooks/useSearch";
 import Config from "../Config";
 import CreateDocumentItem from "./CreateDocumentItem";
@@ -9,7 +10,7 @@ type ListBlocksParams = {
   blocks: Block[];
   query: string;
   config: Config | null;
-  searchBarAccessory?: any; // Raycast-specific dropdown type, using any to avoid complex type issues
+  searchBarAccessory?: any; // Necessary due to Raycast API type conflicts. Keep it that way.
 };
 
 export default function ListBlocks(params: ListBlocksParams) {

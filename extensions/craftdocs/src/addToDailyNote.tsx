@@ -1,34 +1,19 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Form,
-  Icon,
-  showHUD,
-  popToRoot,
-  closeMainWindow,
-  getPreferenceValues,
-} from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, Icon, showHUD, popToRoot, closeMainWindow } from "@raycast/api";
 import { useState, useEffect } from "react";
 import useAppExists from "./hooks/useAppExists";
 import useConfig from "./hooks/useConfig";
 import useDB from "./hooks/useDB";
 import useSearch from "./hooks/useSearch";
+import { getDailyNotePreferences, DailyNotePreferences } from "./preferences";
+import { APPEND_POSITIONS } from "./constants";
 
 interface FormValues {
   content: string;
   spaceId: string;
 }
 
-interface Preferences {
-  appendPosition: "end" | "beginning";
-  addTimestamp: boolean;
-  contentPrefix: string;
-  contentSuffix: string;
-}
-
 // Helper function to format content with timestamp, prefix, and suffix
-const formatContent = (content: string, preferences: Preferences): string => {
+const formatContent = (content: string, preferences: DailyNotePreferences): string => {
   let finalContent = content;
 
   if (preferences.addTimestamp) {
@@ -54,7 +39,7 @@ export default function AddToDailyNote() {
   const configResult = useConfig(appExists);
   const config = configResult?.config || null;
   const configLoading = configResult?.configLoading || false;
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getDailyNotePreferences();
   const db = useDB(configResult);
 
   const [formValues, setFormValues] = useState<FormValues>({
@@ -130,7 +115,7 @@ export default function AddToDailyNote() {
 
     const finalContent = formatContent(formValues.content, preferences);
 
-    const index = preferences.appendPosition === "beginning" ? "0" : "999999";
+    const index = preferences.appendPosition === "beginning" ? APPEND_POSITIONS.BEGINNING : APPEND_POSITIONS.END;
 
     return `craftdocs://createblock?parentBlockId=${parentBlockId}&spaceId=${
       formValues.spaceId
