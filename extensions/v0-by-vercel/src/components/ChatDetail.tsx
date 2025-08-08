@@ -1,4 +1,4 @@
-import { List, Icon, Color, Detail, ActionPanel, Action } from "@raycast/api";
+import { List, Icon, Color, Detail, ActionPanel, Action, Keyboard } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import type { ChatDetailResponse, ChatMetadataResponse } from "../types";
 import AddMessage from "./AddMessage";
@@ -138,7 +138,7 @@ export default function ChatDetail({ chatId, scopeId }: { chatId: string; scopeI
                 />
               }
               icon={Icon.Plus}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
+              shortcut={Keyboard.Shortcut.Common.New}
             />
           </ActionPanel.Section>
         </ActionPanel>
@@ -200,7 +200,7 @@ export default function ChatDetail({ chatId, scopeId }: { chatId: string; scopeI
                   icon={Icon.Globe}
                   title="View Chat in Browser"
                   url={`https://v0.dev/chat/${chatId}`}
-                  shortcut={{ modifiers: ["cmd"], key: "b" }}
+                  shortcut={Keyboard.Shortcut.Common.Open}
                 />
                 {data?.latestVersion?.files && data.latestVersion.files.length > 0 && (
                   <Action.Push
@@ -213,10 +213,15 @@ export default function ChatDetail({ chatId, scopeId }: { chatId: string; scopeI
                 <Action.Push
                   title="Add Message"
                   target={
-                    <AddMessage chatId={chatId} revalidateChats={mutate} chatTitle={data?.name || "Untitled Chat"} />
+                    <AddMessage
+                      chatId={chatId}
+                      scopeId={scopeId}
+                      revalidateChats={mutate}
+                      chatTitle={data?.name || "Untitled Chat"}
+                    />
                   }
                   icon={Icon.Plus}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  shortcut={Keyboard.Shortcut.Common.New}
                 />
                 {data?.latestVersion?.demoUrl && (
                   <Action.OpenInBrowser

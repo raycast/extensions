@@ -1,5 +1,6 @@
 import { ActionPanel, Form, Action, showToast, Toast, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
+import { showFailureToast } from "@raycast/utils";
 import { useActiveProfile } from "../hooks/useActiveProfile";
 import { v0ApiFetcher, V0ApiError } from "../lib/v0-api-utils";
 
@@ -20,7 +21,9 @@ export default function UpdateChatPrivacyForm({ chatId, currentPrivacy, revalida
   const { handleSubmit, itemProps } = useForm<FormValues>({
     onSubmit: async (values) => {
       if (!activeProfileApiKey) {
-        showToast(Toast.Style.Failure, "API Key not available. Please set it in Preferences or manage profiles.");
+        showFailureToast("API Key not available. Please set it in Preferences or manage profiles.", {
+          title: "Update Failed",
+        });
         return;
       }
 
@@ -47,12 +50,12 @@ export default function UpdateChatPrivacyForm({ chatId, currentPrivacy, revalida
         revalidateChats(); // Revalidate the main chat list
         pop(); // Go back to the chat list
       } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Update Failed";
         if (error instanceof V0ApiError) {
-          toast.message = error.message;
+          showFailureToast(error.message, { title: "Update Failed" });
         } else {
-          toast.message = `Failed to update chat privacy: ${error instanceof Error ? error.message : String(error)}`;
+          showFailureToast(`Failed to update chat privacy: ${error instanceof Error ? error.message : String(error)}`, {
+            title: "Update Failed",
+          });
         }
         throw error;
       }

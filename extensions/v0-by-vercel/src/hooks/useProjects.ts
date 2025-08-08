@@ -28,13 +28,13 @@ export function useProjects(scope: string | null = null): UseProjectsResult {
 
   useEffect(() => {
     async function fetchProfileDetails() {
-      const { apiKey, defaultScope } = await getActiveProfileDetails(profiles, activeProfileId); // Pass profiles and activeProfileId
+      const { apiKey, defaultScope } = getActiveProfileDetails(profiles, activeProfileId); // Pass profiles and activeProfileId
       setActiveProfileApiKey(apiKey);
       setActiveProfileDefaultScope(defaultScope);
       setIsLoadingProfileDetails(false);
     }
     fetchProfileDetails();
-  }, []);
+  }, [profiles, activeProfileId]);
 
   const headers: HeadersInit = {
     "Content-Type": "application/json",

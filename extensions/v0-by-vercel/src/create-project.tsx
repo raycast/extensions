@@ -1,5 +1,6 @@
-import { ActionPanel, Form, Action, showToast, Toast, Icon, useNavigation } from "@raycast/api";
+import { ActionPanel, Form, Action, showToast, Toast, Icon, useNavigation, Keyboard } from "@raycast/api";
 import { useForm } from "@raycast/utils";
+import { showFailureToast } from "@raycast/utils";
 import type { Project } from "./types";
 import { useActiveProfile } from "./hooks/useActiveProfile";
 import { v0ApiFetcher, V0ApiError } from "./lib/v0-api-utils";
@@ -37,12 +38,14 @@ export default function CreateProjectCommand(props: CreateProjectCommandProps) {
   const { handleSubmit, itemProps } = useForm<CreateProjectFormValues>({
     onSubmit: async (values) => {
       if (!activeProfileApiKey) {
-        showToast(Toast.Style.Failure, "API Key not available. Please set it in Preferences or manage profiles.");
+        showFailureToast("API Key not available. Please set it in Preferences or manage profiles.", {
+          title: "Project Creation Failed",
+        });
         return;
       }
 
       if (!values.name.trim()) {
-        showToast(Toast.Style.Failure, "Project name cannot be empty.");
+        showFailureToast("Project name cannot be empty.", { title: "Project Creation Failed" });
         return;
       }
 
@@ -84,12 +87,12 @@ export default function CreateProjectCommand(props: CreateProjectCommandProps) {
         }
         push(<ViewProjectsCommand />); // Navigate to view-projects.tsx
       } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Project Creation Failed";
         if (error instanceof V0ApiError) {
-          toast.message = error.message;
+          showFailureToast(error.message, { title: "Project Creation Failed" });
         } else {
-          toast.message = `Failed to create project: ${error instanceof Error ? error.message : String(error)}`;
+          showFailureToast(`Failed to create project: ${error instanceof Error ? error.message : String(error)}`, {
+            title: "Project Creation Failed",
+          });
         }
       }
     },
@@ -111,13 +114,13 @@ export default function CreateProjectCommand(props: CreateProjectCommandProps) {
             title="Add Environment Variable"
             onAction={handleAddEnvironmentVariable}
             icon={Icon.Plus}
-            shortcut={{ modifiers: ["cmd"], key: "e" }}
+            shortcut={Keyboard.Shortcut.Common.New}
           />
           <Action
             title="Remove Last Environment Variable"
             onAction={handleRemoveLastEnvironmentVariable}
             icon={Icon.Minus}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Remove}
           />
         </ActionPanel>
       }

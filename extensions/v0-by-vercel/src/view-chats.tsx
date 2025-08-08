@@ -1,4 +1,5 @@
-import { ActionPanel, Detail, List, Action, Icon, showToast, Toast, confirmAlert } from "@raycast/api";
+import { ActionPanel, Detail, List, Action, Icon, showToast, Toast, confirmAlert, Keyboard } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import type { ChatSummary, FindChatsResponse, ForkChatResponse, ProjectChatsResponse } from "./types";
 import ChatDetail from "./components/ChatDetail";
 import AddMessage from "./components/AddMessage";
@@ -59,7 +60,7 @@ export default function Command(props: { scopeId?: string; projectId?: string })
 
   const deleteChat = async (chatId: string, chatTitle: string) => {
     if (!activeProfileApiKey) {
-      showToast(Toast.Style.Failure, "API Key not available.");
+      showFailureToast("API Key not available.", { title: "Delete Failed" });
       return;
     }
     const toast = await showToast({
@@ -73,7 +74,7 @@ export default function Command(props: { scopeId?: string; projectId?: string })
           method: "DELETE",
           headers: {
             Authorization: `Bearer ${activeProfileApiKey}`,
-            "x-scope": activeProfileDefaultScope || "",
+            "x-scope": selectedScopeFilter || "", // Use selectedScopeFilter instead of activeProfileDefaultScope
           },
         }),
         {
@@ -94,15 +95,15 @@ export default function Command(props: { scopeId?: string; projectId?: string })
       toast.title = "Chat Deleted";
       toast.message = `"${chatTitle}" has been deleted successfully.`;
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Delete Failed";
-      toast.message = error instanceof V0ApiError ? error.response.error.message : "Failed to delete chat";
+      showFailureToast(error instanceof V0ApiError ? error.response.error.message : "Failed to delete chat", {
+        title: "Delete Failed",
+      });
     }
   };
 
   const favoriteChat = async (chatId: string, isFavorite: boolean) => {
     if (!activeProfileApiKey) {
-      showToast(Toast.Style.Failure, "API Key not available.");
+      showFailureToast("API Key not available.", { title: "Favorite Failed" });
       return;
     }
     const toast = await showToast({
@@ -140,15 +141,15 @@ export default function Command(props: { scopeId?: string; projectId?: string })
       toast.title = isFavorite ? "Chat Favorited" : "Chat Unfavorited";
       toast.message = `Chat has been ${isFavorite ? "favorited" : "unfavorited"} successfully.`;
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Favorite Failed";
-      toast.message = error instanceof V0ApiError ? error.response.error.message : "Failed to favorite chat";
+      showFailureToast(error instanceof V0ApiError ? error.response.error.message : "Failed to favorite chat", {
+        title: "Favorite Failed",
+      });
     }
   };
 
   const forkChat = async (chat: ChatSummary) => {
     if (!activeProfileApiKey) {
-      showToast(Toast.Style.Failure, "API Key not available.");
+      showFailureToast("API Key not available.", { title: "Fork Failed" });
       return;
     }
     const toast = await showToast({
@@ -173,9 +174,9 @@ export default function Command(props: { scopeId?: string; projectId?: string })
       toast.title = "Chat Forked";
       toast.message = `"${chat.name}" has been forked successfully!`;
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Fork Failed";
-      toast.message = error instanceof V0ApiError ? error.response.error.message : "Failed to fork chat";
+      showFailureToast(error instanceof V0ApiError ? error.response.error.message : "Failed to fork chat", {
+        title: "Fork Failed",
+      });
     }
   };
 
@@ -240,7 +241,7 @@ export default function Command(props: { scopeId?: string; projectId?: string })
                   title="Add Message"
                   target={<AddMessage chatId={chat.id} chatTitle={chat.name} revalidateChats={mutate} />}
                   icon={Icon.Plus}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  shortcut={Keyboard.Shortcut.Common.New}
                 />
                 {chat.latestVersion?.id && (
                   <Action
@@ -276,7 +277,7 @@ export default function Command(props: { scopeId?: string; projectId?: string })
                       title="Show All Project Chats"
                       icon={Icon.Bubble}
                       target={<Command projectId={chat.projectId} />}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                      shortcut={{ modifiers: ["cmd", "opt"], key: "p" }}
                     />
                   )}
                 </ActionPanel.Section>
@@ -293,7 +294,7 @@ export default function Command(props: { scopeId?: string; projectId?: string })
                     url={`https://v0.dev/chat/${chat.id}`}
                     title="View Chat in Browser"
                     icon={Icon.Globe}
-                    shortcut={{ modifiers: ["cmd"], key: "b" }}
+                    shortcut={Keyboard.Shortcut.Common.Open}
                   />
                   <Action.Push
                     title="View Metadata"
@@ -305,7 +306,7 @@ export default function Command(props: { scopeId?: string; projectId?: string })
                     content={chat.id}
                     title="Copy Chat ID"
                     icon={Icon.CopyClipboard}
-                    shortcut={{ modifiers: ["cmd"], key: "c" }}
+                    shortcut={Keyboard.Shortcut.Common.Copy}
                   />
                   {chat.projectId && !!getProjectName(chat.projectId) && (
                     <Action.CopyToClipboard
@@ -330,7 +331,7 @@ export default function Command(props: { scopeId?: string; projectId?: string })
                         deleteChat(chat.id, chat.name || "Untitled Chat");
                       }
                     }}
-                    shortcut={{ modifiers: ["cmd"], key: "d" }}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                   />
                 </ActionPanel.Section>
               </ActionPanel>

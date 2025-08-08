@@ -11,10 +11,10 @@ interface ActiveProfileDetails {
   defaultScope: string | null;
 }
 
-export async function getActiveProfileDetails(
+export function getActiveProfileDetails(
   profiles: Profile[],
   activeProfileId: string | undefined,
-): Promise<ActiveProfileDetails> {
+): ActiveProfileDetails {
   const preferences = getPreferenceValues<Preferences>();
 
   let apiKey: string | undefined = undefined;

@@ -1,18 +1,14 @@
 import { ActionPanel, Action, showToast, Toast, Form, useNavigation } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
+import { showFailureToast } from "@raycast/utils";
 import { useProjects } from "./hooks/useProjects";
 import { useActiveProfile } from "./hooks/useActiveProfile";
 import { useScopes } from "./hooks/useScopes";
 import { v0ApiFetcher, V0ApiError } from "./lib/v0-api-utils";
-import * as fs from "fs/promises";
-import * as path from "path";
+import { readFilesFromPaths, type FileContent } from "./lib/file-utils";
+
 import ChatDetail from "./components/ChatDetail";
 import type { InitializeChatResponse } from "./types";
-
-interface FileContent {
-  name: string;
-  content: string;
-}
 
 interface BaseInitializationRequestBody {
   name: string;
@@ -77,7 +73,9 @@ export default function Command() {
     },
     onSubmit: async (formValues) => {
       if (!activeProfileApiKey) {
-        showToast(Toast.Style.Failure, "API Key not available. Please set it in Preferences or manage profiles.");
+        showFailureToast("API Key not available. Please set it in Preferences or manage profiles.", {
+          title: "Initialization Failed",
+        });
         return;
       }
 
@@ -91,17 +89,9 @@ export default function Command() {
 
         if (formValues.initializationType === "files") {
           if (!formValues.files || formValues.files.length === 0) {
-            throw new Error("At least one file is required for file upload initialization.");
+            throw new Error("At least one file or directory is required for file upload initialization.");
           }
-          const filesContent: FileContent[] = await Promise.all(
-            formValues.files.map(async (filePath) => {
-              const content = await fs.readFile(filePath, "utf-8");
-              return {
-                name: path.basename(filePath),
-                content: content,
-              };
-            }),
-          );
+          const filesContent = await readFilesFromPaths(formValues.files);
           requestBody = {
             name: formValues.name,
             chatPrivacy: formValues.chatPrivacy,
@@ -170,12 +160,12 @@ export default function Command() {
         // Navigate to the newly created chat's detail page
         push(<ChatDetail chatId={chatResponse.id} />);
       } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Initialization Failed";
         if (error instanceof V0ApiError) {
-          toast.message = error.message;
+          showFailureToast(error.message, { title: "Initialization Failed" });
         } else {
-          toast.message = `Failed to initialize chat: ${error instanceof Error ? error.message : String(error)}`;
+          showFailureToast(`Failed to initialize chat: ${error instanceof Error ? error.message : String(error)}`, {
+            title: "Initialization Failed",
+          });
         }
         throw error;
       }

@@ -96,7 +96,7 @@ export default function ViewBillingCommand() {
 
   const billingItems: React.ReactElement[] = [];
 
-  if (planData && planData.billingCycle) {
+  if (planData?.billingCycle) {
     billingItems.push(
       <List.Section title="Plan Information" key="plan-info">
         <List.Item title="Current Plan" subtitle={planData.plan} icon={Icon.Stars} />

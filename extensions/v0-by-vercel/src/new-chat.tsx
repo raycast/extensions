@@ -1,5 +1,5 @@
 import { ActionPanel, Action, showToast, Toast, Form, useNavigation, Icon } from "@raycast/api";
-import { useForm } from "@raycast/utils";
+import { useForm, showFailureToast } from "@raycast/utils";
 import type { CreateChatRequest, ScopeSummary } from "./types";
 import ViewChats from "./view-chats";
 import { useProjects } from "./hooks/useProjects";
@@ -33,7 +33,9 @@ export default function Command() {
     initialValues: { message: "", chatPrivacy: "private", scopeId: activeProfileDefaultScope || "", attachments: [] },
     onSubmit: async (values) => {
       if (!activeProfileApiKey) {
-        showToast(Toast.Style.Failure, "API Key not available. Please set it in Preferences or manage profiles.");
+        showFailureToast("API Key not available. Please set it in Preferences or manage profiles.", {
+          title: "Create Failed",
+        });
         return;
       }
       const toast = await showToast({
@@ -92,12 +94,12 @@ export default function Command() {
 
         return;
       } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Create Failed";
         if (error instanceof V0ApiError) {
-          toast.message = error.message;
+          showFailureToast(error.message, { title: "Create Failed" });
         } else {
-          toast.message = `Failed to create chat: ${error instanceof Error ? error.message : String(error)}`;
+          showFailureToast(`Failed to create chat: ${error instanceof Error ? error.message : String(error)}`, {
+            title: "Create Failed",
+          });
         }
         throw error;
       }

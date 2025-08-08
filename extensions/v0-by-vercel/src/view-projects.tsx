@@ -1,4 +1,4 @@
-import { List, Detail, Icon, ActionPanel, Action } from "@raycast/api";
+import { List, Detail, Icon, ActionPanel, Action, Keyboard } from "@raycast/api";
 import { useProjects } from "./hooks/useProjects";
 import { useState, useEffect } from "react";
 import { ScopeDropdown } from "./components/ScopeDropdown";
@@ -58,20 +58,20 @@ export default function ViewProjectsCommand() {
               <Action.OpenInBrowser
                 icon={Icon.Globe}
                 title="View in Browser"
-                shortcut={{ modifiers: ["cmd"], key: "b" }}
+                shortcut={Keyboard.Shortcut.Common.Open}
                 url={`https://v0.dev/chat/projects/${project.id}`}
               />
               <Action.CopyToClipboard
                 title="Copy Project ID"
                 content={project.id}
                 icon={Icon.Clipboard}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
+                shortcut={Keyboard.Shortcut.Common.Copy}
               />
               <Action.Push
                 title="Create New Project"
                 icon={Icon.NewFolder}
                 target={<CreateProjectForm onProjectCreated={revalidateProjects} />}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={Keyboard.Shortcut.Common.New}
               />
             </ActionPanel>
           }

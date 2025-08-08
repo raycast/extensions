@@ -27,6 +27,18 @@ export class V0ApiError extends Error {
   }
 }
 
+export async function parseV0ApiResponseBody<T>(response: Response): Promise<T> {
+  if (!response.ok) {
+    const errorResponse: V0ErrorResponse = await response.json();
+    throw new V0ApiError(
+      errorResponse.error.message || `Request failed with status ${response.status}`,
+      errorResponse,
+      response.status,
+    );
+  }
+  return response.json() as Promise<T>;
+}
+
 interface V0ApiFetcherOptions extends Omit<RequestInit, "body"> {
   body?: Record<string, unknown> | string;
 }
@@ -43,14 +55,5 @@ export async function v0ApiFetcher<T>(url: string, options?: V0ApiFetcherOptions
     body: body ? (typeof body === "string" ? body : JSON.stringify(body)) : undefined,
   });
 
-  if (!response.ok) {
-    const errorResponse: V0ErrorResponse = await response.json();
-    throw new V0ApiError(
-      errorResponse.error.message || `Request failed with status ${response.status}`,
-      errorResponse,
-      response.status,
-    );
-  }
-
-  return response.json() as Promise<T>;
+  return parseV0ApiResponseBody(response);
 }

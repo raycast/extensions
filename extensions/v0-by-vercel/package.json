@@ -3,7 +3,9 @@
   "name": "v0-by-vercel",
   "title": "v0 by Vercel",
   "description": "Create, view and manage your v0 chats within Raycast",
+  "owner": "vercel",
   "author": "garrett",
+  "access": "public",
   "version": "1.0.0",
   "categories": [
     "Developer Tools",
@@ -24,36 +26,42 @@
     {
       "name": "view-chats",
       "title": "View Chats",
+      "subtitle": "v0",
       "description": "View and manage your chats",
       "mode": "view"
     },
     {
       "name": "new-chat",
       "title": "New Chat",
+      "subtitle": "v0",
       "description": "Create a new chat",
       "mode": "view"
     },
     {
       "name": "create-project",
       "title": "Create Project",
+      "subtitle": "v0",
       "description": "Create a new v0 project",
       "mode": "view"
     },
     {
       "name": "view-projects",
       "title": "View Projects",
+      "subtitle": "v0",
       "description": "View all your v0 projects",
       "mode": "view"
     },
     {
       "name": "view-billing",
       "title": "View Billing",
+      "subtitle": "v0",
       "description": "View your v0 billing information",
       "mode": "view"
     },
     {
       "name": "manage-profiles",
       "title": "Manage Profiles",
+      "subtitle": "v0",
       "description": "Manage your v0 API key profiles for different teams (SSO/non-SSO)",
       "mode": "view"
     }

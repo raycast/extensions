@@ -9,9 +9,11 @@ import {
   getPreferenceValues,
   confirmAlert,
   Alert,
+  Keyboard,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useCachedState } from "@raycast/utils";
+import { showFailureToast } from "@raycast/utils";
 import type { Profile, ScopeSummary } from "./types";
 import { v4 as uuidv4 } from "uuid";
 import { Icon } from "@raycast/api";
@@ -27,10 +29,7 @@ function AddProfileForm(props: { onAdd: (profile: Profile) => void }) {
 
   async function handleSubmit(values: { name: string; apiKey: string }) {
     if (!values.name || !values.apiKey) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Name and API Key are required.",
-      });
+      showFailureToast("Name and API Key are required.");
       return;
     }
 
@@ -58,10 +57,7 @@ function RenameProfileForm(props: { profile: Profile; onUpdate: (profile: Profil
 
   async function handleSubmit(values: { name: string }) {
     if (!values.name) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Profile name cannot be empty.",
-      });
+      showFailureToast("Profile name cannot be empty.");
       return;
     }
 
@@ -196,17 +192,13 @@ export default function ManageProfiles() {
     showToast(Toast.Style.Success, "Active profile switched!");
   };
 
-  const handleUpdateProfile = (updatedProfile: Profile) => {
-    setProfiles((prev) => prev?.map((p) => (p.id === updatedProfile.id ? updatedProfile : p)) || []);
-  };
-
-  const handleRenameProfile = (updatedProfile: Profile) => {
+  const handleProfileUpdate = (updatedProfile: Profile) => {
     setProfiles((prev) => prev?.map((p) => (p.id === updatedProfile.id ? updatedProfile : p)) || []);
   };
 
   const handleDeleteProfile = async (id: string) => {
     if (id === "default") {
-      showToast(Toast.Style.Failure, "Cannot delete the default profile.");
+      showFailureToast("Cannot delete the default profile.");
       return;
     }
 
@@ -248,21 +240,21 @@ export default function ManageProfiles() {
                 />
                 <Action.Push
                   title="Set Default Scope"
-                  target={<SetDefaultScopeForm profile={profile} onUpdate={handleUpdateProfile} />}
+                  target={<SetDefaultScopeForm profile={profile} onUpdate={handleProfileUpdate} />}
                   icon={Icon.Star}
                 />
                 <Action.Push
                   title="Rename Profile"
-                  target={<RenameProfileForm profile={profile} onUpdate={handleRenameProfile} />}
+                  target={<RenameProfileForm profile={profile} onUpdate={handleProfileUpdate} />}
                   icon={Icon.Pencil}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  shortcut={Keyboard.Shortcut.Common.Edit}
                 />
                 <ActionPanel.Section>
                   <Action.Push
                     title="Add New Profile"
                     target={<AddProfileForm onAdd={handleAddProfile} />}
                     icon={Icon.Plus}
-                    shortcut={{ modifiers: ["cmd"], key: "n" }}
+                    shortcut={Keyboard.Shortcut.Common.New}
                   />
                   {profile.id !== "default" && (
                     <Action
@@ -270,7 +262,7 @@ export default function ManageProfiles() {
                       onAction={() => handleDeleteProfile(profile.id)}
                       icon={Icon.Trash}
                       style={Action.Style.Destructive}
-                      shortcut={{ modifiers: ["cmd"], key: "d" }}
+                      shortcut={Keyboard.Shortcut.Common.Remove}
                     />
                   )}
                 </ActionPanel.Section>
@@ -288,7 +280,7 @@ export default function ManageProfiles() {
               title="Add New Profile"
               target={<AddProfileForm onAdd={handleAddProfile} />}
               icon={Icon.Plus}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
+              shortcut={Keyboard.Shortcut.Common.New}
             />
           </ActionPanel>
         }

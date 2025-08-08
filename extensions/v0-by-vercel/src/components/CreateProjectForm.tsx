@@ -2,7 +2,7 @@ import { ActionPanel, Form, Action, showToast, Toast, Icon } from "@raycast/api"
 import { useNavigation } from "@raycast/api";
 import type { CreateProjectResponse } from "../types";
 import { useActiveProfile } from "../hooks/useActiveProfile";
-import { useForm, FormValidation } from "@raycast/utils"; // Import useForm and FormValidation
+import { useForm, FormValidation, showFailureToast } from "@raycast/utils"; // Import useForm, FormValidation, and showFailureToast
 import { v0ApiFetcher, V0ApiError } from "../lib/v0-api-utils";
 
 interface CreateProjectFormProps {
@@ -21,7 +21,7 @@ export default function CreateProjectForm({ onProjectCreated }: CreateProjectFor
   const { handleSubmit, itemProps } = useForm<CreateProjectFormValues>({
     onSubmit: async (values) => {
       if (!activeProfileApiKey) {
-        showToast(Toast.Style.Failure, "API Key not available. Please set it in Preferences or manage profiles.");
+        showFailureToast("API Key not available. Please set it in Preferences or manage profiles.");
         return;
       }
 
@@ -47,13 +47,13 @@ export default function CreateProjectForm({ onProjectCreated }: CreateProjectFor
         onProjectCreated(newProject.id);
         pop(); // Go back to the previous form (AssignProjectForm)
       } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Creation Failed";
-        if (error instanceof V0ApiError) {
-          toast.message = error.message;
-        } else {
-          toast.message = `Failed to create project: ${error instanceof Error ? error.message : String(error)}`;
-        }
+        showFailureToast({
+          title: "Creation Failed",
+          message:
+            error instanceof V0ApiError
+              ? error.message
+              : `Failed to create project: ${error instanceof Error ? error.message : String(error)}`,
+        });
       }
     },
     validation: {

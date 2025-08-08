@@ -15,7 +15,7 @@ export default function ChatMetadataDetail({ chat }: { chat: ChatSummary }) {
   return (
     <List navigationTitle="Chat Metadata">
       <List.Item title="Title" subtitle={chat.name || "Untitled Chat"} />
-      <List.Item title="Last Updated" subtitle={new Date(chat.updatedAt || "").toLocaleString()} />
+      <List.Item title="Last Updated" subtitle={chat.updatedAt ? new Date(chat.updatedAt).toLocaleString() : "N/A"} />
       <List.Item
         title="Privacy"
         accessories={[
