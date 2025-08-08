@@ -1,5 +1,10 @@
 # Language Detector Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Add support for Windows platform
+- Bump all dependencies to the latest
+
 ## [Enhancement] - 2025-03-31
 
 - Add new detector - [franc](https://npmjs.com/franc)
