@@ -101,7 +101,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.80.0",
+    "@raycast/api": "^1.102.3",
     "@raycast/utils": "^1.19.1",
     "js-yaml": "^4.1.0"
   },
@@ -110,10 +110,14 @@
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^20.10.2",
     "@types/react": "^19.1.8",
-    "callsites": "^4.2.0",
     "eslint": "^8.57.0",
+    "@oclif/core": "^2.12.0",
     "prettier": "^3.3.3",
     "typescript": "^5.8.3"
+  },
+  "overrides": {
+    "tmp": "^0.2.4",
+    "external-editor": "^3.1.0"
   },
   "scripts": {
     "build": "ray build -e dist",
