@@ -15,11 +15,11 @@ export default function SelectBrowsers({ browsers: initialBrowsers, onSelect }: 
   return (
     <List isLoading={isLoading}>
       {data?.map((browser) => {
-        const isSelected = browsers.includes(browser.bundleId as string);
+        const isSelected = browsers.includes(browser.path);
 
         return (
           <List.Item
-            key={browser.bundleId}
+            key={browser.path}
             icon={isSelected ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
             title={browser.name}
             actions={
@@ -28,9 +28,12 @@ export default function SelectBrowsers({ browsers: initialBrowsers, onSelect }: 
                   title={isSelected ? `Disable ${browser.name}` : `Enable ${browser.name}`}
                   icon={isSelected ? Icon.Circle : { source: Icon.CheckCircle, tintColor: Color.Green }}
                   onAction={() => {
-                    const newBrowsers = isSelected
-                      ? browsers.filter((b) => b !== browser.bundleId)
-                      : [...browsers, browser.bundleId as string];
+                    let newBrowsers: string[];
+                    if (isSelected) {
+                      newBrowsers = browsers.filter((bPath) => bPath !== browser.path);
+                    } else {
+                      newBrowsers = [...browsers, browser.path];
+                    }
                     setBrowsers(newBrowsers);
                     onSelect(newBrowsers);
                   }}

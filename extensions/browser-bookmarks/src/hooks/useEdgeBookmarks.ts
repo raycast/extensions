@@ -1,9 +1,15 @@
 import { homedir } from "os";
-
+import path from "path";
 import { BROWSERS_BUNDLE_ID } from "./useAvailableBrowsers";
 import useChromiumBookmarks from "./useChromiumBookmarks";
 
-const EDGE_BOOKMARKS_PATH = `${homedir()}/Library/Application Support/Microsoft Edge`;
+const isWin = process.platform === "win32";
+
+let EDGE_BOOKMARKS_PATH = `${homedir()}/Library/Application Support/Microsoft Edge`;
+
+if (isWin) {
+  EDGE_BOOKMARKS_PATH = path.join(homedir(), `/AppData/Local/Microsoft/Edge/User Data`);
+}
 
 export default function useEdgeBookmarks(enabled: boolean) {
   return useChromiumBookmarks(enabled, {

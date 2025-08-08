@@ -54,8 +54,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.64.0",
-    "@raycast/utils": "^1.10.0",
+    "@raycast/api": "^1.101.1",
+    "@raycast/utils": "^2.2.0",
     "fuse.js": "^7.0.0",
     "ini": "^4.1.1",
     "simple-plist": "^1.4.0-0",
