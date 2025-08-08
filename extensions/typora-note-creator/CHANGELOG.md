@@ -1,0 +1,1 @@
+# Typora Note Creator Changelog
