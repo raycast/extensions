@@ -87,9 +87,9 @@ export interface BankTransaction {
 
 export interface Timeslip {
   url: string;
-  task: string;
-  user: string;
-  project: string;
+  task: string | Task;
+  user: string | User;
+  project: string | Project;
   dated_on: string;
   hours: string;
   comment?: string;

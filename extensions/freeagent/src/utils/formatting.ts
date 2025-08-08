@@ -1,5 +1,5 @@
 import { Color } from "@raycast/api";
-import { Invoice, Contact, CompanyInfo } from "../types";
+import { Invoice, Contact, CompanyInfo, Project, Task, User } from "../types";
 
 export function parseDate(dateString: string): Date {
   return new Date(dateString);
@@ -72,4 +72,27 @@ export function formatCurrencyAmount(currency: string, amount: number | string):
 export function formatDate(dateString: string): string {
   const date = new Date(dateString);
   return date.toLocaleDateString("en-GB");
+}
+
+export function getProjectDisplayName(project: string | Project): string {
+  if (typeof project === "string") {
+    return formatUriAsName(project);
+  }
+  return project.name || "Unknown Project";
+}
+
+export function getTaskDisplayName(task: string | Task): string {
+  if (typeof task === "string") {
+    return formatUriAsName(task);
+  }
+  return task.name || "Unknown Task";
+}
+
+export function getUserDisplayName(user: string | User): string {
+  if (typeof user === "string") {
+    return formatUriAsName(user);
+  }
+  const firstName = user.first_name || "";
+  const lastName = user.last_name || "";
+  return [firstName, lastName].filter(Boolean).join(" ") || "Unknown User";
 }

@@ -137,8 +137,13 @@ export async function fetchBankTransactions(
 export async function fetchTimeslips(
   accessToken: string,
   view: "all" | "unbilled" | "running" = "all",
+  nested: boolean = false,
 ): Promise<Timeslip[]> {
-  const data = await makeRequest<TimeslipsResponse>(`/timeslips?view=${view}&sort=-dated_on`, accessToken);
+  const nestedParam = nested ? "&nested=true" : "";
+  const data = await makeRequest<TimeslipsResponse>(
+    `/timeslips?view=${view}&sort=-dated_on${nestedParam}`,
+    accessToken,
+  );
   return data.timeslips || [];
 }
 
