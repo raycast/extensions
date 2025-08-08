@@ -1,10 +1,10 @@
 import { useHAStates } from "@components/hooks";
 import { filterViaPreferencePatterns } from "@components/state/utils";
-import { StatesList } from "@components/state/list";
+import { CustomStatesList } from "@components/state/customList";
 
 export default function CustomEntitiesCommand() {
   const { states } = useHAStates();
   const entities = filterViaPreferencePatterns(states, []);
 
-  return <StatesList domain="" entitiesState={entities} />;
+  return <CustomStatesList entitiesState={entities} />;
 }
