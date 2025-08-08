@@ -1,0 +1,171 @@
+{
+  "name": "tana-tools",
+  "title": "Tana Tools",
+  "description": "Convert text, YouTube videos, and web pages to Tana Paste format",
+  "icon": "command-icon.png",
+  "author": "lisaross",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "tana",
+    "pkm",
+    "knowledge",
+    "markdown",
+    "youtube",
+    "converter",
+    "clipboard",
+    "notes",
+    "outline",
+    "productivity"
+  ],
+  "license": "MIT",
+  "version": "1.0.0",
+  "type": "module",
+  "commands": [
+    {
+      "name": "quick-clipboard-to-tana",
+      "title": "Quick Clipboard to Tana",
+      "description": "Instantly convert clipboard content to Tana Paste format",
+      "mode": "no-view"
+    },
+    {
+      "name": "paste-and-edit",
+      "title": "Paste and Edit for Tana",
+      "description": "Paste text, edit it, then convert to Tana Paste format",
+      "mode": "view"
+    },
+    {
+      "name": "youtube-to-tana",
+      "title": "Youtube to Tana",
+      "description": "Extract YouTube video information from Chrome, Arc, or Safari and convert to Tana Paste format",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-page-content-to-tana",
+      "title": "Copy Page Content to Tana",
+      "description": "Extract all text from the current browser page and convert to Tana Paste format",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-page-content-to-tana-with-selection",
+      "title": "Copy Page Content to Tana (select Tab)",
+      "description": "Choose from available browser tabs and extract content to Tana Paste format",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "videoTag",
+      "type": "textfield",
+      "required": false,
+      "title": "Video Tag",
+      "description": "Supertag to use for YouTube videos (e.g., 'video', 'youtube')",
+      "default": "video",
+      "placeholder": "video"
+    },
+    {
+      "name": "articleTag",
+      "type": "textfield",
+      "required": false,
+      "title": "Article Tag",
+      "description": "Supertag to use for web articles (leave empty for no tag)",
+      "default": "",
+      "placeholder": "article"
+    },
+    {
+      "name": "transcriptTag",
+      "type": "textfield",
+      "required": false,
+      "title": "Transcript Tag",
+      "description": "Supertag to use for transcripts (leave empty for no tag)",
+      "default": "",
+      "placeholder": "transcript"
+    },
+    {
+      "name": "noteTag",
+      "type": "textfield",
+      "required": false,
+      "title": "Note Tag",
+      "description": "Supertag to use for clipboard/plain text notes (leave empty for no tag)",
+      "default": "",
+      "placeholder": "note"
+    },
+    {
+      "name": "urlField",
+      "type": "textfield",
+      "required": false,
+      "title": "URL Field Name",
+      "description": "Field name for URLs",
+      "default": "URL",
+      "placeholder": "URL"
+    },
+    {
+      "name": "authorField",
+      "type": "textfield",
+      "required": false,
+      "title": "Author Field Name",
+      "description": "Field name for authors/creators",
+      "default": "Author",
+      "placeholder": "Author"
+    },
+    {
+      "name": "transcriptField",
+      "type": "textfield",
+      "required": false,
+      "title": "Transcript Field Name",
+      "description": "Field name for transcript content",
+      "default": "Transcript",
+      "placeholder": "Transcript"
+    },
+    {
+      "name": "contentField",
+      "type": "textfield",
+      "required": false,
+      "title": "Content Field Name",
+      "description": "Field name for main content",
+      "default": "Content",
+      "placeholder": "Content"
+    },
+    {
+      "name": "includeAuthor",
+      "type": "checkbox",
+      "required": false,
+      "title": "Include Author Field",
+      "description": "Whether to include author/creator information in output",
+      "default": true,
+      "label": "Include author field"
+    },
+    {
+      "name": "includeDescription",
+      "type": "checkbox",
+      "required": false,
+      "title": "Include Description Field",
+      "description": "Whether to include description information in output",
+      "default": true,
+      "label": "Include description field"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.99.2",
+    "turndown": "^7.2.0"
+  },
+  "devDependencies": {
+    "@esbuild/darwin-arm64": "^0.25.4",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^18.8.3",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.1",
+    "@types/turndown": "^5.0.5",
+    "eslint": "^9.28.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
