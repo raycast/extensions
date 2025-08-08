@@ -61,6 +61,8 @@ export function resourceToConsoleLink(
       return `${AWS_URL_BASE}/states/home?region=${AWS_REGION}#/statemachines/view/${resourceId}`;
     case "AWS::Amplify::App":
       return `https://${AWS_REGION}.console.aws.amazon.com/amplify/home?region=${AWS_REGION}#/apps/${resourceId}`;
+    case "AWS::Amplify::Branch":
+      return `https://${AWS_REGION}.console.aws.amazon.com/amplify/home?region=${AWS_REGION}#/apps/${resourceId}/branches/${resourceId}`;
     default:
       return "";
   }
