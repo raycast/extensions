@@ -2,49 +2,45 @@ import axios from "axios";
 import { getPreferenceValues } from "@raycast/api";
 import { ApiLoginResponse, CompanyData, Preferences } from "../types";
 
-// Rate limiting state
-const apiCallTimes: number[] = [];
+// --- Caching and Rate Limiting Configuration ---
+
 const MAX_CALLS_PER_MINUTE = 30; // Conservative limit to prevent API abuse
+const COMPANY_CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache for company data
+const AUTH_TOKEN_TTL = 10 * 60 * 1000; // 10 minutes cache for auth token
 
-// Simple cache for API responses
-interface CacheEntry {
-  data: CompanyData;
-  timestamp: number;
-}
+// --- Module-level State ---
 
-const companyCache = new Map<string, CacheEntry>();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache
+const apiCallTimes: number[] = [];
+const companyCache = new Map<string, { data: CompanyData; timestamp: number }>();
+let authToken: { token: string; expiresAt: number } | null = null;
 
 const API_BASE_URL = "https://registre-national-entreprises.inpi.fr";
 
+// --- Private Helper Functions ---
+
 /**
- * Implements rate limiting to prevent API abuse
+ * Implements rate limiting to prevent API abuse. Throws an error if the limit is exceeded.
  */
 function checkRateLimit(): void {
   const now = Date.now();
-  const oneMinuteAgo = now - 60000;
-
-  // Remove old entries
-  while (apiCallTimes.length > 0 && apiCallTimes[0] < oneMinuteAgo) {
+  // Filter out calls older than 1 minute
+  while (apiCallTimes.length > 0 && apiCallTimes[0] < now - 60000) {
     apiCallTimes.shift();
   }
 
-  // Check if we're over the limit
   if (apiCallTimes.length >= MAX_CALLS_PER_MINUTE) {
     throw new Error(
-      `Rate limit exceeded: Maximum ${MAX_CALLS_PER_MINUTE} requests per minute. Please wait a moment and try again.`,
+      `Rate limit exceeded: Maximum ${MAX_CALLS_PER_MINUTE} requests per minute. Please wait and try again.`,
     );
   }
-
-  // Record this call
   apiCallTimes.push(now);
 }
 
 /**
- * Implements retry logic with exponential backoff
+ * Generic retry mechanism with exponential backoff for network operations.
  */
 async function withRetry<T>(operation: () => Promise<T>, maxRetries = 3, baseDelay = 1000): Promise<T> {
-  let lastError: Error;
+  let lastError: Error | undefined;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
@@ -52,77 +48,67 @@ async function withRetry<T>(operation: () => Promise<T>, maxRetries = 3, baseDel
     } catch (error) {
       lastError = error as Error;
 
-      // Don't retry on authentication errors or client errors (4xx)
+      // Don't retry on client-side errors (4xx), except for rate limiting (429)
       if (axios.isAxiosError(error) && error.response) {
         const status = error.response.status;
         if (status >= 400 && status < 500 && status !== 429) {
-          throw error;
+          throw error; // Fail fast on auth errors, not found, etc.
         }
       }
 
-      // Don't retry on the last attempt
       if (attempt === maxRetries) {
-        throw error;
+        break; // Exit loop to throw last error
       }
 
-      // Calculate delay with exponential backoff
       const delay = baseDelay * Math.pow(2, attempt);
-      console.log(`API call failed, retrying in ${delay}ms (attempt ${attempt + 1}/${maxRetries + 1})`);
-
+      console.log(`API call failed. Retrying in ${delay}ms (attempt ${attempt + 1}/${maxRetries})...`);
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
-
-  throw lastError!;
+  throw lastError;
 }
 
+/**
+ * Creates an Axios client instance with optional authorization token.
+ */
 const getApiClient = (token?: string) => {
-  const headers: { [key: string]: string } = {
-    "Content-Type": "application/json",
-  };
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
-
-  return axios.create({
-    baseURL: API_BASE_URL,
-    headers,
-  });
+  return axios.create({ baseURL: API_BASE_URL, headers });
 };
 
 /**
- * Validates INPI credentials format
+ * Validates that credentials are present in preferences.
  */
 function validateCredentials(username: string, password: string): void {
-  if (!username || username.trim().length === 0) {
+  if (!username?.trim()) {
     throw new Error("INPI username is required. Please configure it in Raycast preferences.");
   }
-
-  if (!password || password.trim().length === 0) {
+  if (!password) {
     throw new Error("INPI password is required. Please configure it in Raycast preferences.");
-  }
-
-  // Basic format validation for username (email format expected)
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(username.trim())) {
-    throw new Error("INPI username must be a valid email address.");
-  }
-
-  // Password strength validation
-  if (password.length < 6) {
-    throw new Error("INPI password appears invalid (too short). Please check your credentials.");
   }
 }
 
+// --- Public API Functions ---
+
+/**
+ * Ensures the user is logged in and returns a valid token.
+ * Uses an in-memory cache to avoid repeated login calls.
+ */
 export async function login(): Promise<string> {
+  // Return cached token if it's still valid
+  if (authToken && authToken.expiresAt > Date.now()) {
+    console.log("Using cached auth token.");
+    return authToken.token;
+  }
+
   const { inpiUsername, inpiPassword }: Preferences = getPreferenceValues();
-
-  // Validate credentials format before making API call
   validateCredentials(inpiUsername, inpiPassword);
-
-  // Check rate limit before making request
   checkRateLimit();
 
+  console.log("Authenticating with INPI API...");
   return withRetry(async () => {
     try {
       const apiClient = getApiClient();
@@ -131,119 +117,91 @@ export async function login(): Promise<string> {
         password: inpiPassword,
       });
 
-      if (response.data && response.data.token) {
-        return response.data.token;
+      if (response.data?.token) {
+        console.log("Authentication successful. Caching token.");
+        authToken = {
+          token: response.data.token,
+          expiresAt: Date.now() + AUTH_TOKEN_TTL,
+        };
+        return authToken.token;
       }
       throw new Error("Invalid login response from INPI API.");
     } catch (error) {
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 401) {
-          throw new Error(
-            "Authentication failed: Invalid INPI credentials. Please check your username and password in Raycast preferences.",
-          );
+          throw new Error("Authentication failed: Invalid INPI credentials.");
         }
         if (error.response?.status === 403) {
-          throw new Error("Access denied: Your INPI account may not have API access. Please contact INPI support.");
+          throw new Error("Access denied: Your INPI account may not have API access.");
         }
         if (error.response?.status === 429) {
-          throw new Error("Rate limit exceeded: Too many login attempts. Please wait a few minutes and try again.");
+          throw new Error("Rate limit exceeded on login. Please wait.");
         }
       }
-
       console.error("Authentication failed:", error);
-      throw new Error("Failed to authenticate with INPI API. Please check your internet connection and credentials.");
+      throw new Error("Failed to authenticate with INPI API. Check credentials and connection.");
     }
   });
 }
 
 /**
- * Checks if cached data is still valid
+ * Fetches company data by SIREN. Handles caching and authentication automatically.
  */
-function getCachedCompanyData(siren: string): CompanyData | null {
+export async function getCompanyInfo(siren: string): Promise<CompanyData> {
+  // Check company data cache first
   const cached = companyCache.get(siren);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+  if (cached && Date.now() - cached.timestamp < COMPANY_CACHE_TTL) {
     console.log(`Using cached data for SIREN ${siren}`);
     return cached.data;
   }
 
-  // Remove expired cache entry
-  if (cached) {
-    companyCache.delete(siren);
-  }
-
-  return null;
-}
-
-/**
- * Caches company data for future requests
- */
-function cacheCompanyData(siren: string, data: CompanyData): void {
-  companyCache.set(siren, {
-    data,
-    timestamp: Date.now(),
-  });
-
-  // Cleanup old cache entries (keep only last 50 entries)
-  if (companyCache.size > 50) {
-    const oldestKey = companyCache.keys().next().value;
-    if (oldestKey) {
-      companyCache.delete(oldestKey);
-    }
-  }
-}
-
-export async function getCompanyInfo(token: string, siren: string): Promise<CompanyData> {
-  // Check cache first
-  const cachedData = getCachedCompanyData(siren);
-  if (cachedData) {
-    return cachedData;
-  }
-
-  // Check rate limit before making request
+  const token = await login(); // Ensures we have a valid token
   checkRateLimit();
 
   return withRetry(async () => {
     try {
       const apiClient = getApiClient(token);
-
       console.log(`Fetching INPI data for SIREN ${siren}`);
-      const inpiResponse = await apiClient.get(`/api/companies/${siren}`);
+      const response = await apiClient.get(`/api/companies/${siren}`);
 
       // Cache the successful response
-      cacheCompanyData(siren, inpiResponse.data);
+      companyCache.set(siren, { data: response.data, timestamp: Date.now() });
 
-      return inpiResponse.data;
+      return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 404) {
-          throw new Error(`Company not found: No company found for SIREN ${siren}. Please verify the SIREN number.`);
+          throw new Error(`No company found for SIREN ${siren}.`);
         }
         if (error.response?.status === 401) {
-          throw new Error(
-            "Authentication expired: Please try again. If the problem persists, check your INPI credentials.",
-          );
+          authToken = null; // Token might be expired, clear it
+          throw new Error("Authentication expired. Please try again.");
         }
         if (error.response?.status === 403) {
-          throw new Error("Access denied: Your INPI account may not have permission to access this company's data.");
+          throw new Error("Access denied for this company's data.");
         }
         if (error.response?.status === 429) {
-          throw new Error("Rate limit exceeded: Too many requests. Please wait a moment and try again.");
+          throw new Error("Rate limit exceeded. Please wait and try again.");
         }
       }
-
       console.error(`Failed to fetch company data for SIREN ${siren}:`, error);
-      throw new Error(
-        "Network error: Failed to fetch company data. Please check your internet connection and try again.",
-      );
+      throw new Error("Network error while fetching company data.");
     }
   });
 }
 
 /**
- * Clears the company data cache
- * Useful for testing or when fresh data is required
+ * Clears the in-memory company data cache.
  */
 export function clearCompanyCache(): void {
   companyCache.clear();
-  console.log("Company data cache cleared");
+  console.log("Company data cache cleared.");
+}
+
+/**
+ * Clears the in-memory authentication token.
+ */
+export function clearAuthToken(): void {
+  authToken = null;
+  console.log("Authentication token cleared.");
 }

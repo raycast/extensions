@@ -1,113 +1,56 @@
-import { readFile } from "fs/promises";
-import { readFileSync } from "fs";
-import { join } from "path";
 import { environment } from "@raycast/api";
+import greffeIndexData from "../../assets/greffes-index.json";
 
 interface GreffeIndex {
   [codePostal: string]: string;
 }
 
-// Cache for the greffe index
-let greffeIndex: GreffeIndex | null = null;
-let loadingPromise: Promise<GreffeIndex> | null = null;
-
-/**
- * Loads the greffe index from the JSON file asynchronously
- * Uses promise caching to avoid multiple concurrent loads
- */
-async function loadGreffeIndexAsync(): Promise<GreffeIndex> {
-  if (greffeIndex !== null) {
-    return greffeIndex;
-  }
-
-  // If already loading, return the existing promise
-  if (loadingPromise !== null) {
-    return loadingPromise;
-  }
-
-  loadingPromise = (async () => {
-    try {
-      const jsonPath = join(environment.assetsPath, "greffes-index.json");
-      console.log("Loading greffe index from:", jsonPath);
-      const fileContent = await readFile(jsonPath, "utf-8");
-      greffeIndex = JSON.parse(fileContent);
-      return greffeIndex!;
-    } catch (error) {
-      console.error("Failed to load greffe index asynchronously:", error);
-      // Reset loading promise on error to allow retry
-      loadingPromise = null;
-      return {};
-    }
-  })();
-
-  return loadingPromise;
+// Type guard to check if the data has the nested structure
+function isNestedGreffeData(data: unknown): data is { byCodePostal: GreffeIndex } {
+  return typeof data === "object" && data !== null && "byCodePostal" in data;
 }
 
-/**
- * Loads the greffe index from the JSON file synchronously (fallback)
- * Uses lazy loading to avoid blocking the main thread
- */
-function loadGreffeIndexSync(): GreffeIndex {
-  if (greffeIndex !== null) {
-    return greffeIndex;
-  }
-
-  try {
-    const jsonPath = join(environment.assetsPath, "greffes-index.json");
-    const fileContent = readFileSync(jsonPath, "utf-8");
-    const parsed = JSON.parse(fileContent);
-
-    // Check if the file has the expected structure
-    if (parsed.byCodePostal) {
-      greffeIndex = parsed.byCodePostal;
-    } else {
-      greffeIndex = parsed;
-    }
-
-    return greffeIndex!;
-  } catch (error) {
-    console.error("Failed to load greffe index synchronously:", error);
-    return {};
-  }
-}
+// The index is now loaded statically at build time.
+// The 'byCodePostal' key check is for compatibility with the old format.
+const greffeIndex: GreffeIndex = isNestedGreffeData(greffeIndexData)
+  ? greffeIndexData.byCodePostal
+  : (greffeIndexData as GreffeIndex);
 
 /**
- * Finds the appropriate greffe (court registry) based on postal code
- * Uses synchronous loading for immediate results
+ * Finds the appropriate greffe (court registry) based on a postal code.
+ * This function is now fully synchronous and performant as the data is in-memory.
+ *
+ * @param codePostal The postal code to look up.
+ * @returns The name of the greffe or null if not found.
  */
 export function findGreffeByCodePostal(codePostal: string): string | null {
-  try {
-    const index = loadGreffeIndexSync();
-    return index[codePostal] || null;
-  } catch (error) {
-    console.error("Error looking up greffe for postal code:", codePostal, error);
+  if (!codePostal) {
     return null;
   }
+  return greffeIndex[codePostal] || null;
 }
 
+// The async and preload functions are no longer necessary as the file is
+// handled by the bundler, but they are kept for compatibility with existing calls.
+// They now resolve immediately with the synchronous result.
+
 /**
- * Finds the appropriate greffe (court registry) based on postal code asynchronously
- * Preferred method for better performance
+ * Asynchronously finds the appropriate greffe (court registry) based on a postal code.
+ * @deprecated This function is now synchronous under the hood. Use findGreffeByCodePostal instead.
+ * @param codePostal The postal code to look up.
+ * @returns A promise that resolves to the name of the greffe or null if not found.
  */
 export async function findGreffeByCodePostalAsync(codePostal: string): Promise<string | null> {
-  try {
-    const index = await loadGreffeIndexAsync();
-    return index[codePostal] || null;
-  } catch (error) {
-    console.error("Error looking up greffe for postal code asynchronously:", codePostal, error);
-    return null;
-  }
+  return Promise.resolve(findGreffeByCodePostal(codePostal));
 }
 
 /**
- * Preloads the greffe index to improve performance of subsequent lookups
- * Call this during application initialization
+ * Preloads the greffe index. This function is now a no-op for backward compatibility
+ * as the data is loaded at build time.
  */
 export async function preloadGreffeIndex(): Promise<void> {
-  try {
-    await loadGreffeIndexAsync();
-    console.log("Greffe index preloaded successfully");
-  } catch (error) {
-    console.error("Failed to preload greffe index:", error);
+  if (environment.isDevelopment) {
+    console.log("Greffe index is now statically imported. Preloading is no longer necessary.");
   }
+  return Promise.resolve();
 }

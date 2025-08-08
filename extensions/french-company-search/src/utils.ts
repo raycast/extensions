@@ -1,12 +1,6 @@
 import { AddressInfo } from "./types";
-import { readFile } from "fs/promises";
-import { readFileSync } from "fs";
-import { join } from "path";
 import { environment } from "@raycast/api";
-
-// Cache for role mappings to avoid repeated file reads
-let roleMappings: { [key: string]: string } | null = null;
-let roleMappingsLoadingPromise: Promise<{ [key: string]: string }> | null = null;
+import roleMappings from "../assets/role-mappings.json";
 
 const FALLBACK_VALUE = "[[à compléter]]";
 
@@ -182,108 +176,18 @@ export function formatSiren(siren: string): string {
 }
 
 /**
- * Loads role mappings from external configuration file asynchronously
- */
-async function loadRoleMappingsAsync(): Promise<{ [key: string]: string }> {
-  if (roleMappings !== null) {
-    return roleMappings;
-  }
-
-  // If already loading, return the existing promise
-  if (roleMappingsLoadingPromise !== null) {
-    return roleMappingsLoadingPromise;
-  }
-
-  roleMappingsLoadingPromise = (async () => {
-    try {
-      // Try multiple possible paths for the role mappings file
-      const possiblePaths = [
-        join(environment.assetsPath, "role-mappings.json"),
-        join(environment.assetsPath, "../src/config/role-mappings.json"),
-        join(environment.assetsPath, "../../src/config/role-mappings.json"),
-      ];
-
-      let configPath: string | null = null;
-      for (const path of possiblePaths) {
-        try {
-          if (readFileSync(path, "utf-8")) {
-            configPath = path;
-            break;
-          }
-        } catch {
-          // Continue trying other paths
-        }
-      }
-
-      if (!configPath) {
-        throw new Error("Could not find role-mappings.json in any expected location");
-      }
-      const fileContent = await readFile(configPath, "utf-8");
-      roleMappings = JSON.parse(fileContent);
-      return roleMappings!;
-    } catch (error) {
-      console.error("Failed to load role mappings asynchronously:", error);
-      // Reset loading promise on error to allow retry
-      roleMappingsLoadingPromise = null;
-      return {};
-    }
-  })();
-
-  return roleMappingsLoadingPromise;
-}
-
-/**
- * Loads role mappings from external configuration file synchronously (fallback)
- */
-function loadRoleMappingsSync(): { [key: string]: string } {
-  if (roleMappings !== null) {
-    return roleMappings;
-  }
-
-  try {
-    // Try multiple possible paths for the role mappings file
-    const possiblePaths = [
-      join(environment.assetsPath, "role-mappings.json"),
-      join(environment.assetsPath, "../src/config/role-mappings.json"),
-      join(environment.assetsPath, "../../src/config/role-mappings.json"),
-    ];
-
-    let configPath: string | null = null;
-    for (const path of possiblePaths) {
-      try {
-        if (readFileSync(path, "utf-8")) {
-          configPath = path;
-          break;
-        }
-      } catch {
-        // Continue trying other paths
-      }
-    }
-
-    if (!configPath) {
-      console.error("Could not find role-mappings.json in any expected location");
-      return {};
-    }
-
-    const fileContent = readFileSync(configPath, "utf-8");
-    roleMappings = JSON.parse(fileContent);
-    return roleMappings!;
-  } catch (error) {
-    console.error("Failed to load role mappings synchronously:", error);
-    return {};
-  }
-}
-
-/**
- * Maps role code to human-readable French role name
+ * Maps a role code to its human-readable French name using the statically imported mapping.
+ * This function is synchronous and performant.
+ *
+ * @param roleCode The role code from the API.
+ * @returns The mapped role name or a fallback string.
  */
 export function getRoleName(roleCode: string): string {
   if (!roleCode || roleCode.trim() === "") {
     return FALLBACK_VALUES.REPRESENTATIVE_ROLE;
   }
 
-  const mappings = loadRoleMappingsSync();
-  const mappedRole = mappings[roleCode.trim()];
+  const mappedRole = (roleMappings as { [key: string]: string })[roleCode.trim()];
 
   if (mappedRole) {
     return mappedRole;
@@ -298,38 +202,22 @@ export function getRoleName(roleCode: string): string {
 }
 
 /**
- * Maps role code to human-readable French role name asynchronously
- * Preferred method for better performance
+ * Asynchronously maps a role code to its human-readable French name.
+ * @deprecated This function is now synchronous under the hood. Use getRoleName instead.
+ * @param roleCode The role code to look up.
+ * @returns A promise that resolves to the role name.
  */
 export async function getRoleNameAsync(roleCode: string): Promise<string> {
-  if (!roleCode || roleCode.trim() === "") {
-    return FALLBACK_VALUES.REPRESENTATIVE_ROLE;
-  }
-
-  const mappings = await loadRoleMappingsAsync();
-  const mappedRole = mappings[roleCode.trim()];
-
-  if (mappedRole) {
-    return mappedRole;
-  }
-
-  // If we have a numeric code but no mapping, provide a helpful fallback
-  if (/^\d+$/.test(roleCode.trim())) {
-    return `[[Fonction code ${roleCode} - Mapping à ajouter]]`;
-  }
-
-  return FALLBACK_VALUES.REPRESENTATIVE_ROLE;
+  return Promise.resolve(getRoleName(roleCode));
 }
 
 /**
- * Preloads role mappings to improve performance of subsequent lookups
- * Call this during application initialization
+ * Preloads role mappings. This function is now a no-op for backward compatibility
+ * as the data is loaded at build time.
  */
 export async function preloadRoleMappings(): Promise<void> {
-  try {
-    await loadRoleMappingsAsync();
-    console.log("Role mappings preloaded successfully");
-  } catch (error) {
-    console.error("Failed to preload role mappings:", error);
+  if (environment.isDevelopment) {
+    console.log("Role mappings are now statically imported. Preloading is no longer necessary.");
   }
+  return Promise.resolve();
 }
