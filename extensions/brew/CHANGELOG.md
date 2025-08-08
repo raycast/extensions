@@ -1,5 +1,9 @@
 # Brew Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Add a new configuration option to determine whether to use new terminal sessions. Now you can perform multiple actions simultaneously without waiting for the previous one to finish.
+
 ## [Improvements] - 2025-02-17
 
 - Add a new action to open the Brew formula/cask page in the browser

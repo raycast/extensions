@@ -4,6 +4,8 @@ import { preferences } from "../preferences";
 
 type TerminalApp = (typeof preferences)["terminalApp"];
 
+const useNewTerminalSession = preferences.useNewTerminalSession;
+
 const names: { [key in TerminalApp]: string } = {
   alacritty: "Alacritty",
   ghostty: "Ghostty",
@@ -37,15 +39,21 @@ const appBundleIds: { [key in TerminalApp]: string } = {
   wezterm: "com.github.wez.wezterm",
 };
 
-const runCommandInTermAppleScript = (c: string, terminalApp: string): string => `
-    tell application "${terminalApp}" to activate
+const runCommandInTermAppleScript = (c: string, terminalApp: string): string => {
+  const shortcut = useNewTerminalSession ? "n" : "t"; // cmd+n for new window, cmd+t for new tab
+  return `
+    tell application "${terminalApp}"
+        activate
+        delay 0.2
+    end tell
     tell application "System Events" to tell process "${terminalApp}"
-        keystroke "t" using command down
+        keystroke "${shortcut}" using command down
         delay 0.5
         keystroke "${c}"
         keystroke return
     end tell
   `;
+};
 
 const appleScripts: { [key in TerminalApp]: (c: string) => string } = {
   alacritty: (c: string) => runCommandInTermAppleScript(c, names.alacritty),
@@ -53,11 +61,19 @@ const appleScripts: { [key in TerminalApp]: (c: string) => string } = {
   hyper: (c: string) => runCommandInTermAppleScript(c, names.hyper),
   iterm: (c: string) => `
     tell application "iTerm"
-      set newWindow to create window with default profile command "bash -c '${c}; read -n 1 -s -r -p \\"Press any key to exit - will not quit\\" ; echo' ; exit"
+      create window with default profile command "bash -c '${c}; read -n 1 -s -r -p \\"Press any key to exit - will not quit\\" ; echo' ; exit"
     end tell
     `,
   kitty: (c: string) => runCommandInTermAppleScript(c, names.kitty),
-  terminal: (c: string) => `
+  terminal: (c: string) =>
+    useNewTerminalSession
+      ? `
+    tell application "Terminal"
+      do shell script "open -a 'Terminal'"
+      set newWindow to do script "echo ; ${c} ; bash -c 'read -n 1 -s -r -p \\"Press any key to exit - will not quit\\"' ; exit"
+    end tell
+  `
+      : `
     tell application "Terminal"
       do shell script "open -a 'Terminal'"
       do script "echo ; ${c} ; bash -c 'read -n 1 -s -r -p \\"Press any key to exit - will not quit\\"' ; exit" in selected tab of the front window
