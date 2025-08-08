@@ -1,5 +1,10 @@
 # Brand Icons Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Add support for creating social badges through cross-extension
+- Bump all dependencies to the latest
+
 ## [Bugfix] - 2025-08-04
 
 - Handle error when reading a non-existent file in `makeCopyToDownload`
