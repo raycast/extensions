@@ -11,7 +11,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "webSearch",
+      "name": "index",
       "title": "Search Web",
       "subtitle": "Brave",
       "description": "Search web with Brave",

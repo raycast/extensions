@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Icon, LaunchProps } from "@raycast/api";
+import { Keyboard, List, ActionPanel, Action, Icon, LaunchProps } from "@raycast/api";
 import { useState, useMemo, useCallback } from "react";
 
 import useWebSearch from "./hooks/useWebSearch.js";
@@ -8,6 +8,7 @@ import groupHistory from "./utils/groupHistory.js";
 import formatUrl from "./utils/formatUrl.js";
 import useSuggestions from "./hooks/useSuggestions.js";
 import useMode from "./hooks/useMode.js";
+import HistoryListItem from "./components/HistoryListItem.js";
 
 enum Mode {
   History,
@@ -15,90 +16,53 @@ enum Mode {
   Search,
 }
 
-export default function WebSearchCommand(props: LaunchProps) {
+export default function Index(props: LaunchProps) {
   const [fallbackText, setFallbackText] = useState(props.fallbackText);
   const [query, setQuery] = useState("");
-  const [searching, setSearching] = useState(false);
+  const [mode, setMode] = useMode();
 
-  const mode = useMode(searching, query);
-
-  const {
-    isLoading: isLoadingHistory,
-    items: historyItems,
-    addToHistory,
-    removeFromHistory,
-    clearHistory,
-  } = useHistory(Type.Web);
-  const { isLoading: isLoadingSuggestions, results: suggestionsResults } = useSuggestions(
-    query,
-    mode === Mode.Suggestions,
-  );
-  const { isLoading: isLoadingWebSearch, results: webSearchResults } = useWebSearch(query, mode === Mode.Search);
+  const { isLoadingHistory, historyItems, addHistoryItem, removeHistoryItem, clearHistory } = useHistory(Type.Web);
+  const { isLoadingSuggestions, suggestionsResults } = useSuggestions(query, mode === Mode.Suggestions);
+  const { isLoadingWebSearch, webSearchResults } = useWebSearch(query, mode === Mode.Search);
 
   const historyGroups = useMemo(() => groupHistory(historyItems), [historyItems]);
   const isLoading = isLoadingHistory || isLoadingSuggestions || isLoadingWebSearch;
 
   const onSearchTextChange = useCallback(
     (query: string) => {
-      // When called as a fallback, Raycast calls this function with the fallback text, which should…
-      // …add the query to the history.
-      // …invoke the search .
+      // When called as a fallback, Raycast calls this function with the fallback text, which should invoke the search.
+      // The fallback text is not added to the history as it's already part of the Raycast history.
       const fallbackTextSearchTextChange = fallbackText === query;
 
       setQuery(query);
 
       if (fallbackTextSearchTextChange) {
-        setSearching(true);
-        addToHistory(query);
+        setMode(Mode.Search);
       } else {
-        setSearching(false);
+        if (query.length > 0) {
+          setMode(Mode.Suggestions);
+        } else {
+          setMode(Mode.History);
+        }
       }
 
       // Avoid that upcoming function calls are treated as fallback calls
       setFallbackText(undefined);
     },
-    [fallbackText, addToHistory, setSearching, setQuery, setFallbackText],
+    [fallbackText, setMode, setQuery, setFallbackText],
   );
 
   const historyList = historyGroups.map((historyGroup) => (
     <List.Section key={historyGroup.title} title={historyGroup.title}>
       {historyGroup.items.map((item) => (
-        <List.Item
+        <HistoryListItem
           key={item.id}
-          icon={Icon.MagnifyingGlass}
-          title={item.query}
-          subtitle={`Search web for '${item.query}'`}
-          actions={
-            <ActionPanel>
-              <ActionPanel.Section>
-                <Action
-                  icon={Icon.MagnifyingGlass}
-                  title="Search"
-                  onAction={() => {
-                    addToHistory(item.query);
-                    setQuery(item.query);
-                    setSearching(true);
-                  }}
-                />
-              </ActionPanel.Section>
-              <ActionPanel.Section>
-                <Action
-                  icon={Icon.Trash}
-                  title="Delete Entry"
-                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                  onAction={() => {
-                    removeFromHistory(item.id);
-                  }}
-                />
-                <Action
-                  icon={Icon.Trash}
-                  title="Delete All Entries"
-                  shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
-                  onAction={clearHistory}
-                />
-              </ActionPanel.Section>
-            </ActionPanel>
-          }
+          item={item}
+          addHistoryItem={addHistoryItem}
+          removeHistoryItem={removeHistoryItem}
+          clearHistory={clearHistory}
+          setQuery={setQuery}
+          setMode={setMode}
         />
       ))}
     </List.Section>
@@ -118,9 +82,9 @@ export default function WebSearchCommand(props: LaunchProps) {
                 icon={Icon.MagnifyingGlass}
                 title="Search"
                 onAction={() => {
-                  addToHistory(suggestionsResult.query);
+                  addHistoryItem(suggestionsResult.query);
                   setQuery(suggestionsResult.query);
-                  setSearching(true);
+                  setMode(Mode.Search);
                 }}
               />
             </ActionPanel>
@@ -142,17 +106,17 @@ export default function WebSearchCommand(props: LaunchProps) {
             <ActionPanel>
               <ActionPanel.Section>
                 <Action.OpenInBrowser url={searchResult.url.toString()} />
-                <Action.OpenWith path={searchResult.url.toString()} />
+                <Action.OpenWith shortcut={Keyboard.Shortcut.Common.OpenWith} path={searchResult.url.toString()} />
               </ActionPanel.Section>
               <ActionPanel.Section>
                 <Action.CopyToClipboard
                   title="Copy URL"
-                  shortcut={{ modifiers: ["cmd"], key: "." }}
+                  shortcut={Keyboard.Shortcut.Common.Copy}
                   content={searchResult.url.toString()}
                 />
                 <Action.CopyToClipboard
                   title="Copy Title"
-                  shortcut={{ modifiers: ["shift", "cmd"], key: "." }}
+                  shortcut={Keyboard.Shortcut.Common.CopyName}
                   content={searchResult.title}
                 />
               </ActionPanel.Section>

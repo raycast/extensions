@@ -1,8 +1,9 @@
 # Brave Search with Results Changelog
 
-## 2025-07-21
+## [Update] - {PR_MERGE_DATE}
 
 - Image search
+- Use common keyboard shortcuts
 
 ## [Initial Version] - 2024-05-04
 

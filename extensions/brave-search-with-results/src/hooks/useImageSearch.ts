@@ -72,5 +72,5 @@ export default function useImageSearch(query: string, execute: boolean) {
     return data?.results.map(toResult) ?? fallback;
   }, [data, execute]);
 
-  return { isLoading, results };
+  return { isLoadingImageSearch: isLoading, imageSearchResults: results };
 }
