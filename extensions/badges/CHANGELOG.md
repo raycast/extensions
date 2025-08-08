@@ -1,6 +1,6 @@
 # Badges Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2025-08-08
 
 - Add shortcut for picking logo
 - Bump all dependencies to the latest
