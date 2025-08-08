@@ -65,7 +65,7 @@ export default function CreateNoteCommand() {
     }
 
     writeFileSync(filePath, content);
-    //exec(`open -a Typora "${filePath}"`);
+    // exec(`open -a Typora "${filePath}");
 
     // 使用用户选择的 Typora 路径
     // 使用用户选择的应用路径
