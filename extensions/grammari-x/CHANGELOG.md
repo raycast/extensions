@@ -1,5 +1,10 @@
 # GrammariX Changelog
 
+## [Features] - 2025-08-08
+
+- Change model from GPT-4o Mini to GPT-5 nano
+
+
 ## [Features] - 2025-03-17
 
 - Change model from GPT-3 Turbo to GPT-4o Mini
