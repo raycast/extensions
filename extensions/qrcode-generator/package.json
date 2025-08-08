@@ -11,7 +11,8 @@
     "pernielsentikaer",
     "heytommy",
     "MatteoGauthier",
-    "seewhy"
+    "seewhy",
+    "adamYoung"
   ],
   "license": "MIT",
   "commands": [
@@ -63,6 +64,13 @@
       "title": "Generate QR Code from Clipboard",
       "subtitle": "QR Code Generator",
       "description": "Generate a QR code from clipboard content",
+      "mode": "view"
+    },
+    {
+      "name": "selection",
+      "title": "Generate QR Code from Selection",
+      "subtitle": "QR Code Generator",
+      "description": "Generate a QR code from selection content",
       "mode": "view"
     }
   ],
