@@ -1,6 +1,6 @@
 # GrammariX Changelog
 
-## [Features] - 2025-08-7
+## [Features] - {PR_MERGE_DATE}
 
 - Change model from GPT-4o Mini to GPT-5 nano
 
