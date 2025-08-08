@@ -1,5 +1,19 @@
 # @ Profile Changelog
 
+## [Prevent Infinite Loop in Open Profile and add Screenshots] - {PR_MERGE_DATE}
+
+### Added
+
+- **Screenshots**: Added screenshots to for Raycast Store
+
+### Fixed
+
+- **Infinite Loop**: Fixed infinite loop in Open Profile
+
+### Changed
+
+- **Raycast API**: Updated Raycast API to v1.102.3
+
 ## [Profile History and Custom Apps] - 2025-08-07
 
 ### Added
