@@ -13,20 +13,26 @@ export async function authenticateWithTouchID(): Promise<boolean> {
       return;
     }
 
-    authenticate("access TOTP codes", (err: Error | null) => {
+    authenticate("access TOTP codes", (err: Error | null, didAuthenticate: boolean) => {
       try {
-        // this is a workaround to reopen Raycast after authentication
+        // workaround to refocus Raycast after system auth dialog
         execSync('open -a "Raycast"');
       } catch (error) {
         console.error("Could not reopen Raycast:", error);
       }
 
       if (err) {
-        console.error("Touch ID authentication failed:", err);
+        console.error("Touch ID authentication error:", err);
         resolve(false);
-      } else {
-        resolve(true);
+        return;
       }
+
+      if (!didAuthenticate) {
+        resolve(false);
+        return;
+      }
+
+      resolve(true);
     });
   });
 }
