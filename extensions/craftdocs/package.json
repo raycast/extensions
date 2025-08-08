@@ -86,6 +86,15 @@
           "description": "Automatically add current time before your content"
         },
         {
+          "title": "Time Format",
+          "name": "timeFormat",
+          "type": "textfield",
+          "required": false,
+          "default": "HH:mm",
+          "placeholder": "HH:mm",
+          "description": "Custom time format pattern. Examples: HH:mm (14:30), h:mm A (2:30 PM), HH:mm:ss (14:30:45). Patterns: H/HH=24h, h/hh=12h, mm=minutes, ss=seconds, A/a=AM/PM"
+        },
+        {
           "title": "Prefix",
           "name": "contentPrefix",
           "type": "textfield",

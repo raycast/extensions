@@ -33,7 +33,7 @@ Quick access to your daily notes with smart navigation.
 Add content to your daily note without leaving Raycast.
 
 - Quick text entry with basic markdown formatting (headlines, lists, links)
-- Optional timestamp insertion
+- Optional timestamp insertion with custom time formatting (HH:mm, h:mm A, etc.)
 - Configurable content prefix and suffix
 - Choose to add at beginning or end of note
 
@@ -84,6 +84,14 @@ If you have multiple versions of Craft installed (regular and Setapp), you can s
 
 - **Detailed View**: Toggle between compact and detailed search results
 - Shows document content as a simplified preview
+
+### Daily Note Formatting
+
+Customize how timestamps and content are formatted:
+
+- **Time Format**: Use patterns like `HH:mm` (14:30), `h:mm A` (2:30 PM), or `HH:mm:ss` (14:30:45)
+- **Position**: Add content at the beginning or end of your daily note
+- **Prefix/Suffix**: Customize text around your content
 
 ### Daily Notes Preferences
 

@@ -6,6 +6,7 @@ import useDB from "./hooks/useDB";
 import useSearch from "./hooks/useSearch";
 import { getDailyNotePreferences, DailyNotePreferences } from "./preferences";
 import { APPEND_POSITIONS } from "./constants";
+import { formatTime, formatCraftInternalDate } from "./utils/dateTimeFormatter";
 
 interface FormValues {
   content: string;
@@ -18,11 +19,7 @@ const formatContent = (content: string, preferences: DailyNotePreferences): stri
 
   if (preferences.addTimestamp) {
     const now = new Date();
-    const timeString = now.toLocaleTimeString("en-US", {
-      hour12: false,
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    const timeString = formatTime(now, preferences.timeFormat);
     finalContent = `**${timeString}**${preferences.contentPrefix}${finalContent}`;
   } else {
     finalContent = `${preferences.contentPrefix}${finalContent}`;
@@ -49,12 +46,7 @@ export default function AddToDailyNote() {
 
   // Format today's date as YYYY.MM.DD (Craft's internal db time format)
   const today = new Date();
-  const dateString =
-    today.getFullYear() +
-    "." +
-    String(today.getMonth() + 1).padStart(2, "0") +
-    "." +
-    String(today.getDate()).padStart(2, "0");
+  const dateString = formatCraftInternalDate(today);
 
   // Use useSearch hook to get document blocks matching today's date string
   const { resultsLoading, results } = useSearch(db, dateString);

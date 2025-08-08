@@ -13,6 +13,7 @@ export interface SearchPreferences {
 export interface DailyNotePreferences {
   appendPosition: "end" | "beginning";
   addTimestamp: boolean;
+  timeFormat: string;
   contentPrefix: string;
   contentSuffix: string;
 }
