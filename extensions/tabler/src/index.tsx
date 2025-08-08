@@ -23,15 +23,14 @@ type TablerIcon = {
 const Outline = "https://raw.githubusercontent.com/tabler/tabler-icons/master/icons/outline/";
 const Filled = "https://raw.githubusercontent.com/tabler/tabler-icons/master/icons/filled/";
 
-const downloadSVG = async (url: string, name: string) => {
+const downloadSVG = async (svgContent: string, name: string) => {
   const filename = `${name}.svg`;
   const path = join(homedir(), "Downloads", filename);
 
   try {
     const toast = await showToast(Toast.Style.Animated, "Downloading Icon", "Please wait...");
-    const response = await axios.get(url);
-
-    await writeFile(path, response.data);
+    
+    await writeFile(path, svgContent);
 
     toast.title = "Downloaded";
     toast.message = filename;
@@ -92,7 +91,7 @@ export default function Command() {
                     <Action
                       title="Download Outline SVG"
                       icon={Outline + tablerIcon.name + ".svg"}
-                      onAction={() => downloadSVG(Outline + tablerIcon.name + ".svg", tablerIcon.name)}
+                      onAction={() => downloadSVG(outline, tablerIcon.name)}
                     />
                   )}
                   {filled && (
@@ -107,7 +106,7 @@ export default function Command() {
                     <Action
                       title="Download Filled SVG"
                       icon={Filled + tablerIcon.name + ".svg"}
-                      onAction={() => downloadSVG(Filled + tablerIcon.name + ".svg", tablerIcon.name)}
+                      onAction={() => downloadSVG(filled, tablerIcon.name)}
                       shortcut={{ modifiers: ["cmd", "opt"], key: "return" }}
                     />
                   )}
