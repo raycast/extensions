@@ -1,32 +1,26 @@
-import { Keyboard, List, ActionPanel, Action, Icon, LaunchProps } from "@raycast/api";
+import { List, Grid, ActionPanel, Action, Icon, LaunchProps, Keyboard } from "@raycast/api";
 import { useState, useMemo, useCallback } from "react";
 
-import useWebSearch from "./hooks/useWebSearch.js";
+import useImageSearch from "./hooks/useImageSearch.js";
 import useHistory, { Type } from "./hooks/useHistory.js";
+import useMode, { Mode } from "./hooks/useMode.js";
+import useSuggestions from "./hooks/useSuggestions.js";
 
 import groupHistory from "./utils/groupHistory.js";
 import formatUrl from "./utils/formatUrl.js";
-import useSuggestions from "./hooks/useSuggestions.js";
-import useMode from "./hooks/useMode.js";
 import HistoryListItem from "./components/HistoryListItem.js";
 
-enum Mode {
-  History,
-  Suggestions,
-  Search,
-}
-
-export default function Index(props: LaunchProps) {
+export default function ImageSearchCommand(props: LaunchProps) {
   const [fallbackText, setFallbackText] = useState(props.fallbackText);
   const [query, setQuery] = useState("");
   const [mode, setMode] = useMode();
 
-  const { isLoadingHistory, historyItems, addHistoryItem, removeHistoryItem, clearHistory } = useHistory(Type.Web);
+  const { isLoadingHistory, historyItems, addHistoryItem, removeHistoryItem, clearHistory } = useHistory(Type.Image);
   const { isLoadingSuggestions, suggestionsResults } = useSuggestions(query, mode === Mode.Suggestions);
-  const { isLoadingWebSearch, webSearchResults } = useWebSearch(query, mode === Mode.Search);
+  const { isLoadingImageSearch, imageSearchResults } = useImageSearch(query, mode === Mode.Search);
 
   const historyGroups = useMemo(() => groupHistory(historyItems), [historyItems]);
-  const isLoading = isLoadingHistory || isLoadingSuggestions || isLoadingWebSearch;
+  const isLoading = isLoadingHistory || isLoadingSuggestions || isLoadingImageSearch;
 
   const onSearchTextChange = useCallback(
     (query: string) => {
@@ -73,14 +67,14 @@ export default function Index(props: LaunchProps) {
       {suggestionsResults.map((suggestionsResult) => (
         <List.Item
           key={suggestionsResult.id}
-          icon={Icon.MagnifyingGlass}
+          icon={Icon.Image}
           title={suggestionsResult.query}
-          subtitle={`Search web for '${suggestionsResult.query}'`}
+          subtitle={`Search images for '${suggestionsResult.query}'`}
           actions={
             <ActionPanel>
               <Action
-                icon={Icon.MagnifyingGlass}
-                title="Search"
+                icon={Icon.Image}
+                title="Search Images"
                 onAction={() => {
                   addHistoryItem(suggestionsResult.query);
                   setQuery(suggestionsResult.query);
@@ -94,26 +88,28 @@ export default function Index(props: LaunchProps) {
     </List.Section>
   );
 
-  const webSearchList = (
-    <List.Section title="Results">
-      {webSearchResults.map((searchResult) => (
-        <List.Item
+  const imageSearchGrid = (
+    <Grid.Section title="Images">
+      {imageSearchResults.map((searchResult) => (
+        <Grid.Item
           key={searchResult.id}
-          icon={searchResult.icon}
+          content={searchResult.icon}
           title={searchResult.title}
-          subtitle={formatUrl(searchResult.url)}
+          subtitle={formatUrl(searchResult.sourceUrl)}
           actions={
             <ActionPanel>
               <ActionPanel.Section>
-                <Action.OpenInBrowser url={searchResult.url.toString()} />
+                <Action.OpenInBrowser url={searchResult.sourceUrl.toString()} title="View Image" />
+                <Action.OpenInBrowser url={searchResult.url.toString()} title="View Website" />
                 <Action.OpenWith shortcut={Keyboard.Shortcut.Common.OpenWith} path={searchResult.url.toString()} />
               </ActionPanel.Section>
               <ActionPanel.Section>
                 <Action.CopyToClipboard
-                  title="Copy URL"
+                  title="Copy Image URL"
                   shortcut={Keyboard.Shortcut.Common.Copy}
-                  content={searchResult.url.toString()}
+                  content={searchResult.sourceUrl.toString()}
                 />
+                <Action.CopyToClipboard title="Copy Website URL" content={searchResult.url.toString()} />
                 <Action.CopyToClipboard
                   title="Copy Title"
                   shortcut={Keyboard.Shortcut.Common.CopyName}
@@ -124,14 +120,27 @@ export default function Index(props: LaunchProps) {
           }
         />
       ))}
-    </List.Section>
+    </Grid.Section>
   );
 
-  return (
+  const list = (
     <List searchText={query} onSearchTextChange={onSearchTextChange} isLoading={isLoading} filtering={false}>
       {mode === Mode.History && historyList}
       {mode === Mode.Suggestions && suggestionsList}
-      {mode === Mode.Search && webSearchList}
     </List>
+  );
+
+  const grid = (
+    <Grid searchText={query} onSearchTextChange={onSearchTextChange} isLoading={isLoading} filtering={false}>
+      {mode === Mode.Search && imageSearchGrid}
+    </Grid>
+  );
+
+  return (
+    <>
+      {mode === Mode.History && list}
+      {mode === Mode.Suggestions && list}
+      {mode === Mode.Search && grid}
+    </>
   );
 }
