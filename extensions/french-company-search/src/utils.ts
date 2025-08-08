@@ -164,7 +164,7 @@ export function formatAddress(address: AddressInfo): string {
   return `${street}, ${city}`.trim();
 }
 
-export function getGenderAgreement(gender: "M" | "F" | "1" | "2" | null): string {
+export function getGenderAgreement(gender: string | null): string {
   if (gender === "M" || gender === "1") return "habilité";
   if (gender === "F" || gender === "2") return "habilitée";
   return "habilité(e)";

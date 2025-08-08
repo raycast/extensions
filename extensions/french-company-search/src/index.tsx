@@ -95,12 +95,15 @@ function CompanyDetail({ siren }: { siren: string }) {
     );
   }
 
-  const { data: markdown } = usePromise(async () => {
-    if (data) {
-      return await buildMarkdown(data);
-    }
-    return "";
-  }, [data]);
+  const { data: markdown } = usePromise(
+    async (companyData: CompanyData | undefined) => {
+      if (companyData) {
+        return await buildMarkdown(companyData);
+      }
+      return "";
+    },
+    [data],
+  );
 
   return (
     <Detail
