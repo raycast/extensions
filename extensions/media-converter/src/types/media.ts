@@ -402,17 +402,23 @@ export const DEFAULT_VBR_QUALITIES = {
 // =============================================================================
 
 export function getMediaType(extension: string): MediaType | null {
-  const ext = extension.toLowerCase();
-  if (INPUT_IMAGE_EXTENSIONS.includes(ext as InputImageExtension)) return "image";
-  if (INPUT_AUDIO_EXTENSIONS.includes(ext as InputAudioExtension)) return "audio";
-  if (INPUT_VIDEO_EXTENSIONS.includes(ext as InputVideoExtension)) return "video";
+  extension = extension.toLowerCase();
+  if (INPUT_IMAGE_EXTENSIONS.includes(extension as InputImageExtension)) return "image";
+  if (INPUT_AUDIO_EXTENSIONS.includes(extension as InputAudioExtension)) return "audio";
+  if (INPUT_VIDEO_EXTENSIONS.includes(extension as InputVideoExtension)) return "video";
   return null;
 }
 
-// Helper function to convert simple quality to actual settings
-// F this, I'm using any types. Everything is type-safe. No risks taken here.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getQualitySettingsFromSimple(format: AllOutputExtension, quality: QualityLevel): any {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (SIMPLE_QUALITY_MAPPINGS as any)[format][quality];
+export function getQualitySettingsFromSimple(extension: AllOutputExtension, quality: QualityLevel): any {
+  // For image formats, return the default quality settings since there are no simple quality levels for images
+  if (getMediaType(extension) === "image") {
+    return DEFAULT_QUALITIES[extension as OutputImageExtension];
+  }
+
+  // For audio/video formats, use the simple quality mappings
+  if (extension in SIMPLE_QUALITY_MAPPINGS) {
+    return (SIMPLE_QUALITY_MAPPINGS as any)[extension][quality];
+  }
+
+  throw new Error(`Unsupported format: ${extension}`);
 }

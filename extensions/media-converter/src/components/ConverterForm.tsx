@@ -58,7 +58,7 @@ import path from "path";
 import { execPromise } from "../utils/exec";
 
 export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }) {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues();
   const [selectedFileType, setSelectedFileType] = useState<MediaType | null>(null);
   const [currentFiles, setCurrentFiles] = useState<string[]>(initialFiles || []);
   const [outputFormat, setOutputFormat] = useState<AllOutputExtension | null>(null);
@@ -223,8 +223,7 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
         await toast.hide();
         const errorMessage = String(error);
 
-        // TODO: What's this? AI slop? To check on
-        //
+        // In theory, this should never happen
         // Check if the error is related to FFmpeg not being installed
         if (errorMessage.includes("FFmpeg is not installed or configured")) {
           showFailureToast(new Error("FFmpeg needs to be configured to convert files"), {

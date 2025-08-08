@@ -44,6 +44,7 @@ export async function convertMedia<T extends AllOutputExtension>(
 ): Promise<string> {
   const ffmpegPath = await findFFmpegPath();
 
+  // In theory, this should never happen
   if (!ffmpegPath) {
     throw new Error("FFmpeg is not installed or configured. Please install FFmpeg to use this converter.");
   }
