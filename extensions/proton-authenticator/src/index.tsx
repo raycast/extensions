@@ -11,9 +11,10 @@ import {
   Clipboard,
   closeMainWindow,
 } from "@raycast/api";
-import { useCachedState, getProgressIcon, showFailureToast } from "@raycast/utils";
+import { useCachedState, getProgressIcon, showFailureToast, useFrecencySorting } from "@raycast/utils";
 import { useState, useEffect, useMemo } from "react";
-import Fuse from "fuse.js";
+
+import { STATE_KEYS } from "./lib/constants";
 
 import { TOTPAccount } from "./types";
 import { loadAccountsFromStorage, clearStoredData } from "./lib/storage";
@@ -23,17 +24,20 @@ import { getProgressColor } from "./lib/colors";
 import SetupForm from "./SetupForm";
 
 export default function Command() {
-  const [accounts, setAccounts] = useCachedState<TOTPAccount[]>("accounts", []);
-  const [needsSetup, setNeedsSetup] = useCachedState<boolean>("needs-setup", false);
+  const [accounts, setAccounts] = useCachedState<TOTPAccount[]>(STATE_KEYS.ACCOUNTS, []);
+  const [needsSetup, setNeedsSetup] = useCachedState<boolean>(STATE_KEYS.NEEDS_SETUP, false);
   const [codes, setCodes] = useState<Map<string, string>>(new Map());
   const [nextCodes, setNextCodes] = useState<Map<string, string>>(new Map());
-  const [timeRemaining, setTimeRemaining] = useState(getTimeRemaining());
+  const [timeRemainingMap, setTimeRemainingMap] = useState<Map<string, number>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [authTimestamp, setAuthTimestamp] = useCachedState<number | null>("auth-timestamp", null);
-  const [authEnabled, setAuthEnabled] = useCachedState<boolean>("auth-enabled", true);
-  const [authTimeout, setAuthTimeout] = useCachedState<number>("auth-timeout", 10 * 60 * 1000); // 10 minutes default
-  const [searchText, setSearchText] = useState("");
+  const [authTimestamp, setAuthTimestamp] = useCachedState<number | null>(STATE_KEYS.AUTH_TIMESTAMP, null);
+  const [authEnabled, setAuthEnabled] = useCachedState<boolean>(STATE_KEYS.AUTH_ENABLED, true);
+  const [authTimeout, setAuthTimeout] = useCachedState<number>(STATE_KEYS.AUTH_TIMEOUT, 10 * 60 * 1000); // 10 minutes default
+  const [sortingMode, setSortingMode] = useCachedState<"frecency" | "alphabetical">(
+    STATE_KEYS.SORTING_MODE,
+    "frecency",
+  );
 
   const AUTH_TIMEOUT_OPTIONS = {
     "10 minutes": 10 * 60 * 1000,
@@ -44,22 +48,26 @@ export default function Command() {
   const Label = Metadata.Label;
   const Separator = Metadata.Separator;
 
-  // fuzzy search setup
-  const fuse = useMemo(() => {
-    return new Fuse(accounts, {
-      keys: [
-        { name: "name", weight: 0.7 },
-        { name: "issuer", weight: 0.3 },
-      ],
-      threshold: 0.4,
-      includeScore: true,
-    });
-  }, [accounts]);
+  const {
+    data: sortedByFrecency,
+    visitItem,
+    resetRanking,
+  } = useFrecencySorting(accounts, {
+    key: (account) => account.id,
+  });
 
-  const filteredAccounts = useMemo(() => {
-    if (!searchText.trim()) return accounts;
-    return fuse.search(searchText).map((result) => result.item);
-  }, [accounts, searchText, fuse]);
+  // create final sorted accounts based on sorting mode
+
+  const sortedAccounts = useMemo(() => {
+    if (sortingMode === "alphabetical") {
+      return [...accounts].sort((a, b) => {
+        const nameA = a.issuer || a.name;
+        const nameB = b.issuer || b.name;
+        return nameA.localeCompare(nameB);
+      });
+    }
+    return sortedByFrecency;
+  }, [accounts, sortedByFrecency, sortingMode]);
 
   // check if authentication is still valid or disabled
   const isAuthenticated = useMemo(() => {
@@ -68,7 +76,10 @@ export default function Command() {
     return Date.now() - authTimestamp < authTimeout;
   }, [authTimestamp, authEnabled, authTimeout]);
 
-  const handleCopyCode = async (code: string) => {
+  const handleCopyCode = async (code: string, account: TOTPAccount) => {
+    // track usage for frecency sorting
+    visitItem(account);
+
     await Clipboard.copy(code);
     setTimeout(() => {
       showHUD("Copied to clipboard");
@@ -115,6 +126,21 @@ export default function Command() {
   };
 
   const handleToggleAuth = async () => {
+    // require authentication to disable Touch ID regardless of current auth state
+    if (authEnabled) {
+      try {
+        const authenticated = await authenticateWithTouchID();
+        if (!authenticated) {
+          showFailureToast("Authentication required to disable Touch ID", { title: "Authentication Failed" });
+          return;
+        }
+      } catch (error) {
+        console.error("Authentication error:", error);
+        showFailureToast("Authentication failed");
+        return;
+      }
+    }
+
     const newAuthState = !authEnabled;
     setAuthEnabled(newAuthState);
 
@@ -125,7 +151,6 @@ export default function Command() {
       showToast(Toast.Style.Success, "Touch ID Disabled");
     }
   };
-
   const handleSetAuthTimeout = async (label: string, timeoutMs: number) => {
     setAuthTimeout(timeoutMs);
     showToast(Toast.Style.Success, `Auth timeout set to ${label}`);
@@ -134,6 +159,30 @@ export default function Command() {
   const handleClearAuth = async () => {
     setAuthTimestamp(null);
     showToast(Toast.Style.Success, "Authentication cleared");
+  };
+
+  const handleToggleSort = () => {
+    const newMode = sortingMode === "frecency" ? "alphabetical" : "frecency";
+    setSortingMode(newMode);
+    showToast(Toast.Style.Success, `Sorted by ${newMode === "frecency" ? "usage" : "name"}`);
+  };
+
+  const handleResetRankings = async () => {
+    const confirmed = await confirmAlert({
+      title: "Reset Usage Rankings",
+      message: "This will reset the usage statistics for all accounts. Are you sure?",
+      primaryAction: {
+        title: "Reset",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+
+    if (confirmed) {
+      for (const account of accounts) {
+        await resetRanking(account);
+      }
+      showToast(Toast.Style.Success, "Usage rankings reset");
+    }
   };
 
   useEffect(() => {
@@ -165,22 +214,21 @@ export default function Command() {
     const updateCodes = () => {
       const newCodes = new Map<string, string>();
       const newNextCodes = new Map<string, string>();
+      const newRemaining = new Map<string, number>();
       accounts.forEach((account) => {
         const code = generateTOTP(account);
         const nextCode = generateNextTOTP(account);
         newCodes.set(account.id, code);
         newNextCodes.set(account.id, nextCode);
+        newRemaining.set(account.id, getTimeRemaining(account.period || 30));
       });
       setCodes(newCodes);
       setNextCodes(newNextCodes);
-      setTimeRemaining(getTimeRemaining());
+      setTimeRemainingMap(newRemaining);
     };
 
     updateCodes();
-
-    // update timer every second
     const interval = setInterval(updateCodes, 1000);
-
     return () => clearInterval(interval);
   }, [accounts]);
 
@@ -232,19 +280,15 @@ export default function Command() {
   }
 
   return (
-    <List
-      navigationTitle="Proton TOTP Codes"
-      searchBarPlaceholder="Search accounts..."
-      onSearchTextChange={setSearchText}
-      isShowingDetail
-    >
-      {filteredAccounts.map((account) => {
+    <List navigationTitle="TOTP codes" searchBarPlaceholder="Search accounts..." isShowingDetail>
+      {sortedAccounts.map((account) => {
         const code = codes.get(account.id) || "";
         const nextCode = nextCodes.get(account.id) || "";
         const displayName = account.issuer || account.name;
         const username = account.name;
 
-        const { color, backgroundColor } = getProgressColor(timeRemaining);
+        const remaining = timeRemainingMap.get(account.id) ?? getTimeRemaining(account.period || 30);
+        const { color, backgroundColor } = getProgressColor(remaining);
 
         return (
           <List.Item
@@ -259,7 +303,7 @@ export default function Command() {
                   <Metadata>
                     <Label title="Current Code" text={code} />
                     <Label title="Next Code" text={nextCode} />
-                    <Label title="Time Remaining" text={`${timeRemaining}s`} />
+                    <Label title="Time Remaining" text={`${remaining}s`} />
                     <Separator />
                     <Label title="Username" text={username} />
                     <Label title="Issuer" text={account.issuer || "N/A"} />
@@ -274,7 +318,7 @@ export default function Command() {
             accessories={[
               {
                 icon: {
-                  source: getProgressIcon(timeRemaining / (account.period || 30), color, {
+                  source: getProgressIcon(remaining / (account.period || 30), color, {
                     background: backgroundColor,
                     backgroundOpacity: 1,
                   }),
@@ -284,15 +328,15 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <ActionPanel.Section title="Current Code">
-                  <Action title="Copy Current" icon={Icon.Key} onAction={() => handleCopyCode(code)} />
+                  <Action title="Copy Current" icon={Icon.Clipboard} onAction={() => handleCopyCode(code, account)} />
                   <Action.Paste title="Paste Current" icon={Icon.Key} content={code} />
                 </ActionPanel.Section>
                 <ActionPanel.Section title="Next Code">
                   <Action
                     title="Copy Next"
-                    icon={Icon.Key}
+                    icon={Icon.Clipboard}
                     shortcut={{ modifiers: ["cmd"], key: "n" }}
-                    onAction={() => handleCopyCode(nextCode)}
+                    onAction={() => handleCopyCode(nextCode, account)}
                   />
                   <Action.Paste
                     title="Paste Next"
@@ -334,6 +378,20 @@ export default function Command() {
                   )}
                 </ActionPanel.Section>
                 <ActionPanel.Section title="Settings">
+                  <Action
+                    title={`Sort by ${sortingMode === "frecency" ? "Name" : "Usage"}`}
+                    icon={sortingMode === "frecency" ? Icon.ArrowUp : Icon.BarChart}
+                    shortcut={{ modifiers: ["cmd"], key: "s" }}
+                    onAction={handleToggleSort}
+                  />
+                  {sortingMode === "frecency" && (
+                    <Action
+                      title="Reset Usage Rankings"
+                      icon={Icon.ArrowCounterClockwise}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+                      onAction={handleResetRankings}
+                    />
+                  )}
                   <Action
                     title="Reset Authenticator Data"
                     icon={Icon.Trash}

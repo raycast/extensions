@@ -2,10 +2,11 @@ import { readFile } from "fs/promises";
 import { LocalStorage } from "@raycast/api";
 import { ProtonExport, TOTPAccount } from "../types";
 import { parseOtpAuthUri } from "./parser";
+import { STORAGE_KEYS } from "./constants";
 
 export async function loadAccountsFromStorage(): Promise<TOTPAccount[]> {
   try {
-    const storedData = await LocalStorage.getItem<string>("RAYCAST_PROTON_AUTH_DATA");
+    const storedData = await LocalStorage.getItem<string>(STORAGE_KEYS.PROTON_EXPORT);
     if (!storedData) {
       return [];
     }
@@ -27,7 +28,7 @@ export async function saveAccountsToStorage(filePath: string): Promise<TOTPAccou
       throw new Error("Invalid Proton Authenticator export format");
     }
 
-    await LocalStorage.setItem("RAYCAST_PROTON_AUTH_DATA", fileContent);
+    await LocalStorage.setItem(STORAGE_KEYS.PROTON_EXPORT, fileContent);
 
     return parseProtonExport(exportData);
   } catch (error) {
@@ -67,5 +68,5 @@ function parseProtonExport(exportData: ProtonExport): TOTPAccount[] {
 }
 
 export async function clearStoredData(): Promise<void> {
-  await LocalStorage.removeItem("RAYCAST_PROTON_AUTH_DATA");
+  await LocalStorage.removeItem(STORAGE_KEYS.PROTON_EXPORT);
 }
