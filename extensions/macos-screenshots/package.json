@@ -1,0 +1,170 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "macos-screenshots",
+  "title": "macOS Screenshots",
+  "description": "Take screenshots for uploading to our cdn",
+  "icon": "extension-icon.png",
+  "author": "snowypy",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "set-api-key",
+      "title": "Set Api Key",
+      "description": "Set up your Pain.is API key for screenshot uploads",
+      "mode": "no-view",
+      "keywords": [
+        "setup",
+        "configure",
+        "api",
+        "key",
+        "settings"
+      ]
+    },
+    {
+      "name": "test-api-key",
+      "title": "Test Api Key",
+      "description": "Test if your Pain.is API key is working",
+      "mode": "no-view",
+      "keywords": [
+        "test",
+        "verify",
+        "api",
+        "key",
+        "check"
+      ]
+    },
+    {
+      "name": "check-permissions",
+      "title": "Check Screen Recording Permissions",
+      "description": "Check and help grant Screen Recording permissions for screenshots",
+      "mode": "no-view",
+      "keywords": [
+        "permissions",
+        "screen",
+        "recording",
+        "privacy",
+        "security",
+        "fix"
+      ]
+    },
+    {
+      "name": "take-screenshot",
+      "title": "Take Screenshot",
+      "description": "Take a screenshot with configurable mode",
+      "mode": "no-view",
+      "keywords": [
+        "screenshot",
+        "capture",
+        "screen"
+      ],
+      "preferences": [
+        {
+          "name": "apiKey",
+          "title": "API Key",
+          "description": "Your Pain.is API key (get it from Host Settings)",
+          "type": "password",
+          "required": true
+        },
+        {
+          "name": "baseUrl",
+          "title": "Base URL",
+          "description": "Pain.is server URL",
+          "type": "textfield",
+          "default": "https://beta.pain.is",
+          "required": false
+        },
+        {
+          "name": "screenshotMode",
+          "title": "Screenshot Mode",
+          "description": "Default capture mode",
+          "type": "textfield",
+          "default": "area",
+          "placeholder": "area, window, or screen",
+          "required": false
+        },
+        {
+          "name": "showPreview",
+          "title": "Show Preview",
+          "description": "Show preview before uploading",
+          "type": "checkbox",
+          "label": "Show preview before uploading",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "includePointer",
+          "title": "Include Mouse Pointer",
+          "description": "Include mouse pointer in screenshots",
+          "type": "checkbox",
+          "label": "Include mouse pointer in screenshots",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "soundEnabled",
+          "title": "Enable Sound",
+          "description": "Play camera sound when taking screenshot",
+          "type": "checkbox",
+          "label": "Play camera sound when taking screenshot",
+          "default": true,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "area-screenshot",
+      "title": "Area Screenshot",
+      "description": "Take a screenshot of selected area",
+      "mode": "no-view",
+      "keywords": [
+        "area",
+        "selection",
+        "screenshot"
+      ]
+    },
+    {
+      "name": "window-screenshot",
+      "title": "Window Screenshot",
+      "description": "Take a screenshot of selected window",
+      "mode": "no-view",
+      "keywords": [
+        "window",
+        "screenshot"
+      ]
+    },
+    {
+      "name": "fullscreen-screenshot",
+      "title": "Fullscreen Screenshot",
+      "description": "Take a screenshot of entire screen",
+      "mode": "no-view",
+      "keywords": [
+        "fullscreen",
+        "screenshot"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^1.17.0",
+    "form-data": "^4.0.0",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/form-data": "^2.5.0",
+    "@types/node": "22.13.10",
+    "@types/node-fetch": "^2.6.11",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
