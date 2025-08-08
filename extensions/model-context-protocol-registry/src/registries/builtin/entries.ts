@@ -573,6 +573,17 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://gen-pdf.com/mcp"],
     },
   },
+  {
+    name: "supermemory",
+    title: "supermemory",
+    description:
+      "Your life's memory graph, across every AI app",
+    icon: "https://assets.supermemory.ai/brand/symbol/white-dark.png",
+    homepage: "https://supermemory.ai",
+    configuration: {
+      url: "https://api.supermemory.ai/mcp"
+    },
+  },
 ];
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [
