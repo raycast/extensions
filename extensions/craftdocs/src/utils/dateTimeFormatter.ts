@@ -1,6 +1,6 @@
 /**
  * Time formatting utilities for Craft extension
- * Supports custom time format patterns with locale support
+ * Supports custom time format patterns
  */
 
 interface TimeTokens {
