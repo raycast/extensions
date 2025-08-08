@@ -1,6 +1,6 @@
 # Kiro Changelog
 
-## [1.1.2] - {PR_MERGE_DATE}
+## [1.1.2] - 2025-08-08
 
 ### Bug Fixes
 
@@ -14,7 +14,7 @@
 
 - Removed unused imports in extension-actions.tsx, extensions.tsx, and open-with-kiro.ts to resolve TypeScript warnings
 
-## [1.1.1] - {PR_MERGE_DATE}
+## [1.1.1] - 2025-08-08
 
 ### Improvements & Fixes
 
@@ -25,7 +25,7 @@
 - Combined Raycast API imports in preferences.ts for clarity
 - Improved refresh logic in extensions.tsx for reliable data re-fetch
 
-## [1.1.0] - {PR_MERGE_DATE}
+## [1.1.0] - 2025-08-08
 
 ### Bug Fixes
 
@@ -45,7 +45,7 @@
 - Added missing subtitle to package.json commands
 - Improved error handling consistency across the extension
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [1.0.0] - 2025-08-08
 
 ### Features Added
 
