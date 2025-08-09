@@ -137,7 +137,7 @@ function InitializeBackup({ onCreate }: { onCreate: () => void }) {
     async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Creating", values.name);
       try {
-        await pocketbase.backups.create(values.name);
+        await pocketbase.backups.create(values.name.replaceAll(" ", "_") + ".zip");
         toast.style = Toast.Style.Success;
         toast.title = "Created";
         onCreate();
