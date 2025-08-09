@@ -13,7 +13,7 @@
   ],
   "icon": "extension-icon.png",
   "name": "emojis-com",
-  "title": "Emojis.com",
+  "title": "emojis.com",
   "description": "Search emojis on emojis.com",
   "commands": [
     {
