@@ -11,6 +11,7 @@ import { type Emoji, useRaycastEmojisSearch } from "@/hooks/use-raycast-emojis-s
 import { ModelCategory, SearchEmojiOrder } from "@/utils/graphql/types.generated"
 import { URLS } from "@/utils/urls"
 import { Providers } from "./components/providers"
+import { showFailureToast } from "@raycast/utils"
 
 function SearchEmojisList() {
   const [searchText, setSearchText] = useState("")
@@ -63,7 +64,7 @@ function SearchEmojisList() {
       await showToast({ title: "Copied image to clipboard", message: emoji.prompt })
     } catch (error) {
       console.error(error)
-      await showToast({ style: Toast.Style.Failure, title: "Failed to copy", message: String(error) })
+      showFailureToast(error, { title: "Failed to copy" })
     }
   }, [])
 

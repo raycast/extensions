@@ -5,7 +5,7 @@ import type { Options } from "@imgproxy/imgproxy-js-core"
 const IMGPROXY_URL = "https://imgproxy.attic.sh"
 
 function createImgproxyUrl({ src, options }: { src: string; options: Options }): string {
-  const imgproxyUrl = generateImageUrl({
+  return generateImageUrl({
     endpoint: IMGPROXY_URL,
     url: {
       value: src,
@@ -13,8 +13,6 @@ function createImgproxyUrl({ src, options }: { src: string; options: Options }):
     },
     options,
   })
-
-  return `${imgproxyUrl}`
 }
 
 export { createImgproxyUrl }
