@@ -19,6 +19,7 @@ const useDisplays = () => {
       });
     } catch (error) {
       console.error("Failed to fetch displays:", error);
+      showFailureToast("Failed to fetch displays");
       setState({
         displays: [],
         isLoading: false,
