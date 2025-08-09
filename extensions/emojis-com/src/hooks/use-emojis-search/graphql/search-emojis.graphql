@@ -1,0 +1,16 @@
+query SearchEmojis($first: Int, $query: String, $after: String, $order: SearchEmojiOrder) {
+  searchEmojis(first: $first, query: $query, after: $after, order: $order) {
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
+    nodes {
+      id
+      slug
+      prompt
+      blob {
+        url
+      }
+    }
+  }
+}
