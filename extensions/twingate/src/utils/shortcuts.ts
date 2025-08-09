@@ -1,9 +1,17 @@
 import { Keyboard } from "@raycast/api";
 
-export interface ParsedShortcut {
-  modifiers: Keyboard.KeyModifier[];
-  key: Keyboard.KeyEquivalent;
-}
+export type ParsedShortcut =
+  | {
+      modifiers: Keyboard.KeyModifier[];
+      key: Keyboard.KeyEquivalent;
+    }
+  | {
+      windows: {
+        modifiers: Keyboard.KeyModifier[];
+        key: Keyboard.KeyEquivalent;
+      };
+      macOS: { modifiers: Keyboard.KeyModifier[]; key: Keyboard.KeyEquivalent };
+    };
 
 /**
  * Parse a shortcut string (e.g. "cmd+shift+c") into Raycast's keyboard shortcut format
@@ -51,14 +59,8 @@ export function parseShortcut(
  * Get default shortcuts as fallback
  */
 export const DEFAULT_SHORTCUTS = {
-  refreshResources: {
-    modifiers: ["cmd"] as Keyboard.KeyModifier[],
-    key: "r" as Keyboard.KeyEquivalent,
-  },
-  clearData: {
-    modifiers: ["cmd", "shift"] as Keyboard.KeyModifier[],
-    key: "x" as Keyboard.KeyEquivalent,
-  },
+  refreshResources: Keyboard.Shortcut.Common.Refresh,
+  clearData: Keyboard.Shortcut.Common.RemoveAll,
   debugMode: {
     modifiers: ["cmd", "shift"] as Keyboard.KeyModifier[],
     key: "d" as Keyboard.KeyEquivalent,
@@ -67,28 +69,13 @@ export const DEFAULT_SHORTCUTS = {
     modifiers: ["cmd", "shift"] as Keyboard.KeyModifier[],
     key: "l" as Keyboard.KeyEquivalent,
   },
-  toggleFavorite: {
-    modifiers: ["cmd"] as Keyboard.KeyModifier[],
-    key: "f" as Keyboard.KeyEquivalent,
-  },
-  copyUrl: {
-    modifiers: ["cmd"] as Keyboard.KeyModifier[],
-    key: "c" as Keyboard.KeyEquivalent,
-  },
-  copyAddress: {
-    modifiers: ["cmd", "shift"] as Keyboard.KeyModifier[],
-    key: "c" as Keyboard.KeyEquivalent,
-  },
+  toggleFavorite: Keyboard.Shortcut.Common.Pin,
+  copyUrl: Keyboard.Shortcut.Common.Copy,
+  copyAddress: Keyboard.Shortcut.Common.CopyPath,
   copyAlias: {
     modifiers: ["cmd", "opt"] as Keyboard.KeyModifier[],
     key: "c" as Keyboard.KeyEquivalent,
   },
-  copyName: {
-    modifiers: ["cmd", "shift", "opt"] as Keyboard.KeyModifier[],
-    key: "c" as Keyboard.KeyEquivalent,
-  },
-  openMainSearch: {
-    modifiers: ["cmd"] as Keyboard.KeyModifier[],
-    key: "o" as Keyboard.KeyEquivalent,
-  },
+  copyName: Keyboard.Shortcut.Common.CopyName,
+  openMainSearch: Keyboard.Shortcut.Common.Open,
 };

@@ -58,7 +58,11 @@ Customize keyboard shortcuts for all actions:
 - `Cmd+C` - Copy URL
 - `Cmd+Shift+C` - Copy Address
 - `Cmd+Opt+C` - Copy Alias
+- `Cmd+Shift+Opt+C` - Copy Resource Name
+- `Cmd+O` - Open Main Search
+- `Cmd+Shift+X` - Clear All Data
 - `Cmd+Shift+D` - Toggle Debug Mode
+- `Cmd+Shift+L` - Export Debug Logs
 
 ## 🎯 Usage
 

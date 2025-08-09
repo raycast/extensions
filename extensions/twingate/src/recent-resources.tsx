@@ -16,21 +16,6 @@ import { ResourceListItem } from "./components/ResourceListItem";
 import { useFavorites } from "./hooks/useFavorites";
 import { parseShortcut, DEFAULT_SHORTCUTS } from "./utils/shortcuts";
 
-interface Preferences {
-  apiKey: string;
-  networkUrl: string;
-  shortcutRefreshResources: string;
-  shortcutClearData: string;
-  shortcutDebugMode: string;
-  shortcutExportLogs: string;
-  shortcutToggleFavorite: string;
-  shortcutCopyUrl: string;
-  shortcutCopyAddress: string;
-  shortcutCopyAlias: string;
-  shortcutCopyName: string;
-  shortcutOpenMainSearch: string;
-}
-
 export default function RecentResourcesCommand() {
   const [debugMode, setDebugMode] = useState(false);
   const preferences = getPreferenceValues<Preferences>();

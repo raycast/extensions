@@ -24,11 +24,6 @@ export class TwingateError extends Error {
   }
 }
 
-interface Preferences {
-  apiKey: string;
-  networkUrl: string;
-}
-
 const RESOURCES_QUERY = `
   query Resources($first: Int, $after: String) {
     resources(first: $first, after: $after) {
