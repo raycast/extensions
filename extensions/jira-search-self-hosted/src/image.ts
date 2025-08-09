@@ -1,5 +1,5 @@
 import path from "path";
-import { environment, showToast, Image, Toast } from "@raycast/api";
+import { environment, showToast, Image, Toast, Icon } from "@raycast/api";
 import { promises as fs } from "fs";
 import { jiraFetch } from "./jira";
 import { Warning } from "./exception";
@@ -56,12 +56,47 @@ function parseImageUrl(url: string): ImageSpec {
         key: g.key,
       }),
     },
+    {
+      pattern: /\/secure\/projectavatar\?(?:pid=(?<pid>[0-9]+)&)?avatarId=(?<avatarId>[0-9]+)/i,
+      spec: (g) => ({
+        urlPath: `secure/projectavatar?${g.pid ? `pid=${g.pid}&` : ""}avatarId=${g.avatarId}`,
+        imageType: "projectavatar",
+        key: `${g.pid || "default"}_${g.avatarId}`,
+      }),
+    },
+    {
+      pattern:
+        /\/secure\/useravatar\?(?:size=(?<size>[a-z]+)&)?(?:ownerId=(?<ownerId>[^&]+)&)?avatarId=(?<avatarId>[0-9]+)/i,
+      spec: (g) => ({
+        urlPath: `secure/useravatar?${g.size ? `size=${g.size}&` : ""}${
+          g.ownerId ? `ownerId=${g.ownerId}&` : ""
+        }avatarId=${g.avatarId}`,
+        imageType: "useravatar",
+        key: `${g.ownerId || "default"}_${g.avatarId}`,
+      }),
+    },
+    {
+      pattern:
+        /\/secure\/viewavatar\?size=(?<size>[a-z]+)&avatarId=(?<avatarId>[0-9]+)&avatarType=(?<avatarType>[a-z]+)/i,
+      spec: (g) => ({
+        urlPath: `secure/viewavatar?size=${g.size}&avatarId=${g.avatarId}&avatarType=${g.avatarType}`,
+        imageType: g.avatarType,
+        key: `${g.avatarId}`,
+      }),
+    },
   ];
   const imgSpec = matcher
     .map((m) => ({ matcher: m, match: url.match(m.pattern) }))
     .map((m) => (m.match && m.match.groups ? m.matcher.spec(m.match.groups) : undefined))
     .find((imgSpec) => imgSpec !== undefined);
-  if (!imgSpec) throw new Warning(`Unexpected icon path ${url}`);
+  if (!imgSpec) {
+    console.warn(`Using default icon for unexpected path: ${url}`);
+    return {
+      urlPath: url,
+      imageType: "default",
+      key: `default_${Date.now()}`,
+    };
+  }
   return imgSpec;
 }
 
@@ -74,15 +109,10 @@ export async function jiraImage(url: string): Promise<Image.ImageLike | undefine
   } catch (e) {
     if (e instanceof Warning) {
       console.warn(e);
-      return url;
+      return Icon.Circle;
     } else {
       console.error(e);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to get Jira Icons",
-        message: e instanceof Error ? e.message : undefined,
-      });
-      return undefined;
+      return Icon.Circle;
     }
   }
 }
