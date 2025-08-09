@@ -1,5 +1,5 @@
 import type { GraphQLClient } from "graphql-request";
-import { infiniteQueryOptions } from "@tanstack/react-query";
+import { infiniteQueryOptions, keepPreviousData } from "@tanstack/react-query";
 
 import { tagQueryKey } from "../../utils/query";
 
@@ -31,6 +31,7 @@ function getRaycastEmojisSearchInfiniteQueryOptions({
       if (!lastPage.searchEmojis?.pageInfo.hasNextPage) return undefined;
       return lastPage.searchEmojis.pageInfo.endCursor;
     },
+    placeholderData: keepPreviousData,
   });
 }
 
