@@ -1,0 +1,237 @@
+{
+  "name": "pipedream",
+  "type": "module",
+  "version": "3.0.0",
+  "title": "Pipedream",
+  "description": "Manage Pipedream workflows with AI-powered error analysis. Connect, monitor, and optimize your workflows directly from Raycast.",
+  "icon": "pipedream-logo.png",
+  "author": "olekristianbe",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "pipedream",
+    "workflow",
+    "automation",
+    "api",
+    "integration",
+    "monitoring",
+    "analytics",
+    "ai",
+    "error-tracking"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "connect-workflow",
+      "title": "Connect Workflow",
+      "subtitle": "Pipedream",
+      "description": "Connect an existing Pipedream workflow to manage",
+      "mode": "view"
+    },
+    {
+      "name": "manage-workflows",
+      "title": "Manage Workflows",
+      "subtitle": "Pipedream",
+      "description": "Comprehensive workflow management with editing, error analytics, AI insights, and performance tracking all in one place.",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar-workflows",
+      "title": "Show in Menu Bar",
+      "subtitle": "Pipedream",
+      "description": "Display workflow status, error counts, and quick actions in the menu bar",
+      "mode": "menu-bar",
+      "interval": "5m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "PIPEDREAM_API_KEY",
+      "type": "password",
+      "required": true,
+      "title": "Pipedream API Key",
+      "description": "Requires a Pipedream account. Generate your API key at https://pipedream.com/settings/user and enter it here."
+    },
+    {
+      "name": "DEFAULT_SORT",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Sort Order",
+      "description": "Choose how workflows are sorted by default",
+      "placeholder": "Select sort order",
+      "data": [
+        {
+          "title": "Name",
+          "value": "name"
+        },
+        {
+          "title": "Error Count",
+          "value": "errors"
+        },
+        {
+          "title": "Trigger Count",
+          "value": "triggers"
+        },
+        {
+          "title": "Step Count",
+          "value": "steps"
+        }
+      ],
+      "default": "name"
+    },
+    {
+      "name": "DEFAULT_FILTER",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Filter",
+      "description": "Choose the initial filter view for workflows",
+      "placeholder": "Select filter",
+      "data": [
+        {
+          "title": "All Workflows",
+          "value": "all"
+        },
+        {
+          "title": "Menu Bar Only",
+          "value": "menuBar"
+        },
+        {
+          "title": "With Errors",
+          "value": "errors"
+        }
+      ],
+      "default": "all"
+    },
+    {
+      "name": "REFRESH_INTERVAL_SECONDS",
+      "type": "dropdown",
+      "required": false,
+      "title": "Refresh Interval",
+      "description": "How often to update error counts in the background",
+      "placeholder": "Select refresh interval",
+      "data": [
+        {
+          "title": "5 minutes",
+          "value": "300"
+        },
+        {
+          "title": "10 minutes",
+          "value": "600"
+        },
+        {
+          "title": "15 minutes",
+          "value": "900"
+        },
+        {
+          "title": "30 minutes",
+          "value": "1800"
+        },
+        {
+          "title": "1 hour",
+          "value": "3600"
+        }
+      ],
+      "default": "300"
+    },
+    {
+      "name": "CRITICAL_ERROR_THRESHOLD",
+      "type": "dropdown",
+      "required": false,
+      "title": "Critical Error Threshold",
+      "description": "Number of errors that trigger critical severity indicator",
+      "placeholder": "Select error threshold",
+      "data": [
+        {
+          "title": "5 errors",
+          "value": "5"
+        },
+        {
+          "title": "10 errors",
+          "value": "10"
+        },
+        {
+          "title": "15 errors",
+          "value": "15"
+        },
+        {
+          "title": "20 errors",
+          "value": "20"
+        },
+        {
+          "title": "25 errors",
+          "value": "25"
+        }
+      ],
+      "default": "10"
+    },
+    {
+      "name": "WARNING_ERROR_THRESHOLD",
+      "type": "dropdown",
+      "required": false,
+      "title": "Warning Error Threshold",
+      "description": "Number of errors that trigger warning severity indicator",
+      "placeholder": "Select warning threshold",
+      "data": [
+        {
+          "title": "1 error",
+          "value": "1"
+        },
+        {
+          "title": "3 errors",
+          "value": "3"
+        },
+        {
+          "title": "5 errors",
+          "value": "5"
+        },
+        {
+          "title": "8 errors",
+          "value": "8"
+        }
+      ],
+      "default": "3"
+    },
+    {
+      "name": "SHOW_NEW_ERROR_BADGES",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show New Error Badges",
+      "description": "Display badges for workflows with new errors after being marked as fixed",
+      "placeholder": "Enable new error badges",
+      "default": true,
+      "label": "Show 'NEW' badges for recently fixed workflows with new errors"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.3",
+    "@raycast/utils": "^2.2.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@raycast/eslint-config": "^2.0.4",
+    "@testing-library/react": "^16.3.0",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.1.0",
+    "@types/react": "^19.1.9",
+    "@typescript-eslint/eslint-plugin": "^8.38.0",
+    "@typescript-eslint/parser": "^8.38.0",
+    "eslint": "^9.32.0",
+    "jest": "^30.0.5",
+    "prettier": "^3.6.2",
+    "ts-jest": "^29.4.0",
+    "typescript": "5.8.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "PATH=$(npm bin):$PATH ray lint",
+    "lint:fix": "PATH=$(npm bin):$PATH ray lint --fix",
+    "publish": "raycast-scripts publish",
+    "test": "jest",
+    "type-check": "tsc --noEmit"
+  }
+}
