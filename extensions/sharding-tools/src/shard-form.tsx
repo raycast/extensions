@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, LocalStorage } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, LocalStorage, popToRoot } from "@raycast/api";
 import { useEffect, useState } from "react";
 
 type ShardInfo = {
@@ -119,6 +119,8 @@ export default function ShardForm({ initialData, onSave, isEditMode = false }: S
           ? "Shard config has been successfully updated"
           : "Shard info has been successfully saved to local storage",
       });
+
+      popToRoot();
     } catch (error) {
       console.error("Failed to save data:", error);
       showToast({

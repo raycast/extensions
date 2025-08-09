@@ -8,6 +8,7 @@ import {
   Color,
   useNavigation,
   Clipboard,
+  Keyboard,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import ShardForm from "./shard-form";
@@ -209,11 +210,22 @@ export default function Command() {
               icon={{ source: Icon.Gear, tintColor: Color.Blue }}
               actions={
                 <ActionPanel>
-                  <Action title="Shard Calculator" icon={Icon.Calculator} onAction={() => openCalculator(shardInfo)} />
-                  <Action title="Edit Config" icon={Icon.Pencil} onAction={() => editConfig(shardInfo)} />
+                  <Action
+                    title="Shard Calculator"
+                    icon={Icon.Calculator}
+                    onAction={() => openCalculator(shardInfo)}
+                    shortcut={Keyboard.Shortcut.Common.Open}
+                  />
+                  <Action
+                    title="Edit Config"
+                    icon={Icon.Pencil}
+                    onAction={() => editConfig(shardInfo)}
+                    shortcut={Keyboard.Shortcut.Common.Edit}
+                  />
                   <Action.CopyToClipboard
                     title="Copy Config Info"
                     content={`Table Name: ${shardInfo.tableName}\nDB Name: ${shardInfo.schemeName}\nDB Count: ${shardInfo.schemeSize}\nTable Count: ${shardInfo.tableSize}\nShard Factor: ${shardInfo.shardFactor || "Not set"}\nTotal Shards: ${totalShards}`}
+                    shortcut={Keyboard.Shortcut.Common.Copy}
                     icon={Icon.Clipboard}
                   />
                   <Action
@@ -225,19 +237,21 @@ export default function Command() {
                   <Action
                     title="Import Config"
                     icon={Icon.Upload}
-                    onAction={importConfig}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+                    onAction={importConfig}
                   />
                   <Action
                     title="Delete Config"
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                     onAction={() => deleteData(shardInfo.id)}
                   />
                   <Action
                     title="Clear All Data"
                     icon={Icon.DeleteDocument}
                     style={Action.Style.Destructive}
+                    shortcut={Keyboard.Shortcut.Common.RemoveAll}
                     onAction={clearAllData}
                   />
                 </ActionPanel>
