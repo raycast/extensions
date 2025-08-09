@@ -10,7 +10,7 @@ import {
   type AudioQuality,
   type VideoQuality,
   getMediaType,
-  getQualitySettingsFromSimple,
+  DEFAULT_QUALITIES,
 } from "../types/media";
 import { findFFmpegPath } from "../utils/ffmpeg";
 import { Tool } from "@raycast/api";
@@ -64,7 +64,7 @@ type Input = {
   quality: QualityLevel;
 };
 
-export default async function ConvertMedia({ inputPath, outputFileType, quality }: Input) {
+export default async function ConvertMedia({ inputPath, outputFileType }: Input) {
   const installed = await findFFmpegPath();
   if (!installed) {
     return {
@@ -97,7 +97,7 @@ export default async function ConvertMedia({ inputPath, outputFileType, quality 
   try {
     let outputPath: string;
     const qualitySettings = {
-      [outputFileType]: getQualitySettingsFromSimple(outputFileType, quality),
+      [outputFileType]: DEFAULT_QUALITIES[outputFileType],
     } as QualitySettings;
 
     if (mediaType === "image") {
