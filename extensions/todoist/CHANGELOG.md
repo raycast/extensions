@@ -1,5 +1,28 @@
 # Todoist Changelog
 
+## [Enhanced Natural Language Task Creation] - 2025-07-24
+
+- **Smart NLP Parsing**: Added comprehensive natural language parsing for task creation with real-time form updates
+- **Bidirectional Sync**: Type parameters in the title OR use dropdowns - both update each other seamlessly
+- **Priority Support**: Use p1-p4 notation (p1=urgent, p2=high, p3=medium, p4=low) that maps to Todoist priority values
+- **Project Recognition**: Support for #ProjectName or #"Project Name" (with quotes for spaces) with smart shortest-first matching
+- **Label Detection**: Support for @label or @"Label Name" (with quotes for spaces) with intelligent case-insensitive matching
+- **Natural Date Parsing**: Advanced date recognition using chrono-node library supporting patterns like:
+  - Simple dates: "tomorrow", "next monday", "march 15"
+  - Times: "tomorrow at 3pm", "monday at 12:30"
+  - Relative: "in 3 days", "in 2 weeks"
+  - Complex: "next friday at 2pm", "monday morning"
+- **Deadline Support**: Use {date} notation for deadline parsing (e.g., {march 30}, {next month})
+- **Tiered Matching System**: Advanced matching algorithm with 4-tier priority:
+  1. Exact match (case-sensitive, with emojis)
+  2. Case-insensitive match (with emojis)
+  3. Emoji-insensitive match (case-sensitive)
+  4. Fully normalized match (case-insensitive, no emojis)
+- **Conflict Resolution**: "Last action wins" timestamp-based resolution for competing updates
+- **Smart Text Preservation**: Precise parameter replacement that maintains original text structure
+- **Todoist-Style API**: Always uses quickAddTask API for consistent behavior with native Todoist
+- **Enhanced User Experience**: Updated info message with clear examples and emoji-enhanced formatting
+
 ## [Windows support] - 2025-07-24
 
 - Added Windows support
