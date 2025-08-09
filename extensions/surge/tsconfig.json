@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "include": [ "src/**/*", "raycast-env.d.ts" ],
+  "compilerOptions": {
+    "lib": [ "ES2023" ],
+    "module": "commonjs",
+    "target": "ES2023",
+    "strict": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react-jsx",
+    "resolveJsonModule": true,
+
+    // Allow js temporarily, will update all files to TypeScript later
+    "allowJs": true,
+    "checkJs": false,
+    // Prevent TypeScript from writing output files
+    "noEmit": true
+  }
+}
