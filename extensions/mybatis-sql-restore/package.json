@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mybatis-sql-restore",
+  "title": "Mybatis Sql Restore",
+  "description": "将mybatis日志中的sql日志还原为原始mysql语句并格式化",
+  "icon": "extension-icon.png",
+  "author": "zerlina_ysl",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "restore-mybatis-sql-from-clipboard",
+      "title": "Restore Mybatis Sql from Clipboard",
+      "description": "读取粘贴板中的Mybatis日志，还原为真实SQL并格式化",
+      "mode": "no-view"
+    },
+    {
+      "name": "restore-mybatis-sql-from-inputForm",
+      "title": "Restore Mybatis Sql from Inputform",
+      "description": "通过输入框输入Mybatis日志还原为真实SQL并格式化",
+      "mode": "view"
+    },
+    {
+      "name": "format-sql",
+      "title": "Format Sql",
+      "description": "通过文本框输入SQL语句并直接格式化",
+      "mode": "view"
+    },
+    {
+      "name": "format-clipboard-sql",
+      "title": "Format Clipboard Sql",
+      "description": "读取粘贴板中的SQL语句并格式剪贴板中的SQL语句",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.101.1",
+    "@raycast/utils": "^1.17.0",
+    "sql-formatter": "^15.6.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
