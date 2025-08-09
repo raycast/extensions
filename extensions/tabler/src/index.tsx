@@ -29,7 +29,7 @@ const downloadSVG = async (svgContent: string, name: string) => {
 
   try {
     const toast = await showToast(Toast.Style.Animated, "Downloading Icon", "Please wait...");
-    
+
     await writeFile(path, svgContent);
 
     toast.title = "Downloaded";
