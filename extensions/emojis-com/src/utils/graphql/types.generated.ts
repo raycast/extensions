@@ -24,3 +24,20 @@ export enum SearchEmojiOrder {
   /** recent */
   Recent = "recent",
 }
+
+export enum ModelCategory {
+  /** emojis */
+  Emojis = "emojis",
+  /** icons */
+  Icons = "icons",
+  /** illustrations */
+  Illustrations = "illustrations",
+  /** illustrations_3d */
+  Illustrations_3d = "illustrations_3d",
+  /** images */
+  Images = "images",
+  /** memes */
+  Memes = "memes",
+  /** other */
+  Other = "other",
+}

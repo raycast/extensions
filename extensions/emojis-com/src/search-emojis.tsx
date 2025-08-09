@@ -7,19 +7,19 @@ import { useCallback, useMemo, useState } from "react"
 
 import { createImgproxyUrl } from "@/utils/imgproxy"
 
-import type { Emoji } from "@/hooks/use-emojis-search"
-import { useEmojisSearch } from "@/hooks/use-emojis-search"
-import { SearchEmojiOrder } from "@/utils/graphql/types.generated"
+import { type Emoji, useRaycastEmojisSearch } from "@/hooks/use-raycast-emojis-search"
+import { ModelCategory, SearchEmojiOrder } from "@/utils/graphql/types.generated"
 import { URLS } from "@/utils/urls"
 import { Providers } from "./components/providers"
 
 function SearchEmojisList() {
   const [searchText, setSearchText] = useState("")
-  const { data, isLoading } = useEmojisSearch({
+  const { data, isLoading } = useRaycastEmojisSearch({
     variables: {
       query: searchText,
       first: 50,
       order: SearchEmojiOrder.Recent,
+      modelCategory: ModelCategory.Emojis,
     },
   })
 
