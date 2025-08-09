@@ -1,0 +1,33 @@
+query GetRaycastEmojisSearch(
+  $query: String
+  $first: Int
+  $after: String
+  $order: SearchEmojiOrder
+  $modelIds: [ID!]
+  $modelSlugs: [String!]
+  $modelCategory: ModelCategory
+) {
+  searchEmojis(
+    query: $query
+    first: $first
+    after: $after
+    order: $order
+    modelIds: $modelIds
+    modelSlugs: $modelSlugs
+    modelCategory: $modelCategory
+  ) {
+    totalCount
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
+    nodes {
+      id
+      slug
+      prompt
+      blob {
+        url
+      }
+    }
+  }
+}
