@@ -94,7 +94,7 @@
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.27.0",
     "@raycast/eslint-config": "^2.0.0",
-    "@types/node": "^22.13.10",
+    "@types/node": "^24.0.14",
     "@types/react": "^19.0.10",
     "eslint": "^9.0.0",
     "prettier": "^3.3.3",
@@ -116,6 +116,15 @@
       "required": false,
       "title": "Custom FFmpeg Path (Advanced)",
       "description": "OPTIONAL - If left empty, the extension will look for a valid FFmpeg binary executable at common paths. If not found (expected for most users), you will be prompted to download a lightweight FFmpeg binary only available to this extension."
+    },
+    {
+      "name": "moreConversionSettings",
+      "type": "checkbox",
+      "title": "More Conversion Settings (Advanced)",
+      "label": "More granular control over the conversion",
+      "default": false,
+      "required": false,
+      "description": "Will allow you to choose precise encoding mode, bitrate and more for videos, sample rate, bit depth and more for audios."
     }
   ]
 }

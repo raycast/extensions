@@ -1,13 +1,17 @@
+import { convertMedia } from "../utils/converter";
 import {
-  convertMedia,
-  /* OUTPUT_IMAGE_EXTENSIONS,
-  OUTPUT_AUDIO_EXTENSIONS,
-  OUTPUT_VIDEO_EXTENSIONS, */
-  /* OUTPUT_ALL_EXTENSIONS, */
-  INPUT_IMAGE_EXTENSIONS,
-  INPUT_AUDIO_EXTENSIONS,
-  INPUT_VIDEO_EXTENSIONS,
-} from "../utils/converter";
+  type QualitySettings,
+  type QualityLevel,
+  type OutputImageExtension,
+  type OutputAudioExtension,
+  type OutputVideoExtension,
+  /* type AllOutputExtension, */
+  type ImageQuality,
+  type AudioQuality,
+  type VideoQuality,
+  getMediaType,
+  DEFAULT_QUALITIES,
+} from "../types/media";
 import { findFFmpegPath } from "../utils/ffmpeg";
 import { Tool } from "@raycast/api";
 import path from "path";
@@ -22,8 +26,7 @@ async function getFullPath(inputPath: string | undefined) {
     throw new Error("Input path is required but was not provided.");
   }
 
-  const normalizedPath = path.normalize(inputPath.replace(/^~/, os.homedir()));
-  const fullPath = path.resolve(normalizedPath);
+  const fullPath = path.resolve(path.normalize(inputPath.replace(/^~/, os.homedir())));
 
   if (!fs.existsSync(fullPath)) {
     throw new Error(`The file does not exist at ${fullPath}`);
@@ -32,20 +35,12 @@ async function getFullPath(inputPath: string | undefined) {
   return fullPath;
 }
 
-function getMediaType(filePath: string): "image" | "audio" | "video" | null {
-  const extension = path.extname(filePath).toLowerCase();
-  if (INPUT_IMAGE_EXTENSIONS.includes(extension as (typeof INPUT_IMAGE_EXTENSIONS)[number])) return "image";
-  if (INPUT_AUDIO_EXTENSIONS.includes(extension as (typeof INPUT_AUDIO_EXTENSIONS)[number])) return "audio";
-  if (INPUT_VIDEO_EXTENSIONS.includes(extension as (typeof INPUT_VIDEO_EXTENSIONS)[number])) return "video";
-  return null;
-}
-
 type Input = {
   inputPath: string;
   // I cannot, for the life of me, figure out how to get the type of this array to be a union of its values
   // so I have to type it manually. @sacha_crispin
   // Want to try?
-  // Uncomment OUTPUT_ALL_EXTENSIONS in import in ../utils/converter.ts
+  // Uncomment AllOutputExtension in import in ../types/media.ts
   outputFileType: // VIDEO
   | ".mp4"
     | ".avi"
@@ -58,6 +53,7 @@ type Input = {
     | ".aac"
     | ".wav"
     | ".flac"
+    | ".m4a"
     // IMAGE
     | ".jpg"
     | ".png"
@@ -65,10 +61,10 @@ type Input = {
     | ".heic"
     | ".tiff"
     | ".avif";
-  quality?: string;
+  quality: QualityLevel;
 };
 
-export default async function ConvertMedia({ inputPath, outputFileType, quality }: Input) {
+export default async function ConvertMedia({ inputPath, outputFileType }: Input) {
   const installed = await findFFmpegPath();
   if (!installed) {
     return {
@@ -82,7 +78,7 @@ export default async function ConvertMedia({ inputPath, outputFileType, quality 
 
   try {
     fullPath = await getFullPath(inputPath);
-    mediaType = getMediaType(fullPath);
+    mediaType = getMediaType(path.extname(fullPath));
 
     if (!mediaType) {
       return {
@@ -100,12 +96,28 @@ export default async function ConvertMedia({ inputPath, outputFileType, quality 
 
   try {
     let outputPath: string;
+    const qualitySettings = {
+      [outputFileType]: DEFAULT_QUALITIES[outputFileType],
+    } as QualitySettings;
+
     if (mediaType === "image") {
-      outputPath = await convertMedia(fullPath, outputFileType, quality);
+      outputPath = await convertMedia(
+        fullPath,
+        outputFileType as OutputImageExtension,
+        qualitySettings as ImageQuality,
+      );
     } else if (mediaType === "audio") {
-      outputPath = await convertMedia(fullPath, outputFileType);
+      outputPath = await convertMedia(
+        fullPath,
+        outputFileType as OutputAudioExtension,
+        qualitySettings as AudioQuality,
+      );
     } else if (mediaType === "video") {
-      outputPath = await convertMedia(fullPath, outputFileType);
+      outputPath = await convertMedia(
+        fullPath,
+        outputFileType as OutputVideoExtension,
+        qualitySettings as VideoQuality,
+      );
     } else {
       return {
         type: "error",
@@ -129,16 +141,14 @@ export default async function ConvertMedia({ inputPath, outputFileType, quality 
 export const confirmation: Tool.Confirmation<Input> = async ({ inputPath, outputFileType, quality }: Input) => {
   try {
     const fullPath = await getFullPath(inputPath);
-    const mediaType = getMediaType(fullPath);
+    const mediaType = getMediaType(path.extname(fullPath));
     const message = "This will create a new file in the same directory.";
     const info = [
       { name: "Input Path", value: fullPath },
       { name: "Input Media Type", value: mediaType || "Unknown" },
       { name: "Output File Type", value: outputFileType },
+      { name: "Quality", value: String(quality) },
     ];
-    if (quality) {
-      info.push({ name: "Quality", value: quality });
-    }
 
     return {
       message,
