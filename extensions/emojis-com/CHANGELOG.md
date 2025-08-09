@@ -1,5 +1,5 @@
 # emojis.com Changelog
 
-## [Launched emojis.com] - 2025-8-8
+## [Launched emojis.com] - {PR_MERGE_DATE}
 
 Initial release
