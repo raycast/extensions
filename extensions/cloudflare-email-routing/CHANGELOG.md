@@ -3,6 +3,7 @@ Cloudflare Email Routing Changelog
 ## [] - {PR_MERGE_DATE}
 
 - Update README to clarify which permissions are required
+- Change **Delete Alias** shortcut to prevent clash
 
 ## [Initial Version] - 2025-07-17
  
