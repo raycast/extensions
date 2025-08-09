@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "comet-browser",
+  "title": "Comet Browser",
+  "description": "Enable one to search history and current open tabs",
+  "icon": "comet-icon.png",
+  "author": "ArthurLin0906",
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-tabs",
+      "title": "Search Tabs",
+      "description": "Search currently open tabs in Comet browser",
+      "mode": "view"
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "description": "Search browser history in Comet",
+      "mode": "view"
+    },
+    {
+      "name": "search-comet",
+      "title": "Search Comet",
+      "description": "Unified search across tabs and history",
+      "mode": "view"
+    },
+    {
+      "name": "new-tab",
+      "title": "New Tab",
+      "description": "Open a new tab in Comet browser",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.3",
+    "@raycast/utils": "^1.17.0",
+    "fuse.js": "^7.1.0",
+    "use-debounce": "^10.0.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
