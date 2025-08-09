@@ -1,7 +1,8 @@
 import { ActionPanel, List, Action, useNavigation, showHUD, Icon } from "@raycast/api";
-import { ReactNode, useEffect, useState } from "react";
-import { listDisplays, setMode } from "./utils";
-import { DisplayInfo, DisplayKind, Mode, areModesEqual } from "./types";
+import { showFailureToast } from "@raycast/utils";
+import { useEffect, useState } from "react";
+import { listDisplays, setMode, formatDisplayMode, formatDisplayTitle, formatDisplaySubtitle } from "./utils";
+import { DisplayInfo, areModesEqual } from "./types";
 
 export default function Command() {
   const [displays, setDisplays] = useState<DisplayInfo[] | undefined>();
@@ -15,37 +16,9 @@ export default function Command() {
     fetchDisplaysInfo();
   }, []);
 
-  function formatTitle(display: DisplayInfo): string {
-    return `Display ${display.display.id} (${formatDisplayKind(display.display.kind)})`;
-  }
-
-  function formatSubtitle(display: DisplayInfo): string {
-    return formatDisplayMode(display.currentMode);
-  }
-
-  function formatDisplayKind(kind: DisplayKind): string {
-    switch (kind) {
-      case DisplayKind.builtIn:
-        return "Built-in";
-      case DisplayKind.external:
-        return "External";
-      default:
-        return "Unknown";
-    }
-  }
-
-  function formatDisplayMode(mode: Mode): string {
-    const widthFormatted = mode.width.toString().padStart(5, " ");
-    const heightFormatted = mode.height.toString().padStart(5, " ");
-    const scaleFormatted = mode.scale?.toString().padStart(2, " ") ?? "N/A";
-    const refreshRateFormatted = mode.refreshRate.toString().padStart(4, " ");
-
-    return `${widthFormatted} x ${heightFormatted} @ ${scaleFormatted}x ${refreshRateFormatted}Hz`;
-  }
-
   const navigation = useNavigation();
 
-  function detail(display: DisplayInfo): ReactNode {
+  function DetailComponent({ display }: { display: DisplayInfo }) {
     // First, map the modes to an array of objects with mode and isEqual properties
     const modesWithComparison = display.modes.map((mode) => ({
       mode: mode,
@@ -53,7 +26,7 @@ export default function Command() {
     }));
 
     return (
-      <List navigationTitle={formatTitle(display)}>
+      <List navigationTitle={formatDisplayTitle(display)}>
         {modesWithComparison.map((modeInfo, index) => {
           return (
             <List.Item
@@ -70,11 +43,11 @@ export default function Command() {
                       const result = await setMode(display.display.id, modeInfo.mode);
 
                       if (result) {
-                        await showHUD(`Mode changed successfully ${formatDisplayMode(modeInfo.mode)}`);
+                        await showHUD(`✅ Mode changed successfully ${formatDisplayMode(modeInfo.mode)}`);
                         await fetchDisplaysInfo();
                         navigation.pop();
                       } else {
-                        await showHUD("Failed to change display mode");
+                        showFailureToast("Failed to change display mode");
                       }
                     }}
                   />
@@ -94,11 +67,15 @@ export default function Command() {
           <List.Item
             key={index}
             icon="display-icon.png"
-            title={formatTitle(display)}
-            subtitle={formatSubtitle(display)}
+            title={formatDisplayTitle(display)}
+            subtitle={formatDisplaySubtitle(display)}
             actions={
               <ActionPanel>
-                <Action.Push title="Show Display Modes" icon={Icon.Monitor} target={detail(display)} />
+                <Action.Push
+                  title="Show Display Modes"
+                  icon={Icon.Monitor}
+                  target={<DetailComponent display={display} />}
+                />
               </ActionPanel>
             }
           />
