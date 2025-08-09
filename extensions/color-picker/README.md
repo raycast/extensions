@@ -6,7 +6,8 @@ A simple system-wide color picker. The color picker can be triggered with a stan
 
 - Pick a color on your desktop
 - Access your colors from the menu bar
-- Organize your colors
+- Organize your colors with multi-selection support
+- Select and copy multiple colors in various formats (JSON, CSS Classes, CSS Variables)
 - Generate colors using UI
 - Pick a color using AI
 - Pick a color with color wheel
