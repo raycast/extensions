@@ -24,7 +24,7 @@ import {
   displaySimpleIconsFontFeatures,
   enableAiSearch,
   getAliases,
-  getFileLink,
+  getRelativeFileLink,
   loadCachedJson,
   useSearch,
   useVersion,
@@ -150,7 +150,7 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
         // Limit to 500 icons to avoid performance issues
         searchResult.slice(0, 500).map((icon) => {
           const slug = getIconSlug(icon);
-          const fileLink = getFileLink(slug, version);
+          const fileLink = getRelativeFileLink(slug, version);
           const aliases = getAliases(icon);
 
           return (
