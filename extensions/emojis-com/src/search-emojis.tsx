@@ -5,11 +5,11 @@ import os from "node:os";
 import path from "node:path";
 import { useCallback, useMemo, useState } from "react";
 
-import { createImgproxyUrl } from "@/utils/imgproxy";
+import { createImgproxyUrl } from "./utils/imgproxy";
 
-import { type Emoji, useRaycastEmojisSearch } from "@/hooks/use-raycast-emojis-search";
-import { ModelCategory, SearchEmojiOrder } from "@/utils/graphql/types.generated";
-import { URLS } from "@/utils/urls";
+import { type Emoji, useRaycastEmojisSearch } from "./hooks/use-raycast-emojis-search";
+import { ModelCategory, SearchEmojiOrder } from "./utils/graphql/types.generated";
+import { URLS } from "./utils/urls";
 import { Providers } from "./components/providers";
 import { showFailureToast } from "@raycast/utils";
 

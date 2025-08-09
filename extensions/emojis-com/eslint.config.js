@@ -1,11 +1,4 @@
-import { defineConfig } from "eslint/config"
-import raycastConfig from "@raycast/eslint-config"
-import reactHooks from "eslint-plugin-react-hooks"
+const { defineConfig } = require("eslint/config");
+const raycastConfig = require("@raycast/eslint-config");
 
-export default defineConfig([
-  {
-    ignores: ["**/*.generated.ts"],
-  },
-  ...raycastConfig,
-  reactHooks.configs["recommended-latest"],
-])
+module.exports = defineConfig([...raycastConfig]);

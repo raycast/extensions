@@ -23,7 +23,6 @@
       "mode": "view"
     }
   ],
-  "type": "module",
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",

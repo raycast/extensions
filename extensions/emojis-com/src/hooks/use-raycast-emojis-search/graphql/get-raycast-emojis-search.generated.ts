@@ -1,6 +1,6 @@
 import type { DocumentNode } from "graphql";
 
-import type * as Types from "@/utils/graphql/types.generated";
+import type * as Types from "../../../utils/graphql/types.generated";
 
 export type GetRaycastEmojisSearchQueryVariables = Types.Exact<{
   query?: Types.InputMaybe<Types.Scalars["String"]["input"]>;

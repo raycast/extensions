@@ -1,13 +1,13 @@
 import type { GraphQLClient } from "graphql-request";
 import { infiniteQueryOptions } from "@tanstack/react-query";
 
-import { tagQueryKey } from "@/utils/query";
+import { tagQueryKey } from "../../utils/query";
 
 import type {
   GetRaycastEmojisSearchQuery,
   GetRaycastEmojisSearchQueryVariables,
-} from "@/hooks/use-raycast-emojis-search/graphql/get-raycast-emojis-search.generated";
-import { GetRaycastEmojisSearchDocument } from "@/hooks/use-raycast-emojis-search/graphql/get-raycast-emojis-search.generated";
+} from "./graphql/get-raycast-emojis-search.generated";
+import { GetRaycastEmojisSearchDocument } from "./graphql/get-raycast-emojis-search.generated";
 
 function getRaycastEmojisSearchInfiniteQueryOptions({
   graphqlClient,
