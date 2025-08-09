@@ -1,8 +1,8 @@
-import { generateImageUrl } from "@imgproxy/imgproxy-node"
+import { generateImageUrl } from "@imgproxy/imgproxy-node";
 
-import type { Options } from "@imgproxy/imgproxy-js-core"
+import type { Options } from "@imgproxy/imgproxy-js-core";
 
-const IMGPROXY_URL = "https://imgproxy.attic.sh"
+const IMGPROXY_URL = "https://imgproxy.attic.sh";
 
 function createImgproxyUrl({ src, options }: { src: string; options: Options }): string {
   return generateImageUrl({
@@ -12,7 +12,7 @@ function createImgproxyUrl({ src, options }: { src: string; options: Options }):
       displayAs: "plain",
     },
     options,
-  })
+  });
 }
 
-export { createImgproxyUrl }
+export { createImgproxyUrl };

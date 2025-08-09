@@ -1,5 +1,5 @@
-import { GraphQLClient } from "graphql-request"
+import { GraphQLClient } from "graphql-request";
 
-import { URLS } from "@/utils/urls"
+import { URLS } from "@/utils/urls";
 
-export const graphqlClient = new GraphQLClient(URLS.api.graphql)
+export const graphqlClient = new GraphQLClient(URLS.api.graphql);

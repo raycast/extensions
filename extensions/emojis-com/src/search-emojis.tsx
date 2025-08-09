@@ -1,20 +1,20 @@
-import { Action, ActionPanel, Clipboard, closeMainWindow, Grid, Icon, showToast, Toast } from "@raycast/api"
-import { Buffer } from "node:buffer"
-import fs from "node:fs/promises"
-import os from "node:os"
-import path from "node:path"
-import { useCallback, useMemo, useState } from "react"
+import { Action, ActionPanel, Clipboard, closeMainWindow, Grid, Icon, showToast, Toast } from "@raycast/api";
+import { Buffer } from "node:buffer";
+import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+import { useCallback, useMemo, useState } from "react";
 
-import { createImgproxyUrl } from "@/utils/imgproxy"
+import { createImgproxyUrl } from "@/utils/imgproxy";
 
-import { type Emoji, useRaycastEmojisSearch } from "@/hooks/use-raycast-emojis-search"
-import { ModelCategory, SearchEmojiOrder } from "@/utils/graphql/types.generated"
-import { URLS } from "@/utils/urls"
-import { Providers } from "./components/providers"
-import { showFailureToast } from "@raycast/utils"
+import { type Emoji, useRaycastEmojisSearch } from "@/hooks/use-raycast-emojis-search";
+import { ModelCategory, SearchEmojiOrder } from "@/utils/graphql/types.generated";
+import { URLS } from "@/utils/urls";
+import { Providers } from "./components/providers";
+import { showFailureToast } from "@raycast/utils";
 
 function SearchEmojisList() {
-  const [searchText, setSearchText] = useState("")
+  const [searchText, setSearchText] = useState("");
   const { data, isLoading } = useRaycastEmojisSearch({
     variables: {
       query: searchText,
@@ -22,14 +22,14 @@ function SearchEmojisList() {
       order: SearchEmojiOrder.Recent,
       modelCategory: ModelCategory.Emojis,
     },
-  })
+  });
 
   const emojis = useMemo(
     () =>
       data?.pages
         .flatMap((page) => page.searchEmojis?.nodes ?? [])
         .flatMap((emoji) => {
-          if (!emoji.blob?.url) return []
+          if (!emoji.blob?.url) return [];
 
           const url = createImgproxyUrl({
             src: emoji.blob.url,
@@ -39,34 +39,34 @@ function SearchEmojisList() {
               height: 240,
               quality: 75,
             },
-          })
+          });
 
-          return { ...emoji, url }
+          return { ...emoji, url };
         }) ?? [],
     [data],
-  )
+  );
 
   const copyEmojiImage = useCallback(async (emoji: Emoji) => {
     if (!emoji.blob?.url) {
-      await showToast({ style: Toast.Style.Failure, title: "No image available" })
-      return
+      await showToast({ style: Toast.Style.Failure, title: "No image available" });
+      return;
     }
 
     try {
-      const res = await fetch(emoji.blob.url)
-      const buffer = Buffer.from(await res.arrayBuffer())
-      const extMatch = /\.([a-zA-Z0-9]+)(?:\?|$)/.exec(emoji.blob.url)
-      const ext = extMatch ? extMatch[1] : "png"
-      const tempFile = path.join(os.tmpdir(), `${emoji.slug}-${Date.now()}.${ext}`)
-      await fs.writeFile(tempFile, buffer)
-      await Clipboard.copy({ file: tempFile })
-      await closeMainWindow()
-      await showToast({ title: "Copied image to clipboard", message: emoji.prompt })
+      const res = await fetch(emoji.blob.url);
+      const buffer = Buffer.from(await res.arrayBuffer());
+      const extMatch = /\.([a-zA-Z0-9]+)(?:\?|$)/.exec(emoji.blob.url);
+      const ext = extMatch ? extMatch[1] : "png";
+      const tempFile = path.join(os.tmpdir(), `${emoji.slug}-${Date.now()}.${ext}`);
+      await fs.writeFile(tempFile, buffer);
+      await Clipboard.copy({ file: tempFile });
+      await closeMainWindow();
+      await showToast({ title: "Copied image to clipboard", message: emoji.prompt });
     } catch (error) {
-      console.error(error)
-      showFailureToast(error, { title: "Failed to copy" })
+      console.error(error);
+      showFailureToast(error, { title: "Failed to copy" });
     }
-  }, [])
+  }, []);
 
   return (
     <Grid
@@ -93,7 +93,7 @@ function SearchEmojisList() {
         />
       ))}
     </Grid>
-  )
+  );
 }
 
 export default function Command() {
@@ -101,5 +101,5 @@ export default function Command() {
     <Providers>
       <SearchEmojisList />
     </Providers>
-  )
+  );
 }

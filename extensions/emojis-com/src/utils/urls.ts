@@ -5,4 +5,4 @@ export const URLS = {
   emojis: {
     emoji: (slug: string) => `https://emojis.com/emoji/${slug}`,
   },
-} as const
+} as const;

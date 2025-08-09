@@ -1,33 +1,33 @@
-import type { DocumentNode } from "graphql"
+import type { DocumentNode } from "graphql";
 
-import type * as Types from "@/utils/graphql/types.generated"
+import type * as Types from "@/utils/graphql/types.generated";
 
 export type GetRaycastEmojisSearchQueryVariables = Types.Exact<{
-  query?: Types.InputMaybe<Types.Scalars["String"]["input"]>
-  first?: Types.InputMaybe<Types.Scalars["Int"]["input"]>
-  after?: Types.InputMaybe<Types.Scalars["String"]["input"]>
-  order?: Types.InputMaybe<Types.SearchEmojiOrder>
-  modelIds?: Types.InputMaybe<ReadonlyArray<Types.Scalars["ID"]["input"]> | Types.Scalars["ID"]["input"]>
-  modelSlugs?: Types.InputMaybe<ReadonlyArray<Types.Scalars["String"]["input"]> | Types.Scalars["String"]["input"]>
-  modelCategory?: Types.InputMaybe<Types.ModelCategory>
-}>
+  query?: Types.InputMaybe<Types.Scalars["String"]["input"]>;
+  first?: Types.InputMaybe<Types.Scalars["Int"]["input"]>;
+  after?: Types.InputMaybe<Types.Scalars["String"]["input"]>;
+  order?: Types.InputMaybe<Types.SearchEmojiOrder>;
+  modelIds?: Types.InputMaybe<ReadonlyArray<Types.Scalars["ID"]["input"]> | Types.Scalars["ID"]["input"]>;
+  modelSlugs?: Types.InputMaybe<ReadonlyArray<Types.Scalars["String"]["input"]> | Types.Scalars["String"]["input"]>;
+  modelCategory?: Types.InputMaybe<Types.ModelCategory>;
+}>;
 
 export type GetRaycastEmojisSearchQuery = {
-  readonly __typename: "Query"
+  readonly __typename: "Query";
   readonly searchEmojis?:
     | {
-        readonly __typename: "EmojiSearchResultWithTotal"
-        readonly totalCount: number
+        readonly __typename: "EmojiSearchResultWithTotal";
+        readonly totalCount: number;
         readonly pageInfo: {
-          readonly __typename: "PageInfo"
-          readonly endCursor?: string | null | undefined
-          readonly hasNextPage: boolean
-        }
+          readonly __typename: "PageInfo";
+          readonly endCursor?: string | null | undefined;
+          readonly hasNextPage: boolean;
+        };
         readonly nodes: ReadonlyArray<{
-          readonly __typename: "Emoji"
-          readonly id: string
-          readonly slug: string
-          readonly prompt: string
+          readonly __typename: "Emoji";
+          readonly id: string;
+          readonly slug: string;
+          readonly prompt: string;
           readonly blob?:
             | { readonly __typename: "FileAttachment"; readonly url: string }
             | { readonly __typename: "ImageJpegAttachment"; readonly url: string }
@@ -35,12 +35,12 @@ export type GetRaycastEmojisSearchQuery = {
             | { readonly __typename: "ImageSvgAttachment"; readonly url: string }
             | { readonly __typename: "ImageWebpAttachment"; readonly url: string }
             | null
-            | undefined
-        }>
+            | undefined;
+        }>;
       }
     | null
-    | undefined
-}
+    | undefined;
+};
 
 export const GetRaycastEmojisSearchDocument = {
   kind: "Document",
@@ -177,4 +177,4 @@ export const GetRaycastEmojisSearchDocument = {
       },
     },
   ],
-} as unknown as DocumentNode
+} as unknown as DocumentNode;
