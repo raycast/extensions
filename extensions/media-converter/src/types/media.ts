@@ -352,7 +352,6 @@ export const SIMPLE_QUALITY_MAPPINGS = {
   },
 } as const;
 
-// Default simple quality level
 export const DEFAULT_SIMPLE_QUALITY: QualityLevel = "high";
 
 // =============================================================================
@@ -409,16 +408,10 @@ export function getMediaType(extension: string): MediaType | null {
   return null;
 }
 
-export function getQualitySettingsFromSimple(extension: AllOutputExtension, quality: QualityLevel): any {
-  // For image formats, return the default quality settings since there are no simple quality levels for images
-  if (getMediaType(extension) === "image") {
-    return DEFAULT_QUALITIES[extension as OutputImageExtension];
-  }
-
-  // For audio/video formats, use the simple quality mappings
+// This function should only ever be called for audio/video
+export function getQualitySettingsFromSimple(extension: OutputAudioExtension | OutputVideoExtension) {
   if (extension in SIMPLE_QUALITY_MAPPINGS) {
-    return (SIMPLE_QUALITY_MAPPINGS as any)[extension][quality];
+    return SIMPLE_QUALITY_MAPPINGS[extension][DEFAULT_SIMPLE_QUALITY];
   }
-
   throw new Error(`Unsupported format: ${extension}`);
 }

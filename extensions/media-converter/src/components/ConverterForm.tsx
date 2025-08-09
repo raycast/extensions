@@ -19,9 +19,8 @@ import {
   type MediaType,
   type AllOutputExtension,
   type QualitySettings,
-  type ImageQuality,
-  type AudioQuality,
-  type VideoQuality,
+  type OutputAudioExtension,
+  type OutputVideoExtension,
   getMediaType,
   AUDIO_BITRATES,
   type AudioBitrate,
@@ -51,8 +50,8 @@ import {
   VideoMaxBitrate,
   VIDEO_MAX_BITRATE,
   type QualityLevel,
-  DEFAULT_SIMPLE_QUALITY,
   getQualitySettingsFromSimple,
+  DEFAULT_SIMPLE_QUALITY,
 } from "../types/media";
 import path from "path";
 import { execPromise } from "../utils/exec";
@@ -66,18 +65,19 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
   const [simpleQuality, setSimpleQuality] = useState<QualityLevel>(DEFAULT_SIMPLE_QUALITY);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Helper function to get default quality settings for a format
+  // Helper function to get quality settings. If custom quality level is provided, then it is simple audio/video.
   const getDefaultQuality = (format: AllOutputExtension): QualitySettings => {
-    if (preferences.moreConversionSettings) {
+    // For images or when advanced settings are enabled, use DEFAULT_QUALITIES
+    if (getMediaType(format) === "image" || preferences.moreConversionSettings) {
       return {
-        [format]: DEFAULT_QUALITIES[format as keyof typeof DEFAULT_QUALITIES],
-      } as MediaType extends "image" ? ImageQuality : MediaType extends "audio" ? AudioQuality : VideoQuality;
-    } else {
-      // For simple mode, return the quality settings for the default simple quality level
-      return {
-        [format]: getQualitySettingsFromSimple(format, DEFAULT_SIMPLE_QUALITY),
+        [format]: DEFAULT_QUALITIES[format],
       } as QualitySettings;
     }
+
+    // For audio/video in simple mode, use simple quality mappings
+    return {
+      [format]: getQualitySettingsFromSimple(format as OutputAudioExtension | OutputVideoExtension),
+    } as QualitySettings;
   };
 
   useEffect(() => {
@@ -167,9 +167,7 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
       if (preferences.moreConversionSettings || primaryFileType === "image") {
         setCurrentQualitySetting(getDefaultQuality(defaultFormat));
       } else {
-        setCurrentQualitySetting({
-          [defaultFormat]: getQualitySettingsFromSimple(defaultFormat, DEFAULT_SIMPLE_QUALITY),
-        } as QualitySettings);
+        setCurrentQualitySetting(getDefaultQuality(defaultFormat));
       }
     } catch (error) {
       const errorMessage = String(error);
@@ -283,9 +281,7 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
               setCurrentQualitySetting(getDefaultQuality(format));
             } else {
               // Update quality settings based on current simple quality level
-              setCurrentQualitySetting({
-                [format]: getQualitySettingsFromSimple(format, simpleQuality),
-              } as QualitySettings);
+              setCurrentQualitySetting(getDefaultQuality(format));
             }
           }}
         >
@@ -323,9 +319,7 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
               onChange={(newQuality) => {
                 const quality = newQuality as QualityLevel;
                 setSimpleQuality(quality);
-                setCurrentQualitySetting({
-                  [outputFormat]: getQualitySettingsFromSimple(outputFormat, quality),
-                } as QualitySettings);
+                setCurrentQualitySetting(getDefaultQuality(outputFormat!));
               }}
               info="Choose the quality level for your converted file"
             >
