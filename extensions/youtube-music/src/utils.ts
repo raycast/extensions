@@ -1,13 +1,9 @@
-import { Application, Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { Toast, showToast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
+import { getPreferences } from "./infra/preference";
 
 type SupportedBrowsers = "Safari" | "Chrome" | "YouTube Music" | "Microsoft Edge";
-type UrlPreference = "music" | "youtube" | "both";
-
-interface Preferences {
-  browser: Application;
-  urlPreference: UrlPreference;
-}
+export type UrlPreference = "music" | "youtube" | "both";
 
 interface OsaError {
   stderr: string;
@@ -31,46 +27,57 @@ function runJS(browser: SupportedBrowsers | string, code: string): string {
   return browser === "Safari" ? `do javascript "${escaped}"` : `execute javascript "${escaped}"`;
 }
 
-/**
- * Returns the URL-matching AppleScript condition based on user preferences.
- */
-function getUrlCondition(preference: UrlPreference): string {
-  switch (preference) {
+async function tryRunWithCondition(browserName: string, code: string, condition: string): Promise<string | false> {
+  const result = await runAppleScript(`
+    tell application "${browserName}"
+      repeat with w in (every window)
+        repeat with t in (every tab whose ${condition}) of w
+          tell t
+            try
+              return ${runJS(browserName, code)}
+            on error errMsg
+              return "JS Error: " & errMsg
+            end try
+          end tell
+        end repeat
+      end repeat
+    end tell
+    return "false"
+  `);
+  return result;
+}
+
+function runOnWantedPlatform(urlPreference: UrlPreference, browserName: string, code: string): Promise<string | false> {
+  const musicCondition = 'URL contains "music.youtube.com"';
+  const youtubeCondition = 'URL contains "youtube.com"';
+  switch (urlPreference) {
     case "music":
-      return 'URL contains "music.youtube.com"';
+      return tryRunWithCondition(browserName, code, musicCondition);
     case "youtube":
-      return 'URL contains "youtube.com" and URL does not contain "music.youtube.com"';
+      return tryRunWithCondition(browserName, code, youtubeCondition);
     case "both":
-      return '(URL contains "music.youtube.com" or (URL contains "youtube.com" and URL does not contain "music.youtube.com"))';
+      return (async () => {
+        let result = await tryRunWithCondition(browserName, code, musicCondition);
+        if (result === "false") {
+          result = await tryRunWithCondition(browserName, code, youtubeCondition);
+        }
+        return result;
+      })();
     default:
-      return 'URL contains "music.youtube.com"';
+      return tryRunWithCondition(browserName, code, musicCondition);
   }
 }
 
 /**
  * Executes JavaScript inside a matching YouTube or YouTube Music tab in the selected browser.
+ * In case "both" is selected, it will first try to run the code in YouTube Music tab.
+ * If no YouTube Music tab is found, it will try to run the code in YouTube tab.
  */
 export async function runJSInYouTubeMusicTab(code: string): Promise<string | false> {
-  const preferences = getPreferenceValues<Preferences>();
-  const { browser, urlPreference } = preferences;
+  const { browser, urlPreference } = getPreferences();
 
   try {
-    const result = await runAppleScript(`
-      tell application "${browser.name}"
-        repeat with w in (every window)
-          repeat with t in (every tab whose ${getUrlCondition(urlPreference)}) of w
-            tell t
-              try
-                return ${runJS(browser.name, code)}
-              on error errMsg
-                return "JS Error: " & errMsg
-              end try
-            end tell
-          end repeat
-        end repeat
-      end tell
-      return "false"
-    `);
+    const result: string | false = await runOnWantedPlatform(urlPreference, browser.name, code);
 
     if (result === "false") {
       await showToast({
