@@ -87,7 +87,10 @@ export default function Command() {
 
   function loadPocketNodes(pocket: Pocket, config?: { hideTitle?: boolean }) {
     return (
-      <Grid.Section title={config?.hideTitle ? undefined : pocket?.name?.replaceAll(":", "/") || undefined} key={pocket.name || ".unsorted"}>
+      <Grid.Section
+        title={config?.hideTitle ? undefined : pocket?.name?.replaceAll(":", "/") || undefined}
+        key={pocket.name || ".unsorted"}
+      >
         {pocket.cards.map((card) => (
           <Grid.Item
             key={card.path}

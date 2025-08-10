@@ -2,7 +2,7 @@ import { Toast, environment, getPreferenceValues, showToast } from "@raycast/api
 import { runJxa } from "run-jxa";
 
 import { basename, extname } from "path";
-import * as fs from 'fs';
+import * as fs from "fs";
 
 import { Pocket, Card, Preferences } from "./types";
 
@@ -33,8 +33,7 @@ export function fetchPocketNames(): string[] {
     } catch (e) {
       // Photos is protected by default, and is a frequent appearance in my extension error emails.
       // I figure it makes sense to explicitly ignore it.
-      if (item.endsWith(".photoslibrary")) return
-
+      if (item.endsWith(".photoslibrary")) return;
 
       // Try to continue even if we can't read the directory
       // This allows the extension to work with directories that have special characters
@@ -112,7 +111,7 @@ async function loadPocketCards(dir: string): Promise<Card[]> {
       if (item.startsWith(".")) return;
 
       const filePath = `${dir}/${item}`;
-      let fileExt = extname(filePath)
+      let fileExt = extname(filePath);
       const fileName = basename(filePath, fileExt);
       fileExt = fileExt.toLowerCase();
       let fileStats;
