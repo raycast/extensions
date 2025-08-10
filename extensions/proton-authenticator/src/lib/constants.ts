@@ -5,8 +5,5 @@ export const STORAGE_KEYS = {
 export const STATE_KEYS = {
   ACCOUNTS: "accounts",
   NEEDS_SETUP: "needs-setup",
-  AUTH_TIMESTAMP: "auth-timestamp",
-  AUTH_ENABLED: "auth-enabled",
-  AUTH_TIMEOUT: "auth-timeout",
   SORTING_MODE: "sorting-mode",
 };

@@ -18,7 +18,6 @@ import { STATE_KEYS } from "./lib/constants";
 
 import { TOTPAccount } from "./types";
 import { loadAccountsFromStorage, clearStoredData } from "./lib/storage";
-import { authenticateWithTouchID, hasTouchID } from "./lib/auth";
 import { generateTOTP, generateNextTOTP, getTimeRemaining } from "./lib/totp";
 import { getProgressColor } from "./lib/colors";
 import SetupForm from "./SetupForm";
@@ -31,19 +30,11 @@ export default function Command() {
   const [timeRemainingMap, setTimeRemainingMap] = useState<Map<string, number>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [authTimestamp, setAuthTimestamp] = useCachedState<number | null>(STATE_KEYS.AUTH_TIMESTAMP, null);
-  const [authEnabled, setAuthEnabled] = useCachedState<boolean>(STATE_KEYS.AUTH_ENABLED, true);
-  const [authTimeout, setAuthTimeout] = useCachedState<number>(STATE_KEYS.AUTH_TIMEOUT, 10 * 60 * 1000); // 10 minutes default
   const [sortingMode, setSortingMode] = useCachedState<"frecency" | "alphabetical">(
     STATE_KEYS.SORTING_MODE,
     "frecency",
   );
 
-  const AUTH_TIMEOUT_OPTIONS = {
-    "10 minutes": 10 * 60 * 1000,
-    "30 minutes": 30 * 60 * 1000,
-    "1 hour": 60 * 60 * 1000,
-  };
   const Metadata = List.Item.Detail.Metadata;
   const Label = Metadata.Label;
   const Separator = Metadata.Separator;
@@ -56,8 +47,6 @@ export default function Command() {
     key: (account) => account.id,
   });
 
-  // create final sorted accounts based on sorting mode
-
   const sortedAccounts = useMemo(() => {
     if (sortingMode === "alphabetical") {
       return [...accounts].sort((a, b) => {
@@ -69,15 +58,7 @@ export default function Command() {
     return sortedByFrecency;
   }, [accounts, sortedByFrecency, sortingMode]);
 
-  // check if authentication is still valid or disabled
-  const isAuthenticated = useMemo(() => {
-    if (!authEnabled) return true; // skip auth if disabled
-    if (!authTimestamp) return false;
-    return Date.now() - authTimestamp < authTimeout;
-  }, [authTimestamp, authEnabled, authTimeout]);
-
   const handleCopyCode = async (code: string, account: TOTPAccount) => {
-    // track usage for frecency sorting
     visitItem(account);
 
     await Clipboard.copy(code);
@@ -85,104 +66,6 @@ export default function Command() {
       showHUD("Copied to clipboard");
     }, 100);
     await closeMainWindow();
-  };
-
-  if (!hasTouchID()) {
-    return (
-      <List>
-        <List.EmptyView
-          title="Touch ID Required"
-          description="This extension requires a Mac with Touch ID support."
-          icon="⚠️"
-        />
-      </List>
-    );
-  }
-
-  const handleAuthentication = async () => {
-    if (isAuthenticated) {
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const authenticated = await authenticateWithTouchID();
-      if (authenticated) {
-        setAuthTimestamp(Date.now());
-        showToast(Toast.Style.Success, "Authentication Successful");
-      } else {
-        setError("Authentication failed. Please try again.");
-        showFailureToast("Touch ID authentication was unsuccessful", { title: "Authentication Failed" });
-      }
-    } catch (error) {
-      console.error("Authentication error:", error);
-      setError("Authentication failed");
-      showFailureToast("An error occurred during authentication");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleToggleAuth = async () => {
-    // require authentication to disable Touch ID regardless of current auth state
-    if (authEnabled) {
-      try {
-        const authenticated = await authenticateWithTouchID();
-        if (!authenticated) {
-          showFailureToast("Authentication required to disable Touch ID", { title: "Authentication Failed" });
-          return;
-        }
-      } catch (error) {
-        console.error("Authentication error:", error);
-        showFailureToast("Authentication failed");
-        return;
-      }
-    }
-
-    const newAuthState = !authEnabled;
-    setAuthEnabled(newAuthState);
-
-    if (newAuthState) {
-      showToast(Toast.Style.Success, "Touch ID Enabled");
-    } else {
-      setAuthTimestamp(null); // clear auth when disabled
-      showToast(Toast.Style.Success, "Touch ID Disabled");
-    }
-  };
-  const handleSetAuthTimeout = async (label: string, timeoutMs: number) => {
-    setAuthTimeout(timeoutMs);
-    showToast(Toast.Style.Success, `Auth timeout set to ${label}`);
-  };
-
-  const handleClearAuth = async () => {
-    setAuthTimestamp(null);
-    showToast(Toast.Style.Success, "Authentication cleared");
-  };
-
-  const handleToggleSort = () => {
-    const newMode = sortingMode === "frecency" ? "alphabetical" : "frecency";
-    setSortingMode(newMode);
-    showToast(Toast.Style.Success, `Sorted by ${newMode === "frecency" ? "usage" : "name"}`);
-  };
-
-  const handleResetRankings = async () => {
-    const confirmed = await confirmAlert({
-      title: "Reset Usage Rankings",
-      message: "This will reset the usage statistics for all accounts. Are you sure?",
-      primaryAction: {
-        title: "Reset",
-        style: Alert.ActionStyle.Destructive,
-      },
-    });
-
-    if (confirmed) {
-      for (const account of accounts) {
-        await resetRanking(account);
-      }
-      showToast(Toast.Style.Success, "Usage rankings reset");
-    }
   };
 
   useEffect(() => {
@@ -240,23 +123,6 @@ export default function Command() {
 
   if (needsSetup) {
     return <SetupForm onAccountsLoaded={handleAccountsLoaded} />;
-  }
-
-  if (!isLoading && !isAuthenticated && authEnabled) {
-    return (
-      <List>
-        <List.EmptyView
-          title="Authentication Required"
-          description="Touch ID authentication is required to access your TOTP codes"
-          icon="🔐"
-          actions={
-            <ActionPanel>
-              <Action title="Authenticate with Touch ID" onAction={handleAuthentication} icon="🔓" />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
   }
 
   if (!isLoading && error) {
@@ -345,51 +211,38 @@ export default function Command() {
                     shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
                   />
                 </ActionPanel.Section>
-                <ActionPanel.Section title="Authentication">
-                  <Action
-                    title={authEnabled ? "Disable Touch ID" : "Enable Touch ID"}
-                    icon={authEnabled ? Icon.LockDisabled : Icon.Lock}
-                    shortcut={{ modifiers: ["cmd"], key: "t" }}
-                    onAction={handleToggleAuth}
-                  />
-                  {authEnabled && (
-                    <>
-                      <ActionPanel.Submenu
-                        title={"Set Timeout"}
-                        icon={Icon.Clock}
-                        shortcut={{ modifiers: ["cmd"], key: "d" }}
-                      >
-                        {Object.entries(AUTH_TIMEOUT_OPTIONS).map(([label, timeout]) => (
-                          <Action
-                            key={label}
-                            title={label}
-                            onAction={() => handleSetAuthTimeout(label, timeout)}
-                            icon={authTimeout === timeout ? Icon.Check : undefined}
-                          />
-                        ))}
-                      </ActionPanel.Submenu>
-                      <Action
-                        title="Clear Authentication"
-                        icon={Icon.RotateClockwise}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-                        onAction={handleClearAuth}
-                      />
-                    </>
-                  )}
-                </ActionPanel.Section>
                 <ActionPanel.Section title="Settings">
                   <Action
                     title={`Sort by ${sortingMode === "frecency" ? "Name" : "Usage"}`}
                     icon={sortingMode === "frecency" ? Icon.ArrowUp : Icon.BarChart}
                     shortcut={{ modifiers: ["cmd"], key: "s" }}
-                    onAction={handleToggleSort}
+                    onAction={() => {
+                      const newMode = sortingMode === "frecency" ? "alphabetical" : "frecency";
+                      setSortingMode(newMode);
+                      showToast(Toast.Style.Success, `Sorted by ${newMode === "frecency" ? "usage" : "name"}`);
+                    }}
                   />
                   {sortingMode === "frecency" && (
                     <Action
                       title="Reset Usage Rankings"
                       icon={Icon.ArrowCounterClockwise}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
-                      onAction={handleResetRankings}
+                      onAction={async () => {
+                        const confirmed = await confirmAlert({
+                          title: "Reset Usage Rankings",
+                          message: "This will reset the usage statistics for all accounts. Are you sure?",
+                          primaryAction: {
+                            title: "Reset",
+                            style: Alert.ActionStyle.Destructive,
+                          },
+                        });
+                        if (confirmed) {
+                          for (const a of accounts) {
+                            await resetRanking(a);
+                          }
+                          showToast(Toast.Style.Success, "Usage rankings reset");
+                        }
+                      }}
                     />
                   )}
                   <Action

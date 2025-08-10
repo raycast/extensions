@@ -10,12 +10,6 @@
     "Productivity"
   ],
   "license": "MIT",
-  "os": [
-    "darwin"
-  ],
-  "cpu": [
-    "arm64"
-  ],
   "commands": [
     {
       "name": "index",
@@ -27,8 +21,6 @@
   "dependencies": {
     "@raycast/api": "^1.102.3",
     "@raycast/utils": "^1.17.0",
-    "bindings": "^1.5.0",
-    "macos-touchid": "^1.0.3",
     "otplib": "^12.0.1"
   },
   "devDependencies": {

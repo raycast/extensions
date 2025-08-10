@@ -10,36 +10,11 @@ Easily import your secrets into the extension
 
 <video src="https://github.com/user-attachments/assets/f0e5976f-3cf1-4d05-9c82-c855dfbd15ac" width="800" autoplay loop controls></video>
 
-### Touch ID authentication
-
-Secure your codes with Touch ID authentication
-
-<video src="https://github.com/user-attachments/assets/7807dc36-d675-4950-abde-0369efee0eae" width="800" autoplay loop controls></video>
-
 ### Copy/paste shortcuts
 
 Convenient shortcuts for copying/pasting current and next codes
 
 <video src="https://github.com/user-attachments/assets/ed7a7207-1428-495a-9bf3-db4a962090a0" width="800" autoplay loop controls></video>
-
-### Enable/disable Touch ID
-
-If that's how you roll, you may disable Touch ID if you wish
-
-<video src="https://github.com/user-attachments/assets/47cf13f3-51b7-48a0-ae17-1ddf3554a045" width="800" autoplay loop controls></video>
-
-### Control authentication timeout
-
-Modify how long authentication sessions should last before they expire
-
-<video src="https://github.com/user-attachments/assets/b7f03aad-198c-415f-9ec7-c7f6da14f72b" width="800" autoplay loop controls>
-</video>
-
-### Clear authentication session
-
-Passing your laptop to someone else? Make sure to clear authentication before doing so!
-
-<video src="https://github.com/user-attachments/assets/32c28d5a-2a56-4178-9ff4-6fa5855e0fa5" width="800" autoplay loop controls></video>
 
 ### Reset authenticator data
 
@@ -57,10 +32,6 @@ Wish to import a different JSON file? Reset your data (**Warning: this action ca
 
 1. Export your authenticator data from Proton Pass
 2. Upload the JSON file to the tool as prompted
-
-## Compatibility
-
-Apple Silicon Macs with Touch ID
 
 ## Credits
 
