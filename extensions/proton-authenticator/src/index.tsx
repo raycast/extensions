@@ -1,21 +1,9 @@
-import {
-  Action,
-  ActionPanel,
-  List,
-  showToast,
-  showHUD,
-  Toast,
-  Icon,
-  confirmAlert,
-  Alert,
-  Clipboard,
-  closeMainWindow,
-} from "@raycast/api";
+import { Action, ActionPanel, List, showToast, Toast, Icon, confirmAlert, Alert } from "@raycast/api";
 import { useCachedState, getProgressIcon, showFailureToast, useFrecencySorting } from "@raycast/utils";
 import { useState, useEffect, useMemo } from "react";
+import Fuse from "fuse.js";
 
 import { STATE_KEYS } from "./lib/constants";
-
 import { TOTPAccount } from "./types";
 import { loadAccountsFromStorage, clearStoredData } from "./lib/storage";
 import { generateTOTP, generateNextTOTP, getTimeRemaining } from "./lib/totp";
@@ -29,15 +17,12 @@ export default function Command() {
   const [nextCodes, setNextCodes] = useState<Map<string, string>>(new Map());
   const [timeRemainingMap, setTimeRemainingMap] = useState<Map<string, number>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
+  const [searchText, setSearchText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [sortingMode, setSortingMode] = useCachedState<"frecency" | "alphabetical">(
     STATE_KEYS.SORTING_MODE,
     "frecency",
   );
-
-  const Metadata = List.Item.Detail.Metadata;
-  const Label = Metadata.Label;
-  const Separator = Metadata.Separator;
 
   const {
     data: sortedByFrecency,
@@ -58,15 +43,23 @@ export default function Command() {
     return sortedByFrecency;
   }, [accounts, sortedByFrecency, sortingMode]);
 
-  const handleCopyCode = async (code: string, account: TOTPAccount) => {
-    visitItem(account);
+  const fuse = useMemo(() => {
+    return new Fuse(sortedAccounts, {
+      keys: [
+        { name: "issuer", weight: 0.6 },
+        { name: "name", weight: 0.4 },
+      ],
+      threshold: 0.4,
+      ignoreLocation: false,
+      minMatchCharLength: 1,
+      shouldSort: true,
+    });
+  }, [sortedAccounts]);
 
-    await Clipboard.copy(code);
-    setTimeout(() => {
-      showHUD("Copied to clipboard");
-    }, 100);
-    await closeMainWindow();
-  };
+  const visibleAccounts = useMemo(() => {
+    if (!searchText.trim()) return sortedAccounts;
+    return fuse.search(searchText.trim()).map((r) => r.item);
+  }, [fuse, searchText, sortedAccounts]);
 
   useEffect(() => {
     const loadAccounts = async () => {
@@ -128,7 +121,7 @@ export default function Command() {
   if (!isLoading && error) {
     return (
       <List>
-        <List.EmptyView title="Error Loading Accounts" description={error} icon="⚠️" />
+        <List.EmptyView title="Error Loading Accounts" description={error} icon={Icon.Warning} />
       </List>
     );
   }
@@ -136,78 +129,77 @@ export default function Command() {
   if (!isLoading && accounts.length === 0) {
     return (
       <List>
-        <List.EmptyView title="No TOTP Accounts Found" icon="🔐" />
+        <List.EmptyView title="No TOTP Accounts Found" icon={Icon.Lock} />
       </List>
     );
   }
 
-  if (isLoading) {
-    return <List isLoading={true} />;
-  }
-
   return (
-    <List navigationTitle="TOTP codes" searchBarPlaceholder="Search accounts..." isShowingDetail>
-      {sortedAccounts.map((account) => {
+    <List
+      navigationTitle="TOTP codes"
+      searchBarPlaceholder="Search accounts..."
+      filtering={false}
+      onSearchTextChange={setSearchText}
+      searchText={searchText}
+      isLoading={isLoading}
+    >
+      {visibleAccounts.map((account) => {
         const code = codes.get(account.id) || "";
         const nextCode = nextCodes.get(account.id) || "";
         const displayName = account.issuer || account.name;
         const username = account.name;
 
         const remaining = timeRemainingMap.get(account.id) ?? getTimeRemaining(account.period || 30);
-        const { color, backgroundColor } = getProgressColor(remaining);
+        const colors = getProgressColor(remaining);
 
         return (
           <List.Item
             key={account.id}
             title={displayName}
             subtitle={username}
-            icon={Icon.Key}
             keywords={[displayName, username]}
-            detail={
-              <List.Item.Detail
-                metadata={
-                  <Metadata>
-                    <Label title="Current Code" text={code} />
-                    <Label title="Next Code" text={nextCode} />
-                    <Label title="Time Remaining" text={`${remaining}s`} />
-                    <Separator />
-                    <Label title="Username" text={username} />
-                    <Label title="Issuer" text={account.issuer || "N/A"} />
-                    <Separator />
-                    <Label title="Algorithm" text={account.algorithm} />
-                    <Label title="Digits" text={account.digits.toString()} />
-                    <Label title="Period" text={`${account.period}s`} />
-                  </Metadata>
-                }
-              />
-            }
             accessories={[
+              { tag: code },
               {
+                text: `${remaining}s`,
                 icon: {
-                  source: getProgressIcon(remaining / (account.period || 30), color, {
-                    background: backgroundColor,
+                  source: getProgressIcon(remaining / (account.period || 30), colors.main, {
+                    background: colors.background,
                     backgroundOpacity: 1,
                   }),
                 },
+                tooltip: "Time remaining",
               },
             ]}
             actions={
               <ActionPanel>
                 <ActionPanel.Section title="Current Code">
-                  <Action title="Copy Current" icon={Icon.Clipboard} onAction={() => handleCopyCode(code, account)} />
-                  <Action.Paste title="Paste Current" icon={Icon.Key} content={code} />
+                  <Action.CopyToClipboard
+                    title="Copy Current"
+                    icon={Icon.Clipboard}
+                    content={code}
+                    onCopy={() => visitItem(account)}
+                  />
+                  <Action.Paste
+                    title="Paste Current"
+                    icon={Icon.Key}
+                    content={code}
+                    onPaste={() => visitItem(account)}
+                  />
                 </ActionPanel.Section>
                 <ActionPanel.Section title="Next Code">
-                  <Action
+                  <Action.CopyToClipboard
                     title="Copy Next"
                     icon={Icon.Clipboard}
+                    content={nextCode}
+                    onCopy={() => visitItem(account)}
                     shortcut={{ modifiers: ["cmd"], key: "n" }}
-                    onAction={() => handleCopyCode(nextCode, account)}
                   />
                   <Action.Paste
                     title="Paste Next"
                     icon={Icon.Key}
                     content={nextCode}
+                    onPaste={() => visitItem(account)}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
                   />
                 </ActionPanel.Section>
