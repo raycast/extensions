@@ -41,8 +41,7 @@ export function fetchPocketNames(): string[] {
         showToast({
           style: Toast.Style.Failure,
           title: `${filePath} could not be read`,
-          message:
-            "File/directory may contain special characters, or protect read access. Suppress this error in extension preferences.",
+          message: "File/directory may contain special characters, or protect read access. Suppress this error in extension preferences.",
         });
       }
       return;
