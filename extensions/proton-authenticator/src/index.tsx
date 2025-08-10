@@ -178,6 +178,7 @@ export default function Command() {
                     icon={Icon.Clipboard}
                     content={code}
                     onCopy={() => visitItem(account)}
+                    concealed={true}
                   />
                   <Action.Paste
                     title="Paste Current"
@@ -192,6 +193,7 @@ export default function Command() {
                     icon={Icon.Clipboard}
                     content={nextCode}
                     onCopy={() => visitItem(account)}
+                    concealed={true}
                     shortcut={{ modifiers: ["cmd"], key: "n" }}
                   />
                   <Action.Paste
