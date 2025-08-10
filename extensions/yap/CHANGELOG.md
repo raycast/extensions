@@ -1,6 +1,6 @@
 # Yap Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Hello World] - {PR_MERGE_DATE}
 
 ### Features
 
