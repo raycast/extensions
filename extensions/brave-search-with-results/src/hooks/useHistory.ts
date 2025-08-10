@@ -32,7 +32,6 @@ export default function useHistory(type: Type) {
 
       const nextItems = [newItem, ...value.filter((item) => item.query !== newItem.query)];
 
-      setValue(nextItems);
       return setValue(nextItems);
     },
     [value, setValue, type],
@@ -48,7 +47,6 @@ export default function useHistory(type: Type) {
 
       const nextItems = [...value.filter((item) => item.id !== id)];
 
-      setValue(nextItems);
       return setValue(nextItems);
     },
     [value, setValue],

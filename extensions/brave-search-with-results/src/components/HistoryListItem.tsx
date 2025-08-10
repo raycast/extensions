@@ -24,13 +24,13 @@ export default function HistoryListItem({
     <List.Item
       icon={Icon.MagnifyingGlass}
       title={item.query}
-      subtitle={`Search images for '${item.query}'`}
+      subtitle={`Search for '${item.query}'`}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
             <Action
               icon={Icon.MagnifyingGlass}
-              title="Search Images"
+              title="Search"
               onAction={() => {
                 addHistoryItem(item.query);
                 setQuery(item.query);
