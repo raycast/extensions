@@ -84,5 +84,3 @@ export const MOCK_RESOURCES: ResourceListItem[] = [
     url: "http://flags.prod.platform.example.com",
   },
 ];
-
-
