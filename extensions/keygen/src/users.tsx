@@ -2,14 +2,61 @@ import dayjs from "dayjs";
 import relatimeTime from "dayjs/plugin/relativeTime";
 import { API_URL, headers, parseResponse, useKeygenPaginated } from "./keygen";
 import { User, UserRole } from "./interfaces";
-import { Action, ActionPanel, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  confirmAlert,
+  Form,
+  Icon,
+  Keyboard,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import OpenInKeygen from "./open-in-keygen";
 import { FormValidation, useForm } from "@raycast/utils";
 import { USER_STATUS_COLOR } from "./config";
 dayjs.extend(relatimeTime);
 
 export default function Users() {
-  const { isLoading, data: users, pagination, revalidate, error } = useKeygenPaginated<User>("users");
+  const { isLoading, data: users, pagination, revalidate, error, mutate } = useKeygenPaginated<User>("users");
+
+  async function confirmAndDelete(user: User) {
+    const options: Alert.Options = {
+      title: "Are you absolutely sure?",
+      message:
+        "This action cannot be undone. This will permanently delete the user and delete all associated license and machine resources.",
+      primaryAction: {
+        style: Alert.ActionStyle.Destructive,
+        title: "Delete",
+      },
+    };
+    if (await confirmAlert(options)) {
+      const toast = await showToast(Toast.Style.Animated, "Deleting User", user.attributes.email);
+      try {
+        await mutate(
+          fetch(API_URL + `users/${user.id}`, {
+            method: "DELETE",
+            headers,
+          }).then(parseResponse),
+          {
+            optimisticUpdate(data) {
+              return data.filter((u) => u.id !== user.id);
+            },
+            shouldRevalidateAfter: false,
+          },
+        );
+        toast.style = Toast.Style.Success;
+        toast.title = "Deleted User";
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Could not delete";
+        toast.message = `${error}`;
+      }
+    }
+  }
 
   return (
     <List isLoading={isLoading} pagination={pagination}>
@@ -32,10 +79,18 @@ export default function Users() {
             }}
             title={user.id.slice(0, 8)}
             subtitle={user.attributes.email}
+            keywords={user.attributes.email.split("@")}
             actions={
               <ActionPanel>
                 <OpenInKeygen route={`users/${user.id}`} />
                 <Action.Push icon={Icon.AddPerson} title="New User" target={<NewUser onNew={revalidate} />} />
+                <Action
+                  icon={Icon.RemovePerson}
+                  title="Delete User"
+                  shortcut={Keyboard.Shortcut.Common.Remove}
+                  style={Action.Style.Destructive}
+                  onAction={() => confirmAndDelete(user)}
+                />
               </ActionPanel>
             }
           />
@@ -47,7 +102,7 @@ export default function Users() {
 
 function NewUser({ onNew }: { onNew: () => void }) {
   const { pop } = useNavigation();
-  
+
   interface FormValues {
     firstName: string;
     lastName: string;
@@ -63,11 +118,11 @@ function NewUser({ onNew }: { onNew: () => void }) {
       const attributes: Partial<User["attributes"]> = {
         email: values.email,
         role: values.role as UserRole,
-        ...(values.firstName && { name: values.firstName }),
-        ...(values.lastName && { name: values.lastName }),
-        ...(values.password && { name: values.password })
+        ...(values.firstName && { firstName: values.firstName }),
+        ...(values.lastName && { lastName: values.lastName }),
+        ...(values.password && { password: values.password }),
       };
-      
+
       const body = {
         data: {
           type: "users",
@@ -87,14 +142,13 @@ function NewUser({ onNew }: { onNew: () => void }) {
         onNew();
         pop();
       } catch (error) {
-        console.log(error)
         toast.style = Toast.Style.Failure;
         toast.title = "Could not create";
         toast.message = `${error}`;
       }
     },
     initialValues: {
-      role: "user"
+      role: "user",
     },
     validation: {
       email: FormValidation.Required,
@@ -109,21 +163,9 @@ function NewUser({ onNew }: { onNew: () => void }) {
       }
     >
       <Form.Description text="Attributes" />
-      <Form.TextField
-        title="First Name"
-        placeholder="First Name"
-        {...itemProps.firstName}
-      />
-      <Form.TextField
-        title="Last Name"
-        placeholder="Last Name"
-        {...itemProps.lastName}
-      />
-      <Form.TextField
-        title="Email"
-        placeholder="Email"
-        {...itemProps.email}
-      />
+      <Form.TextField title="First Name" placeholder="First Name" {...itemProps.firstName} />
+      <Form.TextField title="Last Name" placeholder="Last Name" {...itemProps.lastName} />
+      <Form.TextField title="Email" placeholder="Email" {...itemProps.email} />
       <Form.PasswordField title="Password" placeholder="Password" {...itemProps.password} />
       <Form.Dropdown title="Role" {...itemProps.role}>
         <Form.Dropdown.Section title="Product Users">
@@ -132,7 +174,7 @@ function NewUser({ onNew }: { onNew: () => void }) {
         <Form.Dropdown.Section title="Administrators">
           <Form.Dropdown.Item title="Support Agent" value="support-agent" />
           <Form.Dropdown.Item title="Sales Agent" value="sales-agent" />
-          <Form.Dropdown.Item title="Developer"value="developer" />
+          <Form.Dropdown.Item title="Developer" value="developer" />
           <Form.Dropdown.Item title="Read Only" value="read-only" />
           <Form.Dropdown.Item title="Root" value="admin" />
         </Form.Dropdown.Section>

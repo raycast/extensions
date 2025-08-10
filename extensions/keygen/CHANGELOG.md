@@ -2,9 +2,9 @@
 
 ## [List Users + API Usage] - {PR_MERGE_DATE}
 
-- List Users and Create new ones
+- List, Create and Delete Users
 - View API Usage
-- Fix type in command title: "Voew Licenses" -> "View Licenses"
+- Fix typo in command title: "Voew Licenses" -> "View Licenses"
 
 ## [List & Add Products + License Enhancements] - 2025-07-07
 

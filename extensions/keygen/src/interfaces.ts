@@ -113,17 +113,17 @@ export interface Product {
 }
 
 export enum UserStatus {
-  ACTIVE="ACTIVE",
-  INACTIVE="INACTIVE",
-  BANNED="BANNED",
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+  BANNED = "BANNED",
 }
 export enum UserRole {
-  User="user",
-  "Support Agent"="support-agent",
-  "Sales Agent"="sales-agent",
-  Developer="developer",
-  "Read Only"="read-only",
-  Root="admin",
+  User = "user",
+  "Support Agent" = "support-agent",
+  "Sales Agent" = "sales-agent",
+  Developer = "developer",
+  "Read Only" = "read-only",
+  Root = "admin",
 }
 export interface User {
   id: string;
@@ -133,7 +133,7 @@ export interface User {
     email: string;
     status: UserStatus;
     role: UserRole;
-  }
+  };
 }
 
 export interface Result<T> {

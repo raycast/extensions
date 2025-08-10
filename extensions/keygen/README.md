@@ -14,6 +14,7 @@ This is a Raycast extension for [Keygen](https://keygen.sh/) - Open, enterprise-
     - Create Product
 - View Users
     - Create User
+    - Delete User
 
 ## 🚀 Getting Started
 
