@@ -17,7 +17,7 @@ export default function Command() {
   const [nextCodes, setNextCodes] = useState<Map<string, string>>(new Map());
   const [timeRemainingMap, setTimeRemainingMap] = useState<Map<string, number>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
-  const [searchText, setSearchText] = useState("");
+  const [searchText, setSearchText] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [sortingMode, setSortingMode] = useCachedState<"frecency" | "alphabetical">(
     STATE_KEYS.SORTING_MODE,
@@ -139,8 +139,7 @@ export default function Command() {
       navigationTitle="TOTP codes"
       searchBarPlaceholder="Search accounts..."
       filtering={false}
-      onSearchTextChange={setSearchText}
-      searchText={searchText}
+      onSearchTextChange={(text) => setSearchText(text)}
       isLoading={isLoading}
     >
       {visibleAccounts.map((account) => {

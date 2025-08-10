@@ -43,7 +43,6 @@ export default function SetupForm({ onAccountsLoaded }: SetupFormProps) {
       }
     >
       <Form.Description text="Select your Proton Authenticator JSON export file" />
-
       <Form.FilePicker
         id="jsonFile"
         title="JSON Export File"
@@ -54,9 +53,6 @@ export default function SetupForm({ onAccountsLoaded }: SetupFormProps) {
         canChooseDirectories={false}
         info="Get this file by going into the Proton Authenticator app settings -> Export"
       />
-
-      <Form.Separator />
-      <Form.Description text="This file is typically named something like 'Proton_Authenticator_backup_2025-08-02.json'" />
     </Form>
   );
 }
