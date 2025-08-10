@@ -71,6 +71,7 @@ export default function EditUserForm({ user, instance }: EditUserFormProps) {
           <Action.SubmitForm title="Save Changes" onSubmit={handleSubmit} />
         </ActionPanel>
       }
+      navigationTitle="Edit User"
     >
       <Form.TextField id="name" title="Name" defaultValue={user.name} />
       {user.role !== "end-user" && <Form.TextField id="alias" title="Alias" defaultValue={user.alias} />}

@@ -1,4 +1,4 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 
 export interface ZendeskInstance {
@@ -131,4 +131,23 @@ export function getZendeskInstances(): ZendeskInstance[] {
   }
 
   return instances;
+}
+
+const LAST_USED_INSTANCE_KEY = "last-used-instance";
+
+export async function getLastUsedInstance(): Promise<string | undefined> {
+  try {
+    return await LocalStorage.getItem<string>(LAST_USED_INSTANCE_KEY);
+  } catch (error) {
+    console.error("Failed to get last used instance:", error);
+    return undefined;
+  }
+}
+
+export async function setLastUsedInstance(instanceName: string): Promise<void> {
+  try {
+    await LocalStorage.setItem(LAST_USED_INSTANCE_KEY, instanceName);
+  } catch (error) {
+    console.error("Failed to set last used instance:", error);
+  }
 }

@@ -220,6 +220,7 @@ export interface ZendeskTicket {
   ticket_form_id: number;
   priority: string;
   type: string;
+  requester_id?: number;
   via: { channel: string; source: { from: Record<string, unknown>; to: Record<string, unknown> }; rel: string };
   custom_fields: { id: number; value: string | null }[];
 }

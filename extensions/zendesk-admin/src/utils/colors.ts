@@ -162,3 +162,35 @@ export const getRoleAccessLevelText = (level: string) => {
       return level;
   }
 };
+
+// Ticket type color mapping
+export const getTicketTypeColor = (type: string) => {
+  switch (type) {
+    case "problem":
+      return Color.Red;
+    case "incident":
+      return Color.Orange;
+    case "question":
+      return Color.Blue;
+    case "task":
+      return Color.Green;
+    default:
+      return Color.PrimaryText;
+  }
+};
+
+// Ticket type text mapping
+export const getTicketTypeText = (type: string) => {
+  switch (type) {
+    case "problem":
+      return "Problem";
+    case "incident":
+      return "Incident";
+    case "question":
+      return "Question";
+    case "task":
+      return "Task";
+    default:
+      return type;
+  }
+};

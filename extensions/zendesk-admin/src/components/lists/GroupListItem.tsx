@@ -36,11 +36,6 @@ export function GroupListItem({
               <List.Item.Detail.Metadata.Label title="Name" text={group.name} />
               <List.Item.Detail.Metadata.Label title="ID" text={group.id.toString()} />
               {group.description && <List.Item.Detail.Metadata.Label title="Description" text={group.description} />}
-              <List.Item.Detail.Metadata.Link
-                title="Open Group Details"
-                text="View Group Details"
-                target={`https://${instance?.subdomain}.zendesk.com/admin/people/groups/${group.id}`}
-              />
               <List.Item.Detail.Metadata.Separator />
               <List.Item.Detail.Metadata.Label title="Default" icon={getBooleanIcon(group.default)} />
               <List.Item.Detail.Metadata.Label title="Deleted" icon={getBooleanIcon(group.deleted)} />

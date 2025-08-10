@@ -26,7 +26,7 @@ export const createEntityOpenAndCopyActions = (
       key="copy"
       title={copyTitle || "Copy Link"}
       content={url}
-      shortcut={copyShortcut || Keyboard.Shortcut.Common.Copy}
+      shortcut={copyShortcut || Keyboard.Shortcut.Common.CopyDeeplink}
     />
   </>
 );
@@ -37,7 +37,12 @@ export const createEntityOpenAndCopyActions = (
 export const createOpenAndCopyActions = (url: string, title: string) => (
   <>
     <Action.OpenInBrowser key="open" title={title} url={url} shortcut={Keyboard.Shortcut.Common.Open} />
-    <Action.CopyToClipboard key="copy" title={`Copy ${title}`} content={url} shortcut={Keyboard.Shortcut.Common.Copy} />
+    <Action.CopyToClipboard
+      key="copy"
+      title={`Copy ${title}`}
+      content={url}
+      shortcut={Keyboard.Shortcut.Common.CopyDeeplink}
+    />
   </>
 );
 
@@ -46,7 +51,7 @@ export const createOpenAndCopyActions = (url: string, title: string) => (
  */
 export const createCopyAction = (content: string, title: string, shortcut?: Keyboard.Shortcut) => (
   <Action.CopyToClipboard
-    key="copy-content"
+    key={`copy-${title.toLowerCase().replace(/\s+/g, "-")}`}
     title={title}
     content={content}
     shortcut={shortcut || Keyboard.Shortcut.Common.Copy}
@@ -57,7 +62,12 @@ export const createCopyAction = (content: string, title: string, shortcut?: Keyb
  * Creates a "Copy to Clipboard" action with custom shortcut
  */
 export const createCopyActionWithShortcut = (content: string, title: string, shortcut: Keyboard.Shortcut) => (
-  <Action.CopyToClipboard key="copy-custom" title={title} content={content} shortcut={shortcut} />
+  <Action.CopyToClipboard
+    key={`copy-${title.toLowerCase().replace(/\s+/g, "-")}`}
+    title={title}
+    content={content}
+    shortcut={shortcut}
+  />
 );
 
 /**
@@ -76,5 +86,10 @@ export const createOpenAction = (url: string, title: string, shortcut?: Keyboard
  * Creates an "Open in Browser" action with custom shortcut
  */
 export const createOpenActionWithShortcut = (url: string, title: string, shortcut: Keyboard.Shortcut) => (
-  <Action.OpenInBrowser key="open-custom" title={title} url={url} shortcut={shortcut} />
+  <Action.OpenInBrowser
+    key={`open-${title.toLowerCase().replace(/\s+/g, "-")}`}
+    title={title}
+    url={url}
+    shortcut={shortcut}
+  />
 );

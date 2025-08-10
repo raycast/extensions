@@ -2,8 +2,8 @@ import { List } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { SearchTypeSelector, SearchType } from "./components/common/SearchTypeSelector";
 
-import { useState, useEffect } from "react";
-import { getZendeskInstances, ZendeskInstance } from "./utils/preferences";
+import { useState, useEffect, useCallback } from "react";
+import { getZendeskInstances, ZendeskInstance, getLastUsedInstance, setLastUsedInstance } from "./utils/preferences";
 import { useDebounce } from "./hooks/useDebounce";
 import {
   searchZendeskUsers,
@@ -55,7 +55,8 @@ import { SupportAddressListItem } from "./components/lists/SupportAddressListIte
 import { groupDynamicContentResults, GroupedDynamicContentResult } from "./utils/dynamicContentGrouping";
 
 export default function SearchZendesk() {
-  const allInstances = getZendeskInstances();
+  const [allInstances, setAllInstances] = useState<ZendeskInstance[]>([]);
+  const [instancesLoaded, setInstancesLoaded] = useState(false);
 
   // Helper function to get category name from category ID
   const getCategoryName = (categoryId: string | null | undefined): string => {
@@ -71,7 +72,7 @@ export default function SearchZendesk() {
     return brand ? brand.name : `Brand ${brandId}`;
   };
 
-  const [currentInstance, setCurrentInstance] = useState<ZendeskInstance | undefined>(allInstances[0]);
+  const [currentInstance, setCurrentInstance] = useState<ZendeskInstance | undefined>(undefined);
   const [searchText, setSearchText] = useState("");
   const debouncedSearchText = useDebounce(searchText, 350);
   const [results, setResults] = useState<
@@ -112,7 +113,57 @@ export default function SearchZendesk() {
   const [brandsLoaded, setBrandsLoaded] = useState(false);
   const [showDetails, setShowDetails] = useState(true);
 
+  // Load instances once on mount
   useEffect(() => {
+    const loadInstances = async () => {
+      const instances = getZendeskInstances();
+      setAllInstances(instances);
+      setInstancesLoaded(true);
+    };
+    loadInstances();
+  }, []);
+
+  // Initialize current instance with stored value or first available instance
+  useEffect(() => {
+    const initializeCurrentInstance = async () => {
+      if (!instancesLoaded || allInstances.length === 0) return;
+
+      try {
+        const lastUsedInstanceName = await getLastUsedInstance();
+        let instanceToUse: ZendeskInstance | undefined;
+
+        if (lastUsedInstanceName) {
+          // Try to find the stored instance
+          instanceToUse = allInstances.find((instance) => instance.name === lastUsedInstanceName);
+        }
+
+        // If stored instance not found or no stored instance, use the first available
+        if (!instanceToUse && allInstances.length > 0) {
+          instanceToUse = allInstances[0];
+        }
+
+        setCurrentInstance(instanceToUse);
+      } catch (error) {
+        console.error("Failed to initialize current instance:", error);
+        // Fallback to first instance
+        if (allInstances.length > 0) {
+          setCurrentInstance(allInstances[0]);
+        }
+      }
+    };
+
+    initializeCurrentInstance();
+  }, [instancesLoaded, allInstances]);
+
+  // Create a wrapper function to update current instance and store it
+  const updateCurrentInstance = useCallback(async (newInstance: ZendeskInstance) => {
+    setCurrentInstance(newInstance);
+    await setLastUsedInstance(newInstance.name);
+  }, []);
+
+  useEffect(() => {
+    if (!instancesLoaded) return;
+
     setResults([]);
     setSearchText("");
     if (searchType === "dynamic_content") {
@@ -139,7 +190,7 @@ export default function SearchZendesk() {
       setTriggerCategoriesLoaded(false);
       setAllTriggerCategories([]);
     }
-  }, [currentInstance, searchType]);
+  }, [currentInstance, searchType, instancesLoaded]);
 
   useEffect(() => {
     if (searchType === "dynamic_content") {
@@ -218,6 +269,10 @@ export default function SearchZendesk() {
   ]);
 
   async function performSearch() {
+    if (!instancesLoaded) {
+      return; // Don't show error while instances are still loading
+    }
+
     if (!currentInstance) {
       showFailureToast(new Error("No Zendesk instances configured."), { title: "Configuration Error" });
       return;
@@ -393,6 +448,7 @@ export default function SearchZendesk() {
       isShowingDetail={showDetails}
       isLoading={isLoading}
       onSearchTextChange={setSearchText}
+      navigationTitle={currentInstance ? `Search Zendesk - ${currentInstance.name}` : "Search Zendesk"}
       searchBarPlaceholder={
         searchType === "users"
           ? "Search Zendesk users by name, email, etc."
@@ -464,7 +520,7 @@ export default function SearchZendesk() {
                     key={trigger.id}
                     trigger={trigger}
                     instance={currentInstance}
-                    onInstanceChange={setCurrentInstance}
+                    onInstanceChange={updateCurrentInstance}
                     showDetails={showDetails}
                     onShowDetailsChange={setShowDetails}
                     categoryName={getCategoryName(trigger.category_id)}
@@ -503,7 +559,7 @@ export default function SearchZendesk() {
                       key={supportAddress.id}
                       supportAddress={supportAddress}
                       instance={currentInstance}
-                      onInstanceChange={setCurrentInstance}
+                      onInstanceChange={updateCurrentInstance}
                       showDetails={showDetails}
                       onShowDetailsChange={setShowDetails}
                       brandName={getBrandName(supportAddress.brand_id)}
@@ -524,7 +580,7 @@ export default function SearchZendesk() {
                       key={dynamicContent.id}
                       dynamicContent={dynamicContent}
                       instance={currentInstance}
-                      onInstanceChange={setCurrentInstance}
+                      onInstanceChange={updateCurrentInstance}
                       showDetails={showDetails}
                       onShowDetailsChange={setShowDetails}
                     />
@@ -539,7 +595,7 @@ export default function SearchZendesk() {
                       key={user.id}
                       user={user}
                       instance={currentInstance}
-                      onInstanceChange={setCurrentInstance}
+                      onInstanceChange={updateCurrentInstance}
                       showDetails={showDetails}
                       onShowDetailsChange={setShowDetails}
                     />
@@ -551,7 +607,7 @@ export default function SearchZendesk() {
                       key={organization.id}
                       organization={organization}
                       instance={currentInstance}
-                      onInstanceChange={setCurrentInstance}
+                      onInstanceChange={updateCurrentInstance}
                       showDetails={showDetails}
                       onShowDetailsChange={setShowDetails}
                     />
@@ -563,7 +619,7 @@ export default function SearchZendesk() {
                       key={dynamicContent.id}
                       dynamicContent={dynamicContent}
                       instance={currentInstance}
-                      onInstanceChange={setCurrentInstance}
+                      onInstanceChange={updateCurrentInstance}
                       showDetails={showDetails}
                       onShowDetailsChange={setShowDetails}
                     />
@@ -575,7 +631,7 @@ export default function SearchZendesk() {
                       key={macro.id}
                       macro={macro}
                       instance={currentInstance}
-                      onInstanceChange={setCurrentInstance}
+                      onInstanceChange={updateCurrentInstance}
                       showDetails={showDetails}
                       onShowDetailsChange={setShowDetails}
                     />
@@ -587,7 +643,7 @@ export default function SearchZendesk() {
                       key={ticketField.id}
                       ticketField={ticketField}
                       instance={currentInstance}
-                      onInstanceChange={setCurrentInstance}
+                      onInstanceChange={updateCurrentInstance}
                       showDetails={showDetails}
                       onShowDetailsChange={setShowDetails}
                     />
@@ -599,7 +655,7 @@ export default function SearchZendesk() {
                       key={ticketForm.id}
                       ticketForm={ticketForm}
                       instance={currentInstance}
-                      onInstanceChange={setCurrentInstance}
+                      onInstanceChange={updateCurrentInstance}
                       showDetails={showDetails}
                       onShowDetailsChange={setShowDetails}
                     />
@@ -611,7 +667,7 @@ export default function SearchZendesk() {
                       key={group.id}
                       group={group}
                       instance={currentInstance}
-                      onInstanceChange={setCurrentInstance}
+                      onInstanceChange={updateCurrentInstance}
                       showDetails={showDetails}
                       onShowDetailsChange={setShowDetails}
                     />
@@ -623,7 +679,7 @@ export default function SearchZendesk() {
                       key={ticket.id}
                       ticket={ticket}
                       instance={currentInstance}
-                      onInstanceChange={setCurrentInstance}
+                      onInstanceChange={updateCurrentInstance}
                       showDetails={showDetails}
                       onShowDetailsChange={setShowDetails}
                     />
@@ -635,7 +691,7 @@ export default function SearchZendesk() {
                       key={view.id}
                       view={view}
                       instance={currentInstance}
-                      onInstanceChange={setCurrentInstance}
+                      onInstanceChange={updateCurrentInstance}
                       showDetails={showDetails}
                       onShowDetailsChange={setShowDetails}
                     />
@@ -647,7 +703,7 @@ export default function SearchZendesk() {
                       key={brand.id}
                       brand={brand}
                       instance={currentInstance}
-                      onInstanceChange={setCurrentInstance}
+                      onInstanceChange={updateCurrentInstance}
                       showDetails={showDetails}
                       onShowDetailsChange={setShowDetails}
                     />
@@ -659,7 +715,7 @@ export default function SearchZendesk() {
                       key={automation.id}
                       automation={automation}
                       instance={currentInstance}
-                      onInstanceChange={setCurrentInstance}
+                      onInstanceChange={updateCurrentInstance}
                       showDetails={showDetails}
                       onShowDetailsChange={setShowDetails}
                     />
@@ -671,7 +727,7 @@ export default function SearchZendesk() {
                       key={customRole.id}
                       customRole={customRole}
                       instance={currentInstance}
-                      onInstanceChange={setCurrentInstance}
+                      onInstanceChange={updateCurrentInstance}
                       showDetails={showDetails}
                       onShowDetailsChange={setShowDetails}
                     />

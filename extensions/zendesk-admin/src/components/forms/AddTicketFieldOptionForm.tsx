@@ -11,6 +11,12 @@ interface AddTicketFieldOptionFormProps {
 export default function AddTicketFieldOptionForm({ ticketField, instance }: AddTicketFieldOptionFormProps) {
   const { pop } = useNavigation();
 
+  const getNavigationTitle = () => {
+    const maxLen = 20;
+    const truncate = (str: string) => (str.length > maxLen ? str.slice(0, maxLen - 1) + "…" : str);
+    return `Add Option to ${truncate(ticketField.title || "Unknown Field")}`;
+  };
+
   async function handleSubmit(values: { label: string; tag: string }) {
     if (!instance) {
       showFailureToast(new Error("No Zendesk instance configured."), { title: "Configuration Error" });
@@ -32,6 +38,7 @@ export default function AddTicketFieldOptionForm({ ticketField, instance }: AddT
 
   return (
     <Form
+      navigationTitle={getNavigationTitle()}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Add Option" onSubmit={handleSubmit} />

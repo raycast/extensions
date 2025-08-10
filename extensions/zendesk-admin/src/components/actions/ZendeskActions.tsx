@@ -3,7 +3,6 @@ import { getZendeskInstances, ZendeskInstance } from "../../utils/preferences";
 import { getZendeskUrls } from "../../utils/zendeskUrls";
 import {
   createEntityOpenAndCopyActions,
-  createCopyAction,
   createCopyActionWithShortcut,
   createOpenActionWithShortcut,
 } from "../../utils/actionBuilders";
@@ -87,16 +86,22 @@ export function ZendeskActions({
     entityType: "user" | "organization" | "group" | "recipient" | "form" | "brand" | "role",
     entityId?: string,
     entityEmail?: string,
+    entityName?: string,
+    customTitle?: string,
   ) => {
+    const defaultTitle = `View ${entityType.charAt(0).toUpperCase() + entityType.slice(1)}'s Tickets`;
+    const title = customTitle || defaultTitle;
+
     return (
       <Action.Push
-        title={`View ${entityType.charAt(0).toUpperCase() + entityType.slice(1)}'s Tickets`}
+        title={title}
         icon={Icon.Ticket}
         target={
           <EntityTicketsList
             entityType={entityType}
             entityId={entityId}
             entityEmail={entityEmail}
+            entityName={entityName}
             instance={instance}
           />
         }
@@ -129,13 +134,13 @@ export function ZendeskActions({
             "Copy Dynamic Content Link",
           )}
           {defaultVariant &&
-            createCopyActionWithShortcut(defaultVariant.content, "Copy Dynamic Content", {
-              macOS: { modifiers: ["cmd", "shift"], key: "v" },
-              windows: { modifiers: ["ctrl", "shift"], key: "v" },
+            createCopyActionWithShortcut(defaultVariant.content, "Copy Dynamic Text", {
+              macOS: { modifiers: ["cmd"], key: "t" },
+              windows: { modifiers: ["ctrl"], key: "t" },
             })}
           {createCopyActionWithShortcut(
             dynamicContent.placeholder,
-            "Copy Dynamic Content Placeholder",
+            "Copy Placeholder",
             Keyboard.Shortcut.Common.CopyName,
           )}
         </>
@@ -156,7 +161,15 @@ export function ZendeskActions({
       );
     } else if (searchType === "support_addresses") {
       const supportAddress = item as ZendeskSupportAddress;
-      return <>{createCopyAction(supportAddress.email, "Copy Support Email Address")}</>;
+      return (
+        <>
+          {createCopyActionWithShortcut(
+            supportAddress.email,
+            "Copy Support Email Address",
+            Keyboard.Shortcut.Common.CopyName,
+          )}
+        </>
+      );
     } else if (searchType === "ticket_forms") {
       const ticketForm = item as ZendeskTicketForm;
       const ticketFormUrl = urls.getTicketFormDetails(ticketForm.id);
@@ -182,13 +195,19 @@ export function ZendeskActions({
     } else if (searchType === "views") {
       const view = item as ZendeskView;
       const agentViewUrl = urls.getAgentView(view.id);
-      return <>{createEntityOpenAndCopyActions(agentViewUrl, "Open Agent View", "Copy Agent View Link")}</>;
+      const agentEditViewUrl = urls.getAdminViewEdit(view.id);
+      return (
+        <>
+          {createEntityOpenAndCopyActions(agentViewUrl, "Open Agent View", "Copy Agent View Link")}
+          {createOpenActionWithShortcut(agentEditViewUrl, "Open Edit View", Keyboard.Shortcut.Common.Edit)}
+        </>
+      );
     } else if (searchType === "brands") {
       const brand = item as ZendeskBrand;
       const brandUrl = urls.getBrandDetails(brand.id);
       return (
         <>
-          {createEntityOpenAndCopyActions(brandUrl, "Open Brand Details", "Copy Brand Link")}
+          {createEntityOpenAndCopyActions(brandUrl, "Open in Zendesk", "Copy Brand Link")}
           {brand.has_help_center &&
             brand.brand_url &&
             createOpenActionWithShortcut(brand.brand_url, "Open Help Center", {
@@ -200,11 +219,11 @@ export function ZendeskActions({
     } else if (searchType === "automations") {
       const automation = item as ZendeskAutomation;
       const automationUrl = urls.getAutomationDetails(automation.id);
-      return <>{createEntityOpenAndCopyActions(automationUrl, "Open Automation Details", "Copy Automation Link")}</>;
+      return <>{createEntityOpenAndCopyActions(automationUrl, "Open in Zendesk", "Copy Automation Link")}</>;
     } else if (searchType === "custom_roles") {
       const customRole = item as ZendeskCustomRole;
       const customRoleUrl = urls.getCustomRoleDetails(customRole.id);
-      return <>{createEntityOpenAndCopyActions(customRoleUrl, "Open Custom Role Details", "Copy Custom Role Link")}</>;
+      return <>{createEntityOpenAndCopyActions(customRoleUrl, "Open in Zendesk", "Copy Role Link")}</>;
     }
     return null;
   };
@@ -232,12 +251,12 @@ export function ZendeskActions({
               icon={Icon.Person}
               target={<UserGroupMembershipsList userId={user.id} userName={user.name} instance={instance} />}
               shortcut={{
-                macOS: { modifiers: ["cmd"], key: "g" },
-                windows: { modifiers: ["ctrl"], key: "g" },
+                macOS: { modifiers: ["cmd"], key: "m" },
+                windows: { modifiers: ["ctrl"], key: "m" },
               }}
             />
           )}
-          {user.email && renderViewTicketsAction("user", undefined, user.email)}
+          {user.email && renderViewTicketsAction("user", undefined, user.email, user.name)}
         </>
       );
     } else if (searchType === "ticket_fields") {
@@ -266,13 +285,13 @@ export function ZendeskActions({
       return null;
     } else if (searchType === "organizations") {
       const organization = item as ZendeskOrganization;
-      return <>{renderViewTicketsAction("organization", organization.id.toString())}</>;
+      return <>{renderViewTicketsAction("organization", organization.id.toString(), undefined, organization.name)}</>;
     } else if (searchType === "support_addresses") {
       const supportAddress = item as ZendeskSupportAddress;
-      return <>{renderViewTicketsAction("recipient", undefined, supportAddress.email)}</>;
+      return <>{renderViewTicketsAction("recipient", undefined, supportAddress.email, undefined)}</>;
     } else if (searchType === "ticket_forms") {
       const ticketForm = item as ZendeskTicketForm;
-      return <>{renderViewTicketsAction("form", ticketForm.id.toString())}</>;
+      return <>{renderViewTicketsAction("form", ticketForm.id.toString(), undefined, ticketForm.name)}</>;
     } else if (searchType === "groups") {
       const group = item as ZendeskGroup;
       return (
@@ -288,12 +307,29 @@ export function ZendeskActions({
               windows: { modifiers: ["ctrl"], key: "m" },
             }}
           />
-          {renderViewTicketsAction("group", group.id.toString())}
+          {renderViewTicketsAction("group", group.id.toString(), undefined, group.name)}
         </>
       );
     } else if (searchType === "brands") {
       const brand = item as ZendeskBrand;
-      return <>{renderViewTicketsAction("brand", brand.id.toString())}</>;
+      return <>{renderViewTicketsAction("brand", brand.id.toString(), undefined, brand.name)}</>;
+    } else if (searchType === "tickets") {
+      const ticket = item as ZendeskTicket;
+      // Only show action if there is a requester_id
+      if (ticket.requester_id) {
+        return (
+          <>
+            {renderViewTicketsAction(
+              "user",
+              ticket.requester_id.toString(),
+              undefined,
+              `Requester ${ticket.requester_id}`,
+              "Open Requester Tickets",
+            )}
+          </>
+        );
+      }
+      return null;
     } else if (searchType === "automations") {
       // Automations don't have specific entity actions like viewing tickets
       return null;
@@ -304,7 +340,14 @@ export function ZendeskActions({
           <Action.Push
             title="View Role Members"
             icon={Icon.Person}
-            target={<EntityTicketsList entityType="role" entityId={customRole.id.toString()} instance={instance} />}
+            target={
+              <EntityTicketsList
+                entityType="role"
+                entityId={customRole.id.toString()}
+                entityName={customRole.name}
+                instance={instance}
+              />
+            }
             shortcut={{
               macOS: { modifiers: ["cmd"], key: "m" },
               windows: { modifiers: ["ctrl"], key: "m" },
@@ -333,67 +376,52 @@ export function ZendeskActions({
 
   const renderGeneralActions = () => {
     let generalConfigUrl = `https://${instance?.subdomain}.zendesk.com`;
-    let shortcutKey: Keyboard.KeyEquivalent | undefined = undefined;
-    let configTitle = "Open General Configuration";
+    let configTitle = "Open General Config";
 
     const actions = [];
 
     if (searchType === "users") {
       generalConfigUrl = `${generalConfigUrl}/agent/user_filters`;
-      shortcutKey = "u";
-      configTitle = "Open User Configuration";
+      configTitle = "Open User List";
     } else if (searchType === "organizations") {
       generalConfigUrl = `${generalConfigUrl}/agent/organizations`;
-      shortcutKey = "o";
-      configTitle = "Open Organization Configuration";
+      configTitle = "Open Organization List";
     } else if (searchType === "dynamic_content") {
       generalConfigUrl = `${generalConfigUrl}/admin/workspaces/agent-workspace/dynamic_content`;
-      shortcutKey = "d";
-      configTitle = "Open Dynamic Content Configuration";
+      configTitle = "Open Dynamic Content Config";
     } else if (searchType === "macros") {
       generalConfigUrl = `${generalConfigUrl}/admin/workspaces/agent-workspace/macros`;
-      shortcutKey = "m";
-      configTitle = "Open Macro Configuration";
+      configTitle = "Open Macros Config";
     } else if (searchType === "triggers") {
       generalConfigUrl = `${generalConfigUrl}/admin/objects-rules/rules/triggers`;
-      shortcutKey = "t";
-      configTitle = "Open Trigger Configuration";
+      configTitle = "Open Triggers Config";
     } else if (searchType === "ticket_fields") {
       generalConfigUrl = `${generalConfigUrl}/admin/objects-rules/tickets/ticket-fields`;
-      shortcutKey = "f";
-      configTitle = "Open Ticket Field Configuration";
+      configTitle = "Open Ticket Fields Config";
     } else if (searchType === "support_addresses") {
       generalConfigUrl = `${generalConfigUrl}/admin/channels/talk_and_email/email`;
-      shortcutKey = "s";
-      configTitle = "Open Support Address Configuration";
+      configTitle = "Open Support Addresses Config";
     } else if (searchType === "ticket_forms") {
       generalConfigUrl = `${generalConfigUrl}/admin/objects-rules/tickets/ticket-forms`;
-      shortcutKey = "f";
-      configTitle = "Open Ticket Form Configuration";
+      configTitle = "Open Ticket Forms Config";
     } else if (searchType === "groups") {
-      generalConfigUrl = `${generalConfigUrl}/admin/people/groups`;
-      shortcutKey = "g";
-      configTitle = "Open Group Configuration";
+      generalConfigUrl = `${generalConfigUrl}/admin/people/team/groups`;
+      configTitle = "Open Groups Config";
     } else if (searchType === "tickets") {
       generalConfigUrl = `${generalConfigUrl}/agent/filters`;
-      shortcutKey = "t";
-      configTitle = "Open Ticket Configuration";
+      configTitle = "Open Ticket List";
     } else if (searchType === "views") {
-      generalConfigUrl = `${generalConfigUrl}/admin/objects-rules/rules/views`;
-      shortcutKey = "v";
-      configTitle = "Open View Configuration";
+      generalConfigUrl = `${generalConfigUrl}/admin/workspaces/agent-workspace/views`;
+      configTitle = "Open Views Config";
     } else if (searchType === "brands") {
-      generalConfigUrl = `${generalConfigUrl}/admin/brands`;
-      shortcutKey = "b";
-      configTitle = "Open Brand Configuration";
+      generalConfigUrl = `${generalConfigUrl}/admin/account/brand_management/brands`;
+      configTitle = "Open Brands Config";
     } else if (searchType === "automations") {
       generalConfigUrl = `${generalConfigUrl}/admin/objects-rules/rules/automations`;
-      shortcutKey = "n";
-      configTitle = "Open Automation Configuration";
+      configTitle = "Open Automations Config";
     } else if (searchType === "custom_roles") {
-      generalConfigUrl = `${generalConfigUrl}/admin/people/roles`;
-      shortcutKey = "r";
-      configTitle = "Open Custom Role Configuration";
+      generalConfigUrl = `${generalConfigUrl}/admin/people/team/roles`;
+      configTitle = "Open Roles Config";
     }
 
     actions.push(
@@ -401,14 +429,10 @@ export function ZendeskActions({
         key="general-config"
         title={configTitle}
         url={generalConfigUrl}
-        shortcut={
-          shortcutKey
-            ? {
-                macOS: { modifiers: ["cmd", "shift"], key: shortcutKey },
-                windows: { modifiers: ["ctrl", "shift"], key: shortcutKey },
-              }
-            : undefined
-        }
+        shortcut={{
+          macOS: { modifiers: ["cmd"], key: "g" },
+          windows: { modifiers: ["ctrl"], key: "g" },
+        }}
       />,
     );
 

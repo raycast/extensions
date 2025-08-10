@@ -431,6 +431,7 @@ export async function searchZendeskTickets(
   instance: ZendeskInstance,
   filters?: {
     userEmail?: string;
+    userId?: string;
     groupId?: string;
     organizationId?: string;
     brandId?: string;
@@ -442,6 +443,9 @@ export async function searchZendeskTickets(
   let searchTerms = query ? `type:ticket ${query}` : "type:ticket";
   if (filters?.userEmail) {
     searchTerms += ` requester:${filters.userEmail}`;
+  }
+  if (filters?.userId) {
+    searchTerms += ` requester_id:${filters.userId}`;
   }
   if (filters?.groupId) {
     searchTerms += ` group:${filters.groupId}`;
@@ -484,33 +488,30 @@ export async function searchZendeskGroupMemberships(
   instance: ZendeskInstance,
   onPage: (memberships: ZendeskGroupMembership[]) => void,
 ): Promise<void> {
-  let url: string | null = `${getZendeskUrl(instance)}/groups/${groupId}/memberships.json`;
+  const url = `${getZendeskUrl(instance)}/groups/${groupId}/memberships.json`;
   const headers = {
     Authorization: getZendeskAuthHeader(instance),
     "Content-Type": "application/json",
   };
 
   try {
-    while (url) {
-      const response = await fetch(url, {
-        method: "GET",
-        headers: headers,
-      });
+    const response = await fetch(url, {
+      method: "GET",
+      headers: headers,
+    });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        showToast(
-          Toast.Style.Failure,
-          "Zendesk API Error",
-          `Failed to fetch group memberships: ${response.status} - ${errorText}`,
-        );
-        throw new Error(`Zendesk API Error: ${response.status} - ${errorText}`);
-      }
-
-      const data = (await response.json()) as ZendeskGroupMembershipResponse;
-      onPage(data.group_memberships);
-      url = null; // No next page for this endpoint
+    if (!response.ok) {
+      const errorText = await response.text();
+      showToast(
+        Toast.Style.Failure,
+        "Zendesk API Error",
+        `Failed to fetch group memberships: ${response.status} - ${errorText}`,
+      );
+      throw new Error(`Zendesk API Error: ${response.status} - ${errorText}`);
     }
+
+    const data = (await response.json()) as ZendeskGroupMembershipResponse;
+    onPage(data.group_memberships);
   } catch (error) {
     showToast(
       Toast.Style.Failure,
@@ -526,33 +527,30 @@ export async function searchZendeskUserGroupMemberships(
   instance: ZendeskInstance,
   onPage: (memberships: ZendeskGroupMembership[]) => void,
 ): Promise<void> {
-  let url: string | null = `${getZendeskUrl(instance)}/users/${userId}/group_memberships.json`;
+  const url = `${getZendeskUrl(instance)}/users/${userId}/group_memberships.json`;
   const headers = {
     Authorization: getZendeskAuthHeader(instance),
     "Content-Type": "application/json",
   };
 
   try {
-    while (url) {
-      const response = await fetch(url, {
-        method: "GET",
-        headers: headers,
-      });
+    const response = await fetch(url, {
+      method: "GET",
+      headers: headers,
+    });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        showToast(
-          Toast.Style.Failure,
-          "Zendesk API Error",
-          `Failed to fetch user group memberships: ${response.status} - ${errorText}`,
-        );
-        throw new Error(`Zendesk API Error: ${response.status} - ${errorText}`);
-      }
-
-      const data = (await response.json()) as ZendeskGroupMembershipResponse;
-      onPage(data.group_memberships);
-      url = null; // No next page for this endpoint
+    if (!response.ok) {
+      const errorText = await response.text();
+      showToast(
+        Toast.Style.Failure,
+        "Zendesk API Error",
+        `Failed to fetch user group memberships: ${response.status} - ${errorText}`,
+      );
+      throw new Error(`Zendesk API Error: ${response.status} - ${errorText}`);
     }
+
+    const data = (await response.json()) as ZendeskGroupMembershipResponse;
+    onPage(data.group_memberships);
   } catch (error) {
     showToast(
       Toast.Style.Failure,

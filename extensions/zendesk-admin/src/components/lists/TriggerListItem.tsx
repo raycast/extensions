@@ -70,12 +70,6 @@ export function TriggerListItem({
               {trigger.created_at && trigger.updated_at && (
                 <TimestampMetadata created_at={trigger.created_at} updated_at={trigger.updated_at} />
               )}
-              <List.Item.Detail.Metadata.Separator />
-              <List.Item.Detail.Metadata.Link
-                title="Open in Zendesk"
-                text="View Trigger"
-                target={`https://${instance?.subdomain}.zendesk.com/admin/objects-rules/rules/triggers/${trigger.id}`}
-              />
             </List.Item.Detail.Metadata>
           }
         />

@@ -1,7 +1,7 @@
 import { List, Image, Icon } from "@raycast/api";
 import { ZendeskUser } from "../../api/zendesk";
 import { getUserRoleColor } from "../../utils/colors";
-import { TimestampMetadata, InstanceMetadata } from "../common/MetadataHelpers";
+import { TimestampMetadata } from "../common/MetadataHelpers";
 import { ZendeskActions } from "../actions/ZendeskActions";
 import { ZendeskInstance } from "../../utils/preferences";
 
@@ -51,7 +51,6 @@ export function UserListItem({
           <List.Item.Detail
             metadata={
               <List.Item.Detail.Metadata>
-                {instance && <InstanceMetadata instance={instance} />}
                 <List.Item.Detail.Metadata.Label title="Name" text={user.name} />
                 <List.Item.Detail.Metadata.Label title="ID" text={user.id.toString()} />
                 {user.email && (
@@ -88,13 +87,6 @@ export function UserListItem({
                     )}
                   </>
                 )}
-
-                <List.Item.Detail.Metadata.Separator />
-                <List.Item.Detail.Metadata.Link
-                  title="Open in Zendesk"
-                  text="View User Profile"
-                  target={`https://${instance?.subdomain}.zendesk.com/agent/users/${user.id}`}
-                />
               </List.Item.Detail.Metadata>
             }
           />

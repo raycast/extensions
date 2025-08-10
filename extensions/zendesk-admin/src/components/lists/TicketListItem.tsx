@@ -1,7 +1,7 @@
 import { List } from "@raycast/api";
 import { ZendeskTicket, ZendeskInstance } from "../../api/zendesk";
 import { ZendeskActions } from "../actions/ZendeskActions";
-import { getStatusColor, getPriorityColor } from "../../utils/colors";
+import { getStatusColor, getPriorityColor, getTicketTypeColor, getTicketTypeText } from "../../utils/colors";
 import { TimestampMetadata } from "../common/MetadataHelpers";
 import { getViaChannelInfo } from "../../utils/viaChannelMapping";
 
@@ -22,6 +22,8 @@ export function TicketListItem({
 }: TicketListItemProps) {
   const statusColor = getStatusColor(ticket.status);
   const priorityColor = getPriorityColor(ticket.priority);
+  const ticketTypeColor = getTicketTypeColor(ticket.type);
+  const ticketTypeText = getTicketTypeText(ticket.type);
 
   return (
     <List.Item
@@ -38,6 +40,9 @@ export function TicketListItem({
               </List.Item.Detail.Metadata.TagList>
               <List.Item.Detail.Metadata.Separator />
               <List.Item.Detail.Metadata.TagList title="Associations">
+                {ticket.requester_id && (
+                  <List.Item.Detail.Metadata.TagList.Item text={`Requester: ${ticket.requester_id}`} />
+                )}
                 {ticket.organization_id && (
                   <List.Item.Detail.Metadata.TagList.Item text={`Organization: ${ticket.organization_id}`} />
                 )}
@@ -74,7 +79,7 @@ export function TicketListItem({
               )}
               {ticket.type && (
                 <List.Item.Detail.Metadata.TagList title="Type">
-                  <List.Item.Detail.Metadata.TagList.Item text={ticket.type} />
+                  <List.Item.Detail.Metadata.TagList.Item text={ticketTypeText} color={ticketTypeColor} />
                 </List.Item.Detail.Metadata.TagList>
               )}
               {ticket.via && (

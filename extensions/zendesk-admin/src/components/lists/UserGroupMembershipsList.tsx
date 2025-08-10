@@ -148,17 +148,6 @@ export default function UserGroupMembershipsList({ userId, userName, instance }:
                     </List.Item.Detail.Metadata.TagList>
                     <List.Item.Detail.Metadata.Separator />
                     <TimestampMetadata created_at={membership.created_at} updated_at={membership.updated_at} />
-                    <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Link
-                      title="Open User Profile"
-                      text="View User"
-                      target={`https://${instance?.subdomain}.zendesk.com/agent/users/${membership.user_id}`}
-                    />
-                    <List.Item.Detail.Metadata.Link
-                      title="Open Group Details"
-                      text="View Group"
-                      target={`https://${instance?.subdomain}.zendesk.com/admin/people/groups/${membership.group_id}`}
-                    />
                   </List.Item.Detail.Metadata>
                 }
               />

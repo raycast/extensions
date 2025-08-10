@@ -10,12 +10,19 @@ interface EntityTicketsListProps {
   entityType: "user" | "group" | "organization" | "brand" | "form" | "recipient" | "role";
   entityId?: string;
   entityEmail?: string;
+  entityName?: string;
   instance: ZendeskInstance | undefined;
 }
 
 type SortOrder = "created_at_desc" | "created_at_asc" | "updated_at_desc" | "updated_at_asc" | "status" | "priority";
 
-export default function EntityTicketsList({ entityType, entityId, entityEmail, instance }: EntityTicketsListProps) {
+export default function EntityTicketsList({
+  entityType,
+  entityId,
+  entityEmail,
+  entityName,
+  instance,
+}: EntityTicketsListProps) {
   const [searchText, setSearchText] = useState("");
   const debouncedSearchText = useDebounce(searchText, 350);
   const [tickets, setTickets] = useState<ZendeskTicket[]>([]);
@@ -41,7 +48,8 @@ export default function EntityTicketsList({ entityType, entityId, entityEmail, i
     setIsLoading(true);
     try {
       const fetchedTickets = await searchZendeskTickets(debouncedSearchText, instance, {
-        userEmail: entityType === "user" ? entityEmail : undefined,
+        userEmail: entityType === "user" && entityEmail ? entityEmail : undefined,
+        userId: entityType === "user" && entityId ? entityId : undefined,
         groupId: entityType === "group" ? entityId : undefined,
         organizationId: entityType === "organization" ? entityId : undefined,
         brandId: entityType === "brand" ? entityId : undefined,
@@ -82,6 +90,16 @@ export default function EntityTicketsList({ entityType, entityId, entityEmail, i
     });
   };
 
+  const getNavigationTitle = () => {
+    const maxLen = 20;
+    const truncate = (str: string) => (str.length > maxLen ? str.slice(0, maxLen - 1) + "…" : str);
+
+    const entityIdentifier = entityName || entityId || entityEmail || "Unknown";
+    const entityTypeLabel = entityType.charAt(0).toUpperCase() + entityType.slice(1);
+
+    return `Tickets for ${entityTypeLabel}: ${truncate(entityIdentifier)}`;
+  };
+
   return (
     <List
       isLoading={isLoading}
@@ -89,6 +107,7 @@ export default function EntityTicketsList({ entityType, entityId, entityEmail, i
       searchBarPlaceholder={`Search tickets...`}
       throttle
       isShowingDetail={showDetails}
+      navigationTitle={getNavigationTitle()}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Sort Tickets"

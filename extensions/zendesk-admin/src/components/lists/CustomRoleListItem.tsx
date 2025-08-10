@@ -1,9 +1,8 @@
-import { List, ActionPanel, Action, Icon, Keyboard, Color } from "@raycast/api";
+import { List, Icon, Color } from "@raycast/api";
 import { ZendeskCustomRole, ZendeskInstance } from "../../api/zendesk";
-import { getZendeskInstances } from "../../utils/preferences";
 import { getActiveStatusColor, getRoleAccessLevelColor, getRoleAccessLevelText } from "../../utils/colors";
-import { InstanceMetadata, TimestampMetadata } from "../common/MetadataHelpers";
-import UserMembershipList from "./UserMembershipList";
+import { TimestampMetadata } from "../common/MetadataHelpers";
+import { ZendeskActions } from "../actions/ZendeskActions";
 
 interface CustomRoleListItemProps {
   customRole: ZendeskCustomRole;
@@ -20,8 +19,6 @@ export function CustomRoleListItem({
   showDetails,
   onShowDetailsChange,
 }: CustomRoleListItemProps) {
-  const allInstances = getZendeskInstances();
-
   const accessories: List.Item.Accessory[] = [
     ...(customRole.team_member_count > 0 ? [{ text: `${customRole.team_member_count}` }, { icon: Icon.Person }] : []),
   ];
@@ -36,8 +33,6 @@ export function CustomRoleListItem({
           <List.Item.Detail
             metadata={
               <List.Item.Detail.Metadata>
-                {instance && <InstanceMetadata instance={instance} />}
-
                 <List.Item.Detail.Metadata.Label title="Role ID" text={customRole.id?.toString() || "N/A"} />
                 <List.Item.Detail.Metadata.Label title="Name" text={customRole.name || "N/A"} />
                 <List.Item.Detail.Metadata.Label title="Description" text={customRole.description || "N/A"} />
@@ -178,89 +173,14 @@ export function CustomRoleListItem({
         ) : undefined
       }
       actions={
-        <ActionPanel>
-          <ActionPanel.Section title="Open">
-            <Action.OpenInBrowser
-              title="Open in Zendesk"
-              url={`https://${instance?.subdomain}.zendesk.com/admin/people/team/roles/${customRole.id}`}
-              shortcut={Keyboard.Shortcut.Common.Open}
-            />
-            <Action.CopyToClipboard
-              title="Copy Role Link"
-              content={`https://${instance?.subdomain}.zendesk.com/admin/people/team/roles/${customRole.id}`}
-              shortcut={Keyboard.Shortcut.Common.Copy}
-            />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="Role Actions">
-            <Action.Push
-              title="View Role Members"
-              icon={Icon.Person}
-              target={
-                <UserMembershipList
-                  entityType="role"
-                  entityId={customRole.id}
-                  entityName={customRole.name || "Unknown Role"}
-                  instance={instance}
-                />
-              }
-              shortcut={{
-                macOS: { modifiers: ["cmd"], key: "m" },
-                windows: { modifiers: ["ctrl"], key: "m" },
-              }}
-            />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="General">
-            <Action.OpenInBrowser
-              title="Open Roles Configuration"
-              url={`https://${instance?.subdomain}.zendesk.com/admin/people/roles`}
-              shortcut={{
-                macOS: { modifiers: ["cmd", "shift"], key: "r" },
-                windows: { modifiers: ["ctrl", "shift"], key: "r" },
-              }}
-            />
-            <Action
-              title={showDetails ? "Hide Details" : "Show Details"}
-              icon={showDetails ? Icon.EyeDisabled : Icon.Eye}
-              onAction={() => onShowDetailsChange(!showDetails)}
-              shortcut={{
-                macOS: { modifiers: ["cmd"], key: "d" },
-                windows: { modifiers: ["ctrl"], key: "d" },
-              }}
-            />
-            <ActionPanel.Submenu title="Change Instance" icon={Icon.House}>
-              {allInstances.map((inst, index) => {
-                const keyMap: { [key: number]: Keyboard.KeyEquivalent } = {
-                  0: "0",
-                  1: "1",
-                  2: "2",
-                  3: "3",
-                  4: "4",
-                  5: "5",
-                  6: "6",
-                  7: "7",
-                  8: "8",
-                  9: "9",
-                };
-                const key = index < 9 ? keyMap[index + 1] : keyMap[0];
-
-                return (
-                  <Action
-                    key={inst.subdomain}
-                    title={`${inst.subdomain}`}
-                    icon={
-                      instance?.subdomain === inst.subdomain ? { source: Icon.Dot, tintColor: Color.Green } : undefined
-                    }
-                    onAction={() => onInstanceChange(inst)}
-                    shortcut={{
-                      macOS: { modifiers: ["cmd"], key },
-                      windows: { modifiers: ["ctrl"], key },
-                    }}
-                  />
-                );
-              })}
-            </ActionPanel.Submenu>
-          </ActionPanel.Section>
-        </ActionPanel>
+        <ZendeskActions
+          item={customRole}
+          searchType="custom_roles"
+          instance={instance}
+          onInstanceChange={onInstanceChange}
+          showDetails={showDetails}
+          onShowDetailsChange={onShowDetailsChange}
+        />
       }
     />
   );

@@ -1,7 +1,7 @@
 import { List, Icon } from "@raycast/api";
 import { ZendeskView } from "../../api/zendesk";
 import { getActiveStatusColor } from "../../utils/colors";
-import { TimestampMetadata, InstanceMetadata } from "../common/MetadataHelpers";
+import { TimestampMetadata } from "../common/MetadataHelpers";
 import { ZendeskActions } from "../actions/ZendeskActions";
 import { ZendeskInstance } from "../../utils/preferences";
 
@@ -41,7 +41,6 @@ export function ViewListItem({
         <List.Item.Detail
           metadata={
             <List.Item.Detail.Metadata>
-              {instance && <InstanceMetadata instance={instance} />}
               <List.Item.Detail.Metadata.Label title="Title" text={view.title} />
               <List.Item.Detail.Metadata.Label title="ID" text={view.id.toString()} />
               <List.Item.Detail.Metadata.TagList title="Active">
@@ -53,22 +52,6 @@ export function ViewListItem({
               {view.created_at && view.updated_at && (
                 <TimestampMetadata created_at={view.created_at} updated_at={view.updated_at} />
               )}
-              <List.Item.Detail.Metadata.Separator />
-              <List.Item.Detail.Metadata.Link
-                title="Open Agent View"
-                text="View in Agent Interface"
-                target={`https://${instance?.subdomain}.zendesk.com/agent/views/${view.id}`}
-              />
-              <List.Item.Detail.Metadata.Link
-                title="Open Admin Edit View"
-                text="Edit in Admin Interface"
-                target={`https://${instance?.subdomain}.zendesk.com/admin/objects-rules/rules/views/${view.id}`}
-              />
-              <List.Item.Detail.Metadata.Link
-                title="Open Admin Views Page"
-                text="All Views in Admin Interface"
-                target={`https://${instance?.subdomain}.zendesk.com/admin/objects-rules/rules/views`}
-              />
             </List.Item.Detail.Metadata>
           }
         />

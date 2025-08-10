@@ -98,16 +98,6 @@ export function OrganizationListItem({
     );
   }
 
-  // Link section
-  metadataElements.push(
-    <List.Item.Detail.Metadata.Link
-      key="link"
-      title="Open in Zendesk"
-      text="View Organization Profile"
-      target={`https://${instance?.subdomain}.zendesk.com/agent/organizations/${organization.id}`}
-    />,
-  );
-
   // Add separators between sections
   const finalElements: React.ReactNode[] = [];
   metadataElements.forEach((element, index) => {

@@ -25,12 +25,15 @@ export default function TicketFieldOptionsList({ ticketField, instance }: Ticket
     });
   }, [ticketField.custom_field_options, searchText]);
 
+  const maxLen = 20;
+  const truncate = (str: string) => (str.length > maxLen ? str.slice(0, maxLen - 1) + "…" : str);
+
   return (
     <List
       isLoading={!ticketField.custom_field_options}
       searchBarPlaceholder="Search options by name or value"
       onSearchTextChange={setSearchText}
-      navigationTitle={`${ticketField.title || ""} Options`}
+      navigationTitle={`${truncate(ticketField.title || "")} Options`}
     >
       {filteredOptions.map((option) => (
         <List.Item

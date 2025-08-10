@@ -1,6 +1,6 @@
 import { List } from "@raycast/api";
 import { ZendeskDynamicContent } from "../../api/zendesk";
-import { TimestampMetadata, InstanceMetadata } from "../common/MetadataHelpers";
+import { TimestampMetadata } from "../common/MetadataHelpers";
 import { ZendeskActions } from "../actions/ZendeskActions";
 import { ZendeskInstance } from "../../utils/preferences";
 import { formatDynamicContent } from "../../utils/formatters";
@@ -44,7 +44,6 @@ export function DynamicContentListItem({
           markdown={formattedContent}
           metadata={
             <List.Item.Detail.Metadata>
-              {instance && <InstanceMetadata instance={instance} />}
               <List.Item.Detail.Metadata.Label title="Name" text={dynamicContent.name} />
               <List.Item.Detail.Metadata.Label title="ID" text={dynamicContent.id.toString()} />
               <List.Item.Detail.Metadata.Label title="Placeholder" text={dynamicContent.placeholder} />
