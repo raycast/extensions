@@ -23,6 +23,24 @@ const MODEL_RATES: Record<string, { input: number; output: number }> = {
   "moonshotai/kimi-k2-instruct": { input: 1.0, output: 3.0 },
 };
 
+export const THINKING_MODELS = ["deepseek-r1-distill-llama-70b", "qwen/qwen3-32b"] as const;
+
+export function isThinkingModel(model: string): boolean {
+  return THINKING_MODELS.includes(model as (typeof THINKING_MODELS)[number]);
+}
+
+export function buildSystemPrompt(sysPrompt: string) {
+  return `You are an LLM provided by Groq.\nCurrent date: ${currentDate}.\n<goal>\n${sysPrompt}\n</goal>`;
+}
+
+export function buildUserPrompt(extraMsg?: string, selectedText?: string): string {
+  const parts: string[] = [];
+  if (extraMsg) parts.push(`<user_query>\n${extraMsg.trim()}\n</user_query>\n\n`);
+  if (selectedText)
+    parts.push(`Selected text by the user:\n<selected_text>\n${selectedText.trim()}\n</selected_text>\n\n`);
+  return parts.join("");
+}
+
 function naiveRound(num: number, decimalPlaces = 0) {
   const p = Math.pow(10, decimalPlaces);
   return Math.round(num * p) / p;

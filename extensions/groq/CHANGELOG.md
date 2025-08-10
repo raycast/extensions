@@ -3,19 +3,19 @@
 ## [Update] - {PR_MERGE_DATE}
 
 - Enhancements:
+
   - Clipboard copy now excludes thinking tokens, ensuring only final content is copied.
   - System and user prompts updated to use XML tags for clearer message formatting.
   - User prompts now explicitly reference `selected_text` for more precise context.
-  - Pricing estimation function simplified for better performance and readability.
-  - Moved `formatUserMessage` helper into `utils.ts` for improved code organization.
+  - Many simplifications and refactors in the codebase for better performance and readability.
 
 - Deprecated Models:
-    - `deepseek-r1-distill-qwen-32b`
-    - `qwen-2.5-coder-32b`
-    - `llama-3.3-70b-specdec`
-    - `mistral-saba-24b`
-    - `llama3-70b-8192`
-    - `llama3-8b-8192`
+  - `deepseek-r1-distill-qwen-32b`
+  - `qwen-2.5-coder-32b`
+  - `llama-3.3-70b-specdec`
+  - `mistral-saba-24b`
+  - `llama3-70b-8192`
+  - `llama3-8b-8192`
 
 ## [Updated Models] - 2025-07-18
 
