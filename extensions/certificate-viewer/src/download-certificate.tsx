@@ -29,6 +29,7 @@ export default function Command() {
       const options = {
         host: parsedUrl.hostname,
         port: parsedUrl.port ? Number(parsedUrl.port) : 443,
+        servername: parsedUrl.hostname,
         rejectUnauthorized: false,
       };
 
