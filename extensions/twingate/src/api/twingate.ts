@@ -2,6 +2,7 @@ import { GraphQLClient } from "graphql-request";
 import { getPreferenceValues } from "@raycast/api";
 import { ResourceListItem } from "../types.js";
 import { DebugLogger } from "../utils/debug";
+import { MOCK_RESOURCES } from "./mock-resources";
 
 // Enhanced error types for better error handling
 export enum TwingateErrorType {
@@ -61,6 +62,20 @@ export class TwingateApi {
       networkUrl: this.preferences.networkUrl,
       hasApiKey: !!this.preferences.apiKey,
     });
+
+    // Demo mode: use mock data when networkUrl indicates demo
+    const isDemoMode =
+      typeof this.preferences.networkUrl === "string" &&
+      (this.preferences.networkUrl.toLowerCase() === "demo" ||
+        this.preferences.networkUrl.toLowerCase().startsWith("demo://"));
+
+    DebugLogger.info("Environment", { isDemoMode });
+
+    if (isDemoMode) {
+      // Create a no-op client to keep types happy; real fetches aren't used.
+      this.client = new GraphQLClient("https://demo.invalid/");
+      return;
+    }
 
     // Validate preferences
     if (!this.preferences.apiKey) {
@@ -145,6 +160,18 @@ export class TwingateApi {
     DebugLogger.info("getAllResources() called");
 
     try {
+      // Return mock data in demo mode
+      const isDemoMode =
+        typeof this.preferences.networkUrl === "string" &&
+        (this.preferences.networkUrl.toLowerCase() === "demo" ||
+          this.preferences.networkUrl.toLowerCase().startsWith("demo://"));
+      if (isDemoMode) {
+        DebugLogger.info("Returning mock resources for demo mode", {
+          count: MOCK_RESOURCES.length,
+        });
+        return MOCK_RESOURCES;
+      }
+
       const allResources: ResourceListItem[] = [];
       let hasNextPage = true;
       let cursor: string | null = null;
