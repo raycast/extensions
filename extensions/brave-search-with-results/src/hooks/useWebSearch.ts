@@ -28,7 +28,7 @@ interface WebSearchResult {
 
 const toResult = (result: ApiWebSearchResult): WebSearchResult => {
   return {
-    id: "result" + result.type + result.url,
+    id: "web" + result.type + result.url,
     icon: result.meta_url.favicon,
     title: result.title,
     url: new URL(result.url),
@@ -66,5 +66,5 @@ export default function useWebSearch(query: string, execute: boolean) {
     return data?.web.results.map(toResult) ?? fallback;
   }, [data, execute]);
 
-  return { isLoading, results };
+  return { isLoadingWebSearch: isLoading, webSearchResults: results };
 }
