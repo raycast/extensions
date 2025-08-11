@@ -111,7 +111,7 @@ export class TwingateApi {
         "X-API-KEY": this.preferences.apiKey,
         "Content-Type": "application/json",
       },
-      fetch: (url, options) => {
+      fetch: (url: string | URL, options?: RequestInit) => {
         // Add timeout using AbortController
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
@@ -120,10 +120,12 @@ export class TwingateApi {
         const startTime = Date.now();
 
         DebugLogger.debug(`API request #${requestId} started`, {
-          url,
+          url: url.toString(),
           method: options?.method || "POST",
           timeout: "10000ms",
-          headers: options?.headers ? Object.keys(options.headers) : [],
+          headers: options?.headers
+            ? Object.keys(options.headers as Record<string, string>)
+            : [],
         });
 
         return fetch(url, {
