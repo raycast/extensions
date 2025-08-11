@@ -9,6 +9,7 @@ Launch and manage Steam on Windows from Raycast. The extension discovers your St
   - Secondary: Switch (Logout and Restart) — logs out and restarts Steam for manual sign-in
   - Open Steam, open Game Files (opens each library's steamapps/common)
 - Autodiscovers Steam path (registry) and all libraries (libraryfolders.vdf)
+ - Contextual toasts: success and failure toasts include the game title or target account for quick clarity
 
 ## Requirements
 - Windows with Steam installed
@@ -67,6 +68,7 @@ Then in Raycast:
 - Launch game
 - Open Game Folder (uses Windows `start`)
 - Copy App ID
+ - Success/failure toasts explicitly name the game launched
 
 ### Account actions
 - Switch (Prefill Username)
@@ -76,6 +78,7 @@ Then in Raycast:
 - Copy Account Name / SteamID64
 - Set Nickname (for easier search) / Clear Nickname
   - Nickname changes reflect instantly after saving/clearing and selection stays on the edited account
+ - Toasts during switching/starting include the target account; failures mention the account for easier troubleshooting
 
 #### Account search
 - You can search accounts by: persona name, account name, SteamID64, or nickname.

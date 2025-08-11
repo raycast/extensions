@@ -274,16 +274,16 @@ export default function Command() {
     }
   }, [filtered, filteredAccounts, filteredActions, selectedId]);
 
-  async function onLaunch(appid: string) {
+  async function onLaunch(g: GameItem) {
     try {
       await showToast({
         style: Toast.Style.Animated,
-        title: "Launching game...",
+        title: `Launching ${g.title}...`,
       });
-      await launchSteamGame(appid);
-      await showToast({ style: Toast.Style.Success, title: "Launched" });
+      await launchSteamGame(g.appid);
+      await showToast({ style: Toast.Style.Success, title: `Launched ${g.title}` });
     } catch (e: unknown) {
-      await showFailure(e, { title: "Launch failed" });
+      await showFailure(e, { title: `Launch failed: ${g.title}` });
     }
   }
 
@@ -318,12 +318,13 @@ export default function Command() {
       await showToast({
         style: Toast.Style.Animated,
         title: "Logging out and restarting Steam...",
+        message: `Target: ${accountName}`,
       });
       await logoutSteam();
       await restartSteam();
-      await showToast({ style: Toast.Style.Success, title: "Steam restarted" });
+      await showToast({ style: Toast.Style.Success, title: "Steam restarted", message: `${accountName}` });
     } catch (e: unknown) {
-      await showFailure(e, { title: "Failed to switch" });
+      await showFailure(e, { title: `Failed to switch to ${accountName}` });
     }
   }
 
@@ -334,9 +335,9 @@ export default function Command() {
         title: `Starting Steam for ${accountName}...`,
       });
       await startSteamWithLogin(accountName);
-      await showToast({ style: Toast.Style.Success, title: "Steam started" });
+      await showToast({ style: Toast.Style.Success, title: "Steam started", message: `${accountName}` });
     } catch (e: unknown) {
-      await showFailure(e, { title: "Failed to start Steam" });
+      await showFailure(e, { title: `Failed to start Steam for ${accountName}` });
     }
   }
 
@@ -380,7 +381,7 @@ export default function Command() {
               ]}
               actions={
                 <ActionPanel>
-                  <Action title="Launch" icon={Icon.Play} onAction={() => onLaunch(g.appid)} />
+                  <Action title="Launch" icon={Icon.Play} onAction={() => onLaunch(g)} />
                   <Action title="Open Game Folder" icon={Icon.Folder} onAction={() => onOpenFolder(g)} />
                   <Action.CopyToClipboard title="Copy App Id" content={g.appid} />
                 </ActionPanel>
