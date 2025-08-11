@@ -1,4 +1,4 @@
-import { Grid } from "@raycast/api";
+import { Grid, getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
 
 import { Providers } from "./components/providers";
@@ -10,6 +10,7 @@ const PAGE_SIZE = 50;
 
 function SearchEmojisList() {
   const [searchText, setSearchText] = useState("");
+  const { gridColumns } = getPreferenceValues<Preferences>();
   const { data, isLoading, isFetching, hasNextPage, fetchNextPage, isFetchingNextPage } = useRaycastEmojisSearch({
     variables: {
       query: searchText,
@@ -22,7 +23,7 @@ function SearchEmojisList() {
 
   return (
     <Grid
-      columns={8}
+      columns={Number(gridColumns)}
       inset={Grid.Inset.Medium}
       isLoading={isLoading || isFetching || isFetchingNextPage}
       throttle
