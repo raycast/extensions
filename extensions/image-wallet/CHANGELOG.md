@@ -1,6 +1,6 @@
 # Image Wallet Changelog
 
-## [New Features] - {PR_MERGE_DATE}
+## [New Features] - 2025-08-11
 
 - Added 'Show in Finder' action with ⌘O shortcut for individual images
 - Added symbolic link support
