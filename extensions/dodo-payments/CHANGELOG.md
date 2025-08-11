@@ -1,3 +1,3 @@
 # Dodo Payments Raycast Extension
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [1.0.0] - 2025-08-11
