@@ -363,7 +363,7 @@
 /extensions/coze                                                    @chyroc
 /extensions/cpanel                                                  @xmok
 /extensions/cpf-cnpj-generator                                      @gstvds
-/extensions/craftdocs                                               @kudrykv @mafredri @0x77dev @sfkmk
+/extensions/craftdocs                                               @sfkmk @kudrykv @mafredri @0x77dev
 /extensions/cran-e-search                                           @flaming-codes
 /extensions/cratecast                                               @gleich @BalliAsghar
 /extensions/crawldoc                                                @johan-perso
