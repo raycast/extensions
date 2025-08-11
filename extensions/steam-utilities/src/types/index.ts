@@ -1,4 +1,4 @@
-import { Icon } from '@raycast/api';
+import { Icon } from "@raycast/api";
 
 /**
  * Common interface for list items in Raycast extensions
@@ -53,7 +53,7 @@ export interface ProcessInfo {
 export interface FileSystemItem {
   name: string;
   path: string;
-  type: 'file' | 'directory';
+  type: "file" | "directory";
   size?: number;
   modified?: Date;
   extension?: string;

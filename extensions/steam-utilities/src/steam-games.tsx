@@ -11,10 +11,10 @@ import {
   confirmAlert,
   showToast,
   useNavigation,
-} from '@raycast/api';
-import { join } from 'path';
-import { existsSync } from 'fs';
-import { useEffect, useMemo, useRef, useState } from 'react';
+} from "@raycast/api";
+import { join } from "path";
+import { existsSync } from "fs";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   launchSteamGame,
   listInstalledGamesForUser,
@@ -26,8 +26,8 @@ import {
   logoutSteam,
   startSteamWithLogin,
   SteamUser,
-} from './utils/steam';
-import { executeCommand, showFailure } from './utils';
+} from "./utils/steam";
+import { executeCommand, showFailure } from "./utils";
 
 interface GameItem {
   id: string;
@@ -40,7 +40,7 @@ interface GameItem {
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [items, setItems] = useState<GameItem[]>([]);
   const [users, setUsers] = useState<SteamUser[]>([]);
   const [current, setCurrent] = useState<SteamUser | undefined>(undefined);
@@ -58,14 +58,14 @@ export default function Command() {
       try {
         const paths = await getSteamInstallPath();
         if (!paths) {
-          setError('Steam installation not found. Is Steam installed?');
+          setError("Steam installation not found. Is Steam installed?");
           setItems([]);
           setUsers([]);
           return;
         }
         const user = await getCurrentSteamUser(paths);
         if (!user) {
-          setError('Could not determine current Steam user. Log into Steam and try again.');
+          setError("Could not determine current Steam user. Log into Steam and try again.");
           setItems([]);
           setUsers([]);
           return;
@@ -94,7 +94,7 @@ export default function Command() {
         setCurrent(cur);
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : String(e);
-        setError(msg || 'Failed to list Steam games');
+        setError(msg || "Failed to list Steam games");
         setItems([]);
         setUsers([]);
       } finally {
@@ -108,7 +108,7 @@ export default function Command() {
   useEffect(() => {
     (async () => {
       try {
-        const raw = await LocalStorage.getItem<string>('accountNicknames');
+        const raw = await LocalStorage.getItem<string>("accountNicknames");
         if (raw) {
           const parsed = JSON.parse(raw) as Record<string, string>;
           setNicknames(parsed || {});
@@ -131,15 +131,15 @@ export default function Command() {
   function driveColor(drive: string): Color {
     const letter = drive[0]?.toUpperCase();
     switch (letter) {
-      case 'C':
+      case "C":
         return Color.Green;
-      case 'D':
+      case "D":
         return Color.Blue;
-      case 'E':
+      case "E":
         return Color.Purple;
-      case 'F':
+      case "F":
         return Color.Magenta;
-      case 'G':
+      case "G":
         return Color.Orange;
       default:
         return Color.Yellow;
@@ -166,14 +166,14 @@ export default function Command() {
     setRefreshTick((t) => t + 1);
     setForceUpdate((f) => f + 1);
     setUsers((prev) => [...prev]);
-    await LocalStorage.setItem('accountNicknames', JSON.stringify(next));
+    await LocalStorage.setItem("accountNicknames", JSON.stringify(next));
   }
 
   // Workaround to force UI refresh after form-based nickname changes
   function forceUIRefreshAfterForm() {
     const currentQuery = query;
     // Insert invisible character
-    setQuery(currentQuery + '\u200B');
+    setQuery(currentQuery + "\u200B");
     // Remove it after a brief delay to ensure state update completes
     setTimeout(() => setQuery(currentQuery), 10);
   }
@@ -186,7 +186,7 @@ export default function Command() {
 
   // Derive accounts with current nickname baked-in to force prop identity changes
   const accountsData = useMemo(
-    () => users.map((u) => ({ u, nickname: nicknames[u.steamId64] || '' })),
+    () => users.map((u) => ({ u, nickname: nicknames[u.steamId64] || "" })),
     [users, nicknames, forceUpdate],
   );
 
@@ -194,9 +194,9 @@ export default function Command() {
     if (!query) return accountsData;
     const q = query.toLowerCase();
     return accountsData.filter(({ u, nickname }) => {
-      const persona = (u.personaName || '').toLowerCase();
-      const account = (u.accountName || '').toLowerCase();
-      const sid = (u.steamId64 || '').toLowerCase();
+      const persona = (u.personaName || "").toLowerCase();
+      const account = (u.accountName || "").toLowerCase();
+      const sid = (u.steamId64 || "").toLowerCase();
       const nick = nickname.toLowerCase();
       return persona.includes(q) || account.includes(q) || sid.includes(q) || nick.includes(q);
     });
@@ -205,20 +205,20 @@ export default function Command() {
   const actionItems = useMemo(() => {
     const base = [
       {
-        key: 'open',
-        title: 'Open Steam',
+        key: "open",
+        title: "Open Steam",
         icon: Icon.AppWindow,
         action: () => openSteam(),
       },
       {
-        key: 'restart',
-        title: 'Restart Steam',
+        key: "restart",
+        title: "Restart Steam",
         icon: Icon.ArrowClockwise,
         action: async () => {
           const ok = await confirmAlert({
-            title: 'Restart Steam?',
+            title: "Restart Steam?",
             primaryAction: {
-              title: 'Restart',
+              title: "Restart",
               style: Alert.ActionStyle.Destructive,
             },
             icon: Icon.ArrowClockwise,
@@ -233,20 +233,20 @@ export default function Command() {
       title: `Open Game Files (${p})`,
       icon: Icon.Folder,
       action: async () => {
-        const common = join(p, 'steamapps', 'common');
+        const common = join(p, "steamapps", "common");
         await openFolder(common);
       },
     }));
     if (libActions.length === 0) {
       // Fallback to default Steam install path
       base.push({
-        key: 'open-common-default',
-        title: 'Open Game Files (Default)',
+        key: "open-common-default",
+        title: "Open Game Files (Default)",
         icon: Icon.Folder,
         action: async () => {
           const paths = await getSteamInstallPath();
           if (paths) {
-            await openFolder(join(paths.steamPath, 'steamapps', 'common'));
+            await openFolder(join(paths.steamPath, "steamapps", "common"));
           }
         },
       });
@@ -278,38 +278,38 @@ export default function Command() {
     try {
       await showToast({
         style: Toast.Style.Animated,
-        title: 'Launching game...',
+        title: "Launching game...",
       });
       await launchSteamGame(appid);
-      await showToast({ style: Toast.Style.Success, title: 'Launched' });
+      await showToast({ style: Toast.Style.Success, title: "Launched" });
     } catch (e: unknown) {
-      await showFailure(e, { title: 'Launch failed' });
+      await showFailure(e, { title: "Launch failed" });
     }
   }
 
   async function onOpenFolder(g: GameItem) {
-    const full = join(g.libraryPath, 'steamapps', 'common', g.installdir);
+    const full = join(g.libraryPath, "steamapps", "common", g.installdir);
     try {
       if (!existsSync(full)) {
         await showFailure(`Folder not found: ${full}`, {
-          title: 'Folder not found',
+          title: "Folder not found",
         });
         return;
       }
       // Use Windows 'start' for better reliability from Node
       await executeCommand(`start "" "${full}"`);
     } catch (e: unknown) {
-      await showFailure(e, { title: 'Failed to open folder' });
+      await showFailure(e, { title: "Failed to open folder" });
     }
   }
 
   async function onSwitchAndRestart(accountName: string) {
     const ok = await confirmAlert({
-      title: 'Switch account (manual login)?',
+      title: "Switch account (manual login)?",
       message: `This will log out of Steam and restart it. Log in as ${accountName} manually in Steam.`,
       icon: Icon.ArrowClockwise,
       primaryAction: {
-        title: 'Restart Steam',
+        title: "Restart Steam",
         style: Alert.ActionStyle.Destructive,
       },
     });
@@ -317,13 +317,13 @@ export default function Command() {
     try {
       await showToast({
         style: Toast.Style.Animated,
-        title: 'Logging out and restarting Steam...',
+        title: "Logging out and restarting Steam...",
       });
       await logoutSteam();
       await restartSteam();
-      await showToast({ style: Toast.Style.Success, title: 'Steam restarted' });
+      await showToast({ style: Toast.Style.Success, title: "Steam restarted" });
     } catch (e: unknown) {
-      await showFailure(e, { title: 'Failed to switch' });
+      await showFailure(e, { title: "Failed to switch" });
     }
   }
 
@@ -334,9 +334,9 @@ export default function Command() {
         title: `Starting Steam for ${accountName}...`,
       });
       await startSteamWithLogin(accountName);
-      await showToast({ style: Toast.Style.Success, title: 'Steam started' });
+      await showToast({ style: Toast.Style.Success, title: "Steam started" });
     } catch (e: unknown) {
-      await showFailure(e, { title: 'Failed to start Steam' });
+      await showFailure(e, { title: "Failed to start Steam" });
     }
   }
 
@@ -381,11 +381,7 @@ export default function Command() {
               actions={
                 <ActionPanel>
                   <Action title="Launch" icon={Icon.Play} onAction={() => onLaunch(g.appid)} />
-                  <Action
-                    title="Open Game Folder"
-                    icon={Icon.Folder}
-                    onAction={() => onOpenFolder(g)}
-                  />
+                  <Action title="Open Game Folder" icon={Icon.Folder} onAction={() => onOpenFolder(g)} />
                   <Action.CopyToClipboard title="Copy App Id" content={g.appid} />
                 </ActionPanel>
               }
@@ -406,7 +402,7 @@ export default function Command() {
             title={`${u.personaName || u.accountName}`}
             subtitle={u.accountName}
             accessories={[
-              ...(u.mostRecent ? [{ tag: { value: 'Current', color: Color.Green } }] : []),
+              ...(u.mostRecent ? [{ tag: { value: "Current", color: Color.Green } }] : []),
               ...(nickname
                 ? [
                     {
@@ -417,9 +413,7 @@ export default function Command() {
                     },
                   ]
                 : []),
-              ...(u.rememberPassword
-                ? [{ tag: { value: 'Remember Password', color: Color.Blue } }]
-                : []),
+              ...(u.rememberPassword ? [{ tag: { value: "Remember Password", color: Color.Blue } }] : []),
             ]}
             icon={u.mostRecent ? Icon.PersonCircle : Icon.Person}
             actions={
@@ -434,11 +428,7 @@ export default function Command() {
                   icon={Icon.ArrowClockwise}
                   onAction={() => onSwitchAndRestart(u.accountName)}
                 />
-                <Action.OpenInBrowser
-                  title="Open Steam"
-                  url="steam://open/main"
-                  onOpen={async () => openSteam()}
-                />
+                <Action.OpenInBrowser title="Open Steam" url="steam://open/main" onOpen={async () => openSteam()} />
                 {libraryRoots.length <= 1 ? (
                   <Action
                     title="Open Game Files"
@@ -446,11 +436,11 @@ export default function Command() {
                     onAction={async () => {
                       const root = libraryRoots[0];
                       if (root) {
-                        await openFolder(join(root, 'steamapps', 'common'));
+                        await openFolder(join(root, "steamapps", "common"));
                       } else {
                         const paths = await getSteamInstallPath();
                         if (paths) {
-                          await openFolder(join(paths.steamPath, 'steamapps', 'common'));
+                          await openFolder(join(paths.steamPath, "steamapps", "common"));
                         }
                       }
                     }}
@@ -462,19 +452,17 @@ export default function Command() {
                         key={`open-common-${p}`}
                         title={p}
                         icon={Icon.Folder}
-                        onAction={async () => openFolder(join(p, 'steamapps', 'common'))}
+                        onAction={async () => openFolder(join(p, "steamapps", "common"))}
                       />
                     ))}
                   </ActionPanel.Submenu>
                 )}
                 <Action.CopyToClipboard title="Copy Account Name" content={u.accountName} />
                 <Action.CopyToClipboard title="Copy Steamid64" content={u.steamId64} />
-                {getNickname(u) && (
-                  <Action.CopyToClipboard title="Copy Nickname" content={getNickname(u)!} />
-                )}
+                {getNickname(u) && <Action.CopyToClipboard title="Copy Nickname" content={getNickname(u)!} />}
                 <ActionPanel.Section title="Account Nickname">
                   <Action.Push
-                    title={getNickname(u) ? 'Edit Nickname' : 'Set Nickname'}
+                    title={getNickname(u) ? "Edit Nickname" : "Set Nickname"}
                     icon={Icon.Tag}
                     target={
                       <NicknameForm
@@ -507,7 +495,7 @@ export default function Command() {
                         await saveNicknames(next);
                         await showToast({
                           style: Toast.Style.Success,
-                          title: 'Nickname cleared',
+                          title: "Nickname cleared",
                         });
                         // force list to refresh immediately
                         setUsers((prev) => [...prev]);
@@ -515,12 +503,7 @@ export default function Command() {
                     />
                   )}
                 </ActionPanel.Section>
-                {current && (
-                  <Action.CopyToClipboard
-                    title="Copy Current Steamid64"
-                    content={current.steamId64}
-                  />
-                )}
+                {current && <Action.CopyToClipboard title="Copy Current Steamid64" content={current.steamId64} />}
               </ActionPanel>
             }
           />
@@ -570,10 +553,10 @@ function NicknameForm(props: {
                 await onSave(vals.nickname);
                 await showToast({
                   style: Toast.Style.Success,
-                  title: 'Nickname saved',
+                  title: "Nickname saved",
                 });
               } catch (e: unknown) {
-                await showFailure(e, { title: 'Failed to save nickname' });
+                await showFailure(e, { title: "Failed to save nickname" });
               }
             }}
           />
@@ -581,12 +564,7 @@ function NicknameForm(props: {
       }
     >
       <Form.Description text="Give this account a friendly name to make searching easier." />
-      <Form.TextField
-        id="nickname"
-        title="Nickname"
-        placeholder="e.g. Main, Alt, Family"
-        defaultValue={nickname}
-      />
+      <Form.TextField id="nickname" title="Nickname" placeholder="e.g. Main, Alt, Family" defaultValue={nickname} />
       <Form.Description text={`Account: ${user.accountName} • SteamID64: ${user.steamId64}`} />
     </Form>
   );

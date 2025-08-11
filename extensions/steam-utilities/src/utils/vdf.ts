@@ -1,4 +1,4 @@
-import { readFile } from 'fs/promises';
+import { readFile } from "fs/promises";
 
 /**
  * Minimal Valve VDF (KeyValue) parser for Steam files (libraryfolders.vdf, appmanifest_*.acf, loginusers.vdf)
@@ -10,15 +10,15 @@ export type VDFValue = string | VDFObject;
 export type VDFObject = { [key: string]: VDFValue };
 
 export function parseVDF(content: string): VDFObject {
-  const text = content.replace(/\r\n?/g, '\n');
+  const text = content.replace(/\r\n?/g, "\n");
   let i = 0;
 
   function skipWhitespace() {
     while (i < text.length) {
       const ch = text[i];
-      if (ch === '/' && i + 1 < text.length && text[i + 1] === '/') {
-        while (i < text.length && text[i] !== '\n') i++;
-      } else if (ch === '\n' || ch === '\t' || ch === ' ' || ch === '\r') {
+      if (ch === "/" && i + 1 < text.length && text[i + 1] === "/") {
+        while (i < text.length && text[i] !== "\n") i++;
+      } else if (ch === "\n" || ch === "\t" || ch === " " || ch === "\r") {
         i++;
       } else {
         break;
@@ -30,16 +30,15 @@ export function parseVDF(content: string): VDFObject {
     skipWhitespace();
     if (text[i] !== '"') throw new Error(`Expected '"' at position ${i}`);
     i++; // skip opening quote
-    let result = '';
+    let result = "";
     while (i < text.length) {
       const ch = text[i++];
       if (ch === '"') break;
-      if (ch === '\\') {
-        if (i >= text.length)
-          throw new Error(`Unexpected end of input after escape character at position ${i - 1}`);
+      if (ch === "\\") {
+        if (i >= text.length) throw new Error(`Unexpected end of input after escape character at position ${i - 1}`);
         const next = text[i++];
-        if (next === 'n') result += '\n';
-        else if (next === 't') result += '\t';
+        if (next === "n") result += "\n";
+        else if (next === "t") result += "\t";
         else result += next;
       } else {
         result += ch;
@@ -51,17 +50,17 @@ export function parseVDF(content: string): VDFObject {
   function readObject(): VDFObject {
     const obj: VDFObject = {};
     skipWhitespace();
-    if (text[i] !== '{') throw new Error(`Expected '{' at position ${i}`);
+    if (text[i] !== "{") throw new Error(`Expected '{' at position ${i}`);
     i++; // skip '{'
     while (i < text.length) {
       skipWhitespace();
-      if (text[i] === '}') {
+      if (text[i] === "}") {
         i++; // skip '}'
         break;
       }
       const key = readQuoted();
       skipWhitespace();
-      if (text[i] === '{') {
+      if (text[i] === "{") {
         const value = readObject();
         obj[key] = value;
       } else {
@@ -79,7 +78,7 @@ export function parseVDF(content: string): VDFObject {
       if (i >= text.length) break;
       const key = readQuoted();
       skipWhitespace();
-      if (text[i] === '{') {
+      if (text[i] === "{") {
         const value = readObject();
         root[key] = value;
       } else {
@@ -94,6 +93,6 @@ export function parseVDF(content: string): VDFObject {
 }
 
 export async function parseVDFFile(path: string): Promise<VDFObject> {
-  const content = await readFile(path, 'utf8');
+  const content = await readFile(path, "utf8");
   return parseVDF(content);
 }

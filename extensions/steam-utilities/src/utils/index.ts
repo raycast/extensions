@@ -1,9 +1,9 @@
-import { exec } from 'child_process';
-import { promisify } from 'util';
-import { showFailureToast } from '@raycast/utils';
+import { exec } from "child_process";
+import { promisify } from "util";
+import { showFailureToast } from "@raycast/utils";
 
 // Platform utility
-export const isWindows = process.platform === 'win32';
+export const isWindows = process.platform === "win32";
 
 const execAsync = promisify(exec);
 
@@ -19,11 +19,11 @@ export async function executeCommand(
 ): Promise<string> {
   try {
     if (!isWindows) {
-      throw new Error('This command requires Windows (win32)');
+      throw new Error("This command requires Windows (win32)");
     }
     const { stdout } = await execAsync(command, {
       timeout: options?.timeout || 10000,
-      encoding: options?.encoding || 'utf8',
+      encoding: options?.encoding || "utf8",
     });
     return stdout.trim();
   } catch (error) {
@@ -41,7 +41,7 @@ export async function showFailure(error: unknown, options?: { title?: string }):
   try {
     await showFailureToast(error, options);
   } catch (e) {
-    console.error('Failed to show failure toast:', e);
+    console.error("Failed to show failure toast:", e);
   }
 }
 
@@ -51,19 +51,16 @@ export async function showFailure(error: unknown, options?: { title?: string }):
  * @param skipLines - Number of lines to skip from the beginning
  * @returns Parsed data as array of objects
  */
-export function parseCommandOutput(
-  output: string,
-  skipLines: number = 1,
-): Record<string, string>[] {
-  const lines = output.split('\n').filter((line) => line.trim());
+export function parseCommandOutput(output: string, skipLines: number = 1): Record<string, string>[] {
+  const lines = output.split("\n").filter((line) => line.trim());
   if (lines.length <= skipLines) return [];
 
-  const headers = lines[0].split(',').map((h) => h.trim());
+  const headers = lines[0].split(",").map((h) => h.trim());
   return lines.slice(skipLines).map((line) => {
-    const values = line.split(',');
+    const values = line.split(",");
     const obj: Record<string, string> = {};
     headers.forEach((header, index) => {
-      obj[header] = values[index]?.trim() || '';
+      obj[header] = values[index]?.trim() || "";
     });
     return obj;
   });
@@ -75,13 +72,13 @@ export function parseCommandOutput(
  * @returns Formatted string (e.g., "1.2 MB")
  */
 export function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 Bytes';
+  if (bytes === 0) return "0 Bytes";
 
   const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 }
 
 /**
