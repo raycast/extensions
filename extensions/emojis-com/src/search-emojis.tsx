@@ -39,8 +39,9 @@ function SearchEmojisList() {
       }}
     >
       {emojis.length === 0 && !isLoading ? <Grid.EmptyView title="No emojis found" /> : null}
-      {emojis.map((emoji) => (
-        <EmojiGridItem key={emoji.id} emoji={emoji} />
+      {emojis.map((emoji, index) => (
+        // use a compound key w/ index as a temporary fix for search endpoint that may return duplicate items
+        <EmojiGridItem key={`${emoji.id}-${index}`} emoji={emoji} />
       ))}
     </Grid>
   );
