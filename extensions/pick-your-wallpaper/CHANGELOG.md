@@ -1,6 +1,6 @@
 # Pick Your Wallpaper Changelog
 
-## [1.0.7] - {PR_MERGE_DATE}
+## [1.0.7] - 2025-08-11
 
 - Added "Open Wallpaper Folder" action to easily open the configured wallpaper folder in Finder
 - Fixed thumbnail creation issues with file paths containing spaces and special characters
