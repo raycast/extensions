@@ -16,8 +16,6 @@
     "kubeconfig",
     "devops",
     "container",
-    "switch",
-    "management",
     "k8s"
   ],
   "license": "MIT",
