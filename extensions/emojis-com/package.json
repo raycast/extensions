@@ -23,6 +23,33 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "gridColumns",
+      "type": "dropdown",
+      "title": "Grid Columns",
+      "description": "Number of columns to display in the grid",
+      "default": "8",
+      "data": [
+        {
+          "title": "3",
+          "value": "3"
+        },
+        {
+          "title": "5",
+          "value": "5"
+        },
+        {
+          "title": "8",
+          "value": "8"
+        },
+        {
+          "title": "12",
+          "value": "12"
+        }
+      ]
+    }
+  ],
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
