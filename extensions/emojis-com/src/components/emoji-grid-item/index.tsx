@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, closeMainWindow, Grid, Icon, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, closeMainWindow, Grid, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { Buffer } from "node:buffer";
 import fs from "node:fs/promises";
@@ -61,7 +61,7 @@ const EmojiGridItem = memo(
           <ActionPanel>
             <Action icon={Icon.CopyClipboard} title="Copy Image" onAction={() => void copyEmojiImage()} />
             <Action.CopyToClipboard title="Copy Image URL" content={blobUrl} />
-            <Action.OpenInBrowser url={URLS.emojis.emoji(emoji.slug)} />
+            <Action.OpenInBrowser url={URLS.emojis.emoji(emoji.slug)} shortcut={Keyboard.Shortcut.Common.Open} />
           </ActionPanel>
         }
       />
