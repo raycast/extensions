@@ -1,5 +1,6 @@
-import { Action, ActionPanel, Form, Icon, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
+import { showFailureToast } from "@raycast/utils";
 import { generateMultipleCPFs, unmaskCPF } from "./lib/generators/cpf";
 import { BRAZILIAN_STATES, MAX_BATCH_GENERATION } from "./lib/constants";
 import { copyToClipboard, pasteToFrontmostApp } from "./lib/utils/clipboard";
@@ -30,7 +31,7 @@ export default function GenerateCPF() {
         if (action === "paste") {
           await pasteToFrontmostApp(cpf);
         } else {
-          await copyToClipboard(cpf, "CPF copiado com sucesso");
+          await copyToClipboard(cpf, "CPF copied successfully");
         }
 
         if (preferences.enableHistory) {
@@ -38,16 +39,16 @@ export default function GenerateCPF() {
             type: "CPF",
             value: unmaskCPF(cpf),
             masked: cpf,
-            metadata: { state: values.state || "Indiferente" },
+            metadata: { state: values.state || "Any" },
           });
         }
       } else {
         const documents = cpfs.map((cpf) =>
-          formatDocumentForExport("CPF", unmaskCPF(cpf), cpf, { state: values.state || "Indiferente" })
+          formatDocumentForExport("CPF", unmaskCPF(cpf), cpf, { state: values.state || "Any" }),
         );
 
         const formatted = formatBatch(documents, preferences.exportFormat || "json");
-        await copyToClipboard(formatted, `${quantity} CPFs copiados com sucesso`);
+        await copyToClipboard(formatted, `${quantity} CPFs copied successfully`);
 
         if (preferences.enableHistory) {
           for (const cpf of cpfs.slice(0, 10)) {
@@ -55,17 +56,13 @@ export default function GenerateCPF() {
               type: "CPF",
               value: unmaskCPF(cpf),
               masked: cpf,
-              metadata: { state: values.state || "Indiferente" },
+              metadata: { state: values.state || "Any" },
             });
           }
         }
       }
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Erro ao gerar CPF",
-        message: String(error),
-      });
+      await showFailureToast(error, { title: "Error generating CPF" });
     } finally {
       setIsLoading(false);
     }
@@ -76,11 +73,11 @@ export default function GenerateCPF() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Gerar Cpf" icon={Icon.Person} onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Generate Cpf" icon={Icon.Person} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="state" title="Estado de Origem" defaultValue="">
+      <Form.Dropdown id="state" title="State of Origin" defaultValue="">
         {BRAZILIAN_STATES.map((state) => (
           <Form.Dropdown.Item key={state.value} value={state.value} title={state.title} />
         ))}
@@ -88,16 +85,16 @@ export default function GenerateCPF() {
 
       <Form.Checkbox
         id="masked"
-        label="Com formatação (XXX.XXX.XXX-XX)"
+        label="With formatting (XXX.XXX.XXX-XX)"
         defaultValue={preferences.defaultMask !== false}
       />
 
       <Form.TextField
         id="quantity"
-        title="Quantidade"
+        title="Quantity"
         placeholder="1"
         defaultValue={preferences.defaultQuantity || "1"}
-        info={`Máximo: ${MAX_BATCH_GENERATION} itens`}
+        info={`Maximum: ${MAX_BATCH_GENERATION} items`}
       />
     </Form>
   );

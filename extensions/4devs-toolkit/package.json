@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "4devs-toolkit",
   "title": "4devs Toolkit",
-  "description": "Gere documentos brasileiros válidos e dados de teste diretamente do Raycast",
+  "description": "Generate valid Brazilian documents and test data directly from Raycast",
   "icon": "icon.png",
   "author": "thalys",
   "access": "public",
@@ -13,97 +13,97 @@
   "commands": [
     {
       "name": "generate-cpf",
-      "title": "Gerar Cpf",
+      "title": "Generate Cpf",
       "subtitle": "4Devs Toolkit",
-      "description": "Gere números de CPF válidos para testes",
+      "description": "Generate valid CPF numbers for testing",
       "mode": "view"
     },
     {
       "name": "generate-cnpj",
-      "title": "Gerar Cnpj",
+      "title": "Generate Cnpj",
       "subtitle": "4Devs Toolkit", 
-      "description": "Gere números de CNPJ válidos para testes",
+      "description": "Generate valid CNPJ numbers for testing",
       "mode": "view"
     },
     {
       "name": "generate-cnh",
-      "title": "Gerar Cnh",
+      "title": "Generate Cnh",
       "subtitle": "4Devs Toolkit",
-      "description": "Gere números de CNH válidos para testes",
+      "description": "Generate valid driver's license numbers for testing",
       "mode": "view"
     },
     {
       "name": "generate-certidao",
-      "title": "Gerar Certidão",
+      "title": "Generate Certificate",
       "subtitle": "4Devs Toolkit",
-      "description": "Gere certidões brasileiras válidas para testes",
+      "description": "Generate valid Brazilian certificates for testing",
       "mode": "view"
     },
     {
       "name": "generate-card",
-      "title": "Gerar Cartão",
+      "title": "Generate Card",
       "subtitle": "4Devs Toolkit",
-      "description": "Gere números de cartão de crédito válidos para testes",
+      "description": "Generate valid credit card numbers for testing",
       "mode": "view"
     },
     {
       "name": "history",
-      "title": "Histórico E Favoritos",
+      "title": "History and Favorites",
       "subtitle": "4Devs Toolkit",
-      "description": "Visualize e gerencie o histórico de documentos gerados",
+      "description": "View and manage generated documents history",
       "mode": "view"
     }
   ],
   "preferences": [
     {
       "name": "defaultMask",
-      "title": "Formato com Máscara Padrão",
-      "description": "Usar formatação com máscara por padrão",
+      "title": "Default Mask Format",
+      "description": "Use formatting with mask by default",
       "type": "checkbox",
-      "label": "Ativar máscara por padrão",
+      "label": "Enable mask by default",
       "required": false,
       "default": true
     },
     {
       "name": "defaultQuantity",
-      "title": "Quantidade Padrão",
-      "description": "Número padrão de itens a gerar",
+      "title": "Default Quantity",
+      "description": "Default number of items to generate",
       "type": "textfield",
       "required": false,
       "default": "1"
     },
     {
       "name": "primaryAction",
-      "title": "Ação Primária",
-      "description": "Ação padrão ao pressionar Enter",
+      "title": "Primary Action",
+      "description": "Default action when pressing Enter",
       "type": "dropdown",
       "required": false,
       "default": "copy",
       "data": [
-        {"title": "Copiar", "value": "copy"},
-        {"title": "Colar", "value": "paste"}
+        {"title": "Copy", "value": "copy"},
+        {"title": "Paste", "value": "paste"}
       ]
     },
     {
       "name": "enableHistory",
-      "title": "Habilitar Histórico",
-      "description": "Salvar itens gerados no histórico",
+      "title": "Enable History",
+      "description": "Save generated items in history",
       "type": "checkbox",
-      "label": "Salvar no histórico",
+      "label": "Save in history",
       "required": false,
       "default": true
     },
     {
       "name": "exportFormat",
-      "title": "Formato de Exportação",
-      "description": "Formato padrão para exportação em lote",
+      "title": "Export Format",
+      "description": "Default format for batch export",
       "type": "dropdown",
       "required": false,
       "default": "json",
       "data": [
         {"title": "JSON", "value": "json"},
         {"title": "CSV", "value": "csv"},
-        {"title": "Texto", "value": "text"}
+        {"title": "Text", "value": "text"}
       ]
     }
   ],

@@ -62,7 +62,7 @@ export function formatDocumentForExport(
   type: string,
   value: string,
   masked?: string,
-  metadata?: Record<string, string | number | boolean | undefined>
+  metadata?: Record<string, string | number | boolean | undefined>,
 ): DocumentData {
   return {
     type,

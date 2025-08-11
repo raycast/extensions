@@ -1,5 +1,6 @@
-import { Action, ActionPanel, Form, Icon, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
+import { showFailureToast } from "@raycast/utils";
 import { generateMultipleCards, CardBrand, getCardBrandName, unmaskCardNumber } from "./lib/generators/card";
 import { CARD_BRANDS, MAX_BATCH_GENERATION } from "./lib/constants";
 import { copyToClipboard, pasteToFrontmostApp } from "./lib/utils/clipboard";
@@ -32,7 +33,7 @@ export default function GenerateCard() {
 
         if (card.expiry || card.cvv) {
           const parts = [card.number];
-          if (card.expiry) parts.push(`Validade: ${card.expiry}`);
+          if (card.expiry) parts.push(`Expiry: ${card.expiry}`);
           if (card.cvv) parts.push(`CVV: ${card.cvv}`);
           output = parts.join(" | ");
         }
@@ -42,12 +43,12 @@ export default function GenerateCard() {
         if (action === "paste") {
           await pasteToFrontmostApp(output);
         } else {
-          await copyToClipboard(output, "Cartão copiado com sucesso");
+          await copyToClipboard(output, "Card copied successfully");
         }
 
         if (preferences.enableHistory) {
           await addToHistory({
-            type: "Cartão",
+            type: "Card",
             value: unmaskCardNumber(card.number),
             masked: card.number,
             metadata: {
@@ -60,12 +61,12 @@ export default function GenerateCard() {
       } else {
         const documents = cards.map((card) => formatCardForExport(card));
         const formatted = formatBatch(documents, preferences.exportFormat || "json");
-        await copyToClipboard(formatted, `${quantity} Cartões copiados com sucesso`);
+        await copyToClipboard(formatted, `${quantity} Cards copied successfully`);
 
         if (preferences.enableHistory) {
           for (const card of cards.slice(0, 10)) {
             await addToHistory({
-              type: "Cartão",
+              type: "Card",
               value: unmaskCardNumber(card.number),
               masked: card.number,
               metadata: {
@@ -78,11 +79,7 @@ export default function GenerateCard() {
         }
       }
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Erro ao gerar Cartão",
-        message: String(error),
-      });
+      await showFailureToast(error, { title: "Error generating Card" });
     } finally {
       setIsLoading(false);
     }
@@ -93,32 +90,32 @@ export default function GenerateCard() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Gerar Cartão" icon={Icon.CreditCard} onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Generate Card" icon={Icon.CreditCard} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="brand" title="Bandeira do Cartão" defaultValue="visa">
+      <Form.Dropdown id="brand" title="Card Brand" defaultValue="visa">
         {CARD_BRANDS.map((brand) => (
           <Form.Dropdown.Item key={brand.value} value={brand.value} title={brand.title} />
         ))}
       </Form.Dropdown>
 
-      <Form.Checkbox id="includeExpiry" label="Incluir data de validade (MM/AA)" defaultValue={true} />
+      <Form.Checkbox id="includeExpiry" label="Include expiry date (MM/YY)" defaultValue={true} />
 
-      <Form.Checkbox id="includeCVV" label="Incluir código de segurança (CVV)" defaultValue={true} />
+      <Form.Checkbox id="includeCVV" label="Include security code (CVV)" defaultValue={true} />
 
       <Form.Checkbox
         id="masked"
-        label="Com formatação (XXXX XXXX XXXX XXXX)"
+        label="With formatting (XXXX XXXX XXXX XXXX)"
         defaultValue={preferences.defaultMask !== false}
       />
 
       <Form.TextField
         id="quantity"
-        title="Quantidade"
+        title="Quantity"
         placeholder="1"
         defaultValue={preferences.defaultQuantity || "1"}
-        info={`Máximo: ${MAX_BATCH_GENERATION} itens`}
+        info={`Maximum: ${MAX_BATCH_GENERATION} items`}
       />
     </Form>
   );

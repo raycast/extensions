@@ -1,5 +1,5 @@
 export const BRAZILIAN_STATES = [
-  { title: "Indiferente", value: "" },
+  { title: "Any State", value: "" },
   { title: "Acre (AC)", value: "AC" },
   { title: "Alagoas (AL)", value: "AL" },
   { title: "Amapá (AP)", value: "AP" },
@@ -42,10 +42,10 @@ export const CARD_BRANDS = [
 ];
 
 export const CERTIDAO_TYPES = [
-  { title: "Nascimento", value: "nascimento" },
-  { title: "Casamento", value: "casamento" },
-  { title: "Casamento com Efeito Religioso", value: "casamento_religioso" },
-  { title: "Óbito", value: "obito" },
+  { title: "Birth", value: "nascimento" },
+  { title: "Marriage", value: "casamento" },
+  { title: "Religious Marriage", value: "casamento_religioso" },
+  { title: "Death", value: "obito" },
 ];
 
 export const HISTORY_STORAGE_KEY = "4devs-toolkit-history";
@@ -54,17 +54,17 @@ export const MAX_HISTORY_ITEMS = 100;
 export const MAX_BATCH_GENERATION = 50;
 
 export const DISCLAIMER = `
-⚠️ **AVISO LEGAL IMPORTANTE**
+⚠️ **IMPORTANT LEGAL NOTICE**
 
-Esta extensão gera documentos válidos EXCLUSIVAMENTE para fins de TESTE e DESENVOLVIMENTO de software.
+This extension generates valid documents EXCLUSIVELY for SOFTWARE TESTING and DEVELOPMENT purposes.
 
-**É EXPRESSAMENTE PROIBIDO** utilizar os documentos gerados para:
-- Fraudes ou atividades ilegais de qualquer natureza
-- Cadastros em sistemas reais ou produção
-- Falsificação de documentos ou identidade
-- Qualquer atividade que não seja teste de software em ambiente controlado
+**IT IS STRICTLY PROHIBITED** to use the generated documents for:
+- Fraud or illegal activities of any kind
+- Registration in real or production systems
+- Document or identity forgery
+- Any activity other than software testing in a controlled environment
 
-O uso indevido dos documentos gerados é de responsabilidade exclusiva do usuário e pode resultar em consequências legais graves.
+Misuse of generated documents is the sole responsibility of the user and may result in serious legal consequences.
 `;
 
 export const ExportFormat = {

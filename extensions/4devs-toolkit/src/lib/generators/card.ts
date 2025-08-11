@@ -64,7 +64,7 @@ function generateCardNumber(brand: CardBrand): string {
   const prefixChoice = pattern.prefixes[Math.floor(Math.random() * pattern.prefixes.length)];
 
   if (prefixChoice.includes("-")) {
-    const [min, max] = prefixChoice.split("-").map((s) => parseInt(s));
+    const [min, max] = prefixChoice.split("-").map((s) => parseInt(s, 10));
     const randomPrefix = Math.floor(Math.random() * (max - min + 1)) + min;
     prefix = String(randomPrefix);
   } else {

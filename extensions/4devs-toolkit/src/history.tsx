@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Alert, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { showFailureToast } from "@raycast/utils";
 import {
   clearHistory,
   getFavorites,
@@ -43,11 +44,7 @@ export default function History() {
       const favs = await getFavorites();
       setFavorites(favs);
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Erro ao carregar histórico",
-        message: String(error),
-      });
+      await showFailureToast(error, { title: "Error loading history" });
     } finally {
       setIsLoading(false);
     }
@@ -65,18 +62,14 @@ export default function History() {
         setItems(results);
       }
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Erro ao buscar no histórico",
-        message: String(error),
-      });
+      await showFailureToast(error, { title: "Error searching history" });
     } finally {
       setIsLoading(false);
     }
   }
 
   async function handleCopy(item: HistoryItem) {
-    await copyToClipboard(item.masked || item.value, "Copiado com sucesso");
+    await copyToClipboard(item.masked || item.value, "Copied successfully");
   }
 
   async function handlePaste(item: HistoryItem) {
@@ -89,14 +82,10 @@ export default function History() {
       await loadItems();
       await showToast({
         style: Toast.Style.Success,
-        title: "Item removido do histórico",
+        title: "Item removed from history",
       });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Erro ao remover item",
-        message: String(error),
-      });
+      await showFailureToast(error, { title: "Error removing item" });
     }
   }
 
@@ -106,24 +95,19 @@ export default function History() {
       await loadItems();
       await showToast({
         style: Toast.Style.Success,
-        title: item.isFavorite ? "Removido dos favoritos" : "Adicionado aos favoritos",
+        title: item.isFavorite ? "Removed from favorites" : "Added to favorites",
       });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Erro ao alterar favorito",
-        message: String(error),
-      });
+      await showFailureToast(error, { title: "Error changing favorite" });
     }
   }
 
   async function handleClearHistory() {
     const options: Alert.Options = {
-      title: "Limpar Todo o Histórico",
-      message:
-        "Tem certeza que deseja limpar todo o histórico? Esta ação não pode ser desfeita e todos os itens serão perdidos.",
+      title: "Clear All History",
+      message: "Are you sure you want to clear all history? This action cannot be undone and all items will be lost.",
       primaryAction: {
-        title: "Confirmar Limpeza",
+        title: "Confirm Clear",
         style: Alert.ActionStyle.Destructive,
       },
     };
@@ -134,14 +118,10 @@ export default function History() {
         await loadItems();
         await showToast({
           style: Toast.Style.Success,
-          title: "Histórico limpo com sucesso",
+          title: "History cleared successfully",
         });
       } catch (error) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Erro ao limpar o histórico",
-          message: String(error),
-        });
+        await showFailureToast(error, { title: "Error clearing history" });
       }
     }
   }
@@ -164,9 +144,9 @@ export default function History() {
         return Icon.Building;
       case "cnh":
         return Icon.Car;
-      case "certidão":
+      case "certificate":
         return Icon.Document;
-      case "cartão":
+      case "card":
         return Icon.CreditCard;
       default:
         return Icon.Document;
@@ -180,25 +160,25 @@ export default function History() {
       isLoading={isLoading}
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Buscar documentos no histórico..."
+      searchBarPlaceholder="Search documents in history..."
       searchBarAccessory={
         <List.Dropdown
-          tooltip="Filtrar por tipo"
+          tooltip="Filter by type"
           value={showFavoritesOnly ? "favorites" : "all"}
           onChange={(value) => setShowFavoritesOnly(value === "favorites")}
         >
-          <List.Dropdown.Item title="Todos os Documentos" value="all" />
-          <List.Dropdown.Item title="Apenas Favoritos" value="favorites" />
+          <List.Dropdown.Item title="All Documents" value="all" />
+          <List.Dropdown.Item title="Favorites Only" value="favorites" />
         </List.Dropdown>
       }
     >
       {items.length === 0 ? (
         <List.EmptyView
-          title={showFavoritesOnly ? "Nenhum favorito encontrado" : "Histórico vazio"}
+          title={showFavoritesOnly ? "No favorites found" : "History empty"}
           description={
             showFavoritesOnly
-              ? "Marque documentos como favoritos para vê-los aqui"
-              : "Gere documentos para que apareçam no histórico"
+              ? "Mark documents as favorites to see them here"
+              : "Generate documents to appear in history"
           }
         />
       ) : (
@@ -209,33 +189,29 @@ export default function History() {
             title={item.masked || item.value}
             subtitle={getItemSubtitle(item)}
             accessories={[
-              favoriteIds.has(item.id) ? { icon: Icon.Star, tooltip: "Favorito" } : {},
-              { date: new Date(item.generatedAt), tooltip: "Gerado em" },
+              favoriteIds.has(item.id) ? { icon: Icon.Star, tooltip: "Favorite" } : {},
+              { date: new Date(item.generatedAt), tooltip: "Generated on" },
             ]}
             actions={
               <ActionPanel>
-                <Action title="Colar No App Ativo" icon={Icon.Clipboard} onAction={() => handlePaste(item)} />
+                <Action title="Paste to Active App" icon={Icon.Clipboard} onAction={() => handlePaste(item)} />
+                <Action title="Copy to Clipboard" icon={Icon.CopyClipboard} onAction={() => handleCopy(item)} />
                 <Action
-                  title="Copiar Para Área De Transferência"
-                  icon={Icon.CopyClipboard}
-                  onAction={() => handleCopy(item)}
-                />
-                <Action
-                  title={favoriteIds.has(item.id) ? "Remover Dos Favoritos" : "Marcar Como Favorito"}
+                  title={favoriteIds.has(item.id) ? "Remove from Favorites" : "Mark as Favorite"}
                   icon={Icon.Star}
                   shortcut={{ modifiers: ["cmd"], key: "f" }}
                   onAction={() => handleToggleFavorite(item)}
                 />
                 <ActionPanel.Section>
                   <Action
-                    title="Remover Este Item"
+                    title="Remove This Item"
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
                     shortcut={{ modifiers: ["cmd"], key: "delete" }}
                     onAction={() => handleDelete(item)}
                   />
                   <Action
-                    title="Limpar Histórico Completo"
+                    title="Clear Complete History"
                     icon={Icon.XMarkCircle}
                     style={Action.Style.Destructive}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}

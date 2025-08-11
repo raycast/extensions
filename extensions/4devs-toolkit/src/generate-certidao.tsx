@@ -1,5 +1,6 @@
-import { Action, ActionPanel, Form, Icon, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
+import { showFailureToast } from "@raycast/utils";
 import {
   generateMultipleCertidoes,
   unmaskCertidao,
@@ -36,12 +37,12 @@ export default function GenerateCertidao() {
         if (action === "paste") {
           await pasteToFrontmostApp(certidao);
         } else {
-          await copyToClipboard(certidao, "Certidão copiada com sucesso");
+          await copyToClipboard(certidao, "Certificate copied successfully");
         }
 
         if (preferences.enableHistory) {
           await addToHistory({
-            type: "Certidão",
+            type: "Certificate",
             value: unmaskCertidao(certidao),
             masked: certidao,
             metadata: { tipo: getCertidaoTypeName(type) },
@@ -49,29 +50,27 @@ export default function GenerateCertidao() {
         }
       } else {
         const documents = certidoes.map((certidao) =>
-          formatDocumentForExport("Certidão", unmaskCertidao(certidao), certidao, { tipo: getCertidaoTypeName(type) })
+          formatDocumentForExport("Certificate", unmaskCertidao(certidao), certidao, {
+            type: getCertidaoTypeName(type),
+          }),
         );
 
         const formatted = formatBatch(documents, preferences.exportFormat || "json");
-        await copyToClipboard(formatted, `${quantity} Certidões copiadas com sucesso`);
+        await copyToClipboard(formatted, `${quantity} Certificates copied successfully`);
 
         if (preferences.enableHistory) {
           for (const certidao of certidoes.slice(0, 10)) {
             await addToHistory({
-              type: "Certidão",
+              type: "Certificate",
               value: unmaskCertidao(certidao),
               masked: certidao,
-              metadata: { tipo: getCertidaoTypeName(type) },
+              metadata: { type: getCertidaoTypeName(type) },
             });
           }
         }
       }
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Erro ao gerar Certidão",
-        message: String(error),
-      });
+      await showFailureToast(error, { title: "Error generating Certificate" });
     } finally {
       setIsLoading(false);
     }
@@ -82,24 +81,24 @@ export default function GenerateCertidao() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Gerar Certidão" icon={Icon.Document} onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Generate Certificate" icon={Icon.Document} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="type" title="Tipo de Certidão" defaultValue="nascimento">
+      <Form.Dropdown id="type" title="Certificate Type" defaultValue="nascimento">
         {CERTIDAO_TYPES.map((type) => (
           <Form.Dropdown.Item key={type.value} value={type.value} title={type.title} />
         ))}
       </Form.Dropdown>
 
-      <Form.Checkbox id="masked" label="Com formatação numérica" defaultValue={preferences.defaultMask !== false} />
+      <Form.Checkbox id="masked" label="With numeric formatting" defaultValue={preferences.defaultMask !== false} />
 
       <Form.TextField
         id="quantity"
-        title="Quantidade"
+        title="Quantity"
         placeholder="1"
         defaultValue={preferences.defaultQuantity || "1"}
-        info={`Máximo: ${MAX_BATCH_GENERATION} itens`}
+        info={`Maximum: ${MAX_BATCH_GENERATION} items`}
       />
     </Form>
   );

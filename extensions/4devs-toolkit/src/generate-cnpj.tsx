@@ -1,5 +1,6 @@
-import { Action, ActionPanel, Form, Icon, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
+import { showFailureToast } from "@raycast/utils";
 import { generateMultipleCNPJs, unmaskCNPJ } from "./lib/generators/cnpj";
 import { MAX_BATCH_GENERATION } from "./lib/constants";
 import { copyToClipboard, pasteToFrontmostApp } from "./lib/utils/clipboard";
@@ -29,7 +30,7 @@ export default function GenerateCNPJ() {
         if (action === "paste") {
           await pasteToFrontmostApp(cnpj);
         } else {
-          await copyToClipboard(cnpj, "CNPJ copiado com sucesso");
+          await copyToClipboard(cnpj, "CNPJ copied successfully");
         }
 
         if (preferences.enableHistory) {
@@ -43,7 +44,7 @@ export default function GenerateCNPJ() {
         const documents = cnpjs.map((cnpj) => formatDocumentForExport("CNPJ", unmaskCNPJ(cnpj), cnpj));
 
         const formatted = formatBatch(documents, preferences.exportFormat || "json");
-        await copyToClipboard(formatted, `${quantity} CNPJs copiados com sucesso`);
+        await copyToClipboard(formatted, `${quantity} CNPJs copied successfully`);
 
         if (preferences.enableHistory) {
           for (const cnpj of cnpjs.slice(0, 10)) {
@@ -56,11 +57,7 @@ export default function GenerateCNPJ() {
         }
       }
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Erro ao gerar CNPJ",
-        message: String(error),
-      });
+      await showFailureToast(error, { title: "Error generating CNPJ" });
     } finally {
       setIsLoading(false);
     }
@@ -71,22 +68,22 @@ export default function GenerateCNPJ() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Gerar Cnpj" icon={Icon.Building} onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Generate Cnpj" icon={Icon.Building} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.Checkbox
         id="masked"
-        label="Com formatação (XX.XXX.XXX/XXXX-XX)"
+        label="With formatting (XX.XXX.XXX/XXXX-XX)"
         defaultValue={preferences.defaultMask !== false}
       />
 
       <Form.TextField
         id="quantity"
-        title="Quantidade"
+        title="Quantity"
         placeholder="1"
         defaultValue={preferences.defaultQuantity || "1"}
-        info={`Máximo: ${MAX_BATCH_GENERATION} itens`}
+        info={`Maximum: ${MAX_BATCH_GENERATION} items`}
       />
     </Form>
   );

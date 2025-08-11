@@ -68,6 +68,7 @@ export function validateCNH(cnh: string): boolean {
     return false;
   }
 
+  // Prevent CNHs with all identical digits (e.g., 11111111111, 22222222222)
   if (/^(\d)\1{10}$/.test(cleaned)) {
     return false;
   }

@@ -1,47 +1,21 @@
 # Changelog
 
-Todas as mudanças notáveis deste projeto serão documentadas neste arquivo.
+All notable changes to this project will be documented in this file.
 
-O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
-e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [0.0.1] - 2025-08-11
+## [0.0.1] - {PR_MERGE_DATE}
 
-### 🎉 Lançamento Inicial
+### Initial Release
 
-#### Adicionado
-- **Geradores de Documentos**:
-  - CPF com suporte a estado de origem
-  - CNPJ com formatação empresarial
-  - CNH (Carteira Nacional de Habilitação)
-  - Certidões (Nascimento, Casamento, Óbito)
-  - Cartões de Crédito para testes (Visa, MasterCard, AmEx, etc.)
-
-- **Funcionalidades**:
-  - 📋 Sistema de histórico local
-  - ⭐ Favoritos para acesso rápido
-  - 🔄 Geração em lote (até 50 itens)
-  - 📊 Exportação em JSON, CSV e texto
-  - 🎭 Opção de formatação com/sem máscara
-  - 🇧🇷 Interface completamente em português
-
-- **Experiência do Usuário**:
-  - Atalhos de teclado intuitivos
-  - Toast notifications para feedback
-  - Ação padrão configurável (copiar/colar)
-  - Validação local de todos os documentos
-  - Icons personalizados para cada tipo de documento
-
-#### Detalhes Técnicos
-- Algoritmos de geração 100% offline
-- Sem dependências externas ou APIs
-- Validação usando módulo 11 e algoritmo de Luhn
-- Armazenamento local com Raycast LocalStorage
-
-#### Agradecimentos
-- Inspirado pelo trabalho incrível da equipe [4Devs](https://www.4devs.com.br/)
-- Uma homenagem a mais de uma década de ferramentas gratuitas para desenvolvedores
-
----
-
-**Nota**: Esta é uma extensão não oficial, criada como tributo ao 4Devs.
+- Added CPF generator with state-based validation
+- Added CNPJ generator for company IDs
+- Added CNH (driver's license) generator
+- Added Certidão (birth/marriage certificate) generator
+- Added Credit Card generator with multiple brands
+- Added History tracking with LocalStorage
+- Added Favorites system for quick access
+- Added Batch generation (up to 50 items)
+- Added Multiple export formats (JSON, CSV, text)
+- Added Configurable formatting options

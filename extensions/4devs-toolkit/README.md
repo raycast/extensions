@@ -1,44 +1,42 @@
 # 4Devs Toolkit for Raycast
 
-Gerador de documentos brasileiros válidos para testes, diretamente no Raycast.
+Generate valid Brazilian documents and test data directly from Raycast.
 
-## ⚠️ Disclaimer / Aviso Legal
+## ⚠️ Disclaimer
 
 **This is an UNOFFICIAL extension, not affiliated with [4Devs](https://www.4devs.com.br/).**
 
-Este projeto é uma homenagem ao excelente trabalho da equipe 4Devs, que desde 2012 vem ajudando milhares de desenvolvedores brasileiros com suas ferramentas gratuitas. Esta extensão traz algumas dessas funcionalidades para o Raycast, permitindo acesso rápido sem sair do seu fluxo de trabalho.
+This project is a tribute to the excellent work of the 4Devs team, who since 2012 have been helping thousands of Brazilian developers with their free tools. This extension brings some of these functionalities to Raycast, allowing quick access without leaving your workflow.
 
-**Esta é uma extensão NÃO OFICIAL, sem afiliação com [4Devs](https://www.4devs.com.br/).**
+Visit the official website at [www.4devs.com.br](https://www.4devs.com.br/) to access all the original and complete tools.
 
-Visite o site oficial em [www.4devs.com.br](https://www.4devs.com.br/) para acessar todas as ferramentas originais e completas.
+## 🎯 Features
 
-## 🎯 Features / Funcionalidades
+### Document Generators
+- **CPF**: Generate valid CPF numbers with state-based validation
+- **CNPJ**: Generate valid CNPJ numbers for companies
+- **CNH**: Generate valid driver's license numbers
+- **Certidão**: Generate certificate registration numbers (birth, marriage, death)
+- **Credit Card**: Generate valid test credit card numbers (Visa, MasterCard, etc.)
 
-### Geradores de Documentos
-- **CPF**: Gera CPFs válidos com opção de estado de origem
-- **CNPJ**: Gera CNPJs válidos para empresas
-- **CNH**: Gera números de CNH válidos
-- **Certidão**: Gera matrículas de certidões (nascimento, casamento, óbito)
-- **Cartão de Crédito**: Gera números válidos para testes (Visa, MasterCard, etc.)
-
-### Recursos Adicionais
-- 📋 **Histórico**: Mantém registro dos documentos gerados
-- ⭐ **Favoritos**: Marque documentos frequentemente usados
-- 🔄 **Geração em Lote**: Gere até 50 documentos de uma vez
-- 📊 **Exportação**: Exporte em JSON, CSV ou texto simples
-- 🎭 **Formatação**: Com ou sem máscara/pontuação
+### Additional Features
+- 📋 **History**: Keep track of generated documents
+- ⭐ **Favorites**: Mark frequently used documents
+- 🔄 **Batch Generation**: Generate up to 50 documents at once
+- 📊 **Export**: Export in JSON, CSV, or plain text
+- 🎭 **Formatting**: With or without mask/punctuation
 
 ## 📸 Screenshots
 
-![4Devs Toolkit Commands](metadata/4devs-toolkit-01.png)
-![CPF Generator](metadata/4devs-toolkit-02.png)
+![4Devs Toolkit Commands](metadata/4devs-1.png)
+![CPF Generator](metadata/4devs-2.png)
 
-## 🚀 Installation / Instalação
+## 🚀 Installation
 
-### Via Raycast Store (Recomendado)
-1. Abra o Raycast
-2. Procure por "4Devs Toolkit"
-3. Clique em Install
+### Via Raycast Store (Recommended)
+1. Open Raycast
+2. Search for "4Devs Toolkit"
+3. Click Install
 
 ### Manual
 ```bash
@@ -49,28 +47,28 @@ npm run build
 npm run publish
 ```
 
-## 💻 Usage / Como Usar
+## 💻 Usage
 
-### Gerar CPF
-1. Abra Raycast (`⌘ Space`)
-2. Digite "Gerar CPF"
-3. Escolha o estado (opcional)
-4. Pressione `⌘↵` para gerar
+### Generate CPF
+1. Open Raycast (`⌘ Space`)
+2. Type "Generate CPF"
+3. Choose state (optional)
+4. Press `⌘↵` to generate
 
-### Gerar em Lote
-1. No campo "Quantidade", digite o número desejado (máx: 50)
-2. O resultado será copiado em formato JSON/CSV/Texto
+### Batch Generation
+1. In the "Quantity" field, enter desired number (max: 50)
+2. Result will be copied in JSON/CSV/Text format
 
-### Atalhos de Teclado
-| Ação | Atalho |
-|------|--------|
-| Gerar | `⌘↵` |
-| Copiar | `⌘C` |
-| Colar | `⌘V` |
-| Favoritar | `⌘F` |
-| Deletar do Histórico | `⌘⌫` |
+### Keyboard Shortcuts
+| Action | Shortcut |
+|--------|----------|
+| Generate | `⌘↵` |
+| Copy | `⌘C` |
+| Paste | `⌘V` |
+| Favorite | `⌘F` |
+| Delete from History | `⌘⌫` |
 
-## 🛠 Development / Desenvolvimento
+## 🛠 Development
 
 ```bash
 # Install dependencies
@@ -86,34 +84,34 @@ npm run build
 npm run lint
 ```
 
-## 🤝 Contributing / Contribuindo
+## 🤝 Contributing
 
-Contribuições são bem-vindas! Por favor:
+Contributions are welcome! Please:
 
-1. Fork o repositório
-2. Crie sua feature branch (`git checkout -b feature/NovaFuncionalidade`)
-3. Commit suas mudanças (`git commit -m 'Add: Nova funcionalidade'`)
-4. Push para a branch (`git push origin feature/NovaFuncionalidade`)
-5. Abra um Pull Request
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/NewFeature`)
+3. Commit your changes (`git commit -m 'Add: New feature'`)
+4. Push to the branch (`git push origin feature/NewFeature`)
+5. Open a Pull Request
 
-## 📝 Credits / Créditos
+## 📝 Credits
 
-- **Inspiração**: [4Devs](https://www.4devs.com.br/) - O site original com todas as ferramentas
-- **Plataforma**: [Raycast](https://raycast.com/) - Por tornar extensões como esta possíveis
-- **Comunidade**: Todos os desenvolvedores brasileiros que usam e apoiam ferramentas open source
+- **Inspiration**: [4Devs](https://www.4devs.com.br/) - The original website with all tools
+- **Platform**: [Raycast](https://raycast.com/) - For making extensions like this possible
+- **Community**: All Brazilian developers who use and support open source tools
 
-## 🙏 Acknowledgments / Agradecimentos
+## 🙏 Acknowledgments
 
-Um agradecimento especial à equipe 4Devs por criar e manter ferramentas tão úteis para a comunidade de desenvolvedores brasileiros por mais de uma década. Este projeto é um tributo ao trabalho incrível que vocês fazem.
+Special thanks to the 4Devs team for creating and maintaining such useful tools for the Brazilian developer community for over a decade. This project is a tribute to the incredible work you do.
 
-Se você acha estas ferramentas úteis, visite [4Devs](https://www.4devs.com.br/) e considere apoiar o projeto original.
+If you find these tools useful, visit [4Devs](https://www.4devs.com.br/) and consider supporting the original project.
 
-## 📜 License / Licença
+## 📜 License
 
-MIT - Veja o arquivo [LICENSE](LICENSE) para detalhes.
+MIT - See [LICENSE](LICENSE) file for details.
 
 ---
 
-**Nota**: Os documentos gerados são válidos apenas para TESTES e DESENVOLVIMENTO. Não utilize para atividades ilegais ou fraudulentas.
+**Note**: Generated documents are valid for TESTING and DEVELOPMENT only. Do not use for illegal or fraudulent activities.
 
 Made with ❤️ for the Brazilian developer community

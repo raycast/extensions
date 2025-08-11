@@ -108,10 +108,10 @@ export function generateMultipleCertidoes(options: CertidaoOptions = {}): string
 
 export function getCertidaoTypeName(type: CertidaoType): string {
   const names: Record<CertidaoType, string> = {
-    nascimento: "Nascimento",
-    casamento: "Casamento",
-    casamento_religioso: "Casamento com Efeito Religioso",
-    obito: "Óbito",
+    nascimento: "Birth",
+    casamento: "Marriage",
+    casamento_religioso: "Religious Marriage",
+    obito: "Death",
   };
   return names[type];
 }

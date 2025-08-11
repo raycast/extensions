@@ -1,5 +1,6 @@
-import { Action, ActionPanel, Form, Icon, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
+import { showFailureToast } from "@raycast/utils";
 import { generateMultipleCNHs, unmaskCNH } from "./lib/generators/cnh";
 import { MAX_BATCH_GENERATION } from "./lib/constants";
 import { copyToClipboard, pasteToFrontmostApp } from "./lib/utils/clipboard";
@@ -29,7 +30,7 @@ export default function GenerateCNH() {
         if (action === "paste") {
           await pasteToFrontmostApp(cnh);
         } else {
-          await copyToClipboard(cnh, "CNH copiada com sucesso");
+          await copyToClipboard(cnh, "CNH copied successfully");
         }
 
         if (preferences.enableHistory) {
@@ -43,7 +44,7 @@ export default function GenerateCNH() {
         const documents = cnhs.map((cnh) => formatDocumentForExport("CNH", unmaskCNH(cnh), cnh));
 
         const formatted = formatBatch(documents, preferences.exportFormat || "json");
-        await copyToClipboard(formatted, `${quantity} CNHs copiadas com sucesso`);
+        await copyToClipboard(formatted, `${quantity} CNHs copied successfully`);
 
         if (preferences.enableHistory) {
           for (const cnh of cnhs.slice(0, 10)) {
@@ -56,11 +57,7 @@ export default function GenerateCNH() {
         }
       }
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Erro ao gerar CNH",
-        message: String(error),
-      });
+      await showFailureToast(error, { title: "Error generating CNH" });
     } finally {
       setIsLoading(false);
     }
@@ -71,22 +68,22 @@ export default function GenerateCNH() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Gerar Cnh" icon={Icon.Car} onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Generate Cnh" icon={Icon.Car} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.Checkbox
         id="masked"
-        label="Com formatação (XXX XXX XXX XX)"
+        label="With formatting (XXX XXX XXX XX)"
         defaultValue={preferences.defaultMask !== false}
       />
 
       <Form.TextField
         id="quantity"
-        title="Quantidade"
+        title="Quantity"
         placeholder="1"
         defaultValue={preferences.defaultQuantity || "1"}
-        info={`Máximo: ${MAX_BATCH_GENERATION} itens`}
+        info={`Maximum: ${MAX_BATCH_GENERATION} items`}
       />
     </Form>
   );
