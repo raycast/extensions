@@ -2,6 +2,9 @@
 
 ## [Update] - {PR_MERGE_DATE}
 
+- Added `OpenAI GPT OSS 120B`
+- Added `OpenAI GPT OSS 20B`
+
 - Enhancements:
 
   - Clipboard copy now excludes thinking tokens, ensuring only final content is copied.
