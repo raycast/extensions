@@ -81,7 +81,7 @@ export default function Command() {
             b.personaName || b.accountName,
           ),
         );
-        const cur = await getCurrentSteamUser(paths);
+        const cur = user;
         const mapped: GameItem[] = games
           .filter((g) => g.installed)
           .map((g) => ({
