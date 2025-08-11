@@ -116,11 +116,7 @@ export default function Command() {
       console.error("Error fetching theme info:", err);
       const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred";
       setError(errorMessage);
-      await showToast({
-        title: "Error",
-        message: errorMessage,
-        style: Toast.Style.Failure,
-      });
+      await showFailureToast(err, { title: "Could not fetch theme info" });
     } finally {
       setIsLoading(false);
     }
