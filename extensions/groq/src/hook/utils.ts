@@ -2,8 +2,10 @@ import { encode } from "gpt-tokenizer";
 
 export const allModels = [
   { name: "Follow global model", id: "global" },
-  { name: "Kimi K2 Instruct 128K", id: "moonshotai/kimi-k2-instruct" },
-  { name: "Qwen 3 32B 128K", id: "qwen/qwen3-32b" },
+  { name: "GPT OSS 120B 131k", id: "openai/gpt-oss-120b" },
+  { name: "GPT OSS 20B 131k", id: "openai/gpt-oss-20b" },
+  { name: "Kimi K2 Instruct 128k", id: "moonshotai/kimi-k2-instruct" },
+  { name: "Qwen 3 32B 128k", id: "qwen/qwen3-32b" },
   { name: "Llama 4 Maverick 131k", id: "meta-llama/llama-4-maverick-17b-128e-instruct" },
   { name: "Llama 4 Scout 131k", id: "meta-llama/llama-4-scout-17b-16e-instruct" },
   { name: "Llama 3.3 70B 128k", id: "llama-3.3-70b-versatile" },
@@ -13,6 +15,8 @@ export const allModels = [
 ];
 
 const MODEL_RATES: Record<string, { input: number; output: number }> = {
+  "openai/gpt-oss-120b": { input: 0.15, output: 0.75 },
+  "openai/gpt-oss-20b": { input: 0.1, output: 0.5 },
   "meta-llama/llama-4-scout-17b-16e-instruct": { input: 0.11, output: 0.34 },
   "meta-llama/llama-4-maverick-17b-128e-instruct": { input: 0.2, output: 0.6 },
   "deepseek-r1-distill-llama-70b": { input: 0.75, output: 0.99 },
@@ -23,7 +27,12 @@ const MODEL_RATES: Record<string, { input: number; output: number }> = {
   "moonshotai/kimi-k2-instruct": { input: 1.0, output: 3.0 },
 };
 
-export const THINKING_MODELS = ["deepseek-r1-distill-llama-70b", "qwen/qwen3-32b"] as const;
+export const THINKING_MODELS = [
+  "openai/gpt-oss-120b",
+  "openai/gpt-oss-20b",
+  "deepseek-r1-distill-llama-70b",
+  "qwen/qwen3-32b",
+] as const;
 
 export function isThinkingModel(model: string): boolean {
   return THINKING_MODELS.includes(model as (typeof THINKING_MODELS)[number]);

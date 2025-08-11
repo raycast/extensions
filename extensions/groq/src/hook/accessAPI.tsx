@@ -29,7 +29,6 @@ export default function ResultView(props: ResultViewProps) {
   const getChatResponse = useCallback(async (sysPrompt: string, selectedText: string, model: string, temp: number) => {
     const fullSysPrompt = buildSystemPrompt(sysPrompt);
     const userPrompt = buildUserPrompt(user_extra_msg, selectedText);
-    console.log("model: ", model);
     try {
       const res = await openai.chat.completions.create({
         model: model,
