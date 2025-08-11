@@ -2,11 +2,9 @@
 
 A powerful Raycast extension to scan your local network, detect assigned IP addresses, and get smart recommendations for available addresses to prevent IP conflicts.
 
-![IP Finder Main Interface](docs/main-screenshot.png)
 
 ## Features
 
-![Key Features](docs/features.svg)
 
 - **🔍 Network Discovery**: Automatically detect your local network and scan for assigned IPs
 - **📊 IP Recommendations**: Get intelligent recommendations for available IP addresses
@@ -20,7 +18,6 @@ A powerful Raycast extension to scan your local network, detect assigned IP addr
 
 ## Quick Start
 
-![Quick Start Guide](docs/usage.svg)
 
 ## Commands
 
@@ -101,7 +98,6 @@ Recommended Available IPs:
 ## Privacy & Security
 
 - **Local Operation**: All scanning is performed locally on your machine
-- **No External Calls**: No network data is sent to external servers
 - **Secure Storage**: Scan history is stored locally using Raycast's secure storage
 - **Standard Commands**: Uses standard ping commands with no elevated privileges required
 - **No Keychain Access**: Does not require or request keychain access

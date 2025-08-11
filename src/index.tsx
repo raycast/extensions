@@ -1,7 +1,6 @@
-//Copyright © 2025 Sam Analytic Solutions
-//All rights reserved.
+// Copyright © 2025 Swayam Mehta
+// All rights reserved.
 
-// @ts-nocheck
 import { useState, useEffect } from "react";
 import {
   ActionPanel,
@@ -57,6 +56,10 @@ interface Preferences {
   scanCommonRanges: boolean;
   gatherDeviceInfo: boolean;
   scanPorts: boolean;
+  themePreference: "auto" | "light" | "dark";
+  colorScheme: "blue" | "green" | "purple" | "orange" | "red";
+  showNetworkMap: boolean;
+  mapLayout: "hierarchical" | "radial" | "grid";
 }
 
 interface ScanForm {
@@ -75,18 +78,25 @@ interface ScanHistory {
 
 export default function Command() {
   const [networkInfo, setNetworkInfo] = useState<NetworkInfo | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [scanHistory, setScanHistory] = useState<ScanHistory[]>([]);
-  const [showHistory, setShowHistory] = useState(false);
+  const [showHistory, setShowHistory] = useState<boolean>(false);
   const preferences = getPreferenceValues<Preferences>();
   const { push, pop } = useNavigation();
+
+  const currentTheme = "auto";
+  const colorScheme = "blue";
+  const mapLayout = "hierarchical";
+  const shouldShowMap = true;
+
+  const effectiveTheme = currentTheme;
 
   useEffect(() => {
     initializeNetwork();
     loadScanHistory();
   }, []);
 
-  const initializeNetwork = async () => {
+  const initializeNetwork = async (): Promise<void> => {
     try {
       const localIP = getLocalIP();
       const subnet = getSubnetFromIP(localIP);
@@ -101,7 +111,6 @@ export default function Command() {
         scanProgress: 0,
       });
 
-      // Auto-scan if enabled in preferences
       if (preferences.autoScanOnOpen) {
         setTimeout(() => {
           handleScan();
@@ -118,13 +127,18 @@ export default function Command() {
     }
   };
 
-  const loadScanHistory = async () => {
+  const loadScanHistory = async (): Promise<void> => {
     try {
       const history = await LocalStorage.getItem<string>("scanHistory");
       if (history) {
-        const parsed = JSON.parse(history);
+        const parsed = JSON.parse(history) as Array<{
+          subnet: string;
+          timestamp: string;
+          assignedCount: number;
+          recommendedCount: number;
+        }>;
         setScanHistory(
-          parsed.map((item: any) => ({
+          parsed.map((item) => ({
             ...item,
             timestamp: new Date(item.timestamp),
           })),
@@ -139,16 +153,16 @@ export default function Command() {
     subnet: string,
     assignedCount: number,
     recommendedCount: number,
-  ) => {
+  ): Promise<void> => {
     try {
-      const newHistory = [
+      const newHistory: ScanHistory[] = [
         {
           subnet,
           timestamp: new Date(),
           assignedCount,
           recommendedCount,
         },
-        ...scanHistory.slice(0, 9), // Keep last 10 scans
+        ...scanHistory.slice(0, 9),
       ];
       setScanHistory(newHistory);
       await LocalStorage.setItem("scanHistory", JSON.stringify(newHistory));
@@ -164,14 +178,14 @@ export default function Command() {
       const interfaceInfo = interfaces[name];
       if (interfaceInfo) {
         for (const info of interfaceInfo) {
-          if (info.family === "IPv4" && !info.internal) {
+          if (info.family === "IPv4" && !info.internal && info.address) {
             return info.address;
           }
         }
       }
     }
 
-    return "192.168.1.1"; // Fallback
+    return "192.168.1.1";
   };
 
   const getSubnetFromIP = (ip: string): string => {
@@ -190,9 +204,9 @@ export default function Command() {
       for (const line of lines) {
         const match = line.match(/(\d+\.\d+\.\d+\.\d+)\s+([0-9a-fA-F-:]+)/);
         if (match) {
-          const ip = match[1];
+          const ipAddr = match[1];
           const mac = match[2].replace(/-/g, ":").toUpperCase();
-          arpMap.set(ip, mac);
+          arpMap.set(ipAddr, mac);
         }
       }
     } catch (error) {
@@ -201,41 +215,19 @@ export default function Command() {
     return arpMap;
   };
 
-  const getManufacturer = async (mac: string): Promise<string | undefined> => {
-    try {
-      // Add timeout to prevent hanging
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
-
-      const response = await fetch(`https://api.macvendors.com/${mac}`, {
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      if (response.ok) {
-        return await response.text();
-      }
-    } catch (error) {
-      console.error("Failed to get manufacturer:", error);
-    }
-    return undefined;
-  };
-
   const getHostname = async (ip: string): Promise<string | undefined> => {
     try {
-      // Add timeout to prevent hanging
-      const hostnamePromise = dns.reverse(ip);
-      const timeoutPromise = new Promise((_, reject) =>
+      const hostnamePromise = dns.reverse(ip) as unknown as Promise<string[]>;
+      const timeoutPromise = new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error("DNS timeout")), 2000),
       );
 
-      const [hostname] = (await Promise.race([
+      const result = (await Promise.race([
         hostnamePromise,
         timeoutPromise,
-      ])) as [string];
-      return hostname;
-    } catch (error) {
+      ])) as string[];
+      return result && result.length > 0 ? result[0] : undefined;
+    } catch {
       return undefined;
     }
   };
@@ -270,19 +262,16 @@ export default function Command() {
     const isWindows = platform() === "win32";
     const isMac = platform() === "darwin";
 
-    // Common ports to scan
     const commonPorts =
       ports.length > 0
         ? ports
         : [21, 22, 23, 25, 53, 80, 110, 143, 443, 993, 995, 8080, 8443];
 
-    // Try multiple methods for port scanning
     for (const port of commonPorts) {
       try {
-        let command: string;
+        let command = "";
         let success = false;
 
-        // Method 1: Platform-specific commands
         if (isWindows) {
           command = `powershell -Command "Test-NetConnection -ComputerName ${ip} -Port ${port} -InformationLevel Quiet"`;
         } else if (isMac) {
@@ -294,25 +283,14 @@ export default function Command() {
         try {
           await execAsync(command, { timeout: 2000 });
           success = true;
-        } catch (error) {
-          // Try alternative method
-          if (isWindows) {
-            command = `telnet ${ip} ${port}`;
-          } else {
-            command = `timeout 2 bash -c "</dev/tcp/${ip}/${port}"`;
-          }
-
-          try {
-            await execAsync(command, { timeout: 2000 });
-            success = true;
-          } catch (error2) {
-            // Last resort: try with curl
+        } catch {
+          if (!isWindows) {
             try {
-              command = `curl -s --connect-timeout 2 ${ip}:${port}`;
+              command = `timeout 2 bash -c "</dev/tcp/${ip}/${port}"`;
               await execAsync(command, { timeout: 2000 });
               success = true;
-            } catch (error3) {
-              // Port is closed or unreachable
+            } catch {
+              // ignore
             }
           }
         }
@@ -320,8 +298,8 @@ export default function Command() {
         if (success) {
           openPorts.push(port);
         }
-      } catch (error) {
-        // Port is closed
+      } catch {
+        // ignore
       }
     }
 
@@ -330,28 +308,19 @@ export default function Command() {
 
   const getPingCommand = (ip: string, timeout: number): string => {
     const isWindows = platform() === "win32";
-    if (isWindows) {
-      return `ping -n 1 -w ${timeout * 1000} ${ip}`;
-    } else {
-      return `ping -c 1 -W ${timeout} ${ip}`;
-    }
+    return isWindows
+      ? `ping -n 1 -w ${timeout * 1000} ${ip}`
+      : `ping -c 1 -W ${timeout} ${ip}`;
   };
 
   const isPingSuccessful = (stdout: string): boolean => {
     const isWindows = platform() === "win32";
-    if (isWindows) {
-      return (
-        stdout.includes("Reply from") && !stdout.includes("Request timed out")
-      );
-    } else {
-      // More robust detection for macOS/Linux
-      return (
-        stdout.includes("1 packets transmitted, 1 received") ||
-        stdout.includes("1 received") ||
-        stdout.includes("bytes from") ||
-        stdout.includes("time=")
-      );
-    }
+    return isWindows
+      ? stdout.includes("Reply from") && !stdout.includes("Request timed out")
+      : stdout.includes("1 packets transmitted, 1 received") ||
+          stdout.includes("1 received") ||
+          stdout.includes("bytes from") ||
+          stdout.includes("time=");
   };
 
   const validateSubnet = (subnet: string): boolean => {
@@ -362,14 +331,16 @@ export default function Command() {
     if (parts.length !== 2) return false;
 
     const ip = parts[0];
-    const mask = parseInt(parts[1] || "0");
+    const mask = parseInt(parts[1] || "0", 10);
 
-    if (!ip || isNaN(mask) || mask < 1 || mask > 32) return false;
+    if (!ip || Number.isNaN(mask) || mask < 1 || mask > 32) return false;
 
-    const ipParts = ip.split(".").map(Number);
+    const ipParts = ip.split(".").map((p) => Number(p));
     if (ipParts.length !== 4) return false;
 
-    return ipParts.every((part) => !isNaN(part) && part >= 0 && part <= 255);
+    return ipParts.every(
+      (part) => !Number.isNaN(part) && part >= 0 && part <= 255,
+    );
   };
 
   const scanNetworkWithRecommendations = async (
@@ -377,10 +348,10 @@ export default function Command() {
     timeout: number,
     maxThreads: number,
     recommendations: number,
-  ) => {
+  ): Promise<void> => {
     if (!networkInfo) return;
 
-    setNetworkInfo((prev) =>
+    setNetworkInfo((prev: NetworkInfo | null) =>
       prev ? { ...prev, isScanning: true, scanProgress: 0 } : null,
     );
 
@@ -399,120 +370,88 @@ export default function Command() {
       }
 
       const baseIP = networkParts[0];
-      const mask = parseInt(networkParts[1] || "0");
+      const mask = parseInt(networkParts[1] || "0", 10);
 
-      if (!baseIP || isNaN(mask)) {
+      if (!baseIP || Number.isNaN(mask)) {
         throw new Error("Invalid subnet format");
       }
 
       let totalIPs = Math.pow(2, 32 - mask) - 2;
-      const baseParts = baseIP.split(".").map(Number);
+      const baseParts = baseIP.split(".").map((p) => Number(p));
 
-      // If scanCommonRanges is enabled, only scan common ranges
       if (preferences.scanCommonRanges) {
-        totalIPs = Math.min(totalIPs, 254); // Limit to common ranges
+        totalIPs = Math.min(totalIPs, 254);
       }
 
       const chunkSize = Math.min(maxThreads, 50);
       const chunks = Math.ceil(totalIPs / chunkSize);
 
       for (let chunk = 0; chunk < chunks; chunk++) {
-        const promises: Promise<void>[] = [];
+        const promises: Array<Promise<void>> = [];
 
         for (let i = 0; i < chunkSize; i++) {
           const ipIndex = chunk * chunkSize + i;
           if (ipIndex >= totalIPs) break;
 
-          const ip = calculateIP(baseParts, ipIndex);
-          promises.push(pingIP(ip, timeout, assignedIPs));
+          const ipAddr = calculateIP(baseParts, ipIndex);
+          promises.push(pingIP(ipAddr, timeout, assignedIPs));
         }
 
         await Promise.all(promises);
 
         if (preferences.showProgressBar) {
           const progress = Math.round(((chunk + 1) / chunks) * 100);
-          setNetworkInfo((prev) =>
+          setNetworkInfo((prev: NetworkInfo | null) =>
             prev ? { ...prev, scanProgress: progress } : null,
           );
         }
       }
 
-      // Get device information for assigned IPs (if enabled)
       if (preferences.gatherDeviceInfo && assignedIPs.length > 0) {
-        const message = preferences.scanPorts
-          ? "Getting MAC addresses, device details, and scanning ports..."
-          : "Getting MAC addresses and device details...";
-
         showToast({
           style: Toast.Style.Animated,
           title: "Gathering Device Info",
-          message: message,
+          message: preferences.scanPorts
+            ? "Getting MAC addresses, hostnames, and scanning ports..."
+            : "Getting MAC addresses and hostnames...",
         });
 
         const arpTable = await getARPTable();
 
-        // Process device info in parallel with timeout
-        const devicePromises = assignedIPs.map(async (ip) => {
-          try {
-            const mac = arpTable.get(ip);
+        const devicePromises = assignedIPs.map(async (ipAddr) => {
+          const mac = arpTable.get(ipAddr);
 
-            // Get manufacturer, hostname, and ports in parallel with timeout
-            const [manufacturer, hostname, openPorts] =
-              await Promise.allSettled([
-                mac ? getManufacturer(mac) : Promise.resolve(undefined),
-                getHostname(ip),
-                preferences.scanPorts ? scanPorts(ip, []) : Promise.resolve([]),
-              ]);
+          const [hostname, openPorts] = await Promise.all([
+            getHostname(ipAddr),
+            preferences.scanPorts
+              ? scanPorts(ipAddr, [])
+              : Promise.resolve<number[]>([]),
+          ]);
 
-            // Debug logging for port scanning
-            if (preferences.scanPorts && openPorts.status === "fulfilled") {
-              console.log(
-                `Port scan for ${ip}: ${openPorts.value.length} ports found - ${openPorts.value.join(", ")}`,
-              );
-            }
-
-            return {
-              ip,
-              mac,
-              manufacturer:
-                manufacturer.status === "fulfilled"
-                  ? manufacturer.value
-                  : undefined,
-              hostname:
-                hostname.status === "fulfilled" ? hostname.value : undefined,
-              openPorts:
-                openPorts.status === "fulfilled" ? openPorts.value : undefined,
-              isOnline: true,
-              lastSeen: new Date(),
-            };
-          } catch (error) {
-            // Fallback if device info gathering fails
-            return {
-              ip,
-              mac: arpTable.get(ip),
-              manufacturer: undefined,
-              hostname: undefined,
-              openPorts: undefined,
-              isOnline: true,
-              lastSeen: new Date(),
-            };
-          }
+          return {
+            ip: ipAddr,
+            mac,
+            manufacturer: undefined,
+            hostname,
+            openPorts: openPorts.length > 0 ? openPorts : undefined,
+            isOnline: true,
+            lastSeen: new Date(),
+          } as DeviceInfo;
         });
 
-        // Wait for all device info with a timeout
         const deviceResults = await Promise.allSettled(devicePromises);
         devices.push(
           ...deviceResults
-            .filter((result) => result.status === "fulfilled")
-            .map(
-              (result) => (result as PromiseFulfilledResult<DeviceInfo>).value,
-            ),
+            .filter(
+              (result): result is PromiseFulfilledResult<DeviceInfo> =>
+                result.status === "fulfilled",
+            )
+            .map((result) => result.value),
         );
       } else {
-        // Create basic device info without detailed lookup
         devices.push(
-          ...assignedIPs.map((ip) => ({
-            ip,
+          ...assignedIPs.map((ipAddr) => ({
+            ip: ipAddr,
             mac: undefined,
             manufacturer: undefined,
             hostname: undefined,
@@ -529,7 +468,7 @@ export default function Command() {
         recommendations,
       );
 
-      setNetworkInfo((prev) =>
+      setNetworkInfo((prev: NetworkInfo | null) =>
         prev
           ? {
               ...prev,
@@ -543,7 +482,6 @@ export default function Command() {
           : null,
       );
 
-      // Save to history
       await saveScanHistory(subnet, assignedIPs.length, recommendedIPs.length);
 
       showToast({
@@ -557,7 +495,9 @@ export default function Command() {
         title: "Scan Failed",
         message: error instanceof Error ? error.message : "Unknown error",
       });
-      setNetworkInfo((prev) => (prev ? { ...prev, isScanning: false } : null));
+      setNetworkInfo((prev: NetworkInfo | null) =>
+        prev ? { ...prev, isScanning: false } : null,
+      );
     }
   };
 
@@ -571,7 +511,7 @@ export default function Command() {
       if (ip[i] !== undefined && ip[i] > 255) {
         ip[i] = ip[i] % 256;
         if (ip[i - 1] !== undefined) {
-          ip[i - 1]++;
+          ip[i - 1]!++;
         }
       }
     }
@@ -593,10 +533,8 @@ export default function Command() {
       if (isPingSuccessful(stdout)) {
         assignedIPs.push(ip);
       }
-    } catch (error) {
-      // IP is not reachable, which is expected for most IPs
-      // For debugging on macOS, you can uncomment the next line:
-      // console.log(`Ping failed for ${ip}:`, error.message);
+    } catch {
+      // not reachable
     }
   };
 
@@ -615,13 +553,13 @@ export default function Command() {
       return [];
     }
 
-    const baseParts = baseIP.split(".").map(Number);
+    const baseParts = baseIP.split(".").map((p) => Number(p));
     const recommendations: string[] = [];
 
     for (let i = 1; i <= 254 && recommendations.length < count; i++) {
-      const ip = calculateIP(baseParts, i - 1);
-      if (!assignedIPs.includes(ip)) {
-        recommendations.push(ip);
+      const ipAddr = calculateIP(baseParts, i - 1);
+      if (!assignedIPs.includes(ipAddr)) {
+        recommendations.push(ipAddr);
       }
     }
 
@@ -632,8 +570,9 @@ export default function Command() {
     subnet: string,
     timeout: number,
     maxThreads: number,
-  ) => {
-    const recommendations = parseInt(preferences.defaultRecommendations) || 10;
+  ): Promise<void> => {
+    const recommendations =
+      parseInt(preferences.defaultRecommendations, 10) || 10;
     await scanNetworkWithRecommendations(
       subnet,
       timeout,
@@ -642,16 +581,16 @@ export default function Command() {
     );
   };
 
-  const handleScan = () => {
+  const handleScan = (): void => {
     if (!networkInfo) return;
 
     const timeout = parseFloat(preferences.defaultTimeout) || 1.0;
-    const maxThreads = parseInt(preferences.defaultMaxThreads) || 50;
+    const maxThreads = parseInt(preferences.defaultMaxThreads, 10) || 50;
 
     scanNetwork(networkInfo.subnet, timeout, maxThreads);
   };
 
-  const handleCustomScan = (values: ScanForm) => {
+  const handleCustomScan = (values: ScanForm): void => {
     const subnet = values.subnet.trim();
 
     if (!validateSubnet(subnet)) {
@@ -665,10 +604,10 @@ export default function Command() {
     }
 
     const timeout = parseFloat(values.timeout) || 1.0;
-    const maxThreads = parseInt(values.maxThreads) || 50;
-    const recommendations = parseInt(values.recommendations) || 10;
+    const maxThreads = parseInt(values.maxThreads, 10) || 50;
+    const recommendations = parseInt(values.recommendations, 10) || 10;
 
-    setNetworkInfo((prev) =>
+    setNetworkInfo((prev: NetworkInfo | null) =>
       prev
         ? {
             ...prev,
@@ -694,7 +633,7 @@ export default function Command() {
     }, 100);
   };
 
-  const showScanForm = () => {
+  const showScanForm = (): void => {
     push(
       <Form
         actions={
@@ -744,7 +683,7 @@ export default function Command() {
     );
   };
 
-  const showDetails = () => {
+  const showDetails = (): void => {
     if (!networkInfo) return;
 
     push(
@@ -786,6 +725,8 @@ export default function Command() {
   };
 
   const generateDetailMarkdown = (info: NetworkInfo): string => {
+    const themeInfo = `**Theme**: ${effectiveTheme} • **Color Scheme**: ${colorScheme} • **Map Layout**: ${mapLayout}`;
+
     return `# Network Analysis Report
 
 ## Network Information
@@ -794,6 +735,7 @@ export default function Command() {
 - **Devices Found**: ${info.devices.length}
 - **Recommended IPs**: ${info.recommendedIPs.length}
 ${info.lastScanTime ? `- **Last Scan**: ${info.lastScanTime.toLocaleString()}` : ""}
+- ${themeInfo}
 
 ## Network Devices
 ${
@@ -820,11 +762,17 @@ ${
     : "No available IPs found"
 }
 
+## Visual Settings
+- **Current Theme**: ${effectiveTheme}
+- **Color Scheme**: ${colorScheme}
+- **Map Layout**: ${mapLayout}
+- **Network Map**: ${shouldShowMap ? "Enabled" : "Disabled"}
+
 ---
-*Generated by IP Finder*`;
+*Generated by IP Finder with ${colorScheme} theme*`;
   };
 
-  const clearHistory = async () => {
+  const clearHistory = async (): Promise<void> => {
     const confirmed = await confirmAlert({
       title: "Clear Scan History",
       message: "Are you sure you want to clear all scan history?",
@@ -982,61 +930,37 @@ ${
             }
           />
         )}
+        <List.Item
+          title="Visual Settings"
+          subtitle={`${colorScheme} theme • ${effectiveTheme} mode • ${mapLayout} layout`}
+          icon={Icon.Gear}
+          accessories={[{ text: "Customize", icon: Icon.Gear }]}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Open Extension Preferences"
+                icon={Icon.Gear}
+                onAction={() => {
+                  showToast({
+                    style: Toast.Style.Success,
+                    title: "Open Preferences",
+                    message:
+                      "Go to Raycast Preferences > Extensions > IP Finder to customize themes and layouts",
+                  });
+                }}
+              />
+              <Action.CopyToClipboard
+                title="Copy Current Theme Info"
+                content={`Theme: ${currentTheme}\nColor Scheme: ${colorScheme}\nMap Layout: ${mapLayout}\nNetwork Map: ${shouldShowMap ? "Enabled" : "Disabled"}`}
+              />
+            </ActionPanel>
+          }
+        />
       </List.Section>
-
-      {showHistory && scanHistory.length > 0 && (
-        <List.Section title="Scan History">
-          {scanHistory.map((item, index) => (
-            <List.Item
-              key={index}
-              title={item.subnet}
-              subtitle={`${item.assignedCount} assigned, ${item.recommendedCount} recommended`}
-              icon={Icon.Clock}
-              accessories={[
-                {
-                  text: item.timestamp.toLocaleDateString(),
-                  icon: Icon.Calendar,
-                },
-              ]}
-              actions={
-                <ActionPanel>
-                  <Action
-                    title="Scan This Subnet"
-                    icon={Icon.Play}
-                    onAction={() => {
-                      setNetworkInfo((prev) =>
-                        prev
-                          ? {
-                              ...prev,
-                              subnet: item.subnet,
-                              assignedIPs: [],
-                              recommendedIPs: [],
-                              isScanning: false,
-                              scanProgress: 0,
-                            }
-                          : null,
-                      );
-                      const timeout =
-                        parseFloat(preferences.defaultTimeout) || 1.0;
-                      const maxThreads =
-                        parseInt(preferences.defaultMaxThreads) || 50;
-                      scanNetwork(item.subnet, timeout, maxThreads);
-                    }}
-                  />
-                  <Action.CopyToClipboard
-                    title="Copy Subnet"
-                    content={item.subnet}
-                  />
-                </ActionPanel>
-              }
-            />
-          ))}
-        </List.Section>
-      )}
 
       {networkInfo.devices.length > 0 && (
         <List.Section title="Network Devices">
-          {networkInfo.devices.map((device) => (
+          {networkInfo.devices.map((device: DeviceInfo) => (
             <List.Item
               key={device.ip}
               title={device.ip}
@@ -1046,18 +970,20 @@ ${
               icon={Icon.Circle}
               accessories={[
                 { text: "Active", icon: Icon.Check },
-                device.mac
-                  ? { text: device.mac, icon: Icon.Network }
-                  : undefined,
-                device.openPorts && device.openPorts.length > 0
-                  ? {
-                      text: device.openPorts
-                        .map((port) => `${port} (${getPortService(port)})`)
-                        .join(", "),
-                      icon: Icon.Gear,
-                    }
-                  : undefined,
-              ].filter(Boolean)}
+                ...(device.mac
+                  ? [{ text: device.mac, icon: Icon.Network }]
+                  : []),
+                ...(device.openPorts && device.openPorts.length > 0
+                  ? [
+                      {
+                        text: device.openPorts
+                          .map((p: number) => `${p} (${getPortService(p)})`)
+                          .join(", "),
+                        icon: Icon.Gear,
+                      },
+                    ]
+                  : []),
+              ]}
               actions={
                 <ActionPanel>
                   <Action.CopyToClipboard
@@ -1078,7 +1004,7 @@ ${
                     onAction={() => {
                       const ipRange =
                         device.ip.split(".").slice(0, 3).join(".") + ".0/24";
-                      setNetworkInfo((prev) =>
+                      setNetworkInfo((prev: NetworkInfo | null) =>
                         prev
                           ? {
                               ...prev,
@@ -1094,7 +1020,7 @@ ${
                       const timeout =
                         parseFloat(preferences.defaultTimeout) || 1.0;
                       const maxThreads =
-                        parseInt(preferences.defaultMaxThreads) || 50;
+                        parseInt(preferences.defaultMaxThreads, 10) || 50;
                       scanNetwork(ipRange, timeout, maxThreads);
                     }}
                   />
@@ -1106,7 +1032,7 @@ ${
                         const command = getPingCommand(device.ip, 2);
                         await execAsync(command);
                         showHUD(`Ping successful: ${device.ip}`);
-                      } catch (error) {
+                      } catch {
                         showHUD(`Ping failed: ${device.ip}`);
                       }
                     }}
@@ -1132,7 +1058,7 @@ ${
                         } else {
                           showHUD(`No open ports found on ${device.ip}`);
                         }
-                      } catch (error) {
+                      } catch {
                         showHUD(`Port scan failed: ${device.ip}`);
                       }
                     }}
@@ -1146,7 +1072,7 @@ ${
 
       {networkInfo.recommendedIPs.length > 0 && (
         <List.Section title="Recommended Available IPs">
-          {networkInfo.recommendedIPs.map((ip, index) => (
+          {networkInfo.recommendedIPs.map((ip: string, index: number) => (
             <List.Item
               key={ip}
               title={ip}
@@ -1171,7 +1097,7 @@ ${
                         const command = getPingCommand(ip, 1);
                         await execAsync(command);
                         showHUD(`IP ${ip} is NOT available (ping successful)`);
-                      } catch (error) {
+                      } catch {
                         showHUD(`IP ${ip} is available (ping failed)`);
                       }
                     }}

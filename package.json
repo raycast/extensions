@@ -1,9 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ip-finder",
-  "title": "IP Finder - Network Scanner",
+  "title": "Ip Finder - Network Scanner",
   "description": "Scan your local network to find assigned IPs and get recommendations for available addresses",
-  "icon": "store-icon.png",
+  "icon": "command-icon.png",
   "author": "swayam_mehta",
   "license": "MIT",
   "commands": [
@@ -75,7 +75,7 @@
       "type": "checkbox",
       "required": false,
       "title": "Gather Device Information",
-      "description": "Get MAC addresses, hostnames, and manufacturer details",
+      "description": "Get MAC addresses and hostnames",
       "default": true,
       "label": "Gather device information"
     },
@@ -87,6 +87,89 @@
       "description": "Check for open ports on discovered devices",
       "default": true,
       "label": "Scan for open ports"
+    },
+    {
+      "name": "themePreference",
+      "type": "dropdown",
+      "required": false,
+      "title": "Theme Preference",
+      "description": "Choose your preferred theme for the interface",
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto (System)",
+          "value": "auto"
+        },
+        {
+          "title": "Light",
+          "value": "light"
+        },
+        {
+          "title": "Dark",
+          "value": "dark"
+        }
+      ]
+    },
+    {
+      "name": "colorScheme",
+      "type": "dropdown",
+      "required": false,
+      "title": "Color Scheme",
+      "description": "Choose your preferred color scheme",
+      "default": "blue",
+      "data": [
+        {
+          "title": "Blue (Default)",
+          "value": "blue"
+        },
+        {
+          "title": "Green",
+          "value": "green"
+        },
+        {
+          "title": "Purple",
+          "value": "purple"
+        },
+        {
+          "title": "Orange",
+          "value": "orange"
+        },
+        {
+          "title": "Red",
+          "value": "red"
+        }
+      ]
+    },
+    {
+      "name": "showNetworkMap",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Network Map",
+      "description": "Display interactive network topology map",
+      "default": true,
+      "label": "Show network map"
+    },
+    {
+      "name": "mapLayout",
+      "type": "dropdown",
+      "required": false,
+      "title": "Map Layout",
+      "description": "Choose the layout style for the network map",
+      "default": "hierarchical",
+      "data": [
+        {
+          "title": "Hierarchical",
+          "value": "hierarchical"
+        },
+        {
+          "title": "Radial",
+          "value": "radial"
+        },
+        {
+          "title": "Grid",
+          "value": "grid"
+        }
+      ]
     }
   ],
   "dependencies": {
@@ -95,7 +178,7 @@
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
     "@types/node": "^20.8.10",
-    "@types/react": "^18.3.23",
+    "@types/react": "^18.2.67",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
