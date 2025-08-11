@@ -1,0 +1,130 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "4devs-toolkit",
+  "title": "4devs Toolkit",
+  "description": "Gere documentos brasileiros válidos e dados de teste diretamente do Raycast",
+  "icon": "icon.png",
+  "author": "thalys",
+  "access": "public",
+  "version": "0.0.1",
+  "categories": ["Developer Tools", "Productivity"],
+  "license": "MIT",
+  "keywords": ["brazil", "brasil", "cpf", "cnpj", "documents", "generator", "gerador", "teste", "4devs", "validation", "brazilian", "faker"],
+  "commands": [
+    {
+      "name": "generate-cpf",
+      "title": "Gerar Cpf",
+      "subtitle": "4Devs Toolkit",
+      "description": "Gere números de CPF válidos para testes",
+      "mode": "view"
+    },
+    {
+      "name": "generate-cnpj",
+      "title": "Gerar Cnpj",
+      "subtitle": "4Devs Toolkit", 
+      "description": "Gere números de CNPJ válidos para testes",
+      "mode": "view"
+    },
+    {
+      "name": "generate-cnh",
+      "title": "Gerar Cnh",
+      "subtitle": "4Devs Toolkit",
+      "description": "Gere números de CNH válidos para testes",
+      "mode": "view"
+    },
+    {
+      "name": "generate-certidao",
+      "title": "Gerar Certidão",
+      "subtitle": "4Devs Toolkit",
+      "description": "Gere certidões brasileiras válidas para testes",
+      "mode": "view"
+    },
+    {
+      "name": "generate-card",
+      "title": "Gerar Cartão",
+      "subtitle": "4Devs Toolkit",
+      "description": "Gere números de cartão de crédito válidos para testes",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "Histórico E Favoritos",
+      "subtitle": "4Devs Toolkit",
+      "description": "Visualize e gerencie o histórico de documentos gerados",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultMask",
+      "title": "Formato com Máscara Padrão",
+      "description": "Usar formatação com máscara por padrão",
+      "type": "checkbox",
+      "label": "Ativar máscara por padrão",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "defaultQuantity",
+      "title": "Quantidade Padrão",
+      "description": "Número padrão de itens a gerar",
+      "type": "textfield",
+      "required": false,
+      "default": "1"
+    },
+    {
+      "name": "primaryAction",
+      "title": "Ação Primária",
+      "description": "Ação padrão ao pressionar Enter",
+      "type": "dropdown",
+      "required": false,
+      "default": "copy",
+      "data": [
+        {"title": "Copiar", "value": "copy"},
+        {"title": "Colar", "value": "paste"}
+      ]
+    },
+    {
+      "name": "enableHistory",
+      "title": "Habilitar Histórico",
+      "description": "Salvar itens gerados no histórico",
+      "type": "checkbox",
+      "label": "Salvar no histórico",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "exportFormat",
+      "title": "Formato de Exportação",
+      "description": "Formato padrão para exportação em lote",
+      "type": "dropdown",
+      "required": false,
+      "default": "json",
+      "data": [
+        {"title": "JSON", "value": "json"},
+        {"title": "CSV", "value": "csv"},
+        {"title": "Texto", "value": "text"}
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
