@@ -30,6 +30,7 @@
       "title": "Grid Columns",
       "description": "Number of columns to display in the grid",
       "default": "8",
+      "required": false,
       "data": [
         {
           "title": "3",
