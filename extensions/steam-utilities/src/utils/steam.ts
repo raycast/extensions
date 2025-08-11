@@ -1,5 +1,4 @@
-import { existsSync, readdirSync } from 'fs';
-import { readFileSync } from 'fs';
+import { existsSync, readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { executeCommand } from './index';
 import { parseVDF } from './vdf';

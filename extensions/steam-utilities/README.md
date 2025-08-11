@@ -101,7 +101,7 @@ MIT
 - Tip: Use Raycast Window Capture and enable “Save to Metadata” to auto-save screenshots to this folder.
 
 ## Code style
-- Prettier config: see `.prettierrc` (printWidth 100, single quotes, trailing commas, etc.).
+- Prettier config: see `.prettierrc` (printWidth 120, trailing commas, etc.).
 - Scripts:
   - `npm run lint` to check style and ESLint rules.
   - `npm run fix-lint` to auto-fix common issues.
