@@ -35,11 +35,11 @@ export function parseVDF(content: string): VDFObject {
       const ch = text[i++];
       if (ch === '"') break;
       if (ch === "\\") {
+        if (i >= text.length) throw new Error(`Incomplete escape sequence at position ${i - 1}`);
         const next = text[i++];
         if (next === "n") result += "\n";
         else if (next === "t") result += "\t";
         else result += next;
-      } else {
         result += ch;
       }
     }
