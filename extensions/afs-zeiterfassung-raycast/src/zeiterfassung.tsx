@@ -26,6 +26,7 @@ async function handleItemSelect(item: StateItem) {
 
 export default function Command() {
   const [items, setItems] = useState<StateItem[]>();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
@@ -36,6 +37,7 @@ export default function Command() {
       const loginResponse: HttpFunctionResult<LoginResponseDTO> = await user.login();
       if (!loginResponse.success) {
         await showToast({ style: Toast.Style.Failure, title: "Login failed", message: loginResponse.message });
+        setIsLoading(false);
         return;
       }
 
@@ -43,23 +45,25 @@ export default function Command() {
 
       if (!stateResult.success) {
         await showToast({ style: Toast.Style.Failure, title: "Error", message: stateResult.message });
+        setIsLoading(false);
         return;
       }
 
       setItems([{ id: -1, title: "Gehen" }, { id: 0, title: "Kommen" }, ...stateResult.data!]);
+      setIsLoading(false);
     };
     loadData();
   }, []);
 
   return (
-    <List isLoading={items === undefined}>
+    <List isLoading={isLoading}>
       {items?.map((item) => (
         <List.Item
           key={item.id}
           title={item.title}
           actions={
             <ActionPanel>
-              <Action.SubmitForm onSubmit={() => handleItemSelect(item)}></Action.SubmitForm>
+              <Action title={`Switch to ${item.title}`} onAction={() => handleItemSelect(item)} />
             </ActionPanel>
           }
         />
