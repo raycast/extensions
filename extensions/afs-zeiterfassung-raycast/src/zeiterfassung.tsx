@@ -19,7 +19,7 @@ async function handleItemSelect(item: StateItem) {
   await showToast({
     style: Toast.Style.Success,
     title: "Stamp successful!",
-    message: item.id == -1 ? "Time tracking updated successfully." : `You're now clocked in to "${item.title}".`,
+    message: item.id === -1 ? "Time tracking updated successfully." : `You're now clocked in to "${item.title}".`,
   });
   await popToRoot();
 }
@@ -52,7 +52,7 @@ export default function Command() {
   }, []);
 
   return (
-    <List isLoading={items == undefined}>
+    <List isLoading={items === undefined}>
       {items?.map((item) => (
         <List.Item
           key={item.id}

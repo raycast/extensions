@@ -59,7 +59,7 @@ export default class Http {
           Authorization: `Bearer ${await User.getAccessToken()}`,
           "Content-Type": "application/json",
         },
-        validateStatus: (status: number) => status != 401,
+        validateStatus: (status: number) => status >= 200 && status <= 299,
       });
       return this.handleResponse<T>(result);
     } catch (error: any) {
@@ -162,10 +162,10 @@ export default class Http {
 
     try {
       const response: AxiosResponse<LoginResponseDTO> = await axiosRefreshInstace.get("/api/auth/renew");
-      if (response?.data) {
+      if (response?.data && response.data.access_token && response.data.refresh_token) {
         LocalStorage.setItem("AFS_ACCESS_TOKEN", response.data.access_token);
         LocalStorage.setItem("AFS_REFRESH_TOKEN", response.data.refresh_token);
-        return response.data!.access_token!;
+        return response.data.access_token;
       } else throw new Error("Failed to request new access token.");
     } catch (error: any) {
       console.error("Error requesting new access token:", error);
