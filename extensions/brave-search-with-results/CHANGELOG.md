@@ -1,6 +1,6 @@
 # Brave Search with Results Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-08-11
 
 - Image search
 - Use common keyboard shortcuts
