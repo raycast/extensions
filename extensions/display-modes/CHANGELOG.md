@@ -1,6 +1,6 @@
 # Display Modes Changelog
 
-## [Status Menu Bar & Quickly Change Display Mode] - {PR_MERGE_DATE}
+## [Status Menu Bar & Quickly Change Display Mode] - 2025-08-11
 
 - Add a status menu bar
 - Add a new command to quickly change display mode
