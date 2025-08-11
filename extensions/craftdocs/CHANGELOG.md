@@ -1,6 +1,6 @@
 # Craftdocs Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2025-08-11
 
 - Added a new `Add to Daily Note` command with intelligent daily note detection and configurable append/prepend position.
 - Added timestamp toggle and customizable prefix/suffix options for flexible content formatting.
