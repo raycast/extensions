@@ -149,9 +149,9 @@ export default function History() {
   function getItemSubtitle(item: HistoryItem): string {
     const parts = [item.type];
     if (item.metadata) {
-      if (item.metadata.state) parts.push(item.metadata.state);
-      if (item.metadata.tipo) parts.push(item.metadata.tipo);
-      if (item.metadata.brand) parts.push(item.metadata.brand);
+      if (item.metadata.state) parts.push(String(item.metadata.state));
+      if (item.metadata.tipo) parts.push(String(item.metadata.tipo));
+      if (item.metadata.brand) parts.push(String(item.metadata.brand));
     }
     return parts.join(" • ");
   }
