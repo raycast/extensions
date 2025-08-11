@@ -298,13 +298,8 @@ export default function Command() {
       });
       await launchSteamGame(appid);
       await showToast({ style: Toast.Style.Success, title: "Launched" });
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : String(e);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Launch failed",
-        message: msg,
-      });
+    } catch (error) {
+      showFailureToast(error, { title: "Launch failed" });
     }
   }
 
