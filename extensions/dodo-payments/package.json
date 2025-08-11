@@ -6,6 +6,11 @@
   "icon": "command-icon.png",
   "author": "ambuj_kumar",
   "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Finance", 
+    "Productivity"
+  ],
   "commands": [
     {
       "name": "view-payments",
