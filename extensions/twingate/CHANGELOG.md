@@ -1,6 +1,6 @@
 # Twingate Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2025-08-11
 
 - **Search Resources**: Browse and search all Twingate resources with multi-term support
 - **Recent Resources**: Track and quickly access recently used resources
