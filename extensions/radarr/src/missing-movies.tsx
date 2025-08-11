@@ -88,7 +88,7 @@ export default function MissingMovies() {
               />
               <Action.OpenInBrowser
                 title="Search for Movie"
-                url={`${selectedInstance.url}/movie/${movie.tmdbId}#search`}
+                url={`${selectedInstance?.url}/movie/${movie.tmdbId}#search`}
                 icon={Icon.MagnifyingGlass}
               />
               {movie.imdbId && (
