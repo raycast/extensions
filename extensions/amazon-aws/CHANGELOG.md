@@ -1,6 +1,6 @@
 # Amazon AWS Changelog
 
-## [Amplify command] - {PR_MERGE_DATE}
+## [Amplify command] - 2025-08-11
 
 - Add notification management for AWS Amplify branches
   - Manage build notifications settings
