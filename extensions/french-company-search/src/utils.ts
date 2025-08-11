@@ -51,6 +51,8 @@ const LEGAL_FORM_MAPPING: { [key: string]: string } = {
   "5540": "Société en commandite par actions (SCA)",
   "5560": "Société à responsabilité limitée (SARL)",
   "5570": "Société en commandite par actions (SCA)",
+  "5598": "Société anonyme (SA)",
+  "5599": "Société anonyme (SA)",
   "5601": "SA à directoire (s.a.i.)",
   "5602": "SA à conseil d'administration (s.a.i.)",
   "5710": "Société par actions simplifiée (SAS)",
@@ -170,9 +172,44 @@ export function getLegalFormLabel(code: string): string {
 
 export function formatSiren(siren: string): string {
   if (siren && siren.length === 9) {
-    return `${siren.slice(0, 3)} ${siren.slice(3, 6)} ${siren.slice(6, 9)}`;
+    return `${siren.slice(0, 3)}\u00A0${siren.slice(3, 6)}\u00A0${siren.slice(6, 9)}`;
   }
   return siren;
+}
+
+/**
+ * Formats a number with French formatting (spaces for thousands, comma for decimals)
+ * Examples:
+ * - 9077707050 -> "9 077 707 050,00"
+ * - 675.2 -> "675,20"
+ * - 1234.56 -> "1 234,56"
+ * - "675,2" -> "675,20"
+ */
+export function formatFrenchNumber(value: string | number): string {
+  if (!value) return value as string;
+
+  // Convert to string and normalize decimal separators (. or ,)
+  const numString = value.toString().replace(/\s/g, "").replace(",", ".");
+
+  // Check if it's a valid number (integer or decimal)
+  if (!/^\d+(\.\d+)?$/.test(numString)) {
+    return value as string;
+  }
+
+  // Parse the number to handle decimals properly
+  const num = parseFloat(numString);
+
+  // Format to ensure exactly 2 decimal places
+  const formatted = num.toFixed(2);
+  const parts = formatted.split(".");
+  const integerPart = parts[0];
+  const decimalPart = parts[1];
+
+  // Add non-breaking spaces every 3 digits from right to left for integer part
+  const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, "\u00A0");
+
+  // Return with French decimal separator (comma) and exactly 2 decimal places
+  return `${formattedInteger},${decimalPart}`;
 }
 
 /**

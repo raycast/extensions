@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Detail, Form, useNavigation, environment, showToast, Toast } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { Action, ActionPanel, Detail, Form, useNavigation, environment } from "@raycast/api";
+import { usePromise, showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { getCompanyInfo } from "./services/inpi-api";
 import { CompanyData, RepresentativeInfo } from "./types";
@@ -7,6 +7,7 @@ import {
   formatAddress,
   formatField,
   formatSiren,
+  formatFrenchNumber,
   getGenderAgreement,
   getLegalFormLabel,
   getRoleName,
@@ -69,11 +70,7 @@ function CompanyDetail({ siren }: { siren: string }) {
 
   useEffect(() => {
     if (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Erreur de recherche",
-        message: error.message,
-      });
+      showFailureToast(error, { title: "Erreur de recherche" });
     }
   }, [error]);
 
@@ -165,7 +162,7 @@ function Metadata({ data }: { data: CompanyData }) {
       <Detail.Metadata.Separator />
       <Detail.Metadata.Label
         title="Capital social"
-        text={shareCapital !== "[[à compléter]]" && shareCapital !== "N/A" ? `${shareCapital} €` : shareCapital}
+        text={shareCapital !== "[[à compléter]]" && shareCapital !== "N/A" ? `${shareCapital}\u00A0€` : shareCapital}
       />
       <Detail.Metadata.Label
         title="RCS"
@@ -333,8 +330,10 @@ function buildPersonneMoraleMarkdown(data: CompanyData): string {
 
   const identite = personneMorale.identite;
   const denomination = formatField(identite?.entreprise?.denomination) || formatField(personneMorale.denomination);
-  const shareCapital =
+  const shareCapitalRaw =
     formatField(identite?.description?.montantCapital) || formatField(personneMorale.capital?.montant);
+  const shareCapital =
+    shareCapitalRaw !== FALLBACK_VALUES.MISSING_DATA ? formatFrenchNumber(shareCapitalRaw) : shareCapitalRaw;
 
   // Extract address and RCS information
   const address = formatAddress(personneMorale.adresseEntreprise);
@@ -344,7 +343,7 @@ function buildPersonneMoraleMarkdown(data: CompanyData): string {
 
   // Build company header and details
   const title = `**La société ${denomination}**`;
-  const details = `${legalForm} au capital de ${shareCapital} €
+  const details = `${legalForm} au capital de ${shareCapital}\u00A0€
 Immatriculée au RCS de ${rcsCity} sous le n° ${sirenFormatted}
 Dont le siège social est situé ${address}`;
 

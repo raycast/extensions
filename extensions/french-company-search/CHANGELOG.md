@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] - {PR_MERGE_DATE}
+
+### Added
+- **French Number Formatting**: Proper French formatting for share capital with non-breaking spaces as thousand separators and comma as decimal separator
+- **Decimal Places Handling**: Always display exactly 2 decimal places (e.g., 675,2 becomes 675,20)
+- **Missing Legal Form Codes**: Added codes 5598 and 5599 for "Société anonyme (SA)"
+- **Output Template Documentation**: Added comprehensive template examples in README for both corporate entities and individual entrepreneurs
+
+### Changed
+- **SIREN Formatting**: Updated to use non-breaking spaces between digit groups (784608416 → 784 608 416)
+- **Currency Display**: Added non-breaking space between amount and € symbol to prevent line breaks
+- **Repository References**: Updated all repository URLs to match renamed repository (french-company-search)
+- **Greptile Compliance**: Implemented code quality improvements for Raycast Store publication compliance
+
+### Fixed
+- **Share Capital Display**: Large numbers now properly formatted (9077707050 € → 9 077 707 050,00 €)
+- **Legal Form Recognition**: Fixed missing SA (Société Anonyme) form codes causing display of numeric codes instead of readable labels
+
 ## [1.0.1] - 2025-08-08
 
 ### Changed
@@ -15,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Code Simplification**: Refactored complex rendering logic, removed recursive API calls, and simplified the overall architecture to make it more robust and maintainable.
 - **Linting & Formatting**: Fixed all code style issues to align with Raycast's CI/CD validation standards.
 
-## [1.0.0] - 2025-01-08
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 - **Core Feature**: Search French companies by SIREN/SIRET via INPI API
