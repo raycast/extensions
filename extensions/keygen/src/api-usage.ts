@@ -1,8 +1,8 @@
 import { showToast, Toast, updateCommandMetadata } from "@raycast/api";
 import { API_URL, headers } from "./keygen";
 import dayjs from "dayjs";
-import relatimeTime from "dayjs/plugin/relativeTime";
-dayjs.extend(relatimeTime);
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.extend(relativeTime);
 
 export default async function APIUsage() {
   const toast = await showToast(Toast.Style.Animated, "Fetching Usage");
@@ -22,7 +22,7 @@ export default async function APIUsage() {
     await updateCommandMetadata({ subtitle: `Keygen | ${message}` });
   } catch (error) {
     toast.style = Toast.Style.Failure;
-    toast.title = "Something went wrong";
+    toast.title = "Could not fetch API usage";
     toast.message = `${error}`;
   }
 }

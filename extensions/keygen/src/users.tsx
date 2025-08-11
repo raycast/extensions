@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import relatimeTime from "dayjs/plugin/relativeTime";
+import relativeTime from "dayjs/plugin/relativeTime";
 import { API_URL, headers, parseResponse, useKeygenPaginated } from "./keygen";
 import { User, UserRole } from "./interfaces";
 import {
@@ -18,7 +18,7 @@ import {
 import OpenInKeygen from "./open-in-keygen";
 import { FormValidation, useForm } from "@raycast/utils";
 import { USER_STATUS_COLOR } from "./config";
-dayjs.extend(relatimeTime);
+dayjs.extend(relativeTime);
 
 export default function Users() {
   const { isLoading, data: users, pagination, revalidate, error, mutate } = useKeygenPaginated<User>("users");
@@ -109,7 +109,6 @@ function NewUser({ onNew }: { onNew: () => void }) {
     email: string;
     password: string;
     role: string;
-    group: string;
   }
   const { handleSubmit, itemProps } = useForm<FormValues>({
     async onSubmit(values) {

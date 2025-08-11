@@ -27,9 +27,9 @@
   "commands": [
     {
       "name": "api-usage",
-      "title": "View API Usage",
+      "title": "API Usage",
       "subtitle": "Keygen",
-      "description": "View API Usage",
+      "description": "Check current API usage statistics and limits",
       "mode": "no-view"
     },
     {
