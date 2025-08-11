@@ -1,8 +1,13 @@
 # Spotify Player Changelog
 
-## [Include option to prevent duplicate songs in AddToPlaylist command] - {PR_MERGE_DATE}
+## [Include option to prevent duplicate songs in Add to Playlist command] - {PR_MERGE_DATE}
 
 - Introduced an option allowing users to choose whether to allow duplicate songs to be added to their playlists
+
+## [Show the Artist name when liking a song] - 2025-08-04
+
+- Added the artist name into the message in the HUD when liking a new song
+- Added the artist name into the message in the HUD attempting to like an already liked song
 
 ## [Add toggle to filter song name in menu bar] - 2025-07-08
 

@@ -1,6 +1,5 @@
 import { Action, ActionPanel, Grid, Color } from "@raycast/api";
-import axios from "axios";
-import { useEffect, useState } from "react";
+import { useFetch } from "@raycast/utils";
 
 type Styles = {
   outline?: { version: string; unicode: string; svg: string };
@@ -22,19 +21,15 @@ const Outline = "https://raw.githubusercontent.com/tabler/tabler-icons/master/ic
 const Filled = "https://raw.githubusercontent.com/tabler/tabler-icons/master/icons/filled/";
 
 export default function Command() {
-  const [data, setData] = useState<TablerIcon[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const fetcher = async () => {
-    const { data } = await axios.get("https://tabler.io/api/icons");
-    if (data) setIsLoading(false);
-
-    setData(data.icons);
-  };
-
-  useEffect(() => {
-    fetcher();
-  }, []);
+  const { isLoading, data } = useFetch("https://tabler.io/api/icons", {
+    mapResult(result: { icons: TablerIcon[] }) {
+      return {
+        data: result.icons,
+      };
+    },
+    keepPreviousData: false,
+    initialData: [],
+  });
 
   return (
     <Grid isLoading={isLoading} inset={Grid.Inset.Large}>
@@ -82,6 +77,18 @@ export default function Command() {
                     content={tablerIcon.name}
                     shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
                   />
+                  {tablerIcon.styles?.outline?.unicode && (
+                    <Action.CopyToClipboard
+                      title="Copy Outline HTML Char"
+                      content={`&#x${tablerIcon.styles.outline.unicode};`}
+                    />
+                  )}
+                  {tablerIcon.styles?.filled?.unicode && (
+                    <Action.CopyToClipboard
+                      title="Copy Filled HTML Char"
+                      content={`&#x${tablerIcon.styles.filled.unicode};`}
+                    />
+                  )}
                 </ActionPanel>
               }
             />

@@ -30,10 +30,9 @@ export default function Command() {
       {data?.map((match) => (
         <List.Section
           title={
-            new Date(match.day).toISOString().split("T")[0] === new Date().toISOString().split("T")[0]
+            new Date(match.day).toLocaleDateString() === new Date().toLocaleDateString()
               ? "Today"
-              : new Date(match.day).toISOString().split("T")[0] ===
-                  new Date(Date.now() + 86400000).toISOString().split("T")[0]
+              : new Date(match.day).toLocaleDateString() === new Date(Date.now() + 86400000).toLocaleDateString()
                 ? "Tomorrow"
                 : new Date(match.day).toLocaleDateString(undefined, { weekday: "long" })
           }

@@ -32,6 +32,7 @@ export enum VSCodeBuild {
   Code = "Code",
   CodeInsiders = "Code - Insiders",
   Cursor = "Cursor",
+  Kiro = "Kiro",
   Positron = "Positron",
   Trae = "Trae",
   TraeCN = "Trae CN",
