@@ -12,11 +12,13 @@ function generateMatricula(): string {
   const book = Math.floor(Math.random() * 900) + 100;
   const page = Math.floor(Math.random() * 300) + 1;
   const term = Math.floor(Math.random() * 90000) + 10000;
+  const typeCode = Math.floor(Math.random() * 9) + 1;
+  const sequential = Math.floor(Math.random() * 999) + 1;
 
   const serventia = String(Math.floor(Math.random() * 900000) + 100000);
   const uf = String(Math.floor(Math.random() * 27) + 1).padStart(2, "0");
 
-  const baseNumber = `${serventia}${uf}${year}${bookType}${String(book).padStart(5, "0")}${String(page).padStart(3, "0")}${term}`;
+  const baseNumber = `${serventia}${uf}${year}${bookType}${String(book).padStart(5, "0")}${String(page).padStart(3, "0")}${term}${typeCode}${String(sequential).padStart(3, "0")}`;
 
   const checkDigits = calculateCheckDigits(baseNumber);
 
@@ -25,18 +27,29 @@ function generateMatricula(): string {
 
 function calculateCheckDigits(baseNumber: string): string {
   const digits = baseNumber.split("").map(Number);
-  // Standard mod 11 weights for check digit calculation
-  const weights = [2, 3, 4, 5, 6, 7, 8, 9, 2, 3, 4, 5, 6, 7, 8, 9, 2, 3, 4, 5, 6, 7, 8, 9, 2, 3, 4, 5, 6, 7];
 
-  let sum = 0;
+  // First check digit - weights for 30 digits
+  const weights1 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+  let sum1 = 0;
   for (let i = 0; i < digits.length; i++) {
-    sum += digits[i] * weights[i];
+    sum1 += digits[i] * weights1[i];
   }
 
-  const remainder = sum % 11;
-  const checkDigit = remainder < 2 ? 0 : 11 - remainder;
+  const checkDigit1 = sum1 % 11;
 
-  return String(checkDigit).padStart(2, "0");
+  // Second check digit includes the first check digit
+  const extendedDigits = [...digits, checkDigit1];
+  const weights2 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1];
+
+  let sum2 = 0;
+  for (let i = 0; i < extendedDigits.length; i++) {
+    sum2 += extendedDigits[i] * weights2[i];
+  }
+
+  const checkDigit2 = sum2 % 11;
+
+  return String(checkDigit1) + String(checkDigit2);
 }
 
 export function generateCertidao(options: CertidaoOptions = {}): string {
