@@ -1,6 +1,6 @@
 # Keygen Changelog
 
-## [List Users + API Usage] - {PR_MERGE_DATE}
+## [List Users + API Usage] - 2025-08-12
 
 - List, Create and Delete Users
 - View API Usage
