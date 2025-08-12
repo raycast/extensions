@@ -6,7 +6,7 @@ import {
   defaultCometStatePath,
   NO_BOOKMARKS_MESSAGE,
 } from "../constants";
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, getApplications, showToast, Toast, open } from "@raycast/api";
 import { Preferences } from "../interfaces";
 import { BookmarkDirectory, HistoryEntry, RawBookmarks } from "../interfaces";
 
@@ -183,3 +183,36 @@ export const getBookmarks = async (profile?: string): Promise<HistoryEntry[]> =>
     throw new Error(NO_BOOKMARKS_MESSAGE);
   }
 };
+
+async function isCometInstalled() {
+  const applications = await getApplications();
+  return applications.some(({ bundleId }) => bundleId === "ai.perplexity.comet");
+}
+
+export async function checkCometInstallation() {
+  if (!(await isCometInstalled())) {
+    const options: Toast.Options = {
+      style: Toast.Style.Failure,
+      title: "Comet browser is not installed.",
+      message: "Install it from: https://comet.perplexity.ai/",
+      primaryAction: {
+        title: "Go to https://comet.perplexity.ai/",
+        onAction: (toast) => {
+          open("https://comet.perplexity.ai/");
+          toast.hide();
+        },
+      },
+    };
+
+    await showToast(options);
+    return false;
+  }
+  return true;
+}
+
+export function showCometNotOpenToast() {
+  showToast({
+    style: Toast.Style.Failure,
+    title: "You'll need to have Comet open to use this extension",
+  });
+}

@@ -2,6 +2,7 @@ import { ReactElement } from "react";
 import { Action, ActionPanel, closeMainWindow, Icon } from "@raycast/api";
 import { closeActiveTab, createNewTabToWebsite, createNewTabWithProfile, setActiveTab } from "../actions";
 import { Tab } from "../interfaces";
+import { checkCometInstallation } from "../util";
 
 export class CometActions {
   public static NewTab = NewTabActions;
@@ -18,6 +19,11 @@ function NewTabActions({ query, url }: { query?: string; url?: string }): ReactE
   }
 
   const handleAction = async () => {
+    const isInstalled = await checkCometInstallation();
+    if (!isInstalled) {
+      return;
+    }
+
     try {
       if (query) {
         const perplexityUrl = `https://perplexity.ai/search?q=${encodeURIComponent(query)}`;
@@ -62,9 +68,17 @@ function TabListItemActions({ tab, onTabClosed }: { tab: Tab; onTabClosed?: () =
 }
 
 function HistoryItemActions({ title, url }: { title: string; url: string }): ReactElement {
+  const handleAction = async () => {
+    const isInstalled = await checkCometInstallation();
+    if (!isInstalled) {
+      return;
+    }
+    await createNewTabToWebsite(url);
+  };
+
   return (
     <ActionPanel title={title}>
-      <Action onAction={() => createNewTabToWebsite(url)} title={"Open"} />
+      <Action onAction={handleAction} title={"Open"} />
       <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
     </ActionPanel>
   );
@@ -72,6 +86,11 @@ function HistoryItemActions({ title, url }: { title: string; url: string }): Rea
 
 function GoToTab(props: { tab: Tab }) {
   async function handleAction() {
+    const isInstalled = await checkCometInstallation();
+    if (!isInstalled) {
+      return;
+    }
+
     try {
       await setActiveTab(props.tab);
       await closeMainWindow();
@@ -89,6 +108,11 @@ function GoToTab(props: { tab: Tab }) {
 
 function CloseTab(props: { tab: Tab; onTabClosed?: () => void }) {
   async function handleAction() {
+    const isInstalled = await checkCometInstallation();
+    if (!isInstalled) {
+      return;
+    }
+
     await closeActiveTab(props.tab);
     await closeMainWindow();
     props.onTabClosed?.();

@@ -7,8 +7,8 @@ import { useCachedState } from "@raycast/utils";
 import { COMET_PROFILE_KEY, DEFAULT_COMET_PROFILE_ID } from "./constants";
 
 export default function Command() {
-  const [searchText, setSearchText] = useState<string>();
-  const [profile] = useCachedState(COMET_PROFILE_KEY, DEFAULT_COMET_PROFILE_ID);
+  const [searchText, setSearchText] = useState("");
+  const [profile] = useCachedState<string>(COMET_PROFILE_KEY, DEFAULT_COMET_PROFILE_ID);
   const { data, isLoading, errorView, revalidate } = useBookmarkSearch(searchText, profile);
 
   if (errorView) {

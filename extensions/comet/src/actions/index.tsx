@@ -9,8 +9,6 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
         "document.head.querySelector('link[rel~=icon]') ? document.head.querySelector('link[rel~=icon]').href : '';"`
     : '""';
 
-  await checkAppInstalled();
-
   try {
     const openTabs = await runAppleScript(`
       set _output to ""
@@ -37,9 +35,9 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
   } catch (err) {
     if ((err as Error).message.includes('Can\'t get application "Comet"')) {
       LocalStorage.removeItem("is-installed");
+      throw new Error(NOT_INSTALLED_MESSAGE);
     }
-    await checkAppInstalled();
-    return [];
+    throw err;
   }
 }
 
@@ -67,24 +65,6 @@ export async function closeActiveTab(tab: Tab): Promise<void> {
     return true
   `);
 }
-
-const checkAppInstalled = async () => {
-  const installed = await LocalStorage.getItem("is-installed");
-  if (installed) return;
-
-  const appInstalled = await runAppleScript(`
-set isInstalled to false
-try
-    do shell script "osascript -e 'exists application \\"Comet\\"'"
-    set isInstalled to true
-end try
-
-return isInstalled`);
-  if (appInstalled === "false") {
-    throw new Error(NOT_INSTALLED_MESSAGE);
-  }
-  LocalStorage.setItem("is-installed", true);
-};
 
 export async function createNewWindow(): Promise<void> {
   await runAppleScript(`

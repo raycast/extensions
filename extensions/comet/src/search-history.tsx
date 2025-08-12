@@ -24,7 +24,7 @@ export const groupEntriesByDate = (allEntries?: HistoryEntry[]): GroupedEntries 
     : new Map<string, HistoryEntry[]>();
 
 export default function Command(): ReactElement {
-  const [searchText, setSearchText] = useState<string>();
+  const [searchText, setSearchText] = useState("");
   const [profile, setProfile] = useCachedState<string>(COMET_PROFILE_KEY, DEFAULT_COMET_PROFILE_ID);
   const { data, isLoading, errorView } = useHistorySearch(profile, searchText);
 
@@ -32,12 +32,12 @@ export default function Command(): ReactElement {
     setProfile(profileId);
   };
 
+  const groupedEntries = groupEntriesByDate(data);
+  const groups = Array.from(groupedEntries.keys());
+
   if (errorView) {
     return errorView as ReactElement;
   }
-
-  const groupedEntries = groupEntriesByDate(data);
-  const groups = Array.from(groupedEntries.keys());
 
   return (
     <List

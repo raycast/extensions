@@ -26,13 +26,17 @@ function orderByLastVisited(targetId: string, container?: HistoryContainer[]): H
 }
 
 export default function Command() {
-  const [searchText, setSearchText] = useState<string>();
-  const [profiles] = useCachedState<CometProfile[]>(COMET_PROFILES_KEY);
-  const [profile] = useCachedState(COMET_PROFILE_KEY, DEFAULT_COMET_PROFILE_ID);
+  // All simple hooks first
+  const { useOriginalFavicon } = getPreferenceValues<Preferences>();
 
+  // Then state hooks
+  const [searchText, setSearchText] = useState("");
+  const [profiles] = useCachedState<CometProfile[]>(COMET_PROFILES_KEY, []);
+  const [profile] = useCachedState<string>(COMET_PROFILE_KEY, DEFAULT_COMET_PROFILE_ID);
+
+  // Finally custom hooks
   const currentProfileHistory = useHistorySearch(profile, searchText);
   const { data: dataTab, isLoading: isLoadingTab, errorView: errorViewTab } = useTabSearch();
-  const { useOriginalFavicon } = getPreferenceValues<Preferences>();
 
   // Use useMemo to calculate profileHistories to avoid infinite re-renders
   const profileHistories = useMemo<HistoryContainer[]>(() => {
@@ -50,22 +54,15 @@ export default function Command() {
         data: currentProfileHistory.data,
         isLoading: currentProfileHistory.isLoading,
         errorView: currentProfileHistory.errorView,
-        revalidate: currentProfileHistory.revalidate,
+        revalidate:
+          currentProfileHistory.revalidate ||
+          (() => {
+            /* no-op */
+          }),
         profile: currentProfile,
       },
     ];
-  }, [
-    profiles,
-    profile,
-    currentProfileHistory?.data,
-    currentProfileHistory?.isLoading,
-    currentProfileHistory?.errorView,
-  ]);
-
-  if (errorViewTab || profileHistories?.some((p) => p.errorView)) {
-    const errorViewHistory = profileHistories?.find((p) => p.errorView)?.errorView;
-    return errorViewTab || errorViewHistory;
-  }
+  }, [profiles, profile, currentProfileHistory]);
 
   // Simple URL detection function
   const isUrl = (text: string): boolean => {
@@ -92,6 +89,12 @@ export default function Command() {
     actionTitle = `Search "${searchText}" with Perplexity`;
     icon = Icon.MagnifyingGlass;
     actions = <CometActions.NewTab query={searchText} />;
+  }
+
+  // Check for errors after all hooks have been called
+  if (errorViewTab || profileHistories?.some((p) => p.errorView)) {
+    const errorViewHistory = profileHistories?.find((p) => p.errorView)?.errorView;
+    return errorViewTab || errorViewHistory;
   }
 
   return (
