@@ -23,7 +23,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
-                title="Search LinkedIn"
+                title="Search on LinkedIn"
                 url={`https://www.linkedin.com/search/results/all/?keywords=${encodeURIComponent(searchText)}`}
                 onOpen={handleSearch}
               />
