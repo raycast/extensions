@@ -10,6 +10,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import ky from "ky";
 import { useState } from "react";
 import { API_URL } from "x-post";
@@ -98,11 +99,7 @@ export default function SendFeedback() {
     } catch (error) {
       console.error("Failed to send feedback:", error);
 
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to send feedback",
-        message: error instanceof Error ? error.message : "An unknown error occurred",
-      });
+      showFailureToast(error, { title: "Failed to send feedback" });
     } finally {
       setIsLoading(false);
     }
