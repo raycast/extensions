@@ -1,6 +1,6 @@
 # v0 Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2025-08-12
 
 ### Added
 
