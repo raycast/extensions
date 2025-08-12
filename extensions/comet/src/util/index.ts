@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { execSync } from "child_process";
 import {
   DEFAULT_COMET_PROFILE_ID,
   defaultCometProfilePath,
@@ -150,7 +151,6 @@ function extractBookmarkFromBookmarkDirectory(bookmarkDirectory: BookmarkDirecto
       id: bookmarkDirectory.id,
       url: bookmarkDirectory.url,
       title: bookmarkDirectory.name,
-      lastVisited: new Date(bookmarkDirectory.date_added),
     });
   }
   return bookmarks;
@@ -216,3 +216,70 @@ export function showCometNotOpenToast() {
     title: "You'll need to have Comet open to use this extension",
   });
 }
+
+const whereClauses = (tableTitle: string, terms: string[]) => {
+  return terms.map((t) => `(${tableTitle}.title LIKE '%${t}%' OR ${tableTitle}.url LIKE '%${t}%')`).join(" AND ");
+};
+
+export const getHistoryQuery = (table: string, date_field: string, terms: string[]) =>
+  `SELECT id,
+            url,
+            title
+     FROM ${table}
+     WHERE ${whereClauses(table, terms)}
+     AND last_visit_time > 0
+     ORDER BY ${date_field} DESC LIMIT 30;`;
+
+export const getHistory = async (profile?: string, query?: string): Promise<HistoryEntry[]> => {
+  try {
+    const dbPath = getHistoryDbPath(profile);
+
+    if (!fs.existsSync(dbPath)) {
+      return [];
+    }
+
+    // Use the same query logic as useHistorySearch
+    const terms = query ? query.trim().split(" ") : [""];
+    const sqlQuery = getHistoryQuery("urls", "last_visit_time", terms);
+
+    try {
+      // Create temporary copy to avoid database locks
+      const tempDbPath = `${dbPath}.tmp.${Date.now()}`;
+      execSync(`cp "${dbPath}" "${tempDbPath}"`, { timeout: 5000 });
+
+      const output = execSync(`sqlite3 -separator "|" "${tempDbPath}" "${sqlQuery.replace(/"/g, '""')}"`, {
+        encoding: "utf8" as BufferEncoding,
+        timeout: 10000,
+      }) as string;
+
+      // Clean up
+      fs.unlinkSync(tempDbPath);
+
+      if (!output || output.trim() === "") {
+        return [];
+      }
+
+      // Parse results
+      const lines = output.trim().split("\n");
+      return lines
+        .filter((line: string) => line.trim() !== "")
+        .map((line: string) => {
+          const parts = line.split("|");
+          if (parts.length >= 3) {
+            return {
+              id: parts[0],
+              url: parts[1],
+              title: parts[2],
+            };
+          }
+          return null;
+        })
+        .filter((item): item is HistoryEntry => Boolean(item));
+    } catch (error) {
+      // If copy approach fails, return empty array
+      return [];
+    }
+  } catch (error) {
+    return [];
+  }
+};

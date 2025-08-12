@@ -1,4 +1,5 @@
-import { getAvailableProfiles } from "../util";
+import { getAvailableProfiles, resolveProfileName, getHistory } from "../util";
+import { HistoryEntry } from "../interfaces";
 
 type Input = {
   /** The query to search for in the history (optional, returns recent history if empty) */
@@ -7,17 +8,13 @@ type Input = {
   profile?: string;
 };
 
-export default function (input: Input) {
+export default async function (input: Input): Promise<HistoryEntry[] | string> {
   try {
-    // For now, return a message directing users to use the Raycast command instead
-    // This avoids the WASM dependency while maintaining the tool interface
-    const availableProfiles = getAvailableProfiles();
-    const profileInfo = input.profile ? `in profile "${input.profile}"` : "in the default profile";
-    const queryInfo = input.query ? `for "${input.query}"` : "(recent history)";
+    // Resolve profile name (e.g., "Johan" -> "Default")
+    const resolvedProfile = resolveProfileName(input.profile);
+    const history = await getHistory(resolvedProfile, input.query);
 
-    return `To search Comet history ${queryInfo} ${profileInfo}, please use the "Search History" command in Raycast. Available profiles are: ${availableProfiles.join(
-      ", "
-    )}.`;
+    return history;
   } catch (error) {
     const availableProfiles = getAvailableProfiles();
     return `Error: ${

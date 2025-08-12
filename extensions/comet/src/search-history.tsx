@@ -10,12 +10,7 @@ import { COMET_PROFILE_KEY, DEFAULT_COMET_PROFILE_ID } from "./constants";
 export const groupEntriesByDate = (allEntries?: HistoryEntry[]): GroupedEntries =>
   allEntries
     ? allEntries.reduce((acc, cur) => {
-        const title = new Date(cur.lastVisited).toLocaleDateString(undefined, {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        });
+        const title = "Historique";
         const groupEntries = acc.get(title) ?? [];
         groupEntries.push(cur);
         acc.set(title, groupEntries);

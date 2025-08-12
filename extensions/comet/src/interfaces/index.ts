@@ -18,7 +18,6 @@ export interface HistoryEntry {
   readonly id: string;
   readonly url: string;
   readonly title: string;
-  readonly lastVisited: Date;
 }
 
 export type GroupedEntries = Map<string, HistoryEntry[]>;
