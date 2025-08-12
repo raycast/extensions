@@ -57,5 +57,5 @@ export const NON_KEYBOARD_CLASS = `[${SMART_QUOTES.join("")}${DASHES.join("")}${
 export const ASCII_ALLOWED_IN_ALL = /[\n\r\t \x20-\x7E]/;
 
 export function codePointToHex(cp: number): string {
-  return `U+${cp.toString(16).toUpperCase().padStart(4, "0")}`;
+  return `U+${cp.toString(16).toUpperCase()}`;
 }

@@ -5,6 +5,10 @@ import { INVISIBLE_CLASS } from "./lib/sets";
 import { fixAllUnicode, fixInvisibleOnly } from "./lib/clean";
 import { getPreferences } from "./lib/runtime";
 
+// Precompile regexes to avoid recreating them in hot paths
+const INVISIBLE_REGEX = new RegExp(INVISIBLE_CLASS, "u");
+const NON_KEYBOARD_REGEX = /[\u2018\u2019\u201C\u201D\u2013\u2014\u2026]/u;
+
 const EXAMPLE =
   "Hollywood is making a movie about your life, but it has to be in the style of a famous Black film or show (e.g., “Love Jones” vibe, “Insecure” style). Which one are you choosing?\nZWSP:\u200B Soft hyphen:\u00AD NBSP:\u00A0 Em—dash";
 
@@ -162,8 +166,8 @@ function buildPreview(
     const isTab = ch === "\t";
     const isNBSP = ch === "\u00A0";
     // Use the shared pattern to identify invisibles without a literal regex to satisfy lint rule
-    const isInvisible = new RegExp(INVISIBLE_CLASS, "u").test(ch);
-    const isNonKeyboard = /[\u2018\u2019\u201C\u201D\u2013\u2014\u2026]/u.test(ch);
+    const isInvisible = INVISIBLE_REGEX.test(ch);
+    const isNonKeyboard = NON_KEYBOARD_REGEX.test(ch);
     if (flags.showSpaces && (isSpace || isTab || isNBSP)) {
       out += isTab ? "→" : isNBSP ? "⍽" : "·";
     } else if (isInvisible) {
@@ -174,7 +178,7 @@ function buildPreview(
       out += ch;
     }
     if (flags.showUnicodeTags && ch > "\u007f") {
-      out += `[${cp.toString(16).toUpperCase().padStart(4, "0")}]`;
+      out += `[U+${cp.toString(16).toUpperCase()}]`;
     }
   }
   return out;
