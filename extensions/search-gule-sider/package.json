@@ -4,13 +4,16 @@
   "title": "Search Gule Sider",
   "description": "Search Gule Sider for telephone numbers.",
   "icon": "extension-icon.png",
+  "categories": [
+    "Other"
+  ],
   "author": "marruje",
   "license": "MIT",
   "commands": [
     {
       "name": "gulesider",
       "title": "Search Gule Sider",
-      "description": "Phone number lookup in Gule Sider",
+      "description": "Search for phone number or person in Gule Sider",
       "mode": "no-view",
       "arguments": [
         {
