@@ -3,7 +3,10 @@
   "name": "git-command-ai",
   "title": "Git Command AI",
   "description": "Get the git command that best suits your needs and situation",
-  "categories": ["Developer Tools", "Productivity"],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
   "icon": "extension-icon.png",
   "author": "samuel_goncalves",
   "license": "MIT",
@@ -32,12 +35,12 @@
   "dependencies": {
     "@langchain/anthropic": "^0.3.26",
     "@langchain/community": "^0.3.50",
-    "@langchain/core": "^0.3.68",
+    "@langchain/core": "^0.3.69",
     "@langchain/google-genai": "^0.2.16",
     "@langchain/openai": "^0.6.7",
     "@raycast/api": "^1.102.3",
-    "@raycast/utils": "^1.17.0",
-    "zod": "^4.0.17"
+    "@raycast/utils": "^1.19.1",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
