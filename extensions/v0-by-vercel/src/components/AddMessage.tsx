@@ -8,7 +8,7 @@ import fs from "fs/promises";
 
 interface FormValues {
   message: string;
-  modelId?: "v0-1.5-sm" | "v0-1.5-md" | "v0-1.5-lg";
+  modelId?: "v0-1.5-sm" | "v0-1.5-md" | "v0-1.5-lg" | "v0-gpt-5";
   imageGenerations?: boolean;
   thinking?: boolean;
   attachments: string[];
@@ -26,6 +26,13 @@ export default function AddMessage({ chatId, chatTitle, revalidateChats, scopeId
   const { activeProfileApiKey, isLoadingProfileDetails, activeProfileDefaultScope } = useActiveProfile();
 
   const { handleSubmit, itemProps } = useForm<FormValues>({
+    initialValues: {
+      message: "",
+      modelId: "v0-gpt-5",
+      imageGenerations: undefined,
+      thinking: undefined,
+      attachments: [],
+    },
     onSubmit: async (values) => {
       if (!activeProfileApiKey) {
         showFailureToast("API Key not available. Please set it in Preferences or manage profiles.", {
@@ -141,12 +148,13 @@ export default function AddMessage({ chatId, chatTitle, revalidateChats, scopeId
         title="Model"
         value={itemProps.modelId.value || ""}
         onChange={(newValue) =>
-          itemProps.modelId.onChange?.(newValue as "v0-1.5-sm" | "v0-1.5-md" | "v0-1.5-lg" | undefined)
+          itemProps.modelId.onChange?.(newValue as "v0-1.5-sm" | "v0-1.5-md" | "v0-1.5-lg" | "v0-gpt-5" | undefined)
         }
       >
         <Form.Dropdown.Item value="v0-1.5-sm" title="v0-1.5-sm" />
         <Form.Dropdown.Item value="v0-1.5-md" title="v0-1.5-md" />
         <Form.Dropdown.Item value="v0-1.5-lg" title="v0-1.5-lg" />
+        <Form.Dropdown.Item value="v0-gpt-5" title="v0-gpt-5" />
       </Form.Dropdown>
       <Form.Description title="Chat" text={displayTitle} />
     </Form>

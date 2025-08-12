@@ -1,4 +1,4 @@
-import { useFetch } from "@raycast/utils";
+import { useV0Api } from "./useV0Api";
 import type { ScopeSummary, FindScopesResponse } from "../types";
 
 interface UseScopesResult {
@@ -9,14 +9,13 @@ interface UseScopesResult {
 }
 
 export function useScopes(apiKey: string | undefined, execute: boolean = true): UseScopesResult {
-  const { isLoading, data, error, revalidate } = useFetch<FindScopesResponse>(
+  const { isLoading, data, error, revalidate } = useV0Api<FindScopesResponse>(
     apiKey ? "https://api.v0.dev/v1/user/scopes" : "",
     {
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
-      parseResponse: (response) => response.json(),
       execute: !!apiKey && execute,
     },
   );

@@ -8,6 +8,7 @@ interface Options<T> extends Omit<RequestInit, "body"> {
   onData?: (data: T) => void;
   initialData?: T;
   keepPreviousData?: boolean;
+  parseResponse?: (response: Response) => Promise<T>;
 }
 
 export function useV0Api<T>(url: string, options?: Options<T>) {
@@ -26,6 +27,7 @@ export function useV0Api<T>(url: string, options?: Options<T>) {
   return useFetch<T, T, T>(url, {
     ...fetchOptions,
     initialData,
-    parseResponse: parseV0ApiResponseBody,
+    parseResponse:
+      (restOptions as Options<T>)?.parseResponse || (parseV0ApiResponseBody as (r: Response) => Promise<T>),
   });
 }

@@ -1,7 +1,7 @@
 import { ActionPanel, Action, showToast, Toast, Form, useNavigation, Icon } from "@raycast/api";
 import { useForm, showFailureToast } from "@raycast/utils";
 import type { CreateChatRequest, ScopeSummary } from "./types";
-import ViewChats from "./view-chats";
+import ChatDetail from "./components/ChatDetail";
 import { useProjects } from "./hooks/useProjects";
 import { useActiveProfile } from "./hooks/useActiveProfile";
 import { useScopes } from "./hooks/useScopes";
@@ -16,7 +16,7 @@ interface FormValues {
   system?: string;
   chatPrivacy: string;
   projectId?: string;
-  modelId?: "v0-1.5-sm" | "v0-1.5-md" | "v0-1.5-lg";
+  modelId?: "v0-1.5-sm" | "v0-1.5-md" | "v0-1.5-lg" | "v0-gpt-5";
   imageGenerations?: boolean;
   thinking?: boolean;
   scopeId?: string;
@@ -30,7 +30,13 @@ export default function Command() {
   const { scopes: scopesData, isLoadingScopes } = useScopes(activeProfileApiKey);
 
   const { handleSubmit, itemProps, setValue } = useForm<FormValues>({
-    initialValues: { message: "", chatPrivacy: "private", scopeId: activeProfileDefaultScope || "", attachments: [] },
+    initialValues: {
+      message: "",
+      chatPrivacy: "private",
+      scopeId: activeProfileDefaultScope || "",
+      attachments: [],
+      modelId: "v0-gpt-5",
+    },
     onSubmit: async (values) => {
       if (!activeProfileApiKey) {
         showFailureToast("API Key not available. Please set it in Preferences or manage profiles.", {
@@ -75,12 +81,12 @@ export default function Command() {
           delete requestBody.modelConfiguration;
         }
 
-        await v0ApiFetcher<CreateChatResponse>("https://api.v0.dev/v1/chats", {
+        const chatResponse = await v0ApiFetcher<CreateChatResponse>("https://api.v0.dev/v1/chats", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${activeProfileApiKey}`,
             "Content-Type": "application/json",
-            "x-scope": values.scopeId || "",
+            "x-scope": values.scopeId || activeProfileDefaultScope || "",
           },
           body: JSON.stringify(requestBody),
         });
@@ -89,8 +95,13 @@ export default function Command() {
         toast.title = "Chat Created";
         toast.message = "Your new chat has been created successfully!";
 
-        // Push the view-chats component to show the newly created chat
-        push(<ViewChats scopeId={values.scopeId} />);
+        // Navigate to the newly created chat's detail page
+        push(
+          <ChatDetail
+            chatId={chatResponse.id}
+            scopeId={(values.scopeId as string | undefined) || (activeProfileDefaultScope ?? undefined)}
+          />,
+        );
 
         return;
       } catch (error) {
@@ -152,9 +163,10 @@ export default function Command() {
         title="Model"
         value={itemProps.modelId.value || ""}
         onChange={(newValue) =>
-          itemProps.modelId.onChange?.(newValue as "v0-1.5-sm" | "v0-1.5-md" | "v0-1.5-lg" | undefined)
+          itemProps.modelId.onChange?.(newValue as "v0-1.5-sm" | "v0-1.5-md" | "v0-1.5-lg" | "v0-gpt-5" | undefined)
         }
       >
+        <Form.Dropdown.Item value="v0-gpt-5" title="v0-gpt-5" />
         <Form.Dropdown.Item value="v0-1.5-sm" title="v0-1.5-sm" />
         <Form.Dropdown.Item value="v0-1.5-md" title="v0-1.5-md" />
         <Form.Dropdown.Item value="v0-1.5-lg" title="v0-1.5-lg" />
@@ -202,9 +214,6 @@ export default function Command() {
         <Form.Dropdown.Item value="team-edit" title="Team (Editable)" />
         <Form.Dropdown.Item value="unlisted" title="Unlisted" />
       </Form.Dropdown>
-
-      {/* <Form.Checkbox label="Image Generations" {...itemProps.imageGenerations} />
-      <Form.Checkbox label="Thinking" {...itemProps.thinking} /> */}
     </Form>
   );
 }

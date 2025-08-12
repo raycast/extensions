@@ -118,7 +118,7 @@ export interface ForkChatResponse {
   messages: MessageSummary[];
 }
 
-export type V0Model = "v0-1.5-sm" | "v0-1.5-md" | "v0-1.5-lg" | "v0-1.0-md";
+export type V0Model = "v0-1.5-sm" | "v0-1.5-md" | "v0-1.5-lg" | "v0-1.0-md" | "v0-gpt-5";
 
 export interface CreateChatRequest {
   message: string;

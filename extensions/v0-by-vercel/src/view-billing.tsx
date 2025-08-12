@@ -1,5 +1,5 @@
 import { Detail, List, Icon, Color } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { useV0Api } from "./hooks/useV0Api";
 import { useActiveProfile } from "./hooks/useActiveProfile";
 
 interface TokenBillingData {
@@ -59,11 +59,10 @@ export default function ViewBillingCommand() {
       }
     : undefined;
 
-  const { isLoading, data, error } = useFetch<BillingResponse>(
+  const { isLoading, data, error } = useV0Api<BillingResponse>(
     activeProfileApiKey ? "https://api.v0.dev/v1/user/billing" : "",
     {
       headers: commonHeaders,
-      parseResponse: (response) => response.json(),
       execute: !!activeProfileApiKey && !isLoadingProfileDetails,
     },
   );
@@ -72,9 +71,8 @@ export default function ViewBillingCommand() {
     isLoading: isLoadingPlan,
     data: planData,
     error: planError,
-  } = useFetch<PlanResponse>(activeProfileApiKey ? "https://api.v0.dev/v1/user/plan" : "", {
+  } = useV0Api<PlanResponse>(activeProfileApiKey ? "https://api.v0.dev/v1/user/plan" : "", {
     headers: commonHeaders,
-    parseResponse: (response) => response.json(),
     execute: !!activeProfileApiKey && !isLoadingProfileDetails,
   });
 
