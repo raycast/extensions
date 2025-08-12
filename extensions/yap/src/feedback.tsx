@@ -23,11 +23,6 @@ interface HttpError {
   };
 }
 
-interface Preferences {
-  confirmBeforeSubmitting: boolean;
-  apiKey: string;
-}
-
 interface FeedbackFormValues {
   feedback: string;
 }
