@@ -15,7 +15,7 @@ const searchBarAccessory = ({ onTeamChange }: { onTeamChange: () => void }) => {
   const team = teams?.find((x) => x.id === selectedTeam);
   return (
     <List.Dropdown
-      value={selectedTeam || user?.username}
+      value={selectedTeam}
       tooltip="Switch Team"
       onChange={async (newValue) => await onChange(newValue)}
     >
