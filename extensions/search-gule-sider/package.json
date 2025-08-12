@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "gulesider",
-      "title": "Gule Sider",
+      "title": "Search Gule Sider",
       "description": "Phone number lookup in Gule Sider",
       "mode": "no-view",
       "arguments": [
