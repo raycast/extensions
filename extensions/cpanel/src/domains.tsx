@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Alert, Color, confirmAlert, Form, Icon, List, showToast, useNavigation } from "@raycast/api";
-import { FormValidation, getAvatarIcon, getFavicon, useForm } from "@raycast/utils";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Form, Icon, Keyboard, List, showToast, useNavigation } from "@raycast/api";
+import { FormValidation, getAvatarIcon, getFavicon, useCachedState, useForm } from "@raycast/utils";
 import { useListDomains, useParsedDNSZone, useUAPI } from "./lib/hooks";
 import { DEFAULT_ICON } from "./lib/constants";
 import { DNSZoneRecord } from "./lib/types";
@@ -62,6 +62,7 @@ type SOARecord = DNSZoneRecord & { type: "record"; dname: string; data: string[]
 
 function ViewDNSZone({ zone }: { zone: string }) {
   const { isLoading, data = [], revalidate } = useParsedDNSZone(zone);
+  const [isShowingDetail, setIsShowingDetail] = useCachedState("show-dns-zone-details", false);
 
   const [type, setType] = useState("");
   const recordsToShow = useMemo(
@@ -75,7 +76,7 @@ function ViewDNSZone({ zone }: { zone: string }) {
   );
 
   return (
-    <List isShowingDetail
+    <List isShowingDetail={isShowingDetail}
       isLoading={isLoading}
       searchBarPlaceholder="Search dns zone"
       searchBarAccessory={
@@ -132,6 +133,7 @@ function ViewDNSZone({ zone }: { zone: string }) {
                       />
                     }
                   />
+<Action icon={Icon.AppWindowSidebarLeft} title="Toggle Details" onAction={() => setIsShowingDetail(prev => !prev)} />
                   {/* eslint-disable-next-line @raycast/prefer-title-case */}
                   <Action icon={Icon.Trash} title="Delete DNS Zone Record" onAction={() => confirmAlert({
                     icon: {source: Icon.Trash, tintColor: Color.Red},
@@ -145,7 +147,7 @@ function ViewDNSZone({ zone }: { zone: string }) {
                         deleteDNSZoneRecord(soa.data[2], zone, zoneItem.line_index).then(revalidate);
                       },
                     }
-                  })} style={Action.Style.Destructive} />
+                  })} style={Action.Style.Destructive} shortcut={Keyboard.Shortcut.Common.Remove} />
                 </ActionPanel>
               }
             />
