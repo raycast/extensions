@@ -1,11 +1,4 @@
-import {
-  Detail,
-  ActionPanel,
-  Action,
-  Icon,
-  useNavigation,
-  popToRoot,
-} from "@raycast/api";
+import { Detail, ActionPanel, Action, Icon, useNavigation, popToRoot } from "@raycast/api";
 import { KubernetesContext } from "../types";
 import { useKubeconfig } from "../hooks/useKubeconfig";
 import { showSuccessToast, showErrorToast } from "../utils/errors";
@@ -22,10 +15,7 @@ export function ContextDetails({ context }: ContextDetailsProps) {
     try {
       const success = await switchContext(contextName);
       if (success) {
-        await showSuccessToast(
-          "Context Switched",
-          `Switched to: ${contextName}`,
-        );
+        await showSuccessToast("Context Switched", `Switched to: ${contextName}`);
         // Go back to Raycast main command list
         await popToRoot();
       }
@@ -62,7 +52,6 @@ ${
 - **CA Certificate**: ${context.clusterDetails.hasCA ? "✅ Present" : "❌ Missing"}
 
 ### Connection Information
-- **Full Server URL**: ${context.clusterDetails.server || "Not configured"}
 - **Connection Security**: ${context.clusterDetails.isSecure ? "Encrypted with TLS" : "Unencrypted connection"}
 - **Certificate Authority**: ${context.clusterDetails.hasCA ? "CA certificate configured for validation" : "No CA certificate - may skip TLS verification"}
 `
@@ -108,51 +97,25 @@ Use the actions below to manage this context.
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Cluster" text={context.cluster} />
           <Detail.Metadata.Label title="User" text={context.user} />
-          <Detail.Metadata.Label
-            title="Namespace"
-            text={context.namespace || "default"}
-          />
+          <Detail.Metadata.Label title="Namespace" text={context.namespace || "default"} />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label
-            title="Authentication"
-            text={context.userAuthMethod || "Unknown"}
-          />
+          <Detail.Metadata.Label title="Authentication" text={context.userAuthMethod || "Unknown"} />
           {context.clusterDetails && (
             <>
               <Detail.Metadata.Separator />
-              <Detail.Metadata.Label
-                title="Server"
-                text={context.clusterDetails.server || "Not configured"}
-              />
-              <Detail.Metadata.Label
-                title="Hostname"
-                text={context.clusterDetails.hostname}
-              />
-              <Detail.Metadata.Label
-                title="Port"
-                text={context.clusterDetails.port}
-              />
-              <Detail.Metadata.Label
-                title="Protocol"
-                text={context.clusterDetails.protocol}
-              />
+              <Detail.Metadata.Label title="Server" text={context.clusterDetails.server || "Not configured"} />
+              <Detail.Metadata.Label title="Hostname" text={context.clusterDetails.hostname} />
+              <Detail.Metadata.Label title="Port" text={context.clusterDetails.port} />
+              <Detail.Metadata.Label title="Protocol" text={context.clusterDetails.protocol} />
               <Detail.Metadata.Label
                 title="Security"
                 text={context.clusterDetails.isSecure ? "Secure" : "Insecure"}
-                icon={
-                  context.clusterDetails.isSecure
-                    ? Icon.Lock
-                    : Icon.ExclamationMark
-                }
+                icon={context.clusterDetails.isSecure ? Icon.Lock : Icon.ExclamationMark}
               />
               <Detail.Metadata.Label
                 title="CA Certificate"
                 text={context.clusterDetails.hasCA ? "Present" : "Missing"}
-                icon={
-                  context.clusterDetails.hasCA
-                    ? Icon.CheckCircle
-                    : Icon.XMarkCircle
-                }
+                icon={context.clusterDetails.hasCA ? Icon.CheckCircle : Icon.XMarkCircle}
               />
             </>
           )}
@@ -160,11 +123,7 @@ Use the actions below to manage this context.
       }
       actions={
         <ActionPanel>
-          <Action
-            title="Back to Contexts List"
-            icon={Icon.ArrowLeft}
-            onAction={() => pop()}
-          />
+          <Action title="Back to Contexts List" icon={Icon.ArrowLeft} onAction={() => pop()} />
           {!context.current && (
             <Action
               title={`Switch to ${context.name}`}

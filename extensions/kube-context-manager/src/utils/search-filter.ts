@@ -52,10 +52,7 @@ export function fuzzyMatch(text: string, query: string): number {
 /**
  * Search and filter contexts with advanced capabilities
  */
-export function searchAndFilterContexts(
-  contexts: KubernetesContext[],
-  filters: SearchFilters,
-): SearchResult[] {
+export function searchAndFilterContexts(contexts: KubernetesContext[], filters: SearchFilters): SearchResult[] {
   const results: SearchResult[] = [];
 
   for (const context of contexts) {
@@ -153,10 +150,7 @@ export function getFilterOptions(contexts: KubernetesContext[]) {
 export function highlightMatches(text: string, query: string): string {
   if (!query) return text;
 
-  const regex = new RegExp(
-    `(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`,
-    "gi",
-  );
+  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
   return text.replace(regex, "**$1**");
 }
 
@@ -176,10 +170,7 @@ export function addRecentContext(contextName: string): void {
     const filtered = recentContextsCache.filter((name) => name !== contextName);
 
     // Add to front
-    recentContextsCache = [contextName, ...filtered].slice(
-      0,
-      MAX_RECENT_CONTEXTS,
-    );
+    recentContextsCache = [contextName, ...filtered].slice(0, MAX_RECENT_CONTEXTS);
   } catch (error) {
     console.warn("Failed to save recent context:", error);
   }

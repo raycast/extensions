@@ -1,6 +1,4 @@
 **/.DS_Store
-Claude.md
-
 
 # Dependencies
 node_modules/
@@ -37,9 +35,6 @@ build/Release
 
 # Dependency directories
 jspm_packages/
-
-# TypeScript cache
-*.tsbuildinfo
 
 # Optional npm cache directory
 .npm

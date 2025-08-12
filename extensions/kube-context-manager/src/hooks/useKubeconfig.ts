@@ -176,51 +176,43 @@ export function useContextSwitcher() {
     }
   }, []);
 
-  const switchContextWithNamespace = useCallback(
-    async (contextName: string, namespace?: string) => {
-      setIsLoading(true);
-      setError(null);
+  const switchContextWithNamespace = useCallback(async (contextName: string, namespace?: string) => {
+    setIsLoading(true);
+    setError(null);
 
-      try {
-        const success = switchToContextWithNamespace(contextName, namespace);
-        if (!success) {
-          throw new Error(
-            `Failed to switch to context: ${contextName}${namespace ? ` with namespace: ${namespace}` : ""}`,
-          );
-        }
-        return true;
-      } catch (err) {
-        setError(err as Error);
-        return false;
-      } finally {
-        setIsLoading(false);
+    try {
+      const success = switchToContextWithNamespace(contextName, namespace);
+      if (!success) {
+        throw new Error(
+          `Failed to switch to context: ${contextName}${namespace ? ` with namespace: ${namespace}` : ""}`
+        );
       }
-    },
-    [],
-  );
+      return true;
+    } catch (err) {
+      setError(err as Error);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
-  const setNamespace = useCallback(
-    async (contextName: string, namespace: string) => {
-      setIsLoading(true);
-      setError(null);
+  const setNamespace = useCallback(async (contextName: string, namespace: string) => {
+    setIsLoading(true);
+    setError(null);
 
-      try {
-        const success = setContextNamespace(contextName, namespace);
-        if (!success) {
-          throw new Error(
-            `Failed to set namespace for context: ${contextName}`,
-          );
-        }
-        return true;
-      } catch (err) {
-        setError(err as Error);
-        return false;
-      } finally {
-        setIsLoading(false);
+    try {
+      const success = setContextNamespace(contextName, namespace);
+      if (!success) {
+        throw new Error(`Failed to set namespace for context: ${contextName}`);
       }
-    },
-    [],
-  );
+      return true;
+    } catch (err) {
+      setError(err as Error);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   return {
     switchContext,
@@ -258,15 +250,12 @@ export function useKubeconfig() {
       }
       return success;
     },
-    [switcher, currentContext, contexts],
+    [switcher, currentContext, contexts]
   );
 
   const switchContextWithNamespace = useCallback(
     async (contextName: string, namespace?: string) => {
-      const success = await switcher.switchContextWithNamespace(
-        contextName,
-        namespace,
-      );
+      const success = await switcher.switchContextWithNamespace(contextName, namespace);
       if (success) {
         // Refresh all data after successful switch
         currentContext.refresh();
@@ -275,7 +264,7 @@ export function useKubeconfig() {
       }
       return success;
     },
-    [switcher, currentContext, contexts, namespaces],
+    [switcher, currentContext, contexts, namespaces]
   );
 
   return {
@@ -294,19 +283,10 @@ export function useKubeconfig() {
 
     // Loading states
     isLoading:
-      info.isLoading ||
-      currentContext.isLoading ||
-      contexts.isLoading ||
-      namespaces.isLoading ||
-      switcher.isLoading,
+      info.isLoading || currentContext.isLoading || contexts.isLoading || namespaces.isLoading || switcher.isLoading,
 
     // Errors
-    error:
-      info.error ||
-      currentContext.error ||
-      contexts.error ||
-      namespaces.error ||
-      switcher.error,
+    error: info.error || currentContext.error || contexts.error || namespaces.error || switcher.error,
 
     // Operations
     switchContext,

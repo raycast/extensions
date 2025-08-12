@@ -76,12 +76,12 @@
 
 ### **Command Overview**
 
-| Command | Shortcut | Description |
-|---------|----------|-------------|
-| **List Contexts** | `lc` | Search and switch contexts with advanced filtering |
-| **Current Context** | `cc` | View current context details and quick actions |
-| **Switch Context with Namespace** | `scn` | Two-step context + namespace selection |
-| **Manage Contexts** | `mc` | Full context lifecycle management |
+| Command | Description |
+|---------|-------------|
+| **List Contexts** | Search and switch contexts with advanced filtering |
+| **Current Context** | View current context details and quick actions |
+| **Switch Context with Namespace** | Two-step context + namespace selection |
+| **Manage Contexts** | Full context lifecycle management |
 
 ### **Advanced Features**
 
@@ -138,7 +138,7 @@
 - **Solution**: Check available contexts or update kubeconfig
 - **Commands**:
   ```bash
-  kubectl config get-contexts
+  yq '.contexts[].name' ~/.kube/config
   ```
 
 ### **Performance Tips**

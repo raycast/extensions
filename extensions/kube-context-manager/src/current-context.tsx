@@ -3,15 +3,7 @@ import { useKubeconfig } from "./hooks/useKubeconfig";
 import { showSuccessToast, showErrorToast } from "./utils/errors";
 
 export default function CurrentContext() {
-  const {
-    contexts,
-    currentContext,
-    kubeconfigInfo,
-    isLoading,
-    error,
-    refresh,
-    switchContext,
-  } = useKubeconfig();
+  const { contexts, currentContext, kubeconfigInfo, isLoading, error, refresh, switchContext } = useKubeconfig();
 
   const currentCtx = contexts.find((ctx) => ctx.current);
 
@@ -45,11 +37,7 @@ ${error.message}
 - **Total Contexts**: ${kubeconfigInfo.contextCount}
 
 ## Available Contexts
-${
-  contexts.length > 0
-    ? contexts.map((ctx) => `- ${ctx.name} (${ctx.cluster})`).join("\n")
-    : "No contexts found"
-}
+${contexts.length > 0 ? contexts.map((ctx) => `- ${ctx.name} (${ctx.cluster})`).join("\n") : "No contexts found"}
 
 *Use the "List Contexts" command to switch between contexts*
       `;
@@ -102,10 +90,7 @@ Use the actions below to manage your contexts quickly.
     try {
       const success = await switchContext(contextName);
       if (success) {
-        await showSuccessToast(
-          "Context Switched",
-          `Switched to: ${contextName}`,
-        );
+        await showSuccessToast("Context Switched", `Switched to: ${contextName}`);
         // Go back to Raycast main command list
         await popToRoot();
       }
@@ -120,11 +105,7 @@ Use the actions below to manage your contexts quickly.
       markdown={generateMarkdown()}
       actions={
         <ActionPanel>
-          <Action
-            title="Refresh"
-            onAction={refresh}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-          />
+          <Action title="Refresh" onAction={refresh} shortcut={{ modifiers: ["cmd"], key: "r" }} />
           {otherContexts.map((ctx, index) => {
             // Map index to valid KeyEquivalent values
             const keyMap = ["1", "2", "3", "4", "5"] as const;

@@ -2,11 +2,7 @@ import { List, ActionPanel, Action, Icon, popToRoot } from "@raycast/api";
 import { useState, useMemo } from "react";
 import { useKubeconfig } from "./hooks/useKubeconfig";
 import { showSuccessToast, showErrorToast } from "./utils/errors";
-import {
-  searchAndFilterContexts,
-  addRecentContext,
-  SearchFilters,
-} from "./utils/search-filter";
+import { searchAndFilterContexts, addRecentContext, SearchFilters } from "./utils/search-filter";
 import { ContextDetails } from "./components/ContextDetails";
 
 export default function ListContexts() {
@@ -24,10 +20,7 @@ export default function ListContexts() {
       const success = await switchContext(contextName);
       if (success) {
         addRecentContext(contextName);
-        await showSuccessToast(
-          "Context Switched",
-          `Switched to: ${contextName}`,
-        );
+        await showSuccessToast("Context Switched", `Switched to: ${contextName}`);
         // Go back to Raycast main command list
         await popToRoot();
       }
@@ -39,11 +32,7 @@ export default function ListContexts() {
   if (error) {
     return (
       <List>
-        <List.Item
-          title="Error Loading Contexts"
-          subtitle={error.message}
-          accessories={[{ text: "❌" }]}
-        />
+        <List.Item title="Error Loading Contexts" subtitle={error.message} accessories={[{ text: "❌" }]} />
       </List>
     );
   }
@@ -100,12 +89,7 @@ export default function ListContexts() {
                 <Action
                   title="Current Context"
                   icon={Icon.CheckCircle}
-                  onAction={() =>
-                    showSuccessToast(
-                      "Current Context",
-                      `Already using ${context.name}`,
-                    )
-                  }
+                  onAction={() => showSuccessToast("Current Context", `Already using ${context.name}`)}
                 />
               )}
               <Action.Push
@@ -120,11 +104,7 @@ export default function ListContexts() {
       {searchResults.length === 0 && !isLoading && (
         <List.Item
           title="No Matching Contexts"
-          subtitle={
-            searchQuery
-              ? `No contexts match "${searchQuery}"`
-              : "Check your ~/.kube/config file"
-          }
+          subtitle={searchQuery ? `No contexts match "${searchQuery}"` : "Check your ~/.kube/config file"}
           accessories={[{ text: searchQuery ? "🔍" : "⚠️" }]}
         />
       )}

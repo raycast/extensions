@@ -4,15 +4,7 @@ import { showToast, Toast } from "@raycast/api";
  * Enhanced error types for better user guidance
  */
 export interface KubeError {
-  type:
-    | "kubeconfig"
-    | "context"
-    | "permission"
-    | "file"
-    | "yaml"
-    | "network"
-    | "validation"
-    | "unknown";
+  type: "kubeconfig" | "context" | "permission" | "file" | "yaml" | "network" | "validation" | "unknown";
   title: string;
   message: string;
   action?: string;
@@ -44,11 +36,7 @@ function analyzeError(error: Error): KubeError {
   }
 
   // YAML parsing errors
-  if (
-    errorMsg.includes("yaml") ||
-    errorMsg.includes("parse") ||
-    errorMsg.includes("syntax")
-  ) {
+  if (errorMsg.includes("yaml") || errorMsg.includes("parse") || errorMsg.includes("syntax")) {
     return {
       type: "yaml",
       title: "Invalid Kubeconfig",
@@ -58,10 +46,7 @@ function analyzeError(error: Error): KubeError {
   }
 
   // Context-specific errors
-  if (
-    errorMsg.includes("context") &&
-    (errorMsg.includes("not found") || errorMsg.includes("does not exist"))
-  ) {
+  if (errorMsg.includes("context") && (errorMsg.includes("not found") || errorMsg.includes("does not exist"))) {
     return {
       type: "context",
       title: "Context Not Found",
@@ -80,11 +65,7 @@ function analyzeError(error: Error): KubeError {
   }
 
   // Network/cluster errors
-  if (
-    errorMsg.includes("timeout") ||
-    errorMsg.includes("network") ||
-    errorMsg.includes("connection")
-  ) {
+  if (errorMsg.includes("timeout") || errorMsg.includes("network") || errorMsg.includes("connection")) {
     return {
       type: "network",
       title: "Connection Error",
@@ -94,11 +75,7 @@ function analyzeError(error: Error): KubeError {
   }
 
   // Validation errors
-  if (
-    errorMsg.includes("required") ||
-    errorMsg.includes("invalid") ||
-    errorMsg.includes("validation")
-  ) {
+  if (errorMsg.includes("required") || errorMsg.includes("invalid") || errorMsg.includes("validation")) {
     return {
       type: "validation",
       title: "Validation Error",
@@ -108,11 +85,7 @@ function analyzeError(error: Error): KubeError {
   }
 
   // Kubeconfig structure errors
-  if (
-    errorMsg.includes("kubeconfig") ||
-    errorMsg.includes("cluster") ||
-    errorMsg.includes("user")
-  ) {
+  if (errorMsg.includes("kubeconfig") || errorMsg.includes("cluster") || errorMsg.includes("user")) {
     return {
       type: "kubeconfig",
       title: "Kubeconfig Error",
@@ -139,19 +112,14 @@ export async function showErrorToast(error: Error): Promise<void> {
   await showToast({
     style: Toast.Style.Failure,
     title: kubeError.title,
-    message: kubeError.action
-      ? `${kubeError.message}\n💡 ${kubeError.action}`
-      : kubeError.message,
+    message: kubeError.action ? `${kubeError.message}\n💡 ${kubeError.action}` : kubeError.message,
   });
 }
 
 /**
  * Shows a success toast
  */
-export async function showSuccessToast(
-  title: string,
-  message?: string,
-): Promise<void> {
+export async function showSuccessToast(title: string, message?: string): Promise<void> {
   await showToast({
     style: Toast.Style.Success,
     title,
@@ -162,10 +130,7 @@ export async function showSuccessToast(
 /**
  * Shows an informational toast
  */
-export async function showInfoToast(
-  title: string,
-  message?: string,
-): Promise<void> {
+export async function showInfoToast(title: string, message?: string): Promise<void> {
   await showToast({
     style: Toast.Style.Animated,
     title,
@@ -176,11 +141,7 @@ export async function showInfoToast(
 /**
  * Shows a warning toast with actionable guidance
  */
-export async function showWarningToast(
-  title: string,
-  message: string,
-  action?: string,
-): Promise<void> {
+export async function showWarningToast(title: string, message: string, action?: string): Promise<void> {
   await showToast({
     style: Toast.Style.Failure,
     title: `⚠️ ${title}`,
@@ -191,10 +152,7 @@ export async function showWarningToast(
 /**
  * Shows a loading toast that can be updated
  */
-export async function showLoadingToast(
-  title: string,
-  message?: string,
-): Promise<Toast> {
+export async function showLoadingToast(title: string, message?: string): Promise<Toast> {
   return await showToast({
     style: Toast.Style.Animated,
     title,
@@ -208,7 +166,7 @@ export async function showLoadingToast(
 export class ValidationError extends Error {
   constructor(
     message: string,
-    public action?: string,
+    public action?: string
   ) {
     super(message);
     this.name = "ValidationError";
@@ -221,7 +179,7 @@ export class ValidationError extends Error {
 export class KubeconfigError extends Error {
   constructor(
     message: string,
-    public action?: string,
+    public action?: string
   ) {
     super(message);
     this.name = "KubeconfigError";

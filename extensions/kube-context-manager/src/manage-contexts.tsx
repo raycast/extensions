@@ -1,22 +1,7 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  Form,
-  Toast,
-  showToast,
-  useNavigation,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Form, useNavigation } from "@raycast/api";
 import { useState, useMemo } from "react";
 import { useKubeconfig } from "./hooks/useKubeconfig";
-import {
-  createContext,
-  deleteContext,
-  modifyContext,
-  getAllClusters,
-  getAllUsers,
-} from "./utils/kubeconfig-direct";
+import { createContext, deleteContext, modifyContext, getAllClusters, getAllUsers } from "./utils/kubeconfig-direct";
 import { KubernetesContext } from "./types";
 import { showSuccessToast, showErrorToast } from "./utils/errors";
 import { ContextDetails } from "./components/ContextDetails";
@@ -33,19 +18,14 @@ export default function ManageContexts() {
         context.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         context.cluster.toLowerCase().includes(searchQuery.toLowerCase()) ||
         context.user.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (context.namespace &&
-          context.namespace.toLowerCase().includes(searchQuery.toLowerCase())),
+        (context.namespace && context.namespace.toLowerCase().includes(searchQuery.toLowerCase()))
     );
   }, [contexts, searchQuery]);
 
   if (error) {
     return (
       <List>
-        <List.Item
-          title="Error Loading Contexts"
-          subtitle={error.message}
-          accessories={[{ text: "❌" }]}
-        />
+        <List.Item title="Error Loading Contexts" subtitle={error.message} accessories={[{ text: "❌" }]} />
       </List>
     );
   }
@@ -57,11 +37,7 @@ export default function ManageContexts() {
       searchBarPlaceholder="Search contexts to manage..."
       actions={
         <ActionPanel>
-          <Action.Push
-            title="Create New Context"
-            icon={Icon.Plus}
-            target={<CreateContextForm onCreated={refresh} />}
-          />
+          <Action.Push title="Create New Context" icon={Icon.Plus} target={<CreateContextForm onCreated={refresh} />} />
           <Action
             title="Refresh"
             icon={Icon.ArrowClockwise}
@@ -107,9 +83,7 @@ export default function ManageContexts() {
               <Action.Push
                 title={`Modify ${context.name}`}
                 icon={Icon.Pencil}
-                target={
-                  <ModifyContextForm context={context} onModified={refresh} />
-                }
+                target={<ModifyContextForm context={context} onModified={refresh} />}
               />
               {!context.current && (
                 <Action
@@ -119,10 +93,7 @@ export default function ManageContexts() {
                   onAction={async () => {
                     try {
                       await deleteContext(context.name);
-                      await showSuccessToast(
-                        "Context Deleted",
-                        `Successfully deleted context: ${context.name}`,
-                      );
+                      await showSuccessToast("Context Deleted", `Successfully deleted context: ${context.name}`);
                       refresh();
                     } catch (err) {
                       await showErrorToast(err as Error);
@@ -149,11 +120,7 @@ export default function ManageContexts() {
       {filteredContexts.length === 0 && !isLoading && (
         <List.Item
           title="No Contexts Found"
-          subtitle={
-            searchQuery
-              ? `No contexts match "${searchQuery}"`
-              : "No contexts available for management"
-          }
+          subtitle={searchQuery ? `No contexts match "${searchQuery}"` : "No contexts available for management"}
           accessories={[{ text: searchQuery ? "🔍" : "⚠️" }]}
           actions={
             <ActionPanel>
@@ -196,17 +163,13 @@ function CreateContextForm({ onCreated }: { onCreated: () => void }) {
       return;
     }
 
-    const clusterName = useExistingCluster
-      ? values.cluster?.trim()
-      : values.clusterName?.trim();
+    const clusterName = useExistingCluster ? values.cluster?.trim() : values.clusterName?.trim();
     if (!clusterName) {
       setClusterError("Cluster name is required");
       return;
     }
 
-    const userName = useExistingUser
-      ? values.user?.trim()
-      : values.userName?.trim();
+    const userName = useExistingUser ? values.user?.trim() : values.userName?.trim();
     if (!userName) {
       setUserError("User name is required");
       return;
@@ -218,13 +181,10 @@ function CreateContextForm({ onCreated }: { onCreated: () => void }) {
         clusterName,
         userName,
         values.namespace?.trim() || undefined,
-        useExistingCluster ? undefined : values.clusterServer?.trim(),
+        useExistingCluster ? undefined : values.clusterServer?.trim()
       );
 
-      await showSuccessToast(
-        "Context Created",
-        `Successfully created context: ${values.name}`,
-      );
+      await showSuccessToast("Context Created", `Successfully created context: ${values.name}`);
       onCreated();
       pop();
     } catch (error) {
@@ -258,12 +218,7 @@ function CreateContextForm({ onCreated }: { onCreated: () => void }) {
       />
 
       {useExistingCluster ? (
-        <Form.Dropdown
-          id="cluster"
-          title="Cluster"
-          error={clusterError}
-          onChange={() => setClusterError(undefined)}
-        >
+        <Form.Dropdown id="cluster" title="Cluster" error={clusterError} onChange={() => setClusterError(undefined)}>
           <Form.Dropdown.Item value="" title="Select a cluster..." />
           {clusters.map((cluster) => (
             <Form.Dropdown.Item
@@ -299,12 +254,7 @@ function CreateContextForm({ onCreated }: { onCreated: () => void }) {
       />
 
       {useExistingUser ? (
-        <Form.Dropdown
-          id="user"
-          title="User"
-          error={userError}
-          onChange={() => setUserError(undefined)}
-        >
+        <Form.Dropdown id="user" title="User" error={userError} onChange={() => setUserError(undefined)}>
           <Form.Dropdown.Item value="" title="Select a user..." />
           {users.map((user) => (
             <Form.Dropdown.Item
@@ -324,22 +274,12 @@ function CreateContextForm({ onCreated }: { onCreated: () => void }) {
         />
       )}
 
-      <Form.TextField
-        id="namespace"
-        title="Namespace (Optional)"
-        placeholder="default"
-      />
+      <Form.TextField id="namespace" title="Namespace (Optional)" placeholder="default" />
     </Form>
   );
 }
 
-function ModifyContextForm({
-  context,
-  onModified,
-}: {
-  context: KubernetesContext;
-  onModified: () => void;
-}) {
+function ModifyContextForm({ context, onModified }: { context: KubernetesContext; onModified: () => void }) {
   const { pop } = useNavigation();
   const [nameError, setNameError] = useState<string | undefined>();
   const [useExistingCluster, setUseExistingCluster] = useState(true);
@@ -374,16 +314,12 @@ function ModifyContextForm({
         updates.newName = values.name.trim();
       }
 
-      const newCluster = useExistingCluster
-        ? values.cluster?.trim()
-        : values.clusterName?.trim();
+      const newCluster = useExistingCluster ? values.cluster?.trim() : values.clusterName?.trim();
       if (newCluster && newCluster !== context.cluster) {
         updates.cluster = newCluster;
       }
 
-      const newUser = useExistingUser
-        ? values.user?.trim()
-        : values.userName?.trim();
+      const newUser = useExistingUser ? values.user?.trim() : values.userName?.trim();
       if (newUser && newUser !== context.user) {
         updates.user = newUser;
       }
@@ -395,21 +331,14 @@ function ModifyContextForm({
       }
 
       if (Object.keys(updates).length === 0) {
-        await showToast(
-          Toast.Style.Success,
-          "No Changes",
-          "No modifications were made",
-        );
+        await showSuccessToast("No Changes", "No modifications were made");
         pop();
         return;
       }
 
       await modifyContext(context.name, updates);
 
-      await showSuccessToast(
-        "Context Modified",
-        `Successfully updated context: ${values.name}`,
-      );
+      await showSuccessToast("Context Modified", `Successfully updated context: ${values.name}`);
       onModified();
       pop();
     } catch (error) {
@@ -443,11 +372,7 @@ function ModifyContextForm({
       />
 
       {useExistingCluster ? (
-        <Form.Dropdown
-          id="cluster"
-          title="Cluster"
-          defaultValue={context.cluster}
-        >
+        <Form.Dropdown id="cluster" title="Cluster" defaultValue={context.cluster}>
           {clusters.map((cluster) => (
             <Form.Dropdown.Item
               key={cluster.name}
@@ -457,12 +382,7 @@ function ModifyContextForm({
           ))}
         </Form.Dropdown>
       ) : (
-        <Form.TextField
-          id="clusterName"
-          title="Cluster Name"
-          defaultValue={context.cluster}
-          placeholder="my-cluster"
-        />
+        <Form.TextField id="clusterName" title="Cluster Name" defaultValue={context.cluster} placeholder="my-cluster" />
       )}
 
       <Form.Checkbox
@@ -484,20 +404,10 @@ function ModifyContextForm({
           ))}
         </Form.Dropdown>
       ) : (
-        <Form.TextField
-          id="userName"
-          title="User Name"
-          defaultValue={context.user}
-          placeholder="my-user"
-        />
+        <Form.TextField id="userName" title="User Name" defaultValue={context.user} placeholder="my-user" />
       )}
 
-      <Form.TextField
-        id="namespace"
-        title="Namespace"
-        defaultValue={context.namespace || ""}
-        placeholder="default"
-      />
+      <Form.TextField id="namespace" title="Namespace" defaultValue={context.namespace || ""} placeholder="default" />
     </Form>
   );
 }
