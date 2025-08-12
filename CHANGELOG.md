@@ -1,6 +1,6 @@
 # Fetch Youtube Transcript Changelog
 
-## [2.0.1] - 2025-06-24
+## [2.0.1] - {PR_MERGE_DATE}
 
 ### Breaking Changes
 

@@ -3,7 +3,7 @@
   "name": "fetch-youtube-transcript",
   "version": "2.0.1",
   "title": "Fetch YouTube Transcript",
-  "description": "Fetches and saves the transcript of a YouTube video in your downaloads folder",
+  "description": "Fetches and saves the transcript of a YouTube video in your downloads folder",
   "icon": "extension_icon.png",
   "author": "apoorv_khandelwal",
   "contributors": [
