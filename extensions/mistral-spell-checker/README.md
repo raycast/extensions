@@ -1,24 +1,31 @@
 # Mistral Spell Checker
 
-This Raycast extension allows you to check and correct spelling and grammar in selected text using Mistral AI.
+Mistral Spell Checker is a Raycast extension that provides AI-powered spell checking and grammar correction using Mistral AI's API. It follows the no-view command pattern, allowing you to quickly correct spelling and grammar without leaving your current workflow.
 
-## Setup
+![Mistral Spell Checker Screenshot](metadata/screenshot.png)
 
-1. **Set your Mistral API key:**
-   - Open Raycast and go to the Mistral Spell Checker command.
-   - Press `Cmd + ,` to open the command's preferences.
-   - Enter your Mistral API key in the `apiKey` field.
+## Features
 
-## Usage
-
-1. Select the text you want to check and correct.
-2. Open Raycast and run the Mistral Spell Checker command.
-3. The corrected text will be copied to your clipboard.
+- AI-powered spell checking and grammar correction
+- Configurable Mistral AI model selection
+- Customizable API endpoint
+- Seamless integration with Raycast's no-view command pattern
 
 ## Configuration
 
-You can customize the following settings in the command preferences:
+The extension provides several configurable options in the command preferences:
 
-- **API Key**: Your Mistral AI API key (required)
-- **AI Model**: The AI model to use for spell checking (default: mistral-medium-latest-flash)
-- **API Endpoint**: The API endpoint to use for spell checking (default: https://api.mistral.ai/v1/chat/completions)
+- **API Key** (required): Your Mistral AI API key
+- **AI Model** (default: mistral-medium-latest-flash): The AI model to use for spell checking
+- **API Endpoint** (default: https://api.mistral.ai/v1/chat/completions): The API endpoint to use
+
+## Usage
+
+1. Select the text you want to check and correct
+2. Open Raycast and run the Mistral Spell Checker command
+3. The corrected text will be automatically copied to your clipboard
+
+## Requirements
+
+- A Mistral AI API key (available from the Mistral AI platform)
+- Raycast application installed on your Mac

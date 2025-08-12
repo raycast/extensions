@@ -4,6 +4,9 @@
   "title": "Mistral Spell Checker",
   "description": "A Raycast extension to check and correct spelling and grammar using Mistral AI.",
   "icon": "extension-icon.png",
+  "screenshots": [
+    "metadata/screenshot.png"
+  ],
   "author": "lucas_marandat",
   "categories": [
     "Productivity"
