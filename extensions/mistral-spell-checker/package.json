@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mistral-spell-checker",
+  "title": "Mistral Spell Checker",
+  "description": "A Raycast extension to check and correct spelling and grammar using Mistral AI.",
+  "icon": "extension-icon.png",
+  "author": "lucas_marandat",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "spell",
+    "check",
+    "grammar",
+    "writing",
+    "mistral"
+  ],
+  "commands": [
+    {
+      "name": "mistralSpellChecker",
+      "title": "Mistral Spell Checker",
+      "description": "Check and correct spelling and grammar in selected text using Mistral AI.",
+      "mode": "no-view",
+      "keywords": [
+        "spell",
+        "grammar",
+        "correct",
+        "writing"
+      ],
+      "preferences": [
+        {
+          "name": "apiKey",
+          "title": "Mistral API Key",
+          "description": "Your API key for Mistral AI (required).",
+          "type": "password",
+          "required": true
+        },
+        {
+          "name": "model",
+          "title": "AI Model",
+          "description": "The AI model to use for spell checking (optional).",
+          "type": "textfield",
+          "default": "mistral-medium-latest-flash",
+          "required": false
+        },
+        {
+          "name": "endpoint",
+          "title": "API Endpoint",
+          "description": "The API endpoint to use for spell checking (optional).",
+          "type": "textfield",
+          "default": "https://api.mistral.ai/v1/chat/completions",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.96.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
