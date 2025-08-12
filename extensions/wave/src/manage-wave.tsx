@@ -1,13 +1,14 @@
-import { Action, ActionPanel, Form, Icon, List } from "@raycast/api";
-import { useGetBusinesses, useGetBusinessInvoices, useGetBusinessProductsAndServices, useGetValidIncomeAccounts } from "./lib/wave";
-import { Business, InvoiceStatus } from "./lib/types";
+import { Action, ActionPanel, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { common, useGetBusinesses, useGetBusinessInvoices, useGetBusinessProductsAndServices, useGetValidIncomeAccounts } from "./lib/wave";
+import { Business, InvoiceStatus, Result } from "./lib/types";
 import { getInvoiceStatusColor } from "./lib/utils";
 import { FormValidation, useCachedState, useForm, withAccessToken } from "@raycast/utils";
-import { HELP_LINKS, INVOICE_STATUSES } from "./lib/config";
+import { API_URL, HELP_LINKS, INVOICE_STATUSES } from "./lib/config";
 import { provider } from "./lib/oauth";
 import OpenInWave from "./lib/components/open-in-wave";
 import { useState } from "react";
 import BusinessCustomers from "./lib/components/business-customers";
+import { MUTATIONS } from "./lib/gql/mutations";
 
 export default withAccessToken(provider)(ManageWave);
 
@@ -215,16 +216,45 @@ function BusinessProductsAndServices({ business }: { business: Business }) {
 }
 
 function AddProductOrService({ businessId, onCreate }: { businessId: string; onCreate: () => void }) {
-  const {isLoading: isLoadingValidBusinessAccounts} = useGetValidIncomeAccounts(businessId, ["INCOME", "DISCOUNTS", "OTHER_INCOME"]);
+  const {pop} = useNavigation();
+  const [isCreating, setIsCreating] = useState(false);
+  const {isLoading: isLoadingValidBusinessAccounts, data: incomeAccounts} = useGetValidIncomeAccounts(businessId, ["INCOME", "DISCOUNTS", "OTHER_INCOME"]);
 
   type FormValues = {
     name: string;
     description: string;
     unitPrice: string;
+    isSold: boolean;
+    isBought: boolean;
+    incomeAccountId: string;
   }
   const {handleSubmit, itemProps} = useForm<FormValues>({
-    onSubmit(values) {
-      
+    async onSubmit(values) {
+      const toast = await showToast(Toast.Style.Animated, "Creating", values.name);
+      try {
+        setIsCreating(true);
+        const response = await fetch(API_URL, {
+          ...common(),
+          body: JSON.stringify({
+            query: MUTATIONS.createProductOrService,
+            variables: {
+              input: {
+                businessId,
+                ...values
+              }
+            }
+          })
+        });
+        const result = (await response.json()) as Result<{ productCreate: {didSucceed: boolean} }>;
+        if ("errors" in result) throw new Error(result.errors[0].message);
+        if (!result.data.productCreate.didSucceed) throw new Error("Unknown Error");
+        onCreate();
+        pop();
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Could not create";
+        toast.message = `${error}`;
+      }
     },
     initialValues: {
       unitPrice: "0.00"
@@ -241,11 +271,16 @@ function AddProductOrService({ businessId, onCreate }: { businessId: string; onC
       },
     }
   })
-  return <Form isLoading={isLoadingValidBusinessAccounts} actions={<ActionPanel><Action.SubmitForm icon={Icon.Plus} title="Save" onSubmit={handleSubmit} /></ActionPanel>}>
+  const isLoading = isLoadingValidBusinessAccounts || isCreating;
+  return <Form isLoading={isLoading} actions={<ActionPanel><Action.SubmitForm icon={Icon.Plus} title="Save" onSubmit={handleSubmit} /></ActionPanel>}>
     <Form.Description text="Products and services that you buy from vendors are used as items on Bills to record those purchases, and the ones that you sell to customers are used as items on Invoices to record those sales." />
-    <Form.TextField title="Name *" {...itemProps.name} />
-    <Form.Separator />
+    <Form.TextField title="Name" {...itemProps.name} />
     <Form.TextArea title="Description" {...itemProps.description} />
     <Form.TextField title="Price" {...itemProps.unitPrice} />
+    <Form.Checkbox label="Allow this product or service to be added to Invoices." title="Sell this" {...itemProps.isSold} />
+    <Form.Checkbox label="Allow this product or service to be added to Bills." title="Buy this" {...itemProps.isBought} />
+    <Form.Dropdown title="Income Account" {...itemProps.incomeAccountId}>
+      {incomeAccounts.map(account => <Form.Dropdown.Item key={account.id} title={account.name} value={account.id} />)}
+    </Form.Dropdown>
   </Form>
 }

@@ -139,7 +139,7 @@ export const deleteCustomer = async (id: string) => {
   if (!result.data.customerDelete.didSucceed) throw new Error("Unknown Error");
 };
 
-export const useGetValidIncomeAccounts = (businessId: string, subtypes: Array<"INCOME" | "DISCOUNTS" | "OTHER_INCOME">) => useFetch(API_URL + {
+export const useGetValidIncomeAccounts = (businessId: string, subtypes: Array<"INCOME" | "DISCOUNTS" | "OTHER_INCOME">) => useFetch(API_URL, {
   ...common(),
   body: JSON.stringify({
       query: QUERIES.getValidIncomeAccounts,
