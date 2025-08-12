@@ -10,7 +10,6 @@
     {
       "name": "x-post",
       "title": "Yap on X (Twitter)",
-      "subtitle": "Create post on X (Twitter)",
       "description": "Quickly create a post on X (Twitter)",
       "mode": "view"
     }
