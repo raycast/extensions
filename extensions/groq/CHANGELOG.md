@@ -12,13 +12,14 @@
   - User prompts now explicitly reference `selected_text` for more precise context.
   - Many simplifications and refactors in the codebase for better performance and readability.
 
-- Deprecated Models:
+- Removed Deprecated Models:
   - `deepseek-r1-distill-qwen-32b`
   - `qwen-2.5-coder-32b`
   - `llama-3.3-70b-specdec`
   - `mistral-saba-24b`
   - `llama3-70b-8192`
   - `llama3-8b-8192`
+  - `gemma2-9b-it`
 
 ## [Updated Models] - 2025-07-18
 

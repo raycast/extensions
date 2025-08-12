@@ -67,10 +67,6 @@
               "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "gemma2-9b-it",
-              "title": "Gemma2 9B 8k"
-            },
-            {
               "value": "qwen/qwen3-32b",
               "title": "Qwen 3 32B 128K"
             }
@@ -135,10 +131,6 @@
             {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
-            },
-            {
-              "value": "gemma2-9b-it",
-              "title": "Gemma2 9B 8k"
             },
             {
               "value": "qwen/qwen3-32b",
@@ -207,10 +199,6 @@
               "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "gemma2-9b-it",
-              "title": "Gemma2 9B 8k"
-            },
-            {
               "value": "qwen/qwen3-32b",
               "title": "Qwen 3 32B 128K"
             }
@@ -275,10 +263,6 @@
             {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
-            },
-            {
-              "value": "gemma2-9b-it",
-              "title": "Gemma2 9B 8k"
             },
             {
               "value": "qwen/qwen3-32b",
@@ -347,10 +331,6 @@
               "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "gemma2-9b-it",
-              "title": "Gemma2 9B 8k"
-            },
-            {
               "value": "qwen/qwen3-32b",
               "title": "Qwen 3 32B 128K"
             }
@@ -415,10 +395,6 @@
             {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
-            },
-            {
-              "value": "gemma2-9b-it",
-              "title": "Gemma2 9B 8k"
             },
             {
               "value": "qwen/qwen3-32b",
@@ -501,10 +477,6 @@
             {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
-            },
-            {
-              "value": "gemma2-9b-it",
-              "title": "Gemma2 9B 8k"
             },
             {
               "value": "qwen/qwen3-32b",
@@ -590,10 +562,6 @@
               "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "gemma2-9b-it",
-              "title": "Gemma2 9B 8k"
-            },
-            {
               "value": "qwen/qwen3-32b",
               "title": "Qwen 3 32B 128K"
             }
@@ -659,10 +627,6 @@
             {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
-            },
-            {
-              "value": "gemma2-9b-it",
-              "title": "Gemma2 9B 8k"
             },
             {
               "value": "qwen/qwen3-32b",
@@ -732,10 +696,6 @@
               "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "gemma2-9b-it",
-              "title": "Gemma2 9B 8k"
-            },
-            {
               "value": "qwen/qwen3-32b",
               "title": "Qwen 3 32B 128K"
             }
@@ -801,10 +761,6 @@
             {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
-            },
-            {
-              "value": "gemma2-9b-it",
-              "title": "Gemma2 9B 8k"
             },
             {
               "value": "qwen/qwen3-32b",
@@ -874,10 +830,6 @@
               "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "gemma2-9b-it",
-              "title": "Gemma2 9B 8k"
-            },
-            {
               "value": "qwen/qwen3-32b",
               "title": "Qwen 3 32B 128K"
             }
@@ -943,10 +895,6 @@
             {
               "value": "deepseek-r1-distill-llama-70b",
               "title": "DeepSeek R1 70B 128k"
-            },
-            {
-              "value": "gemma2-9b-it",
-              "title": "Gemma2 9B 8k"
             },
             {
               "value": "qwen/qwen3-32b",
@@ -1016,10 +964,6 @@
               "title": "DeepSeek R1 70B 128k"
             },
             {
-              "value": "gemma2-9b-it",
-              "title": "Gemma2 9B 8k"
-            },
-            {
               "value": "qwen/qwen3-32b",
               "title": "Qwen 3 32B 128K"
             }
@@ -1076,10 +1020,6 @@
         {
           "value": "deepseek-r1-distill-llama-70b",
           "title": "DeepSeek R1 70B 128k"
-        },
-        {
-          "value": "gemma2-9b-it",
-          "title": "Gemma2 9B 8k"
         },
         {
           "value": "qwen/qwen3-32b",

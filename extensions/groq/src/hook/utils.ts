@@ -11,7 +11,6 @@ export const allModels = [
   { name: "Llama 3.3 70B 128k", id: "llama-3.3-70b-versatile" },
   { name: "Llama 3.1 8B 128k", id: "llama-3.1-8b-instant" },
   { name: "DeepSeek R1 70B 128k", id: "deepseek-r1-distill-llama-70b" },
-  { name: "Gemma2 9B 8k", id: "gemma2-9b-it" },
 ];
 
 const MODEL_RATES: Record<string, { input: number; output: number }> = {
@@ -22,7 +21,6 @@ const MODEL_RATES: Record<string, { input: number; output: number }> = {
   "deepseek-r1-distill-llama-70b": { input: 0.75, output: 0.99 },
   "llama-3.3-70b-versatile": { input: 0.59, output: 0.79 },
   "llama-3.1-8b-instant": { input: 0.05, output: 0.08 },
-  "gemma2-9b-it": { input: 0.2, output: 0.2 },
   "qwen/qwen3-32b": { input: 0.29, output: 0.59 },
   "moonshotai/kimi-k2-instruct": { input: 1.0, output: 3.0 },
 };
