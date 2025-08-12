@@ -1,6 +1,6 @@
 # Brand Icons Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-08-12
 
 - Add support for creating social badges through cross-extension
 - Bump all dependencies to the latest
