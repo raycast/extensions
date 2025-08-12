@@ -1,6 +1,6 @@
 # Yap Changelog
 
-## [Hello World] - {PR_MERGE_DATE}
+## [Hello World] - 2025-08-12
 
 ### Features
 
