@@ -1,4 +1,4 @@
-import { Action, Icon } from "@raycast/api";
+import { Action, Icon, Keyboard } from "@raycast/api";
 import { AddOWL } from "./AddOWL";
 
 export function AddOWLAction(
@@ -12,10 +12,7 @@ export function AddOWLAction(
     <Action.Push
       title={"Add Owl"}
       icon={Icon.NewDocument}
-      shortcut={{
-        modifiers: ["cmd"],
-        key: "n",
-      }}
+      shortcut={Keyboard.Shortcut.Common.New}
       {...props}
       target={<AddOWL base={props.base} />}
     />

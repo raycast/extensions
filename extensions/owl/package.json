@@ -11,14 +11,12 @@
     {
       "name": "owl",
       "title": "Owl",
-      "subtitle": "Oops Wrong Language",
       "description": "Converts the selected text to another language.",
       "mode": "view"
     },
     {
       "name": "configure-owls",
       "title": "Configure Owls",
-      "subtitle": "Configure your Owls",
       "description": "Configure the Owls (languages) to use.",
       "mode": "view"
     }

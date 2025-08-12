@@ -11,7 +11,7 @@ export default function ConfigureOWLsCommand() {
   const { value: languages, isLoading } = useLanguages();
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading || languages.length === 0}>
       <List.EmptyView
         title={"No OWLs found"}
         actions={

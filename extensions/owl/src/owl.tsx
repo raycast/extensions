@@ -131,7 +131,7 @@ export default function OWLCommand({
   }, [currentOWLs]);
 
   return (
-    <List>
+    <List isLoading={isLoading}>
       <List.EmptyView title={"No OWLs Found"} description="Add OWLs to start using them." />
       {currentOWLs.map((owl) => {
         return (

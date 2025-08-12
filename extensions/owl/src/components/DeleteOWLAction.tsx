@@ -1,4 +1,4 @@
-import { Action, Alert, confirmAlert, Icon } from "@raycast/api";
+import { Action, Alert, confirmAlert, Icon, Keyboard } from "@raycast/api";
 import { useCachedStorage } from "../hooks/storage";
 import { OWL, OWLMapping } from "../types/owl";
 import { StorageKey } from "../types/storage";
@@ -12,10 +12,7 @@ export function DeleteOWLAction(props: Readonly<{ owl: OWL }>) {
       title={"Delete Owl"}
       style={Action.Style.Destructive}
       icon={Icon.Trash}
-      shortcut={{
-        modifiers: ["cmd", "shift"],
-        key: "d",
-      }}
+      shortcut={Keyboard.Shortcut.Common.Remove}
       onAction={async () => {
         if (
           await confirmAlert({
