@@ -38,7 +38,7 @@ export function useRadarrAPI<T>(
       "Content-Type": "application/json",
     },
     execute: shouldExecute,
-    onError: (error) => {
+    onError: error => {
       console.error(`Radarr API Error (${instance?.name || "Unknown"}):`, error);
       showToast({
         style: Toast.Style.Failure,
@@ -243,7 +243,8 @@ export async function testConnection(instance: RadarrInstance | null): Promise<b
     });
 
     return response.ok;
-  } catch {
+  } catch (error) {
+    console.error("Connection test failed:", error);
     return false;
   }
 }

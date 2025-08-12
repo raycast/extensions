@@ -71,7 +71,7 @@ export default function UnmonitoredMovies() {
             </ActionPanel.Section>
             {instances.length > 1 && (
               <ActionPanel.Section title="Instance">
-                {instances.map((instance) => (
+                {instances.map(instance => (
                   <Action
                     key={instance.name}
                     title={`Switch to ${instance.name}`}
@@ -127,9 +127,9 @@ export default function UnmonitoredMovies() {
   }
 
   // Filter only unmonitored movies, then by availability, and sort them
-  const unmonitoredMovies = movies?.filter((movie) => !movie.monitored) || [];
+  const unmonitoredMovies = movies?.filter(movie => !movie.monitored) || [];
   const filteredAndSortedMovies = unmonitoredMovies
-    .filter((movie) => {
+    .filter(movie => {
       if (availabilityFilter === "all") return true;
       const isAvailable = movie.hasFile;
       return (availabilityFilter === "available" && isAvailable) || (availabilityFilter === "missing" && !isAvailable);
@@ -147,7 +147,7 @@ export default function UnmonitoredMovies() {
         <Grid.Dropdown
           tooltip="Filter by Availability"
           value={availabilityFilter}
-          onChange={(value) => setAvailabilityFilter(value as AvailabilityFilter)}
+          onChange={value => setAvailabilityFilter(value as AvailabilityFilter)}
         >
           <Grid.Dropdown.Item title="All Movies" value="all" />
           <Grid.Dropdown.Item title="🟢 Available" value="available" />

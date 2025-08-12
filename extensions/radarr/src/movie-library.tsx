@@ -71,7 +71,7 @@ export default function MovieLibrary() {
             </ActionPanel.Section>
             {instances.length > 1 && (
               <ActionPanel.Section title="Instance">
-                {instances.map((instance) => (
+                {instances.map(instance => (
                   <Action
                     key={instance.name}
                     title={`Switch to ${instance.name}`}
@@ -129,7 +129,7 @@ export default function MovieLibrary() {
   // Filter movies by file status and sort them
   const filteredAndSortedMovies = movies
     ? movies
-        .filter((movie) => {
+        .filter(movie => {
           if (fileStatusFilter === "all") return true;
           return (
             (fileStatusFilter === "available" && movie.hasFile) || (fileStatusFilter === "missing" && !movie.hasFile)
@@ -149,7 +149,7 @@ export default function MovieLibrary() {
         <Grid.Dropdown
           tooltip="Filter by File Status"
           value={fileStatusFilter}
-          onChange={(value) => setFileStatusFilter(value as FileStatusFilter)}
+          onChange={value => setFileStatusFilter(value as FileStatusFilter)}
         >
           <Grid.Dropdown.Item title="All Movies" value="all" />
           <Grid.Dropdown.Item title="🟢 Available" value="available" />

@@ -107,7 +107,7 @@ src/
 ├── movie-library.tsx          # Collection browser
 ├── missing-movies.tsx         # Missing movie tracking
 ├── unmonitored-movies.tsx     # Unmonitored management
-├── instance-switcher.tsx      # Instance status monitoring
+├── instance-status.tsx        # Instance status monitoring
 └── system-status.ts           # Health checks
 ```
 

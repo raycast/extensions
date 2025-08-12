@@ -185,7 +185,7 @@ export interface MovieLookup {
   images: MovieImage[];
   website?: string;
   year: number;
-  youtubeTruailerId?: string;
+  youtubeTrailerId?: string;
   studio?: string;
   runtime: number;
   imdbId?: string;

@@ -134,7 +134,7 @@
       "mode": "view"
     },
     {
-      "name": "instance-switcher",
+      "name": "instance-status",
       "title": "Instance Status",
       "description": "Monitor Radarr instance connection status",
       "mode": "view"

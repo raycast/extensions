@@ -30,7 +30,7 @@ export default function SearchMovies(props: LaunchProps<{ arguments: Arguments }
   // Update existing movies set when movies or instance changes
   useEffect(() => {
     if (existingMoviesList) {
-      const tmdbIds = new Set(existingMoviesList.map((movie) => movie.tmdbId));
+      const tmdbIds = new Set(existingMoviesList.map(movie => movie.tmdbId));
       setExistingMovies(tmdbIds);
     }
   }, [existingMoviesList, selectedInstance]);
@@ -40,14 +40,14 @@ export default function SearchMovies(props: LaunchProps<{ arguments: Arguments }
     if (props.arguments.query && props.arguments.query.trim() && selectedInstance?.url && selectedInstance?.apiKey) {
       setIsSearching(true);
       searchMovies(selectedInstance, props.arguments.query)
-        .then((results) => setSearchResults(results))
-        .catch((error) => {
+        .then(results => setSearchResults(results))
+        .catch(error => {
           console.error("Initial search error:", error);
           setSearchResults([]);
         })
         .finally(() => setIsSearching(false));
     }
-  }, [selectedInstance?.url, selectedInstance?.apiKey]); // Only run when instance is ready
+  }, [props.arguments.query, selectedInstance?.url, selectedInstance?.apiKey]); // Only run when instance is ready
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -59,8 +59,8 @@ export default function SearchMovies(props: LaunchProps<{ arguments: Arguments }
       setIsSearching(true);
 
       searchMovies(selectedInstance, searchText)
-        .then((results) => setSearchResults(results))
-        .catch((error) => {
+        .then(results => setSearchResults(results))
+        .catch(error => {
           console.error("Search error:", error);
           setSearchResults([]);
         })
@@ -79,18 +79,13 @@ export default function SearchMovies(props: LaunchProps<{ arguments: Arguments }
     // Check if movie is already in library using our manual verification
     const isAlreadyAdded = existingMovies.has(movie.tmdbId);
 
-    const accessories = [
-      ...(rating ? [{ text: rating }] : []),
-      ...(movie.runtime ? [{ text: `${movie.runtime}min` }] : []),
-      ...(isAlreadyAdded ? [{ icon: Icon.Check, tooltip: "Already in library" }] : []),
-    ];
+    const accessories = [...(isAlreadyAdded ? [{ icon: Icon.Check, tooltip: "Already in library" }] : [])];
 
     return (
       <List.Item
         key={movie.tmdbId}
         icon={poster || Icon.Video}
         title={formatMovieTitle(movie)}
-        subtitle={genres}
         accessories={accessories}
         detail={
           <List.Item.Detail
@@ -124,13 +119,13 @@ ${movie.certification ? `- **Certification:** ${movie.certification}` : ""}`}
                   url={`${selectedInstance?.url}/movie/${movie.tmdbId}`}
                   icon={Icon.Globe}
                 />
-              ) : (
+              ) : selectedInstance ? (
                 <Action.Push
                   title="Configure & Add"
                   icon={Icon.Plus}
-                  target={<AddMovieForm movie={movie} instance={selectedInstance!} />}
+                  target={<AddMovieForm movie={movie} instance={selectedInstance} />}
                 />
-              )}
+              ) : null}
               {movie.imdbId && (
                 <Action.OpenInBrowser
                   title="Open in Imdb"
@@ -155,7 +150,7 @@ ${movie.certification ? `- **Certification:** ${movie.certification}` : ""}`}
             </ActionPanel.Section>
             {instances.length > 1 && (
               <ActionPanel.Section title="Instance">
-                {instances.map((instance) => (
+                {instances.map(instance => (
                   <Action
                     key={instance.name}
                     title={`Switch to ${instance.name}`}
@@ -197,7 +192,7 @@ ${movie.certification ? `- **Certification:** ${movie.certification}` : ""}`}
     <List
       key={`search-${selectedInstance?.name || "default"}`}
       isLoading={isSearching}
-      onSearchTextChange={(text) => setSearchText(text || "")}
+      onSearchTextChange={text => setSearchText(text || "")}
       searchText={searchText}
       searchBarPlaceholder={`Search movies on ${selectedInstance?.name || "Radarr"}...`}
       throttle

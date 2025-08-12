@@ -91,7 +91,7 @@ export function validateRadarrInstance(instance: RadarrInstance): void {
 export function getRadarrInstanceChoices(): Array<{ title: string; value: string }> {
   const instances = getRadarrInstances();
 
-  return instances.map((instance) => ({
+  return instances.map(instance => ({
     title: `${instance.name} (${instance.url})`,
     value: JSON.stringify({
       name: instance.name,

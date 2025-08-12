@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { getActiveRadarrInstance, getRadarrInstances } from "../config";
 import type { RadarrInstance } from "../types";
 
@@ -26,13 +26,13 @@ export function useInstanceManager() {
     setCurrentInstanceState(instance);
   }, []);
 
-  const availableInstances = (() => {
+  const availableInstances = useMemo(() => {
     try {
       return getRadarrInstances();
     } catch {
       return [];
     }
-  })();
+  }, []);
 
   return {
     currentInstance,

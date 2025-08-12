@@ -93,7 +93,7 @@ export default function UpcomingReleases() {
             </ActionPanel.Section>
             {instances.length > 1 && (
               <ActionPanel.Section title="Instance">
-                {instances.map((instance) => (
+                {instances.map(instance => (
                   <Action
                     key={instance.name}
                     title={`Switch to ${instance.name}`}
@@ -151,7 +151,7 @@ export default function UpcomingReleases() {
   // Filter by monitoring status, exclude movies with files, and sort by release date (closest first)
   const filteredAndSortedMovies = calendarMovies
     ? calendarMovies
-        .filter((movie) => {
+        .filter(movie => {
           // Exclude movies that already have files available
           if (movie.hasFile) return false;
 
@@ -209,7 +209,7 @@ export default function UpcomingReleases() {
         <Grid.Dropdown
           tooltip="Filter by Monitoring Status"
           value={monitoringFilter}
-          onChange={(value) => setMonitoringFilter(value as MonitoringFilter)}
+          onChange={value => setMonitoringFilter(value as MonitoringFilter)}
         >
           <Grid.Dropdown.Item title="All Movies" value="all" />
           <Grid.Dropdown.Item title="📡 Monitored" value="monitored" />

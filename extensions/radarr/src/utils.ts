@@ -39,7 +39,7 @@ export function formatReleaseDate(dateString?: string): string {
 }
 
 export function getMoviePoster(movie: MovieLookup | Movie): string | undefined {
-  const posterImage = movie.images?.find((img) => img.coverType === "poster");
+  const posterImage = movie.images?.find(img => img.coverType === "poster");
   return posterImage?.remoteUrl || posterImage?.url;
 }
 

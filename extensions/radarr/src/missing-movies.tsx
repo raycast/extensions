@@ -111,7 +111,7 @@ export default function MissingMovies() {
             </ActionPanel.Section>
             {instances.length > 1 && (
               <ActionPanel.Section title="Instance">
-                {instances.map((instance) => (
+                {instances.map(instance => (
                   <Action
                     key={instance.name}
                     title={`Switch to ${instance.name}`}
@@ -168,7 +168,7 @@ export default function MissingMovies() {
 
   const filteredAndSortedMovies = missingMovies
     ? [...missingMovies]
-        .filter((movie) => {
+        .filter(movie => {
           if (statusFilter === "all") return true;
           const status = getAvailabilityStatus(movie);
           return (
@@ -201,7 +201,7 @@ export default function MissingMovies() {
         <Grid.Dropdown
           tooltip="Filter by Status"
           value={statusFilter}
-          onChange={(value) => setStatusFilter(value as StatusFilter)}
+          onChange={value => setStatusFilter(value as StatusFilter)}
         >
           <Grid.Dropdown.Item title="All Movies" value="all" />
           <Grid.Dropdown.Item title="🔴 Missing" value="missing" />

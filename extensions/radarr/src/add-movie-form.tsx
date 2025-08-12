@@ -70,12 +70,6 @@ export default function AddMovieForm({ movie, instance }: AddMovieFormProps) {
         values.searchOnAdd,
       );
 
-      showToast({
-        style: Toast.Style.Success,
-        title: "Movie Added",
-        message: `${formatMovieTitle(movie)} added successfully`,
-      });
-
       popToRoot();
     } catch (error) {
       console.error("Add movie error:", error);
@@ -118,13 +112,13 @@ export default function AddMovieForm({ movie, instance }: AddMovieFormProps) {
       <Form.Description text={`Configure settings to add "${formatMovieTitle(movie)}" to your Radarr collection`} />
 
       <Form.Dropdown id="qualityProfileId" title="Quality Profile" defaultValue={qualityProfiles[0]?.id.toString()}>
-        {qualityProfiles.map((profile) => (
+        {qualityProfiles.map(profile => (
           <Form.Dropdown.Item key={profile.id} value={profile.id.toString()} title={profile.name} />
         ))}
       </Form.Dropdown>
 
       <Form.Dropdown id="rootFolderPath" title="Root Folder" defaultValue={rootFolders[0]?.path}>
-        {rootFolders.map((folder) => (
+        {rootFolders.map(folder => (
           <Form.Dropdown.Item key={folder.id} value={folder.path} title={folder.path} />
         ))}
       </Form.Dropdown>
