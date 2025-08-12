@@ -107,7 +107,7 @@ function QuickCapture({ launchContext }: QuickCaptureProps) {
         let content: PageContent;
 
         switch (values.captureAs) {
-          case "bookmark": {
+          case "url": {
             content = [{ type: "bookmark", bookmark: { url: values.url } }];
             break;
           }
@@ -230,7 +230,7 @@ function QuickCapture({ launchContext }: QuickCaptureProps) {
       />
 
       <Form.Dropdown {...itemProps.captureAs} title="Capture As" storeValue>
-        <Form.Dropdown.Item title="Bookmark" value="bookmark" icon={Icon.Link} />
+        <Form.Dropdown.Item title="Bookmark" value="url" icon={Icon.Link} />
         <Form.Dropdown.Item title="Full Page" value="full" icon={Icon.Paragraph} />
         <Form.Dropdown.Item title="Summarize Page with AI" value="ai" icon={Icon.Stars} />
       </Form.Dropdown>
