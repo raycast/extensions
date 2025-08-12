@@ -1,6 +1,6 @@
 # PocketBase Changelog
 
-## [Search Backups + Store Token + Modernize] - {PR_MERGE_DATE}
+## [Search Backups + Store Token + Modernize] - 2025-08-12
 
 - Search Backups
     1. Delete Backup
