@@ -1,5 +1,9 @@
 # Gmail Changelog
 
+## [Add Support for OTP] - {PR_MERGE_DATE}
+
+- Added Gmail OTP extraction command: securely fetches and pastes the most recent OTP codes in the last 15 minutes from your inbox
+
 ## [Unread MenuBar unread fix] - 2025-03-11
 
 - Unread menubar list now only show unread emails in your Inbox.

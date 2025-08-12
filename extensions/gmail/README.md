@@ -43,6 +43,7 @@ Raycast extension to manage your Gmail inbox.
 - Manage unread mails
 - Manage Drafts
 - Open specific mail on gmail.com
+- Extract one-time passcode (OTP) from recent emails and paste them automatically
 
 ## How to get a Gmail OAuth Client ID
 

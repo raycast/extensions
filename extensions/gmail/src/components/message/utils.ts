@@ -265,3 +265,19 @@ export async function sendUpdateRequestToMenus(options?: { silent: true }) {
     }
   }
 }
+
+export function extractOTP(text: string): string | null {
+  const digitMatches = text.match(/\b\d{4,10}\b/g) || [];
+  const hyphenMatches = text.match(/\b\d{3,}-\d{3,}\b/g) || [];
+  const candidates = [...digitMatches, ...hyphenMatches];
+
+  const filtered = candidates.filter((code) => {
+    const index = text.indexOf(code);
+    if (index === -1) return false;
+
+    const surrounding = text.slice(Math.max(0, index - 2), index + code.length + 2);
+    return !/[()\-+./]/.test(surrounding); // dropped `:` and other false positives
+  });
+
+  return filtered.filter((code) => code.replace(/-/g, "").length <= 10).sort((a, b) => b.length - a.length)[0] || null;
+}
