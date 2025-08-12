@@ -21,6 +21,7 @@
     {
       "name": "open-profile",
       "title": "Open Profile",
+      "subtitle": "Google Chrome",
       "description": "Open a Chrome profile",
       "mode": "no-view",
       "disabledByDefault": true
@@ -28,6 +29,7 @@
     {
       "name": "open-profile-url",
       "title": "Open Profile with URL",
+      "subtitle": "Google Chrome",
       "description": "Open a Chrome profile with a specific URL",
       "mode": "no-view",
       "disabledByDefault": true
