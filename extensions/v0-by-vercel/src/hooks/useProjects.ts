@@ -1,4 +1,4 @@
-import { useFetch } from "@raycast/utils";
+import { useV0Api } from "./useV0Api";
 import { getActiveProfileDetails } from "../lib/profile-utils";
 import type { FindProjectsResponse } from "../types";
 import { useState, useEffect } from "react";
@@ -50,11 +50,10 @@ export function useProjects(scope: string | null = null): UseProjectsResult {
     headers["X-Scope"] = activeScope;
   }
 
-  const { isLoading, data, error, revalidate } = useFetch<FindProjectsResponse>(
+  const { isLoading, data, error, revalidate } = useV0Api<FindProjectsResponse>(
     activeProfileApiKey && !isLoadingProfileDetails ? "https://api.v0.dev/v1/projects" : "",
     {
       headers,
-      parseResponse: (response) => response.json(),
       execute: !!activeProfileApiKey && !isLoadingProfileDetails, // Only execute if apiKey and profile details are available
     },
   );

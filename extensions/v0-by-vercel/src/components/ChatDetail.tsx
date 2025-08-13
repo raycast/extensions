@@ -1,45 +1,91 @@
-import { List, Icon, Color, Detail, ActionPanel, Action, Keyboard } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { List, Icon, Color, Detail, ActionPanel, Action, Keyboard, showToast, Toast } from "@raycast/api";
+import { useV0Api } from "../hooks/useV0Api";
 import type { ChatDetailResponse, ChatMetadataResponse } from "../types";
 import AddMessage from "./AddMessage";
 import { useActiveProfile } from "../hooks/useActiveProfile";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ChatFilesDetail from "./ChatFilesDetail";
+import { parseV0ApiResponseBody } from "../lib/v0-api-utils";
 
 export default function ChatDetail({ chatId, scopeId }: { chatId: string; scopeId?: string }) {
-  const { activeProfileApiKey, isLoadingProfileDetails } = useActiveProfile();
+  const { activeProfileApiKey, isLoadingProfileDetails, activeProfileDefaultScope } = useActiveProfile();
   const [messageFilter, setMessageFilter] = useState<"all" | "user" | "v0">("all");
 
-  const { isLoading, data, error, mutate } = useFetch<ChatDetailResponse>(
+  const { isLoading, data, error, mutate } = useV0Api<ChatDetailResponse | null>(
     activeProfileApiKey ? `https://api.v0.dev/v1/chats/${chatId}` : "",
     {
       headers: {
         Authorization: `Bearer ${activeProfileApiKey}`,
         "Content-Type": "application/json",
-        ...(scopeId && { "x-scope": scopeId }), // Add x-scope header if scopeId is present
+        "x-scope": scopeId || activeProfileDefaultScope || "",
       },
-      parseResponse: (response) => response.json(),
+      parseResponse: async (response) => {
+        if (response.status === 404) {
+          // Suppress transient 404s by returning null; we will retry manually
+          return null as unknown as ChatDetailResponse;
+        }
+        return parseV0ApiResponseBody<ChatDetailResponse>(response);
+      },
       execute: !!activeProfileApiKey && !isLoadingProfileDetails,
     },
   );
 
-  const {
-    isLoading: isLoadingMetadata,
-    data: metadata,
-    error: metadataError,
-  } = useFetch<ChatMetadataResponse>(activeProfileApiKey ? `https://api.v0.dev/v1/chats/${chatId}/metadata` : "", {
-    headers: {
-      Authorization: `Bearer ${activeProfileApiKey}`,
-    },
-    parseResponse: (response) => response.json(),
-    execute: !!activeProfileApiKey && !isLoadingProfileDetails,
-  });
+  // If chat was just created, API may return 404 briefly. Retry every 2s up to 3 times.
+  const [notFoundRetries, setNotFoundRetries] = useState(0);
+  const [shownFinalErrorToast, setShownFinalErrorToast] = useState(false);
+  useEffect(() => {
+    if (data === null && notFoundRetries < 3) {
+      const delayMs = 2000; // constant 2s retries
+      const timer = setTimeout(() => {
+        setNotFoundRetries((v) => v + 1);
+        mutate();
+      }, delayMs);
+      return () => clearTimeout(timer);
+    }
+    return undefined;
+  }, [data, mutate, notFoundRetries]);
 
-  if (error || metadataError) {
-    return <Detail markdown={`# Error\n\n${error?.message || metadataError?.message}`} />;
+  // After third retry fails, show a single failure toast.
+  useEffect(() => {
+    if (data === null && notFoundRetries >= 3 && !shownFinalErrorToast) {
+      setShownFinalErrorToast(true);
+      void showToast({ style: Toast.Style.Failure, title: "Failed to load chat", message: "Chat not found" });
+    }
+  }, [data, notFoundRetries, shownFinalErrorToast]);
+
+  const { data: metadata } = useV0Api<ChatMetadataResponse | null>(
+    activeProfileApiKey ? `https://api.v0.dev/v1/chats/${chatId}/metadata` : "",
+    {
+      headers: {
+        Authorization: `Bearer ${activeProfileApiKey}`,
+        "x-scope": scopeId || activeProfileDefaultScope || "",
+      },
+      parseResponse: async (response) => {
+        if (response.status === 404) {
+          return null as unknown as ChatMetadataResponse;
+        }
+        return parseV0ApiResponseBody<ChatMetadataResponse>(response);
+      },
+      execute: !!activeProfileApiKey && !isLoadingProfileDetails,
+    },
+  );
+
+  if (data === null) {
+    if (notFoundRetries < 3) {
+      return (
+        <List navigationTitle="Chat Detail">
+          <List.EmptyView title="Finalizing chat..." description="Just a moment while we load your chat." />
+        </List>
+      );
+    }
+    return <Detail markdown={`# Error\n\nChat not found`} />;
   }
 
-  if (isLoading || isLoadingProfileDetails || isLoadingMetadata) {
+  if (error) {
+    return <Detail markdown={`# Error\n\n${(error as Error)?.message}`} />;
+  }
+
+  if (isLoading || isLoadingProfileDetails) {
     return (
       <List navigationTitle="Chat Detail">
         <List.EmptyView title="Loading..." description="Fetching chat messages..." />
@@ -144,7 +190,7 @@ export default function ChatDetail({ chatId, scopeId }: { chatId: string; scopeI
         </ActionPanel>
       }
     >
-      {data?.messages
+      {(data?.messages ?? [])
         .filter((message) => {
           if (messageFilter === "all") return true;
           return messageFilter === "user" ? isUserMessage(message.role) : !isUserMessage(message.role);
