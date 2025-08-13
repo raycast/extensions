@@ -1,80 +1,66 @@
 import { useState } from "react";
-import { Action, ActionPanel, Clipboard, Form, showToast, Toast, Detail } from "@raycast/api";
-import { formatRawSql } from "./utils";
+import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
+import { MESSAGES } from "./constants/messages";
+import { formatRawSql, copyAndExit } from "./utils";
 
 export default function FormatSqlCommand() {
   const [sqlInput, setSqlInput] = useState<string>("");
-  const [formattedSql, setFormattedSql] = useState<string>("");
-  const [showDetail, setShowDetail] = useState<boolean>(false);
+  const [localFormattedSql, setLocalFormattedSql] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (values: { sqlInput: string }) => {
+  const handleSubmit = async (values: { sqlInput?: string; formattedSql?: string }) => {
+    setIsLoading(true);
     try {
-      if (!values.sqlInput.trim()) {
-        showToast({
+      if (localFormattedSql && values.formattedSql) {
+        await copyAndExit(localFormattedSql);
+        return;
+      }
+
+      const inputSql = values.sqlInput;
+      if (!inputSql?.trim()) {
+        await showToast({
           style: Toast.Style.Failure,
-          title: "请输入SQL语句",
+          title: MESSAGES.ERROR.EMPTY_INPUT,
         });
         return;
       }
 
-      const formatted = formatRawSql(values.sqlInput);
-      setFormattedSql(formatted);
+      const formatted = formatRawSql(inputSql);
 
-      showToast({
-        style: Toast.Style.Success,
-        title: "SQL已格式化",
-      });
-
-      // 自动显示详情页面
-      setShowDetail(true);
+      if (formatted && formatted.trim()) {
+        setLocalFormattedSql(formatted);
+        await showToast({
+          style: Toast.Style.Success,
+          title: MESSAGES.SUCCESS.SQL_FORMATTED,
+        });
+      }
     } catch (error) {
-      showToast({
+      await showToast({
         style: Toast.Style.Failure,
-        title: "发生错误",
+        title: MESSAGES.ERROR.GENERAL_ERROR,
         message: error instanceof Error ? error.message : String(error),
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // 如果显示详情页面
-  if (showDetail && formattedSql) {
-    return (
-      <Detail
-        markdown={`
-
-\`\`\`sql
-${formattedSql}
-\`\`\`
-`}
-        actions={
-          <ActionPanel>
-            <Action
-              title="Copy Formatted Sql"
-              onAction={() => {
-                Clipboard.copy(formattedSql);
-                showToast({ title: "已复制到剪贴板" });
-              }}
-            />
-            <Action title="返回输入表单" onAction={() => setShowDetail(false)} />
-          </ActionPanel>
-        }
-      />
-    );
-  }
-
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Format Sql" onSubmit={handleSubmit} />
-          {formattedSql && (
+          <Action.SubmitForm
+            title={localFormattedSql ? MESSAGES.ACTIONS.COPY_TO_CLIPBOARD : MESSAGES.ACTIONS.FORMAT_SQL}
+            onSubmit={handleSubmit}
+          />
+          {localFormattedSql && (
             <>
-              <Action title="查看格式化Sql" onAction={() => setShowDetail(true)} />
-              <Action
-                title="Copy Formatted Sql"
-                onAction={() => {
-                  Clipboard.copy(formattedSql);
-                  showToast({ title: "已复制到剪贴板" });
+              <Action.CopyToClipboard
+                title={MESSAGES.ACTIONS.COPY_TO_CLIPBOARD}
+                content={localFormattedSql}
+                onCopy={async () => {
+                  await copyAndExit(localFormattedSql);
                 }}
               />
             </>
@@ -82,20 +68,23 @@ ${formattedSql}
         </ActionPanel>
       }
     >
-      <Form.TextArea
-        id="sqlInput"
-        title="SQL语句"
-        placeholder="请输入需要格式化的SQL语句..."
-        value={sqlInput}
-        onChange={setSqlInput}
-      />
-      {formattedSql && (
+      {!localFormattedSql ? (
+        <Form.TextArea
+          id="sqlInput"
+          title={MESSAGES.TITLES.SQL_INPUT}
+          placeholder={MESSAGES.PLACEHOLDERS.SQL_INPUT}
+          value={sqlInput}
+          onChange={setSqlInput}
+        />
+      ) : (
         <Form.TextArea
           id="formattedSql"
-          title="格式化结果"
-          value={formattedSql}
-          onChange={() => {}} // 添加空的onChange处理器使其只读
-          enableMarkdown={true} // 启用Markdown支持以获得语法高亮
+          title={MESSAGES.TITLES.FORMAT_RESULT}
+          value={localFormattedSql}
+          onChange={() => {}}
+          enableMarkdown={true}
+          placeholder=""
+          storeValue={false}
         />
       )}
     </Form>

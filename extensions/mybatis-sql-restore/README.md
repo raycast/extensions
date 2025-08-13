@@ -1,4 +1,4 @@
-# mybatis-sql-reduction
+# mybatis-sql-restore
 
 这是一个Raycast插件，用于将Mybatis日志中的SQL还原为真实SQL并格式化。
 

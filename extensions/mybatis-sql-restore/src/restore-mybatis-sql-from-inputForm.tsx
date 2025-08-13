@@ -1,20 +1,35 @@
 import { useState } from "react";
-import { Action, ActionPanel, Clipboard, Form, showToast, Toast, Detail } from "@raycast/api";
-import { formatSql, parseMybatisLog } from "./utils";
+import { Action, ActionPanel, Form, showToast, Toast, Detail } from "@raycast/api";
+import { formatSql, parseMybatisLog, copyAndExit } from "./utils";
+import { MESSAGES } from "./constants/messages";
 
-export default function SqlInputForm() {
+export default function RestoreMybatisSqlFromInputForm() {
   const [sqlLog, setSqlLog] = useState<string>("");
   const [formattedSql, setFormattedSql] = useState<string>("");
   const [showDetail, setShowDetail] = useState<boolean>(false);
 
-  const handleSubmit = (values: { sqlLog: string }) => {
+  const handleSubmit = async (values: { sqlLog?: string; formattedSql?: string }) => {
     try {
-      const { sql, params } = parseMybatisLog(values.sqlLog);
+      if (formattedSql && values.formattedSql) {
+        await copyAndExit(formattedSql);
+        return;
+      }
+
+      const inputSql = values.sqlLog;
+      if (!inputSql) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: MESSAGES.ERROR.NO_VALID_SQL,
+        });
+        return;
+      }
+
+      const { sql, params } = parseMybatisLog(inputSql);
 
       if (!sql) {
-        showToast({
+        await showToast({
           style: Toast.Style.Failure,
-          title: "未找到有效的SQL语句",
+          title: MESSAGES.ERROR.NO_VALID_SQL,
         });
         return;
       }
@@ -22,23 +37,19 @@ export default function SqlInputForm() {
       const formatted = formatSql(sql, params);
       setFormattedSql(formatted);
 
-      showToast({
+      await showToast({
         style: Toast.Style.Success,
-        title: "SQL已格式化",
+        title: MESSAGES.SUCCESS.SQL_FORMATTED,
       });
-
-      // 自动显示详情页面
-      setShowDetail(true);
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
-        title: "发生错误",
+        title: MESSAGES.ERROR.GENERAL_ERROR,
         message: error instanceof Error ? error.message : String(error),
       });
     }
   };
 
-  // 如果显示详情页面
   if (showDetail && formattedSql) {
     return (
       <Detail
@@ -51,13 +62,12 @@ ${formattedSql}
         actions={
           <ActionPanel>
             <Action
-              title="Copy Formatted Sql"
-              onAction={() => {
-                Clipboard.copy(formattedSql);
-                showToast({ title: "已复制到剪贴板" });
+              title={MESSAGES.ACTIONS.COPY_FORMATTED}
+              onAction={async () => {
+                await copyAndExit(formattedSql);
               }}
             />
-            <Action title="返回输入表单" onAction={() => setShowDetail(false)} />
+            <Action title={MESSAGES.ACTIONS.BACK} onAction={() => setShowDetail(false)} />
           </ActionPanel>
         }
       />
@@ -68,15 +78,17 @@ ${formattedSql}
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Format Sql" onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            title={formattedSql ? MESSAGES.ACTIONS.COPY_TO_CLIPBOARD : MESSAGES.ACTIONS.FORMAT_SQL}
+            onSubmit={handleSubmit}
+          />
           {formattedSql && (
             <>
-              <Action title="查看格式化Sql" onAction={() => setShowDetail(true)} />
+              <Action title={MESSAGES.ACTIONS.VIEW_FORMATTED} onAction={() => setShowDetail(true)} />
               <Action
-                title="Copy Formatted Sql"
-                onAction={() => {
-                  Clipboard.copy(formattedSql);
-                  showToast({ title: "已复制到剪贴板" });
+                title={MESSAGES.ACTIONS.COPY_FORMATTED}
+                onAction={async () => {
+                  await copyAndExit(formattedSql);
                 }}
               />
             </>
@@ -84,20 +96,21 @@ ${formattedSql}
         </ActionPanel>
       }
     >
-      <Form.TextArea
-        id="sqlLog"
-        title="Mybatis SQL 日志"
-        placeholder="请粘贴 Mybatis 日志..."
-        value={sqlLog}
-        onChange={setSqlLog}
-      />
-      {formattedSql && (
+      {!formattedSql ? (
+        <Form.TextArea
+          id="sqlLog"
+          title={MESSAGES.TITLES.MYBATIS_SQL_LOG}
+          placeholder={MESSAGES.PLACEHOLDERS.MYBATIS_LOG}
+          value={sqlLog}
+          onChange={setSqlLog}
+        />
+      ) : (
         <Form.TextArea
           id="formattedSql"
-          title="格式化结果"
+          title={MESSAGES.TITLES.FORMAT_RESULT}
           value={formattedSql}
-          onChange={() => {}} // 添加空的onChange处理器使其只读
-          enableMarkdown={true} // 启用Markdown支持以获得语法高亮
+          onChange={() => {}}
+          enableMarkdown={true}
         />
       )}
     </Form>
