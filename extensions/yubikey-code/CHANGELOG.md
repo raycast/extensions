@@ -1,6 +1,6 @@
 # YubiKey Code Changelog
 
-## [New Feature] - 2025-08-13
+## [New Feature] - {PR_MERGE_DATE}
 
 - Add support for YubiKeys with passcodes
 
