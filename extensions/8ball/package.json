@@ -12,7 +12,27 @@
       "title": "8ball",
       "subtitle": "Random Answers",
       "description": "Returns a random answer to questions",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "defaultAction",
+          "title": "Default action on Enter",
+          "description": "Choose what happens when you run the command (Copy or Paste).",
+          "type": "dropdown",
+          "required": true,
+          "default": "copy",
+          "data": [
+            {
+              "title": "Copy",
+              "value": "copy"
+            },
+            {
+              "title": "Paste",
+              "value": "paste"
+            }
+          ]
+        }
+      ]
     }
   ],
   "dependencies": {
