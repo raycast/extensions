@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Toast, Clipboard, Icon } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, Clipboard, Icon, Keyboard } from "@raycast/api";
 import { useState, useMemo, useEffect } from "react";
 
 interface TimeEntry {
@@ -227,16 +227,17 @@ export default function CalculateTime() {
             shortcut={{ modifiers: ["cmd"], key: "c" }}
           />
           <Action
-            title="Clear All"
-            icon={Icon.Trash}
-            onAction={handleClear}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
-          />
-          <Action
             title="Add More Lines"
             icon={Icon.Plus}
             onAction={handleAddMoreLines}
             shortcut={{ modifiers: ["cmd"], key: "n" }}
+          />
+          <Action
+            title="Clear All"
+            icon={Icon.Trash}
+            onAction={handleClear}
+            style={Action.Style.Destructive}
+            shortcut={Keyboard.Shortcut.Common.RemoveAll}
           />
         </ActionPanel>
       }
