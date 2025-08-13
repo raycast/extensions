@@ -1,6 +1,6 @@
 # Synology Download Station Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2025-08-13
 
 Initial version of the Synology Download Station extension for Raycast.
 
