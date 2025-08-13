@@ -20,19 +20,13 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action title="Copy Result" onAction={handleCopy} />
+          <Action title="Copy Result" onAction={handleCopy} shortcut={{ modifiers: ["cmd"], key: "enter" }} />
         </ActionPanel>
       }
     >
       <Form.TextArea id="input" title="Input" placeholder="Enter text to encode..." value={input} onChange={setInput} />
       <Form.Separator />
-      <Form.TextArea
-        id="output"
-        title="Encoded Result"
-        value={output}
-        onChange={() => {}}
-        placeholder="Result will appear here..."
-      />
+      <Form.TextArea id="output" title="Encoded Result" value={output} placeholder="Result will appear here..." />
     </Form>
   );
 }

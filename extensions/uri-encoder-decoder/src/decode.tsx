@@ -27,7 +27,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action title="Copy Result" onAction={handleCopy} />
+          <Action title="Copy Result" onAction={handleCopy} shortcut={{ modifiers: ["cmd"], key: "enter" }} />
         </ActionPanel>
       }
     >
@@ -40,13 +40,7 @@ export default function Command() {
         error={error}
       />
       <Form.Separator />
-      <Form.TextArea
-        id="output"
-        title="Decoded Result"
-        value={output}
-        onChange={() => {}}
-        placeholder="Result will appear here..."
-      />
+      <Form.TextArea id="output" title="Decoded Result" value={output} placeholder="Result will appear here..." />
     </Form>
   );
 }
