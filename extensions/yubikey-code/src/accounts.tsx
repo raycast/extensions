@@ -110,15 +110,18 @@ function processAccountCode(key: string, actionType: ActionType, usageCallback: 
   const [requiresAuth, setRequiresAuth] = useState<boolean>(false);
 
   useEffect(() => {
-    executeCodeCommand(
-      key,
-      actionType,
-      (error) => setError(error),
-      (loading) => setIsLoading(loading),
-      (result) => setResult(result),
-      usageCallback,
-      () => setRequiresAuth(true)
-    );
+    const executeCode = async () => {
+      await executeCodeCommand(
+        key,
+        actionType,
+        (error) => setError(error),
+        (loading) => setIsLoading(loading),
+        (result) => setResult(result),
+        usageCallback,
+        () => setRequiresAuth(true)
+      );
+    };
+    executeCode();
   }, [key, actionType, usageCallback]);
 
   return { error, isLoading, result, requiresAuth };
