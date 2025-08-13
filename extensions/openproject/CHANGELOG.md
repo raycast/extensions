@@ -1,7 +1,6 @@
 # Changelog
 
-## [1.0.0] - 2025-01-28
-
+## [1.0.0] - {PR_MERGE_DATE}
 ### Added
 - **Create Ticket**: Create new tickets with project, type, assignee, and priority selection
 - **Update Ticket**: Search and edit existing tickets with conflict detection
