@@ -41,11 +41,15 @@
   ],
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
+    "@types/jest": "^29.5.14",
     "@types/node": "22.13.10",
     "@types/react": "18.3.3",
     "csv-parser": "^3.2.0",
     "eslint": "^9.22.0",
+    "jest": "^29.7.0",
     "prettier": "^3.5.3",
+    "ts-jest": "^29.4.1",
+    "ts-node": "^10.9.2",
     "typescript": "^5.8.2"
   },
   "overrides": {
@@ -57,6 +61,16 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:unit": "jest --testPathIgnorePatterns=\"integration|local|performance\"",
+    "test:integration": "jest --testPathPattern=\"api-mocked.integration.test.ts\" --timeout=10000",
+    "test:integration:real": "jest --testPathPattern=\"api-real.local.test.ts\" --timeout=60000",
+    "test:performance": "jest --testPathPattern=\"performance.test.ts\" --timeout=10000",
+    "test:ci": "jest --coverage=false --silent --maxWorkers=2",
+    "test:full": "jest --coverage --verbose",
+    "build-greffes": "ts-node build-greffes-index.ts",
+    "compress-greffes": "ts-node scripts/compress-greffes.ts"
   }
 }

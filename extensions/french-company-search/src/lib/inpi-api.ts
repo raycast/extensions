@@ -1,6 +1,7 @@
 import axios from "axios";
 import { getPreferenceValues } from "@raycast/api";
 import { ApiLoginResponse, CompanyData, Preferences } from "../types";
+import { metrics } from "./metrics";
 
 // --- Caching and Rate Limiting Configuration ---
 
@@ -110,6 +111,11 @@ export async function login(): Promise<string> {
 
   console.log("Authenticating with INPI API...");
   return withRetry(async () => {
+    const startTime = Date.now();
+    let success = false;
+    let statusCode = 0;
+    let errorType: string | undefined;
+
     try {
       const apiClient = getApiClient();
       const response = await apiClient.post<ApiLoginResponse>("/api/sso/login", {
@@ -117,8 +123,11 @@ export async function login(): Promise<string> {
         password: inpiPassword,
       });
 
+      statusCode = response.status;
+
       if (response.data?.token) {
         console.log("Authentication successful. Caching token.");
+        success = true;
         authToken = {
           token: response.data.token,
           expiresAt: Date.now() + AUTH_TOKEN_TTL,
@@ -127,6 +136,10 @@ export async function login(): Promise<string> {
       }
       throw new Error("Invalid login response from INPI API.");
     } catch (error) {
+      errorType = axios.isAxiosError(error) ? "AxiosError" : "UnknownError";
+      if (axios.isAxiosError(error) && error.response?.status) {
+        statusCode = error.response.status;
+      }
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 401) {
           throw new Error("Authentication failed: Invalid INPI credentials.");
@@ -140,6 +153,17 @@ export async function login(): Promise<string> {
       }
       console.error("Authentication failed:", error);
       throw new Error("Failed to authenticate with INPI API. Check credentials and connection.");
+    } finally {
+      // Record metrics
+      const responseTime = Date.now() - startTime;
+      metrics.recordApiCall({
+        endpoint: "/api/sso/login",
+        method: "POST",
+        responseTime,
+        statusCode,
+        success,
+        errorType,
+      });
     }
   });
 }
@@ -159,16 +183,29 @@ export async function getCompanyInfo(siren: string): Promise<CompanyData> {
   checkRateLimit();
 
   return withRetry(async () => {
+    const startTime = Date.now();
+    let success = false;
+    let statusCode = 0;
+    let errorType: string | undefined;
+
     try {
       const apiClient = getApiClient(token);
       console.log(`Fetching INPI data for SIREN ${siren}`);
       const response = await apiClient.get(`/api/companies/${siren}`);
+
+      statusCode = response.status;
+      success = true;
 
       // Cache the successful response
       companyCache.set(siren, { data: response.data, timestamp: Date.now() });
 
       return response.data;
     } catch (error) {
+      errorType = axios.isAxiosError(error) ? "AxiosError" : "UnknownError";
+      if (axios.isAxiosError(error) && error.response?.status) {
+        statusCode = error.response.status;
+      }
+
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 404) {
           throw new Error(`No company found for SIREN ${siren}.`);
@@ -186,6 +223,17 @@ export async function getCompanyInfo(siren: string): Promise<CompanyData> {
       }
       console.error(`Failed to fetch company data for SIREN ${siren}:`, error);
       throw new Error("Network error while fetching company data.");
+    } finally {
+      // Record metrics
+      const responseTime = Date.now() - startTime;
+      metrics.recordApiCall({
+        endpoint: `/api/companies/${siren}`,
+        method: "GET",
+        responseTime,
+        statusCode,
+        success,
+        errorType,
+      });
     }
   });
 }

@@ -1,24 +1,26 @@
-import { AddressInfo } from "./types";
+import { AddressInfo } from "../types";
 import { environment } from "@raycast/api";
-import roleMappings from "../assets/role-mappings.json";
+import roleMappings from "../../assets/role-mappings.json";
+import { expandStreetType } from "./address-formatter";
+import { toTitleCase } from "./formatting";
 
-const FALLBACK_VALUE = "[[à compléter]]";
+const FALLBACK_VALUE = "[[to be completed]]";
 
 // User-friendly fallback values for different contexts
 export const FALLBACK_VALUES = {
-  MISSING_DATA: "[[à compléter]]",
-  COMPANY_NAME: "[[Dénomination à compléter]]",
-  ADDRESS: "[[Adresse à compléter]]",
-  CAPITAL: "[[Montant à compléter]]",
-  RCS_CITY: "[[Ville du greffe à compléter]]",
-  REPRESENTATIVE_NAME: "[[Nom du représentant à compléter]]",
-  REPRESENTATIVE_ROLE: "[[Fonction à compléter]]",
-  BIRTH_DATE: "[[Date de naissance non renseignée]]",
-  BIRTH_PLACE: "[[Lieu de naissance non renseigné]]",
-  NATIONALITY: "[[Nationalité non renseignée]]",
+  MISSING_DATA: "[[to be completed]]",
+  COMPANY_NAME: "[[Company name to be completed]]",
+  ADDRESS: "[[Address to be completed]]",
+  CAPITAL: "[[Amount to be completed]]",
+  RCS_CITY: "[[Registry city to be completed]]",
+  REPRESENTATIVE_NAME: "[[Representative name to be completed]]",
+  REPRESENTATIVE_ROLE: "[[Position to be completed]]",
+  BIRTH_DATE: "[[Birth date not provided]]",
+  BIRTH_PLACE: "[[Birth place not provided]]",
+  NATIONALITY: "[[Nationality not provided]]",
 };
 
-// Mapping des codes de forme juridique INPI vers les libellés complets
+// Mapping of INPI legal form codes to complete labels
 const LEGAL_FORM_MAPPING: { [key: string]: string } = {
   "1000": "Entrepreneur individuel",
   "2110": "Indivision entre personnes physiques",
@@ -144,16 +146,29 @@ export function formatAddress(address: AddressInfo): string {
   if (!address || !address.adresse) return FALLBACK_VALUE;
 
   const addr = address.adresse;
-  const parts = [
-    addr.complementLocalisation,
-    addr.numVoie || addr.numeroVoie,
-    addr.indiceRepetition,
-    addr.typeVoie,
-    addr.voie || addr.libelleVoie,
-  ];
 
-  const street = parts.filter(Boolean).join(" ");
-  const city = `${formatField(addr.codePostal)} ${formatField(addr.commune)}`;
+  // Build street part with expanded type
+  const streetParts = [addr.complementLocalisation, addr.numVoie || addr.numeroVoie, addr.indiceRepetition].filter(
+    Boolean,
+  );
+
+  // Expand street type (BD → Boulevard, AV → Avenue, etc.)
+  if (addr.typeVoie) {
+    const expandedType = expandStreetType(addr.typeVoie);
+    streetParts.push(expandedType.toLowerCase()); // Keep lowercase for French conventions
+  }
+
+  // Add street name
+  if (addr.voie || addr.libelleVoie) {
+    const streetName = toTitleCase(addr.voie || addr.libelleVoie || "");
+    streetParts.push(streetName);
+  }
+
+  const street = streetParts.join(" ");
+
+  // Format city with proper capitalization
+  const formattedCity = addr.commune ? toTitleCase(addr.commune) : FALLBACK_VALUE;
+  const city = `${formatField(addr.codePostal)} ${formattedCity}`;
 
   if (!street && city.trim() === `${FALLBACK_VALUE} ${FALLBACK_VALUE}`) return FALLBACK_VALUE;
 

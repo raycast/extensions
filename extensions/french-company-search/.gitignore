@@ -43,3 +43,7 @@ CLAUDE.md
 
 # Fichiers a conserver en local
 local
+GEMINI.md
+.aider*
+.aicodeprep-gui
+fullcode.txt

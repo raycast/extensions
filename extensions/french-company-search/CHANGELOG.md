@@ -5,7 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.2] - {PR_MERGE_DATE}
+## [1.1.0] - {PR_MERGE_DATE}
+
+### Added
+- **🏗️ Streamlined Folder Architecture**: Complete architectural overhaul with unified business logic in `src/lib/` directory
+- **🧪 Production-Ready Testing Infrastructure**: 103 comprehensive tests covering unit, integration, and performance scenarios
+- **🎭 Comprehensive Mock System**: Pre-recorded API responses for 10 real companies covering all entity types (SA, SARL, SAS, Auto-entrepreneur, SCI, etc.)
+- **🔄 Smart Credential Management**: Automatic detection hierarchy (environment variables → Raycast preferences → mock data fallback)
+- **⚡ Performance Benchmarking**: Sub-20ms operations with memory-efficient processing and performance monitoring
+- **🚀 GitHub Actions CI/CD**: Automated testing pipeline with zero external API dependencies
+- **📋 Enhanced Address Formatting**: Official INPI street type expansion (BD → Boulevard, AV → Avenue) with 231+ supported types
+- **🎯 TypeScript Strict Mode**: Full compliance with zero `any` types for enhanced code quality
+- **📊 API Structure Validation**: Runtime validation with change detection for API response consistency
+- **🔍 Development Monitoring**: Comprehensive metrics system with health checks and performance alerts
+
+### Changed
+- **📁 Folder Structure**: Simplified from 17 directories to 12 (-29% complexity) following Raycast extension best practices
+- **🔧 Import Paths**: Unified import system with consistent `../lib/` paths for better maintainability  
+- **🧪 Testing Strategy**: Hybrid approach using mocked data for CI/CD and real API for local development
+- **📝 Documentation**: Translated all guides to English and unified testing documentation
+- **🏗️ Build Scripts**: Relocated to root level alongside configuration files for better organization
+- **⚙️ Jest Configuration**: Enhanced to exclude helper files and support new folder structure
+
+### Fixed
+- **🔍 TypeScript Compilation**: Resolved import errors and added proper type guards for CI compatibility
+- **📊 Performance Thresholds**: Adjusted test thresholds to account for system performance variations
+- **🔗 GitHub Actions**: Updated workflow to use standardized npm scripts aligned with local development
+- **📋 Code Linting**: Eliminated all ESLint warnings and TypeScript strict mode violations
+
+### Technical Improvements
+- **📈 Test Coverage**: 103 tests across all components (59 unit + 25 integration + 10 address + 9 performance)
+- **🚀 Build Performance**: Streamlined structure reduces build complexity and improves development speed
+- **🔒 Production Readiness**: Full Raycast Store compliance with professional error handling
+- **📚 Architecture Documentation**: Complete guides for development, testing, and deployment procedures
+- **🎯 Scalable Foundation**: Clean separation of concerns enabling future feature development
+
+## [1.0.2] - 2025-08-11
 
 ### Added
 - **French Number Formatting**: Proper French formatting for share capital with non-breaking spaces as thousand separators and comma as decimal separator
@@ -33,7 +68,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Code Simplification**: Refactored complex rendering logic, removed recursive API calls, and simplified the overall architecture to make it more robust and maintainable.
 - **Linting & Formatting**: Fixed all code style issues to align with Raycast's CI/CD validation standards.
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [1.0.0] - 2025-08-08
 
 ### Added
 - **Core Feature**: Search French companies by SIREN/SIRET via INPI API

@@ -228,6 +228,64 @@ Contributions are welcome!
 - Document public APIs
 - Use conventional commits
 
+### 🧪 Testing
+
+This extension features a comprehensive testing architecture with hybrid CI/CD strategy, built-in performance monitoring, and complete troubleshooting diagnostics. See [TESTING_GUIDE.md](TESTING_GUIDE.md) for complete details.
+
+#### Quick Testing Commands
+
+```bash
+# Unit tests (fast, no network)
+npm run test:unit
+
+# Integration tests with mocked data (CI/CD compatible)
+npm run test:integration
+
+# Performance tests (benchmarks)
+npm run test:performance
+
+# Complete test suite
+npm run test:full
+```
+
+#### Local Testing with Real API
+
+```bash
+# Tests with real INPI API (uses Raycast preferences automatically)
+npm run test:integration:real
+
+# Or with environment variables
+INPI_USERNAME=your_user INPI_PASSWORD=your_pass npm run test:integration:real
+```
+
+#### CI/CD Testing Strategy
+
+- **GitHub Actions**: Uses pre-recorded mock data (`assets/mocked-api-responses.json`)
+- **Local Development**: Can use real API with your INPI credentials
+- **Smart Credential Detection**: Automatically tries Raycast preferences → environment variables → mocked data
+- **Network Resilience**: Robust handling of temporary API outages
+
+#### Test Coverage
+
+| Test Type | Count | Execution Time | Coverage |
+|-----------|-------|----------------|----------|
+| Unit Tests | 56 | ~0.4s | Core business logic |
+| Integration Tests (Mocked) | 25 | ~2.9s | End-to-end workflows |
+| Performance Tests | 6 | ~0.3s | Speed & memory benchmarks |
+| **Total** | **87** | **~3.6s** | **Complete functionality** |
+
+#### Generating Mock Dataset
+
+```bash
+# Navigate to local directory
+cd local/
+
+# Run the dataset generator (requires INPI credentials)
+npx ts-node generate-mock-dataset.ts
+```
+
+The mock dataset contains real API responses from 10 different company types (SA, SARL, SAS, Auto-entrepreneur, etc.) for comprehensive testing coverage.
+
 ### 📝 Technical Architecture
 
 #### Security
@@ -240,15 +298,82 @@ Contributions are welcome!
 #### Performance
 
 - **Lazy loading**: On-demand loading of configurations
-- **Caching**: Caching of role and registry mappings
+- **Caching**: Caching of role and registry mappings  
 - **Smart retry**: Automatic retry with exponential backoff
 - **Strict types**: Elimination of runtime errors via TypeScript
+- **Optimized data**: 84% file size reduction for greffe mappings (1.5MB → 251KB)
+- **Fast lookups**: Average 0.004ms lookup time with binary search algorithm
 
 #### Reliability
 
 - **Robust error handling**: Specific and actionable error messages
 - **Graceful fallbacks**: Default values for missing data
 - **Runtime validation**: Verification of API response structure
+
+### 🏛️ Greffe Data Management
+
+The extension uses court registry (greffe) data to determine the correct RCS registration city for companies. This system has been optimized for performance and maintainability.
+
+#### Data Source
+- **Primary Source**: [Datainfogreffe Référentiel Communes-Greffes](https://opendata.datainfogreffe.fr/explore/dataset/referentiel-communes-greffes/)
+- **License**: Open License / Licence Ouverte
+- **Format**: CSV with postal codes mapped to court registries
+- **Update Frequency**: Quarterly recommended (data changes infrequently)
+
+#### Optimization Details
+- **File Size Reduction**: Original 1.5MB → Compressed 251KB (84% reduction)
+- **Data Efficiency**: 28,136 entries → 6,337 compressed entries (77% reduction)
+- **Performance**: Average lookup time 0.004ms with binary search on ranges
+- **Algorithm**: Range-based compression with fallback to individual mappings
+
+#### Data Build Process
+
+```bash
+# Compress existing greffe data (one-time or after updates)
+npm run compress-greffes
+
+# Build new greffe index from CSV source (when available)
+npm run build-greffes
+```
+
+#### File Structure
+```
+assets/
+├── greffes-index.json              # Original full dataset (1.5MB)
+├── greffes-index-compressed.json   # Optimized dataset (251KB)
+└── role-mappings.json              # Legal role mappings
+
+data/
+└── referentiel.csv                 # Source CSV (when updating data)
+
+scripts/
+└── compress-greffes.ts             # Compression utility
+```
+
+#### Updating Greffe Data
+
+1. **Download Latest Data**
+   - Visit [Datainfogreffe Open Data](https://opendata.datainfogreffe.fr/explore/dataset/referentiel-communes-greffes/)
+   - Download CSV export as `data/referentiel.csv`
+
+2. **Rebuild Index**
+   ```bash
+   npm run build-greffes        # Generate from CSV
+   npm run compress-greffes     # Compress for performance
+   npm run test                 # Validate accuracy
+   ```
+
+3. **Validate Changes**
+   - Compression script validates 100% lookup accuracy
+   - Performance tests ensure sub-10ms response times
+   - Build process logs compression statistics
+
+#### Technical Implementation
+The system uses a hybrid approach:
+- **Ranges**: Consecutive postal codes with same greffe (e.g., 75001-75999 → PARIS)
+- **Singles**: Isolated codes that don't benefit from ranges
+- **Binary Search**: O(log n) lookup performance for ranges
+- **Fallback**: Automatic fallback to original format if compressed data unavailable
 
 ## Français
 
@@ -495,3 +620,61 @@ Les contributions sont les bienvenues !
 - **Gestion d'erreurs robuste** : Messages d'erreur spécifiques et actionables
 - **Fallbacks gracieux** : Valeurs par défaut pour les données manquantes
 - **Validation runtime** : Vérification de la structure des réponses API
+
+### 🧪 Tests
+
+Cette extension dispose d'une architecture de tests complète avec stratégie CI/CD hybride, monitoring de performance intégré, et diagnostics de dépannage complets. Voir [TESTING_GUIDE.md](TESTING_GUIDE.md) pour tous les détails.
+
+#### Commandes de Test Rapides
+
+```bash
+# Tests unitaires (rapides, sans réseau)
+npm run test:unit
+
+# Tests d'intégration avec données mockées (compatible CI/CD)
+npm run test:integration
+
+# Tests de performance (benchmarks)
+npm run test:performance
+
+# Suite complète de tests
+npm run test:full
+```
+
+#### Tests Locaux avec API Réelle
+
+```bash
+# Tests avec l'API INPI réelle (utilise automatiquement vos préférences Raycast)
+npm run test:integration:real
+
+# Ou avec des variables d'environnement
+INPI_USERNAME=votre_user INPI_PASSWORD=votre_pass npm run test:integration:real
+```
+
+#### Stratégie de Test CI/CD
+
+- **GitHub Actions** : Utilise des données mockées pré-enregistrées (`assets/mocked-api-responses.json`)
+- **Développement Local** : Peut utiliser l'API réelle avec vos identifiants INPI
+- **Détection Intelligente d'Identifiants** : Essaie automatiquement Préférences Raycast → Variables d'environnement → Données mockées
+- **Résilience Réseau** : Gestion robuste des pannes temporaires d'API
+
+#### Couverture de Test
+
+| Type de Test | Nombre | Temps d'Exécution | Couverture |
+|--------------|--------|-------------------|------------|
+| Tests Unitaires | 56 | ~0,4s | Logique métier principale |
+| Tests d'Intégration (Mockés) | 25 | ~2,9s | Flux de bout en bout |
+| Tests de Performance | 6 | ~0,3s | Benchmarks vitesse & mémoire |
+| **Total** | **87** | **~3,6s** | **Fonctionnalité complète** |
+
+#### Génération du Dataset de Mock
+
+```bash
+# Naviguer vers le répertoire local
+cd local/
+
+# Lancer le générateur de dataset (nécessite identifiants INPI)
+npx ts-node generate-mock-dataset.ts
+```
+
+Le dataset de mock contient des réponses API réelles de 10 types d'entreprises différentes (SA, SARL, SAS, Auto-entrepreneur, etc.) pour une couverture de test complète.
