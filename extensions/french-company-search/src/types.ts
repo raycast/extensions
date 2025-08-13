@@ -36,6 +36,7 @@ export interface RepresentativeInfo {
   gender: string | null;
   // For cascade representation when representative is a holding company
   isHolding?: boolean;
+  corporateSiren?: string | null; // SIREN of the holding company for recursive search
   holdingRepresentative?: {
     name: string;
     role: string;
