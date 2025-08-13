@@ -1,5 +1,4 @@
 import { fetchGranolaData } from "./fetchData";
-import getCache from "./getCache";
 import { NoteData, PanelsByDocId } from "./types";
 
 export interface GranolaDataState {
@@ -17,8 +16,8 @@ export interface GranolaDataState {
 export function useGranolaData(): GranolaDataState {
   try {
     const noteData = fetchGranolaData("get-documents") as NoteData;
-    const cacheData = getCache();
-    const panels = cacheData?.state?.documentPanels;
+    // Avoid loading panels from local cache here to prevent large memory usage
+    const panels = null;
 
     // Check loading state
     if (!noteData?.data && noteData.isLoading === true) {
@@ -41,18 +40,7 @@ export function useGranolaData(): GranolaDataState {
       };
     }
 
-    // Check for no cached data
-    if (!panels) {
-      return {
-        noteData,
-        panels,
-        isLoading: false,
-        hasError: true,
-        error: new Error("No cached panel data available"),
-      };
-    }
-
-    // Success state
+    // Success state (panels may be null; UI should handle fallback to markdown)
     return {
       noteData,
       panels,

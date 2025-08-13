@@ -22,12 +22,12 @@ export const sortNotesByDate = (docs: Doc[] | undefined): Doc[] => {
  * Component that provides standard actions for a note
  */
 export const NoteActions = ({ doc, panels, children }: NoteActionsProps) => {
-  const panelId = getPanelId(panels, doc.id);
+  const panelId = panels ? getPanelId(panels, doc.id) : undefined;
   const canShare = doc.sharing_link_visibility === "public" && panelId;
   const shareUrl = panelId ? `https://notes.granola.ai/p/${panelId}` : "";
 
   let notes = "";
-  if (panels && doc.id && panels[doc.id] && panelId && panels[doc.id][panelId]) {
+  if (panels && doc.id && panelId && panels[doc.id] && panels[doc.id][panelId]) {
     notes = panels[doc.id][panelId].original_content || "";
   }
 

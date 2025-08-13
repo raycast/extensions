@@ -36,7 +36,7 @@ export default async function tool(input: Input): Promise<Output> {
     }
 
     // Get all documents at once using shared helper
-    const documentMap = findDocumentsByIds(input.noteIds);
+    const documentMap = await findDocumentsByIds(input.noteIds);
 
     const results = [];
 

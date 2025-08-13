@@ -28,12 +28,6 @@
       "mode": "no-view"
     },
     {
-      "name": "browse-folders",
-      "title": "Browse Folders",
-      "description": "Browse folders and notes",
-      "mode": "view"
-    },
-    {
       "name": "export-transcripts",
       "title": "Export Transcripts",
       "description": "Select multiple notes and export their transcripts",
@@ -59,6 +53,11 @@
       "description": "Ask AI about your notes, meetings, and transcripts from Granola"
     },
     {
+      "name": "list-meetings",
+      "title": "List Meetings",
+      "description": "List meetings with basic metadata (title, date, folders) without content"
+    },
+    {
       "name": "get-transcript",
       "title": "Get Transcript",
       "description": "Retrieve the full transcript for a specific note"
@@ -67,7 +66,12 @@
       "name": "save-to-notion",
       "title": "Save to Notion",
       "description": "Save one or more notes to Notion"
-    }
+      },
+      {
+        "name": "recipes",
+        "title": "Recipes",
+        "description": "List and search Granola recipes"
+      }
   ],
   "dependencies": {
     "@danielxceron/youtube-transcript": "^1.2.3",
