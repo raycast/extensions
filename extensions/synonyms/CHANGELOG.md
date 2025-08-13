@@ -1,6 +1,6 @@
 # Synonyms Changelog
 
-## [Add OpenAI Compatible and LMStudio providers] - {PR_MERGE_DATE}
+## [Add OpenAI Compatible and LMStudio providers] - 2025-08-13
 
 - Add OpenAI Compatible provider
 - Add LMStudio provider
