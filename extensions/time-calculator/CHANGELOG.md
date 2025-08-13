@@ -1,6 +1,6 @@
 # Time Calculator Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2025-08-13
 
 - ✨ Initial release of Time Calculator
 - 🕐 Support for both HH:MM and decimal time formats
