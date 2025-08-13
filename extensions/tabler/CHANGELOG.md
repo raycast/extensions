@@ -1,5 +1,11 @@
 # tabler Changelog
 
+## [Add Download Actions] - 2025-08-13
+
+- Add download actions for outline and filled SVG icons to `~/Downloads`
+- Breaking: Cmd+Enter now downloads the outline SVG icon
+- Add Option to keyboard shortcuts for filled version when available
+
 ## [Copy HTML Char Actions + Modernize] - 2025-08-04
 
 - Added 'Copy ... HTML Char' actions when available (ref: [Issue #20572](https://github.com/raycast/extensions/issues/20572))
