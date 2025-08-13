@@ -1,6 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "brief",
+  "version": "1.0.0",
   "title": "Brief - Send Links with AI Summary",
   "description": "Capture and email article summaries with AI",
   "icon": "command-icon.png",
