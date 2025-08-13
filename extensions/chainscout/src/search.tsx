@@ -1,4 +1,4 @@
-import { ActionPanel, List, Action, Color, Icon, Toast, showToast } from "@raycast/api";
+import { ActionPanel, List, Action, Color, Icon, Toast, showToast, Keyboard } from "@raycast/api";
 import React from "react";
 import { ChainInfo } from "./types/api";
 import upperFirst from "./utils/upperFirst";
@@ -118,8 +118,18 @@ export default function Command() {
                     icon={Icon.MagnifyingGlass}
                   />
                 ))}
-                {chain.website && <Action.OpenInBrowser title="Open Project Website" url={chain.website} />}
-                <Action.CopyToClipboard title="Copy Chain ID" content={chain.chainId} />
+                {chain.website && (
+                  <Action.OpenInBrowser
+                    title="Open Project Website"
+                    url={chain.website}
+                    shortcut={Keyboard.Shortcut.Common.Open}
+                  />
+                )}
+                <Action.CopyToClipboard
+                  title="Copy Chain ID"
+                  content={chain.chainId}
+                  shortcut={Keyboard.Shortcut.Common.Copy}
+                />
               </ActionPanel>
             }
           />
