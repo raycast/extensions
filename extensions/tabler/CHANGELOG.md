@@ -1,6 +1,6 @@
 # tabler Changelog
 
-## [Add Download Actions] - {PR_MERGE_DATE}
+## [Add Download Actions] - 2025-08-13
 
 - Add download actions for outline and filled SVG icons to `~/Downloads`
 - Breaking: Cmd+Enter now downloads the outline SVG icon
