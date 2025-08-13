@@ -25,6 +25,7 @@ import {
   getPageIcon,
   getPageName,
   Page,
+  PageContent,
 } from "./utils/notion";
 import { notionService } from "./utils/notion/oauth";
 import { Quicklink } from "./utils/types";
@@ -70,6 +71,19 @@ function validateUrl(input: string) {
   return urlPattern.test(input);
 }
 
+function getSummaryPrompt(content: string) {
+  return `Summarize the page content surrounded by triple quotes. Please use the following template:
+
+# {Heading of the page}
+
+{Summary of the content describing what the page is about. Break it down in multiple paragraphs if necessary.}
+
+Here's the content:
+"""
+${content}
+"""`;
+}
+
 function QuickCapture({ launchContext }: QuickCaptureProps) {
   const [searchText, setSearchText] = useState<string>("");
 
@@ -87,29 +101,35 @@ function QuickCapture({ launchContext }: QuickCaptureProps) {
 
         await showToast({ style: Toast.Style.Animated, title: "Capturing content to page" });
 
-        const result = await getPageDetail(values.url);
-        const url = result ? `[${result.title}](${values.url})` : values.url;
-        let content = url;
+        const pageDetail = await getPageDetail(values.url);
+        const pageLink = pageDetail ? `[${pageDetail.title}](${values.url})` : values.url;
 
-        if (result && values.captureAs === "full") {
-          content += `\n\n${result?.content}`;
-        }
+        let content: PageContent;
 
-        if (result && values.captureAs === "ai") {
-          const summary = await AI.ask(
-            `Summarize the page content surrounded by triple quotes. Please use the following template:
+        switch (values.captureAs) {
+          case "url": {
+            content = [{ type: "bookmark", bookmark: { url: values.url } }];
+            break;
+          }
 
-# {Heading of the page}
+          case "full": {
+            content = pageLink;
+            if (pageDetail) content += `\n\n${pageDetail.content}`;
+            break;
+          }
 
-{Summary of the content describing what the page is about. Break it down in multiple paragraphs if necessary.}
+          case "ai": {
+            content = pageLink;
+            if (pageDetail) {
+              const summary = await AI.ask(getSummaryPrompt(pageDetail.content));
+              content += `\n\n${summary}`;
+            }
+            break;
+          }
 
-Here's the content:
-"""
-${result?.content}
-"""`,
-          );
-
-          content += `\n\n${summary}`;
+          default: {
+            content = pageLink;
+          }
         }
 
         let selectedPage: Page | undefined;
@@ -131,7 +151,11 @@ ${result?.content}
         }
 
         if (selectedPage.object === "database") {
-          await createDatabasePage({ database: selectedPage.id, content, "property::title::title": result?.title });
+          await createDatabasePage({
+            database: selectedPage.id,
+            content,
+            "property::title::title": pageDetail?.title,
+          });
         }
 
         await showToast({ style: Toast.Style.Success, title: "Captured content to page" });
