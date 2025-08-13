@@ -1,4 +1,4 @@
-# OpenProject Raycast Extension (Unofficial)
+# OpenProject Raycast Extension
 
 An **unofficial** Raycast extension for managing your OpenProject tickets directly from Raycast.
 
@@ -146,14 +146,3 @@ The extension exclusively uses the public OpenProject REST API and follows its t
 ## Contributing
 
 Contributions are welcome! Please feel free to submit issues, feature requests, or pull requests.
-
-## Changelog
-
-### [1.0.0] - Initial Release
-- Create new tickets in OpenProject
-- Search existing tickets by title  
-- Update ticket details (subject, description, assignee, priority, status)
-- Support for all OpenProject instances via API key authentication
-- Real-time ticket search with debouncing
-- Form validation and error handling
-- Intuitive two-step ticket updating process
