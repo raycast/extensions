@@ -92,7 +92,7 @@
         },
         {
           "name": "vocabularyBaseDir",
-          "type": "textfield",
+          "type": "directory",
           "required": false,
           "title": "Vocabulary Base Directory",
           "description": "Base directory where vocabulary files will be stored (~ for home directory)",

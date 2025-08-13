@@ -62,15 +62,13 @@ export function MdDefinitionListView({ initialText }: MdDefinitionListViewProps)
           />
         )
       ) : (
-        allMdDefinitions.map((mdDefinition, index) => {
+        allMdDefinitions.map((mdDefinition) => {
           const isAiResult = aiResult && mdDefinition.text === aiResult.text;
 
           return (
             <MdDefinitionListItem
               key={`${mdDefinition.text}-${mdDefinition.timestamp}`}
               mdDefinition={mdDefinition}
-              index={index}
-              total={allMdDefinitions.length}
               isAiResult={isAiResult}
               onSave={handleSave}
               onDelete={handleDelete}

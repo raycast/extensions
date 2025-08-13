@@ -1,11 +1,9 @@
-import { List, ActionPanel, Action } from "@raycast/api";
+import { List, ActionPanel, Action, Keyboard } from "@raycast/api";
 import { MdDefinition } from "../types";
 import { MdDefinitionDetail } from "./MdDefinitionDetail";
 
 interface MdDefinitionListItemProps {
   mdDefinition: MdDefinition;
-  index?: number;
-  total?: number;
   isAiResult: boolean | null;
   onSave?: (content: string) => void;
   onDelete?: (timestamp: string) => void;
@@ -14,8 +12,6 @@ interface MdDefinitionListItemProps {
 
 export function MdDefinitionListItem({
   mdDefinition,
-  index,
-  total,
   isAiResult = false,
   onSave,
   onDelete,
@@ -25,7 +21,7 @@ export function MdDefinitionListItem({
     <List.Item
       title={mdDefinition.text}
       subtitle={mdDefinition.chinese}
-      accessories={[isAiResult ? { text: "AI Result" } : { text: `${index! + 1} of ${total}` }]}
+      accessories={[isAiResult ? { text: "AI Result" } : { text: `` }]}
       detail={<MdDefinitionDetail mdDefinition={mdDefinition} />}
       actions={
         <ActionPanel>
@@ -34,14 +30,20 @@ export function MdDefinitionListItem({
           )}
           {!isAiResult && (
             <>
-              {onDelete && mdDefinition.timestamp && (
-                <Action title="Delete Definition" icon="🗑️" onAction={() => onDelete(mdDefinition.timestamp)} />
-              )}
               {onUpdate && mdDefinition.timestamp && (
                 <Action
                   title="Update Definition"
                   icon="📝"
                   onAction={() => onUpdate(mdDefinition.text, mdDefinition.timestamp)}
+                />
+              )}
+              {onDelete && mdDefinition.timestamp && (
+                <Action
+                  title="Delete Definition"
+                  icon="🗑️"
+                  onAction={() => onDelete(mdDefinition.timestamp)}
+                  style={Action.Style.Destructive}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
                 />
               )}
             </>
