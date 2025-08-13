@@ -9,8 +9,8 @@
   "commands": [
     {
       "name": "kz",
-      "title": "Kozip",
-      "subtitle": "South Korea Postal Code Search",
+      "title": "Search South Korea Postal Codes",
+      "subtitle": "Kozip",
       "description": "Search for South Korea addresses with support for multiple formats",
       "mode": "view"
     }
