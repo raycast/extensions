@@ -1,6 +1,6 @@
 # Color Picker Changelog
 
-## [Bugfix & Maintenance] - {PR_MERGE_DATE}
+## [Bugfix & Maintenance] - 2025-08-13
 
 - Fix the incorrect subtitle content in the `Convert Color` command
 - Bump all dependencies to the latest
