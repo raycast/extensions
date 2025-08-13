@@ -1,7 +1,42 @@
 import { ActionPanel, Action, List, Icon } from "@raycast/api";
 import { useFetch, useLocalStorage } from "@raycast/utils";
 import { useState, useEffect } from "react";
-import { getLocalizedStrings, type LocaleStrings } from "./locales";
+
+type UiStrings = {
+  searchPlaceholder: string;
+  resultsTitle: string;
+  copyKoreanAddress: string;
+  copyEnglishAddress: string;
+  copyKoreanLotAddress: string;
+  copyEnglishLotAddress: string;
+  openInKakaoMap: string;
+  openInNaverMap: string;
+  copyAddressSection: string;
+  mapSection: string;
+  noAddressInfo: string;
+  switchToJibun: string;
+  switchToRoad: string;
+  roadAddressType: string;
+  jibunAddressType: string;
+};
+
+const UI_STRINGS: UiStrings = {
+  searchPlaceholder: "Search addresses...",
+  resultsTitle: "Results",
+  copyKoreanAddress: "Copy Korean Address",
+  copyEnglishAddress: "Copy English Address",
+  copyKoreanLotAddress: "Copy Korean Jibun Address",
+  copyEnglishLotAddress: "Copy English Jibun Address",
+  openInKakaoMap: "Open in Kakao Map",
+  openInNaverMap: "Open in Naver Map",
+  copyAddressSection: "Copy Address",
+  mapSection: "Map",
+  noAddressInfo: "No address info",
+  switchToJibun: "Switch to Jibun Address",
+  switchToRoad: "Switch to Road Address",
+  roadAddressType: "Road",
+  jibunAddressType: "Jibun",
+};
 
 // API Response interfaces
 interface ApiResult {
@@ -37,7 +72,7 @@ export default function Command() {
   const [debouncedSearchText, setDebouncedSearchText] = useState("");
   const [showJibunAddress, setShowJibunAddress] = useState(false);
   const [cachedData, setCachedData] = useState<AddressResult[] | null>(null);
-  const strings = getLocalizedStrings();
+  const strings = UI_STRINGS;
 
   const { value: cache, setValue: setCache } = useLocalStorage<Record<string, CacheEntry>>("address-cache", {});
 
@@ -123,7 +158,7 @@ function SearchListItem({
   onToggleAddressType,
 }: {
   searchResult: AddressResult;
-  strings: LocaleStrings;
+  strings: UiStrings;
   showJibunAddress: boolean;
   onToggleAddressType: () => void;
 }) {

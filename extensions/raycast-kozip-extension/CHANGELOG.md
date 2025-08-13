@@ -6,7 +6,6 @@
 - Initial release of Korean Postal Code Search extension
 - Search for South Korean addresses in multiple formats
 - Support for both road address (도로명주소) and lot-based address (지번주소)
-- Bilingual display (Korean and English)
 - Debounced search with 500ms delay to prevent excessive API calls
 - Local caching system for improved performance (24-hour cache duration)
 - Multiple copy options:
@@ -26,4 +25,3 @@
 - Automatic Korean text normalization (NFC)
 - Building name display when available
 - Responsive UI with loading states
-- Localized interface (Korean/English)

@@ -1,108 +1,108 @@
 # Development Guide
 
-[English](DEVELOPMENT.en.md) | 한국어
+English | [한국어](DEVELOPMENT.md)
 
-KoZip 확장 개발을 위한 종합 가이드입니다.
+Comprehensive development guide for the KoZip extension.
 
-## 프로젝트 구조
+## Project Structure
 
 ```
 src/
-├── kz.tsx              # 메인 확장 로직
-└── locales/            # 국제화
-    ├── index.ts        # 로케일 유틸리티
-    ├── ko.json         # 한국어 문자열
-    └── en.json         # 영어 문자열
+├── kz.tsx              # Main extension logic
+└── locales/            # Internationalization
+    ├── index.ts        # Locale utilities
+    ├── ko.json         # Korean strings
+    └── en.json         # English strings
 assets/
-├── icon.png           # 확장 아이콘 (라이트 모드)
-└── icon@dark.png      # 확장 아이콘 (다크 모드)
+├── icon.png           # Extension icon (light mode)
+└── icon@dark.png      # Extension icon (dark mode)
 ```
 
-## 개발 환경 설정
+## Development Setup
 
-### 필수 요구사항
-- Node.js 18 이상
-- npm 또는 yarn
-- Raycast 앱 설치
+### Prerequisites
+- Node.js 18 or higher
+- npm or yarn
+- Raycast app installed
 
-### 설정 단계
+### Setup Steps
 ```bash
-# 저장소 클론
+# Clone repository
 git clone https://github.com/kyungw00k/raycast-kozip-extension.git
 cd raycast-kozip-extension
 
-# 의존성 설치
+# Install dependencies
 npm install
 
-# 개발 모드 시작
+# Start development mode
 npm run dev
 ```
 
-## 개발 명령어
+## Development Commands
 
-| 명령어 | 설명 |
-|--------|------|
-| `npm run dev` | 핫 리로드로 개발 시작 |
-| `npm run build` | 프로덕션 빌드 |
-| `npm run lint` | ESLint 검사 실행 |
-| `npm run fix-lint` | 린트 이슈 자동 수정 |
-| `npm run publish` | Raycast Store에 게시 |
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development with hot reload |
+| `npm run build` | Build for production |
+| `npm run lint` | Run ESLint checks |
+| `npm run fix-lint` | Auto-fix lint issues |
+| `npm run publish` | Publish to Raycast Store |
 
-## 아키텍처
+## Architecture
 
-### 주요 컴포넌트
+### Core Components
 
 #### Command()
-- 메인 검색 인터페이스 컴포넌트
-- 검색 텍스트 디바운싱 (500ms)
-- 캐시 관리 및 API 호출 제어
+- Main search interface component
+- Search text debouncing (500ms)
+- Cache management and API call control
 
 #### SearchListItem()
-- 개별 주소 결과 렌더링
-- 도로명/지번 주소 전환 기능
-- 액션 패널 (복사, 지도 연결)
+- Individual address result rendering
+- Road/lot address toggle functionality
+- Action panel (copy, map integration)
 
 #### getLocalizedStrings()
-- 동적 로케일 로딩
-- fallback 메커니즘 (한국어 → 영어)
-- 런타임 로케일 감지
+- Dynamic locale loading
+- Fallback mechanism (Korean → English)
+- Runtime locale detection
 
 #### parseFetchResponse()
-- API 응답 파싱 및 변환
-- 에러 처리
-- 주소 형식 정규화
+- API response parsing and transformation
+- Error handling
+- Address format normalization
 
-### 상태 관리
+### State Management
 
 ```typescript
-// 검색 관련 상태
+// Search-related state
 const [searchText, setSearchText] = useState("");
 const [debouncedSearchText, setDebouncedSearchText] = useState("");
 
-// UI 상태
+// UI state
 const [showJibunAddress, setShowJibunAddress] = useState(false);
 
-// 캐시 상태
+// Cache state
 const [cachedData, setCachedData] = useState<AddressResult[] | null>(null);
 ```
 
-## API 통합
+## API Integration
 
 ### Postcodify API
-- **엔드포인트**: `https://api.poesis.kr/post/search.php`
-- **파라미터**: `q` (검색어, NFC 정규화)
-- **응답**: JSON 형태의 주소 배열
+- **Endpoint**: `https://api.poesis.kr/post/search.php`
+- **Parameter**: `q` (search query, NFC normalized)
+- **Response**: JSON array of addresses
 
-### 요청 플로우
-1. 검색어 입력 → 디바운싱 (500ms)
-2. 캐시 확인 (24시간 TTL)
-3. 캐시 미스 시 API 호출
-4. 응답 파싱 및 캐시 저장
-5. UI 업데이트
+### Request Flow
+1. Search input → Debouncing (500ms)
+2. Cache check (24-hour TTL)
+3. API call on cache miss
+4. Response parsing and cache storage
+5. UI update
 
-## 캐시 시스템
+## Caching System
 
-### 캐시 전략
+### Cache Strategy
 ```typescript
 interface CacheEntry {
   data: AddressResult[];
@@ -110,90 +110,90 @@ interface CacheEntry {
   expiresAt: number;
 }
 
-// 캐시 키: 정규화된 검색어 (소문자)
+// Cache key: normalized search query (lowercase)
 const cacheKey = searchText.normalize("NFC").toLowerCase();
 ```
 
-### 캐시 관리
-- **TTL**: 24시간
-- **저장소**: Raycast LocalStorage
-- **정리**: 자동 만료 확인
+### Cache Management
+- **TTL**: 24 hours
+- **Storage**: Raycast LocalStorage
+- **Cleanup**: Automatic expiry checking
 
-## 국제화 (i18n)
+## Internationalization (i18n)
 
-### 지원 언어
-- 한국어 (`ko.json`)
-- 영어 (`en.json`)
+### Supported Languages
+- Korean (`ko.json`)
+- English (`en.json`)
 
-### 새 언어 추가
+### Adding New Languages
 
-1. 새 로케일 파일 생성:
+1. Create new locale file:
 ```bash
 cp src/locales/en.json src/locales/ja.json
 ```
 
-2. 문자열 번역:
+2. Translate strings:
 ```json
 {
-  "searchPlaceholder": "韓国の住所を検索...",
-  "resultsTitle": "検索結果",
-  "copyKoreanAddress": "韓国住所をコピー",
-  "copyEnglishAddress": "英語住所をコピー",
-  "noAddressInfo": "住所情報なし"
+  "searchPlaceholder": "Search Korean addresses...",
+  "resultsTitle": "Search Results",
+  "copyKoreanAddress": "Copy Korean Address",
+  "copyEnglishAddress": "Copy English Address",
+  "noAddressInfo": "No address information"
 }
 ```
 
-3. 자동 감지 및 로드 (코드 변경 불필요)
+3. Automatic detection and loading (no code changes required)
 
-### 로케일 fallback
+### Locale Fallback
 ```
-사용자 로케일 → 한국어 → 영어 → 기본값
+User locale → Korean → English → Default
 ```
 
-## 타입 정의
+## Type Definitions
 
 ### AddressResult
 ```typescript
 interface AddressResult {
   id: string;
-  postcode5: string;           // 5자리 우편번호
-  postcode6: string;           // 6자리 우편번호
-  ko_doro: string;             // 한국어 도로명
-  ko_jibeon: string;           // 한국어 지번
-  en_doro: string;             // 영어 도로명
-  en_jibeon: string;           // 영어 지번
-  full_ko_doro: string;        // 전체 한국어 도로명 주소
-  full_ko_jibeon: string;      // 전체 한국어 지번 주소
-  full_en_doro: string;        // 전체 영어 도로명 주소
-  full_en_jibeon: string;      // 전체 영어 지번 주소
-  full_ko_doro_with_postal: string;    // 우편번호 포함 한국어 도로명
-  full_ko_jibeon_with_postal: string;  // 우편번호 포함 한국어 지번
-  full_en_doro_with_postal: string;    // 우편번호 포함 영어 도로명
-  full_en_jibeon_with_postal: string;  // 우편번호 포함 영어 지번
-  building_name?: string;      // 건물명 (선택사항)
+  postcode5: string;           // 5-digit postal code
+  postcode6: string;           // 6-digit postal code
+  ko_doro: string;             // Korean road name
+  ko_jibeon: string;           // Korean lot number
+  en_doro: string;             // English road name
+  en_jibeon: string;           // English lot number
+  full_ko_doro: string;        // Full Korean road address
+  full_ko_jibeon: string;      // Full Korean lot address
+  full_en_doro: string;        // Full English road address
+  full_en_jibeon: string;      // Full English lot address
+  full_ko_doro_with_postal: string;    // Korean road with postal
+  full_ko_jibeon_with_postal: string;  // Korean lot with postal
+  full_en_doro_with_postal: string;    // English road with postal
+  full_en_jibeon_with_postal: string;  // English lot with postal
+  building_name?: string;      // Building name (optional)
 }
 ```
 
-## 테스트
+## Testing
 
-### 수동 테스트 시나리오
-1. **기본 검색**: "강남역" 검색
-2. **건물명 검색**: "롯데타워" 검색
-3. **우편번호 검색**: "06292" 검색
-4. **영어 검색**: "Seoul" 검색
-5. **캐시 테스트**: 동일 검색어 반복
-6. **주소 전환**: 도로명 ↔ 지번 전환
-7. **복사 기능**: 다양한 형식 복사
-8. **지도 연동**: 카카오맵/네이버 지도 열기
+### Manual Testing Scenarios
+1. **Basic Search**: Search "Gangnam Station"
+2. **Building Search**: Search "Lotte Tower"
+3. **Postal Code Search**: Search "06292"
+4. **English Search**: Search "Seoul"
+5. **Cache Test**: Repeat same search query
+6. **Address Toggle**: Road ↔ Lot address switching
+7. **Copy Function**: Various format copying
+8. **Map Integration**: Open Kakao Map/Naver Map
 
-### 성능 테스트
-- 검색 응답 시간 < 2초
-- 캐시 히트 응답 시간 < 100ms
-- 메모리 사용량 모니터링
+### Performance Testing
+- Search response time < 2 seconds
+- Cache hit response time < 100ms
+- Memory usage monitoring
 
-## 코딩 표준
+## Coding Standards
 
-### TypeScript 설정
+### TypeScript Configuration
 ```json
 {
   "strict": true,
@@ -203,81 +203,81 @@ interface AddressResult {
 }
 ```
 
-### ESLint 규칙
-- Raycast 확장 권장 설정
-- React Hooks 규칙
-- TypeScript 엄격 모드
+### ESLint Rules
+- Raycast extension recommended settings
+- React Hooks rules
+- TypeScript strict mode
 
-### 코드 스타일
-- Prettier 자동 포맷팅
-- 2칸 들여쓰기
-- 세미콜론 필수
-- 단일 따옴표 선호
+### Code Style
+- Prettier auto-formatting
+- 2-space indentation
+- Semicolons required
+- Single quotes preferred
 
-## 빌드 및 배포
+## Build and Deploy
 
-### 로컬 빌드
+### Local Build
 ```bash
 npm run build
 ```
 
-### 스토어 게시
+### Store Publishing
 ```bash
 npm run publish
 ```
 
-### 버전 관리
-- [Semantic Versioning](https://semver.org/) 준수
-- `package.json`에서 버전 업데이트
-- Git 태그로 릴리스 표시
+### Version Management
+- Follow [Semantic Versioning](https://semver.org/)
+- Update version in `package.json`
+- Tag releases with Git
 
-## 문제 해결
+## Troubleshooting
 
-### 일반적인 문제
+### Common Issues
 
-#### 캐시 문제
+#### Cache Issues
 ```bash
-# Raycast 캐시 클리어
+# Clear Raycast cache
 rm -rf ~/Library/Caches/com.raycast.macos
 ```
 
-#### 개발 모드 이슈
+#### Development Mode Issues
 ```bash
-# 의존성 재설치
+# Reinstall dependencies
 rm -rf node_modules package-lock.json
 npm install
 npm run dev
 ```
 
-#### API 응답 오류
-- 네트워크 연결 확인
-- API 엔드포인트 상태 확인
-- 검색어 인코딩 확인
+#### API Response Errors
+- Check network connection
+- Verify API endpoint status
+- Check search query encoding
 
-### 디버깅
+### Debugging
 
-#### 로그 확인
+#### Log Checking
 ```javascript
 console.log("Search query:", debouncedSearchText);
 console.log("API response:", data);
 console.log("Cache hit:", cachedData !== null);
 ```
 
-#### 개발자 도구
-- Raycast 개발자 모드 활성화
-- 확장 리로드: `⌘ + R`
-- 개발자 콘솔 열기
+#### Developer Tools
+- Enable Raycast developer mode
+- Reload extension: `⌘ + R`
+- Open developer console
 
-## 기여 가이드
+## Contribution Guide
 
-### Pull Request 프로세스
-1. 기능 브랜치 생성
-2. 코드 변경 및 테스트
-3. 린트 및 포맷팅 확인
-4. 커밋 메시지 작성 (Conventional Commits)
-5. PR 생성 및 리뷰 요청
+### Pull Request Process
+1. Create feature branch
+2. Make changes and add tests
+3. Check linting and formatting
+4. Write commit message (Conventional Commits)
+5. Create PR and request review
 
-### 커밋 메시지 형식
+### Commit Message Format
 ```
 type(scope): description
 
@@ -286,7 +286,7 @@ body
 footer
 ```
 
-예시:
+Example:
 ```
 feat(search): add building name display in results
 
@@ -297,9 +297,9 @@ feat(search): add building name display in results
 Closes #123
 ```
 
-## 리소스
+## Resources
 
-- [Raycast API 문서](https://developers.raycast.com/api-reference)
-- [Postcodify API 문서](https://postcodify.poesis.kr/)
-- [TypeScript 핸드북](https://www.typescriptlang.org/docs/)
-- [React Hooks 가이드](https://reactjs.org/docs/hooks-intro.html)
+- [Raycast API Documentation](https://developers.raycast.com/api-reference)
+- [Postcodify API Documentation](https://postcodify.poesis.kr/)
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
+- [React Hooks Guide](https://reactjs.org/docs/hooks-intro.html)

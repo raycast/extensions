@@ -3,6 +3,9 @@
 # dependencies
 /node_modules
 
+# lock files
+pnpm-lock.yaml
+
 # Raycast specific files
 raycast-env.d.ts
 .raycast-swift-build
