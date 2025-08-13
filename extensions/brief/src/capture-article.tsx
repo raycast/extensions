@@ -1,11 +1,4 @@
-import {
-	Action,
-	ActionPanel,
-	Detail,
-	getPreferenceValues,
-	showToast,
-	Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Detail, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getCurrentURL, getPageTitle } from "./utils/browser";
 
@@ -42,11 +35,7 @@ export default function CaptureArticle() {
 		fetchCurrentPage();
 	}, []);
 
-	async function sendToBrief(options: {
-		aiSummary: boolean;
-		summaryLength: "short" | "long";
-		context?: string;
-	}) {
+	async function sendToBrief(options: { aiSummary: boolean; summaryLength: "short" | "long"; context?: string }) {
 		try {
 			const toast = await showToast({
 				style: Toast.Style.Animated,
@@ -94,9 +83,7 @@ export default function CaptureArticle() {
 	}
 
 	if (isLoading) {
-		return (
-			<Detail isLoading={true} markdown="Loading current page information..." />
-		);
+		return <Detail isLoading={true} markdown="Loading current page information..." />;
 	}
 
 	if (error) {
@@ -104,9 +91,7 @@ export default function CaptureArticle() {
 	}
 
 	if (!url || !title) {
-		return (
-			<Detail markdown="# No Active Page\n\nPlease open a webpage in your browser first." />
-		);
+		return <Detail markdown="# No Active Page\n\nPlease open a webpage in your browser first." />;
 	}
 
 	const site = new URL(url).hostname;
