@@ -1,31 +1,26 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "tabler",
-  "title": "Tabler",
-  "icon": "extension_icon.png",
-  "description": "Copy & Paste Tabler Icons",
-  "author": "zavbala",
-  "contributors": [
-    "bensomething",
-    "bendrucker"
-  ],
+  "name": "chainscout",
+  "title": "Chainscout",
+  "description": "Find information about blockchains (powered by Blockscout)",
+  "icon": "logo-icon.png",
+  "author": "tom_goriunov",
   "categories": [
-    "Web",
-    "Design Tools",
-    "Developer Tools"
+    "Web"
   ],
   "license": "MIT",
   "commands": [
     {
-      "mode": "view",
-      "name": "index",
-      "title": "Show Tabler Icons",
-      "description": "Take a look at all available icons"
+      "name": "search",
+      "title": "Search Blockchains",
+      "description": "Search for blockchains by name, description, ecosystem and more",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.101.1",
-    "@raycast/utils": "^2.2.0"
+    "@raycast/utils": "^1.17.0",
+    "@total-typescript/ts-reset": "0.6.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
