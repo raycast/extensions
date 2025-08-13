@@ -1,0 +1,204 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "montra-cli",
+  "title": "Montra CLI",
+  "description": "This extension interfaces with the dev-cli (montra)",
+  "icon": "extension-icon.png",
+  "author": "rmagatti",
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "montraBinaryPath",
+      "type": "textfield",
+      "title": "Montra Binary Path",
+      "placeholder": "Leave empty to use 'montra' from PATH",
+      "description": "Full path to the montra CLI binary (optional)",
+      "required": false
+    },
+    {
+      "name": "defaultEnvironment",
+      "type": "dropdown",
+      "title": "Default Environment",
+      "description": "Default environment for commands",
+      "defaultValue": "development",
+      "required": true,
+      "data": [
+        {
+          "title": "Development",
+          "value": "development"
+        },
+        {
+          "title": "Staging",
+          "value": "staging"
+        },
+        {
+          "title": "Production",
+          "value": "production"
+        }
+      ]
+    },
+    {
+      "name": "defaultOutputFormat",
+      "type": "dropdown",
+      "title": "Default Output Format",
+      "description": "Default output format when available",
+      "defaultValue": "pretty",
+      "required": true,
+      "data": [
+        {
+          "title": "Pretty",
+          "value": "pretty"
+        },
+        {
+          "title": "JSON",
+          "value": "json"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "home",
+      "title": "Montra: Home",
+      "description": "Quick actions for Montra CLI",
+      "mode": "view"
+    },
+    {
+      "name": "auth-login",
+      "title": "Auth: Login",
+      "description": "Login to Montra",
+      "mode": "view",
+      "keywords": [
+        "montra",
+        "auth",
+        "login"
+      ]
+    },
+    {
+      "name": "auth-status",
+      "title": "Auth: Status",
+      "description": "Show auth status",
+      "mode": "view",
+      "keywords": [
+        "montra",
+        "auth",
+        "status"
+      ]
+    },
+    {
+      "name": "auth-logout",
+      "title": "Auth: Logout",
+      "description": "Logout from Montra",
+      "mode": "view",
+      "keywords": [
+        "montra",
+        "auth",
+        "logout"
+      ]
+    },
+    {
+      "name": "impersonate",
+      "title": "Impersonate User",
+      "description": "Impersonate a user by email",
+      "mode": "view",
+      "keywords": [
+        "montra",
+        "impersonate"
+      ]
+    },
+    {
+      "name": "api-key-create",
+      "title": "API Key: Create",
+      "description": "Create a new API key",
+      "mode": "view",
+      "keywords": [
+        "montra",
+        "api",
+        "key",
+        "create"
+      ]
+    },
+    {
+      "name": "api-key-list",
+      "title": "API Key: List",
+      "description": "List API keys",
+      "mode": "view",
+      "keywords": [
+        "montra",
+        "api",
+        "key",
+        "list"
+      ]
+    },
+    {
+      "name": "data-cp",
+      "title": "Data: Copy Media Sync",
+      "description": "Copy media sync data across environments",
+      "mode": "view",
+      "keywords": [
+        "montra",
+        "data",
+        "copy"
+      ]
+    },
+    {
+      "name": "load-test",
+      "title": "Load Test: Run",
+      "description": "Run load test job",
+      "mode": "view",
+      "keywords": [
+        "montra",
+        "load",
+        "test"
+      ]
+    },
+    {
+      "name": "resign-mp4-urls",
+      "title": "Video: Resign MP4 URLs",
+      "description": "Resign MP4 URLs for environment",
+      "mode": "view",
+      "keywords": [
+        "montra",
+        "video",
+        "mp4",
+        "resign"
+      ]
+    },
+    {
+      "name": "jwt-generate",
+      "title": "JWT: Generate",
+      "description": "Generate a JWT",
+      "mode": "view",
+      "keywords": [
+        "montra",
+        "jwt"
+      ]
+    },
+    {
+      "name": "montra",
+      "title": "Montra (Raw)",
+      "description": "Run raw montra command (advanced)",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.4",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\\\`prepublishOnly\\\\` script and rerun \\\\`npm publish\\\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\\\`npm run publish\\\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
