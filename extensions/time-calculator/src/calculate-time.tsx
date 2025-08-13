@@ -1,4 +1,5 @@
 import { Form, ActionPanel, Action, showToast, Toast, Clipboard, Icon, Keyboard } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useMemo, useEffect } from "react";
 
 interface TimeEntry {
@@ -207,10 +208,8 @@ export default function CalculateTime() {
         message: clipboardContent,
       });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to copy",
-        message: error instanceof Error ? error.message : "Unknown error",
+      await showFailureToast(error, {
+        title: "Failed to copy to clipboard",
       });
     }
   };
