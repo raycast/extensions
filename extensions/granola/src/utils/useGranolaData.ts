@@ -1,5 +1,15 @@
 import { fetchGranolaData } from "./fetchData";
 import { NoteData, PanelsByDocId } from "./types";
+import getCache from "./getCache";
+
+function extractPanelsFromCache(cache: unknown): PanelsByDocId | null {
+  if (typeof cache !== "object" || cache === null) return null;
+  const maybeState = (cache as { state?: unknown }).state;
+  if (typeof maybeState !== "object" || maybeState === null) return null;
+  const maybePanels = (maybeState as { documentPanels?: unknown }).documentPanels;
+  if (typeof maybePanels !== "object" || maybePanels === null) return null;
+  return maybePanels as PanelsByDocId;
+}
 
 export interface GranolaDataState {
   noteData: NoteData | null;
@@ -16,8 +26,15 @@ export interface GranolaDataState {
 export function useGranolaData(): GranolaDataState {
   try {
     const noteData = fetchGranolaData("get-documents") as NoteData;
-    // Avoid loading panels from local cache here to prevent large memory usage
-    const panels = null;
+    // Load panels from local cache (kept fresh via small TTL in getCache)
+    let panels: PanelsByDocId | null = null;
+    try {
+      const cacheData = getCache();
+      // The Granola app stores panels under state.documentPanels in the local cache
+      panels = extractPanelsFromCache(cacheData);
+    } catch {
+      panels = null;
+    }
 
     // Check loading state
     if (!noteData?.data && noteData.isLoading === true) {

@@ -181,6 +181,7 @@ export async function getRecipesFromApi(): Promise<RecipesListResult> {
     const response = await fetch(url, {
       method: "POST",
       headers: {
+        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
     });

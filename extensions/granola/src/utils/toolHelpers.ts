@@ -2,7 +2,7 @@ import { Document } from "./types";
 import { getDocumentsList } from "./fetchData";
 
 /**
- * Get documents from cache with error handling
+ * Get documents from API with error handling
  */
 export async function getDocuments(): Promise<Document[]> {
   return await getDocumentsList();

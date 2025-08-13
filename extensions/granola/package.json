@@ -39,7 +39,7 @@
       "description": "Select multiple notes and export them",
       "mode": "view"
     },
-        {
+    {
       "name": "create-note-from-transcript",
       "title": "Create Note from Transcript",
       "description": "Create a new note in Granola from a transcript",
@@ -66,12 +66,12 @@
       "name": "save-to-notion",
       "title": "Save to Notion",
       "description": "Save one or more notes to Notion"
-      },
-      {
-        "name": "recipes",
-        "title": "Recipes",
-        "description": "List and search Granola recipes"
-      }
+    },
+    {
+      "name": "recipes",
+      "title": "Recipes",
+      "description": "List and search Granola recipes"
+    }
   ],
   "dependencies": {
     "@danielxceron/youtube-transcript": "^1.2.3",

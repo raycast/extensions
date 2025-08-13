@@ -175,8 +175,9 @@ export default async function tool(input: Input): Promise<Note[] | FolderInfo[]>
   }
 
   const documents = (await getDocumentsList()) as Document[];
-  // Defer panel access to on-demand streaming if needed; skip loading from full cache here
-  const panels: PanelsByDocId | undefined = undefined;
+  // Load panels for enhanced content access
+  const cache = await import("../utils/getCache").then((mod) => mod.default());
+  const panels = cache?.state?.documentPanels;
   const notes: Note[] = [];
 
   if (!documents) {
