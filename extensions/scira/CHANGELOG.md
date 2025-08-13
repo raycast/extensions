@@ -1,6 +1,6 @@
 # Scira Changelog
 
-## [v1.0.1] - 2025-08-10
+## [v1.0.1] - {PR_MERGE_DATE}
 
 ### Changed
 - Fix the API URL to use the correct one
