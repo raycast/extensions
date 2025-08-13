@@ -12,7 +12,7 @@ export async function searchLocations(query: string): Promise<LocationResult[]> 
   const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(trimmed)}&limit=10&addressdetails=0`;
   const res = await fetch(url, {
     headers: {
-      "User-Agent": "raycast-yr-extension/1.0 (github.com/holene; contact: axel@kynd.no)",
+      "User-Agent": "raycast-yr-extension/1.0 (https://github.com/kyndig/raycast-yr; contact: raycast@kynd.no)",
     },
   });
   if (!res.ok) {

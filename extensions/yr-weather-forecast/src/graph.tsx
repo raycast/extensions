@@ -3,6 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 import { getForecast, type TimeseriesEntry } from "./weather-client";
 import { precipitationAmount, symbolCode } from "./utils-forecast";
 import { getSunTimes, type SunTimes } from "./sunrise-client";
+import { scaleLinear } from "d3-scale";
+import { line, curveMonotoneX } from "d3-shape";
 import { formatPrecip, formatTemperatureCelsius, getUnits } from "./units";
 
 export default function GraphView(props: { name: string; lat: number; lon: number; hours?: number }) {
@@ -34,9 +36,9 @@ export default function GraphView(props: { name: string; lat: number; lon: numbe
     async function fetchSun() {
       if (series.length === 0) return;
       const subset = series.slice(0, hours);
-      const dates = uniqueDateKeys(subset.map((s) => new Date(s.time)));
+      const dates = Array.from(new Set(subset.map((s) => new Date(s.time)).map((d) => d.toISOString().slice(0, 10))));
       const entries = await Promise.all(
-        dates.map(async (date) => {
+        dates.map(async (date: string) => {
           try {
             const v = await getSunTimes(lat, lon, date);
             return [date, v] as const;
@@ -69,7 +71,7 @@ export function buildGraphMarkdown(
   name: string,
   series: TimeseriesEntry[],
   hours: number,
-  opts?: { sunByDate?: Record<string, SunTimes>; title?: string },
+  opts?: { sunByDate?: Record<string, SunTimes>; title?: string; smooth?: boolean },
 ): { markdown: string } {
   const subset = series.slice(0, hours);
   const width = 800;
@@ -91,21 +93,36 @@ export function buildGraphMarkdown(
 
   const xMin = times[0] ?? 0;
   const xMax = times[times.length - 1] ?? 1;
-  const xScale = (t: number) => margin.left + ((t - xMin) / (xMax - xMin || 1)) * innerWidth;
+  const xScale = scaleLinear()
+    .domain([xMin, xMax])
+    .range([margin.left, margin.left + innerWidth]);
 
   const tMinDisp = minFinite(tempsDisplay) ?? 0;
   const tMaxDisp = maxFinite(tempsDisplay) ?? 1;
   const tPad = 2;
-  const ty = (v: number) =>
-    margin.top + innerHeight - ((v - (tMinDisp - tPad)) / (tMaxDisp + tPad - (tMinDisp - tPad) || 1)) * innerHeight;
+  const yT = scaleLinear()
+    .domain([tMinDisp - tPad, tMaxDisp + tPad])
+    .range([margin.top + innerHeight, margin.top]);
+  const ty = (v: number) => yT(v);
 
   const pMaxDisp = Math.max(1, maxFinite(precsDisplay) ?? 1);
-  const py = (v: number) => margin.top + innerHeight - (v / pMaxDisp) * innerHeight;
+  const yP = scaleLinear()
+    .domain([0, pMaxDisp])
+    .range([margin.top + innerHeight, margin.top]);
+  const py = (v: number) => yP(v);
 
   // Build temperature path
-  const tempPath = pathFromPoints(times.map((t, i) => [xScale(t), ty(tempsDisplay[i] ?? 0)]));
+  const tempLine = line<number>()
+    .x((_: number, i: number) => xScale(times[i]))
+    .y((_: number, i: number) => yT(tempsDisplay[i] ?? 0));
+  if (opts?.smooth) tempLine.curve(curveMonotoneX);
+  const tempPath = tempLine(tempsDisplay as number[]) || "";
   // Build precipitation path (dotted)
-  const precPath = pathFromPoints(times.map((t, i) => [xScale(t), py(precsDisplay[i] ?? 0)]));
+  const precLine = line<number>()
+    .x((_: number, i: number) => xScale(times[i]))
+    .y((_: number, i: number) => yP(precsDisplay[i] ?? 0));
+  if (opts?.smooth) precLine.curve(curveMonotoneX);
+  const precPath = precLine(precsDisplay as number[]) || "";
 
   // Emoji labels for weather above temperature points
   const emojiLabels = times
@@ -262,14 +279,7 @@ function maxFinite(values: number[]): number | undefined {
 
 // (unused helper removed)
 
-function pathFromPoints(points: Array<[number, number]>): string {
-  if (points.length === 0) return "";
-  const cmds = [`M ${points[0][0].toFixed(1)} ${points[0][1].toFixed(1)}`];
-  for (let i = 1; i < points.length; i++) {
-    cmds.push(`L ${points[i][0].toFixed(1)} ${points[i][1].toFixed(1)}`);
-  }
-  return cmds.join(" ");
-}
+// removed old pathFromPoints helper (replaced by d3-shape line)
 
 function svgToDataUri(svg: string): string {
   // Encode minimally to keep it readable while safe for data URI

@@ -33,7 +33,8 @@ export default function ForecastView(props: { name: string; lat: number; lon: nu
   const displaySeries = mode === "detailed" ? items.slice(0, 48) : reduced;
   const graph = useMemo(() => {
     const title = mode === "detailed" ? "48h forecast" : "9-day summary";
-    return buildGraphMarkdown(name, displaySeries, displaySeries.length, { title }).markdown;
+    const smooth = true; // smooth both 48h detailed and 9-day summary
+    return buildGraphMarkdown(name, displaySeries, displaySeries.length, { title, smooth }).markdown;
   }, [name, displaySeries, mode]);
   const listMarkdown = useMemo(
     () => (mode === "detailed" ? buildListMarkdown(byDay) : buildSummaryListMarkdown(reduced)),
