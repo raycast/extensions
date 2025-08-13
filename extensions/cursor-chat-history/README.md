@@ -2,8 +2,6 @@
 
 Search and access your Cursor AI chat history instantly from Raycast
 
-[![raycast-cross-extension-badge]][raycast-cross-extension-link]
-
 ![Cursor Chat History screenshot](./metadata/cursor-chat-history-1.png)
 
 ## Features
@@ -61,6 +59,3 @@ Want to contribute or report issues? Visit our [GitHub repository](https://githu
 # Development setup
 npm install && npm run dev
 ```
-
-[raycast-cross-extension-badge]: https://shields.io/badge/Raycast-Cross--Extension-eee?labelColor=FF6363&logo=raycast&logoColor=fff&style=flat-square
-[raycast-cross-extension-link]: https://github.com/LitoMore/raycast-cross-extension-conventions
