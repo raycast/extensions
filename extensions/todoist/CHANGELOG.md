@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [Enhanced Natural Language Task Creation] - {PR_MERGE_DATE}
+## [Enhanced Natural Language Task Creation] - 2025-08-13
 
 - **Smart NLP Parsing**: Added comprehensive natural language parsing for task creation with real-time form updates
 - **Bidirectional Sync**: Type parameters in the title OR use dropdowns - both update each other seamlessly
