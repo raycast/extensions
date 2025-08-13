@@ -21,7 +21,7 @@ export function MdDefinitionListItem({
     <List.Item
       title={mdDefinition.text}
       subtitle={mdDefinition.chinese}
-      accessories={[isAiResult ? { text: "AI Result" } : { text: `` }]}
+      accessories={isAiResult ? [{ text: "AI Result" }] : []}
       detail={<MdDefinitionDetail mdDefinition={mdDefinition} />}
       actions={
         <ActionPanel>
