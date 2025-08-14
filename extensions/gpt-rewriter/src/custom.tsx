@@ -2,7 +2,6 @@ import {
   getPreferenceValues,
   showToast,
   Toast,
-  getSelectedText,
   Clipboard,
   Form,
   ActionPanel,
@@ -10,6 +9,7 @@ import {
 } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { processText } from "./lib/ai";
+import { getTextFromSelectionOrClipboard } from "./lib/utils";
 
 interface Preferences {
   openaiApiKey: string;
@@ -32,10 +32,10 @@ export default function CustomCommand() {
       }
 
       try {
-        const selectedText = await getSelectedText();
+        // Get text from selection or clipboard
+        const textToProcess = await getTextFromSelectionOrClipboard();
 
-        if (!selectedText.trim()) {
-          showToast(Toast.Style.Failure, "No text selected");
+        if (!textToProcess) {
           return;
         }
 
@@ -50,7 +50,7 @@ export default function CustomCommand() {
         showToast(Toast.Style.Animated, "Processing with custom prompt...");
 
         const response = await processText({
-          text: selectedText,
+          text: textToProcess,
           action: "generalQuestion",
           model: preferences.defaultModel,
           temperature: parseFloat(preferences.temperature),

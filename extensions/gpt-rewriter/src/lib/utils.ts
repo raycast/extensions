@@ -4,10 +4,18 @@ export async function getTextFromSelectionOrClipboard(): Promise<
   string | null
 > {
   // Get selected text first
-  let textToProcess = await getSelectedText();
+  let textToProcess: string;
+
+  try {
+    textToProcess = await getSelectedText();
+  } catch (error) {
+    // If getSelectedText fails (no text selected), try clipboard
+    console.log("No text selected, trying clipboard...");
+    textToProcess = "";
+  }
 
   // If no text is selected, try to get from clipboard
-  if (!textToProcess.trim()) {
+  if (!textToProcess || !textToProcess.trim()) {
     try {
       // Use AppleScript to get clipboard content
       const { execSync } = await import("child_process");
@@ -15,7 +23,10 @@ export async function getTextFromSelectionOrClipboard(): Promise<
 
       if (clipboardText) {
         textToProcess = clipboardText;
-        showToast(Toast.Style.Success, "Using text from clipboard");
+        showToast(
+          Toast.Style.Success,
+          "No text selected - using clipboard content",
+        );
         return textToProcess;
       } else {
         showToast(

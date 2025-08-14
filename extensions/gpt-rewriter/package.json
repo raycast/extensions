@@ -142,6 +142,13 @@
       "description": "Configure API keys and preferences",
       "mode": "view",
       "icon": "settings-icon.png"
+    },
+    {
+      "name": "voice",
+      "title": "Voice to Text",
+      "description": "Record voice and transcribe to text",
+      "mode": "view",
+      "icon": "voice-icon.png"
     }
   ],
   "preferences": [
@@ -168,6 +175,14 @@
       "default": "gpt-4o-mini",
       "data": [
         {
+          "title": "GPT-5",
+          "value": "gpt-5"
+        },
+        {
+          "title": "GPT-5 Mini",
+          "value": "gpt-5-mini"
+        },
+        {
           "title": "GPT-4o Mini",
           "value": "gpt-4o-mini"
         },
@@ -178,6 +193,30 @@
         {
           "title": "GPT-3.5 Turbo",
           "value": "gpt-3.5-turbo"
+        },
+        {
+          "title": "Llama 3.3 70b (Free)",
+          "value": "meta-llama/llama-3.3-70b-instruct:free"
+        },
+        {
+          "title": "qwerky-72b (Free)",
+          "value": "featherless/qwerky-72b:free"
+        },
+        {
+          "title": "DeepSeek Chat V3 (Free)",
+          "value": "deepseek/deepseek-chat-v3-0324:free"
+        },
+        {
+          "title": "GLM 4.5 Air (Free)",
+          "value": "z-ai/glm-4.5-air:free"
+        },
+        {
+          "title": "Grok 4",
+          "value": "x-ai/grok-4"
+        },
+        {
+          "title": "Grok 3 Mini",
+          "value": "x-ai/grok-3-mini"
         },
         {
           "title": "Claude Sonnet 4",
@@ -220,6 +259,18 @@
       "description": "Model for Rewrite command (uses default if empty)",
       "data": [
         {
+          "title": "Use Default",
+          "value": ""
+        },
+        {
+          "title": "GPT-5",
+          "value": "gpt-5"
+        },
+        {
+          "title": "GPT-5 Mini",
+          "value": "gpt-5-mini"
+        },
+        {
           "title": "GPT-4o Mini",
           "value": "gpt-4o-mini"
         },
@@ -230,6 +281,1135 @@
         {
           "title": "GPT-3.5 Turbo",
           "value": "gpt-3.5-turbo"
+        },
+        {
+          "title": "Llama 3.3 70b (Free)",
+          "value": "meta-llama/llama-3.3-70b-instruct:free"
+        },
+        {
+          "title": "qwerky-72b (Free)",
+          "value": "featherless/qwerky-72b:free"
+        },
+        {
+          "title": "DeepSeek Chat V3 (Free)",
+          "value": "deepseek/deepseek-chat-v3-0324:free"
+        },
+        {
+          "title": "GLM 4.5 Air (Free)",
+          "value": "z-ai/glm-4.5-air:free"
+        },
+        {
+          "title": "Grok 4",
+          "value": "x-ai/grok-4"
+        },
+        {
+          "title": "Grok 3 Mini",
+          "value": "x-ai/grok-3-mini"
+        },
+        {
+          "title": "Claude Sonnet 4",
+          "value": "anthropic/claude-sonnet-4"
+        },
+        {
+          "title": "Gemini 2.5 Flash",
+          "value": "google/gemini-2.5-flash"
+        }
+      ]
+    },
+    {
+      "name": "workplaceModel",
+      "type": "dropdown",
+      "required": false,
+      "title": "Workplace Command Model",
+      "description": "Model for Workplace command (uses default if empty)",
+      "data": [
+        {
+          "title": "Use Default",
+          "value": ""
+        },
+        {
+          "title": "GPT-5",
+          "value": "gpt-5"
+        },
+        {
+          "title": "GPT-5 Mini",
+          "value": "gpt-5-mini"
+        },
+        {
+          "title": "GPT-4o Mini",
+          "value": "gpt-4o-mini"
+        },
+        {
+          "title": "GPT-4o",
+          "value": "gpt-4o"
+        },
+        {
+          "title": "GPT-3.5 Turbo",
+          "value": "gpt-3.5-turbo"
+        },
+        {
+          "title": "Llama 3.3 70b (Free)",
+          "value": "meta-llama/llama-3.3-70b-instruct:free"
+        },
+        {
+          "title": "qwerky-72b (Free)",
+          "value": "featherless/qwerky-72b:free"
+        },
+        {
+          "title": "DeepSeek Chat V3 (Free)",
+          "value": "deepseek/deepseek-chat-v3-0324:free"
+        },
+        {
+          "title": "GLM 4.5 Air (Free)",
+          "value": "z-ai/glm-4.5-air:free"
+        },
+        {
+          "title": "Grok 4",
+          "value": "x-ai/grok-4"
+        },
+        {
+          "title": "Grok 3 Mini",
+          "value": "x-ai/grok-3-mini"
+        },
+        {
+          "title": "Claude Sonnet 4",
+          "value": "anthropic/claude-sonnet-4"
+        },
+        {
+          "title": "Gemini 2.5 Flash",
+          "value": "google/gemini-2.5-flash"
+        }
+      ]
+    },
+    {
+      "name": "summarizeModel",
+      "type": "dropdown",
+      "required": false,
+      "title": "Summarize Command Model",
+      "description": "Model for Summarize command (uses default if empty)",
+      "data": [
+        {
+          "title": "Use Default",
+          "value": ""
+        },
+        {
+          "title": "GPT-5",
+          "value": "gpt-5"
+        },
+        {
+          "title": "GPT-5 Mini",
+          "value": "gpt-5-mini"
+        },
+        {
+          "title": "GPT-4o Mini",
+          "value": "gpt-4o-mini"
+        },
+        {
+          "title": "GPT-4o",
+          "value": "gpt-4o"
+        },
+        {
+          "title": "GPT-3.5 Turbo",
+          "value": "gpt-3.5-turbo"
+        },
+        {
+          "title": "Llama 3.3 70b (Free)",
+          "value": "meta-llama/llama-3.3-70b-instruct:free"
+        },
+        {
+          "title": "qwerky-72b (Free)",
+          "value": "featherless/qwerky-72b:free"
+        },
+        {
+          "title": "DeepSeek Chat V3 (Free)",
+          "value": "deepseek/deepseek-chat-v3-0324:free"
+        },
+        {
+          "title": "GLM 4.5 Air (Free)",
+          "value": "z-ai/glm-4.5-air:free"
+        },
+        {
+          "title": "Grok 4",
+          "value": "x-ai/grok-4"
+        },
+        {
+          "title": "Grok 3 Mini",
+          "value": "x-ai/grok-3-mini"
+        },
+        {
+          "title": "Claude Sonnet 4",
+          "value": "anthropic/claude-sonnet-4"
+        },
+        {
+          "title": "Gemini 2.5 Flash",
+          "value": "google/gemini-2.5-flash"
+        }
+      ]
+    },
+    {
+      "name": "bulletsModel",
+      "type": "dropdown",
+      "required": false,
+      "title": "Bullets Command Model",
+      "description": "Model for Bullets command (uses default if empty)",
+      "data": [
+        {
+          "title": "Use Default",
+          "value": ""
+        },
+        {
+          "title": "GPT-5",
+          "value": "gpt-5"
+        },
+        {
+          "title": "GPT-5 Mini",
+          "value": "gpt-5-mini"
+        },
+        {
+          "title": "GPT-4o Mini",
+          "value": "gpt-4o-mini"
+        },
+        {
+          "title": "GPT-4o",
+          "value": "gpt-4o"
+        },
+        {
+          "title": "GPT-3.5 Turbo",
+          "value": "gpt-3.5-turbo"
+        },
+        {
+          "title": "Llama 3.3 70b (Free)",
+          "value": "meta-llama/llama-3.3-70b-instruct:free"
+        },
+        {
+          "title": "qwerky-72b (Free)",
+          "value": "featherless/qwerky-72b:free"
+        },
+        {
+          "title": "DeepSeek Chat V3 (Free)",
+          "value": "deepseek/deepseek-chat-v3-0324:free"
+        },
+        {
+          "title": "GLM 4.5 Air (Free)",
+          "value": "z-ai/glm-4.5-air:free"
+        },
+        {
+          "title": "Grok 4",
+          "value": "x-ai/grok-4"
+        },
+        {
+          "title": "Grok 3 Mini",
+          "value": "x-ai/grok-3-mini"
+        },
+        {
+          "title": "Claude Sonnet 4",
+          "value": "anthropic/claude-sonnet-4"
+        },
+        {
+          "title": "Gemini 2.5 Flash",
+          "value": "google/gemini-2.5-flash"
+        }
+      ]
+    },
+    {
+      "name": "shortenModel",
+      "type": "dropdown",
+      "required": false,
+      "title": "Shorten Command Model",
+      "description": "Model for Shorten command (uses default if empty)",
+      "data": [
+        {
+          "title": "Use Default",
+          "value": ""
+        },
+        {
+          "title": "GPT-5",
+          "value": "gpt-5"
+        },
+        {
+          "title": "GPT-5 Mini",
+          "value": "gpt-5-mini"
+        },
+        {
+          "title": "GPT-4o Mini",
+          "value": "gpt-4o-mini"
+        },
+        {
+          "title": "GPT-4o",
+          "value": "gpt-4o"
+        },
+        {
+          "title": "GPT-3.5 Turbo",
+          "value": "gpt-3.5-turbo"
+        },
+        {
+          "title": "Llama 3.3 70b (Free)",
+          "value": "meta-llama/llama-3.3-70b-instruct:free"
+        },
+        {
+          "title": "qwerky-72b (Free)",
+          "value": "featherless/qwerky-72b:free"
+        },
+        {
+          "title": "DeepSeek Chat V3 (Free)",
+          "value": "deepseek/deepseek-chat-v3-0324:free"
+        },
+        {
+          "title": "GLM 4.5 Air (Free)",
+          "value": "z-ai/glm-4.5-air:free"
+        },
+        {
+          "title": "Grok 4",
+          "value": "x-ai/grok-4"
+        },
+        {
+          "title": "Grok 3 Mini",
+          "value": "x-ai/grok-3-mini"
+        },
+        {
+          "title": "Claude Sonnet 4",
+          "value": "anthropic/claude-sonnet-4"
+        },
+        {
+          "title": "Gemini 2.5 Flash",
+          "value": "google/gemini-2.5-flash"
+        }
+      ]
+    },
+    {
+      "name": "humorModel",
+      "type": "dropdown",
+      "required": false,
+      "title": "Humor Command Model",
+      "description": "Model for Humor command (uses default if empty)",
+      "data": [
+        {
+          "title": "Use Default",
+          "value": ""
+        },
+        {
+          "title": "GPT-5",
+          "value": "gpt-5"
+        },
+        {
+          "title": "GPT-5 Mini",
+          "value": "gpt-5-mini"
+        },
+        {
+          "title": "GPT-4o Mini",
+          "value": "gpt-4o-mini"
+        },
+        {
+          "title": "GPT-4o",
+          "value": "gpt-4o"
+        },
+        {
+          "title": "GPT-3.5 Turbo",
+          "value": "gpt-3.5-turbo"
+        },
+        {
+          "title": "Llama 3.3 70b (Free)",
+          "value": "meta-llama/llama-3.3-70b-instruct:free"
+        },
+        {
+          "title": "qwerky-72b (Free)",
+          "value": "featherless/qwerky-72b:free"
+        },
+        {
+          "title": "DeepSeek Chat V3 (Free)",
+          "value": "deepseek/deepseek-chat-v3-0324:free"
+        },
+        {
+          "title": "GLM 4.5 Air (Free)",
+          "value": "z-ai/glm-4.5-air:free"
+        },
+        {
+          "title": "Grok 4",
+          "value": "x-ai/grok-4"
+        },
+        {
+          "title": "Grok 3 Mini",
+          "value": "x-ai/grok-3-mini"
+        },
+        {
+          "title": "Claude Sonnet 4",
+          "value": "anthropic/claude-sonnet-4"
+        },
+        {
+          "title": "Gemini 2.5 Flash",
+          "value": "google/gemini-2.5-flash"
+        }
+      ]
+    },
+    {
+      "name": "questionsModel",
+      "type": "dropdown",
+      "required": false,
+      "title": "Questions Command Model",
+      "description": "Model for Questions command (uses default if empty)",
+      "data": [
+        {
+          "title": "Use Default",
+          "value": ""
+        },
+        {
+          "title": "GPT-5",
+          "value": "gpt-5"
+        },
+        {
+          "title": "GPT-5 Mini",
+          "value": "gpt-5-mini"
+        },
+        {
+          "title": "GPT-4o Mini",
+          "value": "gpt-4o-mini"
+        },
+        {
+          "title": "GPT-4o",
+          "value": "gpt-4o"
+        },
+        {
+          "title": "GPT-3.5 Turbo",
+          "value": "gpt-3.5-turbo"
+        },
+        {
+          "title": "Llama 3.3 70b (Free)",
+          "value": "meta-llama/llama-3.3-70b-instruct:free"
+        },
+        {
+          "title": "qwerky-72b (Free)",
+          "value": "featherless/qwerky-72b:free"
+        },
+        {
+          "title": "DeepSeek Chat V3 (Free)",
+          "value": "deepseek/deepseek-chat-v3-0324:free"
+        },
+        {
+          "title": "GLM 4.5 Air (Free)",
+          "value": "z-ai/glm-4.5-air:free"
+        },
+        {
+          "title": "Grok 4",
+          "value": "x-ai/grok-4"
+        },
+        {
+          "title": "Grok 3 Mini",
+          "value": "x-ai/grok-3-mini"
+        },
+        {
+          "title": "Claude Sonnet 4",
+          "value": "anthropic/claude-sonnet-4"
+        },
+        {
+          "title": "Gemini 2.5 Flash",
+          "value": "google/gemini-2.5-flash"
+        }
+      ]
+    },
+    {
+      "name": "improveModel",
+      "type": "dropdown",
+      "required": false,
+      "title": "Improve Command Model",
+      "description": "Model for Improve command (uses default if empty)",
+      "data": [
+        {
+          "title": "Use Default",
+          "value": ""
+        },
+        {
+          "title": "GPT-5",
+          "value": "gpt-5"
+        },
+        {
+          "title": "GPT-5 Mini",
+          "value": "gpt-5-mini"
+        },
+        {
+          "title": "GPT-4o Mini",
+          "value": "gpt-4o-mini"
+        },
+        {
+          "title": "GPT-4o",
+          "value": "gpt-4o"
+        },
+        {
+          "title": "GPT-3.5 Turbo",
+          "value": "gpt-3.5-turbo"
+        },
+        {
+          "title": "Llama 3.3 70b (Free)",
+          "value": "meta-llama/llama-3.3-70b-instruct:free"
+        },
+        {
+          "title": "qwerky-72b (Free)",
+          "value": "featherless/qwerky-72b:free"
+        },
+        {
+          "title": "DeepSeek Chat V3 (Free)",
+          "value": "deepseek/deepseek-chat-v3-0324:free"
+        },
+        {
+          "title": "GLM 4.5 Air (Free)",
+          "value": "z-ai/glm-4.5-air:free"
+        },
+        {
+          "title": "Grok 4",
+          "value": "x-ai/grok-4"
+        },
+        {
+          "title": "Grok 3 Mini",
+          "value": "x-ai/grok-3-mini"
+        },
+        {
+          "title": "Claude Sonnet 4",
+          "value": "anthropic/claude-sonnet-4"
+        },
+        {
+          "title": "Gemini 2.5 Flash",
+          "value": "google/gemini-2.5-flash"
+        }
+      ]
+    },
+    {
+      "name": "expandModel",
+      "type": "dropdown",
+      "required": false,
+      "title": "Expand Command Model",
+      "description": "Model for Expand command (uses default if empty)",
+      "data": [
+        {
+          "title": "Use Default",
+          "value": ""
+        },
+        {
+          "title": "GPT-5",
+          "value": "gpt-5"
+        },
+        {
+          "title": "GPT-5 Mini",
+          "value": "gpt-5-mini"
+        },
+        {
+          "title": "GPT-4o Mini",
+          "value": "gpt-4o-mini"
+        },
+        {
+          "title": "GPT-4o",
+          "value": "gpt-4o"
+        },
+        {
+          "title": "GPT-3.5 Turbo",
+          "value": "gpt-3.5-turbo"
+        },
+        {
+          "title": "Llama 3.3 70b (Free)",
+          "value": "meta-llama/llama-3.3-70b-instruct:free"
+        },
+        {
+          "title": "qwerky-72b (Free)",
+          "value": "featherless/qwerky-72b:free"
+        },
+        {
+          "title": "DeepSeek Chat V3 (Free)",
+          "value": "deepseek/deepseek-chat-v3-0324:free"
+        },
+        {
+          "title": "GLM 4.5 Air (Free)",
+          "value": "z-ai/glm-4.5-air:free"
+        },
+        {
+          "title": "Grok 4",
+          "value": "x-ai/grok-4"
+        },
+        {
+          "title": "Grok 3 Mini",
+          "value": "x-ai/grok-3-mini"
+        },
+        {
+          "title": "Claude Sonnet 4",
+          "value": "anthropic/claude-sonnet-4"
+        },
+        {
+          "title": "Gemini 2.5 Flash",
+          "value": "google/gemini-2.5-flash"
+        }
+      ]
+    },
+    {
+      "name": "titleModel",
+      "type": "dropdown",
+      "required": false,
+      "title": "Title Command Model",
+      "description": "Model for Title command (uses default if empty)",
+      "data": [
+        {
+          "title": "Use Default",
+          "value": ""
+        },
+        {
+          "title": "GPT-5",
+          "value": "gpt-5"
+        },
+        {
+          "title": "GPT-5 Mini",
+          "value": "gpt-5-mini"
+        },
+        {
+          "title": "GPT-4o Mini",
+          "value": "gpt-4o-mini"
+        },
+        {
+          "title": "GPT-4o",
+          "value": "gpt-4o"
+        },
+        {
+          "title": "GPT-3.5 Turbo",
+          "value": "gpt-3.5-turbo"
+        },
+        {
+          "title": "Llama 3.3 70b (Free)",
+          "value": "meta-llama/llama-3.3-70b-instruct:free"
+        },
+        {
+          "title": "qwerky-72b (Free)",
+          "value": "featherless/qwerky-72b:free"
+        },
+        {
+          "title": "DeepSeek Chat V3 (Free)",
+          "value": "deepseek/deepseek-chat-v3-0324:free"
+        },
+        {
+          "title": "GLM 4.5 Air (Free)",
+          "value": "z-ai/glm-4.5-air:free"
+        },
+        {
+          "title": "Grok 4",
+          "value": "x-ai/grok-4"
+        },
+        {
+          "title": "Grok 3 Mini",
+          "value": "x-ai/grok-3-mini"
+        },
+        {
+          "title": "Claude Sonnet 4",
+          "value": "anthropic/claude-sonnet-4"
+        },
+        {
+          "title": "Gemini 2.5 Flash",
+          "value": "google/gemini-2.5-flash"
+        }
+      ]
+    },
+    {
+      "name": "keypointsModel",
+      "type": "dropdown",
+      "required": false,
+      "title": "Key Points Command Model",
+      "description": "Model for Key Points command (uses default if empty)",
+      "data": [
+        {
+          "title": "Use Default",
+          "value": ""
+        },
+        {
+          "title": "GPT-5",
+          "value": "gpt-5"
+        },
+        {
+          "title": "GPT-5 Mini",
+          "value": "gpt-5-mini"
+        },
+        {
+          "title": "GPT-4o Mini",
+          "value": "gpt-4o-mini"
+        },
+        {
+          "title": "GPT-4o",
+          "value": "gpt-4o"
+        },
+        {
+          "title": "GPT-3.5 Turbo",
+          "value": "gpt-3.5-turbo"
+        },
+        {
+          "title": "Llama 3.3 70b (Free)",
+          "value": "meta-llama/llama-3.3-70b-instruct:free"
+        },
+        {
+          "title": "qwerky-72b (Free)",
+          "value": "featherless/qwerky-72b:free"
+        },
+        {
+          "title": "DeepSeek Chat V3 (Free)",
+          "value": "deepseek/deepseek-chat-v3-0324:free"
+        },
+        {
+          "title": "GLM 4.5 Air (Free)",
+          "value": "z-ai/glm-4.5-air:free"
+        },
+        {
+          "title": "Grok 4",
+          "value": "x-ai/grok-4"
+        },
+        {
+          "title": "Grok 3 Mini",
+          "value": "x-ai/grok-3-mini"
+        },
+        {
+          "title": "Claude Sonnet 4",
+          "value": "anthropic/claude-sonnet-4"
+        },
+        {
+          "title": "Gemini 2.5 Flash",
+          "value": "google/gemini-2.5-flash"
+        }
+      ]
+    },
+    {
+      "name": "positiveModel",
+      "type": "dropdown",
+      "required": false,
+      "title": "Positive Command Model",
+      "description": "Model for Positive command (uses default if empty)",
+      "data": [
+        {
+          "title": "Use Default",
+          "value": ""
+        },
+        {
+          "title": "GPT-5",
+          "value": "gpt-5"
+        },
+        {
+          "title": "GPT-5 Mini",
+          "value": "gpt-5-mini"
+        },
+        {
+          "title": "GPT-4o Mini",
+          "value": "gpt-4o-mini"
+        },
+        {
+          "title": "GPT-4o",
+          "value": "gpt-4o"
+        },
+        {
+          "title": "GPT-3.5 Turbo",
+          "value": "gpt-3.5-turbo"
+        },
+        {
+          "title": "Llama 3.3 70b (Free)",
+          "value": "meta-llama/llama-3.3-70b-instruct:free"
+        },
+        {
+          "title": "qwerky-72b (Free)",
+          "value": "featherless/qwerky-72b:free"
+        },
+        {
+          "title": "DeepSeek Chat V3 (Free)",
+          "value": "deepseek/deepseek-chat-v3-0324:free"
+        },
+        {
+          "title": "GLM 4.5 Air (Free)",
+          "value": "z-ai/glm-4.5-air:free"
+        },
+        {
+          "title": "Grok 4",
+          "value": "x-ai/grok-4"
+        },
+        {
+          "title": "Grok 3 Mini",
+          "value": "x-ai/grok-3-mini"
+        },
+        {
+          "title": "Claude Sonnet 4",
+          "value": "anthropic/claude-sonnet-4"
+        },
+        {
+          "title": "Gemini 2.5 Flash",
+          "value": "google/gemini-2.5-flash"
+        }
+      ]
+    },
+    {
+      "name": "negativeModel",
+      "type": "dropdown",
+      "required": false,
+      "title": "Negative Command Model",
+      "description": "Model for Negative command (uses default if empty)",
+      "data": [
+        {
+          "title": "Use Default",
+          "value": ""
+        },
+        {
+          "title": "GPT-5",
+          "value": "gpt-5"
+        },
+        {
+          "title": "GPT-5 Mini",
+          "value": "gpt-5-mini"
+        },
+        {
+          "title": "GPT-4o Mini",
+          "value": "gpt-4o-mini"
+        },
+        {
+          "title": "GPT-4o",
+          "value": "gpt-4o"
+        },
+        {
+          "title": "GPT-3.5 Turbo",
+          "value": "gpt-3.5-turbo"
+        },
+        {
+          "title": "Llama 3.3 70b (Free)",
+          "value": "meta-llama/llama-3.3-70b-instruct:free"
+        },
+        {
+          "title": "qwerky-72b (Free)",
+          "value": "featherless/qwerky-72b:free"
+        },
+        {
+          "title": "DeepSeek Chat V3 (Free)",
+          "value": "deepseek/deepseek-chat-v3-0324:free"
+        },
+        {
+          "title": "GLM 4.5 Air (Free)",
+          "value": "z-ai/glm-4.5-air:free"
+        },
+        {
+          "title": "Grok 4",
+          "value": "x-ai/grok-4"
+        },
+        {
+          "title": "Grok 3 Mini",
+          "value": "x-ai/grok-3-mini"
+        },
+        {
+          "title": "Claude Sonnet 4",
+          "value": "anthropic/claude-sonnet-4"
+        },
+        {
+          "title": "Gemini 2.5 Flash",
+          "value": "google/gemini-2.5-flash"
+        }
+      ]
+    },
+    {
+      "name": "translateEnModel",
+      "type": "dropdown",
+      "required": false,
+      "title": "Translate to English Model",
+      "description": "Model for Translate to English command (uses default if empty)",
+      "data": [
+        {
+          "title": "Use Default",
+          "value": ""
+        },
+        {
+          "title": "GPT-5",
+          "value": "gpt-5"
+        },
+        {
+          "title": "GPT-5 Mini",
+          "value": "gpt-5-mini"
+        },
+        {
+          "title": "GPT-4o Mini",
+          "value": "gpt-4o-mini"
+        },
+        {
+          "title": "GPT-4o",
+          "value": "gpt-4o"
+        },
+        {
+          "title": "GPT-3.5 Turbo",
+          "value": "gpt-3.5-turbo"
+        },
+        {
+          "title": "Llama 3.3 70b (Free)",
+          "value": "meta-llama/llama-3.3-70b-instruct:free"
+        },
+        {
+          "title": "qwerky-72b (Free)",
+          "value": "featherless/qwerky-72b:free"
+        },
+        {
+          "title": "DeepSeek Chat V3 (Free)",
+          "value": "deepseek/deepseek-chat-v3-0324:free"
+        },
+        {
+          "title": "GLM 4.5 Air (Free)",
+          "value": "z-ai/glm-4.5-air:free"
+        },
+        {
+          "title": "Grok 4",
+          "value": "x-ai/grok-4"
+        },
+        {
+          "title": "Grok 3 Mini",
+          "value": "x-ai/grok-3-mini"
+        },
+        {
+          "title": "Claude Sonnet 4",
+          "value": "anthropic/claude-sonnet-4"
+        },
+        {
+          "title": "Gemini 2.5 Flash",
+          "value": "google/gemini-2.5-flash"
+        }
+      ]
+    },
+    {
+      "name": "translateTrModel",
+      "type": "dropdown",
+      "required": false,
+      "title": "Translate to Turkish Model",
+      "description": "Model for Translate to Turkish command (uses default if empty)",
+      "data": [
+        {
+          "title": "Use Default",
+          "value": ""
+        },
+        {
+          "title": "GPT-5",
+          "value": "gpt-5"
+        },
+        {
+          "title": "GPT-5 Mini",
+          "value": "gpt-5-mini"
+        },
+        {
+          "title": "GPT-4o Mini",
+          "value": "gpt-4o-mini"
+        },
+        {
+          "title": "GPT-4o",
+          "value": "gpt-4o"
+        },
+        {
+          "title": "GPT-3.5 Turbo",
+          "value": "gpt-3.5-turbo"
+        },
+        {
+          "title": "Llama 3.3 70b (Free)",
+          "value": "meta-llama/llama-3.3-70b-instruct:free"
+        },
+        {
+          "title": "qwerky-72b (Free)",
+          "value": "featherless/qwerky-72b:free"
+        },
+        {
+          "title": "DeepSeek Chat V3 (Free)",
+          "value": "deepseek/deepseek-chat-v3-0324:free"
+        },
+        {
+          "title": "GLM 4.5 Air (Free)",
+          "value": "z-ai/glm-4.5-air:free"
+        },
+        {
+          "title": "Grok 4",
+          "value": "x-ai/grok-4"
+        },
+        {
+          "title": "Grok 3 Mini",
+          "value": "x-ai/grok-3-mini"
+        },
+        {
+          "title": "Claude Sonnet 4",
+          "value": "anthropic/claude-sonnet-4"
+        },
+        {
+          "title": "Gemini 2.5 Flash",
+          "value": "google/gemini-2.5-flash"
+        }
+      ]
+    },
+    {
+      "name": "translateFaModel",
+      "type": "dropdown",
+      "required": false,
+      "title": "Translate to Persian Model",
+      "description": "Model for Translate to Persian command (uses default if empty)",
+      "data": [
+        {
+          "title": "Use Default",
+          "value": ""
+        },
+        {
+          "title": "GPT-5",
+          "value": "gpt-5"
+        },
+        {
+          "title": "GPT-5 Mini",
+          "value": "gpt-5-mini"
+        },
+        {
+          "title": "GPT-4o Mini",
+          "value": "gpt-4o-mini"
+        },
+        {
+          "title": "GPT-4o",
+          "value": "gpt-4o"
+        },
+        {
+          "title": "GPT-3.5 Turbo",
+          "value": "gpt-3.5-turbo"
+        },
+        {
+          "title": "Llama 3.3 70b (Free)",
+          "value": "meta-llama/llama-3.3-70b-instruct:free"
+        },
+        {
+          "title": "qwerky-72b (Free)",
+          "value": "featherless/qwerky-72b:free"
+        },
+        {
+          "title": "DeepSeek Chat V3 (Free)",
+          "value": "deepseek/deepseek-chat-v3-0324:free"
+        },
+        {
+          "title": "GLM 4.5 Air (Free)",
+          "value": "z-ai/glm-4.5-air:free"
+        },
+        {
+          "title": "Grok 4",
+          "value": "x-ai/grok-4"
+        },
+        {
+          "title": "Grok 3 Mini",
+          "value": "x-ai/grok-3-mini"
+        },
+        {
+          "title": "Claude Sonnet 4",
+          "value": "anthropic/claude-sonnet-4"
+        },
+        {
+          "title": "Gemini 2.5 Flash",
+          "value": "google/gemini-2.5-flash"
+        }
+      ]
+    },
+    {
+      "name": "translateEsModel",
+      "type": "dropdown",
+      "required": false,
+      "title": "Translate to Spanish Model",
+      "description": "Model for Translate to Spanish command (uses default if empty)",
+      "data": [
+        {
+          "title": "Use Default",
+          "value": ""
+        },
+        {
+          "title": "GPT-5",
+          "value": "gpt-5"
+        },
+        {
+          "title": "GPT-5 Mini",
+          "value": "gpt-5-mini"
+        },
+        {
+          "title": "GPT-4o Mini",
+          "value": "gpt-4o-mini"
+        },
+        {
+          "title": "GPT-4o",
+          "value": "gpt-4o"
+        },
+        {
+          "title": "GPT-3.5 Turbo",
+          "value": "gpt-3.5-turbo"
+        },
+        {
+          "title": "Llama 3.3 70b (Free)",
+          "value": "meta-llama/llama-3.3-70b-instruct:free"
+        },
+        {
+          "title": "qwerky-72b (Free)",
+          "value": "featherless/qwerky-72b:free"
+        },
+        {
+          "title": "DeepSeek Chat V3 (Free)",
+          "value": "deepseek/deepseek-chat-v3-0324:free"
+        },
+        {
+          "title": "GLM 4.5 Air (Free)",
+          "value": "z-ai/glm-4.5-air:free"
+        },
+        {
+          "title": "Grok 4",
+          "value": "x-ai/grok-4"
+        },
+        {
+          "title": "Grok 3 Mini",
+          "value": "x-ai/grok-3-mini"
+        },
+        {
+          "title": "Claude Sonnet 4",
+          "value": "anthropic/claude-sonnet-4"
+        },
+        {
+          "title": "Gemini 2.5 Flash",
+          "value": "google/gemini-2.5-flash"
+        }
+      ]
+    },
+    {
+      "name": "voiceModel",
+      "type": "dropdown",
+      "required": false,
+      "title": "Voice to Text Model",
+      "description": "Model for Voice to Text command (uses default if empty)",
+      "data": [
+        {
+          "title": "Use Default",
+          "value": ""
+        },
+        {
+          "title": "GPT-5",
+          "value": "gpt-5"
+        },
+        {
+          "title": "GPT-5 Mini",
+          "value": "gpt-5-mini"
+        },
+        {
+          "title": "GPT-4o Mini",
+          "value": "gpt-4o-mini"
+        },
+        {
+          "title": "GPT-4o",
+          "value": "gpt-4o"
+        },
+        {
+          "title": "GPT-3.5 Turbo",
+          "value": "gpt-3.5-turbo"
+        },
+        {
+          "title": "Llama 3.3 70b (Free)",
+          "value": "meta-llama/llama-3.3-70b-instruct:free"
+        },
+        {
+          "title": "qwerky-72b (Free)",
+          "value": "featherless/qwerky-72b:free"
+        },
+        {
+          "title": "DeepSeek Chat V3 (Free)",
+          "value": "deepseek/deepseek-chat-v3-0324:free"
+        },
+        {
+          "title": "GLM 4.5 Air (Free)",
+          "value": "z-ai/glm-4.5-air:free"
+        },
+        {
+          "title": "Grok 4",
+          "value": "x-ai/grok-4"
+        },
+        {
+          "title": "Grok 3 Mini",
+          "value": "x-ai/grok-3-mini"
         },
         {
           "title": "Claude Sonnet 4",
