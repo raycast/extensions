@@ -5,6 +5,7 @@
     "lib": ["DOM", "DOM.Iterable", "ES6"],
     "jsx": "react-jsx",
     "moduleResolution": "node",
+    "module": "ES2020",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "noImplicitReturns": true,
