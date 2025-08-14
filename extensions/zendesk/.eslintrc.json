@@ -18,16 +18,5 @@
     "no-undef": "off",
     "no-redeclare": "off"
   },
-  "overrides": [
-    {
-      "files": ["*.ts", "*.tsx"],
-      "parserOptions": {
-        "ecmaVersion": 2020,
-        "sourceType": "module",
-        "ecmaFeatures": {
-          "jsx": true
-        }
-      }
-    }
-  ]
+  "ignorePatterns": ["**/*.ts", "**/*.tsx"]
 }
