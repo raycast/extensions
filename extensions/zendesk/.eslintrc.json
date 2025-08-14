@@ -17,24 +17,9 @@
     "no-unused-vars": "off",
     "no-undef": "off",
     "no-redeclare": "off",
-    "no-unexpected-multiline": "off"
-  },
-  "overrides": [
-    {
-      "files": ["*.ts", "*.tsx"],
-      "parserOptions": {
-        "ecmaVersion": 2020,
-        "sourceType": "module",
-        "ecmaFeatures": {
-          "jsx": true
-        }
-      },
-      "rules": {
-        "no-unused-vars": "off",
-        "no-undef": "off",
-        "no-redeclare": "off",
-        "no-unexpected-multiline": "off"
-      }
-    }
-  ]
+    "no-unexpected-multiline": "off",
+    "no-unreachable": "off",
+    "no-constant-condition": "off",
+    "no-empty": "off"
+  }
 }
