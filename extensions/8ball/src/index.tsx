@@ -1,4 +1,4 @@
-import { Clipboard, getPreferenceValues, Toast, ToastStyle } from "@raycast/api";
+import { Clipboard, getPreferenceValues, Toast } from "@raycast/api";
 import { setTimeout } from "timers/promises";
 
 export default async function Command() {
@@ -33,7 +33,7 @@ export default async function Command() {
   await toast.show();
   await setTimeout(350);
 
-  const { defaultAction } = getPreferenceValues();
+  const { defaultAction } = getPreferenceValues<Preferences.Index>();
 
   toast.style = Toast.Style.Success;
   toast.title = answer;
@@ -44,5 +44,5 @@ export default async function Command() {
   } else if (defaultAction === "copy") {
     await Clipboard.copy(answer);
     toast.message = "Copied to clipboard";
-  } 
+  }
 }
