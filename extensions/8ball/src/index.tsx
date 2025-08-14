@@ -29,25 +29,20 @@ export default async function Command() {
 
   const answer = answers[Math.floor(Math.random() * answers.length)];
 
-  const toast = new Toast({ style: ToastStyle.Animated, title: "The Magic 8-Ball says.." });
+  const toast = new Toast({ style: Toast.Style.Animated, title: "The Magic 8-Ball says.." });
   await toast.show();
   await setTimeout(350);
 
   const { defaultAction } = getPreferenceValues();
 
+  toast.style = Toast.Style.Success;
+  toast.title = answer;
+
   if (defaultAction === "paste") {
     await Clipboard.paste(answer);
-    toast.style = ToastStyle.Success;
-    toast.title = answer;
     toast.message = "Pasted to current app";
   } else if (defaultAction === "copy") {
     await Clipboard.copy(answer);
-    toast.style = ToastStyle.Success;
-    toast.title = answer;
     toast.message = "Copied to clipboard";
-  } else {
-    toast.style = ToastStyle.Success;
-    toast.title = answer;
-    toast.message = "Shown only";
-  }
+  } 
 }
