@@ -3,7 +3,7 @@ import { Icon } from "@raycast/api";
 import useVercel from "../../hooks/use-vercel-info";
 
 const searchBarAccessory = ({ onTeamChange }: { onTeamChange: () => void }) => {
-  const { user, selectedTeam, teams, updateSelectedTeam } = useVercel();
+  const { selectedTeam, teams, updateSelectedTeam } = useVercel();
 
   const onChange = async (teamIdOrUsername: string) => {
     if (!teamIdOrUsername) {
@@ -14,11 +14,7 @@ const searchBarAccessory = ({ onTeamChange }: { onTeamChange: () => void }) => {
   };
   const team = teams?.find((x) => x.id === selectedTeam);
   return (
-    <List.Dropdown
-      value={selectedTeam}
-      tooltip="Switch Team"
-      onChange={async (newValue) => await onChange(newValue)}
-    >
+    <List.Dropdown value={selectedTeam} tooltip="Switch Team" onChange={async (newValue) => await onChange(newValue)}>
       {team && <List.Dropdown.Item title={team.name} value={team.id} icon={Icon.TwoPeople} />}
       {teams?.length &&
         teams
