@@ -204,6 +204,13 @@
       "title": "Max Tokens",
       "description": "Maximum response length",
       "default": "1000"
+    },
+    {
+      "name": "customSystemPrompt",
+      "type": "textarea",
+      "required": false,
+      "title": "Custom System Prompt",
+      "description": "Override the default system prompt for all operations"
     }
   ],
   "dependencies": {
