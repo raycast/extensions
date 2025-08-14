@@ -1,0 +1,963 @@
+openapi: 3.0.3
+info:
+  title: API de Busca
+  description: |
+    Essa API realiza buscas na base de dados da JUIT.
+  version: 0.0.1
+servers:
+  - url: 'https://api.juit.io:8080/v1/data-products/search'
+    description: Endpoint de consulta
+tags:
+  - name: Jurisprudência
+    description: Endpoints relacionados a jurisprudências
+paths:
+  /jurisprudence:
+    options:
+      tags:
+        - Jurisprudência
+      summary: Retorna nos headers os métodos disponíveis para esse endpoint.
+      operationId: jurisprudenceOptions
+      parameters:
+        - $ref: '#/paths/~1jurisprudence/get/parameters/0'
+      responses:
+        '204':
+          description: 'Success, no content to return'
+          headers:
+            Allow:
+              description: Allowed methods
+              schema:
+                type: string
+            Vary:
+              description: Indicates to the browser that the response may vary based on different header requests
+              schema:
+                type: string
+            Date:
+              $ref: '#/paths/~1jurisprudence/get/responses/200/headers/Date'
+    get:
+      tags:
+        - Jurisprudência
+      summary: Buscar jurisprudências
+      description: Esse endpoint realiza a busca na base da JUIT e retorna 10 jurisprudências.
+      operationId: getJurisprudences
+      security:
+        - basicAuth: []
+      parameters:
+        - in: header
+          name: Accept
+          required: true
+          schema:
+            type: string
+            enum:
+              - application/json
+            default: application/json
+          description: This header specifies the types of content that the client accepts in the response.
+        - in: header
+          name: Accept-Language
+          required: true
+          schema:
+            type: string
+            enum:
+              - pt-br
+            default: pt-br
+          description: It indicates the client's language preferences for the response.
+        - in: header
+          name: Accept-Encoding
+          required: false
+          schema:
+            type: string
+            default: 'gzip, deflate'
+          description: It indicates to the server that the client is capable of decompressing (decoding) responses that are encoded before being sent.
+        - in: header
+          required: true
+          name: Content-Type
+          schema:
+            type: string
+            enum:
+              - application/json
+        - in: header
+          required: false
+          name: User-Agent
+          schema:
+            type: string
+          description: Client User-Agent
+        - $ref: '#/components/parameters/Query'
+        - $ref: '#/components/parameters/Owner'
+        - $ref: '#/components/parameters/SearchID'
+        - $ref: '#/components/parameters/SearchOn'
+        - $ref: '#/components/parameters/DisableSynonymOn'
+        - $ref: '#/components/parameters/SortByField'
+        - $ref: '#/components/parameters/SortByDirection'
+        - $ref: '#/components/parameters/NextPageToken'
+        - $ref: '#/components/parameters/FilterOrderDate'
+        - $ref: '#/components/parameters/FilterJudgmentDate'
+        - $ref: '#/components/parameters/FilterPublicationDate'
+        - $ref: '#/components/parameters/FilterReleaseDate'
+        - $ref: '#/components/parameters/FilterSignatureDate'
+        - $ref: '#/components/parameters/FilterCourtCode'
+        - $ref: '#/components/parameters/FilterDegree'
+        - $ref: '#/components/parameters/FilterProcessOriginState'
+        - $ref: '#/components/parameters/FilterDistrict'
+        - $ref: '#/components/parameters/FilterDocumentMatterList'
+        - $ref: '#/components/parameters/FilterProcessClassNameList'
+        - $ref: '#/components/parameters/FilterJudgmentBody'
+        - $ref: '#/components/parameters/FilterTrier'
+        - $ref: '#/components/parameters/FilterDocumentType'
+        - $ref: '#/components/parameters/FilterJusticeType'
+      responses:
+        '200':
+          description: Retrieved jurisprudences.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/pagination'
+                  - type: object
+                    properties:
+                      search_info:
+                        $ref: '#/components/schemas/search_info'
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Jurisprudence'
+          headers:
+            Content-Language:
+              description: Language returned by the request
+              schema:
+                type: string
+            Content-Length:
+              description: Response body size in bytes
+              schema:
+                type: integer
+            Content-Type:
+              description: Response content type
+              schema:
+                type: string
+            Date:
+              description: UTC response date/time
+              schema:
+                type: string
+                format: date-time
+        '400':
+          description: Bad Request response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    description: Request status code
+                    example: 400
+                  error:
+                    type: string
+                    description: Request status code description
+                    example: Bad Request
+                  message:
+                    type: string
+                    description: The error message
+                    example: invalid user
+                  details:
+                    type: object
+                    properties:
+                      trace_id:
+                        type: string
+                        description: |
+                          Error trace id. The trace ID have this pattern `{1}-{2}-{3}`, where:
+
+                          1. A letter indicating the error layer:
+                            - `D` → Database
+                            - `B` → Backend  
+                            - `F` → Frontend
+                          2. A letter indicating the log level
+                            - `D` → Debug
+                            - `I` → Info
+                            - `W` → Warning
+                            - `E` → Error
+                            - `F` → Fatal
+                          3. A Short UUID implemented based on MySQL Function [`UUID_SHORT()`](https://dev.mysql.com/doc/refman/8.0/en/miscellaneous-functions.html#function_uuid-short)
+                        pattern: '^[BFD]\-[DIWEF]\-\d.+$'
+                        example: D-E-11341740730835009643
+                      short_message:
+                        description: The error feedback short message. Usually in portuguese.
+                        example: Usuário inválido.
+                      long_message:
+                        description: The error feedback complete message. Usually in portuguese.
+                        example: Usuário inválido. Apenas usuários cadastrados no sistema podem efetuar esse tipo de operação.
+              example:
+                status: 400
+                error: Bad request
+                message: '"guid" path param is invalid'
+                details:
+                  trace_id: D-E-11341740730835009643
+                  short_message: Path param "guid" inválido.
+                  long_message: Path param "guid" inválido.
+          headers:
+            Content-Language:
+              $ref: '#/paths/~1jurisprudence/get/responses/200/headers/Content-Language'
+            Content-Length:
+              $ref: '#/paths/~1jurisprudence/get/responses/200/headers/Content-Length'
+            Content-Type:
+              $ref: '#/paths/~1jurisprudence/get/responses/200/headers/Content-Type'
+            Date:
+              $ref: '#/paths/~1jurisprudence/get/responses/200/headers/Date'
+        '403':
+          description: Forbidden response
+          content:
+            application/json:
+              schema:
+                $ref: '#/paths/~1jurisprudence/get/responses/400/content/application~1json/schema'
+              example:
+                status: 403
+                error: Forbidden
+                message: user can not perform this operation.
+                details:
+                  trace_id: D-E-11341740730835009851
+                  short_message: Usuário não tem permissão de executar essa ação.
+                  long_message: Usuário não tem permissão de executar essa ação.
+          headers:
+            Content-Language:
+              $ref: '#/paths/~1jurisprudence/get/responses/200/headers/Content-Language'
+            Content-Length:
+              $ref: '#/paths/~1jurisprudence/get/responses/200/headers/Content-Length'
+            Content-Type:
+              $ref: '#/paths/~1jurisprudence/get/responses/200/headers/Content-Type'
+            Date:
+              $ref: '#/paths/~1jurisprudence/get/responses/200/headers/Date'
+        '422':
+          description: Unprocessably content error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/paths/~1jurisprudence/get/responses/400/content/application~1json/schema'
+              example:
+                status: 422
+                error: Unprocessable content error
+                message: server can't proccess this request
+                details:
+                  trace_id: D-E-11341740730835009855
+                  short_message: Erro no servidor.
+                  long_message: Erro no servidor. Não foi possível processar a solicitação.
+          headers:
+            Content-Language:
+              $ref: '#/paths/~1jurisprudence/get/responses/200/headers/Content-Language'
+            Content-Length:
+              $ref: '#/paths/~1jurisprudence/get/responses/200/headers/Content-Length'
+            Content-Type:
+              $ref: '#/paths/~1jurisprudence/get/responses/200/headers/Content-Type'
+            Date:
+              $ref: '#/paths/~1jurisprudence/get/responses/200/headers/Date'
+        '500':
+          description: Server internal error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/paths/~1jurisprudence/get/responses/400/content/application~1json/schema'
+              example:
+                status: 500
+                error: Server internal error
+                message: database error
+                details:
+                  trace_id: D-E-11341740730835009854
+                  short_message: Erro no servidor.
+                  long_message: Erro no servidor. Entre em contato com o administrador do sistema.
+          headers:
+            Content-Language:
+              $ref: '#/paths/~1jurisprudence/get/responses/200/headers/Content-Language'
+            Content-Length:
+              $ref: '#/paths/~1jurisprudence/get/responses/200/headers/Content-Length'
+            Content-Type:
+              $ref: '#/paths/~1jurisprudence/get/responses/200/headers/Content-Type'
+            Date:
+              $ref: '#/paths/~1jurisprudence/get/responses/200/headers/Date'
+
+components:
+  parameters:
+    Owner:
+      description: |
+        ### Dono da busca
+        
+        Este campo deve ser preenchido com o email do usuário que está solicitando a consulta.
+      in: query
+      name: owner
+      required: true
+      schema:
+        type: string
+        maxLength: 512
+    SearchID:
+      description: |
+        ### ID da busca
+        
+        É o identificador da busca fornecido pelo backend.
+        
+        Deve ser fornecido em todas as requisições para a API, com exceção da primeira requisição, 
+        pois é na primeira requisição que a API irá retornar esse ID na propriedade `search_info.search_id` 
+        no corpo da resposta.
+      in: query
+      name: search_id
+      schema:
+        type: string
+        format: '/^[0-9a-f]{8}\b-[0-9a-f]{4}\b-[0-9a-f]{4}\b-[0-9a-f]{4}\b-[0-9a-f]{12}$/'
+    Query:
+      description: |
+        ### Termo da busca
+        
+        Termo da busca a ser disparada.
+        
+        **Importante**: A busca tem a função de sinônimos habilitada por padrão.
+        
+        #### Operadores de busca
+        
+        - `E` → Sinaliza que cada resultado da pesquisa deverá conter todas as palavras inseridas na caixa de busca
+        - `OU` → Faz com que a busca retorne qualquer uma das palavras inseridas na caixa de busca  
+        - `MASNAO` → Tem a finalidade de excluir da busca os resultados que apresentem os termos inseridos depois dele
+        - `PARÊNTESES ()` → Pode ser aplicado para realizar buscas mais complexas, em que se planeja agrupar conjuntos de termos avulsos ou combinados que devem ser modificados por outros operadores
+        
+        **Exemplos:**
+        - `E` → `indenização E acidente`
+        - `OU` → `juros OU multa diária`
+        - `MASNAO` → `vítima MASNAO fatal`
+        - `PARÊNTESES ()` → `dano E (moral OU material)`
+        
+        #### Busca por termo exato
+        
+        Ativada quando um termo ou sentença está entre aspas. Esse tipo de busca retorna apenas 
+        decisões que contém exatamente os termos inseridos.
+        
+        **Exemplo:** `"dano moral"`
+      in: query
+      name: query
+      required: true
+      schema:
+        type: string
+        maxLength: 512
+    SearchOn:
+      description: |
+        ### Campos onde a busca será realizada
+        
+        Deverá ser informado junto com o `Termo de busca`.
+        
+        #### Opções disponíveis
+        
+        - `title` → Título do documento
+        - `headnote` → Ementa
+        - `full_text` → Inteiro teor
+      in: query
+      name: search_on
+      explode: false
+      required: true
+      schema:
+        type: array
+        items:
+          type: string
+          pattern: (^title$)|(^headnote$)|(^full_text$)
+    DisableSynonymOn:
+      description: |
+        ### Campos de busca onde o sinônimo será desabilitado
+        
+        Por padrão, a busca possui o match de palavras com sinônimos **HABILITADO**. 
+        Ao utilizar o termo de busca _"Grávida"_, a busca padrão retorna resultados que possuem 
+        match com outros sinônimos: _"Estado Gravídico"_ e _"Prenha"_ por exemplo.
+        
+        Para desabilitar esse comportamento, os campos de busca em que os sinônimos devem ser 
+        desabilitados devem ser informados.
+        
+        **Exemplos:**
+        - Busca com sinônimo desabilitado na ementa: `search_on=headnote&disable_synonym_on=headnote`
+        - Busca com sinônimo **habilitado** na ementa, mas **desabilitado** no inteiro teor: `search_on=headnote&search_on=full_text&disable_synonym_on=full_text`
+        
+        #### Opções disponíveis
+        
+        - `headnote` → Ementa
+        - `full_text` → Inteiro teor
+      in: query
+      name: disable_synonym_on
+      explode: false
+      schema:
+        type: array
+        items:
+          type: string
+          pattern: (^title$)|(^headnote$)|(^full_text$)
+    NextPageToken:
+      description: |
+        ### Token de paginação
+        
+        A paginação nessa API se faz de forma contínua, como se fosse um scroll, não sendo possível 
+        utilizar o parâmetro de `offset`.
+        
+        A requisição vai voltar um objeto com uma propriedade chamada `next_page_token`, que deverá 
+        ser utilizada para preencher esse parâmetro para realizar a paginação.
+      in: query
+      name: next_page_token
+      schema:
+        type: string
+    SortByField:
+      description: |
+        ### Campo de ordenação
+        
+        Deve ser utilizado em conjunto com o parâmetro `sort_by_direction`. Para cada `sort_by_field` 
+        informado, outro parâmetro `sort_by_direction` também deverá ser informado.
+        
+        #### Valores possíveis
+        
+        - `score` → Score (Match na query)
+        - `order_date` → Data consolidada
+        - `juit_id` → ID da JUIT (Utilizado como critério de desempate caso o outro campo tenha mais de um documento com o mesmo valor)
+        
+        #### Combinações comuns
+        
+        - **Relevância geral:** `sort_by_field=score&sort_by_field=juit_id&sort_by_direction=desc&sort_by_direction=desc`
+        - **Mais recentes:** `sort_by_field=order_date&sort_by_field=juit_id&sort_by_direction=desc&sort_by_direction=desc`
+        - **Mais antigas:** `sort_by_field=order_date&sort_by_field=juit_id&sort_by_direction=asc&sort_by_direction=desc`
+      in: query
+      name: sort_by_field
+      schema:
+        type: array
+        items:
+          type: string
+          pattern: (^score$)|(^order_date$)|(^juit_id$)
+        default:
+          - score
+          - juit_id
+    SortByDirection:
+      description: |
+        ### Direção de ordenação
+        
+        Deve ser utilizado em conjunto com o parâmetro `sort_by_field`. Para cada `sort_by_direction` 
+        informado, outro parâmetro `sort_by_field` também deverá ser informado.
+        
+        #### Valores possíveis
+        
+        - `asc` → Ascendente/Do menor para o maior/Do mais antigo para o mais recente
+        - `desc` → Descendente/Do maior para o menor/Do mais recente para o mais antigo
+        
+        #### Combinações comuns
+        
+        - **Relevância geral:** `sort_by_field=score&sort_by_field=juit_id&sort_by_direction=desc&sort_by_direction=desc`
+        - **Mais recentes:** `sort_by_field=order_date&sort_by_field=juit_id&sort_by_direction=desc&sort_by_direction=desc`
+        - **Mais antigas:** `sort_by_field=order_date&sort_by_field=juit_id&sort_by_direction=asc&sort_by_direction=desc`
+      in: query
+      name: sort_by_direction
+      schema:
+        type: array
+        items:
+          type: string
+          pattern: (^asc$)|(^desc$)
+        default:
+          - desc
+          - desc
+    FilterOrderDate:
+      description: |
+        ### Data consolidada
+        
+        Esse tipo de data assume um dos valores das demais datas:
+        - Data de Julgamento
+        - Data de Publicação  
+        - Data de Disponibilização
+        - Data de Assinatura
+        
+        #### Formato
+        
+        Utilizar o formato `YYYYMMDD`, podendo ser precedido pelos operadores:
+        
+        - `$gt` → Maior
+        - `$gte` → Maior igual
+        - `$lt` → Menor  
+        - `$lte` → Menor igual
+        
+        **Exemplos:**
+        - Data **maior** que 20/05/2024 → `$gt20240520`
+        - Data **maior igual** a 20/05/2024 → `$gte20240520`
+        - Data **menor** que 20/05/2024 → `$lt20240520`
+        - Data **menor igual** a 20/05/2024 → `$lte20240520`
+        - Data **igual** a 20/05/2024 → `20240520`
+        
+        #### Busca entre datas
+        
+        Para realizar uma consulta entre duas datas, utilize esse mesmo query param duas vezes.
+        Uma com um dos operadores `$gt` ou `$gte`, e outra com um dos operadores `$lt` ou `$lte`.
+        
+        **Exemplo:** Data maior que 20/05/2024 e menor igual a 20/06/2024:
+        `order_date=$gt20240520&order_date=$lte20240620`
+      in: query
+      name: order_date
+      schema:
+        type: array
+        items:
+          type: string
+          pattern: '^(\$(gte?|lte?))?\d{4}\d{2}\d{2}$'
+    FilterJudgmentDate:
+      description: |
+        ### Data de Julgamento
+        
+        Data de julgamento do processo.
+        
+        #### Formato
+        
+        Utilizar o formato `YYYYMMDD`, podendo ser precedido pelos operadores:
+        
+        - `$gt` → Maior
+        - `$gte` → Maior igual
+        - `$lt` → Menor
+        - `$lte` → Menor igual
+        
+        Vide exemplos em **Data Consolidada**.
+      in: query
+      name: judgment_date
+      schema:
+        type: array
+        items:
+          type: string
+          pattern: '^(\$(gte?|lte?))?\d{4}\d{2}\d{2}$'
+    FilterPublicationDate:
+      description: |
+        ### Data de Publicação
+        
+        Data de publicação do julgado.
+        
+        #### Formato
+        
+        Utilizar o formato `YYYYMMDD`, podendo ser precedido pelos operadores:
+        
+        - `$gt` → Maior
+        - `$gte` → Maior igual
+        - `$lt` → Menor
+        - `$lte` → Menor igual
+        
+        Vide exemplos em **Data Consolidada**.
+      in: query
+      name: publication_date
+      schema:
+        type: array
+        items:
+          type: string
+          pattern: '^(\$(gte?|lte?))?\d{4}\d{2}\d{2}$'
+    FilterReleaseDate:
+      description: |
+        ### Data de Disponibilização
+        
+        Data de disponibilização do documento.
+        
+        #### Formato
+        
+        Utilizar o formato `YYYYMMDD`, podendo ser precedido pelos operadores:
+        
+        - `$gt` → Maior
+        - `$gte` → Maior igual
+        - `$lt` → Menor
+        - `$lte` → Menor igual
+        
+        Vide exemplos em **Data Consolidada**.
+      in: query
+      name: release_date
+      schema:
+        type: array
+        items:
+          type: string
+          pattern: '^(\$(gte?|lte?))?\d{4}\d{2}\d{2}$'
+    FilterSignatureDate:
+      description: |
+        ### Data de Assinatura
+        
+        Data de assinatura do documento.
+        
+        #### Formato
+        
+        Utilizar o formato `YYYYMMDD`, podendo ser precedido pelos operadores:
+        
+        - `$gt` → Maior
+        - `$gte` → Maior igual
+        - `$lt` → Menor
+        - `$lte` → Menor igual
+        
+        Vide exemplos em **Data Consolidada**.
+      in: query
+      name: signature_date
+      schema:
+        type: array
+        items:
+          type: string
+          pattern: '^(\$(gte?|lte?))?\d{4}\d{2}\d{2}$'
+    FilterCourtCode:
+      description: |
+        ### Tribunais e outras fontes
+        
+        Tribunal ou órgão no qual o processo foi julgado/decidido. Inclui tribunais do Poder Judiciário, 
+        órgãos administrativos, tribunais de contas e outros órgãos decisórios.
+        
+        #### Fontes Jurídicas
+        
+        | Superiores | TJs | TRFs | TRTs | TREs | TJMs |
+        |------------|-----|------|------|------|------|
+        | `STF` | `TJAC` | `TRF1` | `TRT1` | `TRE-AC` | `TJMMG` |
+        | `STJ` | `TJAL` | `TRF2` | `TRT2` | `TRE-AL` | `TJMRS` |
+        | `STM` | `TJAM` | `TRF3` | `TRT3` | `TRE-AM` | `TJMSP` |
+        | `TSE` | `TJAP` | `TRF4` | `TRT4` | `TRE-AP` |  |
+        | `TST` | `TJBA` | `TRF5` | `TRT5` | `TRE-BA` |  |
+        |  | `TJCE` | `TRF6` | `TRT6` | `TRE-CE` |  |
+        |  | `TJDFT` |  | `TRT7` | `TRE-DF` |  |
+        |  | `TJES` |  | `TRT8` | `TRE-ES` |  |
+        |  | `TJGO` |  | `TRT9` | `TRE-GO` |  |
+        |  | `TJMA` |  | `TRT10` | `TRE-MA` |  |
+        |  | `TJMG` |  | `TRT12` | `TRE-MG` |  |
+        |  | `TJMS` |  | `TRT13` | `TRE-MS` |  |
+        |  | `TJMT` |  | `TRT14` | `TRE-MT` |  |
+        |  | `TJPA` |  | `TRT15` | `TRE-PA` |  |
+        |  | `TJPB` |  | `TRT16` | `TRE-PB` |  |
+        |  | `TJPE` |  | `TRT17` | `TRE-PE` |  |
+        |  | `TJPI` |  | `TRT18` | `TRE-PI` |  |
+        |  | `TJPR` |  | `TRT19` | `TRE-PR` |  |
+        |  | `TJRJ` |  | `TRT20` | `TRE-RJ` |  |
+        |  | `TJRN` |  | `TRT21` | `TRE-RN` |  |
+        |  | `TJRO` |  | `TRT22` | `TRE-RO` |  |
+        |  | `TJRR` |  | `TRT23` | `TRE-RR` |  |
+        |  | `TJRS` |  | `TRT24` | `TRE-RS` |  |
+        |  | `TJSC` |  |  | `TRE-SC` |  |
+        |  | `TJSE` |  |  | `TRE-SE` |  |
+        |  | `TJSP` |  |  | `TRE-SP` |  |
+        |  | `TJTO` |  |  | `TRE-TO` |  |
+        
+        #### Fontes Administrativas
+        
+        | Tributário | Administrativo |
+        |------------|----------------|
+        | `CARF` | `TCE-SP` |
+        | `RFB` | `TCU` |
+        | `TIT-SP` |  |
+      in: query
+      name: court_code
+      schema:
+        type: array
+        items:
+          type: string
+    FilterDegree:
+      description: |
+        ### Instâncias
+        
+        Grau no qual foi julgado, o que corresponde às instâncias que temos no Poder Judiciário.
+        
+        #### Valores possíveis
+        
+        - `1ª Instância`
+        - `2ª Instância`
+        - `Tribunal Superior`
+        - `Administrativo`
+      in: query
+      name: degree
+      schema:
+        type: array
+        items:
+          type: string
+          pattern: (^1ª Instância$)|(^2ª Instância$)|(^Tribunal Superior$)|(^Administrativo$)
+    FilterProcessOriginState:
+      description: |
+        ### Estados de Origem
+        
+        Estado de origem do julgado, isso ocorre quando o julgado vai para instâncias superiores.
+        
+        #### Valores possíveis
+        
+        `AC`, `AL`, `AP`, `AM`, `BA`, `CE`, `ES`, `GO`, `MA`, `MT`, `MS`, `MG`, `PA`, `PB`, `PR`, `PE`, `PI`, `RJ`, `RN`, `RS`, `RO`, `RR`, `SC`, `SP`, `SE`, `TO`, `DF`
+      in: query
+      name: process_origin_state
+      schema:
+        type: array
+        items:
+          type: string
+          pattern: (^AC$)|(^AL$)|(^AP$)|(^AM$)|(^BA$)|(^CE$)|(^ES$)|(^GO$)|(^MA$)|(^MT$)|(^MS$)|(^MG$)|(^PA$)|(^PB$)|(^PR$)|(^PE$)|(^PI$)|(^RJ$)|(^RN$)|(^RS$)|(^RO$)|(^RR$)|(^SC$)|(^SP$)|(^SE$)|(^TO$)|(^DF$)
+    FilterDistrict:
+      description: |
+        ### Comarca
+        
+        Comarca de origem do recurso.
+        
+        #### Valores possíveis
+        
+        Como existem muitos valores possíveis para esse campo, **somente alguns valores serão mapeados como exemplos**:
+        
+        `Avaré`, `São Paulo`, `Campinas`, `Ribeirão Preto`, e outros...
+      in: query
+      name: district
+      schema:
+        type: array
+        items:
+          type: string
+    FilterDocumentMatterList:
+      description: |
+        ### Assunto
+        
+        Os assuntos do CNJ, são aqueles assuntos que foram catalogados pelo CNJ e estão disponíveis 
+        para consulta no site do CNJ dos [Sistemas de Gestão de Tabelas Processuais Unificadas](https://www.cnj.jus.br/sgt/consulta_publica_assuntos.php).
+        
+        #### Valores possíveis
+        
+        Como existem muitos valores possíveis para esse campo, **somente alguns valores serão mapeados como exemplos**:
+        
+        `cartão de crédito`, `Indenização de Dano Moral`, `Práticas Abusivas`, `Atraso de Vôo`, e outros...
+      in: query
+      name: document_matter_list
+      schema:
+        type: array
+        items:
+          type: string
+    FilterProcessClassNameList:
+      description: |
+        ### Classe da Ação
+        
+        Classes da ação definidas pelo tribunal ou recurso.
+        
+        #### Valores possíveis
+        
+        Como existem muitos valores possíveis para esse campo, **somente alguns valores serão mapeados como exemplos**:
+        
+        `Agravo de instrumento`, `Procedimento Comum Cível`, `Cumprimento de Sentença`, `Execução Fiscal`, e outros...
+      in: query
+      name: process_class_name_list
+      schema:
+        type: array
+        items:
+          type: string
+    FilterJudgmentBody:
+      description: |
+        ### Órgão Julgador
+        
+        Órgão responsável pelo julgamento.
+        
+        #### Valores possíveis
+        
+        Como existem muitos valores possíveis para esse campo, **somente alguns valores serão mapeados como exemplos**:
+        
+        `20ª Câmara de Direito Privado`, `2ª Vara Cível`, `Vara Única`, `2ª Vara`, e outros...
+      in: query
+      name: judgment_body
+      schema:
+        type: array
+        items:
+          type: string
+    FilterTrier:
+      description: |
+        ### Magistrado(a)
+        
+        Julgador responsável pelo caso, pode ser um Juiz, Desembargador ou Ministro.
+        
+        #### Valores possíveis
+        
+        Como existem muitos valores possíveis para esse campo, **somente alguns valores serão mapeados como exemplos**:
+        
+        `Correia Lima`, `Min. Alexandre de Moraes`, `Afonso Bráz`, `Jairo Brazil`, e outros...
+      in: query
+      name: trier
+      schema:
+        type: array
+        items:
+          type: string
+    FilterDocumentType:
+      description: |
+        ### Tipo de Documento
+        
+        Tipo de documento do julgado.
+        
+        #### Valores possíveis
+        
+        - `Acórdão`
+        - `Decisão Monocrática`
+        - `Não identificado`
+        - `Admissibilidade`
+        - `Sentença`
+        - `Decisão`
+        - `Despacho`
+        - `Dúvida de Competência`
+      in: query
+      name: document_type
+      schema:
+        type: array
+        items:
+          type: string
+          pattern: (^Acórdão$)|(^Decisão Monocrática$)|(^Não identificado$)|(^Admissibilidade$)|(^Sentença$)|(^Decisão$)|(^Despacho$)|(^Dúvida de Competência$)
+    FilterJusticeType:
+      description: |
+        ### Tipo de Justiça
+        
+        Tipo de justiça.
+        
+        #### Valores possíveis
+        
+        - `Juízo Comum`
+        - `Juizado Especial`
+      in: query
+      name: justice_type
+      schema:
+        type: array
+        items:
+          type: string
+          pattern: (^Juízo Comum$)|(^Juizado Especial$)
+
+  schemas:
+    pagination:
+      type: object
+      description: |
+        Informações da paginação.
+        
+        **Detalhe:** A paginação funciona como se fosse um 'scroll', só é realizada para frente.
+      properties:
+        next_page_token:
+          type: string
+          description: O próximo token que deverá ser informado para realizar a paginação para a próxima página
+          nullable: true
+          example: WzEyMzQsMTIzNF0=
+        total:
+          type: number
+          format: integer
+          description: Total de documentos retornados pela consulta.
+          example: 500
+        size:
+          type: number
+          format: integer
+          minimum: 0
+          maximum: 50
+          description: Quantidade de documentos solicitados nessa requisição.
+          example: 10
+    search_info:
+      type: object
+      description: Informações da busca.
+      properties:
+        search_id:
+          type: string
+          nullable: true
+          description: O ID da busca. Retornado pela própria API e não precisa ser fornecido na primeira solicitação.
+          example: 18fa6ff2-7ce0-4000-8f1d-7444bafc2c00
+        elapsed_time_in_ms:
+          type: number
+          format: integer
+          minimum: 0
+          description: Tempo da execução da requisição em milissegundos.
+          example: 872
+    Jurisprudence:
+      type: object
+      description: Jurisprudência.
+      properties:
+        id:
+          type: string
+          minLength: 1
+          description: ID da decisão.
+          nullable: false
+          example: ffff45f6c298edf77f960b20c3468926
+        juit_id:
+          type: string
+          nullable: false
+          description: ID da decisão gerado pela JUIT.
+          example: ffff45f6c298edf77f960b20c3468926
+        cnj_unique_number:
+          type: string
+          nullable: true
+          example: 2037843-28.2024.8.26.0000
+          description: Número do processo no padrão CNJ.
+        court_code:
+          type: string
+          nullable: false
+          example: TJSP
+          description: Código do tribunal no qual foi julgado.
+        degree:
+          type: string
+          nullable: true
+          example: 2ª Instância
+          description: Grau no qual foi julgado.
+        district:
+          type: string
+          nullable: true
+          example: Avaré
+          description: Comarca de origem do recurso.
+        document_matter_list:
+          type: array
+          items:
+            type: string
+          nullable: true
+          example:
+            - cartão de crédito
+          description: Lista com assuntos baseado na TPU do CNJ.
+        document_type:
+          type: string
+          nullable: true
+          example: Acórdão
+          description: Tipo de documento do julgado.
+        full_text:
+          type: string
+          nullable: true
+          example: null
+          description: Texto do inteiro teor do julgado.
+        headnote:
+          type: string
+          nullable: true
+          example: TUTELA DE URGÊNCIA - Ação de obrigação de fazer c.c. repetição de indébito e indenização por dano moral –  Contratação de reserva de margem consignável em cartão de crédito alegadamente mediante vício de consentimento - Indeferimento da tutela de urgência que visava suspender o desconto das parcelas do empréstimo controvertido - Circunstâncias dependentes de aferição contraditória - Requisitos do art. 300 do CPC não preenchidos - Decisão mantida - Agravo improvido.
+          description: Ementa do julgado.
+        judgment_body:
+          type: string
+          nullable: true
+          example: 20ª Câmara de Direito Privado
+          description: Órgão responsável pelo julgamento.
+        process_class_name_list:
+          type: array
+          items:
+            type: string
+          nullable: true
+          example:
+            - Agravo de instrumento
+          description: Classes da ação definidas pelo tribunal ou recurso.
+        process_origin_state:
+          type: string
+          nullable: true
+          example: null
+          description: Estado de origem do julgado.
+        judgment_date:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2024-05-07T00:00:00Z'
+          description: Data de julgamento do processo.
+        publication_date:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2024-05-07T00:00:00Z'
+          description: Data de publicação do julgado.
+        release_date:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+          description: Data de disponibilização do documento.
+        signature_date:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+          description: Data de assinatura do documento.
+        order_date:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2024-05-07T00:00:00Z'
+          description: Tem o valor de uma das datas para facilitar a visualização de data.
+        title:
+          type: string
+          nullable: false
+          example: TJSP / Acórdão / 2037843-28.2024.8.26.0000
+          description: O título do documento que é exibido na aplicação.
+        trier:
+          type: string
+          nullable: true
+          example: Correia Lima
+          description: 'Julgador responsável pelo caso, pode ser um Juiz, Desembargador ou Ministro.'
+        justice_type:
+          type: string
+          nullable: true
+          example: Juízo Comum
+          description: 'Indica o tipo de justiça que o processo pertence, podendo ser Juizado Especial e Juízo Comum.'
+        rimor_url:
+          type: string
+          nullable: false
+          example: 'https://rimor2.juit.io/busca_jurisprudencia/ffff45f6c298edf77f960b20c3468926'
+
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic

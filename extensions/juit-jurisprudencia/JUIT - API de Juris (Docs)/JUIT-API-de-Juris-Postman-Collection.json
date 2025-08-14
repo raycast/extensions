@@ -1,0 +1,777 @@
+{
+	"info": {
+		"_postman_id": "5e341a25-0038-4876-b2e6-7191b9a26d37",
+		"name": "JUIT API - Busca de Jurisprudência",
+		"description": "# JUIT API - Busca de Jurisprudência\n\n## 🏛️ Sobre a JUIT\n\nA JUIT é uma plataforma de pesquisa jurídica que revoluciona a busca por jurisprudência através de **Inteligência Artificial e Jurimetria**. Com uma base robusta de **68 milhões de precedentes** de todos os **92 tribunais brasileiros**, a JUIT oferece a mais completa solução de pesquisa jurisprudencial do mercado.\n\n## 🚀 O que a API oferece\n\nEsta collection permite acesso programático à poderosa base de dados da JUIT, oferecendo:\n\n### 📊 **Cobertura Completa**\n\n- **Todos os 92 tribunais do Brasil** (STF, STJ, TRFs, TJs, TRTs, TREs e mais)\n    \n- **Atualização diária** das decisões judiciais\n    \n- **Todas as áreas do direito** e órgãos administrativos\n    \n- Classificação automática com **taxonomia jurídica**\n    \n\n### 🔍 **Recursos de Busca Avançada**\n\n- **Filtros especializados** por tribunal, relator, data e assunto\n    \n- **Ordenação flexível** por relevância ou cronologia\n    \n- **Paginação eficiente** para grandes volumes de dados\n    \n- **Busca por número de processo** para localização específica\n    \n\n### 🎯 **Funcionalidades desta Collection**\n\n1. **Busca apenas na ementa** - Para consultas rápidas e precisas\n    \n2. **Busca na ementa e íntegra** - Para análise completa dos julgados\n    \n3. **Filtros por tribunal** - STF, STJ e outros tribunais específicos\n    \n4. **Filtros por relator** - Decisões de magistrados específicos\n    \n5. **Filtros temporais** - Decisões por período determinado\n    \n6. **Busca por processo** - Localização de julgados específicos\n    \n7. **Ordenação inteligente** - Por relevância ou data\n    \n8. **Paginação automática** - Navegação eficiente pelos resultados\n    \n\n### 💡 **Casos de Uso**\n\n- **Desenvolvedores** integrando busca jurídica em aplicações\n    \n- **Pesquisadores** em análise jurimétrica\n    \n- **Escritórios de advocacia** para pesquisa jurisprudencial\n    \n- **Departamentos jurídicos** para análise de precedentes\n    \n- **Estudantes de direito** para pesquisa acadêmica\n    \n\n### 🔐 **Autenticação e Uso**\n\n- Autenticação via **Basic Auth** (usuário/senha)\n    \n- Parâmetro `owner` obrigatório (seu email cadastrado)\n    \n- Scripts automáticos para **paginação** (search_id e next_page_token)\n    \n- Headers otimizados para **performance máxima**\n    \n\n---\n\n**💬 Desenvolvido para profissionais que buscam excelência na pesquisa jurídica**\n\n**Jurisprudência e Jurimetria impulsionadas por IA, para permitir que você faça menos trabalho manual e obtenha melhores resultados.**",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "5170900"
+	},
+	"item": [
+		{
+			"name": "1. Busca apenas na ementa",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/jurisprudence?query=indenização E \"danos morais\"&owner={{owner}}&search_on=headnote&sort_by_direction=desc&sort_by_field=score&sort_by_field=juit_id&sort_by_direction=desc",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"jurisprudence"
+					],
+					"query": [
+						{
+							"key": "query",
+							"value": "indenização E \"danos morais\"",
+							"description": "Obrigatório - Palavra ou frase que você quer buscar nos documentos"
+						},
+						{
+							"key": "owner",
+							"value": "{{owner}}",
+							"description": "Obrigatório - Seu email de usuário cadastrado no sistema"
+						},
+						{
+							"key": "search_on",
+							"value": "headnote",
+							"description": "Obrigatório - Onde buscar: headnote = resumo do caso (ementa)"
+						},
+						{
+							"key": "sort_by_direction",
+							"value": "desc",
+							"description": "Obrigatório - Ordem decrescente (mais relevante primeiro)"
+						},
+						{
+							"key": "sort_by_field",
+							"value": "score",
+							"description": "Obrigatório - Ordenar por relevância (quão bem o documento corresponde à sua busca)"
+						},
+						{
+							"key": "sort_by_field",
+							"value": "juit_id",
+							"description": "Obrigatório - Critério de desempate quando documentos têm a mesma relevância"
+						},
+						{
+							"key": "sort_by_direction",
+							"value": "desc",
+							"description": "Obrigatório - Ordem decrescente para o critério de desempate"
+						},
+						{
+							"key": "search_id",
+							"value": "{{search_id}}",
+							"description": "Opcional - ID da busca para paginação (preenchido automaticamente)",
+							"disabled": true
+						},
+						{
+							"key": "next_page_token",
+							"value": "{{next_page_token}}",
+							"description": "Opcional - Token para próxima página (preenchido automaticamente)",
+							"disabled": true
+						}
+					]
+				},
+				"description": "Realiza busca apenas no resumo (ementa) dos documentos jurídicos"
+			},
+			"response": []
+		},
+		{
+			"name": "2. Busca na ementa e na íntegra",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/jurisprudence?query=indenização E \"danos morais\"&owner={{owner}}&search_on=headnote&search_on=full_text&sort_by_field=score&sort_by_direction=desc&sort_by_field=juit_id&sort_by_direction=desc",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"jurisprudence"
+					],
+					"query": [
+						{
+							"key": "query",
+							"value": "indenização E \"danos morais\"",
+							"description": "Obrigatório - Palavra ou frase que você quer buscar nos documentos"
+						},
+						{
+							"key": "owner",
+							"value": "{{owner}}",
+							"description": "Obrigatório - Seu email de usuário cadastrado no sistema"
+						},
+						{
+							"key": "search_on",
+							"value": "headnote",
+							"description": "Obrigatório - Buscar no resumo do caso (ementa)"
+						},
+						{
+							"key": "search_on",
+							"value": "full_text",
+							"description": "Obrigatório - Buscar no documento completo (inteiro teor)"
+						},
+						{
+							"key": "sort_by_field",
+							"value": "score",
+							"description": "Obrigatório - Ordenar por relevância (quão bem o documento corresponde à sua busca)"
+						},
+						{
+							"key": "sort_by_direction",
+							"value": "desc",
+							"description": "Obrigatório - Critério de desempate quando documentos têm a mesma relevância"
+						},
+						{
+							"key": "sort_by_field",
+							"value": "juit_id",
+							"description": "Obrigatório - Ordem decrescente (mais relevante primeiro)"
+						},
+						{
+							"key": "sort_by_direction",
+							"value": "desc",
+							"description": "Obrigatório - Ordem decrescente para o critério de desempate"
+						},
+						{
+							"key": "search_id",
+							"value": "{{search_id}}",
+							"description": "Opcional - ID da busca para paginação (preenchido automaticamente)",
+							"disabled": true
+						},
+						{
+							"key": "next_page_token",
+							"value": "{{next_page_token}}",
+							"description": "Opcional - Token para próxima página (preenchido automaticamente)",
+							"disabled": true
+						}
+					]
+				},
+				"description": "Realiza busca tanto no resumo quanto no texto completo dos documentos"
+			},
+			"response": []
+		},
+		{
+			"name": "3. Busca na ementa e íntegra c/ Filtro do STJ",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/jurisprudence?query=\"conflito de competência\" E repetitivo &owner={{owner}}&search_on=headnote&search_on=full_text&court_code=STJ&sort_by_field=score&sort_by_direction=desc&sort_by_field=juit_id&sort_by_direction=desc",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"jurisprudence"
+					],
+					"query": [
+						{
+							"key": "query",
+							"value": "\"conflito de competência\" E repetitivo ",
+							"description": "Obrigatório - Palavra ou frase que você quer buscar nos documentos"
+						},
+						{
+							"key": "owner",
+							"value": "{{owner}}",
+							"description": "Obrigatório - Seu email de usuário cadastrado no sistema"
+						},
+						{
+							"key": "search_on",
+							"value": "headnote",
+							"description": "Obrigatório - Buscar no resumo do caso (ementa)"
+						},
+						{
+							"key": "search_on",
+							"value": "full_text",
+							"description": "Obrigatório - Ordenar por relevância (quão bem o documento corresponde à sua busca)"
+						},
+						{
+							"key": "court_code",
+							"value": "STJ",
+							"description": "Obrigatório - Buscar no documento completo (inteiro teor)"
+						},
+						{
+							"key": "sort_by_field",
+							"value": "score",
+							"description": "Opcional - Filtrar apenas decisões do Superior Tribunal de Justiça"
+						},
+						{
+							"key": "sort_by_direction",
+							"value": "desc",
+							"description": "Obrigatório - Critério de desempate quando documentos têm a mesma relevância"
+						},
+						{
+							"key": "sort_by_field",
+							"value": "juit_id",
+							"description": "Obrigatório - Ordem decrescente (mais relevante primeiro)"
+						},
+						{
+							"key": "sort_by_direction",
+							"value": "desc",
+							"description": "Obrigatório - Ordem decrescente para o critério de desempate"
+						},
+						{
+							"key": "search_id",
+							"value": "{{search_id}}",
+							"description": "Opcional - ID da busca para paginação (preenchido automaticamente)",
+							"disabled": true
+						},
+						{
+							"key": "next_page_token",
+							"value": "{{next_page_token}}",
+							"description": "Opcional - Token para próxima página (preenchido automaticamente)",
+							"disabled": true
+						}
+					]
+				},
+				"description": "Busca no resumo e texto completo, mostrando apenas decisões do STJ"
+			},
+			"response": []
+		},
+		{
+			"name": "4. Busca na ementa e íntegra c/ Filtro do STJ - Mais recentes",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/jurisprudence?query=\"conflito de competência\" E repetitivo&owner={{owner}}&search_on=headnote&search_on=full_text&court_code=STJ&sort_by_field=order_date&sort_by_direction=desc&sort_by_field=juit_id&sort_by_direction=desc",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"jurisprudence"
+					],
+					"query": [
+						{
+							"key": "query",
+							"value": "\"conflito de competência\" E repetitivo",
+							"description": "Obrigatório - Palavra ou frase que você quer buscar nos documentos"
+						},
+						{
+							"key": "owner",
+							"value": "{{owner}}",
+							"description": "Obrigatório - Seu email de usuário cadastrado no sistema"
+						},
+						{
+							"key": "search_on",
+							"value": "headnote",
+							"description": "Obrigatório - Buscar no resumo do caso (ementa)"
+						},
+						{
+							"key": "search_on",
+							"value": "full_text",
+							"description": "Obrigatório - Buscar no documento completo (inteiro teor)"
+						},
+						{
+							"key": "court_code",
+							"value": "STJ",
+							"description": "Opcional - Filtrar apenas decisões do Superior Tribunal de Justiça"
+						},
+						{
+							"key": "sort_by_field",
+							"value": "order_date",
+							"description": "Obrigatório - Ordenar por data do documento"
+						},
+						{
+							"key": "sort_by_direction",
+							"value": "desc",
+							"description": "Obrigatório - Critério de desempate quando documentos têm a mesma data"
+						},
+						{
+							"key": "sort_by_field",
+							"value": "juit_id",
+							"description": "Obrigatório - Ordem decrescente (mais recente primeiro)"
+						},
+						{
+							"key": "sort_by_direction",
+							"value": "desc",
+							"description": "Obrigatório - Ordem decrescente para o critério de desempate"
+						},
+						{
+							"key": "search_id",
+							"value": "{{search_id}}",
+							"description": "Opcional - ID da busca para paginação (preenchido automaticamente)",
+							"disabled": true
+						},
+						{
+							"key": "next_page_token",
+							"value": "{{next_page_token}}",
+							"description": "Opcional - Token para próxima página (preenchido automaticamente)",
+							"disabled": true
+						}
+					]
+				},
+				"description": "Busca decisões do STJ ordenadas da mais recente para a mais antiga"
+			},
+			"response": []
+		},
+		{
+			"name": "5. Busca no título pelo número do processo",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/jurisprudence?query=2037843-28.2024.8.26.0000&owner={{owner}}&search_on=title&sort_by_field=score&sort_by_direction=desc&sort_by_field=juit_id&sort_by_direction=desc",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"jurisprudence"
+					],
+					"query": [
+						{
+							"key": "query",
+							"value": "2037843-28.2024.8.26.0000",
+							"description": "Obrigatório - Número do processo no formato padrão (CNJ)"
+						},
+						{
+							"key": "owner",
+							"value": "{{owner}}",
+							"description": "Obrigatório - Seu email de usuário cadastrado no sistema"
+						},
+						{
+							"key": "search_on",
+							"value": "title",
+							"description": "Obrigatório - Buscar apenas no título do documento"
+						},
+						{
+							"key": "sort_by_field",
+							"value": "score",
+							"description": "Obrigatório - Ordenar por relevância (quão bem o documento corresponde à sua busca)"
+						},
+						{
+							"key": "sort_by_direction",
+							"value": "desc",
+							"description": "Obrigatório - Critério de desempate quando documentos têm a mesma relevância"
+						},
+						{
+							"key": "sort_by_field",
+							"value": "juit_id",
+							"description": "Obrigatório - Ordem decrescente (mais relevante primeiro)"
+						},
+						{
+							"key": "sort_by_direction",
+							"value": "desc",
+							"description": "Obrigatório - Ordem decrescente para o critério de desempate"
+						},
+						{
+							"key": "search_id",
+							"value": "{{search_id}}",
+							"description": "Opcional - ID da busca para paginação (preenchido automaticamente)",
+							"disabled": true
+						},
+						{
+							"key": "next_page_token",
+							"value": "{{next_page_token}}",
+							"description": "Opcional - Token para próxima página (preenchido automaticamente)",
+							"disabled": true
+						}
+					]
+				},
+				"description": "Busca um processo específico pelo número no título do documento"
+			},
+			"response": []
+		},
+		{
+			"name": "6. Busca na ementa c/ Filtro STF",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/jurisprudence?query=direitos fundamentais&owner={{owner}}&search_on=headnote&court_code=STF&sort_by_field=score&sort_by_direction=desc&sort_by_field=juit_id&sort_by_direction=desc",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"jurisprudence"
+					],
+					"query": [
+						{
+							"key": "query",
+							"value": "direitos fundamentais",
+							"description": "Obrigatório - Palavra ou frase que você quer buscar nos documentos"
+						},
+						{
+							"key": "owner",
+							"value": "{{owner}}",
+							"description": "Obrigatório - Seu email de usuário cadastrado no sistema"
+						},
+						{
+							"key": "search_on",
+							"value": "headnote",
+							"description": "Obrigatório - Buscar no resumo do caso (ementa)"
+						},
+						{
+							"key": "court_code",
+							"value": "STF",
+							"description": "Opcional - Filtrar apenas decisões do Supremo Tribunal Federal"
+						},
+						{
+							"key": "sort_by_field",
+							"value": "score",
+							"description": "Obrigatório - Ordenar por relevância (quão bem o documento corresponde à sua busca)"
+						},
+						{
+							"key": "sort_by_direction",
+							"value": "desc",
+							"description": "Obrigatório - Critério de desempate quando documentos têm a mesma relevância"
+						},
+						{
+							"key": "sort_by_field",
+							"value": "juit_id",
+							"description": "Obrigatório - Ordem decrescente (mais relevante primeiro)"
+						},
+						{
+							"key": "sort_by_direction",
+							"value": "desc",
+							"description": "Obrigatório - Ordem decrescente para o critério de desempate"
+						},
+						{
+							"key": "search_id",
+							"value": "{{search_id}}",
+							"description": "Opcional - ID da busca para paginação (preenchido automaticamente)",
+							"disabled": true
+						},
+						{
+							"key": "next_page_token",
+							"value": "{{next_page_token}}",
+							"description": "Opcional - Token para próxima página (preenchido automaticamente)",
+							"disabled": true
+						}
+					]
+				},
+				"description": "Busca no resumo de decisões do Supremo Tribunal Federal"
+			},
+			"response": []
+		},
+		{
+			"name": "7. Busca na ementa c/ Filtro STF + Min. Alexandre de Moraes",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/jurisprudence?query=liberdade&owner={{owner}}&search_on=headnote&court_code=STF&trier=Alexandre de Moraes&sort_by_field=score&sort_by_direction=desc&sort_by_field=juit_id&sort_by_direction=desc",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"jurisprudence"
+					],
+					"query": [
+						{
+							"key": "query",
+							"value": "liberdade",
+							"description": "Obrigatório - Palavra ou frase que você quer buscar nos documentos"
+						},
+						{
+							"key": "owner",
+							"value": "{{owner}}",
+							"description": "Obrigatório - Seu email de usuário cadastrado no sistema"
+						},
+						{
+							"key": "search_on",
+							"value": "headnote",
+							"description": "Obrigatório - Buscar no resumo do caso (ementa)"
+						},
+						{
+							"key": "court_code",
+							"value": "STF",
+							"description": "Opcional - Filtrar apenas decisões do Supremo Tribunal Federal"
+						},
+						{
+							"key": "trier",
+							"value": "Alexandre de Moraes",
+							"description": "Opcional - Filtrar apenas decisões do Ministro Alexandre de Moraes"
+						},
+						{
+							"key": "sort_by_field",
+							"value": "score",
+							"description": "Obrigatório - Ordenar por relevância (quão bem o documento corresponde à sua busca)"
+						},
+						{
+							"key": "sort_by_direction",
+							"value": "desc",
+							"description": "Obrigatório - Critério de desempate quando documentos têm a mesma relevância"
+						},
+						{
+							"key": "sort_by_field",
+							"value": "juit_id",
+							"description": "Obrigatório - Ordem decrescente (mais relevante primeiro)"
+						},
+						{
+							"key": "sort_by_direction",
+							"value": "desc",
+							"description": "Obrigatório - Ordem decrescente para o critério de desempate"
+						},
+						{
+							"key": "search_id",
+							"value": "{{search_id}}",
+							"description": "Opcional - ID da busca para paginação (preenchido automaticamente)",
+							"disabled": true
+						},
+						{
+							"key": "next_page_token",
+							"value": "{{next_page_token}}",
+							"description": "Opcional - Token para próxima página (preenchido automaticamente)",
+							"disabled": true
+						}
+					]
+				},
+				"description": "Busca decisões do STF relatadas pelo Ministro Alexandre de Moraes"
+			},
+			"response": []
+		},
+		{
+			"name": "8. Busca ementa/íntegra - Ano 2024",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/jurisprudence?query=rescisão E contrato E multa&owner={{owner}}&search_on=headnote&search_on=full_text&order_date=$gte20240101&order_date=$lte20241231&sort_by_field=score&sort_by_direction=desc&sort_by_field=juit_id&sort_by_direction=desc",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"jurisprudence"
+					],
+					"query": [
+						{
+							"key": "query",
+							"value": "rescisão E contrato E multa",
+							"description": "Obrigatório - Palavra ou frase que você quer buscar nos documentos"
+						},
+						{
+							"key": "owner",
+							"value": "{{owner}}",
+							"description": "Obrigatório - Seu email de usuário cadastrado no sistema"
+						},
+						{
+							"key": "search_on",
+							"value": "headnote",
+							"description": "Obrigatório - Buscar no resumo do caso (ementa)"
+						},
+						{
+							"key": "search_on",
+							"value": "full_text",
+							"description": "Obrigatório - Buscar no documento completo (inteiro teor)"
+						},
+						{
+							"key": "order_date",
+							"value": "$gte20240101",
+							"description": "Opcional - Data maior ou igual a 01/01/2024 (início do período)"
+						},
+						{
+							"key": "order_date",
+							"value": "$lte20241231",
+							"description": "Opcional - Data menor ou igual a 31/12/2024 (fim do período)"
+						},
+						{
+							"key": "sort_by_field",
+							"value": "score",
+							"description": "Obrigatório - Ordenar por relevância (quão bem o documento corresponde à sua busca)"
+						},
+						{
+							"key": "sort_by_direction",
+							"value": "desc",
+							"description": "Obrigatório - Critério de desempate quando documentos têm a mesma relevância"
+						},
+						{
+							"key": "sort_by_field",
+							"value": "juit_id",
+							"description": "Obrigatório - Ordem decrescente (mais relevante primeiro)"
+						},
+						{
+							"key": "sort_by_direction",
+							"value": "desc",
+							"description": "Obrigatório - Ordem decrescente para o critério de desempate"
+						},
+						{
+							"key": "search_id",
+							"value": "{{search_id}}",
+							"description": "Opcional - ID da busca para paginação (preenchido automaticamente)",
+							"disabled": true
+						},
+						{
+							"key": "next_page_token",
+							"value": "{{next_page_token}}",
+							"description": "Opcional - Token para próxima página (preenchido automaticamente)",
+							"disabled": true
+						}
+					]
+				},
+				"description": "Busca documentos de 2024 (período de 01/01/2024 a 31/12/2024)"
+			},
+			"response": []
+		},
+		{
+			"name": "9. Tamanho do Acervo",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/jurisprudence?query=%23%23%23adduceomnia%23%23%23&owner={{owner}}&search_on=headnote&sort_by_field=order_date&sort_by_direction=desc",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"jurisprudence"
+					],
+					"query": [
+						{
+							"key": "query",
+							"value": "%23%23%23adduceomnia%23%23%23"
+						},
+						{
+							"key": "owner",
+							"value": "{{owner}}",
+							"description": "Obrigatório - Seu email de usuário cadastrado no sistema"
+						},
+						{
+							"key": "search_on",
+							"value": "headnote",
+							"description": "Obrigatório - Buscar no resumo do caso (ementa)"
+						},
+						{
+							"key": "sort_by_field",
+							"value": "order_date",
+							"description": "Obrigatório - Ordem decrescente (mais relevante primeiro)"
+						},
+						{
+							"key": "sort_by_direction",
+							"value": "desc",
+							"description": "Obrigatório - Ordem decrescente para o critério de desempate"
+						},
+						{
+							"key": "search_id",
+							"value": "{{search_id}}",
+							"description": "Opcional - ID da busca para paginação (preenchido automaticamente)",
+							"disabled": true
+						},
+						{
+							"key": "next_page_token",
+							"value": "{{next_page_token}}",
+							"description": "Opcional - Token para próxima página (preenchido automaticamente)",
+							"disabled": true
+						}
+					]
+				},
+				"description": "Busca documentos de 2024 (período de 01/01/2024 a 31/12/2024)"
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "password",
+				"value": "",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Save the next_page_token value to the collection variable",
+					"pm.collectionVariables.get(\"next_page_token\");",
+					"",
+					"// Save the search_id value to the collection variable",
+					"pm.collectionVariables.get(\"search_id\");"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Save the next_page_token value to the collection variable",
+					"pm.collectionVariables.set(\"next_page_token\", pm.response.json().next_page_token);",
+					"",
+					"// Save the search_id value to the collection variable",
+					"pm.collectionVariables.set(\"search_id\", pm.response.json().search_info.search_id);"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "owner",
+			"value": "usuario@empresa.com.br",
+			"type": "string"
+		},
+		{
+			"key": "baseUrl",
+			"value": "https://api.juit.io:8080/v1/data-products/search",
+			"type": "string"
+		},
+		{
+			"key": "search_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "next_page_token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
