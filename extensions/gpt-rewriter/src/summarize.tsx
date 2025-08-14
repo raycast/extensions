@@ -1,11 +1,6 @@
-import {
-  getPreferenceValues,
-  showToast,
-  Toast,
-  getSelectedText,
-  Clipboard,
-} from "@raycast/api";
+import { getPreferenceValues, showToast, Toast, Clipboard } from "@raycast/api";
 import { processText } from "./lib/ai";
+import { getTextFromSelectionOrClipboard } from "./lib/utils";
 
 interface Preferences {
   openaiApiKey: string;
@@ -22,10 +17,10 @@ export default async function SummarizeCommand() {
   const preferences = getPreferenceValues<Preferences>();
 
   try {
-    const selectedText = await getSelectedText();
+    // Get text from selection or clipboard
+    const textToProcess = await getTextFromSelectionOrClipboard();
 
-    if (!selectedText.trim()) {
-      showToast(Toast.Style.Failure, "No text selected");
+    if (!textToProcess) {
       return;
     }
 
@@ -37,7 +32,7 @@ export default async function SummarizeCommand() {
     showToast(Toast.Style.Animated, "Summarizing text...");
 
     const response = await processText({
-      text: selectedText,
+      text: textToProcess,
       action: "summarizeText",
       model: preferences.defaultModel,
       temperature: parseFloat(preferences.temperature),

@@ -52,7 +52,7 @@ export default function SettingsCommand() {
           />
           {preferences.openaiApiKey && (
             <Action
-              title="Copy API Key"
+              title="Copy Api Key"
               onAction={() => copyApiKey(preferences.openaiApiKey, "OpenAI")}
               icon={Icon.CopyClipboard}
             />
@@ -76,7 +76,7 @@ export default function SettingsCommand() {
           />
           {preferences.openrouterApiKey && (
             <Action
-              title="Copy API Key"
+              title="Copy Api Key"
               onAction={() =>
                 copyApiKey(preferences.openrouterApiKey, "OpenRouter")
               }

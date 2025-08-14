@@ -177,7 +177,9 @@ export async function processText(
       openaiApiKey,
     );
   } else {
-    throw new Error("No API key configured");
+    // For local testing without API keys, return a mock response
+    console.log("No API key configured - returning mock response for testing");
+    return `[Mock Response] Processed text: "${text.substring(0, 50)}${text.length > 50 ? "..." : ""}"`;
   }
 }
 

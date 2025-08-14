@@ -1,15 +1,11 @@
-import {
-  getPreferenceValues,
-  showToast,
-  Toast,
-  getSelectedText,
-  Clipboard,
-} from "@raycast/api";
+import { getPreferenceValues, showToast, Toast, Clipboard } from "@raycast/api";
 import { processText } from "./lib/ai";
+import { getTextFromSelectionOrClipboard } from "./lib/utils";
 
 interface Preferences {
   openaiApiKey: string;
   openrouterApiKey: string;
+  useOpenRouter: boolean;
   defaultModel: string;
   temperature: string;
   maxTokens: string;
@@ -22,11 +18,10 @@ export default async function RewriteCommand() {
   const preferences = getPreferenceValues<Preferences>();
 
   try {
-    // Get selected text
-    const selectedText = await getSelectedText();
+    // Get text from selection or clipboard
+    const textToProcess = await getTextFromSelectionOrClipboard();
 
-    if (!selectedText.trim()) {
-      showToast(Toast.Style.Failure, "No text selected");
+    if (!textToProcess) {
       return;
     }
 
@@ -38,7 +33,7 @@ export default async function RewriteCommand() {
     showToast(Toast.Style.Animated, "Rewriting text...");
 
     const response = await processText({
-      text: selectedText,
+      text: textToProcess,
       action: "normalRewrite",
       model: preferences.defaultModel,
       temperature: parseFloat(preferences.temperature),
