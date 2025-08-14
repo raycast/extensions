@@ -204,6 +204,42 @@
       "title": "Max Tokens",
       "description": "Maximum response length",
       "default": "1000"
+    },
+    {
+      "name": "customSystemPrompt",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom System Prompt",
+      "description": "Override the default system prompt for all operations"
+    },
+    {
+      "name": "rewriteModel",
+      "type": "dropdown",
+      "required": false,
+      "title": "Rewrite Command Model",
+      "description": "Model for Rewrite command (uses default if empty)",
+      "data": [
+        {
+          "title": "GPT-4o Mini",
+          "value": "gpt-4o-mini"
+        },
+        {
+          "title": "GPT-4o",
+          "value": "gpt-4o"
+        },
+        {
+          "title": "GPT-3.5 Turbo",
+          "value": "gpt-3.5-turbo"
+        },
+        {
+          "title": "Claude Sonnet 4",
+          "value": "anthropic/claude-sonnet-4"
+        },
+        {
+          "title": "Gemini 2.5 Flash",
+          "value": "google/gemini-2.5-flash"
+        }
+      ]
     }
   ],
   "dependencies": {
