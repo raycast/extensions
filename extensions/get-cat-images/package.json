@@ -28,9 +28,6 @@
     "@raycast/api": "^1.101.1",
     "@raycast/utils": "^1.17.0"
   },
-  "platforms": [
-    "macOS",
-    "Windows"
   ],
   "devDependencies": {
     "@eslint/js": "^9.33.0",
