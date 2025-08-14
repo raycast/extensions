@@ -1,4 +1,4 @@
-import Ray from "@raycast/api";
+import { Clipboard, getPreferenceValues, Toast, ToastStyle } from "@raycast/api";
 import { setTimeout } from "timers/promises";
 
 export default async function Command() {
@@ -29,24 +29,24 @@ export default async function Command() {
 
   const answer = answers[Math.floor(Math.random() * answers.length)];
 
-  const toast = new Ray.Toast({ style: Ray.ToastStyle.Animated, title: "The Magic 8-Ball says.." });
+  const toast = new Toast({ style: ToastStyle.Animated, title: "The Magic 8-Ball says.." });
   await toast.show();
   await setTimeout(350);
 
-  const { defaultAction } = Ray.getPreferenceValues();
+  const { defaultAction } = getPreferenceValues();
 
   if (defaultAction === "paste") {
-    await Ray.Clipboard.paste(answer);
-    toast.style = Ray.ToastStyle.Success;
+    await Clipboard.paste(answer);
+    toast.style = ToastStyle.Success;
     toast.title = answer;
     toast.message = "Pasted to current app";
   } else if (defaultAction === "copy") {
-    await Ray.Clipboard.copy(answer);
-    toast.style = Ray.ToastStyle.Success;
+    await Clipboard.copy(answer);
+    toast.style = ToastStyle.Success;
     toast.title = answer;
     toast.message = "Copied to clipboard";
   } else {
-    toast.style = Ray.ToastStyle.Success;
+    toast.style = ToastStyle.Success;
     toast.title = answer;
     toast.message = "Shown only";
   }
