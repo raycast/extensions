@@ -17,11 +17,15 @@
         {
           "name": "defaultAction",
           "title": "Default action on Enter",
-          "description": "Choose what happens when you run the command (Copy or Paste).",
+          "description": "Choose what happens when you run the command",
           "type": "dropdown",
           "required": true,
-          "default": "copy",
+          "default": "none",
           "data": [
+            {
+              "title": "Nothing",
+              "value": "none"
+            },
             {
               "title": "Copy",
               "value": "copy"

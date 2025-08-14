@@ -1,8 +1,6 @@
 import Ray from "@raycast/api";
 import { setTimeout } from "timers/promises";
 
-type Prefs = { defaultAction: "copy" | "paste" };
-
 export default async function Command() {
   const answers: string[] = [
     "Nah, don't do it.",
@@ -35,17 +33,21 @@ export default async function Command() {
   await toast.show();
   await setTimeout(350);
 
-  const { defaultAction } = Ray.getPreferenceValues<Prefs>();
+  const { defaultAction } = Ray.getPreferenceValues();
 
   if (defaultAction === "paste") {
     await Ray.Clipboard.paste(answer);
     toast.style = Ray.ToastStyle.Success;
     toast.title = answer;
     toast.message = "Pasted to current app";
-  } else {
+  } else if (defaultAction === "copy") {
     await Ray.Clipboard.copy(answer);
     toast.style = Ray.ToastStyle.Success;
     toast.title = answer;
     toast.message = "Copied to clipboard";
+  } else {
+    toast.style = Ray.ToastStyle.Success;
+    toast.title = answer;
+    toast.message = "Shown only";
   }
 }

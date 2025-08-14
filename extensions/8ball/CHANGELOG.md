@@ -1,6 +1,6 @@
 # 8 Ball Changelog
 
-## [Add preference to choose default action (copy/paste)] - {PR_MERGE_DATE}
-- Adds "Default action on Enter" preference (Copy or Paste)
-- Performs the chosen action using Clipboard.copy/paste
-- Shows a success toast with the selected answer
+## [Add preference to choose default action (Nothing / Copy / Paste)] - {PR_MERGE_DATE}
+
+- Adds "Default action on Enter" preference (Nothing is default; Copy or Paste also available)
+- Nothing: show the answer toast only; Copy: copy to clipboard; Paste: type into the active app
