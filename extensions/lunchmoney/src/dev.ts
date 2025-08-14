@@ -21,8 +21,8 @@ const sampleTransactions: Transaction[] = [
     status: TransactionStatus.CLEARED,
     is_group: false,
     tags: [
-      { id: 1100, name: "food" },
-      { id: 1101, name: "essential" },
+      { id: 1100, name: "food", archived: false },
+      { id: 1101, name: "essential", archived: false },
     ],
     is_pending: false,
     is_income: false,
@@ -35,6 +35,7 @@ const sampleTransactions: Transaction[] = [
     recurring_type: null,
     recurring_amount: null,
     recurring_description: null,
+    account_display_name: "Chase (...4321)",
   },
   {
     id: 1002,
@@ -64,6 +65,7 @@ const sampleTransactions: Transaction[] = [
     recurring_cadence: "yearly",
     recurring_amount: 96.0,
     recurring_currency: "USD",
+    account_display_name: "Chase (...4321)",
   },
   {
     id: 1003,
@@ -93,6 +95,7 @@ const sampleTransactions: Transaction[] = [
     recurring_cadence: "monthly",
     recurring_amount: 3500.0,
     recurring_currency: "USD",
+    account_display_name: "Chase (...4321)",
   },
   {
     id: 1004,
@@ -122,6 +125,7 @@ const sampleTransactions: Transaction[] = [
     recurring_cadence: null,
     recurring_amount: null,
     recurring_currency: null,
+    account_display_name: "Amex (...9876)",
   },
   {
     id: 1005,
@@ -142,8 +146,8 @@ const sampleTransactions: Transaction[] = [
     status: TransactionStatus.CLEARED,
     is_group: false,
     tags: [
-      { id: 1102, name: "coffee" },
-      { id: 1103, name: "dining" },
+      { id: 1102, name: "coffee", archived: false },
+      { id: 1103, name: "dining", archived: false },
     ],
     is_pending: false,
     is_income: false,
@@ -155,6 +159,7 @@ const sampleTransactions: Transaction[] = [
     recurring_cadence: null,
     recurring_amount: null,
     recurring_currency: null,
+    account_display_name: "Amex (...9876)",
   },
   {
     id: 1006,
@@ -184,6 +189,7 @@ const sampleTransactions: Transaction[] = [
     recurring_cadence: null,
     recurring_amount: null,
     recurring_currency: null,
+    account_display_name: "Amex (...9876)",
   },
   {
     id: 1007,
@@ -213,6 +219,7 @@ const sampleTransactions: Transaction[] = [
     recurring_cadence: "monthly",
     recurring_amount: 50.0,
     recurring_currency: "USD",
+    account_display_name: "Chase (...4321)",
   },
   {
     id: 1008,
@@ -233,8 +240,8 @@ const sampleTransactions: Transaction[] = [
     status: TransactionStatus.UNCLEARED,
     is_group: false,
     tags: [
-      { id: 1105, name: "freelance" },
-      { id: 1106, name: "development" },
+      { id: 1105, name: "freelance", archived: false },
+      { id: 1106, name: "development", archived: false },
     ],
     is_pending: false,
     is_income: true,
@@ -246,6 +253,7 @@ const sampleTransactions: Transaction[] = [
     recurring_cadence: null,
     recurring_amount: null,
     recurring_currency: null,
+    account_display_name: "Chase (...4321)",
   },
   {
     id: 1009,
@@ -275,6 +283,7 @@ const sampleTransactions: Transaction[] = [
     recurring_cadence: "monthly",
     recurring_amount: 85.0,
     recurring_currency: "USD",
+    account_display_name: "Chase (...4321)",
   },
   {
     id: 1010,
@@ -304,6 +313,7 @@ const sampleTransactions: Transaction[] = [
     recurring_cadence: null,
     recurring_amount: null,
     recurring_currency: null,
+    account_display_name: "Amex (...9876)",
   },
   {
     id: 1011,
@@ -333,6 +343,7 @@ const sampleTransactions: Transaction[] = [
     recurring_amount: 9.99,
     recurring_currency: "USD",
     recurring_type: ReccuringTransactionType.CLEARED,
+    account_display_name: "Chase (...4321)",
   },
   {
     id: 1012,
@@ -353,8 +364,8 @@ const sampleTransactions: Transaction[] = [
     status: TransactionStatus.CLEARED,
     is_group: false,
     tags: [
-      { id: 1103, name: "dining" },
-      { id: 1104, name: "social" },
+      { id: 1103, name: "dining", archived: false },
+      { id: 1104, name: "social", archived: false },
     ],
     is_pending: false,
     is_income: false,
@@ -366,6 +377,7 @@ const sampleTransactions: Transaction[] = [
     recurring_cadence: null,
     recurring_amount: null,
     recurring_currency: null,
+    account_display_name: "Amex (...9876)",
   },
 ];
 

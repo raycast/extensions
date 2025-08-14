@@ -10,6 +10,7 @@ import type {
   Build,
   Pagination,
   CreateEnvironment,
+  Domain,
 } from "./types";
 
 export const token = getPreferenceValues().accessToken;
@@ -178,6 +179,15 @@ export function getFetchProjectsURL(teamId?: string, limit = 100) {
   return apiURL + `v8/projects?teamId=${teamId ?? ""}&limit=${limit}`;
 }
 
+export async function fetchProjects(teamId?: string, limit = 100): Promise<Project[]> {
+  const response = await fetch(getFetchProjectsURL(teamId, limit), {
+    method: "get",
+    headers: headers,
+  });
+  const json = (await response.json()) as { projects: Project[] };
+  return json.projects;
+}
+
 // Raw function for fetching project environment variable
 async function _rawFetchProjectEnvironmentVariables(projectId: string, teamId?: string): Promise<Environment[]> {
   try {
@@ -301,4 +311,25 @@ export function getDeploymentURL(userOrTeamSlug: string, projectName: string, de
 
 export function getFetchDomainsURL(teamId?: string, limit = 100) {
   return apiURL + `v5/domains?teamId=${teamId ?? ""}&limit=${limit}`;
+}
+
+export async function fetchDomains(teamId?: string, limit = 100) {
+  const response = await fetch(getFetchDomainsURL(teamId, limit), {
+    method: "get",
+    headers: headers,
+  });
+  const json = (await response.json()) as { domains: Domain[] };
+  return json.domains;
+}
+
+export async function checkDomainAvailability(domain: string) {
+  const response = await fetch(apiURL + `v4/domains/status?name=${domain}`, {
+    method: "get",
+    headers: headers,
+  });
+  const json = (await response.json()) as { available: string; error?: { code: string; message: string } };
+  if (json.error) {
+    return "Check domain availability failed. Please verify that the domain is valid or try again later.";
+  }
+  return json.available;
 }

@@ -102,21 +102,21 @@ export default function Redeem(props: LaunchProps<{ arguments: Arguments.Redeem 
       let token: Token;
       try {
         token = getDecodedToken(input);
-
-        if (!token.unit || token.unit !== "sat") {
-          setError("For now Vortex can receive only satoshi tokens.");
-          return;
+        if (!token.unit) {
+          setError("Invalid token");
         }
 
-        const meltQuote = await requestMeltQuote(token);
+        const meltQuoteResponse = await requestMeltQuote(token);
 
-        if (meltQuote) {
+        if (meltQuoteResponse) {
+          const { meltQuote, unitPrice } = meltQuoteResponse;
           setCashuData({
             data: token,
-            amount: meltQuote.amount - meltQuote.fee_reserve,
-            fee: meltQuote.fee_reserve,
+            amount: Math.floor((meltQuote.amount - meltQuote.fee_reserve) * unitPrice),
+            fee: Math.floor(meltQuote.fee_reserve * unitPrice),
           });
         }
+
         return;
       } catch (e) {
         console.debug(e);

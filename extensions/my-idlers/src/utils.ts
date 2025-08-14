@@ -1,5 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import dayjs from "dayjs";
+import { Server } from "./types";
 
 const { max_num_as_unlimited } = getPreferenceValues<Preferences>();
 
@@ -19,4 +20,20 @@ export function dayHasPassed(date: Date | null) {
 
 export function capitalizeFirst(text: string) {
   return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+export async function deleteServer(server: Server) {
+  const { url, api_key } = getPreferenceValues<Preferences>();
+  const api_url = new URL(`api/servers/${server.id}`, url).toString();
+  const response = await fetch(api_url, {
+    method: "DELETE",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${api_key}`,
+    },
+  });
+  if (!response.ok) throw new Error();
+  const result = (await response.json()) as { result: "success" };
+  return result;
 }

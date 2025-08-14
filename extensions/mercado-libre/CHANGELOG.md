@@ -1,5 +1,14 @@
 # Mercado Libre Changelog
 
+## [Deprecation] - 2025-04-22
+
+- The extension has been deprecated as the API it relies on is no longer available.
+
+## [Enhancements] - 2025-01-26
+
+- Added support for Ecuadorian marketplace.
+- Renamed `Show Details` action to `Show Listing Details` and `Open in Browser` action to `Open Listing in Browser`.
+
 ## [Enhancements] - 2024-09-25
 
 - Added a `Show Details` action, allowing users to access detailed views of items.

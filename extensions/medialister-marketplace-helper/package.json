@@ -16,11 +16,19 @@
       "subtitle": "Medialister Helper",
       "description": "Search for online media in the Medialister marketplace",
       "mode": "view"
+    },
+    {
+      "name": "search-formats",
+      "title": "Check Media for Placement Options",
+      "subtitle": "Medialister Helper",
+      "description": "Booking options for a selected media",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.87.5",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^1.17.0",
+    "axios": "^1.8.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

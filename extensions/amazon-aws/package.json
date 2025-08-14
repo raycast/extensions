@@ -19,7 +19,11 @@
     "vineus",
     "stelo",
     "srikirank",
-    "b0lle"
+    "b0lle",
+    "2357gi",
+    "davzoku",
+    "marco_deleu",
+    "espenbye"
   ],
   "pastContributors": [
     "JonathanWbn"
@@ -146,13 +150,20 @@
       "title": "Step Functions",
       "description": "Find and open a State Machine",
       "mode": "view"
+    },
+    {
+      "name": "amplify",
+      "title": "Amplify",
+      "description": "Manage Amplify apps and branches",
+      "mode": "view"
     }
   ],
   "dependencies": {
+    "@aws-sdk/client-amplify": "^3.859.0",
     "@aws-sdk/client-cloudformation": "^3.216.0",
     "@aws-sdk/client-cloudwatch-logs": "^3.226.0",
     "@aws-sdk/client-codeartifact": "^3.664.0",
-    "@aws-sdk/client-codepipeline": "^3.216.0",
+    "@aws-sdk/client-codepipeline": "^3.787.0",
     "@aws-sdk/client-dynamodb": "^3.216.0",
     "@aws-sdk/client-ec2": "^3.216.0",
     "@aws-sdk/client-ecr": "^3.216.0",
@@ -181,6 +192,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

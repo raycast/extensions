@@ -36,6 +36,11 @@ export enum Status {
 
 export function useCalendar() {
   return useCachedPromise(() => {
-    return getCalendarEvents(7) as Promise<CalendarData[]>;
+    try {
+      return getCalendarEvents(7) as Promise<CalendarData[]>;
+    } catch (error) {
+      console.error("Failed to fetch calendar events:", error);
+      return Promise.resolve([] as CalendarData[]);
+    }
   });
 }

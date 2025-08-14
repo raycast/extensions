@@ -1,5 +1,10 @@
 # Search Database Changelog
 
+## [Update] - 2025-02-02
+
+- Add support for relations links in row metadata
+- Add export JSON action with pagination, can export millions of rows
+
 ## [Update] - 2024-12-12
 
 - Add select inputs for enum columns during update

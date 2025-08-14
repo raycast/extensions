@@ -286,6 +286,10 @@ export const PackageListItem = ({
               title="Copy Package Name"
               content={pkg.name}
             />
+            <Action.CopyToClipboard
+              title="Copy Version"
+              content={pkg.version}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }

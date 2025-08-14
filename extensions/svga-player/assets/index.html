@@ -6,6 +6,15 @@
     <title>SVGA Player</title>
     <script src="https://cdn.jsdelivr.net/npm/svgaplayerweb@2.3.1/build/svga.min.js"></script>
     <style>
+      :root {
+        --primary-bg: #f8f9fa;
+        --dark-bg: #1a1a1a;
+        --accent: #007aff;
+        --glass-bg-light: rgba(255, 255, 255, 0.9);
+        --glass-bg-dark: rgba(30, 30, 30, 0.9);
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
       html {
         border-radius: 12px;
         overflow: hidden;
@@ -19,16 +28,14 @@
         justify-content: center;
         align-items: center;
         min-height: 100vh;
-        background-color: #f8f9fa;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
       }
 
       .window {
         background: transparent;
         border-radius: 12px;
-        box-shadow: none;
         padding: 20px;
-        border: none;
         min-width: 400px;
         height: 100vh;
         display: flex;
@@ -46,14 +53,11 @@
       }
 
       #canvas {
-        background-color: #000000;
+        background-color: #ffffff;
         overflow: visible;
         height: fit-content;
         width: fit-content;
-      }
-
-      #canvas canvas {
-        margin: auto;
+        transition: background 0.3s ease;
       }
 
       .button-container {
@@ -68,34 +72,97 @@
         height: 40px;
         border-radius: 50%;
         cursor: pointer;
-        transition: transform 0.2s ease;
-        position: relative;
-        border: 1px solid rgba(0, 0, 0, 0.2);
-        outline: none;
-        -webkit-tap-highlight-color: transparent;
-        user-select: none;
-      }
-
-      .theme-button::before {
-        display: none;
+        transition: var(--transition);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(4px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       }
 
       .theme-button.dark {
-        background: rgb(0, 0, 0);
-        border-color: rgba(255, 255, 255, 0.2);
+        background: rgba(0, 0, 0, 0.9);
+        border-color: rgba(255, 255, 255, 0.1);
       }
 
-      .theme-button.light {
+      .theme-button:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .info-button {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        cursor: pointer;
+        background: #ffffff;
+        border: none;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+      }
+
+      .info-button svg {
+        width: 40px;
+        height: 40px;
+        fill: #ffffff;
+        transition: var(--transition);
+      }
+
+      .info-button:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .macos-dialog {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
         background: rgba(255, 255, 255, 0.95);
-        border-color: rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(20px) saturate(180%);
+        border-radius: 14px;
+        padding: 24px;
+        width: 280px;
+        opacity: 0;
+        visibility: hidden;
+        transition: var(--transition);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
       }
 
-      .theme-button:active {
-        transform: scale(0.95);
+      .macos-dialog.active {
+        opacity: 1;
+        visibility: visible;
       }
 
-      .theme-button:focus {
-        outline: none;
+      .dialog-content {
+        color: #1a1a1a;
+        font-size: 16px;
+        line-height: 1.5;
+        text-align: center;
+      }
+
+      .dialog-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(4px);
+        opacity: 0;
+        visibility: hidden;
+        transition: var(--transition);
+        z-index: 999;
+      }
+
+      .dialog-overlay.active {
+        opacity: 1;
+        visibility: visible;
       }
 
       .loading {
@@ -150,6 +217,86 @@
         margin-top: 8px;
         text-align: center;
       }
+
+      .info-button {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        cursor: pointer;
+        background: #2196f3;
+        border: none;
+        position: relative;
+        transition: transform 0.2s ease;
+      }
+
+      .metadata-container {
+        padding: 16px;
+        border-radius: 8px;
+        background: rgba(0, 122, 255, 0.1);
+        margin: 30px 16px 16px 16px;
+        font-size: 14px;
+      }
+
+      .metadata-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(0, 122, 255, 0.1);
+      }
+
+      .metadata-item:last-child {
+        border-bottom: none;
+      }
+
+      .metadata-label {
+        color: #666;
+        font-weight: 500;
+      }
+
+      .metadata-value {
+        color: #007AFF;
+        font-weight: 200;
+      }
+
+      .close-button {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        width: 24px;
+        height: 24px;
+        border-radius: 12px;
+        border: none;
+        background: rgba(0, 0, 0, 0.05);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition);
+        padding: 0;
+      }
+
+      .close-button:hover {
+        background: rgba(0, 0, 0, 0.1);
+        transform: scale(1.1);
+      }
+
+      .close-button::before,
+      .close-button::after {
+        content: '';
+        position: absolute;
+        width: 12px;
+        height: 2px;
+        background: #666;
+        border-radius: 1px;
+      }
+
+      .close-button::before {
+        transform: rotate(45deg);
+      }
+
+      .close-button::after {
+        transform: rotate(-45deg);
+      }
     </style>
   </head>
   <body>
@@ -161,16 +308,136 @@
         <div class="error-message"></div>
       </div>
       <div class="button-container">
-        <button class="theme-button dark" onclick="setTheme('dark')"></button>
         <button class="theme-button light" onclick="setTheme('light')"></button>
+        <button class="theme-button dark" onclick="setTheme('dark')"></button>
+        <button class="info-button" onclick="showDialog()">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            x="0px"
+            y="0px"
+            width="100"
+            height="100"
+            viewBox="0 0 48 48"
+          >
+            <path
+              fill="#2196f3"
+              d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"
+            ></path>
+            <path
+              fill="#fff"
+              d="M22 22h4v11h-4V22zM26.5 16.5c0 1.379-1.121 2.5-2.5 2.5s-2.5-1.121-2.5-2.5S22.621 14 24 14 26.5 15.121 26.5 16.5z"
+            ></path>
+          </svg>
+        </button>
       </div>
     </div>
+
+    <div class="dialog-overlay" onclick="hideDialog()"></div>
+    <div class="macos-dialog">
+      <button class="close-button" onclick="hideDialog()" aria-label="Close"></button>
+      <div class="metadata-container">
+        <span class="metadata-label" style="display: block; text-align: center; font-size: 16px; color: #007AFF;">Metadata</span>
+      </div>
+        <div class="metadata-item">
+          <span class="metadata-label">FPS</span>
+          <span class="metadata-value" id="fpsValue"></span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Frames</span>
+          <span class="metadata-value" id="framesValue"></span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Size</span>
+          <span class="metadata-value" id="sizeValue"></span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Memory</span>
+          <span class="metadata-value" id="memoryValue"></span>
+        </div>
+      </div>
+    </div>
+
     <script>
+      function updateMetadata(videoItem) {
+        try {
+          if (!videoItem) {
+            return;
+          }
+
+          // FPS
+          document.getElementById('fpsValue').textContent = videoItem.FPS || 'N/A';
+          
+          // Frames
+          document.getElementById('framesValue').textContent = videoItem.frames || 'N/A';
+
+          // Pixel Size
+          document.getElementById('sizeValue').textContent = `${videoItem.videoSize.width}x${videoItem.videoSize.height}`;
+          
+          // Memory Occupied
+          const memorySize = calcuMemory(videoItem);
+          document.getElementById('memoryValue').textContent = `${memorySize} MB`;
+        } catch (error) {
+          console.error('Error updating metadata:', error);
+          document.getElementById('fpsValue').textContent = 'Error';
+          document.getElementById('framesValue').textContent = 'Error';
+          document.getElementById('sizeValue').textContent = 'Error';
+          document.getElementById('memoryValue').textContent = 'Error';
+        }
+      }
+
+      function calcuMemory(videoItem) {
+        var memoryOccupied  = 0;
+        for (let key in videoItem.images) {
+          let imageData = videoItem.images[key];
+          var image = getImageSizeFromBase64Data(imageData);
+          memoryOccupied += image.width * image.height * 4;
+        }
+        return Math.round(memoryOccupied / 1048576 * 100) / 100 ;
+      }
+
+      function getImageSizeFromBase64Data(base64Data) {
+        var binaryData = convertDataURIToBinary(base64Data);
+        var width = (binaryData[18] << 8) | binaryData[19];
+        var height = (binaryData[22] << 8) | binaryData[23];
+        
+        return {
+          width: width,
+          height: height
+        };
+      }
+
+      function convertDataURIToBinary(base64String) {
+        var decodedString = window.atob(base64String);
+        var length = decodedString.length;
+      
+        var byteArray = new Uint8Array(new ArrayBuffer(length));
+      
+        for (var index = 0; index < length; index++) {
+          byteArray[index] = decodedString.charCodeAt(index);
+        }
+      
+        return byteArray;
+      }
+    </script>
+
+    <script>
+      function showDialog() {
+        document.querySelector(".macos-dialog").classList.add("active");
+        document.querySelector(".dialog-overlay").classList.add("active");
+      }
+
+      function hideDialog() {
+        document.querySelector(".macos-dialog").classList.remove("active");
+        document.querySelector(".dialog-overlay").classList.remove("active");
+      }
+
       function setTheme(theme) {
-        const color = theme === "dark" ? "#000000" : "#ffffff";
-        document.getElementById("canvas").style.backgroundColor = color;
-        const loadingElement = document.querySelector(".loading");
-        loadingElement.classList.toggle("dark", theme === "light");
+        document.body.classList.toggle("dark", theme === "dark");
+        document.getElementById("canvas").style.backgroundColor =
+          theme === "dark" ? "#000000" : "#ffffff";
+        document
+          .querySelector(".loading")
+          .classList.toggle("dark", theme === "light");
       }
 
       window.onload = async function () {
@@ -191,6 +458,7 @@
 
           loadingElement.style.display = "none";
           canvasElement.style.display = "block";
+          updateMetadata(videoItem);
 
           const { width, height } = videoItem.videoSize;
 
@@ -213,7 +481,8 @@
           loadingElement.style.display = "none";
           canvasElement.style.display = "none";
           const errorElement = document.querySelector(".error-message");
-          errorElement.textContent = "Can't load svga file, reason: " + error.message;
+          errorElement.textContent =
+            "Can't load svga file, reason: " + error.message;
           errorElement.style.display = "block";
           errorElement.classList.add("show");
         }

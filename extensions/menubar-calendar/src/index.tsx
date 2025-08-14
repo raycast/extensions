@@ -83,7 +83,12 @@ export default function Command() {
     const cache = new Cache();
     const calendarListItemsStr = cache.get(CacheKey.CONFIGURE_LIST_ITEMS);
     if (calendarListItemsStr) {
-      const ccListItem = JSON.parse(calendarListItemsStr) as CCalendarList[];
+      let ccListItem: CCalendarList[] = [];
+      try {
+        ccListItem = JSON.parse(calendarListItemsStr) as CCalendarList[];
+      } catch (error) {
+        console.error("JSON parsing error:", error);
+      }
       const cCalendarList = ccListItem[1].list.filter((item) => item.enabled);
       return remindersData.reminders.filter((calendar) => {
         if (calendar.list != null) {
@@ -146,7 +151,12 @@ export default function Command() {
     const cache = new Cache();
     const calendarListItemsStr = cache.get(CacheKey.CONFIGURE_LIST_ITEMS);
     if (calendarListItemsStr) {
-      const ccListItem = JSON.parse(calendarListItemsStr) as CCalendarList[];
+      let ccListItem: CCalendarList[] = [];
+      try {
+        ccListItem = JSON.parse(calendarListItemsStr) as CCalendarList[];
+      } catch (error) {
+        console.error("JSON parsing error:", error);
+      }
       const cCalendarList = ccListItem[0].list.filter((item) => item.enabled);
       return calendarData.filter(
         (calendar) => cCalendarList.findIndex((item) => item.id === calendar.calendar.id) !== -1,
@@ -368,10 +378,17 @@ export default function Command() {
             title={"Calendar List"}
             icon={extraItemIcon(CALENDAR_APP, Icon.List)}
             onAction={async () => {
-              await launchCommand({
-                name: "index2",
-                type: LaunchType.UserInitiated,
-              });
+              try {
+                await launchCommand({
+                  name: "index2",
+                  type: LaunchType.UserInitiated,
+                });
+              } catch (e) {
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: "Calendar List command is disabled",
+                });
+              }
             }}
           />
         )}

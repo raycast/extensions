@@ -1,5 +1,12 @@
 # Raycast ElevenLabs TTS Changelog
 
+## [1.1.0] - 2025-01-19
+
+### Added
+- Playback speed control with options from 0.5x to 2.0x speed
+- New preferences dropdown for playback speed selection
+- Integration with macOS afplay command for speed-adjusted playback
+
 ## [1.0.0] - 2025-01-12
 
 ### Added

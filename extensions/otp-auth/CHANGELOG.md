@@ -1,3 +1,3 @@
 # OTP Auth Changelog
 
-## [Initial Version] - 2025-01-09
+## [Initial Version] - 2025-01-17

@@ -179,6 +179,8 @@ export default function EnvironmentsList({ flag, environmentOrder, onMoveEnviron
                 title="Open in Launchdarkly"
                 url={getLDUrlWithEnvs(flag, environmentOrder, envKey)}
               />
+              <Action.CopyToClipboard title="Copy Feature Flag Key" content={flag.key} />
+              <Action.CopyToClipboard title="Copy Environment Key" content={envKey} />
               <Action
                 icon={Icon.ArrowUp}
                 title="Move Up"

@@ -1,5 +1,25 @@
 # GitLab Changelog
 
+## [Added support for Windows] - 2025-08-07
+
+## [Group milestones in MRs and Issues] - 2025-06-27
+
+- Add group milestones to the issue create form
+- Add group milestones to the MR create form
+
+## [Add label filter on issues menu bar] - 2025-06-19
+
+Add label filter on issues menu bar
+
+## [Fix] - 2025-05-14
+
+Fixed request loops that caused the extension to crash
+
+## [Merge Requests Menu Bar] - 2025-05-13
+
+- Added "My Merge Requests" view
+- Added the ability to filter for labels
+
 ## [Fix] - 2024-12-17
 
 - Fix "Ignore SSL Errors" setting not working on some features

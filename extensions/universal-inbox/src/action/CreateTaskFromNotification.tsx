@@ -41,7 +41,7 @@ export function CreateTaskFromNotification({ notification, mutate }: CreateTaskF
   const [searchText, setSearchText] = useState("");
 
   const { isLoading, data: projects } = useFetch<Array<ProjectSummary>>(
-    `${preferences.universalInboxBaseUrl}/api/tasks/projects/search?matches=${searchText}`,
+    `${preferences.universalInboxBaseUrl.replace(/\/$/, "")}/api/tasks/projects/search?matches=${searchText}`,
     {
       keepPreviousData: true,
       headers: {
@@ -123,7 +123,7 @@ async function createTaskFromNotification(
   try {
     await mutate(
       handleErrors(
-        fetch(`${preferences.universalInboxBaseUrl}/api/notifications/${notification.id}/task`, {
+        fetch(`${preferences.universalInboxBaseUrl.replace(/\/$/, "")}/api/notifications/${notification.id}/task`, {
           method: "POST",
           body: JSON.stringify(taskCreation),
           headers: {

@@ -1,5 +1,18 @@
 # World Clock Changelog
 
+## [Bugfix & Maintenance] - 2025-07-16
+
+- Avoid accessing the `.map` function on possibly undefined data
+- Bump all dependencies to the latest
+
+## [Optimization Extension] - 2025-04-29
+
+- Supports non-integer time zone offset
+
+## [Refactor Extension] - 2025-01-20
+
+- Refactoring extensions to replace the api used, now using [TimeAPI](https://www.timeapi.io)
+
 ## [Fix Star Half Hour Time Zone] - 2024-10-04
 
 - Fix the bug that the half-hour time zone is not included in starred time zones

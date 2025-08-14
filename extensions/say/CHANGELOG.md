@@ -1,5 +1,26 @@
 # Say - Text to Speech Changelog
 
+## [Bugfix & Maintenance] - 2025-07-07
+
+- Bump mac-say@0.3.2 to fix the possibly duplicate lines in Configure Say command
+- Bump all dependencies to the latest
+
+## [Routine Maintenance] - 2025-05-19
+
+- Add icon to the Say action
+- Bump all dependencies to the latest
+
+## [Routine Maintenance] - 2025-03-19
+
+- Migrate to `@raycast/api@1.94.0`
+- Use ESLint flag config
+- Bump all dependencies to the latest
+
+## [Routine Maintenance] - 2025-03-17
+
+- Add FAQs
+- Bump all dependencies to the latest
+
 ## [Enhancement] - 2025-01-08
 
 - Suppress error message if argument is empty

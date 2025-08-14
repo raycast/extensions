@@ -12,6 +12,7 @@ Quickly access and manage your LaunchDarkly feature flags directly from Raycast.
 - 👥 See maintainer and team information
 - 🔄 Quick toggle between flag names and keys
 - 🏃 Fast navigation with keyboard shortcuts
+- 🔗 Open flag in LaunchDarkly web UI
 
 ## Setup
 
@@ -39,6 +40,7 @@ Quickly access and manage your LaunchDarkly feature flags directly from Raycast.
 Quick Actions in List View:
 - `↵` View flag details
 - `⌘ + ↵` Open flag in LaunchDarkly web UI
+- Copy feature flag key to clipboard
 - `⌘ + S` Toggle between showing flag names or keys
 - `⌘ + F` Focus search
 
@@ -51,8 +53,9 @@ View complete flag information including:
 - Maintainer information
 
 Quick Actions in Details View:
+- `↵` Open current environment in LaunchDarkly web UI
+- `⌘ + ↵` Copy feature flag key to clipboard
 - `⌘ + ⇧ + ↑/↓` Reorder environments
-- `⌘ + ↵` Open current environment in LaunchDarkly web UI
 - `esc` Return to list view
 
 

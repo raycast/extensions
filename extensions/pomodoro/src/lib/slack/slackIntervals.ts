@@ -81,7 +81,10 @@ export function getNextSlackIntervalExecutor() {
       };
       break;
     case "long-break":
-      executor = { title: FocusText, onStart: async (slackToken) => slackCreateInterval("focus", slackToken) };
+      executor = {
+        title: FocusText,
+        onStart: async (slackToken) => slackCreateInterval("focus", slackToken),
+      };
       break;
     default:
       if (completedCount === longBreakThreshold) {

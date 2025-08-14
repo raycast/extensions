@@ -1,6 +1,6 @@
 import { Clipboard, showHUD, showToast, Toast } from "@raycast/api";
 import { playSvga } from "swift:../swift/svga-player";
-import { runAppleScript, showFailureToast } from "@raycast/utils";
+import { runAppleScript } from "@raycast/utils";
 
 export default async function Main() {
   await runPipeline();
@@ -28,12 +28,12 @@ export default async function Main() {
       tell application "Finder"
         set these_items to the selection as alias list
         if (count of these_items) > 0 then
-            set this_item to (item 1 of these_items) as alias
-            return POSIX path of this_item
+          set this_item to (item 1 of these_items) as alias
+          return POSIX path of this_item
         end if
       end tell
       return ""
-      `;
+    `;
 
     try {
       const isFinderActive = await runAppleScript(checkFinderActive);
@@ -48,10 +48,18 @@ export default async function Main() {
           const localPath = `file://${currentFocus}`;
           await playSvga(localPath);
           return true;
+        } else {
+          throw new Error("Not a valid SVGA file");
         }
       }
     } catch (error) {
-      showFailureToast(error, { title: "Failed to read current focus" });
+      showToast({
+        style: Toast.Style.Failure,
+        title:
+          error instanceof Error
+            ? error.message
+            : "Failed to read current focus",
+      });
       return true;
     }
     return false;

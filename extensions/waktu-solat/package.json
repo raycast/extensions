@@ -67,7 +67,7 @@
   "dependencies": {
     "@raycast/api": "^1.65.1",
     "@raycast/utils": "^1.10.1",
-    "axios": "1.6.0",
+    "axios": "^1.8.4",
     "humanize-duration": "^3.31.0",
     "jsdom": "^22.1.0",
     "moment": "^2.30.1",

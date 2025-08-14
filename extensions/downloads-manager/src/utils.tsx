@@ -1,5 +1,7 @@
-import { Action, ActionPanel, Detail, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, confirmAlert, Detail, getPreferenceValues, showToast, Toast, trash } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { accessSync, constants, readdirSync, statSync } from "fs";
+import { rm } from "fs/promises";
 import { join } from "path";
 import { ComponentType } from "react";
 import untildify from "untildify";
@@ -8,6 +10,7 @@ const preferences = getPreferenceValues();
 export const downloadsFolder = untildify(preferences.downloadsFolder ?? "~/Downloads");
 const showHiddenFiles = preferences.showHiddenFiles;
 const fileOrder = preferences.fileOrder;
+const lastestDownloadOrder = preferences.lastestDownloadOrder;
 
 export function getDownloads() {
   const files = readdirSync(downloadsFolder);
@@ -22,6 +25,7 @@ export function getDownloads() {
         lastModifiedAt: stats.mtime,
         createdAt: stats.ctime,
         addedAt: stats.atime,
+        birthAt: stats.birthtime,
       };
     })
     .sort((a, b) => {
@@ -43,6 +47,16 @@ export function getLatestDownload() {
     return undefined;
   }
 
+  if (lastestDownloadOrder === "addTime") {
+    downloads.sort((a, b) => b.addedAt.getTime() - a.addedAt.getTime());
+  } else if (lastestDownloadOrder === "createTime") {
+    downloads.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  } else if (lastestDownloadOrder === "modifiedTime") {
+    downloads.sort((a, b) => b.lastModifiedAt.getTime() - a.lastModifiedAt.getTime());
+  } else if (lastestDownloadOrder === "birthTime") {
+    downloads.sort((a, b) => b.birthAt.getTime() - a.birthAt.getTime());
+  }
+
   return downloads[0];
 }
 
@@ -53,6 +67,40 @@ export function hasAccessToDownloadsFolder() {
   } catch (error) {
     console.error(error);
     return false;
+  }
+}
+
+export async function deleteFileOrFolder(filePath: string) {
+  if (preferences.deletionBehavior === "trash") {
+    try {
+      await trash(filePath);
+      await showToast({ style: Toast.Style.Success, title: "Item Moved to Trash" });
+    } catch (error) {
+      await showFailureToast(error, { title: "Move to Trash Failed" });
+    }
+    return;
+  }
+
+  const shouldDelete = await confirmAlert({
+    title: "Delete Item?",
+    message: `Are you sure you want to permanently delete:\n${filePath}?`,
+    primaryAction: {
+      title: "Delete",
+    },
+  });
+
+  if (!shouldDelete) {
+    await showToast({ style: Toast.Style.Animated, title: "Cancelled" });
+    return;
+  }
+
+  try {
+    rm(filePath, { recursive: true, force: true });
+    await showToast({ style: Toast.Style.Success, title: "Item Deleted" });
+  } catch (error) {
+    if (error instanceof Error) {
+      await showFailureToast(error, { title: "Deletion Failed" });
+    }
   }
 }
 

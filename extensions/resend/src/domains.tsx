@@ -173,7 +173,7 @@ function DomainsAdd({ onDomainAdded }: { onDomainAdded: () => void }) {
 
       const newDomainRequest: AddDomainRequest = {
         name: values.name,
-        region: values.region === "us-east-1" ? "us-east-1" : values.region === "eu-west-1" ? "eu-west-1" : "sa-east-1",
+        region: values.region as AddDomainRequest["region"],
       };
 
       const response = await addDomain(newDomainRequest);

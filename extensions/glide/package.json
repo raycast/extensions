@@ -13,6 +13,24 @@
       "description": "Get the API keys at https://www.glideapps.com/docs/using-glide-tables-api",
       "type": "password",
       "required": true
+    },
+    {
+      "name": "view",
+      "title": "Type of view",
+      "description": "Choose between grid or list",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Grid",
+          "value": "grid"
+        },
+        {
+          "title": "List",
+          "value": "list"
+        }
+      ],
+      "default": "grid",
+      "required": false
     }
   ],
   "commands": [

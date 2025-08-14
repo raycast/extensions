@@ -1,8 +1,8 @@
-import { ActionPanel, Form, showToast, Icon, Action, Toast, LaunchProps, Color, AI, Detail } from '@raycast/api';
+import { ActionPanel, Form, showToast, Icon, Action, Toast, LaunchProps, Color, AI } from '@raycast/api';
 import { FormValidation, useCachedPromise, useForm } from '@raycast/utils';
-import qs from 'qs';
 
-import { getAreas, getTags, silentlyOpenThingsURL, thingsNotRunningError } from './api';
+import { addProject, getAreas, getTags } from './api';
+import ErrorView from './components/ErrorView';
 import { listItems } from './helpers';
 import { getDateString } from './utils';
 
@@ -23,8 +23,8 @@ type AddNewProjectProps = {
 };
 
 export function AddNewProject({ draftValues }: AddNewProjectProps) {
-  const { data: tags, isLoading: isLoadingTags } = useCachedPromise(() => getTags());
-  const { data: areas, isLoading: isLoadingAreas } = useCachedPromise(() => getAreas());
+  const { data: tags, isLoading: isLoadingTags, error: tagsError } = useCachedPromise(() => getTags());
+  const { data: areas, isLoading: isLoadingAreas, error: areasError } = useCachedPromise(() => getAreas());
 
   const { handleSubmit, itemProps, values, reset, focus, setValue } = useForm<FormValues>({
     async onSubmit(values) {
@@ -38,7 +38,7 @@ export function AddNewProject({ draftValues }: AddNewProjectProps) {
         'to-dos': values.toDos,
       };
 
-      await silentlyOpenThingsURL(`things:///add-project?${qs.stringify(json)}`);
+      await addProject(json);
 
       showToast({ style: Toast.Style.Success, title: 'Added new project', message: values.title });
       reset({ title: '', notes: '', tags: [], when: '', areaId: '', toDos: '', deadline: null });
@@ -86,8 +86,11 @@ Tasks:`);
   }
 
   const isLoading = isLoadingTags || isLoadingAreas;
+  const error = tagsError || areasError;
 
-  if (!tags && !isLoading) return <Detail markdown={thingsNotRunningError} />;
+  if (error) {
+    return <ErrorView error={error} />;
+  }
 
   const now = new Date();
 

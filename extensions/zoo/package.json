@@ -223,11 +223,34 @@
         {
           "title": "GPT-3.5 Turbo",
           "value": "gpt-3.5-turbo"
+        },
+        {
+          "title": "gemini-2.0-flash-exp",
+          "value": "gemini-2.0-flash-exp"
+        },
+        {
+          "title": "gemini-exp-1206",
+          "value": "gemini-exp-1206"
+        },
+        {
+          "title": "learnlm-1.5-pro-experimental",
+          "value": "learnlm-1.5-pro-experimental"
+        },
+        {
+          "title": "gemini-2.0-flash-thinking-exp-1219",
+          "value": "gemini-2.0-flash-thinking-exp-1219"
         }
       ],
       "required": true,
       "default": "gpt-4o",
       "title": "LLM Model Name"
+    },
+    {
+      "name": "custom_model",
+      "description": "Custom model ID for your API endpoint, will override the model selection",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Model ID"
     }
   ],
   "devDependencies": {

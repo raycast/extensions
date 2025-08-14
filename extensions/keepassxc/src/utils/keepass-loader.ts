@@ -1,4 +1,4 @@
-import { Clipboard, getPreferenceValues, showHUD, LocalStorage, Toast, showToast } from "@raycast/api";
+import { getPreferenceValues, LocalStorage, Toast, showToast } from "@raycast/api";
 import { parse } from "csv-parse/sync";
 import path from "path";
 import child_process from "child_process";
@@ -23,7 +23,7 @@ interface Preference {
 const showToastCliErrors = (e: { message: string }) => {
   let invalidPreference = "";
   let toastMessage = e.message.trim();
-  if (e.message.includes("Invalid credentials were provided") || e.message.includes("Failed to load key file")) {
+  if (e.message.includes("Invalid credentials") || e.message.includes("Failed to load key file")) {
     toastMessage = "Invalid Credentials";
   } else if (e.message.includes("keepassxc-cli: No such file or directory") || e.message.includes("ENOENT")) {
     invalidPreference = "KeePassXC App";
@@ -42,13 +42,15 @@ const showToastCliErrors = (e: { message: string }) => {
 class KeePassLoader {
   private static database: string;
   private static databasePassword: string;
-  private static keepassxcCli: string;
+  private static keepassxcCli: string | undefined;
   private static keyFile: string;
   private static spawn = child_process.spawn;
   static {
     const preferences: Preference = getPreferenceValues();
     this.database = preferences.database;
-    this.keepassxcCli = path.join(preferences.keepassxcRootPath.path, "Contents/MacOS/keepassxc-cli");
+    this.keepassxcCli = preferences.keepassxcRootPath?.path
+      ? path.join(preferences.keepassxcRootPath.path, "Contents/MacOS/keepassxc-cli")
+      : undefined;
   }
 
   /**
@@ -187,26 +189,14 @@ class KeePassLoader {
       cli.on("error", reject);
       cli.stderr.on("data", this.cliStderrErrorHandler(reject));
       cli.on("exit", (code) => {
-        code === 0 && resolve();
+        if (code === 0) {
+          resolve();
+        } else {
+          reject(new Error("Invalid Credentials"));
+        }
       });
     });
   };
-
-  /**
-   * Copies the TOTP of the given KeePassXC entry to the clipboard.
-   *
-   * The TOTP is copied as a concealed entry, meaning it will not be stored in the clipboard history.
-   * The function returns a Promise that resolves with the copied TOTP.
-   *
-   * @param entry The title of the KeePassXC entry.
-   * @returns A Promise that resolves with the copied TOTP.
-   */
-  static copyTOTP(entry: string) {
-    return this.getTOTP(entry).then((otp) => {
-      showHUD("TOTP has been copied to clipboard");
-      return Clipboard.copy(otp, { concealed: true }).then(() => otp);
-    });
-  }
 
   /**
    * Removes the stored credentials from LocalStorage.
@@ -261,27 +251,10 @@ class KeePassLoader {
           exited = true;
           tryResolve();
         } else {
-          reject(new Error(`Process exited with code: ${code}`));
+          reject(new Error(`Something went wrong when accessing the database (exit code: ${code})`));
         }
       });
     });
-  };
-
-  /**
-   * Get the TOTP value for a given entry.
-   *
-   * @param {string} entry - The name of the entry to get the TOTP for.
-   * @returns {Promise<string>} The TOTP value.
-   */
-  static getTOTP = (entry: string) => {
-    return this.execKeepassXCCli([
-      "show",
-      ...this.convertIntoKeyFileOption(this.keyFile),
-      "-q",
-      "-t",
-      `${this.database}`,
-      `${entry}`,
-    ]);
   };
 
   /**
@@ -314,7 +287,6 @@ class KeePassLoader {
    *
    * @returns {Promise<string[][]>} The entries in a CSV format.
    */
-  /******  54dad48e-3dfc-410d-b85e-285d0d945e01  *******/
   static loadEntriesCache = () => {
     return LocalStorage.getItem("entries").then((entries) => {
       if (entries == undefined) {
@@ -322,19 +294,6 @@ class KeePassLoader {
       } else {
         return this.parseCsvEntries(entries as string);
       }
-    });
-  };
-
-  /**
-   * Pastes the TOTP value for the given entry from the KeePass database into
-   * the system clipboard.
-   *
-   * @param {string} entry - The name of the entry in the KeePass database.
-   * @returns {Promise<string>} - A promise that resolves to the TOTP value.
-   */
-  static pasteTOTP = (entry: string) => {
-    return this.getTOTP(entry).then((otp) => {
-      return Clipboard.paste(otp).then(() => otp);
     });
   };
 

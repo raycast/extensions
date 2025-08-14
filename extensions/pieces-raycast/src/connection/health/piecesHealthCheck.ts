@@ -11,8 +11,8 @@ import { CapabilitiesEnum } from "@pieces.app/pieces-os-client";
  * - is pieces running
  * - is pieces at least updated to the minimum required version
  * - does the application need to be updated to represent the users's preferences
- * - this will prompt the user to install pieces os if it's not installed, return false if they reject the installation
- * - this will automatically update pieces os if it is not at least the minimum required version
+ * - this will prompt the user to install PiecesOs if it's not installed, return false if they reject the installation
+ * - this will automatically update PiecesOs if it is not at least the minimum required version
  * @returns a boolean on whether or not the health check succeeded
  */
 export default async function piecesHealthCheck(): Promise<boolean> {
@@ -51,7 +51,7 @@ export default async function piecesHealthCheck(): Promise<boolean> {
  * @param {number} [maxPollingMs=8000] - The maximum duration (in milliseconds) to poll for a connection before timing out.
  * @returns {Promise<boolean>} - A promise that resolves to `true` if the connection is established within the polling duration, or `false` if it times out.
  */
-export function pollForConnection(maxPollingMs = 8e3): Promise<boolean> {
+export function pollForConnection(maxPollingMs = 10e3): Promise<boolean> {
   return new Promise<boolean>((res) => {
     const intervalId = setInterval(async () => {
       const ok = await ConnectorSingleton.getInstance()

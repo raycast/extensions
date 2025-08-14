@@ -86,7 +86,7 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
         }
       },
       keepPreviousData: true,
-    }
+    },
   );
 
   const setPrompt = useCallback(
@@ -95,7 +95,7 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
         setValue("prompt", value);
       }
     },
-    [setValue]
+    [setValue],
   );
 
   const [showAwesomePrompts, setShowAwesomePrompts] = useState(false);

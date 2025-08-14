@@ -69,6 +69,7 @@ export const CopyRuleAction = ({ cursorRule }: Props) => {
   async function openProject() {
     const context = {
       cursorDirectory: {
+        ruleName: `${cursorRule.slug}.md`,
         ruleContent: cursorRule.content,
         replace: preferences.replaceOnLaunch,
       },

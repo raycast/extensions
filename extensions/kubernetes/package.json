@@ -51,6 +51,93 @@
       "subtitle": "Kubernetes",
       "description": "List Services in Kubernetes Cluster.",
       "mode": "view"
+    },
+    {
+      "name": "get-configmaps",
+      "title": "Get ConfigMaps",
+      "subtitle": "Kubernetes",
+      "description": "List ConfigMaps in a Kubernetes Cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-endpoints",
+      "title": "Get Endpoints",
+      "subtitle": "Kubernetes",
+      "description": "List Endpoints in a Kubernetes Cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-namespaces",
+      "title": "Get Namespaces",
+      "subtitle": "Kubernetes",
+      "description": "List Namespaces in a Kubernetes Cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-persistentvolumes",
+      "title": "Get PersistentVolumes",
+      "subtitle": "Kubernetes",
+      "description": "List PersistentVolumes in a Kubernetes Cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-persistentvolumeclaims",
+      "title": "Get PersistentVolumeClaims",
+      "subtitle": "Kubernetes",
+      "description": "List PersistentVolumeClaims in a Kubernetes Cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-events",
+      "title": "Get Events",
+      "subtitle": "Kubernetes",
+      "description": "List Events in a Kubernetes cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-limitranges",
+      "title": "Get LimitRanges",
+      "subtitle": "Kubernetes",
+      "description": "List LimitRanges in a Kubernetes cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-podtemplates",
+      "title": "Get PodTemplates",
+      "subtitle": "Kubernetes",
+      "description": "List PodTemplates in a Kubernetes Cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-replicationcontrollers",
+      "title": "Get ReplicationControllers",
+      "subtitle": "Kubernetes",
+      "description": "List ReplicationControllers in a Kubernetes Cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-resourcequotas",
+      "title": "Get ResourceQuotas",
+      "subtitle": "Kubernetes",
+      "description": "List ResourceQuotas in a Kubernetes cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-replicasets",
+      "title": "Get ReplicaSets",
+      "subtitle": "Kubernetes",
+      "description": "List ReplicaSets in a Kubernetes Cluster.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "availableNamespaces",
+      "type": "textfield",
+      "required": false,
+      "title": "Available Namespaces",
+      "description": "List of available namespaces for each Kubernetes context. It is useful when there is no permission to list all namespaces in the cluster, or you don't want to have all namespaces displayed in the dropdown menu. It should be a JSON object with the context name as the key and the list of namespaces as the value.",
+      "placeholder": "{\"ctx1\": [\"ns1\", \"ns2\"], \"ctx2\": [\"ns3\"]}"
     }
   ],
   "dependencies": {

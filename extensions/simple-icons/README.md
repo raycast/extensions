@@ -1,6 +1,6 @@
 # Brand Icons - simpleicons.org
 
-Browse, search, and copy 3200+ free SVG icons for popular brands from [Simple Icons](https://simpleicons.org).
+Browse, search, and copy 3300+ SVG icons for popular brands from [Simple Icons](https://simpleicons.org).
 
 [![raycast-cross-extension-badge]][raycast-cross-extension-link]
 [![raycast-pro-enhanced-badge]][raycast-pro-enhanced-link]
@@ -13,10 +13,11 @@ We ask that all users read our [legal disclaimer](https://github.com/simple-icon
 
 - View and copy SVG sources
 - View and copy brand colors
-- Copy CDN links from `cdn.simpleicons.org`, jsDelivr, or unpkg to clipboard
+- Copy CDN links from [cdn.simpleicons.org](https://cdn.simpleicons.org), [jsDelivr](https://www.jsdelivr.com/package/npm/simple-icons), or [unpkg](https://app.unpkg.com/simple-icons) to clipboard
 - Open file with a specific application
 - View brand aliases, aka-names, and localizations
 - View brand guidelines, sources, and licenses
+- Browse history versions of Simple Icons
 - Keep updating every week
 - Expose launch API for other extensions
 - Searching icons through AI (requires [Raycast Pro](https://raycast.com/pro))

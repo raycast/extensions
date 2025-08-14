@@ -1,5 +1,17 @@
 # GIF Search Changelog
 
+## [Fix] - 2025-07-10
+
+- Expanded Tenor URL detection in ⁠getServiceFromUrl.ts to ensure GIFs from ⁠tenor.com, ⁠c.tenor.com, and ⁠media.tenor.com are added to the "Recent" list in GIF Search.
+
+## [Refactor] - 2025-04-14
+
+- Refactored `copyFileToClipboard` to use Raycast APIs instead of relying on AppleScript.
+
+## [Locale Support] - 2025-03-17
+
+- Added locale support for Giphy and Tenor, configurable via Preferences
+- Updated Raycast packages to latest versions
 
 ## [Enhancement] - 2024-11-25
 
@@ -24,7 +36,6 @@
 ## [Fix favorites GIFS can't be removed] - 2024-09-02
 
 - Fixes a bug where favorited GIFs couldn't be removed from the favorites list
-
 
 ## [Better Results] - 2024-04-19
 

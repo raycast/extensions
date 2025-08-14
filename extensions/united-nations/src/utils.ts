@@ -6,7 +6,7 @@ import { crossLaunchCommand } from "raycast-cross-extension";
 import { useCachedState } from "@raycast/utils";
 import { recommendVoices } from "./constants.js";
 import { i18n } from "./i18n.js";
-import { LanguageCode } from "./types.js";
+import { LanguageCode, RssItem } from "./types.js";
 
 export const textToSpeech = async (text: string, voice?: string) => {
   await killRunningSay();
@@ -16,14 +16,8 @@ export const textToSpeech = async (text: string, voice?: string) => {
       type: LaunchType.Background,
       extensionName: "say",
       ownerOrAuthorName: "litomore",
-      arguments: {
-        content: text,
-      },
-      context: {
-        sayOptions: {
-          voice,
-        },
-      },
+      arguments: { content: text },
+      context: { sayOptions: { voice } },
     });
   } catch {
     const confirm = await confirmAlert({
@@ -100,3 +94,14 @@ export const latinSearchFilter = (languageCode: LanguageCode, text: string, sear
       return true;
   }
 };
+
+export const arrayifyRssItem = (rssItem?: RssItem | RssItem[]): RssItem[] => {
+  if (Array.isArray(rssItem)) return rssItem;
+  if (typeof rssItem === "object") return [rssItem];
+  return [];
+};
+
+export const stripSpecialEscapedCharacters = (markdownContent: string) =>
+  markdownContent
+    // We don't want LaTeX content
+    .replace(/\\([[\]])/g, "$1");

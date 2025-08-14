@@ -29,10 +29,10 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.31.0",
-    "nanoid": "^3.3.1",
     "fromnow": "^3.0.1",
-    "phone": "^3.1.10",
-    "osascript-tag": "^0.1.2"
+    "nanoid": "^3.3.1",
+    "osascript-tag": "^0.1.2",
+    "phone": "^3.1.10"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
@@ -41,6 +41,7 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
+    "prettier": "^3.5.3",
     "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },
@@ -49,5 +50,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

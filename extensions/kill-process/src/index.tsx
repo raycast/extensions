@@ -4,9 +4,11 @@ import {
   clearSearchBar,
   closeMainWindow,
   Color,
+  confirmAlert,
   getPreferenceValues,
   Icon,
   List,
+  open,
   popToRoot,
   showToast,
   Toast,
@@ -85,7 +87,9 @@ export default function ProcessList() {
 
   const fileIcon = (process: Process) => {
     if (process.type === "prefPane") {
-      return { fileIcon: process.path?.replace(/(.+\.prefPane)(.+)/, "$1") ?? "" };
+      return {
+        fileIcon: process.path?.replace(/(.+\.prefPane)(.+)/, "$1") ?? "",
+      };
     }
 
     if (process.type === "app" || process.type === "aggregatedApp") {
@@ -95,8 +99,46 @@ export default function ProcessList() {
     return "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/ExecutableBinaryIcon.icns";
   };
 
-  const killProcess = (process: Process) => {
-    exec(`kill -9 ${process.id}`);
+  const killProcess = async (process: Process, force: boolean = false) => {
+    const processName = process.processName === "-" ? `process ${process.id}?` : process.processName;
+    if (
+      !(await confirmAlert({
+        title: `${force ? "Force " : ""}Kill ${processName}?`,
+        rememberUserChoice: true,
+      }))
+    ) {
+      showToast({
+        title: `Cancelled Killing ${processName}`,
+        style: Toast.Style.Failure,
+      });
+      return;
+    }
+    exec(`zsh -c '${force ? "sudo " : ""}kill -9 ${process.id}'`, (error) => {
+      if (error) {
+        if (force) {
+          confirmAlert({
+            title: `Failed Killing ${processName}`,
+            message:
+              "Please ensure that touch id/password prompt is enabled for sudo: https://dev.to/siddhantkcode/enable-touch-id-authentication-for-sudo-on-macos-sonoma-14x-4d28",
+            primaryAction: {
+              title: "Open Link",
+              onAction: () =>
+                open("https://dev.to/siddhantkcode/enable-touch-id-authentication-for-sudo-on-macos-sonoma-14x-4d28"),
+            },
+          });
+        } else {
+          showToast({
+            title: `Failed Killing ${processName}`,
+            style: Toast.Style.Failure,
+          });
+        }
+        return;
+      }
+      showToast({
+        title: `Killed ${processName}`,
+        style: Toast.Style.Success,
+      });
+    });
     setFetchResult(state.filter((p) => p.id !== process.id));
     if (closeWindowAfterKill) {
       closeMainWindow();
@@ -107,10 +149,6 @@ export default function ProcessList() {
     if (clearSearchBarAfterKill) {
       clearSearchBar({ forceScrollToTop: true });
     }
-    showToast({
-      title: `Killed ${process.processName === "-" ? `process ${process.id}` : process.processName}`,
-      style: Toast.Style.Success,
-    });
   };
 
   const subtitleString = (process: Process) => {
@@ -148,7 +186,10 @@ export default function ProcessList() {
         }
         let knownRootNode = appMap.get(process.pid);
         if (knownRootNode == undefined) {
-          knownRootNode = { process: undefined, childNodes: [node] } as ProcessNode;
+          knownRootNode = {
+            process: undefined,
+            childNodes: [node],
+          } as ProcessNode;
           appMap.set(process.pid, knownRootNode);
         } else {
           if (knownRootNode.process == undefined) {
@@ -267,13 +308,17 @@ export default function ProcessList() {
                   },
                   {
                     text: prettyBytes(process.mem * 1024),
-                    icon: { source: "memorychip.svg", tintColor: Color.PrimaryText },
+                    icon: {
+                      source: "memorychip.svg",
+                      tintColor: Color.PrimaryText,
+                    },
                     tooltip: "Memory",
                   },
                 ]}
                 actions={
                   <ActionPanel>
                     <Action title="Kill" icon={Icon.XMarkCircle} onAction={() => killProcess(process)} />
+                    <Action title="Force Kill" icon={Icon.XMarkCircle} onAction={() => killProcess(process, true)} />
                     {process.path == null ? null : <Action.CopyToClipboard title="Copy Path" content={process.path} />}
                     <Action
                       title="Reload"
@@ -282,13 +327,13 @@ export default function ProcessList() {
                       onAction={() => fetchProcesses()}
                     />
                     <Action
-                      title={`${aggregateApps ? "Dis" : "En"}able Aggregating Apps`}
+                      title={`${aggregateApps ? "Disable" : "Enable"} Aggregating Apps`}
                       icon={Icon.AppWindow}
                       shortcut={{ key: "tab", modifiers: ["shift"] }}
                       onAction={() => {
                         setAggregateApps(!aggregateApps);
                         showToast({
-                          title: `${aggregateApps ? "Dis" : "En"}abled aggregating apps`,
+                          title: `${aggregateApps ? "Disabled" : "Enabled"} aggregating apps`,
                         });
                       }}
                     />

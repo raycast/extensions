@@ -42,4 +42,5 @@ This extension does not directly interact with Roblox Client/Studio, so they are
 
 ### Extra
 
+- View an Image from Roblox with its Image ID.
 - View a Favourite Game's Player Count on the Menu Bar

@@ -67,21 +67,885 @@
       "required": false
     }
   ],
+  "tools": [
+    {
+      "name": "get-current-user",
+      "title": "Get Current User",
+      "description": "Get Current Logged-in HackMD User, including teams"
+    },
+    {
+      "name": "get-recent-notes",
+      "title": "Get recent accessed notes",
+      "description": "Get recently accessed notes from HackMD"
+    },
+    {
+      "name": "get-team-workspace-notes",
+      "title": "Get Team Workspace Notes",
+      "description": "Get notes from a team workspace by team path"
+    },
+    {
+      "name": "get-personal-workspace-notes",
+      "title": "Get Personal Workspace Notes",
+      "description": "Get notes from your personal workspace"
+    },
+    {
+      "name": "view-note",
+      "title": "View Note Details",
+      "description": "Get detailed content and metadata for a specific note by ID or shortId"
+    },
+    {
+      "name": "create-note",
+      "title": "Create Note",
+      "description": "Create a new note in HackMD, optionally in a team workspace"
+    },
+    {
+      "name": "update-note",
+      "title": "Update Note",
+      "description": "Update an existing note in HackMD using note ID or shortId"
+    },
+    {
+      "name": "delete-note",
+      "title": "Delete Note",
+      "description": "Delete an existing note from HackMD using note ID or shortId"
+    }
+  ],
+  "ai": {
+    "instructions": "Use either full length ID or shortId when requesting note operations. Both formats are supported.\n\nWhen you're not sure what a team path is, ask for it or use the get-current-user tool to retrieve the team list.\n\nTeam paths are required for team operations like creating, updating, or deleting team notes.\n\nWhen retrieving notes, verify if it's a personal note or team note before performing operations.",
+    "evals": [
+      {
+        "input": "@hackmd Who am I and what teams have I joined?",
+        "mocks": {
+          "get-current-user": {
+            "id": "1b46ed75-04ac-4d9b-bfbb-9344ef6bd1b6",
+            "name": "My name",
+            "email": "user@email",
+            "userPath": "username",
+            "photo": "https://src_to_image.png",
+            "teams": [
+              {
+                "id": "08a5c75a-4d82-4dee-8b89-cba6f3dce369",
+                "ownerId": null,
+                "path": "hackmd",
+                "name": "HackMD Dev",
+                "logo": "https://uploads-public.hackmd.io/ZmEEvep.png",
+                "description": "Team description",
+                "visibility": "private",
+                "createdAt": 1740586346009,
+                "upgraded": true
+              },
+              {
+                "id": "ba6e4c56-0c04-4b3a-be11-9249a7316554",
+                "ownerId": null,
+                "path": "team-path",
+                "name": "Team Name",
+                "logo": "https://uploads-public.hackmd.io/ZmEEvep.png",
+                "description": "Public Team description",
+                "visibility": "public",
+                "createdAt": 1740586346009,
+                "upgraded": true
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-current-user"
+            }
+          },
+          {
+            "meetsCriteria": "Return user profile and joined teams"
+          }
+        ]
+      },
+      {
+        "input": "@hackmd Can you show me my recent notes?",
+        "mocks": {
+          "get-recent-notes": [
+            {
+              "id": "note_id",
+              "title": "note_title",
+              "tags": [
+                "list",
+                "of",
+                "tags"
+              ],
+              "createdAt": 1560349049743,
+              "titleUpdatedAt": 1736666704378,
+              "tagsUpdatedAt": null,
+              "publishType": "view",
+              "publishedAt": null,
+              "permalink": null,
+              "publishLink": "https://hackmd.io/@username/shortId",
+              "shortId": "shortId",
+              "content": "CONTENT_OMITTED_IN_LIST_API",
+              "lastChangedAt": 1560351606067,
+              "lastChangeUser": {
+                "name": "",
+                "userPath": "userpath",
+                "photo": "https://link_to_photo.png",
+                "biography": "bio"
+              },
+              "userPath": "userpath",
+              "teamPath": null,
+              "readPermission": "guest",
+              "writePermission": "signed_in"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-recent-notes"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@hackmd Show me all notes in my personal workspace",
+        "mocks": {
+          "get-personal-workspace-notes": [
+            {
+              "id": "note_id_1",
+              "title": "Personal Note Title",
+              "tags": [
+                "personal",
+                "notes"
+              ],
+              "createdAt": 1560349049743,
+              "titleUpdatedAt": 1736666704378,
+              "tagsUpdatedAt": null,
+              "publishType": "view",
+              "publishedAt": null,
+              "permalink": null,
+              "publishLink": "https://hackmd.io/@username/shortId1",
+              "shortId": "shortId1",
+              "content": "CONTENT_OMITTED_IN_LIST_API",
+              "lastChangedAt": 1560351606067,
+              "lastChangeUser": {
+                "name": "",
+                "userPath": "userpath",
+                "photo": "https://link_to_photo.png",
+                "biography": "bio"
+              },
+              "userPath": "userpath",
+              "teamPath": null,
+              "readPermission": "guest",
+              "writePermission": "signed_in"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-personal-workspace-notes"
+            }
+          },
+          {
+            "meetsCriteria": "Returns notes from personal workspace"
+          }
+        ]
+      },
+      {
+        "input": "@hackmd Can you pull up the notes from my HackMD team?",
+        "mocks": {
+          "get-current-user": {
+            "id": "1b46ed75-04ac-4d9b-bfbb-9344ef6bd1b6",
+            "name": "My name",
+            "email": "user@email",
+            "userPath": "username",
+            "photo": "https://src_to_image.png",
+            "teams": [
+              {
+                "id": "08a5c75a-4d82-4dee-8b89-cba6f3dce369",
+                "ownerId": null,
+                "path": "hackmd",
+                "name": "HackMD Dev",
+                "logo": "https://uploads-public.hackmd.io/ZmEEvep.png",
+                "description": "Team description",
+                "visibility": "private",
+                "createdAt": 1740586346009,
+                "upgraded": true
+              },
+              {
+                "id": "ba6e4c56-0c04-4b3a-be11-9249a7316554",
+                "ownerId": null,
+                "path": "team-path",
+                "name": "Team Name",
+                "logo": "https://uploads-public.hackmd.io/ZmEEvep.png",
+                "description": "Public Team description",
+                "visibility": "public",
+                "createdAt": 1740586346009,
+                "upgraded": true
+              }
+            ]
+          },
+          "get-team-workspace-notes": [
+            {
+              "id": "team_note_id",
+              "title": "Team Note Title",
+              "tags": [
+                "team",
+                "notes"
+              ],
+              "createdAt": 1560349049743,
+              "titleUpdatedAt": 1736666704378,
+              "tagsUpdatedAt": null,
+              "publishType": "view",
+              "publishedAt": null,
+              "permalink": null,
+              "publishLink": "https://hackmd.io/@teampath/shortId2",
+              "shortId": "shortId2",
+              "content": "CONTENT_OMITTED_IN_LIST_API",
+              "lastChangedAt": 1560351606067,
+              "lastChangeUser": {
+                "name": "",
+                "userPath": "userpath",
+                "photo": "https://link_to_photo.png",
+                "biography": "bio"
+              },
+              "userPath": "userpath",
+              "teamPath": "hackmd",
+              "readPermission": "guest",
+              "writePermission": "signed_in"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-current-user"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-team-workspace-notes",
+              "arguments": {
+                "teamPath": "hackmd"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Returns notes from specified team workspace"
+          }
+        ]
+      },
+      {
+        "input": "@hackmd Open the note with ID note_detail_id",
+        "mocks": {
+          "get-current-user": {
+            "id": "1b46ed75-04ac-4d9b-bfbb-9344ef6bd1b6",
+            "name": "My name",
+            "email": "user@email",
+            "userPath": "username",
+            "photo": "https://src_to_image.png",
+            "teams": [
+              {
+                "id": "08a5c75a-4d82-4dee-8b89-cba6f3dce369",
+                "ownerId": null,
+                "path": "hackmd",
+                "name": "HackMD Dev",
+                "logo": "https://uploads-public.hackmd.io/ZmEEvep.png",
+                "description": "Team description",
+                "visibility": "private",
+                "createdAt": 1740586346009,
+                "upgraded": true
+              },
+              {
+                "id": "ba6e4c56-0c04-4b3a-be11-9249a7316554",
+                "ownerId": null,
+                "path": "team-path",
+                "name": "Team Name",
+                "logo": "https://uploads-public.hackmd.io/ZmEEvep.png",
+                "description": "Public Team description",
+                "visibility": "public",
+                "createdAt": 1740586346009,
+                "upgraded": true
+              }
+            ]
+          },
+          "view-note": {
+            "id": "note_detail_id",
+            "title": "Detailed Note Title",
+            "tags": [
+              "important",
+              "documentation"
+            ],
+            "createdAt": 1560349049743,
+            "titleUpdatedAt": 1736666704378,
+            "tagsUpdatedAt": null,
+            "publishType": "view",
+            "publishedAt": null,
+            "permalink": null,
+            "publishLink": "https://hackmd.io/@username/SomeNoteID",
+            "shortId": "SomeNoteID",
+            "content": "# Detailed Note Content\n\nThis is the full content of the note with Markdown formatting.\n\n## Section 1\n\nContent of section 1\n\n## Section 2\n\nContent of section 2 with **bold** and *italic* text.",
+            "lastChangedAt": 1560351606067,
+            "lastChangeUser": {
+              "name": "Editor Name",
+              "userPath": "editorpath",
+              "photo": "https://link_to_photo.png",
+              "biography": "Editor's bio"
+            },
+            "userPath": "userpath",
+            "teamPath": null,
+            "readPermission": "guest",
+            "writePermission": "signed_in"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "view-note",
+              "arguments": {
+                "noteId": "note_detail_id"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Returns the detailed content and information for the specified note using either ID format"
+          }
+        ]
+      },
+      {
+        "input": "@hackmd I need to check my note with shortId abc123",
+        "mocks": {
+          "view-note": {
+            "id": "abc123_full_id",
+            "title": "My Important Note",
+            "tags": [
+              "project",
+              "meeting"
+            ],
+            "createdAt": 1620349049743,
+            "titleUpdatedAt": 1726666704378,
+            "tagsUpdatedAt": 1726666704378,
+            "publishType": "view",
+            "publishedAt": null,
+            "permalink": null,
+            "publishLink": "https://hackmd.io/@username/abc123",
+            "shortId": "abc123",
+            "content": "# Project Meeting Notes\n\n## Agenda\n\n1. Project status\n2. Timeline review\n3. Next steps\n\n## Discussion\n\nWe discussed the current status of the project and decided on the next steps.",
+            "lastChangedAt": 1720351606067,
+            "lastChangeUser": {
+              "name": "Me",
+              "userPath": "username",
+              "photo": "https://link_to_photo.png",
+              "biography": "My bio"
+            },
+            "userPath": "username",
+            "teamPath": null,
+            "readPermission": "owner",
+            "writePermission": "owner"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "view-note",
+              "arguments": {
+                "noteId": "abc123"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@hackmd Create a new note about project planning that includes deadline tracking",
+        "mocks": {
+          "create-note": {
+            "id": "personal_note_id",
+            "title": "Project Planning with Deadline Tracking",
+            "tags": [],
+            "createdAt": 1720349049743,
+            "titleUpdatedAt": 1720349049743,
+            "tagsUpdatedAt": null,
+            "publishType": "view",
+            "publishedAt": null,
+            "permalink": null,
+            "publishLink": "https://hackmd.io/@username/personal_note_short_id",
+            "shortId": "personal_note_short_id",
+            "lastChangedAt": 1720349049743,
+            "lastChangeUser": {
+              "name": "Current User",
+              "userPath": "username",
+              "photo": "https://link_to_photo.png",
+              "biography": ""
+            },
+            "userPath": "username",
+            "teamPath": null,
+            "readPermission": "guest",
+            "writePermission": "signed_in"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "create-note",
+              "arguments": {
+                "content": {
+                  "includes": "project planning"
+                }
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Creates a note in personal workspace with appropriate content about project planning"
+          }
+        ]
+      },
+      {
+        "input": "@hackmd I need to create a meeting agenda for the design team in our hackmd workspace",
+        "mocks": {
+          "get-current-user": {
+            "id": "1b46ed75-04ac-4d9b-bfbb-9344ef6bd1b6",
+            "name": "My name",
+            "email": "user@email",
+            "userPath": "username",
+            "photo": "https://src_to_image.png",
+            "teams": [
+              {
+                "id": "08a5c75a-4d82-4dee-8b89-cba6f3dce369",
+                "ownerId": null,
+                "path": "hackmd",
+                "name": "HackMD Dev",
+                "logo": "https://uploads-public.hackmd.io/ZmEEvep.png",
+                "description": "Team description",
+                "visibility": "private",
+                "createdAt": 1740586346009,
+                "upgraded": true
+              }
+            ]
+          },
+          "create-note": {
+            "id": "team_note_id",
+            "title": "Design Team Meeting Agenda",
+            "tags": [],
+            "createdAt": 1720349049743,
+            "titleUpdatedAt": 1720349049743,
+            "tagsUpdatedAt": null,
+            "publishType": "view",
+            "publishedAt": null,
+            "permalink": null,
+            "publishLink": "https://hackmd.io/@teampath/team_note_short_id",
+            "shortId": "team_note_short_id",
+            "lastChangedAt": 1720349049743,
+            "lastChangeUser": {
+              "name": "Current User",
+              "userPath": "username",
+              "photo": "https://link_to_photo.png",
+              "biography": ""
+            },
+            "userPath": "username",
+            "teamPath": "hackmd",
+            "readPermission": "team",
+            "writePermission": "team"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-current-user"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "create-note",
+              "arguments": {
+                "teamPath": "hackmd"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@hackmd Could you update my note with ID personal_note_id to include a section on risk management?",
+        "mocks": {
+          "get-current-user": {
+            "id": "1b46ed75-04ac-4d9b-bfbb-9344ef6bd1b6",
+            "name": "My name",
+            "email": "user@email",
+            "userPath": "username",
+            "photo": "https://src_to_image.png",
+            "teams": [
+              {
+                "id": "08a5c75a-4d82-4dee-8b89-cba6f3dce369",
+                "ownerId": null,
+                "path": "hackmd",
+                "name": "HackMD Dev",
+                "logo": "https://uploads-public.hackmd.io/ZmEEvep.png",
+                "description": "Team description",
+                "visibility": "private",
+                "createdAt": 1740586346009,
+                "upgraded": true
+              },
+              {
+                "id": "ba6e4c56-0c04-4b3a-be11-9249a7316554",
+                "ownerId": null,
+                "path": "team-path",
+                "name": "Team Name",
+                "logo": "https://uploads-public.hackmd.io/ZmEEvep.png",
+                "description": "Public Team description",
+                "visibility": "public",
+                "createdAt": 1740586346009,
+                "upgraded": true
+              }
+            ]
+          },
+          "view-note": {
+            "id": "personal_note_id",
+            "title": "Project Planning with Deadline Tracking",
+            "tags": [
+              "project",
+              "planning"
+            ],
+            "createdAt": 1720349049743,
+            "titleUpdatedAt": 1720349049743,
+            "tagsUpdatedAt": 1720349049743,
+            "publishType": "view",
+            "publishedAt": null,
+            "permalink": null,
+            "publishLink": "https://hackmd.io/@username/personal_note_short_id",
+            "shortId": "personal_note_short_id",
+            "content": "# Project Planning\n\n## Timeline\n- Start: January 1, 2023\n- End: June 30, 2023\n\n## Tasks\n- Task 1\n- Task 2\n- Task 3",
+            "lastChangedAt": 1720349049743,
+            "lastChangeUser": {
+              "name": "Current User",
+              "userPath": "username",
+              "photo": "https://link_to_photo.png",
+              "biography": ""
+            },
+            "userPath": "username",
+            "teamPath": null,
+            "readPermission": "guest",
+            "writePermission": "signed_in"
+          },
+          "update-note": {
+            "id": "personal_note_id",
+            "title": "Project Planning with Deadline Tracking",
+            "tags": [
+              "project",
+              "planning"
+            ],
+            "createdAt": 1720349049743,
+            "titleUpdatedAt": 1720349049743,
+            "tagsUpdatedAt": 1720349049743,
+            "publishType": "view",
+            "publishedAt": null,
+            "permalink": null,
+            "publishLink": "https://hackmd.io/@username/personal_note_short_id",
+            "shortId": "personal_note_short_id",
+            "lastChangedAt": 1720352049743,
+            "lastChangeUser": {
+              "name": "Current User",
+              "userPath": "username",
+              "photo": "https://link_to_photo.png",
+              "biography": ""
+            },
+            "userPath": "username",
+            "teamPath": null,
+            "readPermission": "guest",
+            "writePermission": "signed_in"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "view-note",
+              "arguments": {
+                "noteId": "personal_note_id"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "update-note",
+              "arguments": {
+                "noteId": "personal_note_id",
+                "content": {
+                  "includes": "risk management"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@hackmd I'd like to make the team note with shortId team_note_short_id public in the hackmd team",
+        "mocks": {
+          "get-current-user": {
+            "id": "1b46ed75-04ac-4d9b-bfbb-9344ef6bd1b6",
+            "name": "My name",
+            "email": "user@email",
+            "userPath": "username",
+            "photo": "https://src_to_image.png",
+            "teams": [
+              {
+                "id": "08a5c75a-4d82-4dee-8b89-cba6f3dce369",
+                "ownerId": null,
+                "path": "hackmd",
+                "name": "HackMD Dev",
+                "logo": "https://uploads-public.hackmd.io/ZmEEvep.png",
+                "description": "Team description",
+                "visibility": "private",
+                "createdAt": 1740586346009,
+                "upgraded": true
+              },
+              {
+                "id": "ba6e4c56-0c04-4b3a-be11-9249a7316554",
+                "ownerId": null,
+                "path": "team-path",
+                "name": "Team Name",
+                "logo": "https://uploads-public.hackmd.io/ZmEEvep.png",
+                "description": "Public Team description",
+                "visibility": "public",
+                "createdAt": 1740586346009,
+                "upgraded": true
+              }
+            ]
+          },
+          "view-note": {
+            "id": "team_note_id",
+            "title": "Team Meeting Minutes",
+            "tags": [
+              "meeting",
+              "minutes"
+            ],
+            "createdAt": 1720349049743,
+            "titleUpdatedAt": 1720349049743,
+            "tagsUpdatedAt": 1720349049743,
+            "publishType": "view",
+            "publishedAt": null,
+            "permalink": null,
+            "publishLink": "https://hackmd.io/@teampath/team_note_short_id",
+            "shortId": "team_note_short_id",
+            "content": "# Team Meeting Minutes\n\n## Attendees\n- Person A\n- Person B\n- Person C\n\n## Agenda\n1. Project updates\n2. Timeline review\n3. Action items",
+            "lastChangedAt": 1720349049743,
+            "lastChangeUser": {
+              "name": "Team Member",
+              "userPath": "teammember",
+              "photo": "https://link_to_photo.png",
+              "biography": ""
+            },
+            "userPath": "teammember",
+            "teamPath": "hackmd",
+            "readPermission": "team",
+            "writePermission": "team"
+          },
+          "update-note": {
+            "id": "team_note_id",
+            "title": "Team Meeting Minutes",
+            "tags": [
+              "meeting",
+              "minutes"
+            ],
+            "createdAt": 1720349049743,
+            "titleUpdatedAt": 1720349049743,
+            "tagsUpdatedAt": 1720349049743,
+            "publishType": "view",
+            "publishedAt": null,
+            "permalink": null,
+            "publishLink": "https://hackmd.io/@teampath/team_note_short_id",
+            "shortId": "team_note_short_id",
+            "lastChangedAt": 1720352049743,
+            "lastChangeUser": {
+              "name": "Current User",
+              "userPath": "username",
+              "photo": "https://link_to_photo.png",
+              "biography": ""
+            },
+            "userPath": "teammember",
+            "teamPath": "hackmd",
+            "readPermission": "guest",
+            "writePermission": "team"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "update-note",
+              "arguments": {
+                "noteId": "team_note_short_id",
+                "teamPath": "hackmd",
+                "readPermission": "guest"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@hackmd I need to delete the obsolete note with ID obsolete_note_id",
+        "mocks": {
+          "get-current-user": {
+            "id": "1b46ed75-04ac-4d9b-bfbb-9344ef6bd1b6",
+            "name": "My name",
+            "email": "user@email",
+            "userPath": "username",
+            "photo": "https://src_to_image.png",
+            "teams": [
+              {
+                "id": "08a5c75a-4d82-4dee-8b89-cba6f3dce369",
+                "ownerId": null,
+                "path": "hackmd",
+                "name": "HackMD Dev",
+                "logo": "https://uploads-public.hackmd.io/ZmEEvep.png",
+                "description": "Team description",
+                "visibility": "private",
+                "createdAt": 1740586346009,
+                "upgraded": true
+              },
+              {
+                "id": "ba6e4c56-0c04-4b3a-be11-9249a7316554",
+                "ownerId": null,
+                "path": "team-path",
+                "name": "Team Name",
+                "logo": "https://uploads-public.hackmd.io/ZmEEvep.png",
+                "description": "Public Team description",
+                "visibility": "public",
+                "createdAt": 1740586346009,
+                "upgraded": true
+              }
+            ]
+          },
+          "view-note": {
+            "id": "obsolete_note_id",
+            "title": "Obsolete Note",
+            "tags": [
+              "archive"
+            ],
+            "createdAt": 1600349049743,
+            "titleUpdatedAt": 1600349049743,
+            "tagsUpdatedAt": 1600349049743,
+            "publishType": "view",
+            "publishedAt": null,
+            "permalink": null,
+            "publishLink": "https://hackmd.io/@username/obsolete_note_short_id",
+            "shortId": "obsolete_note_short_id",
+            "content": "# Obsolete Content\n\nThis note is no longer needed.",
+            "lastChangedAt": 1600352049743,
+            "lastChangeUser": {
+              "name": "Me",
+              "userPath": "username",
+              "photo": "https://link_to_photo.png",
+              "biography": ""
+            },
+            "userPath": "username",
+            "teamPath": null,
+            "readPermission": "owner",
+            "writePermission": "owner"
+          },
+          "delete-note": {
+            "success": true,
+            "message": "Successfully deleted note (ID: obsolete_note_id)"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "delete-note",
+              "arguments": {
+                "noteId": "obsolete_note_id"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@hackmd Please remove that outdated documentation with shortId team_doc_short_id from our hackmd team workspace",
+        "mocks": {
+          "get-current-user": {
+            "id": "1b46ed75-04ac-4d9b-bfbb-9344ef6bd1b6",
+            "name": "My name",
+            "email": "user@email",
+            "userPath": "username",
+            "photo": "https://src_to_image.png",
+            "teams": [
+              {
+                "id": "08a5c75a-4d82-4dee-8b89-cba6f3dce369",
+                "ownerId": null,
+                "path": "hackmd",
+                "name": "HackMD Dev",
+                "logo": "https://uploads-public.hackmd.io/ZmEEvep.png",
+                "description": "Team description",
+                "visibility": "private",
+                "createdAt": 1740586346009,
+                "upgraded": true
+              },
+              {
+                "id": "ba6e4c56-0c04-4b3a-be11-9249a7316554",
+                "ownerId": null,
+                "path": "team-path",
+                "name": "Team Name",
+                "logo": "https://uploads-public.hackmd.io/ZmEEvep.png",
+                "description": "Public Team description",
+                "visibility": "public",
+                "createdAt": 1740586346009,
+                "upgraded": true
+              }
+            ]
+          },
+          "view-note": {
+            "id": "team_doc_id",
+            "title": "Outdated Team Documentation",
+            "tags": [
+              "docs",
+              "outdated"
+            ],
+            "createdAt": 1700349049743,
+            "titleUpdatedAt": 1700349049743,
+            "tagsUpdatedAt": 1700349049743,
+            "publishType": "view",
+            "publishedAt": null,
+            "permalink": null,
+            "publishLink": "https://hackmd.io/@teampath/team_doc_short_id",
+            "shortId": "team_doc_short_id",
+            "content": "# Old Team Documentation\n\nThis documentation is outdated and should be removed.",
+            "lastChangedAt": 1700352049743,
+            "lastChangeUser": {
+              "name": "Team Admin",
+              "userPath": "admin",
+              "photo": "https://link_to_photo.png",
+              "biography": ""
+            },
+            "userPath": "admin",
+            "teamPath": "hackmd",
+            "readPermission": "team",
+            "writePermission": "team"
+          },
+          "delete-note": {
+            "success": true,
+            "message": "Successfully deleted note (ID: team_doc_id) from team hackmd"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "delete-note",
+              "arguments": {
+                "noteId": "team_doc_short_id",
+                "teamPath": "hackmd"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@hackmd/api": "2.1.0",
-    "@raycast/api": "^1.38.2",
+    "@hackmd/api": "2.4.0",
+    "@raycast/api": "^1.93.0",
     "@raycast/utils": "^1.0.7",
     "mdast-util-to-markdown": "^1.3.0",
     "minisearch": "^5.0.0",
     "remark": "^14.0.2"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",

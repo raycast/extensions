@@ -14,11 +14,16 @@
     "jomifepe",
     "j3lte",
     "litomore",
-    "ridemountainpig"
+    "ridemountainpig",
+    "dbrooks"
   ],
   "license": "MIT",
   "categories": [
     "Developer Tools"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "commands": [
     {

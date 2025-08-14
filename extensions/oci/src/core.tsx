@@ -1,24 +1,31 @@
-/* eslint-disable @raycast/prefer-title-case */
-import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
-import { showFailureToast, useCachedPromise, useCachedState } from "@raycast/utils";
-import common = require("oci-common");
+import { Action, ActionPanel, Alert, Color, confirmAlert, Detail, Icon, List, showToast, Toast } from "@raycast/api";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import * as core from "oci-core";
 import { Instance } from "oci-core/lib/model";
-import { mapObjectToMarkdownTable } from "./utils";
+import { mapObjectToMarkdownTable, onError } from "./utils";
+import { InstanceActionRequest } from "oci-core/lib/request";
+import OpenInOCI from "./open-in-oci";
+import { common, OCIProvider, useProvider } from "./oci";
 
-const provider: common.ConfigFileAuthenticationDetailsProvider = new common.ConfigFileAuthenticationDetailsProvider();
-const computeClient = new core.ComputeClient({ authenticationDetailsProvider: provider });
-const onError = (error: Error) => {
-  const err = error.message as string | common.OciError;
-  const title = "ERROR";
-  const message = err instanceof common.OciError ? err.message : err;
-  showFailureToast(message, { title });
-};
-export default function Core() {
+export default function Command() {
+  return (
+    <OCIProvider>
+      <Core />
+    </OCIProvider>
+  );
+}
+
+function Core() {
+  const { provider } = useProvider();
   const [isShowingDetail, setIsShowingDetail] = useCachedState("show-instance-details", false);
 
-  const { isLoading, data: instances } = useCachedPromise(
+  const {
+    isLoading,
+    data: instances,
+    mutate,
+  } = useCachedPromise(
     async () => {
+      const computeClient = new core.ComputeClient({ authenticationDetailsProvider: provider });
       const instances = await computeClient.listInstances({ compartmentId: provider.getTenantId() });
       return instances.items;
     },
@@ -34,6 +41,7 @@ export default function Core() {
         return Color.Yellow;
       case core.models.Instance.LifecycleState.Provisioning:
         return Color.Blue;
+      case core.models.Instance.LifecycleState.Starting:
       case core.models.Instance.LifecycleState.Stopping:
       case core.models.Instance.LifecycleState.Terminating:
         return Color.Orange;
@@ -44,10 +52,47 @@ export default function Core() {
     }
   }
 
+  async function confirmAndTerminate(instance: Instance) {
+    const options: Alert.Options = {
+      icon: { source: Icon.Trash, tintColor: Color.Red },
+      title: "Terminate instance",
+      message: `Do you want to permanently delete instance "${instance.displayName || instance.id}"?`,
+      primaryAction: {
+        title: "Terminate",
+        style: Alert.ActionStyle.Destructive,
+      },
+    };
+
+    if (await confirmAlert(options)) doInstanceAction(instance, "TERMINATE");
+  }
+
+  async function doInstanceAction(instance: Instance, action: InstanceActionRequest["action"]) {
+    const toast = await showToast(Toast.Style.Animated, action, instance.displayName ?? "");
+    try {
+      const computeClient = new core.ComputeClient({ authenticationDetailsProvider: provider });
+      await mutate(
+        action !== "TERMINATE"
+          ? computeClient.instanceAction({
+              instanceId: instance.id,
+              action,
+            })
+          : computeClient.terminateInstance({ instanceId: instance.id }),
+      );
+      toast.style = Toast.Style.Success;
+      toast.title = `${action} ✅`;
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = `${action} ❌`;
+      toast.message = `${error}`;
+    }
+  }
+
   return (
     <List isLoading={isLoading} isShowingDetail={isShowingDetail} searchBarPlaceholder="Search instances">
       {instances.map((instance) => {
-        const accessories: List.Item.Accessory[] = [];
+        const accessories: List.Item.Accessory[] = [
+          { date: new Date(instance.timeCreated), tooltip: `Created ${new Date(instance.timeCreated).toString()}` },
+        ];
         if (instance.systemTags && instance.systemTags["orcl-cloud"]?.["free-tier-retained"] === "true")
           accessories.push({ tag: "Always Free" });
 
@@ -56,7 +101,10 @@ export default function Core() {
         return (
           <List.Item
             key={instance.id}
-            icon={{ source: Icon.CircleFilled, tintColor: getInstanceColor(instance.lifecycleState) }}
+            icon={{
+              value: { source: Icon.CircleFilled, tintColor: getInstanceColor(instance.lifecycleState) },
+              tooltip: instance.lifecycleState,
+            }}
             title={instance.displayName ?? ""}
             subtitle={isShowingDetail ? undefined : instance.shape}
             accessories={isShowingDetail ? undefined : accessories}
@@ -91,8 +139,30 @@ export default function Core() {
                 <Action.Push
                   icon={Icon.List}
                   title="View VNIC Attachments"
-                  target={<ListInstanceVnicAttachments instanceId={instance.id} />}
+                  target={<ListInstanceVnicAttachments instanceId={instance.id} provider={provider} />}
                 />
+                <OpenInOCI route={`compute/instances/${instance.id}`} />
+                <ActionPanel.Section>
+                  {instance.lifecycleState === Instance.LifecycleState.Running && (
+                    <>
+                      <Action icon={Icon.Redo} title="Reboot" onAction={() => doInstanceAction(instance, "RESET")} />
+                      <Action icon={Icon.Stop} title="Stop" onAction={() => doInstanceAction(instance, "STOP")} />
+                    </>
+                  )}
+                  {instance.lifecycleState === Instance.LifecycleState.Stopped && (
+                    <Action icon={Icon.Play} title="Start" onAction={() => doInstanceAction(instance, "START")} />
+                  )}
+                  {![Instance.LifecycleState.Terminated, Instance.LifecycleState.Terminating].includes(
+                    instance.lifecycleState,
+                  ) && (
+                    <Action
+                      icon={Icon.Trash}
+                      title="Terminate"
+                      onAction={() => confirmAndTerminate(instance)}
+                      style={Action.Style.Destructive}
+                    />
+                  )}
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />
@@ -102,9 +172,16 @@ export default function Core() {
   );
 }
 
-function ListInstanceVnicAttachments({ instanceId }: { instanceId: string }) {
+function ListInstanceVnicAttachments({
+  instanceId,
+  provider,
+}: {
+  instanceId: string;
+  provider: common.ConfigFileAuthenticationDetailsProvider;
+}) {
   const { isLoading, data: VNICs } = useCachedPromise(
     async () => {
+      const computeClient = new core.ComputeClient({ authenticationDetailsProvider: provider });
       const VNICs = await computeClient.listVnicAttachments({ compartmentId: provider.getTenantId(), instanceId });
       return VNICs.items;
     },
@@ -123,7 +200,11 @@ function ListInstanceVnicAttachments({ instanceId }: { instanceId: string }) {
           actions={
             <ActionPanel>
               {vnic.vnicId && (
-                <Action.Push icon={Icon.Eye} title="View VNIC" target={<ViewVnic vnicId={vnic.vnicId} />} />
+                <Action.Push
+                  icon={Icon.Eye}
+                  title="View VNIC"
+                  target={<ViewVnic vnicId={vnic.vnicId} provider={provider} />}
+                />
               )}
             </ActionPanel>
           }
@@ -133,7 +214,7 @@ function ListInstanceVnicAttachments({ instanceId }: { instanceId: string }) {
   );
 }
 
-function ViewVnic({ vnicId }: { vnicId: string }) {
+function ViewVnic({ vnicId, provider }: { vnicId: string; provider: common.ConfigFileAuthenticationDetailsProvider }) {
   const { isLoading, data: vnic } = useCachedPromise(
     async () => {
       const vnicClient = new core.VirtualNetworkClient({ authenticationDetailsProvider: provider });

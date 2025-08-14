@@ -1,11 +1,13 @@
-import { List, Color, Icon } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { LDFlag } from "../types";
+import { getLDUrlWithEnvs } from "../utils/ld-urls";
 
 interface FlagDetailsHeaderProps {
   flag: LDFlag;
+  environmentOrder: string[];
 }
 
-export default function FlagDetailsHeader({ flag }: FlagDetailsHeaderProps) {
+export default function FlagDetailsHeader({ flag, environmentOrder }: FlagDetailsHeaderProps) {
   const maintainer = flag._maintainer;
   const maintainerTeam = flag._maintainerTeam;
 
@@ -72,6 +74,16 @@ export default function FlagDetailsHeader({ flag }: FlagDetailsHeaderProps) {
             </List.Item.Detail.Metadata>
           }
         />
+      }
+      actions={
+        <ActionPanel>
+          <Action.OpenInBrowser
+            icon={Icon.Globe}
+            title="Open in Launchdarkly"
+            url={getLDUrlWithEnvs(flag, environmentOrder)}
+          />
+          <Action.CopyToClipboard title="Copy Feature Flag Key" content={flag.key} />
+        </ActionPanel>
       }
     />
   );

@@ -1,5 +1,5 @@
 import { Clipboard, closeMainWindow, showToast, Toast } from "@raycast/api";
-import { getCurrentTabURL } from "./utils";
+import { getCurrentTabURL } from "./safari";
 
 export default async function Command() {
   try {

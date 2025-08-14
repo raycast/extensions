@@ -56,6 +56,12 @@
       "subtitle": "Tomito",
       "description": "Show timer window",
       "mode": "no-view"
+    },
+    {
+      "name": "toggle-timer-widget",
+      "title": "Toggle Timer Widget",
+      "description": "Show or hide the timer widget",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
@@ -76,5 +82,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

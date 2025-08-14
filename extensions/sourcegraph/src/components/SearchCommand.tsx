@@ -152,6 +152,22 @@ export default function SearchCommand({ src, props }: { src: Sourcegraph; props?
               icon={{ source: Icon.Book }}
               actions={<ActionPanel>{openSearchSyntaxAction}</ActionPanel>}
             />
+            {isSourcegraphDotCom(src.instance) && !src.hasCustomSourcegraphConnection && (
+              <List.Item
+                title="Create a Sourcegraph workspace"
+                subtitle="Get an AI & search experience for your private code"
+                icon={{ source: Icon.Stars, tintColor: ColorEmphasis }}
+                actions={
+                  <ActionPanel>
+                    <Action.OpenInBrowser
+                      icon={Icon.Window}
+                      title="Learn more"
+                      url="https://workspaces.sourcegraph.com"
+                    />
+                  </ActionPanel>
+                }
+              />
+            )}
           </Fragment>
         </List.Section>
       )}
@@ -386,16 +402,19 @@ function SearchResultItem({
   switch (match.type) {
     case "repo":
       if (match.fork) {
-        icon.source = Icon.Circle;
+        icon.source = Icon.CircleEllipsis;
         matchTypeDetails.push("forked");
       }
       if (match.archived) {
-        icon.source = Icon.XMarkCircle;
+        icon.source = Icon.CircleDisabled;
         matchTypeDetails.push("archived");
       }
       if (match.private) {
+        icon.source = Icon.CircleProgress100; // looks less imposing than Circle
         icon.tintColor = ColorPrivate;
         matchTypeDetails.push("private");
+      } else {
+        icon.source = Icon.Circle;
       }
       title = match.repository;
       subtitle = match.description || "";
@@ -618,29 +637,30 @@ function MultiResultView({ searchResult }: { searchResult: { url: string; match:
                   {
                     tag: {
                       value: s.kind.toLowerCase(),
-                      color: ((): Color => {
+                      color: ((): Color.ColorLike => {
                         switch (s.kind) {
                           // Functional things
                           case SymbolKind.Function:
                           case SymbolKind.Method:
                           case SymbolKind.Constructor:
-                            return Color.Purple;
+                            return "A96AF3"; // Violet-07
 
                           // Thing-y things
                           case SymbolKind.Class:
                           case SymbolKind.Interface:
                           case SymbolKind.Struct:
-                            return Color.Orange;
+                            return ColorEmphasis;
 
                           // Even more thing-y things
                           case SymbolKind.Module:
                           case SymbolKind.Namespace:
                           case SymbolKind.File:
-                            return Color.PrimaryText;
+                          case SymbolKind.Package:
+                            return "00A0C8"; // Teal-07
                         }
 
                         // Everybody else
-                        return Color.Blue;
+                        return ColorSubdued;
                       })(),
                     },
                   },

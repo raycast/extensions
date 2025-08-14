@@ -1,4 +1,4 @@
-import { Icon, Image, launchCommand, LaunchType, MenuBarExtra, open, getPreferenceValues, Color } from "@raycast/api";
+import { Icon, launchCommand, LaunchType, MenuBarExtra, open, getPreferenceValues, Color } from "@raycast/api";
 import { gitlab } from "./common";
 import { getTodoIcon, getPrettyTodoActionName } from "./components/todo";
 import { useTodos } from "./components/todo/utils";
@@ -23,7 +23,7 @@ function getMaxTodosPreference(): number {
   return getBoundedPreferenceNumber({ name: "maxtodos" });
 }
 
-export default function TodosMenuBarCommand(): JSX.Element | null {
+export default function TodosMenuBarCommand(): React.ReactNode | null {
   const { todos, error, isLoading } = useTodos();
   const { grayicon, alwaysshow, showtext } = getPreferenceValues<Preferences.Todomenubar>();
 

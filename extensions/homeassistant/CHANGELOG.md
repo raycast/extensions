@@ -1,5 +1,25 @@
 # Home Assistant Changelog
 
+## [AI Tools Enhancement] - 2025-04-29
+
+- Improved `get-entities` tool to only return essential entity information
+- Added `get-attributes` tool to fetch entity states and attributes
+- Enhanced `run-service` tool to ensure each call only contains entities that need the same operation
+- Added comprehensive AI instructions for handling Home Assistant device control
+- Added a new example prompt to the AI Extension
+
+## [Update] - 2025-03-13
+
+- Added preference to Dashboard command to allow opening specific HA page.
+
+## [Update] 2025-03-10
+
+- Added Custom Entities command to allow to add specific entities to the list.
+
+## [✨ AI Enhancements] - 2025-02-21
+
+- Added AI tools.
+
 ## [Update] - 2024-12-17
 
 - Fixed grammar in alert message of the `Updates` command.
@@ -15,7 +35,7 @@
 - Renamed `Mediaplayers` and `Mediaplayer Menu` commands to `Media Players` and `Media Player Menu`.
 - Updated action icons for the `Stop` action in `Vacuum Cleaners` and `Mediaplayers` commands.
 - Updated shortcuts that were removed because they are reserved by Raycast.
-- Rewrote command descriptions for better readability and conciseness.
+- Rewritten command descriptions for better readability and conciseness.
 
 ## [Update] - 2024-09-19
 

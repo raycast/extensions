@@ -22,9 +22,10 @@ import {
   ZSH_PATH,
   signIn,
   useAccounts,
-  CLI_PATH,
+  getCliPath,
 } from "../utils";
 import { Error as ErrorGuide } from "./Error";
+import { Guide } from "./Guide";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -37,6 +38,12 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  try {
+    getCliPath();
+  } catch {
+    return <Guide />;
+  }
+
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(getSignInStatus());
   const [zshMissing] = useState<boolean>(!checkZsh());
   const [accountSelected, setAccountSelected] = useState<boolean>(true);
@@ -83,7 +90,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (!ZSH_PATH) {
         throw new ZshMissingError("Zsh Binary Path Missing!");
       }
-      if (!CLI_PATH) {
+      if (!getCliPath()) {
         throw new CommandLineMissingError("1Password CLI is missing! Please install it before use.");
       }
       signIn();

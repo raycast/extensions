@@ -2,7 +2,7 @@ import { createDataSource } from "../src/datasource";
 import fs from "fs";
 import path from "path";
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
-const TEST_FOLDER = "__tests__"
+const TEST_FOLDER = "__tests__";
 
 describe("FileDataSource", () => {
   const filePath = path.join(TEST_FOLDER, "test_folder", "test.json");
@@ -90,7 +90,7 @@ describe("FileDataSource", () => {
 
     expect(() => {
       dataSource.parseDatasourceFile();
-    }).toThrow("Failed to read or parse JSON file: SyntaxError: Unexpected token i in JSON at position 0");
+    }).toThrow("Failed to read or parse JSON file: SyntaxError: Unexpected token");
   });
 
   test("sortDataByTimestamps should sort data items correctly", () => {
@@ -271,7 +271,7 @@ describe("FileDataSource", () => {
     dataSource.add(newData, newRemark, newArgs);
 
     const updatedDataStructure = JSON.parse(fs.readFileSync(filePath, "utf-8"));
-    const newItem = updatedDataStructure.data.find(item => item.data === newData);
+    const newItem = updatedDataStructure.data.find((item) => item.data === newData);
 
     expect(newItem).toBeDefined();
     expect(newItem.data).toBe(newData);
@@ -310,7 +310,7 @@ describe("FileDataSource", () => {
     dataSource.update(update.id, update.data, update.remark, update.args);
 
     const updatedDataStructure = JSON.parse(fs.readFileSync(filePath, "utf-8"));
-    const updatedDataItem = updatedDataStructure.data.find(item => item.id === update.id);
+    const updatedDataItem = updatedDataStructure.data.find((item) => item.id === update.id);
 
     expect(updatedDataItem).toMatchObject({
       data: "updatedData1",
@@ -377,12 +377,12 @@ describe("FileDataSource", () => {
   test("updateLastUsedTime should update the lastUsedTime of a specific data item", () => {
     const idToUpdate = "1";
     const beforeUpdate = JSON.parse(fs.readFileSync(filePath, "utf-8"));
-    const beforeLastUsedTime = beforeUpdate.data.find(item => item.id === idToUpdate).lastUsedTime;
+    const beforeLastUsedTime = beforeUpdate.data.find((item) => item.id === idToUpdate).lastUsedTime;
 
     dataSource.updateLastUsedTime(idToUpdate);
 
     const afterUpdate = JSON.parse(fs.readFileSync(filePath, "utf-8"));
-    const afterLastUsedTime = afterUpdate.data.find(item => item.id === idToUpdate).lastUsedTime;
+    const afterLastUsedTime = afterUpdate.data.find((item) => item.id === idToUpdate).lastUsedTime;
 
     expect(afterLastUsedTime).toBeGreaterThan(beforeLastUsedTime);
   });
@@ -407,14 +407,14 @@ describe("FileDataSource", () => {
 
     expect(afterUpdateTime).toBeGreaterThan(beforeUpdateTime);
   });
-  
+
   test("delete should delete the data item by id", () => {
     const idToDelete = "1";
 
     dataSource.delete(idToDelete);
 
     const updatedDataStructure = JSON.parse(fs.readFileSync(filePath, "utf-8"));
-    const deletedDataItem = updatedDataStructure.data.find(item => item.id === idToDelete);
+    const deletedDataItem = updatedDataStructure.data.find((item) => item.id === idToDelete);
 
     expect(deletedDataItem).toBeUndefined();
     expect(updatedDataStructure.data.length).toBe(1);

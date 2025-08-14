@@ -17,137 +17,17 @@
       "mode": "view"
     }
   ],
-  "preferences": [
-    {
-      "type": "dropdown",
-      "name": "siteId",
-      "title": "Marketplace",
-      "description": "Select your preferred Mercado Libre marketplace",
-      "required": true,
-      "default": "MLB",
-      "data": [
-        {
-          "title": "Argentina",
-          "value": "MLA"
-        },
-        {
-          "title": "Bolivia",
-          "value": "MBO"
-        },
-        {
-          "title": "Brazil",
-          "value": "MLB"
-        },
-        {
-          "title": "Chile",
-          "value": "MLC"
-        },
-        {
-          "title": "Colombia",
-          "value": "MCO"
-        },
-        {
-          "title": "Costa Rica",
-          "value": "MCR"
-        },
-        {
-          "title": "Dominican Republic",
-          "value": "MRD"
-        },
-        {
-          "title": "El Salvador",
-          "value": "MSV"
-        },
-        {
-          "title": "Guatemala",
-          "value": "MGT"
-        },
-        {
-          "title": "Honduras",
-          "value": "MHN"
-        },
-        {
-          "title": "Mexico",
-          "value": "MLM"
-        },
-        {
-          "title": "Nicaragua",
-          "value": "MNI"
-        },
-        {
-          "title": "Panama",
-          "value": "MPA"
-        },
-        {
-          "title": "Paraguay",
-          "value": "MPY"
-        },
-        {
-          "title": "Peru",
-          "value": "MPE"
-        },
-        {
-          "title": "Uruguay",
-          "value": "MLU"
-        },
-        {
-          "title": "Venezuela",
-          "value": "MLV"
-        }
-      ]
-    },
-    {
-      "type": "dropdown",
-      "name": "viewLayout",
-      "title": "View Layout",
-      "description": "Select your preferred view layout",
-      "required": false,
-      "default": "Grid",
-      "data": [
-        {
-          "title": "Grid",
-          "value": "grid"
-        },
-        {
-          "title": "List",
-          "value": "list"
-        }
-      ]
-    },
-    {
-      "type": "dropdown",
-      "name": "gridItemSize",
-      "title": "Grid Item Size",
-      "description": "Select the size of the grid items",
-      "required": false,
-      "default": "6",
-      "data": [
-        {
-          "title": "Small",
-          "value": "6"
-        },
-        {
-          "title": "Medium",
-          "value": "5"
-        },
-        {
-          "title": "Large",
-          "value": "4"
-        }
-      ]
-    }
-  ],
   "dependencies": {
-    "@raycast/api": "^1.83.1",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.89.1",
+    "@raycast/utils": "^1.18.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.8.10",
     "@types/react": "18.3.9",
     "eslint": "^8.57.1",
-    "prettier": "^3.3.3",
-    "typescript": "^5.6.2"
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
   },
   "scripts": {
     "build": "ray build -e dist",

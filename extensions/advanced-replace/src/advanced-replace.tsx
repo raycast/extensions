@@ -1,33 +1,47 @@
-import { ActionPanel, Action, List, LaunchProps } from "@raycast/api";
+import { ActionPanel, Action, List, LaunchProps, Color } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { deleteSavedItem, getSavedItems } from "./utilities/storage";
-import { ReplacementOption } from "./types";
-import RegexItemForm from "./components/RegexItemForm";
+import { Entry, EntryCutPaste } from "./types";
+import FormCutPaste from "./components/FormCutPaste";
 import { performReplacement } from "./utilities/replacements";
+import EntryForm from "./components/EntryForm";
+import FormDirectReplace from "./components/FormDirectReplace";
 
-export default function ManageOptions(props: Readonly<LaunchProps<{ draftValues: ReplacementOption }>>) {
-  const { data: replacementOptions, revalidate, isLoading } = usePromise(getSavedItems);
+const tagOptions: Record<Entry["type"], { value: string; color?: Color.ColorLike }> = {
+  directReplace: {
+    value: "Direct Replace",
+    color: Color.Green,
+  },
+  cutPaste: {
+    value: "Cut Paste",
+    color: Color.Magenta,
+  },
+};
+
+export default function ManageOptions(props: Readonly<LaunchProps<{ draftValues: EntryCutPaste }>>) {
+  const { data: replacementEntries, revalidate, isLoading } = usePromise(getSavedItems);
 
   return (
     <List
-      isLoading={isLoading}
       navigationTitle="Regex replace options"
+      isLoading={isLoading}
       actions={
         <ActionPanel title="Manage item">
           <Action.Push
             title="Create New"
-            target={<RegexItemForm initialValues={props.draftValues ?? ({} as ReplacementOption)} isNew />}
+            target={<EntryForm initialValues={props.draftValues ?? ({} as EntryCutPaste)} isNew />}
             shortcut={{ modifiers: ["cmd"], key: "n" }}
             onPop={revalidate}
           />
         </ActionPanel>
       }
     >
-      {!!replacementOptions &&
-        replacementOptions.map((option, index) => (
+      {!!replacementEntries &&
+        replacementEntries.map((option, index) => (
           <List.Item
             title={option.title}
             subtitle={option.description}
+            accessories={[{ tag: tagOptions[option.type as Entry["type"]] }]}
             actions={
               <ActionPanel title="Manage item">
                 <Action
@@ -46,13 +60,19 @@ export default function ManageOptions(props: Readonly<LaunchProps<{ draftValues:
                 />
                 <Action.Push
                   title="Create New"
-                  target={<RegexItemForm initialValues={props.draftValues ?? ({} as ReplacementOption)} isNew />}
+                  target={<EntryForm initialValues={props.draftValues ?? ({} as EntryCutPaste)} isNew />}
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
                   onPop={revalidate}
                 />
                 <Action.Push
                   title="Edit Item"
-                  target={<RegexItemForm initialValues={option} />}
+                  target={
+                    option?.type === "cutPaste" ? (
+                      <FormCutPaste initialValues={option} />
+                    ) : (
+                      <FormDirectReplace initialValues={option} />
+                    )
+                  }
                   shortcut={{ modifiers: ["cmd"], key: "e" }}
                   onPop={revalidate}
                 />

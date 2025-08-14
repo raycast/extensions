@@ -1,5 +1,9 @@
 # GitHub Gist Changelog
 
+## [Update GitHub Gist] - 2025-02-02
+
+- Add a new preference to set the default gist tag.
+
 ## [Reduce GitHub Authentication] - 2024-07-16
 
 - Reduce GitHub authentication permissions to access only GitHub Gist content

@@ -1,4 +1,11 @@
-import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  showToast,
+  Toast,
+  Icon,
+} from "@raycast/api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAppInfo, useUpload } from "./lib/hooks";
 import { ACLTitleMap, filePathsToFile, guardInvalidApiKey } from "./lib/utils";
@@ -43,6 +50,7 @@ const Command = () => {
       actions={
         <ActionPanel>
           <Action.SubmitForm<{ files: string[] }>
+            icon={Icon.Upload}
             title={`Upload Files ${appInfo ? `(${ACLTitleMap[appInfo.primary]})` : ""}`}
             onSubmit={(values) => handleSubmit(values, appInfo?.primary)}
           />

@@ -1,6 +1,10 @@
 # Paste as Plain text Changelog
 
-## [Fix Paste as Number] - :2024-12-03
+## [Function Optimisation] - 2025-04-15
+
+- Update Paste as JSON, support flexible JSON-like inputs.
+
+## [Fix Paste as Number] - 2024-12-03
 
 -  Fix Paste as Number
 

@@ -57,11 +57,11 @@ const VISITED_REPOSITORIES_LENGTH = 25;
 export async function cloneAndOpen(repository: ExtendedRepositoryFieldsFragment) {
   const { application, baseClonePath, repositoryCloneProtocol } = getPreferenceValues<Preferences.SearchRepositories>();
   const applicationPath = application?.path.replaceAll(" ", "\\ ");
-  const clonePath = `${baseClonePath}/${repository.nameWithOwner}`;
+  const clonePath = `${baseClonePath}/${repository.name}`;
   const openCommand = `open -a ${applicationPath} ${clonePath}`;
 
   const toast = await showToast({
-    title: `Opening ${repository.nameWithOwner}`,
+    title: `Opening ${repository.name}`,
     message: `at ${clonePath}`,
     style: Toast.Style.Animated,
   });
@@ -70,7 +70,7 @@ export async function cloneAndOpen(repository: ExtendedRepositoryFieldsFragment)
     const cloneCommand = buildCloneCommand(repository.nameWithOwner, repositoryCloneProtocol);
 
     try {
-      execSync(cloneCommand);
+      execSync(cloneCommand, { cwd: baseClonePath });
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Error while cloning the repository";
@@ -81,7 +81,7 @@ export async function cloneAndOpen(repository: ExtendedRepositoryFieldsFragment)
   }
 
   try {
-    execSync(openCommand);
+    execSync(openCommand, { cwd: baseClonePath });
   } catch (error) {
     toast.style = Toast.Style.Failure;
     toast.title = "Error while opening the repository";
@@ -177,3 +177,28 @@ type AdditionalCloneFormatOptions = {
  */
 const formatRepositoryUrl = (repoNameWithOwner: string, protocol: "https" | "ssh"): string =>
   protocol === "https" ? `https://github.com/${repoNameWithOwner}.git` : `git@github.com:${repoNameWithOwner}.git`;
+
+/**
+ * Get the repository filter string based on the filter mode, repository list, and selected repository.
+ *
+ * @param {Preferences.MyIssues["repositoryFilterMode"]} filterMode - The mode to filter repositories ("all", "include", or "exclude").
+ * @param {string[]} repositoryList - The list of repositories to include or exclude.
+ * @param {string | null} selectedRepository - The selected repository to filter.
+ * @returns {string} The repository filter string.
+ */
+export function getRepositoryFilter(
+  filterMode: Preferences.MyIssues["repositoryFilterMode"],
+  repositoryList: string[],
+  selectedRepository: string | null,
+) {
+  if (selectedRepository) {
+    return `repo:${selectedRepository}`;
+  }
+
+  const list = repositoryList.filter(Boolean);
+  return filterMode === "all"
+    ? ""
+    : filterMode === "exclude"
+      ? list.map((repo) => `-repo:${repo}`).join(" ")
+      : list.map((repo) => `repo:${repo}`).join(" ");
+}

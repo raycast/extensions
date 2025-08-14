@@ -1,5 +1,9 @@
 # OmniFocus
 
+> [!IMPORTANT]
+> You need an OmniFocus Pro subscription for this extension to work.
+> See [the OmniFocus feature overview](https://www.omnigroup.com/omnifocus/features#Automation)
+
 ## Commands
 
 ### Quick Add To Inbox

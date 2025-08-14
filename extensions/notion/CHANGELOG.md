@@ -1,5 +1,20 @@
 # Notion Changelog
 
+## [Use Bookmark Block for Quick Capture As Bookmark] - 2025-08-13
+
+- Refactor Quick Capture to create a bookmark block instead of a markdown link when "Capture As" is set to "bookmark"
+
+## [Show page properties in page previews] - 2025-07-08
+
+- Page previews now display page properties
+- Added a checkbox to the extension preferences to control this behaviour, defaults to off.
+
+## [✨ AI Enhancements] - 2025-02-21
+
+## [Use pagination for fetching users list] - 2025-01-24
+
+- User Notion pagination to fetch the list of Notion users. This allows fetching more than 100 users.
+
 ## [Refactor - No functional changes] - 2024-10-21
 
 - Move code around and derives more types from `@notionhq/client` (2024-07-03)

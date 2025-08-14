@@ -17,13 +17,13 @@
       "name": "list-system-launch-agents",
       "title": "List System Launch Agents",
       "description": "List System Launch Agents. This list will not have details available because it needs binary conversion to work.",
-      "mode": "view" 
+      "mode": "view"
     },
     {
       "name": "list-loaded-launch-agents",
       "title": "List Loaded Launch Agents",
       "description": "List Loaded Launch Agents",
-      "mode": "view" 
+      "mode": "view"
     },
     {
       "name": "create-launch-agent",
@@ -33,7 +33,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.1"
+    "@raycast/api": "^1.79.1",
+    "@raycast/utils": "^1.19.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",

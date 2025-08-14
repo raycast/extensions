@@ -15,6 +15,65 @@
       "title": "Life Progress",
       "description": "View life progress and custom Countdown Date. See how much time is left.",
       "mode": "view"
+    },
+    {
+      "name": "life-progress-menubar",
+      "title": "Life Progress Menubar",
+      "description": "View life progress and custom Countdown Date in the menu bar. See how much time is left.",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "preferences": [
+        {
+          "name": "colorIcon",
+          "type": "checkbox",
+          "required": false,
+          "label": "Colorful Icon",
+          "description": "Show colorful icon in the menu bar.",
+          "default": true
+        },
+        {
+          "name": "showTitle",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Title",
+          "description": "Show title in the menu bar.",
+          "default": true
+        },
+        {
+          "name": "hour24",
+          "type": "checkbox",
+          "required": false,
+          "label": "24 Hour",
+          "description": "Show time in 24-hour format.",
+          "default": true
+        },
+        {
+          "name": "commandMetadata",
+          "title": "Menubar Progress",
+          "description": "Information displayed in the menu bar.",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Day",
+              "value": "Day"
+            },
+            {
+              "title": "Week",
+              "value": "Week"
+            },
+            {
+              "title": "Month",
+              "value": "Month"
+            },
+            {
+              "title": "Year",
+              "value": "Year"
+            }
+          ],
+          "required": false,
+          "default": "Year"
+        }
+      ]
     }
   ],
   "preferences": [
@@ -33,32 +92,6 @@
       "label": "Countdown Date First",
       "description": "Show Countdown Date first.",
       "default": true
-    },
-    {
-      "name": "commandMetadata",
-      "title": "Command Metadata",
-      "description": "Information displayed by the Life Progress command subtitle in the main Raycast interface.",
-      "type": "dropdown",
-      "data": [
-        {
-          "title": "Day Progress",
-          "value": "Day"
-        },
-        {
-          "title": "Week Progress",
-          "value": "Week"
-        },
-        {
-          "title": "Month Progress",
-          "value": "Month"
-        },
-        {
-          "title": "Year Progress",
-          "value": "Year"
-        }
-      ],
-      "required": false,
-      "default": "Year"
     },
     {
       "name": "birthday",
@@ -143,16 +176,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.83.1",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.100.2",
+    "@raycast/utils": "^2.0.1",
+    "weeknumber": "^1.2.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "22.7.4",
-    "@types/react": "18.3.10",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.6.2"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.15.3",
+    "@types/react": "19.1.2",
+    "eslint": "^9.25.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",

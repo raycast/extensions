@@ -2,7 +2,7 @@ import { LocalStorage, OAuth, getPreferenceValues } from "@raycast/api";
 import fetch, { type RequestInit } from "node-fetch";
 import { client, doAuth } from "@/oauth";
 
-const { accessKey } = getPreferenceValues<UnsplashPreferences>();
+const { accessKey } = getPreferenceValues<Preferences>();
 
 export const apiRequest = async <T>(path: string, options?: RequestInit) => {
   const tokens = await client.getTokens();

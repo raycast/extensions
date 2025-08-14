@@ -32,19 +32,21 @@ enum MessagesError: Error {
     throw MessagesError.accessDenied
   }
 
-  let keys = [
-    CNContactGivenNameKey,
-    CNContactFamilyNameKey,
-    CNContactPhoneNumbersKey,
-    CNContactEmailAddressesKey,
-    CNContactIdentifierKey,
-    CNContactImageDataKey,
-  ] as [CNKeyDescriptor]
+  let keys =
+    [
+      CNContactIdentifierKey,
+      CNContactGivenNameKey,
+      CNContactFamilyNameKey,
+      CNContactPhoneNumbersKey,
+      CNContactEmailAddressesKey,
+      CNContactImageDataKey,
+    ] as [CNKeyDescriptor]
 
   var contacts: [ContactItem] = []
 
   for phoneNumber in phoneNumbers {
-    let predicate = CNContact.predicateForContacts(matching: CNPhoneNumber(stringValue: phoneNumber))
+    let predicate = CNContact.predicateForContacts(
+      matching: CNPhoneNumber(stringValue: phoneNumber))
     do {
       let matchingContacts = try store.unifiedContacts(matching: predicate, keysToFetch: keys)
       for contact in matchingContacts {

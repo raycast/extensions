@@ -1,9 +1,12 @@
 import DomainListSection from "./pages/lists/domains-list";
-import isValidToken from "./utils/is-valid-token";
+import WithValidToken from "./pages/with-valid-token";
 
 function Main() {
-  isValidToken();
-  return <DomainListSection />;
+  return (
+    <WithValidToken>
+      <DomainListSection />
+    </WithValidToken>
+  );
 }
 
 export default Main;

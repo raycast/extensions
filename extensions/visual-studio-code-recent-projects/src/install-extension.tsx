@@ -21,6 +21,7 @@ function UninstallExtensionAction(props: { extension: GalleryExtension; afterUni
   return (
     <UninstallExtensionByIDAction
       extensionID={getFullExtensionID(props.extension)}
+      extensionName={props.extension.displayName}
       afterUninstall={props.afterUninstall}
     />
   );
@@ -157,7 +158,7 @@ function GalleryExtensionListItem(props: {
             <OpenExtensionByIDInBrowserAction extensionID={getFullExtensionID(e)} />
             <Action.CopyToClipboard
               content={getFullExtensionID(e)}
-              title="Copy Extension ID"
+              title="Copy Extension Id"
               shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
             />
           </ActionPanel.Section>

@@ -1,9 +1,61 @@
-# KeepassXC Extension Changelog
+# KeePassXC Extension Changelog
 
-All notable changes to this project will be documented in this file.
+## [1.6.0] - 2025-04-07
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+### Added
+
+- Optional favicon support for the user interface.
+- New image with favicons.
+
+### Fixed
+
+- Better descriptions for the preferences.
+
+## [1.5.6] - 2025-03-12
+
+### Fixed
+
+- Use a raw.githubusercontent.com link for the KeePassXC image in the README.
+
+## [1.5.5] - 2025-03-12
+
+### Changed
+
+- Use a global info message about security when the database is locked.
+- Update screenshot about the database being locked.
+- Use more explicit error messages when unable to execute the `keepassxc-cli` command.
+
+### Fixed
+
+- Use a blob link for the KeePassXC image in the README.
+
+### Removed
+
+- The test guide.
+
+## [1.5.4] - 2025-02-10
+
+### Fixed
+
+- Use OTPAuth to retrieve TOTP codes since `keepassxc-cli show` can't retrieve details from entries with the same name.
+
+## [1.5.3] - 2025-01-28
+
+### Fixed
+
+- Stop animated toast when unlocking the database if a wrong password is given.
+
+## [1.5.2] - 2025-01-24
+
+### Fixed
+
+- Display the correct tooltip on the URL icon.
+
+## [1.5.1] - 2025-01-20
+
+### Fixed
+
+- Improve error handling when no correct KeePassXC App is given in preferences.
 
 ## [1.5.0] - 2025-01-12
 
@@ -80,4 +132,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Add support for Key File protected database file.
+- Initial release.

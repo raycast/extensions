@@ -25,20 +25,4 @@ export default async function Command() {
     await showToast(Toast.Style.Failure, "Failed to read from clipboard", (error as Error).message);
     return;
   }
-
-  try {
-    const urlScript = `
-      tell application "Google Chrome"
-        activate
-        delay 5
-        set theURL to URL of active tab of first window
-        return theURL
-      end tell
-    `;
-    const theURL = await runAppleScript(urlScript);
-    await Clipboard.copy(theURL);
-  } catch (error) {
-    await showToast(Toast.Style.Failure, "Failed to get URL from Google Chrome", (error as Error).message);
-    return;
-  }
 }

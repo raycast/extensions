@@ -1,15 +1,7 @@
-import { fetch } from "cross-fetch";
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  Keyboard,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import { parseFromMillis } from "./now-playing";
+import { callCider } from "./functions";
 
 interface queueItem {
   id: string;
@@ -39,10 +31,7 @@ export default function Command() {
 
   async function fetchQueue() {
     try {
-      const res = await fetch("http://localhost:10767/api/v1/playback/queue", {
-        signal: AbortSignal.timeout(3000),
-      });
-      const data = (await res.json()) as queueItem[];
+      const data = (await callCider("/playback/queue", "GET", undefined, true)) as queueItem[];
       setQueue(data);
       setIsLoading(false);
       if (toastShownRef.current) {
@@ -66,55 +55,34 @@ export default function Command() {
   }
 
   async function clearQueue() {
-    await fetch(`http://localhost:10767/api/v1/playback/queue/clear-queue`, {
-      method: "POST",
-    });
+    await callCider("/playback/queue/clear-queue", "POST");
   }
 
   async function playSong(song: queueItem) {
-    await fetch(
-      `http://localhost:10767/api/v1/playback/queue/change-to-index`,
-      {
-        method: "POST",
-        body: JSON.stringify({ index: queue.indexOf(song) }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
-    );
+    await callCider("/playback/queue/change-to-index", "POST", {
+      index: queue.indexOf(song),
+    });
   }
 
   async function moveSong(song: queueItem, direction: "up" | "down") {
     const startIndex = queue.indexOf(song);
-    const res = await fetch(
-      `http://localhost:10767/api/v1/playback/queue/move-to-position`,
-      {
-        method: "POST",
-        body: JSON.stringify({
-          startIndex,
-          destinationIndex: startIndex + (direction === "up" ? -1 : 1),
-          returnQueue: true,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
-    );
-    const data = (await res.json()) as queueItem[];
-    setQueue(data);
+    await callCider("/playback/queue/move-to-position", "POST", {
+      startIndex,
+      destinationIndex: startIndex + (direction === "up" ? -1 : 1),
+    });
+    const newQueue = [...queue];
+    const temp = newQueue[startIndex];
+    newQueue[startIndex] = newQueue[startIndex + (direction === "up" ? -1 : 1)];
+    newQueue[startIndex + (direction === "up" ? -1 : 1)] = temp;
+    setQueue(newQueue);
   }
 
   async function removeSong(song: queueItem) {
-    await fetch(
-      `http://localhost:10767/api/v1/playback/queue/remove-by-index`,
-      {
-        method: "POST",
-        body: JSON.stringify({ index: queue.indexOf(song) }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
-    );
+    const index = queue.indexOf(song);
+    await callCider("/playback/queue/remove-by-index", "POST", { index });
+    const newQueue = [...queue];
+    newQueue.splice(index, 1);
+    setQueue(newQueue);
   }
 
   useEffect(() => {
@@ -133,94 +101,73 @@ export default function Command() {
         }
         icon={Icon.EmojiSad}
       />
-      {queue
-        .filter((item) => item._state.current <= 2)
-        .map((item) => (
-          <List.Item
-            key={item.id}
-            title={item.attributes.name}
-            subtitle={item.attributes.artistName}
-            icon={{
-              source:
-                item.attributes.artwork?.url.replace(
-                  "{w}x{h}",
-                  `${item.attributes.artwork.width}x${item.attributes.artwork.height}`,
-                ) || Icon.Music,
-            }}
-            detail={
-              <List.Item.Detail
-                markdown={`![cover](${item.attributes.artwork?.url.replace("{w}x{h}", `${item.attributes.artwork.width}x${item.attributes.artwork.height}`)})`}
-                metadata={
-                  <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label
-                      title={"Name"}
-                      text={item.attributes.name}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title={"Artist"}
-                      text={item.attributes.artistName || "Unknown"}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title={"Album"}
-                      text={item.attributes.albumName || "Unknown"}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title={
-                        "Genre" +
-                        (item.attributes.genreNames.length > 1 ? "s" : "")
-                      }
-                      text={item.attributes.genreNames.join(", ") || "Unknown"}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title={"Duration"}
-                      text={parseFromMillis(item.attributes.durationInMillis)}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title={"Release Date"}
-                      text={new Date(
-                        item.attributes.releaseDate,
-                      ).toLocaleDateString("en-GB")}
-                    />
-                  </List.Item.Detail.Metadata>
-                }
+      {queue.map((item) => (
+        <List.Item
+          key={item.id}
+          title={item.attributes.name}
+          subtitle={item.attributes.artistName}
+          icon={{
+            source:
+              item.attributes.artwork?.url.replace(
+                "{w}x{h}",
+                `${item.attributes.artwork.width}x${item.attributes.artwork.height}`,
+              ) || Icon.Music,
+          }}
+          detail={
+            <List.Item.Detail
+              markdown={`![cover](${item.attributes.artwork?.url.replace("{w}x{h}", `${item.attributes.artwork.width}x${item.attributes.artwork.height}`)})`}
+              metadata={
+                <List.Item.Detail.Metadata>
+                  <List.Item.Detail.Metadata.Label title={"Name"} text={item.attributes.name} />
+                  <List.Item.Detail.Metadata.Label title={"Artist"} text={item.attributes.artistName || "Unknown"} />
+                  <List.Item.Detail.Metadata.Label title={"Album"} text={item.attributes.albumName || "Unknown"} />
+                  <List.Item.Detail.Metadata.Label
+                    title={"Genre" + (item.attributes.genreNames.length > 1 ? "s" : "")}
+                    text={item.attributes.genreNames.join(", ") || "Unknown"}
+                  />
+                  <List.Item.Detail.Metadata.Label
+                    title={"Duration"}
+                    text={parseFromMillis(item.attributes.durationInMillis)}
+                  />
+                  <List.Item.Detail.Metadata.Label
+                    title={"Release Date"}
+                    text={new Date(item.attributes.releaseDate).toLocaleDateString("en-GB")}
+                  />
+                </List.Item.Detail.Metadata>
+              }
+            />
+          }
+          actions={
+            <ActionPanel>
+              <Action title={"Play"} icon={Icon.Play} onAction={() => playSong(item)} />
+              <Action
+                title={"Remove"}
+                icon={Icon.Trash}
+                onAction={() => removeSong(item)}
+                shortcut={Keyboard.Shortcut.Common.Remove}
+                style={Action.Style.Destructive}
               />
-            }
-            actions={
-              <ActionPanel>
-                <Action
-                  title={"Play"}
-                  icon={Icon.Play}
-                  onAction={() => playSong(item)}
-                />
-                <Action
-                  title={"Remove"}
-                  icon={Icon.Trash}
-                  onAction={() => removeSong(item)}
-                  shortcut={Keyboard.Shortcut.Common.Remove}
-                  style={Action.Style.Destructive}
-                />
-                <Action
-                  title={"Clear Queue"}
-                  style={Action.Style.Destructive}
-                  icon={Icon.Xmark}
-                  onAction={clearQueue}
-                />
+              <Action title={"Clear Queue"} style={Action.Style.Destructive} icon={Icon.Xmark} onAction={clearQueue} />
+              {queue.indexOf(item) !== 0 && (
                 <Action
                   title={"Move Up"}
                   icon={Icon.ArrowUp}
                   onAction={() => moveSong(item, "up")}
                   shortcut={Keyboard.Shortcut.Common.MoveUp}
                 />
+              )}
+              {queue.indexOf(item) !== queue.length - 1 && (
                 <Action
                   title={"Move Down"}
                   icon={Icon.ArrowDown}
                   onAction={() => moveSong(item, "down")}
                   shortcut={Keyboard.Shortcut.Common.MoveDown}
                 />
-              </ActionPanel>
-            }
-          />
-        ))}
+              )}
+            </ActionPanel>
+          }
+        />
+      ))}
     </List>
   );
 }

@@ -23,7 +23,18 @@
       "title": "Select Mullvad Location",
       "subtitle": "Mullvad",
       "description": "Sets the destination Mullvad server.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "selectByRanking",
+          "title": "Select by Ranking",
+          "label": "Use the highest ranked server for location",
+          "description": "If enabled, the highest ranked server for the given location will be used when a location is selected. If no server is ranked, Mullvad will determine the server used.",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        }
+      ]
     },
     {
       "name": "connect",

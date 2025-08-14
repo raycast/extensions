@@ -4,7 +4,7 @@ import { authenticate } from "./oauth";
 import { PolarProvider, queryClient } from "./providers";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useCustomers } from "./hooks/customers";
-import { Customer } from "@polar-sh/sdk/models/components";
+import { Customer } from "@polar-sh/sdk/dist/commonjs/models/components/customer";
 import { useOrganization } from "./hooks/organizations";
 
 export default function Command() {

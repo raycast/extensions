@@ -1,9 +1,10 @@
-import { AppsV1Api, V1DaemonSet } from "@kubernetes/client-node";
-import { listDaemonSets } from "./api/appsV1";
-import { ResourceList } from "./components/resource-list";
+import { V1DaemonSet } from "@kubernetes/client-node";
+import { ResourceList } from "./components/ResourceList";
+import PodList from "./components/resources/PodList";
 import { KubernetesContextProvider } from "./states/context";
 import { KubernetesNamespaceProvider } from "./states/namespace";
 import { kubernetesObjectAge } from "./utils/duration";
+import { labelSelectorToString } from "./utils/selector";
 
 export default function Command() {
   return (
@@ -11,12 +12,11 @@ export default function Command() {
       <KubernetesNamespaceProvider>
         <ResourceList
           apiVersion="apps/v1"
-          kind="DaemonSets"
+          kind="DaemonSet"
           namespaced={true}
-          apiClientType={AppsV1Api}
-          listResources={listDaemonSets}
           matchResource={matchDaemonSet}
           renderFields={renderDaemonSetFields}
+          relatedResource={{ kind: "Pod", render: renderDaemonSetRelatedResource }}
         />
       </KubernetesNamespaceProvider>
     </KubernetesContextProvider>
@@ -37,4 +37,13 @@ function renderDaemonSetFields(daemonSet: V1DaemonSet) {
     `Ready: ${daemonSet.status?.numberReady ?? 0}`,
     `Age: ${kubernetesObjectAge(daemonSet)}`,
   ];
+}
+
+function renderDaemonSetRelatedResource(daemonSet: V1DaemonSet) {
+  return (
+    <PodList
+      namespace={daemonSet.metadata?.namespace}
+      labelSelector={labelSelectorToString(daemonSet.spec?.selector)}
+    />
+  );
 }

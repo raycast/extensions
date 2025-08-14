@@ -1,7 +1,11 @@
 import { getErrorMessage } from "../helpers/getError";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 
-type SearchProps = { query: string; limit?: number };
+type SearchProps = {
+  query: string;
+  limit?: number;
+  types?: ("album" | "artist" | "playlist" | "track" | "show" | "episode" | "audiobook")[];
+};
 
 function filterNullItems<T>(category: { items?: (T | null)[] } | undefined) {
   if (!category?.items) return undefined;
@@ -11,15 +15,19 @@ function filterNullItems<T>(category: { items?: (T | null)[] } | undefined) {
   };
 }
 
-export async function search({ query, limit = 50 }: SearchProps) {
+export async function search({
+  query,
+  limit = 50,
+  types = ["track", "artist", "album", "playlist", "show", "episode"],
+}: SearchProps) {
   const { spotifyClient } = getSpotifyClient();
 
   try {
-    const response = await spotifyClient.search(query, ["track", "artist", "album", "playlist", "show", "episode"], {
+    const response = await spotifyClient.search(query, types, {
       limit,
     });
-
     return {
+      audiobooks: filterNullItems(response.audiobooks),
       tracks: filterNullItems(response.tracks),
       artists: filterNullItems(response.artists),
       albums: filterNullItems(response.albums),

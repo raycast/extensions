@@ -1,16 +1,49 @@
-import { Action, ActionPanel, Form, showToast, Toast, Icon, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  showToast,
+  Toast,
+  Icon,
+  useNavigation,
+  getSelectedText,
+  getPreferenceValues,
+} from "@raycast/api";
 import { useForm } from "@raycast/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Prompt, PromptFormValues } from "../types";
 import { usePrompt } from "../hooks";
 import { formConfig, TAGS } from "../config";
+import { promptValidations } from "../utils/validations";
 
 export default function CreatePromptForm() {
+  const preferences = getPreferenceValues();
   const [isLoading, setIsLoading] = useState(false);
   const [create] = usePrompt();
   const { pop } = useNavigation();
+  const [initialContent, setInitialContent] = useState("");
 
-  const { handleSubmit, itemProps, reset } = useForm<PromptFormValues>({
+  useEffect(() => {
+    const fetchSelectedText = async () => {
+      setIsLoading(true);
+      try {
+        const selectedText = await getSelectedText();
+        if (selectedText) {
+          setInitialContent(selectedText);
+        }
+      } catch (error) {
+        setInitialContent("");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (preferences.autoInsertSelectedPrompt) {
+      fetchSelectedText();
+    }
+  }, []);
+
+  const { handleSubmit, itemProps, reset, setValue } = useForm<PromptFormValues>({
     initialValues: {
       title: "",
       content: "",
@@ -50,36 +83,14 @@ export default function CreatePromptForm() {
         setIsLoading(false);
       }
     },
-    validation: {
-      title: (value) => {
-        if (!value) {
-          return "Title is required";
-        }
-        if (value.length < 3) {
-          return "Title must be at least 3 characters";
-        }
-        if (value.length > 100) {
-          return "Title must be less than 100 characters";
-        }
-      },
-      content: (value) => {
-        if (!value) {
-          return "Prompt content is required";
-        }
-        if (value.length < 10) {
-          return "Prompt content must be at least 10 characters";
-        }
-        if (value.length > 5000) {
-          return "Prompt content must be less than 5000 characters";
-        }
-      },
-      tags: (value) => {
-        if (value && value.length > 10) {
-          return "Maximum 10 tags allowed";
-        }
-      },
-    },
+    validation: promptValidations,
   });
+
+  useEffect(() => {
+    if (initialContent) {
+      setValue("content", initialContent);
+    }
+  }, [initialContent]);
 
   return (
     <Form

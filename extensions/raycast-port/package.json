@@ -26,6 +26,18 @@
       "title": "AI.ask",
       "description": "Port for the Raycast AI.ask.",
       "mode": "no-view"
+    },
+    {
+      "name": "browser-extension",
+      "title": "BrowserExtension",
+      "description": "Port for the Raycast BrowserExtension.",
+      "mode": "no-view"
+    },
+    {
+      "name": "window-management",
+      "title": "WindowManagement",
+      "description": "Port for the Raycast WindowManagement.",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -40,15 +52,15 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.86.1",
+    "@raycast/api": "^1.93.1",
     "raycast-cross-extension": "^0.2.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^22.9.3",
-    "@types/react": "^18.3.12",
+    "@types/node": "^22.13.9",
+    "@types/react": "^18.3.18",
     "eslint": "^8.57.1",
-    "prettier": "^3.3.3",
-    "typescript": "^5.7.2"
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   }
 }

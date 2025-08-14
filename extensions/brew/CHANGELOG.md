@@ -1,6 +1,10 @@
 # Brew Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-02-17
+
+- Add a new action to open the Brew formula/cask page in the browser
+
+## [Improvements] - 2025-01-07
 
 - Optimized checkmark icon
 - Minor change on tint color and minor fixes

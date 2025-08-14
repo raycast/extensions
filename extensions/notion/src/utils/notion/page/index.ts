@@ -3,6 +3,7 @@ import { showToast, Toast, Image, Icon } from "@raycast/api";
 import { markdownToBlocks } from "@tryfabric/martian";
 import { NotionToMarkdown } from "notion-to-md";
 
+import { isMarkdownPageContent, PageContent } from "..";
 import { getDateMention } from "../block";
 import { handleError, pageMapper } from "../global";
 import { getNotionClient } from "../oauth";
@@ -61,14 +62,14 @@ export async function patchPage(pageId: string, properties: UpdatePageParameters
   }
 }
 
-export async function search(query?: string, nextCursor?: string) {
+export async function search(query?: string, nextCursor?: string, pageSize: number = 25) {
   const notion = getNotionClient();
   const database = await notion.search({
     sort: {
       direction: "descending",
       timestamp: "last_edited_time",
     },
-    page_size: 25,
+    page_size: pageSize,
     query,
     ...(nextCursor && { start_cursor: nextCursor }),
   });
@@ -137,16 +138,18 @@ export async function appendBlockToPage({
   }
 }
 
-export async function appendToPage(pageId: string, params: { content: string }) {
+export async function appendToPage(pageId: string, params: { content: PageContent }) {
   try {
     const notion = getNotionClient();
+    const { content } = params;
 
-    const arg: Parameters<typeof notion.blocks.children.append>[0] = {
+    const { results } = await notion.blocks.children.append({
       block_id: pageId,
-      children: markdownToBlocks(params.content) as BlockObjectRequest[],
-    };
-
-    const { results } = await notion.blocks.children.append(arg);
+      children: isMarkdownPageContent(content)
+        ? // casting because converting from the `Block` type in martian to the `BlockObjectRequest` type in notion
+          (markdownToBlocks(content) as BlockObjectRequest[])
+        : content,
+    });
 
     const n2m = new NotionToMarkdown({ notionClient: notion });
 
@@ -187,8 +190,4 @@ export interface Page {
   icon_external: string | null;
   url?: string;
   properties: Record<string, PageProperty>;
-}
-
-export interface PageContent {
-  markdown: string | undefined;
 }

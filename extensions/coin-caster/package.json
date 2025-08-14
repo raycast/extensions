@@ -1,0 +1,48 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "coin-caster",
+  "title": "Coin Caster",
+  "description": "Get the price for any crypto asset in Raycast",
+  "icon": "coin-caster-logo.png",
+  "author": "chase_manning",
+  "license": "MIT",
+  "categories": [
+    "Finance",
+    "Data"
+  ],
+  "commands": [
+    {
+      "name": "token-prices",
+      "title": "Search Token Prices",
+      "subtitle": "Coin Caster",
+      "description": "Get the price for any crypto asset",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.92.0",
+    "@raycast/utils": "^1.17.0",
+    "@tanstack/query-async-storage-persister": "^5.66.4",
+    "@tanstack/react-query": "^5.66.9",
+    "@tanstack/react-query-persist-client": "^5.66.9",
+    "chartjs-to-image": "^1.2.2",
+    "fastest-levenshtein": "^1.0.16",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

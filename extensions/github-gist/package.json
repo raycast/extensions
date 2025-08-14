@@ -10,7 +10,8 @@
     "LunaticMuch",
     "pernielsentikaer",
     "stelo",
-    "nbbaier"
+    "nbbaier",
+    "ridemountainpig"
   ],
   "categories": [
     "Developer Tools",
@@ -67,6 +68,28 @@
           "label": "Show Gist Content",
           "description": "Show gist content details.",
           "default": true
+        },
+        {
+          "name": "defaultGistTag",
+          "type": "dropdown",
+          "description": "Default filter tag for the gist item. If \"Remember Filter Tag\" is enabled, this will be ignored.",
+          "required": false,
+          "title": "Default Filter Tag",
+          "default": "My Gists",
+          "data": [
+            {
+              "title": "My Gists",
+              "value": "My Gists"
+            },
+            {
+              "title": "Starred Gists",
+              "value": "Starred Gists"
+            },
+            {
+              "title": "Public Gists",
+              "value": "Public Gists"
+            }
+          ]
         },
         {
           "name": "primaryAction",
