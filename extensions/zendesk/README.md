@@ -1,18 +1,30 @@
-# Zendesk extension
+# Zendesk
 
-Search through any [Zendesk](https://www.zendesk.com/) support center.
+Manage your Zendesk tickets and search Help Center articles directly from Raycast.
 
-## Extension configuration
+## Features
 
-The extension requires one item: your Zendesk base URL
+- **My Tickets**: View and manage your assigned Zendesk tickets
+- **Search Articles**: Search Help Center articles
 
-When viewing your support articles online, the URL will be in the format https://support.mycompany.com/hc/en-us/articles/3600000000000-My-Article-Title. The base URL is everything after the https:// and before the /hc/ part of the URL.
+## Setup
 
-## Planned improvements
-- [x] Add support for multiple locales.
-- [ ] Show previously fetched articles.
-- [ ] Allow favoriting articles.
-- [ ] Show any HTML tag with id attribute and allow copying it.
-- [ ] Add filter by support section (currently only searches all articles).
-- [ ] Add support for multiple Zendesk support center.
-- [ ] Add search for HTML string option.
+Configure your Zendesk settings in the extension preferences:
+
+1. **Subdomain**: Your Zendesk subdomain (e.g., `company` for company.zendesk.com)
+2. **Email**: Your Zendesk agent email address  
+3. **API Token**: Generate from Zendesk Admin → Apps & integrations → APIs → Zendesk API
+
+## Commands
+
+### My Tickets
+- View your assigned tickets
+- Open tickets in browser
+- Reply to tickets (public/private)
+- Assign tickets to yourself
+- Change ticket status (Solved/Pending)
+
+### Search Articles
+- Search Help Center articles
+- Open articles in browser
+- Copy article URLs

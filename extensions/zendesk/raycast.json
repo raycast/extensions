@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zendesk",
+  "title": "Zendesk",
+  "description": "Work with tickets and Help Center",
+  "icon": "assets/icon.png",
+  "author": "Justin Martin",
+  "categories": [
+    "productivity"
+  ],
+  "preferences": [
+    {
+      "name": "subdomain",
+      "type": "text",
+      "title": "Zendesk Subdomain",
+      "description": "Your Zendesk subdomain (e.g., 'company' for company.zendesk.com)"
+    },
+    {
+      "name": "email",
+      "type": "text",
+      "title": "Agent Email",
+      "description": "Your Zendesk agent email address"
+    },
+    {
+      "name": "apiToken",
+      "type": "password",
+      "title": "API Token",
+      "description": "Your Zendesk API token"
+    }
+  ],
+  "commands": [
+    {
+      "name": "tickets",
+      "title": "My Tickets",
+      "subtitle": "Zendesk",
+      "description": "View and manage your assigned tickets",
+      "mode": "view"
+    },
+    {
+      "name": "articles",
+      "title": "Search Articles",
+      "subtitle": "Zendesk",
+      "description": "Search Help Center articles",
+      "mode": "view"
+    }
+  ]
+}
