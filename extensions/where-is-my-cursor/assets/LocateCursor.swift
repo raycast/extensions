@@ -120,8 +120,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var keyDownMonitor: Any?
     
     var presentationConfig: PresentationModeConfig?
-    // var lockFilePath: String!
-    // var lockFilePath: URL
+    var presentationConfig: PresentationModeConfig?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         let args = CommandLine.arguments
