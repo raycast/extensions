@@ -1,6 +1,6 @@
 # Groq Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-08-14
 
 - Added `OpenAI GPT OSS 120B`
 - Added `OpenAI GPT OSS 20B`
