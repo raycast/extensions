@@ -3,7 +3,7 @@
   "name": "zendesk",
   "title": "Zendesk",
   "description": "Work with tickets and Help Center",
-  "icon": "assets/icon.png",
+  "icon": "icon.png",
   "author": "justin_martin",
   "license": "MIT",
   "homepage": "https://github.com/Unicornninja80/raycast-zendesk",
@@ -18,19 +18,25 @@
       "name": "subdomain",
       "type": "text",
       "title": "Zendesk Subdomain",
-      "description": "Your Zendesk subdomain (e.g., company for company.zendesk.com)"
+      "description": "Your Zendesk subdomain (e.g., company for company.zendesk.com)",
+      "required": true,
+      "placeholder": "company"
     },
     {
       "name": "email",
       "type": "text",
       "title": "Agent Email",
-      "description": "Your Zendesk agent email address"
+      "description": "Your Zendesk agent email address",
+      "required": true,
+      "placeholder": "agent@company.com"
     },
     {
       "name": "apiToken",
       "type": "password",
       "title": "API Token",
-      "description": "Your Zendesk API token"
+      "description": "Your Zendesk API token",
+      "required": true,
+      "placeholder": "Enter your API token"
     }
   ],
   "commands": [
