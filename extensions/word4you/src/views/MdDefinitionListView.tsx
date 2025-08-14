@@ -53,7 +53,7 @@ export function MdDefinitionListView({ initialText }: MdDefinitionListViewProps)
                 <ActionPanel>
                   <Action
                     title={`Query "${searchText}" with AI`}
-                    icon="🤖"
+                    icon={Icon.MagnifyingGlass}
                     onAction={() => handleSearch(searchText.trim())}
                   />
                 </ActionPanel>

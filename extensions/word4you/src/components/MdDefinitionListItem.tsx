@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Keyboard } from "@raycast/api";
+import { List, ActionPanel, Action, Keyboard, Icon } from "@raycast/api";
 import { MdDefinition } from "../types";
 import { MdDefinitionDetail } from "./MdDefinitionDetail";
 
@@ -26,23 +26,27 @@ export function MdDefinitionListItem({
       actions={
         <ActionPanel>
           {isAiResult && onSave && (
-            <Action title="Save to Vocabulary" icon="💾" onAction={() => onSave(mdDefinition.raw_output)} />
+            <Action
+              title="Save to Vocabulary"
+              icon={Icon.PlusCircle}
+              onAction={() => onSave(mdDefinition.raw_output)}
+            />
           )}
           {!isAiResult && (
             <>
               {onUpdate && mdDefinition.timestamp && (
                 <Action
                   title="Update Definition"
-                  icon="📝"
+                  icon={Icon.Pencil}
                   onAction={() => onUpdate(mdDefinition.text, mdDefinition.timestamp)}
                 />
               )}
               {onDelete && mdDefinition.timestamp && (
                 <Action
                   title="Delete Definition"
-                  icon="🗑️"
                   onAction={() => onDelete(mdDefinition.timestamp)}
                   style={Action.Style.Destructive}
+                  icon={Icon.Trash}
                   shortcut={Keyboard.Shortcut.Common.Remove}
                 />
               )}
