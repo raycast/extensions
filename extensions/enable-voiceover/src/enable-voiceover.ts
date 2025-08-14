@@ -1,4 +1,4 @@
-import { showToast } from "@raycast/api";
+import { showHUD } from "@raycast/api";
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
 import { showFailureToast } from "@raycast/utils";
@@ -14,7 +14,7 @@ const enableVoiceOver = async () => {
 const main = async () => {
   try {
     await enableVoiceOver();
-    await showToast({ title: "VoiceOver enabled" });
+    await showHUD("VoiceOver enabled");
   } catch (err) {
     await showFailureToast(`Error enabling VoiceOver: ${err}`);
   }
