@@ -18,7 +18,7 @@
       "arguments": [
         {
           "name": "query",
-          "placeholder": "Person / mobilnummer",
+          "placeholder": "Person / Phonenumber",
           "required": true,
           "type": "text"
         }
