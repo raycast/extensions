@@ -1,0 +1,202 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "juit-jurisprudencia",
+  "title": "Juit Jurisprudência",
+  "description": "Pesquise jurisprudência em 68 milhões de precedentes de todos os 92 tribunais brasileiros usando a API da JUIT",
+  "icon": "command-icon.png",
+  "author": "deoclides",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-jurisprudence",
+      "title": "Buscar Jurisprudência",
+      "description": "Busque jurisprudência na base da JUIT com filtros avançados",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "apiUsername",
+      "type": "textfield",
+      "required": true,
+      "title": "Usuário da API",
+      "description": "Seu nome de usuário para a API da JUIT",
+      "placeholder": "Digite seu usuário"
+    },
+    {
+      "name": "apiPassword",
+      "type": "password",
+      "required": true,
+      "title": "Senha da API",
+      "description": "Sua senha para a API da JUIT",
+      "placeholder": "Digite sua senha"
+    },
+    {
+      "name": "apiOwner",
+      "type": "textfield",
+      "required": true,
+      "title": "Email do Proprietário",
+      "description": "Seu email cadastrado no sistema JUIT",
+      "placeholder": "seu.email@empresa.com.br"
+    },
+    {
+      "name": "anthropicApiKey", 
+      "type": "password",
+      "required": false,
+      "title": "Chave API Anthropic",
+      "description": "Sua chave da API Anthropic (Claude) para resumir julgados (opcional)",
+      "placeholder": "sk-ant-..."
+    },
+    {
+      "name": "anthropicModel",
+      "type": "dropdown",
+      "required": false,
+      "title": "Modelo Anthropic",
+      "description": "Modelo Anthropic para usar nos resumos",
+      "default": "claude-sonnet-4-20250514",
+      "data": [
+        {
+          "title": "Claude Sonnet 4",
+          "value": "claude-sonnet-4-20250514"
+        },
+        {
+          "title": "Claude Opus 4", 
+          "value": "claude-opus-4-1-20250805"
+        }
+      ]
+    },
+    {
+      "name": "geminiApiKey",
+      "type": "password", 
+      "required": false,
+      "title": "Chave API Google Gemini",
+      "description": "Sua chave da API Google Gemini para resumir julgados (opcional)",
+      "placeholder": "AIza..."
+    },
+    {
+      "name": "geminiModel",
+      "type": "dropdown",
+      "required": false,
+      "title": "Modelo Gemini",
+      "description": "Modelo Gemini para usar nos resumos",
+      "default": "gemini-2.5-flash",
+      "data": [
+        {
+          "title": "Gemini 2.5 Flash",
+          "value": "gemini-2.5-flash"
+        },
+        {
+          "title": "Gemini 2.5 Pro",
+          "value": "gemini-2.5-pro"
+        }
+      ]
+    },
+    {
+      "name": "openaiApiKey",
+      "type": "password",
+      "required": false,
+      "title": "Chave API OpenAI",
+      "description": "Sua chave da API OpenAI para resumir julgados (opcional)",
+      "placeholder": "sk-..."
+    },
+    {
+      "name": "openaiModel",
+      "type": "dropdown", 
+      "required": false,
+      "title": "Modelo OpenAI",
+      "description": "Modelo OpenAI para usar nos resumos",
+      "default": "gpt-5-mini-2025-08-07",
+      "data": [
+        {
+          "title": "GPT-5",
+          "value": "gpt-5-2025-08-07"
+        },
+        {
+          "title": "GPT-5 Mini",
+          "value": "gpt-5-mini-2025-08-07"
+        },
+        {
+          "title": "GPT-4.1",
+          "value": "gpt-4.1-2025-04-14"
+        }
+      ]
+    },
+    {
+      "name": "mistralApiKey",
+      "type": "password",
+      "required": false, 
+      "title": "Chave API Mistral",
+      "description": "Sua chave da API Mistral para resumir julgados (opcional)",
+      "placeholder": "..."
+    },
+    {
+      "name": "mistralModel",
+      "type": "dropdown",
+      "required": false,
+      "title": "Modelo Mistral", 
+      "description": "Modelo Mistral para usar nos resumos",
+      "default": "mistral-medium-2508",
+      "data": [
+        {
+          "title": "Mistral Medium 3.1",
+          "value": "mistral-medium-2508"
+        },
+        {
+          "title": "Mistral Small 2.1",
+          "value": "mistral-small-2506"
+        }
+      ]
+    },
+    {
+      "name": "defaultLlm",
+      "type": "dropdown",
+      "required": false,
+      "title": "LLM Padrão",
+      "description": "Modelo de linguagem padrão para resumir julgados",
+      "default": "anthropic",
+      "data": [
+        {
+          "title": "Anthropic Claude",
+          "value": "anthropic"
+        },
+        {
+          "title": "Google Gemini",
+          "value": "gemini"
+        },
+        {
+          "title": "OpenAI GPT",
+          "value": "openai"
+        },
+        {
+          "title": "Mistral AI",
+          "value": "mistral"
+        }
+      ]
+    }
+  ]
+}
