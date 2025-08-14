@@ -39,7 +39,9 @@ export function useFavorites(): [
   }, [favorites]);
 
   async function addFavorite(id: string) {
-    setFavorites((prev) => new Set([...prev, id]));
+    const updated = new Set([...favorites, id]);
+    await LocalStorage.setItem("favorites", JSON.stringify(Array.from(updated)));
+    setFavorites(updated);
     showToast({ title: "Added to Favorites", message: "Cat image has been added to your favorites." });
   }
 
