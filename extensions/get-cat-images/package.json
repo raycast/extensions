@@ -15,6 +15,7 @@
       "name": "get-cat-images",
       "title": "Get Cat Images",
       "description": "Fetch a random cat image and add it to your favorites.",
+      "subtitle": "Get Cat Images",
       "mode": "view"
     },
     {
