@@ -16,7 +16,7 @@
   "preferences": [
     {
       "name": "subdomain",
-      "type": "text",
+      "type": "textfield",
       "title": "Zendesk Subdomain",
       "description": "Your Zendesk subdomain (e.g., company for company.zendesk.com)",
       "required": true,
@@ -24,7 +24,7 @@
     },
     {
       "name": "email",
-      "type": "text",
+      "type": "textfield",
       "title": "Agent Email",
       "description": "Your Zendesk agent email address",
       "required": true,
