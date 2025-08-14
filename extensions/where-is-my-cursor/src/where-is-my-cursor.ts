@@ -1,12 +1,22 @@
 import { exec } from "child_process";
-import { showToast, Toast } from "@raycast/api";
+import {
+  showToast,
+  Toast,
+  closeMainWindow,
+  PopToRootType,
+  environment,
+} from "@raycast/api";
 import { join } from "path";
 
-// Helper path (relative to repo or installed path)
-const helperPath = join(__dirname, ".", "assets", "LocateCursor");
+const helperPath = join(environment.assetsPath, "LocateCursor");
+// const supportPath = environment.supportPath;
 
-export default async function main() {
-  exec(helperPath, (error) => {
+export default function main() {
+  // This command runs the helper without any arguments, which defaults to a 1-second highlight.
+  // We still pass the support path as the first argument for consistency.
+  const command = `"${helperPath}"`;
+
+  exec(command, (error) => {
     if (error) {
       showToast({
         style: Toast.Style.Failure,
@@ -14,7 +24,12 @@ export default async function main() {
         message: error.message,
       });
     } else {
-      showToast({ style: Toast.Style.Success, title: "Cursor located" });
+      // The success toast is optional here as the visual effect is the main feedback.
+      // showToast({ style: Toast.Style.Success, title: "Cursor located" });
     }
+  });
+  closeMainWindow({
+    clearRootSearch: true,
+    popToRootType: PopToRootType.Immediate,
   });
 }
