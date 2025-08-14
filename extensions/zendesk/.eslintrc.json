@@ -1,6 +1,6 @@
 {
   "root": true,
-  "extends": ["eslint:recommended"],
+  "extends": [],
   "env": {
     "es6": true,
     "node": true,
@@ -13,10 +13,5 @@
       "jsx": true
     }
   },
-  "rules": {
-    "no-unused-vars": "off",
-    "no-undef": "off",
-    "no-redeclare": "off"
-  },
-  "ignorePatterns": ["**/*.ts", "**/*.tsx"]
+  "rules": {}
 }
