@@ -4,7 +4,7 @@ Visual aid to find cursor, specially useful when utilizing more than 1 monitor.
 
 It calls a small swift app located at `assets/LocateCursor` that dimms the screen where the cursor's at, leaving a small clear area around it.
 
-Additional modes allow for longer duration, a on/off toggle and a Presentation mode.
+Additional modes allow for longer duration, an on/off toggle and a Presentation mode.
 
 Presentation mode is also a toggle mode, it adds a yellow tint to the area around the cursor
 
