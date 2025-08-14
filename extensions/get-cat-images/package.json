@@ -28,7 +28,6 @@
     "@raycast/api": "^1.101.1",
     "@raycast/utils": "^1.17.0"
   },
-  ],
   "devDependencies": {
     "@eslint/js": "^9.33.0",
     "@eslint/json": "^0.13.1",
