@@ -1,5 +1,9 @@
 # Deepwiki Changelog
 
+## [0.2.1] - {PR_MERGE_DATE}
+
+- Update extension icon.
+
 ## [Initial Version] - 2025-05-07
 
 - Initial release with three commands:
