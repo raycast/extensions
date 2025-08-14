@@ -39,9 +39,16 @@ export function useFavorites(): [
   }, [favorites]);
 
   async function addFavorite(id: string) {
-    setFavorites((prev) => new Set([...prev, id]));
+  setFavorites((prev) => {
+    if (prev.has(id)) {
+      showToast({ title: "Already in Favorites", message: "This cat image is already in your favorites." });
+      return prev;
+    }
+    const updated = new Set([...prev, id]);
     showToast({ title: "Added to Favorites", message: "Cat image has been added to your favorites." });
-  }
+    return updated;
+  });
+}
 
   async function removeFavorite(id: string) {
     setFavorites((prev) => {
