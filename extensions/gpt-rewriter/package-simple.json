@@ -1,0 +1,139 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gpt-rewriter",
+  "title": "Gpt Rewriter",
+  "description": "AI-powered text rewriting and transformation tool with customizable prompts",
+  "icon": "command-icon.png",
+  "author": "alen",
+  "categories": [
+    "Productivity",
+    "Text"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "rewrite",
+      "title": "Rewrite Text",
+      "description": "Improve grammar and clarity while keeping a friendly tone",
+      "mode": "no-view",
+      "icon": "rewrite-icon.png"
+    },
+    {
+      "name": "workplace",
+      "title": "Workplace Rewrite",
+      "description": "Rewrite for Slack/tech chat with startup abbreviations",
+      "mode": "no-view",
+      "icon": "workplace-icon.png"
+    },
+    {
+      "name": "translate-en",
+      "title": "Translate to English",
+      "description": "Translate text to English",
+      "mode": "no-view",
+      "icon": "translate-icon.png"
+    },
+    {
+      "name": "summarize",
+      "title": "Summarize Text",
+      "description": "Create concise summaries of text",
+      "mode": "no-view",
+      "icon": "summarize-icon.png"
+    },
+    {
+      "name": "bullets",
+      "title": "Convert to Bullets",
+      "description": "Convert text to bullet points",
+      "mode": "no-view",
+      "icon": "bullets-icon.png"
+    },
+    {
+      "name": "settings",
+      "title": "Settings",
+      "description": "Configure API keys and preferences",
+      "mode": "view",
+      "icon": "settings-icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "openaiApiKey",
+      "type": "password",
+      "required": false,
+      "title": "OpenAI API Key",
+      "description": "Your OpenAI API key for GPT models"
+    },
+    {
+      "name": "openrouterApiKey",
+      "type": "password",
+      "required": false,
+      "title": "OpenRouter API Key",
+      "description": "Your OpenRouter API key for alternative models"
+    },
+    {
+      "name": "defaultModel",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Model",
+      "description": "Default AI model to use",
+      "default": "gpt-4o-mini",
+      "data": [
+        {
+          "title": "GPT-4o Mini",
+          "value": "gpt-4o-mini"
+        },
+        {
+          "title": "GPT-4o",
+          "value": "gpt-4o"
+        },
+        {
+          "title": "GPT-3.5 Turbo",
+          "value": "gpt-3.5-turbo"
+        },
+        {
+          "title": "Claude Sonnet 4",
+          "value": "anthropic/claude-sonnet-4"
+        },
+        {
+          "title": "Gemini 2.5 Flash",
+          "value": "google/gemini-2.5-flash"
+        }
+      ]
+    },
+    {
+      "name": "temperature",
+      "type": "textfield",
+      "required": false,
+      "title": "Temperature",
+      "description": "AI response randomness (0.0 to 1.0)",
+      "default": "0.7"
+    },
+    {
+      "name": "maxTokens",
+      "type": "textfield",
+      "required": false,
+      "title": "Max Tokens",
+      "description": "Maximum response length",
+      "default": "1000"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.4",
+    "@raycast/utils": "^1.5.2",
+    "openai": "^4.20.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

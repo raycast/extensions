@@ -1,0 +1,17 @@
+{
+  "$schema": "https://www.raycast.com/schemas/tsconfig.json",
+  "include": ["src/**/*"],
+  "compilerOptions": {
+    "lib": ["DOM", "DOM.Iterable", "ES6"],
+    "jsx": "react-jsx",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "skipLibCheck": true,
+    "strict": false,
+    "target": "ES2020"
+  }
+}
