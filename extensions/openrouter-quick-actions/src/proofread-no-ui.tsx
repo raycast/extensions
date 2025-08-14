@@ -7,13 +7,16 @@ const model_override = getPreferenceValues().model_proofread_no_ui;
 const provider_sort = getPreferenceValues().provider_sort_proofread_no_ui;
 
 export default async function ProofreadNoUi() {
-  const selectedText = await getSelectedText();
+  let selectedText = "";
+  try {
+    selectedText = await getSelectedText();
+  } catch (error) {
+    console.error(error);
+    await showHUD(`No text selected (${error})`);
+    return;
+  }
   const model = getModelName(model_override);
   await showHUD(`Connecting to OpenRouter with model ${model}...`);
-
-  console.log(prompt);
-  console.log(model_override);
-  console.log(provider_sort);
 
   const res = await openai.chat.completions.create({
     model: model,

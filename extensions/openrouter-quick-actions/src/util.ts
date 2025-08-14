@@ -6,14 +6,14 @@ export const formatCurrency = (amount: number) => {
   }
   return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: "USD",
+    currency: "USD", // OpenRouter uses USD only
     minimumFractionDigits: 5,
     maximumFractionDigits: 5,
-  }).format(amount / 100);
+  }).format(amount);
 };
 
 export const getModelName = (modelOverride: string) => {
-  if (modelOverride == "global" || modelOverride == "" || modelOverride == undefined) {
+  if (modelOverride === "global" || modelOverride === "" || modelOverride === undefined) {
     return getGlobalModel();
   }
   return modelOverride;

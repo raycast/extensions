@@ -226,7 +226,7 @@
           "placeholder": "Follow global model"
         },
         {
-          "name": "provider_sort_custom",
+          "name": "provider_sort_execute",
           "description": "Override the global preferred provider sorting for this command",
           "type": "dropdown",
           "required": false,

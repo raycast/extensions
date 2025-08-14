@@ -7,8 +7,8 @@ export const openai = new OpenAI({
   apiKey: preferences.apikey,
   baseURL: "https://openrouter.ai/api/v1",
   defaultHeaders: {
-    "HTTP-Referer": "https://github.com/raycast/extensions/tree/main/extensions/openrouter-quick",
-    "X-Title": "OpenRouter Quick",
+    "HTTP-Referer": "https://github.com/raycast/extensions/tree/main/extensions/openrouter-quick-actions",
+    "X-Title": "OpenRouter Quick Actions",
   },
 });
 

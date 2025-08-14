@@ -110,7 +110,7 @@ export default function ResultView(config: ResultViewConfig) {
       }
       setLoading(false);
       setResponse(
-        `⚠️ Failed to get response from OpenAI. Please check your network connection and API key. \n\n Error Message: \`\`\`${
+        `⚠️ Failed to get response from OpenRouter. Please check your network connection and API key. \n\n Error Message: \`\`\`${
           (error as Error).message
         }\`\`\``,
       );
