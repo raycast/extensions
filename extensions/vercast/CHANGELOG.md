@@ -1,6 +1,6 @@
 # Vercast Changelog
 
-## [2.11] - {PR_MERGE_DATE}
+## [2.11] - 2025-08-14
 
 - Avoid broken links by removing personal account from the team switcher following Vercel's [personal team change](https://vercel.com/changelog/2024-01-account-changes).
 
