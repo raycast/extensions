@@ -101,10 +101,6 @@ export default async function main() {
 
     await closeMainWindow();
   } catch (error) {
-    await showToast({
-      title: "Failed to open in Positron",
-      style: Toast.Style.Failure,
-      message: error instanceof Error ? error.message : String(error),
-    });
+    showFailureToast(error, { title: "Failed to open in Positron" });
   }
 }
