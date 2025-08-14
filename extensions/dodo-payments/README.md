@@ -2,6 +2,8 @@
 
 Your very own Dodo Payments dashboard, just a few keystrokes away.
 
+If you're new to Dodo Payments, please visit [Dodo Payments](https://dodopayments.com) to learn more.
+
 ## Setup
 
 ### 1. Get your API Key
@@ -22,6 +24,4 @@ Your very own Dodo Payments dashboard, just a few keystrokes away.
    - **Live**: For production
 7. Save the settings
 
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for more information.
+See [Our Documentation](https://docs.dodopayments.com/integrations/raycast-extension) for more details.

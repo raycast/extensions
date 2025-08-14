@@ -4,7 +4,7 @@
   "title": "Dodo Payments",
   "description": "Manage all your Dodo Payments orders, payments, subscriptions, discounts, license keys, disputes, refunds and payouts, right from your keyboard.",
   "icon": "command-icon.png",
-  "author": "ambuj_kumar",
+  "author": "dodopayments",
   "license": "MIT",
   "categories": [
     "Developer Tools",
