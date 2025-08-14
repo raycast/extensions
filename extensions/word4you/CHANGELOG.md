@@ -1,6 +1,6 @@
 # Word4you Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-08-14
 
 - Add Wrapper to consume word4you CLI
 - Query word/phrase/sentence with structured response using Gemini and save it to local markdown file
