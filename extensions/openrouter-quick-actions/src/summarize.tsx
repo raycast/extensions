@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import ResultView from "./common";
+import ResultView from "./ResultView";
 
 const prompt = getPreferenceValues().prompt_summarize;
 const model_override = getPreferenceValues().model_summarize;

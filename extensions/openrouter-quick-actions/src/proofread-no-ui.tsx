@@ -1,6 +1,6 @@
 import { Clipboard, getPreferenceValues, getSelectedText, showHUD } from "@raycast/api";
 import { openai } from "./api";
-import { getModelName } from "./util";
+import { getModelName } from "./utils";
 
 const prompt = getPreferenceValues().prompt_proofread_no_ui;
 const model_override = getPreferenceValues().model_proofread_no_ui;

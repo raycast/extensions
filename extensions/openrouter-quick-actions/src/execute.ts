@@ -1,6 +1,6 @@
 import { Clipboard, getPreferenceValues, getSelectedText, showHUD } from "@raycast/api";
 import { openai } from "./api";
-import { getModelName } from "./util";
+import { getModelName } from "./utils";
 
 const model_override = getPreferenceValues().model_execute;
 const provider_sort = getPreferenceValues().provider_sort_execute;
