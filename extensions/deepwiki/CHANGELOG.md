@@ -1,6 +1,6 @@
 # Deepwiki Changelog
 
-## [0.2.1] - {PR_MERGE_DATE}
+## [0.2.1] - 2025-08-14
 
 - Update extension icon.
 
