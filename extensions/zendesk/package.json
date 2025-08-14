@@ -12,7 +12,7 @@
     "url": "https://github.com/Unicornninja80/raycast-zendesk.git"
   },
   "private": true,
-  "categories": ["productivity"],
+  "categories": ["Productivity"],
   "preferences": [
     {
       "name": "subdomain",
