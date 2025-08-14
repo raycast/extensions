@@ -1,6 +1,6 @@
 # Time Tracking Changelog
 
-## [Rename Timers + Modernize] - {PR_MERGE_DATE}
+## [Rename Timers + Modernize] - 2025-08-14
 
 - Rename timers using Edit Form (ref: [Issue #20915](https://github.com/raycast/extensions/issues/20915))
 - Modernize to use latest Raycast config
