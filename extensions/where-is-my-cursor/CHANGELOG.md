@@ -1,6 +1,6 @@
 # Where's Cursor Changelog
 
-## [Version 2] - 2025-08-13
+## [Version 2] - {PR_MERGE_DATE}
 
 Swift app and Raycast commands fully reviewed to block multiple instances.
 Added toggle mode - permanently on
