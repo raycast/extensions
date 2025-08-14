@@ -28,7 +28,7 @@ export default function Command() {
       ? `![](${data[0].url}?raycast-height=325)`
       : "# Loading...";
 
-  const setContent = (id: string | null) => {
+  const handleBreedSelection = (id: string | null) => {
     if (id === "random") {
       setCurrentBreed(null);
       revalidate();
