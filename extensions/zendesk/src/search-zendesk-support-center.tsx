@@ -1,4 +1,5 @@
-import { Action, ActionPanel, List, showToast, Toast, showFailureToast } from "@raycast/api";
+import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
+
 import React, { useEffect, useState } from "react";
 import { zdFetch } from "./zendesk";
 
@@ -25,7 +26,7 @@ export default function Articles() {
       );
       setArticles(res.results);
     } catch (e) {
-      await showFailureToast("Failed to search articles", String(e));
+      await showToast({ style: Toast.Style.Failure, title: "Failed to search articles", message: String(e) });
     } finally {
       setLoading(false);
     }
