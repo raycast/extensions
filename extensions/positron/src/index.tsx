@@ -1,15 +1,82 @@
-import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, List, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { homedir } from "os";
 import { readFileSync, existsSync, readdirSync, statSync } from "fs";
 import { join, basename } from "path";
+import { execSync } from "child_process";
 
 const POSITRON_APP_NAME = "Positron";
+
+/**
+ * Get the color for a git branch based on common branch naming conventions
+ */
+function getBranchColor(branchName: string): Color {
+  const branch = branchName.toLowerCase();
+
+  // Main/master branches
+  if (branch === "main" || branch === "master") {
+    return Color.Blue;
+  }
+
+  // Development branches
+  if (branch === "develop" || branch === "dev" || branch === "development") {
+    return Color.Purple;
+  }
+
+  // Feature branches
+  if (branch.startsWith("feature/") || branch.startsWith("feat/")) {
+    return Color.Green;
+  }
+
+  // Bug fix branches
+  if (branch.startsWith("fix/") || branch.startsWith("bugfix/") || branch.startsWith("hotfix/")) {
+    return Color.Red;
+  }
+
+  // Release branches
+  if (branch.startsWith("release/") || branch.startsWith("rel/")) {
+    return Color.Orange;
+  }
+
+  // Experimental or test branches
+  if (branch.startsWith("experiment/") || branch.startsWith("test/") || branch.startsWith("chore/")) {
+    return Color.Yellow;
+  }
+
+  // Default color for other branches
+  return Color.SecondaryText;
+}
+
+/**
+ * Get the current git branch for a given directory path
+ */
+function getGitBranch(projectPath: string): string | undefined {
+  try {
+    // Check if it's a git repository
+    const gitDir = join(projectPath, ".git");
+    if (!existsSync(gitDir)) {
+      return undefined;
+    }
+
+    // Get the current branch using git command
+    const branch = execSync("git rev-parse --abbrev-ref HEAD", {
+      cwd: projectPath,
+      encoding: "utf8",
+      timeout: 2000, // 2 second timeout
+    }).trim();
+
+    return branch || undefined;
+  } catch {
+    // If git command fails or directory is not a git repo, return undefined
+    return undefined;
+  }
+}
 
 interface RecentProject {
   path: string;
   name: string;
   lastModified?: Date;
+  gitBranch?: string;
 }
 
 function getRecentProjects(): RecentProject[] {
@@ -45,9 +112,11 @@ function getRecentProjects(): RecentProject[] {
 
             // Check if the path still exists
             if (existsSync(decodedPath)) {
+              const gitBranch = getGitBranch(decodedPath);
               projects.push({
                 path: decodedPath,
                 name: basename(decodedPath),
+                gitBranch,
               });
             }
           }
@@ -133,6 +202,19 @@ export default function Command() {
             key={index}
             title={project.name}
             subtitle={project.path}
+            accessories={[
+              ...(project.gitBranch
+                ? [
+                    {
+                      tag: {
+                        value: project.gitBranch,
+                        color: getBranchColor(project.gitBranch),
+                      },
+                      tooltip: `Git Branch: ${project.gitBranch}`,
+                    },
+                  ]
+                : []),
+            ]}
             icon={{ fileIcon: project.path }}
             actions={
               <ActionPanel>
@@ -143,6 +225,7 @@ export default function Command() {
                 <Action.ShowInFinder path={project.path} />
                 <Action.OpenWith path={project.path} />
                 <Action.CopyToClipboard title="Copy Path" content={project.path} />
+                {project.gitBranch && <Action.CopyToClipboard title="Copy Git Branch" content={project.gitBranch} />}
               </ActionPanel>
             }
           />
