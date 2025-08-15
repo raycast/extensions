@@ -1,0 +1,65 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "forked-extensions",
+  "title": "Forked Extensions",
+  "type": "module",
+  "description": "The Say extension for Raycast allows you to convert text to speech using the built-in macOS voice synthesis. You can configure the voice, rate, and pitch of the speech output. The extension also supports saying selected text from any application and allows you to input text or type directly to say it.",
+  "icon": "forked-extensions-icon.png",
+  "author": "litomore",
+  "categories": [
+    "Communication",
+    "Productivity",
+    "System",
+    "Fun"
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-forked-extensions",
+      "title": "Manage Forked Extensions",
+      "description": "Manage all forked extensions.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "repositoryConfigurationPath",
+      "title": "Repository Path",
+      "description": "Path to the repository where the extension is located.",
+      "type": "textfield",
+      "required": true,
+      "default": "~/.raycast/extensions",
+      "placeholder": "The path to the repository"
+    },
+    {
+      "name": "forkedRepository",
+      "title": "forkedRepository",
+      "description": "The repository where the forked extensions are stored.",
+      "type": "textfield",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.4",
+    "got": "^14.4.7",
+    "nano-spawn": "^1.0.2"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.33.0",
+    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/utils": "^2.2.0",
+    "@types/node": "^24.2.1",
+    "@types/react": "^19.1.10",
+    "eslint": "^9.33.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  }
+}
