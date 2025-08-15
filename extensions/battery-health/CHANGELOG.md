@@ -1,6 +1,6 @@
 # Battery Health Check Changelog
 
-## [Add Charger Wattage] - 2025-08-14
+## [Add Charger Wattage] - {PR_MERGE_DATE}
 
 - Attached charger wattage (when available) to the `<ChargeItem>` component.
 
