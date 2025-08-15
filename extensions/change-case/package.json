@@ -78,7 +78,7 @@
       "default": false,
       "description": "Check this to hide the HUD after the action.",
       "label": "Hide HUD After Action",
-      "required": true
+      "required": false
     },
     {
       "name": "exceptions",
