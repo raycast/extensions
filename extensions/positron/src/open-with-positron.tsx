@@ -1,5 +1,5 @@
 import { closeMainWindow, getFrontmostApplication, getSelectedFinderItems, showToast, Toast } from "@raycast/api";
-import { runAppleScript } from "@raycast/utils";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 
 const POSITRON_APP_NAME = "Positron";
 
@@ -101,6 +101,6 @@ export default async function main() {
 
     await closeMainWindow();
   } catch (error) {
-    showFailureToast(error, { title: "Failed to open in Positron" });
+    await showFailureToast(error, { title: "Failed to open in Positron" });
   }
 }

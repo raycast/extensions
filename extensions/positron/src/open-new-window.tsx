@@ -1,5 +1,5 @@
-import { Toast, closeMainWindow, showToast } from "@raycast/api";
-import { runAppleScript } from "@raycast/utils";
+import { closeMainWindow } from "@raycast/api";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 
 const POSITRON_APP_NAME = "Positron";
 
@@ -39,9 +39,9 @@ const makeNewWindow = async () => {
     `);
   } else {
     // If Positron is not running, launch it with a clean state
-    // Try using command line args to force a new empty window
+    // Use -n flag to open a new instance
     await runAppleScript(`
-      do shell script "open -n -a '${POSITRON_APP_NAME}' --args --disable-workspace-trust --new-window"
+      do shell script "open -n -a '${POSITRON_APP_NAME}'"
     `);
   }
 };
@@ -50,16 +50,7 @@ export default async function command() {
   try {
     await closeMainWindow();
     await makeNewWindow();
-    await showToast({
-      title: "New Positron Window",
-      style: Toast.Style.Success,
-      message: "Opened new window",
-    });
   } catch (error) {
-    await showToast({
-      title: "Failed opening new window",
-      style: Toast.Style.Failure,
-      message: error instanceof Error ? error.message : String(error),
-    });
+    await showFailureToast(error, { title: "Failed to open new Positron window" });
   }
 }

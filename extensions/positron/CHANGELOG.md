@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.0] - 2025-07-22
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 - **List Recent Projects**: Browse and open recently used Positron projects
