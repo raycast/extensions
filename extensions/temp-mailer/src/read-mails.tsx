@@ -16,7 +16,9 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
+    useEffect(() => {
     setMailboxResults(mailList.filter((item) => item.subject.includes(searchText)));
+  }, [searchText, mailList]);
   }, [searchText]);
 
   const didEmailsFetched = useRef(false);
