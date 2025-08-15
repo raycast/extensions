@@ -1,0 +1,48 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ray-mandarin-to-cantonese",
+  "title": "Chinese to Jyutping",
+  "description": "Convert Chinese text to Jyutping pronunciation for Cantonese learning",
+  "icon": "extension-icon.png",
+  "author": "yongjinhuang",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "convert-to-jyutping",
+      "title": "中文转粤拼",
+      "description": "将中文转换为粤拼输入法 (仅支持 MacOS 系统)",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "placeholder": "請輸入中文...",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.4",
+    "@raycast/utils": "^1.17.0",
+    "microsoft-cognitiveservices-speech-sdk": "^1.45.0",
+    "say": "^0.16.0",
+    "to-jyutping": "^3.1.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
