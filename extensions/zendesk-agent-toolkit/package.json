@@ -1,0 +1,113 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zendesk-agent-toolkit",
+  "title": "Zendesk Agent Toolkit",
+  "description": "Complete Zendesk agent toolkit: manage tickets, reply with attachments, edit tickets, and create Help Center articles",
+  "icon": "icon.png",
+  "author": "justin_martin",
+  "license": "MIT",
+  "homepage": "https://github.com/Unicornninja80/raycast-zendesk",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Unicornninja80/raycast-zendesk.git"
+  },
+  "private": true,
+  "categories": ["Productivity"],
+  "preferences": [
+    {
+      "name": "subdomain",
+      "type": "textfield",
+      "title": "Zendesk Subdomain",
+      "description": "Your Zendesk subdomain (e.g., company for company.zendesk.com)",
+      "required": true,
+      "placeholder": "company"
+    },
+    {
+      "name": "email",
+      "type": "textfield",
+      "title": "Agent Email",
+      "description": "Your Zendesk agent email address",
+      "required": true,
+      "placeholder": "agent@company.com"
+    },
+    {
+      "name": "apiToken",
+      "type": "password",
+      "title": "API Token",
+      "description": "Your Zendesk API token",
+      "required": true,
+      "placeholder": "Enter your API token"
+    },
+    {
+      "name": "enableSystemField",
+      "type": "checkbox",
+      "title": "Enable System Field",
+      "label": "Show System custom field in ticket editing",
+      "description": "Show System custom field in ticket editing",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "systemFieldId",
+      "type": "textfield",
+      "title": "System Field ID",
+      "description": "Your Zendesk System custom field ID (find in admin settings)",
+      "required": false,
+      "placeholder": "123456"
+    },
+    {
+      "name": "enableIssueField",
+      "type": "checkbox",
+      "title": "Enable Issue Field",
+      "label": "Show Issue custom field in ticket editing",
+      "description": "Show Issue custom field in ticket editing",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "issueFieldId",
+      "type": "textfield",
+      "title": "Issue Field ID",
+      "description": "Your Zendesk Issue custom field ID (find in admin settings)",
+      "required": false,
+      "placeholder": "123457"
+    }
+  ],
+  "commands": [
+    {
+      "name": "tickets",
+      "title": "My Tickets",
+      "subtitle": "Zendesk",
+      "description": "View and manage your assigned tickets",
+      "mode": "view"
+    },
+    {
+      "name": "search-zendesk-support-center",
+      "title": "Help Center",
+      "subtitle": "Zendesk",
+      "description": "Search Help Center articles and create new articles from Markdown",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray dev",
+    "lint": "eslint --ext .ts,.tsx src",
+    "lint:fix": "eslint --ext .ts,.tsx src --fix",
+    "typecheck": "tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "1.102.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.10",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "@typescript-eslint/eslint-plugin": "^8.39.1",
+    "@typescript-eslint/parser": "^8.39.1",
+    "eslint": "^8.57.1",
+    "prettier": "^3.6.2",
+    "typescript": "~5.4.5"
+  }
+}
