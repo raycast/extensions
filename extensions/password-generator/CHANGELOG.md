@@ -1,6 +1,6 @@
 # Password Generator Changelog
 
-## [Guarantee presence of special chaacters] - {PR_MERGE_DATE}
+## [Guarantee presence of special characters] - {PR_MERGE_DATE}
 
 If "Use numbers?" and/or "Use special characters?" are selected, the password is guaranteed to have at least one of each of those characters.
 
