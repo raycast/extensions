@@ -3,7 +3,7 @@
   "name": "forked-extensions",
   "title": "Forked Extensions",
   "type": "module",
-  "description": "The Say extension for Raycast allows you to convert text to speech using the built-in macOS voice synthesis. You can configure the voice, rate, and pitch of the speech output. The extension also supports saying selected text from any application and allows you to input text or type directly to say it.",
+  "description": "Efficiently manage your forked Raycast extensions using Git sparse-checkout. Explore the full extension catalog, selectively checkout specific extensions, and remove extensions from your forked collection with ease.",
   "icon": "forked-extensions-icon.png",
   "author": "litomore",
   "categories": [
