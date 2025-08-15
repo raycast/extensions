@@ -151,14 +151,14 @@ function ViewDNSZone({ zone }: { zone: string }) {
                     title="Toggle Details"
                     onAction={() => setIsShowingDetail((prev) => !prev)}
                   />
-                  {/* eslint-disable-next-line @raycast/prefer-title-case */}
                   <Action
                     icon={Icon.Trash}
+                    // eslint-disable-next-line @raycast/prefer-title-case
                     title="Delete DNS Zone Record"
                     onAction={() =>
                       confirmAlert({
                         icon: { source: Icon.Trash, tintColor: Color.Red },
-                        title: "Delete DNS Record",
+                        title: `Delete ${zoneItem.record_type} record for ${zoneItem.dname}?`,
                         message: zoneItem.line_index.toString(),
                         primaryAction: {
                           style: Alert.ActionStyle.Destructive,
