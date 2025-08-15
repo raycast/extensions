@@ -41,7 +41,8 @@
     {
       "name": "forkedRepository",
       "title": "forkedRepository",
-      "description": "The repository where the forked extensions are stored.",
+      "placeholder": "e.g. LitoMore/raycast-extensions",
+      "description": "The repository where the forked extensions are stored. The format should be 'username/repository'.",
       "type": "textfield",
       "required": true
     }

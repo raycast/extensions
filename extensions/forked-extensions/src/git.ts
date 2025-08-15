@@ -5,7 +5,7 @@ import spawn from "nano-spawn";
 import { getPreferenceValues } from "@raycast/api";
 import { ForkedExtension } from "./types.js";
 
-const { repositoryConfigurationPath } = getPreferenceValues<ExtensionPreferences>();
+const { repositoryConfigurationPath, forkedRepository } = getPreferenceValues<ExtensionPreferences>();
 
 const resolvePath = (input: string) =>
   input.startsWith("~/") ? path.join(process.env.HOME || "", input.slice(2)) : input;
@@ -30,7 +30,7 @@ export const initRepository = async () => {
     "clone",
     "--filter=blob:none",
     "--no-checkout",
-    "https://github.com/raycast/extensions.git",
+    `https://github.com/${forkedRepository}.git`,
     repositoryPath,
   ]);
   await git(["sparse-checkout", "set", "--cone"]);
