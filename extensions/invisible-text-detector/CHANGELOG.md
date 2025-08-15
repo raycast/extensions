@@ -1,6 +1,6 @@
 # Invisible Text Detector Changelog
 
-## [1.0.0 - Initial Release] - {PR_MERGE_DATE}
+## [1.0.0 - Initial Release] - 2025-08-15
 
 - Added UI command to analyze and clean text with live preview, markers, legend, and keyboard shortcuts.
 - Added no-view quick cleaner for selected text/clipboard with configurable default mode (Only Invisible or All Unicode).
