@@ -12,3 +12,4 @@ compiled_raycast_rust
 
 # misc
 .DS_Store
+.design doc.md

@@ -12,10 +12,9 @@ import {
 type PrestigeViewProps = {
   gameState: GameState;
   onPurchasePrestigeUpgrade: (id: string) => void;
-  onBack: () => void;
 };
 
-export function PrestigeView({ gameState, onPurchasePrestigeUpgrade, onBack }: PrestigeViewProps) {
+export function PrestigeView({ gameState, onPurchasePrestigeUpgrade }: PrestigeViewProps) {
   const [searchText, setSearchText] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<PrestigeUpgrade["category"] | "all">("all");
 
@@ -210,12 +209,6 @@ export function PrestigeView({ gameState, onPurchasePrestigeUpgrade, onBack }: P
                               shortcut={{ modifiers: ["cmd"], key: "e" }}
                             />
                           )}
-                          <Action
-                            title="Back to Game"
-                            onAction={onBack}
-                            icon={Icon.ArrowLeft}
-                            shortcut={{ modifiers: ["cmd"], key: "b" }}
-                          />
                         </ActionPanel>
                       }
                     />
@@ -243,16 +236,6 @@ export function PrestigeView({ gameState, onPurchasePrestigeUpgrade, onBack }: P
                           { text: `${formatNumber(cost)} PP`, icon: Icon.Coins },
                         ]}
                         icon={getCategoryIcon(upgrade.category)}
-                        actions={
-                          <ActionPanel>
-                            <Action
-                              title="Back to Game"
-                              onAction={onBack}
-                              icon={Icon.ArrowLeft}
-                              shortcut={{ modifiers: ["cmd"], key: "b" }}
-                            />
-                          </ActionPanel>
-                        }
                       />
                     );
                   })}

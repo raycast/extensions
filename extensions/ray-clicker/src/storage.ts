@@ -27,11 +27,18 @@ export async function loadGameState(): Promise<GameState> {
       ...(savedState.settings || {}),
     };
 
+    // Ensure achievements map exists
+    const achievements = {
+      ...(INITIAL_STATE.achievements || {}),
+      ...((savedState as Partial<GameState>).achievements || {}),
+    };
+
     return {
       ...INITIAL_STATE,
       ...savedState,
       prestige,
       settings,
+      achievements,
       // Important: Do NOT accrue offline progress here; handled centrally in useGameState
       currency: savedState.currency || 0,
       // Preserve saved lastUpdate so useGameState can compute offline progress
