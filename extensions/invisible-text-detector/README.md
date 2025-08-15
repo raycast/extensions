@@ -1,4 +1,4 @@
-# Invisible Text Detector (Raycast)
+# Invisible Text Detector
 
 Remove hidden and problematic Unicode characters from any text. Detect zero‑width and control marks, visualize "non‑keyboard" typography (smart quotes, en/em dashes, ellipsis, NBSP), and normalize to safe ASCII when needed.
 

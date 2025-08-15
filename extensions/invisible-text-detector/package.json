@@ -5,6 +5,9 @@
   "description": "Remove all hidden Unicode characters in your text, usually injected by LLMs.",
   "icon": "icon.png",
   "author": "garrett",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "categories": [
     "Developer Tools"
