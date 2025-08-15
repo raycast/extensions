@@ -1,4 +1,16 @@
-import { Action, ActionPanel, Alert, Color, confirmAlert, Form, Icon, Keyboard, List, showToast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  confirmAlert,
+  Form,
+  Icon,
+  Keyboard,
+  List,
+  showToast,
+  useNavigation,
+} from "@raycast/api";
 import { FormValidation, getAvatarIcon, getFavicon, useCachedState, useForm } from "@raycast/utils";
 import { useListDomains, useParsedDNSZone, useUAPI } from "./lib/hooks";
 import { DEFAULT_ICON } from "./lib/constants";
@@ -76,7 +88,8 @@ function ViewDNSZone({ zone }: { zone: string }) {
   );
 
   return (
-    <List isShowingDetail={isShowingDetail}
+    <List
+      isShowingDetail={isShowingDetail}
       isLoading={isLoading}
       searchBarPlaceholder="Search dns zone"
       searchBarAccessory={
@@ -133,25 +146,37 @@ function ViewDNSZone({ zone }: { zone: string }) {
                       />
                     }
                   />
-<Action icon={Icon.AppWindowSidebarLeft} title="Toggle Details" onAction={() => setIsShowingDetail(prev => !prev)} />
+                  <Action
+                    icon={Icon.AppWindowSidebarLeft}
+                    title="Toggle Details"
+                    onAction={() => setIsShowingDetail((prev) => !prev)}
+                  />
                   {/* eslint-disable-next-line @raycast/prefer-title-case */}
-                  <Action icon={Icon.Trash} title="Delete DNS Zone Record" onAction={() => confirmAlert({
-                    icon: {source: Icon.Trash, tintColor: Color.Red},
-                    title: "Delete DNS Record",
-                    message: zoneItem.line_index.toString(),
-                    primaryAction: {
-                      style: Alert.ActionStyle.Destructive,
-                      title: "Delete",
-                      onAction() {
-                        const soa = data.find((record) => record.record_type === "SOA") as SOARecord;
-                        deleteDNSZoneRecord(soa.data[2], zone, zoneItem.line_index).then(revalidate);
-                      },
+                  <Action
+                    icon={Icon.Trash}
+                    title="Delete DNS Zone Record"
+                    onAction={() =>
+                      confirmAlert({
+                        icon: { source: Icon.Trash, tintColor: Color.Red },
+                        title: "Delete DNS Record",
+                        message: zoneItem.line_index.toString(),
+                        primaryAction: {
+                          style: Alert.ActionStyle.Destructive,
+                          title: "Delete",
+                          onAction() {
+                            const soa = data.find((record) => record.record_type === "SOA") as SOARecord;
+                            deleteDNSZoneRecord(soa.data[2], zone, zoneItem.line_index).then(revalidate);
+                          },
+                        },
+                      })
                     }
-                  })} style={Action.Style.Destructive} shortcut={Keyboard.Shortcut.Common.Remove} />
+                    style={Action.Style.Destructive}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
+                  />
                 </ActionPanel>
               }
             />
-          )
+          );
         })}
       </List.Section>
     </List>

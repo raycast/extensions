@@ -1,12 +1,12 @@
 # cPanel Changelog
 
-## [] - {PR_MERGE_DATE}
+## [Delete DNS Zone] - {PR_MERGE_DATE}
 
-- show data in zone
-- delete zone
-- view zone data
-- format API Token date
-- fix throw in new func
+- Show more file icons based on MIME types
+- Toggle data/content for DNS Zone
+- Delete DNS Zone
+- Format API Token date
+- Fix: throw in `callUAPI` for better error handling
 
 ## [Modernize + Manage API Tokens] - 2025-05-19
 

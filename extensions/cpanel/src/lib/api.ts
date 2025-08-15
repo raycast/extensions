@@ -33,7 +33,7 @@ export async function callUAPI<T>(
     toast.style = Toast.Style.Failure;
     toast.title = "cPanel Error";
     toast.message = `${error}`;
-    if(options.throwError) throw error;
+    if (options.throwError) throw error;
   }
 }
 
@@ -50,7 +50,13 @@ export const revokeAPIToken = (name: string) =>
   );
 
 // DNS
-export const deleteDNSZoneRecord = (serial: string, zone: string, remove: number) => callUAPI<{new_serial: string;}>("DNS", "mass_edit_zone", {serial, zone, remove}, {
+export const deleteDNSZoneRecord = (serial: string, zone: string, remove: number) =>
+  callUAPI<{ new_serial: string }>(
+    "DNS",
+    "mass_edit_zone",
+    { serial, zone, remove },
+    {
       animatedToastTitle: "Removing Dns Record",
       successToastTitle: "Removed Dns Record",
-    },)
+    },
+  );
