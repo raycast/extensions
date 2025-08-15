@@ -124,7 +124,6 @@ export default function Command(props: { arguments: Arguments }) {
     setSelectedItem(newItem);
 
     // Play pronunciation and copy Jyutping
-    await Promise.all([playPronunciation(text), copyJyutpingToClipboard(formattedJyutping)]);
   };
 
   const playPronunciation = async (text: string) => {
@@ -163,7 +162,6 @@ export default function Command(props: { arguments: Arguments }) {
         const item = filteredHistory.find((h) => h.timestamp.toString() === id);
         if (item) {
           setSelectedItem(item);
-          playPronunciation(item.text);
         }
       }}
     >
@@ -188,7 +186,12 @@ export default function Command(props: { arguments: Arguments }) {
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
-                  <Action.CopyToClipboard title="複製粵拼" content={item.jyutping} />
+                  <Action
+                    title="複製粵拼"
+                    onAction={async () => {
+                      await Promise.all([copyJyutpingToClipboard(item.jyutping), playPronunciation(item.text)]);
+                    }}
+                  />
                   <Action
                     title="播放粵語"
                     onAction={() => playPronunciation(item.text)}

@@ -20,7 +20,7 @@ A Raycast extension that helps you convert Chinese text to Jyutping (Cantonese p
 2. **From History**
    - Use arrow keys (↑↓) to navigate through history
    - Hear pronunciation automatically when selecting
-   - Press Enter to copy Jyutping to clipboard
+   - Press Enter to copy Jyutping and hear pronunciation
    - Press ⌥P to play pronunciation again
 
 3. **Search**
