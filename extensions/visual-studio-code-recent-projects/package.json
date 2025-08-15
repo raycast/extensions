@@ -40,10 +40,6 @@
     "trae",
     "trae-cn"
   ],
-  "platforms": [
-    "macOS",
-    "Windows"
-  ],
   "license": "MIT",
   "commands": [
     {
@@ -226,6 +222,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

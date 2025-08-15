@@ -91,7 +91,6 @@ const cliPathsWindows: Record<string, string> = {
   Windsurf: "C:\\Program Files (x86)\\Windsurf IDE for JavaScript and TypeScript (x64)\\bin\\windsurf.cmd",
 };
 
-
 export function getVSCodeCLIFilename(): string {
   console.log("getVSCodeCLIFilename called");
   if (isWin) {
