@@ -1,4 +1,6 @@
 // Mock implementation of @raycast/api for testing
+import { vi } from "vitest";
+
 export const showToast = vi.fn().mockResolvedValue(undefined);
 export const popToRoot = vi.fn().mockResolvedValue(undefined);
 export const confirmAlert = vi.fn().mockResolvedValue(true);
