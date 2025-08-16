@@ -1,103 +1,82 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
 
-import { Action, ActionPanel, List, showToast, Toast, closeMainWindow, LocalStorage, Detail } from "@raycast/api";
+import { Action, ActionPanel, List, showToast, Toast, closeMainWindow, Detail, Cache, Icon, Color } from "@raycast/api";
 import { Seam } from "seam";
 import { useState, useEffect } from "react";
+import { Device, DeviceStatus, fetchDevices, loadSeam } from "./seam";
 
-// Utility function to retry API calls with exponential backoff
-async function retryWithBackoff<T>(fn: () => Promise<T>, maxRetries: number = 3, baseDelay: number = 1000): Promise<T> {
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      return await fn();
-    } catch (error: any) {
-      // Don't retry for non-rate-limit errors on the last attempt
-      if (attempt === maxRetries) {
-        throw error;
-      }
+let seam: Seam;
+const USE_CACHE = true;
+const cache = new Cache();
 
-      // Only retry for rate limiting (429) or temporary errors (5xx)
-      if (error.response?.status === 429 || (error.response?.status >= 500 && error.response?.status < 600)) {
-        const delay = baseDelay * Math.pow(2, attempt - 1); // Exponential backoff
-        console.log(`Attempt ${attempt} failed, retrying in ${delay}ms...`);
-        await new Promise((resolve) => setTimeout(resolve, delay));
-      } else {
-        throw error; // Don't retry for other types of errors
-      }
-    }
+function getNumberFromCache(key: string, defaultValue: number) {
+  const cachedValue = cache.get(key);
+  if (cachedValue) {
+    const parsed = parseInt(cachedValue, 10);
+    return isNaN(parsed) ? defaultValue : parsed;
   }
-  throw new Error("Max retries exceeded");
+  return defaultValue;
 }
 
-export default async function Command() {
-  let seam: Seam;
-  const [devices, setDevices] = useState<[string, string, string][]>();
+export default function Command() {
+  // Cache by default, set to 'api' if fetching
+  const [deviceSource, setDeviceSource] = useState<"cache" | "api">("cache");
+  const [devices, setDevices] = useState<Device[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string>();
+  const [error, setError] = useState<string>("");
 
+  // Check cache
+  const lastFetch = getNumberFromCache("last_fetch", 0);
+  const now = Date.now();
+  cache.set("last_fetch", now.toString());
+
+  // Fetch devices on command mount (wrapper enables async)
   useEffect(() => {
-    async function onMounted() {
-      const key = await LocalStorage.getItem<string>("seam_api_key");
-      if (!key || key.length !== 38 || !key.startsWith("seam_")) {
-        return <Detail markdown={`# Invalid API Key\n\nPlease set a valid Seam API key in your Raycast settings.`} />;
-      }
-      process.env["SEAM_API_KEY"] = key;
-      seam = new Seam();
-
-      try {
-        setIsLoading(true);
-        setError(undefined); // Clear any previous errors
-
-        // Use retry logic with exponential backoff
-        const devicesList = await retryWithBackoff(
-          () => seam.devices.list(),
-          3, // max 3 retries
-          1000, // start with 1 second delay
-        );
-
-        setDevices(
-          devicesList.map((d) => {
-            return [
-              d.device_id,
-              d.display_name,
-              d.properties.is_heating ? "Heating" : d.properties.is_cooling ? "Cooling" : "Off",
-            ];
-          }),
-        );
-      } catch (error: any) {
-        console.error("Error fetching devices:", error);
-
-        if (error.response?.status === 429) {
-          const message = "Rate limit exceeded. Please wait a moment before trying again.";
-          setError(message);
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Rate Limit Exceeded",
-            message: "Too many requests. Please wait before trying again.",
-          });
-        } else {
-          const message = error.message || "Failed to fetch devices";
-          setError(message);
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Error",
-            message,
-          });
-        }
-      } finally {
+    async function main() {
+      // No use checking device cache if Seam api is not loaded
+      const [possibleSeam, error1] = await loadSeam();
+      if (error1 !== "") {
+        setError(error1);
         setIsLoading(false);
+        return;
       }
+      seam = possibleSeam!;
+      console.debug("Seam loaded successfully");
+
+      if (!USE_CACHE) {
+        console.debug("Cache disabled, erasing devices cache");
+        cache.set("devices", JSON.stringify([]));
+      } else if (now - lastFetch < 60 * 1000) {
+        const cachedDevicesString = cache.get("devices");
+        console.debug("Cache:", cachedDevicesString);
+        if (cachedDevicesString) {
+          const cachedDevices = JSON.parse(cachedDevicesString) as Device[];
+          if (cachedDevices.length > 0) {
+            setDevices(cachedDevices);
+            cache.set("devices", JSON.stringify(cachedDevices));
+            setIsLoading(false);
+            return;
+          }
+        }
+      }
+
+      // Fetch devices from SEAM API if cache fails
+      const [newDevices, error2] = await fetchDevices(seam);
+      if (error2 !== "") {
+        setError(error2);
+      } else {
+        setDevices(newDevices);
+        setDeviceSource("api");
+        cache.set("devices", JSON.stringify(newDevices));
+        console.debug("Fetched devices:", newDevices);
+      }
+      setIsLoading(false);
     }
 
-    onMounted();
-  }, []); // Empty dependency array means this runs once on mount
-
-  if (error) {
-    return (
-      <List>
-        <List.Item title="Error loading devices" subtitle={error} icon="❌" />
-      </List>
-    );
-  }
+    // Ideally, devices should be avaiable now.
+    main();
+  }, []);
 
   // Create a proper component for the mode list that shares state
   const ModeList = ({ deviceId }: { deviceId: string }) => {
@@ -112,15 +91,17 @@ export default async function Command() {
       setLocalHeat(`Heat to ${localTemperature}°F`);
     }, [localTemperature]);
 
-    const sendThermostatCommand = async (mode: string) => {
-      await closeMainWindow();
+    const sendThermostatCommand = async (targetStatus: DeviceStatus) => {
+      closeMainWindow();
       try {
-        if (mode === "cool") {
+        console.debug("Attempting device action", targetStatus, localTemperature);
+        const newDevices = devices.map((d) => (d[0] === deviceId ? ([d[0], d[1], targetStatus, d[3]] as Device) : d));
+        if (targetStatus === DeviceStatus.COOL) {
           await seam.thermostats.cool({
             device_id: deviceId,
             cooling_set_point_fahrenheit: localTemperature,
           });
-        } else if (mode === "heat") {
+        } else if (targetStatus === DeviceStatus.HEAT) {
           await seam.thermostats.heat({
             device_id: deviceId,
             heating_set_point_fahrenheit: localTemperature,
@@ -130,13 +111,12 @@ export default async function Command() {
             device_id: deviceId,
           });
         }
+        cache.set("devices", JSON.stringify(newDevices));
+        setDevices(newDevices);
         await showToast({
           style: Toast.Style.Success,
-          title: {
-            cool: `Cooling to ${localTemperature}°F`,
-            heat: `Heating to ${localTemperature}°F`,
-            off: "Thermostat turned off",
-          }[mode]!,
+          title:
+            targetStatus === DeviceStatus.OFF ? "Thermostat turned off" : `${targetStatus} to ${localTemperature}°F`,
         });
       } catch (error: any) {
         await showToast({
@@ -147,9 +127,9 @@ export default async function Command() {
       }
     };
 
-    const actions = (mode: string) => (
+    const actions = (targetStatus: DeviceStatus) => (
       <ActionPanel title="Thermostat Controls">
-        <Action title="Send Command" onAction={() => sendThermostatCommand(mode)} />
+        <Action title="Send Command" onAction={() => sendThermostatCommand(targetStatus)} />
         <Action
           title={`Lower Temperature (${localTemperature - 1}°F)`}
           shortcut={{ modifiers: [], key: "[" }}
@@ -165,14 +145,14 @@ export default async function Command() {
 
     return (
       <List>
-        <List.Item title="Cool" subtitle={localCool} actions={actions("cool")} />
-        <List.Item title="Heat" subtitle={localHeat} actions={actions("heat")} />
+        <List.Item title="Cool" subtitle={localCool} actions={actions(DeviceStatus.COOL)} />
+        <List.Item title="Heat" subtitle={localHeat} actions={actions(DeviceStatus.HEAT)} />
         <List.Item
           title="Off"
           subtitle="Turn off thermostat"
           actions={
             <ActionPanel title="Thermostat Controls">
-              <Action title="Send Command" onAction={() => sendThermostatCommand("off")} />
+              <Action title="Send Command" onAction={() => sendThermostatCommand(DeviceStatus.OFF)} />
             </ActionPanel>
           }
         />
@@ -180,20 +160,37 @@ export default async function Command() {
     );
   };
 
+  if (error) {
+    return <Detail markdown={`# Error\n\n${error}`} />;
+  }
+
   return (
     <List isLoading={isLoading}>
       {devices
         ?.sort((a, b) => a[1].localeCompare(b[1]))
-        .map(([id, name, subtitle]) => (
+        .map(([id, name, subtitle, temperature]) => (
           <List.Item
             key={id}
             title={name}
-            subtitle={subtitle}
+            subtitle={subtitle + ` (${temperature}°F)`}
             actions={
               <ActionPanel title="">
                 <Action.Push title="See Actions" target={<ModeList deviceId={id} />} />
+                <Action
+                  title="Confirm Source"
+                  onAction={() => showToast({ title: "Data loaded from " + deviceSource })}
+                />
               </ActionPanel>
             }
+            icon={{
+              source: Icon.Circle,
+              tintColor:
+                subtitle === DeviceStatus.HEAT
+                  ? Color.Red
+                  : subtitle === DeviceStatus.COOL
+                    ? Color.Blue
+                    : Color.SecondaryText,
+            }}
           />
         ))}
     </List>

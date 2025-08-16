@@ -29,9 +29,9 @@
             ]
         },
         {
-            "name": "removeapikey",
-            "title": "Remove Seam Api Key",
-            "description": "Remove your Seam API Key to stop controlling your thermostats",
+            "name": "reset",
+            "title": "Reset",
+            "description": "Remove your Seam API Key & erase all cached data",
             "mode": "no-view"
         }
     ],
