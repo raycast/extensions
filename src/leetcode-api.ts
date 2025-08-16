@@ -60,7 +60,7 @@ export async function fetchAllLeetCodeProblems() {
     categorySlug: "",
     skip: 0,
     limit: 3000, // Get more problems
-    filters: {}
+    filters: {},
   };
 
   try {
@@ -68,12 +68,13 @@ export async function fetchAllLeetCodeProblems() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+        "User-Agent":
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
       },
       body: JSON.stringify({
         query,
-        variables
-      })
+        variables,
+      }),
     });
 
     if (!response.ok) {
@@ -81,16 +82,16 @@ export async function fetchAllLeetCodeProblems() {
     }
 
     const data: GraphQLResponse = await response.json();
-    
-    return data.data.problemsetQuestionList.questions.map(q => ({
+
+    return data.data.problemsetQuestionList.questions.map((q) => ({
       id: parseInt(q.frontendQuestionId),
       title: q.title,
       slug: q.titleSlug,
       difficulty: q.difficulty,
-      tags: q.topicTags.map(tag => tag.name),
+      tags: q.topicTags.map((tag) => tag.name),
       url: `https://leetcode.com/problems/${q.titleSlug}/`,
       paidOnly: q.paidOnly,
-      acRate: q.acRate
+      acRate: q.acRate,
     }));
   } catch (error) {
     console.error("Failed to fetch LeetCode problems:", error);

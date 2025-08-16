@@ -1,5 +1,12 @@
 import React from "react";
-import { Action, ActionPanel, Form, useNavigation, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  useNavigation,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useState } from "react";
 
 interface RatingFilterProps {
@@ -8,7 +15,11 @@ interface RatingFilterProps {
   currentMax?: string;
 }
 
-export function RatingFilterForm({ onSubmit, currentMin = "", currentMax = "" }: RatingFilterProps) {
+export function RatingFilterForm({
+  onSubmit,
+  currentMin = "",
+  currentMax = "",
+}: RatingFilterProps) {
   const { pop } = useNavigation();
   const [minRating, setMinRating] = useState(currentMin);
   const [maxRating, setMaxRating] = useState(currentMax);
