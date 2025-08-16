@@ -1,14 +1,13 @@
 /*
  * @Author: Yang
  * @Date: 2025-08-12 20:07:46
- * @Description: 请填写简介
+ * @Description: 入口文件
  */
 import { showToast, Toast, getSelectedFinderItems, Clipboard, getPreferenceValues } from "@raycast/api";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import fs from "fs";
 import path from "path";
 import { execFileSync } from "child_process";
-import "dotenv/config";
 import { convertToAvif } from "./utils/convert";
 
 interface Preferences {
@@ -222,12 +221,6 @@ export default async function Command() {
 
     // 将 Markdown 格式的链接复制到剪贴板
     Clipboard.copy(markdown);
-
-    await showToast({
-      style: Toast.Style.Success,
-      title: "File uploaded",
-      message: "Markdown link copied to clipboard",
-    });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error occurred during upload";
     console.error("Upload error:", errorMessage);

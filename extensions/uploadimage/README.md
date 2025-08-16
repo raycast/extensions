@@ -5,7 +5,7 @@ Upload images to Cloudflare R2 storage service with optional AVIF conversion to 
 ## Contact
 
 For issues or questions regarding this extension, please contact:
-- Email: mazaoshe@hotmail.com
+- Email: `mazaoshe@hotmail.com`
 - GitHub: [https://github.com/mazaoshe/Raycast-UploadImageR2](https://github.com/mazaoshe/Raycast-UploadImageR2)
 
 ## Features
@@ -14,6 +14,8 @@ For issues or questions regarding this extension, please contact:
 - Optionally convert images to AVIF format to reduce file size
 - Support custom filename formats
 - Automatically generate Markdown image links and copy to clipboard
+- After upload, the Markdown link is automatically copied to clipboard for easy pasting
+
 
 ## Requirements
 
@@ -97,7 +99,3 @@ If the upload fails:
 2. Verify your internet connection
 3. Check that your R2 bucket exists and is accessible
 4. Review the Raycast console logs for detailed error information
-
-## 中文版本 (Chinese Version)
-
-For Chinese documentation, please see [README-zh.md](README-zh.md)
