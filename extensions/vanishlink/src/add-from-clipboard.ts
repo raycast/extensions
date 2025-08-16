@@ -51,7 +51,20 @@ export default async function AddFromClipboardCommand() {
     lastAccessedAt: now,
   };
 
-  await saveBookmark(bookmark);
+  try {
+    await saveBookmark(bookmark);
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Link added",
+      message: title,
+    });
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to save bookmark",
+      message: "Please try again",
+    });
+  }
 
   await showToast({
     style: Toast.Style.Success,
