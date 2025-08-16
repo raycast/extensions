@@ -20,7 +20,7 @@ import { promisify } from "util";
 const accessAsync = promisify(fs.access);
 
 // File size limit constant (1GB)
-const MAX_FILE_SIZE = 1 * 1024 * 1024 * 1024;
+const MAX_FILE_SIZE = 1024 * 1024 * 1024;
 
 interface Preferences {
   endpoint: string;

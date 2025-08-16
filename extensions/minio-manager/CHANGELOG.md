@@ -1,6 +1,9 @@
 # MinIO Manager Changelog
 
-## [Initial Version] - 2025-06-25
+## [Optimize interactions] - 2025-08-17
+- Deleting prompts is more in line with interaction habits
+
+## [Initial Version] - 2025-06-24
 
 - Upload files to MinIO server
 - Browse and manage files in MinIO
