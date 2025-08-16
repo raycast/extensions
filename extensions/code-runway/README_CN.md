@@ -41,7 +41,7 @@
    - **简单启动**: 在单个 Warp 窗口中打开
    - **模板启动**: 从可用模板中选择
 
-![search-projects](./images/launch-templates.png)
+![search-projects](./metadata/launch-templates.png)
 
 ### 3. 管理模板
 
@@ -51,7 +51,7 @@
 2. 创建新模板或编辑现有模板
 3. 使用 **"设为默认"** 操作设置默认模板（`Cmd + D`）
 
-![manage-templates](./images/edit-template.png)
+![manage-templates](./metadata/edit-template.png)
 
 
 ## 🔍 项目识别
@@ -84,7 +84,7 @@
 | **项目目录设置** | 管理项目目录，提供完整控制 |
 | **Warp 启动模板** | 创建和管理自定义启动模板 |
 
-![available-commands](./images/settings.png)
+![available-commands](./metadata/settings.png)
 
 ## 🎨 模板自定义
 
@@ -120,7 +120,7 @@
     工作目录: (项目根目录)
 ```
 
-![custom-template](./images/add-template.png)
+![custom-template](./metadata/add-template.png)
 
 ## 🛠️ Warp 集成
 
