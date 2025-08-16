@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.0] - 2025-06-19
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 - Initial release of Content Core extension for Raycast
