@@ -109,7 +109,7 @@ npm run fix-lint
 src/
 ├── add-from-clipboard.ts  # クリップボードからの追加コマンド
 ├── add.tsx               # フォーム形式の追加コマンド
-├── open.tsx              # リンク表示・管理コマンド
+├── search.tsx            # リンク表示・管理コマンド
 └── lib/
     ├── bookmark-delete.ts # ブックマーク削除機能
     ├── bookmark-get.ts   # ブックマーク取得機能
