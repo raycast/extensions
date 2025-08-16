@@ -148,8 +148,9 @@ export async function extractContent(
       );
     }
 
-    const formatFlag = format !== "text" ? ` --format ${format}` : "";
-    const command = `"${uvxPath}" --from "content-core" ccore "${source}"${formatFlag}`;
+    const formatFlag = format !== "text" ? ["--format", format] : [];
+    const args = ["--from", "content-core", "ccore", source, ...formatFlag];
+    const command = uvxPath;
 
     await showToast({
       style: Toast.Style.Animated,
