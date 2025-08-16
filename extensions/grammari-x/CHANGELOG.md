@@ -1,5 +1,9 @@
 # GrammariX Changelog
 
+## [Features] - 2025-08-16
+
+- Fix minor issue related to temperature
+
 ## [Features] - 2025-08-08
 
 - Change model from GPT-4o Mini to GPT-5 nano
