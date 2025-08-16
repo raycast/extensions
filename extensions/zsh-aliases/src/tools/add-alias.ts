@@ -1,4 +1,4 @@
-import { addAlias, aliasExists, validateAliasName, validateAliasCommand, getConfigFiles } from "../utils/alias-utils";
+import { addAlias, aliasExists, getConfigFiles, validateAliasCommand, validateAliasName } from "../utils/alias-utils";
 
 /**
  * Input parameters for adding an alias
@@ -52,11 +52,10 @@ export default function addAliasCommand(input: Input) {
       };
     }
 
-    // Determine config file to use
+    // Get available config files
     const availableFiles = getConfigFiles();
-    const targetFile = configFile || availableFiles[0];
 
-    // Validate config file
+    // Validate config file if provided
     if (
       configFile &&
       !availableFiles.includes(configFile) &&
@@ -67,6 +66,9 @@ export default function addAliasCommand(input: Input) {
         message: `Invalid config file '${configFile}'. Must be one of: .zshrc, .zsh_aliases, .aliases`,
       };
     }
+
+    // Determine config file to use (after validation)
+    const targetFile = configFile || availableFiles[0];
 
     // Add the alias
     addAlias(name, command, targetFile);

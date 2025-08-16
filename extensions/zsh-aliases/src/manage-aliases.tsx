@@ -1,14 +1,15 @@
-import { showToast, Toast, List, ActionPanel, Action, Icon, Form, popToRoot, confirmAlert, Alert } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { Action, ActionPanel, Alert, confirmAlert, Form, Icon, List, popToRoot, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import { useEffect, useState } from "react";
 import {
-  parseAliases,
-  getConfigFiles,
-  aliasExists,
   addAlias,
-  updateAlias,
+  aliasExists,
+  getConfigFiles,
+  parseAliases,
   removeAlias,
-  validateAliasName,
+  updateAlias,
   validateAliasCommand,
+  validateAliasName,
   type Alias,
 } from "./utils/alias-utils";
 
@@ -73,10 +74,8 @@ function AddAliasForm({ onRefresh }: { onRefresh: () => void }) {
       onRefresh();
       await popToRoot();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(error instanceof Error ? error.message : "Unknown error", {
         title: "Failed to add alias",
-        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   }
@@ -174,10 +173,8 @@ function EditAliasForm({
       onRefresh();
       await popToRoot();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(error instanceof Error ? error.message : "Unknown error", {
         title: "Failed to update alias",
-        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   }
@@ -224,10 +221,8 @@ export default function Command() {
       const loadedAliases = parseAliases();
       setAliases(loadedAliases);
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast(error instanceof Error ? error.message : "Unknown error", {
         title: "Failed to load aliases",
-        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setIsLoading(false);
@@ -266,17 +261,13 @@ export default function Command() {
         });
         refreshAliases();
       } else {
-        await showToast({
-          style: Toast.Style.Failure,
+        await showFailureToast(`Alias '${alias.name}' not found in ${alias.file}`, {
           title: "Failed to remove alias",
-          message: `Alias '${alias.name}' not found in ${alias.file}`,
         });
       }
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(error instanceof Error ? error.message : "Unknown error", {
         title: "Failed to remove alias",
-        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   }

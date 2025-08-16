@@ -1,11 +1,20 @@
+import { appendFileSync, existsSync, readFileSync, writeFileSync } from "fs";
 import { homedir } from "os";
-import { readFileSync, writeFileSync, existsSync, appendFileSync } from "fs";
 import { join } from "path";
 
 export interface Alias {
   name: string;
   command: string;
   file: string;
+}
+
+/**
+ * Escapes special regex characters in a string
+ * @param str - The string to escape
+ * @returns The escaped string safe for use in RegExp
+ */
+function escapeRegExp(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 export interface ValidationResult {
@@ -88,7 +97,7 @@ export function aliasExists(aliasName: string, excludeFile?: string, excludeName
     if (existsSync(filePath)) {
       try {
         const content = readFileSync(filePath, "utf-8");
-        const aliasPattern = new RegExp(`^\\s*alias\\s+${aliasName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}=`, "m");
+        const aliasPattern = new RegExp(`^\\s*alias\\s+${escapeRegExp(aliasName)}=`, "m");
         if (aliasPattern.test(content)) {
           // If we're checking the same file and name (for rename), don't count it as existing
           if (excludeFile === configFile && excludeName === aliasName) {
@@ -156,7 +165,7 @@ export function updateAlias(oldName: string, newName: string, newCommand: string
   try {
     const content = readFileSync(filePath, "utf-8");
     const lines = content.split("\n");
-    const aliasPattern = new RegExp(`^\\s*alias\\s+${oldName}=(.*)$`);
+    const aliasPattern = new RegExp(`^\\s*alias\\s+${escapeRegExp(oldName)}=(.*)$`);
     let updated = false;
 
     const newLines = lines.map((line) => {
@@ -200,7 +209,7 @@ export function removeAlias(aliasName: string, configFile: string): boolean {
   try {
     const content = readFileSync(filePath, "utf-8");
     const lines = content.split("\n");
-    const aliasPattern = new RegExp(`^\\s*alias\\s+${aliasName}=`);
+    const aliasPattern = new RegExp(`^\\s*alias\\s+${escapeRegExp(aliasName)}=`);
     let removed = false;
 
     const newLines = lines.filter((line) => {
