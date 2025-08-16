@@ -7,7 +7,7 @@ import { TrackObject } from "./helpers/spotify.api";
 // Import genius-lyrics with fallback
 let GeniusClient: typeof import("genius-lyrics").Client | null = null;
 try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const Genius = require("genius-lyrics");
   GeniusClient = Genius.Client || Genius.default?.Client || Genius;
 } catch (error) {
