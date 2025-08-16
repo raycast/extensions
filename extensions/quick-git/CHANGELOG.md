@@ -1,5 +1,12 @@
 # Quick Git Changelog
 
+## [Smoother repo selection] - {PR_MERGE_DATE}
+
+Updated how repos are selected so that it is quicker to change between them.
+
+- Added a new extension preference for selecting a directory to look for repos
+- Updated the repo selection screen
+
 ## [Diffs and deletes] - 2025-06-16
 
 View the diff for a file that you have changed, and make it easier to delete and push branches.
@@ -10,7 +17,7 @@ View the diff for a file that you have changed, and make it easier to delete and
 - If the `Push Branch` action fails you can now force push it (with lease)
 - Refactor various parts of extension
 
-## [Initial Version] - 2025-06-10
+## [Initial version] - 2025-06-10
 
 Select a git repository and display a list of changed files, along with some information about the current branch.
 
