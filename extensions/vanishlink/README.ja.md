@@ -25,7 +25,7 @@ VanishLinkは、短期間だけ必要なリンクを効率的に管理するた�
 クリップボードのURLをブックマークに追加します。
 
 - クリップボードにURLをコピー
-- `vanishlink add-from-clipboard`を実行
+- `add-from-clipboard`を実行
 - Webページのタイトルが自動取得され、ブックマークに追加
 
 ### Add Bookmark
