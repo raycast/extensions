@@ -29,9 +29,7 @@ export default function TodayTasks({ quickLinkView }: TodayTasksProps) {
   });
 
   // Handle the date grouping case specially to ensure we only use our filtered tasks
-  if (viewProps.groupBy?.value === "date") {
-    sections = groupByDates(tasks);
-  } else if (viewProps.groupBy?.value === "default") {
+  if (viewProps.groupBy?.value === "date" || viewProps.groupBy?.value === "default") {
     sections = groupByDates(tasks);
   } else {
     sections = groupedSections;
