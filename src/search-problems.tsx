@@ -273,7 +273,7 @@ export default function SearchProblems() {
     >
       {filteredProblems.map((problem) => (
         <List.Item
-          key={problem.id}
+          id={problem.id.toString()}
           title={`${problem.id}. ${problem.title}`}
           subtitle={`Contest: ${problem.contestSlug}`}
           accessories={[
