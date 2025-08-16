@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import removeAliasCommand, { confirmation } from "../../tools/remove-alias";
 import * as aliasUtils from "../../utils/alias-utils";
 

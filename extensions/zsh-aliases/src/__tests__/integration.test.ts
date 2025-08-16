@@ -1,9 +1,9 @@
-import { describe, it, expect } from "vitest";
-import * as showAliases from "../tools/show-aliases";
+import { describe, expect, it } from "vitest";
 import * as addAlias from "../tools/add-alias";
 import * as removeAlias from "../tools/remove-alias";
-import * as updateAlias from "../tools/update-alias";
 import * as searchAliases from "../tools/search-aliases";
+import * as showAliases from "../tools/show-aliases";
+import * as updateAlias from "../tools/update-alias";
 
 /**
  * Integration tests that use the real tool functions without mocks.
@@ -119,7 +119,7 @@ describe("Integration tests - Real tools", () => {
     it("should handle removeAlias confirmation", async () => {
       const result = await removeAlias.confirmation({ name: "test_alias" });
       expect(typeof result).toBe("object");
-      expect(typeof result.message).toBe("string");
+      expect(typeof result?.message).toBe("string");
     });
 
     it("should handle updateAlias confirmation", async () => {
@@ -129,7 +129,7 @@ describe("Integration tests - Real tools", () => {
         newCommand: "echo hello",
       });
       expect(typeof result).toBe("object");
-      expect(typeof result.message).toBe("string");
+      expect(typeof result?.message).toBe("string");
     });
   });
 });

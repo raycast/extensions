@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { readFileSync, writeFileSync, existsSync, appendFileSync } from "fs";
+import { appendFileSync, existsSync, readFileSync, writeFileSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock fs module
 vi.mock("fs", () => ({

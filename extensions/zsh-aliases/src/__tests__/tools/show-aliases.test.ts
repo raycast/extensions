@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import showAliases from "../../tools/show-aliases";
 import * as aliasUtils from "../../utils/alias-utils";
 
