@@ -1,0 +1,112 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "version": "1.0.0",
+  "name": "cheatsheets-remastered",
+  "title": "Cheatsheets Remastered",
+  "description": "A remastered Cheatsheets extension with enhanced functionality, custom sheet creation, and an improved browsing experience.",
+  "icon": "logo.png",
+  "author": "smcnab1",
+  "contributors": [],
+  "categories": [
+    "Documentation",
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "show-cheatsheets",
+      "title": "Show Cheatsheets",
+      "description": "List all cheatsheets",
+      "mode": "view"
+    },
+    {
+      "name": "create-custom-cheatsheet",
+      "title": "Create Custom Cheatsheet",
+      "description": "Create a new custom cheatsheet",
+      "mode": "view"
+    },
+    {
+      "name": "manage-custom-cheatsheets",
+      "title": "Manage Custom Cheatsheets",
+      "description": "View, edit, and manage your custom cheatsheets",
+      "mode": "view"
+    },
+    {
+      "name": "copy-cheatsheet",
+      "title": "Copy Cheatsheet",
+      "description": "Search and copy cheatsheet content to clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "search-cheatsheets",
+      "title": "Search Cheatsheets",
+      "description": "Search across all cheatsheets with advanced filtering",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "iconSource",
+      "type": "dropdown",
+      "required": true,
+      "title": "Icon Source",
+      "description": "Where to load cheatsheet icons from (built-in prefers local assets)",
+      "default": "builtin",
+      "data": [
+        {
+          "title": "Raycast System Icons",
+          "value": "raycast"
+        },
+        {
+          "title": "Built-in",
+          "value": "builtin"
+        },
+        {
+          "title": "Custom Directory",
+          "value": "custom"
+        }
+      ]
+    },
+    {
+      "name": "customIconDirectory",
+      "type": "directory",
+      "required": false,
+      "title": "Custom Icon Directory",
+      "description": "Folder with images like php.png, docker.svg, aws.png, etc."
+    },
+    {
+      "name": "githubToken",
+      "type": "password",
+      "required": false,
+      "title": "GitHub Token (optional)",
+      "description": "Optional: Improves rate limits for online content search (local search doesn’t require it)"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.102.4",
+    "@raycast/utils": "2.2.0",
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "eslint-config-prettier": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^4.9.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "normalize:icons": "node scripts/normalize-icons.js",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
