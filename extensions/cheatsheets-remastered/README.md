@@ -58,7 +58,7 @@ _Last Updated 2025-08-16_
 ## About The Project
 <div align="center">
   <a href="https://github.com/smcnab1/cheatsheets-remastered">
-    <img src="metadata/cheatsheets-remastered-1.png" alt="Screenshot" width="100%" height="auto">
+    <img src="media/cheatsheets-remastered-1.png" alt="Screenshot" width="100%" height="auto">
   </a>
   </div>
   
@@ -167,4 +167,4 @@ This project is licensed under the [MIT License](LICENSE).
 [issues-url]: https://github.com/smcnab1/cheatsheets-remastered/issues
 [license-shield]: https://img.shields.io/github/license/smcnab1/cheatsheets-remastered.svg?style=for-the-badge
 [license-url]: https://github.com/smcnab1/cheatsheets-remastered/blob/main/LICENSE
-[product-screenshot]: metadata/cheatsheets-remastered-1.png
+[product-screenshot]: media/cheatsheets-remastered-1.png
