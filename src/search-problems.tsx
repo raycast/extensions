@@ -296,12 +296,12 @@ export default function SearchProblems() {
             <ActionPanel>
               <ActionPanel.Section>
                 <Action.OpenInBrowser
-                  title="Open in LeetCode"
+                  title="Open In LeetCode"
                   url={problem.url}
                   icon={Icon.Globe}
                 />
                 <Action.OpenInBrowser
-                  title="Open in LeetCode (Chinese)"
+                  title="Open In LeetCode (Chinese)"
                   url={problem.url.replace("leetcode.com", "leetcode.cn")}
                   icon={Icon.Globe}
                   shortcut={{ modifiers: ["cmd"], key: "c" }}
