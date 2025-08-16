@@ -22,13 +22,20 @@ export default function TodayTasks({ quickLinkView }: TodayTasksProps) {
 
   let sections = [];
 
-  const {
-    sections: groupedSections,
-    viewProps,
-    sortedTasks,
-  } = useViewTasks("todoist.today", { tasks, data, optionsToExclude: ["date"] });
+  const { sections: groupedSections, viewProps } = useViewTasks("todoist.today", {
+    tasks,
+    data,
+    optionsToExclude: ["date"],
+  });
 
-  sections = viewProps.groupBy?.value === "default" ? groupByDates(sortedTasks) : groupedSections;
+  // Handle the date grouping case specially to ensure we only use our filtered tasks
+  if (viewProps.groupBy?.value === "date") {
+    sections = groupByDates(tasks);
+  } else if (viewProps.groupBy?.value === "default") {
+    sections = groupByDates(tasks);
+  } else {
+    sections = groupedSections;
+  }
 
   if (tasks.length === 0) {
     return <TodayEmptyView quickLinkView={quickLinkView} />;
