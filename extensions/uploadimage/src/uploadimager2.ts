@@ -82,7 +82,10 @@ async function generateFileName(originalPath: string, format: string, customExte
   return formattedName;
 }
 
-async function uploadToR2(filePath: string, customFileName: string): Promise<{ url: string; markdown: string }> {
+async function uploadToR2(
+  filePath: string,
+  customFileName: string | undefined,
+): Promise<{ url: string; markdown: string }> {
   const preferences = getPreferenceValues<Preferences>();
   const {
     r2BucketName: bucketName,
