@@ -170,6 +170,7 @@ function queryDatabase(dbPath: string, query: string): string {
     const result = execSync(`sqlite3 "${dbPath}" "${query}"`, {
       encoding: "utf8",
       timeout: QUERY_TIMEOUT,
+      maxBuffer: 1024 * 1024 * 10, // 10MB buffer to prevent ENOBUFS
     });
     return result.trim();
   } catch {
