@@ -75,6 +75,13 @@
   ],
   "commands": [
     {
+      "name": "dashboard",
+      "title": "Dashboard",
+      "subtitle": "Zendesk",
+      "description": "View your personal ticket statistics and performance metrics",
+      "mode": "view"
+    },
+    {
       "name": "tickets",
       "title": "My Tickets",
       "subtitle": "Zendesk",
