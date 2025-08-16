@@ -1,3 +1,5 @@
+# Zsh Aliases
+
 ## Features
 
 - **Unified interface**: All alias management in one convenient command
