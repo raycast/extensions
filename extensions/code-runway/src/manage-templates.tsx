@@ -322,7 +322,7 @@ function EditTemplateForm({ template, onSaved }: EditTemplateFormProps) {
 
       <Form.Description text="Configure terminal commands (at least one is required)" />
 
-      {commands.map((command) => (
+      {commands.map((command, index) => (
         <Fragment key={command.id}>
           <Form.TextField
             id={`title-${index}`}

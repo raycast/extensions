@@ -83,7 +83,7 @@ export default function SearchProjects() {
 
     try {
       if (template) {
-        await launchWarpConfig(project, template, template.launchMode);
+        await launchWarpConfig(project, template);
         showHUD(`🚀 Launched ${project.name} (${template.name})`);
       } else {
         await launchProjectSimple(project);
@@ -178,7 +178,7 @@ export default function SearchProjects() {
                         });
 
                         try {
-                          await launchWarpConfig(project, template, template.launchMode);
+                          await launchWarpConfig(project, template);
                           showHUD(`🚀 Launched ${project.name} (${template.name})`);
                           console.log(`✅ Warp config launched successfully: ${project.name}`);
                         } catch (error) {
