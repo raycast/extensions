@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "convert-to-jyutping",
-      "title": "中文转粤拼",
+      "title": "Convert to Jyutping",
       "description": "将中文转换为粤拼输入法 (仅支持 MacOS 系统)",
       "mode": "view",
       "arguments": [
@@ -25,7 +25,6 @@
   "dependencies": {
     "@raycast/api": "^1.102.4",
     "@raycast/utils": "^1.17.0",
-    "microsoft-cognitiveservices-speech-sdk": "^1.45.0",
     "say": "^0.16.0",
     "to-jyutping": "^3.1.1"
   },
