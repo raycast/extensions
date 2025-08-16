@@ -335,7 +335,7 @@ function CreateArticleForm() {
         title="Section"
         value={selectedSectionId}
         onChange={setSelectedSectionId}
-        isLoading={selectedCategoryId && sections.length === 0}
+        isLoading={Boolean(selectedCategoryId) && sections.length === 0}
       >
         {sections.map((section) => (
           <Form.Dropdown.Item key={section.id} value={section.id.toString()} title={section.name} />
