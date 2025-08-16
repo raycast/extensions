@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Icon, getPreferenceValues } from "@raycast/api";
 import { Badge, OnBadgeChange } from "../types.js";
+import { pickLogo } from "../utils.js";
 
 export const Documentation = ({ title, url }: { title: string; url: string }) => (
   <ActionPanel.Section>
@@ -31,6 +32,7 @@ export const GeneralActions = ({
             if (resetOnCopy) reset();
           }}
         />
+        <Action icon={Icon.Emoji} title="Edit Logo" shortcut={{ modifiers: ["cmd"], key: "l" }} onAction={pickLogo} />
         <Action icon={Icon.Undo} title="Reset" shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={reset} />
       </ActionPanel.Section>
       <Documentation title="API Documentation" url={documentationUrl} />

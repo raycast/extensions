@@ -57,7 +57,7 @@
       "category": "flag",
       "deprecated": true,
       "alternative": "--debug",
-      "tags": ["debug", "deprecated", "MCP"]
+      "tags": ["MCP", "debug", "deprecated"]
     },
     {
       "id": "mcp-config",
@@ -66,7 +66,7 @@
       "usage": "claude --mcp-config <file or string>",
       "example": "claude --mcp-config ./mcp-servers.json",
       "category": "flag",
-      "tags": ["config", "JSON", "MCP", "servers"]
+      "tags": ["JSON", "MCP", "config", "servers"]
     },
     {
       "id": "resume-flag",
@@ -167,6 +167,66 @@
       "example": "claude -p --permission-prompt-tool mcp_auth_tool \"Deploy to production\"",
       "category": "flag",
       "tags": ["mcp", "non-interactive", "permissions", "prompt", "tool"]
+    },
+    {
+      "id": "permission-mode",
+      "name": "--permission-mode",
+      "description": "Begin in a specified permission mode. Available modes: acceptEdits, bypassPermissions, default, plan.",
+      "usage": "claude --permission-mode <mode>",
+      "example": "claude --permission-mode plan",
+      "isNew": true,
+      "category": "flag",
+      "tags": ["mode", "permissions", "plan", "session"]
+    },
+    {
+      "id": "append-system-prompt",
+      "name": "--append-system-prompt",
+      "description": "Append a system prompt to the default system prompt.",
+      "usage": "claude --append-system-prompt <prompt>",
+      "example": "claude --append-system-prompt \"Always respond concisely\"",
+      "isNew": true,
+      "category": "flag",
+      "tags": ["append", "prompt", "system"]
+    },
+    {
+      "id": "fallback-model",
+      "name": "--fallback-model",
+      "description": "Enable automatic fallback to specified model when default model is overloaded (only works with --print).",
+      "usage": "claude --fallback-model <model>",
+      "example": "claude --fallback-model haiku --print \"query\"",
+      "isNew": true,
+      "category": "flag",
+      "tags": ["fallback", "model", "overload", "print"]
+    },
+    {
+      "id": "ide-flag",
+      "name": "--ide",
+      "description": "Automatically connect to IDE on startup if exactly one valid IDE is available.",
+      "usage": "claude --ide",
+      "example": "claude --ide",
+      "isNew": true,
+      "category": "flag",
+      "tags": ["auto", "connect", "ide", "startup"]
+    },
+    {
+      "id": "strict-mcp-config",
+      "name": "--strict-mcp-config",
+      "description": "Only use MCP servers from --mcp-config, ignoring all other MCP configurations.",
+      "usage": "claude --strict-mcp-config --mcp-config servers.json",
+      "example": "claude --strict-mcp-config --mcp-config ./mcp-servers.json",
+      "isNew": true,
+      "category": "flag",
+      "tags": ["config", "mcp", "servers", "strict"]
+    },
+    {
+      "id": "session-id",
+      "name": "--session-id",
+      "description": "Use a specific session ID for the conversation (must be a valid UUID).",
+      "usage": "claude --session-id <uuid>",
+      "example": "claude --session-id 12345678-1234-1234-1234-123456789abc",
+      "isNew": true,
+      "category": "flag",
+      "tags": ["id", "session", "uuid"]
     }
   ]
 }

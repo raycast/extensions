@@ -10,7 +10,8 @@ Props to the ChatGPT Raycast extension team for some of the functions and design
 
 - **Query Grok**: Send questions to Grok AI and receive responses powered by models like `grok-3-mini-fast-beta`.
 - **History**: Browse your recent conversations with Grok, including questions and answers.
-- **Models**: View and manage default and custom AI models for tailored interactions.
+- **Models**: View and manage AI models with dynamic fetching from xAI's API.
+- **Dynamic Model Discovery**: Automatically fetches available models from xAI's API, ensuring you always have access to the latest models.
 - **Text-Only Interaction**: Fully text-based, no image processing required.
 - **Streaming Support**: Enable real-time response streaming for faster replies (optional).
 - **History Control**: Pause chat history saving for privacy or focus.
@@ -30,13 +31,13 @@ Props to the ChatGPT Raycast extension team for some of the functions and design
 3. Search for "Grok AI"
 4. Click Install
 
-### Option 2: Manual Installation
+### Option 2: Development Installation
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/grok-ai-raycast.git
+git clone https://github.com/andreiciobotar/raycast-grok.git
 
 # Navigate to the extension directory
-cd grok-ai-raycast
+cd raycast-grok
 
 # Install dependencies
 npm install
@@ -44,8 +45,8 @@ npm install
 # Build the extension
 npm run build
 
-# Install the extension
-npm run publish
+# Run in development mode
+npm run dev
 ```
 
 ## Configuration

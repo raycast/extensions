@@ -1,5 +1,13 @@
 # Model Context Protocol Registry Changelog
 
+## [Updated Apify] - 2025-08-04
+
+Updated Apify MCP server configuration from `APIFY_API_TOKEN` to `APIFY_TOKEN`
+
+## [Update Google Drive Homepage URL] - 2025-07-23
+
+Update Google Drive Homepage URL to the correct one.
+
 ## [Add Gen-PDF MCP Server] - 2025-06-19
 
 Add Gen-PDF MCP server to let AI generate beautiful PDF documents.

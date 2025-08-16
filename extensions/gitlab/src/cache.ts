@@ -5,7 +5,7 @@ import { constants } from "fs";
 import { currentSeconds, daysInSeconds, fileExists, getErrorMessage } from "./utils";
 import { useEffect, useRef, useState } from "react";
 
-/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 const logCaching = false;
 
@@ -31,7 +31,6 @@ export async function getCacheFilepath(key: string, ensureDirectory = false): Pr
   return cacheFilePath;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getLargeCacheObjectData(key: string): Promise<{ data: any; ageInSeconds: number } | undefined> {
   let cacheFilePath = undefined;
   try {
@@ -46,12 +45,11 @@ export async function getLargeCacheObjectData(key: string): Promise<{ data: any;
     const delta = timestamp - cache_data.timestamp;
     return { data: cache_data.payload, ageInSeconds: delta };
   } catch (e) {
-    cacheLog(`could not access cache file or not exists '${cacheFilePath}'`);
+    cacheLog(`could not access cache file or not exists '${cacheFilePath}' ${e}`);
   }
   return undefined;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getLargeCacheObject(key: string, seconds: number): Promise<any> {
   cacheLog("GET cache");
   let cacheFilePath = undefined;
@@ -71,12 +69,11 @@ export async function getLargeCacheObject(key: string, seconds: number): Promise
       return cache_data.payload;
     }
   } catch (e) {
-    cacheLog(`could not access cache file or not exists '${cacheFilePath}'`);
+    cacheLog(`could not access cache file or not exists '${cacheFilePath}' ${e}`);
   }
   return undefined;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types
 export async function setLargeCacheObject(key: string, payload: any): Promise<void> {
   let cacheFilePath = undefined;
   try {
@@ -94,7 +91,6 @@ export async function setLargeCacheObject(key: string, payload: any): Promise<vo
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function receiveLargeCachedObject(key: string, fn: () => Promise<any>): Promise<any> {
   let data = await getLargeCacheObject(key, 5 * 60);
   if (!data) {
@@ -122,7 +118,7 @@ export function useCache<T>(
     onFilter?: (data: T) => Promise<T>;
     secondsToRefetch?: number;
     secondsToInvalid?: number;
-  }
+  },
 ): {
   data?: T;
   error?: string;

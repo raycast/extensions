@@ -5,6 +5,9 @@
   "description": "An extension to bring endoflife.date into Raycast. Get End-of-life (EOL) and support information for various products",
   "icon": "command-icon.png",
   "author": "csigritz",
+  "contributors": [
+    "sebdanielsson"
+  ],
   "categories": [
     "Developer Tools"
   ],
@@ -18,23 +21,28 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.69.0",
-    "node-fetch": "^3.0.0"
+    "@raycast/api": "^1.101.1",
+    "@raycast/utils": "^2.2.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^24.1.0",
+    "@types/react": "^19.1.8",
+    "eslint": "^9.31.0",
+    "prettier": "^3.6.2",
+    "typescript": "~5.8.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish",
     "pull-contributions": "ray pull-contributions"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }
