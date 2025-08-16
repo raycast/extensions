@@ -88,7 +88,7 @@ export function aliasExists(aliasName: string, excludeFile?: string, excludeName
     if (existsSync(filePath)) {
       try {
         const content = readFileSync(filePath, "utf-8");
-        const aliasPattern = new RegExp(`^\\s*alias\\s+${aliasName}=`, "m");
+        const aliasPattern = new RegExp(`^\\s*alias\\s+${aliasName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}=`, "m");
         if (aliasPattern.test(content)) {
           // If we're checking the same file and name (for rename), don't count it as existing
           if (excludeFile === configFile && excludeName === aliasName) {
