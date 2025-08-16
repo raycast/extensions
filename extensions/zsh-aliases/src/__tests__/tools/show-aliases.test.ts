@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import listAliases from "../../tools/list-aliases";
+import showAliases from "../../tools/show-aliases";
 import * as aliasUtils from "../../utils/alias-utils";
 
 // Mock the alias utils
@@ -13,11 +13,11 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe("list-aliases tool", () => {
+describe("show-aliases tool", () => {
   it("should return empty list when no aliases exist", () => {
     mockParseAliases.mockReturnValue([]);
 
-    const result = listAliases();
+    const result = showAliases();
 
     expect(result).toEqual({
       success: true,
@@ -32,7 +32,7 @@ describe("list-aliases tool", () => {
     const mockAliases = [{ name: "ll", command: "ls -la", file: ".zshrc" }];
     mockParseAliases.mockReturnValue(mockAliases);
 
-    const result = listAliases();
+    const result = showAliases();
 
     expect(result).toEqual({
       success: true,
@@ -51,7 +51,7 @@ describe("list-aliases tool", () => {
     ];
     mockParseAliases.mockReturnValue(mockAliases);
 
-    const result = listAliases();
+    const result = showAliases();
 
     expect(result).toEqual({
       success: true,
@@ -67,7 +67,7 @@ describe("list-aliases tool", () => {
       throw new Error("File system error");
     });
 
-    const result = listAliases();
+    const result = showAliases();
 
     expect(result).toEqual({
       success: false,
@@ -83,7 +83,7 @@ describe("list-aliases tool", () => {
       throw "String error";
     });
 
-    const result = listAliases();
+    const result = showAliases();
 
     expect(result).toEqual({
       success: false,

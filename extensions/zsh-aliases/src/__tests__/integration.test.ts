@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import * as listAliases from "../tools/list-aliases";
+import * as showAliases from "../tools/show-aliases";
 import * as addAlias from "../tools/add-alias";
 import * as removeAlias from "../tools/remove-alias";
 import * as updateAlias from "../tools/update-alias";
@@ -13,10 +13,10 @@ import * as searchAliases from "../tools/search-aliases";
  * the user's actual alias files have unexpected content or permissions.
  */
 describe("Integration tests - Real tools", () => {
-  describe("listAliases integration", () => {
+  describe("showAliases integration", () => {
     it("should execute without throwing errors", () => {
       expect(() => {
-        const result = listAliases.default();
+        const result = showAliases.default();
         expect(typeof result).toBe("object");
         expect(typeof result.success).toBe("boolean");
         expect(Array.isArray(result.aliases)).toBe(true);
@@ -120,7 +120,6 @@ describe("Integration tests - Real tools", () => {
       const result = await removeAlias.confirmation({ name: "test_alias" });
       expect(typeof result).toBe("object");
       expect(typeof result.message).toBe("string");
-      expect(typeof result.style).toBe("string");
     });
 
     it("should handle updateAlias confirmation", async () => {
@@ -131,7 +130,6 @@ describe("Integration tests - Real tools", () => {
       });
       expect(typeof result).toBe("object");
       expect(typeof result.message).toBe("string");
-      expect(typeof result.style).toBe("string");
     });
   });
 });

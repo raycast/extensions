@@ -1,3 +1,5 @@
+import { parseAliases } from "../utils/alias-utils";
+
 /**
  * Show all current zsh aliases
  *
@@ -8,10 +10,14 @@
  */
 export default function showAliasesCommand() {
   try {
-    // Return dummy data for now to test the schema
-    const allAliases: Array<{ name: string; command: string; file: string }> = [];
+    const allAliases = parseAliases();
 
-    const message = "Found 0 aliases";
+    const message =
+      allAliases.length === 0
+        ? "Found 0 aliases"
+        : allAliases.length === 1
+          ? "Found 1 alias"
+          : `Found ${allAliases.length} aliases`;
 
     return {
       success: true,

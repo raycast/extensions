@@ -24,7 +24,6 @@ describe("remove-alias tool", () => {
 
       expect(result).toEqual({
         message: "Are you sure you want to remove the alias 'll'?",
-        style: "Destructive",
         info: [
           { name: "Alias", value: "ll" },
           { name: "Command", value: "ls -la" },
@@ -40,7 +39,6 @@ describe("remove-alias tool", () => {
 
       expect(result).toEqual({
         message: "Alias 'nonexistent' not found",
-        style: "Regular",
       });
     });
 
@@ -51,7 +49,6 @@ describe("remove-alias tool", () => {
 
       expect(result).toEqual({
         message: "Alias 'll' not found in .zsh_aliases",
-        style: "Regular",
       });
     });
   });

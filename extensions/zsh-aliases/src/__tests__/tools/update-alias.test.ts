@@ -34,7 +34,6 @@ describe("update-alias tool", () => {
 
       expect(result).toEqual({
         message: "Are you sure you want to update the command for 'll'?",
-        style: "Regular",
         info: [
           { name: "Current Name", value: "ll" },
           { name: "New Name", value: "ll" },
@@ -56,7 +55,6 @@ describe("update-alias tool", () => {
 
       expect(result).toEqual({
         message: "Are you sure you want to rename 'll' to 'list' and update its command?",
-        style: "Regular",
         info: [
           { name: "Current Name", value: "ll" },
           { name: "New Name", value: "list" },
@@ -78,7 +76,6 @@ describe("update-alias tool", () => {
 
       expect(result).toEqual({
         message: "Alias 'nonexistent' not found",
-        style: "Regular",
       });
     });
   });
