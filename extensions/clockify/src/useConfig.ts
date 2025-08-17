@@ -45,7 +45,7 @@ export default function useConfig(): ConfigProps {
           showToast(Toast.Style.Failure, "Invalid API Key detected");
           setIsValidToken(false);
         } else {
-          showToast(Toast.Style.Failure, "An error ccurred");
+          showToast(Toast.Style.Failure, "An error occurred");
         }
       }
 

@@ -200,7 +200,7 @@ function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
   const { config } = useConfig();
   const [projects, setProjects] = useState<Project[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
-  const [tasks, setTasks] = useState<Project[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { pop } = useNavigation();
 
