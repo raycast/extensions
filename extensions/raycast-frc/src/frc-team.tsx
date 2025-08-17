@@ -12,10 +12,11 @@ export interface TeamStatus {
 export type Rankings = Record<string, TeamStatus>;
 import { Detail, List } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { config } from "./config";
+import { getPreferenceValues } from "@raycast/api";
 
 interface Arguments {
   team: string;
+  year?: string;
 }
 
 export interface Award {
@@ -88,13 +89,15 @@ function getDistrictName(code: string): string | null {
   return districtMap[code.toUpperCase()] || null;
 }
 
-export default function Command({ arguments: { team } }: { arguments: Arguments }) {
+const preferences = getPreferenceValues<{ tbaApiKey: string }>();
+
+export default function Command({ arguments: { team, year: yearArg } }: { arguments: Arguments }) {
   if (!team || isNaN(Number(team))) {
     console.log(Number(team));
     return <Detail markdown="# Invalid Team Number" />;
   }
   const [teamData, setTeamData] = useState<TeamData | null>(null);
-  const year = new Date().getFullYear();
+  const year = yearArg && !isNaN(Number(yearArg)) ? Number(yearArg) : new Date().getFullYear();
   const markdown = `
 # Team ${team}${teamData ? ` - ${teamData.nickname}` : ""}  
 <img src="https://www.thebluealliance.com/avatar/${year}/frc${team}.png" width="40" />
@@ -117,7 +120,7 @@ ${teamData?.district ? `As a member of the ${getDistrictName(teamData.district)}
       try {
         const tbaResponse = await fetch(`https://www.thebluealliance.com/api/v3/team/frc${team}`, {
           headers: {
-            "X-TBA-Auth-Key": config.TBA_API_KEY,
+            "X-TBA-Auth-Key": preferences.tbaApiKey,
           },
         });
         const tbaData = await tbaResponse.json();
@@ -127,7 +130,7 @@ ${teamData?.district ? `As a member of the ${getDistrictName(teamData.district)}
 
         const eventListResponse = await fetch(`https://www.thebluealliance.com/api/v3/team/frc${team}/events/${year}`, {
           headers: {
-            "X-TBA-Auth-Key": config.TBA_API_KEY,
+            "X-TBA-Auth-Key": preferences.tbaApiKey,
           },
         });
         const eventListRaw = await eventListResponse.json();
@@ -165,7 +168,7 @@ ${teamData?.district ? `As a member of the ${getDistrictName(teamData.district)}
             `https://www.thebluealliance.com/api/v3/team/frc${team}/event/${event.key}/status`,
             {
               headers: {
-                "X-TBA-Auth-Key": config.TBA_API_KEY,
+                "X-TBA-Auth-Key": preferences.tbaApiKey,
               },
             },
           );
@@ -175,7 +178,7 @@ ${teamData?.district ? `As a member of the ${getDistrictName(teamData.district)}
             `https://www.thebluealliance.com/api/v3/team/frc${team}/event/${event.key}/awards`,
             {
               headers: {
-                "X-TBA-Auth-Key": config.TBA_API_KEY,
+                "X-TBA-Auth-Key": preferences.tbaApiKey,
               },
             },
           );
@@ -192,7 +195,7 @@ ${teamData?.district ? `As a member of the ${getDistrictName(teamData.district)}
             `https://www.thebluealliance.com/api/v3/team/frc${team}/event/${event.key}/matches/keys`,
             {
               headers: {
-                "X-TBA-Auth-Key": config.TBA_API_KEY,
+                "X-TBA-Auth-Key": preferences.tbaApiKey,
               },
             },
           );
@@ -202,7 +205,18 @@ ${teamData?.district ? `As a member of the ${getDistrictName(teamData.district)}
             for (const matchKey of matchListData) {
               const curMatch = await fetch(`https://api.statbotics.io/v3/match/${matchKey}`);
               const curMatchData = await curMatch.json();
-              if (curMatchData) {
+              if (
+                curMatchData &&
+                curMatchData.alliances &&
+                curMatchData.alliances.red &&
+                curMatchData.alliances.blue &&
+                Array.isArray(curMatchData.alliances.red.team_keys) &&
+                Array.isArray(curMatchData.alliances.blue.team_keys) &&
+                curMatchData.alliances.red.team_keys.length >= 3 &&
+                curMatchData.alliances.blue.team_keys.length >= 3 &&
+                curMatchData.result &&
+                curMatchData.pred
+              ) {
                 const matchData: Match = {
                   key: curMatchData.key,
                   red1: curMatchData.alliances.red.team_keys[0],
@@ -221,19 +235,6 @@ ${teamData?.district ? `As a member of the ${getDistrictName(teamData.district)}
             }
           }
           event.matches = matches;
-          if (event.gmaps_place_id) {
-            const gmapsResponse = await fetch(`https://places.googleapis.com/v1/places/${event.gmaps_place_id}`, {
-              headers: {
-                "X-Goog-Api-Key": config.GMAPS_API_KEY,
-                "X-Goog-FieldMask": "displayName,formattedAddress",
-              },
-            });
-
-            const gmapsData = await gmapsResponse.json();
-            if (gmapsData && gmapsData.displayName.text) {
-              event.gmaps_location_name = gmapsData.displayName.text || "";
-            }
-          }
           processedTeamData = {
             ...tbaData,
             epa: statboticsData.epa?.total_points?.mean || 0,
@@ -286,7 +287,7 @@ ${teamData?.district ? `As a member of the ${getDistrictName(teamData.district)}
                   markdown={`
 # ${event.name}
 
-${event.gmaps_location_name ? `**Location:** [${event.gmaps_location_name}](${event.gmaps_url}), ` : ""}${event.city}, ${event.state_prov}, ${event.country}
+[${event.city}, ${event.state_prov}, ${event.country}](${event.gmaps_url})
 
 (${event.key}) - [View on TBA](https://www.thebluealliance.com/event/${event.key}) / [View on Statbotics](https://api.statbotics.io/v3/event/${event.key})
 

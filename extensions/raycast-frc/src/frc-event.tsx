@@ -1,14 +1,6 @@
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
-function formatDate(dateStr: string | undefined): string {
-  if (!dateStr) return "";
-  try {
-    return format(new Date(dateStr), "MMMM do, yyyy");
-  } catch {
-    return dateStr;
-  }
-}
-import { config } from "./config";
+import { getPreferenceValues } from "@raycast/api";
 import { List } from "@raycast/api";
 import type { Award, Event, Match, Rankings } from "./frc-team";
 import { getMatchesTable } from "./frc-team";
@@ -16,6 +8,8 @@ import { getMatchesTable } from "./frc-team";
 interface Arguments {
   event: string;
 }
+
+const preferences = getPreferenceValues<{ tbaApiKey: string }>();
 
 export default function Command({ arguments: { event } }: { arguments: Arguments }) {
   const [eventData, setEventData] = useState<Event | null>(null);
@@ -28,7 +22,7 @@ export default function Command({ arguments: { event } }: { arguments: Arguments
       try {
         const response = await fetch(`https://www.thebluealliance.com/api/v3/event/${event}`, {
           headers: {
-            "X-TBA-Auth-Key": config.TBA_API_KEY,
+            "X-TBA-Auth-Key": preferences.tbaApiKey,
           },
         });
         const data = await response.json();
@@ -38,22 +32,10 @@ export default function Command({ arguments: { event } }: { arguments: Arguments
         }
         setMarkdown(data.name);
         const eventData: Event = data;
-        if (eventData.gmaps_place_id) {
-          const gmapsResponse = await fetch(`https://places.googleapis.com/v1/places/${eventData.gmaps_place_id}`, {
-            headers: {
-              "X-Goog-Api-Key": config.GMAPS_API_KEY,
-              "X-Goog-FieldMask": "displayName,formattedAddress",
-            },
-          });
-          const gmapsData = await gmapsResponse.json();
-          if (gmapsData && gmapsData.displayName && gmapsData.displayName.text) {
-            eventData.gmaps_location_name = gmapsData.displayName.text || "";
-          }
-        }
         setEventData(eventData);
         const awardsResponse = await fetch(`https://www.thebluealliance.com/api/v3/event/${event}/awards`, {
           headers: {
-            "X-TBA-Auth-Key": config.TBA_API_KEY,
+            "X-TBA-Auth-Key": preferences.tbaApiKey,
           },
         });
         const awardsData = await awardsResponse.json();
@@ -74,7 +56,7 @@ export default function Command({ arguments: { event } }: { arguments: Arguments
         try {
           const rankingsResponse = await fetch(`https://www.thebluealliance.com/api/v3/event/${event}/teams/statuses`, {
             headers: {
-              "X-TBA-Auth-Key": config.TBA_API_KEY,
+              "X-TBA-Auth-Key": preferences.tbaApiKey,
             },
           });
           const rankingsData: Rankings = await rankingsResponse.json();
@@ -84,7 +66,7 @@ export default function Command({ arguments: { event } }: { arguments: Arguments
         }
         const matchList = await fetch(`https://www.thebluealliance.com/api/v3/event/${event}/matches/keys`, {
           headers: {
-            "X-TBA-Auth-Key": config.TBA_API_KEY,
+            "X-TBA-Auth-Key": preferences.tbaApiKey,
           },
         });
         const matchListData = await matchList.json();
@@ -130,9 +112,9 @@ export default function Command({ arguments: { event } }: { arguments: Arguments
               eventData
                 ? `# ${eventData.name}
 
-**Location:** ${eventData.gmaps_location_name ? `[${eventData.gmaps_location_name}](${eventData.gmaps_url}), ` : ""}${eventData.city}, ${eventData.state_prov}, ${eventData.country}
+**Location:** [${eventData.city}, ${eventData.state_prov}, ${eventData.country}](${eventData.gmaps_url})
 
-**Dates:** ${formatDate(eventData.start_date)} to ${formatDate(eventData.end_date)}
+**Dates:** ${format(new Date(eventData.start_date), "MMMM do, yyyy")} to ${format(new Date(eventData.end_date), "MMMM do, yyyy")}
 
 (${eventData.key}) - [View on TBA](https://www.thebluealliance.com/event/${eventData.key}) / [View on Statbotics](https://api.statbotics.io/v3/event/${eventData.key})
 
