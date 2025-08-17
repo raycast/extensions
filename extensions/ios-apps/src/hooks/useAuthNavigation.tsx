@@ -83,4 +83,3 @@ export function useAuthNavigation(): AuthNavigationHelpers {
     popToRoot,
   };
 }
-
