@@ -1,4 +1,15 @@
-import { ActionPanel, Form, Icon, List, showToast, useNavigation, Toast, Action, LocalStorage, openExtensionPreferences, Cache } from "@raycast/api";
+import {
+  ActionPanel,
+  Form,
+  Icon,
+  List,
+  showToast,
+  useNavigation,
+  Toast,
+  Action,
+  LocalStorage,
+  openExtensionPreferences,
+} from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import isEmpty from "lodash.isempty";
 import uniqWith from "lodash.uniqwith";
@@ -13,7 +24,14 @@ function OpenWebPage() {
 
 function ToggleTags() {
   const [, setIsShowingTags] = useCachedState<boolean>("show-tags");
-  return <Action icon={Icon.Tag} title="Toggle Tags" onAction={() => setIsShowingTags(show => !show)} shortcut={{modifiers: ["cmd"], key: "t"}} />;
+  return (
+    <Action
+      icon={Icon.Tag}
+      title="Toggle Tags"
+      onAction={() => setIsShowingTags((show) => !show)}
+      shortcut={{ modifiers: ["cmd"], key: "t" }}
+    />
+  );
 }
 
 function useClock(entry: TimeEntry) {
@@ -38,13 +56,17 @@ function ItemInProgress({ entry, updateTimeEntries }: { entry: TimeEntry; update
       subtitle={`${[entry.description || "No Description", entry.task?.name].filter(Boolean).join(" • ")}`}
       accessories={[
         { text: `${time}  -  ${entry.project?.name}`, icon: { source: Icon.Dot, tintColor: entry.project?.color } },
-        ...(isShowingTags ? entry.tags.map(tag => ({tag: tag.name})) : [])
+        ...(isShowingTags ? entry.tags.map((tag) => ({ tag: tag.name })) : []),
       ]}
       icon={{ source: Icon.Clock, tintColor: entry.project?.color }}
       keywords={[...(entry.description?.split(" ") ?? []), ...(entry.project?.name.split(" ") ?? [])]}
       actions={
         <ActionPanel>
-          <Action icon={Icon.Stop} title="Stop Timer" onAction={() => stopCurrentTimer().then(() => updateTimeEntries())} />
+          <Action
+            icon={Icon.Stop}
+            title="Stop Timer"
+            onAction={() => stopCurrentTimer().then(() => updateTimeEntries())}
+          />
           <OpenWebPage />
           <ToggleTags />
         </ActionPanel>
@@ -106,9 +128,11 @@ export default function Main() {
           icon={Icon.ExclamationMark}
           title="Invalid API Key Detected"
           accessories={[{ text: `Go to Extensions → Clockify` }]}
-          actions={<ActionPanel>
-            <Action icon={Icon.Gear} title="Open Extension Preferences" onAction={openExtensionPreferences} />
-          </ActionPanel>}
+          actions={
+            <ActionPanel>
+              <Action icon={Icon.Gear} title="Open Extension Preferences" onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
         />
       ) : (
         <>
@@ -140,7 +164,7 @@ export default function Main() {
                   subtitle={`${[entry.description || "No Description", entry.task?.name].filter(Boolean).join(" • ")}`}
                   accessories={[
                     { text: entry.project?.name, icon: { source: Icon.Dot, tintColor: entry.project?.color } },
-                    ...(isShowingTags ? entry.tags.map(tag => ({tag: tag.name})) : [])
+                    ...(isShowingTags ? entry.tags.map((tag) => ({ tag: tag.name })) : []),
                   ]}
                   icon={{ source: Icon.Circle, tintColor: entry.project?.color }}
                   keywords={[...(entry.description?.split(" ") ?? []), ...(entry.project?.name.split(" ") ?? [])]}
@@ -150,9 +174,12 @@ export default function Main() {
                         icon={Icon.Play}
                         title="Start Timer"
                         onAction={() => {
-                          addNewTimeEntry(entry.description, entry.projectId, entry.taskId, entry.tags.map(tag => tag.id)).then(() =>
-                            updateTimeEntries(),
-                          );
+                          addNewTimeEntry(
+                            entry.description,
+                            entry.projectId,
+                            entry.taskId,
+                            entry.tags.map((tag) => tag.id),
+                          ).then(() => updateTimeEntries());
                         }}
                       />
                       <OpenWebPage />
@@ -185,16 +212,16 @@ function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
 
       const [storedProjects, storedTags] = await Promise.all([
         LocalStorage.getItem<string>("projects"),
-        LocalStorage.getItem<string>("tags")
-      ])
+        LocalStorage.getItem<string>("tags"),
+      ]);
       if (storedProjects) setProjects(JSON.parse(storedProjects));
       if (storedTags) setTags(JSON.parse(storedTags));
-      
+
       const [projectsResponse, tagsResponse] = await Promise.all([
         fetcher(`/workspaces/${config.workspaceId}/projects?page-size=1000&archived=false`),
-        fetcher(`/workspaces/${config.workspaceId}/tags?page-size=1000&archived=false`)
-      ])
-      
+        fetcher(`/workspaces/${config.workspaceId}/tags?page-size=1000&archived=false`),
+      ]);
+
       setProjects(projectsResponse.data || []);
       LocalStorage.setItem("projects", JSON.stringify(projectsResponse.data));
       setTags(tagsResponse.data || []);
@@ -281,8 +308,11 @@ function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
 
       <Form.TextField id="description" defaultValue="" title="Description" placeholder="What are you working on?" />
 
-      <Form.TagPicker title="Tags" id="tagIds" placeholder="Search tags">
-        {tags.map(tag => <Form.TagPicker.Item key={tag.id} title={tag.name} value={tag.id} />)}
+      <Form.Separator />
+      <Form.TagPicker title="Tags (optional)" id="tagIds" placeholder="Search tags">
+        {tags.map((tag) => (
+          <Form.TagPicker.Item key={tag.id} title={tag.name} value={tag.id} />
+        ))}
       </Form.TagPicker>
     </Form>
   );
@@ -297,7 +327,7 @@ async function getTimeEntries({ onError }: { onError?: (state: boolean) => void 
   );
 
   if (error === "Unauthorized") {
-    onError && onError(false);
+    onError?.(false);
     return [];
   }
 
@@ -336,7 +366,7 @@ async function addNewTimeEntry(
   description: string,
   projectId: string,
   taskId: string | undefined | null,
-  tagIds: string[] = []
+  tagIds: string[] = [],
 ): Promise<void> {
   showToast(Toast.Style.Animated, "Starting…");
 

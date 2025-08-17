@@ -26,7 +26,10 @@ export interface Task {
   name: string;
 }
 
-export interface Tag extends Task {};
+export interface Tag {
+  id: string;
+  name: string;
+}
 
 export interface FetcherArgs {
   method?: "PATCH" | "POST";

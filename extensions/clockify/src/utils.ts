@@ -1,5 +1,4 @@
 import { LocalStorage, Toast, getPreferenceValues, showToast } from "@raycast/api";
-import fetch from "node-fetch";
 import { FetcherArgs, FetcherResponse, TimeEntry } from "./types";
 
 // https://clockify.me/help/getting-started/data-regions
