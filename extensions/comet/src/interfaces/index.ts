@@ -37,6 +37,10 @@ export class Tab {
   static parse(line: string): Tab {
     const parts = line.split(this.TAB_CONTENTS_SEPARATOR);
 
+    if (parts.length < 5) {
+      throw new Error(`Invalid tab data: expected at least 5 parts but got ${parts.length}`);
+    }
+
     return new Tab(parts[0], parts[1], parts[2], +parts[3], +parts[4], line);
   }
 
