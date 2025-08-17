@@ -4,7 +4,7 @@ import { Preferences, SearchResult, Tab } from "../interfaces";
 import { getPreferenceValues } from "@raycast/api";
 import { NOT_INSTALLED_MESSAGE } from "../constants";
 import { NotInstalledError, UnknownError } from "../components";
-import { checkCometInstallation } from "../util";
+import { useCometInstallation } from "./useCometInstallation";
 
 /**
  * @name useTabSearch
@@ -23,16 +23,24 @@ export function useTabSearch(query = ""): SearchResult<Tab> & { data: NonNullabl
   const [data, setData] = useState<Tab[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [errorView, setErrorView] = useState<ReactNode | undefined>();
+  const { isInstalled, isChecking } = useCometInstallation();
   const queryParts = query.toLowerCase().split(/\s+/);
 
   const loadTabs = async () => {
-    try {
-      const isInstalled = await checkCometInstallation();
-      if (!isInstalled) {
-        setIsLoading(false);
-        return;
-      }
+    // Wait for installation check to complete
+    if (isChecking) {
+      setIsLoading(true);
+      return;
+    }
 
+    if (!isInstalled) {
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
       const tabs = await getOpenTabs(useOriginalFavicon);
       const filteredTabs = tabs
         .map((tab): [Tab, string] => [tab, `${tab.title.toLowerCase()} ${tab.urlWithoutScheme().toLowerCase()}`])
@@ -53,7 +61,7 @@ export function useTabSearch(query = ""): SearchResult<Tab> & { data: NonNullabl
 
   useEffect(() => {
     loadTabs();
-  }, [query]);
+  }, [query, isInstalled, isChecking]);
 
   const revalidate = () => {
     setIsLoading(true);

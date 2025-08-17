@@ -1,67 +1,72 @@
 import { List } from "@raycast/api";
-import { useEffect } from "react";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { existsSync, promises } from "fs";
-import { getLocalStatePath, getAvailableProfiles } from "../util";
+import { useEffect, useState } from "react";
+import { useCachedState } from "@raycast/utils";
+import { getAvailableProfiles, getLocalStatePath } from "../util";
 import { CometProfile } from "../interfaces";
-import { DEFAULT_COMET_PROFILE_ID, COMET_PROFILE_KEY, COMET_PROFILES_KEY } from "../constants";
+import { DEFAULT_COMET_PROFILE_ID, COMET_PROFILE_KEY } from "../constants";
+import * as fs from "fs";
 
 interface Props {
   onProfileSelected?: (profile: string) => void;
 }
 
-async function loadCometProfiles(): Promise<CometProfile[]> {
-  try {
-    // First try to load from Local State file (includes profile names)
-    const path = getLocalStatePath();
-    if (existsSync(path)) {
-      const cometState = await promises.readFile(path, "utf-8");
-      const parsed = JSON.parse(cometState);
-      if (parsed.profile?.info_cache) {
-        const profiles = parsed.profile.info_cache;
-        return Object.entries<{ name: string }>(profiles).map(([key, val]) => ({
-          name: val.name,
-          id: key,
-        }));
-      }
-    }
-  } catch (error) {
-    // If Local State parsing fails, fall back to directory listing
-  }
-
-  // Fallback: get available profiles from directory listing
-  const availableProfiles = getAvailableProfiles();
-  return availableProfiles.map((id) => ({
-    name: id === "Default" ? "Default" : `Profile ${id.split(" ")[1] || id}`,
-    id: id,
-  }));
-}
-
 export default function CometProfileDropDown({ onProfileSelected }: Props) {
   const [selectedProfile, setSelectedProfile] = useCachedState<string>(COMET_PROFILE_KEY, DEFAULT_COMET_PROFILE_ID);
-  const [profiles, setProfiles] = useCachedState<CometProfile[]>(COMET_PROFILES_KEY, [
-    { name: "Person 1", id: DEFAULT_COMET_PROFILE_ID },
-  ]);
-  const { data: loadedProfiles } = useCachedPromise(loadCometProfiles);
+  const [profiles, setProfiles] = useState<CometProfile[]>([]);
 
   useEffect(() => {
-    if (loadedProfiles) {
-      setProfiles(loadedProfiles);
-      if (!selectedProfile) {
-        setSelectedProfile(profiles[0].id);
+    // Load profiles with real names from Local State file
+    const availableProfiles = getAvailableProfiles();
+    let profileList: CometProfile[] = [];
+
+    try {
+      // Try to read profile names from Local State
+      const localStatePath = getLocalStatePath();
+      if (fs.existsSync(localStatePath)) {
+        const cometState = fs.readFileSync(localStatePath, "utf-8");
+        const parsed = JSON.parse(cometState);
+
+        if (parsed.profile?.info_cache) {
+          const profileInfoCache = parsed.profile.info_cache;
+          profileList = availableProfiles.map((id) => {
+            const profileInfo = profileInfoCache[id];
+            return {
+              id: id,
+              name: profileInfo?.name || (id === "Default" ? "Default" : id),
+            };
+          });
+        }
       }
+    } catch (error) {
+      // Fallback to directory names if Local State reading fails
     }
-  }, [loadedProfiles]);
+
+    // Fallback: use directory names if Local State didn't work
+    if (profileList.length === 0) {
+      profileList = availableProfiles.map((id) => ({
+        name: id === "Default" ? "Default" : id.startsWith("Profile ") ? id : `Profile ${id}`,
+        id: id,
+      }));
+    }
+
+    // Always include at least a default profile
+    if (profileList.length === 0) {
+      profileList.push({ id: DEFAULT_COMET_PROFILE_ID, name: "Default" });
+    }
+
+    setProfiles(profileList);
+
+    // Set default profile if none selected and profiles available
+    if (!selectedProfile && profileList.length > 0) {
+      setSelectedProfile(profileList[0].id);
+    }
+  }, []);
 
   useEffect(() => {
-    if (selectedProfile) {
+    if (selectedProfile && profiles.length > 0) {
       onProfileSelected?.(selectedProfile);
     }
-  }, [selectedProfile]);
-
-  if (!profiles || profiles.length === 0) {
-    return null;
-  }
+  }, [selectedProfile, profiles]);
 
   return (
     <List.Dropdown tooltip="Select Comet Profile" value={selectedProfile} onChange={setSelectedProfile}>

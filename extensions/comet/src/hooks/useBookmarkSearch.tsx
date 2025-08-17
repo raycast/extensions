@@ -2,7 +2,8 @@ import { HistoryEntry, SearchResult } from "../interfaces";
 import { ReactNode, useCallback, useEffect, useState } from "react";
 import { NO_BOOKMARKS_MESSAGE, NOT_INSTALLED_MESSAGE } from "../constants";
 import { NoBookmarksError, NotInstalledError, UnknownError } from "../components";
-import { getBookmarks, checkCometInstallation } from "../util";
+import { getBookmarks } from "../util";
+import { useCometInstallation } from "./useCometInstallation";
 
 export function useBookmarkSearch(
   query?: string,
@@ -12,6 +13,7 @@ export function useBookmarkSearch(
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [profile, setProfile] = useState<string | undefined>(initialProfile);
   const [errorView, setErrorView] = useState<ReactNode>();
+  const { isInstalled, isChecking } = useCometInstallation();
 
   const revalidate = useCallback((profileId: string) => {
     setProfile(profileId);
@@ -20,15 +22,21 @@ export function useBookmarkSearch(
   useEffect(() => {
     const loadBookmarks = async () => {
       setErrorView(undefined); // Reset error state on each new search
+
+      // Wait for installation check to complete
+      if (isChecking) {
+        setIsLoading(true);
+        return;
+      }
+
+      if (!isInstalled) {
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(true);
 
       try {
-        const isInstalled = await checkCometInstallation();
-        if (!isInstalled) {
-          setIsLoading(false);
-          return;
-        }
-
         const bookmarks = await getBookmarks(profile);
         setData(
           bookmarks.filter(
@@ -51,7 +59,7 @@ export function useBookmarkSearch(
     };
 
     loadBookmarks();
-  }, [profile, query]);
+  }, [profile, query, isInstalled, isChecking]);
 
   return { errorView, isLoading, data, revalidate };
 }

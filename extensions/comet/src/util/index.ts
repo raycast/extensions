@@ -7,7 +7,7 @@ import {
   defaultCometStatePath,
   NO_BOOKMARKS_MESSAGE,
 } from "../constants";
-import { getPreferenceValues, getApplications, showToast, Toast, open } from "@raycast/api";
+import { getPreferenceValues, getApplications, showToast, Toast, open, openExtensionPreferences } from "@raycast/api";
 import { Preferences } from "../interfaces";
 import { BookmarkDirectory, HistoryEntry, RawBookmarks } from "../interfaces";
 
@@ -23,19 +23,13 @@ const getCometFilePath = (fileName: CometFile, profile?: string) => {
   const { profilePath } = getPreferenceValues<Preferences>();
   let resolvedProfilePath;
   if (profilePath) {
-    resolvedProfilePath = path.join(profilePath, fileName);
+    resolvedProfilePath = path.join(profilePath, profile ?? DEFAULT_COMET_PROFILE_ID, fileName);
   } else {
     resolvedProfilePath = path.join(
       userLibraryDirectoryPath(),
       ...defaultCometProfilePath,
       profile ?? DEFAULT_COMET_PROFILE_ID,
       fileName
-    );
-  }
-
-  if (!fs.existsSync(resolvedProfilePath)) {
-    throw new Error(
-      `The profile path ${resolvedProfilePath} does not exist. Please check your Comet profile location. Then update it in Extension Settings -> Profile Path.`
     );
   }
 
@@ -49,9 +43,18 @@ export const getLocalStatePath = () => path.join(userLibraryDirectoryPath(), ...
 const getCometProfilesDirectory = () => {
   const { profilePath } = getPreferenceValues<Preferences>();
   if (profilePath) {
-    return path.dirname(profilePath);
+    return profilePath;
   } else {
     return path.join(userLibraryDirectoryPath(), ...defaultCometProfilePath);
+  }
+};
+
+const checkProfilePathExists = (): boolean => {
+  try {
+    const profilesDir = getCometProfilesDirectory();
+    return fs.existsSync(profilesDir);
+  } catch (error) {
+    return false;
   }
 };
 
@@ -59,7 +62,7 @@ export const getAvailableProfiles = (): string[] => {
   try {
     const profilesDir = getCometProfilesDirectory();
     if (!fs.existsSync(profilesDir)) {
-      return [DEFAULT_COMET_PROFILE_ID];
+      return [];
     }
 
     const items = fs.readdirSync(profilesDir);
@@ -73,8 +76,13 @@ export const getAvailableProfiles = (): string[] => {
     // Add all Profile X directories
     items
       .filter((item) => {
-        const itemPath = path.join(profilesDir, item);
-        return fs.statSync(itemPath).isDirectory() && (item.startsWith("Profile ") || item === "Default");
+        try {
+          const itemPath = path.join(profilesDir, item);
+          return fs.statSync(itemPath).isDirectory() && (item.startsWith("Profile ") || item === "Default");
+        } catch (error) {
+          // Skip items that can't be stat'd (like broken symlinks)
+          return false;
+        }
       })
       .forEach((item) => {
         if (item !== "Default") {
@@ -82,9 +90,9 @@ export const getAvailableProfiles = (): string[] => {
         }
       });
 
-    return profiles.length > 0 ? profiles : [DEFAULT_COMET_PROFILE_ID];
+    return profiles;
   } catch (error) {
-    return [DEFAULT_COMET_PROFILE_ID];
+    return [];
   }
 };
 
@@ -169,6 +177,12 @@ const extractBookmarks = (rawBookmarks: RawBookmarks): HistoryEntry[] => {
 export const getBookmarks = async (profile?: string): Promise<HistoryEntry[]> => {
   try {
     const bookmarksFilePath = getBookmarksFilePath(profile);
+
+    // Check if file exists before trying to read it
+    if (!fs.existsSync(bookmarksFilePath)) {
+      throw new Error(NO_BOOKMARKS_MESSAGE);
+    }
+
     const fileBuffer = await fs.promises.readFile(bookmarksFilePath, { encoding: "utf-8" });
     const bookmarks = extractBookmarks(JSON.parse(fileBuffer));
 
@@ -187,6 +201,32 @@ export const getBookmarks = async (profile?: string): Promise<HistoryEntry[]> =>
 async function isCometInstalled() {
   const applications = await getApplications();
   return applications.some(({ bundleId }) => bundleId === "ai.perplexity.comet");
+}
+
+export async function checkProfileConfiguration() {
+  const { profilePath } = getPreferenceValues<Preferences>();
+
+  // Only check if custom profilePath is set
+  if (profilePath && !checkProfilePathExists()) {
+    const options: Toast.Options = {
+      style: Toast.Style.Failure,
+      title: "Comet profile directory not found.",
+      message: "Please check your profile path in extension settings.",
+      primaryAction: {
+        title: "Open Extension Settings",
+        onAction: (toast) => {
+          openExtensionPreferences();
+          toast.hide();
+        },
+      },
+    };
+
+    await showToast(options);
+    return false;
+  }
+
+  // If no custom path or path exists, everything is OK
+  return true;
 }
 
 export async function checkCometInstallation() {

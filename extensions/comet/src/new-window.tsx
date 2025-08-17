@@ -11,7 +11,9 @@ export default async function Command() {
   try {
     await closeMainWindow();
     await createNewWindow();
-  } catch {
+    await showHUD("✅ New Comet window opened");
+  } catch (error) {
+    console.error("Failed to create new Comet window:", error);
     await showHUD("❌ Failed opening a new Comet window");
   }
 }

@@ -1,5 +1,5 @@
 import { getPreferenceValues, List } from "@raycast/api";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Preferences } from "./interfaces";
 import { CometListItems } from "./components";
 import { useTabSearch } from "./hooks/useTabSearch";
@@ -9,25 +9,47 @@ import { useCachedState } from "@raycast/utils";
 import { groupEntriesByDate } from "./search-history";
 import CometProfileDropDown from "./components/CometProfileDropdown";
 import { useBookmarkSearch } from "./hooks/useBookmarkSearch";
+import { checkProfileConfiguration } from "./util";
 
 export default function Command() {
   const { useOriginalFavicon } = getPreferenceValues<Preferences>();
+  const [profileValid, setProfileValid] = useState<boolean | null>(null);
   const [searchText, setSearchText] = useState("");
   const [profile] = useCachedState<string>(COMET_PROFILE_KEY, DEFAULT_COMET_PROFILE_ID);
 
+  useEffect(() => {
+    const checkProfile = async () => {
+      const isValid = await checkProfileConfiguration();
+      setProfileValid(isValid);
+    };
+    checkProfile();
+  }, []);
+
+  // Call ALL hooks BEFORE any conditional returns
   const { data: tabData, isLoading: isLoadingTab } = useTabSearch(searchText);
 
+  // Always call with enabled=true to maintain hook consistency, filter results later
   const {
     data: historyData = [],
     isLoading: isLoadingHistory,
     revalidate: revalidateHistory,
-  } = useHistorySearch(profile, searchText);
+  } = useHistorySearch(profile, searchText, true);
 
   const {
-    data: bookmarkData,
+    data: bookmarkData = [],
     isLoading: isLoadingBookmark,
     revalidate: revalidateBookmark,
   } = useBookmarkSearch(searchText);
+
+  // If profile check is still pending, don't render anything
+  if (profileValid === null) {
+    return null;
+  }
+
+  // If profile is invalid, don't render anything (toast already shown)
+  if (!profileValid) {
+    return null;
+  }
 
   const revalidate = (profile: string) => {
     revalidateHistory?.(profile);

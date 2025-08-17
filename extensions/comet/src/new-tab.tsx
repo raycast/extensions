@@ -1,4 +1,4 @@
-import { useState, ReactNode, useMemo } from "react";
+import { useState, ReactNode, useMemo, useEffect } from "react";
 import { getPreferenceValues, Icon, List } from "@raycast/api";
 import { useHistorySearch } from "./hooks/useHistorySearch";
 import { CometActions, CometListItems } from "./components";
@@ -6,7 +6,8 @@ import { useTabSearch } from "./hooks/useTabSearch";
 import { useCachedState } from "@raycast/utils";
 import { CometProfile, HistoryEntry, Preferences, SearchResult } from "./interfaces";
 import CometProfileDropDown from "./components/CometProfileDropdown";
-import { COMET_PROFILE_KEY, COMET_PROFILES_KEY, DEFAULT_COMET_PROFILE_ID } from "./constants";
+import { COMET_PROFILE_KEY, DEFAULT_COMET_PROFILE_ID } from "./constants";
+import { checkProfileConfiguration } from "./util";
 
 type HistoryContainer = {
   profile: CometProfile;
@@ -30,15 +31,26 @@ export default function Command() {
   const { useOriginalFavicon } = getPreferenceValues<Preferences>();
 
   // Then state hooks
+  const [profileValid, setProfileValid] = useState<boolean | null>(null);
   const [searchText, setSearchText] = useState("");
-  const [profiles] = useCachedState<CometProfile[]>(COMET_PROFILES_KEY, []);
+  const [profiles] = useCachedState<CometProfile[]>("COMET_PROFILES", []);
   const [profile] = useCachedState<string>(COMET_PROFILE_KEY, DEFAULT_COMET_PROFILE_ID);
 
-  // Finally custom hooks
-  const currentProfileHistory = useHistorySearch(profile, searchText);
+  useEffect(() => {
+    const checkProfile = async () => {
+      const isValid = await checkProfileConfiguration();
+      setProfileValid(isValid);
+    };
+    checkProfile();
+  }, []);
+
+  // Finally custom hooks - MUST be called before any conditional returns
+  // Always call with enabled=true to maintain hook consistency, filter results later
+  const currentProfileHistory = useHistorySearch(profile, searchText, true);
   const { data: dataTab, isLoading: isLoadingTab, errorView: errorViewTab } = useTabSearch();
 
   // Use useMemo to calculate profileHistories to avoid infinite re-renders
+  // This MUST be called before any conditional returns
   const profileHistories = useMemo<HistoryContainer[]>(() => {
     if (!profiles || !profile || !currentProfileHistory) {
       return [];
@@ -63,6 +75,16 @@ export default function Command() {
       },
     ];
   }, [profiles, profile, currentProfileHistory]);
+
+  // If profile check is still pending, don't render anything
+  if (profileValid === null) {
+    return null;
+  }
+
+  // If profile is invalid, don't render anything (toast already shown)
+  if (!profileValid) {
+    return null;
+  }
 
   // Simple URL detection function
   const isUrl = (text: string): boolean => {
