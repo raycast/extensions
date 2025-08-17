@@ -1,19 +1,9 @@
-<!-- TOP ROW OF BADGES -->
-
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
-
 <a name="readme-top"></a>
 
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/smcnab1/cheatsheets-remastered">
     <img src="media/logo.png" alt="Logo" width="80" height="80">
-  </a>
 
 <h3 align="center">Cheatsheets Remastered</h3>
 
@@ -22,12 +12,6 @@
     <br />
     <a href="./ROADMAP.md"><strong>Explore the roadmap »</strong></a>
     <br />
-    <br />
-    <a href="https://github.com/smcnab1/cheatsheets-remastered/issues/new?template=bug_report.yml">Report Bug</a>
-    ·
-    <a href="https://github.com/smcnab1/cheatsheets-remastered/issues/new?template=cheatsheet_request_update.yml">Request Cheatsheet/Update</a>
-    ·
-    <a href="https://github.com/smcnab1/cheatsheets-remastered/issues/new?template=feature_request.yml">Request Feature</a>
 
   </p>
 </div>
@@ -57,9 +41,7 @@ _Last Updated 2025-08-16_
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 <div align="center">
-  <a href="https://github.com/smcnab1/cheatsheets-remastered">
     <img src="media/cheatsheets-remastered-1.png" alt="Screenshot" width="100%" height="auto">
-  </a>
   </div>
   
 **Cheatsheets Remastered** is a modern [Raycast extension](https://github.com/raycast/extensions) to quickly search, create, and manage cheatsheets. It ships with curated [DevHints](https://devhints.io/) content and lets you keep your own sheets locally. Perfect for fast recall without leaving your keyboard.
@@ -136,7 +118,6 @@ Contributions welcome — especially to expand and improve the default cheatshee
 - Add/Update default cheatsheets: edit markdown under `assets/cheatsheets/`
 - Tag updates: map new tags in `src/default-tags.ts`
 - Icons: add topic icons under `assets/` and optionally run `npm run normalize:icons`
-- Bugs & ideas: [open an Issue](https://github.com/smcnab1/cheatsheets-remastered/issues)
 
 PRs should briefly state:
 - What changed and why
@@ -154,17 +135,3 @@ PRs should briefly state:
 This project is licensed under the [MIT License](LICENSE).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- MARKDOWN LINKS & IMAGES -->
-
-[contributors-shield]: https://img.shields.io/github/contributors/smcnab1/cheatsheets-remastered.svg?style=for-the-badge
-[contributors-url]: https://github.com/smcnab1/cheatsheets-remastered/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/smcnab1/cheatsheets-remastered.svg?style=for-the-badge
-[forks-url]: https://github.com/smcnab1/cheatsheets-remastered/network/members
-[stars-shield]: https://img.shields.io/github/stars/smcnab1/cheatsheets-remastered.svg?style=for-the-badge
-[stars-url]: https://github.com/smcnab1/cheatsheets-remastered/stargazers
-[issues-shield]: https://img.shields.io/github/issues/smcnab1/cheatsheets-remastered.svg?style=for-the-badge
-[issues-url]: https://github.com/smcnab1/cheatsheets-remastered/issues
-[license-shield]: https://img.shields.io/github/license/smcnab1/cheatsheets-remastered.svg?style=for-the-badge
-[license-url]: https://github.com/smcnab1/cheatsheets-remastered/blob/main/LICENSE
-[product-screenshot]: media/cheatsheets-remastered-1.png

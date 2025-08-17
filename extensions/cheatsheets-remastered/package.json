@@ -20,30 +20,36 @@
     {
       "name": "show-cheatsheets",
       "title": "Show Cheatsheets",
+      "subtitle": "Cheatsheets Remastered",
       "description": "List all cheatsheets",
       "mode": "view"
     },
     {
       "name": "create-custom-cheatsheet",
       "title": "Create Custom Cheatsheet",
+      "subtitle": "Cheatsheets Remastered",
       "description": "Create a new custom cheatsheet",
       "mode": "view"
     },
     {
       "name": "manage-custom-cheatsheets",
       "title": "Manage Custom Cheatsheets",
+      "subtitle": "Cheatsheets Remastered",
       "description": "View, edit, and manage your custom cheatsheets",
       "mode": "view"
     },
     {
       "name": "copy-cheatsheet",
       "title": "Copy Cheatsheet",
+      "subtitle": "Cheatsheets Remastered",
+      "subtitle": "Cheatsheets Remastered",
       "description": "Search and copy cheatsheet content to clipboard",
       "mode": "view"
     },
     {
       "name": "search-cheatsheets",
       "title": "Search Cheatsheets",
+      "subtitle": "Cheatsheets Remastered",
       "description": "Search across all cheatsheets with advanced filtering",
       "mode": "view"
     }
