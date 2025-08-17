@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Icon, LocalStorage, showToast, Toast, Clipboard } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, LocalStorage, showToast, Toast, Clipboard, Keyboard } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { ExecutionLog } from "./types";
 
@@ -113,6 +113,7 @@ export function ViewLogs() {
                   <Action
                     title="Copy Log"
                     icon={Icon.Clipboard}
+                    shortcut={Keyboard.Shortcut.Common.Copy}
                     onAction={async () => {
                       const logText = [
                         `Command: ${log.commandName}`,
@@ -131,7 +132,13 @@ export function ViewLogs() {
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
-                  <Action title="Clear Logs" icon={Icon.Trash} style={Action.Style.Destructive} onAction={clearLogs} />
+                  <Action
+                    title="Clear Log"
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    onAction={clearLogs}
+                    shortcut={Keyboard.Shortcut.Common.RemoveAll}
+                  />
                 </ActionPanel.Section>
               </ActionPanel>
             }

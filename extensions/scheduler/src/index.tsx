@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Icon } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Keyboard } from "@raycast/api";
 import { useState } from "react";
 import { ManageScheduledCommand } from "./ManageScheduledCommand";
 import { ViewLogs } from "./view-logs";
@@ -64,8 +64,9 @@ export default function ScheduledCommandsList() {
               <ActionPanel>
                 <ActionPanel.Section>
                   <Action.Push
-                    title="Edit Command"
+                    title="Edit Schedule"
                     icon={Icon.Pencil}
+                    shortcut={Keyboard.Shortcut.Common.Edit}
                     target={<ManageScheduledCommand command={command} onSave={loadCommands} />}
                   />
                   <Action
@@ -74,18 +75,19 @@ export default function ScheduledCommandsList() {
                     onAction={() => toggleCommand(command.id)}
                   />
                   <Action
-                    title="Delete Command"
+                    title="Remove Schedule"
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                     onAction={() => deleteCommand(command.id)}
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
                   <Action.Push
-                    title="Create New Command"
+                    title="Create New Schedule"
                     icon={Icon.Plus}
                     target={<ManageScheduledCommand onSave={loadCommands} />}
-                    shortcut={{ modifiers: ["cmd"], key: "n" }}
+                    shortcut={Keyboard.Shortcut.Common.New}
                   />
                   <Action.Push title="View Execution Logs" icon={Icon.Document} target={<ViewLogs />} />
                 </ActionPanel.Section>
