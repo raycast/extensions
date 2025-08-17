@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "translator",
+  "title": "AI Translator",
+  "description": "Translate text by AI",
+  "icon": "icon.png",
+  "author": "fhf1121",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Translate",
+      "description": "Translate text by AI",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "server",
+      "title": "Server",
+      "description": "The server to use for translation",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "title": "Ollama",
+          "value": "ollama"
+        }
+      ],
+      "default": "ollama"
+    },
+    {
+      "name": "model",
+      "title": "Model",
+      "description": "The model to use for translation",
+      "type": "textfield",
+      "required": true,
+      "default": "deepseek-r1:latest"
+    },
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "The API key of the provider",
+      "type": "password",
+      "required": false,
+      "default": ""
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.102.4",
+    "@raycast/utils": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^24.2.1",
+    "@types/react": "^19.1.10",
+    "eslint": "^9.33.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  }
+}
