@@ -36,24 +36,29 @@ export default function CodeConverter() {
               shortcut={{ modifiers: ["cmd"], key: "5" }}
             />
             <Action.CopyToClipboard
+              title="Copy Decimal"
+              content={converter.get("decimal")}
+              shortcut={{ modifiers: ["cmd"], key: "6" }}
+            />
+            <Action.CopyToClipboard
               title="Copy Entity"
               content={converter.get("entity")}
-              shortcut={{ modifiers: ["cmd"], key: "6" }}
+              shortcut={{ modifiers: ["cmd"], key: "7" }}
             />
             <Action.CopyToClipboard
               title="Copy Base64"
               content={converter.get("base64")}
-              shortcut={{ modifiers: ["cmd"], key: "7" }}
+              shortcut={{ modifiers: ["cmd"], key: "8" }}
             />
             <Action.CopyToClipboard
               title="Copy Encoded URL"
               content={converter.get("url")}
-              shortcut={{ modifiers: ["cmd"], key: "8" }}
+              shortcut={{ modifiers: ["cmd"], key: "9" }}
             />
             <Action.CopyToClipboard
               title="Copy Html Entity"
               content={converter.get("entity")}
-              shortcut={{ modifiers: ["cmd"], key: "9" }}
+              shortcut={{ modifiers: ["cmd"], key: "0" }}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
@@ -111,6 +116,13 @@ export default function CodeConverter() {
         value={converter.get("hex")}
         placeholder="0x0"
         onChange={(v) => converter.set("hex", v)}
+      />
+      <Form.TextField
+        id="Decimal"
+        title="Decimal"
+        value={converter.get("decimal")}
+        placeholder="0"
+        onChange={(v) => converter.set("decimal", v)}
       />
       <Form.TextField
         id="Encoded URL"
