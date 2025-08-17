@@ -1,4 +1,16 @@
-import { Action, ActionPanel, Color, Icon, List, confirmAlert, Alert, launchCommand, LaunchType } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Icon,
+  List,
+  confirmAlert,
+  Alert,
+  launchCommand,
+  LaunchType,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { formatNumber } from "./utils";
 import { UPGRADES, type GameState, UPGRADE_CATEGORIES, calculateUpgradeCost, calculateUpgradeEffect } from "./types";
@@ -204,7 +216,17 @@ export function GameView({
                 <Action
                   title="Enable Background (Menu Bar)"
                   icon={Icon.AppWindow}
-                  onAction={() => launchCommand({ name: "menu-bar", type: LaunchType.UserInitiated })}
+                  onAction={async () => {
+                    try {
+                      await launchCommand({ name: "menu-bar", type: LaunchType.UserInitiated });
+                    } catch (e) {
+                      await showToast({
+                        style: Toast.Style.Failure,
+                        title: "Failed to open Menu Bar",
+                        message: e instanceof Error ? e.message : String(e),
+                      });
+                    }
+                  }}
                 />
                 {/* Category actions moved below Click to Earn; removed Cycle Category (reserved shortcut) */}
               </ActionPanel>
@@ -356,6 +378,26 @@ export function GameView({
                           shortcut={{ modifiers: ["cmd"], key: "m" }}
                         />
                       )}
+                      <ActionPanel.Submenu title="Switch Category (⌘P)" icon={Icon.List}>
+                        <Action
+                          title="Active"
+                          icon={Icon.Star}
+                          shortcut={{ modifiers: ["cmd"], key: "1" }}
+                          onAction={() => setActiveCategory("active")}
+                        />
+                        <Action
+                          title="Idle"
+                          icon={Icon.Clock}
+                          shortcut={{ modifiers: ["cmd"], key: "2" }}
+                          onAction={() => setActiveCategory("idle")}
+                        />
+                        <Action
+                          title="Efficiency"
+                          icon={Icon.Gauge}
+                          shortcut={{ modifiers: ["cmd"], key: "3" }}
+                          onAction={() => setActiveCategory("efficiency")}
+                        />
+                      </ActionPanel.Submenu>
                       <Action title="Show Stats" onAction={onShowStats} icon={Icon.BarChart} />
                       <Action title="Prestige Upgrades" onAction={onShowPrestigeUpgrades} icon={Icon.Stars} />
                       <Action

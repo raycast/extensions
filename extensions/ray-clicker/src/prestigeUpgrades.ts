@@ -11,6 +11,8 @@ export interface PrestigeUpgrade {
   icon: string;
   unlockLevel: number;
   category: "production" | "efficiency" | "special";
+  // How to display the effect in UI accessories
+  effectDisplay?: "additive" | "multiplicative" | "none";
 }
 
 export const PRESTIGE_UPGRADES: { [key: string]: PrestigeUpgrade } = {
@@ -26,6 +28,7 @@ export const PRESTIGE_UPGRADES: { [key: string]: PrestigeUpgrade } = {
     icon: "⚡️",
     unlockLevel: 1,
     category: "production",
+    effectDisplay: "multiplicative",
   },
   quickStart: {
     id: "quickStart",
@@ -38,6 +41,7 @@ export const PRESTIGE_UPGRADES: { [key: string]: PrestigeUpgrade } = {
     icon: "🚀",
     unlockLevel: 1,
     category: "special",
+    effectDisplay: "additive",
   },
   clickApprentice: {
     id: "clickApprentice",
@@ -50,6 +54,7 @@ export const PRESTIGE_UPGRADES: { [key: string]: PrestigeUpgrade } = {
     icon: "👆",
     unlockLevel: 1,
     category: "production",
+    effectDisplay: "additive",
   },
   idleApprentice: {
     id: "idleApprentice",
@@ -62,6 +67,7 @@ export const PRESTIGE_UPGRADES: { [key: string]: PrestigeUpgrade } = {
     icon: "🤖",
     unlockLevel: 1,
     category: "production",
+    effectDisplay: "additive",
   },
   frugalShopper: {
     id: "frugalShopper",
@@ -74,6 +80,7 @@ export const PRESTIGE_UPGRADES: { [key: string]: PrestigeUpgrade } = {
     icon: "💰",
     unlockLevel: 2,
     category: "efficiency",
+    effectDisplay: "none",
   },
   fasterTick: {
     id: "fasterTick",
@@ -86,6 +93,7 @@ export const PRESTIGE_UPGRADES: { [key: string]: PrestigeUpgrade } = {
     icon: "⏱️",
     unlockLevel: 3,
     category: "special",
+    effectDisplay: "none",
   },
   // Mid-tier upgrades
   bulkBuyerPro: {
@@ -99,6 +107,7 @@ export const PRESTIGE_UPGRADES: { [key: string]: PrestigeUpgrade } = {
     icon: "🛒",
     unlockLevel: 5,
     category: "special",
+    effectDisplay: "none",
   },
   secondWind: {
     id: "secondWind",
@@ -111,6 +120,7 @@ export const PRESTIGE_UPGRADES: { [key: string]: PrestigeUpgrade } = {
     icon: "🌪️",
     unlockLevel: 8,
     category: "special",
+    effectDisplay: "none",
   },
   // High-tier upgrades
   infinityEngine: {
@@ -124,6 +134,7 @@ export const PRESTIGE_UPGRADES: { [key: string]: PrestigeUpgrade } = {
     icon: "♾️",
     unlockLevel: 15,
     category: "production",
+    effectDisplay: "multiplicative",
   },
   // Capstone upgrade
   ultimateAscension: {
@@ -137,6 +148,7 @@ export const PRESTIGE_UPGRADES: { [key: string]: PrestigeUpgrade } = {
     icon: "🌟",
     unlockLevel: 25,
     category: "special",
+    effectDisplay: "none",
   },
 };
 
@@ -156,7 +168,8 @@ export function getAvailablePrestigeUpgrades(_prestigeLevel: number): PrestigeUp
 
 // Helper function to calculate prestige upgrade cost
 export function calculatePrestigeUpgradeCost(upgrade: PrestigeUpgrade, level: number): number {
-  return Math.ceil(upgrade.cost * Math.pow(upgrade.costMultiplier, level));
+  const m = !isFinite(upgrade.costMultiplier) || upgrade.costMultiplier <= 0 ? 1 : upgrade.costMultiplier;
+  return Math.ceil(upgrade.cost * Math.pow(m, level));
 }
 
 // Helper function to calculate prestige upgrade effect

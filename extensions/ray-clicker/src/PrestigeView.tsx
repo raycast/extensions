@@ -8,6 +8,7 @@ import {
   getAvailablePrestigeUpgrades,
   calculatePrestigeUpgradeEffect,
 } from "./prestigeUpgrades";
+import { PRESTIGE_PP_DIVISOR } from "./constants";
 
 type PrestigeViewProps = {
   gameState: GameState;
@@ -21,7 +22,7 @@ export function PrestigeView({ gameState, onPurchasePrestigeUpgrade }: PrestigeV
   // Get current prestige level and points
   const { level: prestigeLevel, prestigePoints } = gameState.prestige;
   const estimatedPrestigePoints = useMemo(() => {
-    return Math.floor(Math.sqrt((gameState.prestige.totalEarned || 0) / 800_000));
+    return Math.floor(Math.sqrt((gameState.prestige.totalEarned || 0) / PRESTIGE_PP_DIVISOR));
   }, [gameState.prestige.totalEarned]);
 
   // Get all upgrades and split into unlocked/locked per category
@@ -175,29 +176,35 @@ export function PrestigeView({ gameState, onPurchasePrestigeUpgrade }: PrestigeV
                   const canAfford = prestigePoints >= cost;
                   const effect = calculatePrestigeUpgradeEffect(upgrade, nextLevel);
 
+                  const effectLabel =
+                    upgrade.effectDisplay === "additive"
+                      ? `+${formatNumber(effect)}`
+                      : upgrade.effectDisplay === "multiplicative"
+                        ? `x${formatNumber(effect)}`
+                        : undefined;
+
+                  const accessories: List.Item.Accessory[] = [
+                    {
+                      text: maxed
+                        ? `MAX (${currentLevel}/${upgrade.maxLevel})`
+                        : `Lvl ${currentLevel} → ${nextLevel} | ${formatNumber(cost)} PP`,
+                      icon: maxed
+                        ? { source: Icon.Checkmark, tintColor: Color.Green }
+                        : canAfford
+                          ? { source: Icon.Star, tintColor: Color.Yellow }
+                          : { source: Icon.XmarkCircle, tintColor: Color.Red },
+                    },
+                  ];
+                  if (effectLabel) {
+                    accessories.push({ text: effectLabel, tooltip: "Effect at next level" });
+                  }
+
                   return (
                     <List.Item
                       key={upgrade.id}
                       title={`${upgrade.icon} ${upgrade.name}`}
                       subtitle={upgrade.description}
-                      accessories={[
-                        {
-                          text: maxed
-                            ? `MAX (${currentLevel}/${upgrade.maxLevel})`
-                            : `Lvl ${currentLevel} → ${nextLevel} | ${formatNumber(cost)} PP`,
-                          icon: maxed
-                            ? { source: Icon.Checkmark, tintColor: Color.Green }
-                            : canAfford
-                              ? { source: Icon.Star, tintColor: Color.Yellow }
-                              : { source: Icon.XmarkCircle, tintColor: Color.Red },
-                        },
-                        {
-                          text: upgrade.effect.toString().includes("return")
-                            ? `+${formatNumber(effect)}`
-                            : `x${formatNumber(effect)}`,
-                          tooltip: "Effect at next level",
-                        },
-                      ]}
+                      accessories={accessories}
                       icon={getCategoryIcon(upgrade.category)}
                       actions={
                         <ActionPanel>

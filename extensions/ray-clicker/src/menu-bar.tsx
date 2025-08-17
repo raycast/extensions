@@ -1,4 +1,4 @@
-import { MenuBarExtra, Icon, launchCommand, LaunchType, LocalStorage } from "@raycast/api";
+import { MenuBarExtra, Icon, launchCommand, LaunchType, LocalStorage, showToast, Toast } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import { loadGameState, saveGameState } from "./storage";
 import type { GameState } from "./types";
@@ -66,7 +66,17 @@ export default function MenuBar() {
       <MenuBarExtra.Item
         title="Open Ray Clicker"
         icon={Icon.AppWindow}
-        onAction={() => launchCommand({ name: "index", type: LaunchType.UserInitiated })}
+        onAction={async () => {
+          try {
+            await launchCommand({ name: "index", type: LaunchType.UserInitiated });
+          } catch (e) {
+            await showToast({
+              style: Toast.Style.Failure,
+              title: "Failed to open Ray Clicker",
+              message: e instanceof Error ? e.message : String(e),
+            });
+          }
+        }}
       />
       <MenuBarExtra.Item title={`Points per Second: ${pps}`} icon={Icon.Gauge} />
       <MenuBarExtra.Item
