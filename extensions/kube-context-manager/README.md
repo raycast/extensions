@@ -8,7 +8,7 @@
 
 ### 🎯 **4 Powerful Commands**
 
-#### 1. 📋 **List Contexts**
+#### 1. 📋 **Kube Contexts**
 - **Fuzzy search** across name, cluster, user, and namespace
 - **Relevance scoring** with match highlighting
 - **Rich metadata display** - hostname, port, auth method, protocol
@@ -70,7 +70,7 @@
 
 ### **Quick Start**
 1. Open Raycast (`Cmd + Space`)
-2. Type "List Contexts" to see all available contexts
+2. Type "Kube Contexts" to see all available contexts
 3. Search for your target context
 4. Press `Enter` to switch instantly
 
@@ -78,7 +78,7 @@
 
 | Command | Description |
 |---------|-------------|
-| **List Contexts** | Search and switch contexts with advanced filtering |
+| **Kube Contexts** | Search and switch contexts with advanced filtering |
 | **Current Context** | View current context details and quick actions |
 | **Switch Context with Namespace** | Two-step context + namespace selection |
 | **Manage Contexts** | Full context lifecycle management |
@@ -202,7 +202,7 @@ npm run build
 npm run dev
 
 # Test all 4 commands in Raycast:
-# - List Contexts
+# - Kube Contexts
 # - Current Context  
 # - Switch Context with Namespace
 # - Manage Contexts

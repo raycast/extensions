@@ -99,7 +99,7 @@ src/
 ## Production Commands Available
 
 ### 4 Streamlined Commands:
-1. **"List Contexts"** - ⚡ Enhanced context listing with:
+1. **"Kube Contexts"** - ⚡ Enhanced context listing with:
    - Fuzzy search across name, cluster, user, namespace
    - Relevance scoring and match highlighting  
    - Rich metadata display (hostname, port, auth method, protocol)

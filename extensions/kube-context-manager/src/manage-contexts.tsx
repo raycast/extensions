@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Icon, Form, useNavigation } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Form, useNavigation, Keyboard } from "@raycast/api";
 import { useState, useMemo } from "react";
 import { useKubeconfig } from "./hooks/useKubeconfig";
 import { createContext, deleteContext, modifyContext, getAllClusters, getAllUsers } from "./utils/kubeconfig-direct";
@@ -42,7 +42,7 @@ export default function ManageContexts() {
             title="Refresh"
             icon={Icon.ArrowClockwise}
             onAction={refresh}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
           />
         </ActionPanel>
       }
@@ -83,6 +83,7 @@ export default function ManageContexts() {
               <Action.Push
                 title={`Modify ${context.name}`}
                 icon={Icon.Pencil}
+                shortcut={Keyboard.Shortcut.Common.Edit}
                 target={<ModifyContextForm context={context} onModified={refresh} />}
               />
               {!context.current && (
@@ -90,6 +91,7 @@ export default function ManageContexts() {
                   title={`Delete ${context.name}`}
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
                   onAction={async () => {
                     try {
                       await deleteContext(context.name);
@@ -110,7 +112,7 @@ export default function ManageContexts() {
                 title="Refresh"
                 icon={Icon.ArrowClockwise}
                 onAction={refresh}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
               />
             </ActionPanel>
           }

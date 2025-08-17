@@ -5,10 +5,9 @@ interface NamespaceSelectorProps {
   namespaces: string[];
   currentNamespace?: string;
   onSelect: (namespace: string) => void;
-  onCancel: () => void;
 }
 
-export function NamespaceSelector({ namespaces, currentNamespace, onSelect, onCancel }: NamespaceSelectorProps) {
+export function NamespaceSelector({ namespaces, currentNamespace, onSelect }: NamespaceSelectorProps) {
   const [searchText, setSearchText] = useState("");
 
   const filteredNamespaces = namespaces.filter((namespace) =>
@@ -36,7 +35,6 @@ export function NamespaceSelector({ namespaces, currentNamespace, onSelect, onCa
           actions={
             <ActionPanel>
               <Action title={`Select ${namespace}`} onAction={() => onSelect(namespace)} />
-              <Action title="Cancel" onAction={onCancel} shortcut={{ modifiers: ["cmd"], key: "t" }} />
             </ActionPanel>
           }
         />
@@ -48,7 +46,7 @@ export function NamespaceSelector({ namespaces, currentNamespace, onSelect, onCa
           accessories={[{ text: "⚠️" }]}
           actions={
             <ActionPanel>
-              <Action title="Cancel" onAction={onCancel} shortcut={{ modifiers: ["cmd"], key: "t" }} />
+              <Action title="No Action Available" onAction={() => {}} />
             </ActionPanel>
           }
         />

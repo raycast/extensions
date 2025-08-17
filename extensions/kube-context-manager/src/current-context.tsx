@@ -1,4 +1,4 @@
-import { Detail, ActionPanel, Action, popToRoot } from "@raycast/api";
+import { Detail, ActionPanel, Action, popToRoot, Keyboard } from "@raycast/api";
 import { useKubeconfig } from "./hooks/useKubeconfig";
 import { showSuccessToast, showErrorToast } from "./utils/errors";
 
@@ -39,7 +39,7 @@ ${error.message}
 ## Available Contexts
 ${contexts.length > 0 ? contexts.map((ctx) => `- ${ctx.name} (${ctx.cluster})`).join("\n") : "No contexts found"}
 
-*Use the "List Contexts" command to switch between contexts*
+*Use the "Kube Contexts" command to switch between contexts*
       `;
     }
 
@@ -105,7 +105,7 @@ Use the actions below to manage your contexts quickly.
       markdown={generateMarkdown()}
       actions={
         <ActionPanel>
-          <Action title="Refresh" onAction={refresh} shortcut={{ modifiers: ["cmd"], key: "r" }} />
+          <Action title="Refresh" onAction={refresh} shortcut={Keyboard.Shortcut.Common.Refresh} />
           {otherContexts.map((ctx, index) => {
             // Map index to valid KeyEquivalent values
             const keyMap = ["1", "2", "3", "4", "5"] as const;

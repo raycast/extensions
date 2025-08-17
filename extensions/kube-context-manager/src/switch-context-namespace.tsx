@@ -15,7 +15,6 @@ export default function SwitchContextWithNamespace() {
         namespaces={namespaces}
         currentNamespace={context?.namespace}
         onSelect={(namespace) => handleNamespaceSelect(contextName, namespace)}
-        onCancel={() => {}}
       />
     );
   };

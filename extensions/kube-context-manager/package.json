@@ -22,7 +22,7 @@
   "commands": [
     {
       "name": "list-contexts",
-      "title": "List Contexts",
+      "title": "Kube Contexts",
       "description": "🔍 Search and switch Kubernetes contexts with advanced filtering and rich metadata",
       "mode": "view"
     },
