@@ -126,7 +126,7 @@ export default function FindModels() {
         title: "Copied to Clipboard",
         message: `Model ID: ${modelId}`,
       });
-    } catch (error) {
+    } catch {
       showToast({
         style: Toast.Style.Failure,
         title: "Copy Failed",
@@ -165,6 +165,8 @@ export default function FindModels() {
                 onAction={() => copyToClipboard(model.name)}
               />
               <Action.OpenInBrowser
+                // Preserve brand capitalization; ignore title-case rule for brand names
+                // eslint-disable-next-line @raycast/prefer-title-case
                 title="View on OpenRouter"
                 url={`https://openrouter.ai/models/${model.id}`}
               />

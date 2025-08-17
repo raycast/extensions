@@ -1,54 +1,14 @@
-# Dependencies
-node_modules/
-.pnp
-.pnp.js
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# Testing
-coverage/
+# dependencies
+/node_modules
 
-# Production
-build/
-dist/
-
-# Misc
-.DS_Store
-*.pem
-
-# Debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# Local env files
-.env*.local
-
-# Vercel
-.vercel
-
-# TypeScript
-*.tsbuildinfo
-next-env.d.ts
-
-# Raycast
-.raycast/
+# Raycast specific files
 raycast-env.d.ts
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+compiled_raycast_rust
 
-# Claude
-CLAUDE.md
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS
-Thumbs.db
-
-# Optional npm cache directory
-.npm
-
-# Optional eslint cache
-.eslintcache
+# misc
+.DS_Store
