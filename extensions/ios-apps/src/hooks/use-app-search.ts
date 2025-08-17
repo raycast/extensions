@@ -17,7 +17,6 @@ interface UseAppSearchResult {
  * Hook for searching apps with debounced input
  * @param initialSearchText Initial search text
  * @param debounceMs Debounce time in milliseconds
- * @param limit Maximum number of results to return
  * @returns Object with search results and state
  */
 export function useAppSearch(initialSearchText = "", debounceMs = 500): UseAppSearchResult {
@@ -78,12 +77,7 @@ export function useAppSearch(initialSearchText = "", debounceMs = 500): UseAppSe
   // Create a debounced version of the search function that doesn't change on re-renders
   const debouncedSearch = useCallback(
     debounce((query: string) => {
-      // Wrap in a try/catch to handle errors locally
-      try {
-        performSearch(query);
-      } catch (err) {
-        handleSearchError(err);
-      }
+      performSearch(query);
     }, debounceMs),
     [], // Empty dependency array to ensure stability
   );

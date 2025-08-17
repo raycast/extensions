@@ -119,7 +119,7 @@ export function useAppDownload(authNavigation?: AuthNavigationHelpers) {
               });
             } else if (error instanceof Needs2FAError) {
               logger.log(`[useAppDownload] Pushing 2FA form for ${name} (${bundleId})`);
-              authNavigation.push2FAForm?.("session-token", async () => {
+              authNavigation.push2FAForm?.(async () => {
                 try {
                   logger.log(`[useAppDownload] 2FA callback invoked. Re-checking auth...`);
                   await ensureAuthenticated();
@@ -234,6 +234,7 @@ export function useAppDownload(authNavigation?: AuthNavigationHelpers) {
                   downloadParams.version,
                   downloadParams.price,
                   showHudMessages,
+                  operationId,
                 );
               } catch (authError) {
                 // If auth still fails, let it propagate
@@ -242,7 +243,7 @@ export function useAppDownload(authNavigation?: AuthNavigationHelpers) {
             });
           } else if (error instanceof Needs2FAError) {
             logger.log(`[useAppDownload] Pushing 2FA form (catch) for ${name} (${bundleId})`);
-            authNavigation.push2FAForm?.("session-token", async () => {
+            authNavigation.push2FAForm?.(async () => {
               // After successful 2FA, resume download
               try {
                 logger.log(`[useAppDownload] 2FA callback (catch) invoked. Re-checking auth...`);
@@ -255,6 +256,7 @@ export function useAppDownload(authNavigation?: AuthNavigationHelpers) {
                   downloadParams.version,
                   downloadParams.price,
                   showHudMessages,
+                  operationId,
                 );
               } catch (authError) {
                 // If auth still fails, let it propagate

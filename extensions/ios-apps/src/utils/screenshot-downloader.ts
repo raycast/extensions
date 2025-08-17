@@ -18,7 +18,6 @@ const writeFileAsync = promisify(fs.writeFile);
 // Configuration constants
 const RATE_LIMIT_DELAY_MS = 100;
 const DEFAULT_DOWNLOAD_TIMEOUT_SECONDS = 90;
-// const MIN_DOWNLOAD_TIMEOUT_SECONDS = 30; // Unused after config module integration
 const DEFAULT_MAX_CONCURRENT_DOWNLOADS = 5;
 const MIN_CONCURRENT_DOWNLOADS = 1;
 const MAX_CONCURRENT_DOWNLOADS = 10;

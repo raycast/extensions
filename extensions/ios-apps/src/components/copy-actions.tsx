@@ -64,7 +64,7 @@ export function CopyActions({ app }: CopyActionsProps) {
         <Action
           title="Copy Developer URL"
           icon={Icon.Link}
-          onAction={() => copyToClipboard(app.artistViewUrl || "", "Developer URL")}
+          onAction={() => copyToClipboard(app.artistViewUrl!, "Developer URL")}
         />
       )}
     </ActionPanel.Section>

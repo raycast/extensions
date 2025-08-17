@@ -4,12 +4,13 @@ This document describes the configuration module (`src/config.ts`) that provides
 
 ## Overview
 
-The configuration module exposes four main settings:
+The configuration module exposes five main settings:
 
 - **maxDownloadTimeout** (ms) - Timeout for individual downloads
 - **maxStallTimeout** (ms) - Timeout when no progress is made  
 - **tempCleanupOnExit** (bool) - Whether to clean up temporary files on exit
 - **integrityVerification** (enum) - Level of file integrity verification (`basic` | `checksum` | `off`)
+- **allowedScreenshotDomains** (string[]) - Whitelist of domains allowed for screenshot downloads (defaults include Apple CDN hosts; additional domains can be appended via preferences)
 
 ## Default Values
 

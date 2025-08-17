@@ -1,56 +1,29 @@
 /**
- * Format price to display "Free" instead of "0" with proper currency symbol
+ * Format price using Intl.NumberFormat with currency support.
+ * Returns "Free" for zero values and gracefully falls back on invalid input.
  */
 export function formatPrice(price: string, currency?: string): string {
-  if (price === "0") return "Free";
+  const amount = Number(price);
 
-  // Get the appropriate currency symbol based on the currency code
-  let symbol = "$"; // Default to USD
-  if (currency) {
-    switch (currency) {
-      case "USD":
-        symbol = "$";
-        break;
-      case "EUR":
-        symbol = "€";
-        break;
-      case "GBP":
-        symbol = "£";
-        break;
-      case "JPY":
-        symbol = "¥";
-        break;
-      case "AUD":
-        symbol = "A$";
-        break;
-      case "CAD":
-        symbol = "C$";
-        break;
-      case "CNY":
-        symbol = "¥";
-        break;
-      case "INR":
-        symbol = "₹";
-        break;
-      case "RUB":
-        symbol = "₽";
-        break;
-      case "KRW":
-        symbol = "₩";
-        break;
-      case "BRL":
-        symbol = "R$";
-        break;
-      case "MXN":
-        symbol = "Mex$";
-        break;
-      // Add more currency codes as needed
-      default:
-        symbol = currency; // Use the currency code if no symbol is defined
+  // Treat any numeric zero (e.g., "0", "0.00") as Free
+  if (Number.isFinite(amount) && amount === 0) return "Free";
+
+  // If it's a valid number, use localized currency formatting
+  if (Number.isFinite(amount)) {
+    try {
+      return new Intl.NumberFormat(undefined, {
+        style: "currency",
+        currency: currency || "USD",
+        currencyDisplay: "symbol",
+      }).format(amount);
+    } catch {
+      // Fallback for invalid/unknown currency codes
+      return currency ? `${currency} ${amount}` : `$${amount}`;
     }
   }
 
-  return `${symbol}${price}`;
+  // Non-numeric price fallback (defensive)
+  return currency ? `${currency} ${price}` : `$${price}`;
 }
 
 /**

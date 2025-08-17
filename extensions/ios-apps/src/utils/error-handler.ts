@@ -190,7 +190,7 @@ export async function handleAuthError(
   showPreferencesAction: boolean = true,
   redirectToAuthForm?: (initialError?: string) => void,
   pushLoginForm?: (onSuccess?: () => void) => void,
-  push2FAForm?: (sessionToken: string, onSuccess?: () => void) => void,
+  push2FAForm?: (onSuccess?: () => void) => void,
   onAuthSuccess?: () => void,
 ): Promise<void> {
   const errorMessage = error instanceof Error ? error.message : String(error);
@@ -245,7 +245,7 @@ export async function handleAuthError(
       title: "2FA Required",
       message: "Redirecting to 2FA form...",
     });
-    push2FAForm("session-token-placeholder", async () => {
+    push2FAForm(async () => {
       try {
         await loginToAppleId();
         await showToast({ style: Toast.Style.Success, title: "2FA successful" });
