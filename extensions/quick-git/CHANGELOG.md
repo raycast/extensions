@@ -6,6 +6,7 @@ Updated how repos are selected so that it is quicker to change between them.
 
 - Added a new extension preference for selecting a directory to look for repos
 - Updated the repo selection screen
+- Updated git status parsing to be a bit more robust, and now displays how much files have changes
 
 ## [Diffs and deletes] - 2025-06-16
 
