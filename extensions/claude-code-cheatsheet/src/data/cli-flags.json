@@ -236,7 +236,7 @@
     {
       "id": "settings",
       "name": "--settings",
-      "description": "Load additional settings from a JSON file or JSON string to load additional settings from.",
+      "description": "Load additional settings from a JSON file or JSON string.",
       "usage": "claude --settings <file-or-json>",
       "example": "claude --settings ./my-settings.json",
       "isNew": true,
