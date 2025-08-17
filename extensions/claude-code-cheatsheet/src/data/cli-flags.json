@@ -22,7 +22,7 @@
       "tags": ["format", "json", "output"]
     },
     {
-      "id": "verbose",
+      "id": "verbose-flag",
       "name": "--verbose",
       "description": "Enables verbose logging, showing detailed turn-by-turn output, which is useful for debugging conversations.",
       "usage": "claude --verbose",
@@ -31,7 +31,7 @@
       "tags": ["debug", "detailed", "verbose"]
     },
     {
-      "id": "debug",
+      "id": "debug-flag",
       "name": "--debug, -d",
       "description": "Enables debug mode, providing extensive logging for troubleshooting and development.",
       "usage": "claude --debug",
@@ -124,7 +124,7 @@
       "tags": ["absolute", "additional", "directory", "multiple", "working"]
     },
     {
-      "id": "model",
+      "id": "model-flag",
       "name": "--model",
       "description": "Model for the current session. Provide an alias for the latest model (e.g. 'sonnet' or 'opus') or a model's full name (e.g. 'claude-sonnet-4-20250514').",
       "usage": "claude --model <model>",
@@ -133,7 +133,7 @@
       "tags": ["AI", "model", "selection"]
     },
     {
-      "id": "version",
+      "id": "version-flag",
       "name": "--version, -v",
       "description": "Outputs the current version number of your installed Claude Code CLI.",
       "usage": "claude --version",
@@ -142,7 +142,7 @@
       "tags": ["info", "version"]
     },
     {
-      "id": "help",
+      "id": "help-flag",
       "name": "--help, -h",
       "description": "Displays comprehensive help information for a command or the CLI in general.",
       "usage": "claude --help",
@@ -234,7 +234,7 @@
       "tags": ["id", "session", "uuid"]
     },
     {
-      "id": "settings",
+      "id": "settings-flag",
       "name": "--settings",
       "description": "Load additional settings from a JSON file or JSON string.",
       "usage": "claude --settings <file-or-json>",
