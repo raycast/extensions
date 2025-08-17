@@ -17,11 +17,13 @@
 
 - Set new mail with "Set mail" command
 
-<img src="metadata/set-mail.png"/>
+<img src="metadata/1.png"
+alt="Temp Mail Raycast Set New Email Command"
+/>
 
 - Read inbox with "Read Inbox" command
 
- <img src="metadata/read-inbox.png" alt="Aleph Tools" >
+ <img src="metadata/2.png" alt="Temp Mail Raycast Read Inbox Command" >
 
 <p align="center" >
 <img src="https://halitsever-api.vercel.app/api/installation"/>
