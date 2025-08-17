@@ -39,7 +39,7 @@ export default function GoToListView({ object }: GoToListViewProps) {
 
       try {
         const { data: listsResponse } = await axios.get(
-          `${config.endpoints.api}/workspaces/${config.slug}/objects/${object}/lists`,
+          `${config.endpoints.api}/workspaces/${config.slug}/objects/${object}/lists?sortOrder[column]=rank&sortOrder[dir]=ASC&filter[type]=dynamic`,
           getRequestConfig(),
         );
 
@@ -82,7 +82,7 @@ export default function GoToListView({ object }: GoToListViewProps) {
             <ActionPanel>
               <Action.OpenInBrowser
                 title="Open List in Browser"
-                url={`${config.endpoints.web}/workspaces/${config.slug}/objects/${object}/lists/${item.attributes._id}/views/${item.attributes.default_view_id}`}
+                url={`${config.endpoints.web}/workspaces/${config.slug}/objects/${object}/lists/${item.attributes._id}`}
               />
             </ActionPanel>
           }

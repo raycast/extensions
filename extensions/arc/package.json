@@ -39,11 +39,14 @@
     "geb",
     "ridemountainpig",
     "nebbles",
-    "alanxmay"
+    "alanxmay",
+    "gdsmith",
+    "tama_harrison"
   ],
   "pastContributors": [
     "pomdtr",
-    "danulqua"
+    "danulqua",
+    "josephlou"
   ],
   "commands": [
     {
@@ -130,6 +133,10 @@
             {
               "title": "Kagi",
               "value": "kagi"
+            },
+            {
+              "title": "UnDuck",
+              "value": "unduck"
             }
           ]
         }
@@ -210,6 +217,10 @@
             {
               "title": "Kagi",
               "value": "kagi"
+            },
+            {
+              "title": "UnDuck",
+              "value": "unduck"
             }
           ]
         }
@@ -304,6 +315,10 @@
             {
               "title": "Kagi",
               "value": "kagi"
+            },
+            {
+              "title": "UnDuck",
+              "value": "unduck"
             }
           ]
         },
@@ -322,6 +337,75 @@
             {
               "title": "History → Tabs → Suggestions",
               "value": "historyTabsSuggestions"
+            }
+          ]
+        },
+        {
+          "name": "favoritesTabsOrder",
+          "title": "Favorites Tabs Order",
+          "label": "Favorites Tabs Order",
+          "description": "Order of favorites tabs in search results",
+          "type": "dropdown",
+          "required": false,
+          "default": "1",
+          "data": [
+            {
+              "title": "1",
+              "value": "1"
+            },
+            {
+              "title": "2",
+              "value": "2"
+            },
+            {
+              "title": "3",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "name": "pinnedTabsOrder",
+          "title": "Pinned Tabs Order",
+          "label": "Pinned Tabs Order",
+          "description": "Order of pinned tabs in search results",
+          "type": "dropdown",
+          "required": false,
+          "default": "2",
+          "data": [
+            {
+              "title": "1",
+              "value": "1"
+            },
+            {
+              "title": "2",
+              "value": "2"
+            },
+            {
+              "title": "3",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "name": "unpinnedTabsOrder",
+          "title": "Unpinned Tabs Order",
+          "label": "Unpinned Tabs Order",
+          "description": "Order of unpinned tabs in search results",
+          "type": "dropdown",
+          "required": false,
+          "default": "3",
+          "data": [
+            {
+              "title": "1",
+              "value": "1"
+            },
+            {
+              "title": "2",
+              "value": "2"
+            },
+            {
+              "title": "3",
+              "value": "3"
             }
           ]
         },
@@ -456,7 +540,7 @@
     }
   ],
   "ai": {
-    "instructions": "Arc is a web browser. It contains spaces, which group tabs together. Most likely, the user assumes asking questinos about the active space if they don't specify otherwise",
+    "instructions": "Arc is a web browser. It contains spaces, which group tabs together. Most likely, the user assumes asking questions about the active space if they don't specify otherwise",
     "evals": [
       {
         "input": "@arc open a new window",
@@ -1129,5 +1213,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

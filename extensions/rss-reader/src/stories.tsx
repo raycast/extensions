@@ -129,6 +129,7 @@ async function getStories(feeds: Feed[]) {
       });
       feedLastViewed[feedItem.url] = stories.at(0)?.date || lastViewed;
       storyItems.push(...stories);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,

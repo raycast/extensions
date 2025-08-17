@@ -123,6 +123,16 @@
       "name": "get-deployments",
       "title": "Get Deployments",
       "description": "Get all the Netlify deployments for a team"
+    },
+    {
+      "name": "get-environment-variables",
+      "title": "Get Environment Variables",
+      "description": "Get all the environment variables for a Netlify site"
+    },
+    {
+      "name": "get-dns-records",
+      "title": "Get DNS Records",
+      "description": "Get all the DNS records for a Netlify site"
     }
   ],
   "ai": {
@@ -288,12 +298,114 @@
             }
           ]
         }
+      },
+      {
+        "input": "@netlify Show me KEY env in raycast-frontend",
+        "mocks": {
+          "get-teams": [
+            {
+              "name": "Raycast's Team",
+              "slug": "raycast"
+            }
+          ],
+          "get-sites": [
+            {
+              "id": "xxxxxx-xxxx-xxxx-xxxx-xxxxxxx",
+              "name": "raycast-frontend"
+            }
+          ],
+          "get-environment-variables": [
+            {
+              "is_secret" : false,
+              "key" : "KEY",
+              "values" : [
+                {
+                  "context" : "all",
+                  "id" : "xxxxxx-xxxx-xxxx-xxxx-xxxxxx",
+                  "role" : "",
+                  "value" : "VALUE"
+                }
+              ]
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-teams"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-sites",
+              "arguments": {
+                "query": "raycast-frontend",
+                "teamSlug": "raycast"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-environment-variables",
+              "arguments": {
+                "siteId": "xxxxxx-xxxx-xxxx-xxxx-xxxxxxx"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@netlify Show me all records associated with raycast.com",
+        "mocks": {
+          "get-teams": [
+            {
+              "name": "Raycast's Team",
+              "slug": "raycast"
+            }
+          ],
+          "get-domains": [
+            {
+              "id": "xxxxxx-xxxx-xxxx-xxxx-xxxxxxx",
+              "name": "raycast.com"
+            }
+          ],
+          "get-dns-records": [
+            {
+              "type": "A",
+              "ttl": 3600,
+              "value": "xx.xxx.xxx.xx"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-teams"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-domains",
+              "arguments": {
+                "teamSlug": "raycast"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-dns-records",
+              "arguments": {
+                "zoneId": "xxxxxx"
+              }
+            }
+          }
+        ]
       }
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.90.0",
-    "@raycast/utils": "^1.18.1",
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.19.1",
     "@web3-storage/parse-link-header": "^3.1.0",
     "axios": "^0.24.0",
     "parse-git-config": "^3.0.0",

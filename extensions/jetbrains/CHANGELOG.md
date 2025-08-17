@@ -1,5 +1,9 @@
 # Jetbrains Changelog
 
+## [Bugfix] - 2025-04-14
+- Fix sorting projects which doesn't have a opened value
+- Fix crashing when `projects` field in `settings.json` is not present
+
 ## [Bugfix] - 2024-12-16
 
 - Fix crashing search recent projects command

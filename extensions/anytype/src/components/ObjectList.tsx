@@ -1,174 +1,360 @@
-import { Icon, List, Image, showToast, Toast, getPreferenceValues } from "@raycast/api";
-import { useState, useEffect } from "react";
-import { format } from "date-fns";
-import ObjectListItem from "./ObjectListItem";
-import { useMembers } from "../hooks/useMembers";
-import { useSearch } from "../hooks/useSearch";
-import { useTypes } from "../hooks/useTypes";
-import { getDateLabel, pluralize } from "../helpers/strings";
-import EmptyView from "./EmptyView";
+import { Icon, List } from "@raycast/api";
+import { MutatePromise, showFailureToast } from "@raycast/utils";
+import { useEffect, useState } from "react";
+import { EmptyViewObject, EmptyViewProperty, EmptyViewType, ObjectListItem } from ".";
+import {
+  useMembers,
+  usePinnedMembers,
+  usePinnedObjects,
+  usePinnedProperties,
+  usePinnedTypes,
+  useProperties,
+  useSearch,
+  useTypes,
+} from "../hooks";
+import { Member, MemberStatus, Property, Space, SpaceObject, Type } from "../models";
+import { defaultTintColor, formatMemberRole, localStorageKeys, pluralize, processObject } from "../utils";
 
 type ObjectListProps = {
-  spaceId: string;
+  space: Space;
 };
 
-export default function ObjectList({ spaceId }: ObjectListProps) {
-  const [currentView, setCurrentView] = useState<"objects" | "types" | "members">("objects");
+export enum ViewType {
+  // browse
+  objects = "Object", // is "all" view in global search
+  types = "Type",
+  properties = "Property",
+  tags = "Tag",
+  members = "Member",
+  templates = "Template",
+
+  // search
+  pages = "Page",
+  tasks = "Task",
+  lists = "List",
+  bookmarks = "Bookmark",
+}
+
+export function ObjectList({ space }: ObjectListProps) {
+  const [currentView, setCurrentView] = useState<ViewType>(ViewType.objects);
   const [searchText, setSearchText] = useState("");
 
   const { objects, objectsError, isLoadingObjects, mutateObjects, objectsPagination } = useSearch(
-    spaceId,
+    space.id,
     searchText,
     [],
   );
-  const { types, typesError, isLoadingTypes, mutateTypes, typesPagination } = useTypes(spaceId);
-  const { members, membersError, isLoadingMembers, mutateMembers, membersPagination } = useMembers(spaceId);
+  const { types, typesError, isLoadingTypes, mutateTypes, typesPagination } = useTypes(space.id);
+  const { properties, propertiesError, isLoadingProperties, mutateProperties, propertiesPagination } = useProperties(
+    space.id,
+  );
+  const { members, membersError, isLoadingMembers, mutateMembers, membersPagination } = useMembers(space.id);
+  const { pinnedObjects, pinnedObjectsError, isLoadingPinnedObjects, mutatePinnedObjects } = usePinnedObjects(
+    localStorageKeys.suffixForViewsPerSpace(space.id, ViewType.objects),
+  );
+  const { pinnedTypes, pinnedTypesError, isLoadingPinnedTypes, mutatePinnedTypes } = usePinnedTypes(
+    localStorageKeys.suffixForViewsPerSpace(space.id, ViewType.types),
+  );
+  const { pinnedProperties, pinnedPropertiesError, isLoadingPinnedProperties, mutatePinnedProperties } =
+    usePinnedProperties(localStorageKeys.suffixForViewsPerSpace(space.id, ViewType.properties));
+  const { pinnedMembers, pinnedMembersError, isLoadingPinnedMembers, mutatePinnedMembers } = usePinnedMembers(
+    localStorageKeys.suffixForViewsPerSpace(space.id, ViewType.members),
+  );
   const [pagination, setPagination] = useState(objectsPagination);
 
   useEffect(() => {
-    const newPagination = {
-      objects: objectsPagination,
-      types: typesPagination,
-      members: membersPagination,
-    }[currentView];
-    setPagination(newPagination);
-  }, [currentView, objects, types, members]);
+    const paginationMap: Partial<Record<ViewType, typeof objectsPagination>> = {
+      [ViewType.objects]: objectsPagination,
+      [ViewType.types]: typesPagination,
+      [ViewType.properties]: propertiesPagination,
+      [ViewType.members]: membersPagination,
+    };
+    setPagination(paginationMap[currentView]);
+  }, [currentView, objects, types, properties, members]);
 
   useEffect(() => {
-    if (objectsError) {
-      showToast(Toast.Style.Failure, "Failed to fetch objects", objectsError.message);
+    if (objectsError || typesError || propertiesError || membersError) {
+      showFailureToast(objectsError || typesError || propertiesError || membersError, {
+        title: "Failed to fetch latest data",
+      });
     }
-  }, [objectsError]);
+  }, [objectsError, typesError, propertiesError, membersError]);
 
   useEffect(() => {
-    if (typesError) {
-      showToast(Toast.Style.Failure, "Failed to fetch types", typesError.message);
+    if (pinnedObjectsError || pinnedTypesError || pinnedPropertiesError || pinnedMembersError) {
+      showFailureToast(pinnedObjectsError || pinnedTypesError || pinnedPropertiesError || pinnedMembersError, {
+        title: "Failed to fetch pinned data",
+      });
     }
-  }, [typesError]);
-
-  useEffect(() => {
-    if (membersError) {
-      showToast(Toast.Style.Failure, "Failed to fetch members", membersError.message);
-    }
-  }, [membersError]);
+  }, [pinnedObjectsError, pinnedTypesError, pinnedPropertiesError, pinnedMembersError]);
 
   const filterItems = <T extends { name: string }>(items: T[], searchText: string): T[] => {
     return items?.filter((item) => item.name.toLowerCase().includes(searchText.toLowerCase()));
   };
 
-  const formatRole = (role: string) => {
-    return role.replace("Reader", "Viewer").replace("Writer", "Editor");
+  const processType = (type: Type, isPinned: boolean) => {
+    return {
+      spaceId: space.id,
+      id: type.id,
+      icon: type.icon,
+      title: type.name,
+      subtitle: { value: "", tooltip: "" },
+      accessories: [...(isPinned ? [{ icon: Icon.Star, tooltip: "Pinned" }] : [])],
+      mutate: [mutateTypes, mutatePinnedTypes as MutatePromise<SpaceObject[] | Type[] | Property[] | Member[]>],
+      object: type,
+      layout: type.layout,
+      isPinned,
+    };
   };
-  const dateToSortAfter = getPreferenceValues().sort;
+
+  const processProperty = (property: Property, isPinned: boolean) => {
+    return {
+      spaceId: space.id,
+      id: property.id,
+      icon: property.icon,
+      title: property.name,
+      subtitle: { value: "", tooltip: "" },
+      accessories: [...(isPinned ? [{ icon: Icon.Star, tooltip: "Pinned" }] : [])],
+      mutate: [
+        mutateProperties,
+        mutatePinnedProperties as MutatePromise<SpaceObject[] | Type[] | Property[] | Member[]>,
+      ],
+      object: property,
+      layout: undefined,
+      isPinned,
+    };
+  };
+
+  const processMember = (member: Member, isPinned: boolean) => {
+    return {
+      spaceId: space.id,
+      id: member.id,
+      icon: member.icon,
+      title: member.name,
+      subtitle: { value: member.global_name, tooltip: `ANY Name: ${member.global_name}` },
+      accessories: [
+        ...(isPinned ? [{ icon: Icon.Star, tooltip: "Pinned" }] : []),
+        member.status === MemberStatus.Joining
+          ? {
+              tag: { value: "Join Request", color: "orange", tooltip: "Pending" },
+            }
+          : {
+              text: formatMemberRole(member.role),
+              tooltip: `Role: ${formatMemberRole(member.role)}`,
+            },
+      ],
+      mutate: [mutateMembers, mutatePinnedMembers as MutatePromise<SpaceObject[] | Type[] | Property[] | Member[]>],
+      object: member,
+      layout: undefined,
+      isPinned,
+    };
+  };
 
   const getCurrentItems = () => {
     switch (currentView) {
-      case "objects":
-        return filterItems(objects, searchText)?.map((object) => (
-          <ObjectListItem
-            key={object.id}
-            spaceId={spaceId}
-            objectId={object.id}
-            icon={{
-              source: object.icon,
-              mask:
-                (object.layout === "participant" || object.layout === "profile") && object.icon != Icon.Document
-                  ? Image.Mask.Circle
-                  : Image.Mask.RoundedRectangle,
-            }}
-            title={object.name}
-            subtitle={{
-              value: object.type,
-              tooltip: `Type: ${object.type}`,
-            }}
-            accessories={[
-              ...(object.details.find((detail) => detail.id === dateToSortAfter)
-                ? [
-                    {
-                      date: new Date(
-                        object.details.find((detail) => detail.id === dateToSortAfter)?.details[
-                          dateToSortAfter
-                        ] as string,
-                      ),
-                      tooltip: `${getDateLabel()}: ${format(new Date(object.details.find((detail) => detail.id === dateToSortAfter)?.details[dateToSortAfter] as string), "EEEE d MMMM yyyy 'at' HH:mm")}`,
-                    },
-                  ]
-                : []),
-            ]}
-            mutate={mutateObjects}
-            viewType="object"
-          />
-        ));
-      case "types": {
-        return filterItems(types, searchText)?.map((type) => (
-          <ObjectListItem
-            key={type.id}
-            spaceId={spaceId}
-            objectId={type.id}
-            icon={type.icon}
-            title={type.name}
-            mutate={mutateTypes}
-            viewType="type"
-          />
-        ));
+      case ViewType.objects: {
+        const processedPinned = pinnedObjects?.length
+          ? pinnedObjects
+              .filter((object) => filterItems([object], searchText).length > 0)
+              .map((object) => processObject(object, true, mutateObjects, mutatePinnedObjects))
+          : [];
+
+        const processedRegular = objects
+          .filter(
+            (object) =>
+              !pinnedObjects?.some((pinned) => pinned.id === object.id && pinned.space_id === object.space_id),
+          )
+          .map((object) => processObject(object, false, mutateObjects, mutatePinnedObjects));
+
+        return { processedPinned, processedRegular };
       }
-      case "members": {
-        return filterItems(members, searchText)?.map((member) => (
-          <ObjectListItem
-            key={member.identity}
-            spaceId={spaceId}
-            objectId={member.id}
-            icon={{ source: member.icon, mask: Image.Mask.Circle }}
-            title={member.name}
-            subtitle={{
-              value: member.global_name,
-              tooltip: `Global Name: ${member.global_name}`,
-            }}
-            accessories={[
-              {
-                text: formatRole(member.role),
-                tooltip: `Role: ${formatRole(member.role)}`,
-              },
-            ]}
-            mutate={mutateMembers}
-            viewType="member"
-          />
-        ));
+
+      case ViewType.types: {
+        const processedPinned = pinnedTypes?.length
+          ? pinnedTypes
+              .filter((type) => filterItems([type], searchText).length > 0)
+              .map((type) => processType(type, true))
+          : [];
+
+        const processedRegular = types
+          .filter((type) => !pinnedTypes?.some((pinned) => pinned.id === type.id))
+          .filter((type) => filterItems([type], searchText).length > 0)
+          .map((type) => processType(type, false));
+
+        return { processedPinned, processedRegular };
       }
+
+      case ViewType.properties: {
+        const processedPinned = pinnedProperties?.length
+          ? pinnedProperties
+              .filter((property) => filterItems([property], searchText).length > 0)
+              .map((property) => processProperty(property, true))
+          : [];
+        const processedRegular = properties
+          .filter((property) => !pinnedProperties?.some((pinned) => pinned.id === property.id))
+          .filter((property) => filterItems([property], searchText).length > 0)
+          .map((property) => processProperty(property, false));
+
+        return { processedPinned, processedRegular };
+      }
+
+      case ViewType.members: {
+        const processedPinned = pinnedMembers?.length
+          ? pinnedMembers
+              .filter((member) => filterItems([member], searchText).length > 0)
+              .map((member) => processMember(member, true))
+          : [];
+
+        const processedRegular = members
+          .filter((member) => !pinnedMembers?.some((pinned) => pinned.id === member.id))
+          .filter((member) => filterItems([member], searchText).length > 0)
+          .map((member) => processMember(member, false));
+
+        return { processedPinned, processedRegular };
+      }
+
       default:
-        return null;
+        return {
+          processedPinned: [],
+          processedRegular: [],
+        };
     }
   };
 
-  const currentItems = getCurrentItems();
+  const { processedPinned, processedRegular } = getCurrentItems();
+  const isLoading =
+    isLoadingObjects ||
+    isLoadingTypes ||
+    isLoadingProperties ||
+    isLoadingMembers ||
+    isLoadingPinnedObjects ||
+    isLoadingPinnedTypes ||
+    isLoadingPinnedProperties ||
+    isLoadingPinnedMembers;
 
   return (
     <List
-      isLoading={isLoadingMembers || isLoadingObjects || isLoadingTypes}
+      isLoading={isLoading}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder={`Search ${currentView}...`}
+      searchBarPlaceholder={`Search ${pluralize(2, currentView.charAt(0).toLowerCase() + currentView.slice(1))}...`}
+      navigationTitle={`Browse ${space.name}`}
+      pagination={pagination}
+      throttle={true}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Choose View"
-          onChange={(value) => setCurrentView(value as "objects" | "types" | "members")}
+          onChange={(value) => setCurrentView(value as ViewType)}
+          value={currentView}
         >
-          <List.Dropdown.Item title="Objects" value="objects" icon={Icon.Document} />
-          <List.Dropdown.Item title="Types" value="types" icon={Icon.Lowercase} />
-          <List.Dropdown.Item title="Members" value="members" icon={Icon.PersonCircle} />
+          <List.Dropdown.Item
+            title="Objects"
+            value={ViewType.objects}
+            icon={{ source: "icons/type/document.svg", tintColor: defaultTintColor }}
+          />
+          <List.Dropdown.Item
+            title="Types"
+            value={ViewType.types}
+            icon={{ source: "icons/type/extension-puzzle.svg", tintColor: defaultTintColor }}
+          />
+          <List.Dropdown.Item
+            title="Properties"
+            value={ViewType.properties}
+            icon={{ source: "icons/type/list.svg", tintColor: defaultTintColor }}
+          />
+          <List.Dropdown.Item
+            title="Members"
+            value={ViewType.members}
+            icon={{ source: "icons/type/people.svg", tintColor: defaultTintColor }}
+          />
         </List.Dropdown>
       }
-      pagination={pagination}
-      throttle={true}
     >
-      {currentItems && currentItems?.length > 0 ? (
+      {processedPinned && processedPinned.length > 0 && (
         <List.Section
-          title={searchText ? "Search Results" : `All ${currentView.charAt(0).toUpperCase() + currentView.slice(1)}`}
-          subtitle={`${pluralize(getCurrentItems()?.length || 0, currentView.slice(0, -1), { withNumber: true })}`}
+          title="Pinned"
+          subtitle={`${pluralize(processedPinned.length, currentView, { withNumber: true })}`}
         >
-          {getCurrentItems()}
+          {processedPinned.map((item) => (
+            <ObjectListItem
+              key={item.id}
+              space={space}
+              objectId={item.id}
+              icon={item.icon}
+              title={item.title}
+              subtitle={item.subtitle}
+              accessories={item.accessories}
+              mutate={item.mutate}
+              object={item.object}
+              layout={item.layout}
+              viewType={currentView}
+              isGlobalSearch={false}
+              isNoPinView={false}
+              isPinned={item.isPinned}
+              searchText={searchText}
+            />
+          ))}
+        </List.Section>
+      )}
+      {processedRegular && processedRegular.length > 0 ? (
+        <List.Section
+          title={searchText ? "Search Results" : `All ${pluralize(2, currentView)}`}
+          subtitle={`${pluralize(processedRegular.length, currentView, { withNumber: true })}`}
+        >
+          {processedRegular.map((item) => (
+            <ObjectListItem
+              key={item.id}
+              space={space}
+              objectId={item.id}
+              icon={item.icon}
+              title={item.title}
+              subtitle={item.subtitle}
+              accessories={item.accessories}
+              mutate={item.mutate}
+              object={item.object}
+              layout={item.layout}
+              viewType={currentView}
+              isGlobalSearch={false}
+              isNoPinView={false}
+              isPinned={item.isPinned}
+              searchText={searchText}
+            />
+          ))}
         </List.Section>
       ) : (
-        <EmptyView title={`No ${currentView.charAt(0).toUpperCase() + currentView.slice(1)} Found`} />
+        (() => {
+          switch (currentView) {
+            case ViewType.types:
+              return (
+                <EmptyViewType
+                  title={`No ${currentView.charAt(0).toUpperCase() + currentView.slice(1)} Found`}
+                  contextValues={{
+                    spaceId: space.id,
+                    name: searchText,
+                  }}
+                />
+              );
+            case ViewType.properties:
+              return (
+                <EmptyViewProperty
+                  title={`No ${currentView.charAt(0).toUpperCase() + currentView.slice(1)} Found`}
+                  spaceId={space.id}
+                  contextValues={{
+                    name: searchText,
+                  }}
+                />
+              );
+            default:
+              return (
+                <EmptyViewObject
+                  title={`No ${currentView.charAt(0).toUpperCase() + currentView.slice(1)} Found`}
+                  contextValues={{
+                    spaceId: space.id,
+                    name: searchText,
+                  }}
+                />
+              );
+          }
+        })()
       )}
     </List>
   );

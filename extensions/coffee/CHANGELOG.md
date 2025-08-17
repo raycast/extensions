@@ -2,6 +2,10 @@
 
 ## [✨ AI Enhancements] - 2025-02-21
 
+## [Enhancement] - 2025-03-01
+
+- Show caffeinate duration in menu bar item.
+
 ## [Enhancement] - 2025-01-31
 
 - Added `Caffeinate Until` command.

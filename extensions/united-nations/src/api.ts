@@ -1,20 +1,34 @@
 import { getPreferenceValues } from "@raycast/api";
 import { load } from "cheerio/slim";
-import XMLParser from "fast-xml-parser/src/xmlparser/XMLParser.js";
+import { XMLParser } from "fast-xml-parser";
 import got from "got";
 import TurndownService from "turndown";
 import { newsFeedUrlDict } from "./constants.js";
-import { NewsType, SiteIndex, UnDocument, UnPhoto, UnPress, UnNews, LanguageCode } from "./types.js";
+import { NewsType, SiteIndex, UnDocument, UnPhoto, UnPress, UnNews, LanguageCode, RssResponse } from "./types.js";
+import { arrayifyRssItem, stripSpecialEscapedCharacters } from "./utils.js";
 
 export const fetchUnDocuments = async () => {
-  const xml = await got("https://undocs.org/rss/gadocs.xml").text();
-  const xmlParser = new XMLParser({
-    ignoreAttributes: false,
-    attributeNamePrefix: "",
-  });
-  const documents = xmlParser.parse(xml);
-  // @ts-expect-error: Expected any usage
-  return documents.rss.channel.item.map((x) => ({
+  const [ga, sc, hrc, esc] = await Promise.all([
+    got("https://esubscription.un.org/rss/gadocs.xml").text(),
+    got("https://esubscription.un.org/rss/scdocs.xml").text(),
+    got("https://esubscription.un.org/rss/hrc.xml").text(),
+    got("https://esubscription.un.org/rss/ecosocdocs.xml").text(),
+  ]);
+
+  const xmlParser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "" });
+  const gaDocs = xmlParser.parse(ga) as RssResponse;
+  const scDocs = xmlParser.parse(sc) as RssResponse;
+  const hrcDocs = xmlParser.parse(hrc) as RssResponse;
+  const escDocs = xmlParser.parse(esc) as RssResponse;
+
+  const allItems = [
+    ...arrayifyRssItem(gaDocs.rss.channel.item),
+    ...arrayifyRssItem(scDocs.rss.channel.item),
+    ...arrayifyRssItem(hrcDocs.rss.channel.item),
+    ...arrayifyRssItem(escDocs.rss.channel.item),
+  ];
+
+  return allItems.map((x) => ({
     title: x.title,
     description: x.description,
     link: x.link,
@@ -27,10 +41,7 @@ export const fetchUnNews = async (newsType: NewsType) => {
   const xml = await got(
     `https://news.un.org/feed/subscribe/${newsLanguageCode}/news/${newsFeedUrlDict[newsType]}/rss.xml`,
   ).text();
-  const xmlParser = new XMLParser({
-    ignoreAttributes: false,
-    attributeNamePrefix: "",
-  });
+  const xmlParser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "" });
   const news = xmlParser.parse(xml);
   // @ts-expect-error: Expected any usage
   return news.rss.channel.item.map((x) => ({
@@ -45,10 +56,7 @@ export const fetchUnNews = async (newsType: NewsType) => {
 
 export const fetchUnPress = async () => {
   const xml = await got("https://press.un.org/en/rss.xml").text();
-  const xmlParser = new XMLParser({
-    ignoreAttributes: false,
-    attributeNamePrefix: "",
-  });
+  const xmlParser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "" });
   const press = xmlParser.parse(xml);
   // @ts-expect-error: Expected any usage
   return press.rss.channel.item.map((x) => ({
@@ -75,9 +83,9 @@ export const fetchDetail = async (link: string, selector: string) => {
     .get()
     .map((el) => $(el).text())
     .join("\n")
-    .replace(/&nbsp/g, "");
+    .replace(/&nbsp;/g, "");
   const turndownService = new TurndownService();
-  const markdownContent = turndownService.turndown(htmlContent || "");
+  const markdownContent = stripSpecialEscapedCharacters(turndownService.turndown(htmlContent || ""));
   return { markdownContent, textContent };
 };
 

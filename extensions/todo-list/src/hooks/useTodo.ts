@@ -6,6 +6,8 @@ import {
   editingTagNameAtom,
   searchBarTextAtom,
   todoAtom,
+  editingDueDateAtom,
+  editingDueDateValueAtom,
 } from "../atoms";
 import { compare, insertIntoSection } from "../utils";
 
@@ -17,6 +19,8 @@ export const useTodo = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
   const [, setEditing] = useAtom(editingAtom);
   const [, setEditingTag] = useAtom(editingTagAtom);
   const [, setEditingTagName] = useAtom(editingTagNameAtom);
+  const [, setEditingDueDate] = useAtom(editingDueDateAtom);
+  const [, setEditingDueDateValue] = useAtom(editingDueDateValueAtom);
   const [, setSearchBarText] = useAtom(searchBarTextAtom);
 
   const setClone = () => {
@@ -91,6 +95,14 @@ export const useTodo = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
     setEditingTagName(item.tag ?? "");
   };
 
+  const editTodoDueDate = () => {
+    setEditingDueDate({
+      sectionKey,
+      index: idx,
+    });
+    setEditingDueDateValue(item.dueDate ?? 0);
+  };
+
   const setPriority = (priority?: 1 | 2 | 3) => {
     item.priority = priority;
     setClone();
@@ -99,6 +111,7 @@ export const useTodo = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
   return {
     editTodo,
     editTodoTag,
+    editTodoDueDate,
     deleteTodo,
     markTodo,
     markCompleted,

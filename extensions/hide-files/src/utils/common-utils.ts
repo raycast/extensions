@@ -26,6 +26,7 @@ export const isDirectoryOrFile = (path: string) => {
       return DirectoryType.FILE;
     }
   } catch (e) {
+    console.error(`Error checking path ${path}:`, e);
     return DirectoryType.FILE;
   }
   return DirectoryType.FILE;
@@ -63,6 +64,7 @@ export const getFilesInDirectory = (pathName: string) => {
     });
     return fileSystemItems;
   } catch (e) {
+    console.error(`Error reading directory ${pathName}:`, e);
     return fileSystemItems;
   }
 };

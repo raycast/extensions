@@ -1,0 +1,276 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ccusage",
+  "title": "Claude Code Usage (ccusage)",
+  "description": "Monitor Claude Code usage with real-time tracking",
+  "categories": [
+    "Developer Tools"
+  ],
+  "icon": "extension-icon.png",
+  "author": "nyatinte",
+  "contributors": [
+    "bohdan_zhuravel"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ccusage",
+      "title": "Claude Code Usage",
+      "subtitle": "ccusage",
+      "description": "Monitor Claude Code usage with real-time tracking",
+      "mode": "view"
+    },
+    {
+      "name": "menubar-ccusage",
+      "title": "Claude Code Usage in Menu Bar",
+      "subtitle": "ccusage",
+      "description": "Show Claude Code usage in menu bar",
+      "mode": "menu-bar"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultView",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default View",
+      "description": "Choose the default section to display when opening the extension",
+      "default": "today",
+      "data": [
+        {
+          "title": "Today Usage",
+          "value": "today"
+        },
+        {
+          "title": "Session Usage",
+          "value": "session"
+        },
+        {
+          "title": "Cost Analysis",
+          "value": "cost"
+        },
+        {
+          "title": "Model Breakdown",
+          "value": "model"
+        }
+      ]
+    },
+    {
+      "name": "customNpxPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom npx Path",
+      "description": "Override the default npx path if needed (optional)",
+      "placeholder": "e.g., /usr/local/bin/npx"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-daily-usage",
+      "title": "Get Daily Usage",
+      "description": "Get today's Claude Code usage including cost, tokens, and statistics"
+    },
+    {
+      "name": "get-total-usage",
+      "title": "Get Total Usage",
+      "description": "Get comprehensive Claude Code usage statistics including totals, sessions, and model breakdowns"
+    },
+    {
+      "name": "get-monthly-usage",
+      "title": "Get Monthly Usage",
+      "description": "Get current month's Claude Code usage statistics and model breakdowns"
+    },
+    {
+      "name": "get-session-usage",
+      "title": "Get Session Usage",
+      "description": "Get detailed session-by-session Claude Code usage statistics"
+    }
+  ],
+  "ai": {
+    "instructions": "Analyze Claude Code usage statistics and costs. All cost values are in USD ($). When displaying costs, include the $ symbol. You can convert USD amounts to other currencies when requested (JPY, EUR, etc.).",
+    "evals": [
+      {
+        "input": "@ccusage What's my total cost?",
+        "mocks": {
+          "get-total-usage": {
+            "totalCost": 2.45,
+            "totalTokens": 23000,
+            "inputTokens": 15000,
+            "outputTokens": 8000,
+            "cacheCreationTokens": 500,
+            "cacheReadTokens": 1200,
+            "sessions": 12,
+            "modelBreakdowns": [
+              {
+                "modelName": "claude-3-5-sonnet-20241022",
+                "inputTokens": 10000,
+                "outputTokens": 6000,
+                "totalTokens": 16000,
+                "totalCost": 1.80
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-total-usage"
+          }
+        ]
+      },
+      {
+        "input": "@ccusage Show me today's usage",
+        "mocks": {
+          "get-daily-usage": {
+            "cost": 0.65,
+            "inputTokens": 2500,
+            "outputTokens": 1800,
+            "totalTokens": 4300,
+            "date": "2024-01-15"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-daily-usage"
+          }
+        ]
+      },
+      {
+        "input": "@ccusage Show me this month's breakdown",
+        "mocks": {
+          "get-monthly-usage": {
+            "month": "2024-01",
+            "totalCost": 12.75,
+            "totalTokens": 85000,
+            "inputTokens": 50000,
+            "outputTokens": 35000,
+            "cacheCreationTokens": 2000,
+            "cacheReadTokens": 5000,
+            "modelBreakdowns": [
+              {
+                "modelName": "claude-3-5-sonnet-20241022",
+                "inputTokens": 35000,
+                "outputTokens": 25000,
+                "totalTokens": 60000,
+                "totalCost": 9.00
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-monthly-usage"
+          }
+        ]
+      },
+      {
+        "input": "@ccusage Show me my recent sessions",
+        "mocks": {
+          "get-session-usage": {
+            "sessions": [
+              {
+                "sessionId": "session-123",
+                "totalCost": 0.38,
+                "totalTokens": 2700,
+                "inputTokens": 1500,
+                "outputTokens": 1200,
+                "cacheCreationTokens": 50,
+                "cacheReadTokens": 100,
+                "modelName": "claude-3-5-sonnet-20241022",
+                "date": "2024-01-15T10:30:00Z"
+              }
+            ],
+            "sessionCount": 1
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-session-usage"
+          }
+        ]
+      },
+      {
+        "input": "@ccusage Which model costs me the most?",
+        "mocks": {
+          "get-total-usage": {
+            "totalCost": 2.45,
+            "totalTokens": 23000,
+            "inputTokens": 15000,
+            "outputTokens": 8000,
+            "cacheCreationTokens": 500,
+            "cacheReadTokens": 1200,
+            "sessions": 12,
+            "modelBreakdowns": [
+              {
+                "modelName": "claude-3-5-sonnet-20241022",
+                "inputTokens": 10000,
+                "outputTokens": 6000,
+                "totalTokens": 16000,
+                "totalCost": 1.80
+              },
+              {
+                "modelName": "claude-3-haiku-20240307",
+                "inputTokens": 5000,
+                "outputTokens": 2000,
+                "totalTokens": 7000,
+                "totalCost": 0.65
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-total-usage"
+          }
+        ]
+      },
+      {
+        "input": "@ccusage Convert my total cost to yen",
+        "mocks": {
+          "get-total-usage": {
+            "totalCost": 2.45,
+            "totalTokens": 23000,
+            "inputTokens": 15000,
+            "outputTokens": 8000,
+            "cacheCreationTokens": 500,
+            "cacheReadTokens": 1200,
+            "sessions": 12,
+            "modelBreakdowns": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-total-usage"
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.99.4",
+    "@raycast/utils": "^1.17.0",
+    "ccusage": "^0.6.2",
+    "date-fns": "^4.1.0",
+    "es-toolkit": "^1.39.3",
+    "ts-pattern": "^5.7.1",
+    "zod": "^3.25.61"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "knip": "^5.61.2",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "knip": "knip",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

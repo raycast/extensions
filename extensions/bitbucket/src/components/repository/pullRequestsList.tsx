@@ -1,9 +1,9 @@
 import { ActionPanel, List, showToast, Color, Action, Image, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 
-import { Repository, Pipeline } from "./interface";
+import { Repository } from "./interface";
 import { PullRequest } from "../pullRequests/interface";
-import { icon } from "../../helpers/icon";
+
 import { pullRequestsGetQuery } from "./../../queries";
 
 interface State {
@@ -11,28 +11,28 @@ interface State {
   error?: Error;
 }
 
-export function PullRequestsList(props: { repo: Repository; pageNumber: number }): JSX.Element {
+export function PullRequestsList(props: { repo: Repository; pageNumber: number }) {
   const [state, setState] = useState<State>({});
-  const [pageNumber, setPageNumber] = useState<number>(1);
 
   useEffect(() => {
     async function fetchPRs() {
       try {
-        const { data } = await pullRequestsGetQuery(props.repo.slug, pageNumber);
+        const { data } = await pullRequestsGetQuery(props.repo.slug);
 
-        const prs = data.values.map((pr: any) => ({
-          id: pr.id as number,
-          title: pr.title as string,
-          repo: {
-            name: pr.destination.repository.name as string,
-            fullName: pr.destination.repository.full_name as string,
-          },
-          commentCount: pr.comment_count as number,
-          author: {
-            url: pr.author.links.avatar.href as string,
-            nickname: pr.author.nickname as string,
-          },
-        }));
+        const prs =
+          data.values?.map((pr) => ({
+            id: pr.id as number,
+            title: pr.title as string,
+            repo: {
+              name: pr.destination?.repository?.name as string,
+              fullName: pr?.destination?.repository?.full_name as string,
+            },
+            commentCount: pr.comment_count as number,
+            author: {
+              url: pr.author?.links?.avatar?.href as string,
+              nickname: pr.author?.nickname as string,
+            },
+          })) ?? [];
         setState({ pullRequests: prs });
       } catch (error) {
         setState({ error: error instanceof Error ? error : new Error("Something went wrong") });

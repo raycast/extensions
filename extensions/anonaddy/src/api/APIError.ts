@@ -1,6 +1,6 @@
 class APIError extends Error {
-  constructor(status: number) {
-    super(`API Error: ${status}`);
+  constructor(response: Response) {
+    super(`API Error: ${response.status}`);
   }
 }
 

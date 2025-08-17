@@ -14,8 +14,9 @@ import {
   showHUD,
   showToast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import debounce from "lodash/debounce.js";
-import { getIconSlug } from "simple-icons/sdk";
+import { getIconSlug } from "./vender/simple-icons-sdk.js";
 import { CopyFontEntities, LaunchCommand, Supports, actions, defaultActionsOrder } from "./actions.js";
 import {
   cacheAssetPack,
@@ -23,6 +24,7 @@ import {
   displaySimpleIconsFontFeatures,
   enableAiSearch,
   getAliases,
+  getRelativeFileLink,
   loadCachedJson,
   useSearch,
   useVersion,
@@ -48,16 +50,11 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
 
     await showToast({
       style: Toast.Style.Animated,
-      title: "",
-      message: "Loading Icons",
+      title: "Loading Icons",
     });
 
-    await cacheAssetPack(version).catch(async () => {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "",
-        message: "Failed to download icons asset",
-      });
+    await cacheAssetPack(version).catch(async (error) => {
+      await showFailureToast(error, { title: "Failed to cache asset pack" });
       await setTimeout(1200);
     });
     const json = await loadCachedJson(version).catch(() => {
@@ -74,21 +71,21 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
     if (icons.length > 0) {
       await showToast({
         style: Toast.Style.Success,
-        title: "",
-        message: `${icons.length} icons loaded`,
+        title: `${icons.length} icons loaded`,
       });
     } else {
       await showToast({
         style: Toast.Style.Failure,
-        title: "",
-        message: "Unable to load icons",
+        title: "Unable to load icons",
       });
     }
   };
 
   useEffect(() => {
     if (version) {
-      fetchIcons(version);
+      fetchIcons(version).catch((error) => {
+        showFailureToast(error, { title: "Failed to fetch icons" });
+      });
     }
   }, [version]);
 
@@ -150,9 +147,10 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
       }
     >
       {(!isLoading || !aiIsLoading || !version) &&
+        // Limit to 500 icons to avoid performance issues
         searchResult.slice(0, 500).map((icon) => {
           const slug = getIconSlug(icon);
-          const fileLink = `pack/simple-icons-${version}/icons/${slug}.svg`;
+          const fileLink = getRelativeFileLink(slug, version);
           const aliases = getAliases(icon);
 
           return (

@@ -1,5 +1,45 @@
 # Spotify Player Changelog
 
+## [Show the Artist name when liking a song] - 2025-08-04
+
+- Added the artist name into the message in the HUD when liking a new song
+- Added the artist name into the message in the HUD attempting to like an already liked song
+
+
+## [Add toggle to filter song name in menu bar] - 2025-07-08
+
+- Added new toggle for removing extra info like remix titles or versions from the song name in the menubar
+
+## [Fix Search Feature] - 2025-07-03
+
+- Fixed an issue with the search functionality.
+
+## [Fix Noises and Additional data in Find Lyrics Function] - 2025-07-02
+
+- Fixed Noises in retrieved lyrics in Find Lyrics Function,now clean lyrics is extracted without any additional noise or data like contributors count and numbers
+
+## [Add Option to View the Lyrics of the Song playing] - 2025-06-30
+
+- Add new command 'Find Lyrics'.
+- Add an option that allows users to See the current song’s Lyrics, artist and title.
+
+## [Add Option to Copy the Current Song’s Artist and Title] - 2025-05-26
+
+- Add new command 'Copy Artist And Title'.
+- Add an option in the `NowPlaying` command that allows users to copy the current song’s artist and title.
+
+## [Fix AppleScript fallback for non-premium users] - 2025-05-21
+
+- Fixed AppleScript fallback for functions that use premium-only API endpoints. Most commands now work without a premium subscription except queuing, cycleRepeat (AppleScript can only toggle context off/on) and device selection.
+
+## [✨ AI Enhancements] - 2025-04-30
+
+- Added AI queue interaction (e.g.,"@spotify add 10 random jazz songs to my queue").
+
+## [Fix Select Device] - 2025-02-26
+
+- Fixed a possibly undefined issue from Select Devices command
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [Fix Missing Playlists in Add Playing Song to Playlist command] - 2025-02-20

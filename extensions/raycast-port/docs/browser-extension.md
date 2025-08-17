@@ -8,7 +8,7 @@ Type: [`boolean | Parameters<typeof BrowserExtension.getContent>`](https://devel
 Default: `undefined`\
 Returns: [`Awaited<ReturnType<BrowserExtension.getContent>>`](https://developers.raycast.com/api-reference/browser-extension#browserextension.getcontent)
 
-Set to `true` to envoke this function with empty parameters. You can also pass in an array of parameters of the `BrowserExtension.getContent()` function.
+Set to `true` to invoke this function with empty parameters. You can also pass in an array of parameters of the `BrowserExtension.getContent()` function.
 
 Its return value will be set to the `result.content`.
 
@@ -18,7 +18,7 @@ Type: `boolean`\
 Default: `undefined`\
 Returns: [`Awaited<ReturnType<BrowserExtension.getTabs>>`](https://developers.raycast.com/api-reference/browser-extension#browserextension.gettabs)
 
-Set to `true` to envoke the function.
+Set to `true` to invoke the function.
 
 Its return value will be set to the `result.tabs`.
 
@@ -27,15 +27,15 @@ Its return value will be set to the `result.tabs`.
 Type: [`Parameters<typeof open>`](https://developers.raycast.com/api-reference/utilities#open)\
 Default: `undefined`
 
-Callback with URL or path after the `AI.ask`. It will replace `RAYCAST_PORT_BROWSER_EXTENSION_RESULT` with the result.\
-Exmaple: `https://localhost?result=RAYCAST_PORT_BROWSER_EXTENSION_RESULT`
+Callback with URL or path after port functions. It will replace `RAYCAST_PORT_BROWSER_EXTENSION_RESULT` with the result.\
+Example: `https://localhost?result=RAYCAST_PORT_BROWSER_EXTENSION_RESULT`
 
 ### `callbackExec`
 
-Type: [`Parameters<typeof exeSync>`](https://nodejs.org/api/child_process.html#child_processexecsynccommand-options)\
+Type: [`Parameters<typeof execSync>`](https://nodejs.org/api/child_process.html#child_processexecsynccommand-options)\
 Default: `undefined`
 
-Callback with `execSync` after the `AI.ask`. The result will be set to the environment variable `RAYCAST_PORT_BROWSER_EXTENSION_RESULT`.
+Callback with `execSync` after port functions. The result will be set to the environment variable `RAYCAST_PORT_BROWSER_EXTENSION_RESULT`.
 
 This feature is disabled by default. You need to enable it from extension preferences.
 
@@ -78,7 +78,7 @@ const launchContext = {
   // Callback launch Raycast command
   callbackLaunchOptions: {
     name: "target-command-name",
-    type: "userInitated",
+    type: "userInitiated",
     extensionName: "target-extension-name",
     ownerOrAuthorName: "target-extension-author-name",
     context: {
@@ -89,13 +89,15 @@ const launchContext = {
 };
 
 const context = encodeURIComponent(JSON.stringify(launchContext));
-exeSync(`open "raycast://extensions/litomore/raycast-port/browser-extension?launchType=background&context=${context}"`);
+execSync(
+  `open "raycast://extensions/litomore/raycast-port/browser-extension?launchType=background&context=${context}"`,
+);
 ```
 
 ## Shell Example
 
 ```bash
-deeplink="raycast://extensions/litomore/raycast-port/browser-extension?launchType=background&context=$(jq -rR @uri <<< '{"getWindowsOnActiveDesktop": true, "callbackOpen": ["https://example.com/?result=RAYCAST_PORT_BROWSER_EXTENSION_RESULT"]}')"
+deeplink="raycast://extensions/litomore/raycast-port/browser-extension?launchType=background&context=$(jq -rR @uri <<< '{"getContent": true, "callbackOpen": ["https://example.com/?result=RAYCAST_PORT_BROWSER_EXTENSION_RESULT"]}')"
 open $deeplink
 ```
 

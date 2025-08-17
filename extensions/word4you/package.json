@@ -1,0 +1,143 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "word4you",
+  "title": "Word4you",
+  "description": "AI-Powered English Word Learning/Collecting Tool",
+  "icon": "icon.png",
+  "author": "gnehz972",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "learn-word",
+      "title": "Learn Word",
+      "subtitle": "Word4You",
+      "description": "Learn word/phrase/sentence using AI and save",
+      "mode": "view",
+      "keywords": [
+        "word",
+        "phrase",
+        "sentence",
+        "query",
+        "learn",
+        "english",
+        "vocabulary",
+        "AI",
+        "gemini",
+        "study",
+        "search"
+      ],
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "word/phrase/sentence",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "aiProvider",
+          "type": "dropdown",
+          "required": false,
+          "title": "AI Provider",
+          "description": "Choose your preferred AI provider",
+          "default": "gemini",
+          "data": [
+            {
+              "title": "Google Gemini",
+              "value": "gemini"
+            },
+            {
+              "title": "QWEN",
+              "value": "qwen"
+            }
+          ]
+        },
+        {
+          "name": "geminiApiKey",
+          "type": "password",
+          "required": false,
+          "title": "Gemini API Key",
+          "description": "Your Google Gemini API key (get one at https://aistudio.google.com/app/apikey)",
+          "placeholder": "Enter your Gemini API key"
+        },
+        {
+          "name": "geminiModelName",
+          "type": "textfield",
+          "required": false,
+          "title": "Gemini Model Name",
+          "description": "The Gemini model to use for text explanations",
+          "default": "gemini-2.0-flash-001",
+          "placeholder": "gemini-2.0-flash-001"
+        },
+        {
+          "name": "qwenApiKey",
+          "type": "password",
+          "required": false,
+          "title": "QWEN API Key",
+          "description": "Your QWEN API key (get one at https://dashscope.console.aliyun.com/)",
+          "placeholder": "Enter your QWEN API key"
+        },
+        {
+          "name": "qwenModelName",
+          "type": "textfield",
+          "required": false,
+          "title": "QWEN Model Name",
+          "description": "The QWEN model to use for text explanations",
+          "default": "qwen-turbo",
+          "placeholder": "qwen-turbo"
+        },
+        {
+          "name": "vocabularyBaseDir",
+          "type": "directory",
+          "required": false,
+          "title": "Vocabulary Base Directory",
+          "description": "Base directory where vocabulary files will be stored (~ for home directory)",
+          "default": "~",
+          "placeholder": "~/Documents"
+        },
+        {
+          "name": "gitEnabled",
+          "type": "checkbox",
+          "required": false,
+          "title": "Enable Git Integration",
+          "description": "Enable Git version control for your vocabulary files",
+          "default": false,
+          "label": "Enable Git integration"
+        },
+        {
+          "name": "gitRemoteUrl",
+          "type": "textfield",
+          "required": false,
+          "title": "Git Remote URL",
+          "description": "Git remote repository URL (only used if Git integration is enabled)",
+          "default": "",
+          "placeholder": "https://github.com/username/vocabulary.git"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -16,7 +16,9 @@
     "a-laughlin",
     "tleo19",
     "Tarocch1",
-    "santiago_perez"
+    "santiago_perez",
+    "jonasengelmann",
+    "drewbabel"
   ],
   "license": "MIT",
   "commands": [
@@ -60,6 +62,13 @@
       "title": "Create New Window",
       "subtitle": "Google Chrome",
       "description": "Create New Window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-incognito-window",
+      "title": "Create New Incognito Window",
+      "subtitle": "Google Chrome",
+      "description": "Create New Incognito Window.",
       "mode": "no-view"
     }
   ],

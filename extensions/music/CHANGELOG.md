@@ -1,5 +1,21 @@
 # Apple Music Changelog
 
+## [New Command] - 2025-08-04
+
+- Added a new command that removes the currently playing track from the Library.
+
+## [New Config] - 2025-06-30
+
+- Added a new configuration option to disable HUDs
+
+## [Update Rate Track] - 2025-03-10
+
+- Added the track name to the `Rate Track` command.
+
+## [New Command] - 2025-03-04
+
+- Added new "Toggle Repeat" command.
+
 ## [AI Enhancements] - 2025-02-21
 
 - Added AI extensions to the Music extension.

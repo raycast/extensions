@@ -1,4 +1,4 @@
-# <img src="./assets/resend.png" width="20" height="20" /> Resend Raycast Extension
+# <img src="./assets/resend-extension_icon@dark.png" width="20" height="20" /> Resend Raycast Extension
 
 This is a Raycast extension for [Resend](https://resend.com/). With this extension, you can Manage API Keys and Domains, and Send Emails using Resend.
 
@@ -40,3 +40,9 @@ This extension provides the following commands:
 - Contacts
   - View Contacts
   - Create, Update And Delete Contacts
+
+Additionally, this extension supports ✨[AI tools](https://youtu.be/sHIlFKKaq0A)✨, so you can use it with natural language by mentioning `@resend`.
+
+---
+<br />
+<img src="./assets/resend-wordmark-white.svg" />

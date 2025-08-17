@@ -1,5 +1,5 @@
-import View from "./components/View";
 import ProjectList from "./components/ProjectList";
+import View from "./components/View";
 
 export default function SearchProjects() {
   return (

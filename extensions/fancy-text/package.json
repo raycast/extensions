@@ -13,6 +13,10 @@
     "Fun"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "generate-fancy-text",

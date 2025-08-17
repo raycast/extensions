@@ -17,7 +17,9 @@
     "teziovsky",
     "lukebars",
     "AlanHuang",
-    "alexs"
+    "alexs",
+    "ARui",
+    "pernielsentikaer"
   ],
   "license": "MIT",
   "commands": [
@@ -112,6 +114,51 @@
       "required": true,
       "title": "Toggl API Token",
       "type": "password"
+    },
+    {
+      "name": "showClientsInForm",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Clients in Form",
+      "description": "Whether or not to show the client field in the create and update time entry forms.",
+      "label": "Show clients",
+      "default": true
+    },
+    {
+      "name": "showProjectsInForm",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Projects in Form",
+      "description": "Whether or not to show the project field in the create and update time entry forms.",
+      "label": "Show projects",
+      "default": true
+    },
+    {
+      "name": "showTasksInForm",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Tasks in Form",
+      "description": "Whether or not to show the task field in the create and update time entry forms.",
+      "label": "Show tasks",
+      "default": true
+    },
+    {
+      "name": "showTagsInForm",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Tags in Form",
+      "description": "Whether or not to show the tags field in the create and update time entry forms.",
+      "label": "Show tags",
+      "default": true
+    },
+    {
+      "name": "timeEntriesLookbackDays",
+      "type": "textfield",
+      "required": false,
+      "title": "Time Entries Lookback Days",
+      "description": "Number of days to look back when fetching time entries (default: 14, max: 60)",
+      "placeholder": "Enter a number between 1-60",
+      "default": "14"
     }
   ],
   "dependencies": {

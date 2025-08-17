@@ -1,19 +1,21 @@
 import {
-  List,
-  ActionPanel,
   Action,
-  getPreferenceValues,
-  Toast,
-  Icon,
-  showToast,
-  Form,
-  useNavigation,
+  ActionPanel,
   confirmAlert,
+  Form,
+  getPreferenceValues,
+  getSelectedText,
+  Icon,
+  List,
+  LocalStorage,
+  showToast,
+  Toast,
+  useNavigation,
 } from "@raycast/api";
-import { useState, useEffect } from "react";
 import Gemini from "gemini-ai";
 import fetch from "node-fetch";
-import { LocalStorage, getSelectedText } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { getSafetySettings } from "./api/safetySettings";
 
 export default function Chat({ launchContext }) {
   let toast = async (style, title, message) => {
@@ -23,6 +25,15 @@ export default function Chat({ launchContext }) {
       message,
     });
   };
+
+  function showFailureToast(error, options = {}) {
+    return showToast({
+      style: Toast.Style.Failure,
+      title: options.title || "Error",
+      message: error instanceof Error ? error.message : String(error),
+      primaryAction: options.primaryAction,
+    });
+  }
 
   const { apiKey, defaultModel } = getPreferenceValues();
   const gemini = new Gemini(apiKey, { fetch });
@@ -49,12 +60,12 @@ export default function Chat({ launchContext }) {
             <Action.SubmitForm
               title="Create Chat"
               onSubmit={(values) => {
-                if (chatData.chats.map((x) => x.name).includes(values.chatName)) {
-                  toast(Toast.Style.Failure, "Chat with that name already exists.");
+                let newName = values.chatName.trim() || createNewChatName();
+                if (chatData.chats.map((x) => x.name).includes(newName)) {
+                  showFailureToast("Chat with that name already exists.");
                 } else {
                   pop();
                   setChatData((oldData) => {
-                    let newName = createNewChatName();
                     let newChatData = structuredClone(oldData);
                     newChatData.chats.push({
                       name: newName,
@@ -131,8 +142,9 @@ export default function Chat({ launchContext }) {
                   try {
                     let currentChat = getChat(chatData.currentChat);
                     let aiChat = gemini.createChat({
-                      model: currentChat.model ?? "gemini-1.5-flash-latest",
+                      model: currentChat.model ?? defaultModel,
                       messages: currentChat.messages.map((x) => [x.prompt, x.answer]),
+                      safetySettings: getSafetySettings(),
                     });
 
                     await aiChat.ask(query, {
@@ -285,6 +297,7 @@ export default function Chat({ launchContext }) {
       </ActionPanel>
     );
   };
+
   let formatDate = (dateToCheckISO) => {
     const dateToCheck = new Date(dateToCheckISO);
     if (dateToCheck.toDateString() === new Date().toDateString()) {
@@ -305,8 +318,9 @@ export default function Chat({ launchContext }) {
         if (getChat(newData.currentChat, newData.chats).messages[0]?.finished === false) {
           let currentChat = getChat(newData.currentChat, newData.chats);
           let aiChat = gemini.createChat({
-            model: "gemini-1.5-pro-latest",
+            model: currentChat.model ?? defaultModel,
             messages: currentChat.messages.map((x) => [x.prompt, x.answer]),
+            safetySettings: getSafetySettings(),
           });
           currentChat.messages[0].answer = "";
           toast(Toast.Style.Animated, "Regenerating Last Message");

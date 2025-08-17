@@ -5,6 +5,10 @@
   "description": "A Raycast extension for WeChat to quickly search your contacts and chat",
   "icon": "wechat.png",
   "author": "raffeyang",
+  "contributors": [
+    "JokeNeverSOke",
+    "litomore"
+  ],
   "categories": [
     "Communication"
   ],
@@ -16,26 +20,32 @@
       "subtitle": "WeChat",
       "description": "A Raycast extension for WeChat  to quickly search your contacts and chat",
       "mode": "view"
+    },
+    {
+      "name": "manageTweak",
+      "title": "Manage WeChatTweak",
+      "description": "Install, uninstall, or manage WeChatTweak",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.3",
-    "@raycast/utils": "^1.4.1",
-    "node-fetch": "^3.0.0"
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.19.1",
+    "@types/react": "^19.1.0",
+    "node-fetch": "^3.3.2",
+    "text-search-engine": "^1.4.4"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.38.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.11",
+    "eslint": "^8.57.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop",
     "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish",
+    "dev": "ray develop",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "build": "ray build -e dist"
   }
 }

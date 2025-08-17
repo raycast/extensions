@@ -9,6 +9,7 @@ import { copyFileToClipboard } from "@/functions/copyFileToClipboard";
 
 // Components
 import Details from "@/views/Details";
+import { SearchResult } from "@/types";
 
 // Types
 interface BaseProps {
@@ -25,7 +26,7 @@ export const Actions = ({ details, item, unlike }: BaseProps) => (
 
 export const Sections = ({ details = false, item, unlike }: BaseProps) => {
   const { push } = useNavigation();
-  const { downloadSize } = getPreferenceValues<UnsplashPreferences>();
+  const { downloadSize } = getPreferenceValues<Preferences>();
   const [liked, setLiked] = useState(item.liked_by_user);
 
   const imageUrl = item.urls?.raw || item.urls?.full || item.urls?.regular || item.urls?.small;

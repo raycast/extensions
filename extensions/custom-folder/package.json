@@ -5,6 +5,9 @@
   "description": "Customize MacOS folder icons.",
   "icon": "custom-folder-icon.png",
   "author": "phlo",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "categories": [
     "Other",
     "Design Tools"
@@ -22,12 +25,25 @@
       "title": "Customize Icon with Emoji",
       "description": "Create a custom folder image from an emoji",
       "mode": "view"
+    },
+    {
+      "name": "replaceFolderIcon",
+      "title": "Replace Folder Icon with Image",
+      "description": "Replace the icon of a folder with a custom image",
+      "mode": "view"
+    },
+    {
+      "name": "resetFolderIcon",
+      "title": "Reset Folder Icon",
+      "description": "Reset the icon of a folder to the default one",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.64.3",
     "@raycast/utils": "^1.16.5",
     "emoji-datasource-apple": "^15.1.2",
+    "execa": "^9.5.2",
     "jimp": "^0.22.10",
     "sharp": "^0.33.5"
   },

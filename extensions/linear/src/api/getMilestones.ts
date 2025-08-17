@@ -1,4 +1,5 @@
 import { ProjectMilestone } from "@linear/sdk";
+
 import { getLinearClient } from "../api/linearClient";
 
 export type MilestoneResult = Pick<

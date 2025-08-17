@@ -1,6 +1,6 @@
-import { OAuthService } from "@raycast/utils";
 import { LinearClient, LinearGraphQLClient } from "@linear/sdk";
 import { environment } from "@raycast/api";
+import { OAuthService } from "@raycast/utils";
 
 let linearClient: LinearClient | null = null;
 

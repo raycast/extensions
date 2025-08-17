@@ -1,5 +1,14 @@
 # Bitbucket Changelog
 
+## [Maintenance] - 2025-06-18
+
+- Use the npm official registry
+- Bump all dependencies to the latest
+
+## [Update] - 2025-04-04
+
+- Added the ability to favorite repositories
+
 ## [Update] - 2024-12-02
 
 - Added Prettier to the project as newly required by Raycast

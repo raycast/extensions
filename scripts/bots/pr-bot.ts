@@ -11,6 +11,22 @@ type API = {
 };
 
 export default async ({ github, context }: API) => {
+  const assignReadyForReviewTo = "pernielsentikaer";
+
+  if (context.payload.action === "ready_for_review" && !context.payload.pull_request.draft) {
+    try {
+      await github.rest.issues.addAssignees({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        issue_number: context.issue.number,
+        assignees: [assignReadyForReviewTo]
+      });
+      console.log(`Successfully assigned PR to ${assignReadyForReviewTo}`);
+    } catch (error) {
+      console.error(`Failed to assign PR to ${assignReadyForReviewTo}:`, error);
+    }
+  }
+
   console.log("changed extensions", process.env.CHANGED_EXTENSIONS);
 
   if (!process.env.CHANGED_EXTENSIONS) {
@@ -29,7 +45,8 @@ export default async ({ github, context }: API) => {
     return;
   }
 
-  const expectations = "Due to our current reduced availability, the initial review may take up to 10-15 business days";
+  // You can expect an initial review within five business days.
+  const expectations = "Due to our current reduced availability during summer, the initial review may take up to 10-15 business days.";
 
   const codeowners = await getCodeOwners({ github, context });
 
@@ -57,15 +74,33 @@ export default async ({ github, context }: API) => {
   for (const extensionFolder of touchedExtensions) {
     const owners = codeowners[`/extensions/${extensionFolder}`];
 
+    let aiFilesOrToolsExist = false;
+
     if (!owners) {
       // it's a new extension
       console.log(`cannot find existing extension ${extensionFolder}`);
+
       await github.rest.issues.addLabels({
         issue_number: context.issue.number,
         owner: context.repo.owner,
         repo: context.repo.repo,
         labels: ["new extension"],
       });
+
+      // because it's a new extension, let's check for AI stuff in the PR diff
+      aiFilesOrToolsExist = await checkForAiInPullRequestDiff(extensionFolder, { github, context });
+
+      if (aiFilesOrToolsExist) {
+        console.log(`adding AI Extension label because ai files or tools exist for ${extensionFolder}`);
+
+        await github.rest.issues.addLabels({
+          issue_number: context.issue.number,
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          labels: ["AI Extension"],
+        });
+      }
+
       // `Congratulations on your new Raycast extension! :rocket:\n\nWe will aim to make the initial review within five working days. Once the PR is approved and merged, the extension will be available on our Store.`
       await comment({
         github,
@@ -81,6 +116,57 @@ export default async ({ github, context }: API) => {
       repo: context.repo.repo,
       labels: ["extension fix / improvement", await extensionLabel(extensionFolder, { github, context })],
     });
+
+    // Check package.json tools first
+    try {
+      const packageJson = await getGitHubFile(`extensions/${extensionFolder}/package.json`, { github, context });
+      const packageJsonObj = JSON.parse(packageJson);
+
+      aiFilesOrToolsExist = !!packageJsonObj.tools;
+    } catch {
+      console.log(`No package.json tools for ${extensionFolder}`);
+    }
+
+    // Only check AI files if no tools found in package.json
+    if (!aiFilesOrToolsExist) {
+      try {
+        await getGitHubFile(`extensions/${extensionFolder}/ai.json`, { github, context });
+
+        aiFilesOrToolsExist = true;
+      } catch {
+        console.log(`No ai.json for ${extensionFolder}`);
+      }
+
+      try {
+        await getGitHubFile(`extensions/${extensionFolder}/ai.yaml`, { github, context });
+
+        aiFilesOrToolsExist = true;
+      } catch {
+        console.log(`No ai.yaml for ${extensionFolder}`);
+      }
+
+      try {
+        await getGitHubFile(`extensions/${extensionFolder}/ai.json5`, { github, context });
+
+        aiFilesOrToolsExist = true;
+      } catch {
+        console.log(`No ai.json5 for ${extensionFolder}`);
+      }
+    }
+
+    if (!aiFilesOrToolsExist) {
+      // If we didn't find any AI files or tools in the package.json, let's check the PR diff
+      aiFilesOrToolsExist = await checkForAiInPullRequestDiff(extensionFolder, { github, context });
+    }
+
+    if (aiFilesOrToolsExist) {
+      await github.rest.issues.addLabels({
+        issue_number: context.issue.number,
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        labels: ["AI Extension"],
+      });
+    }
 
     if (!owners.length) {
       console.log("no maintainer for this extension");
@@ -164,6 +250,58 @@ async function getGitHubFile(path: string, { github, context }: Pick<API, "githu
 
   // @ts-ignore
   return data as string;
+}
+
+async function checkForAiInPullRequestDiff(extensionFolder: string, { github, context }: Pick<API, "github" | "context">) {
+  const { data: files } = await github.rest.pulls.listFiles({
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+    pull_number: context.issue.number,
+  });
+
+  let aiFilesOrToolsExist: boolean = false;
+
+  for (const file of files) {
+    const filePath = file.filename;
+
+    // we only care about files in the extension folder
+    if (!filePath.startsWith(`extensions/${extensionFolder}/`)) {
+      continue;
+    }
+
+    if (filePath === `extensions/${extensionFolder}/package.json`) {
+      try {
+        // because it's a new extension, we need to get the content from the PR itself
+        if (file.status === 'added' || file.status === 'modified') {
+          const { data: content } = await github.rest.repos.getContent({
+            mediaType: {
+              format: "raw",
+            },
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            path: filePath,
+            ref: context.payload.pull_request.head.sha,
+          });
+
+          const packageJsonObj = JSON.parse(content as unknown as string);
+
+          aiFilesOrToolsExist = !!packageJsonObj.tools;
+        }
+      } catch {
+        console.log(`Could not parse package.json for ${extensionFolder}`);
+      }
+    }
+
+    if (file.status === 'added' || file.status === 'modified') {
+      const aiFiles = ['ai.json', 'ai.yaml', 'ai.json5'];
+
+      if (aiFiles.some(filename => filePath === `extensions/${extensionFolder}/${filename}`)) {
+        aiFilesOrToolsExist = true;
+      }
+    }
+  }
+
+  return aiFilesOrToolsExist;
 }
 
 // Create a new comment or update the existing one

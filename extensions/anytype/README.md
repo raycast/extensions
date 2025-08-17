@@ -1,6 +1,6 @@
 # Anytype for Raycast
 
-Create, browse and search in Anytype - right at your fingertips, anywhere on your Mac.
+Create, browse, search and edit within Anytype - right at your fingertips, anywhere on your Mac.
 
 ## Setup
 
@@ -10,10 +10,10 @@ To get started, grant the extension access to your account using the local pairi
 2. **Open Anytype Desktop**: Ensure the app is running and you are logged in.
 3. **Run a Command**: Trigger any extension command.
 4. **Authenticate**: When prompted, press <kbd>Enter</kbd> to start the pairing process.
-5. **Enter the Code**: A popup in Anytype Desktop will display a 4-digit code. Input this code in the extension’s `Verification Code` field. Press <kbd>Command</kbd> + <kbd>Enter</kbd> to confirm.
+5. **Enter the Code**: A popup in Anytype Desktop will display a 4-digit code. Input this code in the extension’s `Code` field. Press <kbd>Command</kbd> + <kbd>Enter</kbd> to confirm.
 6. **Confirmation**: Once successfully paired, the extension is ready to use.
 
-![Authenticate](./metadata/anytype-5.png)
+![Authenticate](./metadata/anytype-7.png)
 
 ## Commands
 
@@ -37,6 +37,7 @@ Navigate through your spaces and explore their contents.
 
 ![Browse Spaces](./metadata/anytype-1.png)
 ![Browse Objects](./metadata/anytype-2.png)
+![Browse Types](./metadata/anytype-6.png)
 
 ### Search Anytype
 
@@ -47,6 +48,7 @@ Perform a global search across all spaces in your vault.
 - **Interact**: Press <kbd>Enter</kbd> to view the object in Raycast or <kbd>Command</kbd> + <kbd>Enter</kbd> to open it in Anytype.
 
 ![Search](./metadata/anytype-4.png)
+![Show Details](./metadata/anytype-5.png)
 
 ## Tips
 

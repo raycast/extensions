@@ -1,5 +1,4 @@
-import { runAppleScript } from "@raycast/utils";
-import { safariAppIdentifier } from "../utils";
+import { addToReadingList } from "../safari";
 
 type Input = {
   /**
@@ -8,13 +7,6 @@ type Input = {
   url: string;
 };
 
-const tool = async (input: Input) => {
-  await runAppleScript(`
-      tell application "${safariAppIdentifier}"
-        set theURL to "${input.url}"
-        add reading list item theURL
-      end tell
-    `);
-};
-
-export default tool;
+export default async function tool(input: Input) {
+  await addToReadingList(input.url);
+}

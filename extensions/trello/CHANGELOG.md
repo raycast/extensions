@@ -1,5 +1,9 @@
 # Trello Changelog
 
+## [Update] - 2025-05-30
+
+Update dependencies and allow for card assignee to be empty.
+
 ## [Update] - 2024-06-20
 
 Update dependencies and case of read me to show up in Raycast store.
@@ -15,6 +19,7 @@ Fix scope in auth URL and update dependencies
 ## [Update] - 2024-03-15
 
 Update dependencies and make it more obvious to add preferences.
+
 ## [Update] - 2023-12-12
 
 Added support to open cards in Trello desktop. Thanks to the Trello support team 🥳!

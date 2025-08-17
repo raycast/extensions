@@ -28,6 +28,15 @@
           "type": "checkbox",
           "required": false,
           "default": true
+        },
+        {
+          "name": "popAfterCopy",
+          "title": "Exit command after copying address",
+          "label": "Exit command after copying address from list",
+          "description": "If enabled, the command will close upon copying an address from the list.",
+          "type": "checkbox",
+          "required": false,
+          "default": true
         }
       ]
     },
@@ -50,7 +59,7 @@
   "dependencies": {
     "@raycast/api": "^1.85.0",
     "@raycast/utils": "^1.17.0",
-    "axios": "^1.7.7",
+    "axios": "^1.8.4",
     "axios-cookiejar-support": "^5.0.3",
     "fast-srp-hap": "^2.0.4",
     "patch-package": "^8.0.0",

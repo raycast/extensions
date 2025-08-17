@@ -59,3 +59,22 @@ export const getPlayerState = pipe(
   tell("Music", "player state"),
   TE.map((state) => state as PlayerState),
 );
+
+const getRepeatStatus = pipe(
+  tell("Music", "get song repeat"),
+  TE.map((s) => s === "one"),
+);
+
+const setRepeatStatus = pipe(
+  RTE.ask<boolean>(),
+  RTE.chainTaskEitherK((isEnabled) => tell("Music", `set song repeat to ${isEnabled ? "one" : "off"}`)),
+);
+
+export const repeat = {
+  get: getRepeatStatus,
+  set: setRepeatStatus,
+  toggle: pipe(
+    getRepeatStatus,
+    TE.chain((enabled) => setRepeatStatus(!enabled)),
+  ),
+};

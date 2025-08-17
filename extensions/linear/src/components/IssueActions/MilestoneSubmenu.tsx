@@ -2,10 +2,11 @@ import { Action, ActionPanel, Color } from "@raycast/api";
 import { useState } from "react";
 
 import { IssueResult } from "../../api/getIssues";
-import { UpdateIssueParams } from "./IssueActions";
 import { MilestoneResult } from "../../api/getMilestones";
-import useMilestones from "../../hooks/useMilestones";
 import { getMilestoneIcon } from "../../helpers/milestones";
+import useMilestones from "../../hooks/useMilestones";
+
+import { UpdateIssueParams } from "./IssueActions";
 
 export default function MilestoneSubmenu({
   issue,
@@ -54,7 +55,7 @@ export default function MilestoneSubmenu({
       />
 
       {!milestones && isLoadingMilestones ? (
-        <Action title="Loading..." />
+        <Action title="Loading…" />
       ) : (
         (milestones || []).map((milestone) => (
           <Action

@@ -2,7 +2,7 @@ import { Action, ActionPanel, Form, Icon } from "@raycast/api";
 import { EditSnippetProps, FormValues, useFormLogic } from "./edit-snippet";
 
 export default function EditSnippetXML({ snippet, onSubmit }: EditSnippetProps) {
-  const { handleSubmit, itemProps } = useFormLogic({ snippet, onSubmit });
+  const { handleSubmit, setSnippetText, snippetText } = useFormLogic({ snippet, onSubmit });
   return (
     <Form
       actions={
@@ -30,7 +30,9 @@ export default function EditSnippetXML({ snippet, onSubmit }: EditSnippetProps) 
       <Form.Separator />
       <Form.TextArea
         title="XML"
-        {...itemProps.snippet}
+        value={snippetText}
+        onChange={(value) => setSnippetText(value)}
+        id="snippet"
         autoFocus
         info="Copy/Paste this to/from your code editor for a better experience"
       />

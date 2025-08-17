@@ -49,20 +49,6 @@ import { homedir } from "os";
 import ini from "ini";
 import fs from "node:fs";
 
-interface Configurations {
-  chrome: Factory<ChromeRecord>;
-  orion: Factory<OrionRecord>;
-  arc: Factory<ArcRecord>;
-  safari: Factory<SafariRecord>;
-  firefox: Factory<FirefoxRecord>;
-  zen: Factory<ZenRecord>;
-  brave: Factory<BraveRecord>;
-  vivaldi: Factory<VivaldiRecord>;
-  opera: Factory<OperaRecord>;
-  edge: Factory<EdgeRecord>;
-  [key: string]: Factory<Record>;
-}
-
 export class Factory<T extends Record> {
   getQueryBuilder(): QueryBuilder {
     return new ChromeQueryBuilder();
@@ -78,20 +64,30 @@ export class Factory<T extends Record> {
   }
 
   static create(browser: string, profile: string): Factory<Record> {
-    const config: Configurations = {
-      chrome: new ChromeFactory(profile),
-      orion: new OrionFactory(),
-      arc: new ArcFactory(),
-      safari: new SafariFactory(),
-      firefox: new FirefoxFactory(),
-      zen: new ZenFactory(),
-      brave: new BraveFactory(),
-      vivaldi: new VivaldiFactory(),
-      opera: new OperaFactory(),
-      edge: new EdgeFactory(),
-    };
-
-    return config[browser];
+    switch (browser) {
+      case "chrome":
+        return new ChromeFactory(profile);
+      case "orion":
+        return new OrionFactory();
+      case "arc":
+        return new ArcFactory();
+      case "safari":
+        return new SafariFactory();
+      case "firefox":
+        return new FirefoxFactory();
+      case "zen":
+        return new ZenFactory();
+      case "brave":
+        return new BraveFactory();
+      case "vivaldi":
+        return new VivaldiFactory();
+      case "opera":
+        return new OperaFactory();
+      case "edge":
+        return new EdgeFactory();
+      default:
+        return new ChromeFactory(profile);
+    }
   }
 }
 

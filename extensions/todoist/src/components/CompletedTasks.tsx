@@ -1,10 +1,10 @@
 import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { compareDesc, format } from "date-fns";
 import { useMemo } from "react";
 import removeMarkdown from "remove-markdown";
 
-import { handleError, getActivity } from "../api";
+import { getActivity } from "../api";
 import { uncompleteTask as apiUncompleteTask } from "../api";
 import { displayDate } from "../helpers/dates";
 import { refreshMenuBarCommand } from "../helpers/menu-bar";
@@ -28,7 +28,7 @@ export default function CompletedTasks({ quickLinkView }: CompletedTaskProps) {
       mutate();
       refreshMenuBarCommand();
     } catch (error) {
-      handleError({ error, title: "Unable to uncomplete task" });
+      await showFailureToast(error, { title: "Unable to uncomplete task" });
     }
   }
 

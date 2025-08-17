@@ -244,6 +244,13 @@
       "required": true,
       "default": "gpt-4o",
       "title": "LLM Model Name"
+    },
+    {
+      "name": "custom_model",
+      "description": "Custom model ID for your API endpoint, will override the model selection",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Model ID"
     }
   ],
   "devDependencies": {

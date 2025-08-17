@@ -1,4 +1,5 @@
 import { useCachedPromise } from "@raycast/utils";
+
 import { getProjectUpdates } from "../api/getProjects";
 
 export default function useProjectUpdates(projectId: string) {

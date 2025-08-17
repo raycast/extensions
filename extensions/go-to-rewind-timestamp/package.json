@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "go-to-rewind-timestamp",
+  "title": "Go to Rewind Timestamp",
+  "description": "Open Rewind AI at a specific timestamp",
+  "icon": "rewind-ai.png",
+  "author": "haseab_",
+  "contributors": [
+    "Maclean"
+  ],
+  "categories": [
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "go-to-rewind-timestamp",
+      "title": "Go to Rewind Timestamp",
+      "subtitle": "Open Rewind AI at a specific timestamp",
+      "description": "Enter a time in natural language (e.g. '2nd day of march', '3 minutes ago', 'Feb 1 2am', 'yesterday 8am')",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "time",
+          "placeholder": "e.g. 3 minutes ago",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "go-to-last-timestamp",
+      "title": "Go to Last Timestamp",
+      "subtitle": "Launches Previous Rewind Timestamp",
+      "description": "Launches Previous Rewind Timestamp",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.95.0",
+    "@raycast/utils": "^1.17.0",
+    "chrono-node": "^2.8.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,30 +1,24 @@
-import { Action, ActionPanel, Color, getPreferenceValues, Icon, Keyboard, List } from "@raycast/api";
-import { getFavicon, useCachedState, useFetch } from "@raycast/utils";
-import { DomainInfo, ErrorResult, SuccessResult, ResourceRecord, DomainClientEPPStatus } from "./types";
-
-function useSpaceship<T>(endpoint: string) {
-  const { apiKey, apiSecret } = getPreferenceValues<Preferences>();
-  const { isLoading, data } = useFetch(`https://spaceship.dev/api/v1/${endpoint}?take=20&skip=0`, {
-    headers: {
-      "X-Api-Key": apiKey,
-      "X-Api-Secret": apiSecret,
-    },
-    async parseResponse(response) {
-      if (!response.ok) {
-        const res: ErrorResult = await response.json();
-        throw new Error(res.detail);
-      }
-      const res: SuccessResult<T> = await response.json();
-      return res.items;
-    },
-    initialData: [],
-  });
-  return { isLoading, data };
-}
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Detail,
+  Icon,
+  Keyboard,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
+import { getFavicon, useCachedState } from "@raycast/utils";
+import { DomainInfo, DomainClientEPPStatus, DomainAuthCode } from "./types";
+import ManageDNSRecords from "./manage-dns-records";
+import { API_HEADERS, API_URL, parseResponse, useSpaceship } from "./spaceship";
 
 export default function ManageDomains() {
+  const { push } = useNavigation();
   const [isShowingDetail, setIsShowingDetail] = useCachedState("show-details-domains", false);
-  const { isLoading, data: domains } = useSpaceship<DomainInfo>("domains");
+  const { isLoading, data: domains, mutate } = useSpaceship<DomainInfo>("domains");
 
   function formatDate(date: string) {
     const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "short", day: "numeric" };
@@ -32,14 +26,16 @@ export default function ManageDomains() {
     return formattedDate;
   }
 
+  function isLocked(domain: DomainInfo) {
+    return domain.eppStatuses.includes(DomainClientEPPStatus.clientTransferProhibited);
+  }
+
   function generateAccessories(domain: DomainInfo) {
     const accessories: List.Item.Accessory[] = [
       { tag: domain.privacyProtection.level === "high" ? "Private" : "Public", tooltip: "Privacy" },
     ];
     accessories.push({
-      tag: domain.eppStatuses.includes(DomainClientEPPStatus.clientTransferProhibited)
-        ? { value: "LOCKED", color: Color.Green }
-        : { value: "UNLOCKED", color: Color.Red },
+      tag: isLocked(domain) ? { value: "LOCKED", color: Color.Green } : { value: "UNLOCKED", color: Color.Red },
       tooltip: "Transfer lock",
     });
     accessories.push({
@@ -47,6 +43,63 @@ export default function ManageDomains() {
       tooltip: `Expires on ${formatDate(domain.expirationDate)}`,
     });
     return accessories;
+  }
+
+  async function getDomainAuthCode(domain: DomainInfo) {
+    const toast = await showToast(Toast.Style.Animated, "Fetching Auth Code", domain.name);
+    try {
+      const response = await fetch(`${API_URL}domains/${domain.name}/transfer/auth-code`, {
+        headers: API_HEADERS,
+      });
+      const result = (await parseResponse(response)) as DomainAuthCode;
+      toast.style = Toast.Style.Success;
+      toast.title = "Fetched Auth Code";
+      push(
+        <Detail
+          markdown={`# ${domain.name} \n---\n Auth Code: ${result.authCode} \n\n Expires: ${result.expires || "N/A"}`}
+          actions={
+            <ActionPanel>
+              <Action.CopyToClipboard title="Copy Auth Code to Clipboard" content={result.authCode} />
+            </ActionPanel>
+          }
+        />,
+      );
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed";
+      toast.message = `${error}`;
+    }
+  }
+
+  async function updateDomainTransferLock(domain: DomainInfo, action: "Lock" | "Unlock") {
+    const toast = await showToast(Toast.Style.Animated, `${action}ing`, domain.name);
+    try {
+      await mutate(
+        fetch(`${API_URL}domains/${domain.name}/transfer/lock`, {
+          method: "PUT",
+          headers: API_HEADERS,
+          body: JSON.stringify({
+            isLocked: action === "Lock",
+          }),
+        }).then(parseResponse),
+        {
+          optimisticUpdate(data) {
+            const eppStatuses =
+              action === "Lock"
+                ? [...domain.eppStatuses, DomainClientEPPStatus.clientTransferProhibited]
+                : domain.eppStatuses.filter((status) => status !== DomainClientEPPStatus.clientTransferProhibited);
+            return data.map((d) => (d.name === domain.name ? { ...d, eppStatuses } : d));
+          },
+          shouldRevalidateAfter: false,
+        },
+      );
+      toast.style = Toast.Style.Success;
+      toast.title = `${action}ed`;
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed";
+      toast.message = `${error}`;
+    }
   }
 
   return (
@@ -72,6 +125,22 @@ export default function ManageDomains() {
                 url={`https://${domain.name}`}
                 shortcut={Keyboard.Shortcut.Common.Open}
               />
+              <ActionPanel.Section>
+                <Action icon={Icon.Shield} title="Get Auth Code" onAction={() => getDomainAuthCode(domain)} />
+                {isLocked(domain) ? (
+                  <Action
+                    icon={{ source: Icon.LockUnlocked, tintColor: Color.Red }}
+                    title="Unlock Domain"
+                    onAction={() => updateDomainTransferLock(domain, "Unlock")}
+                  />
+                ) : (
+                  <Action
+                    icon={{ source: Icon.Lock, tintColor: Color.Green }}
+                    title="Lock Domain"
+                    onAction={() => updateDomainTransferLock(domain, "Lock")}
+                  />
+                )}
+              </ActionPanel.Section>
             </ActionPanel>
           }
           detail={
@@ -79,40 +148,6 @@ export default function ManageDomains() {
               markdown={`${domain.nameservers.provider} Nameservers \n\n ${domain.nameservers.hosts.join("\n\n")}`}
             />
           }
-        />
-      ))}
-    </List>
-  );
-}
-
-function ManageDNSRecords({ domain }: { domain: DomainInfo }) {
-  const { isLoading, data: records } = useSpaceship<ResourceRecord>(`dns/records/${domain.name}`);
-
-  function generateAccessories(record: ResourceRecord) {
-    const accessories: List.Item.Accessory[] = [{ tag: record.type, tooltip: "Type" }];
-
-    if (record.address) accessories.unshift({ icon: Icon.Text, text: record.address, tooltip: "Address" });
-    else if (record.value) accessories.unshift({ icon: Icon.Text, text: record.value, tooltip: "Value" });
-
-    return accessories;
-  }
-
-  return (
-    <List isLoading={isLoading}>
-      {domain.nameservers.provider === "custom" && (
-        <List.EmptyView
-          icon={Icon.Store}
-          title="Managed with Custom DNS"
-          description="To manage your records here, change nameservers back to Spaceship DNS. You can even choose to see your inactive records and prepare them before changing back."
-        />
-      )}
-      {records.map((record, index) => (
-        <List.Item
-          key={index}
-          icon={Icon.Store}
-          title={record.name}
-          subtitle={`.${domain.name}`}
-          accessories={generateAccessories(record)}
         />
       ))}
     </List>

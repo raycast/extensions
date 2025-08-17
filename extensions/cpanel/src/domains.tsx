@@ -48,6 +48,7 @@ function Domain({ domain, showAction = true }: { domain: string; showAction?: bo
       actions={
         showAction && (
           <ActionPanel>
+            {/* eslint-disable-next-line @raycast/prefer-title-case */}
             <Action.Push icon={Icon.Eye} title="View DNS Zone" target={<ViewDNSZone zone={domain} />} />
           </ActionPanel>
         )
@@ -105,6 +106,7 @@ function ViewDNSZone({ zone }: { zone: string }) {
                 <ActionPanel>
                   <Action.Push
                     icon={Icon.Plus}
+                    // eslint-disable-next-line @raycast/prefer-title-case
                     title="Create DNS Zone Record"
                     target={
                       <CreateDNSZoneRecord

@@ -1,5 +1,16 @@
 # Docker Changelog
 
+## [Improvement] - 2025-06-15
+- Group containers by state in the container list view
+
+## [Feature] - 2025-06-10
+
+- Added action to Stop and Remove Container if it is running.
+
+## [Improvement] - 2025-03-12
+
+- Show project icon in green if all containers are running.
+
 ## [Feature] - 2025-02-04
 
 - Added ability to search containers by their image-name or id.

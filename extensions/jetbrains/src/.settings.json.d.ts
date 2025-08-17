@@ -3,7 +3,7 @@ export default interface JetBrainsToolboxSettings {
   ordering: {
     installed: path[];
   };
-  projects: Record<path, ToolboxProjectConfig>;
+  projects?: Record<path, ToolboxProjectConfig>;
   shell_scripts: ShellScripts;
 }
 

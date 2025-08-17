@@ -3,8 +3,8 @@ import OpenAI from "openai";
 import { useEffect } from "react";
 import { OPENAI_MODEL } from "../../../const/defaults";
 import { ALERT, FINDING_ANSWER } from "../../../const/toast_messages";
-import { Question } from "../../../hooks/useQuestions";
-import { OpenAIPreferences } from "../../../summarizeVideoWithOpenAI";
+import type { Question } from "../../../hooks/useQuestions";
+import type { OpenAIPreferences } from "../../../summarizeVideoWithOpenAI";
 import { generateQuestionId } from "../../../utils/generateQuestionId";
 import { getFollowUpQuestionSnippet } from "../../../utils/getAiInstructionSnippets";
 
@@ -16,7 +16,12 @@ type FollowUpQuestionParams = {
 };
 
 export function useOpenAIFollowUpQuestion({ setQuestions, setQuestion, transcript, question }: FollowUpQuestionParams) {
+  const preferences = getPreferenceValues() as OpenAIPreferences;
+  const { openaiApiToken, openaiEndpoint, openaiModel, creativity } = preferences;
+
   useEffect(() => {
+    const abortController = new AbortController();
+
     const handleAdditionalQuestion = async () => {
       if (!question || !transcript) return;
       const qID = generateQuestionId();
@@ -26,9 +31,6 @@ export function useOpenAIFollowUpQuestion({ setQuestions, setQuestion, transcrip
         title: FINDING_ANSWER.title,
         message: FINDING_ANSWER.message,
       });
-
-      const preferences = getPreferenceValues() as OpenAIPreferences;
-      const { openaiApiToken, openaiEndpoint, openaiModel } = preferences;
 
       const openai = new OpenAI({
         apiKey: openaiApiToken,
@@ -47,25 +49,32 @@ export function useOpenAIFollowUpQuestion({ setQuestions, setQuestion, transcrip
         ...prevQuestions,
       ]);
 
-      const stream = openai.beta.chat.completions.stream({
-        model: openaiModel || OPENAI_MODEL,
-        messages: [{ role: "user", content: getFollowUpQuestionSnippet(question, transcript) }],
-        stream: true,
-      });
+      const answer = openai.chat.completions.stream(
+        {
+          model: openaiModel || OPENAI_MODEL,
+          messages: [{ role: "user", content: getFollowUpQuestionSnippet(question, transcript) }],
+          stream: true,
+          creativity: Number.parseInt(creativity, 10),
+        },
+        { signal: abortController.signal },
+      );
 
-      stream.on("content", (delta) => {
+      answer.on("content", (delta) => {
         toast.show();
         setQuestions((prevQuestions) =>
           prevQuestions.map((q) => (q.id === qID ? { ...q, answer: q.answer + delta } : q)),
         );
       });
 
-      stream.finalChatCompletion().then(() => {
+      answer.finalChatCompletion().then(() => {
         toast.hide();
         setQuestion("");
       });
 
-      stream.on("error", (error) => {
+      if (abortController.signal.aborted) return;
+
+      answer.on("error", (error) => {
+        if (abortController.signal.aborted) return;
         toast.style = Toast.Style.Failure;
         toast.title = ALERT.title;
         toast.message = error.message;
@@ -73,5 +82,9 @@ export function useOpenAIFollowUpQuestion({ setQuestions, setQuestion, transcrip
     };
 
     handleAdditionalQuestion();
-  }, [question, transcript]);
+
+    return () => {
+      abortController.abort();
+    };
+  }, [question, transcript, creativity, openaiApiToken, openaiEndpoint, openaiModel, setQuestion, setQuestions]);
 }

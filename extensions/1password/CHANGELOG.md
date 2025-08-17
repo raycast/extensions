@@ -1,5 +1,7 @@
 # 1Password Changelog
 
+## [Moved contributor] - 2025-02-24
+
 ## [Moved contributor] - 2025-02-03
 
 ## [Enhancements] - 2025-02-12

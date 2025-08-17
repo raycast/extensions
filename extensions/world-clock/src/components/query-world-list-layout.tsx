@@ -16,18 +16,16 @@ export function QueryWorldListLayout() {
   const [region, setRegion] = useState<string>("");
 
   const { data: allTimezonesData, isLoading: allTimezonesLoading } = useAllTimezones();
-  const timezones = useMemo(() => {
-    return allTimezonesData || [];
-  }, [allTimezonesData]);
+
+  const timezones = Array.isArray(allTimezonesData) ? allTimezonesData : [];
 
   const { data: starTimezonesData, isLoading: starTimezonesLoading, mutate: starTimezonesMutate } = useStarTimezones();
 
   const mutate = async () => {
     await starTimezonesMutate();
   };
-  const starTimezones = useMemo(() => {
-    return starTimezonesData || [];
-  }, [starTimezonesData]);
+
+  const starTimezones = Array.isArray(starTimezonesData) ? starTimezonesData : [];
 
   const { data: showDetailData, mutate: showDetailMutate } = useShowDetail();
   const showDetail = useMemo(() => {
@@ -70,7 +68,7 @@ export function QueryWorldListLayout() {
                 index={index}
                 currentTime={currentTime}
                 timezone={value}
-                detailLoading={detailLoading}
+                detailLoading={false}
                 starTimezones={starTimezones}
                 mutate={mutate}
                 showDetailMutate={showDetailMutate}

@@ -10,12 +10,13 @@ There is no view for this port. You need access then through [deeplinks](https:/
 
 - [AI.ask](https://developers.raycast.com/api-reference/ai) (requires [Raycast Pro](https://raycast.com/pro))
 - [BrowserExtension](https://developers.raycast.com/api-reference/browser-extension)
+- [WindowManagement](https://developers.raycast.com/api-reference/window-management) (requires [Raycast Pro](https://raycast.com/pro))
 
 More features will be added in the future.
 
 ## API
 
-See [docs/README.md](./docs/README.md).
+See [docs/README.md](https://github.com/raycast/extensions/tree/main/extensions/raycast-port/docs).
 
 ## License
 

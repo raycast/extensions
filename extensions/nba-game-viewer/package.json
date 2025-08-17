@@ -119,7 +119,7 @@
   "dependencies": {
     "@raycast/api": "^1.81.0",
     "@raycast/utils": "^1.16.4",
-    "axios": "^1.7.4",
+    "axios": "^1.8.4",
     "lodash": "^4.17.21"
   },
   "devDependencies": {

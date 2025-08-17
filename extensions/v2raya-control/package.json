@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "v2raya-control",
+  "title": "V2RayA Control",
+  "description": "V2RayA Control is a Raycast extension that allows you to easily manage and control V2RayA, a powerful network proxy tool. Quickly toggle proxy modes, and check connection status—all from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "masoud_hamidzadeh",
+  "categories": [
+    "System",
+    "Applications",
+    "Productivity",
+    "Developer Tools",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "toggle",
+      "title": "Toggle Connection",
+      "subtitle": "V2RayA Control",
+      "description": "Toggle V2RayA Connection",
+      "mode": "no-view"
+    },
+    {
+      "name": "status",
+      "title": "Check Status",
+      "subtitle": "V2RayA Control",
+      "description": "Check V2RayA Status",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.85.2",
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^2.6.12"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/node-fetch": "^2.6.12",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "v2rayaHost",
+      "type": "textfield",
+      "required": true,
+      "title": "V2RayA Host",
+      "description": "V2RayA API host address (e.g., http://127.0.0.1:2017)",
+      "default": "http://127.0.0.1:2017"
+    },
+    {
+      "name": "username",
+      "type": "textfield",
+      "required": true,
+      "title": "Username",
+      "description": "V2RayA username"
+    },
+    {
+      "name": "password",
+      "type": "password",
+      "required": true,
+      "title": "Password",
+      "description": "V2RayA password"
+    }
+  ]
+}

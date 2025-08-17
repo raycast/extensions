@@ -1,5 +1,20 @@
 # United Nations Extension
 
+## [Maintenance] - 2025-06-04
+
+- Drop unexpected LaTeX content
+- Bump all dependencies to the latest
+
+## [Bugfix] - 2025-06-03
+
+- Replace broken UN documents GA RSS feed source
+- Add SC, HRC and ESC feeds
+
+## [Maintenance] - 2025-02-28
+
+- Bump `fast-xml-parser` to v5 for named-exports
+- Bump all other dependencies to the latest
+
 ## [Enhancement] - 2024-12-19
 
 - Add Pinyin search support for Chinese

@@ -20,6 +20,10 @@
     "navigation"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "travelHome",

@@ -1,8 +1,7 @@
 import { AI, environment, getPreferenceValues, popToRoot, showToast, Toast } from "@raycast/api";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { ALERT, SUCCESS_SUMMARIZING_VIDEO, SUMMARIZING_VIDEO } from "../../../const/toast_messages";
-
-import { RaycastPreferences } from "../../../summarizeVideoWithRaycast";
+import type { RaycastPreferences } from "../../../summarizeVideoWithRaycast";
 import { getAiInstructionSnippet } from "../../../utils/getAiInstructionSnippets";
 
 type GetRaycastSummaryProps = {
@@ -11,7 +10,8 @@ type GetRaycastSummaryProps = {
   setSummary: React.Dispatch<React.SetStateAction<string | undefined>>;
 };
 
-export const useRaycastSummary = async ({ transcript, setSummaryIsLoading, setSummary }: GetRaycastSummaryProps) => {
+export const useRaycastSummary = ({ transcript, setSummaryIsLoading, setSummary }: GetRaycastSummaryProps) => {
+  const abortController = new AbortController();
   const preferences = getPreferenceValues() as RaycastPreferences;
   const { creativity, language } = preferences;
 
@@ -25,13 +25,15 @@ export const useRaycastSummary = async ({ transcript, setSummaryIsLoading, setSu
     return;
   }
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `abortController ` in dependencies will lead to an error
   useEffect(() => {
     if (!transcript) return;
 
     const aiInstructions = getAiInstructionSnippet(language, transcript, transcript);
 
-    const raycastSummary = AI.ask(aiInstructions, {
-      creativity: parseInt(creativity),
+    const stream = AI.ask(aiInstructions, {
+      creativity: Number.parseInt(creativity),
+      signal: abortController.signal,
     });
 
     setSummaryIsLoading(true);
@@ -42,14 +44,14 @@ export const useRaycastSummary = async ({ transcript, setSummaryIsLoading, setSu
       message: SUMMARIZING_VIDEO.message,
     });
 
-    raycastSummary.on("data", (data) => {
+    stream.on("data", (data) => {
       setSummary((result) => {
         if (result === undefined) return data;
         return result + data;
       });
     });
 
-    raycastSummary.finally(() => {
+    stream.finally(() => {
       setSummaryIsLoading(false);
       showToast({
         style: Toast.Style.Success,
@@ -58,12 +60,17 @@ export const useRaycastSummary = async ({ transcript, setSummaryIsLoading, setSu
       });
     });
 
-    raycastSummary.catch((error) => {
+    stream.catch((error) => {
+      if (abortController.signal.aborted) return;
       showToast({
         style: Toast.Style.Failure,
         title: ALERT.title,
         message: error.message,
       });
     });
-  }, [transcript]);
+
+    return () => {
+      abortController.abort();
+    };
+  }, [transcript, language, creativity, setSummary, setSummaryIsLoading]);
 };

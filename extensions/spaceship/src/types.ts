@@ -23,6 +23,11 @@ export type DomainInfo = {
   };
 };
 
+export type DomainAuthCode = {
+  authCode: string;
+  expires?: string | null;
+};
+
 export type ResourceRecord = {
   type: string;
   name: string;
@@ -32,6 +37,30 @@ export type ResourceRecord = {
   };
   value?: string;
   address?: string;
+  exchange?: string;
+};
+
+export type ResourceRecordsListCreateOrUpdateItem = (
+  | {
+      type: "TXT";
+      value: string;
+    }
+  | {
+      type: "MX";
+      exchange: string;
+      preference: number;
+    }
+  | {
+      type: "A" | "AAAA";
+      address: string;
+    }
+  | {
+      type: "CNAME";
+      cname: string;
+    }
+) & {
+  name: string;
+  ttl?: number;
 };
 
 export type SuccessResult<T> = {

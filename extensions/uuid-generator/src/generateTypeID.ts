@@ -26,7 +26,7 @@ export default async (props: LaunchProps<{ arguments: Arguments.GenerateTypeID }
         () => typeid(prefix).toString(),
         parseableNumber,
         upperCaseLetters,
-        UUIDType.TYPEID
+        UUIDType.TYPEID,
       );
 
       if (defaultAction === "copy") {

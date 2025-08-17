@@ -1,5 +1,19 @@
 # Claude Changelog
 
+## [Update] - 2025-05-23
+
+- Feature: Added new [Claude Sonnet 4](https://www.anthropic.com/news/claude-4)
+
+## [Added missing contributor] - 2025-03-03
+
+## [Update] - 2025-02-26
+
+- Fix: Don't append default model when local models exist
+
+## [Update] - 2025-02-25
+
+- Feature: Added new [Claude 3.7 Sonnet](https://www.anthropic.com/news/claude-3-7-sonnet)
+
 ## [Update] - 2025-01-30
 
 - Fix: History now saves as expected

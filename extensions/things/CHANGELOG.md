@@ -1,5 +1,46 @@
 # Things Changelog
 
+## [Fix Error on Task Update] - 2025-07-09
+
+- Fix JXA errors when updating todos via actions
+
+## [Improved Project Detection] - 2025-07-09
+
+- Improve detection mechanism for projects to not depend on the existence of a project
+- Prevent crashes when receiving an `undefined` value from Things via JavaScript for Automation (JXA)
+- Improve detection of `PERMISSION_DENIED` errors (`-1743` error code)
+
+## [Enhanced Error Handling] - 2025-07-07
+
+- Improved error messages with specific troubleshooting steps for Things connection issues
+- Added detailed guidance for permission errors and automation setup in System Settings
+- Replaced generic "Things Not Running" message with actionable error screens and retry functionality
+
+## [Fix Project Updates] - 2025-07-02
+
+- Fixed update actions failing when used on projects in lists. Projects now use the correct `things:///update-project` URL scheme instead of the regular `things:///update` scheme used for todos.
+
+## [✨ Reminders] - 2025-05-06
+
+- Update the "Today" and "Upcoming" lists to allow updating todo's reminders.
+- Fixed issue with the Deadline action to correctly remove a deadline from a todo.
+
+## [✨ Fix Complete Menu Bar Action] - 2025-04-25
+
+- Fix `Complete` menu bar action to mark the first incomplete todo as complete, rather than completing the first item in the list, even if it is already marked as completed.
+
+## [✨ Menu Bar Todo] - 2025-04-25
+
+- Update the menu bar to display only incomplete todos from today’s list
+
+## [Detect URL in Notes] - 2025-04-11
+
+- Detect a URL in todo notes and offer `Open URL From Notes` and `Copy URL From Notes` actions.
+
+## [✨ Improved Error Handling] - 2025-04-07
+
+- Fixed an issue that caused the application to crash when users attempted to update a todo item from the menu bar without a valid authentication token.
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [Focus Input Fields] - 2024-10-25
@@ -40,6 +81,7 @@
 Ever wanted to add a new to-do to Things with plain, natural text? Well, it's possible now with the new `Quick Add To-Do` command. Just type in your to-do text, maybe set some notes and checklist items and you're good to go.
 
 Under the hood, it'll analyze and process your text to extract these parameters:
+
 - The title
 - The start date
 - The project or area the to-do belongs to
@@ -49,6 +91,7 @@ Under the hood, it'll analyze and process your text to extract these parameters:
 - If it's completed or canceled
 
 Here are some examples:
+
 - Book flights today in my Trips list
 - Add milk to my groceries list for tomorrow with Errand tag
 - Respond to mails
@@ -65,6 +108,7 @@ A big update has been released for the Things extension. Here's what's new:
 ### New actions
 
 You now have additional actions for your to-dos:
+
 - Schedule
 - Move to a project/area
 - Edit the title or notes

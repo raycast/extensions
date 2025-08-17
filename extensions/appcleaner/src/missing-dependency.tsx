@@ -1,26 +1,15 @@
-/* eslint-disable @raycast/prefer-title-case */
-import { ActionPanel, Action, Detail } from "@raycast/api";
-
-const AppCleanerURL = "https://freemacsoft.net/appcleaner/";
-const PearCleanerURL = "https://itsalin.com/appInfo/?id=pearcleaner";
+import { Action, ActionPanel, Detail } from "@raycast/api";
+import { UNINSTALLERS } from "./lib/constants";
 
 export function MissingDependency() {
   const error = `
-# Missing Dependency!
-
-You need either [AppCleaner](${AppCleanerURL}) or [PearCleaner](${PearCleanerURL}) installed.
+# You need at least one of the following uninstallers installed:
+${UNINSTALLERS.map((u) => `- [${u.name}](${u.url})`).join("\n")}
 `;
 
-  return (
-    <Detail
-      markdown={error}
-      navigationTitle="Error"
-      actions={
-        <ActionPanel>
-          <Action.OpenInBrowser icon="icon.png" title="Get AppCleaner" url={AppCleanerURL} />
-          <Action.OpenInBrowser icon="pearcleaner.png" title="Get PearCleaner" url={PearCleanerURL} />
-        </ActionPanel>
-      }
-    />
-  );
+  const uninstallersActions = UNINSTALLERS.map((u) => (
+    <Action.OpenInBrowser key={u.id} icon={u.icon} title={`Get ${u.name}`} url={u.url} />
+  ));
+
+  return <Detail markdown={error} navigationTitle="Error" actions={<ActionPanel>{uninstallersActions}</ActionPanel>} />;
 }

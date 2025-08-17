@@ -1,108 +1,26 @@
 import path from "path";
 import fs from "fs";
-import { getFFmpegPath } from "./ffmpeg";
+import os from "os";
+import { findFFmpegPath } from "./ffmpeg";
 import { execPromise } from "./exec";
-import { execSync } from "child_process";
-import { runAppleScript } from "@raycast/utils";
+import {
+  AllOutputExtension,
+  OutputImageExtension,
+  OutputAudioExtension,
+  OutputVideoExtension,
+  QualitySettings,
+  ImageQuality,
+  AudioQuality,
+  VideoQuality,
+  getMediaType,
+  Percentage,
+} from "../types/media";
 
-const config = {
-  ffmpegOptions: {
-    mp4: {
-      videoCodec: "h264",
-      audioCodec: "aac",
-      fileExtension: ".mp4",
-    },
-    avi: {
-      videoCodec: "libxvid",
-      audioCodec: "mp3",
-      fileExtension: ".avi",
-    },
-    mov: {
-      videoCodec: "prores",
-      audioCodec: "pcm_s16le",
-      fileExtension: ".mov",
-    },
-    mkv: {
-      videoCodec: "libx265",
-      audioCodec: "aac",
-      fileExtension: ".mkv",
-    },
-    mpg: {
-      videoCodec: "mpeg2video",
-      audioCodec: "mp3",
-      fileExtension: ".mpg",
-    },
-    webm: {
-      videoCodec: "libvpx-vp9",
-      audioCodec: "libopus",
-      fileExtension: ".webm",
-    },
-  },
-};
-
-export type VideoOutputFormats = keyof typeof config.ffmpegOptions;
-
-// Audio configuration
-export const audioConfig = {
-  mp3: {
-    audioCodec: "libmp3lame",
-    fileExtension: ".mp3",
-  },
-  aac: {
-    audioCodec: "aac",
-    fileExtension: ".aac",
-  },
-  wav: {
-    audioCodec: "pcm_s16le",
-    fileExtension: ".wav",
-  },
-  flac: {
-    audioCodec: "flac",
-    fileExtension: ".flac",
-  },
-};
-
-export type AudioOutputFormats = keyof typeof audioConfig;
-
-// Image configuration
-interface ImageFormatConfig {
-  fileExtension: string;
-  nsType?: string;
-  sipsFormat?: string;
-  useFFmpeg?: boolean;
+function convertQualityToCrf(qualityPercentage: Percentage): number {
+  // Map 100% quality to CRF 0, and 0% quality to CRF 51
+  // Using a linear mapping for simplicity
+  return Math.round(51 - (qualityPercentage / 100) * 51);
 }
-
-const imageConfig: Record<string, ImageFormatConfig> = {
-  jpg: {
-    fileExtension: ".jpg",
-    nsType: "NSJPEGFileType",
-    sipsFormat: "jpeg",
-  },
-  png: {
-    fileExtension: ".png",
-    nsType: "NSPNGFileType",
-    sipsFormat: "png",
-  },
-  webp: {
-    fileExtension: ".webp",
-    useFFmpeg: true,
-  },
-  heic: {
-    fileExtension: ".heic",
-    sipsFormat: "heic",
-  },
-  tiff: {
-    fileExtension: ".tiff",
-    nsType: "NSTIFFFileType",
-    sipsFormat: "tiff",
-  },
-  avif: {
-    fileExtension: ".avif",
-    useFFmpeg: true,
-  },
-};
-
-export type ImageOutputFormats = "jpg" | "png" | "webp" | "heic" | "tiff";
 
 export function getUniqueOutputPath(filePath: string, extension: string): string {
   const outputFilePath = filePath.replace(path.extname(filePath), extension);
@@ -119,147 +37,313 @@ export function getUniqueOutputPath(filePath: string, extension: string): string
   return finalOutputPath;
 }
 
-async function convertUsingNSBitmapImageRep(inputPath: string, outputPath: string, format: string) {
-  return runAppleScript(`
-    use framework "Foundation"
-    use framework "AppKit"
-    
-    -- Load the image
-    set inputURL to POSIX file "${inputPath}" as string
-    set inputData to current application's NSData's dataWithContentsOfFile:inputURL
-    set inputImage to current application's NSImage's alloc()'s initWithData:inputData
-    
-    -- Convert to bitmap representation
-    set tiffData to inputImage's TIFFRepresentation()
-    set bitmap to current application's NSBitmapImageRep's alloc()'s initWithData:tiffData
-    
-    -- Convert to desired format
-    set outputData to bitmap's representationUsingType:(current application's ${format}) |properties|:(missing value)
-    
-    -- Save to file
-    outputData's writeToFile:"${outputPath}" atomically:false
-  `);
-}
-
-export async function convertImage(filePath: string, outputFormat: keyof typeof imageConfig): Promise<string> {
-  const formatOptions = imageConfig[outputFormat];
-  if (!formatOptions) {
-    throw new Error(`Unsupported output format: ${outputFormat}`);
-  }
-
-  const finalOutputPath = getUniqueOutputPath(filePath, formatOptions.fileExtension);
-  const inputExt = path.extname(filePath).toLowerCase().slice(1);
-
-  try {
-    if (outputFormat === "webp") {
-      const tempPngPath = getUniqueOutputPath(filePath, ".png");
-      execSync(`sips --setProperty format png "${filePath}" --out "${tempPngPath}"`);
-
-      const ffmpegPath = await getFFmpegPath();
-      await execPromise(`"${ffmpegPath}" -i "${tempPngPath}" -c:v libwebp -quality 100 "${finalOutputPath}"`);
-
-      fs.unlinkSync(tempPngPath);
-      return finalOutputPath;
-    }
-
-    // Handle conversion from WebP
-    if (inputExt === "webp") {
-      const ffmpegPath = await getFFmpegPath();
-      const tempPngPath = getUniqueOutputPath(filePath, ".png");
-      await execPromise(`"${ffmpegPath}" -i "${filePath}" "${tempPngPath}"`);
-
-      if (outputFormat === "png") {
-        return tempPngPath;
-      }
-
-      if (outputFormat === "avif") {
-        const ffmpegPath = await getFFmpegPath();
-        await execPromise(`"${ffmpegPath}" -i "${tempPngPath}" -c:v libaom-av1 -crf 30 "${finalOutputPath}"`);
-        fs.unlinkSync(tempPngPath);
-        return finalOutputPath;
-      }
-
-      if (formatOptions.sipsFormat) {
-        execSync(`sips --setProperty format ${formatOptions.sipsFormat} "${tempPngPath}" --out "${finalOutputPath}"`);
-      } else if (formatOptions.nsType) {
-        await convertUsingNSBitmapImageRep(tempPngPath, finalOutputPath, formatOptions.nsType);
-      }
-
-      fs.unlinkSync(tempPngPath);
-      return finalOutputPath;
-    }
-
-    if (outputFormat === "avif") {
-      const ffmpegPath = await getFFmpegPath();
-      await execPromise(`"${ffmpegPath}" -i "${filePath}" -c:v libaom-av1 -crf 30 "${finalOutputPath}"`);
-      return finalOutputPath;
-    }
-
-    if (formatOptions.sipsFormat) {
-      execSync(`sips --setProperty format ${formatOptions.sipsFormat} "${filePath}" --out "${finalOutputPath}"`);
-      return finalOutputPath;
-    }
-
-    if (formatOptions.nsType) {
-      await convertUsingNSBitmapImageRep(filePath, finalOutputPath, formatOptions.nsType);
-      return finalOutputPath;
-    }
-
-    throw new Error(`Unsupported output format: ${outputFormat}`);
-  } catch (error) {
-    const err = error as Error;
-    throw new Error(`Failed to convert image: ${err.message}`);
-  }
-}
-
-export async function optimizeImage(filePath: string, quality: number = 100): Promise<string> {
-  const ext = path.extname(filePath).toLowerCase();
-  const finalOutputPath = getUniqueOutputPath(filePath, `_optimized${ext}`);
-
-  try {
-    switch (ext) {
-      case ".heic":
-        execSync(
-          `sips --setProperty format heic --setProperty formatOptions ${quality} "${filePath}" --out "${finalOutputPath}"`,
-        );
-        break;
-      case ".jpg":
-      case ".jpeg":
-        await convertUsingNSBitmapImageRep(filePath, finalOutputPath, "NSJPEGFileType");
-        break;
-      default:
-        throw new Error(`Optimization not supported for ${ext} files`);
-    }
-    return finalOutputPath;
-  } catch (error) {
-    const err = error as Error;
-    throw new Error(`Failed to optimize image: ${err.message}`);
-  }
-}
-
-export async function convertVideo(
+export async function convertMedia<T extends AllOutputExtension>(
   filePath: string,
-  outputFormat: "mp4" | "avi" | "mkv" | "mov" | "mpg" | "webm",
+  outputFormat: T,
+  quality: QualitySettings,
 ): Promise<string> {
-  const formatOptions = config.ffmpegOptions[outputFormat];
-  const finalOutputPath = getUniqueOutputPath(filePath, formatOptions.fileExtension);
+  const ffmpegPath = await findFFmpegPath();
 
-  const ffmpegPath = await getFFmpegPath();
-  const command = `"${ffmpegPath}" -i "${filePath}" -vcodec ${formatOptions.videoCodec} -acodec ${formatOptions.audioCodec} "${finalOutputPath}"`;
+  // In theory, this should never happen
+  if (!ffmpegPath) {
+    throw new Error("FFmpeg is not installed or configured. Please install FFmpeg to use this converter.");
+  }
 
-  await execPromise(command);
+  let ffmpegCmd = `"${ffmpegPath.path}" -i`;
+  const currentMediaType = getMediaType(path.extname(filePath))!;
+  switch (currentMediaType) {
+    case "image": {
+      const currentOutputFormat = outputFormat as OutputImageExtension;
+      const imageQuality = quality as ImageQuality;
+      const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
 
-  return finalOutputPath;
-}
+      let tempHeicFile: string | null = null;
+      let tempPaletteFile: string | null = null;
+      const extension = path.extname(filePath).toLowerCase();
+      let processedInputPath = filePath;
 
-export async function convertAudio(filePath: string, outputFormat: "mp3" | "aac" | "wav" | "flac"): Promise<string> {
-  const formatOptions = audioConfig[outputFormat];
-  const finalOutputPath = getUniqueOutputPath(filePath, formatOptions.fileExtension);
+      try {
+        // HEIC conversion is theoretically only available on macOS via the built-in SIPS utility.
+        if (currentOutputFormat === ".heic") {
+          try {
+            // Attempt HEIC conversion using SIPS directly
+            await execPromise(
+              `sips --setProperty format heic --setProperty formatOptions ${imageQuality[".heic"]} "${filePath}" --out "${finalOutputPath}"`,
+            );
+          } catch (error) {
+            // Parse error to provide more specific feedback
+            const errorMessage = String(error);
 
-  const ffmpegPath = await getFFmpegPath();
-  const command = `"${ffmpegPath}" -i "${filePath}" -c:a ${formatOptions.audioCodec} "${finalOutputPath}"`;
+            if (errorMessage.includes("command not found") || errorMessage.includes("not recognized")) {
+              throw new Error(
+                "HEIC conversion failed: 'sips' command not found. " +
+                  "Converting to HEIC format is theoretically only available on macOS, " +
+                  "as it requires the built-in SIPS utility with proper HEIC support " +
+                  "(libheif, libde265, and x265 dependencies).",
+              );
+            } else {
+              throw new Error(
+                "HEIC conversion failed: SIPS command found but conversion unsuccessful. " +
+                  "This may indicate that your SIPS installation lacks proper HEIC support. " +
+                  "Converting to HEIC format typically requires macOS with built-in SIPS that includes " +
+                  "libheif, libde265, and x265 dependencies. Error details: " +
+                  String(error),
+              );
+            }
+          }
+        } else {
+          // If the input file is HEIC and the output format is not HEIC, convert to PNG first
+          if (extension === ".heic") {
+            try {
+              const tempFileName = `${path.basename(filePath, ".heic")}_temp_${Date.now()}.png`;
+              tempHeicFile = path.join(os.tmpdir(), tempFileName);
 
-  await execPromise(command);
+              await execPromise(`sips --setProperty format png "${filePath}" --out "${tempHeicFile}"`);
 
-  return finalOutputPath;
+              processedInputPath = tempHeicFile;
+            } catch (error) {
+              console.error(`Error pre-processing HEIC file: ${filePath}`, error);
+              if (tempHeicFile && fs.existsSync(tempHeicFile)) {
+                fs.unlinkSync(tempHeicFile);
+              }
+              throw new Error(`Failed to preprocess HEIC file: ${String(error)}`);
+            }
+          }
+
+          ffmpegCmd += ` "${processedInputPath}"`;
+
+          switch (currentOutputFormat) {
+            case ".jpg":
+              // mjpeg takes in 2 (best) to 31 (worst)
+              ffmpegCmd += ` -q:v ${Math.round(31 - (imageQuality[".jpg"] / 100) * 29)}`;
+              break;
+            case ".png":
+              if (imageQuality[".png"] === "png-8") {
+                const tempPaletteFileName = `${path.basename(filePath, path.extname(filePath))}_palette_${Date.now()}.png`;
+                tempPaletteFile = path.join(os.tmpdir(), tempPaletteFileName);
+
+                // Generate palette first
+                await execPromise(
+                  `"${ffmpegPath.path}" -i "${processedInputPath}" -vf "palettegen=max_colors=256" -y "${tempPaletteFile}"`,
+                );
+                // Then apply palette
+                ffmpegCmd = `"${ffmpegPath.path}" -i "${processedInputPath}" -i "${tempPaletteFile}" -lavfi "paletteuse=dither=bayer:bayer_scale=5"`;
+              }
+              ffmpegCmd += ` -compression_level 100 "${finalOutputPath}"`;
+              break;
+            case ".webp":
+              ffmpegCmd += " -c:v libwebp";
+              if (imageQuality[".webp"] === "lossless") {
+                ffmpegCmd += " -lossless 1";
+              } else {
+                ffmpegCmd += ` -quality ${imageQuality[".webp"]}`;
+              }
+              break;
+            case ".tiff":
+              ffmpegCmd += ` -compression_algo ${imageQuality[".tiff"]}`;
+              break;
+            case ".avif":
+              // libaom-av1 takes in 0 (best/lossless) to 63 (worst)
+              ffmpegCmd += ` -c:v libaom-av1 -crf ${Math.round(63 - (Number(imageQuality[".avif"]) / 100) * 63)} -still-picture 1`;
+              break;
+          }
+          if (currentOutputFormat !== ".png" || imageQuality[".png"] !== "png-8") {
+            ffmpegCmd += ` -y "${finalOutputPath}"`;
+          }
+          console.log(`Executing FFmpeg image command: ${ffmpegCmd}`);
+          await execPromise(ffmpegCmd);
+        }
+        return finalOutputPath;
+      } catch (error) {
+        console.error(`Error converting ${processedInputPath} to ${currentOutputFormat}:`, error);
+        throw error;
+      } finally {
+        // Clean up temp files if they exist
+        if (tempHeicFile && fs.existsSync(tempHeicFile)) {
+          fs.unlinkSync(tempHeicFile);
+        }
+        if (tempPaletteFile && fs.existsSync(tempPaletteFile)) {
+          fs.unlinkSync(tempPaletteFile);
+        }
+      }
+    }
+
+    case "audio": {
+      const currentOutputFormat = outputFormat as OutputAudioExtension;
+      const audioQuality = quality as AudioQuality;
+      const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
+
+      ffmpegCmd += ` "${filePath}"`;
+
+      switch (currentOutputFormat) {
+        case ".mp3": {
+          const mp3Settings = audioQuality[".mp3"];
+          ffmpegCmd += ` -c:a libmp3lame`;
+          if (mp3Settings.vbr) {
+            ffmpegCmd += ` -q:a ${Math.round((320 - Number(mp3Settings.bitrate)) / 40)}`; // Convert bitrate to VBR quality
+          } else {
+            ffmpegCmd += ` -b:a ${mp3Settings.bitrate}k`;
+          }
+          break;
+        }
+        case ".aac": {
+          const aacSettings = audioQuality[".aac"];
+          ffmpegCmd += ` -c:a aac -b:a ${aacSettings.bitrate}k`;
+          if (aacSettings.profile) {
+            ffmpegCmd += ` -profile:a ${aacSettings.profile}`;
+          }
+          break;
+        }
+        case ".m4a": {
+          const m4aSettings = audioQuality[".m4a"];
+          ffmpegCmd += ` -c:a aac -b:a ${m4aSettings.bitrate}k`;
+          if (m4aSettings.profile) {
+            ffmpegCmd += ` -profile:a ${m4aSettings.profile}`;
+          }
+          break;
+        }
+        case ".wav": {
+          const wavSettings = audioQuality[".wav"];
+          ffmpegCmd += ` -c:a pcm_s${wavSettings.bitDepth}le -ar ${wavSettings.sampleRate}`;
+          break;
+        }
+        case ".flac": {
+          const flacSettings = audioQuality[".flac"];
+          ffmpegCmd += ` -c:a flac -compression_level ${flacSettings.compressionLevel} -ar ${flacSettings.sampleRate}`;
+          if (flacSettings.bitDepth === "24") {
+            ffmpegCmd += ` -sample_fmt s32`;
+          }
+          break;
+        }
+        default:
+          throw new Error(`Unknown audio output format: ${currentOutputFormat}`);
+      }
+
+      ffmpegCmd += ` -y "${finalOutputPath}"`;
+      console.log(`Executing FFmpeg audio command: ${ffmpegCmd}`);
+      await execPromise(ffmpegCmd);
+      return finalOutputPath;
+    }
+
+    case "video": {
+      const currentOutputFormat = outputFormat as OutputVideoExtension;
+      const videoQuality = quality as VideoQuality;
+
+      ffmpegCmd += ` "${filePath}"`;
+
+      // Add format-specific codec and settings
+      switch (currentOutputFormat) {
+        case ".mp4": {
+          const mp4Quality = videoQuality[".mp4"];
+          ffmpegCmd += ` -vcodec h264 -acodec aac -preset ${mp4Quality.preset}`;
+          break;
+        }
+        case ".avi": {
+          ffmpegCmd += ` -vcodec libxvid -acodec mp3`;
+          break;
+        }
+        case ".mov": {
+          const movQuality = videoQuality[".mov"];
+          const proresProfiles = {
+            proxy: "0",
+            lt: "1",
+            standard: "2",
+            hq: "3",
+            "4444": "4",
+            "4444xq": "5",
+          };
+          ffmpegCmd += ` -vcodec prores -profile:v ${proresProfiles[movQuality.variant]} -acodec pcm_s16le`;
+          break;
+        }
+        case ".mkv": {
+          const mkvQuality = videoQuality[".mkv"];
+          ffmpegCmd += ` -vcodec libx265 -acodec aac -preset ${mkvQuality.preset}`;
+          break;
+        }
+        case ".mpg": {
+          ffmpegCmd += ` -vcodec mpeg2video -acodec mp3`;
+          break;
+        }
+        case ".webm": {
+          const webmQuality = videoQuality[".webm"];
+          ffmpegCmd += ` -vcodec libvpx-vp9 -acodec libopus -quality ${webmQuality.quality}`;
+          break;
+        }
+        default:
+          throw new Error(`Unknown video output format: ${currentOutputFormat}`);
+      }
+
+      // Handle encoding mode (unified for all formats except .mov)
+      const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
+      let logFilePrefix: string | null = null;
+
+      if (currentOutputFormat !== ".mov") {
+        const qualitySettings = videoQuality[currentOutputFormat];
+
+        if ("encodingMode" in qualitySettings) {
+          if (qualitySettings.encodingMode === "crf") {
+            ffmpegCmd += ` -crf ${convertQualityToCrf(qualitySettings.crf)}`;
+          } else {
+            // VBR or VBR 2-pass
+            ffmpegCmd += ` -b:v ${qualitySettings.bitrate}k`;
+
+            if ("maxBitrate" in qualitySettings && qualitySettings.maxBitrate) {
+              ffmpegCmd += ` -maxrate ${qualitySettings.maxBitrate}k -bufsize ${Number(qualitySettings.maxBitrate) * 2}k`;
+            }
+
+            if (qualitySettings.encodingMode === "vbr-2-pass") {
+              // First pass - need to specify log file prefix for 2-pass encoding
+              logFilePrefix = path.join(os.tmpdir(), `ffmpeg2pass_${Date.now()}`);
+              const nullDevice = process.platform === "win32" ? "NUL" : "/dev/null";
+              const firstPassCmd = ffmpegCmd + ` -pass 1 -passlogfile "${logFilePrefix}" -f null ${nullDevice}`;
+              try {
+                await execPromise(firstPassCmd);
+              } catch (error) {
+                throw new Error(`First pass encoding failed: ${error}`);
+              }
+              // Second pass will be executed below
+              ffmpegCmd += ` -pass 2 -passlogfile "${logFilePrefix}"`;
+            }
+          }
+        }
+      }
+
+      try {
+        ffmpegCmd += ` -y "${finalOutputPath}"`;
+        console.log(`Executing FFmpeg video command: ${ffmpegCmd}`);
+        await execPromise(ffmpegCmd);
+        return finalOutputPath;
+      } finally {
+        // Clean up 2-pass log files if they exist
+        if (logFilePrefix) {
+          try {
+            // Clean up all possible FFmpeg 2-pass log files
+            const logFiles = [
+              `${logFilePrefix}-0.log`,
+              `${logFilePrefix}-0.log.mbtree`,
+              `${logFilePrefix}-0.log.temp`,
+              `${logFilePrefix}-1.log`,
+              `${logFilePrefix}-1.log.mbtree`,
+              `${logFilePrefix}-1.log.temp`,
+            ];
+
+            for (const logFile of logFiles) {
+              if (fs.existsSync(logFile)) {
+                try {
+                  fs.unlinkSync(logFile);
+                } catch (fileError) {
+                  console.warn(`Failed to clean up log file ${logFile}:`, fileError);
+                }
+              }
+            }
+          } catch (error) {
+            console.warn("Failed to clean up FFmpeg log files:", error);
+          }
+        }
+      }
+    }
+
+    default:
+      throw new Error(`Unsupported media type for file: ${filePath}`);
+  }
 }
