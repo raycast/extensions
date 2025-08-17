@@ -18,24 +18,28 @@
     {
       "name": "create-gradient",
       "title": "Create Gradient",
+      "subtitle": "Gradient Generator",
       "description": "Create a gradient and preview it.",
       "mode": "view"
     },
     {
       "name": "preview-gradient",
       "title": "Preview Gradient",
+      "subtitle": "Gradient Generator",
       "description": "Preview a gradient with copy actions.",
       "mode": "view"
     },
     {
       "name": "random-gradient",
       "title": "Random Gradient",
+      "subtitle": "Gradient Generator",
       "description": "Show a random gradient.",
       "mode": "view"
     },
     {
       "name": "saved-gradients",
       "title": "Saved Gradients",
+      "subtitle": "Gradient Generator",
       "description": "View and manage saved gradients.",
       "mode": "view"
     }

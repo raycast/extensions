@@ -219,6 +219,12 @@ const parseHex = (hex: string): RGB => {
           .join('')
       : s;
   const num = parseInt(v, 16);
+  
+  // Validate that the parsed number is not NaN and provide fallback
+  if (Number.isNaN(num)) {
+    return { r: 0, g: 0, b: 0 }; // Default to black for invalid hex
+  }
+  
   return { r: (num >> 16) & 0xff, g: (num >> 8) & 0xff, b: num & 0xff };
 };
 
