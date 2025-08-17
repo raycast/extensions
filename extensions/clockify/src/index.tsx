@@ -242,7 +242,9 @@ function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
             title="Start"
             onSubmit={({ description, projectId, taskId, tagIds }) => {
               if (projectId) {
-                addNewTimeEntry(description, projectId, taskId === "-1" ? null : taskId, tagIds).then(updateTimeEntries);
+                addNewTimeEntry(description, projectId, taskId === "-1" ? null : taskId, tagIds).then(
+                  updateTimeEntries,
+                );
                 pop();
               } else {
                 showToast(Toast.Style.Failure, "Project is required.");
