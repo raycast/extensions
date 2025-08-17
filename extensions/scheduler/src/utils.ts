@@ -1,5 +1,5 @@
 import { Icon } from "@raycast/api";
-import { Schedule, ScheduleType, RaycastCommand, ScheduledCommand } from "./types";
+import { Schedule, ScheduleType, RaycastCommand, ScheduledCommand, FormValues } from "./types";
 import { RAYCAST_DEEPLINK_PREFIX, EXTENSIONS_HOSTNAME, WEEKDAY_NAMES, VALIDATION_MESSAGES } from "./utils/constants";
 import { toLocalYMD } from "./utils/dateTime";
 
@@ -9,17 +9,6 @@ const SCHEDULE_CONFIGS = {
   weekly: { icon: Icon.Calendar, requiresDate: false },
   monthly: { icon: Icon.Calendar, requiresDate: false },
 } as const;
-
-export interface FormValues {
-  name: string;
-  command: string;
-  scheduleType: ScheduleType;
-  date?: string;
-  time: string;
-  dayOfWeek?: string;
-  dayOfMonth?: string;
-  runInBackground?: boolean;
-}
 
 // Helper function for safe number parsing
 const parseIntSafely = (value: string | undefined): number | undefined => {

@@ -25,6 +25,17 @@ export type ScheduledCommand = {
   updatedAt: string;
 };
 
+export interface FormValues {
+  name: string;
+  command: string;
+  scheduleType: ScheduleType;
+  date?: string;
+  time: string;
+  dayOfWeek?: string;
+  dayOfMonth?: string;
+  runInBackground?: boolean;
+}
+
 export type CommandPermissionStatus = {
   commandKey: string; // Unique key for the command (derived from deeplink)
   hasPermission: boolean;

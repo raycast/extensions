@@ -1,13 +1,14 @@
 import { Form } from "@raycast/api";
-import { ScheduleType, ScheduledCommand } from "../types";
+import { ScheduleType, ScheduledCommand, FormValues } from "../types";
 
 interface ScheduleFormProps {
   scheduleType: ScheduleType;
   onScheduleTypeChange: (value: ScheduleType) => void;
   command?: ScheduledCommand;
+  draftValues?: Partial<FormValues>;
 }
 
-export function ScheduleForm({ scheduleType, onScheduleTypeChange, command }: ScheduleFormProps) {
+export function ScheduleForm({ scheduleType, onScheduleTypeChange, command, draftValues }: ScheduleFormProps) {
   return (
     <>
       <Form.Dropdown
@@ -27,7 +28,13 @@ export function ScheduleForm({ scheduleType, onScheduleTypeChange, command }: Sc
           id="date"
           title="Date"
           info="Select the date when the command should run"
-          defaultValue={command?.schedule.date ? new Date(command.schedule.date) : undefined}
+          defaultValue={
+            draftValues?.date
+              ? new Date(draftValues.date)
+              : command?.schedule.date
+                ? new Date(command.schedule.date)
+                : undefined
+          }
           min={new Date(new Date().setDate(new Date().getDate() - 2))} // Allow selecting today or later
           type={Form.DatePicker.Type.Date}
         />
@@ -38,11 +45,15 @@ export function ScheduleForm({ scheduleType, onScheduleTypeChange, command }: Sc
         title="Time"
         placeholder="09:00"
         info="Enter time in 24-hour format (HH:MM)"
-        defaultValue={command?.schedule.time}
+        defaultValue={draftValues?.time ?? command?.schedule.time}
       />
 
       {scheduleType === "weekly" && (
-        <Form.Dropdown id="dayOfWeek" title="Day of Week" defaultValue={command?.schedule.dayOfWeek?.toString()}>
+        <Form.Dropdown
+          id="dayOfWeek"
+          title="Day of Week"
+          defaultValue={(draftValues?.dayOfWeek as string | undefined) ?? command?.schedule.dayOfWeek?.toString()}
+        >
           <Form.Dropdown.Item value="1" title="Monday" />
           <Form.Dropdown.Item value="2" title="Tuesday" />
           <Form.Dropdown.Item value="3" title="Wednesday" />
@@ -54,7 +65,11 @@ export function ScheduleForm({ scheduleType, onScheduleTypeChange, command }: Sc
       )}
 
       {scheduleType === "monthly" && (
-        <Form.Dropdown id="dayOfMonth" title="Day of Month" defaultValue={command?.schedule.dayOfMonth?.toString()}>
+        <Form.Dropdown
+          id="dayOfMonth"
+          title="Day of Month"
+          defaultValue={(draftValues?.dayOfMonth as string | undefined) ?? command?.schedule.dayOfMonth?.toString()}
+        >
           {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
             <Form.Dropdown.Item key={day} value={day.toString()} title={`Day ${day}`} />
           ))}

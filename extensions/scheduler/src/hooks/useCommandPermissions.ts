@@ -69,7 +69,6 @@ export function useCommandPermissions() {
 
       logCommandAction(key, "Testing");
 
-      // Use the consolidated command execution logic
       await executeRaycastCommand(command);
 
       logCommandAction(key, "Successfully launched");

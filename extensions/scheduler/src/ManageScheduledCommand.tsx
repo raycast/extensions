@@ -1,13 +1,14 @@
-import { ScheduledCommand } from "./types";
+import { ScheduledCommand, FormValues } from "./types";
 import { CommandForm } from "./components/CommandForm";
 import { useScheduledCommands } from "./hooks/useScheduledCommands";
 
 type ManageScheduledCommandProps = {
   command?: ScheduledCommand;
   onSave?: () => void;
+  draftValues?: Partial<FormValues>;
 };
 
-export function ManageScheduledCommand({ command, onSave }: ManageScheduledCommandProps) {
+export function ManageScheduledCommand({ command, onSave, draftValues }: ManageScheduledCommandProps) {
   const { addCommand, updateCommand } = useScheduledCommands();
 
   async function handleSave(savedCommand: ScheduledCommand) {
@@ -22,6 +23,7 @@ export function ManageScheduledCommand({ command, onSave }: ManageScheduledComma
   return (
     <CommandForm
       command={command}
+      draftValues={draftValues}
       onSave={handleSave}
       title={command ? "Edit Scheduled Command" : "Create New Scheduled Command"}
       submitButtonTitle={command ? "Update Scheduled Command" : "Create Scheduled Command"}
