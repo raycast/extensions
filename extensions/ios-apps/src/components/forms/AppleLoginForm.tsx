@@ -9,6 +9,7 @@ export function AppleLoginForm({ onSubmit }: AppleLoginFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState<string | undefined>();
+  const [passwordError, setPasswordError] = useState<string | undefined>();
 
   function handleSubmit() {
     if (!email) {
@@ -22,7 +23,7 @@ export function AppleLoginForm({ onSubmit }: AppleLoginFormProps) {
     }
 
     if (!password) {
-      // Password error is handled by Form.PasswordField's required validation
+      setPasswordError("Password is required");
       return;
     }
 
@@ -53,7 +54,11 @@ export function AppleLoginForm({ onSubmit }: AppleLoginFormProps) {
         title="Password"
         placeholder="Enter your Apple password"
         value={password}
-        onChange={setPassword}
+        onChange={(value) => {
+          setPassword(value);
+          setPasswordError(undefined);
+        }}
+        error={passwordError}
       />
     </Form>
   );
