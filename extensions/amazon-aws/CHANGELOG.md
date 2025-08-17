@@ -1,5 +1,45 @@
 # Amazon AWS Changelog
 
+## [Amplify command] - 2025-08-11
+
+- Add notification management for AWS Amplify branches
+  - Manage build notifications settings
+  - Direct link to AWS Console notifications page
+  - Visual notification status in branch list with bell icons
+- Add custom rules management for redirects and rewrites
+  - View and manage redirect and rewrite rules
+  - Create custom rules with source patterns and targets
+  - Configure HTTP status codes (200, 301, 302, 404)
+  - Edit existing rules
+  - Delete unwanted rules
+  - Direct link to AWS Console rewrites and redirects settings
+- Add comprehensive build management and history functionality
+  - View full build history for each branch with status indicators
+  - Start new builds directly from Raycast
+  - Cancel running builds
+  - Retry failed builds with original commit details
+  - View detailed build information including commit, timestamps, and duration
+  - Access build artifacts for completed jobs
+  - Color-coded status indicators for quick visual feedback
+  - Direct links to AWS Console build logs
+- Add monitoring links for AWS Amplify apps and branches
+  - App-level monitoring: Access logs, Alarms, Hosting compute logs, Metrics
+  - Branch-level monitoring: Build & Deploy logs, Access logs
+  - Quick access through dedicated Monitoring submenu
+- Add full environment variables management for AWS Amplify apps
+  - View all configured environment variables in a searchable list
+  - Add new environment variables with validation
+  - Edit existing variable values
+  - Delete environment variables
+  - Copy individual variables or all variables in JSON/.env format
+  - Visual indicator shows which apps have environment variables configured
+  - Direct link to AWS Console environment variables page
+- Add webhook support for AWS Amplify branches
+  - Display webhook URLs in branch actions submenu
+  - Enable direct webhook triggering to initiate builds
+  - Show webhook count indicator in branch accessories
+- Fix console link generation for AWS Amplify branches
+
 ## [Fix] - 2025-08-08
 
 - Fix missing console link generation for AWS Amplify apps in resourceToConsoleLink utility

@@ -1,6 +1,8 @@
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { parse, Allow } from "partial-json";
 import { createOpenAI } from "@ai-sdk/openai";
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import { generateText } from "ai";
 import {
   Action,
   ActionPanel,
@@ -24,15 +26,33 @@ import { fetch } from "undici";
 import { z } from "zod";
 
 const preferences = getPreferenceValues();
-type LLMProvider = "openai" | "groq" | "fireworks" | "anthropic" | "together" | "raycast";
+type LLMProvider =
+  | "raycast"
+  | "openai"
+  | "openai-compatible"
+  | "anthropic"
+  | "fireworks"
+  | "groq"
+  | "together"
+  | "lmstudio";
 
 type Preferences = {
   llmProvider: LLMProvider;
-  openaiApiKey: string;
-  fireworksApiKey: string;
-  anthropicApiKey: string;
-  groqApiKey: string;
+  openaiApiKey?: string;
+  openaiModel?: string;
+  openaiCompatibleUrl?: string;
+  openaiCompatibleKey?: string;
+  openaiCompatibleModel?: string;
+  anthropicApiKey?: string;
+  anthropicModel?: string;
+  fireworksApiKey?: string;
+  fireworksModel?: string;
+  groqApiKey?: string;
+  groqModel?: string;
   togetherApiKey?: string;
+  togetherModel?: string;
+  lmstudioModel?: string;
+  lmstudioBaseUrl?: string;
 };
 
 const prefs = preferences as Preferences;
@@ -40,9 +60,10 @@ const llmProvider: LLMProvider = prefs.llmProvider;
 
 if (
   (llmProvider === "openai" && !prefs.openaiApiKey) ||
-  (llmProvider === "groq" && !prefs.groqApiKey) ||
+  (llmProvider === "anthropic" && !prefs.anthropicApiKey) ||
   (llmProvider === "fireworks" && !prefs.fireworksApiKey) ||
-  (llmProvider === "anthropic" && !prefs.anthropicApiKey)
+  (llmProvider === "groq" && !prefs.groqApiKey) ||
+  (llmProvider === "together" && !prefs.togetherApiKey)
 ) {
   showToast({
     style: Toast.Style.Failure,
@@ -55,10 +76,37 @@ if (
   });
 }
 
+if (
+  (llmProvider === "openai-compatible" && !prefs.openaiCompatibleModel) ||
+  (llmProvider === "lmstudio" && !prefs.lmstudioModel)
+) {
+  showToast({
+    style: Toast.Style.Failure,
+    title: "Model Missing",
+    primaryAction: {
+      title: "Add Model",
+      onAction: () => openExtensionPreferences(),
+    },
+    message: `Model for ${llmProvider} is missing. Please provide the model in the preferences.`,
+  });
+}
+
+if (llmProvider === "openai-compatible" && !prefs.openaiCompatibleUrl) {
+  showToast({
+    style: Toast.Style.Failure,
+    title: "OpenAI-Compatible URL Missing",
+    primaryAction: {
+      title: "Add URL",
+      onAction: () => openExtensionPreferences(),
+    },
+    message: `OpenAI-compatible URL is missing. Please provide the URL in the preferences.`,
+  });
+}
+
 type FetchFunction = typeof globalThis.fetch;
 
 const { model, mode } = (() => {
-  switch (llmProvider) {
+  switch (prefs.llmProvider) {
     case "raycast": {
       return { model: null, mode: "auto" as const };
     }
@@ -67,15 +115,29 @@ const { model, mode } = (() => {
         apiKey: prefs.openaiApiKey,
         fetch: fetch as FetchFunction,
       });
-      return { model: openai("gpt-4o-2024-08-06"), mode: "auto" as const };
+      return { model: openai(prefs.openaiModel ?? "gpt-4.1-mini"), mode: "auto" as const };
     }
-    case "groq": {
-      const groq = createOpenAI({
-        apiKey: prefs.groqApiKey,
-        baseURL: "https://api.groq.com/openai/v1",
+    case "openai-compatible": {
+      const openaiCompatible = createOpenAI({
+        apiKey: prefs.openaiCompatibleKey,
+        baseURL: prefs.openaiCompatibleUrl,
         fetch: fetch as FetchFunction,
       });
-      return { model: groq("llama-3.1-70b-versatile"), mode: "auto" as const };
+      return { model: openaiCompatible(prefs.openaiCompatibleModel ?? ""), mode: "auto" as const };
+    }
+    case "lmstudio": {
+      const lmstudio = createOpenAICompatible({
+        name: "lmstudio",
+        baseURL: prefs.lmstudioBaseUrl || "http://localhost:1234/v1",
+      });
+      return { model: lmstudio(prefs.lmstudioModel ?? ""), mode: "auto" as const };
+    }
+    case "anthropic": {
+      const anthropic = createAnthropic({
+        apiKey: prefs.anthropicApiKey,
+        fetch: fetch as FetchFunction,
+      });
+      return { model: anthropic(prefs.anthropicModel ?? "claude-3-5-haiku-latest"), mode: "auto" as const };
     }
     case "fireworks": {
       const fireworks = createOpenAI({
@@ -83,14 +145,18 @@ const { model, mode } = (() => {
         baseURL: "https://api.fireworks.ai/inference/v1",
         fetch: fetch as FetchFunction,
       });
-      return { model: fireworks("accounts/fireworks/models/llama-v3p1-70b-instruct"), mode: "json" as const };
+      return {
+        model: fireworks(prefs.fireworksModel ?? "accounts/fireworks/models/llama-v3p1-70b-instruct"),
+        mode: "json" as const,
+      };
     }
-    case "anthropic": {
-      const anthropic = createAnthropic({
-        apiKey: prefs.anthropicApiKey,
+    case "groq": {
+      const groq = createOpenAI({
+        apiKey: prefs.groqApiKey,
+        baseURL: "https://api.groq.com/openai/v1",
         fetch: fetch as FetchFunction,
       });
-      return { model: anthropic("claude-3-haiku-20240307"), mode: "auto" as const };
+      return { model: groq(prefs.groqModel ?? "llama-3.1-70b-versatile"), mode: "auto" as const };
     }
     case "together": {
       const together = createOpenAI({
@@ -98,7 +164,10 @@ const { model, mode } = (() => {
         baseURL: "https://api.together.xyz/v1",
         fetch: fetch as FetchFunction,
       });
-      return { model: together("meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo"), mode: "json" as const };
+      return {
+        model: together(prefs.togetherModel ?? "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo"),
+        mode: "json" as const,
+      };
     }
     default: {
       throw new Error("Unknown LLM provider");
@@ -127,7 +196,7 @@ export default function Command() {
         .nullable()
         .describe(
           dedent`
-      Example use of the word that explains its meaning, very short and in user original language. 
+      Example use of the word that explains its meaning, very short and in user original language.
       Omit it if unnecessary, for example when you already used the same meaning for another synonym.
       Omit it if it doesn't add any value, just return null in that case.
       `,
@@ -239,7 +308,7 @@ export default function Command() {
               if (parsed.synonyms?.length) {
                 setResults(parsed.synonyms);
               }
-            } catch (e) {
+            } catch {
               // Partial JSON, wait for more data
             }
           });
@@ -255,11 +324,57 @@ export default function Command() {
                 message: finalResult.originalLanguage,
               });
             }
-          } catch (e) {
+          } catch {
             throw new Error("Failed to parse AI response");
           }
+        } else if (llmProvider === "lmstudio") {
+          // Use generateText for LMStudio as it doesn't support streamObject
+          const prompt = dedent`
+            Find synonyms for: "${query}"
+            The synonyms should be in ${language}.
+            Format the response as a JSON object with this structure:
+            {
+              "originalLanguage": "detected language",
+              "synonyms": [
+                {
+                  "emoji": "relevant emoji",
+                  "synonym": "the synonym",
+                  "meaning": "short meaning or null"
+                }
+              ]
+            }
+            Maximum 9 synonyms. Make them suitable for literary use.
+            If the input is not in ${language}, add the direct translation as first synonym.
+
+            Only output JSON without any other text or markdown formatting.
+          `;
+
+          const lmstudio = createOpenAICompatible({
+            name: "lmstudio",
+            baseURL: prefs.lmstudioBaseUrl || "http://localhost:1234/v1",
+          });
+
+          const result = await generateText({
+            model: lmstudio(prefs.lmstudioModel ?? ""),
+            prompt,
+          });
+
+          let parsed;
+          try {
+            parsed = JSON.parse(result.text);
+            setResults(parsed.synonyms);
+            if (parsed.originalLanguage) {
+              showToast({
+                style: Toast.Style.Success,
+                title: "Language Detected",
+                message: parsed.originalLanguage,
+              });
+            }
+          } catch {
+            throw new Error("Failed to parse LMStudio response");
+          }
         } else {
-          const stream = await streamObject({
+          const stream = streamObject({
             model: model!,
             mode,
             messages: [

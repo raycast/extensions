@@ -33,6 +33,7 @@ export default function OpenProfileForm({ initialProfile, initialApp }: OpenProf
   const [selectedRecentProfile, setSelectedRecentProfile] = useState<string>("");
 
   // Reconcile initialApp with cached selection once apps are available
+  // Guard to avoid setting local-storage-backed state on every render
   useEffect(() => {
     if (apps.length === 0) return;
 
@@ -41,7 +42,7 @@ export default function OpenProfileForm({ initialProfile, initialApp }: OpenProf
         (app) =>
           app.value.toLowerCase() === initialApp.toLowerCase() || app.name.toLowerCase() === initialApp.toLowerCase(),
       );
-      if (foundApp) {
+      if (foundApp && selectedApp !== foundApp.value) {
         setSelectedApp(foundApp.value);
         return;
       }
@@ -51,7 +52,7 @@ export default function OpenProfileForm({ initialProfile, initialApp }: OpenProf
     if (!selectedApp && apps[0]) {
       setSelectedApp(apps[0].value);
     }
-  }, [initialApp, apps, selectedApp, setSelectedApp]);
+  }, [initialApp, apps]);
 
   // Notify user if no apps are available after load
   useEffect(() => {
