@@ -4,11 +4,13 @@ import { renderStarRating } from "./utils/common";
 import { AppActionPanel } from "./components/app-action-panel";
 import { useAppSearch } from "./hooks";
 import { useAppDownload } from "./hooks";
+import { useAuthNavigation } from "./hooks/useAuthNavigation";
 
 export default function Search() {
   // Use the custom hooks - let useAppSearch manage the search text state
   const { apps, isLoading, error, totalResults, searchText, setSearchText } = useAppSearch("", 500);
-  const { downloadApp } = useAppDownload();
+  const authNavigation = useAuthNavigation();
+  const { downloadApp } = useAppDownload(authNavigation);
 
   // If no search text has been entered yet, show a custom empty view
   if (!searchText) {
@@ -16,7 +18,7 @@ export default function Search() {
       <List onSearchTextChange={setSearchText} isLoading={isLoading}>
         <List.EmptyView
           title="Type Query to Search"
-          description="Search for apps by name, developer, or bundle Id. Authentication is now handled with easy in-UI forms!"
+          description="Search for apps by name, developer, or bundle Id."
           icon="no-view.png"
         />
       </List>

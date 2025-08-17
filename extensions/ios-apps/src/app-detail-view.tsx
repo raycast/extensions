@@ -8,6 +8,7 @@ import { AppActionPanel } from "./components/app-action-panel";
 import { useAppDetails, useAppDownload } from "./hooks";
 import { logger } from "./utils/logger";
 import { getAppStoreUrl } from "./utils/constants";
+import { useAuthNavigation } from "./hooks/useAuthNavigation";
 
 interface AppDetailViewProps {
   app: AppDetails;
@@ -16,7 +17,8 @@ interface AppDetailViewProps {
 export default function AppDetailView({ app: initialApp }: AppDetailViewProps) {
   // Use the custom hooks
   const { app, isLoading } = useAppDetails(initialApp);
-  const { downloadApp } = useAppDownload();
+  const authNavigation = useAuthNavigation();
+  const { downloadApp } = useAppDownload(authNavigation);
 
   // Function to format file size to human-readable format (e.g., KB, MB, GB)
   // Handles string or number input and provides fallbacks for invalid values

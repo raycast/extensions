@@ -320,7 +320,8 @@ export async function executeIpatoolCommand(
       };
     }
 
-    logger.log(`[ipatool] Executing command: ${IPATOOL_PATH} ${sanitizedArgs.join(" ")}`);
+    const redactedArgsForLog = redactArgsForLogging(sanitizedArgs);
+    logger.log(`[ipatool] Executing command: ${IPATOOL_PATH} ${redactedArgsForLog.join(" ")}`);
 
     // Execute command using spawnSync for simplicity and timeout control
     const result = spawnSync(IPATOOL_PATH, sanitizedArgs, {
@@ -484,6 +485,27 @@ function sanitizeArgument(arg: string): string {
 }
 
 /**
+ * Redact sensitive values in args for logging only
+ * Masks values following flags like -p/--password, -e/--email/--username, and --auth-code/--2fa/--otp/--code
+ */
+function redactArgsForLogging(args: string[]): string[] {
+  const copy = [...args];
+  for (let i = 0; i < copy.length; i++) {
+    const a = copy[i];
+    if (a === "-p" || a === "--password") {
+      if (i + 1 < copy.length) copy[i + 1] = "***";
+    }
+    if (a === "-e" || a === "--email" || a === "--username") {
+      if (i + 1 < copy.length) copy[i + 1] = "***";
+    }
+    if (a === "--auth-code" || a === "--2fa" || a === "--otp" || a === "--code") {
+      if (i + 1 < copy.length) copy[i + 1] = "******";
+    }
+  }
+  return copy;
+}
+
+/**
  * Create a secure spawn process for ipatool with proper cleanup
  * @param args Command arguments
  * @param options Spawn options
@@ -505,7 +527,8 @@ export function createSecureIpatoolProcess(
       // Validate ipatool path
       validateExecutablePath(IPATOOL_PATH);
 
-      logger.log(`[ipatool] Creating secure process: ${IPATOOL_PATH} ${sanitizedArgs.join(" ")}`);
+      const redactedArgsForLog = redactArgsForLogging(sanitizedArgs);
+      logger.log(`[ipatool] Creating secure process: ${IPATOOL_PATH} ${redactedArgsForLog.join(" ")}`);
 
       // Create the child process with security options
       const child = spawn(IPATOOL_PATH, sanitizedArgs, {

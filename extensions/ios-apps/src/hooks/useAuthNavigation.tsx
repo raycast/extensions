@@ -13,19 +13,14 @@ export interface AuthNavigationHelpers {
 export function useAuthNavigation(): AuthNavigationHelpers {
   const { push, pop } = useNavigation();
 
-  const pushLoginForm = useCallback(
-    (onSuccess?: () => void) => {
+  const push2FAForm = useCallback(
+    (sessionToken: string, onSuccess?: () => void) => {
       push(
-        <AppleLoginForm
-          onSubmit={async ({ email, password, saveCredentials }) => {
-            // Store credentials for future use if user opted in
-            if (saveCredentials) {
-              await storeAppleId(email);
-              await storePassword(password);
-            }
-
-            // Attempt login
-            await loginToAppleId(email, password);
+        <AppleTwoFactorForm
+          onSubmit={async ({ code }) => {
+            // For 2FA, we need to re-authenticate with the stored credentials plus the 2FA code
+            // The credentials should already be stored from the initial login attempt
+            await loginToAppleId(undefined, undefined, code);
 
             // Call success callback if provided
             if (onSuccess) {
@@ -41,26 +36,45 @@ export function useAuthNavigation(): AuthNavigationHelpers {
     [push, pop],
   );
 
-  const push2FAForm = useCallback(
-    (sessionToken: string, onSuccess?: () => void) => {
+  const pushLoginForm = useCallback(
+    (onSuccess?: () => void) => {
       push(
-        <AppleTwoFactorForm
-          onSubmit={async ({ code }) => {
-            // Attempt login with 2FA code
-            await loginToAppleId(undefined, undefined, code);
+        <AppleLoginForm
+          onSubmit={async ({ email, password }) => {
+            try {
+              // Always store credentials for a persistent, seamless experience
+              await storeAppleId(email);
+              await storePassword(password);
 
-            // Call success callback if provided
-            if (onSuccess) {
-              onSuccess();
+              // Attempt login
+              await loginToAppleId(email, password);
+
+              // Call success callback if provided
+              if (onSuccess) {
+                onSuccess();
+              }
+
+              // Pop back to the previous screen
+              pop();
+            } catch (error) {
+              // If 2FA is needed, push the 2FA form
+              if (error instanceof Error && error.name === "Needs2FAError") {
+                // Ensure credentials are stored so they're available for 2FA
+                await storeAppleId(email);
+                await storePassword(password);
+
+                // Push 2FA form
+                push2FAForm("", onSuccess);
+              } else {
+                // Re-throw other errors to be handled by the form
+                throw error;
+              }
             }
-
-            // Pop back to the previous screen
-            pop();
           }}
         />,
       );
     },
-    [push, pop],
+    [push, pop, push2FAForm],
   );
 
   const popToRoot = useCallback(() => {

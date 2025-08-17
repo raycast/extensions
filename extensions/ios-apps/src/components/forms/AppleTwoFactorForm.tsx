@@ -1,5 +1,6 @@
-import { Form, ActionPanel, Action } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, useNavigation } from "@raycast/api";
 import { useState } from "react";
+import { loginToAppleId } from "../../utils/auth";
 
 interface AppleTwoFactorFormProps {
   onSubmit: (credentials: { code: string }) => void;
@@ -8,6 +9,8 @@ interface AppleTwoFactorFormProps {
 export function AppleTwoFactorForm({ onSubmit }: AppleTwoFactorFormProps) {
   const [code, setCode] = useState("");
   const [codeError, setCodeError] = useState<string | undefined>();
+  const [isResending, setIsResending] = useState(false);
+  const { pop } = useNavigation();
 
   function handleSubmit() {
     if (!code) {
@@ -22,6 +25,36 @@ export function AppleTwoFactorForm({ onSubmit }: AppleTwoFactorFormProps) {
     }
 
     onSubmit({ code });
+  }
+
+  async function handleResend() {
+    if (isResending) return;
+    try {
+      setIsResending(true);
+      // Indicate that we're requesting a new code
+      await showToast({ style: Toast.Style.Animated, title: "Requesting new code..." });
+      // Trigger ipatool login without a code to request a new 2FA code
+      await loginToAppleId();
+      // If login unexpectedly succeeds without 2FA, inform the user
+      await showToast({ style: Toast.Style.Success, title: "Authenticated", message: "You're already signed in" });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      // Treat auth prompts as a successful resend signal
+      if (
+        (err instanceof Error && (err.name === "Needs2FAError" || err.name === "NeedsLoginError")) ||
+        /two-factor|2fa|verification code/i.test(message)
+      ) {
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Code resent",
+          message: "Check your devices for a new code",
+        });
+      } else {
+        await showToast({ style: Toast.Style.Failure, title: "Couldn't resend code", message });
+      }
+    } finally {
+      setIsResending(false);
+    }
   }
 
   function handleCodeChange(value: string) {
@@ -40,6 +73,12 @@ export function AppleTwoFactorForm({ onSubmit }: AppleTwoFactorFormProps) {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
+          <Action
+            title={isResending ? "Resending…" : "Resend Code"}
+            onAction={handleResend}
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+          />
+          <Action title="Cancel" onAction={() => pop()} shortcut={{ modifiers: ["cmd"], key: "," }} />
         </ActionPanel>
       }
     >

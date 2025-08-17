@@ -5,11 +5,14 @@ import { handleDownloadError, handleAuthError } from "../utils/error-handler";
 import { analyzeIpatoolError } from "../utils/ipatool-error-patterns";
 import { AuthNavigationHelpers } from "./useAuthNavigation";
 import { NeedsLoginError, Needs2FAError, ensureAuthenticated } from "../utils/auth";
+import { logger } from "../utils/logger";
 
 // Global download state to prevent concurrent downloads across all hook instances
 const globalDownloadState = {
+  isAuthenticating: false,
   isDownloading: false,
   currentApp: null as string | null,
+  activeOpId: null as string | null,
 };
 
 /**
@@ -18,7 +21,7 @@ const globalDownloadState = {
  * @returns Object with download function and loading state
  */
 export function useAppDownload(authNavigation?: AuthNavigationHelpers) {
-  const [isLoading, setIsLoading] = useState(globalDownloadState.isDownloading);
+  const [isLoading, setIsLoading] = useState(globalDownloadState.isDownloading || globalDownloadState.isAuthenticating);
   const [currentDownload, setCurrentDownload] = useState<string | null>(globalDownloadState.currentApp);
 
   /**
@@ -36,47 +39,153 @@ export function useAppDownload(authNavigation?: AuthNavigationHelpers) {
     version: string,
     price: string,
     showHudMessages = true,
+    opId?: string,
   ): Promise<string | null | undefined> => {
-    // Prevent concurrent downloads globally
-    if (globalDownloadState.isDownloading) {
-      await handleDownloadError(
-        new Error(`Download already in progress for ${globalDownloadState.currentApp || "another app"}`),
-        "start concurrent download",
-        "download",
-      );
-      return undefined;
+    // Generate or reuse an operation ID for this logical download flow
+    const operationId = opId ?? `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+    // Concurrency gate: block other requests while authenticating or downloading
+    if (globalDownloadState.activeOpId && globalDownloadState.activeOpId !== operationId) {
+      if (globalDownloadState.isAuthenticating) {
+        logger.log(
+          `[useAppDownload] Authentication in progress for ${globalDownloadState.currentApp}. Blocking new request for ${name}.`,
+        );
+        // Avoid showing HUD/toast here to prevent premature window closure or noisy errors
+        return undefined;
+      }
+      if (globalDownloadState.isDownloading) {
+        logger.log(
+          `[useAppDownload] Download in progress for ${globalDownloadState.currentApp}. Blocking new request for ${name}.`,
+        );
+        return undefined;
+      }
     }
 
-    try {
-      // Set global state first
-      globalDownloadState.isDownloading = true;
+    // Acquire lock if this is a new operation
+    if (!globalDownloadState.activeOpId) {
+      globalDownloadState.activeOpId = operationId;
       globalDownloadState.currentApp = name;
+      globalDownloadState.isAuthenticating = true;
+    }
 
-      // Update local state
-      setIsLoading(true);
-      setCurrentDownload(name);
+    // Update local state
+    setIsLoading(true);
+    setCurrentDownload(name);
 
-      if (showHudMessages) {
-        await showHUD(`Downloading ${name}...`, { clearRootSearch: true });
+    let releaseLock = true;
+
+    try {
+      // Pre-authenticate first so we can push forms without closing the window
+      logger.log(
+        `[useAppDownload] Pre-authentication start for ${name} (${bundleId}) – showHudMessages=${showHudMessages}`,
+      );
+      try {
+        await ensureAuthenticated();
+        logger.log(`[useAppDownload] Pre-authentication OK for ${name} (${bundleId})`);
+        // Transition to downloading phase for this operation
+        if (globalDownloadState.activeOpId === operationId) {
+          globalDownloadState.isAuthenticating = false;
+          globalDownloadState.isDownloading = true;
+        }
+      } catch (error) {
+        if (error instanceof NeedsLoginError || error instanceof Needs2FAError) {
+          logger.log(
+            `[useAppDownload] Pre-authentication indicates auth required (${error instanceof NeedsLoginError ? "login" : "2FA"}). Suppressing HUD and pushing form inline.`,
+          );
+
+          const downloadParams = { bundleId, name, version, price };
+          if (authNavigation) {
+            // Keep the global lock while we wait for the inline auth flow to complete
+            releaseLock = false;
+            if (error instanceof NeedsLoginError) {
+              logger.log(`[useAppDownload] Pushing Login form for ${name} (${bundleId})`);
+              authNavigation.pushLoginForm?.(async () => {
+                try {
+                  logger.log(`[useAppDownload] Login callback invoked. Re-checking auth...`);
+                  await ensureAuthenticated();
+                  logger.log(`[useAppDownload] Auth OK after login. Resuming download for ${name} (${bundleId})`);
+                  await showToast({ style: Toast.Style.Animated, title: "Resuming download..." });
+                  await handleDownload(
+                    downloadParams.bundleId,
+                    downloadParams.name,
+                    downloadParams.version,
+                    downloadParams.price,
+                    showHudMessages,
+                    operationId,
+                  );
+                } catch (authError) {
+                  logger.error(`[useAppDownload] Authentication failed after login:`, authError);
+                }
+              });
+            } else if (error instanceof Needs2FAError) {
+              logger.log(`[useAppDownload] Pushing 2FA form for ${name} (${bundleId})`);
+              authNavigation.push2FAForm?.("session-token", async () => {
+                try {
+                  logger.log(`[useAppDownload] 2FA callback invoked. Re-checking auth...`);
+                  await ensureAuthenticated();
+                  logger.log(`[useAppDownload] Auth OK after 2FA. Resuming download for ${name} (${bundleId})`);
+                  await showToast({ style: Toast.Style.Animated, title: "Resuming download..." });
+                  await handleDownload(
+                    downloadParams.bundleId,
+                    downloadParams.name,
+                    downloadParams.version,
+                    downloadParams.price,
+                    showHudMessages,
+                    operationId,
+                  );
+                } catch (authError) {
+                  logger.error(`[useAppDownload] Authentication failed after 2FA:`, authError);
+                }
+              });
+            }
+          } else {
+            // No navigation available; fall back to preferences
+            logger.log(
+              `[useAppDownload] No authNavigation available. Delegating to handleAuthError with preferences option.`,
+            );
+            await handleAuthError(error, false, true);
+          }
+
+          return undefined;
+        }
+        // Non-auth errors: rethrow to be handled below
+        throw error;
       }
 
-      const filePath = await downloadApp(bundleId, name, version, price);
+      if (showHudMessages) {
+        if (authNavigation) {
+          logger.log(
+            `[useAppDownload] Showing Toast (animated): "Downloading ${name}..." (avoid HUD to keep view open)`,
+          );
+          await showToast({ style: Toast.Style.Animated, title: `Downloading ${name}...` });
+        } else {
+          logger.log(`[useAppDownload] Showing HUD: "Downloading ${name}..."`);
+          await showHUD(`Downloading ${name}...`);
+        }
+      }
+
+      const filePath = await downloadApp(bundleId, name, version, price, 0, undefined, {
+        suppressHUD: Boolean(authNavigation),
+      });
 
       if (filePath) {
         // Verify file actually exists before showing success
         const fs = await import("fs");
         if (fs.existsSync(filePath)) {
-          if (showHudMessages) {
-            await showHUD("Download Complete", { clearRootSearch: true });
+          if (showHudMessages && !authNavigation) {
+            logger.log(`[useAppDownload] Showing HUD: "Download Complete" for ${name}`);
+            await showHUD("Download Complete");
           }
 
+          logger.log(`[useAppDownload] File exists. Success toast for ${name} at ${filePath}`);
           showToast(Toast.Style.Success, "Download Complete", `${name} saved to ${filePath}`);
 
           return filePath;
         } else {
           // File path returned but file doesn't exist
-          if (showHudMessages) {
-            await showHUD("Download Failed", { clearRootSearch: true });
+          if (showHudMessages && !authNavigation) {
+            logger.log(`[useAppDownload] Showing HUD: "Download Failed" (file missing) for ${name}`);
+            await showHUD("Download Failed");
           }
 
           await handleDownloadError(
@@ -87,8 +196,9 @@ export function useAppDownload(authNavigation?: AuthNavigationHelpers) {
           return undefined;
         }
       } else {
-        if (showHudMessages) {
-          await showHUD("Download Failed", { clearRootSearch: true });
+        if (showHudMessages && !authNavigation) {
+          logger.log(`[useAppDownload] Showing HUD: "Download Failed" (no file path) for ${name}`);
+          await showHUD("Download Failed");
         }
 
         await handleDownloadError(new Error("Could not determine file path"), "determine file path", "download");
@@ -99,20 +209,24 @@ export function useAppDownload(authNavigation?: AuthNavigationHelpers) {
       if (error instanceof NeedsLoginError || error instanceof Needs2FAError) {
         // Don't show failure toast for authentication errors
         // The form flow will handle these
-        if (showHudMessages) {
-          await showHUD("Authentication Required", { clearRootSearch: true });
-        }
+        logger.log(
+          `[useAppDownload] Caught auth error in main catch (${error instanceof NeedsLoginError ? "login" : "2FA"}). Suppressing HUD and delegating to form flow.`,
+        );
 
         // Store download parameters for retry after successful auth
         const downloadParams = { bundleId, name, version, price };
-
         if (authNavigation) {
+          // Keep the lock while waiting for inline auth flow
+          releaseLock = false;
           // Let the form flow handle authentication
           if (error instanceof NeedsLoginError) {
+            logger.log(`[useAppDownload] Pushing Login form (catch) for ${name} (${bundleId})`);
             authNavigation.pushLoginForm?.(async () => {
               // After successful login, resume download
               try {
+                logger.log(`[useAppDownload] Login callback (catch) invoked. Re-checking auth...`);
                 await ensureAuthenticated();
+                logger.log(`[useAppDownload] Auth OK after login (catch). Resuming download for ${name} (${bundleId})`);
                 await showToast({ style: Toast.Style.Animated, title: "Resuming download..." });
                 await handleDownload(
                   downloadParams.bundleId,
@@ -123,14 +237,17 @@ export function useAppDownload(authNavigation?: AuthNavigationHelpers) {
                 );
               } catch (authError) {
                 // If auth still fails, let it propagate
-                console.error("Authentication failed after login:", authError);
+                logger.error(`[useAppDownload] Authentication failed after login (catch):`, authError);
               }
             });
           } else if (error instanceof Needs2FAError) {
+            logger.log(`[useAppDownload] Pushing 2FA form (catch) for ${name} (${bundleId})`);
             authNavigation.push2FAForm?.("session-token", async () => {
               // After successful 2FA, resume download
               try {
+                logger.log(`[useAppDownload] 2FA callback (catch) invoked. Re-checking auth...`);
                 await ensureAuthenticated();
+                logger.log(`[useAppDownload] Auth OK after 2FA (catch). Resuming download for ${name} (${bundleId})`);
                 await showToast({ style: Toast.Style.Animated, title: "Resuming download..." });
                 await handleDownload(
                   downloadParams.bundleId,
@@ -141,12 +258,15 @@ export function useAppDownload(authNavigation?: AuthNavigationHelpers) {
                 );
               } catch (authError) {
                 // If auth still fails, let it propagate
-                console.error("Authentication failed after 2FA:", authError);
+                logger.error(`[useAppDownload] Authentication failed after 2FA (catch):`, authError);
               }
             });
           }
         } else {
           // No navigation available, show preferences option
+          logger.log(
+            `[useAppDownload] No authNavigation available (catch). Delegating to handleAuthError with preferences option.`,
+          );
           await handleAuthError(error, false, true);
         }
 
@@ -165,7 +285,13 @@ export function useAppDownload(authNavigation?: AuthNavigationHelpers) {
             : errorAnalysis.errorType === "app_not_found"
               ? "App Not Found"
               : "Download Failed";
-        await showHUD(hudMessage, { clearRootSearch: true });
+        if (authNavigation) {
+          // Avoid HUD to keep the view open; dedicated error handlers will show toasts
+          logger.log(`[useAppDownload] Skipping HUD (view context). Would show: "${hudMessage}" for ${name}`);
+        } else {
+          logger.log(`[useAppDownload] Showing HUD: "${hudMessage}" for ${name}`);
+          await showHUD(hudMessage);
+        }
       }
 
       // For non-specific auth errors, use the existing handler
@@ -174,6 +300,13 @@ export function useAppDownload(authNavigation?: AuthNavigationHelpers) {
         const downloadParams = { bundleId, name, version, price };
 
         // Handle authentication errors with form redirect if available
+        logger.log(
+          `[useAppDownload] Non-specific auth error detected. Routing via handleAuthError with potential form navigation.`,
+        );
+        // Keep the global lock while waiting for inline auth flow via handler
+        if (authNavigation) {
+          releaseLock = false;
+        }
         await handleAuthError(
           new Error(errorAnalysis.userMessage),
           false,
@@ -183,6 +316,7 @@ export function useAppDownload(authNavigation?: AuthNavigationHelpers) {
           authNavigation?.push2FAForm,
           async () => {
             // Resume download after successful authentication
+            logger.log(`[useAppDownload] Auth success via handler. Resuming download for ${name} (${bundleId})`);
             await showToast({ style: Toast.Style.Animated, title: "Resuming download..." });
             await handleDownload(
               downloadParams.bundleId,
@@ -190,19 +324,28 @@ export function useAppDownload(authNavigation?: AuthNavigationHelpers) {
               downloadParams.version,
               downloadParams.price,
               showHudMessages,
+              operationId,
             );
           },
         );
       } else {
         // Handle general download errors with specific user message
+        logger.log(
+          `[useAppDownload] General download error handled. userMessage="${errorAnalysis.userMessage}" type=${errorAnalysis.errorType}`,
+        );
         await handleDownloadError(new Error(errorAnalysis.userMessage), "download app", "download");
       }
 
       return undefined;
     } finally {
-      // Clear global state first
-      globalDownloadState.isDownloading = false;
-      globalDownloadState.currentApp = null;
+      logger.log(`[useAppDownload] Cleaning up global/local download state for ${name} (${bundleId})`);
+      // Release the global lock only if this operation owns it and we're not waiting on auth UI
+      if (globalDownloadState.activeOpId === operationId && releaseLock) {
+        globalDownloadState.isAuthenticating = false;
+        globalDownloadState.isDownloading = false;
+        globalDownloadState.currentApp = null;
+        globalDownloadState.activeOpId = null;
+      }
 
       // Update local state
       setIsLoading(false);

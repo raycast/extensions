@@ -16,6 +16,13 @@
       "subtitle": "iOS App Search",
       "description": "Search for iOS apps on the App Store",
       "mode": "view"
+    },
+    {
+      "name": "logout",
+      "title": "Logout",
+      "subtitle": "Apple ID",
+      "description": "Revoke ipatool auth and clear stored credentials",
+      "mode": "no-view"
     }
   ],
   "tools": [
@@ -90,20 +97,6 @@
     }
   ],
   "preferences": [
-    {
-      "name": "appleId",
-      "title": "Apple ID",
-      "description": "Your Apple ID email for authentication",
-      "type": "textfield",
-      "required": true
-    },
-    {
-      "name": "password",
-      "title": "Password",
-      "description": "Your Apple ID password",
-      "type": "password",
-      "required": true
-    },
     {
       "name": "downloadPath",
       "title": "Download Path",

@@ -59,6 +59,7 @@ export async function validateDownloadPrereqs(
   bundleId: string,
   appName?: string,
   expectedSizeBytes?: number,
+  appVersion?: string,
 ): Promise<ValidationResult> {
   const displayName = appName || bundleId;
   logger.log(`[validation] Starting prerequisite validation for ${displayName}`);
@@ -116,15 +117,17 @@ export async function validateDownloadPrereqs(
     }
 
     // 3. Check for pre-existing target file and prompt for overwrite
+    const sanitizedName = appName ? appName.replace(/[/\\?%*:|"<>]/g, "-") : undefined;
     const possibleFilenames = [
       `${bundleId}.ipa`,
-      appName ? `${appName.replace(/[/\\?%*:|"<>]/g, "-")}.ipa` : null,
-      appName ? `${appName.replace(/[/\\?%*:|"<>]/g, "-")} *.ipa` : null,
+      sanitizedName && appVersion ? `${sanitizedName} ${appVersion}.ipa` : undefined,
+      sanitizedName ? `${sanitizedName}.ipa` : undefined,
     ].filter(Boolean) as string[];
 
     let existingFile: string | null = null;
     let existingFileSize = 0;
 
+    // Prefer exact filename matches only
     for (const filename of possibleFilenames) {
       const filePath = path.join(downloadsDir, filename);
       try {
@@ -138,14 +141,20 @@ export async function validateDownloadPrereqs(
       }
     }
 
-    // Check for similar files if exact match not found
+    // As a last resort, look for very similar files but avoid false positives on short names
     if (!existingFile) {
       const files = await fs.promises.readdir(downloadsDir);
-      const similarFiles = files.filter(
-        (file) =>
-          file.endsWith(".ipa") &&
-          ((appName && file.toLowerCase().includes(appName.toLowerCase())) || file.includes(bundleId)),
-      );
+      const lowerName = sanitizedName?.toLowerCase();
+      const allowFuzzy = lowerName && lowerName.length >= 3; // avoid matching names like "X"
+      const similarFiles = files.filter((file) => {
+        if (!file.endsWith(".ipa")) return false;
+        if (file.includes(bundleId)) return true; // bundleId is precise
+        if (allowFuzzy && lowerName) {
+          // start-with is safer than contains for names
+          return file.toLowerCase().startsWith(lowerName + " ");
+        }
+        return false;
+      });
 
       if (similarFiles.length > 0) {
         const filePath = path.join(downloadsDir, similarFiles[0]);
@@ -353,12 +362,19 @@ export function isFreeApp(price?: string): boolean {
  * @param appName Optional app name for logging
  * @returns Promise<boolean> - true if purchase was successful, false otherwise
  */
-export async function purchaseApp(bundleId: string, appName?: string): Promise<boolean> {
+export async function purchaseApp(
+  bundleId: string,
+  appName?: string,
+  options?: { suppressHUD?: boolean },
+): Promise<boolean> {
   try {
     const displayName = appName || bundleId;
     logger.log(`[ipatool] Attempting to purchase app: ${displayName} (${bundleId})`);
 
-    await showHUD(`Attempting to purchase ${displayName}...`, { clearRootSearch: true });
+    const suppressHUD = options?.suppressHUD ?? false;
+    if (!suppressHUD) {
+      await showHUD(`Attempting to purchase ${displayName}...`);
+    }
 
     // Execute the purchase command using secure spawn
     const { stdout, stderr } = await spawnAsync(IPATOOL_PATH, [
@@ -381,7 +397,9 @@ export async function purchaseApp(bundleId: string, appName?: string): Promise<b
     // Check for success indicators in the output
     if (stdout.includes('"success": true') || stdout.includes("license obtained")) {
       logger.log(`[ipatool] Purchase successful for ${displayName}`);
-      await showHUD(`Successfully purchased ${displayName}`, { clearRootSearch: true });
+      if (!suppressHUD) {
+        await showHUD(`Successfully purchased ${displayName}`);
+      }
       return true;
     }
 
@@ -614,6 +632,7 @@ export async function downloadApp(
   price = "0",
   retryCount = 0,
   retryDelay = INITIAL_RETRY_DELAY,
+  options?: { suppressHUD?: boolean },
 ) {
   try {
     logger.log(`[ipatool] Starting download for bundleId: ${bundleId}, app: ${appName}, version: ${appVersion}`);
@@ -636,18 +655,18 @@ export async function downloadApp(
         logger.warn(`[validation] Could not fetch app size from iTunes API, using fallback:`, error);
       }
 
-      const validation = await validateDownloadPrereqs(bundleId, appName, expectedSizeBytes);
+      const validation = await validateDownloadPrereqs(bundleId, appName, expectedSizeBytes, appVersion);
       if (!validation.isValid) {
-        logger.error(`[ipatool] Prerequisite validation failed: ${validation.errorMessage}`);
-        return null;
+        const msg = validation.errorMessage || "Prerequisite validation failed";
+        logger.error(`[ipatool] Prerequisite validation failed: ${msg}`);
+        throw new Error(msg);
       }
       logger.log(`[ipatool] ✓ Prerequisites validated successfully`);
     }
 
-    // Ensure we're authenticated before proceeding with download
+    // Ensure authenticated before download using centralized flow
     const isAuthenticated = await ensureAuthenticated();
     if (!isAuthenticated) {
-      // Error already handled by ensureAuthenticated via handleAuthError
       return null;
     }
 
@@ -656,7 +675,10 @@ export async function downloadApp(
 
     // Show initial HUD with retry information if applicable
     const retryInfo = retryCount > 0 ? ` (Attempt ${retryCount + 1}/${MAX_RETRIES + 1})` : "";
-    await showHUD(`Downloading ${appName || bundleId}${retryInfo}...`, { clearRootSearch: true });
+    const suppressHUD = options?.suppressHUD ?? false;
+    if (!suppressHUD) {
+      await showHUD(`Downloading ${appName || bundleId}${retryInfo}...`);
+    }
 
     // Check if the app is paid based on price value
     const isPaidApp = price && parseFloat(price) > 0;
@@ -735,9 +757,9 @@ export async function downloadApp(
                 if (progress > lastProgress) {
                   lastProgress = progress;
                   resetStallTimer(); // Reset stall timer on progress
-                  showHUD(`Downloading ${appName || bundleId}... ${Math.round(progress * 100)}%`, {
-                    clearRootSearch: true,
-                  });
+                  if (!suppressHUD) {
+                    showHUD(`Downloading ${appName || bundleId}... ${Math.round(progress * 100)}%`);
+                  }
                 }
               }
             });
@@ -821,12 +843,12 @@ export async function downloadApp(
                 logger.log(
                   `[ipatool] Network/TLS error detected: "${specificError}". Retrying in ${retryDelay}ms (attempt ${nextRetryCount}/${MAX_RETRIES})`,
                 );
-                await showHUD(`Network error. Retrying in ${Math.round(retryDelay / 1000)}s...`, {
-                  clearRootSearch: true,
-                });
+                if (!suppressHUD) {
+                  await showHUD(`Network error. Retrying in ${Math.round(retryDelay / 1000)}s...`);
+                }
 
                 await new Promise((resolve) => setTimeout(resolve, retryDelay));
-                return downloadApp(bundleId, appName, appVersion, price, nextRetryCount, nextRetryDelay);
+                return downloadApp(bundleId, appName, appVersion, price, nextRetryCount, nextRetryDelay, options);
               }
 
               // Use precise ipatool error analysis for categorization
@@ -841,12 +863,12 @@ export async function downloadApp(
                 logger.log(
                   `[ipatool] Timeout/stall error detected. Retrying in ${retryDelay}ms (attempt ${nextRetryCount}/${MAX_RETRIES})`,
                 );
-                await showHUD(`Download stalled – retry? Retrying in ${Math.round(retryDelay / 1000)}s...`, {
-                  clearRootSearch: true,
-                });
+                if (!suppressHUD) {
+                  await showHUD(`Download stalled – retry? Retrying in ${Math.round(retryDelay / 1000)}s...`);
+                }
 
                 await new Promise((resolve) => setTimeout(resolve, retryDelay));
-                return downloadApp(bundleId, appName, appVersion, price, nextRetryCount, nextRetryDelay);
+                return downloadApp(bundleId, appName, appVersion, price, nextRetryCount, nextRetryDelay, options);
               }
 
               // Use the error analysis we already performed above
@@ -864,28 +886,34 @@ export async function downloadApp(
                 );
 
                 try {
-                  const purchaseSuccess = await purchaseApp(bundleId, appName);
+                  const purchaseSuccess = await purchaseApp(bundleId, appName, options);
 
                   if (purchaseSuccess) {
                     logger.log(
                       `[ipatool] License purchase successful for ${appName || bundleId}. Retrying download...`,
                     );
-                    await showHUD(`License obtained. Retrying download...`, { clearRootSearch: true });
+                    if (!suppressHUD) {
+                      await showHUD(`License obtained. Retrying download...`);
+                    }
 
                     // Retry the download after successful license purchase
-                    return downloadApp(bundleId, appName, appVersion, price, 0, INITIAL_RETRY_DELAY);
+                    return downloadApp(bundleId, appName, appVersion, price, 0, INITIAL_RETRY_DELAY, options);
                   } else {
                     logger.log(
                       `[ipatool] License purchase failed for ${appName || bundleId}. Proceeding with error handling.`,
                     );
-                    await showHUD(`Failed to obtain license for ${appName || bundleId}`, { clearRootSearch: true });
+                    if (!suppressHUD) {
+                      await showHUD(`Failed to obtain license for ${appName || bundleId}`);
+                    }
 
                     // Update the error message to be more specific about license purchase failure
                     finalErrorMessage = `License purchase failed for free app "${appName || bundleId}". This may be due to authentication issues or App Store restrictions.`;
                   }
                 } catch (purchaseError) {
                   logger.error(`[ipatool] Error during license purchase attempt:`, purchaseError);
-                  await showHUD(`License purchase error for ${appName || bundleId}`, { clearRootSearch: true });
+                  if (!suppressHUD) {
+                    await showHUD(`License purchase error for ${appName || bundleId}`);
+                  }
 
                   // Update the error message to include the purchase error details
                   const purchaseErrorMsg =
@@ -896,16 +924,21 @@ export async function downloadApp(
 
               // Route to appropriate error handler based on analysis
               if (errorAnalysis.isAuthError) {
-                await handleAuthError(new Error(finalErrorMessage), false);
+                // Import the error types if not already imported at the top
+                const { NeedsLoginError } = await import("./utils/auth");
+                // Reject with NeedsLoginError to let the hook handle it with navigation
+                reject(new NeedsLoginError(finalErrorMessage));
               } else {
                 await handleDownloadError(new Error(finalErrorMessage), "download app", "downloadApp");
+                reject(new Error(errorMessage));
               }
-              reject(new Error(errorMessage));
               return;
             }
 
             // Show complete HUD
-            await showHUD("Download complete", { clearRootSearch: true });
+            if (!suppressHUD) {
+              await showHUD("Download complete");
+            }
 
             // Try to find a JSON object in the output
             let filePath = "";
@@ -1014,13 +1047,15 @@ export async function downloadApp(
                 // Optional automatic retry (once) for corrupted files
                 if (integrityResult.shouldRetry && retryCount === 0) {
                   logger.log(`[ipatool] Attempting automatic retry for corrupted file`);
-                  await showHUD(`File corrupted. Retrying download...`, { clearRootSearch: true });
+                  if (!suppressHUD) {
+                    await showHUD(`File corrupted. Retrying download...`);
+                  }
 
                   // Wait a short delay before retry
                   await new Promise((resolve) => setTimeout(resolve, 2000));
 
                   // Retry with retryCount = 1 to prevent infinite retry loop
-                  return downloadApp(bundleId, appName, appVersion, price, 1, INITIAL_RETRY_DELAY);
+                  return downloadApp(bundleId, appName, appVersion, price, 1, INITIAL_RETRY_DELAY, options);
                 }
 
                 reject(new Error(`File integrity verification failed: ${integrityResult.errorMessage}`));
@@ -1073,9 +1108,9 @@ export async function downloadApp(
               logger.log(
                 `[ipatool] TLS/Network error detected in process error handler. Retrying in ${retryDelay}ms (Attempt ${nextRetryCount}/${MAX_RETRIES})`,
               );
-              await showHUD(`Network error. Retrying in ${Math.round(retryDelay / 1000)}s...`, {
-                clearRootSearch: true,
-              });
+              if (!suppressHUD) {
+                await showHUD(`Network error. Retrying in ${Math.round(retryDelay / 1000)}s...`);
+              }
               logger.log(`[ipatool] Waiting ${retryDelay}ms before retry attempt ${nextRetryCount}/${MAX_RETRIES}`);
 
               // Wait for the retry delay
@@ -1089,6 +1124,7 @@ export async function downloadApp(
                     price,
                     nextRetryCount,
                     nextRetryDelay,
+                    options,
                   );
                   resolve(result);
                 } catch (retryError) {
@@ -1100,7 +1136,9 @@ export async function downloadApp(
 
             // If we're out of retries or it's not a TLS error, fail normally
             handleProcessErrorCleanup(error, "downloadApp");
-            await showHUD("Download failed", { clearRootSearch: true });
+            if (!suppressHUD) {
+              await showHUD("Download failed");
+            }
             await handleDownloadError(error, "download app", "downloadApp");
             reject(error);
           });
@@ -1112,12 +1150,23 @@ export async function downloadApp(
         });
     });
   } catch (error) {
+    // Import the error types if not already imported
+    const { NeedsLoginError, Needs2FAError } = await import("./utils/auth");
+
+    // Let authentication errors bubble up to be handled by the calling code
+    if (error instanceof NeedsLoginError || error instanceof Needs2FAError) {
+      logger.error(`[ipatool] Authentication error during download: ${error.message}`);
+      throw error; // Re-throw to let the hook handle it with navigation
+    }
+
     logger.error(`[ipatool] Unhandled download error: ${error instanceof Error ? error.message : String(error)}`);
     if (error instanceof Error && error.stack) {
       logger.error(`[ipatool] Error stack: ${error.stack}`);
     }
     logger.error(`[ipatool] Error details:`, error);
-    await showHUD("Download failed", { clearRootSearch: true });
+    if (!options?.suppressHUD) {
+      await showHUD("Download failed");
+    }
     await handleDownloadError(error instanceof Error ? error : new Error(String(error)), "download app", "downloadApp");
     return null;
   }

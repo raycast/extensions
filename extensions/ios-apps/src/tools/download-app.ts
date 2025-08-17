@@ -1,8 +1,8 @@
 import { downloadApp, searchApps } from "../ipatool";
 import path from "path";
 import { logger } from "../utils/logger";
-import { Tool } from "@raycast/api";
-import { handleAppSearchError, handleDownloadError, handleIpatoolError, sanitizeQuery } from "../utils/error-handler";
+import { Tool, showToast, Toast } from "@raycast/api";
+import { handleAppSearchError, handleDownloadError, handleAuthError, sanitizeQuery } from "../utils/error-handler";
 import { analyzeIpatoolError } from "../utils/ipatool-error-patterns";
 
 // Constants
@@ -36,7 +36,9 @@ export default async function downloadIosApp(input: Input) {
     if (searchResults.length === 0) {
       await handleAppSearchError(
         new Error(
-          `No apps found matching "${input.query}". Please try a different search term or check the exact app name.`,
+          `No apps found matching "${sanitizeQuery(
+            input.query,
+          )}". Please try a different search term or check the exact app name.`,
         ),
         input.query,
         "download-app",
@@ -64,7 +66,7 @@ export default async function downloadIosApp(input: Input) {
     // Download the app
     if (!bundleId) {
       await handleAppSearchError(
-        new Error(`Could not determine bundle ID for "${input.query}"`),
+        new Error(`Could not determine bundle ID for "${sanitizeQuery(input.query)}"`),
         input.query,
         "download-app",
       );
@@ -87,7 +89,19 @@ export default async function downloadIosApp(input: Input) {
         return { success: false, message: "Download failed" };
       }
 
+      // Verify file exists before reporting success (align with hook behavior)
+      const fs = await import("fs");
+      if (!fs.existsSync(filePath)) {
+        await handleDownloadError(
+          new Error(`File not found at expected path: ${filePath}`),
+          "verify downloaded file",
+          "download-app",
+        );
+        return { success: false, message: "Download failed" };
+      }
+
       logger.log(`[download-app tool] Successfully downloaded app to: ${filePath}`);
+      await showToast(Toast.Style.Success, "Download Complete", `${appName} saved to ${filePath}`);
 
       return {
         filePath,
@@ -99,26 +113,23 @@ export default async function downloadIosApp(input: Input) {
     } catch (downloadError) {
       logger.error(`[download-app tool] Download error for "${appName}":`, downloadError);
 
-      // Use the new intelligent error handler with enhanced patterns and suggested actions
-      await handleIpatoolError(
-        downloadError,
-        "download-app tool",
-        undefined, // no stderr available in this context
-        "download", // operation context
-        false, // Don't throw, we want to return gracefully
-      );
-
-      // Analyze the error to determine the return message
+      // Analyze error to determine auth vs other failures and handle consistently
       const errorMessage = downloadError instanceof Error ? downloadError.message : String(downloadError);
       const errorInfo = analyzeIpatoolError(errorMessage, undefined, "download");
 
       if (errorInfo.isAuthError) {
+        // Show preferences action for auth in tool context
+        await handleAuthError(new Error(errorInfo.userMessage), false, true);
         return { success: false, message: "Authentication failed" };
-      } else if (errorInfo.errorType === "app_not_found") {
-        return { success: false, message: "App not found" };
-      } else {
-        return { success: false, message: "Download failed" };
       }
+
+      // Non-auth errors: show specific failure toast
+      await handleDownloadError(new Error(errorInfo.userMessage), "download app", "download-app");
+
+      if (errorInfo.errorType === "app_not_found") {
+        return { success: false, message: "App not found" };
+      }
+      return { success: false, message: "Download failed" };
     }
   } catch (error) {
     logger.error(`[download-app tool] Error:`, error);

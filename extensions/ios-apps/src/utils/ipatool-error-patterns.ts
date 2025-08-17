@@ -105,6 +105,23 @@ export function analyzeIpatoolError(
     };
   }
 
+  // Keychain/keyring not found (exact message seen in logs)
+  if (
+    fullMessage.includes("failed to get account") ||
+    fullMessage.includes("keyring") ||
+    fullMessage.includes("the specified item could not be found in the keyring")
+  ) {
+    return {
+      isAuthError: true,
+      is2FARequired: false,
+      isCredentialError: false,
+      isLicenseRequired: false,
+      userMessage:
+        "Keychain item not found for ipatool. Please log in again (ipatool auth login) and allow Keychain access.",
+      errorType: "credentials",
+    };
+  }
+
   // License required - specific case for apps that need a license (often free apps)
   if (fullMessage.includes("license is required")) {
     return {

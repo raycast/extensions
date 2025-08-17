@@ -10,3 +10,5 @@ build/
 
 # misc
 .DS_Store
+WARP.md
+/docs/2fa-plan.md

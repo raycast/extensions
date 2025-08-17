@@ -1,9 +1,10 @@
 import { ActionPanel, Action, Icon } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { AppDetails } from "../types";
-import { downloadApp } from "../ipatool";
 import { downloadScreenshots } from "../utils/screenshot-downloader";
 import { getAppStoreUrl } from "../utils/constants";
+import { useAppDownload } from "../hooks/use-app-download";
+import { useAuthNavigation } from "../hooks/useAuthNavigation";
 
 interface AppActionsProps {
   app: AppDetails;
@@ -18,6 +19,10 @@ export function AppActions({ app, onDownload, onDownloadScreenshots }: AppAction
   // Create a fallback App Store URL if trackViewUrl is not available
   const appStoreUrl = app.trackViewUrl || (app.id ? getAppStoreUrl(app.id) : undefined);
 
+  // Auth-aware download helpers
+  const authNavigation = useAuthNavigation();
+  const { downloadApp: downloadWithAuth } = useAppDownload(authNavigation);
+
   // Default download handler if none provided
   const handleDownload = async () => {
     try {
@@ -25,8 +30,8 @@ export function AppActions({ app, onDownload, onDownloadScreenshots }: AppAction
         return await onDownload(app);
       }
 
-      // Fall back to direct download if no handler provided
-      return await downloadApp(app.bundleId, app.name, app.version, app.price);
+      // Fall back to auth-aware download via hook if no handler provided
+      return await downloadWithAuth(app.bundleId, app.name, app.version, app.price);
     } catch (error) {
       console.error("Error downloading app:", error);
       showFailureToast({ title: "Error downloading app", message: String(error) });

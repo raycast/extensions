@@ -73,9 +73,11 @@ The extension uses a sophisticated approach to extract high-resolution screensho
    - Inner JSON strings that need separate parsing
    - Deep path traversal to find screenshot data
 3. **Path Navigation**: Screenshots are located at the path:
-   ```
+
+   ```javascript
    d[0].attributes.platformAttributes[platform].customAttributes.default.default.customScreenshotsByType
    ```
+
 4. **Device Type Mapping**: The extension maps Apple's internal device identifiers to platform types:
    - `iphone_6_5`, `iphone_d74` → iPhone
    - `ipadpro_2018`, `ipad_pro_129` → iPad
@@ -169,6 +171,27 @@ This extension:
   - Secure credential handling with no storage in the extension
 
 When you first attempt to search or download an app, you'll be prompted to authenticate if needed. The new in-UI forms make this process quick and intuitive. After successful authentication, you shouldn't have to re-authenticate for future operations.
+
+### Reducing Keychain Access authentication
+
+The Keychain item that controls `ipatool`'s session is created by `ipatool` itself (usually named `ipatool-auth.service`). macOS may prompt the first time Raycast (or `ipatool`) accesses this item. You can reduce or eliminate repeated prompts by adjusting the item's Access Control:
+
+1. Open Keychain Access and search for `ipatool-auth.service`.
+2. Double‑click the item → open the "Access Control" tab.
+3. Choose one of the following:
+   - Recommended: Keep "Confirm before allowing access" but add specific apps to "Always allow access by these applications":
+     - Click the `+` button and add the actual `ipatool` binary.
+       - On Apple Silicon (Homebrew): `/opt/homebrew/bin/ipatool` → then right‑click → "Show Original" to add the real binary under `/opt/homebrew/Cellar/ipatool/<version>/bin/ipatool` (avoid adding just the symlink).
+       - On Intel (Homebrew): `/usr/local/bin/ipatool` → similarly add the original under `/usr/local/Cellar/ipatool/<version>/bin/ipatool`.
+     - Optionally add `Raycast.app` if the flow originates in Raycast and you still see prompts.
+   - Less secure: Select "Allow all applications to access this item" (not recommended).
+4. Click "Save Changes".
+
+Notes:
+
+- The extension does not create or modify `ipatool-auth.service`; it is owned by `ipatool`.
+- The extension may store your Apple ID password in a separate Keychain entry named `ios-apps-apple-password` (service), which is independent of `ipatool`'s item and does not change its ACL.
+- There is no programmatic way in this extension to set the Keychain ACL default; macOS manages it for security.
 
 ## About Raycast AI Tools
 
