@@ -72,6 +72,7 @@ function SwitchHostsList() {
                   title={item.on ? "Close" : "Open"}
                   onAction={async () => {
                     const toast = await showToast(Toast.Style.Animated, item.on ? "Closing" : "Opening", item.title);
+                    const action = item.on ? "Close" : "Open";
                     try {
                       await mutate(
                         switchHost(item.id).then(async (res) => {
@@ -87,11 +88,11 @@ function SwitchHostsList() {
                       );
                       toast.style = Toast.Style.Success;
                       toast.title = "Success";
-                      toast.message = `${item.on ? "Close" : "Open"} Host ${item.title} Success`;
+                      toast.message = `${action} Host ${item.title} Success`;
                     } catch {
                       toast.style = Toast.Style.Failure;
                       toast.title = "Failed";
-                      toast.message = `${item.on ? "Close" : "Open"} Host ${item.title} Failed`;
+                      toast.message = `${action} Host ${item.title} Failed`;
                     }
                   }}
                 />

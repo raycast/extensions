@@ -4,7 +4,7 @@
 
 # SwitchHosts
 
-This extensions requires [SwitchHosts](https://switchhosts.vercel.app/) to be installed.
+This extension requires [SwitchHosts](https://switchhosts.vercel.app/) to be installed.
 
 ## 🔧 Features
 
