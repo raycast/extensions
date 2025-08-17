@@ -25,12 +25,6 @@ export default function Command() {
   const [devices, setDevices] = useState<Device[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>("");
-
-  // Check cache
-  const lastFetch = getNumberFromCache("last_fetch", 0);
-  const now = Date.now();
-  cache.set("last_fetch", now.toString());
-
   // Fetch devices on command mount (wrapper enables async)
   useEffect(() => {
     async function main() {
@@ -44,10 +38,11 @@ export default function Command() {
       seam = possibleSeam!;
       console.debug("Seam loaded successfully");
 
+      const lastFetch = getNumberFromCache("last_fetch", 0);
       if (!USE_CACHE) {
         console.debug("Cache disabled, erasing devices cache");
         cache.set("devices", JSON.stringify([]));
-      } else if (now - lastFetch < 60 * 1000) {
+      } else if (Date.now() - lastFetch < 60 * 1000) {
         const cachedDevicesString = cache.get("devices");
         console.debug("Cache:", cachedDevicesString);
         if (cachedDevicesString) {
@@ -66,6 +61,7 @@ export default function Command() {
       if (error2 !== "") {
         setError(error2);
       } else {
+        cache.set("last_fetch", Date.now().toString());
         setDevices(newDevices);
         setDeviceSource("api");
         cache.set("devices", JSON.stringify(newDevices));
