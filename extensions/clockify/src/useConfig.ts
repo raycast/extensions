@@ -1,7 +1,7 @@
 import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { fetcher, validateToken } from "./utils";
-import { DataValues } from "./types";
+import { DataValues, User } from "./types";
 
 interface ConfigProps {
   config: DataValues;
@@ -20,9 +20,9 @@ export default function useConfig(): ConfigProps {
     }
 
     async function getStorage() {
-      const name = await LocalStorage.getItem("name");
-      const userId = await LocalStorage.getItem("userId");
-      const workspaceId = await LocalStorage.getItem("workspaceId");
+      const name = await LocalStorage.getItem<string>("name");
+      const userId = await LocalStorage.getItem<string>("userId");
+      const workspaceId = await LocalStorage.getItem<string>("workspaceId");
 
       if (userId && workspaceId && name) {
         setData({ userId, workspaceId, name });
@@ -35,10 +35,11 @@ export default function useConfig(): ConfigProps {
         const { data, error } = await fetcher(`/user`);
 
         if (data) {
-          LocalStorage.setItem("userId", data.id);
-          LocalStorage.setItem("workspaceId", data.defaultWorkspace);
-          LocalStorage.setItem("name", data.name);
-          setData({ userId: data.id, workspaceId: data.defaultWorkspace, name: data.name });
+          const user = data as User;
+          LocalStorage.setItem("userId", user.id);
+          LocalStorage.setItem("workspaceId", user.defaultWorkspace);
+          LocalStorage.setItem("name", user.name);
+          setData({ userId: user.id, workspaceId: user.defaultWorkspace, name: user.name });
           showToast(Toast.Style.Success, "Clockify is ready");
         } else if (error === "Unauthorized") {
           showToast(Toast.Style.Failure, "Invalid API Key detected");

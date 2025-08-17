@@ -4,6 +4,7 @@ export interface TimeEntry {
   projectId: string;
   taskId: string | undefined;
   description: string;
+  tags: Tag[];
   project: Project;
   task: Task | undefined;
   timeInterval: {
@@ -28,12 +29,18 @@ export interface Task {
 export interface Tag extends Task {};
 
 export interface FetcherArgs {
-  method?: string;
+  method?: "PATCH" | "POST";
   body?: any;
   headers?: {
-    "X-Api-Key": any;
+    "X-Api-Key": string;
     "Content-Type": string;
   };
+}
+
+export interface User {
+  id: string;
+  name: string;
+  defaultWorkspace: string;
 }
 
 export interface FetcherResponse {
@@ -41,15 +48,8 @@ export interface FetcherResponse {
   error?: string | Error;
 }
 
-export type ClockifyRegion = "GLOBAL" | "USA" | "AU" | "EU" | "UK";
-
-export interface PreferenceValues {
-  token: string;
-  region: ClockifyRegion;
-}
-
 export interface DataValues {
-  userId: LocalStorageValue;
-  workspaceId: LocalStorageValue;
-  name: LocalStorageValue;
+  userId: string;
+  workspaceId: string;
+  name: string;
 }

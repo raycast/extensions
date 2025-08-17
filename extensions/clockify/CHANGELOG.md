@@ -1,11 +1,14 @@
 # Clockify Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Select Tag During Start + Modernize] - {PR_MERGE_DATE}
 
-- `Action` to openExtensionPreferences in invalid token view
+- `Action` to `openExtensionPreferences` in invalid token view
 - Add `placeholder`s to API Key & Description
 - Add `icon`s to Start,Stop
 - Allow selecting a Tag during timer start (ref: [Issue #18009](https://github.com/raycast/extensions/issues/18009))
+- Allow toggling Tag visibility
+- Make some `types` more precise
+- Modernize to use latest Raycast `eslint.config.js`
 
 ## [Update] - 2024-11-11
 
