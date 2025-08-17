@@ -1,5 +1,5 @@
 import { ActionPanel, Form, Action, LocalStorage, showToast } from "@raycast/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { TEMP_MAIL_DOMAINS } from "temp-mail-plus-api";
 
 export default function Command() {
@@ -23,11 +23,13 @@ export default function Command() {
 
     await showToast({
       title: "Mail address set",
-      message: `Your new mail address is ${mailUsername}@${mailDomain}`,
+      message: `Your new mail address is ${mail_username}@${mail_domain}`,
     });
   };
 
-  getCurrentMailAddress();
+  useEffect(() => {
+    getCurrentMailAddress();
+  }, []);
 
   return (
     <Form
@@ -37,7 +39,7 @@ export default function Command() {
             title="Get New Mail Address"
             onSubmit={(values) => {
               setMailAddress({
-                mail_username: values.mail_address as string,
+                mail_username: values.mail_username as string,
                 mail_domain: values.mail_domain as string,
               });
             }}
@@ -51,7 +53,7 @@ export default function Command() {
         ))}
       </Form.Dropdown>
 
-      <Form.TextField id="mail_address" title="Mail name" value={mailUsername} />
+      <Form.TextField id="mail_username" title="Mail name" value={mailUsername} />
     </Form>
   );
 }

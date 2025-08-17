@@ -15,10 +15,10 @@
       "mode": "view"
     },
     {
-      "name": "read-mails",
-      "title": "Read Mails",
+      "name": "view-inbox",
+      "title": "View Inbox",
       "subtitle": "Shows Mails From Selected Mail Address",
-      "description": "View and read emails from your configured temporary email address with search functionality and detailed mail content",
+      "description": "View current emails from your configured temporary email address with search functionality and detailed mail content",
       "mode": "view"
     }
   ],

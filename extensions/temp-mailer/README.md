@@ -10,24 +10,26 @@
 <br/>
 <img src="https://img.shields.io/github/sponsors/halitsever"/>
 </p>
-<p align="center">
-<a align="center" href="#">Documentation</a>
-  </p>
-</p>
 
 <p align="center">
 <img src="https://halitsever-api.vercel.app/api/details"/>
 </p>
 
-- 🧑‍💻 [**TODO**](#) - update docs
+- Set new mail with "Set mail" command
+
+<img src="metadata/set-mail.png"/>
+
+- Read inbox with "Read Inbox" command
+
+ <img src="metadata/read-inbox.png" alt="Aleph Tools" >
 
 <p align="center" >
 <img src="https://halitsever-api.vercel.app/api/installation"/>
 </p>
 
-Todo: update docs
+You can install on <a href="https://www.raycast.com/store">Raycast Store</a>
 
-<p align="center" href="https://github.com/halitsever/repo_name/issues">
+<p align="center" href="https://github.com/halitsever/raycast-extensions/tree/ext/temp-mailer/issues">
 <img src="https://halitsever-api.vercel.app/api/issue"/>
 </p>
 

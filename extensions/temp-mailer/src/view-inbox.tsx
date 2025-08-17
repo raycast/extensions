@@ -16,10 +16,8 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
-    useEffect(() => {
     setMailboxResults(mailList.filter((item) => item.subject.includes(searchText)));
   }, [searchText, mailList]);
-  }, [searchText]);
 
   const didEmailsFetched = useRef(false);
 
@@ -72,7 +70,7 @@ export default function Command() {
     <List isShowingDetail filtering={false} onSearchTextChange={setSearchText}>
       {mailboxResults.map((mail: MailItem) => (
         <List.Item
-          key={mail.subject}
+          key={mail.mail_id}
           title={mail.subject}
           subtitle={mail.from_mail}
           detail={<List.Item.Detail markdown={mailDetails[mail.mail_id]?.markdown ?? "Loading..."} />}
