@@ -22,14 +22,14 @@ export default function FindModels() {
   const [error, setError] = useState<string | null>(null);
 
   async function loadModels(forceRefresh = false) {
-    // 如果不是强制刷新，先尝试加载缓存
+    // If not force refresh, try to load cache first
     if (!forceRefresh) {
       const cachedModels = getCachedModels();
       if (cachedModels && cachedModels.length > 0) {
         setModels(cachedModels);
         setIsLoading(false);
 
-        // 后台静默更新数据
+        // Background silent update
         fetchOpenRouterModels()
           .then((fetchedModels) => {
             setModels(fetchedModels);
@@ -41,7 +41,7 @@ export default function FindModels() {
       }
     }
 
-    // 没有缓存或强制刷新时，显示加载状态
+    // Show loading state when no cache or force refresh
     setIsLoading(true);
     setError(null);
     try {
@@ -88,7 +88,7 @@ export default function FindModels() {
       });
       console.error("Error loading models:", error);
 
-      // 如果加载失败，尝试使用缓存
+      // Try to use cache if loading fails
       const cachedModels = getCachedModels();
       if (cachedModels && cachedModels.length > 0) {
         setModels(cachedModels);
@@ -155,7 +155,7 @@ export default function FindModels() {
           actions={
             <ActionPanel>
               <Action
-                title="Copy Model Id"
+                title="Copy Model ID"
                 icon={Icon.Clipboard}
                 onAction={() => copyToClipboard(model.id)}
               />
@@ -165,7 +165,7 @@ export default function FindModels() {
                 onAction={() => copyToClipboard(model.name)}
               />
               <Action.OpenInBrowser
-                title="View on Openrouter"
+                title="View on OpenRouter"
                 url={`https://openrouter.ai/models/${model.id}`}
               />
               <Action

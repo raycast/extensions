@@ -21,7 +21,8 @@ export interface OpenRouterResponse {
 
 const cache = new Cache();
 const CACHE_KEY = "openrouter-models";
-const CACHE_TTL = 1000 * 60 * 60; // 1小时缓存有效期
+const CACHE_TTL = 1000 * 60 * 60; // 1 hour cache TTL
+const TOKENS_PER_MILLION = 1000000; // Used for price formatting
 
 export interface CachedData {
   models: OpenRouterModel[];
@@ -36,7 +37,7 @@ export function getCachedModels(): OpenRouterModel[] | null {
     const data = JSON.parse(cached) as CachedData;
     const now = Date.now();
 
-    // 检查缓存是否过期
+    // Check if cache is expired
     if (now - data.timestamp > CACHE_TTL) {
       return null;
     }
@@ -57,7 +58,7 @@ export function setCachedModels(models: OpenRouterModel[]): void {
 
 export async function fetchOpenRouterModels(): Promise<OpenRouterModel[]> {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒超时
+  const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
   try {
     const response = await fetch("https://openrouter.ai/api/v1/models", {
@@ -82,7 +83,7 @@ export async function fetchOpenRouterModels(): Promise<OpenRouterModel[]> {
     const data = (await response.json()) as OpenRouterResponse;
     const models = data.data || [];
 
-    // 缓存数据
+    // Cache the data
     setCachedModels(models);
 
     return models;
@@ -111,14 +112,14 @@ export async function fetchOpenRouterModels(): Promise<OpenRouterModel[]> {
 }
 
 export function formatModelPrice(prompt: string, completion: string): string {
-  const promptPrice = parseFloat(prompt) * 1000000;
-  const completionPrice = parseFloat(completion) * 1000000;
+  const promptPrice = parseFloat(prompt) * TOKENS_PER_MILLION;
+  const completionPrice = parseFloat(completion) * TOKENS_PER_MILLION;
   return `$${promptPrice.toFixed(2)}/$${completionPrice.toFixed(2)} per 1M tokens`;
 }
 
 export function formatTokens(tokens: number): string {
   if (tokens >= 1000000000) {
-    // B (Billion) 单位
+    // B (Billion) units
     const value = tokens / 1000000000;
     if (value >= 100) {
       return `${value.toFixed(0)}B tokens`;
@@ -128,7 +129,7 @@ export function formatTokens(tokens: number): string {
       return `${value.toFixed(2)}B tokens`;
     }
   } else if (tokens >= 1000000) {
-    // M (Million) 单位
+    // M (Million) units
     const value = tokens / 1000000;
     if (value >= 100) {
       return `${value.toFixed(0)}M tokens`;
@@ -138,7 +139,7 @@ export function formatTokens(tokens: number): string {
       return `${value.toFixed(2)}M tokens`;
     }
   } else if (tokens >= 1000) {
-    // K (Thousand) 单位
+    // K (Thousand) units
     return `${(tokens / 1000).toFixed(0)}K tokens`;
   } else {
     return `${tokens} tokens`;

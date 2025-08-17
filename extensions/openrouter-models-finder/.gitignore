@@ -34,6 +34,9 @@ next-env.d.ts
 .raycast/
 raycast-env.d.ts
 
+# Claude
+CLAUDE.md
+
 # IDE
 .vscode/
 .idea/

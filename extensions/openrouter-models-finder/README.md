@@ -43,7 +43,7 @@ npm run build
 
 ## Author
 
-Created by @jeejeeguan
+Created by `@jeejeeguan`
 
 ## License
 
