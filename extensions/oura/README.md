@@ -10,6 +10,8 @@ Get data from your [Oura ring experience](https://ouraring.com) to keep track of
 - Get Readiness - Get your readiness score based on yesterday's factors
 - Get Activity - Get your activity for today
 - Get your latest workouts - Get your latest logged activities from Oura; either automatically logged or from outside sources
+- Get Stress - Get the last two week's stress data: stress high, recovery high, and day summary.
+- Get Resilience - Get the last two week's resilience and contributing factors.
 - Info - Get your measurement data from Oura
 
 ## Getting set up

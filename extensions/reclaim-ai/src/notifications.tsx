@@ -1,5 +1,15 @@
+import "./initSentry";
+
 import { LaunchType, MenuBarExtra, getPreferenceValues, launchCommand, open } from "@raycast/api";
-import { addDays, differenceInHours, endOfDay, formatDistance, isWithinInterval, startOfDay } from "date-fns";
+import {
+  addDays,
+  differenceInMinutes,
+  differenceInHours,
+  endOfDay,
+  formatDistance,
+  isWithinInterval,
+  startOfDay,
+} from "date-fns";
 import { useMemo } from "react";
 import { MenuBarEventSection } from "./components/MenuBarEventSection";
 import { useCallbackSafeRef } from "./hooks/useCallbackSafeRef";
@@ -11,6 +21,7 @@ import { NativePreferences } from "./types/preferences";
 import { miniDuration } from "./utils/dates";
 import { getOriginalEventIDFromSyncEvent, truncateEventSize } from "./utils/events";
 import { stripPlannerEmojis } from "./utils/string";
+import { withRAIErrorBoundary } from "./components/RAIErrorBoundary";
 
 type EventSection = { section: string; sectionTitle: string; events: Event[] };
 
@@ -21,7 +32,7 @@ type TitleInfo = {
   nowOrNext: "NOW" | "NEXT" | "NONE";
 };
 
-export default function Command() {
+function Command() {
   /********************/
   /*   custom hooks   */
   /********************/
@@ -121,7 +132,27 @@ export default function Command() {
 
   const titleInfo = useMemo<TitleInfo>(() => {
     const now = new Date();
-    const eventNextNow = eventMoment?.event;
+    let eventNextNow;
+    const showNowEvent = getPreferenceValues()["showNowEvent"];
+    if (showNowEvent) {
+      const nowEvent = events?.filter((event) => {
+        const start = new Date(event.eventStart);
+        const end = new Date(event.eventEnd);
+        return isWithinInterval(now, { start, end });
+      });
+
+      const recentNowEvent = nowEvent?.find((event) => differenceInMinutes(now, new Date(event.eventStart)) <= 5);
+
+      if (recentNowEvent) {
+        eventNextNow = recentNowEvent;
+      } else if (eventMoment?.event) {
+        eventNextNow = eventMoment.event;
+      } else if (nowEvent?.length) {
+        eventNextNow = nowEvent[0];
+      }
+    } else {
+      eventNextNow = eventMoment?.event;
+    }
 
     if (eventNextNow) {
       const realEventTitle = eventNextNow.sourceDetails?.title || eventNextNow.title;
@@ -160,7 +191,7 @@ export default function Command() {
       nowOrNext: "NONE",
       event: null,
     };
-  }, [eventMoment]);
+  }, [eventMoment, events]);
 
   /********************/
   /*    useCallback   */
@@ -198,3 +229,5 @@ export default function Command() {
     </MenuBarExtra>
   );
 }
+
+export default withRAIErrorBoundary(Command);

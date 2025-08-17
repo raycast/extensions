@@ -41,16 +41,17 @@ export const useSecretValue = (secretId: string) => {
 
       let md = "## Secret Value\n\n```";
       let value = SecretString;
+      let json = undefined;
 
       try {
-        const json = JSON.parse(SecretString || "");
+        json = JSON.parse(SecretString || "");
         md += `json\n${JSON.stringify(json, null, 4)}`;
         value = JSON.stringify(json, null, 4);
       } catch {
         md += `text\n${SecretString}`;
       }
 
-      return { value, markdown: md + "\n```" };
+      return { value, markdown: md + "\n```", json };
     },
     [secretId],
     { execute: isReadyToFetch() },

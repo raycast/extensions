@@ -1,9 +1,9 @@
 import { Action, ActionPanel, Form, Icon, List, showToast, useNavigation } from "@raycast/api";
-import { FormValidation, getFavicon, useForm } from "@raycast/utils";
+import { FormValidation, getAvatarIcon, getFavicon, useForm } from "@raycast/utils";
 import { useListDomains, useParsedDNSZone, useUAPI } from "./lib/hooks";
 import { DEFAULT_ICON } from "./lib/constants";
 import { DNSZoneRecord } from "./lib/types";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { isInvalidUrl } from "./lib/utils";
 import InvalidUrl from "./lib/components/invalid-url";
 
@@ -48,6 +48,7 @@ function Domain({ domain, showAction = true }: { domain: string; showAction?: bo
       actions={
         showAction && (
           <ActionPanel>
+            {/* eslint-disable-next-line @raycast/prefer-title-case */}
             <Action.Push icon={Icon.Eye} title="View DNS Zone" target={<ViewDNSZone zone={domain} />} />
           </ActionPanel>
         )
@@ -59,39 +60,67 @@ function Domain({ domain, showAction = true }: { domain: string; showAction?: bo
 type SOARecord = DNSZoneRecord & { type: "record"; dname: string; data: string[] };
 
 function ViewDNSZone({ zone }: { zone: string }) {
-  const { isLoading, data, revalidate } = useParsedDNSZone(zone);
+  const { isLoading, data = [], revalidate } = useParsedDNSZone(zone);
+
+  const [type, setType] = useState("");
+  const recordsToShow = useMemo(
+    //filter out the record types cPanel does not show. We do not do this in hook as the records are still needed for other operations
+    () => data.filter((record) => record.record_type !== "SOA" && record.record_type !== "NS"),
+    [data],
+  );
+  const filteredRecords = useMemo(
+    () => recordsToShow.filter((record) => !type || record.record_type === type),
+    [recordsToShow, type],
+  );
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search dns zone">
-      <List.Section title={`Domains / ${zone} / DNS Zone`}>
-        {data
-          ?.filter((zoneItem) => !["SOA", "NS"].includes(zoneItem.record_type))
-          .map((zoneItem) => {
-            const subtitle = zoneItem.dname.includes(zone) ? undefined : `.${zone}.`;
-            return (
-              <List.Item
-                key={zoneItem.line_index}
-                title={zoneItem.dname}
-                subtitle={subtitle}
-                accessories={[{ tag: zoneItem.record_type }]}
-                actions={
-                  <ActionPanel>
-                    <Action.Push
-                      icon={Icon.Plus}
-                      title="Create DNS Zone Record"
-                      target={
-                        <CreateDNSZoneRecord
-                          zone={zone}
-                          soa={data.find((record) => record.record_type === "SOA") as SOARecord}
-                          onRecordCreated={revalidate}
-                        />
-                      }
-                    />
-                  </ActionPanel>
-                }
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search dns zone"
+      searchBarAccessory={
+        <List.Dropdown tooltip="Record Type" onChange={setType}>
+          <Form.Dropdown.Item icon={Icon.Dot} title={`All (${recordsToShow.length})`} value="" />
+          <Form.Dropdown.Section>
+            {[...new Set(recordsToShow.map((record) => record.record_type))].map((type) => (
+              <List.Dropdown.Item
+                key={type}
+                icon={getAvatarIcon(type)}
+                title={`${type} (${recordsToShow.filter((record) => record.record_type === type).length})`}
+                value={type}
               />
-            );
-          })}
+            ))}
+          </Form.Dropdown.Section>
+        </List.Dropdown>
+      }
+    >
+      <List.Section title={`Domains / ${zone} / DNS Zone`} subtitle={`${filteredRecords.length} records`}>
+        {filteredRecords.map((zoneItem) => {
+          const subtitle = zoneItem.dname.includes(zone) ? undefined : `.${zone}.`;
+          return (
+            <List.Item
+              key={zoneItem.line_index}
+              title={zoneItem.dname}
+              subtitle={subtitle}
+              accessories={[{ tag: zoneItem.record_type }]}
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    icon={Icon.Plus}
+                    // eslint-disable-next-line @raycast/prefer-title-case
+                    title="Create DNS Zone Record"
+                    target={
+                      <CreateDNSZoneRecord
+                        zone={zone}
+                        soa={data.find((record) => record.record_type === "SOA") as SOARecord}
+                        onRecordCreated={revalidate}
+                      />
+                    }
+                  />
+                </ActionPanel>
+              }
+            />
+          );
+        })}
       </List.Section>
     </List>
   );

@@ -1,65 +1,11 @@
 import { Action, ActionPanel, Form, getPreferenceValues, Icon } from "@raycast/api";
 import { FormValidation, useCachedState, useForm } from "@raycast/utils";
-import fetch from "node-fetch";
 import { useEffect, useState } from "react";
-import { CollectionCreationResponse, FormValues, Preferences } from "../types";
+import { FormValues } from "../types";
 
 import { useRequest } from "../hooks/useRequest";
 import { useTags } from "../hooks/useTags";
-
-async function createCollection({
-  preferences,
-  title,
-}: {
-  preferences: Preferences;
-  title: string;
-}): Promise<CollectionCreationResponse> {
-  const response = await fetch("https://api.raindrop.io/rest/v1/collection", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${preferences.token}`,
-    },
-    body: JSON.stringify({ title, parent: { $id: {} } }),
-  });
-
-  return (await response.json()) as CollectionCreationResponse;
-}
-
-async function createBookmark({
-  preferences,
-  values,
-  showCollectionCreation,
-}: {
-  preferences: Preferences;
-  values: FormValues;
-  showCollectionCreation: boolean;
-}) {
-  let collectionId = values.collection;
-
-  if (showCollectionCreation && values.newCollection) {
-    collectionId = await createCollection({
-      preferences,
-      title: values.newCollection,
-    }).then((data) => data.item._id.toString());
-  }
-
-  return fetch("https://api.raindrop.io/rest/v1/raindrops", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${preferences.token}`,
-    },
-    body: JSON.stringify({
-      items: values.link.split(/[ ,;]/).map((link) => ({
-        link: link.trim(),
-        collectionId,
-        tags: values.tags,
-        pleaseParse: {},
-      })),
-    }),
-  });
-}
+import { createBookmark, getLinkTitle } from "../helpers/utils";
 
 type CreateFormProps = {
   isLoading?: boolean;
@@ -110,6 +56,7 @@ export const CreateForm = (props: CreateFormProps) => {
     },
     initialValues: {
       link: props.defaultLink ?? "",
+      title: undefined,
       collection: "-1",
     },
   });
@@ -119,6 +66,14 @@ export const CreateForm = (props: CreateFormProps) => {
       setValue("link", props.defaultLink);
     }
   }, [props.defaultLink, setValue]);
+
+  useEffect(() => {
+    if (props.defaultLink) {
+      getLinkTitle(props.defaultLink).then((title) => {
+        setValue("title", title);
+      });
+    }
+  }, [props.defaultLink]);
 
   return (
     <Form
@@ -135,7 +90,16 @@ export const CreateForm = (props: CreateFormProps) => {
         placeholder="https://example.com"
         info="You can add multiple links separated by commas, spaces, or semicolons."
         autoFocus
+        onBlur={(event) => {
+          const link = event.target.value;
+          if (link) {
+            getLinkTitle(link).then((title) => {
+              setValue("title", title);
+            });
+          }
+        }}
       />
+      <Form.TextField {...itemProps.title} title="Title" placeholder="Example title" />
       <Form.Dropdown
         {...itemProps.collection}
         title="Collection"

@@ -11,19 +11,19 @@ export function SwitchActionPanel(props: { state: State }) {
         <Action
           title="Toggle"
           onAction={async () => await ha.toggleSwitch(props.state.entity_id)}
-          icon={{ source: "toggle.png", tintColor: Color.PrimaryText }}
+          icon={{ source: "cached.svg", tintColor: Color.PrimaryText }}
         />
         <Action
           title="Turn On"
           shortcut={{ modifiers: ["cmd"], key: "o" }}
           onAction={async () => await ha.turnOnSwitch(props.state.entity_id)}
-          icon={{ source: "power-btn.png", tintColor: Color.Green }}
+          icon={{ source: "power-on.svg", tintColor: Color.PrimaryText }}
         />
         <Action
           title="Turn Off"
           shortcut={{ modifiers: ["cmd"], key: "f" }}
           onAction={async () => await ha.turnOffSwitch(props.state.entity_id)}
-          icon={{ source: "power-btn.png", tintColor: Color.Red }}
+          icon={{ source: "power-off.svg", tintColor: Color.PrimaryText }}
         />
       </ActionPanel.Section>
       <EntityStandardActionSections state={state} />

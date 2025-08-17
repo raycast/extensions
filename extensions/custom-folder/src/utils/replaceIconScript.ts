@@ -37,6 +37,10 @@ export const replaceIconScript = (sanitizedIconPath: string, targetPath: string)
       fi
       
       rm "$rsrc" "$icon"
+      
+      if [ -f "/tmp/cf-custom-emoji.png" ]; then
+        rm "/tmp/cf-custom-emoji.png"
+      fi
     `;
   }
   return undefined;

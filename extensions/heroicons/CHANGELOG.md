@@ -1,5 +1,10 @@
 # Heroicons Changelog
 
+## [v.1.2.3] - 2025-04-12
+
+- Fixed 404 error by replacing the repo where we get the name from
+
+
 ## [v.1.2.2] - 2024-04-09
 
 - Fixed an issue with search crashing due to a list not being able to load (url changed)

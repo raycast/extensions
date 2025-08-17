@@ -8,7 +8,8 @@
   "contributors": [
     "FezVrasta",
     "pernielsentikaer",
-    "j3lte"
+    "j3lte",
+    "xilopaint"
   ],
   "license": "MIT",
   "commands": [
@@ -67,29 +68,67 @@
           "value": "large"
         }
       ]
+    },
+    {
+      "name": "dataSet",
+      "type": "dropdown",
+      "required": false,
+      "title": "Data Set",
+      "description": "The data set to use for the search. By default it uses the minimal data set, which contains about 5400 characters. The full set contains +40000 characters. Using this big of a dataset might impact performance. Note: In 'List View' only the minimal dataset is supported.",
+      "default": "minimal",
+      "data": [
+        {
+          "title": "Minimal",
+          "value": "minimal"
+        },
+        {
+          "title": "Full",
+          "value": "full"
+        }
+      ]
+    },
+    {
+      "name": "primaryAction",
+      "type": "dropdown",
+      "required": false,
+      "title": "Primary Action",
+      "description": "The action to perform when selecting an item.",
+      "default": "paste",
+      "data": [
+        {
+          "title": "Paste Character to Active App",
+          "value": "paste"
+        },
+        {
+          "title": "Copy Character to Clipboard",
+          "value": "copy"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.69.0",
+    "@raycast/api": "^1.88.3",
+    "@raycast/utils": "^1.18.1",
     "fuse.js": "^6.6.2",
     "js-base64": "^3.7.7"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
-    "@types/node": "20.11.25",
-    "@types/react": "18.2.64",
-    "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
+    "@raycast/eslint-config": "^1.0.11",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.0",
+    "@types/node": "22.10.2",
+    "@types/react": "18.3.8",
+    "eslint": "^8.57.1",
+    "prettier": "^3.4.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.4.2",
-    "unidata": "^13.0.0"
+    "typescript": "^5.7.2",
+    "unidata16": "^0.3.1"
   },
   "scripts": {
-    "prebuild": "ts-node ./scripts/generate-dataset.ts",
     "build": "ray build -e dist",
     "dev": "ray develop",
     "generate-dataset": "ts-node ./scripts/generate-dataset.ts",
+    "generate-htmlset": "ts-node ./scripts/generate-htmllist.ts",
+    "generate": "npm run generate-dataset && npm run generate-htmlset",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"

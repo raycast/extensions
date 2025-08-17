@@ -88,7 +88,8 @@ export async function play({ id, type, contextUri }: PlayProps = {}) {
       isSpotifyInstalled &&
       (error?.toLocaleLowerCase().includes("no device found") ||
         error?.toLocaleLowerCase().includes("no active device") ||
-        error?.toLocaleLowerCase().includes("restricted device"))
+        error?.toLocaleLowerCase().includes("restricted device") ||
+        error?.toLocaleLowerCase().includes("premium required"))
     ) {
       // If one of the above errors is thrown, we need to open Spotify and play the track.
       await launchSpotifyAndPlay({ id, type });

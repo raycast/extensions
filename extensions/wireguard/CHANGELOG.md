@@ -1,4 +1,10 @@
 # Wireguard Changelog
+
+## [Add Toasts and Huds] - 2024-12-03
+
+- `showToast` then `showHud` on **toggle**
+- `showToast` then `showHud` on **disconnectAll**
+
 ## [Fixed] - 2023-11-28
 
 - Fixed VPN not starting via `scutil` with too long a name

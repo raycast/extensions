@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sefaria",
+  "title": "Sefaria",
+  "description": "Unofficial Raycast extension for searching Sefaria's library of Jewish texts",
+  "icon": "extension-icon.png",
+  "author": "danyeric123",
+  "categories": [
+    "Documentation",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-sefaria",
+      "title": "Search Sefaria",
+      "subtitle": "Sefaria",
+      "description": "Search for texts, commentaries, and sources in Sefaria",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "searchMode",
+          "title": "Default Search Mode",
+          "description": "Choose the default search display mode",
+          "type": "dropdown",
+          "required": false,
+          "default": "list",
+          "data": [
+            {
+              "title": "List View",
+              "value": "list"
+            },
+            {
+              "title": "Category View",
+              "value": "category"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "get-source",
+      "title": "Get Source",
+      "subtitle": "Sefaria",
+      "description": "Get Hebrew and English text for a specific reference",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "reference",
+          "placeholder": "e.g., Exod. 17:15, Exodus 17:15, Shemot 17:15, Berakhot 14b, Rashi on Genesis 1:1",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "format": "prettier --write .",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`pnpm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`pnpm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

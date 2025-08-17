@@ -1,5 +1,11 @@
 # Change Case Changelog
 
+## [Add `preserve punctuation` preference] - 2025-07-15
+- Added a preference to preserve punctuation when transforming text to Lower Case or Upper Case
+
+## [Focus last used case] - 2024-11-24
+- Focus the last used case when opening the extension
+
 ## [Fix logic regarding preserve casing] - 2024-09-02
 - Properly handle the logic regarding the `Preserve Casing` preference
 - Rewrote some of the documentation to make it clearer

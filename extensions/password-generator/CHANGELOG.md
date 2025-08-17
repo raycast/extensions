@@ -1,5 +1,9 @@
 # Password Generator Changelog
 
+## [Generate memorable passwords] - 2024-09-23
+
+There's now a command called "Generate Memorable Password". It will create an easier-to-type-and-remember password and can be fully customized.
+
 ## [Update] - 2024-09-05
 
 Updated dependencies

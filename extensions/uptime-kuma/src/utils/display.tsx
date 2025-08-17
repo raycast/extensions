@@ -1,4 +1,4 @@
-import { Heartbeat, Monitor } from "../modules/UptimeKuma";
+import { Heartbeat, Monitor, MonitorStatus } from "../modules/UptimeKuma";
 import { Color, Icon, List } from "@raycast/api";
 
 export const getMonitorStatus = (monitor: Monitor): string => {
@@ -45,13 +45,13 @@ export const getMonitorStatusIcon = (monitor: Monitor) => {
   }
 
   switch (monitor.heartbeat?.status) {
-    case 0:
+    case MonitorStatus.DOWN:
       return Icon.XMarkCircle;
-    case 1:
+    case MonitorStatus.UP:
       return Icon.CheckCircle;
-    case 2:
+    case MonitorStatus.PENDING:
       return Icon.Warning;
-    case 3:
+    case MonitorStatus.MAINTENANCE:
       return Icon.Gear;
   }
 

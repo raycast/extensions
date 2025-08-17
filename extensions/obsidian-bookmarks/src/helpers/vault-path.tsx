@@ -105,3 +105,46 @@ export async function getOrCreateBookmarksPath(): Promise<string> {
 
   return fullBookmarksPath;
 }
+
+export async function getSaveSubfolderPath(): Promise<string> {
+  const vaultPath = await getVaultPath();
+  const { saveSubfolder, bookmarksPath } = getPreferenceValues<Preferences>();
+
+  // If no save subfolder specified, use bookmarksPath
+  const savePath = saveSubfolder?.trim() ? saveSubfolder : bookmarksPath;
+
+  const fullSavePath = path.resolve(path.join(vaultPath, savePath));
+  if (fullSavePath !== vaultPath && !isSubdirectory(vaultPath, fullSavePath)) {
+    throw new ToastableError(
+      "Configuration Error",
+      "The Save subfolder path must be a subdirectory of your Obsidian Vault."
+    );
+  }
+
+  // Create the save directory if it doesn't exist
+  try {
+    const stat = await fs.stat(fullSavePath);
+    if (!stat.isDirectory()) {
+      throw new ToastableError(
+        "Configuration Error",
+        "The Save subfolder path must be a directory, but a file was found instead."
+      );
+    } else if (!(await isReadWrite(fullSavePath))) {
+      throw new ToastableError(
+        "Configuration Error",
+        "The Save subfolder path must be to a directory with proper read/write permissions set."
+      );
+    }
+  } catch {
+    try {
+      await fs.mkdir(fullSavePath, { recursive: true });
+    } catch (err) {
+      throw new ToastableError(
+        "Could not create Save subfolder directory",
+        err instanceof Error ? err.message : String(err)
+      );
+    }
+  }
+
+  return fullSavePath;
+}

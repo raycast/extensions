@@ -58,14 +58,18 @@ export default function Command() {
 
 function Accessories(item: Item) {
   const preferences = getPreferenceValues<Preferences>();
-  const { showDate } = preferences;
+  const { showDate, showCountdownByDay } = preferences;
   const items = [];
 
   if (showDate) {
     items.push({ text: moment(item.date).format("YYYY-MM-DD"), icon: Icon.Calendar });
   }
 
-  items.push({ text: moment(item.date).fromNow(), icon: Icon.Clock });
+  if (showCountdownByDay) {
+    items.push({ text: moment(item.date).diff(new Date(), "days") + " days", icon: Icon.Clock });
+  } else {
+    items.push({ text: moment(item.date).fromNow(), icon: Icon.Clock });
+  }
 
   return items;
 }

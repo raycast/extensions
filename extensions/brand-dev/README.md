@@ -4,7 +4,7 @@
 
 # Brand.dev
 
-This is a Raycast extension to get a company's brand logos, colors, slogan, socials, and more via the Brand.dev API.
+This is a Raycast extension to get a company's brand logos, colors, slogan, socials, and more via the [Brand.dev](https://brand.dev/) API.
 
 ## 🚀 Getting Started
 
@@ -19,6 +19,10 @@ This is a Raycast extension to get a company's brand logos, colors, slogan, soci
     b. `Copy` the "API Key"
   
     c. `Enter` this key in Preferences OR at first prompt
+
+## ⚙️ Configuration
+
+By default the secondary `Action` performs "Deletion" but if you prefer, you can change this in Preferences to be "New".
 
 ## 🗒️ NOTE
 

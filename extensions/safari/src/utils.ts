@@ -1,17 +1,12 @@
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import Fuse, { FuseOptionKey } from "fuse.js";
 import _ from "lodash";
 import osascript from "osascript-tag";
 import { URL } from "url";
-import Fuse, { FuseOptionKey } from "fuse.js";
+import { langAdaptor } from "./lang-adaptor";
+import { HistoryItem, LooseTab } from "./types";
 
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-
-import { HistoryItem, Tab } from "./types";
-
-type Preferences = {
-  safariAppIdentifier: string;
-};
-
-export const { safariAppIdentifier }: Preferences = getPreferenceValues();
+export const { safariAppIdentifier, enableFuzzySearch }: Preferences = getPreferenceValues();
 
 export const executeJxa = async (script: string) => {
   try {
@@ -69,16 +64,54 @@ export const formatDate = (date: string) =>
     day: "numeric",
   });
 
-export const getTitle = (tab: Tab) => _.truncate(tab.title, { length: 75 });
+export const getTitle = (tab: LooseTab) => _.truncate(tab.title, { length: 75 });
 
 export const plural = (count: number, string: string) => `${count} ${string}${count > 1 ? "s" : ""}`;
 
-export const search = function (collection: object[], keys: Array<FuseOptionKey<object>>, searchText: string) {
+function installLangHandlers() {
+  const enablePinyin = getPreferenceValues<Preferences>().enablePinyin;
+  if (enablePinyin) {
+    import("./lang-adaptor/pinyin").then((pinyinModule) => {
+      const pinyinHandler = new pinyinModule.PinyinHandler();
+      langAdaptor.registerLang(pinyinHandler.name, pinyinHandler);
+    });
+  }
+}
+
+export const search = function (collection: LooseTab[], keys: Array<FuseOptionKey<object>>, searchText: string) {
+  installLangHandlers();
+
   if (!searchText) {
     return collection;
   }
 
-  return new Fuse(collection, { keys, threshold: 0.35 }).search(searchText).map((x) => x.item);
+  const _formatPerf = performance.now();
+  const formattedCollection = collection.map((item) => {
+    return {
+      ...item,
+      title_formatted: langAdaptor.formatString(searchText, item.title, { id: item.uuid }),
+    };
+  });
+  const _formatCost = performance.now() - _formatPerf;
+
+  const _searchPerf = performance.now();
+  const result = new Fuse(formattedCollection, {
+    keys,
+    threshold: enableFuzzySearch ? 0.35 : 0,
+    ignoreLocation: true,
+  })
+    .search(searchText)
+    .map((x) => x.item);
+  const _searchCost = performance.now() - _searchPerf;
+
+  if (process.env.NODE_ENV === "development") {
+    console.log("searchText", searchText);
+    console.log(`format cost ${_formatCost}ms`);
+    console.log(`search cost ${_searchCost}ms`);
+    // console.log('formatted collection', formattedCollection);
+    console.log("result size", result.length);
+  }
+  return result;
 };
 
 const dtf = new Intl.DateTimeFormat(undefined, {

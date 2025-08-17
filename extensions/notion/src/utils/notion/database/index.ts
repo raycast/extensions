@@ -3,14 +3,15 @@ import type { BlockObjectRequest } from "@notionhq/client/build/src/api-endpoint
 import { type Form, showToast, Toast } from "@raycast/api";
 import { markdownToBlocks } from "@tryfabric/martian";
 
-import { isWritableProperty } from "..";
+import { isMarkdownPageContent, isReadableProperty } from "..";
 import { handleError, isNotNullOrUndefined, pageMapper } from "../global";
 import { getNotionClient } from "../oauth";
 import { formValueToPropertyValue } from "../page/property";
+import { standardize } from "../standardize";
 
 import { DatabaseProperty } from "./property";
 
-export { getPropertyConfig, type PropertyConfig } from "./property";
+export type { PropertyConfig } from "./property";
 export type { DatabaseProperty };
 
 export async function fetchDatabase(pageId: string, silent: boolean = true) {
@@ -65,15 +66,16 @@ export async function fetchDatabaseProperties(databaseId: string) {
 
     propertyNames.forEach((name) => {
       const property = database.properties[name];
-      if (isWritableProperty(property)) {
+      if (isReadableProperty(property)) {
         if (property.type == "select")
           property.select.options.unshift({
             id: "_select_null_",
             name: "No Selection",
             color: "default",
+            description: "No selection",
           });
 
-        databaseProperties.push(property);
+        databaseProperties.push(standardize(property, "config"));
       }
     });
 
@@ -121,7 +123,6 @@ export async function queryDatabase(
 
 type CreateRequest = Parameters<Client["pages"]["create"]>[0];
 
-// Create database page
 export async function createDatabasePage(values: Form.Values) {
   try {
     const notion = getNotionClient();
@@ -133,8 +134,10 @@ export async function createDatabasePage(values: Form.Values) {
     };
 
     if (content) {
-      // casting because converting from the `Block` type in martian to the `BlockObjectRequest` type in notion
-      arg.children = markdownToBlocks(content) as BlockObjectRequest[];
+      arg.children = isMarkdownPageContent(content)
+        ? // casting because converting from the `Block` type in martian to the `BlockObjectRequest` type in notion
+          (markdownToBlocks(content) as BlockObjectRequest[])
+        : content;
     }
 
     Object.keys(props).forEach((formId) => {

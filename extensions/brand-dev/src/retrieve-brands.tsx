@@ -4,14 +4,16 @@ import {
   Detail,
   Form,
   Icon,
+  Keyboard,
+  LaunchProps,
   List,
   Toast,
   getPreferenceValues,
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { FormValidation, useFetch, useForm, useLocalStorage } from "@raycast/utils";
-import { useState } from "react";
+import { FormValidation, showFailureToast, useFetch, useForm, useLocalStorage } from "@raycast/utils";
+import { useEffect, useState } from "react";
 
 type Color = {
   hex: string;
@@ -47,6 +49,14 @@ type Address = {
   postal_code?: string;
   additional_info?: string;
 };
+type Stock = {
+  ticker: string;
+  exchange: string;
+};
+type Font = {
+  usage: string;
+  name: string;
+};
 type Brand = {
   domain: string;
   title: string | null;
@@ -57,7 +67,10 @@ type Brand = {
   backdrops: Backdrop[];
   socials: Social[];
   address: Address | null;
-  verified: boolean;
+  stock: Stock | null;
+  fonts: Font[];
+  email: string | null;
+  phone: string | null;
 };
 type Response = {
   status: "ok";
@@ -69,14 +82,20 @@ type BrandInStorage = Brand & {
 };
 const { api_key } = getPreferenceValues<Preferences>();
 
-export default function RetrieveBrand() {
+export default function RetrieveBrand(props: LaunchProps<{ arguments: Arguments.RetrieveBrands }>) {
   const { push } = useNavigation();
+  const { action } = getPreferenceValues<Preferences.RetrieveBrands>();
+  const { search } = props.arguments;
+  const [searched, setSearched] = useState(!search);
+  const [searchText, setSearchText] = useState("");
+
   const { isLoading, value: brands = [], setValue: setBrands } = useLocalStorage<BrandInStorage[]>("brands", []);
 
   async function updateBrands(newBrand: BrandInStorage) {
-    const newBrands = brands;
+    const newBrands = [...brands];
     const index = newBrands.findIndex((brand) => brand.domain === newBrand.domain);
-    index !== -1 ? (newBrands[index] = newBrand) : newBrands.push(newBrand);
+    if (index !== -1) newBrands[index] = newBrand;
+    else newBrands.push(newBrand);
     await setBrands(newBrands);
     push(<ViewBrand brand={newBrand} />);
   }
@@ -87,68 +106,113 @@ export default function RetrieveBrand() {
     await setBrands(newBrands);
   }
 
+  useEffect(() => {
+    async function searchAndShow() {
+      setSearched(true);
+      const brand = brands.find((b) => b.domain === search);
+      if (brand) {
+        push(<ViewBrand brand={brand} />);
+      } else {
+        await showFailureToast("No matching brand found", {
+          title: search,
+          primaryAction: {
+            title: "Search Brand",
+            onAction() {
+              push(<SearchBrand search={search} onSearched={updateBrands} />);
+            },
+          },
+        });
+      }
+    }
+    if (brands.length && !searched) searchAndShow();
+  }, [brands]);
+
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search brand">
-      {!isLoading && brands.length === 0 ? (
-        <List.EmptyView
-          title="No Brands"
-          description="Search for a brand to get started"
-          actions={
-            <ActionPanel>
-              <Action.Push
-                icon={Icon.MagnifyingGlass}
-                title="Search Brand"
-                target={<SearchBrand onSearched={updateBrands} />}
-              />
-            </ActionPanel>
-          }
-        />
-      ) : (
-        <List.Section title={`${brands.length} Brands`}>
-          {brands.map((brand) => (
-            <List.Item
-              key={brand.domain}
-              icon={brand.logos[0]?.url || Icon.Dot}
-              title={brand.domain}
-              subtitle={`${brand.title} - ${brand.slogan}`}
-              keywords={[`${brand.title}`, `${brand.slogan}`]}
-              accessories={[{ date: new Date(brand.updated_on) }]}
-              actions={
-                <ActionPanel>
-                  <Action.Push title="View Brand" icon={Icon.Eye} target={<ViewBrand brand={brand} />} />
+    <List isLoading={isLoading} searchBarPlaceholder="Search brand" onSearchTextChange={setSearchText} filtering={true}>
+      <List.EmptyView
+        title={!searchText ? "No Brands" : "No Results"}
+        description={!searchText ? "Search for a brand to get started" : `Search for "${searchText}"`}
+        actions={
+          <ActionPanel>
+            <Action.Push
+              icon={Icon.MagnifyingGlass}
+              title={!searchText ? "Search Brand" : `Search "${searchText}"`}
+              target={<SearchBrand search={searchText} onSearched={updateBrands} />}
+            />
+          </ActionPanel>
+        }
+      />
+      <List.Section title={`${brands.length} Brands`}>
+        {brands.map((brand) => (
+          <List.Item
+            key={brand.domain}
+            icon={brand.logos[0]?.url || Icon.Dot}
+            title={brand.domain}
+            subtitle={`${brand.title} - ${brand.slogan}`}
+            keywords={[`${brand.title}`, `${brand.slogan}`]}
+            accessories={[{ date: new Date(brand.updated_on) }]}
+            actions={
+              <ActionPanel>
+                <Action.Push title="View Brand" icon={Icon.Eye} target={<ViewBrand brand={brand} />} />
+                {action === "del" ? (
                   <Action
                     icon={Icon.DeleteDocument}
                     style={Action.Style.Destructive}
                     title="Remove Brand"
                     onAction={() => removeBrand(brand)}
                   />
-                  <ActionPanel.Section>
+                ) : (
+                  <Action.Push
+                    icon={Icon.MagnifyingGlass}
+                    title="Search Brand"
+                    target={<SearchBrand onSearched={updateBrands} />}
+                  />
+                )}
+                <ActionPanel.Section>
+                  {action === "del" ? (
                     <Action.Push
-                      shortcut={{ modifiers: ["cmd"], key: "n" }}
+                      shortcut={Keyboard.Shortcut.Common.New}
                       icon={Icon.MagnifyingGlass}
                       title="Search Brand"
                       target={<SearchBrand onSearched={updateBrands} />}
                     />
-                  </ActionPanel.Section>
-                </ActionPanel>
-              }
-            />
-          ))}
-        </List.Section>
-      )}
+                  ) : (
+                    <Action
+                      icon={Icon.DeleteDocument}
+                      style={Action.Style.Destructive}
+                      title="Remove Brand"
+                      onAction={() => removeBrand(brand)}
+                      shortcut={Keyboard.Shortcut.Common.Remove}
+                    />
+                  )}
+                </ActionPanel.Section>
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
     </List>
   );
 }
 
 type SearchBrandProps = {
+  search?: string;
   onSearched: (brand: BrandInStorage) => void;
 };
-function SearchBrand({ onSearched }: SearchBrandProps) {
+function SearchBrand({ search, onSearched }: SearchBrandProps) {
   const { pop } = useNavigation();
   const [execute, setExecute] = useState(false);
+
+  useEffect(() => {
+    if (search) handleSubmit({ domain: search });
+  }, []);
+
   const { itemProps, handleSubmit, values } = useForm<{ domain: string }>({
     onSubmit() {
       setExecute(true);
+    },
+    initialValues: {
+      domain: search,
     },
     validation: {
       domain: FormValidation.Required,
@@ -181,7 +245,7 @@ function SearchBrand({ onSearched }: SearchBrandProps) {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm icon={Icon.Check} title="Retrieve Brand" onSubmit={handleSubmit} />
+          {!isLoading && <Action.SubmitForm icon={Icon.Check} title="Retrieve Brand" onSubmit={handleSubmit} />}
         </ActionPanel>
       }
     >
@@ -193,7 +257,7 @@ function SearchBrand({ onSearched }: SearchBrandProps) {
 
 function ViewBrand({ brand }: { brand: BrandInStorage }) {
   const logo = brand.logos[0]?.url;
-  const markdown = `# ${brand.title}
+  const markdown = `# ${brand.title} ${brand.stock ? `(${brand.stock.ticker}, ${brand.stock.exchange})` : ""}
 
 ${brand.description}
 
@@ -216,7 +280,6 @@ ${brand.backdrops.map(({ url }) => `![${url}](${url})`).join(`\n\n`)}`;
         <Detail.Metadata>
           <Detail.Metadata.Label title="Domain" icon={logo || Icon.QuestionMark} text={brand.domain} />
           <Detail.Metadata.Label title="Slogan" text={brand.slogan || "N/A"} />
-          <Detail.Metadata.Label title="Verified" icon={brand.verified ? Icon.Check : Icon.Multiply} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.TagList title="Colors">
             {brand.colors.map((color) => (
@@ -224,42 +287,80 @@ ${brand.backdrops.map(({ url }) => `![${url}](${url})`).join(`\n\n`)}`;
             ))}
           </Detail.Metadata.TagList>
           <Detail.Metadata.Separator />
-          {brand.socials.map((social) => (
-            <Detail.Metadata.Link
-              key={social.type}
-              title={formatSocialType(social.type)}
-              text={social.url}
-              target={social.url}
-            />
+          {brand.fonts?.map((font) => (
+            <Detail.Metadata.Label key={font.name + font.usage} title={capitalize(font.usage)} text={font.name} />
           ))}
+          <Detail.Metadata.Separator />
+          {!brand.socials.length ? (
+            <Detail.Metadata.Label title="Socials" text="N/A" />
+          ) : (
+            brand.socials.map((social) => (
+              <Detail.Metadata.Link
+                key={social.type}
+                title={formatSocialType(social.type)}
+                text={social.url}
+                target={social.url}
+              />
+            ))
+          )}
           <Detail.Metadata.Separator />
           {!brand.address ? (
             <Detail.Metadata.Label title="Address" text="N/A" />
           ) : (
             <>
-              {Object.entries(brand.address).map(([key, val]) => (
-                <Detail.Metadata.Label key={key} title={key} text={val} />
-              ))}
+              {brand.address.street && <Detail.Metadata.Label title="Street" text={brand.address.street} />}
+              {brand.address.city && <Detail.Metadata.Label title="City" text={brand.address.city} />}
+              {brand.address.country && <Detail.Metadata.Label title="Country" text={brand.address.country} />}
+              {brand.address.country_code && (
+                <Detail.Metadata.Label title="Country Code" text={brand.address.country_code} />
+              )}
+              {brand.address.state_province && (
+                <Detail.Metadata.Label title="State / Province" text={brand.address.state_province} />
+              )}
+              {brand.address.state_code && <Detail.Metadata.Label title="State Code" text={brand.address.state_code} />}
+              {brand.address.postal_code && (
+                <Detail.Metadata.Label title="Postal Code" text={brand.address.postal_code} />
+              )}
+              {brand.address.additional_info && (
+                <Detail.Metadata.Label title="Additional Info" text={brand.address.additional_info} />
+              )}
             </>
+          )}
+          <Detail.Metadata.Separator />
+          {brand.email ? (
+            <Detail.Metadata.Link title="Email" text={brand.email} target={`mailto:${brand.email}`} />
+          ) : (
+            <Detail.Metadata.Label title="Email" text="N/A" />
+          )}
+          {brand.phone ? (
+            <Detail.Metadata.Link title="Phone" text={brand.phone} target={`tel:${brand.phone}`} />
+          ) : (
+            <Detail.Metadata.Label title="Phone" text="N/A" />
           )}
         </Detail.Metadata>
       }
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser
-              icon="brand-dev-purple.png"
-              title="View on brand.dev"
-              url={`https://world.brand.dev/brand/${brand.domain}`}
-            />
-            {brand.logos.length > 0 && (
-              <Action.OpenInBrowser title="Open Logo in Browser" icon={brand.logos[0].url} url={brand.logos[0].url} />
-            )}
+            <Action.OpenInBrowser icon={logo} title={`Go to ${brand.domain}`} url={`https://${brand.domain}`} />
+            {brand.logos.map((logo, index) => (
+              <Action.OpenInBrowser
+                key={index}
+                shortcut={{ modifiers: ["cmd"], key: (index + 1).toString() as Keyboard.KeyEquivalent }}
+                title={`Open Logo # ${index + 1} in Browser`}
+                icon={logo.url}
+                url={logo.url}
+              />
+            ))}
           </ActionPanel.Section>
         </ActionPanel>
       }
     />
   );
+}
+
+function capitalize(txt: string) {
+  return txt.charAt(0).toUpperCase() + txt.slice(1);
 }
 
 function formatSocialType(type: string) {
@@ -268,7 +369,9 @@ function formatSocialType(type: string) {
       return "X (formerly Twitter)";
     case "linkedin":
       return "LinkedIn";
+    case "youtube":
+      return "YouTube";
     default:
-      return type.charAt(0).toUpperCase() + type.slice(1);
+      return capitalize(type);
   }
 }

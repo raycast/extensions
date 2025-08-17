@@ -2,6 +2,8 @@
 
 Search and show macOS's built-in Stickies via Raycast.
 
+To use this extension, you need to grant access to Raycast in **System Settings** - **Privacy & Security** - **Accessibility**, otherwise some commands will not work.
+
 ## Search Stickies
 
 - Support content search

@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "defbro",
+  "title": "Defbro",
+  "description": "Change the default browser quickly!",
+  "icon": "defbro_icon.png",
+  "author": "fernando_barrios",
+  "contributors": [
+    "william_morland"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "change_browser",
+      "title": "Change Default Browser",
+      "description": "Change Default browser",
+      "mode": "view",
+      "icon": "defbro_icon.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.85.2",
+    "@raycast/utils": "^1.18.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.14.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.17.6",
+    "@types/react": "18.3.12",
+    "eslint": "^9.14.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.14.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

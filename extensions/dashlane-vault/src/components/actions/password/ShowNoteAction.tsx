@@ -1,5 +1,6 @@
 import { Action, Detail, Icon } from "@raycast/api";
 
+import { usePasswordContext } from "@/context/passwords";
 import { VaultCredential } from "@/types/dcli";
 
 type Props = {
@@ -7,6 +8,7 @@ type Props = {
 };
 
 export default function ShowNoteAction({ item }: Props) {
+  const { visitItem } = usePasswordContext();
   const name = item.title ?? item.url;
   if (!item.note || !name) return;
 
@@ -16,6 +18,7 @@ export default function ShowNoteAction({ item }: Props) {
       target={<DetailNote name={name} note={item.note} />}
       icon={Icon.Paragraph}
       shortcut={{ modifiers: ["cmd"], key: "n" }}
+      onPush={() => visitItem(item)}
     />
   );
 }

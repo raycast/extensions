@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, getPreferenceValues, Icon } from "@raycast/api";
 import { FormValidation, useForm, usePromise } from "@raycast/utils";
 import { Creativity } from "./lib/enum";
-import { GetModelsName } from "./lib/ui/function";
+import { GetModels } from "./lib/ui/function";
 import * as React from "react";
 import { ValidationKeepAlive } from "./lib/ui/valitadion";
 import { InfoKeepAlive } from "./lib/ui/info";
@@ -18,7 +18,7 @@ interface FormData {
 }
 
 export default function Command(): JSX.Element {
-  const { data: Model, isLoading: IsLoadingModel } = usePromise(GetModelsName, []);
+  const { data: Model, isLoading: IsLoadingModel } = usePromise(GetModels, []);
   const { itemProps } = useForm<FormData>({
     onSubmit() {
       () => {
@@ -50,9 +50,9 @@ export default function Command(): JSX.Element {
 - High: 1.5
 - Maximum: 2`;
   const InfoPrompt = `Prompt Template, you can download public prompt form prompts.ray.so.
-Following tag are supported:
+The following tags are supported:
 - {selection}: Add selected text or clipboard to the prompt.
-- {broswer-tab}: Add current browser tab text to the prompt. Use {broser-tab format="markdown|html|text"} if you need a differente format from markdown. Raycast Browser Extention is required.
+- {browser-tab}: Add current browser tab text to the prompt. Use {browser-tab format="markdown|html|text"} if you need a different format from Markdown. The Raycast Browser Extension is required.
 - {image}: Add image on clipboard to the prompt. A model with vision capability is required.`;
 
   const ActionView = (
@@ -89,7 +89,7 @@ Following tag are supported:
             .filter((v) => v[0] === itemProps.server.value)[0][1]
             .sort()
             .map((s) => (
-              <Form.Dropdown.Item title={s} value={s} key={s} />
+              <Form.Dropdown.Item title={s.name} value={s.name} key={s.name} />
             ))}
         </Form.Dropdown>
       )}

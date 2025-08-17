@@ -9,7 +9,8 @@
     "HelloImSteven",
     "madza",
     "xilopaint",
-    "yug2005"
+    "yug2005",
+    "ridemountainpig"
   ],
   "license": "MIT",
   "commands": [
@@ -167,5 +168,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

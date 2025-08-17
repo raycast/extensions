@@ -72,6 +72,6 @@ export const play =
 				duplicate (every track of playlist 1 whose album contains "${album}") to playlist "Raycast DJ"
 				play playlist "Raycast DJ"
 			end tell
-		`)
-      )
+		`),
+      ),
     );

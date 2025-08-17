@@ -1,5 +1,34 @@
 # Browser Bookmarks Changelog
 
+## [Add Quicklinks Support] - 2025-07-07
+
+- Added action to create `Quicklink` from bookmark.
+
+## [Support for Dia and Ghost Browser] - 2025-06-26
+
+- Added support for `Dia` browser.
+- Added support for `Ghost Browser`.
+
+## [Support Island Browser] - 2025-01-30
+
+- Added support for `Island` browser.
+
+## [Support Whale Browser] - 2024-12-14
+
+- Added support for `Whale` Browser Desktop.
+
+## [Update Logo] - 2024-12-11
+
+- Updated to latest logo since rebrand.
+
+## [Support Zen Browser] - 2024-11-26
+
+- Added support for Zen Browser Desktop.
+
+## [Support for Prisma Access] - 2024-11-24
+
+- Add support for `Prisma Access` browser.
+
 ## [Support for Chrome Beta] - 2024-01-12
 
 - Add support for `Chrome Beta` browser.

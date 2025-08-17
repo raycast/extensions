@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 import { SmartHabit } from "../types/smart-series";
-import { fetcher } from "../utils/axiosPromise";
 import { normalize } from "../utils/objects";
 import { useSyncCachedPromise } from "./useSyncCachedPromise";
+import { fetcher } from "../utils/fetcher";
 
 const useSmartHabits = () => {
   const {
@@ -11,7 +11,7 @@ const useSmartHabits = () => {
     data: smartHabits,
   } = useSyncCachedPromise<readonly SmartHabit[]>(
     "use-smart-habits",
-    async () => (await fetcher<readonly SmartHabit[]>("/smart-habits")).data,
+    async () => await fetcher<readonly SmartHabit[]>("/smart-habits"),
     {
       wrapError: (cause) => new Error("Error while fetching smart-habits", { cause }),
     }

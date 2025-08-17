@@ -5,7 +5,6 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-05 23:35:48
- * Last modified  : 2024-06-26 21:37:46
  */
 
 import { execSync } from "child_process";
@@ -14,6 +13,7 @@ import {
   execSIPSCommandOnAVIF,
   execSIPSCommandOnSVG,
   execSIPSCommandOnWebP,
+  expandTilde,
   getDestinationPaths,
   moveImageResultsToFinalDestination,
 } from "../utilities/utils";
@@ -27,10 +27,11 @@ import {
  * @returns A promise that resolves when the operation is complete.
  */
 export default async function pad(sourcePaths: string[], padding: number, color: string) {
-  const newPaths = await getDestinationPaths(sourcePaths);
+  const expandedPaths = sourcePaths.map((path) => expandTilde(path));
+  const newPaths = await getDestinationPaths(expandedPaths);
   const resultPaths: string[] = [];
 
-  for (const imagePath of sourcePaths) {
+  for (const imagePath of expandedPaths) {
     const dimensions = execSync(`sips -g pixelWidth -g pixelHeight "${imagePath}"`)
       .toString()
       .split(/(: |\n)/g);
@@ -63,7 +64,7 @@ export default async function pad(sourcePaths: string[], padding: number, color:
       );
     } else {
       // Image is not a special format, so pad using SIPS
-      const newPath = newPaths[sourcePaths.indexOf(imagePath)];
+      const newPath = newPaths[expandedPaths.indexOf(imagePath)];
       resultPaths.push(newPath);
 
       execSync(
@@ -75,4 +76,5 @@ export default async function pad(sourcePaths: string[], padding: number, color:
   }
 
   await moveImageResultsToFinalDestination(resultPaths);
+  return resultPaths;
 }

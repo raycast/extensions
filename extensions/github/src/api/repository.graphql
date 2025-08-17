@@ -15,6 +15,7 @@ fragment ShortRepositoryFields on Repository {
   mergeCommitAllowed
   squashMergeAllowed
   rebaseMergeAllowed
+  autoMergeAllowed
 }
 
 fragment ExtendedRepositoryFields on Repository {

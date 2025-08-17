@@ -1,5 +1,13 @@
 # Bonjour Changelog
 
+## [Minor Improvements] - 2024-09-12
+
+- add status indicator to menu bar
+
+## [Improvements] - 2024-09-11
+
+- add status indicators
+
 ## [Bug Fixes] - 2024-08-26
 
 - fix cache value when no services present

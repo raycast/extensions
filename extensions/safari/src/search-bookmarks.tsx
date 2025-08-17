@@ -1,16 +1,27 @@
+import { List, LocalStorage } from "@raycast/api";
 import _ from "lodash";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BookmarkListSection, PermissionError } from "./components";
+import BookmarksDropdown from "./components/BookmarksDropdown";
 import { useBookmarks } from "./hooks";
 import { GeneralBookmark } from "./types";
 import { search } from "./utils";
-import { List } from "@raycast/api";
-import BookmarksDropdown from "./components/BookmarksDropdown";
 
-const Command = () => {
+export default function Command() {
   const [searchText, setSearchText] = useState<string>("");
   const [selectedFolder, setSelectedFolder] = useState<string>("All Bookmarks");
+  const [tagColor, setTagColor] = useState<{ [key: string]: string }>({});
   const { bookmarks, hasPermission } = useBookmarks(false);
+
+  const fetchTagColor = async () => {
+    const tagColorLocalStorage = await LocalStorage.getItem("bookmarkTagColor");
+    const tagColorObject = tagColorLocalStorage ? JSON.parse(tagColorLocalStorage as string) : {};
+    setTagColor(tagColorObject);
+  };
+
+  useEffect(() => {
+    fetchTagColor();
+  }, []);
 
   if (!hasPermission) {
     return <PermissionError />;
@@ -53,11 +64,11 @@ const Command = () => {
             key={key}
             title={key.toString() || "Top Level Bookmarks"}
             filteredBookmarks={filteredBookmarks}
+            tagColor={tagColor}
+            fetchTagColor={fetchTagColor}
           />
         );
       })}
     </List>
   );
-};
-
-export default Command;
+}

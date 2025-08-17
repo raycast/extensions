@@ -1,11 +1,12 @@
 import { ActionPanel, List, Icon, Action, Image, LaunchProps } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { useSearch } from "./commands/raycastCommands";
+import { useSearch } from "./hooks/searchCryptoHooks";
 import {
   getFavorites,
   addToFavorites,
   removeFromFavoritesForCoins,
   isFavoriteForCoins,
+  localStorage,
 } from "./commands/dropstabCoinsCommands";
 import { SearchResult } from "./types/coinType";
 
@@ -20,14 +21,27 @@ export default function Command(props: LaunchProps<{ arguments: CommandArguments
   const { coin } = props.arguments;
   const { state, search, updateCoinData } = useSearch();
   const [favorites, setFavorites] = useState<SearchResult[]>(() => getFavorites(CRYPTO_FAVORITES_KEY));
+  const [updateInterval, setUpdateInterval] = useState(2000); // Начальный интервал 2 секунды
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      updateCoinData(favorites, setFavorites);
-    }, 30000); // Обновление каждые 30 секунд
+    const intervalId = setInterval(() => {
+      updateCoinData(favorites, (updatedFavorites) => {
+        // Обновляем только данные существующих монет
+        const newFavorites = favorites.map((fav) => {
+          const updatedFav = updatedFavorites.find((updated) => updated.id === fav.id);
+          return updatedFav ? updatedFav : fav;
+        });
+        setFavorites(newFavorites);
+        localStorage.setItem(CRYPTO_FAVORITES_KEY, JSON.stringify(newFavorites));
+      });
 
-    return () => clearInterval(interval);
-  }, [favorites]);
+      // После первого обновления изменяем интервал на 20 секунд
+      setUpdateInterval(20000);
+    }, updateInterval);
+
+    // Очистка интервала при размонтировании компонента
+    return () => clearInterval(intervalId);
+  }, [favorites, updateInterval]);
 
   useEffect(() => {
     if (coin) {
@@ -107,7 +121,7 @@ function SearchListItem({
     <List.Item
       key={searchResult.id}
       icon={{ source: searchResult.icon || "", mask: Image.Mask.RoundedRectangle }}
-      title={`${searchResult.symbol}`} // Изменено для отображения rank перед символом
+      title={`${searchResult.symbol}`}
       subtitle={searchResult.name}
       accessories={[{ text: `${searchResult.rank} | ${searchResult.price} | ${searchResult.marketCap}` }]}
       actions={

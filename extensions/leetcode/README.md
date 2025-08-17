@@ -11,6 +11,7 @@ Search LeetCode problem, view LeetCode daily challenge and view LeetCode problem
 - [ ] View LeetCode problem solution
 - [ ] View LeetCode problem discussion
 - [ ] Copy problem default code definition to clipboard/file
+  - [x] Copy problem default code definition to clipboard
 - [ ] Store user's login information to provide more features
   - [ ] Test problem solution
   - [ ] Submit problem solution

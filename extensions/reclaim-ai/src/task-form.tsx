@@ -1,3 +1,5 @@
+import "./initSentry";
+
 import { Action, ActionPanel, Clipboard, Form, Toast, popToRoot, showHUD, showToast } from "@raycast/api";
 import { addDays, addMinutes, setHours, setMilliseconds, setMinutes, setSeconds } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
@@ -8,6 +10,7 @@ import { useUser } from "./hooks/useUser";
 import { TaskPlanDetails } from "./types/plan";
 import { makeOrderedListComparator } from "./utils/arrays";
 import { TIME_BLOCK_IN_MINUTES, formatDuration, parseDurationToMinutes } from "./utils/dates";
+import { withRAIErrorBoundary } from "./components/RAIErrorBoundary";
 
 export const timeSchemeTitleComparator = makeOrderedListComparator<string>(["Working Hours", "Personal Hours"]);
 
@@ -45,7 +48,7 @@ const getDefaultDueDate = (defaultDueDatePreference: number | undefined) => {
   return null;
 };
 
-export default (props: Props) => {
+function Command(props: Props) {
   const { timeNeeded: userTimeNeeded, title: userTitle, interpreter } = props;
 
   /********************/
@@ -268,4 +271,6 @@ export default (props: Props) => {
       )}
     </Form>
   );
-};
+}
+
+export default withRAIErrorBoundary(Command);

@@ -5,8 +5,6 @@ import { Details } from "./details";
 import { pluralize } from "./helpers";
 import { HltbSearch } from "./hltbsearch";
 
-export const baseUrl = "https://howlongtobeat.com/game?id=";
-
 export default function Command() {
   const { state, search } = useSearch();
 
@@ -22,7 +20,7 @@ export default function Command() {
 }
 
 function SearchListItem({ searchResult }: { searchResult: HowLongToBeatEntry }) {
-  const url = `${baseUrl}${searchResult.id}`;
+  const url = `${HltbSearch.DETAIL_URL}${searchResult.id}`;
   const { push } = useNavigation();
 
   const mainStoryHours = searchResult.gameplayMain || 0;

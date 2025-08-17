@@ -5,7 +5,10 @@ import { Group } from "./interfaces";
 import { preferences } from "./constants";
 
 export default function MenuCommand() {
-  const [state, setState] = useState<{ isLoading: boolean; connections?: Group[] }>({ isLoading: true });
+  const [state, setState] = useState<{
+    isLoading: boolean;
+    connections?: Group[];
+  }>({ isLoading: true });
   const { showPathInMenubar, showMonochromeIcon, subtitleMenubar } = getPreferenceValues<ExtensionPreferences>();
 
   useEffect(() => {

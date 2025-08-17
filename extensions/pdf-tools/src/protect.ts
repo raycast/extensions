@@ -24,12 +24,10 @@ export default async function Command(props: { arguments: { password: string } }
 
     await closeMainWindow();
 
-    for (let i = 0; i < selectedItems.length; i++) {
-      const item = selectedItems[i];
-
+    for (const item of selectedItems) {
       await showToast({
         style: Toast.Style.Animated,
-        title: `Protecting "${path.basename(item.path)}" [file ${i + 1} of ${selectedItems.length}]`,
+        title: `Protecting "${path.basename(item.path)}"`,
       });
 
       await protect(item.path, password);

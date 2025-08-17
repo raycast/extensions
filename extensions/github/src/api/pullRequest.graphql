@@ -57,6 +57,13 @@ fragment PullRequestFields on PullRequest {
       }
     }
   }
+
+  isMergeQueueEnabled
+  isInMergeQueue
+  mergeStateStatus
+  autoMergeRequest {
+    enabledAt
+  }
 }
 
 query searchPullRequests($query: String!, $numberOfItems: Int!) {
@@ -83,6 +90,12 @@ fragment PullRequestDetailsFields on PullRequest {
   additions
   deletions
   mergeable
+  isMergeQueueEnabled
+  isInMergeQueue
+  mergeStateStatus
+  autoMergeRequest {
+    enabledAt
+  }
   milestone {
     id
     title
@@ -167,9 +180,14 @@ query pullRequestDetails($nodeId: ID!) {
   }
 }
 
-query repositoryCollaboratorsForPullRequests($owner: String!, $name: String!, $pullRequestNumber: Int!) {
+query repositoryCollaboratorsForPullRequests(
+  $owner: String!
+  $name: String!
+  $pullRequestNumber: Int!
+  $searchQuery: String
+) {
   repository(owner: $owner, name: $name) {
-    collaborators(first: 25) {
+    collaborators(first: 25, query: $searchQuery) {
       totalCount
       nodes {
         ... on User {
@@ -297,6 +315,34 @@ mutation mergePullRequest($nodeId: ID!, $method: PullRequestMergeMethod!) {
   mergePullRequest(input: { pullRequestId: $nodeId, mergeMethod: $method }) {
     pullRequest {
       nodeId: id
+    }
+  }
+}
+
+mutation addPullRequestToMergeQueue($nodeId: ID!) {
+  enqueuePullRequest(input: { pullRequestId: $nodeId }) {
+    __typename
+  }
+}
+
+mutation removePullRequestFromMergeQueue($nodeId: ID!) {
+  dequeuePullRequest(input: { id: $nodeId }) {
+    __typename
+  }
+}
+
+mutation enablePullRequestAutoMerge($nodeId: ID!) {
+  enablePullRequestAutoMerge(input: { pullRequestId: $nodeId }) {
+    pullRequest {
+      id
+    }
+  }
+}
+
+mutation disablePullRequestAutoMerge($nodeId: ID!) {
+  disablePullRequestAutoMerge(input: { pullRequestId: $nodeId }) {
+    pullRequest {
+      id
     }
   }
 }

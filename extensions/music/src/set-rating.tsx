@@ -1,14 +1,5 @@
-import {
-  Action,
-  ActionPanel,
-  closeMainWindow,
-  Icon,
-  List,
-  showHUD,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { hud } from "./util/feedback";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import { useEffect, useState } from "react";
@@ -25,15 +16,17 @@ export default function SetRating() {
   useEffect(() => {
     pipe(
       music.currentTrack.getCurrentTrack(),
-      handleTaskEitherError((error) => error, setTrack)
+      handleTaskEitherError((error) => error, setTrack),
     )();
   }, []);
 
   return (
     <List isLoading={!track}>
-      {ratings.map((rating) => (
-        <List.Item key={rating} title={rating.toString()} icon={Icon.Star} actions={<Actions value={rating} />} />
-      ))}
+      <List.Section title={track ? `${track.name} - ${track.artist}` : undefined}>
+        {ratings.map((rating) => (
+          <List.Item key={rating} title={rating.toString()} icon={Icon.Star} actions={<Actions value={rating} />} />
+        ))}
+      </List.Section>
     </List>
   );
 }
@@ -50,9 +43,9 @@ function Actions({ value }: { value: number }) {
         showToast(Toast.Style.Failure, "Could not rate this track");
       }),
       TE.map(() => {
-        showHUD("Rated " + "⭐".repeat(value));
+        hud("Rated " + "⭐".repeat(value));
         closeMainWindow();
-      })
+      }),
     )();
 
     pop();

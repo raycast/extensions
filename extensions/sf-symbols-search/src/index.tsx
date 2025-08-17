@@ -1,13 +1,13 @@
-import { ActionPanel, Action, Color, Grid, environment, getPreferenceValues, Icon } from "@raycast/api";
-import React, { useState, useEffect } from "react";
-import { SaveActions, getPinnedSymbols, getRecentSymbols, addRecentSymbol } from "./storage";
+import { Action, ActionPanel, Color, Grid, Icon, environment, getPreferenceValues } from "@raycast/api";
 import { readFileSync } from "node:fs";
+import React, { useEffect, useState } from "react";
+import { SaveActions, addRecentSymbol, getPinnedSymbols, getRecentSymbols } from "./storage";
 
 export interface Preferences {
-  version: "beta" | "stable";
   primaryAction: "copySymbol" | "pasteSymbol" | "copyName" | "pasteName";
-  gridItemSize: Grid.ItemSize;
+  gridColumns: string;
   showName: boolean;
+  minimumVersionOS: "iOS" | "macOS" | "watchOS" | "tvOS" | "visionOS" | "disabled";
 }
 
 export type sfsymbol = {
@@ -15,12 +15,21 @@ export type sfsymbol = {
   symbol: string;
   categories: string[];
   searchTerms: string[];
+  availableFrom: number;
 };
 
 export type category = {
   name: string;
   title: string;
   symbol: string;
+};
+
+export type version = {
+  iOS: string;
+  macOS: string;
+  tvOS: string;
+  visionOS: string;
+  watchOS: string;
 };
 
 export interface SymbolProps {
@@ -30,27 +39,26 @@ export interface SymbolProps {
   recent?: boolean;
 }
 
-const { version, primaryAction, gridItemSize, showName }: Preferences = getPreferenceValues();
+const { primaryAction, gridColumns, showName, minimumVersionOS }: Preferences = getPreferenceValues();
 
 function getDataPath() {
-  return `${environment.assetsPath}/symbols/data${version === "beta" ? "_beta" : ""}.json`;
+  return `${environment.assetsPath}/symbols/data.json`;
 }
 
 function getImageURL(name: string) {
-  return `https://raw.githubusercontent.com/yugtesh/sf-symbols/main/images/${name}.png`;
+  return `https://raw.githubusercontent.com/ndckj/sf-symbols/main/images/100/${name}.png`;
 }
 
+const data: {
+  symbols: sfsymbol[];
+  categories: category[];
+  versions: { [key: string]: version };
+} = JSON.parse(readFileSync(getDataPath(), { encoding: "utf8" }));
+
 export default function Command() {
-  const data: {
-    symbols: sfsymbol[];
-    categories: category[];
-  } = JSON.parse(readFileSync(getDataPath(), { encoding: "utf8" }));
-
-  const [pinned, setPinned] = useState(getPinnedSymbols());
-  const [recent, setRecent] = useState(getRecentSymbols());
-
-  const [category, setCategory] = useState<string | undefined>();
-
+  const [category, setCategory] = useState<string>();
+  const [pinned, setPinned] = useState<sfsymbol[]>([]);
+  const [recent, setRecent] = useState<sfsymbol[]>([]);
   const [refreshState, setRefreshState] = useState(false);
   const refresh = () => setRefreshState(!refreshState);
 
@@ -59,12 +67,15 @@ export default function Command() {
     setRecent(getRecentSymbols());
   }, [refreshState]);
 
+  const filteredSymbols =
+    category && category !== "all" ? data.symbols.filter((s) => s.categories.includes(category)) : data.symbols;
+
   return (
     <Grid
       isLoading={category === undefined}
       searchBarPlaceholder="Search SF Symbols..."
       inset={Grid.Inset.Large}
-      itemSize={gridItemSize}
+      columns={Number(gridColumns)}
       searchBarAccessory={
         <Grid.Dropdown
           tooltip="Select SF sfsymbol category"
@@ -98,14 +109,14 @@ export default function Command() {
     >
       {category && (
         <React.Fragment>
-          <Grid.Section title="Pinned Symbols">
+          <Grid.Section title="Pinned">
             {pinned
               .filter((s) => category === "all" || s.categories.includes(category))
               .map((symbol: sfsymbol, index: number) => (
                 <SFSymbol key={index} symbol={symbol} refresh={refresh} pinned />
               ))}
           </Grid.Section>
-          <Grid.Section title="Recent Symbols">
+          <Grid.Section title="Recently Used">
             {recent
               .filter((s) => category === "all" || s.categories.includes(category))
               .map((symbol: sfsymbol, index: number) => (
@@ -113,11 +124,9 @@ export default function Command() {
               ))}
           </Grid.Section>
           <Grid.Section title={recent.length + pinned.length > 0 ? "All Symbols" : undefined}>
-            {data.symbols
-              .filter((s) => category === "all" || s.categories.includes(category))
-              .map((symbol: sfsymbol, index: number) => (
-                <SFSymbol key={index} symbol={symbol} refresh={refresh} />
-              ))}
+            {filteredSymbols.map((symbol: sfsymbol, index: number) => (
+              <SFSymbol key={index} symbol={symbol} refresh={refresh} />
+            ))}
           </Grid.Section>
         </React.Fragment>
       )}
@@ -127,13 +136,25 @@ export default function Command() {
 
 const SFSymbol = (props: SymbolProps) => {
   const { symbol } = props;
+
+  let subtitle;
+  if (minimumVersionOS != "disabled" && symbol.availableFrom) {
+    subtitle = `${minimumVersionOS} ${data.versions[symbol.availableFrom][minimumVersionOS]}`;
+  } else {
+    subtitle = undefined;
+  }
+
   return (
     <Grid.Item
       title={showName ? symbol.name : undefined}
+      subtitle={subtitle}
       content={{
-        source: getImageURL(symbol.name),
-        fallback: Icon.Warning,
-        tintColor: Color.PrimaryText,
+        tooltip: symbol.name,
+        value: {
+          source: getImageURL(symbol.name),
+          fallback: Icon.Warning,
+          tintColor: Color.PrimaryText,
+        },
       }}
       keywords={symbol.searchTerms.concat([symbol.name])}
       actions={<SymbolActions {...props} />}
@@ -148,9 +169,9 @@ const SymbolActions = (props: SymbolProps): JSX.Element => {
     paste: (
       <Action.Paste
         key="paste"
-        title="Paste sfsymbol"
+        title="Paste Symbol"
         content={symbol}
-        shortcut={{ modifiers: ["shift", "cmd"], key: "v" }}
+        shortcut={{ modifiers: ["shift", "opt"], key: "v" }}
         onPaste={() => {
           addRecentSymbol(props.symbol);
           props.refresh();
@@ -160,9 +181,9 @@ const SymbolActions = (props: SymbolProps): JSX.Element => {
     copy: (
       <Action.CopyToClipboard
         key="copy"
-        title="Copy sfsymbol"
+        title="Copy Symbol"
         content={symbol}
-        shortcut={{ modifiers: ["shift", "cmd"], key: "c" }}
+        shortcut={{ modifiers: ["shift", "opt"], key: "c" }}
         onCopy={() => {
           addRecentSymbol(props.symbol);
           props.refresh();

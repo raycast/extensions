@@ -11,7 +11,7 @@ import {
 } from '@raycast/api';
 import { useCachedPromise } from '@raycast/utils';
 
-import { Todo, getListTodos, getLists, setTodoProperty, updateTodo } from './api';
+import { Todo, getListTodos, getLists, setTodoProperty, updateTodo, handleError } from './api';
 import { listItems, menuBarStatusIcons } from './helpers';
 
 const TASK_NAME_LENGTH_LIMIT = 30;
@@ -21,7 +21,8 @@ export default function ShowTodayInMenuBar() {
   const { data: todos, isLoading, mutate } = useCachedPromise(() => getListTodos('today'));
   const { data: lists } = useCachedPromise(() => getLists());
 
-  const tooltip = todos && todos.length > 0 ? todos[0].name : '';
+  const firstIncompleteTodo = todos?.find((item) => item.status === 'open');
+  const tooltip = firstIncompleteTodo?.name || '';
 
   let title = '';
   if (displayTodo) {
@@ -40,23 +41,35 @@ export default function ShowTodayInMenuBar() {
   }
 
   async function schedule(todo: Todo, when: string) {
-    await updateTodo(todo.id, { when });
-    await mutate();
-    await showToast({ style: Toast.Style.Success, title: 'Scheduled to-do' });
+    try {
+      await updateTodo(todo.id, { when });
+      await mutate();
+      await showToast({ style: Toast.Style.Success, title: 'Scheduled to-do' });
+    } catch (error) {
+      handleError(error);
+    }
   }
 
   async function moveTo(todo: Todo, listId: string) {
-    await updateTodo(todo.id, { 'list-id': listId });
-    await mutate();
-    await showToast({ style: Toast.Style.Success, title: 'Moved to-do' });
+    try {
+      await updateTodo(todo.id, { 'list-id': listId });
+      await mutate();
+      await showToast({ style: Toast.Style.Success, title: 'Moved to-do' });
+    } catch (error) {
+      handleError(error);
+    }
   }
 
   return (
     <MenuBarExtra icon="things-flat.png" title={title} tooltip={tooltip} isLoading={isLoading}>
       {todos && todos.length > 0 ? (
         <>
-          {displayTodo ? (
-            <MenuBarExtra.Item title="Complete" icon={Icon.CheckCircle} onAction={() => completeTodo(todos[0])} />
+          {displayTodo && firstIncompleteTodo ? (
+            <MenuBarExtra.Item
+              title="Complete"
+              icon={Icon.CheckCircle}
+              onAction={() => completeTodo(firstIncompleteTodo)}
+            />
           ) : null}
           <MenuBarExtra.Section>
             <MenuBarExtra.Item title="Today" />

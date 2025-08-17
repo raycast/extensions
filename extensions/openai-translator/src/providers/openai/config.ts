@@ -1,4 +1,6 @@
+import fetch from "node-fetch";
 import { IConfig, IModel } from "../types";
+import { dropdownDataByName } from "../../raycast-utils";
 
 const config: IConfig = {
   requireModel: true,
@@ -8,24 +10,46 @@ const config: IConfig = {
   },
   supportCustomModel: true,
   /* eslint-disable @typescript-eslint/no-unused-vars */
-  async listModels(apikey: string | undefined): Promise<IModel[]> {
-    return Promise.resolve([
-      { name: "gpt-3.5-turbo-1106", id: "gpt-3.5-turbo-1106" },
-      { name: "gpt-3.5-turbo", id: "gpt-3.5-turbo" },
-      { name: "gpt-3.5-turbo-0613", id: "gpt-3.5-turbo-0613" },
-      { name: "gpt-3.5-turbo-0301", id: "gpt-3.5-turbo-0301" },
-      { name: "gpt-3.5-turbo-16k", id: "gpt-3.5-turbo-16k" },
-      { name: "gpt-3.5-turbo-16k-0613", id: "gpt-3.5-turbo-16k-0613" },
-      { name: "gpt-4", id: "gpt-4" },
-      { name: "gpt-4-turbo-preview", id: "gpt-4-turbo-preview" },
-      { name: "gpt-4-0125-preview (recommended)", id: "gpt-4-0125-preview" },
-      { name: "gpt-4-1106-preview", id: "gpt-4-1106-preview" },
-      { name: "gpt-4-0314", id: "gpt-4-0314" },
-      { name: "gpt-4-0613", id: "gpt-4-0613" },
-      { name: "gpt-4-32k", id: "gpt-4-32k" },
-      { name: "gpt-4-32k-0314", id: "gpt-4-32k-0314" },
-      { name: "gpt-4-32k-0613", id: "gpt-4-32k-0613" },
-    ]);
+  async listModels(apikey: string | undefined, entrypoint: string | undefined): Promise<IModel[]> {
+    const predefine = dropdownDataByName("apiModel");
+    // map {title: string, value:string} to {name:string, id: string}
+    const fallbackModels: IModel[] =
+      predefine?.map((model) => ({
+        name: model.title,
+        id: model.value,
+      })) || [];
+    let result = fallbackModels;
+    if (entrypoint && entrypoint !== "") {
+      const url = entrypoint.replace("/chat/completions", "/models");
+
+      try {
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${apikey}`,
+          },
+        });
+
+        if (!response.ok) {
+          console.error(`API request failed with status ${response.status}`);
+        }
+
+        const data = (await response.json()) as { data: { id: string }[] };
+        // check gpt inside the model list
+        result = data.data
+          .filter((model: { id: string }) => {
+            return model.id.includes("gpt");
+          })
+          .map((model: { id: string }) => ({
+            name: model.id,
+            id: model.id,
+          }));
+        return result;
+      } catch (error) {
+        console.error("Failed to fetch model list from API, using fallback models:", error);
+      }
+    }
+    return Promise.resolve(result);
   },
   defaultEntrypoint: "https://api.openai.com/v1/chat/completions",
   supportCustomEntrypoint: true,

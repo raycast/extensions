@@ -51,6 +51,7 @@ export default function ListWebDomainsComponent({ user }: ListWebDomainsComponen
                     />
                   </ActionPanel.Submenu>
                   <Action.Push
+                    // eslint-disable-next-line @raycast/prefer-title-case
                     title="View Domain SSL"
                     icon={Icon.Lock}
                     target={<ViewDomainSSL user={user} domain={domain} />}
@@ -69,7 +70,7 @@ export default function ListWebDomainsComponent({ user }: ListWebDomainsComponen
               <ActionPanel>
                 <Action.Push
                   title="Add Web Domain"
-                  target={<AddWebDomain user={user} onWebDomainAdded={() => revalidate?.()} />}
+                  target={<AddWebDomain user={user} onWebDomainAdded={revalidate} />}
                 />
               </ActionPanel>
             }
@@ -206,7 +207,7 @@ function AddWebDomain({ user, onWebDomainAdded }: AddWebDomainProps) {
     async onData() {
       await showToast({
         title: "SUCCESS",
-        message: `Added ${values.domain}>`,
+        message: `Added ${values.domain}`,
       });
       onWebDomainAdded();
       pop();

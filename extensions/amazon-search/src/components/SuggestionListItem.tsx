@@ -3,11 +3,10 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 interface SuggestionListItemProps {
   item: string;
   tld: string;
-  searchText: string;
   onOpen: (text: string) => void;
 }
 
-export const SuggestionListItem = ({ item, tld, searchText, onOpen }: SuggestionListItemProps) => (
+export const SuggestionListItem = ({ item, tld, onOpen }: SuggestionListItemProps) => (
   <List.Item
     title={item}
     icon={Icon.MagnifyingGlass}
@@ -15,7 +14,7 @@ export const SuggestionListItem = ({ item, tld, searchText, onOpen }: Suggestion
       <ActionPanel>
         <Action.OpenInBrowser
           url={`https://www.amazon.${tld}/s?k=${encodeURIComponent(item)}`}
-          onOpen={() => onOpen(searchText)}
+          onOpen={() => onOpen(item)}
         />
       </ActionPanel>
     }

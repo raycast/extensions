@@ -41,28 +41,28 @@ export interface ResourceObj {
 }
 
 export interface MemoInfoResponse {
-  uid: string;
   name: string;
-  rowStatus: string;
+  state: string;
   creator: string;
   createTime: string;
   updateTime: string;
   displayTime: string;
   content: string;
+  markdown?: string;
   visibility: string;
   pinned: boolean;
   displayTs: number;
   resources: ResourceObj[];
+  tags: string[];
+  property: {
+    hasLink: boolean;
+    hasTaskList: boolean;
+    hasCode: boolean;
+    hasIncompleteTasks: boolean;
+  };
 }
 
-export type TagResponse = {
-  tagAmounts: {
-    [tag: string]: number;
-  };
-};
-
 export interface MeResponse {
-  id: number;
   name: string;
   rowStatus: "ACTIVE";
   createdTime: number;

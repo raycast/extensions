@@ -1,5 +1,79 @@
 # Spotify Player Changelog
 
+## [Show the Artist name when liking a song] - 2025-08-04
+
+- Added the artist name into the message in the HUD when liking a new song
+- Added the artist name into the message in the HUD attempting to like an already liked song
+
+
+## [Add toggle to filter song name in menu bar] - 2025-07-08
+
+- Added new toggle for removing extra info like remix titles or versions from the song name in the menubar
+
+## [Fix Search Feature] - 2025-07-03
+
+- Fixed an issue with the search functionality.
+
+## [Fix Noises and Additional data in Find Lyrics Function] - 2025-07-02
+
+- Fixed Noises in retrieved lyrics in Find Lyrics Function,now clean lyrics is extracted without any additional noise or data like contributors count and numbers
+
+## [Add Option to View the Lyrics of the Song playing] - 2025-06-30
+
+- Add new command 'Find Lyrics'.
+- Add an option that allows users to See the current song’s Lyrics, artist and title.
+
+## [Add Option to Copy the Current Song’s Artist and Title] - 2025-05-26
+
+- Add new command 'Copy Artist And Title'.
+- Add an option in the `NowPlaying` command that allows users to copy the current song’s artist and title.
+
+## [Fix AppleScript fallback for non-premium users] - 2025-05-21
+
+- Fixed AppleScript fallback for functions that use premium-only API endpoints. Most commands now work without a premium subscription except queuing, cycleRepeat (AppleScript can only toggle context off/on) and device selection.
+
+## [✨ AI Enhancements] - 2025-04-30
+
+- Added AI queue interaction (e.g.,"@spotify add 10 random jazz songs to my queue").
+
+## [Fix Select Device] - 2025-02-26
+
+- Fixed a possibly undefined issue from Select Devices command
+
+## [✨ AI Enhancements] - 2025-02-21
+
+## [Fix Missing Playlists in Add Playing Song to Playlist command] - 2025-02-20
+
+- Fixed an issue where some playlists were not appearing when users attempted to add a currently playing song to a playlist.
+
+## [Add Copy Embed Code Command] - 2025-02-20
+
+- Added a new command to copy the iframe embed code for the currently playing song.
+
+## [Add "Skip 15 Seconds" and "Back 15 Seconds" commands] - 2025-02-18
+
+- Added the ability to skip forward or back 15 seconds in the current episode. This adds two new commands as well as two new menu bar items which only show when an 'episode' is playing.
+
+## [Artist Name Visibility Option] - 2025-02-07
+
+- Added the option to hide the artist's name in the Menu Bar Player.
+
+## [Fix Your Library] - 2025-02-04
+
+- Fix a possibly null issue from `getMeAlbums` API.
+
+## [Generate Playlist Improvement - Artists] - 2024-12-03
+
+- Modify the prompt so if the description contains "songs from: artist1, artist2, etc" it will only generate a playlist using those artists
+
+## [Fix Search Command] - 2024-11-22
+
+- Even though it's not documented, the Spotify API can return null items in some cases when searching for items. This has now been fixed.
+
+## [Minor Fixes] - 2024-09-20
+
+- Fixed an issue when "Nothing is playing" popped up after commands `next`, `previous` and `like` having `Current Track` command disabled
+
 ## [Generate Playlist Improvement] - 2024-09-06
 
 - Use GPT-4o mini instead of GPT-4o to make it faster.
@@ -35,7 +109,7 @@
 
 ## [New Album Actions] - 2024-05-30
 
--  Added new actions in the album panel: `Add To Library` and `Remove From Library`.
+- Added new actions in the album panel: `Add To Library` and `Remove From Library`.
 
 ## [Automatically Trigger Current Track] - 2024-05-28
 

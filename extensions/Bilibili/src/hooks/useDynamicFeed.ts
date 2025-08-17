@@ -1,4 +1,4 @@
-import { getDynamicFeed, getPlayUrl, getVideoInfo } from "../utils";
+import { getDynamicFeed, getPlayUrl, getVideoInfo } from "../apis";
 
 import { useEffect, useState } from "react";
 import { showToast, Toast } from "@raycast/api";

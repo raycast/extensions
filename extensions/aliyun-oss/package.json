@@ -64,7 +64,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.28.0",
-    "ali-oss": "^6.17.1",
+    "ali-oss": "^6.22.0",
     "dayjs": "^1.10.7",
     "execa": "^6.1.0",
     "iconv-lite": "^0.6.3"
@@ -78,8 +78,11 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
+    "react-devtools": "^5.2.0",
     "typescript": "^4.4.3"
+  },
+  "overrides": {
+    "urllib": "^3.9.0"
   },
   "scripts": {
     "build": "ray build -e dist",

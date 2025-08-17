@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, List, Toast, Action } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { handler, stopHandler } from "swift:../swift/MyExecutable";
 
@@ -57,7 +57,7 @@ export default function Command() {
   const [icon, setIcon] = useState<string | null>(null);
 
   const selectDuration = (duration: Duration) => {
-    const lockToast = new Toast({ title: "Keyboard Locked" });
+    const lockToast = new Toast({ title: "Keyboard locked" });
     handler(duration.seconds);
     setTimeLeft(duration.seconds);
     setIcon(duration.icon);
@@ -82,8 +82,8 @@ export default function Command() {
       <List>
         <List.EmptyView
           icon={icon ?? "🧼"}
-          description="Press ⌃ + U at any time to unlock keyboard."
-          title={`Cleaning keyboard${timeLeft ? ` for ${timeLeft} seconds ` : ""}`}
+          description="Press ⌃ + U at any time to unlock the keyboard."
+          title={`Cleaning keyboard${timeLeft ? ` for ${timeLeft} seconds…` : ""}`}
           actions={
             <ActionPanel>
               <Action title={"Back"} onAction={() => setIsRunning(false)} />
@@ -103,12 +103,12 @@ export default function Command() {
     );
   }
   return (
-    <List filtering={false} navigationTitle="Lock keyboard for..">
+    <List navigationTitle="Clean Keyboard" searchBarPlaceholder="Lock keyboard for">
       <List.Section title="Durations">
         {durations.map((duration) => (
           <List.Item
             key={duration.display + duration.seconds}
-            title={`Lock Keyboard for ${duration.display}`}
+            title={`${duration.display}`}
             icon={duration.icon}
             actions={
               <ActionPanel>

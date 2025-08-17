@@ -1,0 +1,252 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "nhl",
+  "title": "NHL",
+  "description": "Get today's NHL games, scores, matchups, and statistics.",
+  "icon": "extension-icon.png",
+  "author": "Rob",
+  "categories": [
+    "Fun",
+    "News"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "nhlScores",
+      "title": "NHL Scores",
+      "description": "Get the latest NHL scores",
+      "mode": "view"
+    },
+    {
+      "name": "nhlStandings",
+      "title": "NHL Standings",
+      "description": "Get the latest NHL standings",
+      "mode": "view"
+    },
+    {
+      "name": "searchPlayers",
+      "title": "Search NHL Players",
+      "description": "Search for NHL players",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "name",
+          "title": "Player Name",
+          "description": "Enter the player's name",
+          "type": "text",
+          "required": true,
+          "placeholder": "Wayne Gretzky"
+        },
+        {
+          "name": "playerType",
+          "title": "Player Type",
+          "type": "dropdown",
+          "required": false,
+          "default": "true",
+          "placeholder": "Active",
+          "data": [
+            {
+              "title": "Active",
+              "value": "true"
+            },
+            {
+              "title": "All",
+              "value": "false"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "timezone",
+      "title": "Timezone",
+      "description": "Choose your timezone",
+      "type": "dropdown",
+      "required": false,
+      "default": "America/New_York",
+      "data": [
+        {
+          "title": "Eastern",
+          "value": "America/New_York"
+        },
+        {
+          "title": "Central",
+          "value": "America/Chicago"
+        },
+        {
+          "title": "Mountain",
+          "value": "America/Denver"
+        },
+        {
+          "title": "Pacific",
+          "value": "America/Los_Angeles"
+        }
+      ]
+    },
+    {
+      "name": "team",
+      "title": "Favorite Team",
+      "description": "Choose your favorite NHL team",
+      "type": "dropdown",
+      "required": false,
+      "default": "default",
+      "data": [
+        {
+          "title": "None",
+          "value": "default"
+        },
+        {
+          "title": "Anaheim Ducks",
+          "value": "ANA"
+        },
+        {
+          "title": "Boston Bruins",
+          "value": "BOS"
+        },
+        {
+          "title": "Buffalo Sabres",
+          "value": "BUF"
+        },
+        {
+          "title": "Calgary Flames",
+          "value": "CGY"
+        },
+        {
+          "title": "Carolina Hurricanes",
+          "value": "CAR"
+        },
+        {
+          "title": "Chicago Blackhawks",
+          "value": "CHI"
+        },
+        {
+          "title": "Colorado Avalanche",
+          "value": "COL"
+        },
+        {
+          "title": "Columbus Blue Jackets",
+          "value": "CBJ"
+        },
+        {
+          "title": "Dallas Stars",
+          "value": "DAL"
+        },
+        {
+          "title": "Detroit Red Wings",
+          "value": "DET"
+        },
+        {
+          "title": "Edmonton Oilers",
+          "value": "EDM"
+        },
+        {
+          "title": "Florida Panthers",
+          "value": "FLA"
+        },
+        {
+          "title": "Los Angeles Kings",
+          "value": "LAK"
+        },
+        {
+          "title": "Minnesota Wild",
+          "value": "MIN"
+        },
+        {
+          "title": "Montreal Canadiens",
+          "value": "MTL"
+        },
+        {
+          "title": "Nashville Predators",
+          "value": "NSH"
+        },
+        {
+          "title": "New Jersey Devils",
+          "value": "NJD"
+        },
+        {
+          "title": "New York Islanders",
+          "value": "NYI"
+        },
+        {
+          "title": "New York Rangers",
+          "value": "NYR"
+        },
+        {
+          "title": "Ottawa Senators",
+          "value": "OTT"
+        },
+        {
+          "title": "Philadelphia Flyers",
+          "value": "PHI"
+        },
+        {
+          "title": "Pittsburgh Penguins",
+          "value": "PIT"
+        },
+        {
+          "title": "San Jose Sharks",
+          "value": "SJS"
+        },
+        {
+          "title": "Seattle Kraken",
+          "value": "SEA"
+        },
+        {
+          "title": "St. Louis Blues",
+          "value": "STL"
+        },
+        {
+          "title": "Tampa Bay Lightning",
+          "value": "TBL"
+        },
+        {
+          "title": "Toronto Maple Leafs",
+          "value": "TOR"
+        },
+        {
+          "title": "Vancouver Canucks",
+          "value": "VAN"
+        },
+        {
+          "title": "Vegas Golden Knights",
+          "value": "VGK"
+        },
+        {
+          "title": "Washington Capitals",
+          "value": "WSH"
+        },
+        {
+          "title": "Winnipeg Jets",
+          "value": "WPG"
+        },
+        {
+          "title": "Utah Hockey Club",
+          "value": "UHC"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prettier": "prettier --write .",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

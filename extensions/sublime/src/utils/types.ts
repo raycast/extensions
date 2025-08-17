@@ -65,6 +65,10 @@ export interface SublimeCard {
     text?: string;
     thumbnail?: string;
     last_updated_at: string;
+    info?: {
+        content: string;
+        images: string[];
+    };
 
     urls: string[];
     source?: {

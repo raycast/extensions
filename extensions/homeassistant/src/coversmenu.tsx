@@ -3,8 +3,8 @@ import { useHAStates } from "@components/hooks";
 import { LaunchCommandMenubarItem } from "@components/menu";
 import { filterViaPreferencePatterns } from "@components/state/utils";
 import { getErrorMessage, getFriendlyName } from "@lib/utils";
-import { Color, Icon, LaunchType, MenuBarExtra } from "@raycast/api";
 import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
+import { Color, Icon, LaunchType, MenuBarExtra } from "@raycast/api";
 
 export default function CoversMenuCommand() {
   const { states, error, isLoading } = useHAStates();
@@ -15,7 +15,7 @@ export default function CoversMenuCommand() {
 
   const coversOpenCount = entities?.filter((e) => e.state === "open").length || 0;
   const coversClosedCount = entities?.filter((e) => e.state === "closed").length || 0;
-  const icon = coversOpenCount && coversOpenCount > 0 ? "cover-open.png" : "cover-close.png";
+  const icon = coversOpenCount && coversOpenCount > 0 ? "window-open.svg" : "window-closed.svg";
 
   return (
     <MenuBarExtra

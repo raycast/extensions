@@ -8,15 +8,14 @@ import {
   showHUD,
 } from "@raycast/api";
 import { calculateTimeInfoByOffset, formatMenubarDate, getMenubarAvatar, isEmpty } from "./utils/common-utils";
-import { useStarTimezones } from "./hooks/useStarTimezones";
 import { useMemo } from "react";
 import { showFirstTimezone } from "./types/preferences";
+import { useStarTimezones } from "./hooks/useStarTimezones";
 
 export default function QueryWorldTime() {
   const { data: starTimezonesData, isLoading } = useStarTimezones();
-  const starTimezones = useMemo(() => {
-    return starTimezonesData || [];
-  }, [starTimezonesData]);
+
+  const starTimezones = Array.isArray(starTimezonesData) ? starTimezonesData : [];
 
   const menubarTitle = useMemo(() => {
     if (showFirstTimezone && starTimezones.length > 0) {

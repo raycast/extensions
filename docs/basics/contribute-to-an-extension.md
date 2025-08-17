@@ -18,4 +18,10 @@ After you have the source code locally, open the Terminal and navigate to the ex
 
 ![Open imported extension](../.gitbook/assets/basics-open-command.webp) ![Icon list command](../.gitbook/assets/basics-icon-list.webp)
 
-You should see your forked extension at the top of your root search and can open its commands. When you're done editing the extension, make sure to add yourself to the contributors section of its [manifest](../information/manifest.md#extension-properties). Additionally, ensure the `CHANGELOG.md` file is updated with your changes; create it if it doesn't exist. Once everything is ready, [run](./publish-an-extension.md) `npx @raycast/api@latest publish`.
+You should see your forked extension at the top of your root search and can open its commands.
+
+When you're done editing the extension, make sure to add yourself to the contributors section of its [manifest](../information/manifest.md#extension-properties). If you used the `Fork Extension` action, this should have happened automatically.
+
+Additionally, ensure the `CHANGELOG.md` file is updated with your changes; create it if it doesn't exist. Use the `{PR_MERGE_DATE}` placeholder for the date – see the [Version History documentation](prepare-an-extension-for-store.md#version-history) for details.
+
+Once everything is ready, see [how to publish an extension](publish-an-extension.md) for instructions on validating and publishing the changes (via a pull request).

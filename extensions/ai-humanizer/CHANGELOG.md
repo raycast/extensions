@@ -1,5 +1,9 @@
 # AI Humanizer Changelog
 
+## [Fixes] - 2024-11-15
+
+- Changed API to [Rephrasy](https://rephrasy.ai)
+
 ## [Fixes] - 2024-05-17
 
 - Fixed API

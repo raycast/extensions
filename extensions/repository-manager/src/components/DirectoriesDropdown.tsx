@@ -1,3 +1,4 @@
+import React from 'react'
 import { Color, Icon, Image, List } from '@raycast/api'
 import { useCachedState } from '@raycast/utils'
 
@@ -16,7 +17,7 @@ export function useDirectory() {
     return { directory, setDirectory }
 }
 
-export function DirectoriesDropdown({ directories }: DirectoriesDropdownProps) {
+export const DirectoriesDropdown = React.memo(({ directories }: DirectoriesDropdownProps) => {
     const { directory, setDirectory } = useDirectory()
 
     return (
@@ -32,19 +33,28 @@ export function DirectoriesDropdown({ directories }: DirectoriesDropdownProps) {
                     value="all"
                     icon={Icon.HardDrive}
                 />
+                <List.Dropdown.Item
+                    key="favorites"
+                    title="Favorites"
+                    value="favorites"
+                    icon={{
+                        source: Icon.Star,
+                        tintColor: Color.Yellow,
+                    }}
+                />
             </List.Dropdown.Section>
             <List.Dropdown.Section>
-                {directories.map((dir: Directory) => {
-                    return (
-                        <List.Dropdown.Item
-                            key={dir.name}
-                            title={dir.name}
-                            value={dir.name}
-                            icon={dir.icon}
-                        />
-                    )
-                })}
+                {directories.map((dir: Directory, index: number) => (
+                    <List.Dropdown.Item
+                        key={`${dir.name}-${index}`}
+                        title={dir.name}
+                        value={dir.name}
+                        icon={dir.icon}
+                    />
+                ))}
             </List.Dropdown.Section>
         </List.Dropdown>
     )
-}
+})
+
+DirectoriesDropdown.displayName = 'DirectoriesDropdown'

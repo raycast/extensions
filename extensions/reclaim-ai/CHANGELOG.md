@@ -1,5 +1,32 @@
 # reclaim Changelog
 
+## [Update] - 2025-06-04
+- Update to the package.json description to include Outlook as a valid calendar provider.
+
+## [Fixes] - 2025-04-02
+- Don't split surrogate pairs
+
+## [Fixes] - 2024-10-25
+- Don't hardcode task category to "work"
+
+## [Update] - 2024-10-16
+- Add Sentry support
+
+## [Fixes] - 2024-10-15
+- Don't cache moment data, should always be up to date
+
+## [Update] - 2024-10-14
+- Add the `Show Now Event in Menu Bar` configuration option for the Calendar menu bar
+
+## [Fixes] - 2024-09-05
+- Route useFetch through useApi
+
+## [Fixes] - 2024-09-04
+- Break out separate components and hook for Scheduling Links
+
+## [Fixes] - 2024-09-03
+- Replace axios with node-fetch
+
 ## [Fixes] - 2024-08-23
 - Stopped rapid-fire calls to `GET:/api/smart-habits`
     - New hook `useSyncCachedPromise`

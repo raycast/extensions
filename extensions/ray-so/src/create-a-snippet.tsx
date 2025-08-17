@@ -1,6 +1,5 @@
 import { Form, ActionPanel, closeMainWindow, showToast, Action, Toast, Color } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useState } from "react";
 import open from "open";
 import { encodeURI } from "js-base64";
 
@@ -34,15 +33,13 @@ const defaultSnippet: Values = {
   color: "candy",
 };
 
-export default function CreateSnippet() {
-  const [code, setCode] = useState<Values>(defaultSnippet);
-  const { data } = useFetch<Data>("https://ray.so/api/config");
-  const url = `https://ray.so/#theme=${code.color}&background=${code.background}&darkMode=${code.darkMode}&padding=${
-    code.padding
-  }&title=${code.title || "Untitled%201"}&code=${encodeURI(code.snippet)}&language=${code.language}`;
+const defaultTitle = "Untitled%201";
 
-  const handleSubmit = async () => {
-    if (!code.snippet) {
+export default function CreateSnippet() {
+  const { data } = useFetch<Data>("https://ray.so/api/config");
+
+  const handleSubmit = async (values: Values) => {
+    if (!values.snippet) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Missing Code",
@@ -50,6 +47,13 @@ export default function CreateSnippet() {
       });
       return;
     }
+
+    const parsedTitle = values.title ? values.title.replace(/ /g, "%20") : defaultTitle;
+
+    const url = `https://ray.so/#theme=${values.color}&background=${values.background}&darkMode=${values.darkMode}&padding=${
+      values.padding
+    }&title=${parsedTitle}&code=${encodeURI(values.snippet)}&language=${values.language}`;
+
     open(url);
     closeMainWindow();
   };
@@ -62,25 +66,14 @@ export default function CreateSnippet() {
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="title"
-        title="Title"
-        placeholder="Untitled 1"
-        onChange={(title) => setCode({ ...code, title: title.replace(/ /g, "%20").trim() })}
-      />
-      <Form.TextArea
-        id="code"
-        title="Code"
-        placeholder="Paste your code here"
-        onChange={(snippet) => setCode({ ...code, snippet })}
-      />
+      <Form.TextField id="title" title="Title" placeholder="Untitled 1" />
+      <Form.TextArea id="snippet" title="Code" placeholder="Paste your code here" />
       <Form.Separator />
       <Form.Dropdown
         id="color"
         title="Color"
         storeValue
         defaultValue={data ? defaultSnippet.color : undefined}
-        onChange={(color) => setCode({ ...code, color })}
         isLoading={!data}
       >
         <Form.Dropdown.Section title="Partners">
@@ -112,39 +105,21 @@ export default function CreateSnippet() {
             ),
         )}
       </Form.Dropdown>
-      <Form.Dropdown
-        id="language"
-        title="Language"
-        storeValue
-        defaultValue={defaultSnippet.language}
-        onChange={(language) => setCode({ ...code, language })}
-        isLoading={!data}
-      >
+      <Form.Dropdown id="language" title="Language" storeValue defaultValue={defaultSnippet.language} isLoading={!data}>
         <Form.Dropdown.Item value="auto" title="Auto-Detect" />
         {data?.languages.map((el: { id: string; name: string }, idx: number) => (
           <Form.Dropdown.Item key={idx} value={el.id} title={el.name} />
         ))}
       </Form.Dropdown>
-      <Form.Dropdown
-        id="background"
-        title="Background"
-        storeValue
-        onChange={(background) => setCode({ ...code, background })}
-      >
+      <Form.Dropdown id="background" title="Background" storeValue defaultValue={defaultSnippet.background}>
         <Form.Dropdown.Item value="true" title="Yes" />
         <Form.Dropdown.Item value="false" title="No" />
       </Form.Dropdown>
-      <Form.Dropdown id="darkMode" title="Dark Mode" storeValue onChange={(darkMode) => setCode({ ...code, darkMode })}>
+      <Form.Dropdown id="darkMode" title="Dark Mode" storeValue defaultValue={defaultSnippet.darkMode}>
         <Form.Dropdown.Item value="true" title="Yes" />
         <Form.Dropdown.Item value="false" title="No" />
       </Form.Dropdown>
-      <Form.Dropdown
-        id="padding"
-        title="Padding"
-        storeValue
-        onChange={(padding) => setCode({ ...code, padding })}
-        isLoading={!data}
-      >
+      <Form.Dropdown id="padding" title="Padding" storeValue defaultValue={defaultSnippet.padding} isLoading={!data}>
         {data?.padding.map((el: number, idx: number) => (
           <Form.Dropdown.Item key={idx} value={el.toString()} title={el.toString()} />
         ))}

@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "protondb",
+  "title": "ProtonDB",
+  "type": "module",
+  "description": "Browse game information for Proton, Linux, Steam Deck, and SteamOS.",
+  "icon": "protondb-icon.png",
+  "author": "litomore",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Data",
+    "Fun"
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browse",
+      "title": "Browse ProtonDB",
+      "description": "Browse information for Proton, Linux, Steam Deck, and SteamOS.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "change-case": "^5.4.4",
+    "got": "^14.4.7",
+    "lodash": "^4.17.21",
+    "raycast-cross-extension": "^0.2.3",
+    "sort-keys": "^5.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/lodash": "^4.17.20",
+    "@types/node": "^24.0.12",
+    "@types/react": "^19.1.8",
+    "eslint": "^9.30.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3"
+  }
+}

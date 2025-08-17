@@ -17,13 +17,14 @@
     "unlock",
     "encrypt",
     "decrypt",
-    "password"
+    "password",
+    "watermark"
   ],
   "commands": [
     {
       "name": "split-by-file-size",
       "title": "Split PDF by File Size",
-      "description": "Split a PDF file into multiple parts based on file size",
+      "description": "Split PDF files into multiple parts based on file size",
       "mode": "no-view",
       "arguments": [
         {
@@ -32,12 +33,22 @@
           "placeholder": "Max file size in MB",
           "required": true
         }
+      ],
+      "preferences": [
+        {
+          "name": "suffix",
+          "title": "Output PDF Filename Suffix",
+          "description": "Suffix for split PDF filenames (e.g., 'part')",
+          "type": "textfield",
+          "default": "part",
+          "required": false
+        }
       ]
     },
     {
       "name": "split-by-page-count",
       "title": "Split PDF by Page Count",
-      "description": "Split a PDF file into multiple parts based on the number of pages",
+      "description": "Split PDF files into multiple parts based on the number of pages",
       "mode": "no-view",
       "arguments": [
         {
@@ -45,6 +56,16 @@
           "type": "text",
           "placeholder": "Number of pages",
           "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "suffix",
+          "title": "Output PDF Filename Suffix",
+          "description": "Suffix for split PDF filenames (e.g., 'part')",
+          "type": "textfield",
+          "default": "part",
+          "required": false
         }
       ]
     },
@@ -65,7 +86,7 @@
     {
       "name": "protect",
       "title": "Protect PDF",
-      "description": "Protect a PDF file with a password",
+      "description": "Protect PDF files with a password",
       "mode": "no-view",
       "arguments": [
         {
@@ -83,7 +104,7 @@
     {
       "name": "unlock",
       "title": "Unlock PDF",
-      "description": "Unlock a password-protected PDF file",
+      "description": "Unlock password-protected PDF files",
       "mode": "no-view",
       "arguments": [
         {
@@ -97,34 +118,103 @@
           ]
         }
       ]
-    }
-  ],
-  "preferences": [
+    },
     {
-      "name": "suffix",
-      "title": "Output PDF Filename Suffix",
-      "description": "Suffix for split PDF filenames (e.g., 'part')",
-      "type": "textfield",
-      "default": "part",
-      "required": false
+      "name": "watermark",
+      "title": "Watermark PDF",
+      "description": "Add watermarks to PDF files",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "placeholder": "Watermark text",
+          "required": true
+        },
+        {
+          "name": "fontSize",
+          "type": "dropdown",
+          "placeholder": "Font size",
+          "required": false,
+          "data": [
+            {
+              "title": "Small",
+              "value": "48"
+            },
+            {
+              "title": "Medium",
+              "value": "64"
+            },
+            {
+              "title": "Large",
+              "value": "72"
+            }
+          ]
+        }
+      ],
+      "preferences": [
+        {
+          "name": "transparency",
+          "title": "Transparency",
+          "description": "Transparency level of the watermark",
+          "type": "dropdown",
+          "required": true,
+          "default": "0.25",
+          "data": [
+            {
+              "title": "Light",
+              "value": "0.125"
+            },
+            {
+              "title": "Medium",
+              "value": "0.25"
+            },
+            {
+              "title": "Dark",
+              "value": "0.5"
+            }
+          ]
+        },
+        {
+          "name": "rotation",
+          "title": "Rotation",
+          "description": "Rotation angle of the watermark",
+          "type": "dropdown",
+          "required": true,
+          "default": "45",
+          "data": [
+            {
+              "title": "No Rotation",
+              "value": "0"
+            },
+            {
+              "title": "45°",
+              "value": "45"
+            }
+          ]
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.81.2"
+    "@raycast/api": "^1.82.3"
   },
   "devDependencies": {
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "@types/react": "18.3.3",
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.8.10",
-    "typescript": "^5.4.5"
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
   },
   "scripts": {
-    "fix-lint": "ray lint --fix",
-    "publish": "npx @raycast/api@latest publish",
+    "build": "ray build --skip-types -e dist -o dist",
     "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "build": "ray build -e dist"
-  }
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -1,5 +1,26 @@
 # Badges Changelog
 
+## [Improvement] - 2025-08-08
+
+- Add shortcut for picking logo
+- Bump all dependencies to the latest
+
+## [Enhancement] - 2025-07-29
+
+- Add support for using base64 encoded SVG for logo
+- Bump all dependencies to the latest
+
+## [Enhancement] - 2025-01-12
+
+- Add support for setting label to empty
+- Bump all dependencies to the latest
+
+## [Chore] - 2024-10-01
+
+- Refactor duplicate codes
+- Optimize extension file size
+- Bump all denpendencies to latest
+
 ## [Enhancement] - 2024-07-09
 
 - Bump dependencies

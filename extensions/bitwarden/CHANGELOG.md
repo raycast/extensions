@@ -1,5 +1,66 @@
 # Bitwarden Changelog
 
+## [Fix] - 2025-06-26
+
+- Catch any errors caused by `OTPAuth.TOTP` constructor
+
+## [Fix] - 2025-06-25
+
+- Check if user can access `BrowserExtension` before getting tabs
+
+## [Fix] - 2025-06-24
+
+- More authenticator error handling to prevent "TypeError: t is not a function" error
+
+## [Fix] - 2025-06-05
+
+- Fix attempt for authenticator "TypeError: t is not a function" error
+
+## [New Preference] - 2025-04-09
+
+- Add primary action preference for authenticator command
+
+## [New Command] - 2025-04-08
+
+- Add Authenticator command
+- Correct README typos
+
+## [Improvement] - 2025-03-24
+
+- Correct setup API key instructions
+- Remove local CLI mention from extension description
+- Mention local CLI option in README
+
+## [Fix] - 2025-03-17
+
+- Fix CLI binary download hash mismatch error
+
+## [Feature] - 2025-03-15
+
+- Re-enable CLI binary download for arm64 devices
+- Add Debugging & Bug Reporting action section to more commands
+
+## [Fix] - 2025-03-04
+
+- Fix search when vault contains SSH keys
+
+## [Feature] - 2025-02-19
+
+- Add fuzzy search for vault and include url or username in search
+
+## [Feature] - 2025-01-02
+
+- Add button to show/hide password in unlock form
+
+## [Fix] - 2024-10-04
+
+- Simplify number and special effects on min fields to prevent re-render loop
+
+## [Fix and New Password Generation Options] - 2024-10-02
+
+- Added Minimum numbers and Minimum special password options
+- Fixed some password options not being reflected
+
 ## [Fix] - 2024-07-25
 
 - Prevent search vault sections from changing order

@@ -1,11 +1,13 @@
-import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
-import { useEffect, useMemo, useState } from "react";
+import "./initSentry";
 
-import { useTasks, useTaskActions } from "./hooks/useTask";
+import { withRAIErrorBoundary } from "./components/RAIErrorBoundary";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { useEffect, useMemo, useState } from "react";
+import { useCallbackSafeRef } from "./hooks/useCallbackSafeRef";
+import { useTaskActions, useTasks } from "./hooks/useTask";
 import { useUser } from "./hooks/useUser";
 import { Task, TaskStatus } from "./types/task";
-import { TIME_BLOCK_IN_MINUTES, formatPriority, formatPriorityIcon, formatStrDuration } from "./utils/dates";
-import { useCallbackSafeRef } from "./hooks/useCallbackSafeRef";
+import { formatPriority, formatPriorityIcon, formatStrDuration, TIME_BLOCK_IN_MINUTES } from "./utils/dates";
 
 type DropdownStatus = "OPEN" | "DONE";
 
@@ -27,9 +29,10 @@ type StatusDropdownProps = {
   onStatusChange: (newValue: DropdownStatus) => void;
 };
 
+const STATUS_TYPES: readonly DropdownStatus[] = ["OPEN", "DONE"];
+
 const StatusDropdown = (props: StatusDropdownProps) => {
   const { onStatusChange } = props;
-  const statusTypes = useMemo<DropdownStatus[]>(() => ["OPEN", "DONE"], []);
 
   return (
     <List.Dropdown
@@ -37,7 +40,7 @@ const StatusDropdown = (props: StatusDropdownProps) => {
       storeValue={true}
       onChange={(value) => onStatusChange(value as DropdownStatus)}
     >
-      {statusTypes.map((statusType) => (
+      {STATUS_TYPES.map((statusType) => (
         <List.Dropdown.Item key={statusType} title={DROPDOWN_STATUS[statusType]} value={statusType} />
       ))}
     </List.Dropdown>
@@ -342,7 +345,7 @@ function TaskList() {
                           >
                             <Action
                               icon={{ source: Icon.Circle }}
-                              title="Add 15min"
+                              title="Add 15Min"
                               onAction={() => {
                                 const time = 15;
                                 handleAddTime(task, time);
@@ -350,7 +353,7 @@ function TaskList() {
                             />
                             <Action
                               icon={{ source: Icon.CircleProgress25 }}
-                              title="Add 30min"
+                              title="Add 30Min"
                               onAction={() => {
                                 const time = 30;
                                 handleAddTime(task, time);
@@ -358,7 +361,7 @@ function TaskList() {
                             />
                             <Action
                               icon={{ source: Icon.CircleProgress50 }}
-                              title="Add 1h"
+                              title="Add 1H"
                               onAction={() => {
                                 const time = 60;
                                 handleAddTime(task, time);
@@ -366,7 +369,7 @@ function TaskList() {
                             />
                             <Action
                               icon={{ source: Icon.CircleProgress75 }}
-                              title="Add 2h"
+                              title="Add 2H"
                               onAction={() => {
                                 const time = 120;
                                 handleAddTime(task, time);
@@ -375,7 +378,7 @@ function TaskList() {
                             />
                             <Action
                               icon={{ source: Icon.CircleProgress100 }}
-                              title="Add 4h"
+                              title="Add 4H"
                               onAction={() => {
                                 const time = 240;
                                 handleAddTime(task, time);
@@ -395,7 +398,8 @@ function TaskList() {
                           {task.onDeck ? (
                             <Action
                               icon={{ source: Icon.ArrowDown, tintColor: Color.Red }}
-                              title="Remove From Up Next"
+                              // eslint-disable-next-line @raycast/prefer-title-case
+                              title="Remove from Up Next"
                               onAction={() => {
                                 const payload = { onDeck: false };
                                 handleUpdateTask(task, payload);
@@ -404,6 +408,7 @@ function TaskList() {
                           ) : (
                             <Action
                               icon={{ source: Icon.ArrowNe, tintColor: Color.Yellow }}
+                              // eslint-disable-next-line @raycast/prefer-title-case
                               title="Send to Up Next"
                               onAction={() => {
                                 const payload = { onDeck: true };
@@ -445,6 +450,8 @@ function TaskList() {
   );
 }
 
-export default function Command() {
+function Command() {
   return <TaskList />;
 }
+
+export default withRAIErrorBoundary(Command);

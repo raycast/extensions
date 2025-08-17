@@ -1,6 +1,5 @@
 import { List, ActionPanel, Action, Icon, showToast, Toast, confirmAlert } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import fetch from "node-fetch";
 import { Fragment, useEffect, useState } from "react";
 import { type DomainPricing, Response } from "./utils/types";
 import { API_DOCS_URL, API_URL, TLD_SVG_BASE_URL } from "./utils/constants";
@@ -16,28 +15,27 @@ export default function DomainPricing() {
 
   const callApi = async () => {
     setIsLoading(true);
-    showToast({
+    const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Fetching Domain Pricing",
     });
-    const response = await fetch(API_URL + "pricing/get");
-    const result = (await response.json()) as Response;
-    if (result.status === "ERROR") {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "ERROR",
-        message: result.message,
-      });
-    } else {
-      showToast({
-        style: Toast.Style.Success,
-        title: "SUCCESS",
-        message: `Fetched ${result.pricing && Object.keys(result.pricing).length + " "}domains`,
-      });
+    try {
+      const response = await fetch(API_URL + "pricing/get");
+      if (!response.headers.get("content-type")?.includes("application/json")) throw new Error("Unknown Error");
+      const result = (await response.json()) as Response;
+      if (result.status === "ERROR") throw new Error(result.message);
+      toast.style = Toast.Style.Success;
+      toast.title = "SUCCESS";
+      toast.message = `Fetched ${result.pricing && Object.keys(result.pricing).length + " "}domains`;
       setDomainPricing(result.pricing);
       setUpdatedOn(new Date());
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "ERROR";
+      toast.message = `${error}`;
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -145,6 +143,13 @@ export default function DomainPricing() {
                     />
                     <List.Item.Detail.Metadata.Label title="Renewal" text={formatStringAsCurrency(pricing.renewal)} />
                     <List.Item.Detail.Metadata.Label title="Transfer" text={formatStringAsCurrency(pricing.transfer)} />
+                    {pricing.specialType ? (
+                      <List.Item.Detail.Metadata.TagList title="Special Type">
+                        <List.Item.Detail.Metadata.TagList.Item text={pricing.specialType} />
+                      </List.Item.Detail.Metadata.TagList>
+                    ) : (
+                      <List.Item.Detail.Metadata.Label title="Special Type" icon={Icon.Minus} />
+                    )}
                     {Object.keys(pricing.coupons).length ? (
                       <List.Item.Detail.Metadata.TagList title="Coupons">
                         {Object.entries(pricing.coupons).map(([, details]) => (
@@ -164,7 +169,7 @@ export default function DomainPricing() {
                         <List.Item.Detail.Metadata.Label
                           title="Amount"
                           text={new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
-                            details.amount
+                            details.amount,
                           )}
                         />
                         {index !== Object.keys(pricing.coupons).length - 1 && (
