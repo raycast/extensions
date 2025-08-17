@@ -51,7 +51,7 @@
     {
       "name": "tbaApiKey",
       "title": "TBA API Key",
-  "type": "textfield",
+      "type": "textfield",
       "required": true,
       "description": "Your The Blue Alliance API Key. Get one at https://www.thebluealliance.com/account"
     }

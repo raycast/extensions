@@ -123,46 +123,74 @@ ${teamData?.district ? `As a member of the ${getDistrictName(teamData.district)}
             "X-TBA-Auth-Key": preferences.tbaApiKey,
           },
         });
-        const tbaData = await tbaResponse.json();
-        setTeamData(tbaData);
+        const tbaData = (await tbaResponse.json()) as Partial<TeamData>;
+        setTeamData({
+          nickname: tbaData.nickname ?? "",
+          city: tbaData.city ?? "",
+          state_prov: tbaData.state_prov ?? "",
+          country: tbaData.country ?? "",
+          district: "",
+          epa: 0,
+          wins: 0,
+          losses: 0,
+          ties: 0,
+          competing: false,
+          district_points: 0,
+          district_rank: 0,
+          events: [],
+        });
         const statboticsResponse = await fetch(`https://api.statbotics.io/v3/team_year/${team}/${year}`);
-        const statboticsData = await statboticsResponse.json();
+        type StatboticsData = {
+          district?: string;
+          epa?: { total_points?: { mean?: number } };
+          record?: { wins?: number; losses?: number; ties?: number };
+          district_points?: number;
+          district_rank?: number;
+        };
+        const statboticsData = (await statboticsResponse.json()) as StatboticsData;
 
         const eventListResponse = await fetch(`https://www.thebluealliance.com/api/v3/team/frc${team}/events/${year}`, {
           headers: {
             "X-TBA-Auth-Key": preferences.tbaApiKey,
           },
         });
-        const eventListRaw = await eventListResponse.json();
-        let processedTeamData = {
-          ...tbaData,
-          epa: statboticsData.epa?.total_points?.mean || 0,
-          wins: statboticsData.record.wins || 0,
-          losses: statboticsData.record.losses || 0,
-          ties: statboticsData.record.ties || 0,
-          district: statboticsData.district || null,
-          district_points: statboticsData.district_points || 0,
-          district_rank: statboticsData.district_rank || 0,
+        const eventListRaw = (await eventListResponse.json()) as Event[];
+        let processedTeamData: TeamData = {
+          nickname: tbaData.nickname ?? "",
+          city: tbaData.city ?? "",
+          state_prov: tbaData.state_prov ?? "",
+          country: tbaData.country ?? "",
+          district: statboticsData?.district ?? "",
+          epa: statboticsData?.epa?.total_points?.mean || 0,
+          wins: statboticsData?.record?.wins || 0,
+          losses: statboticsData?.record?.losses || 0,
+          ties: statboticsData?.record?.ties || 0,
+          competing: false,
+          district_points: statboticsData?.district_points || 0,
+          district_rank: statboticsData?.district_rank || 0,
+          events: [],
         };
         setTeamData(processedTeamData);
 
-        const events: Event[] = (eventListRaw as Array<Partial<Event>>).map((event) => ({
-          key: event.key ?? "",
-          name: event.name ?? "",
-          city: event.city ?? "",
-          state_prov: event.state_prov ?? "",
-          country: event.country ?? "",
-          start_date: event.start_date ?? "",
-          end_date: event.end_date ?? "",
-          gmaps_place_id: event.gmaps_place_id ?? "",
-          gmaps_url: event.gmaps_url ?? "",
-          matches: [],
-          status: "",
-          team_awards: [],
-          gmaps_location_name: "",
-          awards: [],
-          teams: [],
-        }));
+        const events: Event[] = Array.isArray(eventListRaw)
+          ? eventListRaw.map((event) => ({
+              key: event.key ?? "",
+              name: event.name ?? "",
+              city: event.city ?? "",
+              state_prov: event.state_prov ?? "",
+              country: event.country ?? "",
+              start_date: event.start_date ?? "",
+              end_date: event.end_date ?? "",
+              gmaps_place_id: event.gmaps_place_id ?? "",
+              gmaps_url: event.gmaps_url ?? "",
+              matches: [],
+              status: "",
+              team_awards: [],
+              gmaps_location_name: "",
+              awards: [],
+              teams: [],
+            }))
+          : [];
         for (const event of events) {
           const eventStatus = await fetch(
             `https://www.thebluealliance.com/api/v3/team/frc${team}/event/${event.key}/status`,
@@ -173,7 +201,8 @@ ${teamData?.district ? `As a member of the ${getDistrictName(teamData.district)}
             },
           );
 
-          const eventStatusData = await eventStatus.json();
+          type EventStatusData = { overall_status_str?: string };
+          const eventStatusData = (await eventStatus.json()) as EventStatusData;
           const eventAwards = await fetch(
             `https://www.thebluealliance.com/api/v3/team/frc${team}/event/${event.key}/awards`,
             {
@@ -182,12 +211,12 @@ ${teamData?.district ? `As a member of the ${getDistrictName(teamData.district)}
               },
             },
           );
-          const eventAwardsData = await eventAwards.json();
+          const eventAwardsData = (await eventAwards.json()) as Award[];
 
-          if (eventAwardsData) {
+          if (Array.isArray(eventAwardsData)) {
             event.team_awards = eventAwardsData.map((award: { name: string }) => award.name) || [];
           }
-          if (eventStatusData) {
+          if (eventStatusData && typeof eventStatusData === "object") {
             event.status = eventStatusData.overall_status_str || "";
           }
 
@@ -199,14 +228,24 @@ ${teamData?.district ? `As a member of the ${getDistrictName(teamData.district)}
               },
             },
           );
-          const matchListData = await matchList.json();
+          const matchListData = (await matchList.json()) as string[];
           const matches: Match[] = [];
-          if (matchListData.length > 0) {
+          if (Array.isArray(matchListData) && matchListData.length > 0) {
             for (const matchKey of matchListData) {
               const curMatch = await fetch(`https://api.statbotics.io/v3/match/${matchKey}`);
-              const curMatchData = await curMatch.json();
+              type Alliance = { team_keys: string[] };
+              type MatchResult = { blue_score: number; red_score: number };
+              type MatchPred = { blue_score: number; red_score: number };
+              type CurMatchData = {
+                key: string;
+                alliances: { red: Alliance; blue: Alliance };
+                result: MatchResult;
+                pred: MatchPred;
+              };
+              const curMatchData = (await curMatch.json()) as CurMatchData;
               if (
                 curMatchData &&
+                curMatchData.key &&
                 curMatchData.alliances &&
                 curMatchData.alliances.red &&
                 curMatchData.alliances.blue &&
@@ -236,27 +275,35 @@ ${teamData?.district ? `As a member of the ${getDistrictName(teamData.district)}
           }
           event.matches = matches;
           processedTeamData = {
-            ...tbaData,
-            epa: statboticsData.epa?.total_points?.mean || 0,
-            wins: statboticsData.record.wins || 0,
-            losses: statboticsData.record.losses || 0,
-            ties: statboticsData.record.ties || 0,
-            district: statboticsData.district || null,
-            district_points: statboticsData.district_points || 0,
-            district_rank: statboticsData.district_rank || 0,
+            nickname: tbaData.nickname ?? "",
+            city: tbaData.city ?? "",
+            state_prov: tbaData.state_prov ?? "",
+            country: tbaData.country ?? "",
+            district: statboticsData?.district ?? "",
+            epa: statboticsData?.epa?.total_points?.mean || 0,
+            wins: statboticsData?.record?.wins || 0,
+            losses: statboticsData?.record?.losses || 0,
+            ties: statboticsData?.record?.ties || 0,
+            competing: false,
+            district_points: statboticsData?.district_points || 0,
+            district_rank: statboticsData?.district_rank || 0,
             events,
           };
           setTeamData(processedTeamData);
         }
         processedTeamData = {
-          ...tbaData,
-          epa: statboticsData.epa?.total_points?.mean || 0,
-          wins: statboticsData.record.wins || 0,
-          losses: statboticsData.record.losses || 0,
-          ties: statboticsData.record.ties || 0,
-          district: statboticsData.district || null,
-          district_points: statboticsData.district_points || 0,
-          district_rank: statboticsData.district_rank || 0,
+          nickname: tbaData.nickname ?? "",
+          city: tbaData.city ?? "",
+          state_prov: tbaData.state_prov ?? "",
+          country: tbaData.country ?? "",
+          district: statboticsData?.district ?? "",
+          epa: statboticsData?.epa?.total_points?.mean || 0,
+          wins: statboticsData?.record?.wins || 0,
+          losses: statboticsData?.record?.losses || 0,
+          ties: statboticsData?.record?.ties || 0,
+          competing: false,
+          district_points: statboticsData?.district_points || 0,
+          district_rank: statboticsData?.district_rank || 0,
           events,
         };
         setTeamData(processedTeamData);
