@@ -1,7 +1,11 @@
 # Ray Clicker Changelog
 
+## [Assets & README compliance] - {PR_MERGE_DATE}
 
-## [Polish: Upgrades, Prestige, Store Readiness] - 2025-08-07
+- Set extension icon to `icon.png` (Raycast resolves to `assets/icon.png`) in `package.json`.
+- Add `assets/screenshot.png` (copied from `metadata/ray-clicker.png`) to satisfy README and keep images outside `metadata/`.
+
+## [Polish: Upgrades, Prestige, Store Readiness] - {PR_MERGE_DATE}
 
 - Fix efficiency stacking; treat production efficiency as (1 + effect); `aiOptimizer` as direct multiplier
 - Integrate Raycast Pro Mode cost reduction into purchase and previews
@@ -13,13 +17,13 @@
 - Truncate design doc overview; expand README with Store checklist
 - Add categories to `package.json` and refine description
 
-## [Initial Version] - 2025-08-07
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Idle clicker core gameplay
 - Active / Idle / Efficiency upgrades
 - Prestige system and UI
 
-## [Polish: Menu Bar] - 2025-08-08
+## [Polish: Menu Bar] - {PR_MERGE_DATE}
 
 - Menu bar idle accrual
 - Menu bar idle rate
@@ -27,7 +31,7 @@
 - fix: menu bar idle rate not updating
 - fix: Not saving to local storage
 
-## [Clean Up & Bug Fixes: Upgrades, Stats Menu, UI] - 2025-08-15
+## [Clean Up & Bug Fixes: Upgrades, Stats Menu, UI] - {PR_MERGE_DATE}
 
 - Add icon for "Click to earn"
 - Remove legacy HTML code
@@ -56,7 +60,7 @@
     - Added milestones & achievements to stats page
     - Cleaned up organization
 
-## [Stability & Store Readiness: Prestige, UX] - 2025-08-16
+## [Stability & Store Readiness: Prestige, UX] - {PR_MERGE_DATE}
 
 - Introduce `PRESTIGE_PP_DIVISOR` constant and replace magic number in `src/PrestigeView.tsx` and `src/useGameState.ts`.
 - Add `effectDisplay` metadata to prestige upgrades and refactor effect accessory rendering in `src/PrestigeView.tsx`.
