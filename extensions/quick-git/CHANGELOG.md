@@ -1,6 +1,6 @@
 # Quick Git Changelog
 
-## [Smoother repo selection] - {PR_MERGE_DATE}
+## [Smoother repo selection] - 2025-08-18
 
 Updated how repos are selected so that it is quicker to change between them.
 
