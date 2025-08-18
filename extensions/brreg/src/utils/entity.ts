@@ -1,9 +1,10 @@
 import { Enhet } from "../types";
+import type { Image } from "@raycast/api";
 
 /**
  * Get the display icon for an entity, prioritizing emoji over favicon
  */
-export function getEntityIcon(entity: Enhet): string | undefined {
+export function getEntityIcon(entity: Enhet): Image.ImageLike | undefined {
   return entity.emoji || entity.faviconUrl;
 }
 
