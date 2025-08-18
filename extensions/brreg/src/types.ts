@@ -1,3 +1,5 @@
+import type { Image } from "@raycast/api";
+
 export interface Company {
   name: string;
   organizationNumber: string;
@@ -45,7 +47,6 @@ export interface SearchResult {
 }
 
 // BRREG Enhetsregisteret entity summary used in search lists and favorites
-import type { Image } from "@raycast/api";
 export interface Enhet {
   organisasjonsnummer: string;
   navn: string;

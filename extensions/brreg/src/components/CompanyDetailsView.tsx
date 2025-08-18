@@ -44,7 +44,7 @@ export default function CompanyDetailsView({ company, isLoading, onBack }: Compa
           {
             headers: {
               Accept: "application/json",
-              "User-Agent": "Raycast-Brreg-Search/1.0.0 (contact: support@raycast.local)" as unknown as string,
+              "User-Agent": "Raycast-Brreg-Search/1.0.0 (contact: support@raycast.local)",
             },
           },
         );
@@ -129,7 +129,7 @@ ${company.accountingYear ? `**Accounting Year:** ${company.accountingYear}\n\n` 
               })
               .join("   ")}\n\n# Location Information
 
-${formattedAddress ? `**Address:** ${formattedAddress}\n\n` : ""}${mapImageUrl ? `![Map](${mapImageUrl})\n\n` : ""}${formattedAddress ? `[Get Directions](https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(formattedAddress)})` : ""}`
+${formattedAddress ? `**Address:** ${formattedAddress}\n\n` : ""}${mapImageDataUri ? `![Map](${mapImageDataUri})\n\n` : mapImageUrl ? `![Map](${mapImageUrl})\n\n` : ""}${formattedAddress ? `[Get Directions](https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(formattedAddress)})` : ""}`
           : "";
 
   const renderMetadata = () => {
@@ -232,7 +232,9 @@ ${formattedAddress ? `**Address:** ${formattedAddress}\n\n` : ""}${mapImageUrl ?
               url={`https://www.proff.no/bransjes%C3%B8k?q=${encodeURIComponent(company.name)}`}
             />
           )}
-          <Action.CopyToClipboard title="Copy Organization Number" content={company.organizationNumber} />
+          {company.organizationNumber && (
+            <Action.CopyToClipboard title="Copy Organization Number" content={company.organizationNumber} />
+          )}
           <ActionPanel.Section title="Tabs">
             <Action
               title="Show Overview"

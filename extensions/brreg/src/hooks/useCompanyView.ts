@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Company, Enhet } from "../types";
 import { getCompanyDetails } from "../brreg-api";
-import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "../utils/toast";
 
 export function useCompanyView() {
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
@@ -25,7 +25,7 @@ export function useCompanyView() {
       setDetailedCompany(details ?? base);
     } catch (e) {
       setDetailedCompany(base);
-      showToast(Toast.Style.Failure, "Failed to load details");
+      showFailureToast("Failed to load details");
     }
   };
 
@@ -36,7 +36,7 @@ export function useCompanyView() {
 
   const isCompanyViewOpen = selectedCompany !== null;
   const currentCompany = detailedCompany || selectedCompany;
-  const isLoadingDetails = !detailedCompany;
+  const isLoadingDetails = selectedCompany !== null && detailedCompany === null;
 
   return {
     // State

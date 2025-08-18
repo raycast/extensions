@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "../utils/toast";
 import { getFavicon, useLocalStorage } from "@raycast/utils";
 import { Enhet } from "../types";
 import { getCompanyDetails } from "../brreg-api";
@@ -107,7 +108,7 @@ export function useFavorites() {
       setFavorites(next);
       showToast(Toast.Style.Success, "Favicon Refreshed", entity.navn);
     } catch {
-      showToast(Toast.Style.Failure, "Failed to refresh favicon");
+      showFailureToast("Failed to refresh favicon");
     }
   };
 

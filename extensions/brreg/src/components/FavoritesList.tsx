@@ -1,9 +1,10 @@
-import { ActionPanel, List } from "@raycast/api";
+import { ActionPanel, List, showToast, Toast } from "@raycast/api";
 import { Enhet } from "../types";
 import { formatAddress } from "../utils/format";
 import { canMoveUp, canMoveDown } from "../utils/entity";
 import EntityActions from "./EntityActions";
 import FavoriteActions from "./FavoriteActions";
+import { useEntityActions } from "../hooks/useEntityActions";
 
 interface FavoritesListProps {
   favorites: Enhet[];
@@ -30,6 +31,7 @@ export default function FavoritesList({
   onMoveDown,
   onToggleMoveMode,
 }: FavoritesListProps) {
+  const { handleCopyOrgNumber, handleCopyAddress } = useEntityActions();
   if (favorites.length === 0) {
     return (
       <List.Section title="Welcome to Brreg Search">
@@ -87,9 +89,9 @@ export default function FavoritesList({
                   entity={entity}
                   addressString={addressString}
                   onViewDetails={onViewDetails}
-                  onCopyOrgNumber={() => {}}
-                  onCopyAddress={() => {}}
-                  onOpenInBrowser={() => {}}
+                  onCopyOrgNumber={() => handleCopyOrgNumber()}
+                  onCopyAddress={() => handleCopyAddress()}
+                  onOpenInBrowser={() => showToast(Toast.Style.Success, "Opening in browser")}
                 />
                 <FavoriteActions
                   entity={entity}

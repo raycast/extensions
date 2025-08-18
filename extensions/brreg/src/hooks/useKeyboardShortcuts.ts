@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "../utils/toast";
 
 export function useKeyboardShortcuts() {
   const [showMoveIndicators, setShowMoveIndicators] = useState(false);
@@ -16,11 +17,11 @@ export function useKeyboardShortcuts() {
             showToast(Toast.Style.Success, "Organization number copied", orgNumber);
           })
           .catch(() => {
-            showToast(Toast.Style.Failure, "Failed to copy organization number");
+            showFailureToast("Failed to copy organization number");
           });
       } else {
         // Fallback for environments without clipboard API
-        showToast(Toast.Style.Failure, "Clipboard not available");
+        showFailureToast("Clipboard not available");
       }
     }
   }, []);

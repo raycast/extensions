@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { showToast, Toast } from "@raycast/api";
+
+import { showFailureToast } from "../utils/toast";
 import { Enhet } from "../types";
 import { searchEntities } from "../brreg-api";
 
@@ -32,7 +33,7 @@ export function useSearch() {
         const results = await searchEntities(trimmed);
         setEntities(results);
       } catch (error) {
-        showToast(Toast.Style.Failure, "Failed to fetch legal entities", (error as { message?: string })?.message);
+        showFailureToast("Failed to fetch legal entities", (error as { message?: string })?.message);
       } finally {
         setIsLoading(false);
       }
