@@ -79,7 +79,7 @@ const cliPaths: Record<string, string> = {
 };
 
 const cliPathsWindows: Record<string, string> = {
-  Code: "C:\\Program Files\\Microsoft VS Code\\bin\\code.cmd",
+  Code: `${os.homedir()}\\AppData\\Local\\Programs\\Microsoft VS Code\\bin\\code.cmd`,
   "Code - Insiders": "C:\\Program Files\\Microsoft VS Code Insiders\\bin\\code-insiders.cmd",
   Cursor: "C:\\Program Files\\Cursor\\bin\\cursor.cmd",
   Kiro: "C:\\Program Files\\Kiro\\bin\\kiro.cmd",
@@ -92,13 +92,12 @@ const cliPathsWindows: Record<string, string> = {
 };
 
 export function getVSCodeCLIFilename(): string {
-  console.log("getVSCodeCLIFilename called");
   if (isWin) {
     const name = cliPathsWindows[getBuildNamePreference()];
     if (!name || name.length <= 0) {
       return cliPaths.Code;
     }
-    throw new Error(`The CLI for ${getBuildNamePreference()} is not supported on Windows.`);
+    return name;
   }
   const name = cliPaths[getBuildNamePreference()];
   if (!name || name.length <= 0) {
