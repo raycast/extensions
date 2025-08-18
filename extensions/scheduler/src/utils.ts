@@ -1,6 +1,6 @@
 import { Icon } from "@raycast/api";
 import { Schedule, ScheduleType, RaycastCommand, ScheduledCommand, FormValues } from "./types";
-import { RAYCAST_DEEPLINK_PREFIX, EXTENSIONS_HOSTNAME, WEEKDAY_NAMES, VALIDATION_MESSAGES } from "./utils/constants";
+import { RAYCAST_DEEPLINK_PREFIX, EXTENSIONS_HOSTNAME, WEEKDAY_NAMES } from "./utils/constants";
 import { toLocalYMD } from "./utils/dateTime";
 
 const SCHEDULE_CONFIGS = {
@@ -29,28 +29,6 @@ export function processFormValues(values: Record<string, unknown>): FormValues {
     dayOfMonth: values.dayOfMonth ? String(values.dayOfMonth) : undefined,
     runInBackground: Boolean(values.runInBackground),
   };
-}
-
-const validateScheduleSpecificFields = (values: FormValues): string | null => {
-  switch (values.scheduleType) {
-    case "once":
-      return values.date ? null : VALIDATION_MESSAGES.DATE_REQUIRED_ONCE;
-    case "weekly":
-      return values.dayOfWeek ? null : VALIDATION_MESSAGES.DAY_OF_WEEK_REQUIRED;
-    case "monthly":
-      return values.dayOfMonth ? null : VALIDATION_MESSAGES.DAY_OF_MONTH_REQUIRED;
-    default:
-      return null;
-  }
-};
-
-export function validateFormValues(values: FormValues): string | null {
-  const deeplinkError = validateRaycastDeeplink(values.command);
-  if (deeplinkError) {
-    return deeplinkError;
-  }
-
-  return validateScheduleSpecificFields(values);
 }
 
 export function buildScheduleFromValues(values: FormValues): Schedule {
@@ -82,6 +60,16 @@ export function buildScheduleFromValues(values: FormValues): Schedule {
   }
 
   return schedule;
+}
+
+// Generate a display name for a command
+export function getCommandDisplayName(command: RaycastCommand): string {
+  const parsed = parseRaycastDeeplink(command.deeplink);
+  if (!parsed) {
+    return command.deeplink;
+  }
+
+  return `${parsed.extensionName}${parsed.name ? " > " + parsed.name : ""}`;
 }
 
 export function getScheduleDescription(schedule: Schedule): string {
@@ -138,7 +126,7 @@ const parseExtensionFormat = (pathParts: string[]): ParsedRaycastCommand | null 
 };
 
 const parseRaycastOwnedFormat = (hostname: string, pathParts: string[]): ParsedRaycastCommand | null => {
-  if (hostname && pathParts.length >= 1) {
+  if (hostname) {
     return {
       extensionName: hostname,
       name: pathParts.length >= 2 ? pathParts[1] : pathParts[0],
@@ -171,30 +159,6 @@ export function parseRaycastDeeplink(deeplink: string): ParsedRaycastCommand | n
   }
 }
 
-// Validate a Raycast deeplink string
-export function validateRaycastDeeplink(deeplink: string): string | null {
-  if (!deeplink.trim()) {
-    return VALIDATION_MESSAGES.DEEPLINK_REQUIRED;
-  }
-
-  const command = parseRaycastDeeplink(deeplink);
-  if (!command) {
-    return VALIDATION_MESSAGES.INVALID_DEEPLINK_FORMAT;
-  }
-
-  return null;
-}
-
-// Generate a display name for a command
-export function getCommandDisplayName(command: RaycastCommand): string {
-  const parsed = parseRaycastDeeplink(command.deeplink);
-  if (!parsed) {
-    return command.deeplink;
-  }
-
-  return `${parsed.extensionName} > ${parsed.name}`;
-}
-
 // Create a RaycastCommand object
 export function createRaycastCommand(deeplink: string, runInBackground?: boolean): RaycastCommand {
   return {
@@ -205,7 +169,7 @@ export function createRaycastCommand(deeplink: string, runInBackground?: boolean
 }
 
 // Create a ScheduledCommand object from form values
-export function createSavedCommand(
+export function createSavedSchedule(
   values: FormValues,
   raycastCommand: RaycastCommand,
   existingCommand?: ScheduledCommand,

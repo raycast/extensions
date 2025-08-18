@@ -1,19 +1,18 @@
 import { ActionPanel, Action, Form, showToast, Toast, popToRoot, Icon } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
-import { useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { ScheduledCommand, RaycastCommand, FormValues, ScheduleType } from "../types";
-import { ScheduleForm } from "./ScheduleForm";
+import { toLocalYMD } from "../utils/dateTime";
 import { useCommandPermissions } from "../hooks/useCommandPermissions";
 import {
-  validateFormValues,
   getScheduleDescription,
   parseRaycastDeeplink,
-  validateRaycastDeeplink,
   getCommandDisplayName,
   processFormValues,
   createRaycastCommand,
-  createSavedCommand,
+  createSavedSchedule,
 } from "../utils";
+import { ERROR_MESSAGES } from "../utils/constants";
 
 interface CommandFormProps {
   command?: ScheduledCommand;
@@ -53,11 +52,7 @@ const showSuccess = async (title: string, message: string) => {
 export function CommandForm({ command, onSave, title, submitButtonTitle, draftValues }: CommandFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTestingCommand, setIsTestingCommand] = useState(false);
-  const [parsedCommand, setParsedCommand] = useState<RaycastCommand | null>(null);
   const { getCommandPermission, testCommandPermission } = useCommandPermissions();
-  const [scheduleType, setScheduleType] = useState<ScheduleType>(
-    (draftValues?.scheduleType as ScheduleType) || command?.schedule.type || "daily",
-  );
   const { handleSubmit, itemProps } = useForm<FormValues>({
     initialValues: {
       command: (draftValues?.command as string) ?? (command ? command.command.deeplink : ""),
@@ -67,25 +62,21 @@ export function CommandForm({ command, onSave, title, submitButtonTitle, draftVa
       time: (draftValues?.time as string) ?? (command?.schedule.time || "09:00"),
       date: (draftValues?.date as string) ?? (command?.schedule.date || ""),
       dayOfWeek: (draftValues?.dayOfWeek as string) ?? command?.schedule.dayOfWeek?.toString(),
+      dayOfMonth: (draftValues?.dayOfMonth as string) ?? command?.schedule.dayOfMonth?.toString(),
     },
     async onSubmit(values) {
       setIsSubmitting(true);
       try {
         const processedValues = processFormValues(values as unknown as Record<string, unknown>);
-        const validationError = validateFormValues(processedValues);
-        if (validationError) {
-          await showError(validationError, "Validation Error");
-          return;
-        }
 
         const parsed = parseRaycastDeeplink(processedValues.command);
         if (!parsed) {
-          await showError("Could not parse the Raycast deeplink", "Invalid Command");
+          await showError(ERROR_MESSAGES.DEEPLINK_INVALID, "Invalid Command");
           return;
         }
 
         const raycastCommand = createRaycastCommand(processedValues.command, processedValues.runInBackground);
-        const savedCommand = createSavedCommand(processedValues, raycastCommand, command);
+        const savedCommand = createSavedSchedule(processedValues, raycastCommand, command);
 
         await onSave(savedCommand);
         await showSuccess(
@@ -103,7 +94,8 @@ export function CommandForm({ command, onSave, title, submitButtonTitle, draftVa
     validation: {
       command: (value) => {
         if (!value || String(value).trim() === "") return "Command is required";
-        return validateRaycastDeeplink(String(value));
+        const isValid = parseRaycastDeeplink(String(value)) !== null;
+        return isValid ? undefined : ERROR_MESSAGES.DEEPLINK_INVALID;
       },
       scheduleType: FormValidation.Required,
       date: (value) => {
@@ -111,7 +103,12 @@ export function CommandForm({ command, onSave, title, submitButtonTitle, draftVa
           return "Date is required for 'once' schedule";
         }
       },
-      time: FormValidation.Required,
+      time: (value) => {
+        if (!value) return "Time is required";
+        const str = String(value).trim();
+        const isValid = /^([01]\d|2[0-3]):[0-5]\d$/.test(str);
+        return isValid ? undefined : "Time must be in 24-hour format HH:MM (e.g., 09:00)";
+      },
       dayOfWeek: (value) => {
         if (itemProps.scheduleType.value === "weekly" && !value) {
           return "Day of week is required for 'weekly' schedule";
@@ -125,40 +122,33 @@ export function CommandForm({ command, onSave, title, submitButtonTitle, draftVa
     },
   });
 
-  useEffect(() => {
-    const value = (itemProps.command?.value as string) || "";
-    const runBg = Boolean(itemProps.runInBackground?.value as boolean | undefined);
-    const validationError = value ? validateRaycastDeeplink(value) : "Command is required";
-    if (value.trim() && !validationError) {
-      setParsedCommand(createRaycastCommand(value.trim(), runBg));
-    } else {
-      setParsedCommand(null);
-    }
+  const parsedCommand: RaycastCommand | null = useMemo(() => {
+    const currentCommand = String(itemProps.command?.value ?? "");
+    const parsed = parseRaycastDeeplink(currentCommand);
+    const runInBackground = Boolean(itemProps.runInBackground?.value ?? false);
+    return parsed ? createRaycastCommand(currentCommand, runInBackground) : null;
   }, [itemProps.command?.value, itemProps.runInBackground?.value]);
+  const currentScheduleType =
+    (itemProps.scheduleType?.value as ScheduleType) ??
+    ((draftValues?.scheduleType as ScheduleType) || command?.schedule.type || "daily");
 
-  async function handleTest(values: Record<string, unknown>) {
+  const permission = useMemo(
+    () => (parsedCommand ? getCommandPermission(parsedCommand) : null),
+    [parsedCommand, getCommandPermission],
+  );
+
+  async function handleTest() {
+    if (!parsedCommand) {
+      await showError(ERROR_MESSAGES.DEEPLINK_INVALID, "Test Command Error");
+      return;
+    }
     setIsTestingCommand(true);
 
     try {
-      const processedValues = processFormValues(values as unknown as Record<string, unknown>);
-      const validationError = validateFormValues(processedValues);
-      if (validationError) {
-        await showError(validationError, "Validation Error");
-        return;
-      }
-
-      const parsed = parseRaycastDeeplink(processedValues.command);
-      if (!parsed) {
-        await showError("Could not parse the Raycast deeplink", "Invalid Command");
-        return;
-      }
-
-      const raycastCommand = createRaycastCommand(processedValues.command, processedValues.runInBackground);
-
-      await testCommandPermission(raycastCommand);
+      await testCommandPermission(parsedCommand);
     } catch (error) {
-      console.error("Error during test command:", error);
-      await showError("Failed to test command");
+      const message = error instanceof Error ? error.message : String(error);
+      await showError(message, "Failed to test command");
     } finally {
       setIsTestingCommand(false);
     }
@@ -178,18 +168,7 @@ export function CommandForm({ command, onSave, title, submitButtonTitle, draftVa
             <Action
               title={isTestingCommand ? "Testing Command…" : "Test Command Now"}
               icon={Icon.Play}
-              onAction={() =>
-                handleTest({
-                  name: String(itemProps.name?.value ?? ""),
-                  command: String(itemProps.command?.value ?? ""),
-                  runInBackground: Boolean(itemProps.runInBackground?.value ?? false),
-                  scheduleType: String(itemProps.scheduleType?.value ?? scheduleType) as ScheduleType,
-                  time: String(itemProps.time?.value ?? ""),
-                  date: String(itemProps.date?.value ?? ""),
-                  dayOfWeek: String(itemProps.dayOfWeek?.value ?? ""),
-                  dayOfMonth: String(itemProps.dayOfMonth?.value ?? ""),
-                })
-              }
+              onAction={handleTest}
               shortcut={{ modifiers: ["cmd"], key: "t" }}
             />
           </ActionPanel.Section>
@@ -214,35 +193,83 @@ export function CommandForm({ command, onSave, title, submitButtonTitle, draftVa
         label="Execute this command in the background."
         info="When enabled, the command will run silently without user interaction. Best for automated tasks and scripts."
       />
-      {parsedCommand &&
-        (() => {
-          const permission = getCommandPermission(parsedCommand);
+      {parsedCommand && (
+        <>
+          {!permission || !permission.hasPermission ? (
+            <Form.Description title={PERMISSION_MESSAGES.REQUIRED.title} text={PERMISSION_MESSAGES.REQUIRED.text} />
+          ) : (
+            <Form.Description
+              title={PERMISSION_MESSAGES.VERIFIED.title}
+              text={PERMISSION_MESSAGES.VERIFIED.getText(permission.lastTestedAt || "")}
+            />
+          )}
+          <Form.Separator />
+        </>
+      )}
 
-          if (!permission || !permission.hasPermission) {
-            return (
-              <>
-                <Form.Description title={PERMISSION_MESSAGES.REQUIRED.title} text={PERMISSION_MESSAGES.REQUIRED.text} />
-                <Form.Separator />
-              </>
-            );
+      {/* Schedule Type */}
+      <Form.Dropdown
+        id="scheduleType"
+        title="Schedule Type"
+        value={itemProps.scheduleType?.value as string}
+        error={itemProps.scheduleType?.error as string | undefined}
+        onChange={(v) => itemProps.scheduleType?.onChange?.(v as unknown as ScheduleType)}
+      >
+        <Form.Dropdown.Item value="once" title="Once" />
+        <Form.Dropdown.Item value="daily" title="Daily" />
+        <Form.Dropdown.Item value="weekly" title="Weekly" />
+        <Form.Dropdown.Item value="monthly" title="Monthly" />
+      </Form.Dropdown>
+
+      {/* Once: Date */}
+      {currentScheduleType === "once" && (
+        <Form.DatePicker
+          id="date"
+          title="Date"
+          info="Select the date when the command should run"
+          defaultValue={
+            draftValues?.date
+              ? new Date(draftValues.date)
+              : command?.schedule.date
+                ? new Date(command.schedule.date)
+                : undefined
           }
+          min={new Date(new Date().setDate(new Date().getDate() - 2))}
+          type={Form.DatePicker.Type.Date}
+          error={itemProps.date?.error as string | undefined}
+          onChange={(d) => itemProps.date?.onChange?.(d ? toLocalYMD(d) : "")}
+        />
+      )}
 
-          return (
-            <>
-              <Form.Description
-                title={PERMISSION_MESSAGES.VERIFIED.title}
-                text={PERMISSION_MESSAGES.VERIFIED.getText(permission.lastTestedAt || "")}
-              />
-              <Form.Separator />
-            </>
-          );
-        })()}
-      <ScheduleForm
-        scheduleType={scheduleType}
-        onScheduleTypeChange={setScheduleType}
-        command={command}
-        draftValues={draftValues}
+      {/* Time */}
+      <Form.TextField
+        title="Time"
+        placeholder="09:00"
+        info="Enter time in 24-hour format (HH:MM)"
+        {...itemProps.time}
       />
+
+      {/* Weekly: Day of Week */}
+      {currentScheduleType === "weekly" && (
+        <Form.Dropdown title="Day of Week" {...itemProps.dayOfWeek}>
+          <Form.Dropdown.Item value="1" title="Monday" />
+          <Form.Dropdown.Item value="2" title="Tuesday" />
+          <Form.Dropdown.Item value="3" title="Wednesday" />
+          <Form.Dropdown.Item value="4" title="Thursday" />
+          <Form.Dropdown.Item value="5" title="Friday" />
+          <Form.Dropdown.Item value="6" title="Saturday" />
+          <Form.Dropdown.Item value="7" title="Sunday" />
+        </Form.Dropdown>
+      )}
+
+      {/* Monthly: Day of Month */}
+      {currentScheduleType === "monthly" && (
+        <Form.Dropdown title="Day of Month" {...itemProps.dayOfMonth}>
+          {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
+            <Form.Dropdown.Item key={day} value={day.toString()} title={`Day ${day}`} />
+          ))}
+        </Form.Dropdown>
+      )}
     </Form>
   );
 }
