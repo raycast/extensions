@@ -4,6 +4,7 @@ import * as afs from "fs/promises";
 import * as os from "os";
 import path from "path";
 import { fileExists, isWin, isMacOs } from "../utils";
+import { runPowerShellScript } from "@raycast/utils";
 
 interface ExtensionMetaRoot {
   identifier: ExtensionIdentifier;
@@ -136,73 +137,34 @@ export class VSCodeCLI {
     this.cliFilename = cliFilename;
   }
 
-  openPath(targetPath: string, newWindow = false) {
-    const args: string[] = [targetPath];
-    if (newWindow) {
-      args.unshift("--new-window");
-    }
-
+  async installExtensionByIDSync(id: string) {
     if (isWin) {
-      const commandForCmdExe = `"${this.cliFilename}" ${newWindow ? "--new-window " : ""} "${targetPath}"`;
-      try {
-        child_process.execFileSync("cmd.exe", ["/c", commandForCmdExe], {
-          encoding: "utf8",
-          shell: true,
-        });
-      } catch (error: any) {
-        throw new Error(`Failed to open path "${targetPath}" with VS Code CLI: ${error.message || error}`);
-      }
+      await runPowerShellScript(`
+        Start-Process -FilePath "${this.cliFilename}" -ArgumentList "--install-extension ${id}", "--force" -WindowStyle Hidden
+      `)
     } else {
-      try {
-        child_process.execFileSync(this.cliFilename, args, { encoding: "utf8" });
-      } catch (error: any) {
-        throw new Error(`Failed to open path "${targetPath}" with VS Code CLI: ${error.message || error}`);
-      }
+      child_process.execFileSync(this.cliFilename, ["--install-extension", id, "--force"]);
     }
   }
 
-  installExtensionByIDSync(id: string) {
+  async uninstallExtensionByIDSync(id: string) {
     if (isWin) {
-      const commandForCmdExe = `"${this.cliFilename}" --install-extension ${id} --force`;
-      child_process.execFileSync("cmd.exe", ["/c", commandForCmdExe], {
-        encoding: "utf8",
-        shell: true,
-      });
-      return;
+      await runPowerShellScript(`
+        Start-Process -FilePath "${this.cliFilename}" -ArgumentList "--uninstall-extension ${id}", "--force" -WindowStyle Hidden
+      `)
+    } else {
+      child_process.execFileSync(this.cliFilename, ["--uninstall-extension", id, "--force"]);
     }
-    child_process.execFileSync(this.cliFilename, ["--install-extension", id, "--force"]);
-  }
-
-  uninstallExtensionByIDSync(id: string) {
-    if (isWin) {
-      try {
-        const commandForCmdExe = `"${this.cliFilename}" --uninstall-extension ${id} --force`;
-        child_process.execFileSync("cmd.exe", ["/c", commandForCmdExe], {
-          encoding: "utf8",
-          shell: true,
-        });
-      } catch (error) {
-        console.log(error);
-      }
-      return;
-    }
-    child_process.execFileSync(this.cliFilename, ["--uninstall-extension", id, "--force"]);
   }
 
   newWindow() {
     if (isWin) {
-      try {
-        const commandForCmdExe = `"${this.cliFilename}" --new-window`;
-        child_process.execFileSync("cmd.exe", ["/c", commandForCmdExe], {
-          encoding: "utf8",
-          shell: true,
-        });
-      } catch (error) {
-        console.log(error);
-      }
-      return;
+      runPowerShellScript(`
+        Start-Process -FilePath "${this.cliFilename}" -ArgumentList "--new-window" -WindowStyle Hidden
+      `)
+    } else {
+      child_process.execFileSync(this.cliFilename, ["--new-window"]);
     }
-    child_process.execFileSync(this.cliFilename, ["--new-window"]);
   }
 }
 
@@ -257,10 +219,13 @@ export async function getLocalExtensions(): Promise<Extension[] | undefined> {
     if (extensions && extensions.length > 0) {
       const result: Extension[] = [];
       for (const e of extensions) {
-        const extFsPath =
+        let extFsPath =
           typeof e.location === "string"
             ? path.join(extensionsRootFolder, e.location)
             : e.location.fsPath ?? e.location.path;
+
+        if (isWin && extFsPath.startsWith("/")) extFsPath = extFsPath.slice(1)
+
         const packageFilename = path.join(extFsPath, "package.json");
         const pkgInfo = await getPackageJSONInfo(packageFilename);
         result.push({

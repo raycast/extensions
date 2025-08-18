@@ -1,9 +1,8 @@
 import { closeMainWindow, getFrontmostApplication, getSelectedFinderItems, open, showToast, Toast } from "@raycast/api";
 import { bundleIdentifier } from "./preferences";
+import { isMacOs, isWin } from "./utils";
 import { getCurrentFinderPath, getSelectedPathFinderItems } from "./utils/apple-scripts";
-import { getSelectedFileExplorerItems, getCurrentExplorerPath } from "./utils/win-scripts";
-import { isWin, isMacOs } from "./utils";
-import { getVSCodeCLI } from "./lib/vscode";
+import { getCurrentExplorerPath, getSelectedFileExplorerItems } from "./utils/win-scripts";
 
 export default async function main() {
   try {
@@ -30,8 +29,7 @@ export default async function main() {
     }
 
     if (isWin) {
-      // windows app's name localized, we check Explorer instead
-      const isFileExplorerWindows = currentApp.path && currentApp.path.includes("Explorer.EXE");
+      const isFileExplorerWindows = currentApp.name === "Windows Explorer";
 
       if (isFileExplorerWindows) {
         const paths = await getSelectedFileExplorerItems();
@@ -48,13 +46,16 @@ export default async function main() {
           throw new Error("Not a valid directory or no selection in active application.");
         }
 
-        getVSCodeCLI().openPath(currentPath);
-      }
-    } else {
-      for (const item of selectedItems) {
-        getVSCodeCLI().openPath(item.path);
+        await open(currentPath, bundleIdentifier);
       }
     }
+
+    if (selectedItems.length > 0) {
+      for (const item of selectedItems) {
+        await open(item.path, bundleIdentifier);
+      }
+    }
+
 
     await closeMainWindow();
   } catch (error) {
