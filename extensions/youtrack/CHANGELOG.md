@@ -1,5 +1,9 @@
 # YouTrack Changelog
 
+## [Update] - 2025-08-08
+
+- Bugfixes and improvements
+
 ## [Update] - 2025-06-23
 
 - Move screenshots to `metadata`

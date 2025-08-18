@@ -27,7 +27,7 @@ function MyIssueList(props: {
     | React.ReactElement<List.Dropdown.Props, string | React.JSXElementConstructor<any>>
     | null
     | undefined;
-}): JSX.Element {
+}) {
   const issues = props.issues;
 
   const refresh = () => {
@@ -51,7 +51,7 @@ function MyIssueList(props: {
   );
 }
 
-export function MyIssues(props: { scope: IssueScope; state: IssueState }): JSX.Element {
+export function MyIssues(props: { scope: IssueScope; state: IssueState }) {
   const scope = props.scope;
   const state = props.state;
   const [project, setProject] = useState<Project>();
@@ -76,7 +76,7 @@ export function useMyIssues(
   scope: IssueScope,
   state: IssueState,
   project: Project | undefined,
-  params?: Record<string, any>
+  params?: Record<string, any>,
 ): {
   issues: Issue[] | undefined;
   isLoading: boolean;
@@ -96,14 +96,14 @@ export function useMyIssues(
       return await gitlab.getIssues(
         apiParams,
         undefined,
-        scope === IssueScope.assigned_to_me && state === IssueState.opened ? true : false
+        scope === IssueScope.assigned_to_me && state === IssueState.opened ? true : false,
       );
     },
     {
       deps: [project?.id, scope, state, JSON.stringify(params)], // Use project?.id for stable dependency
       secondsToRefetch: 10,
       secondsToInvalid: daysInSeconds(7),
-    }
+    },
   );
   return { issues, isLoading, error, performRefetch };
 }

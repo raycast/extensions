@@ -13,6 +13,16 @@
       "tags": ["directory", "project", "workspace"]
     },
     {
+      "id": "bashes",
+      "name": "/bashes",
+      "description": "List and manage background bash shells running in the current session.",
+      "usage": "/bashes",
+      "example": "/bashes",
+      "isNew": true,
+      "category": "slash",
+      "tags": ["background", "bash", "manage", "shells"]
+    },
+    {
       "id": "bug",
       "name": "/bug",
       "description": "Initiates a bug report workflow, helping you to capture and submit issues you encounter.",
@@ -76,13 +86,23 @@
       "tags": ["documentation", "help", "support"]
     },
     {
+      "id": "hooks",
+      "name": "/hooks",
+      "description": "Manage hook configurations for tool events and workflow automation.",
+      "usage": "/hooks",
+      "example": "/hooks",
+      "isNew": true,
+      "category": "slash",
+      "tags": ["automation", "configuration", "events", "hooks", "tools"]
+    },
+    {
       "id": "ide",
       "name": "/ide",
       "description": "Manage IDE integrations and show status of connected development environments.",
       "usage": "/ide",
       "example": "/ide",
       "category": "slash",
-      "tags": ["development", "IDE", "integration", "status"]
+      "tags": ["IDE", "development", "integration", "status"]
     },
     {
       "id": "init",
@@ -100,7 +120,7 @@
       "usage": "/install-github-app",
       "example": "/install-github-app",
       "category": "slash",
-      "tags": ["Actions", "automation", "GitHub", "repository", "setup"]
+      "tags": ["Actions", "GitHub", "automation", "repository", "setup"]
     },
     {
       "id": "login",
@@ -127,7 +147,7 @@
       "usage": "/mcp",
       "example": "/mcp",
       "category": "slash",
-      "tags": ["connection", "MCP", "protocol", "server", "status"]
+      "tags": ["MCP", "connection", "protocol", "server", "status"]
     },
     {
       "id": "memory",
@@ -139,13 +159,23 @@
       "tags": ["CLAUDE.md", "edit", "memory"]
     },
     {
+      "id": "migrate-installer",
+      "name": "/migrate-installer",
+      "description": "Migrate from global npm installation to local installation for better version control.",
+      "usage": "/migrate-installer",
+      "example": "/migrate-installer",
+      "isNew": true,
+      "category": "slash",
+      "tags": ["installation", "local", "migration", "npm"]
+    },
+    {
       "id": "pr_comments",
       "name": "/pr_comments",
       "description": "Fetches and displays comments from a specified GitHub pull request, bringing review feedback into your terminal.",
       "usage": "/pr_comments",
       "example": "/pr_comments",
       "category": "slash",
-      "tags": ["comments", "GitHub", "PR", "pull request", "review"]
+      "tags": ["GitHub", "PR", "comments", "pull request", "review"]
     },
     {
       "id": "permissions",
@@ -199,7 +229,7 @@
       "usage": "/vim",
       "example": "/vim",
       "category": "slash",
-      "tags": ["enable", "mode", "Vim"]
+      "tags": ["Vim", "enable", "mode"]
     },
     {
       "id": "model",
@@ -211,13 +241,33 @@
       "tags": ["AI", "change", "configuration", "model"]
     },
     {
+      "id": "export",
+      "name": "/export",
+      "description": "Export the current conversation for sharing or archival purposes.",
+      "usage": "/export",
+      "example": "/export",
+      "isNew": true,
+      "category": "slash",
+      "tags": ["archival", "export", "save", "sharing"]
+    },
+    {
+      "id": "resume",
+      "name": "/resume",
+      "description": "Switch between conversations within Claude Code session.",
+      "usage": "/resume",
+      "example": "/resume",
+      "isNew": true,
+      "category": "slash",
+      "tags": ["conversation", "resume", "session", "switch"]
+    },
+    {
       "id": "exit",
       "name": "/exit",
       "description": "Exits the Claude Code REPL session and returns you to your regular shell prompt.",
       "usage": "/exit",
       "example": "/exit",
       "category": "slash",
-      "tags": ["exit", "quit", "REPL"]
+      "tags": ["REPL", "exit", "quit"]
     },
     {
       "id": "status",

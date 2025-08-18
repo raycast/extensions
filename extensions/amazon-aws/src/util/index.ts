@@ -59,6 +59,14 @@ export function resourceToConsoleLink(
       return `${AWS_URL_BASE}/dynamodb/home?region=${AWS_REGION}#tables:selected=${resourceId}`;
     case "AWS::StepFunctions::StateMachine":
       return `${AWS_URL_BASE}/states/home?region=${AWS_REGION}#/statemachines/view/${resourceId}`;
+    case "AWS::Amplify::App":
+      return `https://${AWS_REGION}.console.aws.amazon.com/amplify/home?region=${AWS_REGION}#/apps/${resourceId}`;
+    case "AWS::Amplify::Branch": {
+      const parts = resourceId.split("/branches/");
+      const appId = parts[0];
+      const branchName = parts[1] || "main";
+      return `https://${AWS_REGION}.console.aws.amazon.com/amplify/apps/${appId}/branches/${branchName}/deployments`;
+    }
     default:
       return "";
   }

@@ -1,7 +1,7 @@
 import fs from "fs";
 import os from "os";
 import { LocalStorage, environment, getPreferenceValues } from "@raycast/api";
-import { execPromise } from "../utils/exec";
+import { execPromise } from "./exec";
 import * as ffmpegStatic from "./ffmpeg-static";
 
 export async function checkFFmpegVersion(ffmpegPath: string): Promise<number | null> {

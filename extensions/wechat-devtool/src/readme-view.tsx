@@ -15,7 +15,7 @@ export default function ReadmeView() {
   async function loadReadme() {
     try {
       setIsLoading(true);
-      const readmePath = path.join(environment.assetsPath, "README.md");
+      const readmePath = path.resolve(environment.assetsPath, "README.md");
       const content = await readFile(readmePath, "utf8");
       setReadmeContent(content);
     } catch (error) {

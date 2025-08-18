@@ -1,4 +1,4 @@
-import { Action, Icon } from "@raycast/api";
+import { Action, Icon, open } from "@raycast/api";
 import { ProjectLink } from "../../types";
 
 interface OpenAllLinksActionProps {

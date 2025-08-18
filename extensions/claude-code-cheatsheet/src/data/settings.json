@@ -47,6 +47,46 @@
       "example": "{\n  \"includeCoAuthoredBy\": false\n}",
       "category": "settings",
       "tags": ["author", "commits", "git"]
+    },
+    {
+      "id": "settings-enable-all-project-mcp-servers",
+      "name": "enableAllProjectMcpServers",
+      "description": "Automatically approve all MCP servers defined in project .mcp.json files.",
+      "usage": "\"enableAllProjectMcpServers\": true",
+      "example": "{\n  \"enableAllProjectMcpServers\": true\n}",
+      "isNew": true,
+      "category": "settings",
+      "tags": ["approve", "auto", "mcp", "project", "servers"]
+    },
+    {
+      "id": "settings-enabled-mcp-json-servers",
+      "name": "enabledMcpjsonServers",
+      "description": "List of specific MCP servers from .mcp.json files to approve.",
+      "usage": "\"enabledMcpjsonServers\": [\"server1\", \"server2\"]",
+      "example": "{\n  \"enabledMcpjsonServers\": [\n    \"memory\",\n    \"github\"\n  ]\n}",
+      "isNew": true,
+      "category": "settings",
+      "tags": ["approve", "list", "mcp", "servers", "specific"]
+    },
+    {
+      "id": "settings-disabled-mcp-json-servers",
+      "name": "disabledMcpjsonServers",
+      "description": "List of specific MCP servers from .mcp.json files to reject.",
+      "usage": "\"disabledMcpjsonServers\": [\"server1\", \"server2\"]",
+      "example": "{\n  \"disabledMcpjsonServers\": [\n    \"filesystem\"\n  ]\n}",
+      "isNew": true,
+      "category": "settings",
+      "tags": ["block", "list", "mcp", "reject", "servers"]
+    },
+    {
+      "id": "settings-force-login-method",
+      "name": "forceLoginMethod",
+      "description": "Use 'claudeai' to restrict login to Claude.ai accounts, 'console' to restrict login to Anthropic Console (API usage billing) accounts.",
+      "usage": "\"forceLoginMethod\": \"claudeai\"",
+      "example": "{\n  \"forceLoginMethod\": \"console\"\n}",
+      "isNew": true,
+      "category": "settings",
+      "tags": ["account", "authentication", "login", "restrict"]
     }
   ]
 }

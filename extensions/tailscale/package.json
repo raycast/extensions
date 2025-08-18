@@ -14,7 +14,8 @@
     "erics118",
     "brandenw",
     "j3lte",
-    "itsmatteomanf"
+    "itsmatteomanf",
+    "MatteoGauthier"
   ],
   "categories": [
     "Developer Tools",
@@ -125,7 +126,8 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.77.3",
-    "@raycast/utils": "^1.9.0"
+    "@raycast/utils": "^1.9.0",
+    "country-emoji": "^1.5.6"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
