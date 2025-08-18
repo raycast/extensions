@@ -1,0 +1,93 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "friday",
+  "title": "Friday AI Assistant",
+  "description": "AI-powered assistant that automatically executes tasks across Gmail, Calendar, GitHub, Notion, Twitter, and web search using natural language commands.",
+  "icon": "extension-icon.png",
+  "author": "anshuman_mishra",
+  "license": "MIT",
+  "keywords": [
+    "ai",
+    "assistant", 
+    "productivity",
+    "automation",
+    "gmail",
+    "calendar",
+    "github",
+    "notion",
+    "twitter",
+    "search"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "commands": [
+    {
+      "name": "friday",
+      "title": "Friday AI Assistant",
+      "description": "Execute tasks using natural language across multiple productivity tools",
+      "mode": "view",
+      "keywords": [
+        "ai",
+        "assistant",
+        "task",
+        "automation"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@composio/core": "^0.1.43",
+    "@composio/openai": "^0.1.43",
+    "@raycast/api": "^1.102.4",
+    "@raycast/utils": "^1.17.0",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@types/uuid": "^10.0.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "composioApiKey",
+      "title": "Composio API Key",
+      "description": "Your API key from the Composio dashboard.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "openaiApiKey",
+      "title": "OpenAI API Key",
+      "description": "Your API key from OpenAI.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "tavilyApiKey",
+      "title": "Tavily API Key",
+      "description": "Your API key from Tavily for web search functionality.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "tavilyAuthConfigId",
+      "title": "Tavily Auth Config ID",
+      "description": "The auth config ID from Composio dashboard (starts with ac_).",
+      "type": "password",
+      "required": false
+    }
+  ]
+}
