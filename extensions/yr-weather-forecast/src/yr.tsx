@@ -87,11 +87,7 @@ export default function Command() {
           setFavoriteIds(map);
         }
       } catch (error) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Search failed",
-          message: String((error as Error)?.message ?? error),
-        });
+        await showFailureToast("Search failed", error);
         if (!cancelled) setLocations([]);
       } finally {
         if (!cancelled) setIsLoading(false);
