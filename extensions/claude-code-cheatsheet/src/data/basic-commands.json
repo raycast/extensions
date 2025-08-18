@@ -119,7 +119,6 @@
       "description": "Set up a long-lived authentication token (requires Claude subscription).",
       "usage": "claude setup-token",
       "example": "claude setup-token",
-      "isNew": true,
       "category": "basic",
       "tags": ["auth", "setup", "subscription", "token"]
     },
@@ -129,7 +128,6 @@
       "description": "Install Claude Code native build. Use [target] to specify version (stable, latest, or specific version).",
       "usage": "claude install [target]",
       "example": "claude install stable",
-      "isNew": true,
       "category": "basic",
       "tags": ["build", "install", "native", "version"]
     }
