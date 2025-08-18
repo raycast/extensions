@@ -1,6 +1,6 @@
 # Clockify Changelog
 
-## [Select Tag During Start + Modernize] - {PR_MERGE_DATE}
+## [Select Tag During Start + Modernize] - 2025-08-18
 
 - `Action` to `openExtensionPreferences` in invalid token view
 - Add `placeholder`s to API Key & Description
