@@ -1,6 +1,6 @@
 # Trakt Manager Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-08-18
 
 - New unified detail view across movies, shows, episodes, watchlist, history, up next & recommendations
 - Detail pages now show richer information (clearer summaries, images and key stats)
