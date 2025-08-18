@@ -16,9 +16,7 @@ export function ListOrGridSection(props: ListOrGridSectionProps) {
 
 type ListOrGridItemProps = List.Item.Props | Grid.Item.Props;
 export function ListOrGridItem(props: ListOrGridItemProps) {
-  return layout === "list"
-    ? List.Item(props as List.Item.Props)
-    : Grid.Item(props as Grid.Item.Props);
+  return layout === "list" ? List.Item(props as List.Item.Props) : Grid.Item(props as Grid.Item.Props);
 }
 
 type ListOrGridEmptyViewProps = List.EmptyView.Props | Grid.EmptyView.Props;
@@ -28,9 +26,7 @@ export function ListOrGridEmptyView(props: ListOrGridEmptyViewProps) {
 
 type ListOrGridDropdownProps = List.Dropdown.Props | Grid.Dropdown.Props;
 export function ListOrGridDropdown(props: ListOrGridDropdownProps) {
-  return layout === "list"
-    ? List.Dropdown(props as List.Dropdown.Props)
-    : Grid.Dropdown(props as Grid.Dropdown.Props);
+  return layout === "list" ? List.Dropdown(props as List.Dropdown.Props) : Grid.Dropdown(props as Grid.Dropdown.Props);
 }
 
 type ListOrGridDropdownSectionProps = List.Dropdown.Section.Props | Grid.Dropdown.Section.Props;
