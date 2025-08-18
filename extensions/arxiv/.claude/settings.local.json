@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm ls:*)",
+      "Bash(npm test:*)",
+      "WebSearch",
+      "Bash(npm run build:*)",
+      "Bash(grep:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npx @raycast/api@latest lint --help)",
+      "Bash(npx @raycast/api@latest publish --help)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
