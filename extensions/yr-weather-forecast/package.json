@@ -45,7 +45,6 @@
         },
         {
           "name": "showWindDirection",
-          "label": "Show Wind Direction",
           "title": "Show Wind Direction",
           "description": "Display wind direction arrows in the main view",
           "type": "checkbox",
