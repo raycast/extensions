@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "8-ball",
   "title": "8 Ball",
-  "description": "Returns an 8 ball like answer to questions",
+  "description": "Returns an 8 ball like answer to questions.",
   "icon": "8ball.png",
   "author": "rocksack",
   "contributors": [
