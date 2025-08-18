@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Fix Zen Support] - {PR_MERGE_DATE}
+
+- Fix Bundle ID for Zen Browser.
+
 ## [Add Quicklinks Support] - 2025-07-07
 
 - Added action to create `Quicklink` from bookmark.
