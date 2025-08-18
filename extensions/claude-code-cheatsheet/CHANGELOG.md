@@ -1,6 +1,6 @@
 # Claude Code Cheatsheet Changelog
 
-## [1.2.0] - {PR_MERGE_DATE}
+## [1.2.0] - 2025-08-18
 
 - Add support for Claude Code v1.0.55 through v1.0.81 with 19+ new features
 - Add new CLI flag: `--settings` for loading additional settings from JSON file or string
