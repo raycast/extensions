@@ -31,7 +31,7 @@ export default function Command() {
       <List.Section title="Recent">
         {recentItems.map((item) => {
           if (isFriend(item)) {
-            const friend = item as Friend;
+            const friend = item;
             return (
               <List.Item
                 key={`f-${friend.id}`}
@@ -73,7 +73,7 @@ export default function Command() {
               />
             );
           } else {
-            const group = item as Group;
+            const group = item;
             return (
               <List.Item
                 key={`g-${group.id}`}
