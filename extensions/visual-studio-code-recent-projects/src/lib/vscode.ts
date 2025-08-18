@@ -141,7 +141,7 @@ export class VSCodeCLI {
     if (isWin) {
       await runPowerShellScript(`
         Start-Process -FilePath "${this.cliFilename}" -ArgumentList "--install-extension ${id}", "--force" -WindowStyle Hidden
-      `)
+      `);
     } else {
       child_process.execFileSync(this.cliFilename, ["--install-extension", id, "--force"]);
     }
@@ -151,7 +151,7 @@ export class VSCodeCLI {
     if (isWin) {
       await runPowerShellScript(`
         Start-Process -FilePath "${this.cliFilename}" -ArgumentList "--uninstall-extension ${id}", "--force" -WindowStyle Hidden
-      `)
+      `);
     } else {
       child_process.execFileSync(this.cliFilename, ["--uninstall-extension", id, "--force"]);
     }
@@ -161,7 +161,7 @@ export class VSCodeCLI {
     if (isWin) {
       runPowerShellScript(`
         Start-Process -FilePath "${this.cliFilename}" -ArgumentList "--new-window" -WindowStyle Hidden
-      `)
+      `);
     } else {
       child_process.execFileSync(this.cliFilename, ["--new-window"]);
     }
@@ -224,7 +224,7 @@ export async function getLocalExtensions(): Promise<Extension[] | undefined> {
             ? path.join(extensionsRootFolder, e.location)
             : e.location.fsPath ?? e.location.path;
 
-        if (isWin && extFsPath.startsWith("/")) extFsPath = extFsPath.slice(1)
+        if (isWin && extFsPath.startsWith("/")) extFsPath = extFsPath.slice(1);
 
         const packageFilename = path.join(extFsPath, "package.json");
         const pkgInfo = await getPackageJSONInfo(packageFilename);
