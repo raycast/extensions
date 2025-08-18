@@ -96,6 +96,6 @@ async function saveEntries(entries: EntryLike[]) {
     const query = `INSERT INTO ItemTable (key, value) VALUES ('history.recentlyOpenedPathsList', '${data}');`;
     await executeSQL(getPath(), query);
   } catch (error) {
-    console.error(error)
+    console.error(error);
   }
 }

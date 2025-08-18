@@ -5,7 +5,7 @@ import { isMacOs, isWin } from "../utils";
 const cachedGetApplications = cacheFunc(getApplications);
 
 // Map of build names to bundle IDs
-const bundleIdMap: Record<string, { macos: string, windows: string }> = {
+const bundleIdMap: Record<string, { macos: string; windows: string }> = {
   Code: { macos: "com.microsoft.VSCode", windows: "/Applications/bf529bb3-7152-5c7a-a51b-0b5e131a7bcd" },
   "Code - Insiders": { macos: "com.microsoft.VSCodeInsiders", windows: "" },
   Cursor: { macos: "com.todesktop.230313mzl4w4u92", windows: "" },
@@ -24,8 +24,7 @@ const bundleIdMap: Record<string, { macos: string, windows: string }> = {
  * @returns The bundle ID for the specified build
  */
 export function getBundleId(buildName: string): string {
-  if (isWin)
-    return bundleIdMap[buildName].windows || "";
+  if (isWin) return bundleIdMap[buildName].windows || "";
   return bundleIdMap[buildName].macos || "";
 }
 
@@ -45,8 +44,8 @@ export async function getEditorApplication(buildName: string): Promise<Applicati
       if (app) return app;
     }
   } else {
-    const app = apps.find(app => app.windowsAppId === bundleId.windows)
-    if (app) return app
+    const app = apps.find((app) => app.windowsAppId === bundleId.windows);
+    if (app) return app;
   }
 
   return undefined;

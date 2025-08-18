@@ -56,7 +56,6 @@ export default async function main() {
       }
     }
 
-
     await closeMainWindow();
   } catch (error) {
     await showToast({
