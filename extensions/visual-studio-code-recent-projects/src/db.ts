@@ -1,12 +1,11 @@
 import { Alert, Icon, Toast, confirmAlert, showToast } from "@raycast/api";
-import { useSQL } from "@raycast/utils";
+import { executeSQL, useSQL } from "@raycast/utils";
 import fs from "fs";
 import { homedir } from "os";
+import path from "path";
 import { build } from "./preferences";
 import { EntryLike, RecentEntries } from "./types";
 import { isSameEntry, isWin } from "./utils";
-import { execFilePromise } from "./utils/exec";
-import path from "path";
 
 export type RemoveMethods = {
   removeEntry: (entry: EntryLike) => Promise<void>;
@@ -92,7 +91,11 @@ function getPath() {
 }
 
 async function saveEntries(entries: EntryLike[]) {
-  const data = JSON.stringify({ entries });
-  const query = `INSERT INTO ItemTable (key, value) VALUES ('history.recentlyOpenedPathsList', '${data}');`;
-  await execFilePromise("sqlite3", [getPath(), query]);
+  try {
+    const data = JSON.stringify({ entries });
+    const query = `INSERT INTO ItemTable (key, value) VALUES ('history.recentlyOpenedPathsList', '${data}');`;
+    await executeSQL(getPath(), query);
+  } catch (error) {
+    console.error(error)
+  }
 }
