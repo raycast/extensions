@@ -2,7 +2,7 @@
 
 ## [Initial Version] - 2025-08-04
 
-## [Potential fix of error] - 2025-08-18
+## [Potential fix of error] - {PR_MERGE_DATE}
 
 Originally the exception happened in the `src/search-image.tsx:96:37`:
 
