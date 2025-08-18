@@ -1,6 +1,6 @@
 # GrammariX Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-08-18
 
 - Fix minor issue related to temperature
 
