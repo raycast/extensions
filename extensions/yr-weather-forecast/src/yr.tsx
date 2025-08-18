@@ -145,11 +145,7 @@ export default function Command() {
                               message: formatWeatherToast(ts),
                             });
                           } catch (error) {
-                            await showToast({
-                              style: Toast.Style.Failure,
-                              title: "Failed to load weather",
-                              message: String((error as Error)?.message ?? error),
-                            });
+                            await showFailureToast("Failed to load weather", error);
                           }
                         }}
                       />
