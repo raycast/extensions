@@ -19,7 +19,7 @@ intro: |
 @import url('https://fonts.googleapis.com/css?family=Open+Sans:400,700');
 
 /* Combining multiple fonts */
-@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,400italic|Montserrat:400,700'');
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,400italic|Montserrat:400,700');
 ```
 
 Great for using with [Codepen.io](https://codepen.io/) or similar websites!

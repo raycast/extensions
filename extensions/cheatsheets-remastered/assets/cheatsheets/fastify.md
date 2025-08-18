@@ -64,7 +64,7 @@ fastify.route({
   method: 'GET',
   url: '/',
   schema: { ··· },
-  handler: (req, reply) => { ··· }
+  handler: (req, reply) => { ··· },
   beforeHandler: (req, reply, done) => { ··· }
 })
 ```
