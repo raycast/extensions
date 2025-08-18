@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Icon, List } from "@raycast/api";
-import type { StatusInfo } from "../../utils/status.js";
-import type { BranchInfo } from "../../utils/branch.js";
+import type { StatusInfo } from "../../utils/git-status/porcelain.js";
+import type { BranchInfo } from "../../utils/git-status/branch.js";
 import { GitStatusItemDetail } from "./GitStatusItemDetail.js";
 import { GitStatusItemActions } from "./GitStatusItemActions.js";
 
@@ -12,13 +12,6 @@ interface Props {
 
 export function GitStatusItem({ status, branch }: Props) {
   const [diff, setDiff] = useState("");
-  const isNotStaged = useMemo(() => {
-    return status.staged === "." || status.staged === "?";
-  }, [status.staged]);
-
-  const isCommittedFile = useMemo(() => {
-    return status.format !== "untracked" && status.format !== "ignored";
-  }, [status.format]);
 
   const title = useMemo(() => {
     if (status.origPath) {
@@ -27,14 +20,26 @@ export function GitStatusItem({ status, branch }: Props) {
     return status.fileName;
   }, [status.fileName, status.origPath]);
 
+  const icon = useMemo(() => {
+    if (status.changes.hasStagedChanges && status.changes.hasUnstagedChanges) {
+      return Icon.CircleProgress50;
+    }
+
+    if (status.changes.hasStagedChanges && !status.changes.hasUnstagedChanges) {
+      return Icon.CheckCircle;
+    }
+
+    return Icon.Circle;
+  }, [status.changes.hasStagedChanges, status.changes.hasUnstagedChanges]);
+
   return (
     <List.Item
-      icon={isNotStaged ? Icon.Circle : Icon.CheckCircle}
+      icon={icon}
       title={title}
       actions={
         <GitStatusItemActions
-          isNotStaged={isNotStaged}
-          isCommittedFile={isCommittedFile}
+          isNotStaged={status.changes.hasUnstagedChanges}
+          isCommittedFile={status.changes.isTracked}
           isShowingDiff={!!diff}
           fileName={status.fileName}
           updateDiff={setDiff}
