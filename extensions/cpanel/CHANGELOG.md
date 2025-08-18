@@ -1,6 +1,6 @@
 # cPanel Changelog
 
-## [Delete DNS Zone] - {PR_MERGE_DATE}
+## [Delete DNS Zone] - 2025-08-18
 
 - Show more file icons based on MIME types
 - Toggle data/content for DNS Zone
