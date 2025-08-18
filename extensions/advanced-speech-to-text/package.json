@@ -5,6 +5,9 @@
   "description": "Convert speech to text using OpenAI's latest models including GPT-4o-transcribe",
   "icon": "icon.png",
   "author": "inakitajes",
+  "contributors": [
+    "dingyj"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -42,6 +45,10 @@
         {
           "title": "GPT-4o Transcribe - Latest model with enhanced understanding",
           "value": "gpt-4o-transcribe"
+        },
+        {
+          "title": "GPT-4o Mini Transcribe - Faster, cost-effective model",
+          "value": "gpt-4o-mini-transcribe"
         },
         {
           "title": "Whisper-1 (Large-v2) - Most accurate, 99+ languages",
@@ -163,6 +170,32 @@
       "title": "Custom Report Prompt",
       "description": "Custom prompt for report formatting (leave empty to use default)",
       "default": ""
+    },
+    {
+      "name": "retentionPeriod",
+      "type": "dropdown",
+      "required": false,
+      "title": "File Retention Period",
+      "description": "How long to keep audio files and transcriptions before automatic cleanup",
+      "default": "24",
+      "data": [
+        {
+          "title": "24 hours",
+          "value": "24"
+        },
+        {
+          "title": "48 hours",
+          "value": "48"
+        },
+        {
+          "title": "72 hours",
+          "value": "72"
+        },
+        {
+          "title": "Never (not recommended)",
+          "value": "never"
+        }
+      ]
     }
   ],
   "dependencies": {
