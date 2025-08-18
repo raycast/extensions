@@ -34,6 +34,9 @@ export async function scanVaultForUrls(): Promise<NoteWithUrl[]> {
           return;
         }
 
+        // Get file stats for actual modification time
+        const stats = await fs.stat(filePath);
+
         // Check all properties for valid URLs
         for (const [property, value] of Object.entries(frontmatter)) {
           // Skip non-string values
@@ -55,7 +58,7 @@ export async function scanVaultForUrls(): Promise<NoteWithUrl[]> {
               path: relativePath,
               vault: vaultPath,
               frontmatter,
-              lastModified: new Date(),
+              lastModified: stats.mtime,
               url: value,
               urlSource: property,
             });

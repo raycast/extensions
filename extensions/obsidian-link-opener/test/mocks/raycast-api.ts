@@ -1,76 +1,79 @@
 import { vi } from "vitest";
 
-<<<<<<< ours
-// Log when this mock is loaded
-console.log("Loading Raycast API mock...");
-||||||| ancestor
+// Mock implementation of @raycast/api
 export const getPreferenceValues = vi.fn(() => ({
   vaultPath: "/path/to/vault",
   refreshInterval: "24",
+  useFrecency: true,
 }));
-=======
-// Mock implementation of @raycast/api
-export const getPreferenceValues = vi.fn();
+
 export const showToast = vi.fn().mockResolvedValue(undefined);
 export const open = vi.fn().mockResolvedValue(undefined);
 
-export const Toast = {
-  Style: {
-    Success: "success",
-    Failure: "failure",
-  },
-};
->>>>>>> theirs
-
-<<<<<<< ours
-// Preferences
-export const getPreferenceValues = vi.fn(() => {
-  console.log("Mock getPreferenceValues called");
-  return {
-    vaultPath: "/path/to/vault",
-    refreshInterval: "24",
-  };
-});
-
-// System
-export const showToast = vi.fn();
-export const open = vi.fn();
 export const environment = {
   supportPath: "/path/to/support",
-||||||| ancestor
-// Add other Raycast API mocks as needed
-export const showToast = vi.fn();
-export const open = vi.fn();
-export const environment = {
-  supportPath: "/path/to/support",
-=======
-export const Action = {
-  SubmitForm: ({ title, onSubmit }: any) => ({
-    title,
-    onSubmit,
-  }),
->>>>>>> theirs
 };
-<<<<<<< ours
+
 export const getApplications = vi.fn();
 export const getSelectedText = vi.fn();
 export const showHUD = vi.fn();
 export const closeMainWindow = vi.fn();
 export const popToRoot = vi.fn();
+
 export const Clipboard = {
   copy: vi.fn(),
   read: vi.fn(),
   clear: vi.fn(),
 };
 
+// LocalStorage mock
+export const LocalStorage = {
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
+  allItems: vi.fn(),
+};
+
 // UI Components
-export const ActionPanel = vi.fn(() => null);
-export const Action = vi.fn(() => null);
-export const List = vi.fn(() => null);
-export const Form = vi.fn(() => null);
-export const Detail = vi.fn(() => null);
+export const ActionPanel = vi.fn(({ children }) => children);
+ActionPanel.Section = vi.fn(({ children }) => children);
+
+export const Action = {
+  OpenInBrowser: vi.fn(() => null),
+  CopyToClipboard: vi.fn(() => null),
+  SubmitForm: vi.fn(({ title, onSubmit }) => ({
+    title,
+    onSubmit,
+  })),
+};
+
+export const List = vi.fn(({ children }) => children);
+List.Item = vi.fn(() => null);
+List.EmptyView = vi.fn(() => null);
+
+export const Form = {
+  TextField: vi.fn(({ id, value, onChange, onBlur, error }) => ({
+    id,
+    value,
+    onChange,
+    onBlur,
+    error,
+  })),
+  Description: vi.fn(({ text }) => ({
+    text,
+  })),
+};
+
+export const Detail = vi.fn(({ markdown, isLoading, actions }) => ({
+  markdown,
+  isLoading,
+  actions,
+}));
+
 export const Grid = vi.fn(() => null);
 export const MenuBarExtra = vi.fn(() => null);
+
 export const Keyboard = {
   Shortcut: vi.fn(() => null),
 };
@@ -97,37 +100,31 @@ export const Icon = {
   Info: "info",
   Warning: "warning",
   Error: "error",
+  House: "house",
+  Window: "window",
+  Compass: "compass",
+  Megaphone: "megaphone",
+  Code: "code",
+  SpeechBubble: "speech-bubble",
+  Video: "video",
+  QuestionMark: "question-mark",
+  Book: "book",
+  Pencil: "pencil",
+  Cart: "cart",
+  Folder: "folder",
+  ArrowClockwise: "arrow-clockwise",
 };
 
-// Re-export React hooks that Raycast components might use
+// Launch functionality
+export const launchCommand = vi.fn();
+export const LaunchType = {
+  UserInitiated: "user-initiated",
+  Background: "background",
+};
+
+// React hooks (re-exported for convenience)
 export const useEffect = vi.fn();
 export const useState = vi.fn();
 export const useCallback = vi.fn();
 export const useMemo = vi.fn();
 export const useRef = vi.fn();
-||||||| ancestor
-=======
-
-export const ActionPanel = ({ children }: any) => ({
-  children,
-});
-
-export const Form = {
-  TextField: ({ id, value, onChange, onBlur, error }: any) => ({
-    id,
-    value,
-    onChange,
-    onBlur,
-    error,
-  }),
-  Description: ({ text }: any) => ({
-    text,
-  }),
-};
-
-export const Detail = ({ markdown, isLoading, actions }: any) => ({
-  markdown,
-  isLoading,
-  actions,
-});
->>>>>>> theirs
