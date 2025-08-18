@@ -394,13 +394,56 @@ export async function purchaseApp(
       logger.log(`[ipatool] stderr: ${stderr}`);
     }
 
-    // Check for success indicators in the output
-    if (stdout.includes('"success": true') || stdout.includes("license obtained")) {
-      logger.log(`[ipatool] Purchase successful for ${displayName}`);
+    // Normalize and combine outputs for detection and parsing
+    const combined = `${stdout}\n${stderr}`;
+    const combinedLower = combined.toLowerCase();
+
+    // Quick string-based success checks in either stream
+    if (
+      combinedLower.includes('"success": true') ||
+      combinedLower.includes("license obtained") ||
+      combinedLower.includes("already purchased") ||
+      combinedLower.includes("already owned")
+    ) {
+      logger.log(`[ipatool] Purchase successful or already owned for ${displayName}`);
       if (!suppressHUD) {
         await showHUD(`Successfully purchased ${displayName}`);
       }
       return true;
+    }
+
+    // Parse line-delimited JSON emitted by ipatool in stdout/stderr
+    try {
+      const lines = combined
+        .split("\n")
+        .map((l) => l.trim())
+        .filter((l) => l.startsWith("{") && l.endsWith("}"));
+
+      for (const line of lines) {
+        try {
+          const obj = JSON.parse(line) as Record<string, unknown>;
+          // success true anywhere indicates success
+          if (obj && (obj["success"] === true || obj["message"] === "license obtained")) {
+            logger.log(`[ipatool] Parsed JSON success during purchase for ${displayName}`);
+            if (!suppressHUD) {
+              await showHUD(`Successfully purchased ${displayName}`);
+            }
+            return true;
+          }
+          // Some versions report status text in "error" but success boolean separately
+          if (obj && typeof obj["error"] === "string") {
+            const err = String(obj["error"]).toLowerCase();
+            if (err.includes("already purchased") || err.includes("already owned")) {
+              logger.log(`[ipatool] Parsed JSON indicates already owned for ${displayName}`);
+              return true;
+            }
+          }
+        } catch (e) {
+          // ignore bad lines
+        }
+      }
+    } catch (e) {
+      // ignore parse errors, fallback to analyzer below
     }
 
     // If we get here, the purchase might have failed
@@ -409,7 +452,7 @@ export async function purchaseApp(
     logger.log(`[ipatool] Purchase stderr: ${stderr}`);
 
     // Analyze any errors
-    const errorAnalysis = analyzeIpatoolError(stdout + stderr, stderr);
+    const errorAnalysis = analyzeIpatoolError(combined, stderr);
 
     if (errorAnalysis.isAuthError) {
       logger.error(`[ipatool] Authentication error during app purchase: ${errorAnalysis.userMessage}`);
@@ -421,17 +464,11 @@ export async function purchaseApp(
     logger.log(`[ipatool] Purchase failed for ${displayName}: ${errorAnalysis.userMessage}`);
 
     // Check for specific purchase failure reasons
-    const combinedOutput = (stdout + stderr).toLowerCase();
-    if (combinedOutput.includes("already purchased") || combinedOutput.includes("already owned")) {
-      logger.log(`[ipatool] App ${displayName} appears to be already purchased`);
-      return true; // Treat as success if already owned
-    }
-
-    if (combinedOutput.includes("not available") || combinedOutput.includes("not found")) {
+    if (combinedLower.includes("not available") || combinedLower.includes("not found")) {
       logger.log(`[ipatool] App ${displayName} not available for purchase in this region`);
     }
 
-    if (combinedOutput.includes("requires payment") || combinedOutput.includes("not free")) {
+    if (combinedLower.includes("requires payment") || combinedLower.includes("not free")) {
       logger.log(`[ipatool] App ${displayName} is not free and requires payment`);
     }
 
