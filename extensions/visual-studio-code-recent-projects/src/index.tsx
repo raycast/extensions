@@ -18,7 +18,6 @@ import { getBuildScheme } from "./lib/vscode";
 import { usePinnedEntries } from "./pinned";
 import {
   build,
-  bundleIdentifier,
   closeOtherWindows,
   gitBranchColor,
   keepSectionOrder,
@@ -206,7 +205,7 @@ function LocalItem(
       }
 
       if (isWin) open(path, editorApp);
-      else open(props.uri, bundleIdentifier);
+      else open(props.uri, editorApp);
     };
   };
 
