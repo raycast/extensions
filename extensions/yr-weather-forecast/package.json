@@ -27,7 +27,6 @@
       "preferences": [
         {
           "name": "units",
-          "label": "Units",
           "title": "Units",
           "description": "Choose metric or imperial units",
           "type": "dropdown",
