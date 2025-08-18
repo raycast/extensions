@@ -37,6 +37,10 @@ export interface IpatoolErrorInfo {
     | "disk_space"
     | "permission_denied"
     | "corruption"
+    | "rate_limited"
+    | "maintenance"
+    | "regional_restriction"
+    | "account_restriction"
     | "generic";
 }
 
@@ -243,6 +247,47 @@ export function analyzeIpatoolError(
     };
   }
 
+  // Rate limiting (HTTP 429 / too many requests)
+  if (
+    fullMessage.includes("too many requests") ||
+    fullMessage.includes("rate limit") ||
+    fullMessage.includes("rate-limited") ||
+    fullMessage.includes("status code 429") ||
+    fullMessage.includes("http 429") ||
+    fullMessage.includes("request limit exceeded") ||
+    fullMessage.includes("exceeded your request limit")
+  ) {
+    return {
+      isAuthError: false,
+      is2FARequired: false,
+      isCredentialError: false,
+      isLicenseRequired: false,
+      userMessage: "Rate limited by Apple. Too many requests in a short time. Please wait a minute and try again.",
+      suggestedAction: "Retry",
+      errorType: "rate_limited",
+    };
+  }
+
+  // App Store maintenance / temporary unavailability
+  if (
+    fullMessage.includes("service unavailable") ||
+    fullMessage.includes("temporarily unavailable") ||
+    fullMessage.includes("maintenance") ||
+    fullMessage.includes("down for maintenance") ||
+    fullMessage.includes("app store is currently unavailable") ||
+    fullMessage.includes("we are unable to process your request")
+  ) {
+    return {
+      isAuthError: false,
+      is2FARequired: false,
+      isCredentialError: false,
+      isLicenseRequired: false,
+      userMessage: "App Store is temporarily unavailable or under maintenance. Try again later.",
+      suggestedAction: "Retry",
+      errorType: "maintenance",
+    };
+  }
+
   // Network errors
   if (
     fullMessage.includes("network") ||
@@ -257,6 +302,50 @@ export function analyzeIpatoolError(
       isLicenseRequired: false,
       userMessage: "Network error occurred. Please check your internet connection.",
       errorType: "network",
+    };
+  }
+
+  // Regional restrictions / storefront issues
+  if (
+    fullMessage.includes("not available in your region") ||
+    fullMessage.includes("not available in your country") ||
+    fullMessage.includes("not currently available in the") ||
+    fullMessage.includes("item is not available in your country") ||
+    fullMessage.includes("this app is currently not available in your country or region") ||
+    fullMessage.includes("account not in this store") ||
+    fullMessage.includes("your account is not valid for use in the")
+  ) {
+    return {
+      isAuthError: false,
+      is2FARequired: false,
+      isCredentialError: false,
+      isLicenseRequired: false,
+      userMessage:
+        "This app isn't available in your App Store country/region. Change your App Store region to download.",
+      errorType: "regional_restriction",
+    };
+  }
+
+  // Account-specific restrictions (Family Sharing, disabled account, billing review, MDM)
+  if (
+    fullMessage.includes("this apple id has not been used in the itunes store") ||
+    fullMessage.includes("review your account information") ||
+    fullMessage.includes("your account has been disabled") ||
+    fullMessage.includes("you cannot purchase this item") ||
+    fullMessage.includes("your account does not have permission") ||
+    fullMessage.includes("family sharing") ||
+    fullMessage.includes("ask to buy") ||
+    fullMessage.includes("managed apple id") ||
+    fullMessage.includes("mdm")
+  ) {
+    return {
+      isAuthError: true,
+      is2FARequired: false,
+      isCredentialError: false,
+      isLicenseRequired: false,
+      userMessage:
+        "Account restriction detected (e.g., Family Sharing, billing review, disabled account). Review your Apple ID in the App Store.",
+      errorType: "account_restriction",
     };
   }
 

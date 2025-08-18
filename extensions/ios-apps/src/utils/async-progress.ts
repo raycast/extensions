@@ -118,9 +118,9 @@ export class AsyncProgress {
   /**
    * Update the toast message with current progress
    */
-  private updateToast(itemName?: string): void {
+  private updateToast(itemName?: string, force = false): void {
     const now = Date.now();
-    if (now - this.lastUpdate < this.updateThrottle) {
+    if (!force && now - this.lastUpdate < this.updateThrottle) {
       return; // Throttle updates
     }
     this.lastUpdate = now;
@@ -157,6 +157,9 @@ export class AsyncProgress {
    */
   async complete(): Promise<void> {
     if (!this.toast) return;
+
+    // Force a final update to ensure latest counts are reflected
+    this.updateToast(undefined, true);
 
     const hasFailures = this.failed > 0;
     const allFailed = this.successful === 0;

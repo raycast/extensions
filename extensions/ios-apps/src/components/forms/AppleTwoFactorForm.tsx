@@ -1,5 +1,5 @@
 import { Form, ActionPanel, Action, showToast, Toast, useNavigation } from "@raycast/api";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { loginToAppleId } from "../../utils/auth";
 
 interface AppleTwoFactorFormProps {
@@ -11,8 +11,16 @@ export function AppleTwoFactorForm({ onSubmit }: AppleTwoFactorFormProps) {
   const [codeError, setCodeError] = useState<string | undefined>();
   const [isResending, setIsResending] = useState(false);
   const { pop } = useNavigation();
+  const lastSubmissionRef = useRef<number>(0);
 
   function handleSubmit() {
+    // Prevent rapid submissions
+    const now = Date.now();
+    if (now - lastSubmissionRef.current < 1000) {
+      setCodeError("Please wait before trying again");
+      return;
+    }
+
     if (!code) {
       setCodeError("Verification code is required");
       return;
@@ -24,6 +32,8 @@ export function AppleTwoFactorForm({ onSubmit }: AppleTwoFactorFormProps) {
       return;
     }
 
+    // Only record timestamp on valid attempts
+    lastSubmissionRef.current = now;
     onSubmit({ code });
   }
 

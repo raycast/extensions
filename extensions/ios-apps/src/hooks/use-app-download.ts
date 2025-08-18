@@ -286,7 +286,15 @@ export function useAppDownload(authNavigation?: AuthNavigationHelpers) {
             ? "Network Error"
             : errorAnalysis.errorType === "app_not_found"
               ? "App Not Found"
-              : "Download Failed";
+              : errorAnalysis.errorType === "rate_limited"
+                ? "Rate Limited"
+                : errorAnalysis.errorType === "maintenance"
+                  ? "App Store Maintenance"
+                  : errorAnalysis.errorType === "regional_restriction"
+                    ? "Region Restricted"
+                    : errorAnalysis.errorType === "account_restriction"
+                      ? "Account Restricted"
+                      : "Download Failed";
         if (authNavigation) {
           // Avoid HUD to keep the view open; dedicated error handlers will show toasts
           logger.log(`[useAppDownload] Skipping HUD (view context). Would show: "${hudMessage}" for ${name}`);

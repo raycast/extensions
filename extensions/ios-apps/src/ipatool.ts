@@ -866,8 +866,33 @@ export async function downloadApp(
                 if (!suppressHUD) {
                   await showHUD(`Download stalled – retry? Retrying in ${Math.round(retryDelay / 1000)}s...`);
                 }
-
                 await new Promise((resolve) => setTimeout(resolve, retryDelay));
+                return downloadApp(bundleId, appName, appVersion, price, nextRetryCount, nextRetryDelay, options);
+              }
+
+              // Retry for rate limiting or maintenance downtime with extended backoff
+              if (
+                (errorAnalysis.errorType === "rate_limited" || errorAnalysis.errorType === "maintenance") &&
+                retryCount < MAX_RETRIES
+              ) {
+                const nextRetryCount = retryCount + 1;
+                const baseDelay = Math.max(retryDelay, 5000);
+                const nextRetryDelay = Math.min(Math.floor(baseDelay * 1.5), 30000);
+
+                logger.log(
+                  `[ipatool] ${
+                    errorAnalysis.errorType === "rate_limited" ? "Rate limited" : "App Store maintenance"
+                  } detected. Retrying in ${Math.round(baseDelay / 1000)}s (attempt ${nextRetryCount}/${MAX_RETRIES})`,
+                );
+                if (!suppressHUD) {
+                  await showHUD(
+                    `${
+                      errorAnalysis.errorType === "rate_limited" ? "Rate limited" : "Maintenance"
+                    } – retrying in ${Math.round(baseDelay / 1000)}s...`,
+                  );
+                }
+
+                await new Promise((resolve) => setTimeout(resolve, baseDelay));
                 return downloadApp(bundleId, appName, appVersion, price, nextRetryCount, nextRetryDelay, options);
               }
 
