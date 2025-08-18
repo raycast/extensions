@@ -1,5 +1,5 @@
 # Translator Changelog
 
-## [Added Translator] - 2025-08-17
+## [Added Translator] - {PR_MERGE_DATE}
 
 Initial version of the Translator extension.

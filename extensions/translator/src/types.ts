@@ -14,7 +14,7 @@ export interface TranslationResult {
   translation: string;
 }
 
-export interface ollamaResponseData {
+export interface OllamaResponseData {
   model: string;
   created_at: string;
   response: string;
