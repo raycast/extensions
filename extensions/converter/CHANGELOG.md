@@ -1,6 +1,6 @@
 # Converter Changelog
 
-## [Scientific notation and Decimal encoding] - {PR_MERGE_DATE}
+## [Scientific notation and Decimal encoding] - 2025-08-18
 
 - Add support for scientific notation in byte converter.
 - Add decimal encoding in code converter.
