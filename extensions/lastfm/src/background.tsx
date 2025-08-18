@@ -1,6 +1,6 @@
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { getCurrentPlayerState } from "./functions/applescript/index";
-import { updateNowPlaying, scrobbleTracks, processQueue } from "./functions/scrobble/index";
+import { updateNowPlaying, scrobbleTracks, processQueue, queueScrobble } from "./functions/scrobble/index";
 import type { TrackInfo, PlayerState } from "./functions/applescript/types";
 
 interface Preferences {
@@ -166,14 +166,47 @@ async function scrobbleTrackOnEnd(track: TrackInfo, state: ScrobbleState): Promi
         ignored: scrobbleResult.data.scrobbles["@attr"].ignored,
         timestamp: scrobbleTimestamp,
       });
+      // Mark as scrobbled to avoid duplicates
+      state.hasScrobbled = true;
+      await saveState(state);
     } else {
       log("Scrobble failed", {
         error: scrobbleResult.error,
         timestamp: scrobbleTimestamp,
       });
+
+      // Queue the scrobble to retry later (e.g., offline or auth issues)
+      await queueScrobble({
+        name: track.name,
+        artist: track.artist,
+        album: track.album,
+        timestamp: scrobbleTimestamp,
+        duration: track.duration,
+      });
+      log("Queued scrobble for retry");
+      // Mark as scrobbled to avoid duplicate queueing
+      state.hasScrobbled = true;
+      await saveState(state);
     }
   } catch (error) {
     log("Failed to scrobble track", error);
+    // Best-effort queue on unexpected errors
+    try {
+      const scrobbleTimestamp = Math.floor(state.trackStartTime / 1000);
+      await queueScrobble({
+        name: track.name,
+        artist: track.artist,
+        album: track.album,
+        timestamp: scrobbleTimestamp,
+        duration: track.duration,
+      });
+      log("Queued scrobble after exception for retry");
+      // Mark as scrobbled to avoid duplicate queueing
+      state.hasScrobbled = true;
+      await saveState(state);
+    } catch (e) {
+      log("Failed to queue scrobble after exception", e);
+    }
   }
 }
 

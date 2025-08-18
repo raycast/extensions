@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import { getPreferenceValues } from "@raycast/api";
 import crypto from "crypto";
 
@@ -49,6 +48,13 @@ function generateApiSignature(params: Record<string, string>): string {
  */
 export async function getAuthToken(): Promise<AuthResponse<string>> {
   try {
+    if (!API_KEY || !API_SECRET) {
+      return {
+        success: false,
+        error:
+          "Missing Last.fm API credentials. Please set your API key and secret in the extension preferences (Last.fm → Preferences).",
+      };
+    }
     // Parameters for API signature generation (excluding format)
     const paramsForSig: Record<string, string> = {
       method: "auth.getToken",
@@ -93,6 +99,13 @@ export async function getAuthToken(): Promise<AuthResponse<string>> {
  */
 export async function getSession(token: string): Promise<AuthResponse<string>> {
   try {
+    if (!API_KEY || !API_SECRET) {
+      return {
+        success: false,
+        error:
+          "Missing Last.fm API credentials. Please set your API key and secret in the extension preferences (Last.fm → Preferences).",
+      };
+    }
     // Create parameters object without format first (for signature generation)
     const params: Record<string, string> = {
       method: "auth.getSession",
@@ -145,6 +158,9 @@ export async function getSession(token: string): Promise<AuthResponse<string>> {
  */
 export async function validateSessionKey(sessionKey: string): Promise<boolean> {
   try {
+    if (!API_KEY || !API_SECRET) {
+      return false;
+    }
     const params: Record<string, string> = {
       method: "user.getInfo",
       api_key: API_KEY,

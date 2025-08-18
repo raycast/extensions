@@ -14,7 +14,7 @@ import { getAuthToken, getSession } from "./functions/auth";
 import { storeSessionKey, hasSessionKey, removeSessionKey, validateStoredSessionKey } from "./functions/storage";
 
 const Command: React.FC = () => {
-  const { apikey: API_KEY } = getPreferenceValues();
+  const { apikey: API_KEY, apisecret: API_SECRET } = getPreferenceValues();
   const [isLoading, setIsLoading] = useState(true);
   const [token, setToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -22,6 +22,14 @@ const Command: React.FC = () => {
 
   useEffect(() => {
     async function checkAuth() {
+      // Verify API Secret is configured (required for scrobbling)
+      if (!API_SECRET) {
+        setError(
+          "API Secret is missing. Scrobbling requires an API secret. Open preferences to set it up.",
+        );
+        setIsLoading(false);
+        return;
+      }
       const hasAuth = await hasSessionKey();
       if (hasAuth) {
         const isValid = await validateStoredSessionKey();

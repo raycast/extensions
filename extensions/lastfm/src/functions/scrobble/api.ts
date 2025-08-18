@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import { getPreferenceValues } from "@raycast/api";
 import crypto from "crypto";
 import { getSessionKey } from "../storage";
@@ -42,6 +41,13 @@ export async function updateNowPlaying(track: NowPlayingTrack): Promise<{
   error?: string;
 }> {
   try {
+    if (!API_KEY || !API_SECRET) {
+      return {
+        success: false,
+        error:
+          "Missing Last.fm API credentials. Please set your API key and secret in the extension preferences (Last.fm → Preferences).",
+      };
+    }
     const sessionKey = await getSessionKey();
     if (!sessionKey) {
       return { success: false, error: "No session key available" };
@@ -108,6 +114,13 @@ export async function scrobbleTracks(tracks: ScrobbleTrack[]): Promise<{
   error?: string;
 }> {
   try {
+    if (!API_KEY || !API_SECRET) {
+      return {
+        success: false,
+        error:
+          "Missing Last.fm API credentials. Please set your API key and secret in the extension preferences (Last.fm → Preferences).",
+      };
+    }
     const sessionKey = await getSessionKey();
     if (!sessionKey) {
       return { success: false, error: "No session key available" };
