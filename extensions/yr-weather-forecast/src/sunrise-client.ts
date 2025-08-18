@@ -19,7 +19,7 @@ type SunriseApiResponse = {
 const SIX_HOURS_MS = 6 * 60 * 60 * 1000;
 
 export async function getSunTimes(lat: number, lon: number, dateISO?: string): Promise<SunTimes> {
-  const date = (dateISO ?? new Date().toISOString().slice(0, 10)).split("T")[0];
+  const date = (dateISO ?? new Date().toISOString().slice(0, 10));
   const cacheKey = `sun:${lat.toFixed(3)},${lon.toFixed(3)}:${date}`;
   const cached = await getCached<SunTimes>(cacheKey, SIX_HOURS_MS);
   if (cached) return cached;
