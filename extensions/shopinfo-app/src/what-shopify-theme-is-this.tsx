@@ -233,7 +233,7 @@ export default function Command() {
   };
 
   const getStepAccessories = (step: Step) => {
-    const accessories: any[] = [];
+    const accessories: List.Item.Accessory[] = [];
 
     if (step.status === "loading") {
       accessories.push({ text: "Loading...", icon: Icon.CircleProgress });
@@ -254,7 +254,7 @@ export default function Command() {
   };
 
   const getActions = () => {
-    const actions: any[] = [];
+    const actions: React.ReactElement[] = [];
 
     // Theme-specific actions when successfully loaded
     if (themeInfo) {
