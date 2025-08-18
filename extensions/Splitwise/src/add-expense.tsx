@@ -13,7 +13,7 @@ export default function Command() {
   }
 
   function isFriend(entity: Entity): entity is Friend {
-    return (entity as Friend).first_name !== undefined;
+    return "first_name" in entity;
   }
 
   function lastInteractionAccessory(entity: Entity) {
@@ -106,77 +106,83 @@ export default function Command() {
         })}
       </List.Section>
       <List.Section title="Friends">
-        {friends.sort(cmpUpdatedAt).map((friend) => (
-          <List.Item
-            key={friend.id}
-            icon={{ source: friend.picture.small ?? Icon.PersonCircle, mask: Image.Mask.Circle }}
-            title={[friend.first_name, friend.last_name].join(" ")}
-            accessories={[
-              // return the amount and currency code if they are present, if not, don't show anything
-              friend.balance.length > 0
-                ? {
-                    tag: {
-                      value: `${Number(friend.balance[0].amount).toFixed(2)} ${
-                        getCurrency_code(friend.balance[0].currency_code).symbol
-                      }`,
-                      color: Number(friend.balance[0].amount) < 0 ? Color.Red : Color.Green,
-                    },
-                  }
-                : {},
-              lastInteractionAccessory(friend),
-            ]}
-            actions={
-              <ActionPanel>
-                <Action.Push
-                  icon={Icon.Wallet}
-                  title="Add Expense"
-                  target={<FillForm friend={friend} revalidateFriends={revalidateFriends} />}
-                />
-                <Action
-                  title="Reload"
-                  icon={Icon.Repeat}
-                  shortcut={Keyboard.Shortcut.Common.Refresh}
-                  onAction={() => revalidateFriends()}
-                />
-                <Action.OpenInBrowser
-                  title="Open in Browser"
-                  url={`https://secure.splitwise.com/#/friends/${friend.id}`}
-                  shortcut={Keyboard.Shortcut.Common.Open}
-                />
-              </ActionPanel>
-            }
-          />
-        ))}
+        {friends
+          .filter((f) => !recentItems.some((item) => item.id === f.id))
+          .sort(cmpUpdatedAt)
+          .map((friend) => (
+            <List.Item
+              key={friend.id}
+              icon={{ source: friend.picture.small ?? Icon.PersonCircle, mask: Image.Mask.Circle }}
+              title={[friend.first_name, friend.last_name].join(" ")}
+              accessories={[
+                // return the amount and currency code if they are present, if not, don't show anything
+                friend.balance.length > 0
+                  ? {
+                      tag: {
+                        value: `${Number(friend.balance[0].amount).toFixed(2)} ${
+                          getCurrency_code(friend.balance[0].currency_code).symbol
+                        }`,
+                        color: Number(friend.balance[0].amount) < 0 ? Color.Red : Color.Green,
+                      },
+                    }
+                  : {},
+                lastInteractionAccessory(friend),
+              ]}
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    icon={Icon.Wallet}
+                    title="Add Expense"
+                    target={<FillForm friend={friend} revalidateFriends={revalidateFriends} />}
+                  />
+                  <Action
+                    title="Reload"
+                    icon={Icon.Repeat}
+                    shortcut={Keyboard.Shortcut.Common.Refresh}
+                    onAction={() => revalidateFriends()}
+                  />
+                  <Action.OpenInBrowser
+                    title="Open in Browser"
+                    url={`https://secure.splitwise.com/#/friends/${friend.id}`}
+                    shortcut={Keyboard.Shortcut.Common.Open}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
       </List.Section>
       <List.Section title="Groups">
-        {groups.sort(cmpUpdatedAt).map((Group) => (
-          <List.Item
-            key={Group.id}
-            icon={{ source: Group.avatar.small ?? Icon.PersonCircle, mask: Image.Mask.Circle }}
-            title={Group.name}
-            accessories={[lastInteractionAccessory(Group)]}
-            actions={
-              <ActionPanel>
-                <Action.Push
-                  icon={Icon.Wallet}
-                  title="Add Expense"
-                  target={<FillForm group={Group} revalidateGroups={revalidateGroups} />}
-                />
-                <Action
-                  title="Reload"
-                  icon={Icon.Repeat}
-                  shortcut={Keyboard.Shortcut.Common.Refresh}
-                  onAction={() => revalidateGroups()}
-                />
-                <Action.OpenInBrowser
-                  title="Open in Browser"
-                  url={`https://secure.splitwise.com/#/groups/${Group.id}`}
-                  shortcut={Keyboard.Shortcut.Common.Open}
-                />
-              </ActionPanel>
-            }
-          />
-        ))}
+        {groups
+          .filter((g) => !recentItems.some((item) => item.id === g.id))
+          .sort(cmpUpdatedAt)
+          .map((Group) => (
+            <List.Item
+              key={Group.id}
+              icon={{ source: Group.avatar.small ?? Icon.PersonCircle, mask: Image.Mask.Circle }}
+              title={Group.name}
+              accessories={[lastInteractionAccessory(Group)]}
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    icon={Icon.Wallet}
+                    title="Add Expense"
+                    target={<FillForm group={Group} revalidateGroups={revalidateGroups} />}
+                  />
+                  <Action
+                    title="Reload"
+                    icon={Icon.Repeat}
+                    shortcut={Keyboard.Shortcut.Common.Refresh}
+                    onAction={() => revalidateGroups()}
+                  />
+                  <Action.OpenInBrowser
+                    title="Open in Browser"
+                    url={`https://secure.splitwise.com/#/groups/${Group.id}`}
+                    shortcut={Keyboard.Shortcut.Common.Open}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
       </List.Section>
     </List>
   );
