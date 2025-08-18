@@ -24,9 +24,7 @@ const Command: React.FC = () => {
     async function checkAuth() {
       // Verify API Secret is configured (required for scrobbling)
       if (!API_SECRET) {
-        setError(
-          "API Secret is missing. Scrobbling requires an API secret. Open preferences to set it up.",
-        );
+        setError("API Secret is missing. Scrobbling requires an API secret. Open preferences to set it up.");
         setIsLoading(false);
         return;
       }

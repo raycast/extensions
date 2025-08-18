@@ -1,22 +1,13 @@
-import React, { ReactNode } from "react";
+import React from "react";
 import { Grid } from "@raycast/api";
 
-/**
- * ActionPanel component type
- *
- * Using `any` here is intentional and necessary due to React type conflicts:
- * - Project uses @types/react@^19.1.4
- * - Raycast API uses @types/react@19.0.10
- * - These versions have incompatible ReactNode definitions
- * - ActionPanel JSX elements work correctly at runtime
- */
 interface GridItemProps {
   key: string;
   title: string;
   subtitle?: string;
   content?: string;
   accessory?: Grid.Item.Accessory;
-  actions?: unknown;
+  actions?: any;
 }
 
 interface GridResultsProps {
@@ -34,7 +25,7 @@ export function GridResults(props: GridResultsProps) {
           subtitle={item.subtitle}
           content={item.content || ""}
           accessory={item.accessory}
-          actions={item.actions as ReactNode}
+          actions={item.actions}
         />
       ))}
     </Grid.Section>
