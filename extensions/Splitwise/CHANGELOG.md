@@ -1,5 +1,9 @@
 # Splitwise Changelog
 
+## [New Features] - {PR_MERGE_DATE}
+
+- Add "Recent" section to `Add Expense` showing the top 3 most recently updated friends/groups, which aligns with Splitwise's app UI
+
 ## [Improvements] - 2024-09-28
 
 - Added support for multiple currencies
