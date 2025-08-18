@@ -141,16 +141,16 @@ This extension relies on open and official data sources to ensure the quality of
 ### 📸 Screenshots
 
 #### Search Interface
-![Search Form](assets/screenshots/screenshot_input-page.png)
+![Search Form](./media/screenshot_input-page.png)
 
 #### Company Search Results
-![Search Results](assets/screenshots/screenshot_search.png)
+![Search Results](./media/screenshot_search.png)
 
 #### Company Details
-![Company Details](assets/screenshots/screenshot_result.png)
+![Company Details](./media/screenshot_result.png)
 
 #### Login Configuration
-![Login Setup](assets/screenshots/screenshot_login.png)
+![Login Setup](./media/screenshot_login.png)
 
 ### 🔍 Troubleshooting
 
