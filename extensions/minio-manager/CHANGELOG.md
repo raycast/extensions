@@ -1,6 +1,6 @@
 # MinIO Manager Changelog
 
-## [Optimize interactions] - {PR_MERGE_DATE}
+## [Optimize interactions] - 2025-08-18
 
 - Deleting prompts is more in line with interaction habits
 
