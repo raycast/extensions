@@ -1,9 +1,8 @@
 import { Action, ActionPanel, Form, LaunchProps } from "@raycast/api";
-import { Props } from "./Props";
 import { useState } from "react";
 import { useChatGptSearchForm } from "./useChatGptSearchForm";
 
-export default function Command(props: LaunchProps<{ arguments: Props }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.ChatgptSearch }>) {
   const { itemProps, handleSubmit } = useChatGptSearchForm();
   const [isOpenExecuted, setIsOpenExecuted] = useState(false);
 

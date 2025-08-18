@@ -1,11 +1,9 @@
 import { getPreferenceValues, popToRoot, getDefaultApplication, open } from "@raycast/api";
-import { ExtensionPreferences } from "./ExtensionPreferences";
-import { Props } from "./Props";
 
-export async function executeSearchToOpen({ query }: Props) {
-  const { useChatgptApp, useTemporaryChat } = getPreferenceValues<ExtensionPreferences>();
+export async function executeSearchToOpen({ query }: Arguments.ChatgptSearch) {
+  const { useChatgptApp, useTemporaryChat } = getPreferenceValues<Preferences.ChatgptSearch>();
 
-  popToRoot();
+  await popToRoot();
 
   const params = new URLSearchParams({
     q: query,
