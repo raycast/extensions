@@ -6,6 +6,9 @@
   "description": "Efficiently manage your forked Raycast extensions using Git sparse-checkout. Explore the full extension catalog, selectively checkout specific extensions, and remove extensions from your forked collection with ease.",
   "icon": "forked-extensions-icon.png",
   "author": "litomore",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Communication",
     "Productivity",
@@ -33,10 +36,9 @@
       "name": "repositoryConfigurationPath",
       "title": "Repository Path",
       "description": "Path to the repository where the extension is located.",
-      "type": "textfield",
+      "type": "directory",
       "required": true,
-      "default": "~/.raycast/extensions",
-      "placeholder": "The path to the repository"
+      "default": "~/Documents"
     },
     {
       "name": "forkedRepository",

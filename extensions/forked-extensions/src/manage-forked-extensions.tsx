@@ -1,5 +1,15 @@
-import { useEffect, useMemo, useState } from "react";
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { useState } from "react";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  confirmAlert,
+  Icon,
+  Keyboard,
+  List,
+  openExtensionPreferences,
+} from "@raycast/api";
 
 import Tags from "./components/tags.js";
 import ValidExtensions from "./components/valid-extensions.js";
@@ -7,30 +17,21 @@ import { getExtensionList, initRepository } from "./git.js";
 import opeartion from "./operation.js";
 import { ForkedExtension } from "./types.js";
 import { extensionLink, getActualIconPath, userLink } from "./utils.js";
+import { useCachedPromise } from "@raycast/utils";
 
 export default function ListExtensions() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [extensions, setExtensions] = useState<ForkedExtension[]>([]);
   const [isShowingDetail, setIsShowingDetail] = useState(false);
 
-  const foredExtensionFolders = useMemo(() => extensions.map((x) => x.folderName), [extensions]);
-
-  const init = async () => {
-    try {
-      setIsLoading(true);
-      await initRepository();
-      const extensions = await getExtensionList();
-      setExtensions(extensions);
-    } catch (error) {
-      console.error("Error loading extensions:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    init();
-  }, []);
+  const {
+    data: { extensions = [], foredExtensionFolders = [] } = {},
+    isLoading,
+    revalidate,
+  } = useCachedPromise(async (): Promise<{ extensions: ForkedExtension[]; foredExtensionFolders: string[] }> => {
+    await initRepository();
+    const extensions = await getExtensionList();
+    const foredExtensionFolders = extensions.map((x) => x.folderName);
+    return { extensions, foredExtensionFolders };
+  });
 
   return (
     <List
@@ -41,8 +42,11 @@ export default function ListExtensions() {
           <ActionPanel>
             <Action.Push
               title="Fork an Extension"
-              target={<ValidExtensions forkedExtensionFolders={foredExtensionFolders} onPop={init} />}
+              shortcut={Keyboard.Shortcut.Common.New}
+              icon={Icon.NewDocument}
+              target={<ValidExtensions forkedExtensionFolders={foredExtensionFolders} onPop={revalidate} />}
             />
+            <Action onAction={openExtensionPreferences} title="Open Extension Preferences" icon={Icon.Gear} />
           </ActionPanel>
         )
       }
@@ -77,18 +81,31 @@ export default function ListExtensions() {
               <Action.Push
                 icon={Icon.NewDocument}
                 title="Fork an Extension"
-                target={<ValidExtensions forkedExtensionFolders={foredExtensionFolders} onPop={init} />}
+                shortcut={Keyboard.Shortcut.Common.New}
+                target={<ValidExtensions forkedExtensionFolders={foredExtensionFolders} onPop={revalidate} />}
               />
+              <Action.OpenInBrowser url={extensionLink(x.author, x.name)} shortcut={Keyboard.Shortcut.Common.Open} />
               <Action
                 icon={Icon.DeleteDocument}
                 style={Action.Style.Destructive}
-                title="Remove This Fork"
+                title="Remove Fork"
+                shortcut={Keyboard.Shortcut.Common.Remove}
                 onAction={async () => {
-                  await opeartion.remove(x.folderName);
-                  await init();
+                  await confirmAlert({
+                    title: "Remove Fork",
+                    message: "Are you sure you want to remove this fork?",
+                    rememberUserChoice: true,
+                    primaryAction: {
+                      title: "Remove",
+                      style: Alert.ActionStyle.Destructive,
+                      onAction: async () => {
+                        await opeartion.remove(x.folderName);
+                        revalidate();
+                      },
+                    },
+                  });
                 }}
               />
-              <Action.OpenInBrowser url={extensionLink(x.author, x.name)} />
             </ActionPanel>
           }
         />
