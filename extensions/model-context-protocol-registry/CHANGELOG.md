@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Linear MCP Server] - 2025-08-11
+
+Add official Linear MCP Server to registry to manage projects
+
 ## [Updated Apify] - 2025-08-04
 
 Updated Apify MCP server configuration from `APIFY_API_TOKEN` to `APIFY_TOKEN`
