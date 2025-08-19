@@ -47,13 +47,13 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="mail_domain" title="Domain" value={mailDomain}>
+      <Form.Dropdown id="mail_domain" title="Domain" value={mailDomain} onChange={setMailDomain}>
         {TEMP_MAIL_DOMAINS.map((domain) => (
           <Form.Dropdown.Item value={domain} title={`@${domain}`} key={domain} icon={"💌"} />
         ))}
       </Form.Dropdown>
 
-      <Form.TextField id="mail_username" title="Mail name" value={mailUsername} />
+      <Form.TextField id="mail_username" title="Mail name" value={mailUsername} onChange={setMailUsername} />
     </Form>
   );
 }
