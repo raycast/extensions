@@ -36591,6 +36591,7 @@ export type CreateIssueMutationVariables = Exact<{
   assigneeIds: Array<Scalars["ID"]["input"]> | Scalars["ID"]["input"];
   labelIds: Array<Scalars["ID"]["input"]> | Scalars["ID"]["input"];
   milestoneId?: InputMaybe<Scalars["ID"]["input"]>;
+  issueTypeId?: InputMaybe<Scalars["ID"]["input"]>;
 }>;
 
 export type CreateIssueMutation = {
@@ -38545,6 +38546,17 @@ export type DataForRepositoryQuery = {
         | { __typename?: "Tree" }
         | null;
     } | null;
+    issueTypes?: {
+      __typename?: "IssueTypeConnection";
+      totalCount: number;
+      nodes?: Array<{
+        __typename?: "IssueType";
+        id: string;
+        name: string;
+        color: IssueTypeColor;
+        isEnabled: boolean;
+      } | null> | null;
+    } | null;
     refs?: {
       __typename?: "RefConnection";
       totalCount: number;
@@ -39525,6 +39537,7 @@ export const CreateIssueDocument = gql`
     $assigneeIds: [ID!]!
     $labelIds: [ID!]!
     $milestoneId: ID
+    $issueTypeId: ID
   ) {
     createIssue(
       input: {
@@ -39534,6 +39547,7 @@ export const CreateIssueDocument = gql`
         assigneeIds: $assigneeIds
         labelIds: $labelIds
         milestoneId: $milestoneId
+        issueTypeId: $issueTypeId
       }
     ) {
       issue {
@@ -39852,6 +39866,15 @@ export const DataForRepositoryDocument = gql`
         name
         target {
           ...CommitFields
+        }
+      }
+      issueTypes(orderBy: { direction: ASC, field: NAME }, first: 50) {
+        totalCount
+        nodes {
+          id
+          name
+          color
+          isEnabled
         }
       }
       refs(refPrefix: "refs/heads/", direction: ASC, first: 50) {
