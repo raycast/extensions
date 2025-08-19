@@ -1,7 +1,6 @@
 # BRREG Search Changelog
 
-## Version 2.0.0 - Major Refactoring & Enhancement Release
-
+## Version 2.0.0 - Major Refactoring & Enhancement Release {PR_MERGE_DATE}
 🚀 **What's New?**
 
 ### ✨ **Enhanced User Experience**
@@ -33,7 +32,7 @@
 
 ---
 
-## Version 1.1.0 - Initial Enhancement Release
+## Version 1.1.0 - Initial Enhancement Release – {PR_MERGE_DATE}
 
 ♻️ **What's Changed:**
 - Corrected the English name of Brønnøysundregistrene to the official translation (The Brønnøysund Register Centre).
@@ -46,10 +45,12 @@
 
 ---
 
-## Version 1.0.0 - Initial Release
+## Version 1.0.0 - Initial Release - 2025-02-25
 
 🎯 **Core Features:**
 - Search Norwegian companies by name or organization number
 - View company details and financial information
 - Copy company data to clipboard
 - Open companies in Brønnøysundregistrene website
+
+Made with 🫶 by [kynd](https://www.kynd.no) 
