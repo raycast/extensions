@@ -129,10 +129,12 @@ export default function Command() {
 
       if (!response.ok) {
         let errorMessage = "Failed to analyze theme";
-        if (response.status === 401) {
-          errorMessage = "Invalid API key";
+        if (response.status === 400) {
+          errorMessage = "Bad request. Please provide URL.";
+        } else if (response.status === 401) {
+          errorMessage = "Unauthorized. Invalid API key";
         } else if (response.status === 404) {
-          errorMessage = "Not a Shopify store";
+          errorMessage = "Not a Shopify store or theme name not detected";
         }
 
         updateStep("theme-analysis", {

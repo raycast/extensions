@@ -2,10 +2,15 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "shopinfo-app",
   "title": "Shopinfo.app",
-  "description": "Use shopinfo.app to determine what website a Shopify theme is using",
+  "description": "Identify Shopify themes from your current browser tab using shopinfo.app's database",
   "icon": "shopinfo-icon.png",
   "author": "trpage_dev",
   "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "Web"
+  ],
   "commands": [
     {
       "name": "what-shopify-theme-is-this",
