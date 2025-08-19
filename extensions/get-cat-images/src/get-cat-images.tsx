@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 
-import { List, ActionPanel, Action, Icon } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Keyboard } from "@raycast/api";
 import { useFetch, showFailureToast } from "@raycast/utils";
 
 import breeds from "./lib/breeds";
@@ -14,7 +14,7 @@ export interface CatImage {
 
 export default function Command() {
   const [currentBreed, setCurrentBreed] = useState<string | null>(null);
-  const [, , saveFavorite] = useFavorites();
+  const [, , saveFavorite, , isFavoritesLoading] = useFavorites();
 
   const apiUrl =
     currentBreed && currentBreed !== "random"
@@ -44,8 +44,8 @@ export default function Command() {
     }
   }, [error]);
 
-  async function addToFavorites() {
-    if (data && data[0] && typeof saveFavorite === "function") {
+  const addToFavorites = useCallback(async () => {
+    if (data && data[0]) {
       const url = data[0].url;
       if (url && url.toLowerCase().endsWith(".gif")) {
         showFailureToast("GIFs can't be favorited", { title: "GIF Detected" });
@@ -53,13 +53,13 @@ export default function Command() {
       }
       await saveFavorite(data[0].id);
     }
-  }
+  }, [data, saveFavorite]);
 
-  function Actions() {
-    return (
+  const actions = useMemo(
+    () => (
       <ActionPanel>
-        <Action.CopyToClipboard title="Copy Image URL" content={data && data[0]?.url ? data[0].url : ""} />
         <Action title="Re-Roll" icon={Icon.Repeat} onAction={revalidate} />
+        <Action.CopyToClipboard title="Copy Image URL" content={data && data[0]?.url ? data[0].url : ""} />
         <Action.OpenInBrowser
           title="Open in Browser"
           icon={Icon.Window}
@@ -67,13 +67,14 @@ export default function Command() {
         />
         <Action
           title="Add to Favorites"
-          shortcut={{ macOS: { modifiers: ["cmd"], key: "f" }, windows: { modifiers: ["ctrl"], key: "f" } }}
+          shortcut={Keyboard.Shortcut.Common.Pin}
           icon={Icon.Star}
           onAction={addToFavorites}
         />
       </ActionPanel>
-    );
-  }
+    ),
+    [data, revalidate, isFavoritesLoading, addToFavorites],
+  );
 
   return (
     <List
@@ -82,9 +83,9 @@ export default function Command() {
       isLoading={isLoading}
       onSelectionChange={(id: string | null) => setContent(id)}
     >
-      <List.Item id="random" title="Random" detail={<List.Item.Detail markdown={content} />} actions={Actions()} />
+      <List.Item id="random" title="Random" detail={<List.Item.Detail markdown={content} />} actions={actions} />
       {breeds.map(({ id, name }) => (
-        <List.Item key={id} id={id} title={name} detail={<List.Item.Detail markdown={content} />} actions={Actions()} />
+        <List.Item key={id} id={id} title={name} detail={<List.Item.Detail markdown={content} />} actions={actions} />
       ))}
     </List>
   );
