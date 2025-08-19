@@ -1,6 +1,6 @@
 # Granola Changelog
 
-## [1.5.1] - {PR_MERGE_DATE}
+## [1.5.1] - 2025-08-19
 
 ### 🔧 Bug Fixes
 - Add support for WorkOS authentication tokens
