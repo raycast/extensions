@@ -39,7 +39,9 @@ export default async function Command() {
 
   try {
     const textToSearch = await getSelectedTextOrFallbackToClipboard();
-    const searchResult = getStaticResult(textToSearch, "GENERAL")[0];
+    const results = getStaticResult(textToSearch, "GENERAL");
+    if (!results.length) throw new Error("No search results found");
+    const searchResult = results[0];
 
     await open(searchResult.url);
     await closeMainWindow();
