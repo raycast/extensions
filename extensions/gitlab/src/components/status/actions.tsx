@@ -8,7 +8,7 @@ import { clearDurations, clearDurationText, getClearDurationDate } from "./utils
 
 export function StatusSetCustomAction(props: {
   setCurrentStatus: React.Dispatch<React.SetStateAction<Status | undefined>>;
-}): JSX.Element {
+}) {
   return (
     <Action.Push
       title="Set Custom Status"
@@ -22,7 +22,7 @@ export function StatusSetCustomAction(props: {
 export function StatusClearCurrentAction(props: {
   status?: Status | undefined;
   setCurrentStatus: React.Dispatch<React.SetStateAction<Status | undefined>>;
-}): JSX.Element | null {
+}) {
   const status = props.status;
   if (status === undefined) {
     return null;
@@ -41,9 +41,7 @@ export function StatusClearCurrentAction(props: {
   return null;
 }
 
-export function StatusPresetFactoryResetAction(props: {
-  setPresets: React.Dispatch<React.SetStateAction<Status[]>>;
-}): JSX.Element {
+export function StatusPresetFactoryResetAction(props: { setPresets: React.Dispatch<React.SetStateAction<Status[]>> }) {
   const handle = async () => {
     try {
       await wipePresets();
@@ -60,7 +58,7 @@ export function StatusPresetFactoryResetAction(props: {
 export function StatusPresetCreateAction(props: {
   presets: Status[];
   setPresets: React.Dispatch<React.SetStateAction<Status[]>>;
-}): JSX.Element {
+}) {
   const presets = props.presets;
   const { push, pop } = useNavigation();
   return (
@@ -78,7 +76,7 @@ export function StatusPresetCreateAction(props: {
               props.setPresets(np);
               pop();
             }}
-          />
+          />,
         );
       }}
     />
@@ -88,7 +86,7 @@ export function StatusPresetCreateAction(props: {
 export function StatusPresetSetAction(props: {
   status: Status;
   setCurrentStatus: React.Dispatch<React.SetStateAction<Status | undefined>>;
-}): JSX.Element {
+}) {
   const handle = async () => {
     try {
       await gitlab.setUserStatus(props.status);
@@ -104,7 +102,7 @@ export function StatusPresetSetAction(props: {
 export function StatusPresetSetWithDurationAction(props: {
   status: Status;
   setCurrentStatus: React.Dispatch<React.SetStateAction<Status | undefined>>;
-}): JSX.Element {
+}) {
   const handle = async (durationKey: string) => {
     try {
       const newStatus = { ...props.status, clear_status_after: durationKey };
@@ -130,7 +128,7 @@ export function StatusPresetEditAction(props: {
   presets: Status[];
   index: number;
   setPresets: React.Dispatch<React.SetStateAction<Status[]>>;
-}): JSX.Element {
+}) {
   const presets = props.presets;
   const index = props.index;
   const setStatus = async (newStatus: Status) => {
@@ -160,7 +158,7 @@ export function StatusPresetEditAction(props: {
             presets={presets}
             setPresets={props.setPresets}
             onFinish={setStatus}
-          />
+          />,
         );
       }}
     />
@@ -171,7 +169,7 @@ export function StatusPresetDeleteAction(props: {
   presets: Status[];
   index: number;
   setPresets: React.Dispatch<React.SetStateAction<Status[]>>;
-}): JSX.Element {
+}) {
   const presets = props.presets;
   const index = props.index;
   const handle = async () => {
@@ -201,7 +199,7 @@ export function StatusPresetMoveUpAction(props: {
   index: number;
   setPresets: React.Dispatch<React.SetStateAction<Status[]>>;
   setSelectedId: React.Dispatch<React.SetStateAction<string | undefined>>;
-}): JSX.Element | null {
+}) {
   const index = props.index;
   if (index - 1 < 0) {
     return null;
@@ -229,7 +227,7 @@ export function StatusPresetMoveDownAction(props: {
   index: number;
   setPresets: React.Dispatch<React.SetStateAction<Status[]>>;
   setSelectedId: React.Dispatch<React.SetStateAction<string | undefined>>;
-}): JSX.Element | null {
+}) {
   const index = props.index;
   const upperIndex = index + 1;
   if (upperIndex >= props.presets.length) {

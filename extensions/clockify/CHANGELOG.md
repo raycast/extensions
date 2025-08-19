@@ -1,5 +1,15 @@
 # Clockify Changelog
 
+## [Select Tag During Start + Modernize] - 2025-08-18
+
+- `Action` to `openExtensionPreferences` in invalid token view
+- Add `placeholder`s to API Key & Description
+- Add `icon`s to Start,Stop
+- Allow selecting a Tag during timer start (ref: [Issue #18009](https://github.com/raycast/extensions/issues/18009))
+- Allow toggling Tag visibility
+- Make some `types` more precise
+- Modernize to use latest Raycast `eslint.config.js`
+
 ## [Autofocus description field] - 2025-05-13
 
 - Autofocus description field in "Start New Timer" view.

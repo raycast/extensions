@@ -34,7 +34,7 @@ async function launchMyIssues(): Promise<void> {
  * It reads preferences for label inclusion/exclusion and passes them to the issues API.
  */
 
-export default function MenuCommand(): JSX.Element {
+export default function MenuCommand() {
   // Memoize preferences to avoid unnecessary re-renders and rendering loops
   const preferences = useMemo(() => getPreferenceValues(), []);
   const includeLabels =
