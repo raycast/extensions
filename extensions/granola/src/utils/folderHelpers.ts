@@ -1,5 +1,4 @@
 import { Folder } from "./types";
-import getCache from "./getCache";
 import { getFolders } from "./fetchData";
 
 export interface FolderServiceOptions {
@@ -14,34 +13,7 @@ export async function getFoldersWithCache(options: FolderServiceOptions = {}): P
   const { includeDocumentIds = true } = options;
   let folders: Folder[] = [];
 
-  // Try cache first
-  try {
-    const cacheData = getCache();
-    const { documentListsMetadata, documentLists, documents } = cacheData?.state || {};
-
-    if (documentListsMetadata && documentLists && documents) {
-      const actualDocuments = new Set(Object.keys(documents));
-
-      folders = Object.entries(documentListsMetadata).map(([folderId, metadata]) => {
-        const allDocumentIds = documentLists[folderId] || [];
-        const actualDocumentIds = includeDocumentIds
-          ? allDocumentIds.filter((docId: string) => actualDocuments.has(docId))
-          : [];
-
-        return {
-          ...(metadata as Omit<Folder, "document_ids">),
-          id: folderId,
-          document_ids: actualDocumentIds,
-        };
-      });
-
-      return folders;
-    }
-  } catch (error) {
-    // Cache failed, continue to API fallback
-  }
-
-  // Fall back to API
+  // Use API as the primary source to avoid reading large cache files
   try {
     const response = await getFolders();
 
@@ -49,29 +21,10 @@ export async function getFoldersWithCache(options: FolderServiceOptions = {}): P
       return [];
     }
 
-    let actualDocuments: Set<string>;
-    if (includeDocumentIds) {
-      try {
-        const cacheData = getCache();
-        actualDocuments = new Set(Object.keys(cacheData?.state?.documents || {}));
-      } catch {
-        actualDocuments = new Set();
-      }
-    } else {
-      actualDocuments = new Set();
-    }
-
     folders = Object.values(response.lists).map((folder: Folder) => {
-      const filteredDocumentIds =
-        includeDocumentIds && actualDocuments.size > 0
-          ? folder.document_ids.filter((docId: string) => actualDocuments.has(docId))
-          : includeDocumentIds
-            ? folder.document_ids
-            : [];
-
       return {
         ...folder,
-        document_ids: filteredDocumentIds,
+        document_ids: includeDocumentIds ? folder.document_ids : [],
       };
     });
 
