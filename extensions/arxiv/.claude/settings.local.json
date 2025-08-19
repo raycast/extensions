@@ -8,9 +8,16 @@
       "Bash(grep:*)",
       "Bash(npm run lint:*)",
       "Bash(npx @raycast/api@latest lint --help)",
-      "Bash(npx @raycast/api@latest publish --help)"
+      "Bash(npx @raycast/api@latest publish --help)",
+      "WebFetch(domain:github.com)",
+      "Bash(npm ci:*)",
+      "WebFetch(domain:developers.raycast.com)",
+      "Bash(node:*)"
     ],
     "deny": [],
-    "ask": []
+    "ask": [],
+    "additionalDirectories": [
+      "/Users/osteele/src/raycast-extensions/extensions/shortcuts-search"
+    ]
   }
 }

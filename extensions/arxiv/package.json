@@ -15,6 +15,9 @@
     "Media"
   ],
   "license": "MIT",
+  "engines": {
+    "node": ">=22.14.0"
+  },
   "commands": [
     {
       "name": "index",
