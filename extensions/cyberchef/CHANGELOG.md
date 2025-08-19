@@ -1,6 +1,6 @@
 # CyberChef Changelog
 
-## Add support for custom URL - {PR_MERGE_DATE}
+## Add support for custom URL - 2025-08-19
 
 - You can now configure your own (private) Instance while keeping the default of `https://gchq.github.io/CyberChef`
 
