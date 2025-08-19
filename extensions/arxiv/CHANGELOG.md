@@ -6,7 +6,7 @@
 - Added multiple viewing formats: Abstract, PDF, TeX Source, and HTML
 - Added citation export in multiple formats: BibTeX, APA, MLA, and Chicago
 - Added preferences for default open format and citation style
-- Enhanced search results with additional metadata (DOI, publication year,journal references, comments)
+- Enhanced search results with additional metadata (DOI, publication year, journal references, comments)
 - Added quick actions to copy various paper links
 - Added tooltip showing full author list when hovering over abbreviated authors
 - Enhanced title tooltip to show full citation in selected style, followed by category codes
