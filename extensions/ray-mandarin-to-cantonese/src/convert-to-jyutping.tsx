@@ -69,7 +69,7 @@ export default function Command(props: { arguments: Arguments }) {
     await Clipboard.copy(jyutping);
     await showToast({
       style: Toast.Style.Success,
-      title: "粵拼已複製到剪貼板",
+      title: "Jyutping copied to clipboard",
     });
   };
 
@@ -132,13 +132,13 @@ export default function Command(props: { arguments: Arguments }) {
         await execPromise(`say -v Sinji -r 0.8 "${text}"`);
         showToast({
           style: Toast.Style.Success,
-          title: "正在播放粵語發音",
+          title: "Playing Cantonese pronunciation",
         });
       } catch (error) {
         console.error("Speech error:", error);
         showToast({
           style: Toast.Style.Failure,
-          title: "播放發音失敗",
+          title: "Failed to play pronunciation",
           message: String(error),
         });
       }
@@ -155,7 +155,7 @@ export default function Command(props: { arguments: Arguments }) {
     <List
       isLoading={isLoading}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder="輸入中文..."
+      searchBarPlaceholder="Enter Chinese text..."
       searchText={searchText}
       selectedItemId={selectedItem?.timestamp.toString()}
       onSelectionChange={(id) => {
@@ -167,16 +167,16 @@ export default function Command(props: { arguments: Arguments }) {
     >
       {searchText && !filteredHistory.some((item) => item.text === searchText) && (
         <List.Item
-          title="轉換新文字"
+          title="Convert New Text"
           subtitle={searchText}
           actions={
             <ActionPanel>
-              <Action title="轉換並播放" onAction={() => handleConvert(searchText)} />
+              <Action title="Convert and Play" onAction={() => handleConvert(searchText)} />
             </ActionPanel>
           }
         />
       )}
-      <List.Section title="歷史記錄">
+      <List.Section title="History">
         {filteredHistory.map((item) => (
           <List.Item
             key={item.timestamp}
@@ -187,13 +187,13 @@ export default function Command(props: { arguments: Arguments }) {
               <ActionPanel>
                 <ActionPanel.Section>
                   <Action
-                    title="複製粵拼"
+                    title="Copy Jyutping"
                     onAction={async () => {
                       await Promise.all([copyJyutpingToClipboard(item.jyutping), playPronunciation(item.text)]);
                     }}
                   />
                   <Action
-                    title="播放粵語"
+                    title="Play Cantonese"
                     onAction={() => playPronunciation(item.text)}
                     shortcut={{ modifiers: ["opt"], key: "p" }}
                   />

@@ -10,13 +10,13 @@
     {
       "name": "convert-to-jyutping",
       "title": "Convert to Jyutping",
-      "description": "将中文转换为粤拼输入法 (仅支持 MacOS 系统)",
+      "description": "Convert Chinese text to Jyutping (MacOS only)",
       "mode": "view",
       "arguments": [
         {
           "name": "text",
           "type": "text",
-          "placeholder": "請輸入中文...",
+          "placeholder": "Enter Chinese text...",
           "required": true
         }
       ]
