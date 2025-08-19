@@ -1,7 +1,6 @@
 import { fetchGranolaData } from "./fetchData";
 import { NoteData, PanelsByDocId } from "./types";
 import getCache from "./getCache";
-import { useState, useEffect } from "react";
 
 function extractPanelsFromCache(cache: unknown): PanelsByDocId | null {
   if (typeof cache !== "object" || cache === null) return null;
@@ -25,39 +24,24 @@ export interface GranolaDataState {
  * Consolidates the common pattern used across multiple command files
  */
 export function useGranolaData(): GranolaDataState {
-  const [panels, setPanels] = useState<PanelsByDocId | null>(null);
-  const [isLoadingPanels, setIsLoadingPanels] = useState(true);
-
-  // Load panels from cache asynchronously
-  useEffect(() => {
-    async function loadPanels() {
-      try {
-        setIsLoadingPanels(true);
-        const cacheData = await getCache();
-        const extractedPanels = extractPanelsFromCache(cacheData);
-        setPanels(extractedPanels);
-      } catch (error) {
-        console.error("[useGranolaData] Failed to load panels:", error);
-        setPanels(null);
-      } finally {
-        setIsLoadingPanels(false);
-      }
-    }
-
-    loadPanels();
-  }, []);
-
   try {
     const noteData = fetchGranolaData("get-documents") as NoteData;
+    // Load panels from local cache (kept fresh via small TTL in getCache)
+    let panels: PanelsByDocId | null = null;
+    try {
+      const cacheData = getCache();
+      // The Granola app stores panels under state.documentPanels in the local cache
+      panels = extractPanelsFromCache(cacheData);
+    } catch {
+      panels = null;
+    }
 
-    // Check loading state - consider both notes and panels loading
-    const isLoading = noteData.isLoading === true || isLoadingPanels;
-
+    // Check loading state
     if (!noteData?.data && noteData.isLoading === true) {
       return {
         noteData,
         panels,
-        isLoading,
+        isLoading: true,
         hasError: false,
       };
     }
@@ -67,17 +51,17 @@ export function useGranolaData(): GranolaDataState {
       return {
         noteData,
         panels,
-        isLoading: isLoadingPanels, // Still might be loading panels
+        isLoading: false,
         hasError: true,
         error: new Error("No data available"),
       };
     }
 
-    // Success state (panels may still be loading)
+    // Success state (panels may be null; UI should handle fallback to markdown)
     return {
       noteData,
       panels,
-      isLoading,
+      isLoading: false,
       hasError: false,
     };
   } catch (error) {

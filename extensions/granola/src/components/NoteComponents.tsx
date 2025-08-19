@@ -22,12 +22,12 @@ export const sortNotesByDate = (docs: Doc[] | undefined): Doc[] => {
  * Component that provides standard actions for a note
  */
 export const NoteActions = ({ doc, panels, children }: NoteActionsProps) => {
-  const panelId = getPanelId(panels, doc.id);
+  const panelId = panels ? getPanelId(panels, doc.id) : undefined;
   const canShare = doc.sharing_link_visibility === "public" && panelId;
   const shareUrl = panelId ? `https://notes.granola.ai/p/${panelId}` : "";
 
   let notes = "";
-  if (panels && doc.id && panels[doc.id] && panelId && panels[doc.id][panelId]) {
+  if (panels && doc.id && panelId && panels[doc.id] && panels[doc.id][panelId]) {
     notes = panels[doc.id][panelId].original_content || "";
   }
 
@@ -73,28 +73,6 @@ export const NoteActions = ({ doc, panels, children }: NoteActionsProps) => {
   return (
     <>
       {children}
-      {doc.notes_markdown && (
-        <Action.Push
-          title="View My Notes"
-          icon={Icon.Text}
-          target={
-            <Detail
-              markdown={`# ${doc.title || "My Notes"}\n\n---\n\n${doc.notes_markdown}`}
-              navigationTitle="My Notes"
-              actions={
-                <ActionPanel>
-                  <Action.CopyToClipboard
-                    title="Copy My Notes"
-                    content={doc.notes_markdown}
-                    shortcut={{ modifiers: ["cmd"], key: "c" }}
-                  />
-                </ActionPanel>
-              }
-            />
-          }
-          shortcut={{ modifiers: ["cmd"], key: "m" }}
-        />
-      )}
       <Action
         title="Save to Notion"
         icon={Icon.Document}
