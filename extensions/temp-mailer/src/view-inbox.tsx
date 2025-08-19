@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { List, LocalStorage } from "@raycast/api";
 import TempMail from "temp-mail-plus-api";
 import { MailResponse } from "temp-mail-plus-api/dist/src/types";
+import TurndownService from "turndown";
 
 interface MailItem {
   mail_id: number;
@@ -14,6 +15,7 @@ export default function Command() {
   const [mailDetails, setMailDetails] = useState<Record<number, MailResponse & { markdown: string }>>({});
   const [mailboxResults, setMailboxResults] = useState<MailItem[]>([]);
   const [searchText, setSearchText] = useState("");
+  const turndownService = new TurndownService();
 
   useEffect(() => {
     setMailboxResults(mailList.filter((item) => item.subject.includes(searchText)));
@@ -49,9 +51,10 @@ export default function Command() {
       const allMailDetails: Record<string, Partial<MailResponse> & { markdown: string }> = {};
       const details = await fetchMailInformation(mail?.mail_id);
       if (details) {
+        const preparedMarkdown = turndownService.turndown(details.html as string);
         allMailDetails[mail.mail_id] = {
           ...details,
-          markdown: `# ${details.subject}\n\n**From:** ${details.from_mail}\n\n**Date:** ${details.date}\n\n${details.text || details.html}`,
+          markdown: `# ${details.subject}\n\n**From:** ${details.from_mail}\n\n**Date:** ${details.date}\n\n${preparedMarkdown}`,
         };
       }
       setMailDetails((prevDetails) => ({ ...prevDetails, ...allMailDetails }));
