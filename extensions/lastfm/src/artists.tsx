@@ -43,7 +43,7 @@ const TopArtists: React.FC = () => {
         title: artist.name,
         subtitle: undefined,
         icon: Icon.Person,
-        accessories: [{ text: artist.playcount ? `${artist.playcount} plays` : null }],
+        accessories: artist.playcount ? [{ text: `${artist.playcount} plays` }] : [],
         accessory: artist.playcount ? { tooltip: artist.playcount } : undefined,
         actions: <ArtistActionPanel artist={artist as Artist} />,
       };
