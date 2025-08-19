@@ -11,8 +11,9 @@ import { PeriodDropdown } from "./components/period";
 import { ListResults } from "./components/list";
 import { GridResults } from "./components/grid";
 import { generateMusicServiceAction } from "./lib/utils";
+import type { ItemProps } from "./types";
 
-interface ItemProps {
+interface AlbumItemProps {
   key: string;
   title: string;
   subtitle?: string;
@@ -23,7 +24,7 @@ interface ItemProps {
   actions: React.ReactNode;
 }
 
-export const processAlbumItem = (album: Album, idx: number): ItemProps => {
+export const processAlbumItem = (album: Album, idx: number): AlbumItemProps => {
   const { view } = getPreferenceValues();
   const image = album.image?.find((img) => img.size === "large")?.["#text"] || "";
   const { url, name } = album.artist;

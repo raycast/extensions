@@ -6,7 +6,7 @@ interface GridItemProps {
   subtitle?: string;
   content?: string;
   accessory?: Grid.Item.Accessory;
-  actions?: any;
+  actions?: React.ReactNode;
 }
 
 interface GridResultsProps {
@@ -24,7 +24,7 @@ export function GridResults(props: GridResultsProps) {
           subtitle={item.subtitle}
           content={item.content || ""}
           accessory={item.accessory}
-          actions={item.actions}
+          actions={item.actions as Parameters<typeof Grid.Item>[0]["actions"]}
         />
       ))}
     </Grid.Section>

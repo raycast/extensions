@@ -1,8 +1,9 @@
 import type { Grid, List } from "@raycast/api";
+import type React from "react";
 
 export type periodTypes = "7day" | "1month" | "3month" | "6month" | "12month" | "overall";
 
-export type ActionPanelComponent = any;
+export type ActionPanelComponent = React.ReactNode;
 
 export interface ExtensionPreferences {
   username: string;

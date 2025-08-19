@@ -1,4 +1,3 @@
-import React from "react";
 import { List } from "@raycast/api";
 
 interface ListItemProps {
@@ -7,7 +6,7 @@ interface ListItemProps {
   subtitle?: string;
   icon?: string;
   accessories?: Array<{ text: string | null }>;
-  actions?: any;
+  actions?: React.ReactNode;
 }
 
 interface ListResultsProps {
@@ -25,7 +24,7 @@ export function ListResults(props: ListResultsProps) {
           title={item.title}
           subtitle={item.subtitle}
           accessories={item.accessories}
-          actions={item.actions}
+          actions={item.actions as Parameters<typeof List.Item>[0]["actions"]}
         />
       ))}
     </List.Section>
