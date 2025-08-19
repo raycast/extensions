@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import crypto from "crypto";
-import { getSessionKey } from "../storage";
+import { getSessionKey } from "../../utils/storage";
 import type { ScrobbleTrack, ScrobbleResponse, ScrobbleErrorResponse } from "@/types/ScrobbleResponse";
 import type { NowPlayingTrack, NowPlayingResponse, NowPlayingErrorResponse } from "@/types/NowPlayingResponse";
 

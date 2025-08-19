@@ -1,5 +1,5 @@
 import { LocalStorage } from "@raycast/api";
-import { validateSessionKey } from "./auth";
+import { validateSessionKey } from "../services/auth";
 
 const STORAGE_KEYS = {
   SESSION_KEY: "lastfm_session_key",

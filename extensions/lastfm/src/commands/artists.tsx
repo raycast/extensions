@@ -1,10 +1,10 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { ActionPanel, showToast, Toast, getPreferenceValues, List, Action, Icon } from "@raycast/api";
-import { periodTypes, Artist } from "./types";
-import { useTopArtists } from "./hooks/useTopArtists";
-import { PeriodDropdown } from "./components/period";
-import { ListResults } from "./components/list";
-import { generateMusicServiceAction } from "./utils/utils";
+import { periodTypes, Artist } from "../types";
+import { useTopArtists } from "../hooks/useTopArtists";
+import { PeriodDropdown } from "../components/period";
+import { ListResults } from "../components/list";
+import { generateMusicServiceAction } from "../utils/utils";
 
 // Memoized action panel component
 const ArtistActionPanel = React.memo(({ artist }: { artist: Artist }) => (

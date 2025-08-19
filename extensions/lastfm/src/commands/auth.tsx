@@ -2,8 +2,8 @@ import { ActionPanel, List, showToast, Toast, Icon, getPreferenceValues, Action 
 import { showFailureToast } from "@raycast/utils";
 import React from "react";
 import { useEffect, useState } from "react";
-import { getAuthToken, getSession } from "./services/auth";
-import { storeSessionKey, hasSessionKey, removeSessionKey, validateStoredSessionKey } from "./utils/storage";
+import { getAuthToken, getSession } from "../services/auth";
+import { storeSessionKey, hasSessionKey, removeSessionKey, validateStoredSessionKey } from "../utils/storage";
 
 const Command: React.FC = () => {
   const { apikey: API_KEY, apisecret: API_SECRET } = getPreferenceValues();

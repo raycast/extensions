@@ -1,9 +1,9 @@
 import { Action, ActionPanel, List, showToast, Toast, Icon, Color, LocalStorage } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { getCurrentPlayerState } from "./services/applescript/index";
-import { getQueueStats, clearQueue, processQueue } from "./services/scrobble/index";
-import { getSessionKey } from "./utils/storage";
-import type { TrackInfo, PlayerState } from "./services/applescript/types";
+import { getCurrentPlayerState } from "../services/applescript/index";
+import { getQueueStats, clearQueue, processQueue } from "../services/scrobble/index";
+import { getSessionKey } from "../utils/storage";
+import type { TrackInfo, PlayerState } from "../services/applescript/types";
 
 interface ScrobbleState {
   lastTrack: TrackInfo | null;

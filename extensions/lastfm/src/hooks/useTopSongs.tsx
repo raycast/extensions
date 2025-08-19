@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { ActionPanel, Action, getPreferenceValues } from "@raycast/api";
 import type { TopTrack } from "@/types/SongResponse";
-import { generateMusicServiceAction } from "@/lib/utils";
+import { generateMusicServiceAction } from "../utils/utils";
 
 const createTrackActions = (track: TopTrack) => (
   <ActionPanel>

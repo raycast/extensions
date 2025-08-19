@@ -1,7 +1,7 @@
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
-import { getCurrentPlayerState } from "./services/applescript/index";
-import { updateNowPlaying, scrobbleTracks, processQueue, queueScrobble } from "./services/scrobble/index";
-import type { TrackInfo, PlayerState } from "./services/applescript/types";
+import { getCurrentPlayerState } from "../services/applescript/index";
+import { updateNowPlaying, scrobbleTracks, processQueue, queueScrobble } from "../services/scrobble/index";
+import type { TrackInfo, PlayerState } from "../services/applescript/types";
 
 interface Preferences {
   scrobbleInterval: string;
