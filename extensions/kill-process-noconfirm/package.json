@@ -1,0 +1,761 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kill-process-noconfirm",
+  "title": "Kill Process No Confirm",
+  "description": "Terminate processes sorted by CPU or memory usage without confirmation",
+  "icon": "icon.png",
+  "author": "a_kadir_sert_icloud_com",
+  "contributors": [
+    "rolandleth",
+    "crazyones110",
+    "zhenpewu",
+    "Saafo",
+    "erics118",
+    "xilopaint",
+    "validate",
+    "dead_hikikomori"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Kill Process No Confirm",
+      "description": "Lists all running processes, ordered by CPU or memory usage and allows (force) killing one",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "list-processes",
+      "title": "List Processes",
+      "description": "Lists running processes with their CPU and memory usage, sorted by memory usage"
+    },
+    {
+      "name": "kill-process",
+      "title": "(force) Kill Process",
+      "description": "Terminates a process by its exact name or PID (Force kill requires enabling sudo authentication with touchID: https://dev.to/siddhantkcode/enable-touch-id-authentication-for-sudo-on-macos-sonoma-14x-4d28)"
+    }
+  ],
+  "ai": {
+    "instructions": "When handling process termination requests:\n1. For single process (e.g. 'kill Safari'):\n   - Use list-processes with searchTerm: ['Safari']\n   - Only kill the exact process name match (e.g., 'Safari' matches 'Safari' but not 'Safari Helper')\n   - DO NOT kill helper processes even if found in the search\n   - Call kill-process directly - DO NOT ask for confirmation as no confirmation will be shown\n2. For multiple processes (e.g. 'kill UpNote and Notion'):\n   - Use list-processes ONCE with all terms in the array (e.g., searchTerm: ['UpNote', 'Notion'])\n   - Only kill processes that exactly match the requested names\n   - DO NOT kill helper processes even if they contain the search terms\n   - Call kill-process directly for each process - DO NOT ask for confirmation\n   - Example: 'kill UpNote and Notion' should only kill 'UpNote' and 'Notion', not 'UpNote Helper' or 'Notion Helper'\n3. For process with related processes (e.g. 'kill Chrome with related processes'):\n   - Use list-processes with the app name (e.g., searchTerm: ['Chrome'])\n   - Kill main process first, then all related helper processes\n   - Include processes with matching name patterns (e.g. 'Chrome Helper')\n   - Only kill helpers when explicitly requested with phrases like 'with related processes' or 'and all its processes'\n   - Call kill-process directly for each process - DO NOT ask for confirmation\n4. When searching for processes:\n   - Use list-processes tool which returns detailed process info\n   - For exact matches, compare the full processName\n   - DO NOT match partial names unless explicitly looking for helpers\n   - Results include: id (PID), cpu usage, memory usage, type (app/binary/prefPane)\n5. When killing processes:\n   - Always provide processName and id (PID) for kill-process\n   - Include the full path for better process identification\n   - Call kill-process directly - no confirmation will be shown\n6. Process types and special handling:\n   - 'app': Main application processes (.app)\n   - 'binary': Helper processes and command line tools\n   - 'prefPane': System preference panes\n7. Memory and CPU considerations:\n   - Can sort processes by memory (mem) or CPU usage\n   - Memory is in bytes, CPU in percentage\n8. Error handling:\n   - Handle cases where process is not found\n   - Handle failed kill operations gracefully\n   - Provide clear feedback on success/failure\n9. IMPORTANT: When killing multiple processes:\n   - Always use a single list-processes call with all search terms in the array\n   - DO NOT make separate list-processes calls for each process\n   - Only kill processes that exactly match the requested names\n   - DO NOT kill helper processes unless explicitly requested\n   - DO NOT ask for confirmation - no confirmation will be shown\n   - Example: 'kill UpNote and Notion' should only kill processes named exactly 'UpNote' and 'Notion'\n10. For PID-based termination (e.g. 'kill PID 12345, 23142, 32456'):\n    - When user specifies PIDs directly, bypass list-processes tool\n    - Call kill-process directly for each PID\n    - No need to search for process names or paths\n    - Handle multiple PIDs in a single request by calling kill-process for each PID\n    - Example: For 'kill PID 12345, 23142, 32456', make three separate kill-process calls with respective PIDs",
+    "evals": [
+      {
+        "input": "@kill-process list all processes",
+        "mocks": {
+          "list-processes": [
+            {
+              "id": 1234,
+              "pid": 1,
+              "cpu": 10.5,
+              "mem": 1024000,
+              "type": "app",
+              "path": "/Applications/Firefox.app/Contents/MacOS/Firefox",
+              "processName": "firefox",
+              "appName": "Firefox"
+            },
+            {
+              "id": 5678,
+              "pid": 1,
+              "cpu": 5.2,
+              "mem": 512000,
+              "type": "app",
+              "path": "/Applications/Safari.app/Contents/MacOS/Safari",
+              "processName": "Safari",
+              "appName": "Safari"
+            },
+            {
+              "id": 9012,
+              "pid": 1,
+              "cpu": 15.3,
+              "mem": 2048000,
+              "type": "binary",
+              "path": "/usr/bin/Google Chrome Helper",
+              "processName": "Google Chrome Helper",
+              "appName": "undefined"
+            },
+            {
+              "id": 9012,
+              "pid": 1,
+              "cpu": 15.3,
+              "mem": 2048000,
+              "type": "prefPane",
+              "path": "/System/Library/PreferencePanes/Displays.prefPane",
+              "processName": "Displays",
+              "appName": "undefined"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "list-processes"
+          },
+          {
+            "meetsCriteria": "Lists running processes with their CPU and memory usage"
+          }
+        ]
+      },
+      {
+        "input": "@kill-process kill PID 12345",
+        "mocks": {
+          "kill-process": [
+            {
+              "success": true,
+              "message": "Killed process: (PID: 12345)"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "kill-process",
+              "arguments": {
+                "id": 12345
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Directly kills a process by its PID"
+          }
+        ]
+      },
+      {
+        "input": "@kill-process list Chrome processes",
+        "mocks": {
+          "list-processes": [
+            {
+              "id": 9012,
+              "pid": 1,
+              "cpu": 15.3,
+              "mem": 2048000,
+              "type": "app",
+              "path": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+              "processName": "Google Chrome",
+              "appName": "Google Chrome"
+            },
+            {
+              "id": 9013,
+              "pid": 9012,
+              "cpu": 15.3,
+              "mem": 2048000,
+              "type": "binary",
+              "path": "/usr/bin/Google Chrome Helper",
+              "processName": "Google Chrome Helper",
+              "appName": "undefined"
+            },
+            {
+              "id": 9014,
+              "pid": 9012,
+              "cpu": 15.3,
+              "mem": 2048000,
+              "type": "binary",
+              "path": "/usr/bin/Google Chrome Helper (Renderer)",
+              "processName": "Google Chrome Helper (Renderer)",
+              "appName": "undefined"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-processes",
+              "arguments": {
+                "searchTerm": [
+                  "Chrome"
+                ]
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Shows Chrome-related processes"
+          }
+        ]
+      },
+      {
+        "input": "@kill-process kill Safari",
+        "mocks": {
+          "list-processes": [
+            {
+              "id": 5678,
+              "pid": 1,
+              "cpu": 5.2,
+              "mem": 512000,
+              "type": "app",
+              "path": "/Applications/Safari.app/Contents/MacOS/Safari",
+              "processName": "Safari",
+              "appName": "Safari"
+            },
+            {
+              "id": 9015,
+              "pid": 5678,
+              "cpu": 5.2,
+              "mem": 512000,
+              "type": "binary",
+              "path": "/usr/bin/Safari Helper",
+              "processName": "Safari Helper",
+              "appName": "Safari"
+            },
+            {
+              "id": 9016,
+              "pid": 5678,
+              "cpu": 5.2,
+              "mem": 512000,
+              "type": "binary",
+              "path": "/usr/bin/Safari Web Content",
+              "processName": "Safari Web Content",
+              "appName": "Safari"
+            },
+            {
+              "id": 9017,
+              "pid": 5678,
+              "cpu": 5.2,
+              "mem": 512000,
+              "type": "binary",
+              "path": "/usr/bin/Safari Plugin",
+              "processName": "Safari Plugin",
+              "appName": "Safari"
+            }
+          ],
+          "kill-process": {
+            "success": true,
+            "message": "Killed process: Safari (PID: 5678)"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-processes",
+              "arguments": {
+                "searchTerm": [
+                  "Safari"
+                ]
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "kill-process",
+              "arguments": {
+                "processName": "Safari",
+                "id": 5678,
+                "path": "/Applications/Safari.app/Contents/MacOS/Safari"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Confirms killing Safari process"
+          }
+        ]
+      },
+      {
+        "input": "@kill-process kill Notion",
+        "mocks": {
+          "list-processes": [
+            {
+              "id": 28588,
+              "pid": 1,
+              "cpu": 2.5,
+              "mem": 1024000,
+              "type": "app",
+              "path": "/Applications/Notion.app/Contents/MacOS/Notion",
+              "processName": "Notion",
+              "appName": "Notion"
+            },
+            {
+              "id": 28601,
+              "pid": 28588,
+              "cpu": 1.2,
+              "mem": 512000,
+              "type": "binary",
+              "path": "/Applications/Notion.app/Contents/MacOS/Notion Helper (Renderer)",
+              "processName": "Notion Helper (Renderer)",
+              "appName": "Notion"
+            }
+          ],
+          "kill-process": {
+            "success": true,
+            "message": "Killed process: Notion (PID: 28588)"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-processes",
+              "arguments": {
+                "searchTerm": [
+                  "Notion"
+                ]
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "kill-process",
+              "arguments": {
+                "processName": "Notion",
+                "id": 28588,
+                "path": "/Applications/Notion.app/Contents/MacOS/Notion"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Confirms killing Notion process"
+          }
+        ]
+      },
+      {
+        "input": "@kill-process kill Notion with related processes",
+        "mocks": {
+          "list-processes": [
+            {
+              "id": 28588,
+              "pid": 1,
+              "cpu": 2.5,
+              "mem": 1024000,
+              "type": "app",
+              "path": "/Applications/Notion.app/Contents/MacOS/Notion",
+              "processName": "Notion",
+              "appName": "Notion"
+            },
+            {
+              "id": 28601,
+              "pid": 28588,
+              "cpu": 1.2,
+              "mem": 512000,
+              "type": "binary",
+              "path": "/Applications/Notion.app/Contents/MacOS/Notion Helper (Renderer)",
+              "processName": "Notion Helper (Renderer)",
+              "appName": "Notion"
+            },
+            {
+              "id": 28596,
+              "pid": 28588,
+              "cpu": 0.8,
+              "mem": 256000,
+              "type": "binary",
+              "path": "/Applications/Notion.app/Contents/MacOS/Notion Helper",
+              "processName": "Notion Helper",
+              "appName": "Notion"
+            },
+            {
+              "id": 28592,
+              "pid": 28588,
+              "cpu": 0.5,
+              "mem": 128000,
+              "type": "binary",
+              "path": "/Applications/Notion.app/Contents/MacOS/Notion Helper (GPU)",
+              "processName": "Notion Helper (GPU)",
+              "appName": "Notion"
+            }
+          ],
+          "kill-process": [
+            {
+              "success": true,
+              "message": "Killed process: Notion (PID: 28588)"
+            },
+            {
+              "success": false,
+              "message": "Failed to kill process: Notion Helper (Renderer) (PID: 28601)"
+            },
+            {
+              "success": false,
+              "message": "Failed to kill process: Notion Helper (PID: 28596)"
+            },
+            {
+              "success": false,
+              "message": "Failed to kill process: Notion Helper (GPU) (PID: 28592)"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-processes",
+              "arguments": {
+                "searchTerm": [
+                  "Notion"
+                ]
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "kill-process",
+              "arguments": {
+                "processName": "Notion",
+                "id": 28588,
+                "path": "/Applications/Notion.app/Contents/MacOS/Notion"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Kills Notion and all its helper processes as requested, but fails to kill some of them as main process is killed first"
+          }
+        ]
+      },
+      {
+        "input": "@kill-process kill Notion and Notion Calendar",
+        "mocks": {
+          "list-processes": [
+            {
+              "id": 41406,
+              "pid": 1,
+              "cpu": 2.5,
+              "mem": 1024000,
+              "type": "app",
+              "path": "/Applications/Notion.app/Contents/MacOS/Notion",
+              "processName": "Notion",
+              "appName": "Notion"
+            },
+            {
+              "id": 28757,
+              "pid": 1,
+              "cpu": 1.2,
+              "mem": 512000,
+              "type": "app",
+              "path": "/Applications/Notion Calendar.app/Contents/MacOS/Notion Calendar",
+              "processName": "Notion Calendar",
+              "appName": "Notion Calendar"
+            }
+          ],
+          "kill-process": [
+            {
+              "success": true,
+              "message": "Killed process: Notion (PID: 41406)"
+            },
+            {
+              "success": true,
+              "message": "Killed process: Notion Calendar (PID: 28757)"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-processes",
+              "arguments": {
+                "searchTerm": [
+                  {
+                    "includes": "Notion"
+                  },
+                  {
+                    "includes": "Notion Calendar"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "kill-process",
+              "arguments": {
+                "processName": "Notion",
+                "id": 41406,
+                "path": "/Applications/Notion.app/Contents/MacOS/Notion"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "kill-process",
+              "arguments": {
+                "processName": "Notion Calendar",
+                "id": 28757,
+                "path": "/Applications/Notion Calendar.app/Contents/MacOS/Notion Calendar"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Successfully kills both Notion and Notion Calendar processes sequentially"
+          }
+        ]
+      },
+      {
+        "input": "@kill-process kill Arc and related processes",
+        "mocks": {
+          "list-processes": [
+            {
+              "id": 12345,
+              "pid": 1,
+              "cpu": 5,
+              "mem": 2048000,
+              "type": "app",
+              "path": "/Applications/Arc.app/Contents/MacOS/Arc",
+              "processName": "Arc",
+              "appName": "Arc"
+            },
+            {
+              "id": 12346,
+              "pid": 12345,
+              "cpu": 2,
+              "mem": 512000,
+              "type": "binary",
+              "path": "/Applications/Arc.app/Contents/MacOS/Arc Helper",
+              "processName": "Arc Helper",
+              "appName": "Arc"
+            },
+            {
+              "id": 12347,
+              "pid": 12345,
+              "cpu": 1.5,
+              "mem": 256000,
+              "type": "binary",
+              "path": "/Applications/Arc.app/Contents/MacOS/Arc Helper (Renderer)",
+              "processName": "Arc Helper (Renderer)",
+              "appName": "Arc"
+            },
+            {
+              "id": 12348,
+              "pid": 12345,
+              "cpu": 1.5,
+              "mem": 256000,
+              "type": "binary",
+              "path": "/Applications/Arc.app/Contents/MacOS/Arc Helper (GPU)",
+              "processName": "Arc Helper (GPU)",
+              "appName": "Arc"
+            }
+          ],
+          "kill-process": [
+            {
+              "success": true,
+              "message": "Killed process: Arc (PID: 12345)"
+            },
+            {
+              "success": false,
+              "message": "Failed to kill process: Arc Helper (PID: 12346)"
+            },
+            {
+              "success": false,
+              "message": "Failed to kill process: Arc Helper (Renderer) (PID: 12347)"
+            },
+            {
+              "success": false,
+              "message": "Failed to kill process: Arc Helper (GPU) (PID: 12348)"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-processes",
+              "arguments": {
+                "searchTerm": [
+                  "Arc"
+                ]
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "kill-process",
+              "arguments": {
+                "processName": "Arc",
+                "id": 12345,
+                "path": "/Applications/Arc.app/Contents/MacOS/Arc"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Kills Arc and all its helper processes as requested, but fails to kill some of them as main process is killed firstt"
+          }
+        ]
+      },
+      {
+        "input": "@kill-process kill UpNote",
+        "mocks": {
+          "list-processes": [
+            {
+              "id": 12348,
+              "pid": 1,
+              "cpu": 1.5,
+              "mem": 256000,
+              "type": "app",
+              "path": "/Applications/UpNote.app/Contents/MacOS/UpNote",
+              "processName": "UpNote",
+              "appName": "UpNote"
+            },
+            {
+              "id": 12349,
+              "pid": 12348,
+              "cpu": 1.5,
+              "mem": 256000,
+              "type": "binary",
+              "path": "/Applications/UpNote.app/Contents/MacOS/UpNote Helper",
+              "processName": "UpNote Helper",
+              "appName": "UpNote"
+            },
+            {
+              "id": 12350,
+              "pid": 12348,
+              "cpu": 1.5,
+              "mem": 256000,
+              "type": "binary",
+              "path": "/Applications/UpNote.app/Contents/MacOS/UpNote Helper (Renderer)",
+              "processName": "UpNote Helper (Renderer)",
+              "appName": "UpNote"
+            },
+            {
+              "id": 12351,
+              "pid": 12348,
+              "cpu": 1.5,
+              "mem": 256000,
+              "type": "binary",
+              "path": "/Applications/UpNote.app/Contents/MacOS/UpNote Helper (GPU)",
+              "processName": "UpNote Helper (GPU)",
+              "appName": "UpNote"
+            }
+          ],
+          "kill-process": [
+            {
+              "success": true,
+              "message": "Killed process: UpNote (PID: 12348)"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-processes",
+              "arguments": {
+                "searchTerm": [
+                  "UpNote"
+                ]
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "kill-process",
+              "arguments": {
+                "processName": "UpNote",
+                "id": 12348,
+                "path": "/Applications/UpNote.app/Contents/MacOS/UpNote"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Kills only the main UpNote process, as no helpers and/or related processes were specified"
+          }
+        ]
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "description": "Determine whether the process path should be searched for the query or only the process name.",
+      "label": "Search Process Paths",
+      "name": "shouldSearchInPaths",
+      "required": false,
+      "default": false,
+      "title": "Filtering",
+      "type": "checkbox"
+    },
+    {
+      "description": "Determine whether the process PID should be searched for the query or only the process name.",
+      "label": "Search Process PID",
+      "name": "shouldSearchInPid",
+      "required": false,
+      "default": false,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "description": "Determine whether apps are listed before other results when filtering.",
+      "label": "Prioritize Apps",
+      "name": "shouldPrioritizeAppsWhenFiltering",
+      "required": false,
+      "default": false,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "description": "Determine whether processes are sorted by CPU or memory usage.",
+      "label": "Sort by Memory Usage",
+      "name": "sortByMem",
+      "required": false,
+      "default": false,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "description": "Determine whether aggregate processes belong to the same app.",
+      "label": "Aggregate Apps",
+      "name": "aggregateApps",
+      "required": false,
+      "default": false,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "description": "Show process PID info.",
+      "label": "Show PID",
+      "name": "shouldShowPID",
+      "required": false,
+      "default": false,
+      "title": "Display",
+      "type": "checkbox"
+    },
+    {
+      "description": "Show process path.",
+      "label": "Show Process Path",
+      "name": "shouldShowPath",
+      "required": false,
+      "default": false,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "description": "Close window after killing a process",
+      "label": "Close Window",
+      "name": "closeWindowAfterKill",
+      "required": false,
+      "default": true,
+      "title": "After Killing",
+      "type": "checkbox"
+    },
+    {
+      "description": "Clear search bar after killing a process",
+      "label": "Clear Search Bar",
+      "name": "clearSearchBarAfterKill",
+      "required": false,
+      "default": true,
+      "type": "checkbox"
+    },
+    {
+      "description": "Go back to root search after killing a process",
+      "label": "Go back to Root Search",
+      "name": "goToRootAfterKill",
+      "required": false,
+      "default": false,
+      "type": "checkbox"
+    },
+    {
+      "description": "Refresh duration in milliseconds (min: 1000ms; 0 to disable auto-refresh).",
+      "label": "Refresh Duration",
+      "name": "refreshDuration",
+      "required": false,
+      "title": "Refresh Duration",
+      "type": "textfield",
+      "default": "3000",
+      "placeholder": "3000"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.3",
+    "pretty-bytes": "^6.1.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.37",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
