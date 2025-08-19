@@ -47,7 +47,7 @@ const Command: React.FC = () => {
     }
 
     checkAuth();
-  }, []);
+  }, [API_SECRET]);
 
   if (error) {
     return (
