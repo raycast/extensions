@@ -1,5 +1,9 @@
 # LookAway Raycast Extension Changelog
 
+## [1.0.2] - {PR_MERGE_DATE}
+
+- Update domain name from lookaway.app to lookaway.com
+
 ## [1.0.1] - 2025-06-27
 
 - Added new commands:
