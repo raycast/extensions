@@ -15,9 +15,9 @@ export default function ValidExtensions({
   const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
   const [allExtensions, setAllExtension] = useCachedState<ExtentionNameFolder[]>("all-extensions", []);
-  const foldersSet = useMemo(() => new Set(forkedExtensionFolders), [forkedExtensionFolders]);
 
   useEffect(() => {
+    const foldersSet = new Set(forkedExtensionFolders);
     const loadAllExtensions = async () => {
       setIsLoading(true);
       const allExtensions = await getAllExtensions();
@@ -26,7 +26,7 @@ export default function ValidExtensions({
       setIsLoading(false);
     };
     loadAllExtensions();
-  }, []);
+  }, [forkedExtensionFolders]);
 
   const fork = async (extensionFolder: string) => {
     try {
