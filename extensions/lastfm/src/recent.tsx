@@ -4,6 +4,7 @@ import { Track } from "./types";
 import { useRecentTracks } from "./lib/use-lastfm";
 import { ListResults } from "./components/list";
 import { GridResults } from "./components/grid";
+import { generateMusicServiceAction } from "./lib/utils";
 
 const RecentTracks: React.FC = () => {
   const { view } = getPreferenceValues();
@@ -36,14 +37,9 @@ const RecentTracks: React.FC = () => {
         <ActionPanel>
           <ActionPanel.Section title="Open And Search">
             <Action.OpenInBrowser url={track.url} title="Open on Last.fm" />
-            <Action.OpenInBrowser
-              url={`https://open.spotify.com/search/${encodeURIComponent(`${artist} - ${track.name}`)}`}
-              title="Search on Spotify"
-            />
-            <Action.OpenInBrowser
-              url={`https://music.apple.com/search?term=${encodeURIComponent(`${artist} - ${track.name}`)}`}
-              title="Search on Apple Music"
-            />
+            {generateMusicServiceAction({ term: `${artist} - ${track.name}`, type: "song" }).map((service) => (
+              <Action.OpenInBrowser key={service.url} url={service.url} title={service.label} />
+            ))}
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard title="Copy URL to Clipboard" content={track.url} />

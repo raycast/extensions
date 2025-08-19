@@ -1,4 +1,3 @@
-import React from "react";
 import { Grid } from "@raycast/api";
 
 interface GridItemProps {

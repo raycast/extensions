@@ -4,20 +4,16 @@ import { periodTypes, Artist } from "./types";
 import { useTopArtists } from "./lib/use-lastfm";
 import { PeriodDropdown } from "./components/period";
 import { ListResults } from "./components/list";
+import { generateMusicServiceAction } from "./lib/utils";
 
 // Memoized action panel component
 const ArtistActionPanel = React.memo(({ artist }: { artist: Artist }) => (
   <ActionPanel>
     <ActionPanel.Section title="Open And Search">
       <Action.OpenInBrowser url={artist.url} title="Open on Last.fm" />
-      <Action.OpenInBrowser
-        url={`https://open.spotify.com/search/${encodeURIComponent(artist.name)}`}
-        title="Search on Spotify"
-      />
-      <Action.OpenInBrowser
-        url={`https://music.apple.com/search?term=${encodeURIComponent(artist.name)}`}
-        title="Search on Apple Music"
-      />
+      {generateMusicServiceAction({ term: artist.name, type: "artist" }).map((service) => (
+        <Action.OpenInBrowser key={service.url} url={service.url} title={service.label} />
+      ))}
     </ActionPanel.Section>
     <ActionPanel.Section title="Copy">
       <Action.CopyToClipboard title="Copy URL to Clipboard" content={artist.url} />

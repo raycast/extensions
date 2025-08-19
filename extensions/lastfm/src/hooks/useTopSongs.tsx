@@ -1,19 +1,15 @@
 import React, { useMemo } from "react";
 import { ActionPanel, Action, getPreferenceValues } from "@raycast/api";
 import type { TopTrack } from "@/types/SongResponse";
+import { generateMusicServiceAction } from "@/lib/utils";
 
 const createTrackActions = (track: TopTrack) => (
   <ActionPanel>
     <ActionPanel.Section title="Open And Search">
       <Action.OpenInBrowser url={track.url} title="Open on Last.fm" />
-      <Action.OpenInBrowser
-        url={`https://open.spotify.com/search/${encodeURIComponent(`${track.artist.name} - ${track.name}`)}`}
-        title="Search on Spotify"
-      />
-      <Action.OpenInBrowser
-        url={`https://music.apple.com/search?term=${encodeURIComponent(`${track.artist.name} - ${track.name}`)}`}
-        title="Search on Apple Music"
-      />
+      {generateMusicServiceAction({ term: `${track.artist.name} - ${track.name}`, type: "song" }).map((service) => (
+        <Action.OpenInBrowser key={service.url} url={service.url} title={service.label} />
+      ))}
     </ActionPanel.Section>
     <ActionPanel.Section title="Copy">
       <Action.CopyToClipboard title="Copy URL to Clipboard" content={track.url} />

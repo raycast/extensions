@@ -10,6 +10,7 @@ import { periodTypes } from "./types";
 import { PeriodDropdown } from "./components/period";
 import { ListResults } from "./components/list";
 import { GridResults } from "./components/grid";
+import { generateMusicServiceAction } from "./lib/utils";
 
 interface ItemProps {
   key: string;
@@ -40,14 +41,9 @@ export const processAlbumItem = (album: Album, idx: number): ItemProps => {
         <ActionPanel.Section title="Open And Search">
           <Action.OpenInBrowser url={album.url} title="Open on Last.fm" />
           {url && <Action.OpenInBrowser url={url} title="Open Artist Page on Last.fm" />}
-          <Action.OpenInBrowser
-            url={`https://open.spotify.com/search/${encodeURIComponent(`${name} - ${album.name}`)}`}
-            title="Search on Spotify"
-          />
-          <Action.OpenInBrowser
-            url={`https://music.apple.com/search?term=${encodeURIComponent(`${name} - ${album.name}`)}`}
-            title="Search on Apple Music"
-          />
+          {generateMusicServiceAction({ term: `${name} - ${album.name}`, type: "album" }).map((service) => (
+            <Action.OpenInBrowser key={service.url} url={service.url} title={service.label} />
+          ))}
         </ActionPanel.Section>
         <ActionPanel.Section title="Copy">
           <Action.CopyToClipboard title="Copy URL to Clipboard" content={album.url} />
