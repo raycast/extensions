@@ -66,8 +66,18 @@ export default function SearchResults({
                   entity={entity}
                   addressString={addressString}
                   onViewDetails={onViewDetails}
-                  onCopyOrgNumber={() => {}}
-                  onCopyAddress={() => {}}
+                  onCopyOrgNumber={(orgNumber) => {
+                    // Copy to clipboard using Raycast's clipboard API
+                    if (typeof navigator !== "undefined" && navigator.clipboard) {
+                      navigator.clipboard.writeText(orgNumber);
+                    }
+                  }}
+                  onCopyAddress={(address) => {
+                    // Copy to clipboard using Raycast's clipboard API
+                    if (typeof navigator !== "undefined" && navigator.clipboard) {
+                      navigator.clipboard.writeText(address);
+                    }
+                  }}
                   onOpenInBrowser={() => {}}
                 />
                 <SearchResultActions

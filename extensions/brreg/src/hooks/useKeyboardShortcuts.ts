@@ -26,6 +26,23 @@ export function useKeyboardShortcuts() {
     }
   }, []);
 
+  const handleCopyAddress = useCallback((address: string) => {
+    if (address) {
+      if (typeof navigator !== "undefined" && navigator.clipboard) {
+        navigator.clipboard
+          .writeText(address)
+          .then(() => {
+            showToast(Toast.Style.Success, "Business address copied", address);
+          })
+          .catch(() => {
+            showFailureToast("Failed to copy business address");
+          });
+      } else {
+        showFailureToast("Clipboard not available");
+      }
+    }
+  }, []);
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       // Handle move mode indicators (cmd+shift)
@@ -40,6 +57,16 @@ export function useKeyboardShortcuts() {
         // The component will need to provide the current org number
         if (typeof window !== "undefined") {
           window.dispatchEvent(new CustomEvent("copyOrgNumber"));
+        }
+      }
+
+      // Handle copy business address (cmd+b)
+      if (event.metaKey && event.key === "b" && !event.shiftKey && !event.altKey) {
+        event.preventDefault();
+        // Emit a custom event that components can listen to
+        // The component will need to provide the current address
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("copyAddress"));
         }
       }
     };
@@ -65,5 +92,6 @@ export function useKeyboardShortcuts() {
   return {
     showMoveIndicators,
     handleCopyOrgNumber,
+    handleCopyAddress,
   };
 }
