@@ -1,5 +1,9 @@
 # Google Gemini Changelog
 
+## [Update Models] - 2025-08-04
+
+- ⬆️ Update Gemini 2.5 series models from preview to production ready versions.
+
 ## [Add Safety Settings] - 2025-07-03
 
 - 🛡️ Now users can set their safety filtering options as they need.

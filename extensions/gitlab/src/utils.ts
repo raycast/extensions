@@ -13,8 +13,6 @@ import { emojiSymbol } from "./components/status/utils";
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
 
-/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types,no-useless-escape */
-
 export function projectIconUrl(project: Project): string | undefined {
   let result: string | undefined;
   // TODO check also namespace for icon
@@ -69,7 +67,7 @@ export function currentSeconds(): number {
   return Date.now() / 1000;
 }
 
-export async function getCacheObject(key: string, seconds: number): Promise<any> {
+export async function getCacheObject<T>(key: string, seconds: number): Promise<T | undefined> {
   console.log(`get cache object ${key} from store`);
   const cache = await LocalStorage.getItem(key);
   console.log("after local storage");
@@ -87,7 +85,7 @@ export async function getCacheObject(key: string, seconds: number): Promise<any>
   return undefined;
 }
 
-export async function setCacheObject(key: string, payload: any): Promise<void> {
+export async function setCacheObject<T>(key: string, payload: T): Promise<void> {
   const cache_data = {
     timestamp: currentSeconds(),
     payload: payload,
@@ -110,7 +108,7 @@ export function fileExistsSync(filename: string): boolean {
   try {
     fsSync.accessSync(filename, constants.F_OK);
     return true;
-  } catch (e) {
+  } catch {
     return false;
   }
 }
@@ -139,10 +137,10 @@ export function optimizeMarkdownText(text: string, baseUrl?: string): string {
   if (baseUrl) {
     // replace relative links with absolute ones
     try {
-      const regexMdLinks = /\[([^\[]+)\](\(.*\))/gm;
+      const regexMdLinks = /\[([^[]+)\](\(.*\))/gm;
       const matches = result.match(regexMdLinks);
       if (matches) {
-        const singleMatch = /\[([^\[]+)\]\((.*)\)/;
+        const singleMatch = /\[([^[]+)\]\((.*)\)/;
         for (let i = 0; i < matches.length; i++) {
           const text = singleMatch.exec(matches[i]);
           if (text) {
@@ -156,8 +154,8 @@ export function optimizeMarkdownText(text: string, baseUrl?: string): string {
           }
         }
       }
-    } catch (error) {
-      // ignore errors
+    } catch {
+      // Do nothing
     }
   }
 
@@ -170,11 +168,11 @@ export function hashString(text: string): string {
   return sha256.digest("hex");
 }
 
-export function hashRecord(rec: Record<string, any>, prefix?: string | undefined): string {
+export function hashRecord(rec: Record<string, unknown>, prefix?: string | undefined): string {
   const sha256 = crypto.createHash("sha256");
   Object.entries(rec)
     .sort()
-    .forEach((k: any, v: any) => {
+    .forEach(([k, v]) => {
       sha256.update(`${k}${v}`);
     });
   const h = sha256.digest("hex");
@@ -192,8 +190,8 @@ export function capitalizeFirstLetter(name: string): string {
   return name.replace(/^./, name[0].toUpperCase());
 }
 
-export function toFormValues(values: any): Record<string, any> {
-  const val: Record<string, any> = {};
+export function toFormValues(values: Record<string, unknown>): Record<string, string> {
+  const val: Record<string, string> = {};
   for (const [k, v] of Object.entries(values)) {
     if (v) {
       if (Array.isArray(v)) {
@@ -203,7 +201,7 @@ export function toFormValues(values: any): Record<string, any> {
           continue;
         }
       } else {
-        val[k] = v;
+        val[k] = String(v);
       }
     }
   }

@@ -57,12 +57,24 @@ export interface Project {
   compose: Compose[];
 }
 
+export interface Destination {
+  destinationId: string;
+  name: string;
+  provider: string;
+  accessKey: string;
+  secretAccessKey: string;
+  bucket: string;
+  region: string;
+  endpoint: string;
+  createdAt: string;
+}
 export interface User {
   id: string;
   userId: string;
   role: string;
   createdAt: string;
   user: {
+    name: string;
     email: string;
     twoFactorEnabled: boolean;
   };

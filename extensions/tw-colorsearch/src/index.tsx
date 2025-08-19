@@ -3,10 +3,11 @@ import { useState, useEffect } from "react";
 import { formatHex } from "culori";
 
 function HexToRGB(hex: string) {
-  // Ommit first char which is hash symbol
-  const r = parseInt(hex.substring(1, 3), 16);
-  const g = parseInt(hex.substring(3, 5), 16);
-  const b = parseInt(hex.substring(5, 7), 16);
+  // Remove hash symbol if present
+  const cleanHex = hex.startsWith("#") ? hex.substring(1) : hex;
+  const r = parseInt(cleanHex.substring(0, 2), 16);
+  const g = parseInt(cleanHex.substring(2, 4), 16);
+  const b = parseInt(cleanHex.substring(4, 6), 16);
   return `rgb(${r}, ${g}, ${b})`;
 }
 
@@ -317,7 +318,7 @@ const COLORS = () => {
         title: `${colorName}-${shade}`,
         oklch: tw_colors[colorName][shade],
         hex: formatHex(tw_colors[colorName][shade]) || "",
-        rgb: HexToRGB(tw_colors[colorName][shade]),
+        rgb: HexToRGB(formatHex(tw_colors[colorName][shade]) || ""),
       }),
     );
   });
@@ -354,7 +355,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.CopyToClipboard title="Copy Hex" content={item.hex.toUpperCase()} />
-              <Action.CopyToClipboard title="Copy RGB" content={item.rgb} />
+              <Action.CopyToClipboard title="Copy Rgb" content={item.rgb} />
               <Action.CopyToClipboard title="Copy Oklch" content={item.oklch} />
               <Action.CopyToClipboard
                 title="Copy Tailwind CSS Name"

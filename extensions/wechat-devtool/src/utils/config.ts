@@ -1,10 +1,10 @@
 import path from "path";
 import { randomUUID } from "crypto";
 import { readFile, writeFile, access, mkdir } from "fs/promises";
-
 import { environment } from "@raycast/api";
+
+import { REPOSITORY_TYPE, WECHAT_DEVTOOL_CLI_PATH } from "../constants";
 import { ExtensionConfig, Project } from "../types";
-import { WECHAT_DEVTOOL_CLI_PATH } from "../constants";
 
 const CONFIG_DIR = environment.supportPath;
 const CONFIG_PATH = path.resolve(CONFIG_DIR, "config-v2.json");
@@ -22,7 +22,14 @@ export async function getExtensionConfig(): Promise<ExtensionConfig> {
     await ensureConfigDir();
     try {
       const content = await readFile(CONFIG_PATH, "utf8");
-      return JSON.parse(content);
+      const config = JSON.parse(content);
+      config.projects.forEach((project: Project) => {
+        // v1.2.0 起支持 repositoryType
+        if (!project.repositoryType) {
+          project.repositoryType = REPOSITORY_TYPE.UNKNOWN;
+        }
+      });
+      return config;
     } catch {
       // File doesn't exist, return default config
       return {
@@ -60,10 +67,11 @@ export function createEmptyProject(): Project {
     path: "",
     lastUsedAt: Date.now(),
     aliases: [],
+    repositoryType: REPOSITORY_TYPE.UNKNOWN,
   };
 }
 
-export async function updateProjectLastUsed(projectId: string) {
+export async function updateProjectLastUsedAt(projectId: string) {
   const config = await getExtensionConfig();
   const project = config.projects.find((project) => project.id === projectId);
   if (project) {

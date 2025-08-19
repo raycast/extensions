@@ -1,5 +1,11 @@
 # Keygen Changelog
 
+## [List Users + API Usage] - 2025-08-12
+
+- List, Create and Delete Users
+- View API Usage
+- Fix typo in command title: "Voew Licenses" -> "View Licenses"
+
 ## [List & Add Products + License Enhancements] - 2025-07-07
 
 - List Products and Create new ones

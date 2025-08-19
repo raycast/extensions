@@ -1,5 +1,9 @@
 # Brand.dev Changelog
 
+## [Quick Search via Search Text] - 2025-08-14
+
+- If a Brand is not found when you search/filter, you can now quickly trigger a search for that query
+
 ## [Show Stocks, Fonts, Contact] - 2025-06-12
 
 - Replace "View on brand.dev" with "Go to example.com" as Brand.dev has removed their world.brand.dev site for previews

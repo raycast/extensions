@@ -1,5 +1,10 @@
 # Badges Changelog
 
+## [Improvement] - 2025-08-08
+
+- Add shortcut for picking logo
+- Bump all dependencies to the latest
+
 ## [Enhancement] - 2025-07-29
 
 - Add support for using base64 encoded SVG for logo
