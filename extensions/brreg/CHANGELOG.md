@@ -1,6 +1,6 @@
 # BRREG Search Changelog
 
-## [Version 2.0.0 - Major Refactoring & Enhancement Release] - {PR_MERGE_DATE}
+## [Version 2.0.0 - Major Refactoring & Enhancement Release] - 2025-08-19
 
 🚀 **What's New?**
 
@@ -31,7 +31,7 @@
 - **Constants Management**: Centralized configuration for easy maintenance
 - **Dependency Cleanup**: Removed unused Google Static Maps API key requirement
 
-## [Version 1.1.0 - Initial Enhancement Release] – {PR_MERGE_DATE}
+## [Version 1.1.0 - Initial Enhancement Release] – 2025-08-19
 
 ♻️ **What's Changed:**
 - Corrected the English name of Brønnøysundregistrene to the official translation (The Brønnøysund Register Centre).
