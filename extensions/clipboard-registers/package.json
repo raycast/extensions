@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "clipboard-registers",
+  "title": "Clipboard Registers",
+  "description": "Adds four “clipboard registers” so you can save multiple clipboard slots and cycle between them with hotkeys.",
+  "icon": "icon.png",
+  "author": "hashmaphooligan",
+  "license": "MIT",
+  "categories": ["Productivity", "Developer Tools"],
+  "commands": [
+    {
+      "name": "overview",
+      "title": "Register Overview",
+      "subtitle": "View and manage all clipboard registers",
+      "description": "View and manage all clipboard registers in a list with quick actions",
+      "mode": "view"
+    },
+    {
+      "name": "register-1",
+      "title": "Register #1",
+      "subtitle": "Switch to clipboard register #1",
+      "description": "Switch to clipboard register #1",
+      "mode": "no-view"
+    },
+    {
+      "name": "register-2",
+      "title": "Register #2",
+      "subtitle": "Switch to clipboard register #2",
+      "description": "Switch to clipboard register #2",
+      "mode": "no-view"
+    },
+    {
+      "name": "register-3",
+      "title": "Register #3",
+      "subtitle": "Switch to clipboard register #3",
+      "description": "Switch to clipboard register #3",
+      "mode": "no-view"
+    },
+    {
+      "name": "register-4",
+      "title": "Register #4",
+      "subtitle": "Switch to clipboard register #4",
+      "description": "Switch to clipboard register #4",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.101.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
