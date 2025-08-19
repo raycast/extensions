@@ -44,6 +44,6 @@ class Operation {
   };
 }
 
-const opeartion = new Operation();
+const operation = new Operation();
 
-export default opeartion;
+export default operation;

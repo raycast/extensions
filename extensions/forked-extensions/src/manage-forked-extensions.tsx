@@ -14,10 +14,10 @@ import {
 import Tags from "./components/tags.js";
 import ValidExtensions from "./components/valid-extensions.js";
 import { getExtensionList, initRepository } from "./git.js";
-import opeartion from "./operation.js";
 import { ForkedExtension } from "./types.js";
 import { extensionLink, getActualIconPath, userLink } from "./utils.js";
 import { useCachedPromise } from "@raycast/utils";
+import operation from "./operation.js";
 
 export default function ListExtensions() {
   const [isShowingDetail, setIsShowingDetail] = useState(false);
@@ -99,7 +99,7 @@ export default function ListExtensions() {
                       title: "Remove",
                       style: Alert.ActionStyle.Destructive,
                       onAction: async () => {
-                        await opeartion.remove(x.folderName);
+                        await operation.remove(x.folderName);
                         revalidate();
                       },
                     },

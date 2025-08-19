@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Action, ActionPanel, Icon, List, Toast, showToast, useNavigation } from "@raycast/api";
 import { showFailureToast, useCachedState } from "@raycast/utils";
-import { getAllExtenisons } from "../api.js";
+import { getAllExtensions } from "../api.js";
 import { sparseCheckoutAdd } from "../git.js";
 import { ExtentionNameFolder } from "../types.js";
 
@@ -20,7 +20,7 @@ export default function ValidExtensions({
   useEffect(() => {
     const loadAllExtensions = async () => {
       setIsLoading(true);
-      const allExtensions = await getAllExtenisons();
+      const allExtensions = await getAllExtensions();
       const filteredExtensions = allExtensions.filter((x) => !foldersSet.has(x.folder));
       setAllExtension(filteredExtensions);
       setIsLoading(false);
@@ -32,7 +32,7 @@ export default function ValidExtensions({
     try {
       const toast = await showToast({
         style: Toast.Style.Animated,
-        title: "Forkinig extension",
+        title: "Forking extension",
       });
       await sparseCheckoutAdd(extensionFolder);
       toast.style = Toast.Style.Success;
