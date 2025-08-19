@@ -11,7 +11,7 @@ async function getAccessToken() {
   let accessToken;
 
   try {
-    // First try WorkOS tokens (new auth method)
+    // Try WorkOS tokens first (updated auth method)
     if (jsonData.workos_tokens) {
       let workosTokens;
       if (typeof jsonData.workos_tokens === "string") {
