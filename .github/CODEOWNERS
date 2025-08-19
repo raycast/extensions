@@ -1150,7 +1150,7 @@
 /extensions/mldocs                                                  @sadanand-singh
 /extensions/mochi                                                   @kawamataryo
 /extensions/moco                                                    @eviscares
-/extensions/model-context-protocol-registry                         @thomaspaulmann
+/extensions/model-context-protocol-registry                         @thomaspaulmann @nagauta
 /extensions/modify-hash                                             @tisfeng
 /extensions/modrinth                                                @soradotwav
 /extensions/modrinth-search                                         @MagnusHJensen
