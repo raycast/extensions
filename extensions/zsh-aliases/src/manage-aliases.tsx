@@ -1,4 +1,16 @@
-import { Action, ActionPanel, Alert, confirmAlert, Form, Icon, List, popToRoot, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  confirmAlert,
+  Form,
+  Icon,
+  Keyboard,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import {
@@ -17,6 +29,7 @@ import {
  * Add Alias Form Component
  */
 function AddAliasForm({ onRefresh }: { onRefresh: () => void }) {
+  const { pop } = useNavigation();
   const [nameError, setNameError] = useState<string | undefined>();
   const [commandError, setCommandError] = useState<string | undefined>();
   const configFiles = getConfigFiles();
@@ -72,7 +85,7 @@ function AddAliasForm({ onRefresh }: { onRefresh: () => void }) {
       });
 
       onRefresh();
-      await popToRoot();
+      pop();
     } catch (error) {
       await showFailureToast(error instanceof Error ? error.message : "Unknown error", {
         title: "Failed to add alias",
@@ -126,6 +139,7 @@ function EditAliasForm({
   configFile: string;
   onRefresh: () => void;
 }) {
+  const { pop } = useNavigation();
   const [nameError, setNameError] = useState<string | undefined>();
   const [commandError, setCommandError] = useState<string | undefined>();
   const originalName = aliasName;
@@ -171,7 +185,7 @@ function EditAliasForm({
       });
 
       onRefresh();
-      await popToRoot();
+      pop();
     } catch (error) {
       await showFailureToast(error instanceof Error ? error.message : "Unknown error", {
         title: "Failed to update alias",
@@ -319,19 +333,19 @@ export default function Command() {
                       onRefresh={refreshAliases}
                     />
                   }
-                  shortcut={{ modifiers: ["cmd"], key: "e" }}
+                  shortcut={Keyboard.Shortcut.Common.Edit}
                 />
                 <Action
                   title="Remove Alias"
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
                   onAction={() => handleRemoveAlias(alias)}
-                  shortcut={{ modifiers: ["cmd"], key: "d" }}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
                 />
                 <Action.CopyToClipboard
                   title="Copy Alias Command"
                   content={alias.command}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  shortcut={Keyboard.Shortcut.Common.Copy}
                 />
                 <Action.CopyToClipboard
                   title="Copy Alias Name"
@@ -347,7 +361,7 @@ export default function Command() {
                   title="Add New Alias"
                   icon={Icon.Plus}
                   target={<AddAliasForm onRefresh={refreshAliases} />}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  shortcut={Keyboard.Shortcut.Common.New}
                 />
               </ActionPanel>
             }
