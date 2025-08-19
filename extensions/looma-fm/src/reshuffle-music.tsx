@@ -1,7 +1,6 @@
 import { showToast, Toast, environment } from "@raycast/api";
 import { createClient } from "@supabase/supabase-js";
 import { spawn } from "child_process";
-import fetch from "node-fetch";
 import { writeFileSync, unlinkSync, existsSync, mkdirSync } from "fs";
 import { join } from "path";
 import {
@@ -9,13 +8,9 @@ import {
   clearPlaybackState,
   savePlaybackState,
 } from "./shared-state";
-
-interface MusicTrack {
-  name: string;
-  url: string;
-  size: number;
-  path: string;
-}
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from "./consts";
+import { MusicTrack } from "./interfaces";
+import { showFailureToast } from "@raycast/utils";
 
 export default async function Command() {
   try {
@@ -25,9 +20,9 @@ export default async function Command() {
       try {
         process.kill(currentState.pid, "SIGTERM");
       } catch (error) {
-        console.error(
-          "Failed to stop previous track using PID, falling back to generic stop.",
-        );
+        await showFailureToast(error, {
+          title: "Failed to stop previous track using PID",
+        });
         spawn("pkill", ["-f", "afplay"]);
       }
     } else {
@@ -35,16 +30,11 @@ export default async function Command() {
     }
     clearPlaybackState();
 
-    showToast({
+    const toast = await showToast({
       style: Toast.Style.Animated,
       title: "🔀 Reshuffling...",
       message: "Loading new random track",
     });
-
-    // Supabase configuration
-    const SUPABASE_URL = "https://fbrrpowisxjwnrsgvuek.supabase.co";
-    const SUPABASE_ANON_KEY =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZicnJwb3dpc3hqd25yc2d2dWVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3ODAzNTMsImV4cCI6MjA2MDM1NjM1M30.JVTbW6u6BlDG0FGkU-8XrI6xXjvOosWrxxurJKcD7tI";
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -79,11 +69,8 @@ export default async function Command() {
       const randomIndex = Math.floor(Math.random() * musicFiles.length);
       const track = musicFiles[randomIndex];
 
-      showToast({
-        style: Toast.Style.Animated,
-        title: "🔄 Buffering...",
-        message: `Loading ${track.name}`,
-      });
+      toast.title = "🔄 Buffering...";
+      toast.message = `Loading ${track.name}`;
 
       // Download and play the track
       const response = await fetch(track.url);
@@ -129,28 +116,19 @@ export default async function Command() {
 
       audioProcess.on("error", (err) => {
         console.error("Playback error:", err);
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Playback Error",
-          message: `Cannot play ${track.name}`,
-        });
+        toast.title = "Playback Error";
+        toast.style = Toast.Style.Failure;
+        toast.message = `Cannot play ${track.name}`;
         clearPlaybackState();
       });
 
-      showToast({
-        style: Toast.Style.Success,
-        title: "♪ Now Playing",
-        message: track.name,
-      });
+      toast.title = "♪ Now Playing";
+      toast.style = Toast.Style.Success;
+      toast.message = track.name;
     } else {
       throw new Error("No tracks found in music library");
     }
   } catch (error) {
-    console.error("Reshuffle error:", error);
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Reshuffle Error",
-      message: `Cannot reshuffle: ${error instanceof Error ? error.message : "Unknown error"}`,
-    });
+    await showFailureToast(error);
   }
 }

@@ -1,7 +1,6 @@
 import { showToast, Toast, environment } from "@raycast/api";
 import { createClient } from "@supabase/supabase-js";
 import { spawn } from "child_process";
-import fetch from "node-fetch";
 import { writeFileSync, unlinkSync, existsSync, mkdirSync } from "fs";
 import { join } from "path";
 import {
@@ -9,13 +8,9 @@ import {
   clearPlaybackState,
   loadPlaybackState,
 } from "./shared-state";
-
-interface MusicTrack {
-  name: string;
-  url: string;
-  size: number;
-  path: string;
-}
+import { showFailureToast } from "@raycast/utils";
+import { MusicTrack } from "./interfaces";
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from "./consts";
 
 export default async function Command() {
   try {
@@ -25,25 +20,20 @@ export default async function Command() {
       try {
         process.kill(existingState.pid, "SIGTERM");
       } catch (error) {
-        console.error(
-          "Failed to stop previous track using PID, falling back to generic stop.",
-        );
+        await showFailureToast(error, {
+          title: "Failed to stop previous track using PID",
+        });
         spawn("pkill", ["-f", "afplay"]);
       }
     } else {
       spawn("pkill", ["-f", "afplay"]);
     }
 
-    showToast({
+    const toast = await showToast({
       style: Toast.Style.Animated,
       title: "🎵 Looma.FM",
       message: "Loading music library...",
     });
-
-    // Supabase configuration (same as working reshuffle)
-    const SUPABASE_URL = "https://fbrrpowisxjwnrsgvuek.supabase.co";
-    const SUPABASE_ANON_KEY =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZicnJwb3dpc3hqd25yc2d2dWVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3ODAzNTMsImV4cCI6MjA2MDM1NjM1M30.JVTbW6u6BlDG0FGkU-8XrI6xXjvOosWrxxurJKcD7tI";
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -55,11 +45,8 @@ export default async function Command() {
     if (error) throw error;
 
     if (files && files.length > 0) {
-      showToast({
-        style: Toast.Style.Animated,
-        title: "📁 Found Files",
-        message: `Processing ${files.length} files...`,
-      });
+      toast.title = "📁 Found Files";
+      toast.message = `Processing ${files.length} files...`;
 
       const musicFiles = files
         .filter((file) => {
@@ -84,21 +71,15 @@ export default async function Command() {
         throw new Error("No music files found");
       }
 
-      showToast({
-        style: Toast.Style.Animated,
-        title: "🎵 Music Ready",
-        message: `${musicFiles.length} tracks loaded, starting stream...`,
-      });
+      toast.title = "🎵 Music Ready";
+      toast.message = `${musicFiles.length} tracks loaded, starting stream...`;
 
       // Pick random track (exactly like reshuffle)
       const randomIndex = Math.floor(Math.random() * musicFiles.length);
       const track = musicFiles[randomIndex];
 
-      showToast({
-        style: Toast.Style.Animated,
-        title: "🔄 Buffering...",
-        message: `Loading ${track.name}`,
-      });
+      toast.title = "🔄 Buffering...";
+      toast.message = `Loading ${track.name}`;
 
       // Download and play the track (exactly like reshuffle)
       const response = await fetch(track.url);
@@ -145,40 +126,27 @@ export default async function Command() {
 
         if (code === 0) {
           // Track finished, offer to play another
-          showToast({
-            style: Toast.Style.Success,
-            title: "🎵 Track Complete",
-            message: `"${track.name}" finished • Use Reshuffle for next track`,
-          });
+          toast.title = "🎵 Track Complete";
+          toast.message = `"${track.name}" finished • Use Reshuffle for next track`;
+          toast.style = Toast.Style.Success;
         }
       });
 
       audioProcess.on("error", (err) => {
         console.error("Playback error:", err);
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Playback Error",
-          message: `Cannot play ${track.name}`,
-        });
+        toast.title = "Playback Error";
+        toast.message = `Cannot play ${track.name}`;
+        toast.style = Toast.Style.Failure;
         clearPlaybackState();
       });
 
-      showToast({
-        style: Toast.Style.Success,
-        title: "♪ Now Streaming",
-        message: `"${track.name}" • Looma.FM by Adi Goldstein`,
-      });
+      toast.title = "♪ Now Streaming";
+      toast.message = `"${track.name}" • Looma.FM by Adi Goldstein`;
+      toast.style = Toast.Style.Success;
     } else {
       throw new Error("No tracks found in music library");
     }
-  } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown error";
-    console.error("Looma.FM error:", error);
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Looma.FM Error",
-      message: `Cannot start stream: ${errorMessage}`,
-    });
+  } catch (error) {
+    showFailureToast(error);
   }
 }

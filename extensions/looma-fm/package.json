@@ -3,7 +3,7 @@
   "name": "looma-fm",
   "title": "Looma.fm",
   "description": "Shuffle and play amazing and relaxing music by Adi Goldstein",
-  "icon": "command-icon.png",
+  "icon": "icon.png",
   "author": "adigold1",
   "categories": [
     "Media"
@@ -16,7 +16,7 @@
       "subtitle": "Looma.fm",
       "description": "Shuffle and play Adi Goldstein's relaxing music",
       "mode": "no-view",
-      "icon": "command-icon.png"
+      "icon": "icon.png"
     },
     {
       "name": "pause-music",
@@ -24,7 +24,7 @@
       "subtitle": "Looma.fm",
       "description": "Pause or resume the currently playing track",
       "mode": "no-view",
-      "icon": "command-icon.png"
+      "icon": "icon.png"
     },
     {
       "name": "reshuffle-music",
@@ -32,7 +32,7 @@
       "subtitle": "Looma.fm",
       "description": "Reshuffle and play a new random track",
       "mode": "no-view",
-      "icon": "command-icon.png"
+      "icon": "icon.png"
     },
     {
       "name": "stop-music",
@@ -40,7 +40,7 @@
       "subtitle": "Looma.fm",
       "description": "Stop the currently playing music",
       "mode": "no-view",
-      "icon": "command-icon.png"
+      "icon": "icon.png"
     },
     {
       "name": "short-meditation",
@@ -48,13 +48,13 @@
       "subtitle": "Looma.fm",
       "description": "Start a single meditation session from Adi Goldstein",
       "mode": "no-view",
-      "icon": "command-icon.png"
+      "icon": "icon.png"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.100.3",
-    "@supabase/supabase-js": "^2.45.0",
-    "react": "^18.0.0"
+    "@raycast/api": "^1.101.0",
+    "@raycast/utils": "^2.2.0",
+    "@supabase/supabase-js": "^2.45.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

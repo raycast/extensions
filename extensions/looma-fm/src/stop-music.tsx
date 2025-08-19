@@ -3,6 +3,7 @@ import { spawn } from "child_process";
 import { unlinkSync, readdirSync } from "fs";
 import { join } from "path";
 import { loadPlaybackState, clearPlaybackState } from "./shared-state";
+import { showFailureToast } from "@raycast/utils";
 
 export default async function Command() {
   try {
@@ -19,6 +20,7 @@ export default async function Command() {
         });
       } catch (error) {
         // PID might be stale, fallback to generic pkill
+        console.log(error);
         const killProcess = spawn("pkill", ["-f", "afplay"]);
         killProcess.on("close", () => {
           showToast({
@@ -78,11 +80,6 @@ export default async function Command() {
     // Clear the playback state
     clearPlaybackState();
   } catch (error) {
-    console.error("Command error:", error);
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Error",
-      message: "Failed to stop music",
-    });
+    await showFailureToast(error);
   }
 }

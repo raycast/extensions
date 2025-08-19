@@ -1,7 +1,6 @@
 import { showToast, Toast, environment } from "@raycast/api";
 import { createClient } from "@supabase/supabase-js";
 import { spawn } from "child_process";
-import fetch from "node-fetch";
 import { writeFileSync, unlinkSync, existsSync, mkdirSync } from "fs";
 import { join } from "path";
 import {
@@ -9,13 +8,8 @@ import {
   clearPlaybackState,
   savePlaybackState,
 } from "./shared-state";
-
-interface MeditationTrack {
-  name: string;
-  url: string;
-  size: number;
-  path: string;
-}
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from "./consts";
+import { MeditationTrack } from "./interfaces";
 
 export default async function Command() {
   try {
@@ -24,7 +18,7 @@ export default async function Command() {
     if (existingState && existingState.isPlaying && existingState.pid) {
       try {
         process.kill(existingState.pid, "SIGTERM");
-      } catch (error) {
+      } catch {
         console.error(
           "Failed to stop previous audio using PID, falling back to generic stop.",
         );
@@ -40,11 +34,6 @@ export default async function Command() {
       title: "🧘‍♀️ Preparing...",
       message: "Loading meditation session",
     });
-
-    // Supabase configuration
-    const SUPABASE_URL = "https://fbrrpowisxjwnrsgvuek.supabase.co";
-    const SUPABASE_ANON_KEY =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZicnJwb3dpc3hqd25yc2d2dWVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3ODAzNTMsImV4cCI6MjA2MDM1NjM1M30.JVTbW6u6BlDG0FGkU-8XrI6xXjvOosWrxxurJKcD7tI";
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -127,6 +116,7 @@ export default async function Command() {
             unlinkSync(tempFilePath);
           } catch (e) {
             // Ignore cleanup errors
+            console.error("Failed to clean up temp file:", e);
           }
         }
 

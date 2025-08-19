@@ -4,10 +4,16 @@ import {
   savePlaybackState,
   clearPlaybackState,
 } from "./shared-state";
+import { showFailureToast } from "@raycast/utils";
 
 export default async function Command() {
   try {
     const currentState = loadPlaybackState();
+
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "⏸ Pausing...",
+    });
 
     if (currentState) {
       if (currentState.isPlaying && currentState.pid) {
@@ -22,20 +28,14 @@ export default async function Command() {
             isPaused: true,
           });
 
-          showToast({
-            style: Toast.Style.Success,
-            title: "⏸ Paused",
-            message: currentState.currentTrack
-              ? `"${currentState.currentTrack.name}" paused`
-              : "Looma.FM music paused",
-          });
+          toast.title = "⏸ Paused";
+          toast.style = Toast.Style.Success;
+          toast.message = currentState.currentTrack
+            ? `"${currentState.currentTrack.name}" paused`
+            : "Looma.FM music paused";
         } catch (error) {
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Pause Error",
-            message: "Could not pause music - process may have already ended",
-          });
-          // Clear state since process is likely gone
+          await showFailureToast(error);
+
           clearPlaybackState();
         }
       } else if (currentState.isPaused && currentState.currentTrack) {
@@ -46,31 +46,20 @@ export default async function Command() {
           isPaused: false, // Signal to resume
         });
 
-        showToast({
-          style: Toast.Style.Success,
-          title: "▶️ Resume",
-          message: `Open Looma.FM Music to resume "${currentState.currentTrack.name}"`,
-        });
+        toast.title = "▶️ Resume";
+        toast.style = Toast.Style.Success;
+        toast.message = `Open Looma.FM Music to resume "${currentState.currentTrack.name}"`;
       } else {
-        showToast({
-          style: Toast.Style.Animated,
-          title: "No Music Playing",
-          message: "Open Looma.FM Music to start streaming",
-        });
+        toast.title = "No Music Playing";
+        toast.style = Toast.Style.Success;
+        toast.message = "Open Looma.FM Music to start streaming";
       }
     } else {
-      // No saved state - no specific process to target
-      showToast({
-        style: Toast.Style.Animated,
-        title: "No Music Playing",
-        message: "Open Looma.FM Music to start streaming",
-      });
+      toast.title = "No Music Playing";
+      toast.style = Toast.Style.Success;
+      toast.message = "Open Looma.FM Music to start streaming";
     }
   } catch (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Error",
-      message: "Failed to pause music",
-    });
+    await showFailureToast(error);
   }
 }
