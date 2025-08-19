@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [Fix Today view showing tomorrow's tasks] - {PR_MERGE_DATE}
+## [Fix Today view showing tomorrow's tasks] - 2025-08-19
 
 - **Fixed Today view filtering**: Resolved an issue where recurring tasks due tomorrow were incorrectly appearing in the Today view
 - **Improved date comparison logic**: Enhanced the date filtering algorithm to properly handle timezone differences and recurring task dates
