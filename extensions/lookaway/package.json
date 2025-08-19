@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lookaway",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "title": "Lookaway",
   "description": "Control the Lookaway app for managing breaks.",
   "icon": "lookaway-icon.png",
