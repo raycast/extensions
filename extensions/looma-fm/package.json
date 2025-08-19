@@ -54,7 +54,6 @@
   "dependencies": {
     "@raycast/api": "^1.100.3",
     "@supabase/supabase-js": "^2.45.0",
-    "node-fetch": "^3.3.2",
     "react": "^18.0.0"
   },
   "devDependencies": {
