@@ -14,7 +14,7 @@ const RETRY_DELAY_BASE = 30000; // 30 seconds base delay
  * Generate a unique ID for a scrobble
  */
 function generateScrobbleId(): string {
-  return `scrobble_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  return `scrobble_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 }
 
 /**
