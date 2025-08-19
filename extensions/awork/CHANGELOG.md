@@ -1,5 +1,10 @@
 # awork Changelog
 
+## [] - {PR_Merge_Date}
+
+- Added option to show tasks with status done
+- Added option to show projects with status closed
+
 ## [Bug Fix] - 2025-06-04
 
 - Added error response when authenticating fails
