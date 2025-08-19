@@ -195,9 +195,8 @@ export async function processQueue(): Promise<ScrobbleResult> {
     };
   } catch (error) {
     // Reset processing state on error
-    const currentState = await getQueueState();
-    currentState.processing = false;
-    await saveQueueState(currentState);
+    state.processing = false;
+    await saveQueueState(state);
 
     return {
       success: false,
