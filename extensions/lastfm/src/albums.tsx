@@ -11,7 +11,6 @@ import { PeriodDropdown } from "./components/period";
 import { ListResults } from "./components/list";
 import { GridResults } from "./components/grid";
 import { generateMusicServiceAction } from "./lib/utils";
-import type { ItemProps } from "./types";
 
 interface AlbumItemProps {
   key: string;
