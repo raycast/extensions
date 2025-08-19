@@ -1,5 +1,12 @@
 # Granola Changelog
 
+## [1.5.1] - {PR_MERGE_DATE}
+
+### 🔧 Bug Fixes
+- Add support for WorkOS authentication tokens
+- Maintain backward compatibility with Cognito tokens  
+- Update API client version to 6.157.0
+
 ## [1.5] - 2025-07-14
 
 ### 🚀 Major New Features
