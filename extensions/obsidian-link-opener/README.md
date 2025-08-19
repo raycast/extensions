@@ -46,7 +46,7 @@ Configure the extension in Raycast preferences:
 
 ## Usage
 
-### Open Obsidian Link
+### Open Link
 The main command that displays a list of all notes with URLs in their frontmatter. You can:
 - Search notes by title or URL
 - Open URLs in your default browser
@@ -54,7 +54,7 @@ The main command that displays a list of all notes with URLs in their frontmatte
 - Quickly open other URLs from the same note using keyboard shortcuts
 - URLs within each note are sorted with homepage first, then alphabetically by property name
 
-### Select Obsidian Vault
+### Select Vault
 Choose which Obsidian vault to scan for URLs. The extension remembers your selection for future use.
 
 ### Quick Access to Other URLs

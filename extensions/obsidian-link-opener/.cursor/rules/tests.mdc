@@ -1,0 +1,11 @@
+---
+description: writing and running tests
+globs: 
+alwaysApply: false
+---
+- Tests in `test/` directory with `.test.ts` extension
+- Use `bun test` to run tests.
+- Tests use `vitest`.
+- Mocks for Raycast API in `test/mocks/`
+- Use explicit assertions and descriptive test names
+

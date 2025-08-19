@@ -9,13 +9,13 @@
   "commands": [
     {
       "name": "index",
-      "title": "Open Obsidian Link",
+      "title": "Open Link",
       "description": "Open URLs from Obsidian notes' frontmatter",
       "mode": "view"
     },
     {
       "name": "select-vault",
-      "title": "Select Obsidian Vault",
+      "title": "Select Vault",
       "description": "Choose which Obsidian vault to use",
       "mode": "view"
     }
