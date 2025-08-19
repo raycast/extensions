@@ -1,39 +1,21 @@
 import React from "react";
-import {
-  ActionPanel,
-  showToast,
-  Icon,
-  ToastStyle,
-  getPreferenceValues,
-  List,
-  OpenInBrowserAction,
-  CopyToClipboardAction,
-} from "@raycast/api";
+import { ActionPanel, showToast, Icon, Toast, List, Action } from "@raycast/api";
 
 // Hooks
-import useLastFm from "./hooks/useLastfm";
+import { useTopTracks } from "./hooks/useTopTracks";
+import { useRecentTracks } from "./hooks/useRecentTracks";
 
 // Types
-import type { Track, TopTrack } from "@/types/SongResponse";
+import type { Track, TopTrack } from "@/types";
 
 const LastFm: React.FC = () => {
-  const { username, apikey, period } = getPreferenceValues();
-
   // Fetch songs
-  const {
-    loading: topLoading,
-    error: topError,
-    songs: topSongs,
-  } = useLastFm({ username, apikey, period, limit: "6", method: "top" });
+  const { loading: topLoading, error: topError, songs: topSongs } = useTopTracks({ limit: "6" });
 
-  const {
-    loading: recentLoading,
-    error: recentError,
-    songs: recentSongs,
-  } = useLastFm({ username, apikey, period, limit: "10", method: "recent" });
+  const { loading: recentLoading, error: recentError, songs: recentSongs } = useRecentTracks({ limit: "10" });
 
   if (recentError !== null || topError !== null) {
-    showToast(ToastStyle.Failure, "Something went wrong.", String(recentError || topError));
+    showToast(Toast.Style.Failure, "Something went wrong.", String(recentError || topError));
   }
 
   return (
@@ -54,9 +36,9 @@ const LastFm: React.FC = () => {
               accessoryIcon={Icon.Star}
               actions={
                 <ActionPanel>
-                  <OpenInBrowserAction url={song.url} title="Open on Last.fm" />
-                  <CopyToClipboardAction title="Copy URL to Clipboard" content={song.url} />
-                  <CopyToClipboardAction title="Copy Name and Artist" content={`${song.name} - ${artist}`} />
+                  <Action.OpenInBrowser url={song.url} title="Open on Last.fm" />
+                  <Action.CopyToClipboard title="Copy URL to Clipboard" content={song.url} />
+                  <Action.CopyToClipboard title="Copy Name and Artist" content={`${song.name} - ${artist}`} />
                 </ActionPanel>
               }
             />
@@ -79,9 +61,9 @@ const LastFm: React.FC = () => {
               accessoryTitle={song.playcount ? `${song.playcount} plays` : undefined}
               actions={
                 <ActionPanel>
-                  <OpenInBrowserAction url={song.url} title="Open on Last.fm" />
-                  <CopyToClipboardAction title="Copy URL to Clipboard" content={song.url} />
-                  <CopyToClipboardAction title="Copy Name and Artist" content={`${song.name} - ${artist}`} />
+                  <Action.OpenInBrowser url={song.url} title="Open on Last.fm" />
+                  <Action.CopyToClipboard title="Copy URL to Clipboard" content={song.url} />
+                  <Action.CopyToClipboard title="Copy Name and Artist" content={`${song.name} - ${artist}`} />
                 </ActionPanel>
               }
             />
