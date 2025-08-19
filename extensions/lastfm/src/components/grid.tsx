@@ -11,7 +11,9 @@ interface GridItemProps {
 
 interface GridResultsProps {
   items: GridItemProps[];
-  isLoading?: boolean;
+  interface GridResultsProps {
+  items: GridItemProps[];
+}
 }
 
 export function GridResults(props: GridResultsProps) {
