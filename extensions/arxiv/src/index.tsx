@@ -92,7 +92,6 @@ export default function Command() {
       }
     >
       <List.EmptyView icon={{ source: "../assets/arxiv-logo.png" }} title={title} />
-
       <List.Section title="Results" subtitle={filteredData?.length + ""}>
         {filteredData?.map((searchResult: SearchResult) =>
           constructSearchListItem(searchResult, citationStyle, handleSetCitationStyle, preferences.accessoryDisplay)
@@ -149,8 +148,8 @@ function SearchListItem({
 
   // Generate citation for tooltip
   const paperData: SearchResult = {
-    id: [id],
-    title: [title],
+    id: id,
+    title: title,
     authors,
     published,
     updated,
@@ -219,11 +218,11 @@ function constructSearchListItem(
 ) {
   return (
     <SearchListItem
-      key={searchResult.id ? searchResult.id[0] : ""}
-      id={searchResult.id ? searchResult.id[0] : ""}
+      key={searchResult.id || ""}
+      id={searchResult.id || ""}
       published={searchResult.published}
       updated={searchResult.updated}
-      title={searchResult.title ? searchResult.title[0] : ""}
+      title={searchResult.title || ""}
       summary={searchResult.summary}
       authors={searchResult.authors}
       category={searchResult.category ? searchResult.category : ""}

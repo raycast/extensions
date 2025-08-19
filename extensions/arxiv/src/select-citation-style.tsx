@@ -1,15 +1,14 @@
-import { Action, ActionPanel, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, LocalStorage, showHUD } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { CitationStyle, CITATION_STYLES, DEFAULT_CITATION_STYLE } from "./citations";
-
-const STORAGE_KEY = "selectedCitationStyle";
+import { CITATION_STYLE_STORAGE_KEY } from "./constants";
 
 export default function SelectCitationStyle() {
   const [citationStyle, setCitationStyle] = useState<CitationStyle>(DEFAULT_CITATION_STYLE);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    LocalStorage.getItem<string>(STORAGE_KEY).then((storedStyle) => {
+    LocalStorage.getItem<string>(CITATION_STYLE_STORAGE_KEY).then((storedStyle) => {
       if (storedStyle && isValidCitationStyle(storedStyle)) {
         setCitationStyle(storedStyle as CitationStyle);
       }
@@ -19,12 +18,8 @@ export default function SelectCitationStyle() {
 
   const handleSelectStyle = async (style: CitationStyle) => {
     setCitationStyle(style);
-    await LocalStorage.setItem(STORAGE_KEY, style);
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Citation Style Updated",
-      message: `Default style set to ${style.toUpperCase()}`,
-    });
+    await LocalStorage.setItem(CITATION_STYLE_STORAGE_KEY, style);
+    await showHUD(`Citation style set to ${style.toUpperCase()}`);
   };
 
   return (

@@ -1,10 +1,10 @@
 import { Color } from "@raycast/api";
 
 export interface SearchResult {
-  id: string[];
+  id: string;
   published: string;
   updated?: string;
-  title: string[];
+  title: string;
   summary?: string;
   authors: string[];
   category: string;

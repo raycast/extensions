@@ -87,15 +87,31 @@ function hasAuthors(authors?: string[]): boolean {
 }
 
 export function formatBibTeX(paper: SearchResult): string {
-  const rawArxivId = paper.id[0].split("/abs/")[1] || paper.id[0];
+  const rawArxivId = paper.id.split("/abs/")[1] || paper.id;
   const arxivId = validateArxivId(rawArxivId);
   const year = new Date(paper.published).getFullYear();
   const authors = safeAuthors(paper.authors);
-  const firstAuthorLastName = hasAuthors(paper.authors) ? escapeHtml(authors[0].split(" ").slice(-1)[0]) : "Unknown";
-  const entryKey = `${firstAuthorLastName}${year}${arxivId.replace(".", "")}`;
+  const firstAuthorLastName = hasAuthors(paper.authors)
+    ? authors[0]
+        .split(" ")
+        .slice(-1)[0]
+        .toLowerCase()
+        .replace(/[^a-z]/g, "")
+    : "unknown";
+
+  // Extract first meaningful word from title (skip articles and common words)
+  const titleWords = paper.title.toLowerCase().split(/\s+/);
+  const skipWords = ["a", "an", "the", "on", "in", "of", "for", "and", "or", "but", "with", "to"];
+  const firstTitleWord =
+    titleWords
+      .find((word) => !skipWords.includes(word) && word.replace(/[^a-z]/g, "").length > 0)
+      ?.replace(/[^a-z]/g, "") || "paper";
+
+  // Zotero-style entry key: authorYearWord (e.g., doe2023deep)
+  const entryKey = `${firstAuthorLastName}${year}${firstTitleWord}`;
 
   const authorString = hasAuthors(paper.authors) ? authors.map(escapeHtml).join(" and ") : "Unknown";
-  const title = escapeHtml(paper.title[0].replace(/[\n\r]+/g, " ").trim());
+  const title = escapeHtml(paper.title.replace(/[\n\r]+/g, " ").trim());
 
   let bibtex = `@article{${entryKey},
   author = {${authorString}},
@@ -125,8 +141,8 @@ export function formatBibTeX(paper: SearchResult): string {
 export function formatAPA(paper: SearchResult): string {
   const year = new Date(paper.published).getFullYear();
   const authors = formatAuthorsAPA(paper.authors);
-  const title = escapeHtml(paper.title[0].replace(/[\n\r]+/g, " ").trim());
-  const rawArxivId = paper.id[0].split("/abs/")[1] || paper.id[0];
+  const title = escapeHtml(paper.title.replace(/[\n\r]+/g, " ").trim());
+  const rawArxivId = paper.id.split("/abs/")[1] || paper.id;
   const arxivId = validateArxivId(rawArxivId);
 
   let citation = `${authors} (${year}). ${title}. arXiv preprint arXiv:${arxivId}`;
@@ -140,8 +156,8 @@ export function formatAPA(paper: SearchResult): string {
 
 export function formatMLA(paper: SearchResult): string {
   const authors = formatAuthorsMLA(paper.authors);
-  const title = escapeHtml(paper.title[0].replace(/[\n\r]+/g, " ").trim());
-  const rawArxivId = paper.id[0].split("/abs/")[1] || paper.id[0];
+  const title = escapeHtml(paper.title.replace(/[\n\r]+/g, " ").trim());
+  const rawArxivId = paper.id.split("/abs/")[1] || paper.id;
   const arxivId = validateArxivId(rawArxivId);
   const date = new Date(paper.published);
   const formattedDate = `${date.getDate()} ${getMonthName(date.getMonth())} ${date.getFullYear()}`;
@@ -151,8 +167,8 @@ export function formatMLA(paper: SearchResult): string {
 
 export function formatChicago(paper: SearchResult): string {
   const authors = formatAuthorsChicago(paper.authors);
-  const title = escapeHtml(paper.title[0].replace(/[\n\r]+/g, " ").trim());
-  const rawArxivId = paper.id[0].split("/abs/")[1] || paper.id[0];
+  const title = escapeHtml(paper.title.replace(/[\n\r]+/g, " ").trim());
+  const rawArxivId = paper.id.split("/abs/")[1] || paper.id;
   const arxivId = validateArxivId(rawArxivId);
   const year = new Date(paper.published).getFullYear();
 
@@ -167,8 +183,8 @@ export function formatChicago(paper: SearchResult): string {
 
 export function formatIEEE(paper: SearchResult): string {
   const authors = formatAuthorsIEEE(paper.authors);
-  const title = escapeHtml(paper.title[0].replace(/[\n\r]+/g, " ").trim());
-  const rawArxivId = paper.id[0].split("/abs/")[1] || paper.id[0];
+  const title = escapeHtml(paper.title.replace(/[\n\r]+/g, " ").trim());
+  const rawArxivId = paper.id.split("/abs/")[1] || paper.id;
   const arxivId = validateArxivId(rawArxivId);
   const year = new Date(paper.published).getFullYear();
   const month = getMonthName(new Date(paper.published).getMonth());
@@ -184,8 +200,8 @@ export function formatIEEE(paper: SearchResult): string {
 
 export function formatACM(paper: SearchResult): string {
   const authors = formatAuthorsACM(paper.authors);
-  const title = escapeHtml(paper.title[0].replace(/[\n\r]+/g, " ").trim());
-  const rawArxivId = paper.id[0].split("/abs/")[1] || paper.id[0];
+  const title = escapeHtml(paper.title.replace(/[\n\r]+/g, " ").trim());
+  const rawArxivId = paper.id.split("/abs/")[1] || paper.id;
   const arxivId = validateArxivId(rawArxivId);
   const year = new Date(paper.published).getFullYear();
 
@@ -200,8 +216,8 @@ export function formatACM(paper: SearchResult): string {
 
 export function formatHarvard(paper: SearchResult): string {
   const authors = formatAuthorsHarvard(paper.authors);
-  const title = escapeHtml(paper.title[0].replace(/[\n\r]+/g, " ").trim());
-  const rawArxivId = paper.id[0].split("/abs/")[1] || paper.id[0];
+  const title = escapeHtml(paper.title.replace(/[\n\r]+/g, " ").trim());
+  const rawArxivId = paper.id.split("/abs/")[1] || paper.id;
   const arxivId = validateArxivId(rawArxivId);
   const year = new Date(paper.published).getFullYear();
 
@@ -216,8 +232,8 @@ export function formatHarvard(paper: SearchResult): string {
 
 export function formatTurabian(paper: SearchResult): string {
   const authors = formatAuthorsTurabian(paper.authors);
-  const title = escapeHtml(paper.title[0].replace(/[\n\r]+/g, " ").trim());
-  const rawArxivId = paper.id[0].split("/abs/")[1] || paper.id[0];
+  const title = escapeHtml(paper.title.replace(/[\n\r]+/g, " ").trim());
+  const rawArxivId = paper.id.split("/abs/")[1] || paper.id;
   const arxivId = validateArxivId(rawArxivId);
   const year = new Date(paper.published).getFullYear();
 

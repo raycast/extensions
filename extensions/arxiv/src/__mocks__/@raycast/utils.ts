@@ -10,3 +10,5 @@ export const useCachedPromise = jest.fn(() => {
 export const useCachedState = jest.fn((_key, initialValue) => {
   return [initialValue, jest.fn()];
 });
+
+export const showFailureToast = jest.fn(() => Promise.resolve());

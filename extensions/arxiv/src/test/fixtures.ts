@@ -1,10 +1,10 @@
 import { SearchResult } from "../types";
 
 export const mockSearchResult: SearchResult = {
-  id: ["http://arxiv.org/abs/2301.12345"],
+  id: "http://arxiv.org/abs/2301.12345",
   published: "2023-01-15T10:30:00Z",
   updated: "2023-01-20T14:00:00Z",
-  title: ["Deep Learning for Natural Language Processing: A Survey"],
+  title: "Deep Learning for Natural Language Processing: A Survey",
   summary: "This paper provides a comprehensive survey of deep learning techniques for NLP.",
   authors: ["John Doe", "Jane Smith", "Bob Johnson"],
   category: "cs.CL, cs.AI",
@@ -61,12 +61,12 @@ export const mockSearchResultNoJournal: SearchResult = {
 
 export const mockSearchResultOldFormat: SearchResult = {
   ...mockSearchResult,
-  id: ["http://arxiv.org/abs/math.GT/0605123"],
+  id: "http://arxiv.org/abs/math.GT/0605123",
 };
 
 export const mockSearchResultSpecialChars: SearchResult = {
   ...mockSearchResult,
-  title: ['Machine Learning & Deep Learning: <Theory> and "Practice"'],
+  title: 'Machine Learning & Deep Learning: <Theory> and "Practice"',
   authors: ["José García-López", "François D'Alembert", "Müller-Schmidt"],
 };
 

@@ -5,9 +5,9 @@ import {
   mockXMLResponseMalformed,
   mockXMLResponseMissingFields,
 } from "./test/fixtures";
-import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
-jest.mock("@raycast/api");
+jest.mock("@raycast/utils");
 
 describe("XML Parser Utils", () => {
   let consoleErrorSpy: jest.SpyInstance;
@@ -41,7 +41,7 @@ describe("XML Parser Utils", () => {
 
       expect(results).toHaveLength(1);
       expect(results[0]).toMatchObject({
-        title: ["Deep Learning for Natural Language Processing: A Survey"],
+        title: "Deep Learning for Natural Language Processing: A Survey",
         authors: ["John Doe", "Jane Smith", "Bob Johnson"],
         category: "cs.CL, cs.AI",
         published: "2023-01-15T10:30:00Z",
@@ -66,7 +66,7 @@ describe("XML Parser Utils", () => {
       const results = await parseResponse(response);
 
       expect(results).toEqual([]);
-      expect(showToast).not.toHaveBeenCalled();
+      expect(showFailureToast).not.toHaveBeenCalled();
     });
 
     it("should handle missing fields gracefully", async () => {
@@ -79,7 +79,7 @@ describe("XML Parser Utils", () => {
 
       expect(results).toHaveLength(1);
       expect(results[0]).toMatchObject({
-        title: ["Paper Without Authors or Summary"],
+        title: "Paper Without Authors or Summary",
         authors: [],
         category: "cs.LG",
         published: "2023-01-15T10:30:00Z",
@@ -97,9 +97,7 @@ describe("XML Parser Utils", () => {
       });
 
       await expect(parseResponse(response)).rejects.toThrow(ArxivParseError);
-      expect(showToast).toHaveBeenCalledWith({
-        style: Toast.Style.Failure,
-        title: "Search Failed",
+      expect(showFailureToast).toHaveBeenCalledWith("Search Failed", {
         message: "Unable to connect to arXiv. Please try again later.",
       });
       // Verify error was logged (but suppressed from output)
@@ -125,9 +123,7 @@ describe("XML Parser Utils", () => {
       });
 
       await expect(parseResponse(response)).rejects.toThrow(ArxivParseError);
-      expect(showToast).toHaveBeenCalledWith({
-        style: Toast.Style.Failure,
-        title: "Search Error",
+      expect(showFailureToast).toHaveBeenCalledWith("Search Error", {
         message: "Failed to process search results. Please try again.",
       });
     });
@@ -139,9 +135,7 @@ describe("XML Parser Utils", () => {
       });
 
       await expect(parseResponse(response)).rejects.toThrow(ArxivParseError);
-      expect(showToast).toHaveBeenCalledWith({
-        style: Toast.Style.Failure,
-        title: "Parse Error",
+      expect(showFailureToast).toHaveBeenCalledWith("Parse Error", {
         message: "Received invalid data from arXiv. Please try again.",
       });
     });

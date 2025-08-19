@@ -26,7 +26,7 @@ describe("Citation Formatting", () => {
   describe("formatBibTeX", () => {
     it("should format a standard paper correctly", () => {
       const result = formatBibTeX(mockSearchResult);
-      expect(result).toContain("@article{Doe2023230112345");
+      expect(result).toContain("@article{doe2023deep");
       expect(result).toContain("author = {John Doe and Jane Smith and Bob Johnson}");
       expect(result).toContain("title = {Deep Learning for Natural Language Processing: A Survey}");
       expect(result).toContain("year = {2023}");
@@ -41,7 +41,7 @@ describe("Citation Formatting", () => {
     it("should handle papers without authors", () => {
       const result = formatBibTeX(mockSearchResultNoAuthors);
       expect(result).toContain("author = {Unknown}");
-      expect(result).toContain("@article{Unknown2023230112345");
+      expect(result).toContain("@article{unknown2023deep");
     });
 
     it("should handle papers without DOI", () => {
@@ -238,25 +238,25 @@ describe("Citation Formatting", () => {
 
   describe("arXiv ID validation", () => {
     it("should handle new format IDs", () => {
-      const paper = { ...mockSearchResult, id: ["http://arxiv.org/abs/2301.12345"] };
+      const paper = { ...mockSearchResult, id: "http://arxiv.org/abs/2301.12345" };
       const result = formatAPA(paper);
       expect(result).toContain("arXiv:2301.12345");
     });
 
     it("should handle new format IDs with version", () => {
-      const paper = { ...mockSearchResult, id: ["http://arxiv.org/abs/2301.12345v2"] };
+      const paper = { ...mockSearchResult, id: "http://arxiv.org/abs/2301.12345v2" };
       const result = formatAPA(paper);
       expect(result).toContain("arXiv:2301.12345v2");
     });
 
     it("should handle old format IDs", () => {
-      const paper = { ...mockSearchResult, id: ["http://arxiv.org/abs/math.GT/0605123"] };
+      const paper = { ...mockSearchResult, id: "http://arxiv.org/abs/math.GT/0605123" };
       const result = formatAPA(paper);
       expect(result).toContain("arXiv:math.GT/0605123");
     });
 
     it("should sanitize invalid IDs", () => {
-      const paper = { ...mockSearchResult, id: ["http://arxiv.org/abs/../../etc/passwd"] };
+      const paper = { ...mockSearchResult, id: "http://arxiv.org/abs/../../etc/passwd" };
       const result = formatAPA(paper);
       expect(result).toContain("arXiv:etc/passwd");
       expect(result).not.toContain("../");

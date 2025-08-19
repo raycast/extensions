@@ -1,6 +1,6 @@
 import xml2js from "xml2js";
 import { SearchResult } from "./types";
-import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 declare module "xml2js";
 
@@ -82,9 +82,7 @@ export async function parseResponse(response: Response): Promise<SearchResult[]>
     if (!response.ok) {
       const errorMessage = `arXiv API error: ${response.status} ${response.statusText}`;
       console.error(errorMessage);
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Search Failed",
+      await showFailureToast("Search Failed", {
         message: "Unable to connect to arXiv. Please try again later.",
       });
       throw new ArxivParseError(errorMessage);
@@ -100,13 +98,11 @@ export async function parseResponse(response: Response): Promise<SearchResult[]>
     }
 
     // Parse the XML string
-    return await parser.parseStringPromise(xml).then((result: ArxivResponse) => {
+    return await parser.parseStringPromise(xml).then(async (result: ArxivResponse) => {
       // Check if result and result.feed exist
       if (!result || !result.feed) {
         console.error("Invalid XML structure: missing feed", result);
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Parse Error",
+        await showFailureToast("Parse Error", {
           message: "Received invalid data from arXiv. Please try again.",
         });
         throw new ArxivParseError("Invalid XML structure: missing feed element");
@@ -147,10 +143,10 @@ export async function parseResponse(response: Response): Promise<SearchResult[]>
         const htmlUrl = `https://ar5iv.org/abs/${arxivId}`;
 
         return {
-          id: entry.id,
+          id: entry.id?.[0] ?? "",
           published,
           updated: updated || undefined,
-          title: entry.title,
+          title: entry.title?.[0] ?? "",
           summary: summary || undefined,
           authors: entry.author?.map((a: ArxivAuthor) => a.name?.[0] ?? "Unknown") ?? [],
           category: categories,
@@ -175,9 +171,7 @@ export async function parseResponse(response: Response): Promise<SearchResult[]>
     console.error("Error parsing arXiv XML response:", error);
 
     // Show user-friendly error message
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Search Error",
+    await showFailureToast("Search Error", {
       message: "Failed to process search results. Please try again.",
     });
 

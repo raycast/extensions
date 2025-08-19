@@ -1,4 +1,5 @@
 export const showToast = jest.fn();
+export const showHUD = jest.fn(() => Promise.resolve());
 export const getPreferenceValues = jest.fn(() => ({}));
 export const LocalStorage = {
   getItem: jest.fn(),
