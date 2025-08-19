@@ -7,7 +7,7 @@ import { useTopSongs } from "./hooks/useTopSongs";
 // Types
 import type { TopTrack } from "@/types/SongResponse";
 import { periodTypes } from "./types";
-import { useTopTracks } from "./lib/use-lastfm";
+import { useTopTracks } from "./hooks/useTopTracks";
 import { PeriodDropdown } from "./components/period";
 import { ListResults } from "./components/list";
 import { GridResults } from "./components/grid";

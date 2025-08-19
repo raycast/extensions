@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { ActionPanel, showToast, Toast, getPreferenceValues, List, Grid, Action } from "@raycast/api";
 
 // Hooks
-import { useTopAlbums } from "./lib/use-lastfm";
+import { useTopAlbums } from "./hooks/useTopAlbums";
 
 // Types
 import type { Album } from "@/types/AlbumResponse";
