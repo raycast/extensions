@@ -1,6 +1,6 @@
 # Defbro Changelog
 
-## [Dynamic defbro path detection] - {PR_MERGE_DATE}
+## [Dynamic defbro path detection] - 2025-08-19
 
 - Dynamically detects defbro installation path instead of using hardcoded location
 - Supports multiple installation methods (Homebrew on Intel/ARM, manual installations)
