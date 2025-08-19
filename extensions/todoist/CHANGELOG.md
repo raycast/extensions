@@ -1,5 +1,12 @@
 # Todoist Changelog
 
+## [Fix Today view showing tomorrow's tasks] - 2025-08-19
+
+- **Fixed Today view filtering**: Resolved an issue where recurring tasks due tomorrow were incorrectly appearing in the Today view
+- **Improved date comparison logic**: Enhanced the date filtering algorithm to properly handle timezone differences and recurring task dates
+- **Fixed task grouping**: Ensured that filtered tasks are properly grouped without including unfiltered future tasks
+- **Better timezone handling**: Tasks are now compared at midnight in local timezone to avoid time-of-day confusion
+
 ## [Enhanced Natural Language Task Creation] - 2025-08-13
 
 - **Smart NLP Parsing**: Added comprehensive natural language parsing for task creation with real-time form updates
@@ -31,7 +38,7 @@
  - Add a priority mapping function to ensure the user-selected priority aligns with the priority value used in the backend.
 
 ## [Use confetti when completing tasks] - 2025-05-28
-- Add option to use the Raycast confetti command when completing tasks. 
+- Add option to use the Raycast confetti command when completing tasks.
 
 ## [Automatically create labels on quick add command] - 2025-05-09
 
