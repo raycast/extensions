@@ -10,9 +10,9 @@ async function getAccessToken() {
 
   let accessToken;
 
-  try {
-    // Try WorkOS tokens first (updated auth method)
-    if (jsonData.workos_tokens) {
+  // Try WorkOS tokens first (updated auth method)
+  if (jsonData.workos_tokens) {
+    try {
       let workosTokens;
       if (typeof jsonData.workos_tokens === "string") {
         workosTokens = JSON.parse(jsonData.workos_tokens);
@@ -23,10 +23,14 @@ async function getAccessToken() {
       if (workosTokens?.access_token) {
         accessToken = workosTokens.access_token;
       }
+    } catch {
+      // Silently continue to Cognito fallback if WorkOS parsing fails
     }
+  }
 
-    // Fallback to Cognito tokens for backward compatibility
-    if (!accessToken && jsonData.cognito_tokens) {
+  // Fallback to Cognito tokens for backward compatibility
+  if (!accessToken && jsonData.cognito_tokens) {
+    try {
       let cognitoTokens;
       if (typeof jsonData.cognito_tokens === "string") {
         cognitoTokens = JSON.parse(jsonData.cognito_tokens);
@@ -37,10 +41,9 @@ async function getAccessToken() {
       if (cognitoTokens?.access_token) {
         accessToken = cognitoTokens.access_token;
       }
+    } catch {
+      // Silently continue if Cognito parsing fails
     }
-  } catch (error) {
-    const parseError = error instanceof Error ? error : new Error(String(error));
-    throw new Error(`Failed to parse local access token: ${parseError.message}`);
   }
 
   if (!accessToken) {

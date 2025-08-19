@@ -28,56 +28,52 @@ export function useGranolaData(): GranolaDataState {
   const [panels, setPanels] = useState<PanelsByDocId | null>(null);
   const [isLoadingPanels, setIsLoadingPanels] = useState(true);
 
-  // Load panels from cache asynchronously
+  // Load panels from cache synchronously in useEffect
   useEffect(() => {
-    async function loadPanels() {
-      try {
-        setIsLoadingPanels(true);
-        const cacheData = await getCache();
-        const extractedPanels = extractPanelsFromCache(cacheData);
-        setPanels(extractedPanels);
-      } catch (error) {
-        console.error("[useGranolaData] Failed to load panels:", error);
-        setPanels(null);
-      } finally {
-        setIsLoadingPanels(false);
-      }
+    try {
+      const cacheData = getCache();
+      const extractedPanels = extractPanelsFromCache(cacheData);
+      setPanels(extractedPanels);
+    } catch {
+      // Silently handle cache loading errors
+      setPanels(null);
+    } finally {
+      setIsLoadingPanels(false);
     }
-
-    loadPanels();
   }, []);
 
   try {
     const noteData = fetchGranolaData("get-documents") as NoteData;
 
-    // Check loading state - consider both notes and panels loading
+    // Unified loading state
     const isLoading = noteData.isLoading === true || isLoadingPanels;
 
-    if (!noteData?.data && noteData.isLoading === true) {
+    // Handle loading state
+    if (isLoading) {
       return {
         noteData,
         panels,
-        isLoading,
+        isLoading: true,
         hasError: false,
       };
     }
 
     // Check for no data state
-    if (!noteData?.data && noteData.isLoading === false) {
+    if (!noteData?.data) {
       return {
         noteData,
         panels,
-        isLoading: isLoadingPanels, // Still might be loading panels
+        isLoading: false,
         hasError: true,
         error: new Error("No data available"),
       };
     }
 
-    // Success state (panels may still be loading)
+    // Success state
     return {
       noteData,
       panels,
-      isLoading,
+      isLoading: false,
       hasError: false,
     };
   } catch (error) {
