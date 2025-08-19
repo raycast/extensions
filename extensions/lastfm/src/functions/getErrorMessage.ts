@@ -4,6 +4,8 @@ export const getErrorMessage = (errorNumber: number): string => {
       return "User not found.";
     case 10:
       return "Invalid API key.";
+    case 17:
+      return "Authentication required. Auth login required for this operation";
     case 29:
       return "Rate limit exceeded. Please wait a while.";
     default:
