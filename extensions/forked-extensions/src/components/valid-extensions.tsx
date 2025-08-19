@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Action, ActionPanel, Icon, List, Toast, showToast, useNavigation } from "@raycast/api";
 import { showFailureToast, useCachedState } from "@raycast/utils";
 import { getAllExtensions } from "../api.js";
