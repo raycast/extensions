@@ -37,7 +37,8 @@ export function formatPrecip(mm?: number, units: Units = getUnits()): string | u
   if (typeof mm !== "number") return undefined;
   if (units === "imperial") {
     const inches = mm / 25.4;
-    return `${Number(inches.toFixed(2))} in`;
+    const inchesText = inches.toFixed(2).replace(/\.?0+$/, "");
+    return `${inchesText} in`;
   }
   return `${mm} mm`;
 }

@@ -1,8 +1,8 @@
 # Yr-new Changelog
 
-## [Initial Version] - 2025-08-18
+## [Initial Version] - {PR_MERGE_DATE}
 
-- Raycast extension for MET Norway weather forecasts
+- Raycast extension using The Norwegian Institute of Meteorology's open API for weather forcast. 
 - Search locations and manage favorites
 - Main view shows temperature, wind, precipitation; optional wind direction and sunrise/sunset
 - Detailed forecast with SVG graph (temperature, precipitation, icons, wind arrows)
