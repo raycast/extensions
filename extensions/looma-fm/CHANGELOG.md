@@ -1,6 +1,6 @@
-# Changelog
+# Looma.FM Changelog
 
-## [Unreleased] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Added new feature: Ambient music streaming with 99+ tracks by Adi Goldstein
 - Added new feature: Meditation sessions with single-track playback  
