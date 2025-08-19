@@ -1,13 +1,5 @@
-import {
-  ActionPanel,
-  List,
-  OpenInBrowserAction,
-  showToast,
-  ToastStyle,
-  Icon,
-  getPreferenceValues,
-  Action,
-} from "@raycast/api";
+import { ActionPanel, List, showToast, Toast, Icon, getPreferenceValues, Action } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import React from "react";
 import { useEffect, useState } from "react";
 import { getAuthToken, getSession } from "./functions/auth";
@@ -65,7 +57,7 @@ const Command: React.FC = () => {
           subtitle={error}
           actions={
             <ActionPanel>
-              <OpenInBrowserAction
+              <Action.OpenInBrowser
                 title="Open Extension Preferences"
                 icon={Icon.Gear}
                 url="raycast://extensions/eggsy/lastfm/preferences"
@@ -86,9 +78,9 @@ const Command: React.FC = () => {
           icon={Icon.Checkmark}
           actions={
             <ActionPanel>
-              <ActionPanel.Item
+              <Action
                 title="Reset Authentication"
-                icon={Icon.XmarkCircle}
+                icon={Icon.XMarkCircle}
                 onAction={async () => {
                   await removeSessionKey();
                   setIsAuthenticated(false);
@@ -130,7 +122,7 @@ const Command: React.FC = () => {
         icon={Icon.Checkmark}
         actions={
           <ActionPanel>
-            <ActionPanel.Item
+            <Action
               title="Complete Authentication"
               icon={Icon.Checkmark}
               onAction={async () => {
@@ -138,7 +130,10 @@ const Command: React.FC = () => {
                 const sessionResponse = await getSession(token);
 
                 if (!sessionResponse.success) {
-                  await showToast(ToastStyle.Failure, "Authentication Failed", sessionResponse.error);
+                  await showFailureToast({
+                    title: "Authentication Failed",
+                    message: sessionResponse.error,
+                  });
                   setIsLoading(false);
                   return;
                 }
@@ -149,12 +144,12 @@ const Command: React.FC = () => {
                     setIsAuthenticated(true);
                   }
                   await showToast(
-                    ToastStyle.Success,
+                    Toast.Style.Success,
                     "Authentication Successful",
                     "You can now use scrobbling features!",
                   );
                 } catch (error) {
-                  await showToast(ToastStyle.Failure, "Storage Error", "Failed to store authentication data");
+                  await showToast(Toast.Style.Failure, "Storage Error", "Failed to store authentication data");
                 }
                 setIsLoading(false);
               }}
