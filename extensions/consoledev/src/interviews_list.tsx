@@ -19,8 +19,8 @@ export default function InterviewsList() {
       searchBarPlaceholder="Filter interviews by name"
       isShowingDetail
     >
-      {feed?.items.map((interview, i) => (
-        <FeedItem item={formatInterview(interview)} key={interview.link + i} icon={Icon.Person} />
+      {feed?.items.map((interview) => (
+        <FeedItem item={formatInterview(interview)} key={interview.link} icon={Icon.Person} />
       ))}
     </List>
   );

@@ -1,6 +1,7 @@
 # Consoledev changelog
 
 ## [Major Rewrite + Support Windows] - {PR_MERGE_DATE}
+- Fix extension was no longer working
 - Description shown in Detail panel w/ Markdown formatting
 - Simplify parser to directly expose objects
 - Use Raycast hook (`useCachedPromise`) to benefit from caching
