@@ -1,6 +1,6 @@
 # Browser Bookmarks Changelog
 
-## [Fix Zen Support] - {PR_MERGE_DATE}
+## [Fix Zen Support] - 2025-08-19
 
 - Fix Bundle ID for Zen Browser.
 
