@@ -1,12 +1,8 @@
-import { Application, getPreferenceValues, showToast, Toast, open } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast, open } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 
+const preferences = getPreferenceValues<Preferences>();
 type SupportedBrowsers = "Safari" | "Chrome" | "Microsoft Edge" | "Arc" | "Brave Browser";
-
-interface Preferences {
-  browser: Application;
-  autoplay: boolean;
-}
 
 interface OsaError {
   stderr: string;
@@ -34,17 +30,16 @@ function runJS(browser: SupportedBrowsers | string, code: string): string {
  * Executes JavaScript inside the Endel tab in the selected browser.
  */
 async function runJSInEndelTab(code: string): Promise<string | false> {
-  const preferences = getPreferenceValues<Preferences>();
   const { browser } = preferences;
 
   try {
     const result = await runAppleScript(`
-      tell application "${browser.name}"
+      tell application "${browser?.name}"
         repeat with w in (every window)
           repeat with t in (every tab whose URL contains "app.endel.io") of w
             tell t
               try
-                return ${runJS(browser.name, code)}
+                return ${runJS(browser?.name || "", code)}
               on error errMsg
                 return "JS Error: " & errMsg
               end try
@@ -59,7 +54,7 @@ async function runJSInEndelTab(code: string): Promise<string | false> {
       await showToast({
         style: Toast.Style.Failure,
         title: "No Endel tab found",
-        message: "Make sure Endel is open in " + browser.name,
+        message: "Make sure Endel is open in " + browser?.name,
       });
       return false;
     }
@@ -72,7 +67,7 @@ async function runJSInEndelTab(code: string): Promise<string | false> {
       await showToast({
         style: Toast.Style.Failure,
         title: "JavaScript not allowed",
-        message: `Enable "Allow JavaScript from Apple Events" in ${browser.name}'s Develop menu.`,
+        message: `Enable "Allow JavaScript from Apple Events" in ${browser?.name}'s Develop menu.`,
       });
     } else {
       await showToast({
@@ -87,13 +82,12 @@ async function runJSInEndelTab(code: string): Promise<string | false> {
 }
 
 export async function openEndel(soundscape: string): Promise<void> {
-  const preferences = getPreferenceValues<Preferences>();
   const url = `https://app.endel.io/player/${soundscape}`;
 
   // Open the URL in the selected browser
   await open(url, preferences.browser);
 
-  if (preferences.autoplay) {
+  if (preferences.autoplay && preferences.browser) {
     // Wait for the page to load
     await new Promise((resolve) => setTimeout(resolve, 5000));
 

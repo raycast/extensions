@@ -3,9 +3,11 @@
   "name": "endel",
   "title": "Endel",
   "description": "Interact with the Endel player.",
-  
   "icon": "extension-icon.png",
   "author": "zach",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "categories": [
     "Media",
