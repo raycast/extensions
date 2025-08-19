@@ -1,18 +1,20 @@
+import getCache from "./getCache";
 import { Document } from "./types";
-import { getDocumentsList } from "./fetchData";
 
 /**
- * Get documents from API with error handling
+ * Get documents from cache with error handling
  */
-export async function getDocuments(): Promise<Document[]> {
-  return await getDocumentsList();
+export function getDocuments(): Document[] {
+  const cache = getCache();
+  const documents = Object.values(cache?.state?.documents || {}) as Document[];
+  return documents;
 }
 
 /**
  * Find a document by ID with validation
  */
-export async function findDocumentById(noteId: string): Promise<Document> {
-  const documents = await getDocuments();
+export function findDocumentById(noteId: string): Document {
+  const documents = getDocuments();
   const document = documents.find((doc) => doc.id === noteId);
 
   if (!document) {
@@ -25,9 +27,11 @@ export async function findDocumentById(noteId: string): Promise<Document> {
 /**
  * Get multiple documents by IDs
  */
-export async function findDocumentsByIds(
-  noteIds: string[],
-): Promise<Array<{ document: Document | null; noteId: string }>> {
-  const documents = await getDocuments();
-  return noteIds.map((noteId) => ({ noteId, document: documents.find((doc) => doc.id === noteId) || null }));
+export function findDocumentsByIds(noteIds: string[]): Array<{ document: Document | null; noteId: string }> {
+  const documents = getDocuments();
+
+  return noteIds.map((noteId) => ({
+    noteId,
+    document: documents.find((doc) => doc.id === noteId) || null,
+  }));
 }

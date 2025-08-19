@@ -1,14 +1,5 @@
 # Granola Changelog
 
-## [1.6] - {PR_MERGE_DATE}
-
-### ✨ New Tools
-- **Recipes Tool** - Use recipes from Granola within Raycast AI. 
-- **List Meetings Tool** - List meetings from Granola, with optional filtering by title, date, or folder.
-
-### 🗑 Removed
-- **Browse Folders** command removed as redundant. Use `Search Notes` with the folder filter instead.
-
 ## [1.5] - 2025-07-14
 
 ### 🚀 Major New Features
