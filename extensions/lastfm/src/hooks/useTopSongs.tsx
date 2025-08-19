@@ -31,8 +31,9 @@ export const useTopSongs = (tracks: TopTrack[]) => {
         subtitle: track.artist ? `by ${track.artist.name}` : undefined,
         icon: view === "list" ? image : undefined,
         content: view === "grid" ? image : undefined,
-        accessories: [{ text: track.playcount ? `${track.playcount} plays` : null }],
-        accessory: track.playcount ? { tooltip: track.playcount } : undefined,
+        ...(view === "list"
+          ? { accessories: [{ text: track.playcount ? `${track.playcount} plays` : null }] }
+          : { accessory: track.playcount ? { tooltip: track.playcount } : undefined }),
         actions: createTrackActions(track),
       };
     });
