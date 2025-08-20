@@ -22,8 +22,18 @@ export default function main() {
       });
     }
   });
-  closeMainWindow({
-    clearRootSearch: true,
-    popToRootType: PopToRootType.Immediate,
+  exec(command, (error) => {
+    if (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to locate cursor",
+        message: error.message,
+      });
+    } else {
+      closeMainWindow({
+        clearRootSearch: true,
+        popToRootType: PopToRootType.Immediate,
+      });
+    }
   });
 }
