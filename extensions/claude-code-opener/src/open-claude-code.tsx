@@ -12,6 +12,7 @@ import {
   confirmAlert,
   Alert,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { FAVORITE_ICON_NAMES, getIcon } from "./favorite-icons";
 import { getTerminalAdapter } from "./terminal-adapters";
 import { useState, useEffect, useMemo } from "react";
@@ -112,10 +113,8 @@ async function openInTerminal(favorite: Favorite, preferences: Preferences, onSu
     onSuccess();
     showSuccessToast("Opened in Terminal", favorite.name || getDirectoryName(favorite.path));
   } catch (error) {
-    showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast(error, {
       title: "Failed to open terminal",
-      message: error instanceof Error ? error.message : "Unknown error",
     });
   }
 }
@@ -229,10 +228,8 @@ export default function Command() {
       }
     } catch (error) {
       console.error("Failed to load favorites:", error);
-      showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(error, {
         title: "Failed to load favorites",
-        message: "Starting with empty list",
       });
     } finally {
       setIsLoading(false);
@@ -249,8 +246,7 @@ export default function Command() {
       setFavorites(newFavorites);
     } catch (error) {
       console.error("Failed to save favorites:", error);
-      showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(error, {
         title: "Failed to save favorites",
       });
     }

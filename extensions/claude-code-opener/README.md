@@ -9,7 +9,7 @@ This extension lets you save your most-used project directories and open them in
 ## Getting Started
 
 1. **Install from Raycast Store** - Search for "Claude Code Opener"
-2. **Configure once** - Tell it where Claude Code is installed (usually `~/.claude/code/claude`)
+2. **Configure once** - Tell it where Claude Code is installed (usually `~/.claude/local/claude`)
 3. **Add your projects** - Press `⌘N` and add directories you work with frequently
 4. **Start coding faster** - Search and open any project instantly
 
@@ -68,4 +68,4 @@ Open an issue at [github.com/stephendolan/raycast-claude-code-opener](https://gi
 
 ---
 
-Made with ❤️ by Stephen Kronish
+Made with ❤️ by Stephen Dolan

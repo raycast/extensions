@@ -1,6 +1,8 @@
 import { exec } from "child_process";
 import { promisify } from "util";
-import { writeFile, unlink } from "fs/promises";
+import { writeFile, unlink, mkdtemp, rmdir } from "fs/promises";
+import { tmpdir } from "os";
+import { join } from "path";
 import { TerminalAdapter } from "../types";
 
 const execAsync = promisify(exec);
@@ -8,6 +10,10 @@ const execAsync = promisify(exec);
 export class TerminalAppAdapter implements TerminalAdapter {
   name = "Terminal";
   bundleId = "com.apple.Terminal";
+
+  private escapeAppleScript(script: string): string {
+    return script.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  }
 
   async open(directory: string, claudeBinary: string): Promise<void> {
     const userShell = process.env.SHELL || "/bin/zsh";
@@ -19,22 +25,37 @@ clear
 '${escapedBinary}'
 exec ${userShell}`;
 
-    const scriptFile = `/tmp/terminal-cmd-${Date.now()}.sh`;
-    await writeFile(scriptFile, command, { mode: 0o644 });
+    const tempDir = await mkdtemp(join(tmpdir(), "claude-code-"));
+    const scriptFile = join(tempDir, "run.sh");
+    await writeFile(scriptFile, command, { mode: 0o600 });
 
-    const openScript = `
-      tell application "Terminal"
-        do script "${userShell} -l -i -c 'source ${scriptFile} && rm ${scriptFile}'"
-        activate
-      end tell
-    `;
+    const shellCommand = `${userShell} -l -i -c 'source ${scriptFile} && rm -rf ${tempDir}'`;
+    const escapedCommand = this.escapeAppleScript(shellCommand);
+
+    const openScript = `tell application "Terminal"
+do script "${escapedCommand}"
+activate
+end tell`;
 
     try {
-      await execAsync(`osascript -e '${openScript.replace(/'/g, "'\"'\"'").replace(/\n/g, "' -e '")}'`);
-    } finally {
-      setTimeout(() => {
-        unlink(scriptFile).catch(() => {});
-      }, 5000);
+      await execAsync(`osascript -e "${this.escapeAppleScript(openScript)}"`);
+
+      setTimeout(async () => {
+        try {
+          await unlink(scriptFile).catch(() => {});
+          await rmdir(tempDir).catch(() => {});
+        } catch (error) {
+          console.error("Failed to clean up temp files:", error);
+        }
+      }, 1000);
+    } catch (error) {
+      try {
+        await unlink(scriptFile).catch(() => {});
+        await rmdir(tempDir).catch(() => {});
+      } catch (cleanupError) {
+        console.error("Failed to clean up temp files after error:", cleanupError);
+      }
+      throw error;
     }
   }
 }
