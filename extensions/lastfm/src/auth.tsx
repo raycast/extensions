@@ -1,4 +1,13 @@
-import { ActionPanel, List, showToast, Toast, Icon, getPreferenceValues, Action } from "@raycast/api";
+import {
+  ActionPanel,
+  List,
+  showToast,
+  Toast,
+  Icon,
+  getPreferenceValues,
+  Action,
+  openExtensionPreferences,
+} from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import React from "react";
 import { useEffect, useState } from "react";
@@ -57,11 +66,7 @@ const Command: React.FC = () => {
           subtitle={error}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser
-                title="Open Extension Preferences"
-                icon={Icon.Gear}
-                url="raycast://extensions/eggsy/lastfm/preferences"
-              />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />
