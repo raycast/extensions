@@ -10,7 +10,7 @@ export type EntryProps = { children?: ReactNode };
 export function Entry(props: EntryProps) {
   const prefs = usePreferences();
 
-  let baseURL = prefs.serverUrl?.trim() || "https://api.solidtime.io";
+  let baseURL = prefs.serverUrl?.trim() || "https://api.solidtime.io/api";
 
   // Automatically append /api if it's not already present
   if (!baseURL.endsWith("/api")) {

@@ -2,15 +2,9 @@
  * https://github.com/solidtime-io/solidtime/tree/main/resources/js/packages/api/src
  * Modified the client to include the API key
  */
-
+import type { ApiOf, ZodiosBodyByAlias, ZodiosQueryParamsByAlias, ZodiosResponseByAlias } from "@zodios/core";
 import { getPreferenceValues } from "@raycast/api";
 import { createApiClient } from "./openapi.json.client";
-import type {
-  ApiOf,
-  ZodiosBodyByAlias,
-  ZodiosQueryParamsByAlias,
-  ZodiosResponseByAlias,
-} from "@zodios/core";
 
 export type SolidTimeApi = ApiOf<typeof api>;
 export type InvitationsIndexResponse = ZodiosResponseByAlias<SolidTimeApi, "getInvitations">;
