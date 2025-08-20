@@ -5,6 +5,9 @@
   "description": "Manage your clients, projects and time entries for Solidtime",
   "icon": "solidtime.png",
   "author": "cupcakearmy",
+  "contributors": [
+    "patricksthannon"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools"
@@ -38,6 +41,15 @@
       "type": "password",
       "required": true
     },
+    {
+      "name": "serverUrl",
+      "title": "SolidTime Server URL",
+      "description": "Enter your self-hosted SolidTime API URL (e.g., https://your-server:port). Leave empty to use the official API.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+
     {
       "name": "onTimeEntryAction",
       "description": "What should happen after a time entry is started or stopped",

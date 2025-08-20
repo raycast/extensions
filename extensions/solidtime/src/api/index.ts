@@ -3,11 +3,16 @@
  * Modified the client to include the API key
  */
 
-import type { ApiOf, ZodiosBodyByAlias, ZodiosQueryParamsByAlias, ZodiosResponseByAlias } from "@zodios/core";
+import { getPreferenceValues } from "@raycast/api";
 import { createApiClient } from "./openapi.json.client";
+import type {
+  ApiOf,
+  ZodiosBodyByAlias,
+  ZodiosQueryParamsByAlias,
+  ZodiosResponseByAlias,
+} from "@zodios/core";
 
 export type SolidTimeApi = ApiOf<typeof api>;
-
 export type InvitationsIndexResponse = ZodiosResponseByAlias<SolidTimeApi, "getInvitations">;
 
 export type CreateInvitationBody = ZodiosBodyByAlias<SolidTimeApi, "invite">;
@@ -103,8 +108,9 @@ export type ApiTokenIndexResponse = ZodiosResponseByAlias<SolidTimeApi, "getApiT
 export type CreateApiTokenBody = ZodiosBodyByAlias<SolidTimeApi, "createApiToken">;
 export type ApiToken = ApiTokenIndexResponse["data"][0];
 
-const api = createApiClient("https://app.solidtime.io/api", {
-  validate: "none",
-});
+const preferences = getPreferenceValues<{ serverUrl?: string }>();
+const baseUrl = preferences.serverUrl?.trim() || "https://app.solidtime.io/api";
+
+const api = createApiClient(baseUrl, { validate: "none" });
 
 export { api, createApiClient };

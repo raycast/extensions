@@ -8,9 +8,21 @@ import { usePreferences } from "../../utils/preferences.js";
 export type EntryProps = { children?: ReactNode };
 
 export function Entry(props: EntryProps) {
-  // Set API key for api client
   const prefs = usePreferences();
-  api.axios.defaults.headers.common["Authorization"] = `Bearer ${prefs.apiKey}`;
+
+  let baseURL = prefs.serverUrl?.trim() || "https://api.solidtime.io";
+
+  // Automatically append /api if it's not already present
+  if (!baseURL.endsWith("/api")) {
+    baseURL = baseURL.replace(/\/+$/, ""); // remove trailing slashes
+    baseURL += "/api";
+  }
+
+  api.axios.defaults.baseURL = baseURL;
+
+  if (prefs.apiKey && prefs.apiKey.trim().length > 0) {
+    api.axios.defaults.headers.common["Authorization"] = `Bearer ${prefs.apiKey}`;
+  }
 
   return (
     <QueryClientProvider client={queryClient}>
