@@ -75,7 +75,7 @@ export default function PromptList({
       await loadPrompts();
       showToast(Toast.Style.Success, "Prompt duplicated");
     } catch (error) {
-      showToast(Toast.Style.Failure, "Failed to duplicate prompt");
+      showFailureToast(error, { title: "Failed to duplicate prompt" });
     }
   }
 
