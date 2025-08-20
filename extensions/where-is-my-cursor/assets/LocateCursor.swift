@@ -24,7 +24,10 @@ struct Config: Codable {
 // MARK: - Configuration Loader
 class ConfigLoader {
     func loadConfig() -> Config? {
-        let url = Bundle.main.url(forResource: "locatecursor", withExtension: "json")!
+        guard let url = Bundle.main.url(forResource: "locatecursor", withExtension: "json") else {
+            print("Config file 'locatecursor.json' not found")
+            return nil
+        }
         do {
             let data = try Data(contentsOf: url)
             let decoder = JSONDecoder()
