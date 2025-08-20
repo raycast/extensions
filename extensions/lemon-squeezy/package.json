@@ -2,7 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lemon-squeezy",
   "title": "Lemon Squeezy",
-  "description": "",
+  "categories": ["Finance"],
+  "description": "Orders and Products in all your Stores",
   "icon": "extension_icon.png",
   "author": "xmok",
   "license": "MIT",
@@ -12,15 +13,21 @@
       "title": "API Key",
       "type": "password",
       "required": true,
-      "description": "",
+      "description": "API Key from Lemon Squeezy",
       "placeholder": "ey...XXX"
     }
   ],
   "commands": [
     {
+      "name": "search-orders",
+      "title": "Search Orders",
+      "description": "List all orders in all your stores",
+      "mode": "view"
+    },
+    {
       "name": "search-products",
       "title": "Search Products",
-      "description": "",
+      "description": "List all products in all your stores",
       "mode": "view"
     }
   ],
