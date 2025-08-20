@@ -47,7 +47,11 @@ Desktop.ini
 .idea/
 *.swp
 *.swo
-*~
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
 
 # Logs
 logs
