@@ -1,0 +1,18 @@
+# Dependencies
+/node_modules
+
+# Build files
+/dist
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Env files
+.env
+assets/LocateCursor.swift.bak
+
+*.DS_Store
+.DS_Store
+.DS_Store

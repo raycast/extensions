@@ -10,14 +10,15 @@ import { join } from "path";
 
 const helperPath = join(environment.assetsPath, "LocateCursor");
 
+// If you have a specific type for arguments, import it, otherwise use 'any' or define the shape:
 export default function main() {
-  const command = `"${helperPath}"`;
+  const command = `"${helperPath}" -p presentation`;
 
   exec(command, (error) => {
     if (error) {
       showToast({
         style: Toast.Style.Failure,
-        title: "Failed to locate cursor",
+        title: "Failed to start presentation mode",
         message: error.message,
       });
     }

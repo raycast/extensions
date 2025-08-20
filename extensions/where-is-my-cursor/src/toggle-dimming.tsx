@@ -11,7 +11,7 @@ import { join } from "path";
 const helperPath = join(environment.assetsPath, "LocateCursor");
 
 export default function main() {
-  const command = `"${helperPath}"`;
+  const command = `"${helperPath}" -p simple`;
 
   exec(command, (error) => {
     if (error) {
