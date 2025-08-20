@@ -1,0 +1,86 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "orpheus",
+  "title": "Orpheus",
+  "description": "Your friendly dino!",
+  "icon": "orpheus.png",
+  "author": "Orpheus",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "events",
+      "title": "Events",
+      "description": "Check latest Hack Club events!",
+      "mode": "view"
+    },
+      {
+      "name": "hcb",
+      "title": "hcb",
+      "description": "Track your HCB organization",
+      "mode": "view"
+    },
+    {
+      "name": "branding",
+      "title": "Branding",
+      "description": "Branding of Hack Club",
+      "mode": "view"
+    },
+    {
+      "name": "ysws",
+      "title": "YSWS",
+      "description": "Active YSWS programs",
+      "mode": "view"
+    },
+    {
+      "name": "scrappy",
+      "title": "Scrappy",
+      "description": "Your Scrapbook Posts :)",
+      "mode": "view"
+    },
+    {
+      "name": "scrapbook",
+      "title": "Scrapbook",
+      "description": "Other people's Scrapbook Posts",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "org-id",
+      "label": "HCB Org ID",
+      "description": "Enter slug of the HCB organization (hcb.hackclub.com/<slug>",
+      "type": "textfield",
+      "title": "HCB Org ID",
+      "required": true
+    },
+    {
+      "name": "scrapbook-user",
+      "label": "Scrapbook User",
+      "description": "Enter your Scrapbook username (scrapbook.hackclub.com/@<username>)",
+      "type": "textfield",
+      "title": "Scrapbook User",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.101.1",
+    "@raycast/utils": "^1.17.0",
+    "unirest": "^0.6.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
