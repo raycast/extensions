@@ -1,6 +1,6 @@
 # Zsh Aliases Changelog
 
-## [Added Zsh Aliases] - {PR_MERGE_DATE}
+## [Added Zsh Aliases] - 2025-08-20
 
 ### Added
 
