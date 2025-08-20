@@ -1,3 +1,3 @@
-# ray-mandarin-to-cantonese Changelog
+# Chinese to Jyutping Converter
 
 ## [Initial Version] - {PR_MERGE_DATE}

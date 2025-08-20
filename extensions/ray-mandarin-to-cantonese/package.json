@@ -10,7 +10,7 @@
     {
       "name": "convert-to-jyutping",
       "title": "Convert to Jyutping",
-      "description": "Convert Chinese text to Jyutping (MacOS only)",
+      "description": "Convert Chinese text to Jyutpin",
       "mode": "view",
       "arguments": [
         {

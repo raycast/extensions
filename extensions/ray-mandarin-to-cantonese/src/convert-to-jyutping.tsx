@@ -10,17 +10,13 @@ const execPromise = promisify(exec);
 const HISTORY_FILE = path.join(environment.supportPath, "jyutping-history.json");
 const MAX_HISTORY = 20;
 
-interface Arguments {
-  text: string;
-}
-
 interface HistoryItem {
   text: string;
   jyutping: string;
   timestamp: number;
 }
 
-export default function Command(props: { arguments: Arguments }) {
+export default function Command(props: { arguments: Arguments.ConvertToJyutping }) {
   const [searchText, setSearchText] = useState(props.arguments.text || "");
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
