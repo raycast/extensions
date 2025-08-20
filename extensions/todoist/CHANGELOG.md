@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [Fixed Create Task Project and Assignee Assignment] - 2025-08-20
+## [Fixed Create Task Project and Assignee Assignment] - {PR_MERGE_DATE}
 
 - **Fixed Create Task API Issue**: Switched from `quickAddTask` to `addTask` API to use structured parameters instead of relying on server-side NLP parsing
 - **Direct Parameter Passing**: Form selections (project, assignee, labels, priority, dates) are now passed directly to the API instead of being embedded in text content
