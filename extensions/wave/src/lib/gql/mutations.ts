@@ -28,5 +28,5 @@ const createProductOrService = `
 export const MUTATIONS = {
   createCustomer,
   deleteCustomer,
-  createProductOrService
+  createProductOrService,
 };

@@ -3,6 +3,8 @@
 ## [Enhance Invoice] - {PR_MERGE_DATE}
 
 - Enhance `Invoice` to show amounts due and paid
+- Move "Business Products And Services" to its own file
+- Add new product or service
 
 ## [Add & Remove Customers] - 2025-07-02
 

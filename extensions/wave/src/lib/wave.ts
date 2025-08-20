@@ -139,20 +139,28 @@ export const deleteCustomer = async (id: string) => {
   if (!result.data.customerDelete.didSucceed) throw new Error("Unknown Error");
 };
 
-export const useGetValidIncomeAccounts = (businessId: string, subtypes: Array<"INCOME" | "DISCOUNTS" | "OTHER_INCOME">) => useFetch(API_URL, {
-  ...common(),
-  body: JSON.stringify({
+export const useGetValidIncomeAccounts = (
+  businessId: string,
+  subtypes: Array<"INCOME" | "DISCOUNTS" | "OTHER_INCOME">,
+) =>
+  useFetch(API_URL, {
+    ...common(),
+    body: JSON.stringify({
       query: QUERIES.getValidIncomeAccounts,
       variables: {
         businessId,
-        subtypes
+        subtypes,
       },
     }),
     mapResult(
       result: Result<{
         business: {
           id: string;
-          accounts: Edges<{ id: string; name: string; subtype: {name: string; value: "INCOME" | "DISCOUNTS" | "OTHER_INCOME"} }>
+          accounts: Edges<{
+            id: string;
+            name: string;
+            subtype: { name: string; value: "INCOME" | "DISCOUNTS" | "OTHER_INCOME" };
+          }>;
         };
       }>,
     ) {
@@ -162,4 +170,4 @@ export const useGetValidIncomeAccounts = (businessId: string, subtypes: Array<"I
       };
     },
     initialData: [],
-})
+  });
