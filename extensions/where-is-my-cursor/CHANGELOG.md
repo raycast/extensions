@@ -10,7 +10,7 @@ This version introduces a major refactoring of the entire extension, providing m
 - **Enhanced `README.md`**: The documentation has been completely overhauled to be more comprehensive, user-friendly, and fun! 🗺️
 - **Removed Command**: The `dim-with-duration` command has been removed, as its functionality is now available through the new "Custom Locator" command.
 
-## [Version 2.1] - 2025-08-19
+## [Version 2.1] - {PR_MERGE_DATE}
 
 Refactored the extension to simplify the commands and add more flexibility.
 
