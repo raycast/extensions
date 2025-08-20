@@ -59,7 +59,7 @@ export default function PromptList({
       setPrompts((prev) => prev.filter((p) => p.id !== id));
       showToast(Toast.Style.Success, "Prompt deleted");
     } catch (error) {
-      showToast(Toast.Style.Failure, "Failed to delete prompt");
+      showFailureToast(error, { title: "Failed to delete prompt" });
     }
   }
 
