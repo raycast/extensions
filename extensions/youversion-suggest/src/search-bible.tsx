@@ -1,4 +1,4 @@
-import { List, showToast, Toast } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { getReferencesMatchingPhrase } from "youversion-suggest";
@@ -20,12 +20,8 @@ export default function Command() {
     [query],
     {
       keepPreviousData: true,
-      onError: (err) => {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Could not perform search",
-          message: String(err),
-        });
+      failureToastOptions: {
+        title: "Could not perform search",
       },
     },
   );
