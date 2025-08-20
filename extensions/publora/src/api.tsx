@@ -7,6 +7,11 @@ export const fetchPlatforms = async (api_key: string): Promise<Platform[]> => {
     },
   });
 
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(`Error fetching platforms: ${errorData.message}`);
+  }
+
   const data = await response.json();
 
   return data.connections as Platform[];

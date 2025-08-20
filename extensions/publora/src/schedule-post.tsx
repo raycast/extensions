@@ -6,12 +6,17 @@ import { Post, Platform } from "./types";
 import { fetchPlatforms, schedulePost } from "./api";
 
 export default function Command(props: LaunchProps<{ draftValues: Post }>) {
-  function handleSubmit(post: Post) {
-    schedulePost(api_key, post);
-    showToast({ title: "Submitted form", message: "See logs for submitted values" });
-    setContent("");
-    setDue(null);
-    setPlatforms([]);
+  async function handleSubmit(post: Post) {
+    try {
+      await schedulePost(api_key, post);
+      showToast({ title: "Submitted form", message: "Your post scheduled successfully" });
+      setContent("");
+      setDue(null);
+      setPlatforms([]);
+    } catch (error) {
+      console.error("Error scheduling post:", error);
+      showToast({ title: "Error", message: "Failed to schedule post" });
+    }
   }
 
   const api_key = getPreferenceValues<{ api_key: string }>().api_key;

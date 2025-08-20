@@ -11,7 +11,7 @@
     {
       "name": "schedule-post",
       "title": "Schedule Post",
-      "description": "Create and shedule a post in Publora",
+      "description": "Create and schedule a post in Publora",
       "mode": "view"
     }
   ],
