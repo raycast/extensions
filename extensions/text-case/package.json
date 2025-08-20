@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "text-case",
+  "title": "Aa",
+  "description": "Transform selected text case with smart cycling. Works globally across applications.",
+  "icon": "extension-icon.png",
+  "author": "robinn",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "text-case",
+      "title": "Aa",
+      "description": "Toggle case of selected text (UPPER ↔ lower ↔ Title Case)",
+      "mode": "no-view",
+      "shortcut": "cmd-option-t",
+      "keywords": ["case", "text", "transform", "uppercase", "lowercase", "titlecase"]
+    },
+    {
+      "name": "uppercase",
+      "title": "Uppercase",
+      "description": "Convert selected text to UPPERCASE",
+      "mode": "no-view",
+      "shortcut": "cmd-option-1",
+      "keywords": ["uppercase", "caps", "text"]
+    },
+    {
+      "name": "lowercase",
+      "title": "Lowercase",
+      "description": "Convert selected text to lowercase",
+      "mode": "no-view",
+      "shortcut": "cmd-option-2",
+      "keywords": ["lowercase", "text"]
+    },
+    {
+      "name": "titlecase",
+      "title": "Title Case",
+      "description": "Convert selected text to Title Case",
+      "mode": "no-view",
+      "shortcut": "cmd-option-3",
+      "keywords": ["titlecase", "capitalize", "text"]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.4",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
