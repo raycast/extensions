@@ -2259,5 +2259,6 @@
   "raycast/zoom": "zoom",
   "prashantv/zoom-meeting-control": "zoom-control",
   "reckoning-dev/zotero": "zotero",
-  "theherk/zoxide-git-projects": "zoxide-git-projects"
+  "theherk/zoxide-git-projects": "zoxide-git-projects",
+  "espenbye/zsh-aliases": "zsh-aliases"
 }
