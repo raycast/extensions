@@ -10,7 +10,7 @@ import { join } from "path";
 
 const helperPath = join(environment.assetsPath, "LocateCursor");
 
-// If you have a specific type for arguments, import it, otherwise use 'any' or define the shape:
+export default function main() {
 export default function main() {
   const command = `"${helperPath}" -p presentation`;
 
