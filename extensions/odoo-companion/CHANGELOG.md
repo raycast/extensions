@@ -4,7 +4,7 @@
 
 ### Features
 
-- **Bring You Own Key**: Fully compatible with every Odoo instances (Cloud/Self-Hosted)
+- **Bring Your Own Key**: Fully compatible with every Odoo instances (Cloud/Self-Hosted)
 - **Search Projects**: Quickly find and access Odoo projects with real-time search
 - **Search Helpdesk Teams**: Browse and navigate to helpdesk teams and tickets
 - **Direct Navigation**: One-click access to project tasks and helpdesk tickets in your browser
