@@ -133,7 +133,7 @@ export default function Command() {
       await showToast({
         style: Toast.Style.Success,
         title: "Settings saved",
-        message: "Default vibe agent updated successfully",
+        message: "Settings updated successfully",
       });
     } catch (error) {
       await showToast({
