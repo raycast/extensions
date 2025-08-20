@@ -1,6 +1,6 @@
 # Easy Vibe Changelog
 
-## [1.0.0] - 2025-08-19
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### ✨ Initial Release
 
