@@ -71,34 +71,18 @@ function cliPaths(): Record<string, string> {
   let cliPaths: Record<string, string> = {};
 
   if (isWin) {
+    const programsFolder = path.join(os.homedir(), "AppData", "Local", "Programs");
     cliPaths = {
-      Code: path.join(os.homedir(), "AppData", "Local", "Programs", "Microsoft VS Code", "bin", "code.cmd"),
-      "Code - Insiders": path.join(
-        os.homedir(),
-        "AppData",
-        "Local",
-        "Programs",
-        "Microsoft VS Code Insiders",
-        "bin",
-        "code-insiders.cmd"
-      ),
-      Cursor: path.join(
-        os.homedir(),
-        "AppData",
-        "Local",
-        "Programs",
-        "cursor",
-        "resources",
-        "app",
-        "bin",
-        "cursor.cmd"
-      ), // it also has code, which is an alias
-      Positron: path.join(process.env.ProgramFiles ?? "C:Program Files", "Positron", "bin", "positron.cmd"),
-      Trae: "/Applications/Trae.app/Contents/Resources/app/bin/marscode",
-      "Trae CN": "/Applications/Trae CN.app/Contents/Resources/app/bin/marscode",
-      VSCodium: "/Applications/VSCodium.app/Contents/Resources/app/bin/codium",
-      "VSCodium - Insiders": "/Applications/VSCodium - Insiders.app/Contents/Resources/app/bin/codium-insiders",
-      Windsurf: "/Applications/Windsurf.app/Contents/Resources/app/bin/windsurf",
+      Code: path.join(programsFolder, "Microsoft VS Code", "bin", "code.cmd"),
+      "Code - Insiders": path.join(programsFolder, "Microsoft VS Code Insiders", "bin", "code-insiders.cmd"),
+      Kiro: path.join(programsFolder, "Kiro", "bin", "kiro.cmd"),
+      Cursor: path.join(programsFolder, "cursor", "resources", "app", "bin", "cursor.cmd"),
+      Positron: path.join(programsFolder, "Positron", "bin", "positron.cmd"),
+      Trae: path.join(programsFolder, "Trae", "bin", "trae.cmd"),
+      "Trae CN": path.join(programsFolder, "Trae CN", "bin", "trae-cn.cmd"),
+      VSCodium: path.join(programsFolder, "VSCodium", "bin", "codium.cmd"),
+      "VSCodium - Insiders": path.join(programsFolder, "VSCodium Insiders", "bin", "codium-insiders.cmd"),
+      Windsurf: path.join(programsFolder, "Windsurf", "bin", "windsurf.cmd"),
     };
   }
 

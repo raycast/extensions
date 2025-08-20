@@ -195,8 +195,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.4",
-    "@raycast/utils": "^2.2.0",
+    "@raycast/api": "^1.102.5",
+    "@raycast/utils": "^2.2.1",
     "cache-func": "^1.0.2",
     "lodash.get": "^4.4.2",
     "prettier": "^2.8.1",
