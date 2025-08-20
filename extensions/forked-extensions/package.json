@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "forked-extensions",
+  "title": "Forked Extensions",
+  "type": "module",
+  "description": "Efficiently manage your forked Raycast extensions using Git sparse-checkout. Explore the full extension catalog, selectively checkout specific extensions, and remove extensions from your forked collection with ease.",
+  "icon": "forked-extensions-icon.png",
+  "author": "litomore",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Communication",
+    "Productivity",
+    "System",
+    "Fun"
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-forked-extensions",
+      "title": "Manage Forked Extensions",
+      "description": "Manage all forked extensions.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "repositoryConfigurationPath",
+      "title": "Repository Path",
+      "description": "Path to the repository where the extension is located.",
+      "type": "directory",
+      "required": true,
+      "default": "~/Documents"
+    },
+    {
+      "name": "forkedRepository",
+      "title": "Forked Repository",
+      "placeholder": "e.g. LitoMore/raycast-extensions",
+      "description": "The repository where the forked extensions are stored. The format should be 'username/repository'.",
+      "type": "textfield",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.4",
+    "got": "^14.4.7",
+    "nano-spawn": "^1.0.2"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.33.0",
+    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/utils": "^2.2.0",
+    "@types/node": "^24.2.1",
+    "@types/react": "^19.1.10",
+    "eslint": "^9.33.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  }
+}
