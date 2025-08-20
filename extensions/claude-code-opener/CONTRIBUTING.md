@@ -1,4 +1,4 @@
-# Contributing to Claude Code Opener
+# Contributing to Claude Code
 
 Thanks for your interest in contributing! This guide will help you get started.
 
@@ -28,33 +28,34 @@ The extension uses an adapter pattern to support different terminals. Here's how
 
 ### 1. Create Your Adapter
 
-In `src/terminal-adapters.ts`, create a new class extending `BaseTerminalAdapter`:
+Create a new file in `src/terminal-adapters/adapters/` (e.g., `iterm2.ts`):
 
 ```typescript
-import { BaseTerminalAdapter } from './terminal-adapters';
+import { TerminalAdapter } from '../types';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 
-export class ITerm2Adapter extends BaseTerminalAdapter {
+const execAsync = promisify(exec);
+
+export class ITerm2Adapter implements TerminalAdapter {
   name = "iTerm2";
   bundleId = "com.googlecode.iterm2";
   
   async open(directory: string, claudeBinary: string): Promise<void> {
-    // Your implementation here
-    // Available utilities:
-    // - this.escapeShellArg(str) - escapes shell arguments
-    // - this.getUserShell() - returns user's shell path
+    const escapedDir = directory.replace(/'/g, "'\\''");
+    const escapedBinary = claudeBinary.replace(/'/g, "'\\''");
     
-    // Example implementation:
+    // Example implementation using AppleScript:
     const script = `
       tell application "iTerm2"
         create window with default profile
         tell current session of current window
-          write text "cd '${this.escapeShellArg(directory)}'"
-          write text "'${this.escapeShellArg(claudeBinary)}'"
+          write text "cd '${escapedDir}' && '${escapedBinary}'"
         end tell
       end tell
     `;
     
-    await execAsync(`osascript -e '${script.replace(/'/g, "'\"'\"'").replace(/\n/g, "' -e '")}'`);
+    await execAsync(`osascript -e "${script.replace(/\n/g, "' -e '")}"`);
   }
 }
 ```
@@ -66,14 +67,16 @@ osascript -e 'id of app "YourTerminalName"'
 
 ### 2. Register Your Adapter
 
-Add your adapter to the registry in `terminal-adapters.ts`:
+Add your adapter to the registry in `src/terminal-adapters/registry.ts`:
 
 ```typescript
-const TERMINAL_ADAPTERS = new Map<string, TerminalAdapter>([
-  ["Terminal", new TerminalAppAdapter()],
-  ["Alacritty", new AlacrittyAdapter()],
-  ["iTerm2", new ITerm2Adapter()], // Add this line
-]);
+import { ITerm2Adapter } from "./adapters/iterm2";
+
+const adapters: Record<string, TerminalAdapter> = {
+  Terminal: new TerminalAppAdapter(),
+  Alacritty: new AlacrittyAdapter(),
+  iTerm2: new ITerm2Adapter(), // Add this line
+};
 ```
 
 ### 3. Update TypeScript Types
@@ -152,9 +155,9 @@ Some terminals accept commands via CLI args. See `AlacrittyAdapter` for an examp
 
 ### Things to Consider
 
-1. **Shell Detection**: Use `this.getUserShell()` to respect user's shell preference
-2. **Path Escaping**: Always use `this.escapeShellArg()` for paths
-3. **Cleanup**: Remove temporary files if your implementation creates any
+1. **Shell Detection**: Use `process.env.SHELL` to respect user's shell preference
+2. **Path Escaping**: Always escape paths properly with `.replace(/'/g, "'\\''")` for shell safety
+3. **Cleanup**: Remove temporary files if your implementation creates any (see TerminalAppAdapter for example)
 4. **Error Messages**: Provide clear error messages for common failures
 
 ## Questions?

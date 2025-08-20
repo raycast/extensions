@@ -19,6 +19,7 @@ import { useState, useEffect, useMemo } from "react";
 import { randomUUID } from "crypto";
 import { homedir } from "os";
 import path from "path";
+import { access, constants } from "fs/promises";
 
 // Constants
 const STORAGE_KEY = "claude-code-favorites";
@@ -103,6 +104,18 @@ async function openInTerminal(favorite: Favorite, preferences: Preferences, onSu
   const claudeBinary = expandTilde(preferences.claudeBinaryPath);
 
   try {
+    try {
+      await access(expandedPath, constants.R_OK);
+    } catch {
+      throw new Error(`Cannot access directory: ${expandedPath}. It may have been moved or deleted.`);
+    }
+
+    try {
+      await access(claudeBinary, constants.X_OK);
+    } catch {
+      throw new Error(`Claude binary not found at: ${claudeBinary}. Please check your preferences.`);
+    }
+
     const adapter = getTerminalAdapter(preferences.terminalApp);
 
     if (!adapter) {
@@ -113,7 +126,8 @@ async function openInTerminal(favorite: Favorite, preferences: Preferences, onSu
     onSuccess();
     showSuccessToast("Opened in Terminal", favorite.name || getDirectoryName(favorite.path));
   } catch (error) {
-    await showFailureToast(error, {
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    await showFailureToast(errorMessage, {
       title: "Failed to open terminal",
     });
   }
@@ -130,12 +144,58 @@ function IconDropdown({ value, onChange }: { value?: string; onChange?: (value: 
   );
 }
 
-function AddFavoriteForm({ onAdd }: { onAdd: (favorite: Favorite) => void }) {
+function AddFavoriteForm({ onAdd, existingPaths }: { onAdd: (favorite: Favorite) => void; existingPaths: string[] }) {
   const { pop } = useNavigation();
   const [path, setPath] = useState("");
   const [name, setName] = useState("");
+  const [pathError, setPathError] = useState<string | undefined>();
+  const [nameError, setNameError] = useState<string | undefined>();
+  const [, setIsValidating] = useState(false);
 
-  const handleSubmit = (values: { path: string; name: string; icon: string }) => {
+  const validatePath = async (pathValue: string): Promise<string | undefined> => {
+    if (!pathValue.trim()) {
+      return "Path is required";
+    }
+
+    const expandedPath = expandTilde(pathValue);
+
+    if (existingPaths.includes(expandedPath)) {
+      return "This directory is already in your favorites";
+    }
+
+    try {
+      await access(expandedPath, constants.R_OK);
+      const stats = await import("fs/promises").then((fs) => fs.stat(expandedPath));
+      if (!stats.isDirectory()) {
+        return "Path must be a directory";
+      }
+    } catch {
+      return "Directory does not exist or is not accessible";
+    }
+
+    return undefined;
+  };
+
+  const validateName = (nameValue: string): string | undefined => {
+    if (nameValue.length > 100) {
+      return "Name must be 100 characters or less";
+    }
+    return undefined;
+  };
+
+  const handleSubmit = async (values: { path: string; name: string; icon: string }) => {
+    setIsValidating(true);
+
+    const pathValidationError = await validatePath(values.path);
+    const nameValidationError = validateName(values.name);
+
+    if (pathValidationError || nameValidationError) {
+      setPathError(pathValidationError);
+      setNameError(nameValidationError);
+      setIsValidating(false);
+      return;
+    }
+
     const expandedPath = expandTilde(values.path);
     const newFavorite: Favorite = {
       id: randomUUID(),
@@ -164,9 +224,31 @@ function AddFavoriteForm({ onAdd }: { onAdd: (favorite: Favorite) => void }) {
         title="Directory Path"
         placeholder="~/Documents/Projects"
         value={path}
-        onChange={setPath}
+        error={pathError}
+        onChange={(value) => {
+          setPath(value);
+          setPathError(undefined);
+        }}
+        onBlur={async (event) => {
+          const error = await validatePath(event.target.value || "");
+          setPathError(error);
+        }}
       />
-      <Form.TextField id="name" title="Name (Optional)" placeholder="My Project" value={name} onChange={setName} />
+      <Form.TextField
+        id="name"
+        title="Name (Optional)"
+        placeholder="My Project"
+        value={name}
+        error={nameError}
+        onChange={(value) => {
+          setName(value);
+          setNameError(undefined);
+        }}
+        onBlur={(event) => {
+          const error = validateName(event.target.value || "");
+          setNameError(error);
+        }}
+      />
       <IconDropdown />
     </Form>
   );
@@ -176,8 +258,23 @@ function EditFavoriteForm({ favorite, onEdit }: { favorite: Favorite; onEdit: (f
   const { pop } = useNavigation();
   const [name, setName] = useState(favorite.name || "");
   const [icon, setIcon] = useState(favorite.icon || "Folder");
+  const [nameError, setNameError] = useState<string | undefined>();
+
+  const validateName = (nameValue: string): string | undefined => {
+    if (nameValue.length > 100) {
+      return "Name must be 100 characters or less";
+    }
+    return undefined;
+  };
 
   const handleSubmit = (values: { name: string; icon: string }) => {
+    const nameValidationError = validateName(values.name);
+
+    if (nameValidationError) {
+      setNameError(nameValidationError);
+      return;
+    }
+
     const updatedFavorite = {
       ...favorite,
       name: values.name || undefined,
@@ -198,10 +295,53 @@ function EditFavoriteForm({ favorite, onEdit }: { favorite: Favorite; onEdit: (f
       }
     >
       <Form.Description text={`Path: ${favorite.path}`} />
-      <Form.TextField id="name" title="Name" placeholder="My Project" value={name} onChange={setName} />
+      <Form.TextField
+        id="name"
+        title="Name"
+        placeholder="My Project"
+        value={name}
+        error={nameError}
+        onChange={(value) => {
+          setName(value);
+          setNameError(undefined);
+        }}
+        onBlur={(event) => {
+          const error = validateName(event.target.value || "");
+          setNameError(error);
+        }}
+      />
       <IconDropdown value={icon} onChange={setIcon} />
     </Form>
   );
+}
+
+async function checkDependencies(preferences: Preferences): Promise<void> {
+  const claudeBinary = expandTilde(preferences.claudeBinaryPath);
+
+  try {
+    await access(claudeBinary, constants.X_OK);
+  } catch (error) {
+    await showFailureToast("Claude binary not found", {
+      title: "Claude Code Not Found",
+      message: `Could not find Claude at: ${claudeBinary}. Please check your preferences.`,
+      primaryAction: {
+        title: "Open Preferences",
+        onAction: () => {
+          // This will open the extension preferences
+        },
+      },
+    });
+    throw error;
+  }
+
+  const adapter = getTerminalAdapter(preferences.terminalApp);
+  if (!adapter) {
+    await showFailureToast(`Unsupported terminal: ${preferences.terminalApp}`, {
+      title: "Terminal Not Supported",
+      message: "Please select a supported terminal in preferences.",
+    });
+    throw new Error(`Unsupported terminal: ${preferences.terminalApp}`);
+  }
 }
 
 export default function Command() {
@@ -209,28 +349,62 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [favorites, setFavorites] = useState<Favorite[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [, setDependenciesValid] = useState(true);
 
   useEffect(() => {
-    loadFavorites();
+    checkDependencies(preferences)
+      .then(() => setDependenciesValid(true))
+      .catch(() => setDependenciesValid(false))
+      .finally(() => loadFavorites());
   }, []);
 
   const loadFavorites = async () => {
     try {
       const stored = await LocalStorage.getItem<string>(STORAGE_KEY);
       if (stored) {
-        const state: FavoritesState = JSON.parse(stored);
-        const favorites = state.favorites.map((fav) => ({
-          ...fav,
-          addedAt: new Date(fav.addedAt),
-          lastOpened: fav.lastOpened ? new Date(fav.lastOpened) : undefined,
-        }));
+        let state: FavoritesState;
+        try {
+          state = JSON.parse(stored);
+        } catch (parseError) {
+          console.error("Failed to parse favorites data:", parseError);
+          await showFailureToast("Favorites data is corrupted. Resetting to empty list.", {
+            title: "Corrupted Data",
+            message: "Your favorites data was corrupted and has been reset.",
+          });
+          await LocalStorage.removeItem(STORAGE_KEY);
+          setFavorites([]);
+          return;
+        }
+
+        if (!state.favorites || !Array.isArray(state.favorites)) {
+          console.error("Invalid favorites structure");
+          await showFailureToast("Invalid favorites data structure. Resetting to empty list.", {
+            title: "Invalid Data",
+            message: "Your favorites data structure was invalid and has been reset.",
+          });
+          await LocalStorage.removeItem(STORAGE_KEY);
+          setFavorites([]);
+          return;
+        }
+
+        const favorites = state.favorites
+          .filter((fav) => fav && fav.id && fav.path)
+          .map((fav) => ({
+            ...fav,
+            addedAt: new Date(fav.addedAt),
+            lastOpened: fav.lastOpened ? new Date(fav.lastOpened) : undefined,
+            openCount: fav.openCount || 0,
+            icon: fav.icon || "Folder",
+          }));
         setFavorites(favorites);
       }
     } catch (error) {
       console.error("Failed to load favorites:", error);
       await showFailureToast(error, {
         title: "Failed to load favorites",
+        message: "An unexpected error occurred while loading favorites.",
       });
+      setFavorites([]);
     } finally {
       setIsLoading(false);
     }
@@ -336,7 +510,7 @@ export default function Command() {
               <Action.Push
                 title="Add Favorite"
                 icon={Icon.Plus}
-                target={<AddFavoriteForm onAdd={addFavorite} />}
+                target={<AddFavoriteForm onAdd={addFavorite} existingPaths={favorites.map((f) => f.path)} />}
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
               />
             </ActionPanel>
@@ -352,7 +526,7 @@ export default function Command() {
               <Action.Push
                 title="Add Favorite"
                 icon={Icon.Plus}
-                target={<AddFavoriteForm onAdd={addFavorite} />}
+                target={<AddFavoriteForm onAdd={addFavorite} existingPaths={favorites.map((f) => f.path)} />}
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
               />
             </ActionPanel>

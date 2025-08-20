@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "claude-code-opener",
-  "title": "Claude Code Opener",
+  "title": "Claude Code",
   "description": "Quickly open Claude Code in any directory with your preferred terminal.",
   "icon": "icon.png",
   "author": "stephendolan",
@@ -10,8 +10,9 @@
   "commands": [
     {
       "name": "open-claude-code",
-      "title": "Open with Claude Code",
-      "description": "Open a Claude Code shell in your favorite directories.",
+      "title": "Open Project",
+      "subtitle": "Claude Code",
+      "description": "Launch Claude Code in favorite directories.",
       "mode": "view"
     }
   ],
