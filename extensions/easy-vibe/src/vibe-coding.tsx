@@ -195,7 +195,8 @@ export default async function Command() {
     await launchAgentInTerminal(agentCommand, settings.defaultTerminal, settings.customTerminal, settings.yoloEnabled);
 
     // Exit immediately after launching
-    process.exit(0);
+    // Exit immediately after launching
+    return;
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
