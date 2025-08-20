@@ -6,6 +6,7 @@ import {
   Toast,
   Clipboard,
   Icon,
+  Keyboard,
 } from "@raycast/api";
 import React, { useState, useEffect } from "react";
 import {
@@ -168,6 +169,7 @@ export default function FindModels() {
                 // Preserve brand capitalization; ignore title-case rule for brand names
                 // eslint-disable-next-line @raycast/prefer-title-case
                 title="View on OpenRouter"
+                shortcut={Keyboard.Shortcut.Common.Open}
                 url={`https://openrouter.ai/models/${model.id}`}
               />
               <Action
