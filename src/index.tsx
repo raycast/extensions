@@ -23,7 +23,8 @@ export default function Command() {
   const [isLoading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Pagination not implemented yet - keeping simple for initial version
-  const limit = useMemo(() => Math.max(1, Math.min(100, parseInt(prefs.pageSize || "24", 10))), [prefs.pageSize]);
+  // Max limit is clamped to 12 in api.ts to align with API constraints
+  const limit = useMemo(() => Math.max(1, Math.min(12, parseInt(prefs.pageSize || "12", 10))), [prefs.pageSize]);
   const debounced = useDebouncedValue(query, 250);
 
   // Request deduplication: prevents race conditions from multiple rapid searches

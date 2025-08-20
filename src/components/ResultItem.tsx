@@ -22,25 +22,30 @@ export default function ResultItem({ item }: { item: ExtendedSearchResult }) {
   const pkgId: string = item?.metadata?.id ?? item?.package_id ?? "";
   const cleanId = pkgId || String(item?.id || "").replace(/^sw:(winget|homebrew):/, "");
 
+  // Validate that we have a valid package ID for install commands
+  const hasValidId = cleanId && cleanId.trim().length > 0;
+
   // Guard: title is required
   const title = name || cleanId || slug || "Unknown";
   const subtitle = cleanId || slug || "";
 
-  // Generate appropriate install commands based on ecosystem and package type
-  const primary =
-    ecosystem === "winget"
+  // Generate appropriate install commands based on ecosystem and package type (only if valid ID exists)
+  const primary = hasValidId
+    ? ecosystem === "winget"
       ? `winget install ${cleanId}`
       : hbType === "cask"
         ? `brew install --cask ${cleanId}`
-        : `brew install ${cleanId}`;
+        : `brew install ${cleanId}`
+    : "# No valid package ID available";
 
-  const alts =
-    ecosystem === "winget"
+  const alts = hasValidId
+    ? ecosystem === "winget"
       ? [{ title: "Copy WinGet Install (CMD/PowerShell)", cmd: `winget install ${cleanId}` }]
       : [
           { title: "Copy Brew Install", cmd: `brew install ${cleanId}` },
           { title: "Copy Brew Cask Install", cmd: `brew install --cask ${cleanId}` },
-        ];
+        ]
+    : [{ title: "No Install Commands Available", cmd: "# No valid package ID found" }];
 
   // Accessories
   const accessories: List.Item.Accessory[] = [];
