@@ -1,4 +1,6 @@
-import { Icon } from "@raycast/api";
+import { Icon, Image } from "@raycast/api";
+
+const CLAUDE_COLOR = "#C15F3C";
 
 export const FAVORITE_ICON_NAMES = [
   "Folder",
@@ -44,6 +46,11 @@ export const FAVORITE_ICON_NAMES = [
 
 export type IconName = (typeof FAVORITE_ICON_NAMES)[number];
 
-export function getIcon(name: string): Icon {
-  return Icon[name as keyof typeof Icon] || Icon.Folder;
+export function getIcon(name: string): Image {
+  const icon = Icon[name as keyof typeof Icon] || Icon.Folder;
+
+  return {
+    source: icon,
+    tintColor: CLAUDE_COLOR,
+  };
 }

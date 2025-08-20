@@ -28,6 +28,7 @@ const CURRENT_VERSION = 1;
 interface Preferences {
   claudeBinaryPath: string;
   terminalApp: "Terminal" | "Alacritty";
+  defaultFavoriteIcon: string;
 }
 
 interface Favorite {
@@ -134,9 +135,17 @@ async function openInTerminal(favorite: Favorite, preferences: Preferences, onSu
 }
 
 // Components
-function IconDropdown({ value, onChange }: { value?: string; onChange?: (value: string) => void }) {
+function IconDropdown({
+  value,
+  onChange,
+  defaultValue,
+}: {
+  value?: string;
+  onChange?: (value: string) => void;
+  defaultValue?: string;
+}) {
   return (
-    <Form.Dropdown id="icon" title="Icon" value={value} onChange={onChange} defaultValue="Folder">
+    <Form.Dropdown id="icon" title="Icon" value={value} onChange={onChange} defaultValue={defaultValue}>
       {FAVORITE_ICON_NAMES.map((iconName) => (
         <Form.Dropdown.Item key={iconName} value={iconName} title={iconName} icon={getIcon(iconName)} />
       ))}
@@ -144,7 +153,15 @@ function IconDropdown({ value, onChange }: { value?: string; onChange?: (value: 
   );
 }
 
-function AddFavoriteForm({ onAdd, existingPaths }: { onAdd: (favorite: Favorite) => void; existingPaths: string[] }) {
+function AddFavoriteForm({
+  onAdd,
+  existingPaths,
+  defaultIcon,
+}: {
+  onAdd: (favorite: Favorite) => void;
+  existingPaths: string[];
+  defaultIcon: string;
+}) {
   const { pop } = useNavigation();
   const [path, setPath] = useState("");
   const [name, setName] = useState("");
@@ -201,7 +218,7 @@ function AddFavoriteForm({ onAdd, existingPaths }: { onAdd: (favorite: Favorite)
       id: randomUUID(),
       path: expandedPath,
       name: values.name || undefined,
-      icon: values.icon || "Folder",
+      icon: values.icon || defaultIcon,
       addedAt: new Date(),
       openCount: 0,
     };
@@ -249,15 +266,23 @@ function AddFavoriteForm({ onAdd, existingPaths }: { onAdd: (favorite: Favorite)
           setNameError(error);
         }}
       />
-      <IconDropdown />
+      <IconDropdown defaultValue={defaultIcon} />
     </Form>
   );
 }
 
-function EditFavoriteForm({ favorite, onEdit }: { favorite: Favorite; onEdit: (favorite: Favorite) => void }) {
+function EditFavoriteForm({
+  favorite,
+  onEdit,
+  defaultIcon,
+}: {
+  favorite: Favorite;
+  onEdit: (favorite: Favorite) => void;
+  defaultIcon: string;
+}) {
   const { pop } = useNavigation();
   const [name, setName] = useState(favorite.name || "");
-  const [icon, setIcon] = useState(favorite.icon || "Folder");
+  const [icon, setIcon] = useState(favorite.icon || defaultIcon);
   const [nameError, setNameError] = useState<string | undefined>();
 
   const validateName = (nameValue: string): string | undefined => {
@@ -278,7 +303,7 @@ function EditFavoriteForm({ favorite, onEdit }: { favorite: Favorite; onEdit: (f
     const updatedFavorite = {
       ...favorite,
       name: values.name || undefined,
-      icon: values.icon || "Folder",
+      icon: values.icon || defaultIcon,
     };
 
     onEdit(updatedFavorite);
@@ -510,7 +535,13 @@ export default function Command() {
               <Action.Push
                 title="Add Favorite"
                 icon={Icon.Plus}
-                target={<AddFavoriteForm onAdd={addFavorite} existingPaths={favorites.map((f) => f.path)} />}
+                target={
+                  <AddFavoriteForm
+                    onAdd={addFavorite}
+                    existingPaths={favorites.map((f) => f.path)}
+                    defaultIcon={preferences.defaultFavoriteIcon}
+                  />
+                }
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
               />
             </ActionPanel>
@@ -526,7 +557,13 @@ export default function Command() {
               <Action.Push
                 title="Add Favorite"
                 icon={Icon.Plus}
-                target={<AddFavoriteForm onAdd={addFavorite} existingPaths={favorites.map((f) => f.path)} />}
+                target={
+                  <AddFavoriteForm
+                    onAdd={addFavorite}
+                    existingPaths={favorites.map((f) => f.path)}
+                    defaultIcon={preferences.defaultFavoriteIcon}
+                  />
+                }
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
               />
             </ActionPanel>
@@ -537,7 +574,7 @@ export default function Command() {
           {filteredAndSortedFavorites.map((favorite) => (
             <List.Item
               key={favorite.id}
-              icon={getIcon(favorite.icon || "Folder")}
+              icon={getIcon(favorite.icon || preferences.defaultFavoriteIcon)}
               title={favorite.name || getDirectoryName(favorite.path)}
               subtitle={favorite.name ? favorite.path : undefined}
               accessories={[
@@ -558,7 +595,13 @@ export default function Command() {
                   <Action.Push
                     title="Edit Favorite"
                     icon={Icon.Pencil}
-                    target={<EditFavoriteForm favorite={favorite} onEdit={updateFavorite} />}
+                    target={
+                      <EditFavoriteForm
+                        favorite={favorite}
+                        onEdit={updateFavorite}
+                        defaultIcon={preferences.defaultFavoriteIcon}
+                      />
+                    }
                     shortcut={{ modifiers: ["cmd"], key: "e" }}
                   />
                   <Action
@@ -588,7 +631,13 @@ export default function Command() {
                     <Action.Push
                       title="Add Favorite"
                       icon={Icon.Plus}
-                      target={<AddFavoriteForm onAdd={addFavorite} />}
+                      target={
+                        <AddFavoriteForm
+                          onAdd={addFavorite}
+                          existingPaths={favorites.map((f) => f.path)}
+                          defaultIcon={preferences.defaultFavoriteIcon}
+                        />
+                      }
                       shortcut={{ modifiers: ["cmd"], key: "n" }}
                     />
                   </ActionPanel.Section>

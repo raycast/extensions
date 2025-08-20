@@ -43,6 +43,48 @@
           "value": "Alacritty"
         }
       ]
+    },
+    {
+      "name": "defaultFavoriteIcon",
+      "title": "Default Favorite Icon",
+      "description": "Default icon for new favorites",
+      "type": "dropdown",
+      "required": false,
+      "default": "Terminal",
+      "data": [
+        {
+          "title": "Terminal",
+          "value": "Terminal"
+        },
+        {
+          "title": "Folder",
+          "value": "Folder"
+        },
+        {
+          "title": "Code",
+          "value": "Code"
+        },
+        {
+          "title": "Star",
+          "value": "Star"
+        },
+        {
+          "title": "Rocket",
+          "value": "Rocket"
+        },
+        {
+          "title": "Box",
+          "value": "Box"
+        },
+        {
+          "title": "Hammer",
+          "value": "Hammer"
+        },
+        {
+          "title": "Globe",
+          "value": "Globe"
+        }
+      ]
     }
   ],
   "dependencies": {
