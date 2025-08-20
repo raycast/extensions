@@ -5,7 +5,7 @@ Ever lost your cursor in the vast expanse of your multi-monitor setup? 😥 One 
 It calls a small Swift app that dims the screen where's the cursors at and puts a spotlight on its location.
 
 ### Default mode
-![where is my cursor presentation mode](/metadata/LocateCursor_defaultmode.gif)
+![where is my cursor default mode](/metadata/LocateCursor_defaultmode.gif)
 
 ## ✨ Features
 
