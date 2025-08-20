@@ -175,10 +175,7 @@ export async function getIssues({ jql } = { jql: "" }) {
     body: JSON.stringify(body),
   });
 
-  const rawIssues =
-    (result?.issues as Issue[] | undefined) ??
-    (result as unknown as { searchResults?: Issue[] }).searchResults ??
-    (result as unknown as { values?: Issue[] }).values;
+  const rawIssues = result?.issues ?? result?.searchResults ?? result?.values;
 
   if (!rawIssues) {
     return rawIssues;
