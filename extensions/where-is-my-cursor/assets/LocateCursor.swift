@@ -261,9 +261,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     private func removeMonitors() {
         if let monitor = mouseMoveMonitor { NSEvent.removeMonitor(monitor) }
-        if
- let monitor = keyDownMonitor { NSEvent.removeMonitor(monitor) }
-     }
+        if let monitor = mouseMoveMonitor { NSEvent.removeMonitor(monitor) }
+        if let monitor = keyDownMonitor { NSEvent.removeMonitor(monitor) }
+    }
 }
 // MARK: - Main Execution
 let app = NSApplication.shared
