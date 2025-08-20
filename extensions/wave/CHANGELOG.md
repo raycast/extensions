@@ -1,6 +1,6 @@
 # Wave Changelog
 
-## [Enhance Invoice] - {PR_MERGE_DATE}
+## [Enhance Invoice] - 2025-08-20
 
 - Enhance `Invoice` to show amounts due and paid
 - Move "Business Products And Services" to its own file
