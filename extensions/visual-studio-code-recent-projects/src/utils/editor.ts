@@ -8,14 +8,20 @@ const cachedGetApplications = cacheFunc(getApplications);
 // Map of build names to bundle IDs
 const bundleIdMap: Record<string, { macos: string; windows: { name: string; exe: string } }> = {
   Code: { macos: "com.microsoft.VSCode", windows: { name: "Visual Studio Code", exe: "Code.exe" } },
-  "Code - Insiders": { macos: "com.microsoft.VSCodeInsiders", windows: { name: "Visual Studio Code - Insiders", exe: "Code - Insiders.exe" } },
+  "Code - Insiders": {
+    macos: "com.microsoft.VSCodeInsiders",
+    windows: { name: "Visual Studio Code - Insiders", exe: "Code - Insiders.exe" },
+  },
   Cursor: { macos: "com.todesktop.230313mzl4w4u92", windows: { name: "Cursor", exe: "Cursor.exe" } },
   Kiro: { macos: "dev.kiro.desktop", windows: { name: "Kiro", exe: "Kiro.exe" } },
   Positron: { macos: "com.rstudio.positron", windows: { name: "Positron", exe: "Positron.exe" } },
   Trae: { macos: "com.trae.app", windows: { name: "Trae", exe: "Trae.exe" } },
   "Trae CN": { macos: "cn.trae.app", windows: { name: "Trae CN", exe: "Trae - CN.exe" } },
   VSCodium: { macos: "com.vscodium", windows: { name: "VSCodium", exe: "VSCodium.exe" } },
-  "VSCodium - Insiders": { macos: "com.vscodium.VSCodiumInsiders", windows: { name: "VSCodium - Insiders", exe: "VSCodium - Insiders.exe" } },
+  "VSCodium - Insiders": {
+    macos: "com.vscodium.VSCodiumInsiders",
+    windows: { name: "VSCodium - Insiders", exe: "VSCodium - Insiders.exe" },
+  },
   Windsurf: { macos: "com.exafunction.windsurf", windows: { name: "Windsurf", exe: "Windsurf.exe" } },
 };
 
