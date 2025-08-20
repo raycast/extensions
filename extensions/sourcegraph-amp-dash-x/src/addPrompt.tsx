@@ -60,7 +60,7 @@ export default function AddPrompt() {
       showToast(Toast.Style.Success, "Prompt saved successfully");
       pop();
     } catch (error) {
-      showToast(Toast.Style.Failure, "Failed to save prompt");
+      showFailureToast(error, { title: "Failed to save prompt" });
       console.error("Save error:", error);
     }
   }
