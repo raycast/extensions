@@ -1,7 +1,7 @@
 import { Platform, Post } from "./types";
 
 export const fetchPlatforms = async (api_key: string): Promise<Platform[]> => {
-  const response = await fetch<Platform[]>("https://api.publora.com/api/v1/platform-connections", {
+  const response = await fetch("https://api.publora.com/api/v1/platform-connections", {
     headers: {
       "x-publora-key": `${api_key}`,
     },
