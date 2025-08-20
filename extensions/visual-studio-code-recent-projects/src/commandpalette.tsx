@@ -18,7 +18,7 @@ function transitFolder(): string {
   let ts = path.join(os.homedir(), `Library/Application Support/${build}/User/globalStorage/tonka3000.raycast/transit`);
 
   if (isWin) {
-    ts = path.join(os.homedir(), `/AppData/Roaming/${build}/User/globalStorage/tonka3000.raycast/transit`);
+    ts = path.join(os.homedir(), `AppData/Roaming/${build}/User/globalStorage/tonka3000.raycast/transit`);
   }
   return ts;
 }

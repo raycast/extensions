@@ -24,10 +24,6 @@ export default async function main() {
         const currentPath = await getCurrentFinderPath();
         if (currentPath.length === 0) throw new Error("Not a valid directory");
         await open(currentPath, editorApp);
-      } else {
-        for (const item of selectedItems) {
-          await open(item.path, editorApp);
-        }
       }
     }
 

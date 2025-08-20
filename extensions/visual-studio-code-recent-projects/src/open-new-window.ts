@@ -61,7 +61,7 @@ const makeNewWindowMacos = async () => {
 
 const makeNewWindowWindows = async () => {
   const cli = getVSCodeCLI();
-  cli.newWindow();
+  return cli.newWindow();
 };
 
 export default async function command() {
