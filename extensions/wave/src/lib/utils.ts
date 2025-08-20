@@ -4,6 +4,7 @@ import { Customer, InvoiceStatus, Money } from "./types";
 export function getInvoiceStatusColor(status: InvoiceStatus) {
   switch (status) {
     case "PAID":
+    case "OVERPAID":
       return Color.Green;
     case "OVERDUE":
       return Color.Red;
@@ -12,7 +13,7 @@ export function getInvoiceStatusColor(status: InvoiceStatus) {
     case "SENT":
       return Color.Blue;
     case "PARTIAL":
-      return Color.Magenta;
+      return Color.Yellow;
     case "SAVED":
     case "VIEWED":
       return Color.Purple;
