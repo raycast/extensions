@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "text-counter",
+  "title": "Text Counter",
+  "description": "Count tokens, words, lines, and characters from clipboard text",
+  "icon": "icon.png",
+  "author": "fernando_jacob",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "counter",
+    "tokens",
+    "words",
+    "characters",
+    "lines",
+    "clipboard",
+    "gpt"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "count-text",
+      "title": "Count Tokens / Words / Lines",
+      "description": "Count tokens, words, lines, and characters from clipboard input",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.82.5",
+    "gpt-tokenizer": "^2.6.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "@typescript-eslint/eslint-plugin": "^8.40.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
