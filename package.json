@@ -1,0 +1,92 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dev-dx-command-search",
+  "title": "Dev Dx – Winget/homebrew Package Search",
+  "description": "Search WinGet and Homebrew packages and copy the install command instantly.",
+  "icon": "extension-icon.png",
+  "author": "KyTechInc",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "System"
+  ],
+  "keywords": [
+    "winget",
+    "homebrew",
+    "brew",
+    "packages",
+    "software",
+    "install"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Software",
+      "subtitle": "Winget and Homebrew",
+      "description": "Find packages and copy install commands for WinGet and Homebrew.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "apiBaseUrl",
+          "title": "API Base URL",
+          "description": "Base URL for the search API.",
+          "type": "textfield",
+          "required": false,
+          "default": "https://dev-dx-api.kytech.workers.dev",
+          "placeholder": "https://your-api.example.com"
+        },
+        {
+          "name": "defaultEcosystem",
+          "title": "Default Ecosystem",
+          "description": "Default package ecosystem to search.",
+          "type": "dropdown",
+          "required": false,
+          "default": "all",
+          "data": [
+            {
+              "title": "All",
+              "value": "all"
+            },
+            {
+              "title": "Homebrew",
+              "value": "homebrew"
+            },
+            {
+              "title": "WinGet",
+              "value": "winget"
+            }
+          ]
+        },
+        {
+          "name": "pageSize",
+          "title": "Page Size",
+          "description": "Number of results to show (1–100).",
+          "type": "textfield",
+          "required": false,
+          "default": "24",
+          "placeholder": "e.g., 12"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.4",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
