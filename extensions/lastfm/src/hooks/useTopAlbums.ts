@@ -1,4 +1,4 @@
-import { useLastFm } from "./useLastFm";
+import { useLastFm } from "./useLastfm";
 import type { AlbumResponse, LastFmParams } from "@/types";
 
 export const useTopAlbums = (params: LastFmParams) => {

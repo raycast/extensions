@@ -1,4 +1,4 @@
-import { useLastFm } from "./useLastFm";
+import { useLastFm } from "./useLastfm";
 import type { ArtistResponse, LastFmParams } from "@/types";
 
 export const useTopArtists = (params: LastFmParams) => {
