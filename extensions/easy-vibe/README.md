@@ -101,7 +101,7 @@ easy-vibe/
 ## 🏗️ Technical Architecture
 
 ### Core Technology Stack
-- **React 18**: User interface construction
+- **React 19**: User interface construction
 - **TypeScript**: Type-safe JavaScript
 - **@raycast/api**: Raycast extension API
 - **@raycast/utils**: Raycast utility library
