@@ -14,14 +14,14 @@ export default function Common({ from }: { from: "clipboard" | "selection" }) {
       setSourceText(currentText || "");
 
       if (!currentText?.trim()) {
-        await showToast(Toast.Style.Failure, "Failed", "No text found");
+        const errorText = from === "clipboard" ? "No text found in clipboard" : "You need to select an URL to generate the qrcode";
+        await showToast(Toast.Style.Failure, "Failed", errorText);
         return;
       }
 
       const qrData = await generateQRCode({ URL: currentText, preview: true });
       setQrData(qrData);
 
-      // show origin text in Toast message
       showToast(Toast.Style.Success, "Create Success", currentText);
     })();
   }, []);
