@@ -5,6 +5,9 @@
   "description": "Manage zsh aliases",
   "icon": "extension-icon.png",
   "author": "espenbye",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools"
@@ -35,14 +38,85 @@
       "description": "Update an existing zsh alias"
     }
   ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@zsh-aliases Add new alias \"dev\" that runs npm run dev ",
+        "mocks": {
+          "add-alias": {
+            "aliasName": "dev",
+            "configFile": ".zshrc",
+            "message": "Alias 'dev' added successfully to .zshrc",
+            "success": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "command": "npm run dev",
+                "name": "dev"
+              },
+              "name": "add-alias"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@zsh-aliases Update alias dev to ls -lah",
+        "mocks": {
+          "update-alias": {
+            "configFile": ".zshrc",
+            "message": "Alias 'dev' updated successfully in .zshrc",
+            "newName": "dev",
+            "oldName": "dev",
+            "success": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "currentName": "dev",
+                "newCommand": "ls -lah",
+                "newName": "dev"
+              },
+              "name": "update-alias"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@zsh-aliases Remove the alias dev",
+        "mocks": {
+          "remove-alias": {
+            "aliasName": "dev",
+            "configFile": ".zshrc",
+            "message": "Alias 'dev' removed successfully from .zshrc",
+            "success": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "name": "dev"
+              },
+              "name": "remove-alias"
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
     "@raycast/api": "^1.102.4",
     "@raycast/utils": "^2.2.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "^24.3.0",
-    "@types/react": "^19.1.10",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"

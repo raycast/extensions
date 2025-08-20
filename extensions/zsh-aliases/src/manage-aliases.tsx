@@ -115,7 +115,7 @@ function AddAliasForm({ onRefresh }: { onRefresh: () => void }) {
         error={commandError}
         onChange={() => setCommandError(undefined)}
       />
-      <Form.Dropdown id="configFile" title="Configuration File" defaultValue={configFiles[0]}>
+      <Form.Dropdown id="configFile" title="Configuration File" defaultValue={configFiles[0] || ""}>
         {configFiles.map((file) => (
           <Form.Dropdown.Item key={file} value={file} title={file} />
         ))}
