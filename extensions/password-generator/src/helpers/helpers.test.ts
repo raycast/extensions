@@ -3,7 +3,7 @@ import { describe, test, expect } from "bun:test";
 import { generatePassword } from "./helpers";
 
 describe("generatePassword", () => {
-  const numbers = "0123456789";
+  const numbers = "23456789";
   const symbols = "!@#$*^&%";
 
   test("generates password of correct length", () => {
@@ -14,7 +14,7 @@ describe("generatePassword", () => {
   test("generates password with only letters when both options are false", () => {
     for (let i = 0; i < 50; i++) {
       const password = generatePassword(20, false, false);
-      const hasNumbers = /[0-9]/.test(password);
+      const hasNumbers = /[2-9]/.test(password);
       const hasSymbols = /[!@#$*^&%]/.test(password);
 
       expect(hasNumbers).toBe(false);
