@@ -21,10 +21,27 @@
       "mode": "view"
     },
     {
+      {
+      "name": "vibe-version",
+      "title": "Vibe Version",
+      "subtitle": "Easy Vibe",
+      "description": "Manage AI CLI tool versions and updates",
+      "mode": "view"
+    },
+    {
+      "name": "vibe-settings",
+      "title": "Vibe Settings",
+      "subtitle": "Easy Vibe",
+      "description": "Configure AI agents and preferences",
+      "mode": "view"
+    },
+    {
       "name": "vibe-coding",
       "title": "Vibe Coding",
+      "subtitle": "Easy Vibe",
       "description": "Quick launch AI coding assistant",
       "mode": "no-view"
+    }
     }
   ],
   "dependencies": {
