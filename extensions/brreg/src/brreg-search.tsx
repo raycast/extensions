@@ -9,12 +9,8 @@ import { useSearch } from "./hooks/useSearch";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { useCompanyView } from "./hooks/useCompanyView";
 import { useSettings } from "./hooks/useSettings";
-import { useState, useEffect } from "react";
-import { Enhet } from "./types";
 
 export default function SearchAndCopyCommand() {
-  const [selectedEntity, setSelectedEntity] = useState<Enhet | null>(null);
-
   const favoritesResult = useFavorites();
   const searchResult = useSearch();
   const keyboardResult = useKeyboardShortcuts();
@@ -34,7 +30,7 @@ export default function SearchAndCopyCommand() {
 
   // Now safe to destructure all hooks
   const { entities, isLoading, setSearchText, trimmed } = searchResult;
-  const { showMoveIndicators: keyboardMoveIndicators, handleCopyOrgNumber, handleCopyAddress } = keyboardResult;
+  const { showMoveIndicators: keyboardMoveIndicators } = keyboardResult;
   const { currentCompany, isLoadingDetails, isCompanyViewOpen, handleViewDetails, closeCompanyView } =
     companyViewResult;
 
@@ -58,35 +54,6 @@ export default function SearchAndCopyCommand() {
 
   // Use the keyboard shortcuts from the hook
   const showMoveIndicators = keyboardMoveIndicators;
-
-  // Handle copy organization number keyboard shortcut
-  useEffect(() => {
-    if (isCompanyViewOpen) return;
-
-    const handleCopyEvent = () => {
-      if (selectedEntity) {
-        handleCopyOrgNumber(selectedEntity.organisasjonsnummer);
-      }
-    };
-
-    const handleCopyAddressEvent = () => {
-      if (selectedEntity) {
-        const addressString = selectedEntity.forretningsadresse?.adresse?.join(", ");
-        if (addressString) {
-          handleCopyAddress(addressString); // Reuse the same function for now
-        }
-      }
-    };
-
-    if (typeof window !== "undefined") {
-      window.addEventListener("copyOrgNumber", handleCopyEvent);
-      window.addEventListener("copyAddress", handleCopyAddressEvent);
-      return () => {
-        window.removeEventListener("copyOrgNumber", handleCopyEvent);
-        window.removeEventListener("copyAddress", handleCopyAddressEvent);
-      };
-    }
-  }, [isCompanyViewOpen, selectedEntity, handleCopyOrgNumber, handleCopyAddress]);
 
   if (isCompanyViewOpen) {
     const orgNumber = currentCompany!.organizationNumber;
@@ -122,11 +89,6 @@ export default function SearchAndCopyCommand() {
           ? "Move Mode Active - Use ⌘⇧↑↓ to reorder favorites"
           : "Search for name or organisation number"
       }
-      onSelectionChange={(id) => {
-        // Find the selected entity from either favorites or search results
-        const entity = [...favorites, ...entities].find((e) => e.organisasjonsnummer === id);
-        setSelectedEntity(entity || null);
-      }}
     >
       {trimmed.length === 0 && (
         <FavoritesList

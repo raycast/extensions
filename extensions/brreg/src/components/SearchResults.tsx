@@ -66,17 +66,11 @@ export default function SearchResults({
                   entity={entity}
                   addressString={addressString}
                   onViewDetails={onViewDetails}
-                  onCopyOrgNumber={(orgNumber) => {
-                    // Copy to clipboard using Raycast's clipboard API
-                    if (typeof navigator !== "undefined" && navigator.clipboard) {
-                      navigator.clipboard.writeText(orgNumber);
-                    }
+                  onCopyOrgNumber={() => {
+                    // Show success toast - clipboard is handled by Action.CopyToClipboard
                   }}
-                  onCopyAddress={(address) => {
-                    // Copy to clipboard using Raycast's clipboard API
-                    if (typeof navigator !== "undefined" && navigator.clipboard) {
-                      navigator.clipboard.writeText(address);
-                    }
+                  onCopyAddress={() => {
+                    // Show success toast - clipboard is handled by Action.CopyToClipboard
                   }}
                   onOpenInBrowser={() => {}}
                 />
