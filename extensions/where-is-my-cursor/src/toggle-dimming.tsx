@@ -15,11 +15,7 @@ export default function main() {
 
   exec(command, (error) => {
     if (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to locate cursor",
-        message: error.message,
-      });
+      showFailureToast("Failed to locate cursor", error);
     }
   });
   closeMainWindow({
