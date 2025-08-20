@@ -34,7 +34,7 @@ export async function isLookAwayInstalledAndRecent(requiredVersion: string = REQ
     await showToast({
       style: Toast.Style.Failure,
       title: `${APP_NAME} not found`,
-      message: `Please install ${APP_NAME} from lookaway.app`,
+      message: `Please install ${APP_NAME} from lookaway.com`,
     });
     return false;
   }
