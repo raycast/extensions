@@ -51,7 +51,7 @@ A simple idle clicker game for Raycast with upgrade, made as a learning exercise
 ## Screenshots
 
 Use Raycast Window Capture (Preferences → Advanced):
-![Ray Clicker screenshot](assets/screenshot.png)
+![Ray Clicker screenshot](./metadata/ray-clicker.png)
 - Size: 2000×1250 (16:10), PNG
 - Use a single, high-contrast background
 - Showcase informative views (Upgrades, Stats, Prestige)

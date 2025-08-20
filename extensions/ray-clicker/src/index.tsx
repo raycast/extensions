@@ -69,8 +69,6 @@ export default function Command() {
     [purchaseUpgrade, gameState.upgrades],
   );
 
-  // Buy 10 removed per request
-
   // Handle buy max
   const handleUpgradeMax = useCallback(
     (id: string) => {

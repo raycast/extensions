@@ -3,7 +3,6 @@
 ## [Assets & README compliance] - {PR_MERGE_DATE}
 
 - Set extension icon to `icon.png` (Raycast resolves to `assets/icon.png`) in `package.json`.
-- Add `assets/screenshot.png` (copied from `metadata/ray-clicker.png`) to satisfy README and keep images outside `metadata/`.
 
 ## [Polish: Upgrades, Prestige, Store Readiness] - {PR_MERGE_DATE}
 
