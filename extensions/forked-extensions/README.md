@@ -8,6 +8,10 @@ This extension used the [Git sparse-checkout](https://git-scm.com/docs/git-spars
 
 _Please note that the `fork` we mention here is not the same as Git's `fork`._
 
+## Requirements
+
+- [Git](https://git-scm.com) installed on your system
+
 ## Features
 
 - [x] Explorer full extension list
