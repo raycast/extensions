@@ -1,6 +1,6 @@
 # Where's Cursor Changelog
 
-## [Version 3.0] - 2025-08-19
+## [Version 3.0] - {PR_MERGE_DATE}
 
 This version introduces a major refactoring of the entire extension, providing more power and flexibility.
 
