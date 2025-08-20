@@ -75,13 +75,13 @@ export function FanActionPanel(props: { state: State }) {
           icon={{ source: "cached.svg", tintColor: Color.PrimaryText }}
         />
         <Action
-          title="Turn On"
+          title="Turn on"
           shortcut={{ modifiers: ["cmd"], key: "o" }}
           onAction={async () => await ha.turnOnFan(props.state.entity_id)}
           icon={{ source: "power-on.svg", tintColor: Color.PrimaryText }}
         />
         <Action
-          title="Turn Off"
+          title="Turn off"
           shortcut={{ modifiers: ["cmd"], key: "f" }}
           onAction={async () => await ha.turnOffFan(props.state.entity_id)}
           icon={{ source: "power-off.svg", tintColor: Color.PrimaryText }}
