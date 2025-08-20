@@ -1,0 +1,1 @@
+export const PRESTIGE_PP_DIVISOR = 800_000;
