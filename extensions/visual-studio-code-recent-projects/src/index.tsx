@@ -192,7 +192,7 @@ function LocalItem(
         }
           `);
         } else {
-          runAppleScript(`
+          await runAppleScript(`
         tell application "System Events"
           tell process "${build}"
             repeat while window 1 exists

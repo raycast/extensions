@@ -121,7 +121,7 @@ export class VSCodeCLI {
     this.cliFilename = cliFilename;
   }
 
-  async installExtensionByIDSync(id: string) {
+  async installExtensionByID(id: string) {
     if (isWin) {
       await runPowerShellScript(`
         Start-Process -FilePath "${this.cliFilename}" -ArgumentList "--install-extension ${id}", "--force" -WindowStyle Hidden
@@ -131,7 +131,7 @@ export class VSCodeCLI {
     }
   }
 
-  async uninstallExtensionByIDSync(id: string) {
+  async uninstallExtensionByID(id: string) {
     if (isWin) {
       await runPowerShellScript(`
         Start-Process -FilePath "${this.cliFilename}" -ArgumentList "--uninstall-extension ${id}", "--force" -WindowStyle Hidden
@@ -141,9 +141,9 @@ export class VSCodeCLI {
     }
   }
 
-  newWindow() {
+  async newWindow() {
     if (isWin) {
-      runPowerShellScript(`
+      await runPowerShellScript(`
         Start-Process -FilePath "${this.cliFilename}" -ArgumentList "--new-window" -WindowStyle Hidden
       `);
     } else {
