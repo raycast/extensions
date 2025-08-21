@@ -2,10 +2,10 @@ import { Action, ActionPanel, Icon, List, confirmAlert } from "@raycast/api";
 import { useCommandHistory } from "./api/useCommandHistory";
 
 export default function History() {
-  const { history, clearHistory } = useCommandHistory();
+  const { history, clearHistory, isLoading } = useCommandHistory();
 
   return (
-    <List isShowingDetail>
+    <List isShowingDetail isLoading={isLoading}>
       {history.map((item) => (
         <List.Item
           key={item.id}
