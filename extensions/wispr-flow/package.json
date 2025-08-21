@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wispr-flow",
+  "title": "Wispr Flow",
+  "description": "Control Wispr Flow voice dictation app: view your stats, switch microphones, and launch the app.",
+  "keywords": [
+    "Wispr Flow",
+    "wispr",
+    "flow",
+    "voice",
+    "transcription",
+    "microphone",
+    "stats",
+    "productivity"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "icon": "extension-icon.png",
+  "author": "kylehess",
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "showMenuBar",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Show Menu Bar Stats",
+      "label": "Show Menu Bar Stats",
+      "description": "Display word count and WPM in your menu bar"
+    }
+  ],
+  "commands": [
+    {
+      "name": "view-stats",
+      "title": "View Stats",
+      "description": "View your WPM and overall word count in Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "switch-microphone",
+      "title": "Switch Microphone",
+      "description": "Change the microphone used by Wispr Flow",
+      "mode": "view"
+    },
+    {
+      "name": "launch-app",
+      "title": "Launch Wispr Flow",
+      "description": "Open the Wispr Flow application",
+      "mode": "no-view"
+    },
+    {
+      "name": "menu-bar-stats",
+      "title": "My Stats Menu Bar",
+      "description": "Display your Wispr Flow statistics in the menu bar",
+      "mode": "menu-bar",
+      "interval": "60m"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
