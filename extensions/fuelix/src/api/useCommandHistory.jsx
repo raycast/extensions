@@ -36,13 +36,14 @@ export function useCommandHistory() {
   /**
    * Add a new entry to command history
    * @param {string} prompt - The user's prompt
-   * @param {string} response - FuelIX's response
+   * @param {string} response - Fuelix's response
    * @param {string} modelUsed - The model used for this query
    */
   const addToHistory = async (prompt, response, modelUsed) => {
     try {
-      const storedHistory = await LocalStorage.getItem("fuelix_command_history");
-      let currentHistory = storedHistory ? JSON.parse(storedHistory) : [];
+      // Use current history state instead of reading from LocalStorage
+      // This avoids race conditions and improves performance
+      const currentHistory = history;
 
       const newEntry = {
         id: Date.now(),

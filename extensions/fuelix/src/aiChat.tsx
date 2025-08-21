@@ -128,7 +128,7 @@ export default function Chat({ launchContext }: { launchContext?: LaunchContext 
       >
         <Form.Description
           title="Chat Name"
-          text="In each chat, FuelIX will remember the previous messages you send in it."
+          text="In each chat, Fuelix will remember the previous messages you send in it."
         />
         <Form.TextField id="chatName" />
         <Form.Description
@@ -188,7 +188,6 @@ export default function Chat({ launchContext }: { launchContext?: LaunchContext 
                 return newChatData;
               });
 
-              // Then handle the API call separately
               (async () => {
                 try {
                   // Build messages array for better context handling
@@ -373,11 +372,12 @@ export default function Chat({ launchContext }: { launchContext?: LaunchContext 
   };
 
   const formatDate = (dateToCheckISO: string) => {
+    const now = new Date();
     const dateToCheck = new Date(dateToCheckISO);
-    if (dateToCheck.toDateString() === new Date().toDateString()) {
-      return `${new Date().getHours()}:${String(new Date().getMinutes()).padStart(2, "0")}`;
+    if (dateToCheck.toDateString() === now.toDateString()) {
+      return `${now.getHours()}:${String(now.getMinutes()).padStart(2, "0")}`;
     } else {
-      return `${new Date().toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "2-digit" })}`;
+      return `${now.toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "2-digit" })}`;
     }
   };
 
@@ -414,7 +414,6 @@ export default function Chat({ launchContext }: { launchContext?: LaunchContext 
 
             // Add current user message
             messages.push({ role: "user", content: currentChat.messages[0].prompt });
-            // messages, currentChat.model ?? defaultModel
             const result = await getResponse({
               prompt: messages,
               modelName: currentChat.model ?? defaultModel,
@@ -444,7 +443,7 @@ export default function Chat({ launchContext }: { launchContext?: LaunchContext 
               }
               return newChatData;
             });
-            toast(Toast.Style.Failure, "FuelIX cannot process this message.");
+            toast(Toast.Style.Failure, "Fuelix cannot process this message.");
           }
         }
 
@@ -521,7 +520,7 @@ export default function Chat({ launchContext }: { launchContext?: LaunchContext 
 
   return chatData === null ? (
     <List searchText={searchText} onSearchTextChange={setSearchText}>
-      <List.EmptyView icon={Icon.Stars} title="Send a Message to FuelIX to get started." />
+      <List.EmptyView icon={Icon.Stars} title="Send a Message to Fuelix to get started." />
     </List>
   ) : (
     <List
@@ -530,7 +529,7 @@ export default function Chat({ launchContext }: { launchContext?: LaunchContext 
       isShowingDetail={
         getChat(chatData.currentChat)?.messages.length ? getChat(chatData.currentChat)!.messages.length > 0 : false
       }
-      searchBarPlaceholder="Ask FuelIX..."
+      searchBarPlaceholder="Ask Fuelix..."
       searchBarAccessory={
         <List.Dropdown
           tooltip="Your Chats"
@@ -557,7 +556,7 @@ export default function Chat({ launchContext }: { launchContext?: LaunchContext 
           return (
             <List.EmptyView
               icon={Icon.Stars}
-              title="Send a Message to FuelIX to get started."
+              title="Send a Message to Fuelix to get started."
               actions={<FuelIXActionPanel />}
             />
           );

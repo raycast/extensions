@@ -22,7 +22,7 @@ export default async function getResponse({
   try {
     const model = createOpenAICompatible({
       baseURL: apiBaseURL,
-      name: "FuelIX",
+      name: "Fuelix",
       headers: {
         Authorization: `Bearer ${apiKey}`,
       },

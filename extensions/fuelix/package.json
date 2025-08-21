@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fuelix",
   "title": "Fuelix",
-  "description": "Unofficial - Use FuelIX Platform from the comfort of Raycast",
+  "description": "Unofficial - Use Fuelix Platform from the comfort of Raycast",
   "icon": "extension-icon.png",
   "author": "fernando_barrios",
   "license": "MIT",
@@ -10,7 +10,7 @@
     {
       "name": "history",
       "title": "Command History",
-      "subtitle": "FuelIX",
+      "subtitle": "Fuelix",
       "description": "View your command history",
       "mode": "view",
       "icon": "extension-icon.png"
@@ -18,8 +18,8 @@
     {
       "name": "askAI",
       "title": "Ask AI",
-      "subtitle": "FuelIX",
-      "description": "Ask FuelIX AI",
+      "subtitle": "Fuelix",
+      "description": "Ask Fuelix AI",
       "mode": "view",
       "icon": "extension-icon.png",
       "arguments": [
@@ -44,16 +44,16 @@
     {
       "name": "aiChat",
       "title": "AI Chat",
-      "subtitle": "FuelIX",
-      "description": "Chat with FuelIX AI",
+      "subtitle": "Fuelix",
+      "description": "Chat with Fuelix AI",
       "icon": "extension-icon.png",
       "mode": "view"
     },
     {
       "name": "askAboutScreen",
       "title": "Ask About Screen Content",
-      "subtitle": "FuelIX",
-      "description": "Ask FuelIX AI about what's on your screen",
+      "subtitle": "Fuelix",
+      "description": "Ask Fuelix AI about what's on your screen",
       "mode": "no-view",
       "icon": "extension-icon.png",
       "arguments": [
@@ -78,8 +78,8 @@
     {
       "name": "askAboutSelectedScreen",
       "title": "Ask About Selected Screen Area",
-      "subtitle": "FuelIX",
-      "description": "Ask FuelIX about your selected screen area",
+      "subtitle": "Fuelix",
+      "description": "Ask Fuelix about your selected screen area",
       "mode": "no-view",
       "icon": "extension-icon.png",
       "arguments": [
@@ -104,8 +104,8 @@
     {
       "name": "askAboutSelectedText",
       "title": "Ask About Selected Text",
-      "subtitle": "FuelIX",
-      "description": "Ask FuelIX AI about your selected text",
+      "subtitle": "Fuelix",
+      "description": "Ask Fuelix AI about your selected text",
       "mode": "view",
       "icon": "extension-icon.png",
       "arguments": [
@@ -130,6 +130,7 @@
     {
       "name": "summarize",
       "title": "Summarize",
+      "subtitle": "Fuelix",
       "description": "Summarize text",
       "icon": "extension-icon.png",
       "mode": "view",
@@ -147,6 +148,7 @@
     {
       "name": "explain",
       "title": "Explain",
+      "subtitle": "Fuelix",
       "description": "Explain text",
       "icon": "extension-icon.png",
       "mode": "view",
@@ -164,6 +166,7 @@
     {
       "name": "comment",
       "title": "Add Comments to Code",
+      "subtitle": "Fuelix",
       "description": "Add comments to code",
       "icon": "extension-icon.png",
       "mode": "view",
@@ -181,6 +184,7 @@
     {
       "name": "friendly",
       "title": "Change Tone to Friendly",
+      "subtitle": "Fuelix",
       "icon": "extension-icon.png",
       "description": "Change tone of selected text to friendly",
       "mode": "view",
@@ -198,6 +202,7 @@
     {
       "name": "professional",
       "title": "Change Tone to Professional",
+      "subtitle": "Fuelix",
       "icon": "extension-icon.png",
       "description": "Change tone of selected text to professional",
       "mode": "view",
@@ -215,6 +220,7 @@
     {
       "name": "synonym",
       "title": "Find Synonym",
+      "subtitle": "Fuelix",
       "icon": "extension-icon.png",
       "description": "Find synonym of selected word",
       "mode": "view",
@@ -232,6 +238,7 @@
     {
       "name": "grammar",
       "title": "Fix Spelling and Grammar",
+      "subtitle": "Fuelix",
       "icon": "extension-icon.png",
       "description": "Fix spelling and grammar of selected text",
       "mode": "view",
@@ -249,6 +256,7 @@
     {
       "name": "longer",
       "title": "Make Longer",
+      "subtitle": "Fuelix",
       "icon": "extension-icon.png",
       "description": "Make selected text longer",
       "mode": "view",
@@ -266,6 +274,7 @@
     {
       "name": "shorter",
       "title": "Make Shorter",
+      "subtitle": "Fuelix",
       "icon": "extension-icon.png",
       "description": "Make selected text shorter",
       "mode": "view",
@@ -283,6 +292,7 @@
     {
       "name": "translate",
       "title": "Translate",
+      "subtitle": "Fuelix",
       "icon": "extension-icon.png",
       "description": "Translate selected text",
       "mode": "view",
@@ -324,22 +334,22 @@
   ],
   "preferences": [
     {
-      "description": "FuelIX API Base URL",
+      "description": "Fuelix API Base URL",
       "name": "apiBaseURL",
       "required": true,
-      "title": "FuelIX API Base URL",
+      "title": "Fuelix API Base URL",
       "type": "textfield",
       "default": "https://api.fuelix.ai/v1"
     },
     {
-      "description": "FuelIX API Key",
+      "description": "Fuelix API Key",
       "name": "apiKey",
       "required": true,
-      "title": "FuelIX API Key",
+      "title": "Fuelix API Key",
       "type": "password"
     },
     {
-      "description": "Which model FuelIX for Raycast uses by default (unless overriden by individual commands).",
+      "description": "Which model Fuelix for Raycast uses by default (unless overriden by individual commands).",
       "name": "defaultModel",
       "title": "Model",
       "type": "dropdown",

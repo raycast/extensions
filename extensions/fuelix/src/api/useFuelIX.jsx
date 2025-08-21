@@ -16,6 +16,7 @@ export default function useFuelIX(props, options = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState("");
   const [error, setError] = useState(null);
+  const [regenerateCounter, setRegenerateCounter] = useState(0);
   const { addToHistory } = useCommandHistory();
   const { defaultModel, apiKey, apiBaseURL } = getPreferenceValues();
 
@@ -78,7 +79,7 @@ export default function useFuelIX(props, options = {}) {
     }
 
     generateResponse();
-  }, [context, useSelected, buffer, defaultModel]);
+  }, [context, useSelected, buffer, defaultModel, apiKey, apiBaseURL, regenerateCounter]);
 
   const actions = (
     <ActionPanel>
@@ -99,8 +100,8 @@ export default function useFuelIX(props, options = {}) {
       <Action
         title="Regenerate"
         onAction={() => {
-          // Trigger regeneration by updating a state that causes useEffect to run
-          setResponse("");
+          // Trigger regeneration by incrementing counter to avoid infinite loops
+          setRegenerateCounter((prev) => prev + 1);
           setError(null);
         }}
         shortcut={{ modifiers: ["cmd"], key: "r" }}

@@ -16,6 +16,9 @@ export default async function askScreenshot(props, prompt, isSelecting) {
   try {
     await execPromise(screencaptureCmd);
     fileBuffer = await fs.promises.readFile(screenshotPath);
+
+    // Clean up the temporary screenshot file after reading it into memory
+    await fs.promises.unlink(screenshotPath);
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,

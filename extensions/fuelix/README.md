@@ -1,12 +1,12 @@
-# FuelIX
+# Fuelix
 
-Unofficial support to use FuelIX Platform from the comfort of Raycast
+Unofficial support to use Fuelix Platform from the comfort of Raycast
 
-![Command List](screenshots/1.png)
+![Command List](metadata/1.png)
 
 ## Getting an API Key
 
-1. Go to [FuelIX Dev Portal](https://dev.fuelix.ai)
+1. Go to [Fuelix Dev Portal](https://dev.fuelix.ai)
 2. Click on "Create New Project"
 3. Enter project name, description and enable the Core API PR.
 4. Click on "Create Project"
@@ -23,43 +23,43 @@ You're all good to go!
 
 Straight from your command bar, ask anything that you wanted and get an AI-generated answer without any effort.
 
-![Ask anything](screenshots/askAI.png)
+![Ask anything](metadata/askAI.png)
 
 #### AI Chat
 
-Continue talking about everything right where you left off. Have ongoing conversations with FuelIX AI.
+Continue talking about everything right where you left off. Have ongoing conversations with Fuelix AI.
 
-![AI Chat](screenshots/aiChat.png)
+![AI Chat](metadata/aiChat.png)
 
 Create a new Chat
 
-![AI Create a new Chat](screenshots/aiChatNewChat.png)
+![AI Create a new Chat](metadata/aiChatNewChat.png)
 
 #### Command History
 
 View your command history to keep track of your previous interactions.
 
-![Command History](screenshots/commandHistory.png)
+![Command History](metadata/commandHistory.png)
 
 ### Screen Analysis Commands
 
 #### Ask About Screen Content
 
-Capture a screenshot of your entire screen and ask FuelIX AI questions about what's displayed. Enter your query and the AI will analyze the screenshot to provide detailed answers about the content, layout, or any specific elements visible on your screen.
+Capture a screenshot of your entire screen and ask Fuelix AI questions about what's displayed. Enter your query and the AI will analyze the screenshot to provide detailed answers about the content, layout, or any specific elements visible on your screen.
 
-![Ask About Screen Content](screenshots/askAboutScreenContent.png)
+![Ask About Screen Content](metadata/askAboutScreenContent.png)
 
 #### Ask About Selected Screen Area
 
-Capture a screenshot of a specific selected area of your screen and ask FuelIX AI about that particular region. This allows for more focused analysis of specific parts of your screen - perfect for analyzing particular windows, sections, or UI elements.
+Capture a screenshot of a specific selected area of your screen and ask Fuelix AI about that particular region. This allows for more focused analysis of specific parts of your screen - perfect for analyzing particular windows, sections, or UI elements.
 
-![Ask About Selected Screen Area](screenshots/askAboutSelectedScreenArea.png)
+![Ask About Selected Screen Area](metadata/askAboutSelectedScreenArea.png)
 
 #### Ask About Selected Text
 
-Ask FuelIX AI about your selected text for detailed explanations or analysis.
+Ask Fuelix AI about your selected text for detailed explanations or analysis.
 
-![Ask About Selected Text](screenshots/askAboutSelectedText.png)
+![Ask About Selected Text](metadata/askAboutSelectedText.png)
 
 ### Text Processing Commands
 
@@ -67,19 +67,19 @@ Ask FuelIX AI about your selected text for detailed explanations or analysis.
 
 Quickly summarize any text to get the key points and main ideas.
 
-![Summarize](screenshots/summarize.png)
+![Summarize](metadata/summarize.png)
 
 #### Explain
 
 Get detailed explanations of complex text, concepts, or content.
 
-![Explain](screenshots/explain.png)
+![Explain](metadata/explain.png)
 
 #### Translate
 
 Translate text between different languages with customizable target languages.
 
-![Translate](screenshots/translate.png)
+![Translate](metadata/translate.png)
 
 ### Code Enhancement Commands
 
@@ -87,7 +87,7 @@ Translate text between different languages with customizable target languages.
 
 Automatically add helpful comments to your code to improve readability and documentation.
 
-![Add Comments to Code](screenshots/addCommentsToCode.png)
+![Add Comments to Code](metadata/addCommentsToCode.png)
 
 ### Writing Enhancement Commands
 
@@ -95,40 +95,40 @@ Automatically add helpful comments to your code to improve readability and docum
 
 Transform your text to have a more friendly and approachable tone.
 
-![Change Tone to Friendly](screenshots/changeToneFriendly.png)
+![Change Tone to Friendly](metadata/changeToneFriendly.png)
 
 #### Change Tone to Professional
 
 Convert your text to use professional language with advanced vocabulary and proper grammar.
 
-![Change Tone to Professional](screenshots/changeToneToProfessional.png)
+![Change Tone to Professional](metadata/changeToneToProfessional.png)
 
 #### Fix Spelling and Grammar
 
 Correct spelling errors and grammar issues in your text while maintaining the original meaning.
 
-![Fix Spelling and Grammar](screenshots/fixSpellingAndGrammar.png)
+![Fix Spelling and Grammar](metadata/fixSpellingAndGrammar.png)
 
 #### Make Longer
 
 Expand your text to be more detailed without adding extra information beyond what's given.
 
-![Make Longer](screenshots/makeLonger.png)
+![Make Longer](metadata/makeLonger.png)
 
 #### Make Shorter
 
 Condense your text while keeping the core idea and essential information.
 
-![Make Shorter](screenshots/makeShorter.png)
+![Make Shorter](metadata/makeShorter.png)
 
 #### Find Synonym
 
 Find appropriate synonyms for selected words to improve your writing variety.
 
-![Find Synonym](screenshots/findSynonym.png)
+![Find Synonym](metadata/findSynonym.png)
 
 ### Personalized for you, really
 
 Customize the model to your liking. Choose from a wide variety of AI models including GPT, Claude, Gemini, and more.
 
-![Custom model](screenshots/aiChatNewChat.png)
+![Custom model](metadata/aiChatNewChat.png)
