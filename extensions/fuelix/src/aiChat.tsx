@@ -12,6 +12,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import getResponse, { ChatMessage } from "./api/fuelix";
 import { models } from "./api/models";
@@ -51,14 +52,6 @@ interface FormValues {
   model: string;
 }
 
-interface ToastOptions {
-  title?: string;
-  primaryAction?: {
-    title: string;
-    onAction: () => void;
-  };
-}
-
 export default function Chat({ launchContext }: { launchContext?: LaunchContext }) {
   const toast = async (style: Toast.Style, title: string, message?: string) => {
     await showToast({
@@ -67,15 +60,6 @@ export default function Chat({ launchContext }: { launchContext?: LaunchContext 
       message,
     });
   };
-
-  function showFailureToast(error: unknown, options: ToastOptions = {}) {
-    return showToast({
-      style: Toast.Style.Failure,
-      title: options.title || "Error",
-      message: error instanceof Error ? error.message : String(error),
-      primaryAction: options.primaryAction,
-    });
-  }
 
   const { defaultModel, apiKey, apiBaseURL } = getPreferenceValues<Preferences>();
 
