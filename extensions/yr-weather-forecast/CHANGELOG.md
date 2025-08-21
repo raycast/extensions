@@ -1,6 +1,6 @@
 # Yr-new Changelog
 
-## [Unreleased] - Next PR
+## Version 1.1.0 - {PR_MERGE_DATE}
 
 - **New**: Quick day search with natural language queries like "Oslo fredag", "London next monday", "Bergen 25"
 - **New**: One-day view showing mini graph, hourly table, and natural language weather summary
@@ -11,7 +11,7 @@
 - **Improved**: Consolidated duplicate weather emoji functions into shared utility
 - **Improved**: Better error handling for out-of-bounds dates with helpful guidance
 
-## [Initial Version] - {PR_MERGE_DATE}
+## Version 1.0.0 - {PR_MERGE_DATE}
 
 - Raycast extension using The Norwegian Institute of Meteorology's open API for weather forcast. 
 - Search locations and manage favorites
