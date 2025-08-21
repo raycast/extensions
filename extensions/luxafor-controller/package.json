@@ -1,0 +1,115 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "version": "1.0.0",
+  "name": "luxafor-controller",
+  "title": "Luxafor Controller",
+  "description": "Control your Luxafor LED device directly from Raycast",
+  "icon": "logo.png",
+  "author": "smcnab1",
+  "contributors": [],
+  "categories": [
+    "Applications"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "control-luxafor",
+      "title": "Control Luxafor",
+      "subtitle": "Luxafor Controller",
+      "description": "Control your Luxafor device",
+      "mode": "view"
+    },
+    {
+      "name": "luxafor-status",
+      "title": "Luxafor Status",
+      "subtitle": "Luxafor Status",
+      "description": "Show Luxafor device status in menubar",
+      "mode": "menu-bar",
+      "interval": "5s"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "userId",
+      "type": "textfield",
+      "required": true,
+      "title": "Luxafor User ID",
+      "description": "Your Luxafor User ID from the Webhook tab in Luxafor software",
+      "placeholder": "Enter your Luxafor User ID",
+      "label": "User ID"
+    },
+    {
+      "name": "apiEndpoint",
+      "type": "dropdown",
+      "required": true,
+      "title": "API Endpoint",
+      "description": "Choose your preferred API endpoint",
+      "default": "com",
+      "label": "API Endpoint",
+      "data": [
+        {
+          "title": "api.luxafor.com",
+          "value": "com"
+        },
+        {
+          "title": "api.luxafor.co.uk",
+          "value": "co.uk"
+        }
+      ]
+    },
+    {
+      "name": "menubarMode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Menubar Layout",
+      "description": "Choose between simple toggle or full color control",
+      "default": "simple",
+      "label": "Menubar Layout",
+      "data": [
+        {
+          "title": "Simple Toggle (Red/Green)",
+          "value": "simple"
+        },
+        {
+          "title": "Full Color Control",
+          "value": "full"
+        }
+      ]
+    },
+    {
+      "name": "debugMode",
+      "type": "checkbox",
+      "required": false,
+      "title": "Enable Debug Mode",
+      "description": "Show detailed debug information and logging",
+      "default": false,
+      "label": "Debug Mode"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.4",
+    "@raycast/utils": "^2.2.0",
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "eslint-config-prettier": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^4.9.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test:api": "node test-api.js",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
