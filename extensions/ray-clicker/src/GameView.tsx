@@ -57,20 +57,19 @@ const defaultGameState: GameState = {
 };
 
 export function GameView({
-  gameState = defaultGameState,
-  comboMultiplier = 1,
-  onUpgrade = () => {},
-  onUpgradeMax = () => {},
-  onEarn = () => {},
-  onReset = () => {},
-  onShowStats = () => {},
-  onShowPrestigeUpgrades = () => {
-    /* This will be overridden by the actual implementation in index.tsx */
-  },
-  onSearchTextChange = () => {},
-  isLoading = false,
-  onToggleLuckyToasts = () => {},
-}: Partial<GameViewProps> = {}) {
+  gameState,
+  comboMultiplier,
+  onUpgrade,
+  onUpgradeMax,
+  onEarn,
+  onReset,
+  onPrestige,
+  onShowStats,
+  onShowPrestigeUpgrades,
+  onSearchTextChange,
+  isLoading,
+  onToggleLuckyToasts,
+}: GameViewProps) {
   // Ensure we have a valid game state
   const safeGameState = useMemo(
     () => ({
@@ -250,6 +249,7 @@ export function GameView({
             actions={
               <ActionPanel>
                 <Action title="Open Prestige Menu" onAction={onShowPrestigeUpgrades} icon={Icon.Stars} />
+                <Action title="Prestige Now" onAction={onPrestige} icon={Icon.Star} />
                 <Action title="Show Stats" onAction={onShowStats} icon={Icon.BarChart} />
                 <Action
                   title="Reset Game"

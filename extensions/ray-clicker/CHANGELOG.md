@@ -1,5 +1,18 @@
 # Ray Clicker Changelog
 
+## [Fix: Idle Accrual Sync & Prestige fix & UX improvements] - {PR_MERGE_DATE}
+
+- Sync main UI state from storage when the menu bar heartbeat is active to reflect idle gains without double-counting (`src/useGameState.ts`).
+- Convert menu bar command to a continuous 1s accrual loop; maintain heartbeat, persist each tick, and clean up on unmount (`src/menu-bar.tsx`).
+- Add visible "Prestige Now" action and require explicit `GameView` props (remove placeholder overrides) for clarity and top-level correctness (`src/GameView.tsx`).
+- Rebalance: Reduce `PRESTIGE_PP_DIVISOR` from 800,000 to 500,000 for faster early prestige (`src/constants.ts`).
+- fix: changed wording on some upgrades to make them fit the space better
+- fix: prestige upgrade purchase to not update state if it fails
+- fix: readded missing prestige upgrade purchase button
+- fix: prestige duplication glitch
+- fix: idle rate not updating
+- add way for user to see how achievement was unlocked
+
 ## [Assets & README compliance] - 2025-08-20
 
 - Set extension icon to `icon.png` (Raycast resolves to `assets/icon.png`) in `package.json`.
