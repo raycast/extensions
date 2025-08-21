@@ -21,6 +21,7 @@ This extension does not send any user data to our servers. All API requests are 
 ### Features
 
 - **Search locations**: Type a city/place to find coordinates (via OpenStreetMap Nominatim).
+- **Quick day search**: Search for specific dates like "Oslo fredag", "London next monday", or "Bergen 25" to get quick weather summaries for that day.
 - **Favorites in main view**: Your saved places show:
   - Temperature and colored emoji weather icon
   - Wind speed, optional wind direction (arrow + cardinal)
@@ -32,6 +33,10 @@ This extension does not send any user data to our servers. All API requests are 
   - Weather emojis at each point, wind arrows on the bottom axis
   - 24-hour clock labels, axes reflect selected units
   - Forecast table grouped by day
+- **One-day view**: Quick access to weather for a specific date with:
+  - Mini SVG graph for the day
+  - Hourly weather table
+  - Natural language summary (e.g., "Partly cloudy, with a low chance of precipitation")
 - **Graph view**: Also available directly from a favorite.
 - **Units**: Metric (default) or Imperial; respected in lists and graphs.
 - **Caching**: Reduces API calls (MET: 30 minutes, Sunrise/Sunset: 6 hours).
@@ -40,12 +45,28 @@ This extension does not send any user data to our servers. All API requests are 
 
 1. Open Raycast and run the command `Yr`.
 2. Start typing to search for a location.
-3. In search results:
+3. **Quick day search**: Type queries like:
+   - "Oslo fredag" or "oslo friday" for upcoming Friday
+   - "London next monday" for next Monday
+   - "Bergen 25" for December 25th
+   - "Paris tomorrow" or "Paris i morgen"
+4. In search results:
    - Press Enter to show current weather (toast)
-   - Add to favorites (Action: Add to Favorites)
-4. In the favorites section:
+   - **Cmd+F** to add to favorites
+   - **Cmd+Shift+F** to remove from favorites
+5. In the favorites section:
    - Press Enter to open the combined Forecast screen
    - Use actions to open the Graph directly or remove from favorites
+   - **Cmd+Shift+F** to remove from favorites
+6. **Quick View**: When searching for a specific day, a Quick View item appears at the top showing:
+   - Weather summary for that day
+   - Actions to open the one-day view or full forecast
+
+### Keyboard Shortcuts
+
+- **Cmd+F**: Add location to favorites
+- **Cmd+Shift+F**: Remove location from favorites
+- **Enter**: Show current weather (search results) or open forecast (favorites)
 
 ### Command preferences
 

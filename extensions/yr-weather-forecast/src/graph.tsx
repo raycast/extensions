@@ -6,27 +6,71 @@ import { getSunTimes, type SunTimes } from "./sunrise-client";
 import { scaleLinear } from "d3-scale";
 import { line, curveMonotoneX } from "d3-shape";
 import { formatPrecip, formatTemperatureCelsius, getUnits } from "./units";
+import { symbolToEmoji } from "./weather-emoji";
+import { directionFromDegrees } from "./weather-utils";
+import { minFinite, maxFinite, svgToDataUri } from "./graph-utils";
 
 export default function GraphView(props: { name: string; lat: number; lon: number; hours?: number }) {
   const { name, lat, lon, hours = 48 } = props;
   const [series, setSeries] = useState<TimeseriesEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [showError, setShowError] = useState(false);
+  const [showNoData, setShowNoData] = useState(false);
   const [sunByDate, setSunByDate] = useState<Record<string, SunTimes>>({});
 
   useEffect(() => {
     let cancelled = false;
+    let errorTimeout: NodeJS.Timeout;
+    let noDataTimeout: NodeJS.Timeout;
+
     async function fetchData() {
       setLoading(true);
+      setError(null);
+      setShowError(false);
+      setShowNoData(false);
+
       try {
         const data = await getForecast(lat, lon);
-        if (!cancelled) setSeries(data);
+        if (!cancelled) {
+          setSeries(data);
+          setError(null);
+          setShowError(false);
+          setShowNoData(false);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setSeries([]); // Clear existing weather forecasts
+          const errorMessage = err instanceof Error ? err.message : "Failed to fetch weather data";
+          setError(errorMessage);
+
+          // Delay showing error message by 150ms to give API time to catch up
+          errorTimeout = setTimeout(() => {
+            if (!cancelled) {
+              setShowError(true);
+            }
+          }, 150);
+        }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+
+          // Delay showing "no data" message by 150ms to give API time to catch up
+          if (series.length === 0) {
+            noDataTimeout = setTimeout(() => {
+              if (!cancelled) {
+                setShowNoData(true);
+              }
+            }, 150);
+          }
+        }
       }
     }
     fetchData();
     return () => {
       cancelled = true;
+      if (errorTimeout) clearTimeout(errorTimeout);
+      if (noDataTimeout) clearTimeout(noDataTimeout);
     };
   }, [lat, lon]);
 
@@ -59,10 +103,38 @@ export default function GraphView(props: { name: string; lat: number; lon: numbe
     };
   }, [series, hours, lat, lon]);
 
-  const { markdown } = useMemo(
-    () => buildGraphMarkdown(name, series, hours, { sunByDate }),
-    [name, series, hours, sunByDate],
-  );
+  const { markdown } = useMemo(() => {
+    if (error && showError) {
+      return {
+        markdown: `## ⚠️ Data Fetch Failed
+
+Unable to retrieve weather forecast data from the MET API.
+
+**Error details:**
+${error}
+
+**Available options:**
+- Check your internet connection
+- Try again later
+- Verify the location coordinates are correct`,
+      };
+    }
+
+    if (series.length === 0 && showNoData) {
+      return {
+        markdown: `## ⚠️ No Forecast Data Available
+
+No weather forecast data is currently available for this location.
+
+**Available options:**
+- Check the location coordinates
+- Try refreshing the data
+- Contact support if the issue persists`,
+      };
+    }
+
+    return buildGraphMarkdown(name, series, hours, { sunByDate });
+  }, [name, series, hours, sunByDate, error, showError, showNoData]);
 
   return <Detail isLoading={loading} markdown={markdown} />;
 }
@@ -259,52 +331,4 @@ export function buildGraphMarkdown(
   const titleLabel = opts?.title ?? `${hours}h forecast`;
   const md = `# ${name} – ${titleLabel}\n\n![forecast](data:image/svg+xml;utf8,${svgToDataUri(svg)})\n\nMin ${tMinText ?? "N/A"} • Max ${tMaxText ?? "N/A"} • Max precip ${pMaxText ?? "N/A"}`;
   return { markdown: md };
-}
-
-function minFinite(values: number[]): number | undefined {
-  let min: number | undefined = undefined;
-  for (const v of values) {
-    if (Number.isFinite(v)) min = min === undefined ? (v as number) : Math.min(min, v as number);
-  }
-  return min;
-}
-
-function maxFinite(values: number[]): number | undefined {
-  let max: number | undefined = undefined;
-  for (const v of values) {
-    if (Number.isFinite(v)) max = max === undefined ? (v as number) : Math.max(max, v as number);
-  }
-  return max;
-}
-
-// (unused helper removed)
-
-// removed old pathFromPoints helper (replaced by d3-shape line)
-
-function svgToDataUri(svg: string): string {
-  // Encode minimally to keep it readable while safe for data URI
-  return encodeURIComponent(svg).replace(/'/g, "%27").replace(/\(/g, "%28").replace(/\)/g, "%29");
-}
-
-function symbolToEmoji(symbol?: string): string {
-  if (!symbol) return "";
-  const s = symbol.toLowerCase();
-  if (s.includes("thunder")) return "⛈️";
-  if (s.includes("sleet")) return "🌨️";
-  if (s.includes("snow")) return "🌨️";
-  if (s.includes("rain")) return s.includes("showers") ? "🌦️" : "🌧️";
-  if (s.includes("fog")) return "🌫️";
-  if (s.includes("partlycloudy")) return "🌤️";
-  if (s.includes("cloudy")) return "☁️";
-  if (s.includes("fair")) return s.includes("night") ? "🌙" : "🌤️";
-  if (s.includes("clearsky")) return s.includes("night") ? "🌙" : "☀️";
-  return "";
-}
-
-function directionFromDegrees(degrees: number): { arrow: string; name: string } {
-  const d = ((degrees % 360) + 360) % 360;
-  const names = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"] as const;
-  const arrows = ["↑", "↗", "→", "↘", "↓", "↙", "←", "↖"] as const;
-  const index = Math.round(d / 45) % 8;
-  return { arrow: arrows[index], name: names[index] };
 }
