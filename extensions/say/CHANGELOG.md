@@ -1,5 +1,11 @@
 # Say - Text to Speech Changelog
 
+## [Enhancement] - {PR_MERGE_DATE}
+
+- Add support for stopping the text-to-speech process
+- Bump latest mac-say to handle SIGTERM gracefully
+- Bump all dependencies to the latest
+
 ## [Bugfix & Maintenance] - 2025-07-07
 
 - Bump mac-say@0.3.2 to fix the possibly duplicate lines in Configure Say command
