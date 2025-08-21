@@ -1,6 +1,6 @@
 # Statamic Docs Changelog
 
-## [Update] - 2025-08-21
+## [Update] - {PR_MERGE_DATE}
 
 - Updated the search index
 
