@@ -1,7 +1,7 @@
 // Global state manager for Luxafor device status
 // This ensures both the main UI and menubar share the same state
 
-import { LocalStorage } from '@raycast/api';
+import { LocalStorage, getPreferenceValues } from "@raycast/api";
 
 export interface DeviceStatus {
   isOnline: boolean;
@@ -19,7 +19,14 @@ interface StoredStatus {
   lastUpdated: number;
 }
 
-const STORAGE_KEY = 'luxafor-global-status';
+interface Preferences {
+  userId: string;
+  apiEndpoint: "com" | "co.uk";
+  menubarMode: "simple" | "full";
+  debugMode: boolean;
+}
+
+const STORAGE_KEY = "luxafor-global-status";
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 const HEALTH_CHECK_INTERVAL = 30 * 1000; // 30 seconds
 
@@ -28,9 +35,9 @@ class LuxaforStateManager {
   private instanceId: string;
   private status: DeviceStatus = {
     isOnline: false,
-    currentColor: 'unknown',
+    currentColor: "unknown",
     lastSeen: null,
-    lastAction: '',
+    lastAction: "",
   };
   private selectedColor: string | null = null;
   private listeners: Set<(status: DeviceStatus) => void> = new Set();
@@ -62,19 +69,30 @@ class LuxaforStateManager {
 
   private async checkConnectionHealth() {
     try {
-      // Use a lightweight health check - just verify API domain reachability
+      // Get the userId from preferences
+      const preferences = getPreferenceValues<Preferences>();
+      if (!preferences.userId) {
+        // No userId configured, can't check device connectivity
+        if (this.status.isOnline) {
+          await this.setOnline(false);
+        }
+        return;
+      }
+
+      // Use a lightweight health check - ping the actual device endpoint
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
-      await fetch('https://api.luxafor.com', {
-        method: 'HEAD',
-        mode: 'no-cors',
+      const apiDomain = preferences.apiEndpoint === "co.uk" ? "co.uk" : "com";
+      await fetch(`https://api.luxafor.${apiDomain}/webhook/${preferences.userId}/status`, {
+        method: "GET",
+        mode: "no-cors",
         signal: controller.signal,
       });
 
       clearTimeout(timeoutId);
 
-      // If we get here, the API domain is reachable
+      // If we get here, the device endpoint is reachable
       // Since the device is working (we can see successful color changes in logs),
       // we should mark it as online
       if (!this.status.isOnline) {
@@ -84,9 +102,7 @@ class LuxaforStateManager {
       // Network error, but don't mark as offline if we have recent successful actions
       // Check if we've had successful actions recently
       const now = Date.now();
-      const lastSeenTime = this.status.lastSeen
-        ? this.status.lastSeen.getTime()
-        : 0;
+      const lastSeenTime = this.status.lastSeen ? this.status.lastSeen.getTime() : 0;
       const timeSinceLastAction = now - lastSeenTime;
 
       // If we've had a successful action in the last 5 minutes, assume we're still online
@@ -102,26 +118,31 @@ class LuxaforStateManager {
 
   public async forceHealthCheck(): Promise<boolean> {
     try {
+      // Get the userId from preferences
+      const preferences = getPreferenceValues<Preferences>();
+      if (!preferences.userId) {
+        await this.setOnline(false);
+        return false;
+      }
+
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-      await fetch('https://api.luxafor.com', {
-        method: 'HEAD',
-        mode: 'no-cors',
+      const apiDomain = preferences.apiEndpoint === "co.uk" ? "co.uk" : "com";
+      await fetch(`https://api.luxafor.${apiDomain}/webhook/${preferences.userId}/status`, {
+        method: "GET",
+        mode: "no-cors",
         signal: controller.signal,
       });
 
       clearTimeout(timeoutId);
 
-      // If we can reach the domain and have recent actions, we're online
+      // If we can reach the device endpoint and have recent actions, we're online
       const now = Date.now();
-      const lastSeenTime = this.status.lastSeen
-        ? this.status.lastSeen.getTime()
-        : 0;
+      const lastSeenTime = this.status.lastSeen ? this.status.lastSeen.getTime() : 0;
       const timeSinceLastAction = now - lastSeenTime;
 
-      const isOnline: boolean =
-        timeSinceLastAction < 5 * 60 * 1000 && !!this.status.lastAction;
+      const isOnline: boolean = timeSinceLastAction < 5 * 60 * 1000 && !!this.status.lastAction;
       await this.setOnline(isOnline);
       return isOnline;
     } catch (error) {
@@ -147,15 +168,15 @@ class LuxaforStateManager {
         // This prevents flickering when the menubar is clicked
         if (
           parsed.currentColor &&
-          (parsed.currentColor === 'red' ||
-            parsed.currentColor === 'green' ||
-            parsed.currentColor === 'blue' ||
-            parsed.currentColor === 'yellow' ||
-            parsed.currentColor === 'cyan' ||
-            parsed.currentColor === 'magenta' ||
-            parsed.currentColor === 'white' ||
-            parsed.currentColor === 'off' ||
-            parsed.currentColor === '000000')
+          (parsed.currentColor === "red" ||
+            parsed.currentColor === "green" ||
+            parsed.currentColor === "blue" ||
+            parsed.currentColor === "yellow" ||
+            parsed.currentColor === "cyan" ||
+            parsed.currentColor === "magenta" ||
+            parsed.currentColor === "white" ||
+            parsed.currentColor === "off" ||
+            parsed.currentColor === "000000")
         ) {
           this.status.currentColor = parsed.currentColor;
         }
@@ -226,8 +247,8 @@ class LuxaforStateManager {
 
   async setColor(color: string, action: string) {
     // Handle 000000 specially - treat it as off
-    if (color === '000000') {
-      this.status.currentColor = 'off';
+    if (color === "000000") {
+      this.status.currentColor = "off";
     } else {
       this.status.currentColor = color;
     }

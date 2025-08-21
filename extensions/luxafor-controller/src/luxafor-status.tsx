@@ -1,19 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  MenuBarExtra,
-  getPreferenceValues,
-  showToast,
-  Toast,
-  Color,
-  Icon,
-} from '@raycast/api';
-import { LuxaforService, LuxaforColor } from './luxafor-service';
-import { luxaforState, DeviceStatus } from './luxafor-state';
+import React, { useState, useEffect, useCallback } from "react";
+import { MenuBarExtra, getPreferenceValues, showToast, Toast, Color, Icon } from "@raycast/api";
+import { LuxaforService, LuxaforColor } from "./luxafor-service";
+import { luxaforState, DeviceStatus } from "./luxafor-state";
 
 interface Preferences {
   userId: string;
-  apiEndpoint: 'com' | 'co.uk';
-  menubarMode: 'simple' | 'full';
+  apiEndpoint: "com" | "co.uk";
+  menubarMode: "simple" | "full";
   debugMode: boolean;
 }
 
@@ -21,9 +14,9 @@ export default function LuxaforStatus() {
   const [isLoading, setIsLoading] = useState(false);
   const [currentStatus, setCurrentStatus] = useState<DeviceStatus>({
     isOnline: false,
-    currentColor: 'unknown',
+    currentColor: "unknown",
     lastSeen: null,
-    lastAction: '',
+    lastAction: "",
   });
 
   const preferences = getPreferenceValues<Preferences>();
@@ -33,11 +26,7 @@ export default function LuxaforStatus() {
   const handleColorChange = useCallback(
     async (newColor: LuxaforColor) => {
       if (!preferences.userId) {
-        showToast(
-          Toast.Style.Failure,
-          'Error',
-          'Please set your Luxafor User ID in preferences',
-        );
+        showToast(Toast.Style.Failure, "Error", "Please set your Luxafor User ID in preferences");
         return;
       }
 
@@ -47,16 +36,12 @@ export default function LuxaforStatus() {
       try {
         const result = await luxaforService.setSolidColor(newColor);
         if (result.success) {
-          showToast(Toast.Style.Success, 'Success', `Changed to ${newColor}`);
+          showToast(Toast.Style.Success, "Success", `Changed to ${newColor}`);
         } else {
-          showToast(
-            Toast.Style.Failure,
-            'Error',
-            result.error || 'Failed to change color',
-          );
+          showToast(Toast.Style.Failure, "Error", result.error || "Failed to change color");
         }
       } catch (error) {
-        showToast(Toast.Style.Failure, 'Error', 'Failed to change color');
+        showToast(Toast.Style.Failure, "Error", "Failed to change color");
       } finally {
         setIsLoading(false);
       }
@@ -111,40 +96,18 @@ export default function LuxaforStatus() {
     }
   }, [preferences.debugMode]);
 
-  // Handle color changes
-  useEffect(() => {
-    if (currentStatus.currentColor !== 'unknown') {
-      // Update local state for persistence - no need for localStorage in Raycast
-      // The global state manager already handles persistence
-    }
-  }, [currentStatus.currentColor]);
-
-  // Force re-render when currentColor changes
-  useEffect(() => {
-    // Color change detected
-  }, [currentStatus.currentColor]);
-
   // Optimized toggle function
   const toggleColor = useCallback(async () => {
     if (!preferences.userId) {
-      showToast(
-        Toast.Style.Failure,
-        'Error',
-        'Please set your Luxafor User ID in preferences',
-      );
+      showToast(Toast.Style.Failure, "Error", "Please set your Luxafor User ID in preferences");
       return;
     }
 
     if (isLoading) return;
 
-    const newColor = currentStatus.currentColor === 'red' ? 'green' : 'red';
+    const newColor = currentStatus.currentColor === "red" ? "green" : "red";
     await handleColorChange(newColor);
-  }, [
-    preferences.userId,
-    isLoading,
-    currentStatus.currentColor,
-    handleColorChange,
-  ]);
+  }, [preferences.userId, isLoading, currentStatus.currentColor, handleColorChange]);
 
   const getStatusIcon = () => {
     if (!preferences.userId) return Icon.QuestionMark;
@@ -157,21 +120,21 @@ export default function LuxaforStatus() {
     if (isLoading) return Color.Blue;
 
     switch (currentStatus.currentColor) {
-      case 'red':
+      case "red":
         return Color.Red;
-      case 'green':
+      case "green":
         return Color.Green;
-      case 'blue':
+      case "blue":
         return Color.Blue;
-      case 'yellow':
+      case "yellow":
         return Color.Yellow;
-      case 'cyan':
+      case "cyan":
         return Color.Blue;
-      case 'magenta':
+      case "magenta":
         return Color.Purple;
-      case 'white':
+      case "white":
         return Color.PrimaryText;
-      case 'off':
+      case "off":
         return Color.SecondaryText;
 
       default:
@@ -180,9 +143,9 @@ export default function LuxaforStatus() {
   };
 
   const getToggleTarget = () => {
-    if (currentStatus.currentColor === 'red') return 'Green';
-    if (currentStatus.currentColor === 'green') return 'Red';
-    return 'Red';
+    if (currentStatus.currentColor === "red") return "Green";
+    if (currentStatus.currentColor === "green") return "Red";
+    return "Red";
   };
 
   const renderSimpleMode = () => (
@@ -192,12 +155,12 @@ export default function LuxaforStatus() {
       />
       <MenuBarExtra.Item
         title={`Toggle to ${getToggleTarget()}`}
-        icon={{ source: Icon.Circle, tintColor: getToggleTarget() }}
+        icon={{ source: Icon.Circle, tintColor: getToggleTarget() === "Green" ? Color.Green : Color.Red }}
         onAction={toggleColor}
       />
       <MenuBarExtra.Separator />
       <MenuBarExtra.Item
-        title={`Status: ${currentStatus.isOnline ? 'Online' : 'Offline'}`}
+        title={`Status: ${currentStatus.isOnline ? "Online" : "Offline"}`}
         icon={{
           source: currentStatus.isOnline ? Icon.Wifi : Icon.XmarkCircle,
           tintColor: currentStatus.isOnline ? Color.Green : Color.Red,
@@ -215,40 +178,40 @@ export default function LuxaforStatus() {
       <MenuBarExtra.Item
         title="Red"
         icon={{ source: Icon.Circle, tintColor: Color.Red }}
-        onAction={() => handleColorChange('red')}
+        onAction={() => handleColorChange("red")}
       />
       <MenuBarExtra.Item
         title="Green"
         icon={{ source: Icon.Circle, tintColor: Color.Green }}
-        onAction={() => handleColorChange('green')}
+        onAction={() => handleColorChange("green")}
       />
       <MenuBarExtra.Item
         title="Blue"
         icon={{ source: Icon.Circle, tintColor: Color.Blue }}
-        onAction={() => handleColorChange('blue')}
+        onAction={() => handleColorChange("blue")}
       />
       <MenuBarExtra.Item
         title="Yellow"
         icon={{ source: Icon.Circle, tintColor: Color.Yellow }}
-        onAction={() => handleColorChange('yellow')}
+        onAction={() => handleColorChange("yellow")}
       />
 
       <MenuBarExtra.Item
         title="Cyan"
         icon={{ source: Icon.Circle, tintColor: Color.Blue }}
-        onAction={() => handleColorChange('cyan')}
+        onAction={() => handleColorChange("cyan")}
       />
 
       <MenuBarExtra.Item
         title="Magenta"
         icon={{ source: Icon.Circle, tintColor: Color.Purple }}
-        onAction={() => handleColorChange('magenta')}
+        onAction={() => handleColorChange("magenta")}
       />
 
       <MenuBarExtra.Item
         title="White"
         icon={{ source: Icon.Circle, tintColor: Color.SecondaryText }}
-        onAction={() => handleColorChange('white')}
+        onAction={() => handleColorChange("white")}
       />
 
       <MenuBarExtra.Separator />
@@ -258,27 +221,19 @@ export default function LuxaforStatus() {
         icon={{ source: Icon.Power, tintColor: Color.SecondaryText }}
         onAction={async () => {
           if (!preferences.userId) {
-            showToast(
-              Toast.Style.Failure,
-              'Error',
-              'Please set your Luxafor User ID in preferences',
-            );
+            showToast(Toast.Style.Failure, "Error", "Please set your Luxafor User ID in preferences");
             return;
           }
           setIsLoading(true);
           try {
             const result = await luxaforService.turnOff();
             if (result.success) {
-              showToast(Toast.Style.Success, 'Success', 'Turned off');
+              showToast(Toast.Style.Success, "Success", "Turned off");
             } else {
-              showToast(
-                Toast.Style.Failure,
-                'Error',
-                result.error || 'Failed to turn off',
-              );
+              showToast(Toast.Style.Failure, "Error", result.error || "Failed to turn off");
             }
           } catch (error) {
-            showToast(Toast.Style.Failure, 'Error', 'Failed to turn off');
+            showToast(Toast.Style.Failure, "Error", "Failed to turn off");
           } finally {
             setIsLoading(false);
           }
@@ -286,7 +241,7 @@ export default function LuxaforStatus() {
       />
       <MenuBarExtra.Separator />
       <MenuBarExtra.Item
-        title={`Status: ${currentStatus.isOnline ? 'Online' : 'Offline'}`}
+        title={`Status: ${currentStatus.isOnline ? "Online" : "Offline"}`}
         icon={{
           source: currentStatus.isOnline ? Icon.Wifi : Icon.XmarkCircle,
           tintColor: currentStatus.isOnline ? Color.Green : Color.Red,
@@ -296,16 +251,8 @@ export default function LuxaforStatus() {
   );
 
   return (
-    <MenuBarExtra
-      icon={{ source: getStatusIcon(), tintColor: getStatusColor() }}
-      title=""
-      isLoading={isLoading}
-    >
-      {isLoading
-        ? null
-        : preferences.menubarMode === 'simple'
-          ? renderSimpleMode()
-          : renderFullMode()}
+    <MenuBarExtra icon={{ source: getStatusIcon(), tintColor: getStatusColor() }} title="" isLoading={isLoading}>
+      {isLoading ? null : preferences.menubarMode === "simple" ? renderSimpleMode() : renderFullMode()}
     </MenuBarExtra>
   );
 }

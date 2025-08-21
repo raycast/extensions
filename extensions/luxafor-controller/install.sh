@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🚀 Installing Cheatsheets Remastered..."
+echo "🚀 Installing Luxafor Controller..."
 
 # Check if Raycast is installed
 if ! command -v ray &> /dev/null; then
