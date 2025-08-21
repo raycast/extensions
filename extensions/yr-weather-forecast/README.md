@@ -4,7 +4,7 @@ This is a [Raycast](https://www.raycast.com) extension for displaying weather fo
 
 **Maintainer:** Kynd  
 **Contact:** weather@kynd.no  
-**Issues & Feedback:** [GitHub Issues](https://github.com/kynd/yr-weather-raycast/issues)
+**Issues & Feedback:** [GitHub Issues](https://github.com/kyndig/yr-weather-raycast/issues)
 
 ### API Compliance
 
