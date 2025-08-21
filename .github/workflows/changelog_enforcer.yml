@@ -1,14 +1,40 @@
 name: "Changelog Enforcer"
+
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
     paths:
       - "extensions/**"
-    branches: [main, master]
+    # Removed branches filter so it runs on any target branch
 
 jobs:
   changelog:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
     steps:
       - name: Changelog enforce
+        id: enforce
         uses: raycast/github-actions/changelog-enforcer@master
+        continue-on-error: true
+
+      - name: Prompt Claude for missing changelog
+        if: steps.enforce.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          # Use PAT if present (fork PRs), otherwise fallback to GITHUB_TOKEN
+          github-token: ${{ secrets.PAT || secrets.GITHUB_TOKEN }}
+          script: |
+            const body = "@claude Please add a CHANGELOG.md entry for this pull request.";
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
+
+      - name: Fail if changelog missing
+        if: steps.enforce.outcome == 'failure'
+        run: exit 1
