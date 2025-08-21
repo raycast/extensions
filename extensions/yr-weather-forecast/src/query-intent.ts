@@ -166,9 +166,9 @@ export function parseQueryIntent(input: string, now = new Date()): QueryIntent {
   if (isToday) {
     targetDate = startOfLocalDay(now);
   } else if (isTomorrow) {
-    const d = startOfLocalDay(now);
-    d.setDate(d.getDate() + 1);
-    targetDate = d;
+    const tomorrowDate = startOfLocalDay(now);
+    tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+    targetDate = tomorrowDate;
   } else if (typeof dayOfMonth === "number" && typeof monthIndex === "number") {
     // Specific month and day (optionally with weekday constraint)
     const baseYear = startOfLocalDay(now).getFullYear();
@@ -176,32 +176,32 @@ export function parseQueryIntent(input: string, now = new Date()): QueryIntent {
     let candidate: Date | undefined;
     for (let yearOffset = 0; yearOffset < 5; yearOffset++) {
       const y = baseYear + yearOffset;
-      const d = new Date(y, monthIndex, dayOfMonth);
-      if (d.getMonth() !== monthIndex) continue; // invalid date (e.g., Feb 30)
-      if (d.getTime() < startOfLocalDay(now).getTime()) continue; // past
-      if (typeof desiredWeekday === "number" && d.getDay() !== desiredWeekday) continue; // mismatch, try next year
-      candidate = startOfLocalDay(d);
+      const yearCandidateDate: Date = new Date(y, monthIndex, dayOfMonth);
+      if (yearCandidateDate.getMonth() !== monthIndex) continue; // invalid date (e.g., Feb 30)
+      if (yearCandidateDate.getTime() < startOfLocalDay(now).getTime()) continue; // past
+      if (typeof desiredWeekday === "number" && yearCandidateDate.getDay() !== desiredWeekday) continue; // mismatch, try next year
+      candidate = startOfLocalDay(yearCandidateDate);
       break;
     }
     targetDate = candidate;
   } else if (typeof dayOfMonth === "number" && typeof weekday === "number") {
     // Find next date >= today that matches both weekday and day-of-month
     const base = startOfLocalDay(now);
-    const d = new Date(base);
+    const candidateDate: Date = new Date(base);
     for (let i = 0; i < 400; i++) {
-      if (d.getDate() === dayOfMonth && d.getDay() === weekday) {
-        targetDate = new Date(d);
+      if (candidateDate.getDate() === dayOfMonth && candidateDate.getDay() === weekday) {
+        targetDate = new Date(candidateDate);
         break;
       }
-      d.setDate(d.getDate() + 1);
+      candidateDate.setDate(candidateDate.getDate() + 1);
     }
   } else if (typeof dayOfMonth === "number") {
     // Next occurrence of this day-of-month (this month if not passed, else next month), ignore weekday
     const base = startOfLocalDay(now);
     let y = base.getFullYear();
     let m = base.getMonth();
-    let d = new Date(y, m, dayOfMonth);
-    if (d.getMonth() !== m || d.getTime() < base.getTime()) {
+    let candidateDate: Date = new Date(y, m, dayOfMonth);
+    if (candidateDate.getMonth() !== m || candidateDate.getTime() < base.getTime()) {
       // move to next month until valid and future
       for (let i = 0; i < 24; i++) {
         m += 1;
@@ -209,11 +209,11 @@ export function parseQueryIntent(input: string, now = new Date()): QueryIntent {
           m = 0;
           y += 1;
         }
-        d = new Date(y, m, dayOfMonth);
-        if (d.getMonth() === m && d.getTime() >= base.getTime()) break;
+        candidateDate = new Date(y, m, dayOfMonth);
+        if (candidateDate.getMonth() === m && candidateDate.getTime() >= base.getTime()) break;
       }
     }
-    targetDate = startOfLocalDay(d);
+    targetDate = startOfLocalDay(candidateDate);
   } else if (typeof weekday === "number") {
     // Distinguish between upcoming and next week explicitly
     if (sawNext) {
@@ -222,9 +222,9 @@ export function parseQueryIntent(input: string, now = new Date()): QueryIntent {
       let delta = (weekday - cur + 7) % 7;
       if (delta === 0) delta = 7; // at least one week ahead
       delta += 7; // force next week
-      const d = new Date(base);
-      d.setDate(base.getDate() + delta);
-      targetDate = d;
+      const nextWeekDate = new Date(base);
+      nextWeekDate.setDate(base.getDate() + delta);
+      targetDate = nextWeekDate;
     } else {
       targetDate = thisOrNextOccurrence(weekday, now);
     }

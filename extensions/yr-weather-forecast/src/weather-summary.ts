@@ -71,8 +71,6 @@ const symbolToCondition: Record<string, string> = {
   heavyrainshowersandthunder_night: "Heavy rain showers and thunder",
   rainshowersandthunder_day: "Rain showers and thunder",
   rainshowersandthunder_night: "Rain showers and thunder",
-  heavyrainandthunder: "Heavy rain and thunder",
-  rainandthunder: "Rain and thunder",
 
   // Fog
   fog: "Foggy",
