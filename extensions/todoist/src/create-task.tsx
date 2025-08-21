@@ -100,8 +100,8 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
             priority: parseInt(values.priority),
             section_id: values.sectionId || undefined,
             parent_id: values.parentId || undefined,
-            due: values.date ? { date: values.date.toISOString().split("T")[0] } : undefined,
-            deadline: values.deadline ? { date: values.deadline.toISOString().split("T")[0] } : undefined,
+            due: values.date ? { date: values.date.toLocaleDateString("en-CA") } : undefined,
+            deadline: values.deadline ? { date: values.deadline.toLocaleDateString("en-CA") } : undefined,
             duration:
               values.duration && values.date && !values.date.toDateString().includes(":")
                 ? {
