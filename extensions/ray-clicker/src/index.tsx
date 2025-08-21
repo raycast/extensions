@@ -5,7 +5,7 @@ import { PrestigeView } from "./PrestigeView";
 import { useGameState } from "./useGameState";
 import { UPGRADES, UPGRADE_CATEGORIES } from "./types";
 import { ACHIEVEMENTS, type AchievementId, achievementWhy } from "./achievements";
-import { formatNumber } from "./utils";
+import { formatNumber, calculatePrestigePoints } from "./utils";
 import { PRESTIGE_PP_DIVISOR } from "./constants";
 
 // --- Main Clicker Game View ---
@@ -253,7 +253,7 @@ export default function Command() {
             message: "Are you sure you want to prestige? This will reset your progress but give you permanent bonuses.",
           });
           if (!confirmed) return false;
-          const gained = Math.floor(Math.sqrt(((gameState.prestige.totalEarned || 0) as number) / PRESTIGE_PP_DIVISOR));
+          const gained = calculatePrestigePoints((gameState.prestige.totalEarned || 0) as number, PRESTIGE_PP_DIVISOR);
           if (gained <= 0) {
             showToast({ style: Toast.Style.Failure, title: "Not enough to prestige" });
             return false;

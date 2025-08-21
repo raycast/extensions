@@ -12,6 +12,7 @@ import { loadGameState, saveGameState, resetGameState } from "./storage";
 import { PRESTIGE_UPGRADES, calculatePrestigeUpgradeCost, calculatePrestigeUpgradeEffect } from "./prestigeUpgrades";
 import { ACHIEVEMENTS } from "./achievements";
 import { PRESTIGE_PP_DIVISOR } from "./constants";
+import { calculatePrestigePoints } from "./utils";
 
 // Only trigger UI updates when the gain exceeds this epsilon to avoid noisy re-renders
 const MIN_GAIN_EPS = 0.01;
@@ -717,7 +718,7 @@ export function useGameState(): UseGameStateReturn {
   // Handle prestige action
   const prestige = useCallback(() => {
     setGameState((prev) => {
-      const gained = Math.floor(Math.sqrt((prev.prestige.totalEarned || 0) / PRESTIGE_PP_DIVISOR));
+      const gained = calculatePrestigePoints(prev.prestige.totalEarned || 0, PRESTIGE_PP_DIVISOR);
       if (gained <= 0) {
         showToast({ style: Toast.Style.Failure, title: "Not enough to prestige" });
         return prev;

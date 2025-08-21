@@ -57,9 +57,8 @@ export default function MenuBar() {
               const touched = { ...current, lastUpdate: now } as GameState;
               await saveGameState(touched);
               const prevUI = uiStateRef.current;
-              const currencyChanged =
-                Math.abs(current.currency - (prevUI?.currency ?? current.currency)) >= MIN_GAIN_EPS;
-              const ppsChanged = (prevUI?.idleRate ?? current.idleRate) !== current.idleRate;
+              const currencyChanged = !prevUI || Math.abs(current.currency - prevUI.currency) >= MIN_GAIN_EPS;
+              const ppsChanged = !prevUI || prevUI.idleRate !== current.idleRate;
               if (currencyChanged || ppsChanged) {
                 setState(current);
                 uiStateRef.current = current;
@@ -70,8 +69,8 @@ export default function MenuBar() {
             const touched = { ...current, lastUpdate: now } as GameState;
             await saveGameState(touched);
             const prevUI = uiStateRef.current;
-            const currencyChanged = Math.abs(current.currency - (prevUI?.currency ?? current.currency)) >= MIN_GAIN_EPS;
-            const ppsChanged = (prevUI?.idleRate ?? current.idleRate) !== current.idleRate;
+            const currencyChanged = !prevUI || Math.abs(current.currency - prevUI.currency) >= MIN_GAIN_EPS;
+            const ppsChanged = !prevUI || prevUI.idleRate !== current.idleRate;
             if (currencyChanged || ppsChanged) {
               setState(current);
               uiStateRef.current = current;

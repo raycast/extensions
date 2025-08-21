@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List, Color, showToast, Toast } from "@raycast/api";
 import { useState, useMemo, useEffect } from "react";
-import { formatNumber } from "./utils";
+import { formatNumber, calculatePrestigePoints } from "./utils";
 import { GameState } from "./types";
 import {
   PrestigeUpgrade,
@@ -38,7 +38,7 @@ export function PrestigeView({ gameState, onPurchasePrestigeUpgrade, onPrestige 
     setLocalUpgrades({ ...gameState.prestige.upgrades });
   }, [gameState.prestige.upgrades]);
   const estimatedPrestigePoints = useMemo(() => {
-    return Math.floor(Math.sqrt((gameState.prestige.totalEarned || 0) / PRESTIGE_PP_DIVISOR));
+    return calculatePrestigePoints(gameState.prestige.totalEarned || 0, PRESTIGE_PP_DIVISOR);
   }, [gameState.prestige.totalEarned]);
 
   // Get all upgrades and split into unlocked/locked per category

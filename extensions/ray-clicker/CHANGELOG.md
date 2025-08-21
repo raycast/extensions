@@ -12,6 +12,9 @@
 - fix: prestige duplication glitch
 - fix: idle rate not updating
 - add way for user to see how achievement was unlocked
+ - fix: ensure initial Menu Bar UI updates when previous UI state is null (avoid self-compare) (`src/menu-bar.tsx`)
+ - refactor: centralize prestige points calculation via `calculatePrestigePoints()` and replace duplicates (`src/utils.ts`, `src/index.tsx`, `src/PrestigeView.tsx`, `src/useGameState.ts`)
+ - chore: Title-case Menu Bar command title in `package.json` (reviewer-preferred casing)
 
 ## [Assets & README compliance] - 2025-08-20
 
