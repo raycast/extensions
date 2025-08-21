@@ -1,5 +1,6 @@
 import { Icon, Image } from "@raycast/api";
 
+// Claude's official brand color for consistent UI theming
 const CLAUDE_COLOR = "#C15F3C";
 
 export const FAVORITE_ICON_NAMES = [

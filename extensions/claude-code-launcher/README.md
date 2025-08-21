@@ -64,7 +64,7 @@ Check that the Claude binary path in preferences points to your actual Claude Co
 ## Support
 
 Having issues? Found a bug? Want to request a feature?  
-Open an issue at [github.com/stephendolan/raycast-claude-code-opener](https://github.com/stephendolan/raycast-claude-code-opener)
+Open an issue at [github.com/raycast/extensions](https://github.com/raycast/extensions/issues) with "Claude Code Launcher" in the title
 
 ---
 

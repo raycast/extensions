@@ -7,6 +7,7 @@
   "author": "stephendolan",
   "categories": ["Developer Tools", "Productivity"],
   "license": "MIT",
+  "version": "1.0.0",
   "commands": [
     {
       "name": "open-claude-code",

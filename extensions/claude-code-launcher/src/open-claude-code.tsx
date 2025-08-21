@@ -11,6 +11,7 @@ import {
   useNavigation,
   confirmAlert,
   Alert,
+  openExtensionPreferences,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { FAVORITE_ICON_NAMES, getIcon } from "./favorite-icons";
@@ -351,9 +352,7 @@ async function checkDependencies(preferences: Preferences): Promise<void> {
       message: `Could not find Claude at: ${claudeBinary}. Please check your preferences.`,
       primaryAction: {
         title: "Open Preferences",
-        onAction: () => {
-          // This will open the extension preferences
-        },
+        onAction: openExtensionPreferences,
       },
     });
     throw error;

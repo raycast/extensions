@@ -1,13 +1,25 @@
-# Contributing to Claude Code
+# Contributing to Claude Code Launcher
 
 Thanks for your interest in contributing! This guide will help you get started.
 
-## Development Setup
+## Contributing to the Published Extension
+
+If you want to contribute to the published Raycast extension:
+
+1. **Fork the Extension**
+   - Use Raycast's "Fork Extension" action in the root search
+   - Or fork from [github.com/raycast/extensions](https://github.com/raycast/extensions)
+   - Find the extension at `extensions/claude-code-launcher`
+
+2. **Follow Raycast Guidelines**
+   - Read the [contribution guide](https://developers.raycast.com/basics/contribute-to-an-extension)
+   - Follow the [extension guidelines](https://developers.raycast.com/basics/guidelines)
+
+## Local Development Setup
 
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/claude-code-opener.git
-cd claude-code-opener
+# After forking via Raycast or cloning the extensions repo
+cd path/to/claude-code-launcher
 
 # Install dependencies
 npm install
@@ -162,4 +174,10 @@ Some terminals accept commands via CLI args. See `AlacrittyAdapter` for an examp
 
 ## Questions?
 
-Feel free to open an issue for discussion before implementing major changes.
+For extension-related issues:
+- Open an issue in the [Raycast extensions repository](https://github.com/raycast/extensions/issues)
+- Use the extension name "Claude Code Launcher" in your issue title
+
+For development questions:
+- Check the [Raycast Developer Documentation](https://developers.raycast.com)
+- Join the [Raycast Slack Community](https://raycast.com/community)
