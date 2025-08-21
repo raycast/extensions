@@ -22,7 +22,6 @@ import { homedir } from "os";
 import path from "path";
 import { access, constants } from "fs/promises";
 
-// Constants
 const STORAGE_KEY = "claude-code-favorites";
 const CURRENT_VERSION = 1;
 
@@ -47,7 +46,6 @@ interface FavoritesState {
   version: number;
 }
 
-// Helper functions
 function showSuccessToast(title: string, message?: string) {
   showToast({
     style: Toast.Style.Success,
@@ -135,7 +133,6 @@ async function openInTerminal(favorite: Favorite, preferences: Preferences, onSu
   }
 }
 
-// Components
 function IconDropdown({
   value,
   onChange,
