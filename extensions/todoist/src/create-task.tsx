@@ -82,10 +82,9 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
           const selectedProject = projects.find((p) => p.id === values.projectId);
           if (selectedProject) {
             // Remove both quoted and unquoted project references
-            const projectRegex = new RegExp(
-              `#(?:"${selectedProject.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"|#${selectedProject.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`,
-              "gi",
-            );
+            // Create regex to match both #Project and #"Project Name" formats
+            const escapedName = selectedProject.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+            const projectRegex = new RegExp(`#(?:"${escapedName}"|#${escapedName})`, "gi");
             cleanContent = cleanContent.replace(projectRegex, "").trim();
           }
         }
