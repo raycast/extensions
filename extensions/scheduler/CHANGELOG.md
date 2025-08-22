@@ -1,6 +1,6 @@
 # Scheduler Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-08-22
 
 - 🎉 Initial release of the Scheduler extension
 - ⏰ Create and manage scheduled commands
