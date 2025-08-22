@@ -149,7 +149,7 @@ export async function extractContent(
     }
 
     const formatFlag = format !== "text" ? ["--format", format] : [];
-    const args = ["--from", "content-core", "ccore", source, ...formatFlag];
+    // const args = ["--from", "content-core", "ccore", source, ...formatFlag];
     const command = uvxPath;
 
     await showToast({
