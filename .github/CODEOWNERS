@@ -674,6 +674,7 @@
 /extensions/geohash-encode-decode                                   @alrico88
 /extensions/geoping                                                 @Chiroyce1
 /extensions/gerrit-code-review                                      @vkhitrin
+/extensions/get-cat-images                                          @luiggircardoso
 /extensions/get-direct-link                                         @trungnghiatn
 /extensions/get-favicon                                             @vimtor @robotdestroy @LeonChenWenJia @ViGeng
 /extensions/get-ssh-key                                             @tc9011 @pernielsentikaer @j3lte @xmok
