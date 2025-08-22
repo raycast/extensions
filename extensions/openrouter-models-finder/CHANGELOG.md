@@ -1,6 +1,6 @@
 # OpenRouter Models Finder Changelog
 
-## [Update README] - {PR_MERGE_DATE}
+## [Update README] - 2025-08-22
 
 - Removed redundant parts related to the development environment from the readme document, making the plugin description more concise and readable.
 
