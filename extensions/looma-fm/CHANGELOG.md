@@ -1,6 +1,6 @@
 # Looma.FM Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2025-08-22
 
 - Added new feature: Ambient music streaming with 99+ tracks by Adi Goldstein
 - Added new feature: Meditation sessions with single-track playback  
