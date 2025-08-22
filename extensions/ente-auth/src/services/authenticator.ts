@@ -236,39 +236,8 @@ export class AuthenticatorService {
     // Verify API client is properly configured
     const apiClient = await getApiClient();
 
-    // Try to use stored decrypted authenticator key first
-    const storedAuthKey = await this.storage.getStoredDecryptedAuthKey();
-    if (storedAuthKey) {
-      this.cachedDecryptionKey = storedAuthKey;
-
-      // SMART AUTO-SYNC: Check if we have local entities, if not, try to sync automatically
-      const existingEntities = await this.storage.getAuthEntities();
-
-      if (existingEntities.length === 0) {
-        try {
-          // Attempt automatic sync, but fail gracefully if offline
-          await this.syncAuthenticator(false);
-        } catch (error) {
-          // Check if it's a network error
-          const isNetworkError =
-            error instanceof Error &&
-            (error.message.includes("Network error") ||
-              error.message.includes("ENOTFOUND") ||
-              error.message.includes("ECONNREFUSED") ||
-              error.message.includes("timeout"));
-
-          if (isNetworkError) {
-            // Network error during session restoration - will work offline
-          } else {
-            // Other sync error during session restoration
-          }
-          // Don't fail session restoration due to sync errors - user can sync manually
-        }
-      } else {
-        // Already have cached entities, no need to sync
-      }
-      return true;
-    }
+    // SECURITY FIX: Removed getStoredDecryptedAuthKey() - no longer store decrypted keys for security
+    // Session restoration will re-derive the key from encrypted sources when needed
 
     // CRITICAL FIX: Check if we have master key for decryption
     const masterKey = await this.storage.getMasterKey();
@@ -283,12 +252,7 @@ export class AuthenticatorService {
         this.cachedDecryptionKey = await decryptAuthKey(authKey.encryptedKey, authKey.header, masterKey);
         await this.storage.storeAuthKey(authKey);
 
-        // Store decrypted key for future session restoration
-        try {
-          await this.storage.storeDecryptedAuthKey(this.cachedDecryptionKey);
-        } catch {
-          // Ignore errors when storing decrypted key for session restoration
-        }
+        // SECURITY FIX: No longer store decrypted keys for security - key will be re-derived as needed
         return true;
       }
     } catch {
@@ -327,12 +291,7 @@ export class AuthenticatorService {
           this.cachedDecryptionKey = newAuthenticatorKey;
           await this.storage.storeAuthKey(authKey);
 
-          // [PERSISTENCE FIX] Store decrypted key for session restoration
-          try {
-            await this.storage.storeDecryptedAuthKey(this.cachedDecryptionKey);
-          } catch {
-            // Ignore errors when storing decrypted key for session restoration
-          }
+          // SECURITY FIX: No longer store decrypted keys for security - key will be re-derived as needed
 
           toast.style = Toast.Style.Success;
           toast.title = "Authenticator setup complete";
@@ -347,12 +306,7 @@ export class AuthenticatorService {
 
     this.cachedDecryptionKey = await decryptAuthKey(authKey.encryptedKey, authKey.header, masterKey);
 
-    // [PERSISTENCE FIX] Store decrypted key for session restoration
-    try {
-      await this.storage.storeDecryptedAuthKey(this.cachedDecryptionKey);
-    } catch {
-      // Ignore errors when storing decrypted key for session restoration
-    }
+    // SECURITY FIX: No longer store decrypted keys for security - key will be re-derived as needed
 
     return this.cachedDecryptionKey;
   }
