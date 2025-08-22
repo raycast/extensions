@@ -74,7 +74,20 @@ export default function ManageTemplates() {
   }
 
   return (
-    <List isLoading={isLoading} navigationTitle="Manage Warp Launch Configurations">
+    <List
+      isLoading={isLoading}
+      navigationTitle="Manage Warp Launch Configurations"
+      actions={
+        <ActionPanel>
+          <Action.Push
+            title="Create New Template"
+            target={<EditTemplateForm onSaved={loadTemplates} />}
+            icon={Icon.Plus}
+            shortcut={{ modifiers: ["cmd"], key: "n" }}
+          />
+        </ActionPanel>
+      }
+    >
       {templates.map((template) => (
         <List.Item
           key={template.id}
@@ -104,6 +117,12 @@ export default function ManageTemplates() {
                     shortcut={{ modifiers: ["cmd"], key: "d" }}
                   />
                 )}
+                <Action.Push
+                  title="Create New Template"
+                  target={<EditTemplateForm onSaved={loadTemplates} />}
+                  icon={Icon.Plus}
+                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                />
               </ActionPanel.Section>
 
               <ActionPanel.Section>

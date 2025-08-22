@@ -244,8 +244,8 @@ function AddDirectoryForm({ onAdded }: AddDirectoryFormProps) {
           continue; // Skip existing directories
         }
 
-        const projectCount = await scanProjectsInDirectory(path, recursive);
-        totalProjects += projectCount;
+        const projects = await scanProjectsInDirectory(path, recursive, path);
+        totalProjects += projects.length;
 
         const folderName = path.split("/").pop() || path;
         const displayName = namePrefix.trim() ? `${namePrefix.trim()}-${folderName}` : folderName;
