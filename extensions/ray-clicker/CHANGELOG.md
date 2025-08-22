@@ -1,6 +1,6 @@
 # Ray Clicker Changelog
 
-## [Fix: Idle Accrual Sync & Prestige fix & UX improvements] - {PR_MERGE_DATE}
+## [Fix: Idle Accrual Sync & Prestige fix & UX improvements] - 2025-08-22
 
 - Sync main UI state from storage when the menu bar heartbeat is active to reflect idle gains without double-counting (`src/useGameState.ts`).
 - Convert menu bar command to a continuous 1s accrual loop; maintain heartbeat, persist each tick, and clean up on unmount (`src/menu-bar.tsx`).
