@@ -1,6 +1,6 @@
 # Comet Browser Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2025-08-22
 
 - Search and navigate through open Comet tabs with fuzzy search
 - Search Comet browser history with date grouping and SQL-based filtering
