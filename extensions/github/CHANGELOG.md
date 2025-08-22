@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Issue type specification] - {PR_MERGE_DATE}
+## [Issue type specification] - 2025-08-22
 
 - Adds the ability to specify the issue type when creating a new issue.
 
