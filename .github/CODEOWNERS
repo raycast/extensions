@@ -751,6 +751,7 @@
 /extensions/gopass                                                  @bake @buchanan @andyfase
 /extensions/gotify                                                  @bxb100
 /extensions/govee                                                   @j3lte
+/extensions/gradient-generator                                      @smcnab1
 /extensions/gradle-plugins                                          @alex-w0
 /extensions/grafana                                                 @Lp-Francois
 /extensions/grafbase                                                @mlafeldt @notrab
@@ -1894,7 +1895,7 @@
 /extensions/surf-check                                              @johnalxndr
 /extensions/surfed                                                  @hosy
 /extensions/surfs-up                                                @comoser
-/extensions/surge                                                   @ysj151215 @Hopsken
+/extensions/surge                                                   @LitoMore @Hopsken @Caffeine19
 /extensions/surge-outbound-switcher                                 @the3ash
 /extensions/surl                                                    @fujiyamaorange
 /extensions/svelte-docs                                             @paoloricciuti
