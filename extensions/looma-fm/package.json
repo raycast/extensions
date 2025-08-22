@@ -19,14 +19,6 @@
       "icon": "icon.png"
     },
     {
-      "name": "pause-music",
-      "title": "Pause Music",
-      "subtitle": "Looma.fm",
-      "description": "Pause or resume the currently playing track",
-      "mode": "no-view",
-      "icon": "icon.png"
-    },
-    {
       "name": "reshuffle-music",
       "title": "Shuffle Music",
       "subtitle": "Looma.fm",
