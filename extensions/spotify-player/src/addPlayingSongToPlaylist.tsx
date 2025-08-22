@@ -21,6 +21,7 @@ import { addToPlaylist } from "./api/addToPlaylist";
 import { useMyPlaylists } from "./hooks/useMyPlaylists";
 import { getError } from "./helpers/getError";
 import { CreateQuicklink } from "./components/CreateQuicklink";
+import { getCurrentlyPlaying } from "./api/getCurrentlyPlaying";
 
 type LaunchContextData = {
   playlistId?: string;
@@ -31,6 +32,7 @@ type AddToPlaylistCommandProps = {
 };
 
 function AddToPlaylistCommand(props: AddToPlaylistCommandProps) {
+  console.log("🚀 ~ addPlayingSongToPlaylist.tsx:34 ~ AddToPlaylistCommand ~ props:", props);
   const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying();
   const [searchText, setSearchText] = useState("");
 
@@ -72,26 +74,46 @@ function AddToPlaylistCommand(props: AddToPlaylistCommandProps) {
 
   useEffect(() => {
     if (props?.playlistId) {
-      try {
-        addToPlaylist({
-          playlistId: props.playlistId,
-          trackUris: [currentlyPlayingData.item?.uri as string],
-        });
-        const playlist = myPlaylistsData?.items?.find((p) => p.id == props.playlistId);
-        if (!playlist) {
-          showHUD("Playlist not found");
-          popToRoot();
-          return;
+      // modified by github copilot, will review later, it works
+      const addCurrentSongToPlaylist = async () => {
+        try {
+          const currentlyPlayingResponse = await getCurrentlyPlaying();
+
+          if (!currentlyPlayingResponse?.item?.uri) {
+            showHUD("No song is currently playing");
+            popToRoot();
+            return;
+          }
+
+          if (!props.playlistId) {
+            showHUD("Playlist ID not found");
+            popToRoot();
+            return;
+          }
+
+          await addToPlaylist({
+            playlistId: props.playlistId,
+            trackUris: [currentlyPlayingResponse.item.uri],
+          });
+
+          const playlist = myPlaylistsData?.items?.find((p) => p.id == props.playlistId);
+          if (!playlist) {
+            showHUD("Playlist not found");
+            popToRoot();
+            return;
+          }
+          showHUD(`Added to ${playlist?.name}`);
+        } catch (err) {
+          const error = getError(err);
+          showHUD(`Error adding song to playlist: ${error.message}`);
         }
-        showHUD(`Added to ${playlist?.name}`);
-      } catch (err) {
-        const error = getError(err);
-        showHUD(`Error adding song to playlist: ${error.message}`);
-      }
-      popToRoot();
+        popToRoot();
+      };
+
+      addCurrentSongToPlaylist();
       return;
     }
-  }, []);
+  }, [props?.playlistId, myPlaylistsData]);
 
   return (
     <List

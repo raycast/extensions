@@ -25,7 +25,7 @@ export function AlbumActionPanel({ album }: AlbumActionPanelProps) {
       />
       <Action
         icon={isAlbumSaved ? Icon.Minus : Icon.Plus}
-        title={isAlbumSaved ? "Remove From Library" : "Add To Library"}
+        title={isAlbumSaved ? "Remove from Library" : "Add to Library"}
         shortcut={{ modifiers: ["cmd", "shift"], key: isAlbumSaved ? "d" : "s" }}
         onAction={async () => {
           try {
