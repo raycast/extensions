@@ -1,5 +1,14 @@
 # Todoist Changelog
 
+## [Fixed Create Task Project and Assignee Assignment] - 2025-08-22
+
+- **Fixed Create Task API Issue**: Switched from `quickAddTask` to `addTask` API to use structured parameters instead of relying on server-side NLP parsing
+- **Direct Parameter Passing**: Form selections (project, assignee, labels, priority, dates) are now passed directly to the API instead of being embedded in text content
+- **Content Cleaning**: Automatically removes embedded project references (like "#ProjectName") from task content when projects are selected via dropdown, preventing duplication and keeping task titles clean
+- **Fixed Date Handling**: Resolved timezone issue where selected dates were shifting to the wrong day by using local date format instead of UTC conversion
+- **Maintained NLP Fallback**: Natural language parsing still works when users type project names and assignees in the content field
+- **Resolved Issue #21076**: Tasks created through Raycast now properly assign to selected projects and assignees instead of ending up in Inbox with "#ProjectName" appended to titles
+
 ## [Fix Today view showing tomorrow's tasks] - 2025-08-19
 
 - **Fixed Today view filtering**: Resolved an issue where recurring tasks due tomorrow were incorrectly appearing in the Today view
