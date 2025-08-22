@@ -151,12 +151,41 @@ export default function Index() {
     }
   };
 
-  // Smart sync with offline fallback
+  // Check internet connectivity
+  const checkInternetConnectivity = async (): Promise<boolean> => {
+    try {
+      // Try to reach a reliable endpoint with a short timeout
+      await fetch("https://www.google.com/favicon.ico", {
+        method: "HEAD",
+        mode: "no-cors",
+        cache: "no-cache",
+        signal: AbortSignal.timeout(3000), // 3 second timeout
+      });
+      return true;
+    } catch {
+      // Network request failed - likely offline
+      return false;
+    }
+  };
+
+  // Smart sync with offline prevention
   const syncCodes = async () => {
     if (!isLoggedIn) return;
 
     try {
       setIsLoading(true);
+
+      // Check internet connectivity before attempting sync
+      const isOnline = await checkInternetConnectivity();
+
+      if (!isOnline) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "No internet connection",
+          message: "Please connect to the internet",
+        });
+        return;
+      }
 
       const toast = await showToast({
         style: Toast.Style.Animated,
@@ -169,7 +198,6 @@ export default function Index() {
       const currentCodes = await authenticatorService.getAuthCodes();
 
       // Try incremental sync first (faster)
-
       let syncResult = await authenticatorService.syncAuthenticator(false);
       let authCodes = await authenticatorService.getAuthCodes();
 
@@ -231,7 +259,11 @@ export default function Index() {
         await showToast({
           style: Toast.Style.Failure,
           title: "Sync failed",
-          message: isNetworkError ? "No internet connection" : error instanceof Error ? error.message : "Unknown error",
+          message: isNetworkError
+            ? "Please connect to the internet"
+            : error instanceof Error
+              ? error.message
+              : "Unknown error",
         });
       }
     } finally {
@@ -683,7 +715,7 @@ export default function Index() {
             key={item.id}
             title={displayTitle}
             subtitle={displaySubtitle}
-            icon={{ source: Icon.Key, tintColor: progressColor }}
+            icon={getItemIcon(item, progressColor)}
             // accessories={[
             //   { text: formattedCode, tooltip: "Current OTP Code" }
             // ]}
@@ -754,4 +786,89 @@ function getProgressColor(progress: number): Color {
     return Color.Yellow;
   }
   return Color.Red;
+}
+
+// Helper function to get the appropriate icon for an auth code
+function getItemIcon(item: AuthCode, progressColor: Color): { source: string | Icon; tintColor?: Color } {
+  // Since server doesn't provide actual icon data (iconSrc/iconID are empty),
+  // we use issuer-based mapping for better visual recognition
+
+  if (item.issuer) {
+    const issuerLower = item.issuer.toLowerCase();
+
+    // Map issuers to their official service icons/favicons
+    const issuerIconMap: Record<string, string> = {
+      // Authentication & Security Services
+      google: "https://accounts.google.com/favicon.ico",
+      microsoft: "https://www.microsoft.com/favicon.ico",
+      apple: "https://appleid.apple.com/favicon.ico",
+      github: "https://github.com/favicon.ico",
+      gitlab: "https://gitlab.com/assets/favicon.ico",
+      bitbucket: "https://bitbucket.org/favicon.ico",
+
+      // Communication & Social
+      discord: "https://discord.com/assets/favicon.ico",
+      slack: "https://slack.com/favicon.ico",
+      telegram: "https://telegram.org/favicon.ico",
+      whatsapp: "https://web.whatsapp.com/favicon.ico",
+      twitter: "https://abs.twimg.com/favicons/twitter.ico",
+      facebook: "https://static.xx.fbcdn.net/rsrc.php/yo/r/iRmz9lCMBD2.ico",
+      instagram: "https://static.cdninstagram.com/rsrc.php/v3/yz/r/VsNE-OHk_8a.ico",
+      linkedin: "https://static.licdn.com/sc/h/al2o9zrvru7aqj8e1x2rzsrca",
+
+      // Password Managers & Security
+      bitwarden: "https://bitwarden.com/favicon.ico",
+      "1password": "https://1password.com/favicon.ico",
+      lastpass: "https://www.lastpass.com/favicon.ico",
+      dashlane: "https://www.dashlane.com/favicon.ico",
+      authy: "https://authy.com/favicon.ico",
+
+      // Email & Productivity
+      tutanota: "https://tutanota.com/favicon.ico",
+      protonmail: "https://proton.me/favicon.ico",
+      proton: "https://proton.me/favicon.ico",
+      gmail: "https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico",
+      outlook: "https://outlook.live.com/favicon.ico",
+
+      // Cloud Storage
+      dropbox: "https://cfl.dropboxstatic.com/static/images/favicon.ico",
+      onedrive: "https://res.cdn.office.net/officehub/bundles/1.0.944/images/favicon.ico",
+      icloud: "https://www.icloud.com/favicon.ico",
+
+      // Gaming & Entertainment
+      steam: "https://store.steampowered.com/favicon.ico",
+      twitch: "https://static.twitchcdn.net/assets/favicon-32-e29e246c157142c94346.png",
+      nintendo: "https://accounts.nintendo.com/favicon.ico",
+      playstation: "https://id.sonyentertainmentnetwork.com/favicon.ico",
+      xbox: "https://login.live.com/favicon.ico",
+
+      // Financial & Shopping
+      amazon: "https://www.amazon.com/favicon.ico",
+      paypal: "https://www.paypal.com/favicon.ico",
+      stripe: "https://stripe.com/favicon.ico",
+      coinbase: "https://coinbase.com/favicon.ico",
+
+      // Development & Tools
+      atlassian: "https://www.atlassian.com/favicon.ico",
+      jira: "https://www.atlassian.com/favicon.ico",
+      confluence: "https://www.atlassian.com/favicon.ico",
+      notion: "https://www.notion.so/favicon.ico",
+      figma: "https://static.figma.com/app/icon/1/favicon.ico",
+    };
+
+    // Try exact match first
+    if (issuerIconMap[issuerLower]) {
+      return { source: issuerIconMap[issuerLower] };
+    }
+
+    // Try partial matches for common cases
+    for (const [key, iconUrl] of Object.entries(issuerIconMap)) {
+      if (issuerLower.includes(key)) {
+        return { source: iconUrl };
+      }
+    }
+  }
+
+  // Fallback to the default key icon with progress color for timing indication
+  return { source: Icon.Key, tintColor: progressColor };
 }

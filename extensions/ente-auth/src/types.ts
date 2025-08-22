@@ -25,7 +25,12 @@ export interface AuthData {
   period: number;
   counter?: number;
   updatedAt: number;
-  codeDisplay?: { trashed?: boolean; pinned?: boolean }; // Metadata from Ente Auth
+  codeDisplay?: {
+    trashed?: boolean;
+    pinned?: boolean;
+    iconSrc?: string;
+    iconID?: string;
+  }; // Metadata from Ente Auth
 }
 
 export interface AuthCode extends AuthData {

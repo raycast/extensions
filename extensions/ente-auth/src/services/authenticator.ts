@@ -30,9 +30,9 @@ function parseAuthDataFromUri(uriString: string, entityId: string, updatedAt: nu
 
     const url = new URL(cleanedUri);
 
-    // CRITICAL FIX: Parse codeDisplay metadata to check for trashed items
+    // CRITICAL FIX: Parse codeDisplay metadata to check for trashed items and extract icon data
     // This matches the official web implementation's filtering behavior
-    let codeDisplay: { trashed?: boolean; pinned?: boolean } | undefined;
+    let codeDisplay: { trashed?: boolean; pinned?: boolean; iconSrc?: string; iconID?: string } | undefined;
     const codeDisplayParam = url.searchParams.get("codeDisplay");
     if (codeDisplayParam) {
       try {
