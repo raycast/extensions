@@ -1,3 +1,5 @@
+import type { Application, Image, Icon } from "@raycast/api";
+
 export type Format = {
   format_id: string;
   vcodec: string;
@@ -16,4 +18,9 @@ export type Video = {
   duration: number;
   live_status: string;
   formats: Format[];
+};
+
+export type Browser = Application & {
+  iconPath: Image | Icon;
+  ytDlpCompatibleName: string;
 };
