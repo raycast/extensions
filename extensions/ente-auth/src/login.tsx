@@ -1,5 +1,6 @@
 // src/login.tsx
 import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { getApiClient, resetApiClient } from "./services/api";
 import { getStorageService } from "./services/storage";
@@ -34,13 +35,11 @@ export default function Login() {
           const authMethod = await determineAuthMethod(values.email);
 
           if (authMethod === "srp") {
-            console.log("DEBUG: SRP authentication available - requesting password for SRP flow");
             setUseSRP(true);
             setOtpRequested(true);
             toast.style = Toast.Style.Success;
             toast.title = "Enter your password to continue";
           } else {
-            console.log("DEBUG: Using email OTP authentication method");
             setUseSRP(false);
             await apiClient.requestEmailOTP(values.email);
             setOtpRequested(true);
@@ -67,19 +66,14 @@ export default function Login() {
           // SRP authentication doesn't need OTP, just password
           const toast = await showToast({ style: Toast.Style.Animated, title: "Authenticating with SRP..." });
 
-          console.log("DEBUG: Using SRP authentication for full session privileges");
-
           try {
             const response = await SRPAuthenticationService.performSRPAuthentication(values.email, values.password);
-
-            console.log("DEBUG: ✅ SRP authentication successful! Processing session token...");
 
             if (!response.keyAttributes || !response.encryptedToken) {
               throw new Error("SRP response missing required data");
             }
 
             // [PHASE 1] Derive keys first to enable storage operations
-            console.log("DEBUG: [PHASE 1] Deriving cryptographic keys for storage operations");
 
             // Derive KEK from password for token decryption
             const keyEncryptionKey = await deriveKeyEncryptionKey(
@@ -99,15 +93,12 @@ export default function Login() {
             // Set master key in memory FIRST to enable storage operations
             const storage = getStorageService();
             storage.setMasterKey(masterKey);
-            console.log("DEBUG: Master key set in memory for storage operations");
 
             // Now store encrypted token for later processing (web app pattern)
-            console.log("DEBUG: [PHASE 1] Storing encrypted token from SRP response (matching web app pattern)");
             await storage.storeEncryptedToken(response.id, response.encryptedToken);
             await storage.storePartialCredentials(values.email, response.id, response.encryptedToken);
 
             // [PHASE 2] Complete token decryption and activation (web app pattern)
-            console.log("DEBUG: [PHASE 2] Completing token decryption and activation (matching web app pattern)");
 
             const secretKey = await decryptSecretKey(
               response.keyAttributes.encryptedSecretKey,
@@ -124,8 +115,6 @@ export default function Login() {
             if (!token) {
               throw new Error("Decrypted token is empty. Final decryption failed.");
             }
-
-            console.log("DEBUG: [PHASE 2] Token decrypted successfully, activating for API access");
 
             // Store credentials and activate token (web app pattern)
             const credentials: UserCredentials = {
@@ -154,23 +143,18 @@ export default function Login() {
             await storage.clearEncryptedToken();
 
             // CRITICAL FIX: Reset the API client instance to clear old cached token
-            console.log("DEBUG: 🔧 CRITICAL FIX: Resetting API client to clear cached expired token");
             resetApiClient();
 
             // CRITICAL FIX: Reset sync state to force fresh initial sync
-            console.log("DEBUG: 🔧 CRITICAL FIX: Resetting sync state for clean initial sync");
             await storage.resetSyncState();
 
             // Get fresh API client instance that will use the new activated token
-            console.log("DEBUG: 🔧 CRITICAL FIX: Getting fresh API client with new token");
             const freshApiClient = await getApiClient();
-            console.log("DEBUG: Fresh token being used:", token);
 
             // Test token validity with SRP-derived session
-            console.log("DEBUG: Testing SRP token validity after two-phase activation...");
             const isTokenValid = await freshApiClient.testTokenValidity();
             if (isTokenValid) {
-              console.log("DEBUG: ✅ SRP Authentication successful - full API access granted!");
+              // SRP token is valid and ready for use
             } else {
               console.warn("DEBUG: SRP token validation failed - but proceeding");
             }
@@ -199,7 +183,6 @@ export default function Login() {
 
         const toast = await showToast({ style: Toast.Style.Animated, title: "Verifying with email OTP..." });
         const response: AuthorizationResponse = await apiClient.verifyEmailOTP(values.email, values.otp);
-        console.log("DEBUG: Received authorization response from email OTP.");
 
         // [Step 1] Derive the KEK from the password
         const keyEncryptionKey = await deriveKeyEncryptionKey(
@@ -256,15 +239,12 @@ export default function Login() {
         apiClient.setAuthenticationContext(authContext);
 
         // [+] Test token validity with comprehensive endpoint testing
-        console.log("DEBUG: Testing token validity after login with comprehensive endpoint testing...");
         const isTokenValid = await apiClient.testTokenValidity();
         if (!isTokenValid) {
           console.warn("DEBUG: Token validation failed - but proceeding with login since authentication succeeded");
         } else {
-          console.log("DEBUG: Token validation successful!");
+          // Token is valid and ready for use
         }
-
-        console.log("DEBUG: Login successful. Credentials stored securely.");
 
         toast.style = Toast.Style.Success;
         toast.title = "Login successful!";
@@ -275,11 +255,8 @@ export default function Login() {
       console.error("Login error:", error);
       const message = error instanceof Error ? error.message : "An unknown error occurred";
       setError(message);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Login failed",
-        message: message,
-      });
+
+      await showFailureToast(error, { title: "Login failed" });
     } finally {
       setIsLoading(false);
     }

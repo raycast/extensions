@@ -12,7 +12,6 @@ export default function Index() {
   const [codes, setCodes] = useState<AuthCode[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
-  const [timer] = useState<NodeJS.Timeout | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
 
@@ -24,18 +23,14 @@ export default function Index() {
 
   // Offline-first login status check (no network dependency)
   const checkLoginStatus = async () => {
-    console.log("DEBUG: 🔍 Starting checkLoginStatus - tracing all network calls");
     try {
       const storage = getStorageService();
 
       // First, try to restore from persistent session token (OFFLINE-FIRST)
-      console.log("DEBUG: 📱 Checking for stored session token...");
       const storedSession = await storage.getStoredSessionToken();
       if (storedSession) {
-        console.log("DEBUG: ✅ Found stored session token, attempting offline restoration");
         try {
           // Set up API client with stored session (NO NETWORK CALLS YET)
-          console.log("DEBUG: 🔧 Setting up API client (NO NETWORK CALLS)");
           resetApiClient();
           const apiClient = await getApiClient();
           apiClient.setToken(storedSession.token);
@@ -48,82 +43,55 @@ export default function Index() {
           apiClient.setAuthenticationContext(authContext);
 
           // Store authentication context (no network needed)
-          console.log("DEBUG: 💾 Storing authentication context (NO NETWORK)");
           try {
             await storage.storeAuthenticationContext(authContext);
-          } catch (error) {
-            console.log("DEBUG: Failed to store auth context, continuing...", error);
+          } catch {
+            // Ignore storage errors during session restoration
           }
 
           // Initialize authenticator service (OFFLINE - uses cached data)
-          console.log("DEBUG: 🔐 Initializing authenticator service (SHOULD BE OFFLINE)");
           const authenticatorService = getAuthenticatorService();
           const initialized = await authenticatorService.init();
 
           if (initialized) {
-            console.log("DEBUG: ✅ Session restored successfully (OFFLINE MODE)");
             setIsLoggedIn(true);
-            console.log("DEBUG: 📋 About to call loadCodes() after session restoration with forceLoad=true");
             await loadCodes(true); // forceLoad=true to bypass React state timing issue
             return;
           } else {
-            console.log("DEBUG: ❌ Authenticator service initialization failed during session restoration");
-            console.log("DEBUG: Session token exists but master key missing - incomplete session");
             // Clear the incomplete session data
             await storage.clearStoredSessionToken();
-            console.log("DEBUG: 🗑️ Cleared incomplete session token - user needs to re-authenticate");
           }
-        } catch (error) {
-          console.log("DEBUG: ❌ Session restoration failed, trying fallback:", error);
-          console.log("DEBUG: 🕵️ ERROR DETAILS:", {
-            message: error instanceof Error ? error.message : "Unknown",
-            stack: error instanceof Error ? error.stack : "No stack",
-            name: error instanceof Error ? error.name : "Unknown",
-          });
+        } catch {
           // Don't clear token immediately - it might work when back online
         }
       } else {
-        console.log("DEBUG: ❌ No stored session token found");
+        // No persistent session found, trying credential fallback
       }
 
       // Fallback: Try traditional credential-based login (OFFLINE-FIRST)
-      console.log("DEBUG: 🔑 Checking for stored credentials...");
       const credentials = await storage.getCredentials();
 
       if (credentials) {
-        console.log("DEBUG: ✅ Found stored credentials, attempting offline initialization");
         const authenticatorService = getAuthenticatorService();
-
-        console.log("DEBUG: 🔐 Initializing authenticator service with credentials (SHOULD BE OFFLINE)");
         const initialized = await authenticatorService.init();
 
         if (initialized) {
-          console.log("DEBUG: ✅ Credentials-based initialization successful (OFFLINE MODE)");
           setIsLoggedIn(true);
-          console.log("DEBUG: 📋 About to call loadCodes() after credentials init");
           await loadCodes();
           return;
         } else {
-          console.log("DEBUG: ❌ Credentials-based initialization failed");
+          // No cached authenticator initialization available
         }
       } else {
-        console.log("DEBUG: ❌ No stored credentials found");
+        // No stored credentials found
       }
-
-      console.log("DEBUG: 🚨 No valid session or credentials found, showing login");
       setIsLoggedIn(false);
       setShowLogin(true);
     } catch (error) {
       console.error("DEBUG: 💥 CRITICAL ERROR in checkLoginStatus:", error);
-      console.log("DEBUG: 🕵️ CRITICAL ERROR DETAILS:", {
-        message: error instanceof Error ? error.message : "Unknown",
-        stack: error instanceof Error ? error.stack : "No stack",
-        name: error instanceof Error ? error.name : "Unknown",
-      });
       setIsLoggedIn(false);
       setShowLogin(true);
     } finally {
-      console.log("DEBUG: 🏁 checkLoginStatus complete, setting loading to false");
       setIsLoading(false);
     }
   };
@@ -137,39 +105,24 @@ export default function Index() {
 
   // Load and refresh codes (offline-first) - with explicit login override for session restoration
   const loadCodes = async (forceLoad: boolean = false) => {
-    console.log("DEBUG: 📋 Starting loadCodes (TRACING FOR NETWORK CALLS)");
-    console.log(`DEBUG: 🔍 Current login state: isLoggedIn=${isLoggedIn}, forceLoad=${forceLoad}`);
-
     if (!isLoggedIn && !forceLoad) {
-      console.log("DEBUG: ❌ Not logged in and no forceLoad, skipping loadCodes");
       return;
     }
 
     try {
-      console.log("DEBUG: 🔐 Getting authenticator service...");
       const authenticatorService = getAuthenticatorService();
-
-      console.log("DEBUG: 📱 About to call getAuthCodes() - WATCH FOR NETWORK CALLS");
       const authCodes = await authenticatorService.getAuthCodes();
-
-      console.log(`DEBUG: ✅ getAuthCodes() returned ${authCodes.length} codes`);
       setCodes(authCodes);
 
       // Only show "no codes" message if we actually have no codes
       // Don't show network error messages during offline code loading
       if (!authCodes || authCodes.length === 0) {
-        console.log("DEBUG: ❌ No cached codes found, but NOT showing toast (offline-first)");
         // Don't show toast for offline - user can sync manually when ready
       } else {
-        console.log(`DEBUG: ✅ Loaded ${authCodes.length} cached codes (offline-capable)`);
+        // Codes loaded successfully
       }
     } catch (error) {
       console.error("DEBUG: 💥 ERROR in loadCodes:", error);
-      console.log("DEBUG: 🕵️ LOADCODES ERROR DETAILS:", {
-        message: error instanceof Error ? error.message : "Unknown",
-        stack: error instanceof Error ? error.stack : "No stack",
-        name: error instanceof Error ? error.name : "Unknown",
-      });
 
       // Check if it's a network error - if so, fail silently for offline use
       const isNetworkError =
@@ -178,26 +131,22 @@ export default function Index() {
           error.message.includes("ENOTFOUND") ||
           error.message.includes("ECONNREFUSED"));
 
-      console.log(`DEBUG: 🌐 Is this a network error? ${isNetworkError}`);
-
       if (!isNetworkError) {
         // Only show error toast for non-network errors
-        console.log("DEBUG: 🚨 Showing error toast for non-network error");
         await showToast({
           style: Toast.Style.Failure,
           title: "Failed to get authentication codes",
           message: error instanceof Error ? error.message : "Unknown error",
         });
       } else {
-        console.log("DEBUG: 🔇 Network error during loadCodes - continuing silently for offline use");
+        // Network error during offline use, fail silently
       }
 
       // Don't clear codes on network errors - keep any existing codes
       if (!isNetworkError) {
-        console.log("DEBUG: 🗑️ Clearing codes due to non-network error");
         setCodes([]);
       } else {
-        console.log("DEBUG: 💾 Keeping existing codes despite network error");
+        // Keep existing codes during network errors
       }
     }
   };
@@ -218,7 +167,6 @@ export default function Index() {
 
       // Get current codes before sync to compare
       const currentCodes = await authenticatorService.getAuthCodes();
-      console.log(`DEBUG: SMART SYNC - Starting with ${currentCodes.length} local codes`);
 
       // Try incremental sync first (faster)
 
@@ -240,9 +188,6 @@ export default function Index() {
         JSON.stringify(currentCodes.map((c) => c.id).sort()) === JSON.stringify(authCodes.map((c) => c.id).sort());
 
       if (shouldForceCompleteSync) {
-        console.log("DEBUG: SMART SYNC TRIGGERED - Same codes detected, forcing complete refresh for deletions...");
-        console.log(`DEBUG: Before sync: ${currentCodes.length} codes, After sync: ${authCodes.length} codes`);
-        console.log(`DEBUG: Same IDs detected - likely stale timestamp preventing deletion sync`);
         toast.title = "Refreshing all data from server...";
 
         // Reset and do complete sync
@@ -250,9 +195,6 @@ export default function Index() {
         await storage.resetSyncState();
         syncResult = await authenticatorService.syncAuthenticator(true);
         authCodes = await authenticatorService.getAuthCodes();
-
-        console.log(`DEBUG: Complete sync result - Final codes: ${authCodes.length}`);
-        console.log(`DEBUG: Complete sync IDs: ${authCodes.map((c) => c.id).join(", ")}`);
       }
 
       if (!syncResult) {
@@ -358,13 +300,11 @@ export default function Index() {
           const authMethod = await determineAuthMethod(values.email);
 
           if (authMethod === "srp") {
-            console.log("DEBUG: SRP authentication available - requesting password for SRP flow");
             setUseSRP(true);
             setOtpRequested(true);
             toast.style = Toast.Style.Success;
             toast.title = "Enter your password to continue";
           } else {
-            console.log("DEBUG: Using email OTP authentication method");
             setUseSRP(false);
             await apiClient.requestEmailOTP(values.email);
             setOtpRequested(true);
@@ -390,8 +330,6 @@ export default function Index() {
 
           try {
             const response = await SRPAuthenticationService.performSRPAuthentication(values.email, values.password);
-
-            console.log("DEBUG: ✅ SRP authentication successful! Processing session token...");
 
             if (!response.keyAttributes || !response.encryptedToken) {
               throw new Error("SRP response missing required data");
@@ -460,25 +398,19 @@ export default function Index() {
             await storage.resetSyncState();
 
             // Skip token validation during login - we know it's valid since SRP just succeeded
-            console.log("DEBUG: ✅ SRP Authentication successful - session established!");
 
             // [PERSISTENCE FIX] Store decrypted authenticator key for session restoration
             try {
               const authenticatorService = getAuthenticatorService();
               await authenticatorService.init();
-              console.log("DEBUG: 💾 Attempting to store decrypted authenticator key for session persistence");
 
               // Try to get the decrypted authenticator key and store it
               await authenticatorService.getAuthCodes();
-              console.log("DEBUG: ✅ Authenticator key accessed successfully, should be cached and stored");
 
               // The authenticator key should now be cached in the service
               // We need to access the private method, so let's store it via a public method
-            } catch (error) {
-              console.log(
-                "DEBUG: ⚠️ Could not store authenticator key during login, will be fetched during session restoration:",
-                error,
-              );
+            } catch {
+              // Ignore errors during authenticator key caching
             }
 
             toast.style = Toast.Style.Success;
@@ -561,18 +493,13 @@ export default function Index() {
           try {
             const authenticatorService = getAuthenticatorService();
             await authenticatorService.init();
-            console.log("DEBUG: 💾 Attempting to store decrypted authenticator key for session persistence");
 
             // Try to get the decrypted authenticator key and store it
             await authenticatorService.getAuthCodes();
-            console.log("DEBUG: ✅ Authenticator key accessed successfully, should be cached and stored");
 
             // The authenticator key should now be cached in the service
-          } catch (error) {
-            console.log(
-              "DEBUG: ⚠️ Could not store authenticator key during login, will be fetched during session restoration:",
-              error,
-            );
+          } catch {
+            // Ignore errors during authenticator key caching
           }
 
           // Switch to codes view
@@ -593,7 +520,6 @@ export default function Index() {
           error.message.includes("kekSalt") ||
           error.message.includes("keyAttributes"))
       ) {
-        console.log("DEBUG: 🔑 Detected passkey-related error - showing custom message");
         message = "Passkey not supported, kindly disable and login and enable it back";
       }
 
@@ -651,9 +577,7 @@ export default function Index() {
 
               // Log when code actually changes (new period started)
               if (newCode !== code.code) {
-                console.log(
-                  `DEBUG: 🔄 New ${code.type.toUpperCase()} code generated for ${code.issuer || code.name}: ${newCode.substring(0, 3)}***`,
-                );
+                // Code updated for new TOTP period
               }
 
               // Always update with fresh values
@@ -690,9 +614,6 @@ export default function Index() {
       }
       if (refreshTimer) {
         clearInterval(refreshTimer);
-      }
-      if (timer) {
-        clearInterval(timer);
       }
     };
   }, [isLoggedIn]); // Only depend on isLoggedIn for timer setup

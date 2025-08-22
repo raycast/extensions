@@ -15,10 +15,8 @@ function parseAuthDataFromUri(uriString: string, entityId: string, updatedAt: nu
 
     // Check if the URI string is JSON-encoded (starts and ends with quotes)
     if (cleanedUri.startsWith('"') && cleanedUri.endsWith('"')) {
-      console.log(`DEBUG: Detected JSON-encoded URI for entity ${entityId}, parsing...`);
       try {
         cleanedUri = JSON.parse(cleanedUri);
-        console.log(`DEBUG: Successfully parsed JSON-encoded URI for entity ${entityId}`);
       } catch (jsonError) {
         console.warn(`DEBUG: Failed to parse JSON-encoded URI for entity ${entityId}:`, jsonError);
         // Continue with original string if JSON parsing fails
@@ -31,7 +29,6 @@ function parseAuthDataFromUri(uriString: string, entityId: string, updatedAt: nu
     }
 
     const url = new URL(cleanedUri);
-    console.log(`DEBUG: Parsing URI for entity ${entityId}: ${cleanedUri}`);
 
     // CRITICAL FIX: Parse codeDisplay metadata to check for trashed items
     // This matches the official web implementation's filtering behavior
@@ -40,11 +37,9 @@ function parseAuthDataFromUri(uriString: string, entityId: string, updatedAt: nu
     if (codeDisplayParam) {
       try {
         codeDisplay = JSON.parse(codeDisplayParam);
-        console.log(`DEBUG: Parsed codeDisplay for entity ${entityId}:`, codeDisplay);
 
         // EXACT MATCH TO WEB IMPLEMENTATION: Filter out trashed entries
         if (codeDisplay && codeDisplay.trashed) {
-          console.log(`DEBUG: ❌ Entity ${entityId} is trashed, filtering out (matching web implementation)`);
           return null;
         }
       } catch (error) {
@@ -84,8 +79,6 @@ function parseAuthDataFromUri(uriString: string, entityId: string, updatedAt: nu
       updatedAt,
       codeDisplay, // Include codeDisplay metadata for future use
     };
-
-    console.log(`DEBUG: Successfully parsed entity ${entityId}:`, result);
     return result;
   } catch (error) {
     console.error(`Failed to parse URI for entity ${entityId}: "${uriString}"`, error);
@@ -163,46 +156,26 @@ export class AuthenticatorService {
   private cachedDecryptionKey: Buffer | null = null; // Changed to Buffer for consistency
 
   async init(): Promise<boolean> {
-    console.log("DEBUG: 🚀 --- Starting AuthenticatorService Init (TRACING NETWORK CALLS) ---");
-
     try {
       // First, try traditional credentials-based initialization
-      console.log("DEBUG: 🔍 Checking for credentials and master key...");
       const credentials = await this.storage.getCredentials();
       const masterKey = await this.storage.getMasterKey();
 
       if (credentials && masterKey) {
-        console.log("DEBUG: ✅ Found credentials and master key, using traditional initialization");
-        console.log("DEBUG: 🔐 About to call initWithCredentials (WATCH FOR NETWORK CALLS)");
         return await this.initWithCredentials(credentials);
       }
 
       // Fallback: Try session restoration initialization
-      console.log("DEBUG: ❌ No credentials/master key available, attempting session restoration");
-      console.log("DEBUG: 🔄 About to call initWithSessionRestoration (WATCH FOR NETWORK CALLS)");
       return await this.initWithSessionRestoration();
     } catch (error) {
       console.error("DEBUG: 💥 AuthenticatorService init failed:", error);
-      console.log("DEBUG: 🕵️ INIT ERROR DETAILS:", {
-        message: error instanceof Error ? error.message : "Unknown",
-        stack: error instanceof Error ? error.stack : "No stack",
-        name: error instanceof Error ? error.name : "Unknown",
-      });
-      console.log("DEBUG: --- AuthenticatorService Init Complete (Failure) ---");
       return false;
     }
   }
 
   private async initWithCredentials(credentials: UserCredentials): Promise<boolean> {
-    console.log("DEBUG: 🔐 Initializing with full credentials and master key");
-
     // Get authentication context
     const authContext = await this.storage.getAuthenticationContext();
-    console.log("DEBUG: Retrieved authentication context:", {
-      hasContext: !!authContext,
-      userId: authContext?.userId,
-      accountKey: authContext?.accountKey ? authContext.accountKey.substring(0, 20) + "..." : "none",
-    });
 
     // Initialize API client with token and authentication context
     const apiClient = await getApiClient();
@@ -212,7 +185,6 @@ export class AuthenticatorService {
 
     if (authContext) {
       apiClient.setAuthenticationContext(authContext);
-      console.log("DEBUG: Set authentication context on API client");
     } else {
       console.warn("DEBUG: No authentication context available - this may cause API failures");
     }
@@ -220,22 +192,14 @@ export class AuthenticatorService {
     // Try to get/setup authenticator key
     try {
       await this.getDecryptionKey();
-      console.log("DEBUG: Authenticator key initialized successfully");
 
       // SMART AUTO-SYNC FOR FRESH LOGIN: Check if we have local entities, if not, try to sync automatically
       const existingEntities = await this.storage.getAuthEntities();
-      console.log(
-        `DEBUG: 📊 Found ${existingEntities.length} existing local entities during credentials initialization`,
-      );
 
       if (existingEntities.length === 0) {
-        console.log("DEBUG: 🔄 No local entities found during fresh login - attempting smart auto-sync");
         try {
           // Attempt automatic sync, but fail gracefully if offline
-          const syncedEntities = await this.syncAuthenticator(false);
-          console.log(
-            `DEBUG: ✅ Smart auto-sync successful during fresh login - retrieved ${syncedEntities.length} entities`,
-          );
+          await this.syncAuthenticator(false);
         } catch (error) {
           // Check if it's a network error
           const isNetworkError =
@@ -246,40 +210,28 @@ export class AuthenticatorService {
               error.message.includes("timeout"));
 
           if (isNetworkError) {
-            console.log(
-              "DEBUG: 🌐 Network error during fresh login auto-sync - continuing offline (user can sync manually)",
-            );
+            // Network error during initialization - will work offline
           } else {
-            console.log("DEBUG: ⚠️ Non-network error during fresh login auto-sync:", error);
+            // Other sync error during initialization
           }
           // Don't fail initialization due to sync errors - user can sync manually
         }
       } else {
-        console.log("DEBUG: ✅ Found existing entities during fresh login - no auto-sync needed");
+        // Already have cached entities, no need to sync
       }
     } catch (error) {
       console.error("DEBUG: Failed to initialize authenticator key:", error);
       // Don't fail init if we can't get the auth key yet - it might be created later
     }
-
-    console.log("DEBUG: --- AuthenticatorService Init Complete (Success - Credentials with Smart Auto-Sync) ---");
     return true;
   }
 
   private async initWithSessionRestoration(): Promise<boolean> {
-    console.log("DEBUG: 🔄 Attempting session restoration initialization");
-
     // Check if we have authentication context (needed for API calls)
     const authContext = await this.storage.getAuthenticationContext();
     if (!authContext) {
-      console.log("DEBUG: No authentication context available for session restoration");
       return false;
     }
-
-    console.log("DEBUG: Retrieved authentication context for session restoration:", {
-      userId: authContext.userId,
-      accountKey: authContext.accountKey ? authContext.accountKey.substring(0, 20) + "..." : "none",
-    });
 
     // Verify API client is properly configured
     const apiClient = await getApiClient();
@@ -287,21 +239,15 @@ export class AuthenticatorService {
     // Try to use stored decrypted authenticator key first
     const storedAuthKey = await this.storage.getStoredDecryptedAuthKey();
     if (storedAuthKey) {
-      console.log("DEBUG: 🔑 Found stored decrypted authenticator key, using for session restoration");
       this.cachedDecryptionKey = storedAuthKey;
 
       // SMART AUTO-SYNC: Check if we have local entities, if not, try to sync automatically
       const existingEntities = await this.storage.getAuthEntities();
-      console.log(`DEBUG: 📊 Found ${existingEntities.length} existing local entities during session restoration`);
 
       if (existingEntities.length === 0) {
-        console.log("DEBUG: 🔄 No local entities found during session restoration - attempting smart auto-sync");
         try {
           // Attempt automatic sync, but fail gracefully if offline
-          const syncedEntities = await this.syncAuthenticator(false);
-          console.log(
-            `DEBUG: ✅ Smart auto-sync successful - retrieved ${syncedEntities.length} entities during session restoration`,
-          );
+          await this.syncAuthenticator(false);
         } catch (error) {
           // Check if it's a network error
           const isNetworkError =
@@ -312,73 +258,49 @@ export class AuthenticatorService {
               error.message.includes("timeout"));
 
           if (isNetworkError) {
-            console.log(
-              "DEBUG: 🌐 Network error during session restoration auto-sync - continuing offline (user can sync manually)",
-            );
+            // Network error during session restoration - will work offline
           } else {
-            console.log("DEBUG: ⚠️ Non-network error during session restoration auto-sync:", error);
+            // Other sync error during session restoration
           }
           // Don't fail session restoration due to sync errors - user can sync manually
         }
       } else {
-        console.log("DEBUG: ✅ Found existing entities during session restoration - no auto-sync needed");
+        // Already have cached entities, no need to sync
       }
-
-      console.log("DEBUG: ✅ Session restoration successful with smart auto-sync");
-      console.log("DEBUG: 🔄 Using cached authenticator key with automatic entity sync");
-
-      console.log(
-        "DEBUG: --- AuthenticatorService Init Complete (Success - Session Restoration with Smart Auto-Sync) ---",
-      );
       return true;
     }
 
     // CRITICAL FIX: Check if we have master key for decryption
     const masterKey = await this.storage.getMasterKey();
     if (!masterKey) {
-      console.log("DEBUG: ❌ No master key available for session restoration");
-      console.log("DEBUG: Session restoration incomplete - cannot decrypt authenticator key without master key");
-      console.log("DEBUG: User will need to re-authenticate to restore full session");
-      console.log("DEBUG: --- AuthenticatorService Init Complete (Failure - Missing Master Key) ---");
       return false;
     }
 
     // If we have master key, try to fetch and decrypt authenticator key from API
-    console.log("DEBUG: ✅ Master key available, attempting to fetch and decrypt authenticator key from API");
     try {
       const authKey = await apiClient.getAuthKey();
       if (authKey) {
-        console.log("DEBUG: 🔑 Got encrypted auth key from API, decrypting with master key");
         this.cachedDecryptionKey = await decryptAuthKey(authKey.encryptedKey, authKey.header, masterKey);
         await this.storage.storeAuthKey(authKey);
 
         // Store decrypted key for future session restoration
         try {
           await this.storage.storeDecryptedAuthKey(this.cachedDecryptionKey);
-          console.log("DEBUG: ✅ Stored decrypted authenticator key for future session restoration");
-        } catch (error) {
-          console.log("DEBUG: ⚠️ Failed to store decrypted authenticator key:", error);
+        } catch {
+          // Ignore errors when storing decrypted key for session restoration
         }
-
-        console.log("DEBUG: ✅ Session restoration complete with full cryptographic context");
-        console.log(
-          "DEBUG: --- AuthenticatorService Init Complete (Success - Session Restoration with Decryption) ---",
-        );
         return true;
       }
-    } catch (error) {
-      console.log("DEBUG: Failed to fetch/decrypt auth key from API during session restoration:", error);
+    } catch {
+      // API call failed during session restoration
     }
 
     // If we get here, session restoration failed
-    console.log("DEBUG: ❌ Session restoration failed - no authenticator key available");
-    console.log("DEBUG: --- AuthenticatorService Init Complete (Failure - No Authenticator Key) ---");
     return false;
   }
 
   private async getDecryptionKey(): Promise<Buffer> {
     if (this.cachedDecryptionKey) {
-      console.log("DEBUG: Using cached authenticator decryption key.");
       return this.cachedDecryptionKey;
     }
 
@@ -391,20 +313,16 @@ export class AuthenticatorService {
 
     let authKey = await this.storage.getAuthKey();
     if (!authKey) {
-      console.log("DEBUG: No local auth key found. Fetching from API...");
       try {
         authKey = await apiClient.getAuthKey();
-        console.log("DEBUG: Fetched auth key from API.");
       } catch (error) {
         if ((error as Error).message === "AuthenticatorKeyNotFound") {
-          console.log("DEBUG: No auth key on server, creating a new one.");
           const toast = await showToast({ style: Toast.Style.Animated, title: "Setting up authenticator..." });
 
           const newAuthenticatorKey = await generateAuthenticatorKey();
           const { encryptedKeyB64, headerB64 } = await encryptAuthKey(newAuthenticatorKey, masterKey);
 
           authKey = await apiClient.createAuthKey(encryptedKeyB64, headerB64);
-          console.log("DEBUG: Created and stored new auth key on server.");
 
           this.cachedDecryptionKey = newAuthenticatorKey;
           await this.storage.storeAuthKey(authKey);
@@ -412,8 +330,8 @@ export class AuthenticatorService {
           // [PERSISTENCE FIX] Store decrypted key for session restoration
           try {
             await this.storage.storeDecryptedAuthKey(this.cachedDecryptionKey);
-          } catch (error) {
-            console.log("DEBUG: ⚠️ Failed to store new authenticator key for session restoration:", error);
+          } catch {
+            // Ignore errors when storing decrypted key for session restoration
           }
 
           toast.style = Toast.Style.Success;
@@ -424,17 +342,16 @@ export class AuthenticatorService {
       }
       await this.storage.storeAuthKey(authKey);
     } else {
-      console.log("DEBUG: Using auth key from local storage.");
+      // Auth key already exists in storage
     }
 
     this.cachedDecryptionKey = await decryptAuthKey(authKey.encryptedKey, authKey.header, masterKey);
-    console.log("DEBUG: Successfully decrypted authenticator key.");
 
     // [PERSISTENCE FIX] Store decrypted key for session restoration
     try {
       await this.storage.storeDecryptedAuthKey(this.cachedDecryptionKey);
-    } catch (error) {
-      console.log("DEBUG: ⚠️ Failed to store decrypted authenticator key for session restoration:", error);
+    } catch {
+      // Ignore errors when storing decrypted key for session restoration
     }
 
     return this.cachedDecryptionKey;
@@ -442,9 +359,7 @@ export class AuthenticatorService {
 
   // Clear cached keys when switching accounts
   clearCache(): void {
-    console.log("DEBUG: 🧹 Clearing authenticator service cache");
     this.cachedDecryptionKey = null;
-    console.log("DEBUG: ✅ Authenticator cache cleared");
   }
 
   async syncAuthenticator(forceCompleteSync: boolean = false): Promise<AuthData[]> {
@@ -452,7 +367,6 @@ export class AuthenticatorService {
       style: Toast.Style.Animated,
       title: forceCompleteSync ? "Force syncing all data..." : "Syncing...",
     });
-    console.log(`DEBUG: --- Starting SIMPLIFIED Sync (forceCompleteSync: ${forceCompleteSync}) ---`);
 
     try {
       const apiClient = await getApiClient();
@@ -466,9 +380,7 @@ export class AuthenticatorService {
       if (!forceCompleteSync) {
         const currentEntities = await this.storage.getAuthEntities();
         currentEntities.forEach((e) => entityMap.set(e.id, e));
-        console.log(`DEBUG: Starting with ${entityMap.size} local entities (incremental sync).`);
       } else {
-        console.log("DEBUG: Force sync - starting with empty entity map (complete refresh)");
         // Clear all storage locations to prevent stale data
         await this.storage.resetSyncState();
       }
@@ -480,9 +392,7 @@ export class AuthenticatorService {
       // Only use stored timestamp if we have entities and not force sync
       if (entityMap.size > 0 && storedLastSync > 0 && !forceCompleteSync) {
         sinceTime = storedLastSync;
-        console.log("DEBUG: Using stored sync timestamp for incremental sync:", sinceTime);
       } else {
-        console.log("DEBUG: Starting from timestamp 0 (matching official web implementation)");
         await this.storage.storeLastSyncTime(0);
       }
 
@@ -492,12 +402,9 @@ export class AuthenticatorService {
 
       // SIMPLIFIED SYNC: Direct Map manipulation matching web implementation
       while (true) {
-        console.log(`DEBUG: Fetching batch since timestamp: ${sinceTime}, limit: ${batchSize}`);
         const { diff: entities } = await apiClient.getAuthDiff(sinceTime, batchSize);
-        console.log(`DEBUG: Received ${entities.length} entities in this batch.`);
 
         if (entities.length === 0) {
-          console.log("DEBUG: No more entities to sync, batch complete.");
           break;
         }
 
@@ -508,10 +415,7 @@ export class AuthenticatorService {
 
           if (change.isDeleted) {
             // EXACT MATCH TO WEB IMPLEMENTATION: Simple deletion
-            const wasDeleted = entityMap.delete(change.id);
-            console.log(
-              `DEBUG: ${wasDeleted ? "✅" : "⚠️"} ${wasDeleted ? "Deleted" : "Already missing"} entity ${change.id}`,
-            );
+            entityMap.delete(change.id);
           } else if (change.encryptedData && change.header) {
             try {
               const decryptedJson = await decryptAuthEntity(change.encryptedData, change.header, authenticatorKey);
@@ -520,12 +424,10 @@ export class AuthenticatorService {
               if (authData) {
                 // EXACT MATCH TO WEB IMPLEMENTATION: Simple set operation
                 entityMap.set(change.id, authData);
-                console.log(`DEBUG: ✅ Updated entity ${change.id}: ${authData.issuer || authData.name}`);
               } else {
                 // CRITICAL FIX: If parseAuthDataFromUri returns null, it means the entity is trashed
                 // Remove it from the map to match web implementation behavior
-                const wasDeleted = entityMap.delete(change.id);
-                console.log(`DEBUG: 🗑️ ${wasDeleted ? "Removed trashed" : "Trashed (not in map)"} entity ${change.id}`);
+                entityMap.delete(change.id);
               }
             } catch (e) {
               console.error(`DEBUG: 💥 Failed to decrypt/parse entity ${change.id}:`, e);
@@ -538,22 +440,16 @@ export class AuthenticatorService {
 
         // If we got fewer entities than batch size, we're done
         if (entities.length < batchSize) {
-          console.log("DEBUG: Received partial batch, sync complete.");
           break;
         }
       }
 
       // SIMPLIFIED STORAGE: Direct storage without dual-storage complexity
       const finalEntities = Array.from(entityMap.values());
-      console.log(`DEBUG: 💾 Storing ${finalEntities.length} entities using simplified storage`);
 
       // Store directly using a simplified approach that bypasses dual storage issues
       await this.storeEntitiesDirectly(finalEntities);
       await this.storage.storeLastSyncTime(maxUpdatedAt);
-
-      console.log(
-        `DEBUG: ✅ Simplified sync complete - processed ${totalEntitiesProcessed} changes, final count: ${finalEntities.length}. New sync time: ${maxUpdatedAt}`,
-      );
 
       if (totalEntitiesProcessed > 0) {
         toast.style = Toast.Style.Success;
@@ -563,27 +459,21 @@ export class AuthenticatorService {
         toast.style = Toast.Style.Success;
         toast.title = "Already up to date";
       }
-
-      console.log("DEBUG: --- Simplified Sync Finished (Success) ---");
       return finalEntities;
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Sync failed";
       toast.message = error instanceof Error ? error.message : "An unknown error occurred";
       console.error("Sync error:", error);
-      console.log("DEBUG: --- Simplified Sync Finished (Failure) ---");
       return await this.storage.getAuthEntities();
     }
   }
 
   // SIMPLIFIED STORAGE: Bypass dual storage complexity
   private async storeEntitiesDirectly(entities: AuthData[]): Promise<void> {
-    console.log(`DEBUG: 💾 Storing ${entities.length} entities with simplified approach`);
-
     try {
       // Try to store encrypted first
       await this.storage.storeAuthEntities(entities);
-      console.log("DEBUG: ✅ Entities stored successfully (simplified)");
     } catch (error) {
       console.error("DEBUG: ❌ Failed to store entities:", error);
       throw error;
@@ -593,13 +483,11 @@ export class AuthenticatorService {
   // Offline-first getAuthCodes - no automatic network calls
   async getAuthCodes(): Promise<AuthCode[]> {
     const entities = await this.storage.getAuthEntities();
-    console.log(`DEBUG: getAuthCodes found ${entities.length} local entities (offline-first).`);
 
     // OFFLINE FIX: Don't trigger automatic sync - let user explicitly sync when ready
     // This prevents "Network error" messages when offline
     if (entities.length === 0) {
-      console.log("DEBUG: No local entities found, but not triggering automatic sync (offline-first approach)");
-      console.log("DEBUG: User can manually sync when they have internet connection");
+      // No cached entities found - user can sync manually when ready
     }
 
     return entities.map((entity) => {
@@ -643,7 +531,6 @@ export const getAuthenticatorService = (): AuthenticatorService => {
 // Add method to clear cached keys when switching accounts
 export const clearAuthenticatorServiceCache = (): void => {
   if (authenticatorServiceInstance) {
-    console.log("DEBUG: 🧹 Clearing cached authenticator decryption key for account switch");
     authenticatorServiceInstance.clearCache();
   }
 };

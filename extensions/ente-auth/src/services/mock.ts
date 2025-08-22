@@ -172,8 +172,6 @@ export class MockEnteApiClient {
    * Mock login implementation
    */
   async login(email: string): Promise<{ token: string; userID: number }> {
-    console.log("Mock login for:", email);
-
     // Simulate success for any valid-looking email
     if (email && email.includes("@")) {
       return {
@@ -189,16 +187,14 @@ export class MockEnteApiClient {
    * Mock auth key retrieval
    */
   async getAuthKey(): Promise<AuthKey> {
-    console.log("Mock getAuthKey");
     return getMockAuthKey();
   }
 
   /**
    * Mock auth entities retrieval
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async getAuthDiff(sinceTime = 0, limit = 500): Promise<AuthEntity[]> {
-    console.log("Mock getAuthDiff", { sinceTime, limit });
-
     // In real implementation, this would return AuthEntity objects
     // For mock, we'll convert AuthData to AuthEntity format
     const mockEntities = getMockAuthEntities();
@@ -223,14 +219,11 @@ export class MockEnteApiClient {
   /**
    * Set token (no-op in mock)
    */
-  setToken(token: string): void {
-    console.log("Mock setToken:", token);
-  }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  setToken(token: string): void {}
 
   /**
    * Test connection (always succeeds in mock)
    */
-  async testConnection(): Promise<void> {
-    console.log("Mock testConnection - always succeeds");
-  }
+  async testConnection(): Promise<void> {}
 }
