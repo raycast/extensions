@@ -1,5 +1,9 @@
 # OpenRouter Models Finder Changelog
 
+## [Update README] - 2025-08-22
+
+- Removed redundant parts related to the development environment from the readme document, making the plugin description more concise and readable.
+
 ## [Initial Release] - 2025-08-20
 
 - Search AI models from OpenRouter with real-time filtering
