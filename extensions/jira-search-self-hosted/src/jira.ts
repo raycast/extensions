@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import fetch, { FetchError, Response } from "node-fetch";
+import fetch, { FetchError, Response, RequestInit } from "node-fetch";
 import { ErrorText, PresentableError } from "./exception";
 import * as https from "https";
 
@@ -8,6 +8,7 @@ export const jiraUrl = `https://${prefs.domain}`;
 
 const headers = {
   Accept: "application/json",
+  "Content-Type": "application/json",
   Authorization: `Bearer ${prefs.token}`,
 };
 const agent = new https.Agent({ rejectUnauthorized: !prefs.unsafeHTTPS });
@@ -24,6 +25,8 @@ type StatusErrors = { [key: number]: ErrorText };
  * @param path the Jira path (without domain) to fetch
  * @param params an object defining the query params to request
  * @param statusErrors define custom error texts for response status codes to be thrown
+ * @param method HTTP method (default: GET)
+ * @param body request body for POST/PUT requests
  * @throws if the response's status code is not okay
  * @return the jira response
  */
@@ -31,8 +34,10 @@ export async function jiraFetchObject<Result>(
   path: string,
   params: QueryParams = {},
   statusErrors?: StatusErrors,
+  method: string = "GET",
+  body?: unknown,
 ): Promise<Result> {
-  const response = await jiraFetch(path, params, statusErrors);
+  const response = await jiraFetch(path, params, statusErrors, method, body);
   return (await response.json()) as unknown as Result;
 }
 
@@ -41,6 +46,8 @@ export async function jiraFetchObject<Result>(
  * @param path the Jira path (without domain) to fetch
  * @param params an object defining the query params to request
  * @param statusErrors define custom error texts for response status codes to be thrown
+ * @param method HTTP method (default: GET)
+ * @param body request body for POST/PUT requests
  * @throws if the response's status code is not okay
  * @return the jira response
  */
@@ -48,13 +55,26 @@ export async function jiraFetch(
   path: string,
   params: QueryParams = {},
   statusErrors?: StatusErrors,
+  method: string = "GET",
+  body?: unknown,
 ): Promise<Response> {
   const paramKeys = Object.keys(params);
   const query = paramKeys.map((key) => `${key}=${encodeURI(params[key])}`).join("&");
   try {
     const sanitizedPath = path.startsWith("/") ? path.substring(1) : path;
     const url = `${jiraUrl}/${sanitizedPath}` + (query.length > 0 ? `?${query}` : "");
-    const response = await fetch(url, init);
+
+    const requestInit: RequestInit = {
+      headers: init.headers,
+      agent: init.agent,
+      method,
+    };
+
+    if (body) {
+      requestInit.body = JSON.stringify(body);
+    }
+
+    const response = await fetch(url, requestInit);
     throwIfResponseNotOkay(response, statusErrors);
     return response;
   } catch (error) {
