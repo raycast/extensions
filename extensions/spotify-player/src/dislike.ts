@@ -26,7 +26,7 @@ export default async function Command() {
     });
     await showHUD(`Disliked ${currentlyPlayingData?.item.name}`);
     await safeLaunchCommandInBackground("current-track");
-  } catch (error) {
+  } catch {
     await showHUD("Nothing is currently playing");
   }
 }

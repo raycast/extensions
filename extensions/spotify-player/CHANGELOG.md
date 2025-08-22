@@ -1,10 +1,15 @@
 # Spotify Player Changelog
 
+## [Fix reading values from possibly undefined objects] - 2025-08-22
+
+- Remove unneeded `.tool-versions`
+- Fix reading values from possibly undefined objects
+- Bump dependencies to the latest & fix linting issues
+
 ## [Show the Artist name when liking a song] - 2025-08-04
 
 - Added the artist name into the message in the HUD when liking a new song
 - Added the artist name into the message in the HUD attempting to like an already liked song
-
 
 ## [Add toggle to filter song name in menu bar] - 2025-07-08
 
