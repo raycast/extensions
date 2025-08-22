@@ -1,6 +1,6 @@
 # Splitwise Changelog
 
-## [New Features] - {PR_MERGE_DATE}
+## [New Features] - 2025-08-22
 
 - Add "Recent" section to `Add Expense` showing the top 3 most recently updated friends/groups, which aligns with Splitwise's app UI
 
