@@ -1,5 +1,5 @@
 // src/services/sodium-loader.ts
-import sodium from "sodium-javascript";
+import sodium from "libsodium-wrappers-sumo";
 
 // This is the promise that resolves when the WebAssembly module is ready.
 // We will await this in all our crypto functions.

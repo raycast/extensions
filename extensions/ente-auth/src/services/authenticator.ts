@@ -43,7 +43,7 @@ function parseAuthDataFromUri(uriString: string, entityId: string, updatedAt: nu
         console.log(`DEBUG: Parsed codeDisplay for entity ${entityId}:`, codeDisplay);
 
         // EXACT MATCH TO WEB IMPLEMENTATION: Filter out trashed entries
-        if (codeDisplay.trashed) {
+        if (codeDisplay && codeDisplay.trashed) {
           console.log(`DEBUG: ❌ Entity ${entityId} is trashed, filtering out (matching web implementation)`);
           return null;
         }
