@@ -29,3 +29,8 @@ export function formatTime(seconds: number): string {
 
   return parts.join(" ");
 }
+
+// Centralized prestige points calculation helper to avoid duplication
+export function calculatePrestigePoints(totalEarned: number, divisor: number): number {
+  return Math.floor(Math.sqrt((totalEarned || 0) / divisor));
+}

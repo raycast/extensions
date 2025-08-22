@@ -142,3 +142,46 @@ export const ACHIEVEMENTS: Record<AchievementId, AchievementDef> = {
     icon: "🏷️",
   },
 };
+
+export function achievementWhy(id: AchievementId): string {
+  switch (id) {
+    case "optimizerOnline":
+      return "AI Optimizer reached level 20";
+    case "costEngineer":
+      return "Total upgrade cost reduction ≥ 25%";
+    case "daemonWrangler":
+      return "Idle rate ≥ 10 RC/sec";
+    case "cronCommandant":
+      return "Idle rate ≥ 100 RC/sec";
+    case "twinPeaks":
+      return "Two upgrade categories at level 25";
+    case "synergyOnline":
+      return "Each category totals ≥ 25 levels";
+    case "milestoneTrifecta":
+      return "Reached L25 milestone in all categories";
+    case "bulkSend":
+      return "Bought ≥10 levels in a single action (Bulk)";
+    case "silentMaxxing":
+      return "Bought ≥50 levels using Buy Max";
+    case "freshStartPro":
+      return "First prestige with ≥10 Prestige Points";
+    case "insufficientFunds":
+      return "Attempted 20 purchases without enough RC";
+    case "holdTheClicker":
+      return "Hold the clicker: ≥180 clicks in 30s.";
+    case "whoNeedsIdle":
+      return "Reached 250k RC with idle ≤ 1 RC/sec at that moment";
+    case "goldenHour":
+      return "Triggered 5 Lucky Command events in one run";
+    case "helloRaycast":
+      return "Lifetime RC earned ≥ 1,000";
+    case "killionaire":
+      return "Lifetime RC earned ≥ 1,000,000";
+    case "afkIrl":
+      return "Claimed ≥12h offline progress";
+    case "timeBender":
+      return "Claimed offline gains boosted by Faster Tick";
+    default:
+      return ACHIEVEMENTS[id]?.description || "Achievement unlocked";
+  }
+}

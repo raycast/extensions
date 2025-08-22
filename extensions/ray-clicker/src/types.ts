@@ -73,7 +73,7 @@ export const UPGRADES: { [key: string]: UpgradeDefinition } = {
   homeRowNovice: {
     id: "homeRowNovice",
     name: "Home Row Novice",
-    description: "You've learned proper typing placement increasing your wpm. ",
+    description: "You've learned about home row, your wpm increased. ",
     category: "active",
     baseCost: 10,
     costMultiplier: 1.15,
@@ -86,7 +86,7 @@ export const UPGRADES: { [key: string]: UpgradeDefinition } = {
   ergonomicKeyboard: {
     id: "ergonomicKeyboard",
     name: "Ergonomic Keyboard",
-    description: "The keyboard has curves now, that must make you faster.",
+    description: "The keyboard has curves now, you must be faster.",
     category: "active",
     baseCost: 100,
     costMultiplier: 1.2,
@@ -99,7 +99,7 @@ export const UPGRADES: { [key: string]: UpgradeDefinition } = {
   shortcutMaestro: {
     id: "shortcutMaestro",
     name: "Shortcut Maestro",
-    description: "Mastering Raycast shortcuts, you are blazing with efficiency.",
+    description: "Mastering Raycast shortcuts, you are blazing efficiency.",
     category: "active",
     baseCost: 500,
     costMultiplier: 1.25,
@@ -125,7 +125,7 @@ export const UPGRADES: { [key: string]: UpgradeDefinition } = {
   hypertyping: {
     id: "hypertyping",
     name: "Hypertyping",
-    description: "Your typing speed is inhuman, every tap showers currency.",
+    description: "Your typing speed is inhuman, every tap showers points.",
     category: "active",
     baseCost: 10000,
     costMultiplier: 1.35,
@@ -192,7 +192,7 @@ export const UPGRADES: { [key: string]: UpgradeDefinition } = {
   serverCluster: {
     id: "serverCluster",
     name: "Server Cluster",
-    description: "Cloud servers dedicated to running your Raycast commands.",
+    description: "Cloud servers made to run your Raycast commands.",
     category: "idle",
     baseCost: 25000,
     costMultiplier: 1.4,
