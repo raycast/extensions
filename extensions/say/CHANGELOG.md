@@ -1,6 +1,6 @@
 # Say - Text to Speech Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2025-08-22
 
 - Add support for stopping the text-to-speech process
 - Bump latest mac-say to handle SIGTERM gracefully
