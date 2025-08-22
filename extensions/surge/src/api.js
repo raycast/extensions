@@ -2,6 +2,9 @@ import axios from "axios"
 import { getPreferenceValues } from "@raycast/api"
 import https from "https"
 
+/**
+ * @link https://manual.nssurge.com/others/http-api.html
+ */
 export default function (xKey, port) {
   const preferences = getPreferenceValues()
   const host = preferences.host || "127.0.0.1"
