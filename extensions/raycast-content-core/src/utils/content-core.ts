@@ -116,7 +116,7 @@ export function validateFile(filePath: string): {
 export async function extractContent(
   options: ProcessingOptions,
 ): Promise<ContentResult> {
-  const { source, sourceType, format = "text" } = options;
+  const { source, sourceType } = options;
 
   // Validate input
   if (sourceType === "url" && !isValidUrl(source)) {
