@@ -4,10 +4,13 @@
   "title": "Surge",
   "description": "Switch outbound mode, change proxy tunnel and other Surge settings from Raycast.",
   "icon": "AppIcon.png",
-  "author": "ysj151215",
+  "author": "litomore",
   "contributors": [
     "Hopsken",
     "CaffeineCat"
+  ],
+  "pastContributors": [
+    "ysj151215"
   ],
   "license": "MIT",
   "commands": [
