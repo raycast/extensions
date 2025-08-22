@@ -1,6 +1,6 @@
 # Video Downloader Changelog
 
-## [Chore: Fixed a typo in the installation view] - {PR_MERGE_DATE}
+## [Chore: Fixed a typo in the installation view] - 2025-08-22
 
 ## [Chore] - 2025-03-10
 
