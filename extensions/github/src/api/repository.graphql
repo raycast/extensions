@@ -110,6 +110,15 @@ query dataForRepository($owner: String!, $name: String!) {
         ...CommitFields
       }
     }
+    issueTypes(orderBy: { direction: ASC, field: NAME }, first: 50) {
+      totalCount
+      nodes {
+        id
+        name
+        color
+        isEnabled
+      }
+    }
     refs(refPrefix: "refs/heads/", direction: ASC, first: 50) {
       totalCount
       nodes {

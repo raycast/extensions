@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Issue type specification] - 2025-08-22
+
+- Adds the ability to specify the issue type when creating a new issue.
+
 ## [Fix repository filtering] - 2025-06-26
 
 - Correct the repository filtering for exclude mode
