@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Fix reading values from possibly undefined objects] - {PR_MERGE_DATE}
+## [Fix reading values from possibly undefined objects] - 2025-08-22
 
 - Remove unneeded `.tool-versions`
 - Fix reading values from possibly undefined objects
