@@ -1,26 +1,16 @@
-import { execa } from "execa";
-import { getFormatValue, getFormats, ytdlPath, ffmpegPath, ffprobePath, downloadPath, forceIpv4 } from "../utils.js";
-import fs from "node:fs";
 import path from "node:path";
-import { Video } from "../types.js";
+import { execa } from "execa";
+import { getPreferenceValues } from "@raycast/api";
+import { checkExecutables, getFormats, getFormatValue } from "../utils.js";
+import { Category, Video } from "../types.js";
 
-type Input = {
-  /**
-   * The URL of the video to download.
-   */
-  url: string;
-};
+const { downloadPath, ytdlPath, ffmpegPath, forceIpv4 } = getPreferenceValues<ExtensionPreferences>();
 
-export default async function tool(input: Input) {
-  // Validate executables exist
-  if (!fs.existsSync(ytdlPath)) {
-    throw new Error("yt-dlp is not installed");
-  }
-  if (!fs.existsSync(ffmpegPath)) {
-    throw new Error("ffmpeg is not installed");
-  }
-  if (!fs.existsSync(ffprobePath)) {
-    throw new Error("ffprobe is not installed");
+export default async function tool(input: { url: string }) {
+  const executables = await checkExecutables();
+  const notInstalled = executables.filter(([, exists]) => !exists).map(([app]) => app);
+  if (notInstalled.length > 0) {
+    throw new Error(`${notInstalled.join(", ")} ${notInstalled.length > 1 ? "are" : "is"} not installed`);
   }
 
   // Get video info and available formats
@@ -41,11 +31,11 @@ export default async function tool(input: Input) {
   // Set up download options
   const options: string[] = ["-P", downloadPath];
 
-  // Getet the best video+audio format
+  // Get the best video+audio format
   const formats = getFormats(video);
-  const bestFormat = formats["Video"][0]; // First format in Video category is best quality
+  const bestFormat = formats[Category.Video][0]; // First format in Video category is best quality
   if (bestFormat) {
-    const formatValue = getFormatValue(bestFormat);
+    const formatValue = getFormatValue(bestFormat, Category.Video, true);
     const [downloadFormat, recodeFormat] = formatValue.split("#");
     options.push("--ffmpeg-location", ffmpegPath);
     options.push("--format", downloadFormat);

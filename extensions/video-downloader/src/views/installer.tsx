@@ -11,17 +11,25 @@ import {
   showToast,
 } from "@raycast/api";
 import { ExecaError, execa } from "execa";
-import { homebrewPath } from "../utils.js";
+import { preferences } from "../utils.js";
 
-export default function Installer({ executable, onRefresh }: { executable: string; onRefresh: () => void }) {
+const { homebrewPath } = preferences;
+
+export default function Installer({
+  missingExecutables,
+  onRefresh,
+}: {
+  missingExecutables: string[];
+  onRefresh: () => void;
+}) {
   return (
     <Detail
       actions={<AutoInstall onRefresh={onRefresh} />}
       markdown={`
-# 🚨 Error: \`${executable}\` is not installed
-This extension depends on a command-line utility that is not detected on your system. You must install it continue.
+# 🚨 Error: \`${missingExecutables.join(",")}\` ${missingExecutables.length > 1 ? "are" : "is"} not installed
+This extension depends on a command-line utility that is not detected on your system. You must install it to continue.
 
-If you have homebrew installed, simply press **⏎** to have this extension install it for you. Since \`${executable}\` is a heavy library, 
+If you have homebrew installed, simply press **⏎** to have this extension install it for you. Since \`${missingExecutables.join(",")}\` is a heavy library set, 
 **it can take up 2 minutes to install**.
 
 **Please do not close Raycast while the installation is in progress.**
