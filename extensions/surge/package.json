@@ -4,7 +4,11 @@
   "title": "Surge",
   "description": "Switch outbound mode, change proxy tunnel and other Surge settings from Raycast.",
   "icon": "AppIcon.png",
+  "type": "module",
   "author": "litomore",
+  "platforms": [
+    "macOS"
+  ],
   "contributors": [
     "Hopsken",
     "CaffeineCat"
@@ -79,17 +83,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.101.1",
-    "@raycast/utils": "^2.2.0",
-    "axios": "^1.10.0"
+    "@raycast/api": "^1.102.5",
+    "@raycast/utils": "^2.2.1",
+    "axios": "^1.11.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "24.0.15",
-    "@types/react": "^19.1.8",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "@types/node": "24.3.0",
+    "@types/react": "^19.1.10",
+    "eslint": "^9.33.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
   },
   "scripts": {
     "build": "ray build",
