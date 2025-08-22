@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { List, Action, ActionPanel, Icon, Color, showToast, Toast, Clipboard, Form } from "@raycast/api";
+import { List, Action, ActionPanel, Icon, Color, showToast, Toast, Clipboard, Form, showHUD } from "@raycast/api";
 import { getAuthenticatorService, clearAuthenticatorServiceCache } from "./services/authenticator";
 import { getStorageService } from "./services/storage";
 import { getApiClient, resetApiClient } from "./services/api";
@@ -7,6 +7,7 @@ import { deriveKeyEncryptionKey, decryptMasterKey, decryptSecretKey, decryptSess
 import { determineAuthMethod, SRPAuthenticationService } from "./services/srp";
 import { generateTOTP } from "./utils/totp";
 import { AuthCode, AuthorizationResponse, UserCredentials } from "./types";
+import { sanitizeErrorMessage, logSecureError } from "./utils/errorHandling";
 
 export default function Index() {
   const [codes, setCodes] = useState<AuthCode[]>([]);
@@ -30,45 +31,53 @@ export default function Index() {
       const storedSession = await storage.getStoredSessionToken();
       if (storedSession) {
         try {
-          // Set up API client with stored session (NO NETWORK CALLS YET)
-          resetApiClient();
-          const apiClient = await getApiClient();
-          apiClient.setToken(storedSession.token);
+          // CRITICAL FIX: Restore master key from stored credentials first
+          // Try to get credentials to restore master key for session restoration
+          const credentials = await storage.getCredentials();
+          if (credentials && credentials.masterKey) {
+            // Master key successfully restored, now set up session
+            storage.setMasterKey(credentials.masterKey);
 
-          const authContext = {
-            userId: storedSession.userId,
-            accountKey: `auth-${storedSession.userId}`,
-            userAgent: storedSession.userAgent,
-          };
-          apiClient.setAuthenticationContext(authContext);
+            // Set up API client with stored session (NO NETWORK CALLS YET)
+            resetApiClient();
+            const apiClient = await getApiClient();
+            apiClient.setToken(storedSession.token);
 
-          // Store authentication context (no network needed)
-          try {
-            await storage.storeAuthenticationContext(authContext);
-          } catch {
-            // Ignore storage errors during session restoration
+            const authContext = {
+              userId: storedSession.userId,
+              accountKey: `auth-${storedSession.userId}`,
+              userAgent: storedSession.userAgent,
+            };
+            apiClient.setAuthenticationContext(authContext);
+
+            // Store authentication context (no network needed)
+            try {
+              await storage.storeAuthenticationContext(authContext);
+            } catch {
+              // Ignore storage errors during session restoration
+            }
+
+            // Initialize authenticator service (OFFLINE - uses cached data)
+            const authenticatorService = getAuthenticatorService();
+            const initialized = await authenticatorService.init();
+
+            if (initialized) {
+              setIsLoggedIn(true);
+              await loadCodes(true); // forceLoad=true to bypass React state timing issue
+              return;
+            }
           }
 
-          // Initialize authenticator service (OFFLINE - uses cached data)
-          const authenticatorService = getAuthenticatorService();
-          const initialized = await authenticatorService.init();
-
-          if (initialized) {
-            setIsLoggedIn(true);
-            await loadCodes(true); // forceLoad=true to bypass React state timing issue
-            return;
-          } else {
-            // Clear the incomplete session data
-            await storage.clearStoredSessionToken();
-          }
-        } catch {
+          // If we couldn't restore credentials, clear the incomplete session
+          await storage.clearStoredSessionToken();
+        } catch (error) {
+          console.error("DEBUG: Session restoration failed:", error);
           // Don't clear token immediately - it might work when back online
         }
-      } else {
-        // No persistent session found, trying credential fallback
       }
 
       // Fallback: Try traditional credential-based login (OFFLINE-FIRST)
+      // This will only work if master key was previously set or credentials can be accessed
       const credentials = await storage.getCredentials();
 
       if (credentials) {
@@ -82,9 +91,9 @@ export default function Index() {
         } else {
           // No cached authenticator initialization available
         }
-      } else {
-        // No stored credentials found
       }
+
+      // No valid session or credentials found
       setIsLoggedIn(false);
       setShowLogin(true);
     } catch (error) {
@@ -132,11 +141,12 @@ export default function Index() {
           error.message.includes("ECONNREFUSED"));
 
       if (!isNetworkError) {
-        // Only show error toast for non-network errors
+        // SECURITY FIX: Sanitize error messages to prevent information leakage
+        logSecureError(error, "loadCodes");
         await showToast({
           style: Toast.Style.Failure,
           title: "Failed to get authentication codes",
-          message: error instanceof Error ? error.message : "Unknown error",
+          message: sanitizeErrorMessage(error),
         });
       } else {
         // Network error during offline use, fail silently
@@ -256,14 +266,12 @@ export default function Index() {
           message: "Using cached codes. Sync when back online.",
         });
       } else {
+        // SECURITY FIX: Sanitize error messages to prevent information leakage
+        logSecureError(error, "syncCodes");
         await showToast({
           style: Toast.Style.Failure,
           title: "Sync failed",
-          message: isNetworkError
-            ? "Please connect to the internet"
-            : error instanceof Error
-              ? error.message
-              : "Unknown error",
+          message: isNetworkError ? "Please connect to the internet" : sanitizeErrorMessage(error),
         });
       }
     } finally {
@@ -302,13 +310,11 @@ export default function Index() {
     }
   };
 
-  // Copy code to clipboard
-  const copyCode = async (code: string) => {
+  // Copy and paste code simultaneously
+  const copyAndPasteCode = async (code: string) => {
     await Clipboard.copy(code);
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Code copied to clipboard!",
-    });
+    await Clipboard.paste(code);
+    await showHUD("Copied to clipboard");
   };
 
   // Login form submit handler
@@ -742,7 +748,7 @@ export default function Index() {
             }
             actions={
               <ActionPanel>
-                <Action title="Copy Code" icon={Icon.Clipboard} onAction={() => copyCode(item.code)} />
+                <Action title="Copy Code" icon={Icon.Clipboard} onAction={() => copyAndPasteCode(item.code)} />
                 <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={loadCodes} />
                 <Action title="Sync with Server" icon={Icon.Download} onAction={syncCodes} />
                 <Action

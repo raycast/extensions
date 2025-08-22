@@ -10,6 +10,8 @@ import {
   SRPVerificationResponse,
 } from "../types";
 import { getStorageService } from "./storage";
+import { validateToken, validateSessionResponse } from "../utils/validation";
+import { sanitizeErrorMessage, logSecureError } from "../utils/errorHandling";
 
 const API_BASE_URL = "https://api.ente.io";
 
@@ -34,11 +36,9 @@ export class EnteApiClient {
     this.client.interceptors.response.use(
       (response) => response,
       (error: AxiosError) => {
+        // SECURITY FIX: Remove sensitive data logging - only log non-sensitive error info
         const url = error.config?.url;
-        console.error(`API Error on ${url}:`, {
-          status: error.response?.status,
-          data: error.response?.data,
-        });
+        logSecureError(error, `API Request to ${url}`);
 
         if (error.response) {
           switch (error.response.status) {
@@ -48,8 +48,13 @@ export class EnteApiClient {
             case 404:
               error.message = "The requested resource was not found.";
               break;
+            case 403:
+              error.message = "Access denied. Please check your permissions.";
+              break;
             default:
-              error.message = "An API error occurred. Please try again later.";
+              error.message = sanitizeErrorMessage(
+                error.response.data || "An API error occurred. Please try again later.",
+              );
           }
         } else if (error.request) {
           error.message = "Network error. Please check your connection.";
@@ -82,16 +87,22 @@ export class EnteApiClient {
   }
 
   setToken(token: string): void {
-    // Validate that the token contains only valid HTTP header characters
-    const hasInvalidChars = /[^\x20-\x7E]/.test(token);
+    // SECURITY FIX: Validate token before setting it
+    const tokenValidation = validateToken(token);
+    if (!tokenValidation.isValid) {
+      logSecureError(new Error(tokenValidation.error || "Invalid token"), "setToken");
+      throw new Error(`Invalid token: ${sanitizeErrorMessage(tokenValidation.error || "Token validation failed")}`);
+    }
 
+    // Additional validation for HTTP header compatibility
+    const hasInvalidChars = /[^\x20-\x7E]/.test(token);
     if (hasInvalidChars) {
-      console.error("ERROR: Token contains invalid characters for HTTP headers!");
-      console.error("ERROR: This will cause API requests to fail.");
-      // Don't throw here, let the request fail so we can debug
+      logSecureError(new Error("Token contains invalid HTTP header characters"), "setToken");
+      throw new Error("Invalid token: contains invalid characters for HTTP headers");
     }
 
     this.client.defaults.headers.common["X-Auth-Token"] = token;
+    console.log("DEBUG: ✅ Valid token set for API client");
   }
 
   async requestEmailOTP(email: string): Promise<void> {
@@ -99,8 +110,27 @@ export class EnteApiClient {
   }
 
   async verifyEmailOTP(email: string, otp: string): Promise<AuthorizationResponse> {
-    const response = await this.client.post("/users/verify-email", { email, ott: otp });
-    return response.data;
+    try {
+      const response = await this.client.post("/users/verify-email", { email, ott: otp });
+
+      // SECURITY FIX: Validate session response to prevent passkey issues
+      const validation = validateSessionResponse(response.data);
+      if (!validation.isValid) {
+        logSecureError(new Error(validation.error || "Invalid session response"), "verifyEmailOTP");
+        throw new Error(sanitizeErrorMessage(validation.error || "Authentication response validation failed"));
+      }
+
+      return response.data;
+    } catch (error) {
+      // SECURITY FIX: Sanitize error messages to prevent information leakage
+      if (error instanceof Error && error.message.includes("Passkey not supported")) {
+        throw error; // Pass through our sanitized passkey message
+      }
+
+      logSecureError(error, "verifyEmailOTP");
+      const sanitizedMessage = sanitizeErrorMessage(error);
+      throw new Error(sanitizedMessage);
+    }
   }
 
   // SRP Authentication methods
@@ -120,12 +150,31 @@ export class EnteApiClient {
   }
 
   async verifySRPSession(srpUserID: string, sessionID: string, srpM1: string): Promise<SRPVerificationResponse> {
-    const response = await this.client.post("/users/srp/verify-session", {
-      srpUserID,
-      sessionID,
-      srpM1,
-    });
-    return response.data;
+    try {
+      const response = await this.client.post("/users/srp/verify-session", {
+        srpUserID,
+        sessionID,
+        srpM1,
+      });
+
+      // SECURITY FIX: Validate session response to prevent passkey issues
+      const validation = validateSessionResponse(response.data);
+      if (!validation.isValid) {
+        logSecureError(new Error(validation.error || "Invalid SRP session response"), "verifySRPSession");
+        throw new Error(sanitizeErrorMessage(validation.error || "SRP authentication response validation failed"));
+      }
+
+      return response.data;
+    } catch (error) {
+      // SECURITY FIX: Sanitize error messages to prevent information leakage
+      if (error instanceof Error && error.message.includes("Passkey not supported")) {
+        throw error; // Pass through our sanitized passkey message
+      }
+
+      logSecureError(error, "verifySRPSession");
+      const sanitizedMessage = sanitizeErrorMessage(error);
+      throw new Error(sanitizedMessage);
+    }
   }
 
   async getAuthKey(): Promise<AuthKey> {

@@ -1,6 +1,8 @@
 import { Buffer } from "buffer";
 import base32Decode from "base32-decode";
 import CryptoJS from "crypto-js";
+import { validateBase32Secret } from "./validation";
+import { logSecureError, sanitizeErrorMessage } from "./errorHandling";
 
 // Steam alphabet for Steam Guard codes
 const steamAlphabet = "23456789BCDFGHJKMNPQRTVWXY";
@@ -25,6 +27,13 @@ function hmac(algorithm: string, key: Buffer, message: Buffer) {
   return Buffer.from(hash.toString(CryptoJS.enc.Hex), "hex");
 }
 
+// SECURITY FIX: Result interface for secure TOTP generation
+export interface TOTPResult {
+  success: boolean;
+  code?: string;
+  error?: string;
+}
+
 function generate(
   secret: string,
   counter: number,
@@ -32,8 +41,16 @@ function generate(
   algorithm: "sha1" | "sha256" | "sha512",
   type: "totp" | "hotp" | "steam",
 ): string {
-  // Use a reliable base32 decoding library
-  const key = Buffer.from(base32Decode(secret.replace(/\s/g, "").toUpperCase(), "RFC4648"));
+  // SECURITY FIX: Add try-catch error handling around base32Decode
+  let key: Buffer;
+  try {
+    const cleanSecret = secret.replace(/\s/g, "").toUpperCase();
+    const decodedBytes = base32Decode(cleanSecret, "RFC4648");
+    key = Buffer.from(decodedBytes);
+  } catch (error) {
+    logSecureError(error, "TOTP base32 decode");
+    throw new Error("Invalid authenticator secret format");
+  }
 
   const counterBuffer = Buffer.alloc(8);
   // Write counter to buffer in big-endian format
@@ -64,9 +81,60 @@ export const generateTOTP = (
   algorithm: "sha1" | "sha256" | "sha512" = "sha1",
   type: "totp" | "steam" = "totp",
 ): string => {
-  const now = Date.now();
-  const counter = Math.floor(now / 1000 / period);
-  return generate(secret, counter, digits, algorithm, type);
+  // SECURITY FIX: Validate secret before processing
+  const validation = validateBase32Secret(secret);
+  if (!validation.isValid) {
+    logSecureError(new Error(validation.error || "Invalid base32 secret"), "generateTOTP");
+    throw new Error("Invalid authenticator secret format");
+  }
+
+  try {
+    const now = Date.now();
+    const counter = Math.floor(now / 1000 / period);
+    return generate(secret, counter, digits, algorithm, type);
+  } catch (error) {
+    logSecureError(error, "generateTOTP");
+    throw new Error("Failed to generate TOTP code");
+  }
+};
+
+/**
+ * SECURITY FIX: Secure TOTP generation with comprehensive error handling
+ * Returns error codes instead of throwing exceptions
+ */
+export const generateSecureTOTP = (
+  secret: string,
+  period = 30,
+  digits = 6,
+  algorithm: "sha1" | "sha256" | "sha512" = "sha1",
+  type: "totp" | "steam" = "totp",
+): TOTPResult => {
+  // Validate secret before processing
+  const validation = validateBase32Secret(secret);
+  if (!validation.isValid) {
+    logSecureError(new Error(validation.error || "Invalid base32 secret"), "generateSecureTOTP");
+    return {
+      success: false,
+      error: sanitizeErrorMessage(validation.error || "Invalid authenticator secret format"),
+    };
+  }
+
+  try {
+    const now = Date.now();
+    const counter = Math.floor(now / 1000 / period);
+    const code = generate(secret, counter, digits, algorithm, type);
+
+    return {
+      success: true,
+      code,
+    };
+  } catch (error) {
+    logSecureError(error, "generateSecureTOTP");
+    return {
+      success: false,
+      error: sanitizeErrorMessage(error),
+    };
+  }
 };
 
 export const getRemainingSeconds = (period = 30): number => {
