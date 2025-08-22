@@ -1,202 +1,203 @@
-import axios from "axios"
-import { getPreferenceValues } from "@raycast/api"
-import https from "https"
+import https from "node:https";
+import { getPreferenceValues } from "@raycast/api";
+import axios, { AxiosError } from "axios";
+import { OutBoundMode } from "./types.js";
 
 /**
  * @link https://manual.nssurge.com/others/http-api.html
  */
-export default function (xKey, port) {
-  const preferences = getPreferenceValues()
-  const host = preferences.host || "127.0.0.1"
-  const protocol = preferences.tls_enabled ? "https" : "http"
+export default function (xKey: string, port: string) {
+  const preferences = getPreferenceValues();
+  const host = preferences.host || "127.0.0.1";
+  const protocol = preferences.tls_enabled ? "https" : "http";
   const api = axios.create({
     baseURL: `${protocol}://${xKey}@${host}:${port}`,
     headers: { "X-Key": xKey },
     httpsAgent: new https.Agent({
-      rejectUnauthorized: false
-    })
-  })
+      rejectUnauthorized: false,
+    }),
+  });
 
   return {
     async isMacOSVersion() {
       try {
-        await this.getSystemProxyStatus()
-        return true
+        await this.getSystemProxyStatus();
+        return true;
       } catch (err) {
-        if (err.response?.status === 404) {
-          return false
+        if (err instanceof AxiosError && err.response?.status === 404) {
+          return false;
         }
-        throw err
+        throw err;
       }
     },
 
     getOutboundMode() {
       return api({
         method: "get",
-        url: "/v1/outbound"
-      })
+        url: "/v1/outbound",
+      });
     },
 
     getPolicyGroups() {
       return api({
         method: "get",
-        url: "/v1/policy_groups"
-      })
+        url: "/v1/policy_groups",
+      });
     },
 
-    getSelectOptionFromPolicyGroup(groupName) {
+    getSelectOptionFromPolicyGroup(groupName: string) {
       return api({
         method: "get",
         url: "/v1/policy_groups/select",
         params: {
-          group_name: groupName
-        }
-      })
+          group_name: groupName,
+        },
+      });
     },
 
     getSystemProxyStatus() {
       return api({
         method: "get",
-        url: "/v1/features/system_proxy"
-      })
+        url: "/v1/features/system_proxy",
+      });
     },
 
     getEnhancedMode() {
       return api({
         method: "get",
-        url: "/v1/features/enhanced_mode"
-      })
+        url: "/v1/features/enhanced_mode",
+      });
     },
 
     getHttpCaptureStatus() {
       return api({
         method: "get",
-        url: "/v1/features/capture"
-      })
+        url: "/v1/features/capture",
+      });
     },
 
     getMitmStatus() {
       return api({
         method: "get",
-        url: "/v1/features/mitm"
-      })
+        url: "/v1/features/mitm",
+      });
     },
 
     getRewriteStatus() {
       return api({
         method: "get",
-        url: "/v1/features/rewrite"
-      })
+        url: "/v1/features/rewrite",
+      });
     },
 
     getScriptingStatus() {
       return api({
         method: "get",
-        url: "/v1/features/scripting"
-      })
+        url: "/v1/features/scripting",
+      });
     },
 
     getProfile() {
       return api({
         method: "get",
-        url: "/v1/profiles/current"
-      })
+        url: "/v1/profiles/current",
+      });
     },
 
     getProfiles() {
       return api({
         method: "get",
-        url: "/v1/profiles"
-      })
+        url: "/v1/profiles",
+      });
     },
 
-    changeOutboundMode(mode) {
+    changeOutboundMode(mode: OutBoundMode) {
       return api({
         method: "post",
         url: "/v1/outbound",
-        data: { mode }
-      })
+        data: { mode },
+      });
     },
 
-    changeOptionOfGroup(groupName, option) {
+    changeOptionOfGroup(groupName: string, option: string) {
       return api({
         method: "post",
         url: "/v1/policy_groups/select",
         data: {
           group_name: groupName,
-          policy: option
-        }
-      })
+          policy: option,
+        },
+      });
     },
 
-    changeSystemProxyStatus(status) {
+    changeSystemProxyStatus(status: boolean) {
       return api({
         method: "post",
         url: "/v1/features/system_proxy",
-        data: { enabled: status }
-      })
+        data: { enabled: status },
+      });
     },
 
-    changeEnhancedMode(status) {
+    changeEnhancedMode(status: boolean) {
       return api({
         method: "post",
         url: "/v1/features/enhanced_mode",
-        data: { enabled: status }
-      })
+        data: { enabled: status },
+      });
     },
 
-    changeHttpCaptureStatus(status) {
+    changeHttpCaptureStatus(status: boolean) {
       return api({
         method: "post",
         url: "/v1/features/capture",
-        data: { enabled: status }
-      })
+        data: { enabled: status },
+      });
     },
 
-    changeMitmStatus(status) {
+    changeMitmStatus(status: boolean) {
       return api({
         method: "post",
         url: "/v1/features/mitm",
-        data: { enabled: status }
-      })
+        data: { enabled: status },
+      });
     },
 
-    changeRewriteStatus(status) {
+    changeRewriteStatus(status: boolean) {
       return api({
         method: "post",
         url: "/v1/features/rewrite",
-        data: { enabled: status }
-      })
+        data: { enabled: status },
+      });
     },
 
-    changeScriptingStatus(status) {
+    changeScriptingStatus(status: boolean) {
       return api({
         method: "post",
         url: "/v1/features/scripting",
-        data: { enabled: status }
-      })
+        data: { enabled: status },
+      });
     },
 
-    changeProfile(profile) {
+    changeProfile(profile: string) {
       return api({
         method: "post",
         url: "/v1/profiles/switch",
-        data: { name: profile }
-      })
+        data: { name: profile },
+      });
     },
 
     reloadProfile() {
       return api({
         method: "post",
-        url: "/v1/profiles/reload"
-      })
+        url: "/v1/profiles/reload",
+      });
     },
 
     flushDnsCache() {
       return api({
         method: "post",
-        url: "/v1/dns/flush"
-      })
-    }
-  }
+        url: "/v1/dns/flush",
+      });
+    },
+  };
 }

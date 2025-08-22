@@ -1,5 +1,14 @@
 # Surge Changelog
 
+## [Routine Maintenance] - {PR_MERGE_DATE}
+
+- Mark this extension as macOS only
+- Remove the past author contact information from readme
+- Refactor project to ESM
+- Rewrite all `.js(x)` files to `.ts(x)`
+- Update all configuration files to Raycast's latest standards
+- Bump all dependencies to the latest
+
 ## [Major refactoring and new standalone commands] - 2025-08-22
 
 - **New standalone commands**: Added three new focused commands for quick access
