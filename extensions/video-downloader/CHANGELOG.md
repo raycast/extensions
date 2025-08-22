@@ -1,5 +1,7 @@
 # Video Downloader Changelog
 
+## [Chore: Fixed a typo in the installation view] - {PR_MERGE_DATE}
+
 ## [Features] - {PR_MERGE_DATE}
 
 - Implement a feature to import browser cookies, enabling the download of age-restricted YouTube videos.
