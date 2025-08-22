@@ -1,6 +1,6 @@
 # Commit Issue Parser Changelog
 
-## [New Additions & Fixes] - {PR_MERGE_DATE}
+## [New Additions & Fixes] - 2025-08-22
 
 - Added the `Commit Format` setting to customize the commit format
 - Added the `Body Format` setting to customize the body format
