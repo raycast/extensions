@@ -8,7 +8,7 @@ export default function Command() {
   const [favorites, , , removeFavorite, isFavoritesLoading] = useFavorites();
 
   return (
-    <Grid columns={5}>
+    <Grid columns={5} isLoading={isFavoritesLoading}>
       {favorites.size === 0 ? (
         <Grid.EmptyView
           title="No Favorites Yet"
