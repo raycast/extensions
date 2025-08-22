@@ -19,7 +19,7 @@ export interface TerminalCommand {
   id: string;
   title: string;
   command: string;
-  workingDirectory?: string; // 相对于项目根目录，如果为空则使用项目根目录
+  workingDirectory?: string; // Relative to project root directory, if empty use project root directory
 }
 
 export interface ProjectDirectory {

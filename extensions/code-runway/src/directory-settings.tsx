@@ -233,19 +233,19 @@ function AddDirectoryForm({ onAdded }: AddDirectoryFormProps) {
     }
 
     try {
+      showToast({ style: Toast.Style.Animated, title: "Adding directories..." });
+
+      const existing = await ProjectDirectoryStorage.getDirectories();
       let addedCount = 0;
       let totalProjects = 0;
 
       for (const path of selectedPaths) {
-        // Check if already exists
-        const existing = await ProjectDirectoryStorage.getDirectories();
         if (existing.some((d) => d.path === path)) {
           continue; // Skip existing directories
         }
 
-        // Scan projects
-        const projects = await scanProjectsInDirectory(path, recursive, path);
-        totalProjects += projects.length;
+        const projectCount = await scanProjectsInDirectory(path, recursive);
+        totalProjects += projectCount;
 
         const folderName = path.split("/").pop() || path;
         const displayName = namePrefix.trim() ? `${namePrefix.trim()}-${folderName}` : folderName;
