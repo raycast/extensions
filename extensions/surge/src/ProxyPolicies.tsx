@@ -2,14 +2,6 @@ import { Action, ActionPanel, Color, Icon, List, Toast, popToRoot, showToast } f
 import { showFailureToast } from "@raycast/utils";
 import api from "./api.js";
 
-/**
- * @param {Object} props
- * @param {string} props.xKey
- * @param {string} props.port
- * @param {boolean} props.allPolicyGroups - All policy group(s) and their options.
- * @param {boolean} props.allSelectOptions - All options of select group(s).
- * @returns {React.ReactElement}
- */
 export default function ProxyPolicies({
   xKey,
   port,
@@ -25,12 +17,6 @@ export default function ProxyPolicies({
   const iconCheckMark = { source: Icon.Checkmark, tintColor: Color.Green };
   const iconTransparent = { source: "Transparent.png" };
 
-  /**
-   * Change Proxy Policy.
-   * @param {Object} props
-   * @param {string} props.groupName
-   * @param {string} props.option - The option of a select Proxy Policy.
-   */
   async function handleAction({ groupName, option }: { groupName: string; option: string }) {
     try {
       await api(xKey, port).changeOptionOfGroup(groupName, option);

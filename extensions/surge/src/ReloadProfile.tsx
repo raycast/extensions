@@ -10,7 +10,6 @@ export default function ReloadProfile({ xKey, port }: { xKey: string; port: stri
       await showToast(Toast.Style.Success, "Success", "Profile has been reloaded.");
       popToRoot({ clearSearchBar: true });
     } catch (error) {
-      await showToast(Toast.Style.Failure, "Failed", "Please check your X-Key, port and function availability");
       await showFailureToast(error, {
         title: "Failed",
         message: "Please check your X-Key, port and function availability",

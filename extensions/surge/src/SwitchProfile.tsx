@@ -16,11 +16,6 @@ export default function SwitchProfile({
   const iconCheckMark = { source: Icon.Checkmark, tintColor: Color.Green };
   const iconTransparent = { source: "Transparent.png" };
 
-  /**
-   * Change profile.
-   * @param {Object} props
-   * @param {string} props.profileName
-   */
   async function handleAction(profileName: string) {
     try {
       await api(xKey, port).changeProfile(profileName);

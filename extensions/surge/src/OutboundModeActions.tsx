@@ -19,10 +19,6 @@ export default function OutboundModeActions({
     rule: "Rule-Based Proxy",
   };
 
-  /**
-   * Change Outbound Mode.
-   * @param {string} mode - pending Outbound Mode.
-   */
   async function changeOutboundMode(mode: OutBoundMode) {
     try {
       await api(xKey, port).changeOutboundMode(mode);
