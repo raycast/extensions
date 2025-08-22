@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "monkeytype",
+  "title": "Monkeytype",
+  "description": "Quick access to Monkeytype sections - typing tests, stats, leaderboards, and settings",
+  "icon": "icon.png",
+  "author": "radouane-tamouss",
+
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "dev": "npx ray develop",
+    "develop": "npx ray develop",
+    "build": "npx ray build -e dist",
+    "lint": "npx ray lint",
+    "migrate": "npx ray migrate",
+    "publish": "npx ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.79.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.0",
+    "eslint": "^8.57.0",
+    "typescript": "^5.4.0"
+  },
+  "commands": [
+    {
+      "name": "index",
+      "title": "Open Monkeytype",
+      "subtitle": "Typing Test",
+      "description": "Quick access to Monkeytype sections - typing tests, stats, leaderboards, and settings",
+      "mode": "view",
+      "keywords": [
+        "monkeytype",
+        "typing",
+        "wpm",
+        "speed",
+        "test",
+        "stats",
+        "leaderboard",
+        "settings",
+        "practice",
+        "keyboard",
+        "accuracy",
+        "typing test"
+      ],
+      "path": "src/index.tsx"
+    }
+  ]
+}
