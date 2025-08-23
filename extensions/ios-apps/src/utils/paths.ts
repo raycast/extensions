@@ -21,17 +21,24 @@ function containsTraversalAttempts(inputPath: string): boolean {
     return false;
   }
 
-  // Check for common traversal patterns
+  // Check for common and edge-case traversal patterns
   const traversalPatterns = [
     /\.{2}/g, // Basic ..
-    /%2e%2e/gi, // URL encoded ..
-    /%2E%2E/gi, // URL encoded ..
-    /\.{2}%2f/gi, // Mixed encoding
-    /\.{2}%2F/gi, // Mixed encoding
-    /%2e%2e%2f/gi, // Full URL encoded
-    /%2E%2E%2F/gi, // Full URL encoded
-    /\.{2}\//g, // Double dot with forward slash
-    /\.{2}\\/g, // Double dot with backslash
+    /\.{2}\//g, // .. followed by forward slash
+    /\.{2}\\/g, // .. followed by backslash
+
+    /%2e%2e/gi, // URL encoded .. (lowercase)
+    /%2E%2E/gi, // URL encoded .. (uppercase)
+
+    /\.%2e/gi, // Mixed encoding: .%2e
+    /%2e\./gi, // Mixed encoding: %2e.
+
+    /\.{2}%2f/gi, // Mixed encoding ../ (lowercase)
+    /\.{2}%2F/gi, // Mixed encoding ../ (uppercase)
+    /%2e%2e%2f/gi, // Full URL encoded ../ (lowercase)
+    /%2E%2E%2F/gi, // Full URL encoded ../ (uppercase)
+
+    /%c0%ae%c0%ae/gi, // UTF-8 overlong encoding for '..'
   ];
 
   return traversalPatterns.some((pattern) => pattern.test(inputPath));
@@ -146,7 +153,12 @@ export function validatePathSecurity(inputPath: string): string {
     throw new Error("Invalid path: must be a non-empty string");
   }
 
-  // Check for directory traversal attempts
+  // First, reuse the comprehensive regex-based traversal check
+  if (containsTraversalAttempts(inputPath)) {
+    throw new Error("Path contains unsafe directory traversal pattern");
+  }
+
+  // Additional simple substring patterns as a second line of defense
   const dangerousPatterns = [
     "..", // Basic traversal
     "%2e%2e", // URL encoded ..
@@ -155,7 +167,6 @@ export function validatePathSecurity(inputPath: string): string {
     "..%2F", // Mixed encoding (uppercase)
     "%2e%2e%2f", // Full URL encoded ../
     "%2E%2E%2F", // Full URL encoded ../ (uppercase)
-    "....//", // Double dot variations
   ];
 
   const lowerPath = inputPath.toLowerCase();
