@@ -1,6 +1,6 @@
 import { List } from "@raycast/api";
 
-export function EmptyRepositoryList(): JSX.Element {
+export function EmptyRepositoryList() {
   return (
     <List>
       <List.EmptyView

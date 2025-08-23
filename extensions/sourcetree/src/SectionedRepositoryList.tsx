@@ -6,7 +6,7 @@ interface SectionedRepositoryListProps {
   repositories?: Repository[];
 }
 
-export function SectionedRepositoryList({ repositories }: SectionedRepositoryListProps): JSX.Element {
+export function SectionedRepositoryList({ repositories }: SectionedRepositoryListProps) {
   if (!repositories) {
     return <></>;
   }
