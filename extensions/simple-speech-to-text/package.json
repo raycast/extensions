@@ -1,0 +1,222 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "simple-speech-to-text",
+  "title": "Simple Speech to Text",
+  "description": "Convert speech to text using OpenAI's latest models including GPT-4o-transcribe",
+  "icon": "icon.png",
+  "author": "dingyj",
+  "contributors": [
+    "inakitajes"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "dictate",
+      "title": "Dictate",
+      "description": "Start recording immediately and auto-transcribe when stopped",
+      "mode": "view"
+    },
+    {
+      "name": "recording-history",
+      "title": "Recording History",
+      "description": "View and manage recording history",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "openaiApiKey",
+      "type": "password",
+      "required": true,
+      "title": "OpenAI API Key",
+      "description": "Your OpenAI API key"
+    },
+    {
+      "name": "model",
+      "type": "dropdown",
+      "required": false,
+      "title": "Whisper Model",
+      "description": "Select the transcription model",
+      "default": "gpt-4o-transcribe",
+      "data": [
+        {
+          "title": "GPT-4o Transcribe - Latest model with enhanced understanding",
+          "value": "gpt-4o-transcribe"
+        },
+        {
+          "title": "GPT-4o Mini Transcribe - Faster, cost-effective model",
+          "value": "gpt-4o-mini-transcribe"
+        },
+        {
+          "title": "Whisper-1 (Large-v2) - Most accurate, 99+ languages",
+          "value": "whisper-1"
+        }
+      ]
+    },
+    {
+      "name": "language",
+      "type": "dropdown",
+      "required": false,
+      "title": "Language",
+      "description": "Language for transcription (auto-detect if not specified)",
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto-detect",
+          "value": "auto"
+        },
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Spanish",
+          "value": "es"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "German",
+          "value": "de"
+        },
+        {
+          "title": "Italian",
+          "value": "it"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "Chinese",
+          "value": "zh"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Korean",
+          "value": "ko"
+        },
+        {
+          "title": "Russian",
+          "value": "ru"
+        }
+      ]
+    },
+    {
+      "name": "prompt",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Prompt",
+      "description": "Optional prompt to guide transcription style, terminology, or context"
+    },
+    {
+      "name": "temperature",
+      "type": "dropdown",
+      "required": false,
+      "title": "Temperature",
+      "description": "Sampling temperature for more creative or conservative transcription",
+      "default": "0",
+      "data": [
+        {
+          "title": "0 (Most Conservative)",
+          "value": "0"
+        },
+        {
+          "title": "0.2 (Conservative)",
+          "value": "0.2"
+        },
+        {
+          "title": "0.5 (Balanced)",
+          "value": "0.5"
+        },
+        {
+          "title": "0.8 (Creative)",
+          "value": "0.8"
+        },
+        {
+          "title": "1.0 (Most Creative)",
+          "value": "1.0"
+        }
+      ]
+    },
+    {
+      "name": "customPromptEmail",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Email Prompt",
+      "description": "Custom prompt for email formatting (leave empty to use default)",
+      "default": ""
+    },
+    {
+      "name": "customPromptSlack",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Slack Prompt",
+      "description": "Custom prompt for Slack message formatting (leave empty to use default)",
+      "default": ""
+    },
+    {
+      "name": "customPromptReport",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Report Prompt",
+      "description": "Custom prompt for report formatting (leave empty to use default)",
+      "default": ""
+    },
+    {
+      "name": "retentionPeriod",
+      "type": "dropdown",
+      "required": false,
+      "title": "File Retention Period",
+      "description": "How long to keep audio files and transcriptions before automatic cleanup",
+      "default": "24",
+      "data": [
+        {
+          "title": "24 hours",
+          "value": "24"
+        },
+        {
+          "title": "48 hours",
+          "value": "48"
+        },
+        {
+          "title": "72 hours",
+          "value": "72"
+        },
+        {
+          "title": "Never (not recommended)",
+          "value": "never"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.77.0",
+    "@raycast/utils": "^1.19.0",
+    "openai": "^4.0.0",
+    "title-case": "^3.0.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "18.18.4",
+    "@types/react": "^17.0.52",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
