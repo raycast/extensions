@@ -179,7 +179,10 @@ class LocateCursorTool: NSObject, NSApplicationDelegate {
     var keyDownMonitor: Any?
 
     private var lockFileURL: URL = {
-        let directoryURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!.appendingPathComponent("com.raycast.where-is-my-cursor")
+        guard let appSupportURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
+            fatalError("Unable to find Application Support directory.")
+        }
+        let directoryURL = appSupportURL.appendingPathComponent("com.raycast.where-is-my-cursor")
         try? FileManager.default.createDirectory(at: directoryURL, withIntermediateDirectories: true, attributes: nil)
         return directoryURL.appendingPathComponent("LocateCursor.lock")
     }()
@@ -316,6 +319,16 @@ class LocateCursorTool: NSObject, NSApplicationDelegate {
         mouseMoveMonitor = NSEvent.addGlobalMonitorForEvents(matching: .mouseMoved) { [weak self] _ in
             self?.window.contentView?.needsDisplay = true
         }
+
+        /// The keycode for the Escape key on macOS keyboards.
+        let escapeKeyCode: UInt16 = 53
+
+        keyDownMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            if event.keyCode == escapeKeyCode {
+            self?.cleanupAndTerminate()
+            }
+        }
+
 
         keyDownMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
             if event.keyCode == 53 { // 53 is the keycode for Escape

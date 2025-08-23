@@ -36,17 +36,49 @@ function handleSubmit(values: FormValues) {
   const circleColor = values.circleColorHex || values.circleColor || "yellow";
   const borderColor = values.borderColorHex || values.borderColor;
 
+  // Input validation
+  const duration = parseFloat(values.duration || "10");
+  const screenOpacity = parseFloat(values.screenOpacity || "0.0");
+  const circleRadius = parseFloat(values.circleRadius || "50");
+  const circleOpacity = parseFloat(values.circleOpacity || "0.4");
+  const borderWidth = values.borderWidth ? parseFloat(values.borderWidth) : undefined;
+
+  if (isNaN(duration) || duration <= 0) {
+    showFailureToast("Duration must be a positive number.");
+    return;
+  }
+  if (isNaN(screenOpacity) || screenOpacity < 0 || screenOpacity > 1) {
+    showFailureToast("Screen Opacity must be between 0 and 1.");
+    return;
+  }
+  if (isNaN(circleRadius) || circleRadius <= 0) {
+    showFailureToast("Circle Radius must be a positive number.");
+    return;
+  }
+
+  // Fix JSON escaping: escape both quotes and backslashes
+  const escapeJsonString = (str: string) =>
+    str.replace(/(["\\])/g, "\\$1");
+  if (isNaN(circleOpacity) || circleOpacity < 0 || circleOpacity > 1) {
+    showFailureToast("Circle Opacity must be between 0 and 1.");
+    return;
+  }
+  if (values.borderWidth && (isNaN(borderWidth!) || borderWidth! < 0)) {
+    showFailureToast("Border Width must be a non-negative number.");
+    return;
+  }
+
   const presetConfig = {
-    duration: parseFloat(values.duration || "10"),
-    screenOpacity: parseFloat(values.screenOpacity || "0.0"),
+    duration,
+    screenOpacity,
     circle: {
-      radius: parseFloat(values.circleRadius || "50"),
-      opacity: parseFloat(values.circleOpacity || "0.4"),
+      radius: circleRadius,
+      opacity: circleOpacity,
       color: circleColor,
       border:
         values.borderWidth && borderColor
           ? {
-              width: parseFloat(values.borderWidth),
+              width: borderWidth,
               color: borderColor,
             }
           : undefined,
