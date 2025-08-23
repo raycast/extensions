@@ -11,16 +11,20 @@ const urlBuilders = {
 type ServiceKey = keyof typeof urlBuilders;
 
 export default async function Command(props: LaunchProps<{ arguments: Arguments.Query }>) {
-  const { prompt } = props.arguments;
+  try {
+    const { prompt } = props.arguments;
 
-  // If you define preferences for a command, you can get its strong type via Preferences.Query
-  const { defaultService } = getPreferenceValues<Preferences.Query>();
+    // If you define preferences for a command, you can get its strong type via Preferences.Query
+    const { defaultService } = getPreferenceValues<Preferences.Query>();
 
-  const argService = props.arguments.service as ServiceKey | undefined;
-  const service: ServiceKey = argService && argService in urlBuilders ? argService : (defaultService as ServiceKey);
+    const argService = props.arguments.service as ServiceKey | undefined;
+    const service: ServiceKey = argService && argService in urlBuilders ? argService : (defaultService as ServiceKey);
 
-  const build = urlBuilders[service];
-  const url = build(prompt);
+    const build = urlBuilders[service];
+    const url = build(prompt);
 
-  await open(url); // open in default browser, or specify an app bundle id
+    await open(url); // open in default browser, or specify an app bundle id
+  } catch (error) {
+    console.error("Failed to open URL:", error);
+  }
 }
