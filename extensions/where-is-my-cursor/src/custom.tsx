@@ -59,7 +59,6 @@ function handleSubmit(values: FormValues) {
   }
 
   // Fix JSON escaping: escape both quotes and backslashes
-  const escapeJsonString = (str: string) => str.replace(/(["\\])/g, "\\$1");
   if (isNaN(circleOpacity) || circleOpacity < 0 || circleOpacity > 1) {
     showFailureToast("Circle Opacity must be between 0 and 1.");
     return;
