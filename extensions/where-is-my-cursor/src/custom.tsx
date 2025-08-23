@@ -1,9 +1,4 @@
-import {
-  Form,
-  ActionPanel,
-  Action,
-  environment,
-} from "@raycast/api";
+import { Form, ActionPanel, Action, environment } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { exec } from "child_process";
 import { join } from "path";
