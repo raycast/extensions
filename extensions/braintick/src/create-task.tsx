@@ -36,8 +36,8 @@ export default function CreateTask({ onTaskCreated, defaultProjectId }: CreateTa
         const data = await response.json();
         setProjects((data as Project[]) || []);
       }
-    } catch (error) {
-      console.error("Failed to load projects:", error);
+    } catch {
+      console.error("Failed to load projects");
     }
   }
 
@@ -82,8 +82,7 @@ export default function CreateTask({ onTaskCreated, defaultProjectId }: CreateTa
 
         await popToRoot();
       } else {
-        const error = await response.json();
-        throw new Error(error.cause || "Failed to create task");
+        throw new Error("Failed to create task");
       }
     } catch {
       await showToast({

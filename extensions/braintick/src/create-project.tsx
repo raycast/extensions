@@ -59,8 +59,7 @@ export default function CreateProject({ onProjectCreated }: CreateProjectProps) 
 
         await popToRoot();
       } else {
-        const error = await response.json();
-        throw new Error(error.cause || "Failed to create project");
+        throw new Error("Failed to create project");
       }
     } catch {
       await showToast({

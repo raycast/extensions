@@ -75,8 +75,7 @@ export default function EditProject({ project, onProjectUpdated }: EditProjectPr
 
         await popToRoot();
       } else {
-        const error = await response.json();
-        throw new Error(error.cause || "Failed to update project");
+        throw new Error("Failed to update project");
       }
     } catch {
       await showToast({

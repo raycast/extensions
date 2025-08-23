@@ -40,8 +40,8 @@ export default function StartTimer({ onTimerStarted, defaultProjectId, defaultTa
         const tasksData = await tasksResponse.json();
         setTasks((tasksData as Task[]) || []);
       }
-    } catch (error) {
-      console.error("Failed to load data:", error);
+    } catch {
+      console.error("Failed to load data");
     } finally {
       setIsDataLoading(false);
     }
@@ -87,8 +87,7 @@ export default function StartTimer({ onTimerStarted, defaultProjectId, defaultTa
 
         await popToRoot();
       } else {
-        const error = await response.json();
-        throw new Error(error.cause || "Failed to start timer");
+        throw new Error("Failed to start timer");
       }
     } catch {
       await showToast({
