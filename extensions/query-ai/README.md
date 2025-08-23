@@ -78,7 +78,7 @@ Head to the extension's preferences in Raycast to set your **Default Service**. 
 
 ## Development
 
-You need installed raycast.
+You need Raycast installed.
 
 ```sh
 npm install
