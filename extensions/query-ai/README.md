@@ -3,22 +3,40 @@
 Instantly send prompts to your favorite AI services directly from Raycast—no API keys needed\! This extension opens a new browser tab (or desktop app) with your prompt pre-filled, leveraging your existing accounts.
 
 
-<img src="./assets/chatgpt.gif" width="600"/>
+https://github.com/user-attachments/assets/f1b8c787-c9ab-4aca-9d2a-70916a64edce
+
+
 
 <details>
 <summary>More examples from Claude, Grok, Perplexity, and Bing Copilot</summary>
 
 ### Claude
-<img src="./assets/claude.gif" width="600"/>
+
+
+https://github.com/user-attachments/assets/880edf9b-9134-4f4d-9902-a0f245dc7bb5
+
+
 
 ### Grok
-<img src="./assets/grok.gif" width="600"/>
+
+
+https://github.com/user-attachments/assets/b31a5039-a9a8-4dfb-a0c2-3d79ec064f6d
+
+
 
 ### Perplexity
-<img src="./assets/pplx.gif" width="600"/>
+
+
+https://github.com/user-attachments/assets/ae9c54e1-0cd6-4772-9a89-cd2d3a944e40
+
+
 
 ### Bing Copilot
-<img src="./assets/bing.gif" width="600"/>
+
+
+https://github.com/user-attachments/assets/7b1af004-4222-42d1-a235-f5771f82d17d
+
+
 
 </details>
 
@@ -57,3 +75,12 @@ Query the AI that's best for the job. We support all the major players:
 Make your workflow even faster by setting a default AI service\!
 
 Head to the extension's preferences in Raycast to set your **Default Service**. This service will be used automatically whenever you don't explicitly choose one in the command arguments.
+
+## Development
+
+You need installed raycast.
+
+```sh
+npm install
+npm run dev
+```
