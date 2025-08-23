@@ -414,7 +414,7 @@ type SimpleQualityMappingExtension = keyof typeof SIMPLE_QUALITY_MAPPINGS;
 
 export function getDefaultQuality(
   format: AllOutputExtension,
-  preferences?: PreferenceValues,
+  preferences: PreferenceValues,
   qualityLevel?: QualityLevel,
 ): QualitySettings {
   // For images or when advanced settings are enabled, use DEFAULT_QUALITIES
