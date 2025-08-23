@@ -11,13 +11,13 @@ import { join } from "path";
 const helperPath = join(environment.assetsPath, "LocateCursor");
 
 export default function main() {
-  const command = `"${helperPath}"`;
+  const command = `"${helperPath}" -p simple`;
 
   exec(command, (error) => {
     if (error) {
       showToast({
         style: Toast.Style.Failure,
-        title: "Failed to locate cursor",
+        title: "Failed to start simple mode",
         message: error.message,
       });
     }
