@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "delete-screenshots",
+  "version": "1.0.0",
+  "title": "Delete Screenshots",
+  "description": "Delete screenshots from specified folders",
+  "icon": "extension-icon.png",
+  "author": "BinaryBlitz10",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "delete-screenshots",
+      "title": "Delete Screenshots",
+      "description": "Deletes screenshots from folders",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "folders",
+          "type": "textfield",
+          "title": "Folders (comma separated)",
+          "default": "~/Desktop",
+          "description": "Comma-separated folder paths to look for screenshots",
+          "required": true
+        },
+        {
+          "name": "keywords",
+          "type": "textfield",
+          "title": "Filename Keywords (comma separated)",
+          "default": "Screenshot",
+          "description": "Words the filename should contain (comma-separated)",
+          "required": true
+        },
+        {
+          "name": "extensions",
+          "type": "textfield",
+          "title": "Extensions (comma separated)",
+          "default": "jpg,jpeg",
+          "description": "File extensions to include (comma-separated)",
+          "required": true
+        },
+        {
+          "name": "askBeforeDelete",
+          "label": "Ask Before Deleting",
+          "type": "checkbox",
+          "title": "Ask Before Deleting",
+          "default": true,
+          "description": "Ask before deleting",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.101.1",
+    "@raycast/utils": "^1.17.0",
+    "trash": "^9.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
