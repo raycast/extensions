@@ -1,24 +1,20 @@
 import { exec } from "child_process";
-import { closeMainWindow, PopToRootType, environment } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { showToast, Toast } from "@raycast/api";
 import { join } from "path";
 
-const helperPath = join(environment.assetsPath, "LocateCursor");
+// Helper path (relative to repo or installed path)
+const helperPath = join(__dirname, ".", "assets", "LocateCursor");
 
-export default function main() {
-  const command = `"${helperPath}"`;
-
-  try {
-    exec(command, (error) => {
-      if (error) {
-        showFailureToast(error, { title: "Failed to locate cursor" });
-      }
-      closeMainWindow({
-        clearRootSearch: true,
-        popToRootType: PopToRootType.Immediate,
+export default async function main() {
+  exec(helperPath, (error) => {
+    if (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to locate cursor",
+        message: error.message,
       });
-    });
-  } catch (error) {
-    showFailureToast(error, { title: "Failed to execute command" });
-  }
+    } else {
+      showToast({ style: Toast.Style.Success, title: "Cursor located" });
+    }
+  });
 }

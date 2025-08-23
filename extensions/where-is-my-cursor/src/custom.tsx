@@ -2,8 +2,6 @@ import {
   Form,
   ActionPanel,
   Action,
-  closeMainWindow,
-  PopToRootType,
   environment,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
@@ -68,10 +66,6 @@ function handleSubmit(values: FormValues) {
     if (error) {
       showFailureToast(error, { title: "Failed to locate cursor" });
     }
-  });
-  closeMainWindow({
-    clearRootSearch: true,
-    popToRootType: PopToRootType.Immediate,
   });
 }
 
