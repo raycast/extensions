@@ -37,6 +37,7 @@ const MIN_FILE_SIZE_BYTES = 1024 * 1024; // 1 MB minimum file size
 interface ValidationResult {
   isValid: boolean;
   errorMessage?: string;
+  cancelled?: boolean;
 }
 
 /**
@@ -183,16 +184,15 @@ export async function validateDownloadPrereqs(
       });
 
       if (!confirmed) {
-        const errorMsg = `Download cancelled - file already exists: ${path.basename(existingFile)}`;
-        logger.log(`[validation] User cancelled overwrite for existing file`);
+        const errorMsg = "App already exists and won't be  downloaded again.";
+        logger.log(`[validation] Skipped download: file already exists (${path.basename(existingFile)})`);
 
         await showToast({
           style: Toast.Style.Animated,
-          title: "Download Cancelled",
-          message: "File already exists",
+          title: "App already exists and won't be  downloaded again.",
         });
 
-        return { isValid: false, errorMessage: errorMsg };
+        return { isValid: false, errorMessage: errorMsg, cancelled: true };
       }
 
       logger.log(`[validation] ✓ User confirmed overwrite of existing file`);
@@ -660,7 +660,7 @@ export async function searchApps(query: string, limit = 20): Promise<IpaToolSear
  * @param price Optional price for determining if app is paid
  * @param retryCount Current retry attempt (used for exponential backoff)
  * @param retryDelay Current retry delay in milliseconds
- * @returns Promise<string | null> - Path to the downloaded app file or null if failed
+ * @returns Promise<string | null | undefined> - Path on success; null if user cancelled; undefined on failure
  */
 export async function downloadApp(
   bundleId: string,
@@ -670,7 +670,7 @@ export async function downloadApp(
   retryCount = 0,
   retryDelay = INITIAL_RETRY_DELAY,
   options?: { suppressHUD?: boolean },
-) {
+): Promise<string | null | undefined> {
   try {
     logger.log(`[ipatool] Starting download for bundleId: ${bundleId}, app: ${appName}, version: ${appVersion}`);
 
@@ -695,6 +695,11 @@ export async function downloadApp(
       const validation = await validateDownloadPrereqs(bundleId, appName, expectedSizeBytes, appVersion);
       if (!validation.isValid) {
         const msg = validation.errorMessage || "Prerequisite validation failed";
+        if (validation.cancelled) {
+          // Existing file; download skipped as a non-error outcome.
+          logger.log(`[ipatool] Skipping download during validation: ${msg}`);
+          return null;
+        }
         logger.error(`[ipatool] Prerequisite validation failed: ${msg}`);
         throw new Error(msg);
       }
@@ -724,7 +729,7 @@ export async function downloadApp(
     );
 
     // Use spawn instead of exec to get real-time output
-    return new Promise<string | null>((resolve, reject) => {
+    return new Promise<string | null | undefined>((resolve, reject) => {
       // Prepare the command and arguments
       const args = [
         "download",
@@ -1226,11 +1231,8 @@ export async function downloadApp(
       logger.error(`[ipatool] Error stack: ${error.stack}`);
     }
     logger.error(`[ipatool] Error details:`, error);
-    if (!options?.suppressHUD) {
-      await showHUD("Download failed");
-    }
-    await handleDownloadError(error instanceof Error ? error : new Error(String(error)), "download app", "downloadApp");
-    return null;
+    // Re-throw to let callers handle HUD/toasts consistently and avoid duplicates
+    throw error instanceof Error ? error : new Error(String(error));
   }
 }
 

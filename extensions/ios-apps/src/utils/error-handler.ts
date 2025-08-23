@@ -12,14 +12,20 @@ import { loginToAppleId, NeedsLoginError, Needs2FAError } from "./auth";
  */
 export function sanitizeQuery(query: string): string {
   // Remove common sensitive patterns
-  return query
-    .replace(/token[=:]\s*[^\s&]+/gi, "token=***")
-    .replace(/key[=:]\s*[^\s&]+/gi, "key=***")
-    .replace(/password[=:]\s*[^\s&]+/gi, "password=***")
-    .replace(/auth[=:]\s*[^\s&]+/gi, "auth=***")
-    .replace(/bearer\s+[^\s&]+/gi, "bearer ***")
-    .replace(/[a-f0-9]{32,}/gi, "***") // Remove long hex strings (potential tokens/hashes)
-    .replace(/[A-Za-z0-9+/]{20,}={0,2}/g, "***"); // Remove base64-like strings
+  return (
+    query
+      .replace(/token[=:]\s*[^\s&]+/gi, "token=***")
+      .replace(/key[=:]\s*[^\s&]+/gi, "key=***")
+      .replace(/password[=:]\s*[^\s&]+/gi, "password=***")
+      .replace(/auth[=:]\s*[^\s&]+/gi, "auth=***")
+      .replace(/bearer\s+[^\s&]+/gi, "bearer ***")
+      // Redact CLI-style flags with values (handle quoted values)
+      .replace(/(?:^|\s)(-p|--password)\s+("[^"]*"|'[^']*'|\S+)/gi, " $1 ***")
+      .replace(/(?:^|\s)(-e|--email|--username)\s+("[^"]*"|'[^']*'|\S+)/gi, " $1 ***")
+      .replace(/(?:^|\s)(--auth-code|--2fa|--otp|--code)\s+("[^"]*"|'[^']*'|\S+)/gi, " $1 ******")
+      .replace(/[a-f0-9]{32,}/gi, "***") // Remove long hex strings (potential tokens/hashes)
+      .replace(/[A-Za-z0-9+/]{20,}={0,2}/g, "***")
+  ); // Remove base64-like strings
 }
 
 /**

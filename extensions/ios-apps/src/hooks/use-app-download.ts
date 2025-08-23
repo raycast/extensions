@@ -114,7 +114,13 @@ export function useAppDownload(authNavigation?: AuthNavigationHelpers) {
                     operationId,
                   );
                 } catch (authError) {
-                  logger.error(`[useAppDownload] Authentication failed after login:`, authError);
+                  const msg = authError instanceof Error ? authError.message : String(authError);
+                  const info = analyzeIpatoolError(msg);
+                  if (info.isAuthError) {
+                    logger.error(`[useAppDownload] Authentication failed after login:`, authError);
+                  } else {
+                    logger.error(`[useAppDownload] Download retry after login failed:`, authError);
+                  }
                 }
               });
             } else if (error instanceof Needs2FAError) {
@@ -134,7 +140,13 @@ export function useAppDownload(authNavigation?: AuthNavigationHelpers) {
                     operationId,
                   );
                 } catch (authError) {
-                  logger.error(`[useAppDownload] Authentication failed after 2FA:`, authError);
+                  const msg = authError instanceof Error ? authError.message : String(authError);
+                  const info = analyzeIpatoolError(msg);
+                  if (info.isAuthError) {
+                    logger.error(`[useAppDownload] Authentication failed after 2FA:`, authError);
+                  } else {
+                    logger.error(`[useAppDownload] Download retry after 2FA failed:`, authError);
+                  }
                 }
               });
             }
@@ -195,6 +207,12 @@ export function useAppDownload(authNavigation?: AuthNavigationHelpers) {
           );
           return undefined;
         }
+      } else if (filePath === null) {
+        // User cancelled (e.g., existing file) – already shown an informational toast in validation flow.
+        logger.log(
+          `[useAppDownload] Download cancelled by user for ${name} (${bundleId}). Suppressing failure HUD/toast.`,
+        );
+        return null;
       } else {
         if (showHudMessages && !authNavigation) {
           logger.log(`[useAppDownload] Showing HUD: "Download Failed" (no file path) for ${name}`);
@@ -237,8 +255,13 @@ export function useAppDownload(authNavigation?: AuthNavigationHelpers) {
                   operationId,
                 );
               } catch (authError) {
-                // If auth still fails, let it propagate
-                logger.error(`[useAppDownload] Authentication failed after login (catch):`, authError);
+                const msg = authError instanceof Error ? authError.message : String(authError);
+                const info = analyzeIpatoolError(msg);
+                if (info.isAuthError) {
+                  logger.error(`[useAppDownload] Authentication failed after login (catch):`, authError);
+                } else {
+                  logger.error(`[useAppDownload] Download retry after login failed (catch):`, authError);
+                }
               }
             });
           } else if (error instanceof Needs2FAError) {
@@ -259,8 +282,13 @@ export function useAppDownload(authNavigation?: AuthNavigationHelpers) {
                   operationId,
                 );
               } catch (authError) {
-                // If auth still fails, let it propagate
-                logger.error(`[useAppDownload] Authentication failed after 2FA (catch):`, authError);
+                const msg = authError instanceof Error ? authError.message : String(authError);
+                const info = analyzeIpatoolError(msg);
+                if (info.isAuthError) {
+                  logger.error(`[useAppDownload] Authentication failed after 2FA (catch):`, authError);
+                } else {
+                  logger.error(`[useAppDownload] Download retry after 2FA failed (catch):`, authError);
+                }
               }
             });
           }

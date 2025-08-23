@@ -7,4 +7,5 @@
 - [X] Create forms to handle ipatool authentication
 - [X] Create form to handle Apple 2FA code for ipatool
 - [ ] Add "Recent searches" to App Search
+- [ ] Add "Download History"
 - [ ] Add app ability to save favorite apps

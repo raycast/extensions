@@ -78,6 +78,13 @@ export default async function downloadIosApp(input: Input) {
     try {
       const filePath = await downloadApp(bundleId, appName, appVersion, price);
 
+      if (filePath === null) {
+        // Existing file found; skipped re-download. Validation flow already showed an informational toast.
+        const msg = "App already exists and won't be  downloaded again.";
+        logger.log(`[download-app tool] ${msg} (${appName} - ${bundleId})`);
+        return { success: false, message: msg };
+      }
+
       if (!filePath) {
         await handleDownloadError(
           new Error(

@@ -314,9 +314,10 @@ export async function executeIpatoolCommand(
     // Sanitize and validate arguments
     const sanitizedArgs = validateAndSanitizeArgs(args, allowedCommands);
     if (!sanitizedArgs) {
+      const redacted = redactArgsForLogging(args);
       return {
         success: false,
-        error: new Error(`Invalid or disallowed command arguments: ${args.join(" ")}`),
+        error: new Error(`Invalid or disallowed command arguments: ${redacted.join(" ")}`),
       };
     }
 
@@ -415,30 +416,50 @@ function validateAndSanitizeArgs(args: string[], allowedCommands: readonly strin
 
   // Sanitize all arguments
   const sanitizedArgs: string[] = [];
+  const sensitiveValueFlags = new Set([
+    "-p",
+    "--password",
+    "-e",
+    "--email",
+    "--username",
+    "--auth-code",
+    "--2fa",
+    "--otp",
+    "--code",
+  ]);
 
-  for (const arg of args) {
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
     if (typeof arg !== "string") {
       logger.error(`[ipatool] Invalid argument type: ${typeof arg}`);
       return null;
     }
 
-    // Check for dangerous patterns
-    if (containsDangerousPatterns(arg)) {
-      logger.error(`[ipatool] Dangerous pattern detected in argument: ${arg}`);
-      return null;
-    }
+    const prev = i > 0 ? args[i - 1] : undefined;
+    const isSensitiveValue = prev ? sensitiveValueFlags.has(prev) : false;
 
-    // For file paths and bundle IDs, apply additional sanitization
-    if (arg.includes("/") || arg.includes("\\\\")) {
-      try {
-        // Validate file paths
-        const sanitizedPath = validateExecutablePath(arg);
-        sanitizedArgs.push(sanitizedPath);
-      } catch {
-        // If path validation fails, treat as regular string but sanitize
+    if (!isSensitiveValue) {
+      // Check for dangerous patterns only on non-sensitive tokens (flags/command/subcommand/paths)
+      if (containsDangerousPatterns(arg)) {
+        logger.error(`[ipatool] Dangerous pattern detected in argument: ${arg}`);
+        return null;
+      }
+
+      // For file paths and bundle IDs, apply additional sanitization
+      if (arg.includes("/") || arg.includes("\\\\")) {
+        try {
+          // Validate file paths
+          const sanitizedPath = validateExecutablePath(arg);
+          sanitizedArgs.push(sanitizedPath);
+        } catch {
+          // If path validation fails, treat as regular string but sanitize
+          sanitizedArgs.push(sanitizeArgument(arg));
+        }
+      } else {
         sanitizedArgs.push(sanitizeArgument(arg));
       }
     } else {
+      // For sensitive values (passwords, emails, auth codes), skip dangerous/path validation
       sanitizedArgs.push(sanitizeArgument(arg));
     }
   }
@@ -520,7 +541,8 @@ export function createSecureIpatoolProcess(
       // Validate arguments first
       const sanitizedArgs = validateAndSanitizeArgs(args, options.allowedCommands || ALLOWED_IPATOOL_COMMANDS);
       if (!sanitizedArgs) {
-        reject(new Error(`Invalid arguments: ${args.join(" ")}`));
+        const redacted = redactArgsForLogging(args);
+        reject(new Error(`Invalid arguments: ${redacted.join(" ")}`));
         return;
       }
 
