@@ -31,7 +31,7 @@ export default function Timers() {
 
       if (response.ok) {
         const data = await response.json();
-        setTimers(data || []);
+        setTimers((data as Timer[]) || []);
       } else if (response.status === 401) {
         setIsAuth(false);
         await showToast({

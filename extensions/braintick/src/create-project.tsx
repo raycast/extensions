@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Form, Icon, Toast, popToRoot, showToast } from "@raycast/api";
 import { useState } from "react";
 import { makeAuthenticatedRequest } from "./lib/auth";
 import { CreateProjectInput } from "./types";
@@ -62,11 +62,11 @@ export default function CreateProject({ onProjectCreated }: CreateProjectProps) 
         const error = await response.json();
         throw new Error(error.cause || "Failed to create project");
       }
-    } catch (error) {
+    } catch {
       await showToast({
         style: Toast.Style.Failure,
         title: "Error",
-        message: error instanceof Error ? error.message : "Failed to create project",
+        message: "Failed to create project",
       });
     } finally {
       setIsLoading(false);

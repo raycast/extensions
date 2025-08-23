@@ -34,7 +34,7 @@ export default function EditTask({ task, onTaskUpdated }: EditTaskProps) {
       const response = await makeAuthenticatedRequest("/projects");
       if (response.ok) {
         const data = await response.json();
-        setProjects(data || []);
+        setProjects((data as Project[]) || []);
       }
     } catch (error) {
       console.error("Failed to load projects:", error);
@@ -84,11 +84,11 @@ export default function EditTask({ task, onTaskUpdated }: EditTaskProps) {
         const error = await response.json();
         throw new Error(error.cause || "Failed to update task");
       }
-    } catch (error) {
+    } catch {
       await showToast({
         style: Toast.Style.Failure,
         title: "Error",
-        message: error instanceof Error ? error.message : "Failed to update task",
+        message: "Failed to update task",
       });
     } finally {
       setIsLoading(false);

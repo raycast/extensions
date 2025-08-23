@@ -1,4 +1,4 @@
-import { getPreferenceValues, LocalStorage } from "@raycast/api";
+import { LocalStorage, getPreferenceValues } from "@raycast/api";
 
 interface Preferences {
   apiUrl: string;
@@ -34,10 +34,20 @@ export async function authenticate(email: string, password: string): Promise<Aut
     });
 
     const token = response.headers.get("set-auth-token");
-    const data = await response.json();
-    console.log("got resp from api ", data, token);
+    const data = (await response.json()) as
+      | {
+          token: string;
+          user: {
+            id: string;
+            email: string;
+            name?: string;
+          };
+        }
+      | {
+          message: string;
+        };
 
-    if (response.ok && data.token) {
+    if (response.ok && "token" in data) {
       return {
         success: true,
         token: token || "",
@@ -47,7 +57,7 @@ export async function authenticate(email: string, password: string): Promise<Aut
 
     return {
       success: false,
-      error: data.message || "Authentication failed",
+      error: "message" in data ? data.message : "Authentication failed",
     };
   } catch (error) {
     console.error("Authentication error:", error);

@@ -24,8 +24,8 @@ export default function Login() {
       const result = await authenticate(email, password);
 
       if (result.success) {
-        await LocalStorage.setItem("auth-token", result.token);
-        await LocalStorage.setItem("user-email", email);
+        await LocalStorage.setItem("auth-token", result.token || "");
+        await LocalStorage.setItem("user-email", email || "");
 
         await showToast({
           style: Toast.Style.Success,
@@ -109,7 +109,7 @@ Ready to boost your productivity? Sign in to your Braintick account and start ma
       navigationTitle="Sign In to Braintick"
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Sign in" icon={Icon.LogIn} onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Sign in" icon={Icon.Person} onSubmit={handleSubmit} />
           <Action
             title="Back to Welcome"
             icon={Icon.ArrowLeft}

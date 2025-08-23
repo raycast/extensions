@@ -32,7 +32,7 @@ export default function Projects() {
 
       if (response.ok) {
         const data = await response.json();
-        setProjects(data || []);
+        setProjects((data as Project[]) || []);
       } else if (response.status === 401) {
         setIsAuth(false);
         await showToast({

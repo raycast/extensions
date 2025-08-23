@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, Toast, popToRoot, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { makeAuthenticatedRequest } from "./lib/auth";
 import { CreateTaskInput, Project } from "./types";
@@ -34,7 +34,7 @@ export default function CreateTask({ onTaskCreated, defaultProjectId }: CreateTa
       const response = await makeAuthenticatedRequest("/projects");
       if (response.ok) {
         const data = await response.json();
-        setProjects(data || []);
+        setProjects((data as Project[]) || []);
       }
     } catch (error) {
       console.error("Failed to load projects:", error);
@@ -85,11 +85,11 @@ export default function CreateTask({ onTaskCreated, defaultProjectId }: CreateTa
         const error = await response.json();
         throw new Error(error.cause || "Failed to create task");
       }
-    } catch (error) {
+    } catch {
       await showToast({
         style: Toast.Style.Failure,
         title: "Error",
-        message: error instanceof Error ? error.message : "Failed to create task",
+        message: "Failed to create task",
       });
     } finally {
       setIsLoading(false);

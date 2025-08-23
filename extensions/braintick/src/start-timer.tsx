@@ -33,12 +33,12 @@ export default function StartTimer({ onTimerStarted, defaultProjectId, defaultTa
 
       if (projectsResponse.ok) {
         const projectsData = await projectsResponse.json();
-        setProjects(projectsData || []);
+        setProjects((projectsData as Project[]) || []);
       }
 
       if (tasksResponse.ok) {
         const tasksData = await tasksResponse.json();
-        setTasks(tasksData || []);
+        setTasks((tasksData as Task[]) || []);
       }
     } catch (error) {
       console.error("Failed to load data:", error);
@@ -90,11 +90,11 @@ export default function StartTimer({ onTimerStarted, defaultProjectId, defaultTa
         const error = await response.json();
         throw new Error(error.cause || "Failed to start timer");
       }
-    } catch (error) {
+    } catch {
       await showToast({
         style: Toast.Style.Failure,
         title: "Error",
-        message: error instanceof Error ? error.message : "Failed to start timer",
+        message: "Failed to start timer",
       });
     } finally {
       setIsLoading(false);
@@ -142,12 +142,7 @@ export default function StartTimer({ onTimerStarted, defaultProjectId, defaultTa
         {tasks
           .filter((task) => (projectId ? task.project_id === projectId : true))
           .map((task) => (
-            <Form.Dropdown.Item
-              key={task.id}
-              value={task.id}
-              title={task.title}
-              subtitle={task.description || undefined}
-            />
+            <Form.Dropdown.Item key={task.id} value={task.id} title={task.title} />
           ))}
       </Form.Dropdown>
 

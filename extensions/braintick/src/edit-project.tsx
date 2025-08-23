@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Form, Icon, Toast, popToRoot, showToast } from "@raycast/api";
 import { useState } from "react";
 import { makeAuthenticatedRequest } from "./lib/auth";
 import { Project, UpdateProjectInput } from "./types";
@@ -78,11 +78,11 @@ export default function EditProject({ project, onProjectUpdated }: EditProjectPr
         const error = await response.json();
         throw new Error(error.cause || "Failed to update project");
       }
-    } catch (error) {
+    } catch {
       await showToast({
         style: Toast.Style.Failure,
         title: "Error",
-        message: error instanceof Error ? error.message : "Failed to update project",
+        message: "Failed to update project",
       });
     } finally {
       setIsLoading(false);

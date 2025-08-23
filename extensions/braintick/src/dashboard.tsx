@@ -55,9 +55,9 @@ export default function Dashboard() {
       ]);
 
       setData({
-        tasks: tasksData || [],
-        projects: projectsData || [],
-        timers: timersData || [],
+        tasks: (tasksData as Task[]) || [],
+        projects: (projectsData as Project[]) || [],
+        timers: (timersData as Timer[]) || [],
       });
     } catch {
       await showToast({

@@ -36,7 +36,7 @@ export default function ListTasks() {
 
       if (response.ok) {
         const data = await response.json();
-        setTasks(data || []);
+        setTasks((data as Task[]) || []);
       } else if (response.status === 401) {
         setIsAuth(false);
         await showToast({
@@ -63,7 +63,7 @@ export default function ListTasks() {
       const response = await makeAuthenticatedRequest("/projects");
       if (response.ok) {
         const data = await response.json();
-        setProjects(data || []);
+        setProjects((data as Project[]) || []);
       }
     } catch (error) {
       console.error("Failed to load projects:", error);
