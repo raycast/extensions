@@ -9,32 +9,37 @@
   "permissions": ["execute"],
   "commands": [
     {
-      "name": "main",
+      "name": "where-is-my-cursor",
       "title": "Where Is My Cursor?",
+      "subtitle": "Where Is My Cursor? - Visual aid to find cursor",
       "description": "Visual aid to find cursor, specially useful when utilizing more than 1 monitor.",
       "mode": "no-view"
     },
     {
       "name": "off",
       "title": "Turn off Cursor Highlight",
+      "subtitle": "Where Is My Cursor? - Turn off Cursor Highlight",
       "description": "Manually turn off the cursor highlight.",
       "mode": "no-view"
     },
     {
       "name": "simple-mode",
       "title": "Simple Mode",
+      "subtitle": "Where Is My Cursor? - Simple Mode",
       "description": "A simple visual aid to find the cursor.",
       "mode": "no-view"
     },
     {
       "name": "presentation-mode",
       "title": "Presentation Mode",
+      "subtitle": "Where Is My Cursor? - Presentation Mode",
       "description": "Dim the screen with a yellow-tinted area around the cursor.",
       "mode": "no-view"
     },
     {
       "name": "custom",
       "title": "Custom Mode",
+      "subtitle": "Where Is My Cursor? - Custom Mode",
       "description": "Run with custom parameters.",
       "mode": "view"
     }

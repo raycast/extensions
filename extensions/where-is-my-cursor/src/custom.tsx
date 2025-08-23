@@ -2,12 +2,11 @@ import {
   Form,
   ActionPanel,
   Action,
-  showToast,
-  Toast,
   closeMainWindow,
   PopToRootType,
   environment,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { exec } from "child_process";
 import { join } from "path";
 
@@ -67,11 +66,7 @@ function handleSubmit(values: FormValues) {
 
   exec(command, (error) => {
     if (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to locate cursor",
-        message: error.message,
-      });
+      showFailureToast(error, { title: "Failed to locate cursor" });
     }
   });
   closeMainWindow({

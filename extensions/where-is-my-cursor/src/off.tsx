@@ -1,11 +1,6 @@
 import { exec } from "child_process";
-import {
-  showToast,
-  Toast,
-  closeMainWindow,
-  PopToRootType,
-  environment,
-} from "@raycast/api";
+import { closeMainWindow, PopToRootType, environment } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { join } from "path";
 
 const helperPath = join(environment.assetsPath, "LocateCursor");
@@ -15,11 +10,7 @@ export default function main() {
 
   exec(command, (error) => {
     if (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to turn off cursor highlight",
-        message: error.message,
-      });
+      showFailureToast(error, { title: "Failed to turn off cursor highlight" });
     }
   });
   closeMainWindow({
