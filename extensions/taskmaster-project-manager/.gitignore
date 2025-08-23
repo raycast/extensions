@@ -140,8 +140,6 @@ temp/
 *.sln
 *.sw?
 
-package-lock.json
-
 dev-debug.log
 node_modules/
 .vscode
