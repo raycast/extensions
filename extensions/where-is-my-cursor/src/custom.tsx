@@ -41,7 +41,9 @@ function handleSubmit(values: FormValues) {
   const screenOpacity = parseFloat(values.screenOpacity || "0.0");
   const circleRadius = parseFloat(values.circleRadius || "50");
   const circleOpacity = parseFloat(values.circleOpacity || "0.4");
-  const borderWidth = values.borderWidth ? parseFloat(values.borderWidth) : undefined;
+  const borderWidth = values.borderWidth
+    ? parseFloat(values.borderWidth)
+    : undefined;
 
   if (isNaN(duration) || duration <= 0) {
     showFailureToast("Duration must be a positive number.");
@@ -57,8 +59,7 @@ function handleSubmit(values: FormValues) {
   }
 
   // Fix JSON escaping: escape both quotes and backslashes
-  const escapeJsonString = (str: string) =>
-    str.replace(/(["\\])/g, "\\$1");
+  const escapeJsonString = (str: string) => str.replace(/(["\\])/g, "\\$1");
   if (isNaN(circleOpacity) || circleOpacity < 0 || circleOpacity > 1) {
     showFailureToast("Circle Opacity must be between 0 and 1.");
     return;
