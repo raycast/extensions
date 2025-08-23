@@ -13,6 +13,7 @@ import {
   Toast,
   getPreferenceValues,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import {
   Task,
   TaskStatus,
@@ -142,11 +143,7 @@ export function TaskDetailView({
         onTaskUpdate();
       }
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Update Failed",
-        message: String(error),
-      });
+      showFailureToast(error, { title: "Update Failed" });
     }
   };
 
@@ -170,11 +167,7 @@ export function TaskDetailView({
         onTaskUpdate();
       }
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Delete Failed",
-        message: String(error),
-      });
+      showFailureToast(error, { title: "Delete Failed" });
     }
   };
 

@@ -221,7 +221,7 @@ export default async function () {
       const score = t.complexityScore || 6;
       return score >= 5 && score < 8;
     });
-    const mediumComplexityTasks = mediumComplexityTasksArray;
+    const mediumComplexityTasks = mediumComplexityTasksArray.length;
 
     const tasksWithManySubtasks = tasks.filter(
       (t) => t.subtasks && t.subtasks.length > 10,
@@ -244,7 +244,7 @@ export default async function () {
       report += `- 🔍 **Investigate high-complexity tasks**: Use **get-task-info** with IDs ${highIds}\n`;
       report += `- 📋 **Break down complex tasks**: Consider task subdivision using TaskMaster CLI\n`;
     }
-    if (mediumComplexityTasks.length > 0) {
+    if (mediumComplexityTasks > 0) {
       report += `- ⚖️ **Review medium-complexity tasks**: May benefit from 2-3 subtasks each\n`;
     }
     report += `- 🎯 **Start with ready tasks**: Use **get-next-task** to find optimal starting point\n`;

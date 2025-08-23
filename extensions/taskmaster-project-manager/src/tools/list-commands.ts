@@ -11,7 +11,7 @@ import path from "path";
 export default async function () {
   try {
     // Read the TaskMaster commands guide
-    const guidePath = path.join(process.cwd(), "TM_COMMANDS_GUIDE copy.md");
+    const guidePath = path.join(process.cwd(), "TM_COMMANDS_GUIDE.md");
 
     if (fs.existsSync(guidePath)) {
       const content = fs.readFileSync(guidePath, "utf-8");
@@ -48,26 +48,21 @@ export default async function () {
     // Fallback command list if guide not found
     return `# TaskMaster Commands Reference
 
-## Core Commands
-- \`tm list\` - List all tasks with filters
-- \`tm show <id>\` - Show detailed task information  
-- \`tm next\` - Get next recommended task
-- \`tm status\` - Show project dashboard
-- \`tm analyze-complexity\` - Analyze task complexity
-- \`tm validate-dependencies\` - Check dependency issues
+## Raycast Commands
+- Kanban Board — View and manage tasks in a visual Kanban board with drag-and-drop
+- Task List — Browse all tasks with filters and quick actions
+- Search Tasks — Search and filter tasks with advanced options
+- Next Task — See the next recommended task based on dependencies and priority
+- Project Status — Project dashboard with progress insights
+- Add Task — Create a new task with validation
+- Task Detail — View detailed task info, subtasks, and dependencies
 
-## Task Management
-- \`tm add-task\` - Create a new task
-- \`tm update\` - Update task information
-- \`tm set-status\` - Change task status
-- \`tm expand <id>\` - Break down complex tasks
+## Tips
+- Use ⌘R to refresh lists
+- Use the Copy submenu to copy IDs, titles, and JSON
+- Open a task’s detail from Kanban or Task List to see metadata
 
-## Analysis & Insights
-- \`tm utils/analyze\` - Comprehensive project analysis
-- \`tm complexity-report\` - View complexity analysis
-- \`tm workflows/smart-flow\` - Show recommended workflows
-
-*Note: Full command guide not found. Check TM_COMMANDS_GUIDE.md for complete reference.*`;
+Note: Full command guide not found. Ensure TM_COMMANDS_GUIDE.md exists at the project root.`;
   } catch (error) {
     return `Error reading commands: ${String(error)}`;
   }

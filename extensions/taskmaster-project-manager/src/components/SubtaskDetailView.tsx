@@ -13,6 +13,7 @@ import {
   Toast,
   getPreferenceValues,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { Task, TaskStatus, Subtask, TaskMasterSettings } from "../types/task";
 import { updateSubtaskStatus } from "../lib/write-utils";
 
@@ -167,11 +168,7 @@ export function SubtaskDetailView({
         onSubtaskUpdate();
       }
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Update Failed",
-        message: String(error),
-      });
+      showFailureToast(error, { title: "Update Failed" });
     }
   };
 

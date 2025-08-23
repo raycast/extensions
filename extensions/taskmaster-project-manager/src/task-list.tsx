@@ -192,7 +192,7 @@ function TaskListItem({
                     showToast({
                       style: Toast.Style.Success,
                       title: "Subtask Details",
-                      message: `${subtask.title}\\n${subtask.description || "No description"}`,
+                      message: `${subtask.title}\n${subtask.description || "No description"}`,
                     });
                   }}
                 />

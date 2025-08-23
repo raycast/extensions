@@ -199,7 +199,7 @@ ${
     ? `## Dependencies
 
 This task depends on:
-${nextTask!.dependencies.map((dep) => `- Task ${dep}`).join("\\n")}`
+${nextTask!.dependencies.map((dep) => `- Task ${dep}`).join("\n")}`
     : ""
 }
 
@@ -212,7 +212,7 @@ ${nextTask!.subtasks
     (subtask) =>
       `- **${subtask.title}** (${subtask.status})${subtask.description ? `: ${subtask.description}` : ""}`,
   )
-  .join("\\n")}`
+  .join("\n")}`
     : ""
 }
 
@@ -336,7 +336,10 @@ This task has been identified as the next priority item based on task dependenci
             />
             <Action.CopyToClipboard
               title="Task Summary"
-              content={`Next Task ${nextTask!.id}: ${nextTask!.title}\nStatus: ${nextTask!.status}\nPriority: ${nextTask!.priority}\n${nextTask!.description ? `Description: ${nextTask!.description}` : ""}`}
+              content={`Next Task ${nextTask!.id}: ${nextTask!.title}
+Status: ${nextTask!.status}
+Priority: ${nextTask!.priority}
+${nextTask!.description ? `Description: ${nextTask!.description}` : ""}`}
             />
             <Action.CopyToClipboard
               title="Task as JSON"

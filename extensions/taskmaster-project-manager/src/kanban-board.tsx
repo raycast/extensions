@@ -265,11 +265,7 @@ export default function KanbanBoardCommand() {
         // Kanban view: Show tasks grouped by status
         Object.entries(tasksByStatus).map(([status, statusTasks]) => {
           const config = KANBAN_COLUMNS[status as TaskStatus];
-          if (
-            !settings.showCompletedTasks &&
-            status === "done" &&
-            statusTasks.length === 0
-          ) {
+          if (!settings.showCompletedTasks && status === "done") {
             return null;
           }
 
