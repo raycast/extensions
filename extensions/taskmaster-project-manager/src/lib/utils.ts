@@ -119,7 +119,9 @@ export async function readTasks(projectRoot: string): Promise<TaskData> {
     console.log(`Parsed ${tasks.length} tasks from TaskMaster data`);
 
     return {
-      tasks: tasks.map(transformTaskFromFile),
+      tasks: tasks.map((task) =>
+        transformTaskFromFile(task as Record<string, unknown>),
+      ),
       currentTag,
       availableTags,
     };
@@ -206,7 +208,8 @@ function transformTaskFromFile(fileTask: Record<string, unknown>): Task {
     priority: String(
       fileTask.priority || "medium",
     ).toLowerCase() as Task["priority"],
-    details: fileTask.details || undefined,
+    details:
+      typeof fileTask.details === "string" ? fileTask.details : undefined,
     dependencies: Array.isArray(fileTask.dependencies)
       ? fileTask.dependencies.map(String)
       : [],
@@ -220,8 +223,13 @@ function transformTaskFromFile(fileTask: Record<string, unknown>): Task {
             ({
               id: typeof subtask.id === "number" ? subtask.id : 0,
               title: String(subtask.title || ""),
-              description: subtask.description || undefined,
-              status: (subtask.status || "pending").toLowerCase() as TaskStatus,
+              description:
+                typeof subtask.description === "string"
+                  ? subtask.description
+                  : undefined,
+              status: String(
+                subtask.status || "pending",
+              ).toLowerCase() as TaskStatus,
               dependencies: Array.isArray(subtask.dependencies)
                 ? subtask.dependencies.map(String)
                 : [],

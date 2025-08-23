@@ -42,7 +42,11 @@ function DependencyItem({
     ? `${dependencyTask.description.substring(0, 80)}${dependencyTask.description.length > 80 ? "..." : ""}`
     : "No description";
 
-  const accessories = [
+  const accessories: Array<{
+    icon?: { source: Icon; tintColor: Color } | Icon;
+    tooltip?: string;
+    text?: string;
+  }> = [
     {
       icon: { source: statusConfig.icon, tintColor: statusConfig.color },
       tooltip: `Status: ${statusConfig.title}`,
@@ -51,9 +55,7 @@ function DependencyItem({
 
   if (dependencyTask.priority) {
     accessories.push({
-      icon: Icon.ExclamationMark,
-      text: dependencyTask.priority,
-      tooltip: `Priority: ${dependencyTask.priority}`,
+      text: `${dependencyTask.priority} priority`,
     });
   }
 

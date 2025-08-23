@@ -322,18 +322,6 @@ export default function SearchTasksCommand() {
                 />
               </ActionPanel>
             }
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Clear Filters"
-                  icon={Icon.Trash}
-                  onAction={() => {
-                    setStatusFilter("all");
-                    setPriorityFilter("all");
-                  }}
-                />
-              </ActionPanel>
-            }
           />
         )}
 

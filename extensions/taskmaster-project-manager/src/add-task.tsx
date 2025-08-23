@@ -20,8 +20,8 @@ interface TaskFormValues {
   title: string;
   description: string;
   details: string;
-  priority: TaskPriority;
-  status: TaskStatus;
+  priority: string;
+  status: string;
   testStrategy: string;
   dependencies: string;
 }
@@ -41,8 +41,8 @@ export default function AddTaskCommand() {
           title: values.title.trim(),
           description: values.description.trim(),
           details: values.details.trim() || undefined,
-          priority: values.priority,
-          status: values.status,
+          priority: values.priority as TaskPriority,
+          status: values.status as TaskStatus,
           testStrategy: values.testStrategy.trim() || undefined,
           dependencies: values.dependencies
             ? values.dependencies
@@ -76,6 +76,7 @@ export default function AddTaskCommand() {
         if (value.trim().length > 100) {
           return "Task title must be less than 100 characters";
         }
+        return undefined;
       },
       description: (value) => {
         if (!value || !value.trim()) {
@@ -87,6 +88,7 @@ export default function AddTaskCommand() {
         if (value.trim().length > 1000) {
           return "Task description must be less than 1000 characters";
         }
+        return undefined;
       },
       priority: FormValidation.Required,
       status: FormValidation.Required,
@@ -94,11 +96,13 @@ export default function AddTaskCommand() {
         if (value && value.length > 2000) {
           return "Implementation details must be less than 2000 characters";
         }
+        return undefined;
       },
       testStrategy: (value) => {
         if (value && value.length > 1000) {
           return "Test strategy must be less than 1000 characters";
         }
+        return undefined;
       },
       dependencies: (value) => {
         if (!value || !value.trim()) return undefined;
@@ -112,6 +116,7 @@ export default function AddTaskCommand() {
         if (invalidDeps.length > 0) {
           return "Dependencies must be task IDs (e.g., 1, 2.1, 5) separated by commas";
         }
+        return undefined;
       },
     },
     initialValues: {

@@ -30,7 +30,13 @@ export default async function () {
     }
 
     const generatedAt = new Date().toISOString();
-    const analysisData = [];
+    const analysisData: Array<{
+      task_id: string;
+      complexity_score: number;
+      recommended_subtasks: number;
+      reasoning: string;
+      breakdown_suggestion: string[];
+    }> = [];
 
     // Generate analysis data
     complexTasks.slice(0, 5).forEach((task) => {
@@ -125,12 +131,11 @@ export default async function () {
 
       // Add to analysis data
       analysisData.push({
-        taskId: task.id,
-        taskTitle: task.title,
-        complexityScore: estimatedComplexity,
-        recommendedSubtasks,
-        expansionPrompt,
+        task_id: task.id,
+        complexity_score: estimatedComplexity,
+        recommended_subtasks: recommendedSubtasks,
         reasoning,
+        breakdown_suggestion: [expansionPrompt],
       });
     });
 
@@ -179,15 +184,15 @@ export default async function () {
     report += `## Complex Tasks Analysis\n\n`;
 
     analysisData.forEach((analysis, index) => {
-      report += `### ${index + 1}. Task ${analysis.taskId}: ${analysis.taskTitle}\n\n`;
-      report += `**Complexity Score**: ${analysis.complexityScore}/10\n`;
-      report += `**Recommended Subtasks**: ${analysis.recommendedSubtasks}\n`;
+      const originalTask = tasks.find((t) => t.id === analysis.task_id);
+      report += `### ${index + 1}. Task ${analysis.task_id}: ${originalTask?.title || "Unknown Task"}\n\n`;
+      report += `**Complexity Score**: ${analysis.complexity_score}/10\n`;
+      report += `**Recommended Subtasks**: ${analysis.recommended_subtasks}\n`;
 
       // Find current subtasks count
-      const originalTask = tasks.find((t) => t.id === analysis.taskId);
       report += `**Current Subtasks**: ${originalTask?.subtasks ? originalTask.subtasks.length : 0}\n\n`;
 
-      report += `**Expansion Recommendation**:\n${analysis.expansionPrompt}\n\n`;
+      report += `**Expansion Recommendation**:\n${analysis.breakdown_suggestion[0] || "No specific breakdown provided"}\n\n`;
       report += `**Reasoning**: ${analysis.reasoning}\n\n`;
       report += `---\n\n`;
     });
@@ -204,12 +209,19 @@ export default async function () {
       report += `- 📊 **${tasksWithoutScores} tasks lack complexity scores** - consider assigning scores 1-10\n`;
     }
 
-    const highComplexityTasks = tasks.filter(
+    const highComplexityTasksArray = tasks.filter(
       (t) => (t.complexityScore || 6) >= 8,
-    ).length;
+    );
+    const highComplexityTasks = highComplexityTasksArray.length;
     if (highComplexityTasks > 0) {
       report += `- ⚠️  **${highComplexityTasks} tasks have very high complexity (≥8)** - consider breaking down\n`;
     }
+
+    const mediumComplexityTasksArray = tasks.filter((t) => {
+      const score = t.complexityScore || 6;
+      return score >= 5 && score < 8;
+    });
+    const mediumComplexityTasks = mediumComplexityTasksArray;
 
     const tasksWithManySubtasks = tasks.filter(
       (t) => t.subtasks && t.subtasks.length > 10,
@@ -225,8 +237,10 @@ export default async function () {
     // Add workflow guidance
     report += `## Tool Workflow\n\n`;
     report += `**Next Steps:**\n`;
-    if (highComplexityTasks.length > 0) {
-      const highIds = highComplexityTasks.map((t) => `\`${t.id}\``).join(", ");
+    if (highComplexityTasksArray.length > 0) {
+      const highIds = highComplexityTasksArray
+        .map((t) => `\`${t.id}\``)
+        .join(", ");
       report += `- 🔍 **Investigate high-complexity tasks**: Use **get-task-info** with IDs ${highIds}\n`;
       report += `- 📋 **Break down complex tasks**: Consider task subdivision using TaskMaster CLI\n`;
     }
