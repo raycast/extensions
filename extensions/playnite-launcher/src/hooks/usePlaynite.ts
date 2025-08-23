@@ -9,11 +9,6 @@ import { promisify } from "util";
 const removeBOM = (source: string) => source.replace(/^\uFEFF/, "");
 const execAsync = promisify(exec);
 
-interface Preferences {
-  includeHidden: boolean;
-  defaultFilter: string;
-}
-
 interface PlayniteGameSource {
   Id: string;
   Name: string;
@@ -75,7 +70,7 @@ async function loadPlayniteGames(includeHidden: boolean): Promise<PlayniteGame[]
 }
 
 export function usePlaynite() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues();
   const {
     data: games = [],
     isLoading,
