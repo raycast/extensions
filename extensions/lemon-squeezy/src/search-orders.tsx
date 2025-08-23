@@ -3,7 +3,7 @@ import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { getFavicon, useCachedPromise } from "@raycast/utils";
 import { configureLemonSqueezy } from "./lemon-squeezy";
 
-export default function SearchProducts() {
+export default function SearchOrders() {
   const { isLoading, data: orders = [] } = useCachedPromise(async () => {
     configureLemonSqueezy();
     const { data } = await listOrders();
@@ -34,8 +34,8 @@ export default function SearchProducts() {
       {!isLoading && !orders.length ? (
         <List.EmptyView
           title="Make your first sale"
-          description="Create and share a product to start making sales.
-Your orders will be displayed here."
+          description={`Create and share a product to start making sales.
+Your orders will be displayed here.`}
           actions={
             <ActionPanel>
               <Action.OpenInBrowser

@@ -1,7 +1,8 @@
 import { listProducts } from "@lemonsqueezy/lemonsqueezy.js";
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { getFavicon, useCachedPromise } from "@raycast/utils";
+import { ActionPanel, Color, Icon, List } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { configureLemonSqueezy } from "./lemon-squeezy";
+import OpenInLemonSqueezy from "./open-in-lemon-squeezy";
 
 export default function SearchProducts() {
   const { isLoading, data: products = [] } = useCachedPromise(async () => {
@@ -15,15 +16,11 @@ export default function SearchProducts() {
       {!isLoading && !products.length ? (
         <List.EmptyView
           title="Create your first product"
-          description="Adding products to your store is easy peasy.
-    Create products in minutes and start making sales."
+          description={`Adding products to your store is easy peasy.
+    Create products in minutes and start making sales.`}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser
-                icon={getFavicon("https://app.lemonsqueezy.com/products/add")}
-                title="New Product"
-                url="https://app.lemonsqueezy.com/products/add"
-              />
+              <OpenInLemonSqueezy title="New Product" route="products/add" />
             </ActionPanel>
           }
         />
@@ -45,12 +42,8 @@ export default function SearchProducts() {
             ]}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser url={`https://app.lemonsqueezy.com/products/${product.id}`} />
-                <Action.OpenInBrowser
-                  icon={getFavicon("https://app.lemonsqueezy.com/products/add")}
-                  title="New Product"
-                  url="https://app.lemonsqueezy.com/products/add"
-                />
+                <OpenInLemonSqueezy route={`products/${product.id}`} />
+                <OpenInLemonSqueezy title="New Product" route="products/add" />
               </ActionPanel>
             }
           />

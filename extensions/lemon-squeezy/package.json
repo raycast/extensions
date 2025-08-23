@@ -9,7 +9,7 @@
   "license": "MIT",
   "preferences": [
     {
-      "name": "apiKey",
+      "name": "api_key",
       "title": "API Key",
       "type": "password",
       "required": true,
@@ -21,13 +21,15 @@
     {
       "name": "search-orders",
       "title": "Search Orders",
+      "subtitle": "Lemon Squeezy",
       "description": "List all orders in all your stores",
       "mode": "view"
     },
     {
       "name": "search-products",
       "title": "Search Products",
-      "description": "List all products in all your stores",
+            "subtitle": "Lemon Squeezy",
+"description": "List all products in all your stores",
       "mode": "view"
     }
   ],
