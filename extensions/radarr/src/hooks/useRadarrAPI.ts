@@ -111,7 +111,8 @@ export async function searchMovies(instance: RadarrInstance | null, query: strin
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
-    return await response.json();
+    const result = await response.json();
+    return Array.isArray(result) ? result : [];
   } catch (error) {
     console.error("Movie search error:", error);
     showToast({
@@ -119,7 +120,7 @@ export async function searchMovies(instance: RadarrInstance | null, query: strin
       title: "Search Failed",
       message: `Failed to search movies: ${error instanceof Error ? error.message : "Unknown error"}`,
     });
-    throw error;
+    return [];
   }
 }
 

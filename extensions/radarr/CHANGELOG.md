@@ -1,5 +1,11 @@
 # Radarr Changelog
 
+## [1.0.1] - {PR_MERGE_DATE}
+
+### Fixed
+
+- Fixed TypeError when API data is undefined in search-movies command
+
 ## [Initial Version] - 2025-08-14
 
 ### Added

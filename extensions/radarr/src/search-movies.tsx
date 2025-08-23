@@ -30,7 +30,8 @@ export default function SearchMovies(props: LaunchProps<{ arguments: Arguments }
   // Update existing movies set when movies or instance changes
   useEffect(() => {
     if (existingMoviesList) {
-      const tmdbIds = new Set(existingMoviesList.map(movie => movie.tmdbId));
+      const tmdbIds = new Set((existingMoviesList || []).map(movie => movie.tmdbId));
+
       setExistingMovies(tmdbIds);
     }
   }, [existingMoviesList, selectedInstance]);
@@ -205,8 +206,7 @@ ${movie.certification ? `- **Certification:** ${movie.certification}` : ""}`}
         }
         icon={searchText.trim() ? Icon.MagnifyingGlass : Icon.Video}
       />
-
-      {searchResults.map(movieListItem)}
+      {(searchResults || []).map(movieListItem)}contributions/merge-1755946618974
     </List>
   );
 }
