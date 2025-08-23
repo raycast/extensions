@@ -1,4 +1,4 @@
-# Playnite for Raycast Changelog
+# Playnite Launcher Changelog
 
 ## [Initial Release] - {PR_MERGE_DATE}
 

@@ -1,5 +1,5 @@
 import { showToast, Toast, getPreferenceValues } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { homedir } from "os";
 import { join } from "path";
 import { readFile, access } from "fs/promises";
@@ -86,10 +86,8 @@ export function usePlaynite() {
         if (error.message === "ADDON_NOT_FOUND") {
           return;
         }
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Error",
-          message: "Failed to load Playnite library",
+        await showFailureToast(error, {
+          title: "Failed to load Playnite library",
         });
       },
     },
@@ -105,8 +103,7 @@ export function usePlaynite() {
   const launchGame = async (game: PlayniteGame) => {
     try {
       if (!game.IsInstalled) {
-        await showToast({
-          style: Toast.Style.Failure,
+        await showFailureToast({
           title: "Game Not Installed",
           message: `${game.Name} is not currently installed`,
         });
@@ -124,8 +121,7 @@ export function usePlaynite() {
       });
     } catch (err) {
       console.error("Failed to launch game:", err);
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(err, {
         title: "Launch Failed",
         message: `Could not launch ${game.Name}. Make sure Playnite is running.`,
       });
@@ -145,8 +141,7 @@ export function usePlaynite() {
       });
     } catch (err) {
       console.error("Failed to open game in Playnite:", err);
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(err, {
         title: "Failed to Open",
         message: `Could not view ${game.Name} in Playnite. Make sure Playnite is installed.`,
       });
@@ -156,8 +151,7 @@ export function usePlaynite() {
   const openInstallFolder = async (game: PlayniteGame) => {
     try {
       if (!game.InstallDirectory) {
-        await showToast({
-          style: Toast.Style.Failure,
+        await showFailureToast({
           title: "No Install Directory",
           message: `${game.Name} has no known installation directory`,
         });
@@ -174,8 +168,7 @@ export function usePlaynite() {
       });
     } catch (err) {
       console.error("Failed to open install folder:", err);
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(err, {
         title: "Failed to Open Folder",
         message: `Could not open ${game.Name} install directory`,
       });
