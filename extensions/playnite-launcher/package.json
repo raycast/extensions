@@ -57,7 +57,6 @@
       "mode": "view"
     }
   ],
-  "preferences": [],
   "dependencies": {
     "@raycast/api": "^1.100.3",
     "@raycast/utils": "^2.2.0"
