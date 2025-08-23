@@ -1,12 +1,10 @@
-# Playnite Launcher
+# 🎮 Playnite Launcher
 
 Launch your favorite games from Raycast using Playnite.
 
-## Requirements
+## ❗ Requirements
 
 1. [Playnite](https://playnite.link/)
-2. [FlowLauncherExporter](https://github.com/Garulf/FlowLauncherExporter/releases/latest)
+2. [FlowLauncherExporter Extension](https://github.com/Garulf/FlowLauncherExporter/releases/latest)
 
-## License
-
-MIT License - see LICENSE file for details.
+[How do I install a Playnite extension?🤔](https://api.playnite.link/docs/manual/features/extensionsSupport/installingExtensions.html)
