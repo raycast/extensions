@@ -2,6 +2,7 @@ import { closeMainWindow, getFrontmostApplication } from "@raycast/api";
 import { finderBundleId } from "./utils/constants";
 import {
   copyFinderPath,
+  copyWindowPath,
   copyBrowserTabUrl,
   showLoadingHUD,
   isEmpty,
@@ -16,6 +17,9 @@ export default async () => {
     // get finder path
     await copyFinderPath();
   } else {
+    const windowPath = await copyWindowPath(frontmostApp)
+    if (!isEmpty(windowPath)) { return }
+
     // get browser web page url
     const url = await copyBrowserTabUrl(frontmostApp);
     if (isEmpty(url)) {
