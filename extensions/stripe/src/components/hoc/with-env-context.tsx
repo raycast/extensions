@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Environment } from "../../types";
 import { EnvironmentContext } from "../../contexts";
 
-export const withEnvContext = (Component: React.FC) => {
+export const withEnvContext = (Component: React.FC<any>) => {
   return (props: any) => {
     const [environment, setEnvironment] = useState<Environment>("live");
     return (

@@ -7,7 +7,8 @@
   "author": "pradeepb28",
   "contributors": [
     "farisaziz12",
-    "bradgarropy"
+    "bradgarropy",
+    "xmorse"
   ],
   "license": "MIT",
   "categories": [
@@ -92,6 +93,20 @@
       "subtitle": "Stripe",
       "description": "Create new subscription accounts for your customers",
       "mode": "no-view"
+    },
+    {
+      "name": "manage-subscriptions",
+      "title": "Manage Subscriptions",
+      "subtitle": "Stripe",
+      "description": "View and manage your active Stripe subscriptions with options to cancel or refund",
+      "mode": "view"
+    },
+    {
+      "name": "manage-customers",
+      "title": "Manage Customers",
+      "subtitle": "Stripe",
+      "description": "Search and view your Stripe customers with their subscription details",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -113,8 +128,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.2",
-    "@raycast/utils": "^1.0.7",
+    "@raycast/api": "^1.102.5",
+    "@raycast/utils": "^2.2.1",
     "lodash": "^4.17.21",
     "stripe": "^17.3.1"
   },
@@ -133,6 +148,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish",
     "lint": "ray lint"
   }
 }
