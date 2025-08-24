@@ -1,3 +1,12 @@
+export interface TranscriptionData {
+  transcription: string;
+  wordCount: number;
+  transcribedAt: string;
+  model?: string;
+  language?: string;
+  formatMode?: FormatMode;
+}
+
 export interface TranscriptionFile {
   id: string;
   filePath: string;
@@ -25,7 +34,10 @@ export interface AudioValidationResult {
   error?: ErrorTypes;
 }
 
-export type WhisperModel = "whisper-1" | "gpt-4o-transcribe";
+export type WhisperModel =
+  | "whisper-1"
+  | "gpt-4o-transcribe"
+  | "gpt-4o-mini-transcribe";
 
 export type ResponseFormat = "text" | "verbose_json" | "srt" | "vtt";
 
@@ -48,6 +60,7 @@ export interface Preferences {
   customPromptEmail?: string;
   customPromptSlack?: string;
   customPromptReport?: string;
+  retentionPeriod?: string;
 }
 
 export interface TranscriptionMetadata {
