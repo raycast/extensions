@@ -1,14 +1,20 @@
 import {
   Action,
   ActionPanel,
+  Alert,
   Detail,
+  Form,
   Icon,
   Keyboard,
   List,
+  Toast,
+  confirmAlert,
   getPreferenceValues,
   openExtensionPreferences,
+  showToast,
+  useNavigation,
 } from "@raycast/api";
-import { getFavicon, useFetch } from "@raycast/utils";
+import { getFavicon, useFetch, useForm } from "@raycast/utils";
 
 interface Watch {
   last_changed: number;
@@ -26,12 +32,12 @@ const { instance_url, api_key } = getPreferenceValues<Preferences>();
 
 function useApi<T>(endpoint: string) {
   const url = new URL(`api/v1/${endpoint}`, instance_url).toString();
-  const { isLoading, data } = useFetch<T>(url, {
+  const { isLoading, data, mutate, revalidate } = useFetch<T>(url, {
     headers: {
       "x-api-key": api_key,
     },
   });
-  return { isLoading, data };
+  return { isLoading, data, mutate, revalidate };
 }
 
 export default function ListWatches() {
@@ -51,7 +57,7 @@ export default function ListWatches() {
   }
   const url = new URL(instance_url).toString();
 
-  const { isLoading, data } = useApi<WatchesResponse>("watch");
+  const { isLoading, data, revalidate, mutate } = useApi<WatchesResponse>("watch");
 
   return (
     <List isLoading={isLoading}>
@@ -71,7 +77,7 @@ export default function ListWatches() {
               keywords={keywords}
               accessories={[
                 { icon: watch.viewed ? Icon.Eye : Icon.EyeDisabled, tooltip: watch.viewed ? "Viewed" : "Not Viewed" },
-                { date: new Date(watch.last_checked * 1000), tooltip: "Last Checked", icon: Icon.MagnifyingGlass },
+                watch.last_checked ? { date: new Date(watch.last_checked * 1000), tooltip: "Last Checked", icon: Icon.MagnifyingGlass } : { text: "Not yet", tooltip: "Last Checked", icon: Icon.MagnifyingGlass },
                 watch.last_changed
                   ? { date: new Date(watch.last_changed * 1000), tooltip: "Last Changed", icon: Icon.Pencil }
                   : { text: "Not yet", tooltip: "Last Changed", icon: Icon.Pencil },
@@ -93,6 +99,41 @@ export default function ListWatches() {
                     shortcut={Keyboard.Shortcut.Common.Edit}
                   />
                   <Action.OpenInBrowser icon={icon} url={watch.url} shortcut={Keyboard.Shortcut.Common.Open} />
+                  <Action icon={Icon.Trash} title="Delete Watch" onAction={() => confirmAlert({
+                    title: "Delete",
+                    message: watch.url,
+                    primaryAction: {
+                      style: Alert.ActionStyle.Destructive,
+                      title: "Delete Watch?",
+                      async onAction() {
+                        const toast = await showToast(Toast.Style.Animated, "Deleting");
+                        const url = new URL(`api/v1/watch/${id}`, instance_url).toString();
+                        try {
+                          await mutate(
+                            fetch(url, {
+                              method: "DELETE",
+                              headers: {
+                                "x-api-key": api_key,
+                              },
+                            }), {
+                              optimisticUpdate(data) {
+                                if (data) delete data[id];
+                                return data;
+                              },
+                              shouldRevalidateAfter: false
+                            }
+                          )
+                          toast.style = Toast.Style.Success;
+                          toast.title = "Deleted";
+                        } catch (error) {
+                          toast.style = Toast.Style.Failure;
+                          toast.title = "Failed";
+                          toast.message = `${error}`;
+                        }
+                      },
+                    }
+                  })}/>
+                  <Action.Push icon={Icon.Plus} title="Create Watch" target={<CreateWatch onCreate={revalidate} />} shortcut={Keyboard.Shortcut.Common.New} />
                 </ActionPanel>
               }
             />
@@ -178,4 +219,71 @@ function WatchHistory({ id }: { id: string }) {
         ))}
     </List>
   );
+}
+
+function CreateWatch({onCreate}: {onCreate: () => void}) {
+  const {pop} = useNavigation();
+  interface FormValues {
+    url: string;
+    title: string;
+    paused: boolean;
+    muted: boolean;
+    method: string;
+  }
+  const {handleSubmit,itemProps} = useForm<FormValues>({
+    async onSubmit(values) {
+      const toast = await showToast(Toast.Style.Animated, "Creating", values.title);
+      try {
+        const endpoint = "watch";
+        const url = new URL(`api/v1/${endpoint}`, instance_url).toString();
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": api_key,
+          },
+          body: JSON.stringify(values)
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result as string);
+        toast.style = Toast.Style.Success;
+        toast.title = "Created";
+        onCreate();
+        pop();
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failed";
+        toast.message = `${error}`;
+      }
+    },
+    initialValues: {
+      url: "https://",
+      paused: true
+    },
+    validation: {
+      url(value) {
+        if (!value) return "The item is required";
+        try {
+          new URL(value);
+        } catch {
+          return "Must be a valid URL";
+        }
+      },
+    }
+  })
+  return <Form actions={<ActionPanel>
+    <Action.SubmitForm icon={Icon.Plus} title="Create Watch" onSubmit={handleSubmit} />
+  </ActionPanel>}>
+    <Form.TextField title="URL" placeholder="https://..." info="URL to monitor for changes" {...itemProps.url} />
+    <Form.Separator />
+    <Form.TextField title="Title" info="Custom title for the watch" {...itemProps.title} />
+    <Form.Checkbox label="Paused" info="Whether the watch is paused" {...itemProps.paused} />
+    <Form.Checkbox label="Muted" info="Whether notifications are muted" {...itemProps.muted} />
+    <Form.Dropdown title="Method" {...itemProps.method}>
+      <Form.Dropdown.Item title="GET" value="GET" />
+      <Form.Dropdown.Item title="POST" value="POST" />
+      <Form.Dropdown.Item title="DELETE" value="DELETE" />
+      <Form.Dropdown.Item title="PUT" value="PUT" />
+    </Form.Dropdown>
+  </Form>
 }
