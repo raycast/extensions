@@ -203,7 +203,7 @@ export default function Command() {
                 <Action
                   title="📋   Copy Public URL"
                   onAction={async () => {
-                    const url = await getOrCreatePublicUrl(cocktail.id);
+                    const url = await getOrCreatePublicUrl(cocktail.id, cocktail.name);
                     if (url) {
                       await Clipboard.copy(url);
                       showToast({ style: Toast.Style.Success, title: "Copied Public URL", message: url });
