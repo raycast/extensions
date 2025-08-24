@@ -27,7 +27,7 @@ export default async function Command() {
   try {
     await repeat(newState);
     await showHUD(`Repeat is set to ${newState}`);
-  } catch (error) {
+  } catch {
     await showHUD("No active device");
   }
 }

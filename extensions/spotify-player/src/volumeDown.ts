@@ -13,7 +13,7 @@ export default async function Command() {
   try {
     await changeVolume(newVolume);
     await showHUD(`Volume set to ${newVolume}%`);
-  } catch (error) {
+  } catch {
     await showHUD("No active device");
   }
 }

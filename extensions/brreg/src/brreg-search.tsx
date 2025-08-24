@@ -1,111 +1,161 @@
-import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
-import fetch from "node-fetch"; // If your Node version < 18
-
-interface EnheterResponse {
-  _embedded?: {
-    enheter?: Enhet[];
-  };
-}
-
-interface Enhet {
-  organisasjonsnummer: string;
-  navn: string;
-  forretningsadresse?: {
-    land?: string;
-    landkode?: string;
-    postnummer?: string;
-    poststed?: string;
-    adresse?: string[];
-    kommune?: string;
-    kommunenummer?: string;
-  };
-}
-
-// Helper function to format address
-function formatAddress(addr?: Enhet["forretningsadresse"]): string {
-  if (!addr) {
-    return "";
-  }
-  const street = addr.adresse?.join(", ") ?? "";
-  const post = [addr.postnummer, addr.poststed].filter(Boolean).join(" ");
-  const country = addr.land ?? "Norge";
-
-  return [street, post, country].filter(Boolean).join(", ");
-}
-
-// Helper function to detect numeric vs text input
-function isAllDigits(str: string) {
-  return /^\d+$/.test(str);
-}
+import { List, ActionPanel, Action } from "@raycast/api";
+import CompanyDetailsView from "./components/CompanyDetailsView";
+import FavoritesList from "./components/FavoritesList";
+import SearchResults from "./components/SearchResults";
+import SettingsView from "./components/SettingsView";
+import KeyboardShortcutsHelp from "./components/KeyboardShortcutsHelp";
+import { useFavorites } from "./hooks/useFavorites";
+import { useSearch } from "./hooks/useSearch";
+import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
+import { useCompanyView } from "./hooks/useCompanyView";
+import { useSettings } from "./hooks/useSettings";
+import { useState, useEffect } from "react";
+import { Enhet } from "./types";
 
 export default function SearchAndCopyCommand() {
-  const [searchText, setSearchText] = useState("");
-  const [enheter, setEnheter] = useState<Enhet[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [selectedEntity, setSelectedEntity] = useState<Enhet | null>(null);
 
+  const favoritesResult = useFavorites();
+  const searchResult = useSearch();
+  const keyboardResult = useKeyboardShortcuts();
+  const companyViewResult = useCompanyView();
+  const settingsResult = useSettings();
+
+  // Guard against undefined hook results
+  if (!favoritesResult || !searchResult || !keyboardResult || !companyViewResult || !settingsResult) {
+    return (
+      <List isLoading={true}>
+        <List.Section title="Loading">
+          <List.Item title="Initializing..." subtitle="Please wait..." />
+        </List.Section>
+      </List>
+    );
+  }
+
+  // Now safe to destructure all hooks
+  const { entities, isLoading, setSearchText } = searchResult;
+  const { showMoveIndicators: keyboardMoveIndicators, handleCopyOrgNumber } = keyboardResult;
+  const { currentCompany, isLoadingDetails, isCompanyViewOpen, handleViewDetails, closeCompanyView } =
+    companyViewResult;
+
+  const { settings } = settingsResult;
+
+  // Now safe to destructure
+  const {
+    favorites,
+    favoriteIds,
+    favoriteById,
+    isLoadingFavorites,
+    addFavorite,
+    removeFavorite,
+    updateFavoriteEmoji,
+    resetFavoriteToFavicon,
+    refreshFavoriteFavicon,
+    moveFavoriteUp,
+    moveFavoriteDown,
+    toggleMoveMode,
+  } = favoritesResult;
+
+  // Use the keyboard shortcuts from the hook
+  const showMoveIndicators = keyboardMoveIndicators;
+
+  // Handle copy organization number keyboard shortcut
   useEffect(() => {
-    // If empty, clear results
-    if (!searchText.trim()) {
-      setEnheter([]);
-      return;
-    }
-
-    // If user typed only digits, use ?organisasjonsnummer=, else ?navn=
-    const isNumeric = isAllDigits(searchText.trim());
-    // Org. No.'s are exactly 9 digits in Norway
-    const paramName = isNumeric && searchText.trim().length === 9 ? "organisasjonsnummer" : "navn";
-
-    async function fetchEnheter() {
-      setIsLoading(true);
-      try {
-        const response = await fetch(
-          `https://data.brreg.no/enhetsregisteret/api/enheter?${paramName}=${encodeURIComponent(searchText)}`,
-        );
-        if (!response.ok) {
-          throw new Error(`API responded with status ${response.status}`);
-        }
-        const data = (await response.json()) as EnheterResponse;
-        setEnheter(data._embedded?.enheter || []);
-      } catch (error) {
-        showToast(Toast.Style.Failure, "Failed to fetch enheter", (error as { message?: string })?.message);
-      } finally {
-        setIsLoading(false);
+    const handleCopyEvent = () => {
+      if (selectedEntity) {
+        handleCopyOrgNumber(selectedEntity.organisasjonsnummer);
       }
-    }
+    };
 
-    fetchEnheter();
-  }, [searchText]);
+    if (typeof window !== "undefined") {
+      window.addEventListener("copyOrgNumber", handleCopyEvent);
+      return () => window.removeEventListener("copyOrgNumber", handleCopyEvent);
+    }
+  }, [selectedEntity, handleCopyOrgNumber]);
+
+  if (isCompanyViewOpen) {
+    return <CompanyDetailsView company={currentCompany!} isLoading={isLoadingDetails} onBack={closeCompanyView} />;
+  }
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingFavorites}
       onSearchTextChange={setSearchText}
       throttle
-      searchBarPlaceholder="Search for name or organisation number"
+      searchBarPlaceholder={
+        showMoveIndicators
+          ? "Move Mode Active - Use ⌘⇧↑↓ to reorder favorites"
+          : "Search for name or organisation number"
+      }
+      onSelectionChange={(id) => {
+        // Find the selected entity from either favorites or search results
+        const entity = [...favorites, ...entities].find((e) => e.organisasjonsnummer === id);
+        setSelectedEntity(entity || null);
+      }}
     >
-      {enheter.map((enhet) => {
-        const addressString = formatAddress(enhet.forretningsadresse);
-        return (
-          <List.Item
-            key={enhet.organisasjonsnummer}
-            title={enhet.navn}
-            subtitle={enhet.organisasjonsnummer}
-            accessories={addressString ? [{ text: addressString }] : []}
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard content={enhet.organisasjonsnummer} title="Copy Org.nr." />
-                {addressString && <Action.CopyToClipboard content={addressString} title="Copy Forretningsadresse" />}
-                <Action.OpenInBrowser
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-                  title="Open in Brønnøysund Register Center"
-                  url={`https://virksomhet.brreg.no/nb/oppslag/enheter/${enhet.organisasjonsnummer}`}
-                />
-              </ActionPanel>
-            }
-          />
-        );
-      })}
+      <FavoritesList
+        favorites={favorites}
+        showMoveIndicators={showMoveIndicators}
+        onViewDetails={handleViewDetails}
+        onRemoveFavorite={removeFavorite}
+        onUpdateEmoji={updateFavoriteEmoji}
+        onResetToFavicon={resetFavoriteToFavicon}
+        onRefreshFavicon={refreshFavoriteFavicon}
+        onMoveUp={moveFavoriteUp}
+        onMoveDown={moveFavoriteDown}
+        onToggleMoveMode={toggleMoveMode}
+      />
+
+      <SearchResults
+        entities={entities}
+        favoriteIds={favoriteIds as Set<string>}
+        favoriteById={favoriteById}
+        onViewDetails={handleViewDetails}
+        onAddFavorite={addFavorite}
+        onRemoveFavorite={removeFavorite}
+        onUpdateEmoji={updateFavoriteEmoji}
+        onResetToFavicon={resetFavoriteToFavicon}
+        onRefreshFavicon={refreshFavoriteFavicon}
+      />
+
+      {/* Show welcome message when no favorites and no search results */}
+      {settings.showWelcomeMessage &&
+        favorites.length === 0 &&
+        entities.length === 0 &&
+        !isLoading &&
+        !isLoadingFavorites && (
+          <List.Section title="Getting Started">
+            <List.Item
+              title="Welcome to Brreg Search!"
+              subtitle="Your gateway to Norwegian business information"
+              icon="🇳🇴"
+              accessories={[
+                { text: "Search for companies above" },
+                { text: "Add favorites with ⌘F" },
+                { text: "Organize with custom emojis" },
+                { text: "Reorder favorites with ⌘⇧↑↓" },
+                { text: "Copy org number with ⌘O" },
+              ]}
+              actions={
+                <ActionPanel>
+                  <Action.Push title="Open Settings" target={<SettingsView />} />
+                  <Action.Push title="Keyboard Shortcuts" target={<KeyboardShortcutsHelp />} />
+                </ActionPanel>
+              }
+            />
+            <List.Item
+              title="Quick Tips"
+              subtitle="Make the most of your search experience"
+              icon="💡"
+              accessories={[
+                { text: "Search by company name" },
+                { text: "Or organization number" },
+                { text: "View detailed company info" },
+                { text: "Copy addresses and details" },
+              ]}
+            />
+          </List.Section>
+        )}
     </List>
   );
 }

@@ -62,12 +62,17 @@ export const insertDot = (n: bigint) => {
   return v;
 };
 
-export const parseBigFloat = (n: string) => {
-  const dot = n.indexOf(".");
-  if (dot == -1) return [parseBigInt(n, 10), BigInt(1)] as const;
-  const exp = n.length - dot - 1;
-  const m = n.substring(0, dot) + n.substring(dot + 1);
-  let quotient = BigInt(1);
-  for (let i = 0; i < exp; i++) quotient *= BigInt(10);
-  return [parseBigInt(m, 10), quotient] as const;
+export const parseBigFloat = (value: string) => {
+  const eSplit = value.split("e");
+  const mantissa = eSplit[0];
+  let exponent = parseInt(eSplit[1]);
+  if (isNaN(exponent)) exponent = 0;
+
+  const dot = mantissa.indexOf(".");
+  const m = dot === -1 ? mantissa : mantissa.substring(0, dot) + mantissa.substring(dot + 1);
+  const exp = mantissa.length - (dot === -1 ? mantissa.length - 1 : dot) - 1 - exponent;
+  const quotient = BigInt("1" + "0".repeat(Math.max(0, exp)));
+  let r = parseBigInt(m, 10);
+  if (exp < 0 && r !== null) r *= BigInt("1" + "0".repeat(-exp));
+  return [r, quotient] as const;
 };
