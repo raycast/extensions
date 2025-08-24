@@ -1,4 +1,5 @@
 import { List, ActionPanel, Action, showToast, Toast, Clipboard, getPreferenceValues } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 async function getOrCreatePublicUrl(cocktailId: number, cocktailName: string): Promise<string | undefined> {
   // First, try to fetch cocktail details to see if a public link exists
   const detailsRes = await fetch(`${API_URL}/${cocktailId}`, {
@@ -163,7 +164,7 @@ export default function Command() {
         }
         fs.writeFileSync(cacheFile, JSON.stringify(allCocktails), "utf-8");
       } catch (error) {
-        showToast({ style: Toast.Style.Failure, title: "Error", message: String(error) });
+        showFailureToast(error);
       } finally {
         setIsLoading(false);
       }
