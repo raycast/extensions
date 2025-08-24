@@ -133,7 +133,8 @@ export default function SearchForParts() {
                     <ActionPanel>
                       <Action.OpenInBrowser title="Open Product Page" url={productUrl} />
                       <Action.CopyToClipboard
-                        title="Copy Mpn"
+                        // eslint-disable-next-line @raycast/prefer-title-case
+                        title="Copy MPN"
                         content={part.mpn}
                         shortcut={{ modifiers: ["cmd"], key: "c" }}
                       />
