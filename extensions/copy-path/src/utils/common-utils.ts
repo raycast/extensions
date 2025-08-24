@@ -73,10 +73,15 @@ export const copyFinderPath = async () => {
 };
 
 export const copyWindowPath = async (app: Application) => {
-  const path = await getFocusWindowPath(app);
+  const { useTildeForHome } = await getPreferenceValues();
+  let path = await getFocusWindowPath(app);
+  if (useTildeForHome) {
+    path = path.replace(os.homedir(), "~");
+  }
   if (!isEmpty(path)) {
     await Clipboard.copy(path);
     await showSuccessHUD("📂 " + path);
+    await customUpdateCommandMetadata(path);
   }
   return path;
 };

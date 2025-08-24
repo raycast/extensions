@@ -39,11 +39,18 @@ return windowPath
 
 export const getFocusWindowPath = async (app: Application) => {
   try {
-    const path = await runAppleScript(scriptWindowPath(app));
+    let path = await runAppleScript(scriptWindowPath(app));
     if (path == "missing value" || path == "") {
       return "";
     }
-    return decodeURIComponent(path);
+    if (path.startsWith("file://")) {
+      path = path.replace("file://", "");
+    }
+    try {
+      return decodeURIComponent(path);
+    } catch {
+      return path;
+    }
   } catch (e) {
     return "";
   }
