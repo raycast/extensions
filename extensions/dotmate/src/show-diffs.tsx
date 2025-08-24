@@ -1,19 +1,15 @@
-import { Detail } from "@raycast/api";
-import { existsSync, readFileSync } from "fs";
-import { useState, useEffect } from "react";
-import { DOTFILES } from "./dotfiles";
+import { Detail } from '@raycast/api';
+import { existsSync, readFileSync } from 'fs';
+import { useState, useEffect } from 'react';
+import { DOTFILES } from './dotfiles';
 
-function createSideBySideDiff(
-  repoContent: string,
-  homeContent: string,
-  fileName: string,
-): string {
-  const repoLines = repoContent.split("\n");
-  const homeLines = homeContent.split("\n");
+function createSideBySideDiff(repoContent: string, homeContent: string, fileName: string): string {
+  const repoLines = repoContent.split('\n');
+  const homeLines = homeContent.split('\n');
 
   const maxLines = Math.max(repoLines.length, homeLines.length);
   let foundDifferences = false;
-  let diffOutput = "";
+  let diffOutput = '';
 
   // Find diff sections with context
   let currentSection: { start: number; end: number } | null = null;
@@ -21,8 +17,8 @@ function createSideBySideDiff(
   const diffSections: { start: number; end: number }[] = [];
 
   for (let i = 0; i < maxLines; i++) {
-    const repoLine = repoLines[i] || "";
-    const homeLine = homeLines[i] || "";
+    const repoLine = repoLines[i] || '';
+    const homeLine = homeLines[i] || '';
 
     if (repoLine !== homeLine) {
       foundDifferences = true;
@@ -42,23 +38,23 @@ function createSideBySideDiff(
     diffSections.push(currentSection);
   }
 
-  if (!foundDifferences) return "";
+  if (!foundDifferences) return '';
 
   diffOutput += `## 📄 ${fileName}\n\n`;
 
   // Create sections for each diff area
   diffSections.forEach((section, sectionIndex) => {
     if (sectionIndex > 0) {
-      diffOutput += "\n---\n\n";
+      diffOutput += '\n---\n\n';
     }
 
     diffOutput += `**Lines ${section.start + 1}-${section.end + 1}:**\n\n`;
-    diffOutput += "| 🏠 Home Version | 📦 Repo Version |\n";
-    diffOutput += "|-----------------|------------------|\n";
+    diffOutput += '| 🏠 Home Version | 📦 Repo Version |\n';
+    diffOutput += '|-----------------|------------------|\n';
 
     for (let i = section.start; i <= section.end; i++) {
-      const repoLine = repoLines[i] || "";
-      const homeLine = homeLines[i] || "";
+      const repoLine = repoLines[i] || '';
+      const homeLine = homeLines[i] || '';
       const lineNum = i + 1;
 
       // Escape markdown special characters but preserve line content
@@ -82,36 +78,36 @@ function createSideBySideDiff(
         }
       }
     }
-    diffOutput += "\n";
+    diffOutput += '\n';
   });
 
-  diffOutput += "---\n\n";
+  diffOutput += '---\n\n';
   return diffOutput;
 }
 
 function escapeMarkdown(text: string): string {
   return text
-    .replace(/\\/g, "\\\\")
-    .replace(/\|/g, "\\|")
-    .replace(/`/g, "\\`")
-    .replace(/\*/g, "\\*")
-    .replace(/_/g, "\\_")
-    .replace(/~/g, "\\~")
-    .replace(/\[/g, "\\[")
-    .replace(/\]/g, "\\]")
-    .replace(/\(/g, "\\(")
-    .replace(/\)/g, "\\)")
-    .replace(/#/g, "\\#")
-    .replace(/\+/g, "\\+")
-    .replace(/-/g, "\\-")
-    .replace(/!/g, "\\!")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+    .replace(/\\/g, '\\\\')
+    .replace(/\|/g, '\\|')
+    .replace(/`/g, '\\`')
+    .replace(/\*/g, '\\*')
+    .replace(/_/g, '\\_')
+    .replace(/~/g, '\\~')
+    .replace(/\[/g, '\\[')
+    .replace(/\]/g, '\\]')
+    .replace(/\(/g, '\\(')
+    .replace(/\)/g, '\\)')
+    .replace(/#/g, '\\#')
+    .replace(/\+/g, '\\+')
+    .replace(/-/g, '\\-')
+    .replace(/!/g, '\\!')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 }
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
-  const [markdown, setMarkdown] = useState<string>("");
+  const [markdown, setMarkdown] = useState<string>('');
 
   useEffect(() => {
     generateDiffMarkdown();
@@ -119,7 +115,7 @@ export default function Command() {
 
   const generateDiffMarkdown = () => {
     setIsLoading(true);
-    let markdown = "# 🔍 Dotfiles Differences\n\n";
+    let markdown = '# 🔍 Dotfiles Differences\n\n';
     let foundAnyDifferences = false;
 
     for (const dotfile of DOTFILES) {
@@ -135,22 +131,18 @@ export default function Command() {
         if (!homeExists) {
           markdown += `> 🏠 \`${dotfile.homePath}\` does not exist in the home directory.\n`;
         }
-        markdown += "---\n\n";
+        markdown += '---\n\n';
         continue;
       }
 
       try {
-        const repoContent = readFileSync(dotfile.repoPath, "utf8");
-        const homeContent = readFileSync(dotfile.homePath, "utf8");
+        const repoContent = readFileSync(dotfile.repoPath, 'utf8');
+        const homeContent = readFileSync(dotfile.homePath, 'utf8');
 
         if (repoContent !== homeContent) {
           foundAnyDifferences = true;
-          markdown += "*Side-by-side comparison of your dotfiles*\n\n";
-          const diffOutput = createSideBySideDiff(
-            repoContent,
-            homeContent,
-            dotfile.name,
-          );
+          markdown += '*Side-by-side comparison of your dotfiles*\n\n';
+          const diffOutput = createSideBySideDiff(repoContent, homeContent, dotfile.name);
           if (diffOutput) {
             markdown += `> **📍 File paths:**\n`;
             markdown += `> 🏠 \`${dotfile.homePath}\`\n`;
@@ -161,14 +153,13 @@ export default function Command() {
       } catch (error) {
         markdown += `## ❌ Error comparing ${dotfile.name}\n\n`;
         markdown += `Error: ${error instanceof Error ? error.message : String(error)}\n\n`;
-        markdown += "---\n\n";
+        markdown += '---\n\n';
       }
     }
 
     if (!foundAnyDifferences) {
-      markdown += "## **✅ No differences found!**\n>\n";
-      markdown +=
-        "> All your dotfiles are perfectly in sync between your repo and home directory. 🎉\n";
+      markdown += '## **✅ No differences found!**\n>\n';
+      markdown += '> All your dotfiles are perfectly in sync between your repo and home directory. 🎉\n';
     }
 
     setMarkdown(markdown);
