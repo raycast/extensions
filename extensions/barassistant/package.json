@@ -5,6 +5,7 @@
   "description": "Search self-hosted BarAssistant API",
   "icon": "extension-icon.png",
   "author": "stupifier",
+  "categories": ["Fun", "Media"],
   "license": "MIT",
   "commands": [
     {
