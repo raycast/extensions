@@ -5,7 +5,10 @@
   "description": "Search self-hosted BarAssistant API",
   "icon": "extension-icon.png",
   "author": "stupifier",
-  "categories": ["Fun", "Media"],
+  "categories": [
+    "Fun",
+    "Media"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -33,7 +36,7 @@
     },
     {
       "name": "TOKEN",
-      "type": "textfield",
+      "type": "password",
       "title": "API Token",
       "description": "Enter your Bar Assistant API token with Read Access",
       "required": true
