@@ -61,6 +61,8 @@ your-dotfiles-repo/
 │   │   └── profile
 │   ├── fish/
 │   │   └── config.fish
+│   ├── starship/
+│   │   └── starship.toml
 │   ├── git/
 │   │   ├── attributes
 │   │   ├── config
@@ -251,13 +253,17 @@ DotMate currently manages these configuration files:
 | Shell | Bash | ~/.bash_login, ~/.bash_logout, ~/.bash_profile, ~/.bashrc, ~/.profile | config/bash/bash_login, config/bash/bash_logout, config/bash/bash_profile, config/bash/bashrc, config/bash/profile |
 | Shell | Fish | ~/.config/fish/config.fish | config/fish/config.fish |
 | Prompts | Starship | ~/.config/starship.toml | config/starship/starship.toml |
-| Git | Git core | ~/.gitconfig, ~/.gitignore_global | config/git/gitconfig, config/git/gitignore_global |
-| Git | XDG Git | ~/.config/git/config, ~/.config/git/attributes, ~/.config/git/ignore | config/git/config, config/git/attributes, config/git/ignore |
-| Git | GitHub/GitLab CLI | ~/.config/gh/config.yml, ~/.config/glab-cli/config.yml | config/git/gh-config.yml, config/git/glab-config.yml |
+| Git | Core | ~/.gitconfig, ~/.gitignore_global | config/git/gitconfig, config/git/gitignore_global |
+| Git | XDG | ~/.config/git/config, ~/.config/git/attributes, ~/.config/git/ignore | config/git/config, config/git/attributes, config/git/ignore |
+| Git | GitHub CLI | ~/.config/gh/config.yml | config/git/gh-config.yml |
+| Git | GitLab CLI | ~/.config/glab-cli/config.yml | config/git/glab-config.yml |
 | Editors | Vim | ~/.vimrc | config/vim/vimrc |
 | Editors | Neovim | ~/.config/nvim/init.lua | config/nvim/init.lua |
 | Editors | Emacs | ~/.emacs, ~/.emacs.d/init.el | config/emacs/emacs, config/emacs/init.el |
-| Editors | VS Code | ~/Library/Application Support/Code/User/settings.json, keybindings.json, mcp.json; ~/.vscode/vscode-extensions | config/vscode/settings.json, config/vscode/keybindings.json, config/vscode/mcp.json, config/vscode/vscode-extensions |
+| Editors | VS Code (settings) | ~/Library/Application Support/Code/User/settings.json | config/vscode/settings.json |
+| Editors | VS Code (keybindings) | ~/Library/Application Support/Code/User/keybindings.json | config/vscode/keybindings.json |
+| Editors | VS Code (MCP) | ~/Library/Application Support/Code/User/mcp.json | config/vscode/mcp.json |
+| Editors | VS Code (extensions list) | ~/.vscode/vscode-extensions | config/vscode/vscode-extensions |
 | Editors | Zed | ~/.config/zed/settings.json | config/zed/settings.json |
 | Terminals | Kitty | ~/.config/kitty/kitty.conf | config/kitty/kitty.conf |
 | Terminals | Alacritty | ~/.config/alacritty/alacritty.yml | config/alacritty/alacritty.yml |
@@ -293,6 +299,10 @@ DotMate currently manages these configuration files:
 | Language Tooling | Ruby | ~/.gemrc, ~/.irbrc, ~/.pryrc | config/ruby/gemrc, config/ruby/irbrc, config/ruby/pryrc |
 | Language Tooling | Rust | ~/.cargo/config.toml | config/rust/cargo-config.toml |
 | Language Tooling | Go | ~/.config/go/env | config/go/env |
+| Package Managers | npm | ~/.npmrc | config/node/npmrc |
+| Package Managers | pnpm | ~/.config/pnpm/rc | config/node/pnpmrc |
+| Package Managers | yarn | ~/.yarnrc, ~/.yarnrc.yml | config/node/yarnrc, config/node/yarnrc.yml |
+| Package Managers | RubyGems | ~/.gemrc | config/ruby/gemrc |
 | Package Managers | Homebrew | ~/Brewfile | config/brew/Brewfile |
 | SSH | OpenSSH | ~/.ssh/config, ~/.ssh/known_hosts | config/ssh/config, config/ssh/known_hosts |
 | Debuggers | GDB | ~/.gdbinit, ~/.config/gdb/gdbinit | config/gdb/gdbinit, config/gdb/gdbinit.xdg |
