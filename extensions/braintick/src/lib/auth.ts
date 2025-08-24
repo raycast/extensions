@@ -1,11 +1,6 @@
-import { LocalStorage, getPreferenceValues } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 
-interface Preferences {
-  apiUrl: string;
-}
-
-const preferences = getPreferenceValues<Preferences>();
-const API_URL = preferences.apiUrl || "http://localhost:3003";
+const API_URL = "https://braintick.coolify.samarpit.dev";
 
 export interface AuthResult {
   success: boolean;
