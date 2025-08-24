@@ -265,13 +265,19 @@ function AddServer({ mutate }: { mutate: MutatePromise<Server[]> }) {
     async onSubmit(values) {
       setIsAdding(true);
       try {
+        const ram = +values.ram;
+        const disk = +values.disk;
         const body = {
           ...values,
           active: 1,
           price: +values.price,
           owned_since: values.owned_since?.toISOString().split("T")[0],
           next_due_date: values.next_due_date?.toISOString().split("T")[0],
-          show_public: +values.show_public as Server["show_public"]
+          show_public: +values.show_public as Server["show_public"],
+          ram,
+          ram_as_mb: values.ram_type==="MB" ? ram : ram*1000,
+          disk,
+          disk_as_gb: values.disk_type==="GB" ? disk : disk*1000
         };
         await mutate(
           addServer(body)
@@ -292,7 +298,11 @@ function AddServer({ mutate }: { mutate: MutatePromise<Server[]> }) {
       cpu: "2"
     },
     validation: {
-      hostname: FormValidation.Required
+      hostname: FormValidation.Required,
+      ip1: FormValidation.Required,
+      ip2: FormValidation.Required,
+      owned_since: FormValidation.Required,
+      next_due_date: FormValidation.Required
     }
   });
 
@@ -317,8 +327,8 @@ function AddServer({ mutate }: { mutate: MutatePromise<Server[]> }) {
           <Form.Dropdown.Item key={item.id} title={item.name} value={item.id.toString()} />
         ))}
       </Form.Dropdown>
-      <Form.TextField title="IP" {...itemProps.ip1} />
-      <Form.TextField title="IP" {...itemProps.ip2} />
+      <Form.TextField title="IP 1" {...itemProps.ip1} />
+      <Form.TextField title="IP 2" {...itemProps.ip2} />
       <Form.TextField title="NS1" {...itemProps.ns1} />
       <Form.TextField title="NS2" {...itemProps.ns2} />
       <Form.TextField title="SSH" {...itemProps.ssh_port} />
