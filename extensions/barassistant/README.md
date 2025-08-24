@@ -1,0 +1,3 @@
+# SaltRim
+
+Search BarAssistant API
