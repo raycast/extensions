@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as os from "os";
 import path from "path";
-import { useEffect } from "react";
+import { Fragment, useEffect } from "react";
 
 import {
   Clipboard,
@@ -17,25 +17,33 @@ import {
 } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 
-import OpenAllMenuItem from "./components/OpenAllMenuItem";
-import PinMenuItem from "./components/PinMenuItem";
+import OpenAllMenuItem from "./components/menu-items/OpenAllMenuItem";
+import PinMenuItem from "./components/menu-items/PinMenuItem";
 import RecentApplicationsList from "./components/RecentApplicationsList";
-import { SupportedBrowsers } from "./lib/browser-utils";
-import { KEYBOARD_SHORTCUT, StorageKey } from "./lib/constants";
-import { createNewGroup, Group, useGroups } from "./lib/Groups";
+import { KEYBOARD_SHORTCUT, Visibility } from "./lib/constants";
+import { getSubgroups, Group, useGroups } from "./lib/Groups";
 import { getGroupIcon } from "./lib/icons";
 import { useLocalData } from "./lib/LocalData";
-import { copyPinData, createNewPin, Pin, sortPins, usePins } from "./lib/Pins";
-import { Placeholders } from "./lib/placeholders";
-import { cutoff, getStorage, setStorage } from "./lib/utils";
-import { ExtensionPreferences } from "./lib/preferences";
+import { copyPinData, openPin, Pin, sortPins, usePins } from "./lib/Pins";
+import { ExtensionPreferences, GroupDisplaySetting } from "./lib/preferences";
 import { PinsMenubarPreferences } from "./lib/preferences";
+import PinsPlaceholders from "./lib/placeholders";
+import NotesQuickPin from "./components/menu-items/quick-pins/NotesQuickPin";
+import AppQuickPin from "./components/menu-items/quick-pins/AppQuickPin";
+import TextQuickPin from "./components/menu-items/quick-pins/TextQuickPin";
+import TabQuickPin from "./components/menu-items/quick-pins/TabQuickPin";
+import TabsQuickPin from "./components/menu-items/quick-pins/TabsQuickPin";
+import FilesQuickPin from "./components/menu-items/quick-pins/FilesQuickPin";
+import DirectoryQuickPin from "./components/menu-items/quick-pins/DirectoryQuickPin";
+import DocumentQuickPin from "./components/menu-items/quick-pins/DocumentQuickPin";
+import TrackQuickPin from "./components/menu-items/quick-pins/TrackQuickPin";
+import TargetGroupMenu from "./components/TargetGroupMenu";
 
 /**
  * Raycast menu bar command providing quick access to pins.
  */
 export default function ShowPinsCommand() {
-  const { groups, loadingGroups, revalidateGroups } = useGroups();
+  const { groups, loadingGroups, revalidateGroups, getAncestorsOfGroup, shouldDisplayGroup } = useGroups();
   const { pins, setPins, loadingPins, revalidatePins } = usePins();
   const [relevantPins, setRelevantPins] = useCachedState<Pin[]>("relevant-pins", []);
   const [irrelevantPins, setIrrelevantPins] = useCachedState<Pin[]>("irrelevant-pins", []);
@@ -49,19 +57,6 @@ export default function ShowPinsCommand() {
   const pinIcon = { source: { light: "pin-icon.svg", dark: "pin-icon@dark.svg" }, tintColor: iconColor };
 
   useEffect(() => {
-    // Set initial values for the next pin/group IDs
-    Promise.resolve(getStorage(StorageKey.NEXT_PIN_ID)).then((id) => {
-      if (id.length == 0) {
-        setStorage(StorageKey.NEXT_PIN_ID, [0]);
-      }
-    });
-
-    Promise.resolve(getStorage(StorageKey.NEXT_GROUP_ID)).then((id) => {
-      if (id.length == 0) {
-        setStorage(StorageKey.NEXT_GROUP_ID, [0]);
-      }
-    });
-
     Promise.resolve(revalidateGroups())
       .then(() => Promise.resolve(revalidatePins()))
       .then(async () => {
@@ -70,19 +65,15 @@ export default function ShowPinsCommand() {
           const inapplicablePins = [];
           for (const pin of pins) {
             const targetRaw = pin.url.startsWith("~") ? pin.url.replace("~", os.homedir()) : pin.url;
-            const placeholders = Placeholders.allPlaceholders;
             let containsPlaceholder = false;
             let passesTests = true;
             let ruleCount = 0;
-            for (const [placeholderText, placeholderValue] of Object.entries(placeholders)) {
-              if (
-                targetRaw.includes(placeholderText) ||
-                placeholderValue.aliases?.some((alias) => targetRaw.includes(alias))
-              ) {
+            for (const placeholder of PinsPlaceholders) {
+              if (targetRaw.match(placeholder.regex)) {
                 containsPlaceholder = true;
-                for (const rule of placeholderValue.rules) {
+                for (const rule of placeholder.rules || []) {
                   ruleCount++;
-                  if (!(await rule(targetRaw, localData))) {
+                  if (!(await rule(targetRaw, localData as unknown as { [key: string]: unknown }))) {
                     passesTests = false;
                   }
                 }
@@ -106,7 +97,15 @@ export default function ShowPinsCommand() {
   );
 
   const allPins = sortPins(
-    pins.filter((p) => preferences.showInapplicablePins || !irrelevantPins.find((pin) => pin.id == p.id)),
+    pins
+      .filter((p) => preferences.showInapplicablePins || !irrelevantPins.find((pin) => pin.id == p.id))
+      .filter(
+        (pin) =>
+          pin.visibility === undefined ||
+          pin.visibility === Visibility.USE_PARENT ||
+          pin.visibility === Visibility.VISIBLE ||
+          pin.visibility === Visibility.MENUBAR_ONLY,
+      ),
     groups,
   );
 
@@ -116,13 +115,128 @@ export default function ShowPinsCommand() {
    * @param groups The list of all groups.
    * @returns A submenu containing the group's subsections and pins.
    */
-  const getSubsections = (group: Group, groups: Group[]) => {
+  const getSubsections = (group: Group, groups: Group[]): JSX.Element | null => {
+    const parent = groups.find((g) => g.id == group.parent);
+    const allSubgroups = getSubgroups(group, groups, true);
     const children = groups.filter((g) => g.parent == group.id);
     const memberPins = allPins.filter((pin) => pin.group == group.name);
     const subgroupPins = allPins.filter((pin) => children.some((g) => g.name == pin.group));
     if (memberPins.length == 0 && subgroupPins.length == 0) {
       return null;
     }
+
+    const trueDepth = getAncestorsOfGroup(group).length;
+    const visualDepth = Math.max(
+      getAncestorsOfGroup(group).findIndex(
+        (g) =>
+          g.menubarDisplay === GroupDisplaySetting.SUBMENUS ||
+          (groups.find((pr) => pr.id === g.parent)?.menubarDisplay === GroupDisplaySetting.SUBMENUS &&
+            g.menubarDisplay === GroupDisplaySetting.USE_PARENT),
+      ),
+      0,
+    );
+
+    if (!shouldDisplayGroup(group)) {
+      return (
+        <Fragment key={group.name}>
+          {allPins
+            .filter(
+              (pin) =>
+                pin.group == group.name && pin.visibility !== Visibility.USE_PARENT && pin.visibility !== undefined,
+            )
+            .map((pin) => (
+              <PinMenuItem
+                pin={pin}
+                relevant={relevantPins.find((p) => p.id == pin.id) != undefined && !preferences.showInapplicablePins}
+                preferences={preferences}
+                localData={localData}
+                setPins={setPins}
+                key={pin.id}
+              />
+            ))}
+          {children
+            .filter((g) => g.visibility !== Visibility.USE_PARENT && g.visibility !== undefined)
+            .map((g) => getSubsections(g, groups))}
+        </Fragment>
+      );
+    }
+
+    if (
+      group.menubarDisplay === GroupDisplaySetting.ITEMS ||
+      (group.menubarDisplay === GroupDisplaySetting.USE_PARENT &&
+        parent?.menubarDisplay === GroupDisplaySetting.ITEMS) ||
+      (group.menubarDisplay === GroupDisplaySetting.USE_PARENT &&
+        visualDepth === 0 &&
+        preferences.groupDisplaySetting === GroupDisplaySetting.ITEMS)
+    ) {
+      return (
+        <Fragment key={group.name}>
+          <MenuBarExtra.Item
+            icon={getGroupIcon(group)}
+            title={group.name}
+            key={group.id}
+            subtitle={memberPins.length > 0 ? "  ✧" : ""}
+            onAction={async () => {
+              for (const pin of memberPins) {
+                await openPin(pin, preferences, localData as unknown as { [key: string]: string });
+              }
+              for (const subgroup of allSubgroups) {
+                const ancestors = getAncestorsOfGroup(subgroup, { excluding: [group] });
+                const openSubgroup =
+                  ancestors.every((g) => g.menubarDisplay === GroupDisplaySetting.USE_PARENT) &&
+                  subgroup.menubarDisplay === GroupDisplaySetting.USE_PARENT;
+                if (openSubgroup) {
+                  for (const pin of allPins.filter((p) => p.group == subgroup.name)) {
+                    await openPin(pin, preferences, localData as unknown as { [key: string]: string });
+                  }
+                }
+              }
+            }}
+          />
+          {children.map((g) => {
+            const ancestors = getAncestorsOfGroup(g, { excluding: [group] });
+            const displaySubgroup =
+              ancestors.some((g) => g.menubarDisplay !== GroupDisplaySetting.USE_PARENT) ||
+              g.menubarDisplay !== GroupDisplaySetting.USE_PARENT;
+            if (displaySubgroup) {
+              return getSubsections(g, groups);
+            }
+          })}
+        </Fragment>
+      );
+    }
+    if (
+      group.menubarDisplay === GroupDisplaySetting.SUBSECTIONS ||
+      (group.menubarDisplay === GroupDisplaySetting.USE_PARENT &&
+        parent?.menubarDisplay === GroupDisplaySetting.SUBSECTIONS) ||
+      (group.menubarDisplay === GroupDisplaySetting.USE_PARENT &&
+        visualDepth === 0 &&
+        preferences.groupDisplaySetting === GroupDisplaySetting.SUBSECTIONS)
+    ) {
+      return (
+        <MenuBarExtra.Section title={`${"  ".repeat(visualDepth)}${group.name}`} key={group.id}>
+          {memberPins.map((pin) => (
+            <PinMenuItem
+              pin={pin}
+              relevant={relevantPins.find((p) => p.id == pin.id) != undefined && !preferences.showInapplicablePins}
+              preferences={preferences}
+              localData={localData}
+              setPins={setPins}
+              key={pin.id}
+            />
+          ))}
+          {children.map((g) => getSubsections(g, groups))}
+          {trueDepth > 0 && visualDepth > 0 ? (
+            <OpenAllMenuItem
+              key={`open_all_${group.name}`}
+              pins={allPins.filter((p) => p.group == group.name)}
+              submenuName={group.name}
+            />
+          ) : null}
+        </MenuBarExtra.Section>
+      );
+    }
+
     return (
       <MenuBarExtra.Submenu
         title={
@@ -151,27 +265,45 @@ export default function ShowPinsCommand() {
             )),
         ].sort(() => (preferences.topSection == "pins" ? -1 : 1))}
         {memberPins.length > 0 ? (
-          <OpenAllMenuItem pins={allPins.filter((p) => p.group == group.name)} submenuName={group.name} />
+          <OpenAllMenuItem
+            key={`open_all_${group.name}`}
+            pins={allPins.filter((p) => p.group == group.name)}
+            submenuName={group.name}
+          />
         ) : null}
       </MenuBarExtra.Submenu>
     );
   };
 
-  const groupSubmenus = groups
-    .filter((g) => g.parent == undefined)
-    .map((group) => getSubsections(group, groups))
-    .filter((g) => g != null);
+  const ungroupedPins = allPins.filter((p) => {
+    if (preferences.groupDisplaySetting !== GroupDisplaySetting.NONE) {
+      return p.group == "None";
+    } else {
+      if (p.visibility === Visibility.USE_PARENT || p.visibility === undefined) {
+        return groups.some(
+          (g) => g.name == p.group && g.visibility !== Visibility.HIDDEN && g.visibility !== Visibility.VIEW_PINS_ONLY,
+        );
+      }
+      return true;
+    }
+  });
+  const groupSubmenus =
+    preferences.groupDisplaySetting === GroupDisplaySetting.NONE
+      ? []
+      : groups
+          .filter((g) => g.parent == undefined)
+          .map((group) => getSubsections(group, groups))
+          .filter((g) => g != null);
 
   // Display the menu
   return (
     <MenuBarExtra icon={pinIcon} isLoading={loadingPins || loadingGroups || loadingLocalData}>
       {[
         [
-          <MenuBarExtra.Section title={preferences.showCategories ? "Pins" : undefined} key="pins">
-            {allPins.length == 0 ? <MenuBarExtra.Item title="No pins yet!" /> : null}
-            {allPins
-              .filter((p) => p.group == "None")
-              .map((pin: Pin) => (
+          ungroupedPins.length > 0 ? (
+            <MenuBarExtra.Section title={preferences.showCategories ? "Pins" : undefined} key="pins">
+              {allPins.length == 0 ? <MenuBarExtra.Item title="No pins yet!" /> : null}
+              {ungroupedPins.map((pin: Pin) => (
                 <PinMenuItem
                   pin={pin}
                   relevant={relevantPins.find((p) => p.id == pin.id) != undefined && !preferences.showInapplicablePins}
@@ -181,7 +313,8 @@ export default function ShowPinsCommand() {
                   key={pin.id}
                 />
               ))}
-          </MenuBarExtra.Section>,
+            </MenuBarExtra.Section>
+          ) : null,
           groupSubmenus?.length ? (
             <MenuBarExtra.Section title={preferences.showCategories ? "Groups" : undefined} key="groups">
               {groupSubmenus}
@@ -190,267 +323,22 @@ export default function ShowPinsCommand() {
           ) : null,
         ].sort(() => (preferences.topSection == "pins" ? 1 : -1)),
         preferences.showPinShortcut &&
-        !(localData.currentApplication.name == "Finder" && localData.currentDirectory.name == "Desktop") ? (
-          <MenuBarExtra.Section title="Quick Pins">
-            {localData.currentApplication.name.length > 0 &&
-            (localData.currentApplication.name != "Finder" || localData.currentDirectory.name != "Desktop") ? (
-              <MenuBarExtra.Item
-                title={`Pin This App (${localData.currentApplication.name.substring(0, 20)})`}
-                icon={{ fileIcon: localData.currentApplication.path }}
-                tooltip="Add a pin whose target path is the path of the current app"
-                shortcut={KEYBOARD_SHORTCUT.PIN_CURRENT_APP}
-                onAction={async () => {
-                  await createNewPin(
-                    localData.currentApplication.name,
-                    localData.currentApplication.path,
-                    "Favicon / File Icon",
-                    "None",
-                    "None",
-                    undefined,
-                    undefined,
-                    false,
-                    undefined,
-                    undefined,
-                  );
-                }}
-              />
-            ) : null}
-            {localData.selectedText.trim().length > 0 ? (
-              <MenuBarExtra.Item
-                title={`Pin Selected Text (${cutoff(localData.selectedText, 20)})`}
-                icon={Icon.Text}
-                tooltip="Pin the currently selected text as a text fragment"
-                shortcut={KEYBOARD_SHORTCUT.PIN_SELECTED_TEXT}
-                onAction={async () => {
-                  await createNewPin(
-                    localData.selectedText.substring(0, 50).trim(),
-                    localData.selectedText,
-                    "text-16",
-                    "None",
-                    "None",
-                    undefined,
-                    undefined,
-                    true,
-                    undefined,
-                    undefined,
-                  );
-                }}
-              />
-            ) : null}
-            {SupportedBrowsers.includes(localData.currentApplication.name) ? (
-              <MenuBarExtra.Item
-                title={`Pin This Tab (${cutoff(localData.currentTab.name, 20)})`}
-                icon={Icon.AppWindow}
-                tooltip="Add a pin whose target URL is the URL of the current browser tab"
-                shortcut={KEYBOARD_SHORTCUT.PIN_CURRENT_TAB}
-                onAction={async () => {
-                  await createNewPin(
-                    localData.currentTab.name,
-                    localData.currentTab.url,
-                    "Favicon / File Icon",
-                    "None",
-                    localData.currentApplication.name,
-                    undefined,
-                    undefined,
-                    false,
-                    undefined,
-                    undefined,
-                  );
-                }}
-              />
-            ) : null}
-            {SupportedBrowsers.includes(localData.currentApplication.name) && localData.tabs.length > 1 ? (
-              <MenuBarExtra.Item
-                title={`Pin All Tabs (${localData.tabs.length})`}
-                icon={Icon.AppWindowGrid3x3}
-                tooltip="Create a new pin for each tab in the current browser window, pinned to a new group"
-                shortcut={KEYBOARD_SHORTCUT.PIN_ALL_TABS}
-                onAction={async () => {
-                  let newGroupName = "New Tab Group";
-                  let iter = 2;
-                  while (groups.map((group) => group.name).includes(newGroupName)) {
-                    newGroupName = `New Tab Group (${iter})`;
-                    iter++;
-                  }
-                  await createNewGroup(
-                    newGroupName,
-                    Object.entries(Icon).find((entry) => entry[1] == Icon.AppWindowGrid3x3)?.[0] || "None",
-                  );
-                  for (const tab of localData.tabs) {
-                    await createNewPin(
-                      tab.name,
-                      tab.url,
-                      "Favicon / File Icon",
-                      newGroupName,
-                      localData.currentApplication.name,
-                      undefined,
-                      undefined,
-                      false,
-                      undefined,
-                      undefined,
-                    );
-                  }
-                }}
-              />
-            ) : null}
-            {localData.currentApplication.name == "Finder" && selectedFiles.length > 0 ? (
-              <MenuBarExtra.Item
-                title={`Pin ${
-                  selectedFiles.length > 1
-                    ? `These Files (${selectedFiles.length})`
-                    : `This File (${cutoff(selectedFiles[0].name, 20)})`
-                }`}
-                icon={{ fileIcon: selectedFiles[0].path }}
-                tooltip="Create a pin for each selected file, pinned to a new group"
-                shortcut={KEYBOARD_SHORTCUT.PIN_SELECTED_FILES}
-                onAction={async () => {
-                  if (selectedFiles.length == 1) {
-                    await createNewPin(
-                      selectedFiles[0].name,
-                      selectedFiles[0].path,
-                      "Favicon / File Icon",
-                      "None",
-                      "None",
-                      undefined,
-                      undefined,
-                      false,
-                      undefined,
-                      undefined,
-                    );
-                  } else {
-                    let newGroupName = "New File Group";
-                    let iter = 2;
-                    while (groups.map((group) => group.name).includes(newGroupName)) {
-                      newGroupName = `New File Group (${iter})`;
-                      iter++;
-                    }
-                    await createNewGroup(
-                      newGroupName,
-                      Object.entries(Icon).find((entry) => entry[1] == Icon.Document)?.[0] || "None",
-                    );
-                    for (const file of selectedFiles) {
-                      await createNewPin(
-                        file.name,
-                        file.path,
-                        "Favicon / File Icon",
-                        newGroupName,
-                        "None",
-                        undefined,
-                        undefined,
-                        false,
-                        undefined,
-                        undefined,
-                      );
-                    }
-                  }
-                }}
-              />
-            ) : null}
-            {localData.currentApplication.name == "Finder" && localData.currentDirectory.name != "Desktop" ? (
-              <MenuBarExtra.Item
-                title={`Pin This Directory (${cutoff(localData.currentDirectory.name, 20)})`}
-                icon={{ fileIcon: localData.currentDirectory.path }}
-                tooltip="Create a pin whose target path is the current directory of Finder"
-                shortcut={KEYBOARD_SHORTCUT.PIN_CURRENT_DIRECTORY}
-                onAction={async () => {
-                  await createNewPin(
-                    localData.currentDirectory.name,
-                    localData.currentDirectory.path,
-                    "Favicon / File Icon",
-                    "None",
-                    "None",
-                    undefined,
-                    undefined,
-                    false,
-                    undefined,
-                    undefined,
-                  );
-                }}
-              />
-            ) : null}
-            {[
-              "TextEdit",
-              "Pages",
-              "Numbers",
-              "Keynote",
-              "Microsoft Word",
-              "Microsoft Excel",
-              "Microsoft PowerPoint",
-              "Script Editor",
-            ].includes(localData.currentApplication.name) && localData.currentDocument.path != "" ? (
-              <MenuBarExtra.Item
-                title={`Pin This Document (${cutoff(localData.currentDocument.name, 20)})`}
-                icon={{ fileIcon: localData.currentApplication.path }}
-                tooltip="Create a pin whose target path is the document currently open in the frontmost application"
-                shortcut={KEYBOARD_SHORTCUT.PIN_CURRENT_DOCUMENT}
-                onAction={async () => {
-                  await createNewPin(
-                    localData.currentDocument.name,
-                    localData.currentDocument.path,
-                    localData.currentApplication.path,
-                    "None",
-                    "None",
-                    undefined,
-                    undefined,
-                    false,
-                    undefined,
-                    undefined,
-                  );
-                }}
-              />
-            ) : null}
-            {localData.currentApplication.name == "Notes" && localData.selectedNotes.length > 0 ? (
-              <MenuBarExtra.Item
-                title={`Pin ${
-                  localData.selectedNotes.length > 1
-                    ? `These Notes (${localData.selectedNotes.length})`
-                    : `This Note (${cutoff(localData.selectedNotes[0].name, 20)})`
-                }`}
-                icon={{ fileIcon: localData.currentApplication.path }}
-                tooltip="Create a pin for each selected note, pinned to a new group"
-                shortcut={KEYBOARD_SHORTCUT.PIN_SELECTED_NOTES}
-                onAction={async () => {
-                  if (localData.selectedNotes.length == 1) {
-                    const cmd = `osascript -e 'Application("Notes").notes.byId("${localData.selectedNotes[0].id}").show()' -l "JavaScript"`;
-                    await createNewPin(
-                      localData.selectedNotes[0].name,
-                      cmd,
-                      localData.currentApplication.path,
-                      "None",
-                      "None",
-                      undefined,
-                      true,
-                      false,
-                      undefined,
-                      undefined,
-                    );
-                  } else {
-                    let newGroupName = "New Note Group";
-                    let iter = 2;
-                    while (groups.map((group) => group.name).includes(newGroupName)) {
-                      newGroupName = `New Note Group (${iter})`;
-                      iter++;
-                    }
-                    await createNewGroup(newGroupName, localData.currentApplication.path);
-                    for (const note of localData.selectedNotes) {
-                      const cmd = `osascript -e 'Application("Notes").notes.byId("${note.id}").show()' -l "JavaScript"`;
-                      await createNewPin(
-                        note.name,
-                        cmd,
-                        localData.currentApplication.path,
-                        newGroupName,
-                        "None",
-                        undefined,
-                        true,
-                        false,
-                        undefined,
-                        undefined,
-                      );
-                    }
-                  }
-                }}
-              />
-            ) : null}
+        !(
+          localData.currentApplication.name == "Finder" &&
+          localData.currentDirectory.name == "Desktop" &&
+          localData.selectedFiles.length == 0
+        ) ? (
+          <MenuBarExtra.Section title="Quick Pins" key="quickPins">
+            <AppQuickPin app={localData.currentApplication} />
+            <TextQuickPin />
+            <TabQuickPin app={localData.currentApplication} tab={localData.currentTab} />
+            <TabsQuickPin app={localData.currentApplication} tabs={localData.tabs} groups={groups} />
+            <FilesQuickPin app={localData.currentApplication} selectedFiles={selectedFiles} groups={groups} />
+            <DirectoryQuickPin app={localData.currentApplication} directory={localData.currentDirectory} />
+            <DocumentQuickPin app={localData.currentApplication} document={localData.currentDocument} />
+            <TrackQuickPin app={localData.currentApplication} track={localData.currentTrack} />
+            <NotesQuickPin app={localData.currentApplication} notes={localData.selectedNotes} groups={groups} />
+            <TargetGroupMenu groups={groups} />
           </MenuBarExtra.Section>
         ) : null,
       ].sort(() => (preferences.topSection == "quickPins" ? -1 : 1))}

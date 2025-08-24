@@ -1,10 +1,11 @@
 import { useCachedPromise } from "@raycast/utils";
+import { UseCachedPromiseReturnType } from "@raycast/utils/dist/types";
 import { createContext, useContext } from "react";
 
 import { getData } from "../lib/tim";
 import { Data } from "../types/tim";
 
-const DataContext = createContext<{ data?: Data; isLoading: boolean; error?: Error } | undefined>(undefined);
+const DataContext = createContext<UseCachedPromiseReturnType<Data, undefined> | undefined>(undefined);
 
 export const DataProvider: React.FC<React.PropsWithChildren<object>> = ({ children }) => {
   const cached = useCachedPromise(getData);

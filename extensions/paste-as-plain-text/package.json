@@ -2,18 +2,50 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "paste-as-plain-text",
   "title": "Paste as Plain Text",
-  "description": "Paste text from the clipboard as plain text.",
+  "description": "Paste text from the clipboard as any format.",
   "icon": "paste-icon.png",
   "author": "koinzhang",
-  "contributors": ["pantajoe"],
+  "contributors": [
+    "pantajoe",
+    "kero13"
+  ],
   "categories": [
+    "Developer Tools",
     "Productivity",
     "System"
+  ],
+  "keywords": [
+    "clipboard",
+    "paste",
+    "text",
+    "format",
+    "paste as url",
+    "paste as file",
+    "paste as json",
+    "paste as number",
+    "paste as markdown link",
+    "paste as markdown image"
   ],
   "license": "MIT",
   "preferences": [
     {
-      "title": "Format",
+      "title": "Actions Before Pasting",
+      "label": "Trim Start",
+      "name": "trimStart",
+      "type": "checkbox",
+      "description": "Trim spaces in front of plain text",
+      "default": true,
+      "required": false
+    },
+    {
+      "label": "Trim End",
+      "name": "trimEnd",
+      "type": "checkbox",
+      "description": "Trim spaces at the end of plain text",
+      "default": true,
+      "required": false
+    },
+    {
       "label": "Clean line breaks",
       "name": "cleanLineBreaks",
       "type": "checkbox",
@@ -22,53 +54,96 @@
       "required": false
     },
     {
-      "title": "Trim",
-      "name": "trim",
-      "type": "dropdown",
-      "description": "Trim leading and trailing spaces",
-      "default": "none",
-      "data": [
-        {
-          "title": "None",
-          "value": "none"
-        },
-        {
-          "title": "Leading spaces",
-          "value": "leading"
-        },
-        {
-          "title": "Trailing spaces",
-          "value": "trailing"
-        },
-        {
-          "title": "Both",
-          "value": "both"
-        }
-      ],
-      "required": false
+      "title": "Actions When Pasting",
+      "name": "autoFetchTitle",
+      "label": "Auto Fetch Title",
+      "type": "checkbox",
+      "description": "Auto fetch title from URL when pasting as Markdown Link and Markdown Image",
+      "required": false,
+      "default": true
+    },
+    {
+      "title": "Actions After Pasting",
+      "name": "replaceClipboard",
+      "label": "Replace Clipboard",
+      "type": "checkbox",
+      "description": "Replace clipboard with pasted text after pasting",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "showTips",
+      "label": "Show Tips",
+      "type": "checkbox",
+      "description": "Show tips after pasting",
+      "required": false,
+      "default": true
     }
   ],
   "commands": [
     {
       "name": "paste-as-plain-text",
-      "title": "Paste as Plain Text",
-      "description": "Paste text from the clipboard as plain text.",
-      "mode": "no-view"
+      "title": "Paste as",
+      "subtitle": "Plain Text",
+      "description": "Paste text from the clipboard as any format.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "advancedPasteFormat",
+          "type": "dropdown",
+          "description": "Paste text from the clipboard as any format you want.",
+          "placeholder": "Plain Text",
+          "required": false,
+          "default": "",
+          "data": [
+            {
+              "title": "URL",
+              "value": "URL"
+            },
+            {
+              "title": "File",
+              "value": "File"
+            },
+            {
+              "title": "JSON",
+              "value": "JSON"
+            },
+            {
+              "title": "Number",
+              "value": "Number"
+            },
+            {
+              "title": "Markdown Link",
+              "value": "Markdown Link"
+            },
+            {
+              "title": "Markdown Image",
+              "value": "Markdown Image"
+            }
+          ]
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0"
+    "@raycast/api": "^1.86.1",
+    "axios": "^1.8.4",
+    "cheerio": "^1.0.0",
+    "fs-extra": "^11.2.0",
+    "json5": "^2.2.3",
+    "validator": "^13.12.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "~22.10.1",
+    "@types/react": "^18.3.12",
+    "@types/validator": "^13.12.2",
+    "@typescript-eslint/eslint-plugin": "^8.17.0",
+    "@typescript-eslint/parser": "^8.17.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.4.1",
+    "typescript": "^5.7.2"
   },
   "scripts": {
     "build": "ray build -e dist",

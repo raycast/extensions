@@ -1,16 +1,16 @@
-import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
-import { useState } from "react";
+import { ShowAttributesAction } from "@components/entity";
+import { useHAStates } from "@components/hooks";
+import { useStateSearch } from "@components/state/hooks";
+import { StateListItem } from "@components/state/list";
+import { PrimaryIconColor } from "@components/state/utils";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
-import { useHAStates } from "@components/hooks";
 import { getStateTooltip } from "@lib/utils";
-import { ShowAttributesAction } from "@components/entity";
-import { StateListItem } from "@components/state/list";
+import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
+import React, { useState } from "react";
 import { HACSRepo } from "./utils";
-import { useStateSearch } from "@components/state/hooks";
-import { PrimaryIconColor } from "@components/state/utils";
 
-function HACSUpdateItem(props: { repo: HACSRepo | undefined; state: State }): JSX.Element | null {
+function HACSUpdateItem(props: { repo: HACSRepo | undefined; state: State }): React.ReactElement | null {
   const r = props.repo;
   if (!r || !r.display_name || !r.available_version || !r.name) {
     return null;
@@ -22,7 +22,7 @@ function HACSUpdateItem(props: { repo: HACSRepo | undefined; state: State }): JS
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Install">
-            <Action.OpenInBrowser title="Open in Dashboard" url={ha.urlJoin("hacs/entry")} />
+            <Action.OpenInBrowser title="Open in Dashboard" url={ha.navigateUrl("hacs/entry")} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Attribtues">
             <ShowAttributesAction state={props.state} />
@@ -36,7 +36,7 @@ function HACSUpdateItem(props: { repo: HACSRepo | undefined; state: State }): JS
   );
 }
 
-function HACSUpdateItems(props: { state: State | undefined }): JSX.Element | null {
+function HACSUpdateItems(props: { state: State | undefined }): React.ReactElement | null {
   const s = props.state;
   if (!s) {
     return null;
@@ -45,7 +45,7 @@ function HACSUpdateItems(props: { state: State | undefined }): JSX.Element | nul
   return <>{repos?.map((r, i) => <HACSUpdateItem key={i} repo={r} state={s} />)}</>;
 }
 
-export function UpdatesList(): JSX.Element {
+export function UpdatesList(): React.ReactElement {
   const [searchText, setSearchText] = useState<string>();
   const { states: allStates, error, isLoading } = useHAStates();
   const { states } = useStateSearch(searchText, "update", "", allStates);
@@ -69,11 +69,11 @@ export function UpdatesList(): JSX.Element {
 
   return (
     <List searchBarPlaceholder="Filter by name or ID..." isLoading={isLoading} onSearchTextChange={setSearchText}>
-      <List.Section title="Updates available" subtitle={`${updateRequiredStates?.length}`}>
+      <List.Section title="Update Available" subtitle={`${updateRequiredStates?.length}`}>
         {updateRequiredStates?.map((state) => <StateListItem key={state.entity_id} state={state} />)}
         <HACSUpdateItems state={hacsState} />
       </List.Section>
-      <List.Section title="No Updates required" subtitle={`${otherStates?.length}`}>
+      <List.Section title="Up-to-Date" subtitle={`${otherStates?.length}`}>
         {otherStates?.map((state) => <StateListItem key={state.entity_id} state={state} />)}
       </List.Section>
     </List>

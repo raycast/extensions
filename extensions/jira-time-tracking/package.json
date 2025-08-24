@@ -5,6 +5,10 @@
   "description": "Log time against Jira issues",
   "icon": "command-icon.png",
   "author": "niallpaterson",
+  "contributors": [
+    "0w0miki",
+    "hayden_barnes"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -17,10 +21,28 @@
   ],
   "preferences": [
     {
+      "name": "isJiraCloud",
+      "type": "dropdown",
+      "required": true,
+      "title": "Select your Jira instance type",
+      "description": "Choose whether you are using a Jira Cloud or a Jira Server instance.",
+      "data": [
+        {
+          "title": "Jira Cloud",
+          "value": "cloud"
+        },
+        {
+          "title": "Jira Server",
+          "value": "server"
+        }
+      ],
+      "default": "cloud"
+    },
+    {
       "name": "domain",
       "type": "textfield",
       "required": true,
-      "title": "Jira Domain",
+      "title": "Jira Domain/Url",
       "description": "Jira domain name",
       "placeholder": "your-domain.atlassian.net"
     },
@@ -38,20 +60,37 @@
       "required": true,
       "title": "API Token",
       "description": "Jira API token"
+    },
+    {
+      "name": "customJQL",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom JQL Query",
+      "description": "Enter a custom JQL query to filter issues (optional).",
+      "placeholder": "e.g., assignee = currentUser() AND status = 'In Progress'"
+    },
+    {
+      "name": "defaultProject",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Project Key",
+      "description": "Set the key of a project to select by default (e.g., 'MYPROJECT').",
+      "placeholder": "Enter project key"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.3",
+    "@raycast/api": "^1.66.1",
     "@types/node-fetch": "^3.0.3",
     "node-fetch": "^3.2.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/react": "^18.2.21",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
+    "prettier": "^3.2.5",
     "typescript": "^4.4.3"
   },
   "scripts": {

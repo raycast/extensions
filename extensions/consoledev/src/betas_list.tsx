@@ -1,4 +1,4 @@
-import { List, showToast, ToastStyle } from "@raycast/api";
+import { Icon, List, showToast, ToastStyle } from "@raycast/api";
 import { isLeft } from "fp-ts/lib/Either";
 import { useEffect, useState } from "react";
 import FeedItem from "./components/FeedItem";
@@ -36,9 +36,7 @@ export default function BetasList() {
       navigationTitle={state.feed?.title}
       searchBarPlaceholder="Filter betas by name..."
     >
-      {state.feed?.items.map((beta) => (
-        <FeedItem item={beta} key={beta.link} />
-      ))}
+      {state.feed?.items.map((beta) => <FeedItem item={beta} key={beta.link} icon={Icon.Gear} />)}
     </List>
   );
 }

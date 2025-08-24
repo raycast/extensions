@@ -2,16 +2,16 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pipedrive",
   "title": "Pipedrive Search",
-  "description": "Search Pipedrive Deals",
+  "description": "Search Pipedrive deals, people and organizations",
   "icon": "command-icon.png",
-  "author": "stephendolan",
+  "author": "ahp",
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Search Deals",
+      "title": "Search Pipedrive",
       "subtitle": "Pipedrive",
-      "description": "Search Pipedrive deals.",
+      "description": "Search Pipedrive deals, people and organizations",
       "mode": "view"
     }
   ],
@@ -31,24 +31,40 @@
       "title": "API Token",
       "description": "Your Pipedrive API Token",
       "placeholder": "Enter your Pipedrive API Token"
+    },
+    {
+      "name": "limit",
+      "type": "textfield",
+      "required": true,
+      "title": "Result Limit",
+      "description": "Maximum number of results",
+      "placeholder": "20"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.2",
-    "node-fetch": "^3.0.0"
+    "@raycast/api": "^1.89.0",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@eslint/eslintrc": "^3.2.0",
+    "@eslint/js": "^9.18.0",
+    "@types/node": "^20.11.5",
+    "@types/react": "^18.2.48",
+    "@typescript-eslint/eslint-plugin": "^8.21.0",
+    "@typescript-eslint/parser": "^8.21.0",
+    "eslint": "^9.18.0",
+    "eslint-config-prettier": "^10.0.1",
+    "globals": "^15.14.0",
+    "prettier": "^3.4.2",
+    "react": "^19.0.0",
+    "typescript": "^5.7.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop"
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

@@ -4,11 +4,11 @@ We generally recommend altering this or top_p but not both.
 
 Default: 0.7`;
 
-export const model = `The model which will generate the completion. Some models are more sutiable for certain tasks than others. "gpt-4" is the most powerful one, but "gpt-3.5-turbo" is cheaper, faster, and almost as capable`;
+export const model = `The model which will generate the completion. Some models are more sutiable for certain tasks than others. "gpt-4-0125-preview" is the most powerful one, but "gpt-3.5-turbo-0125" is cheaper, faster, and almost as capable`;
 
 export const maxTokens = `The maximum number of tokens to generate in the completion.
 
-The token count of your prompt plus this parameter cannot exceed the model's context length. "text-davinci-002" and "text-davinci-003" models have a context length of 4000 tokens, while the others have 2048.
+The token count of your prompt plus this parameter cannot exceed the model's context length. Please consult OpenAI documentation for the token limits.
 
 Default: 256`;
 

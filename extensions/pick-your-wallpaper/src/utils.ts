@@ -3,10 +3,9 @@ import path from "path";
 import { runAppleScript } from "run-applescript";
 
 export function isValidFile(file: FileSystemItem) {
-  const extname = path.extname(file.path);
+  const extname = path.extname(file.path).toLowerCase();
   return [".jpg", ".jpeg", ".png", ".gif", ".heic"].includes(extname);
 }
-
 /**
  * Runs the AppleScript and closes the main window afterwards.
  *

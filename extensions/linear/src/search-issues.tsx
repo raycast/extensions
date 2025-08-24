@@ -1,48 +1,33 @@
-import { useState } from "react";
 import { List } from "@raycast/api";
+import { useState } from "react";
 
-import { getLastUpdatedIssues, searchIssues } from "./api/getIssues";
-
-import useIssues from "./hooks/useIssues";
-import usePriorities from "./hooks/usePriorities";
-import useMe from "./hooks/useMe";
-import useUsers from "./hooks/useUsers";
-
-import View from "./components/View";
 import IssueListItem from "./components/IssueListItem";
+import View from "./components/View";
+import useMe from "./hooks/useMe";
+import usePriorities from "./hooks/usePriorities";
+import useSearchIssues from "./hooks/useSearchIssues";
 
 function SearchIssues() {
   const [query, setQuery] = useState("");
 
-  const { issues, isLoadingIssues, mutateList } = useIssues(
-    (query: string) => (query === "" ? getLastUpdatedIssues() : searchIssues(query)),
-    [query],
-    { keepPreviousData: true }
-  );
+  const { isLoading, data, mutate, pagination } = useSearchIssues(query);
   const { priorities, isLoadingPriorities } = usePriorities();
   const { me, isLoadingMe } = useMe();
-  const { users, isLoadingUsers } = useUsers();
 
-  const numberOfIssues = issues?.length === 1 ? "1 issue" : `${issues?.length} issues`;
+  const numberOfIssues = data?.length === 1 ? "1 issue" : `${data?.length} issues`;
 
   return (
     <List
       navigationTitle="Search issues"
-      isLoading={isLoadingIssues || isLoadingPriorities || isLoadingMe || isLoadingUsers}
+      isLoading={isLoading || isLoadingPriorities || isLoadingMe}
       onSearchTextChange={setQuery}
       throttle
       searchBarPlaceholder="Globally search issues across projects"
+      pagination={pagination}
     >
       <List.Section title="Updated Recently" subtitle={numberOfIssues}>
-        {issues?.map((issue) => (
-          <IssueListItem
-            issue={issue}
-            key={issue.id}
-            mutateList={mutateList}
-            priorities={priorities}
-            users={users}
-            me={me}
-          />
+        {data?.map((issue) => (
+          <IssueListItem issue={issue} key={issue.id} mutateList={mutate} priorities={priorities} me={me} />
         ))}
       </List.Section>
     </List>

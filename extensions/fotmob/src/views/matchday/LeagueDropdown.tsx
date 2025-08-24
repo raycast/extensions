@@ -1,6 +1,6 @@
-import { List } from "@raycast/api";
-import { MatchDayLeague } from "../../types/match-day";
 import { useMemo } from "react";
+import { List } from "@raycast/api";
+import type { MatchDayLeague } from "@/types/match-day";
 
 export type LeagueDropDownResult = "all" | number;
 

@@ -1,10 +1,12 @@
 import { Color } from "@raycast/api";
+import { FormValidation } from "@raycast/utils";
 import { format } from "date-fns";
 import { groupBy, partition } from "lodash";
-import markdownToAdf from "md-to-adf";
+import { markdownToAdf } from "marklassian";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 
 import { Issue, IssueDetail, IssueTypeWithCustomFields, StatusCategoryKey } from "../api/issues";
+import { slugify } from "../helpers/string";
 
 export function formatDate(dateString: string) {
   const date = new Date(dateString);
@@ -74,7 +76,7 @@ export function getMarkdownFromHtml(description: string) {
         prefix: "```\n",
         postfix: "\n```",
       },
-    }
+    },
   );
 
   return nodeToMarkdown.translate(description);
@@ -138,7 +140,7 @@ export function getCustomFieldsForDetail(issue?: IssueDetail | null) {
   // Jira's textareas are shown in the markdown field of the Detail screen
   const [markdownFieldsKeys, metadataFieldsKeys] = partition(
     customFieldsWithValueKeys,
-    (key) => issue.schema[key].custom === CustomFieldSchema.textarea
+    (key) => issue.schema[key].custom === CustomFieldSchema.textarea,
   );
 
   const customMarkdownFields = markdownFieldsKeys.map((key) => {
@@ -224,10 +226,10 @@ export function getCustomFieldsForCreateIssue(issueType: IssueTypeWithCustomFiel
     };
   }, {});
 
-  const validation = customFields.reduce((acc, { key, fieldSchema }) => {
+  const validation = customFields.reduce((acc, { key, fieldSchema, required }) => {
     return {
       ...acc,
-      [key]: getCustomFieldValidation(fieldSchema),
+      [key]: getCustomFieldValidation(fieldSchema, required),
     };
   }, {});
 
@@ -249,18 +251,25 @@ export function getCustomFieldInitialValue(fieldSchema: CustomFieldSchema) {
   }
 }
 
-export function getCustomFieldValidation(fieldSchema: CustomFieldSchema) {
-  switch (fieldSchema) {
-    case CustomFieldSchema.float:
-    case CustomFieldSchema.storyPointEstimate:
-      return (value: string) => {
+export function getCustomFieldValidation(fieldSchema: CustomFieldSchema, required: boolean) {
+  return (value: string) => {
+    if (required && !value) {
+      return FormValidation.Required;
+    }
+
+    switch (fieldSchema) {
+      case CustomFieldSchema.float:
+      case CustomFieldSchema.storyPointEstimate:
         if (value && isNaN(Number(value))) {
           return "Please enter a valid number";
         }
-      };
-    default:
-      return "";
-  }
+        break;
+      default:
+        break;
+    }
+
+    return "";
+  };
 }
 
 export function getCustomFieldValue(fieldSchema: CustomFieldSchema, value: unknown) {
@@ -306,4 +315,22 @@ export function getCustomFieldValue(fieldSchema: CustomFieldSchema, value: unkno
     default:
       return null;
   }
+}
+
+export function generateBranchName(issue: Issue | IssueDetail, nameFormat?: string): string {
+  const issueKey = issue.key;
+  const issueSummary = issue.fields.summary.toLowerCase();
+  const issueSummaryShort = issueSummary.split(" ").slice(0, 5).join(" ");
+
+  if (!nameFormat) {
+    nameFormat = "{issueKey}-{issueSummary}";
+  }
+
+  // Supported fields in the Jira UI: issue key, issue summary, issue summary short, issue type, project key
+  return nameFormat
+    .replace("{issueKey}", issueKey)
+    .replace("{issueSummary}", slugify(issueSummary))
+    .replace("{issueSummaryShort}", slugify(issueSummaryShort))
+    .replace("{issueType}", issue.fields.issuetype.name)
+    .replace("{projectKey}", issue.fields.project?.key || "");
 }

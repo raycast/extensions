@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Color, LocalStorage, Icon, List, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, LocalStorage, popToRoot } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { formatDateShort } from "../lib/utils";
 

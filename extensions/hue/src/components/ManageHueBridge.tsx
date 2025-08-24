@@ -4,6 +4,7 @@ import { SendHueMessage } from "../hooks/useHue";
 import { pathToFileURL } from "url";
 import ActionStyle = Alert.ActionStyle;
 import Style = Toast.Style;
+import React from "react";
 
 const successImagePath = pathToFileURL(`${environment.assetsPath}/bridge-success.png`).href;
 const failureImagePath = pathToFileURL(`${environment.assetsPath}/bridge-failure.png`).href;
@@ -81,7 +82,7 @@ You can remove your saved Hue Bridge by using the ‘Unlink Hue Bridge’ action
 export default function ManageHueBridge(
   hueBridgeState: HueBridgeState,
   sendHueMessage: SendHueMessage,
-): JSX.Element | null {
+): React.JSX.Element | null {
   const unlinkSavedBridge = async () => {
     await confirmAlert({
       title: "Are you sure you want to unlink the configured Hue Bridge?",
@@ -89,7 +90,7 @@ export default function ManageHueBridge(
     });
   };
 
-  let contextActions: JSX.Element[] = [];
+  let contextActions: React.JSX.Element[] = [];
   let markdown = "";
   const toast = new Toast({ style: Style.Animated, title: "" });
 
@@ -133,7 +134,7 @@ export default function ManageHueBridge(
       break;
     case "linkWithBridge":
       contextActions = [
-        <Action key="link" title="Link With Hue Bridge" onAction={() => sendHueMessage("LINK")} icon={Icon.Plug} />,
+        <Action key="link" title="Link with Hue Bridge" onAction={() => sendHueMessage("LINK")} icon={Icon.Plug} />,
       ];
       markdown = linkWithBridgeMessage;
       toast.hide().then();

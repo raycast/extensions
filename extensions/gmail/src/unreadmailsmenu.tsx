@@ -1,4 +1,4 @@
-import { MenuBarExtra, Toast, showToast, open, showHUD, Icon, LaunchType } from "@raycast/api";
+import { MenuBarExtra, Toast, showToast, open, showHUD, Icon, LaunchType, getPreferenceValues } from "@raycast/api";
 import { getAvatarIcon, useCachedPromise } from "@raycast/utils";
 import {
   generateQuery,
@@ -36,8 +36,8 @@ function MessageMenubarItem(props: { message: gmail_v1.Schema$Message; onAction?
   );
 }
 
-function UnreadMenuCommand(): JSX.Element {
-  const query = generateQuery({ baseQuery: ["is:unread"] });
+function UnreadMenuCommand() {
+  const query = generateQuery({ baseQuery: ["is:unread", "label:inbox"] });
   const { gmail } = getGMailClient();
   const { isLoading, data, error, mutate } = useCachedPromise(
     async (q: string) => {
@@ -70,6 +70,10 @@ function UnreadMenuCommand(): JSX.Element {
     }
   };
   const unreadCount = data?.length || 0;
+  const { showAlways } = getPreferenceValues<Preferences.Unreadmailsmenu>();
+  if (!showAlways && unreadCount <= 0) {
+    return null;
+  }
   return (
     <MenuBarExtra icon={"gmail.svg"} title={unreadCount.toString()} isLoading={isLoading} tooltip="Unread Mails">
       {error ? <MenuBarExtra.Item title={`Error: ${getErrorMessage(error)}`} /> : null}
@@ -82,7 +86,7 @@ function UnreadMenuCommand(): JSX.Element {
         />
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
-        {!error && unreadCount <= 0 && <MenuBarExtra.Item title="No Unread Mails" />}
+        {!error && unreadCount <= 0 && <MenuBarExtra.Item title="No Unread Mails" icon={Icon.Envelope} />}
         {data?.map((m) => <MessageMenubarItem key={m.data.id} message={m.data} onAction={() => onMailOpen(m.data)} />)}
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>

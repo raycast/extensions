@@ -5,6 +5,9 @@
   "description": "Send GET requests in your postman collections.",
   "icon": "postman.png",
   "author": "tarikyildizci",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "categories": [
     "Applications",
     "Developer Tools",

@@ -1,1 +1,0 @@
-export { useAllRegionNamespacesQuery } from './useNamespacesQuery'

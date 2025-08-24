@@ -1,7 +1,7 @@
 import { isEmpty } from "./common-utils";
 import fetch, { AbortError } from "node-fetch";
 import { queryPackagesURL } from "./constans";
-import { artifactMapModel, artifactModel, PackageResponseModel } from "../model/packages-model";
+import { artifactMapModel, artifactModel, PackageResponseModel } from "../types/packages-model";
 import { showToast, Toast } from "@raycast/api";
 
 export type ArtifactTag = {

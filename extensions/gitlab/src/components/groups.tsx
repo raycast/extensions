@@ -2,7 +2,7 @@ import { ActionPanel, Color, Action, Icon, List, getPreferenceValues } from "@ra
 import { useEffect, useState } from "react";
 import { useCache } from "../cache";
 import { getGitLabGQL, gitlab } from "../common";
-import { dataToProject, Group, Project } from "../gitlabapi";
+import { dataToProject, Group, Milestone, Project } from "../gitlabapi";
 import { getTextIcon, GitLabIcons, useImage } from "../icons";
 import { getFirstChar, hashRecord, showErrorToast } from "../utils";
 import { GitLabOpenInBrowserAction } from "./actions";
@@ -13,7 +13,7 @@ import { MilestoneList } from "./milestones";
 import { MRList, MRScope, MRState } from "./mr";
 import { ProjectListItem } from "./project";
 
-/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 function groupIconUrl(group: any): string | undefined {
   let result: string | undefined;
@@ -30,7 +30,7 @@ function webUrl(group: Group, partial: string) {
   return getGitLabGQL().urlJoin(`groups/${group.full_path}/${partial}`);
 }
 
-export function GroupListItem(props: { group: any; nameOnly?: boolean }): JSX.Element {
+export function GroupListItem(props: { group: any; nameOnly?: boolean }) {
   const group = props.group;
   const { localFilepath: localImageFilepath } = useImage(groupIconUrl(group));
   return (
@@ -51,6 +51,7 @@ export function GroupListItem(props: { group: any; nameOnly?: boolean }): JSX.El
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard title="Copy Group ID" content={group.id} />
+            <Action.CopyToClipboard title="Copy Group URL" content={group.web_url} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.Push
@@ -105,7 +106,7 @@ export function GroupListItem(props: { group: any; nameOnly?: boolean }): JSX.El
   );
 }
 
-function GroupListEmptyView(): JSX.Element {
+export function GroupListEmptyView() {
   return <List.EmptyView title="No Groups or Projects" icon={{ source: "group.svg", tintColor: Color.PrimaryText }} />;
 }
 
@@ -114,7 +115,7 @@ function flatListViewPreferences(): boolean {
   return (prefs.flatlist as boolean) || false;
 }
 
-export function GroupList(props: { parentGroup?: Group }): JSX.Element {
+export function GroupList(props: { parentGroup?: Group }) {
   const parentGroup = props.parentGroup;
   const parentGroupID = parentGroup ? parentGroup.id : 0;
   const topLevelOnly = !flatListViewPreferences();
@@ -183,7 +184,7 @@ export function useMyGroups(args?: { query?: string; parentGroupID?: number; top
     {
       secondsToInvalid: 900,
       deps: [parentGroupID],
-    }
+    },
   );
   useEffect(() => {
     setGroupsInfo(data);
@@ -192,6 +193,7 @@ export function useMyGroups(args?: { query?: string; parentGroupID?: number; top
 }
 
 export interface GroupInfo {
+  milestones?: Milestone[];
   groups: Group[];
   projects: Project[];
 }

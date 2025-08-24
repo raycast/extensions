@@ -72,15 +72,17 @@ export default function Command() {
             actions={
               <GalleryItemActions
                 item={{
-                  guidance_scale: generationResult.settings.guidance_scale,
-                  height: generationResult.settings.height,
                   id: output.id,
                   image_url: output.url,
-                  inference_steps: generationResult.settings.inference_steps,
-                  model_id: generationResult.settings.model_id,
-                  prompt_text: cleanedPrompt,
-                  scheduler_id: generationResult.settings.scheduler_id,
-                  width: generationResult.settings.width,
+                  generation: {
+                    guidance_scale: generationResult.settings.guidance_scale,
+                    height: generationResult.settings.height,
+                    model_id: generationResult.settings.model_id,
+                    prompt: {
+                      text: cleanedPrompt,
+                    },
+                    width: generationResult.settings.width,
+                  },
                 }}
               ></GalleryItemActions>
             }
@@ -135,7 +137,9 @@ function ImagineAdvancedForm({ handleSubmit }: { handleSubmit: (values: TGenerat
         <Form.Dropdown.Item title="Desktop (16:9)" value="16:9" />
         <Form.Dropdown.Item title="Squarish (4:5)" value="4:5" />
       </Form.Dropdown>
-      <Form.Dropdown title="Model" id="model" defaultValue="Kandinsky 2.2">
+      <Form.Dropdown title="Model" id="model" defaultValue="FLUX.1">
+        <Form.Dropdown.Item title="FLUX.1" value="FLUX.1" />
+        <Form.Dropdown.Item title="Stable Diffusion 3" value="Stable Diffusion 3" />
         <Form.Dropdown.Item title="Kandinsky 2.2" value="Kandinsky 2.2" />
         <Form.Dropdown.Item value="SDXL" title="SDXL" />
       </Form.Dropdown>

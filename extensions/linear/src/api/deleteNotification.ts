@@ -1,5 +1,6 @@
 import { Notification } from "@linear/sdk";
-import { getLinearClient } from "../helpers/withLinearClient";
+
+import { getLinearClient } from "../api/linearClient";
 
 export async function deleteNotification(id: Notification["id"]) {
   const { graphQLClient } = getLinearClient();
@@ -14,7 +15,7 @@ export async function deleteNotification(id: Notification["id"]) {
           success
         }
       }
-    `
+    `,
   );
 
   return { success: data?.notificationArchive.success };

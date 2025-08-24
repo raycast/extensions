@@ -4,6 +4,8 @@
  * DO NOT MODIFY - This file has been generated using oazapfts.
  * See https://www.npmjs.com/package/oazapfts
  */
+/* eslint @typescript-eslint/ban-ts-comment: off, @typescript-eslint/no-explicit-any: off */
+// @ts-nocheck
 import * as Oazapfts from "oazapfts/lib/runtime";
 import * as QS from "oazapfts/lib/runtime/query";
 export const defaults: Oazapfts.RequestOpts = {
@@ -649,7 +651,7 @@ export function getAlbumsById(
   }: {
     market?: string;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -679,12 +681,12 @@ export function getAlbumsById(
       `/albums/${encodeURIComponent(id)}${QS.query(
         QS.explode({
           market,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -698,7 +700,7 @@ export function getAlbums(
   }: {
     market?: string;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -731,12 +733,12 @@ export function getAlbums(
         QS.explode({
           ids,
           market,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -754,7 +756,7 @@ export function getAlbumsByIdTracks(
     limit?: number;
     offset?: number;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -786,12 +788,12 @@ export function getAlbumsByIdTracks(
           market,
           limit,
           offset,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -825,7 +827,7 @@ export function getArtistsById(id: string, opts?: Oazapfts.RequestOpts) {
         }
     >(`/artists/${encodeURIComponent(id)}`, {
       ...opts,
-    })
+    }),
   );
 }
 /**
@@ -863,12 +865,12 @@ export function getArtists(ids: string, opts?: Oazapfts.RequestOpts) {
       `/artists${QS.query(
         QS.explode({
           ids,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -888,7 +890,7 @@ export function getArtistsByIdAlbums(
     limit?: number;
     offset?: number;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -921,12 +923,12 @@ export function getArtistsByIdAlbums(
           market,
           limit,
           offset,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -940,7 +942,7 @@ export function getArtistsByIdTopTracks(
   }: {
     market?: string;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -972,12 +974,12 @@ export function getArtistsByIdTopTracks(
       `/artists/${encodeURIComponent(id)}/top-tracks${QS.query(
         QS.explode({
           market,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -1013,7 +1015,7 @@ export function getArtistsByIdRelatedArtists(id: string, opts?: Oazapfts.Request
         }
     >(`/artists/${encodeURIComponent(id)}/related-artists`, {
       ...opts,
-    })
+    }),
   );
 }
 /**
@@ -1027,7 +1029,7 @@ export function getShowsById(
   }: {
     market?: string;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -1057,12 +1059,12 @@ export function getShowsById(
       `/shows/${encodeURIComponent(id)}${QS.query(
         QS.explode({
           market,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -1076,7 +1078,7 @@ export function getShows(
   }: {
     market?: string;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -1109,12 +1111,12 @@ export function getShows(
         QS.explode({
           market,
           ids,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -1132,7 +1134,7 @@ export function getShowsByIdEpisodes(
     limit?: number;
     offset?: number;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -1164,12 +1166,12 @@ export function getShowsByIdEpisodes(
           market,
           limit,
           offset,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -1183,7 +1185,7 @@ export function getEpisodesById(
   }: {
     market?: string;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -1213,12 +1215,12 @@ export function getEpisodesById(
       `/episodes/${encodeURIComponent(id)}${QS.query(
         QS.explode({
           market,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -1232,7 +1234,7 @@ export function getEpisodes(
   }: {
     market?: string;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -1265,12 +1267,12 @@ export function getEpisodes(
         QS.explode({
           ids,
           market,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -1284,7 +1286,7 @@ export function getAudiobooksById(
   }: {
     market?: string;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -1314,12 +1316,12 @@ export function getAudiobooksById(
       `/audiobooks/${encodeURIComponent(id)}${QS.query(
         QS.explode({
           market,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -1333,7 +1335,7 @@ export function getAudiobooks(
   }: {
     market?: string;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -1366,12 +1368,12 @@ export function getAudiobooks(
         QS.explode({
           ids,
           market,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -1389,7 +1391,7 @@ export function getAudiobooksByIdChapters(
     limit?: number;
     offset?: number;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -1421,12 +1423,12 @@ export function getAudiobooksByIdChapters(
           market,
           limit,
           offset,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -1441,7 +1443,7 @@ export function getMeAudiobooks(
     limit?: number;
     offset?: number;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -1472,12 +1474,12 @@ export function getMeAudiobooks(
         QS.explode({
           limit,
           offset,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -1512,13 +1514,13 @@ export function putMeAudiobooks(ids: string, opts?: Oazapfts.RequestOpts) {
       `/me/audiobooks${QS.query(
         QS.explode({
           ids,
-        })
+        }),
       )}`,
       {
         ...opts,
         method: "PUT",
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -1553,13 +1555,13 @@ export function deleteMeAudiobooks(ids: string, opts?: Oazapfts.RequestOpts) {
       `/me/audiobooks${QS.query(
         QS.explode({
           ids,
-        })
+        }),
       )}`,
       {
         ...opts,
         method: "DELETE",
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -1595,12 +1597,12 @@ export function getMeAudiobooksContains(ids: string, opts?: Oazapfts.RequestOpts
       `/me/audiobooks/contains${QS.query(
         QS.explode({
           ids,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -1614,7 +1616,7 @@ export function getChaptersById(
   }: {
     market?: string;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -1644,12 +1646,12 @@ export function getChaptersById(
       `/chapters/${encodeURIComponent(id)}${QS.query(
         QS.explode({
           market,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -1663,7 +1665,7 @@ export function getChapters(
   }: {
     market?: string;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -1696,12 +1698,12 @@ export function getChapters(
         QS.explode({
           ids,
           market,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -1715,7 +1717,7 @@ export function getTracksById(
   }: {
     market?: string;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -1745,12 +1747,12 @@ export function getTracksById(
       `/tracks/${encodeURIComponent(id)}${QS.query(
         QS.explode({
           market,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -1764,7 +1766,7 @@ export function getTracks(
   }: {
     market?: string;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -1797,12 +1799,12 @@ export function getTracks(
         QS.explode({
           market,
           ids,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -1823,7 +1825,7 @@ export function search(
     offset?: number;
     includeExternal?: "audio";
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -1868,12 +1870,12 @@ export function search(
         }),
         QS.form({
           type: $type,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -1907,7 +1909,7 @@ export function getMe(opts?: Oazapfts.RequestOpts) {
         }
     >("/me", {
       ...opts,
-    })
+    }),
   );
 }
 /**
@@ -1925,7 +1927,7 @@ export function getPlaylistsByPlaylistId(
     fields?: string;
     additionalTypes?: string;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -1957,12 +1959,12 @@ export function getPlaylistsByPlaylistId(
           market,
           fields,
           additional_types: additionalTypes,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -1978,7 +1980,7 @@ export function putPlaylistsByPlaylistId(
     description?: string;
     [key: string]: any;
   },
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -2009,8 +2011,8 @@ export function putPlaylistsByPlaylistId(
         ...opts,
         method: "PUT",
         body,
-      })
-    )
+      }),
+    ),
   );
 }
 /**
@@ -2032,7 +2034,7 @@ export function getPlaylistsByPlaylistIdTracks(
     offset?: number;
     additionalTypes?: string;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -2066,12 +2068,12 @@ export function getPlaylistsByPlaylistIdTracks(
           limit,
           offset,
           additional_types: additionalTypes,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -2092,7 +2094,7 @@ export function postPlaylistsByPlaylistIdTracks(
     position?: number;
     uris?: string;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -2125,14 +2127,14 @@ export function postPlaylistsByPlaylistIdTracks(
         QS.explode({
           position,
           uris,
-        })
+        }),
       )}`,
       oazapfts.json({
         ...opts,
         method: "POST",
         body,
-      })
-    )
+      }),
+    ),
   );
 }
 /**
@@ -2154,7 +2156,7 @@ export function putPlaylistsByPlaylistIdTracks(
   }: {
     uris?: string;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -2186,14 +2188,14 @@ export function putPlaylistsByPlaylistIdTracks(
       `/playlists/${encodeURIComponent(playlistId)}/tracks${QS.query(
         QS.explode({
           uris,
-        })
+        }),
       )}`,
       oazapfts.json({
         ...opts,
         method: "PUT",
         body,
-      })
-    )
+      }),
+    ),
   );
 }
 /**
@@ -2208,7 +2210,7 @@ export function deletePlaylistsByPlaylistIdTracks(
     }[];
     snapshot_id?: string;
   },
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -2242,8 +2244,8 @@ export function deletePlaylistsByPlaylistIdTracks(
         ...opts,
         method: "DELETE",
         body,
-      })
-    )
+      }),
+    ),
   );
 }
 /**
@@ -2258,7 +2260,7 @@ export function getMePlaylists(
     limit?: number;
     offset?: number;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -2289,12 +2291,12 @@ export function getMePlaylists(
         QS.explode({
           limit,
           offset,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -2311,7 +2313,7 @@ export function getMeAlbums(
     offset?: number;
     market?: string;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -2343,12 +2345,12 @@ export function getMeAlbums(
           limit,
           offset,
           market,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -2361,7 +2363,7 @@ export function putMeAlbums(
     ids?: string[];
     [key: string]: any;
   },
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -2390,14 +2392,14 @@ export function putMeAlbums(
       `/me/albums${QS.query(
         QS.explode({
           ids,
-        })
+        }),
       )}`,
       oazapfts.json({
         ...opts,
         method: "PUT",
         body,
-      })
-    )
+      }),
+    ),
   );
 }
 /**
@@ -2410,7 +2412,7 @@ export function deleteMeAlbums(
     ids?: string[];
     [key: string]: any;
   },
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -2439,14 +2441,14 @@ export function deleteMeAlbums(
       `/me/albums${QS.query(
         QS.explode({
           ids,
-        })
+        }),
       )}`,
       oazapfts.json({
         ...opts,
         method: "DELETE",
         body,
-      })
-    )
+      }),
+    ),
   );
 }
 /**
@@ -2482,12 +2484,12 @@ export function getMeAlbumsContains(ids: string, opts?: Oazapfts.RequestOpts) {
       `/me/albums/contains${QS.query(
         QS.explode({
           ids,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -2504,7 +2506,7 @@ export function getMeTracks(
     limit?: number;
     offset?: number;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -2536,12 +2538,12 @@ export function getMeTracks(
           market,
           limit,
           offset,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -2554,7 +2556,7 @@ export function putMeTracks(
     ids: string[];
     [key: string]: any;
   },
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -2583,14 +2585,14 @@ export function putMeTracks(
       `/me/tracks${QS.query(
         QS.explode({
           ids,
-        })
+        }),
       )}`,
       oazapfts.json({
         ...opts,
         method: "PUT",
         body,
-      })
-    )
+      }),
+    ),
   );
 }
 /**
@@ -2603,7 +2605,7 @@ export function deleteMeTracks(
     ids?: string[];
     [key: string]: any;
   },
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -2632,14 +2634,14 @@ export function deleteMeTracks(
       `/me/tracks${QS.query(
         QS.explode({
           ids,
-        })
+        }),
       )}`,
       oazapfts.json({
         ...opts,
         method: "DELETE",
         body,
-      })
-    )
+      }),
+    ),
   );
 }
 /**
@@ -2675,12 +2677,12 @@ export function getMeTracksContains(ids: string, opts?: Oazapfts.RequestOpts) {
       `/me/tracks/contains${QS.query(
         QS.explode({
           ids,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -2697,7 +2699,7 @@ export function getMeEpisodes(
     limit?: number;
     offset?: number;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -2729,12 +2731,12 @@ export function getMeEpisodes(
           market,
           limit,
           offset,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -2747,7 +2749,7 @@ export function putMeEpisodes(
     ids: string[];
     [key: string]: any;
   },
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -2776,14 +2778,14 @@ export function putMeEpisodes(
       `/me/episodes${QS.query(
         QS.explode({
           ids,
-        })
+        }),
       )}`,
       oazapfts.json({
         ...opts,
         method: "PUT",
         body,
-      })
-    )
+      }),
+    ),
   );
 }
 /**
@@ -2796,7 +2798,7 @@ export function deleteMeEpisodes(
     ids?: string[];
     [key: string]: any;
   },
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -2825,14 +2827,14 @@ export function deleteMeEpisodes(
       `/me/episodes${QS.query(
         QS.explode({
           ids,
-        })
+        }),
       )}`,
       oazapfts.json({
         ...opts,
         method: "DELETE",
         body,
-      })
-    )
+      }),
+    ),
   );
 }
 /**
@@ -2868,12 +2870,12 @@ export function getMeEpisodesContains(ids: string, opts?: Oazapfts.RequestOpts) 
       `/me/episodes/contains${QS.query(
         QS.explode({
           ids,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -2888,7 +2890,7 @@ export function getMeShows(
     limit?: number;
     offset?: number;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -2919,12 +2921,12 @@ export function getMeShows(
         QS.explode({
           limit,
           offset,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -2936,7 +2938,7 @@ export function putMeShows(
   body?: {
     ids?: string[];
   },
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -2965,14 +2967,14 @@ export function putMeShows(
       `/me/shows${QS.query(
         QS.explode({
           ids,
-        })
+        }),
       )}`,
       oazapfts.json({
         ...opts,
         method: "PUT",
         body,
-      })
-    )
+      }),
+    ),
   );
 }
 /**
@@ -2989,7 +2991,7 @@ export function deleteMeShows(
   }: {
     market?: string;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -3019,14 +3021,14 @@ export function deleteMeShows(
         QS.explode({
           ids,
           market,
-        })
+        }),
       )}`,
       oazapfts.json({
         ...opts,
         method: "DELETE",
         body,
-      })
-    )
+      }),
+    ),
   );
 }
 /**
@@ -3062,12 +3064,12 @@ export function getMeShowsContains(ids: string, opts?: Oazapfts.RequestOpts) {
       `/me/shows/contains${QS.query(
         QS.explode({
           ids,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -3101,7 +3103,7 @@ export function getUsersByUserId(userId: string, opts?: Oazapfts.RequestOpts) {
         }
     >(`/users/${encodeURIComponent(userId)}`, {
       ...opts,
-    })
+    }),
   );
 }
 /**
@@ -3117,7 +3119,7 @@ export function getUsersByUserIdPlaylists(
     limit?: number;
     offset?: number;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -3148,12 +3150,12 @@ export function getUsersByUserIdPlaylists(
         QS.explode({
           limit,
           offset,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -3169,7 +3171,7 @@ export function postUsersByUserIdPlaylists(
     description?: string;
     [key: string]: any;
   },
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -3201,8 +3203,8 @@ export function postUsersByUserIdPlaylists(
         ...opts,
         method: "POST",
         body,
-      })
-    )
+      }),
+    ),
   );
 }
 /**
@@ -3215,7 +3217,7 @@ export function putPlaylistsByPlaylistIdFollowers(
     public?: boolean;
     [key: string]: any;
   },
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -3246,8 +3248,8 @@ export function putPlaylistsByPlaylistIdFollowers(
         ...opts,
         method: "PUT",
         body,
-      })
-    )
+      }),
+    ),
   );
 }
 /**
@@ -3281,7 +3283,7 @@ export function deletePlaylistsByPlaylistIdFollowers(playlistId: string, opts?: 
     >(`/playlists/${encodeURIComponent(playlistId)}/followers`, {
       ...opts,
       method: "DELETE",
-    })
+    }),
   );
 }
 /**
@@ -3302,7 +3304,7 @@ export function getBrowseFeaturedPlaylists(
     limit?: number;
     offset?: number;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -3336,12 +3338,12 @@ export function getBrowseFeaturedPlaylists(
           timestamp,
           limit,
           offset,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -3360,7 +3362,7 @@ export function getBrowseCategories(
     limit?: number;
     offset?: number;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -3397,12 +3399,12 @@ export function getBrowseCategories(
           locale,
           limit,
           offset,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -3418,7 +3420,7 @@ export function getBrowseCategoriesByCategoryId(
     country?: string;
     locale?: string;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -3449,12 +3451,12 @@ export function getBrowseCategoriesByCategoryId(
         QS.explode({
           country,
           locale,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -3472,7 +3474,7 @@ export function getBrowseCategoriesByCategoryIdPlaylists(
     limit?: number;
     offset?: number;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -3504,12 +3506,12 @@ export function getBrowseCategoriesByCategoryIdPlaylists(
           country,
           limit,
           offset,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -3543,7 +3545,7 @@ export function getPlaylistsByPlaylistIdImages(playlistId: string, opts?: Oazapf
         }
     >(`/playlists/${encodeURIComponent(playlistId)}/images`, {
       ...opts,
-    })
+    }),
   );
 }
 /**
@@ -3578,7 +3580,7 @@ export function putPlaylistsByPlaylistIdImages(playlistId: string, body: string,
       ...opts,
       method: "PUT",
       body,
-    })
+    }),
   );
 }
 /**
@@ -3595,7 +3597,7 @@ export function getBrowseNewReleases(
     limit?: number;
     offset?: number;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -3629,12 +3631,12 @@ export function getBrowseNewReleases(
           country,
           limit,
           offset,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -3650,7 +3652,7 @@ export function getMeFollowing(
     after?: string;
     limit?: number;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -3684,12 +3686,12 @@ export function getMeFollowing(
           type: $type,
           after,
           limit,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -3703,7 +3705,7 @@ export function putMeFollowing(
     ids: string[];
     [key: string]: any;
   },
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -3733,14 +3735,14 @@ export function putMeFollowing(
         QS.explode({
           type: $type,
           ids,
-        })
+        }),
       )}`,
       oazapfts.json({
         ...opts,
         method: "PUT",
         body,
-      })
-    )
+      }),
+    ),
   );
 }
 /**
@@ -3754,7 +3756,7 @@ export function deleteMeFollowing(
     ids?: string[];
     [key: string]: any;
   },
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -3784,14 +3786,14 @@ export function deleteMeFollowing(
         QS.explode({
           type: $type,
           ids,
-        })
+        }),
       )}`,
       oazapfts.json({
         ...opts,
         method: "DELETE",
         body,
-      })
-    )
+      }),
+    ),
   );
 }
 /**
@@ -3828,12 +3830,12 @@ export function getMeFollowingContains($type: "artist" | "user", ids: string, op
         QS.explode({
           type: $type,
           ids,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -3843,7 +3845,7 @@ export function getMeFollowingContains($type: "artist" | "user", ids: string, op
 export function getPlaylistsByPlaylistIdFollowersContains(
   playlistId: string,
   ids: string,
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -3873,12 +3875,12 @@ export function getPlaylistsByPlaylistIdFollowersContains(
       `/playlists/${encodeURIComponent(playlistId)}/followers/contains${QS.query(
         QS.explode({
           ids,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -3916,12 +3918,12 @@ export function getAudioFeatures(ids: string, opts?: Oazapfts.RequestOpts) {
       `/audio-features${QS.query(
         QS.explode({
           ids,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -3955,7 +3957,7 @@ export function getAudioFeaturesById(id: string, opts?: Oazapfts.RequestOpts) {
         }
     >(`/audio-features/${encodeURIComponent(id)}`, {
       ...opts,
-    })
+    }),
   );
 }
 /**
@@ -3989,7 +3991,7 @@ export function getAudioAnalysisById(id: string, opts?: Oazapfts.RequestOpts) {
         }
     >(`/audio-analysis/${encodeURIComponent(id)}`, {
       ...opts,
-    })
+    }),
   );
 }
 /**
@@ -4094,7 +4096,7 @@ export function getRecommendations(
     maxValence?: number;
     targetValence?: number;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -4170,12 +4172,12 @@ export function getRecommendations(
           min_valence: minValence,
           max_valence: maxValence,
           target_valence: targetValence,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -4211,7 +4213,7 @@ export function getRecommendationsAvailableGenreSeeds(opts?: Oazapfts.RequestOpt
         }
     >("/recommendations/available-genre-seeds", {
       ...opts,
-    })
+    }),
   );
 }
 /**
@@ -4226,7 +4228,7 @@ export function getMePlayer(
     market?: string;
     additionalTypes?: string;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -4260,12 +4262,12 @@ export function getMePlayer(
         QS.explode({
           market,
           additional_types: additionalTypes,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -4278,7 +4280,7 @@ export function putMePlayer(
     play?: boolean;
     [key: string]: any;
   },
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -4309,8 +4311,8 @@ export function putMePlayer(
         ...opts,
         method: "PUT",
         body,
-      })
-    )
+      }),
+    ),
   );
 }
 /**
@@ -4344,7 +4346,7 @@ export function getMePlayerDevices(opts?: Oazapfts.RequestOpts) {
         }
     >("/me/player/devices", {
       ...opts,
-    })
+    }),
   );
 }
 /**
@@ -4359,7 +4361,7 @@ export function getMePlayerCurrentlyPlaying(
     market?: string;
     additionalTypes?: string;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -4390,12 +4392,12 @@ export function getMePlayerCurrentlyPlaying(
         QS.explode({
           market,
           additional_types: additionalTypes,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -4417,7 +4419,7 @@ export function putMePlayerPlay(
   }: {
     deviceId?: string;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -4446,14 +4448,14 @@ export function putMePlayerPlay(
       `/me/player/play${QS.query(
         QS.explode({
           device_id: deviceId,
-        })
+        }),
       )}`,
       oazapfts.json({
         ...opts,
         method: "PUT",
         body,
-      })
-    )
+      }),
+    ),
   );
 }
 /**
@@ -4466,7 +4468,7 @@ export function putMePlayerPause(
   }: {
     deviceId?: string;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -4495,13 +4497,13 @@ export function putMePlayerPause(
       `/me/player/pause${QS.query(
         QS.explode({
           device_id: deviceId,
-        })
+        }),
       )}`,
       {
         ...opts,
         method: "PUT",
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -4514,7 +4516,7 @@ export function postMePlayerNext(
   }: {
     deviceId?: string;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -4543,13 +4545,13 @@ export function postMePlayerNext(
       `/me/player/next${QS.query(
         QS.explode({
           device_id: deviceId,
-        })
+        }),
       )}`,
       {
         ...opts,
         method: "POST",
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -4562,7 +4564,7 @@ export function postMePlayerPrevious(
   }: {
     deviceId?: string;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -4591,13 +4593,13 @@ export function postMePlayerPrevious(
       `/me/player/previous${QS.query(
         QS.explode({
           device_id: deviceId,
-        })
+        }),
       )}`,
       {
         ...opts,
         method: "POST",
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -4611,7 +4613,7 @@ export function putMePlayerSeek(
   }: {
     deviceId?: string;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -4641,13 +4643,13 @@ export function putMePlayerSeek(
         QS.explode({
           position_ms: positionMs,
           device_id: deviceId,
-        })
+        }),
       )}`,
       {
         ...opts,
         method: "PUT",
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -4661,7 +4663,7 @@ export function putMePlayerRepeat(
   }: {
     deviceId?: string;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -4691,13 +4693,13 @@ export function putMePlayerRepeat(
         QS.explode({
           state,
           device_id: deviceId,
-        })
+        }),
       )}`,
       {
         ...opts,
         method: "PUT",
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -4711,7 +4713,7 @@ export function putMePlayerVolume(
   }: {
     deviceId?: string;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -4741,13 +4743,13 @@ export function putMePlayerVolume(
         QS.explode({
           volume_percent: volumePercent,
           device_id: deviceId,
-        })
+        }),
       )}`,
       {
         ...opts,
         method: "PUT",
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -4761,7 +4763,7 @@ export function putMePlayerShuffle(
   }: {
     deviceId?: string;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -4791,13 +4793,13 @@ export function putMePlayerShuffle(
         QS.explode({
           state,
           device_id: deviceId,
-        })
+        }),
       )}`,
       {
         ...opts,
         method: "PUT",
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -4814,7 +4816,7 @@ export function getMePlayerRecentlyPlayed(
     after?: number;
     before?: number;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -4846,12 +4848,12 @@ export function getMePlayerRecentlyPlayed(
           limit,
           after,
           before,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -4885,7 +4887,7 @@ export function getMePlayerQueue(opts?: Oazapfts.RequestOpts) {
         }
     >("/me/player/queue", {
       ...opts,
-    })
+    }),
   );
 }
 /**
@@ -4899,7 +4901,7 @@ export function postMePlayerQueue(
   }: {
     deviceId?: string;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -4929,13 +4931,13 @@ export function postMePlayerQueue(
         QS.explode({
           uri,
           device_id: deviceId,
-        })
+        }),
       )}`,
       {
         ...opts,
         method: "POST",
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -4971,7 +4973,7 @@ export function getMarkets(opts?: Oazapfts.RequestOpts) {
         }
     >("/markets", {
       ...opts,
-    })
+    }),
   );
 }
 /**
@@ -4988,7 +4990,7 @@ export function getMeTopArtists(
     limit?: number;
     offset?: number;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -5020,12 +5022,12 @@ export function getMeTopArtists(
           time_range: timeRange,
           limit,
           offset,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
   );
 }
 /**
@@ -5042,7 +5044,7 @@ export function getMeTopTracks(
     limit?: number;
     offset?: number;
   } = {},
-  opts?: Oazapfts.RequestOpts
+  opts?: Oazapfts.RequestOpts,
 ) {
   return oazapfts.ok(
     oazapfts.fetchJson<
@@ -5074,11 +5076,49 @@ export function getMeTopTracks(
           time_range: timeRange,
           limit,
           offset,
-        })
+        }),
       )}`,
       {
         ...opts,
-      }
-    )
+      },
+    ),
+  );
+}
+/**
+ * Get next page
+ *
+ */
+export function getNext(
+  nextUrl: string,
+  opts?: Oazapfts.RequestOpts,
+) {
+  const url = nextUrl.replace(servers.server1, "");
+  return oazapfts.ok(
+    oazapfts.fetchJson<
+      | {
+          status: 200;
+          data: PagingPlaylistObject;
+        }
+      | {
+          status: 401;
+          data: {
+            error: ErrorObject;
+          };
+        }
+      | {
+          status: 403;
+          data: {
+            error: ErrorObject;
+          };
+        }
+      | {
+          status: 429;
+          data: {
+            error: ErrorObject;
+          };
+        }
+    >(url, {
+      ...opts,
+    }),
   );
 }

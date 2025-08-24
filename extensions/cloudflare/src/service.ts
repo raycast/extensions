@@ -40,6 +40,10 @@ interface ZoneItem {
   type: string;
   development_mode: number;
   name_servers: string[];
+  modified_on: string;
+  created_on: string;
+  activated_on: string;
+  permissions: string[];
 }
 
 interface Zone {
@@ -50,12 +54,15 @@ interface Zone {
 }
 
 interface DnsRecordItem {
+  id: string;
   name: string;
   type: string;
   content: string;
+  ttl: number;
 }
 
 interface DnsRecord {
+  id: string;
   name: string;
   type: string;
   content: string;
@@ -90,7 +97,7 @@ interface PageItem {
   name: string;
   subdomain: string;
   domains: string;
-  source: SourceItem;
+  source?: SourceItem;
   latest_deployment: DeploymentItem;
 }
 
@@ -106,7 +113,7 @@ interface Source {
 interface Page {
   name: string;
   subdomain: string;
-  source: Source;
+  source?: Source;
   status: DeploymentStatus;
 }
 
@@ -182,9 +189,8 @@ class Service {
     if (this.cache.has('accounts')) {
       data = JSON.parse(this.cache.get('accounts')!) as Response<AccountItem[]>;
     } else {
-      const response = await this.client.get<Response<AccountItem[]>>(
-        'accounts',
-      );
+      const response =
+        await this.client.get<Response<AccountItem[]>>('accounts');
       data = response.data;
       this.cache.set('accounts', JSON.stringify(data));
     }
@@ -210,7 +216,7 @@ class Service {
       try {
         result = JSON.parse(this.cache.get(`zones-${id}`)!) as ZoneItem[];
         return result.map((item) => formatZone(item));
-      } catch (e) {
+      } catch {
         // Whenever the cache can't be parsed, clear it and fetch from API
         this.cache.remove(`zones-${id}`);
       }
@@ -233,9 +239,9 @@ class Service {
     return result.map((item) => formatZone(item));
   }
 
-  async getZone(id: string): Promise<Zone> {
+  async getZone(id: string): Promise<ZoneItem> {
     const response = await this.client.get<Response<ZoneItem>>(`zones/${id}`);
-    return formatZone(response.data.result);
+    return response.data.result;
   }
 
   async listDnsRecords(zoneId: string): Promise<DnsRecord[]> {
@@ -243,9 +249,30 @@ class Service {
       `zones/${zoneId}/dns_records`,
     );
     return response.data.result.map((item) => {
-      const { name, type, content } = item;
-      return { name, type, content };
+      const { id, name, type, content } = item;
+      return { id, name, type, content };
     });
+  }
+
+  async createDnsRecord(
+    zoneId: string,
+    record: Omit<DnsRecordItem, 'id'>,
+  ): Promise<DnsRecordItem> {
+    const response = await this.client.post<Response<DnsRecordItem>>(
+      `zones/${zoneId}/dns_records`,
+      record,
+    );
+    return response.data.result;
+  }
+
+  async deleteDnsRecord(
+    zoneId: string,
+    recordId: string,
+  ): Promise<{ id: string }> {
+    const response = await this.client.delete<Response<{ id: string }>>(
+      `zones/${zoneId}/dns_records/${recordId}`,
+    );
+    return response.data.result;
   }
 
   async purgeFilesbyURL(
@@ -346,14 +373,16 @@ function formatPage(item: PageItem): Page {
   return {
     name,
     subdomain,
-    source: {
-      type: source.type,
-      config: {
-        owner: source.config.owner,
-        repo: source.config.repo_name,
-        autopublishEnabled: source.config.deployments_enabled,
-      },
-    },
+    source: source
+      ? {
+          type: source.type,
+          config: {
+            owner: source.config.owner,
+            repo: source.config.repo_name,
+            autopublishEnabled: source.config.deployments_enabled,
+          },
+        }
+      : undefined,
     status: latest_deployment.latest_stage.status,
   };
 }

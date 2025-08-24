@@ -2,62 +2,69 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "premier-league",
   "title": "Premier League",
-  "description": "View the latest Premier League tables, form guides and season archives in Raycast.",
+  "description": "Get instant access to Premier League data right from your Raycast menu. Easily search for teams, players, fixtures, results, standings and awards.",
   "icon": "icon.png",
   "author": "anhthang",
   "license": "MIT",
+  "contributors": [
+    "stelo"
+  ],
   "categories": [
+    "Data",
+    "Other",
     "Fun"
   ],
   "commands": [
     {
       "name": "table",
       "title": "Tables",
-      "subtitle": "Premier League",
-      "description": "View the latest Premier League tables, form guides and season archives.",
+      "description": "View current and historical Premier League standings, form guides, and season archives.",
       "mode": "view"
     },
     {
       "name": "fixture",
       "title": "Fixtures",
-      "subtitle": "Premier League",
-      "description": "View the 380 Premier League fixtures for the current season.",
+      "description": "Explore upcoming and past Premier League match fixtures and details.",
       "mode": "view"
     },
     {
       "name": "result",
       "title": "Results",
-      "subtitle": "Premier League",
-      "description": "View Premier League scores, results & season archives, along with other competitions involving Premier League clubs.",
-      "mode": "view"
-    },
-    {
-      "name": "player",
-      "title": "Players",
-      "subtitle": "Premier League",
-      "description": "Find profiles and information about current and all-time Premier League players.",
-      "mode": "view"
-    },
-    {
-      "name": "manager",
-      "title": "Managers",
-      "subtitle": "Premier League",
-      "description": "Find profiles and information about current and all-time Premier League managers",
+      "description": "Access Premier League scores, results, and season archives, as well as matches involving Premier League clubs in other competitions.",
       "mode": "view"
     },
     {
       "name": "club",
       "title": "Clubs",
-      "subtitle": "Premier League",
-      "description": "Find profiles and information about current and all-time Premier League clubs",
+      "description": "Explore club profiles, player rosters, historical data, and recent performances.",
+      "mode": "view"
+    },
+    {
+      "name": "player",
+      "title": "Players",
+      "description": "Search for player profiles, statistics, career highlights, and transfer history.",
+      "mode": "view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "manager",
+      "title": "Managers",
+      "description": "Find manager profiles, career achievements, and teams managed.",
+      "mode": "view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "award",
+      "title": "Awards",
+      "description": "View a list of Premier League individual and team awards, including winners and statistics.",
       "mode": "view"
     }
   ],
   "preferences": [
     {
       "name": "filter",
-      "title": "Search bar filter",
-      "description": "Choose your preffered filter in the search bar for Fixtures & Results",
+      "title": "Search Bar Filter",
+      "description": "Select your preferred filtering method in the search bar for Fixtures & Results.",
       "required": false,
       "type": "dropdown",
       "default": "competition",
@@ -74,26 +81,26 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.47.3",
-    "axios": "^1.3.2",
-    "date-fns": "^2.29.3",
-    "json2md": "^2.0.0",
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0",
+    "axios": "^1.8.4",
+    "date-fns": "^4.1.0",
+    "json2md": "^2.0.1",
     "lodash.groupby": "^4.6.0"
   },
   "devDependencies": {
-    "@types/json2md": "^1.5.1",
-    "@types/lodash.groupby": "^4.6.7",
-    "@types/node": "~18.13.0",
-    "@types/react": "^18.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.51.0",
-    "@typescript-eslint/parser": "^5.51.0",
-    "eslint": "^8.34.0",
-    "eslint-config-prettier": "^8.6.0",
-    "react-devtools": "^4.27.2",
-    "typescript": "^4.9.5"
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/json2md": "^1.5.4",
+    "@types/lodash.groupby": "^4.6.9",
+    "@types/react": "^18.3.12",
+    "eslint": "^8.57.1",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.2"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
   }
 }

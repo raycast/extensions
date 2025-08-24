@@ -5,6 +5,9 @@
   "description": "Convert Markdown text in clipboard to HTML",
   "icon": "command-icon.png",
   "author": "aravindballa",
+  "contributors": [
+    "chihkang_lin"
+  ],
   "categories": [
     "Developer Tools"
   ],
@@ -18,8 +21,11 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.35.2",
-    "markdown-it": "^13.0.1"
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.17.0",
+    "highlight.js": "^11.11.1",
+    "marked": "^15.0.4",
+    "marked-highlight": "^2.2.1"
   },
   "devDependencies": {
     "@types/markdown-it": "^12.2.3",
@@ -36,6 +42,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

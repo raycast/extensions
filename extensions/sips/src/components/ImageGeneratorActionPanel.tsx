@@ -5,16 +5,18 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-06 11:45:04
- * Last modified  : 2023-07-06 16:47:05
+ * Last modified  : 2024-06-26 21:37:46
  */
 
 import os from "os";
 import path from "path";
 
-import { Action, ActionPanel, Icon, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, showInFinder, showToast, Toast } from "@raycast/api";
 
 import { Generator } from "../utilities/types";
 import { cleanup, getDestinationPaths, moveImageResultsToFinalDestination, showErrorToast } from "../utilities/utils";
+
+import SettingsActionPanelSection from "./SettingsActionPanelSection";
 
 /**
  * Action panel for image generators displayed in the main grid.
@@ -44,16 +46,20 @@ export default function ImageGeneratorActionPanel(props: {
         title={`Create ${objectType}`}
         icon={Icon.Image}
         onAction={async () => {
-          const destinations = getDestinationPaths(
+          const destinations = await getDestinationPaths(
             [path.join(os.tmpdir(), `${objectType.replaceAll(" ", "_").toLowerCase()}.png`)],
-            true
+            true,
           );
-          const toast = await showToast({ title: `Creating ${objectType}...`, style: Toast.Style.Animated });
+          const toast = await showToast({
+            title: `Creating ${objectType}...`,
+            style: Toast.Style.Animated,
+          });
           try {
             await generator.applyMethod(destinations[0], generator.CIFilterName, width, height, options);
             await moveImageResultsToFinalDestination(destinations);
             toast.title = `Created ${objectType}`;
             toast.style = Toast.Style.Success;
+            showInFinder(destinations[0]);
           } catch (error) {
             await showErrorToast(`Failed To Create ${objectType}`, error as Error, toast);
           } finally {
@@ -67,10 +73,27 @@ export default function ImageGeneratorActionPanel(props: {
         shortcut={{ modifiers: ["cmd"], key: "r" }}
         onAction={regeneratePreviews}
       />
+      <Action.CreateQuicklink
+        title="Create Quicklink"
+        shortcut={{ modifiers: ["cmd"], key: "l" }}
+        quicklink={{
+          name: `Create ${width}x${height} ${objectType} Image`,
+          link: `raycast://extensions/HelloImSteven/sips/create-image?context=${encodeURIComponent(
+            JSON.stringify({
+              imageWidth: width,
+              imageHeight: height,
+              imagePattern: {
+                name: objectType,
+                options: options,
+              },
+            }),
+          )}`,
+        }}
+      />
 
       <ActionPanel.Section title="Clipboard Actions">
         <Action.Paste
-          title="Paste Preview In Active App"
+          title="Paste Preview in Active App"
           shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
           content={{ html: `<img src="${preview}" />` }}
         />
@@ -85,6 +108,7 @@ export default function ImageGeneratorActionPanel(props: {
           shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
         />
       </ActionPanel.Section>
+      <SettingsActionPanelSection />
     </ActionPanel>
   );
 }

@@ -4,19 +4,29 @@ import { VAULT_LOCK_MESSAGES } from "~/constants/general";
 import { SessionStorage } from "~/context/session/utils";
 
 async function lockVaultCommand() {
+  const toast = await showToast(Toast.Style.Animated, "Locking vault...", "Please wait");
   try {
-    await showToast(Toast.Style.Animated, "Locking vault...", "Please wait");
     const [token] = await SessionStorage.getSavedSession();
     if (!token) {
-      await showToast(Toast.Style.Failure, "No session found", "Already locked or not logged in");
+      toast.style = Toast.Style.Failure;
+      toast.title = "No session found";
+      toast.message = "Already locked or not logged in";
       return;
     }
 
-    const bitwarden = await new Bitwarden().initialize();
-    await bitwarden.withSession(token).lock(VAULT_LOCK_MESSAGES.MANUAL);
+    const bitwarden = await new Bitwarden(toast).initialize();
+
+    await bitwarden.withSession(token).lock({ reason: VAULT_LOCK_MESSAGES.MANUAL });
+  } catch (error) {
+    await showToast(Toast.Style.Failure, "Failed to lock vault");
+  }
+
+  try {
     await SessionStorage.clearSession();
 
-    await showToast(Toast.Style.Success, "Vault successfully locked");
+    toast.style = Toast.Style.Success;
+    toast.title = "Vault successfully locked";
+    toast.message = undefined;
   } catch (error) {
     await showToast(Toast.Style.Failure, "Failed to lock vault");
   }

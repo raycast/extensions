@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pagespeed",
+  "title": "Pagespeed",
+  "description": "A simple extension that reports page speed insights based on page-speed.dev",
+  "icon": "icon.png",
+  "author": "vorillaz",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Web",
+    "Productivity"
+  ],
+  "keywords": [
+    "website",
+    "analytics",
+    "pagespeed",
+    "stats"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "form",
+      "title": "Run Pagespeed Report",
+      "description": "Run a pagespeed test on a given domain",
+      "mode": "view"
+    },
+    {
+      "name": "pagespeed",
+      "title": "View and Manage Pagespeed Reports",
+      "description": "Check and manage your previous pagespeed reports",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.78.1",
+    "@raycast/utils": "1.16.2",
+    "node-fetch": "3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

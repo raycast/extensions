@@ -2,36 +2,66 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-maps-search",
   "title": "Google Maps Search",
-  "description": "Quickly open Google Maps directions, for example from your current location to your home.",
+  "description": "Quickly search Google Maps or get directions.",
   "icon": "google-maps-icon.png",
   "author": "ratoru",
   "categories": [
     "Web"
   ],
   "contributors": [
-    "lin"
+    "lin",
+    "chrismessina",
+    "klaussner",
+    "krsntn"
+  ],
+  "keywords": [
+    "directions",
+    "maps",
+    "navigation"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "travelHome",
-      "title": "Travel Home",
+      "title": "Get Me Home",
       "subtitle": "Google Maps",
       "description": "Open Google Maps with directions from your current location to your home.",
       "mode": "no-view"
     },
     {
       "name": "travelTo",
-      "title": "Travel To",
+      "title": "Get Me Somewhere",
       "subtitle": "Google Maps",
-      "description": "Open Google Maps with directions to a destination.",
+      "description": "Get directions to a destination.",
       "mode": "view"
     },
     {
-      "name": "find",
-      "title": "Find Place",
+      "name": "quickSearchMaps",
+      "title": "Quickly Search Google Maps",
       "subtitle": "Google Maps",
-      "description": "Find a specific place or category on Google Maps.",
+      "description": "Quickly search for a place or category on Google Maps.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Location or Category",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "keywords": [
+        "find place"
+      ]
+    },
+    {
+      "name": "find",
+      "title": "Search Google Maps",
+      "subtitle": "Google Maps",
+      "description": "Use text selection or clipboard to find a place or category on Google Maps.",
       "mode": "view"
     }
   ],
@@ -39,54 +69,85 @@
     {
       "name": "homeAddress",
       "title": "Home Address",
-      "description": "Enter your home address as you would enter it into Google Maps.",
+      "description": "Enter your home address.",
       "type": "textfield",
       "required": true,
       "placeholder": "Street Address, City, State, ZIP Code"
     },
     {
       "name": "preferredMode",
-      "title": "Preferred Mode of Travel",
-      "description": "Select your default mode of travel.",
+      "title": "Preferred Mode of Transport",
+      "description": "Select your preferred type of transport.",
       "type": "dropdown",
       "required": true,
       "default": "transit",
       "data": [
         {
-          "title": "🚗 Car",
+          "title": "Driving",
           "value": "driving"
         },
         {
-          "title": "🚆 Public Transport",
+          "title": "Transit",
           "value": "transit"
         },
         {
-          "title": "🚶‍♀️ Walk",
+          "title": "Walking",
           "value": "walking"
         },
         {
-          "title": "🚲 Bike",
+          "title": "Cycling",
           "value": "bicycling"
         }
       ]
     },
     {
+      "name": "preferredOrigin",
+      "title": "Preferred Starting Location",
+      "description": "Select your preferred starting location.",
+      "type": "dropdown",
+      "required": true,
+      "default": "curloc",
+      "data": [
+        {
+          "title": "Current Location",
+          "value": "curloc"
+        },
+        {
+          "title": "Home",
+          "value": "home"
+        },
+        {
+          "title": "Custom",
+          "value": "custom"
+        }
+      ]
+    },
+    {
       "name": "useSelected",
-      "title": "Autofill Destination Field",
-      "label": "Always fill the destination using selected text, or clipboard.",
-      "description": "Check this box if you want to autofill form values using selected text, or clipboard if no text selected.",
+      "title": "Use selected text or clipboard to fill destination",
+      "label": "Enable Autofill",
+      "description": "Check this box to autofill destination using selected text or clipboard (if no text selected).",
       "type": "checkbox",
       "required": false,
       "default": false
+    },
+    {
+      "name": "saveSearchHistory",
+      "title": "Save Search History",
+      "label": "Save and suggest past searches",
+      "description": "Check this box to save and suggest past searches.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.8"
+    "@raycast/api": "^1.80.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.5",
     "@types/node": "^18.8.3",
-    "@types/react": "^17.0.28",
+    "@types/react": "^18.0.9",
     "eslint": "^8.22.0",
     "typescript": "^4.7.4"
   },

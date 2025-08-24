@@ -1,10 +1,9 @@
-import { launchCommand, LaunchType, closeMainWindow } from "@raycast/api";
-import { getCurrentAudioInputLevel, toggleSystemAudioInputLevel } from "./shared/utils";
+import { LaunchType, closeMainWindow, launchCommand } from "@raycast/api";
+import { toggleSystemAudioInputLevel } from "./utils";
 
 export default async function toggleMute() {
-  const currentAudioInputLevel = getCurrentAudioInputLevel();
   await closeMainWindow();
-  await toggleSystemAudioInputLevel(currentAudioInputLevel);
+  await toggleSystemAudioInputLevel();
 
   try {
     await launchCommand({ name: "mute-menu-bar", type: LaunchType.Background });

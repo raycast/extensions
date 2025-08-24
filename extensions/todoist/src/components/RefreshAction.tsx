@@ -14,7 +14,7 @@ export default function RefreshAction() {
       setCachedData(data);
       await showToast({ style: Toast.Style.Success, title: "Synced data" });
       await refreshMenuBarCommand();
-    } catch (error) {
+    } catch {
       await showToast({ style: Toast.Style.Failure, title: "Unable to sync data" });
     }
   }

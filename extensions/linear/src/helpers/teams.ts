@@ -1,9 +1,11 @@
 import { Icon } from "@raycast/api";
-import { TeamResult } from "../api/getTeams";
+
+import { OrganizationResult, TeamResult } from "../api/getTeams";
+
 import { getIcon } from "./icons";
 
-export function getTeamIcon(team: TeamResult) {
-  const fallbackIcon = team.organization.logoUrl ? encodeURI(team.organization.logoUrl) : Icon.Person;
+export function getTeamIcon(team: TeamResult, organization?: OrganizationResult) {
+  const fallbackIcon = organization?.logoUrl ? encodeURI(organization.logoUrl) : Icon.TwoPeople;
 
   return getIcon({ icon: team.icon, color: team.color, fallbackIcon });
 }

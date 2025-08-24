@@ -6,7 +6,10 @@
   "icon": "git-repos-icon.png",
   "author": "moored",
   "contributors": [
-    "nitishpdmn"
+    "nitishpdmn",
+    "go_dima",
+    "cameronsstone",
+    "hacdias"
   ],
   "categories": [
     "Developer Tools",

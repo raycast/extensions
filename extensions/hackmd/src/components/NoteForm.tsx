@@ -13,6 +13,13 @@ const PermissionItems = () => (
   </>
 );
 
+type FormValues = {
+  teamPath: string;
+  content: string;
+  readPermission: SingleNote["readPermission"];
+  writePermission: SingleNote["writePermission"];
+};
+
 export default function NoteForm({
   note,
   submitTitle,
@@ -20,7 +27,7 @@ export default function NoteForm({
 }: {
   note?: SingleNote;
   submitTitle?: string;
-  onSubmit: (values: any) => void;
+  onSubmit: (values: FormValues) => void;
 }) {
   const [content, setContent] = useState(note?.content);
 
@@ -36,7 +43,7 @@ export default function NoteForm({
       isLoading={isTeamsLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={submitTitle} onSubmit={(values) => onSubmit(values)} icon={Icon.ArrowUpCircle} />
+          <Action.SubmitForm title={submitTitle} onSubmit={onSubmit} icon={Icon.ArrowUpCircle} />
         </ActionPanel>
       }
     >

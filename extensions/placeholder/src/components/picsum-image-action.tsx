@@ -1,15 +1,15 @@
+import type { Dispatch, SetStateAction } from "react";
 import { Action, Clipboard, Icon, showHUD } from "@raycast/api";
-import { downloadAndCopyImage, downloadImage } from "../utils/common-utils";
-import React from "react";
+import { downloadAndCopyImage, downloadImage } from "@/utils/common-utils";
+import { primaryAction } from "@/utils/preferences";
 
 export function PicsumImageAction(props: {
   imageURL: string;
   size: string;
-  primaryAction: string;
   autoRefresh?: boolean;
-  setRefresh?: React.Dispatch<React.SetStateAction<number>>;
+  setRefresh?: Dispatch<SetStateAction<number>>;
 }) {
-  const { imageURL, size, primaryAction } = props;
+  const { imageURL, size } = props;
   const autoRefresh = typeof props.autoRefresh === "undefined" ? false : props.autoRefresh;
   const setRefresh =
     typeof props.setRefresh === "undefined"
@@ -25,7 +25,7 @@ export function PicsumImageAction(props: {
         title={primaryAction === "Copy Image URL" ? "Copy Image URL" : "Copy Image File"}
         shortcut={{
           modifiers: primaryAction === "Copy Image URL" ? ["shift", "cmd"] : ["cmd"],
-          key: primaryAction === "Copy Image URL" ? "," : ".",
+          key: primaryAction === "Copy Image URL" ? "." : ".",
         }}
         onAction={() => {
           if (primaryAction === "Copy Image URL") {

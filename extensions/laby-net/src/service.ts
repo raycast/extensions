@@ -3,15 +3,15 @@ import { Cache, LocalStorage } from "@raycast/api";
 
 interface Profile {
   uuid: string;
-  username: string;
-  username_history: NameHistoryEntry[];
+  name: string;
+  name_history: NameHistoryEntry[];
   textures: Textures;
 }
 
 interface ProfileItem {
   uuid: string;
-  username: string;
-  username_history: NameHistoryEntryItem[];
+  name: string;
+  name_history: NameHistoryEntryItem[];
   textures: TexturesItem;
 }
 
@@ -37,8 +37,9 @@ interface Textures {
 
 interface TexturesItem {
   SKIN: TextureItem[];
-  CAPE: TextureItem[] | null;
-  ITEM1: TextureItem[] | null;
+  CAPE?: TextureItem[] | null;
+  CLOAK?: TextureItem[] | null;
+  BANDANA?: TextureItem[] | null;
 }
 
 interface Texture {
@@ -74,24 +75,12 @@ interface SearchResultEntry {
 
 interface SearchResultEntryItem {
   uuid: string;
-  user_name: string;
+  name: string;
 }
 
 interface Views {
   views: number;
 }
-
-interface AccountType {
-  type: string;
-}
-
-const accountTypes: { [key: string]: string } = {
-  LEGACY: "Legacy",
-  MOJANG: "Mojang",
-  MSA: "Microsoft",
-  MIGRATED_MSA: "Migrated to Microsoft",
-  UNKNOWN: "Unknown",
-};
 
 interface SocialMediaEntry {
   name: string;
@@ -140,7 +129,7 @@ interface TextureSearchResult {
 }
 
 interface TextureSearchResultItem {
-  textures: TextureSearchTextureItem[];
+  results: TextureSearchTextureItem[];
 }
 
 class Service {
@@ -182,12 +171,21 @@ class Service {
     return;
   }
 
+  async removeSearch(uuid: string): Promise<void> {
+    let searches = await this.getLatestSearches();
+    searches = searches.filter((entry) => entry.uuid !== uuid);
+
+    await LocalStorage.setItem("searches", JSON.stringify(searches));
+
+    return;
+  }
+
   async getProfile(uuid: string): Promise<Profile> {
-    const response = await this.client.get<ProfileItem>("v2/user/" + uuid + "/get-profile");
+    const response = await this.client.get<ProfileItem>("v3/user/" + uuid + "/profile");
     return {
       uuid: response.data.uuid,
-      username: response.data.username,
-      username_history: response.data.username_history.map((entry) => {
+      name: response.data.name,
+      name_history: response.data.name_history.map((entry) => {
         let changedAt: Date | string | null = null;
         if (entry.changed_at !== null) {
           if (entry.changed_at.length === 4) {
@@ -226,7 +224,7 @@ class Service {
             };
           }) ?? null,
         cloaks:
-          response.data.textures.ITEM1?.map((texture) => {
+          response.data.textures.CLOAK?.map((texture) => {
             return {
               type: texture.type,
               imageHash: texture.image_hash,
@@ -241,11 +239,11 @@ class Service {
   }
 
   async search(query: string): Promise<SearchResult> {
-    const response = await this.client.get<SearchResultItem>("search/names/" + query);
+    const response = await this.client.get<SearchResultItem>("v3/search/names/" + query);
     const result: SearchResultEntry[] = response.data.results.map((entry) => {
       return {
         uuid: entry.uuid,
-        userName: entry.user_name,
+        userName: entry.name,
       };
     });
 
@@ -255,19 +253,14 @@ class Service {
   }
 
   async getViews(uuid: string): Promise<Views> {
-    const response = await this.client.get<Views>("user/" + uuid + "/get-views");
+    const response = await this.client.get<Views>("v3/user/" + uuid + "/views");
     return {
       views: response.data.views,
     };
   }
 
-  async getAccountType(uuid: string): Promise<string> {
-    const response = await this.client.get<AccountType>("user/" + uuid + "/account-type");
-    return accountTypes[response.data.type];
-  }
-
   async getSocialMedia(uuid: string): Promise<SocialMediaEntry[]> {
-    const response = await this.client.get<SocialMediaEntryItem[]>("v2/user/" + uuid + "/socials");
+    const response = await this.client.get<SocialMediaEntryItem[]>("v3/user/" + uuid + "/socials");
     return response.data.map((entry) => {
       return {
         name: entry.name,
@@ -279,7 +272,7 @@ class Service {
   }
 
   async getBadges(uuid: string): Promise<Badge[]> {
-    const response = await this.client.get<BadgeItem[]>("user/" + uuid + "/get-badges");
+    const response = await this.client.get<BadgeItem[]>("v3/user/" + uuid + "/badges");
     return response.data.map((entry) => {
       return {
         name: entry.name,
@@ -291,19 +284,19 @@ class Service {
   }
 
   async searchTextures(type: string, input: string): Promise<TextureSearchResult> {
-    const params: any = {
-      type: type,
+    const params: Record<string, string> = {
+      order: "most_used",
     };
 
     if (input !== "") {
       params["input"] = input;
     }
 
-    const response = await this.client.get<TextureSearchResultItem>("texture/search", {
+    const response = await this.client.get<TextureSearchResultItem>(`v3/search/textures/${type.toLowerCase()}`, {
       params: params,
     });
     return {
-      textures: response.data.textures.map((texture) => {
+      textures: response.data.results.map((texture) => {
         return {
           name: texture.name,
           imageHash: texture.image_hash,

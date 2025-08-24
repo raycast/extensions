@@ -8,6 +8,8 @@ Browse Feedly through Raycast
 
 ## Requirements
 
-Head over to https://feedly.com/v3/auth/dev to get your Feedly Access Token.
+Head over to https://feedly.com/v3/auth/dev to get your Feedly Access Token*.
+
+* Need a pro account.
 
 Built with 💙 by [Shubham](https://shbm.fyi/tw)

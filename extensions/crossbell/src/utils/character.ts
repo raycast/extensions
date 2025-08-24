@@ -1,4 +1,4 @@
-import type { CharacterEntity } from "crossbell.js";
+import type { CharacterEntity } from "crossbell";
 import { ipfsLinkToHttpLink } from "./ipfs";
 
 export function extractCharacterInfo(character?: CharacterEntity) {
@@ -50,7 +50,7 @@ function stringToInteger(
   }: {
     min?: number;
     max?: number;
-  } = {}
+  } = {},
 ) {
   let total = 0;
   for (let i = 0; i !== string.length; i++) {

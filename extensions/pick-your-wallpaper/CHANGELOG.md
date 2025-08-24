@@ -1,5 +1,22 @@
 # Pick Your Wallpaper Changelog
 
+## [1.0.7] - 2025-08-11
+
+- Added "Open Wallpaper Folder" action to easily open the configured wallpaper folder in Finder
+- Fixed thumbnail creation issues with file paths containing spaces and special characters
+
+## [1.0.6] - 2025-01-12
+
+- Create small thumbnails for faster loading times when using high resolution wallpaper images.
+
+## [1.0.5] - 2024-05-20
+
+- Improved search by making it non-case sensitive.
+
+## [Moved contributor] - 2024-04-15
+
+- No changes were made in the code.
+
 ## [1.0.4] - 2023-09-08
 
 - Added new command for setting a selected picture in Finder as a desktop wallpaper

@@ -4,36 +4,52 @@ import {
   launchCommand,
   LaunchType,
   MenuBarExtra,
-  openExtensionPreferences,
+  openCommandPreferences,
   showHUD,
 } from "@raycast/api";
-import { getStarTimezones } from "./hooks/hooks";
-import { buildDayAndNightIcon, calculateTimeInfoByOffset, isEmpty } from "./utils/common-utils";
+import { calculateTimeInfoByOffset, formatMenubarDate, getMenubarAvatar, isEmpty } from "./utils/common-utils";
+import { useMemo } from "react";
+import { showFirstTimezone } from "./types/preferences";
+import { useStarTimezones } from "./hooks/useStarTimezones";
 
 export default function QueryWorldTime() {
-  const { starTimezones, loading } = getStarTimezones();
+  const { data: starTimezonesData, isLoading } = useStarTimezones();
+
+  const starTimezones = Array.isArray(starTimezonesData) ? starTimezonesData : [];
+
+  const menubarTitle = useMemo(() => {
+    if (showFirstTimezone && starTimezones.length > 0) {
+      const timeInfo = calculateTimeInfoByOffset(Date.now(), starTimezones[0].utc_offset);
+      const title = isEmpty(starTimezones[0].alias) ? starTimezones[0].timezone : starTimezones[0].alias + "";
+      return title + " " + formatMenubarDate(timeInfo.dateRaw);
+    } else {
+      return "";
+    }
+  }, [starTimezones]);
+
+  const menubarIcon = useMemo(() => {
+    if (showFirstTimezone && starTimezones.length > 0) {
+      return getMenubarAvatar(starTimezones[0]);
+    } else {
+      return Icon.Globe;
+    }
+  }, [starTimezones]);
+
   return (
-    <MenuBarExtra
-      isLoading={loading}
-      icon={{ source: { light: "world-time-menu-bar.png", dark: "world-time-menu-bar@dark.png" } }}
-    >
+    <MenuBarExtra isLoading={isLoading} icon={menubarIcon} title={menubarTitle}>
       {starTimezones.length === 0 && <MenuBarExtra.Item title={"No star timezone"} />}
-      {starTimezones.map((value) => {
+      {starTimezones.map((value, index) => {
         const timeInfo = calculateTimeInfoByOffset(Date.now(), value.utc_offset);
         return (
           <MenuBarExtra.Submenu
-            key={value.timezone}
-            icon={{
-              source: {
-                light: buildDayAndNightIcon(value.unixtime, true),
-                dark: buildDayAndNightIcon(value.unixtime, false),
-              },
-            }}
-            title={(isEmpty(value.alias) ? value.timezone : value.alias + "") + ": " + value.date_time}
+            key={value.timezone + index}
+            icon={getMenubarAvatar(value)}
+            title={(isEmpty(value.alias) ? value.timezone : value.alias + "") + "   " + value.date_time}
           >
             <MenuBarExtra.Item
               icon={Icon.Geopin}
-              title={"Timezone: " + value.timezone}
+              title={"Timezone"}
+              subtitle={value.timezone}
               onAction={async () => {
                 await showHUD("Timezone is copied to clipboard");
                 await Clipboard.copy(value.timezone);
@@ -41,7 +57,8 @@ export default function QueryWorldTime() {
             />
             <MenuBarExtra.Item
               icon={Icon.Clock}
-              title={"Date Time: " + timeInfo.dateTime}
+              title={"Date Time"}
+              subtitle={timeInfo.dateTime}
               onAction={async () => {
                 await showHUD("Date Time is copied to clipboard");
                 await Clipboard.copy(timeInfo.dateTime);
@@ -49,7 +66,8 @@ export default function QueryWorldTime() {
             />
             <MenuBarExtra.Item
               icon={Icon.CricketBall}
-              title={"UTC Time: " + timeInfo.utc_datetime}
+              title={"UTC Time"}
+              subtitle={timeInfo.utc_datetime}
               onAction={async () => {
                 await showHUD("UTC Time is copied to clipboard");
                 await Clipboard.copy(timeInfo.utc_datetime);
@@ -57,7 +75,8 @@ export default function QueryWorldTime() {
             />
             <MenuBarExtra.Item
               icon={Icon.BandAid}
-              title={"UTC Offset: " + value.utc_offset}
+              title={"UTC Offset"}
+              subtitle={value.utc_offset}
               onAction={async () => {
                 await showHUD("UTC Offset is copied to clipboard");
                 await Clipboard.copy(value.utc_offset);
@@ -66,7 +85,8 @@ export default function QueryWorldTime() {
             {!isEmpty(value.alias) && (
               <MenuBarExtra.Item
                 icon={Icon.Text}
-                title={"Alias: " + value.alias}
+                title={"Alias"}
+                subtitle={value.alias}
                 onAction={async () => {
                   await showHUD("Alias is copied to clipboard");
                   await Clipboard.copy(value.alias + "");
@@ -76,7 +96,8 @@ export default function QueryWorldTime() {
             {!isEmpty(value.memo) && (
               <MenuBarExtra.Item
                 icon={value.memoIcon}
-                title={"Memo: " + value.memo}
+                title={"Memo"}
+                subtitle={value.memo}
                 onAction={async () => {
                   await showHUD("Memo is copied to clipboard");
                   await Clipboard.copy(value.memo + "");
@@ -99,11 +120,11 @@ export default function QueryWorldTime() {
 
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
-          title={"Preferences"}
+          title={"Settings..."}
           icon={Icon.Gear}
           shortcut={{ modifiers: ["cmd"], key: "," }}
           onAction={() => {
-            openExtensionPreferences().then();
+            openCommandPreferences().then();
           }}
         />
       </MenuBarExtra.Section>

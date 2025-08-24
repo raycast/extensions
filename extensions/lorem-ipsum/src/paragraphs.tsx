@@ -1,18 +1,15 @@
-import { getPreferenceValues, showHUD } from "@raycast/api";
-import { generateParagraphs, preformAction, safeLoremIpsumNumberArg } from "./utils";
-import { LoremIpsumArguments } from "./types";
+import { LaunchProps } from "@raycast/api";
+import { generateParagraphs, showError, produceOutput, safeLoremIpsumNumberArg } from "./utils";
 
-export default async function ParagraphCommand(props?: { arguments: LoremIpsumArguments }) {
-  const { action = "clipboard" } = getPreferenceValues();
-
-  const numberArg = props?.arguments.numberOfLoremIpsumsToGenerate;
+export default async function ParagraphCommand(props?: LaunchProps<{ arguments: Arguments.Paragraphs }>) {
+  const numberArg = props?.arguments.numberOfParagraphs;
 
   const { error, safeLoremIpsumNumber } = await safeLoremIpsumNumberArg(numberArg);
 
   if (error) {
-    await showHUD(`❌ ${error.message}`);
+    await showError(error.message);
   } else {
     const output = generateParagraphs(safeLoremIpsumNumber);
-    await preformAction(action, output);
+    await produceOutput(output);
   }
 }

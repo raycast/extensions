@@ -1,5 +1,180 @@
 # Spotify Player Changelog
 
+## [Fix reading values from possibly undefined objects] - 2025-08-22
+
+- Remove unneeded `.tool-versions`
+- Fix reading values from possibly undefined objects
+- Bump dependencies to the latest & fix linting issues
+
+## [Show the Artist name when liking a song] - 2025-08-04
+
+- Added the artist name into the message in the HUD when liking a new song
+- Added the artist name into the message in the HUD attempting to like an already liked song
+
+## [Add toggle to filter song name in menu bar] - 2025-07-08
+
+- Added new toggle for removing extra info like remix titles or versions from the song name in the menubar
+
+## [Fix Search Feature] - 2025-07-03
+
+- Fixed an issue with the search functionality.
+
+## [Fix Noises and Additional data in Find Lyrics Function] - 2025-07-02
+
+- Fixed Noises in retrieved lyrics in Find Lyrics Function,now clean lyrics is extracted without any additional noise or data like contributors count and numbers
+
+## [Add Option to View the Lyrics of the Song playing] - 2025-06-30
+
+- Add new command 'Find Lyrics'.
+- Add an option that allows users to See the current song’s Lyrics, artist and title.
+
+## [Add Option to Copy the Current Song’s Artist and Title] - 2025-05-26
+
+- Add new command 'Copy Artist And Title'.
+- Add an option in the `NowPlaying` command that allows users to copy the current song’s artist and title.
+
+## [Fix AppleScript fallback for non-premium users] - 2025-05-21
+
+- Fixed AppleScript fallback for functions that use premium-only API endpoints. Most commands now work without a premium subscription except queuing, cycleRepeat (AppleScript can only toggle context off/on) and device selection.
+
+## [✨ AI Enhancements] - 2025-04-30
+
+- Added AI queue interaction (e.g.,"@spotify add 10 random jazz songs to my queue").
+
+## [Fix Select Device] - 2025-02-26
+
+- Fixed a possibly undefined issue from Select Devices command
+
+## [✨ AI Enhancements] - 2025-02-21
+
+## [Fix Missing Playlists in Add Playing Song to Playlist command] - 2025-02-20
+
+- Fixed an issue where some playlists were not appearing when users attempted to add a currently playing song to a playlist.
+
+## [Add Copy Embed Code Command] - 2025-02-20
+
+- Added a new command to copy the iframe embed code for the currently playing song.
+
+## [Add "Skip 15 Seconds" and "Back 15 Seconds" commands] - 2025-02-18
+
+- Added the ability to skip forward or back 15 seconds in the current episode. This adds two new commands as well as two new menu bar items which only show when an 'episode' is playing.
+
+## [Artist Name Visibility Option] - 2025-02-07
+
+- Added the option to hide the artist's name in the Menu Bar Player.
+
+## [Fix Your Library] - 2025-02-04
+
+- Fix a possibly null issue from `getMeAlbums` API.
+
+## [Generate Playlist Improvement - Artists] - 2024-12-03
+
+- Modify the prompt so if the description contains "songs from: artist1, artist2, etc" it will only generate a playlist using those artists
+
+## [Fix Search Command] - 2024-11-22
+
+- Even though it's not documented, the Spotify API can return null items in some cases when searching for items. This has now been fixed.
+
+## [Minor Fixes] - 2024-09-20
+
+- Fixed an issue when "Nothing is playing" popped up after commands `next`, `previous` and `like` having `Current Track` command disabled
+
+## [Generate Playlist Improvement] - 2024-09-06
+
+- Use GPT-4o mini instead of GPT-4o to make it faster.
+
+## [Add "Start DJ" Command] - 2024-09-05
+
+- Added a command to start the DJ using AppleScript, because the Spotify API doesn't support it.
+
+## [Quicklink to Add Playing Song to Playlist] - 2024-08-29
+
+- Adds an action to create a quicklink to add the currently playing song to a specific playlist.
+
+## [Add Preference to Only Show Music in Search Command] - 2024-08-26
+
+- Added a preference to only show music results in the search command for users who don't want to see podcasts and episodes.
+
+## [Add "Remove All Searches" Action in Search Command] - 2024-08-22
+
+- Added `Remove All Searches` action to remove all search history in one click.
+
+## [Log out the user if re-authentication fails] - 2024-07-11
+
+- Automatically log out users if re-authentication fails, instead of displaying an error message.
+
+## [Generate Playlist Fixes] - 2024-06-11
+
+- Removed automatic copying to clipboard after AI generates a result.
+- Improved the error message displayed when the playlist generation fails.
+
+## [Generate Playlist] - 2024-06-04
+
+- Added a new feature where Raycast AI can create a playlist for you. You can then add this playlist to Spotify or queue all the songs directly.
+
+## [New Album Actions] - 2024-05-30
+
+- Added new actions in the album panel: `Add To Library` and `Remove From Library`.
+
+## [Automatically Trigger Current Track] - 2024-05-28
+
+- Automatically trigger the current track command when commands that modify the current track state are executed. (Like, Unlike, Next, Previous).
+
+## [New Actions Added] - 2024-05-27
+
+- Added `Like` and `Dislike` actions for tracks.
+
+## [Improvements] - 2024-05-27
+
+- Users can now set their preferred first section for search results.
+- Added a new keyboard shortcut for "Add to queue".
+
+## [New "Remove Playing Song from Playlist" command] - 2024-05-27
+
+- New command `Remove Playing Song from Playlist` to remove the current song from the playlist it's in.
+
+## [New "Add Playing Song to Playlist" command] - 2024-02-02
+
+- New command `Add Playing Song to Playlist` to directly add the current song to a playlist of your choice.
+- Removed the condition to filter collaborative playlists from other users, since Spotify doesn't update it correctly.
+
+## [New "Queue" Command] - 2023-01-31
+
+- New `Queue` command allowing the user to view songs/epsiodes in the queue.
+
+## [Bug fixes] - 2024-01-31
+
+- Fixed a bug that caused launching the Spotify app to not work properly
+- Modified the device selection preference for playback
+
+## [Improvement] - 2024-01-30
+
+- Increase the stale data time from 10 minutes to 2 hours
+
+## [Fix Current Track Like State] - 2023-12-31
+
+- Fix showing the like/disliked state of the current track
+
+## [Feature & Optimisation] - 2023-12-02
+
+- Added `Select Device` command to select the device to play music on.
+- Automatically select a device when no device is selected.
+- Better handling when no device is found or Spotify is not installed.
+- Informative error toast messages.
+- Show songs for the `Liked Songs` playlist.
+- Fix uri for `Liked Songs` playlist.
+
+## [Feature] - 2023-09-29
+
+- Show a Liked Songs playlist in search and library commands.
+
+## [More Commands] - 2023-09-07
+
+- Added `Current Track` command to view the current track and artist/show, and the like state
+- Added `Replay` command to go to the beginning of the song, replaying it
+- Added `Set Volume` command to set the volume to an arbitrary percent, using an argument
+- Renamed `Toggle Repeat` to `Cycle Repeat` command to cycle between all three repeat states instead of just two states
+
 ## [Feature] - 2023-07-31
 
 - New Menu Bar Player preference to hide the icon when Spotify is not running, or when there is nothing playing.

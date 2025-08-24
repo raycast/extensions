@@ -1,5 +1,14 @@
 # LastPass Changelog
 
+## [Fix] - 2024-08-01
+
+- Increase `maxBuffer` to be able to handle larger output
+- Add note about 2FA support to README
+
+## [Fix] - 2023-11-06
+
+- Fixed a bug that caused the extension to crash
+
 ## [Enhancements] - 2023-11-01
 
 - Fixed a bug that caused the extension to crash when using special chars

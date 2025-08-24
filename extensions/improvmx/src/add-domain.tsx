@@ -1,174 +1,37 @@
-import {
-  ActionPanel,
-  Form,
-  Action,
-  Toast,
-  getPreferenceValues,
-  popToRoot,
-  showToast,
-  LaunchProps,
-  Detail,
-  openExtensionPreferences,
-} from "@raycast/api";
+import { Toast, popToRoot, showToast, LaunchProps } from "@raycast/api";
 
-import { useState } from "react";
 import fetch from "node-fetch";
+import { API_HEADERS, API_URL, DOMAIN_REGEX } from "./constants";
+import { showFailureToast } from "@raycast/utils";
+import { Domain } from "./types";
+import { parseImprovMXResponse } from "./utils";
 
-interface Preferences {
-  api_token: string;
-}
+export default async function AddDomain(props: LaunchProps<{ arguments: Arguments.AddDomain }>) {
+  const propDomain = props.arguments.domain;
+  const isValid = DOMAIN_REGEX.test(propDomain);
 
-interface State {
-  domain?: string;
-  isValid?: boolean;
-  isLoading?: boolean;
-  error: string;
-  isRequireUpgrade: boolean;
-}
+  try {
+    await showToast(Toast.Style.Animated, "Adding Domain");
+    if (!isValid) throw new Error("Invalid Domain");
 
-export default function AddDomain() {
-  const [state, setState] = useState<State>({
-    domain: undefined,
-    isValid: false,
-    isLoading: false,
-    error: "",
-    isRequireUpgrade: false,
-  });
+    const response = await fetch(API_URL + "domains", {
+      method: "POST",
+      headers: API_HEADERS,
+      body: JSON.stringify({
+        domain: propDomain,
+      }),
+    });
+    // @ts-expect-error Response type is incompatible
+    const result = await parseImprovMXResponse<{ domain: Domain }>(response, { pagination: false });
 
-  const [domain, setDomain] = useState("");
-  const [isValid, setIsValid] = useState(true);
-
-  const API_TOKEN = getPreferenceValues<Preferences>().api_token;
-
-  const API_URL = "https://api.improvmx.com/v3/";
-
-  const auth = Buffer.from("api:" + API_TOKEN).toString("base64");
-  const DOMAIN_REGEX = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/i;
-
-  const handleDomainChange = (newDomain: string) => {
-    if (newDomain.length > 0) {
-      setIsValid(DOMAIN_REGEX.test(newDomain));
-      setDomain(newDomain);
-    }
-  };
-
-  const handleSubmit = async () => {
-    if (isValid) {
-      setState((prevState) => {
-        return { ...prevState, isLoading: true };
-      });
-
-      try {
-        const apiResponse = await fetch(API_URL + "domains", {
-          method: "POST",
-          headers: {
-            Authorization: "Basic " + auth,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            domain: domain,
-          }),
-        });
-
-        if (!apiResponse.ok) {
-          if (apiResponse.status === 401) {
-            setState((prevState) => {
-              return { ...prevState, error: "Invalid API Token", isLoading: false };
-            });
-
-            await showToast(Toast.Style.Failure, "ImprovMX Error", "Invalid API Token");
-            setDomain("");
-            setTimeout(() => {
-              popToRoot({ clearSearchBar: true });
-            }, 2000);
-            return;
-          }
-
-          const apiErrors = (await apiResponse.json()) as { error?: string; errors?: Record<string, string[]> };
-          if (apiErrors.errors) {
-            const errorToShow = Object.values(apiErrors.errors).flat();
-
-            await showToast(Toast.Style.Failure, "ImprovMX Error", errorToShow[0]);
-
-            if (errorToShow[0].startsWith("Your account is limited to")) {
-              setState((prevState) => {
-                return { ...prevState, isRequireUpgrade: true, isLoading: false };
-              });
-            }
-
-            await showToast(Toast.Style.Failure, "ImprovMX Error", errorToShow[0]);
-            setDomain("");
-            setState((prevState) => {
-              return { ...prevState, isLoading: false, error: errorToShow[0] };
-            });
-          }
-          return;
-        }
-      } catch (err) {
-        setState((prevState) => {
-          return {
-            ...prevState,
-            error:
-              "There was an error with your request. Make sure you are connected to the internet. Please check that your API Token is correct and up-to-date. You can find your API Token in your Improvmx Dashboard at https://improvmx.com/dashboard. If you need help, please contact support@improvmx.com.",
-            isLoading: false,
-          };
-        });
-        await showToast(Toast.Style.Failure, "ImprovMX Error", "Failed to add domain. Please try again later.");
-        return;
-      }
-
-      setState((prevState) => {
-        return { ...prevState, isLoading: false };
-      });
-      await showToast(Toast.Style.Success, "Domain Added", "Domain added successfully to your ImprovMX account.");
-      setDomain("");
-      popToRoot({ clearSearchBar: true });
-    }
-  };
-
-  const upgradeAction = (
-    <ActionPanel>
-      <Action.OpenInBrowser url="https://app.improvmx.com/account/payment" title="Upgrade ImprovMX Account" />
-    </ActionPanel>
-  );
-
-  return state.error ? (
-    <Detail
-      markdown={"⚠️" + state.error}
-      actions={
-        <ActionPanel>
-          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
-        </ActionPanel>
-      }
-    />
-  ) : (
-    <Form
-      isLoading={state.isLoading}
-      actions={
-        state.isRequireUpgrade ? (
-          upgradeAction
-        ) : (
-          <ActionPanel>
-            <Action
-              title="Submit"
-              onAction={() => {
-                handleSubmit();
-              }}
-            />
-          </ActionPanel>
-        )
-      }
-    >
-      <Form.TextField
-        id="domain"
-        autoFocus
-        info="Enter a domain to add to your ImprovMX account."
-        error={isValid ? undefined : "Invalid domain"}
-        title="Domain"
-        placeholder="example.com"
-        value={domain}
-        onChange={handleDomainChange}
-      />
-    </Form>
-  );
+    await showToast(
+      Toast.Style.Success,
+      `${result.data.domain.display} Added`,
+      "Domain added successfully to your ImprovMX account.",
+    );
+    popToRoot({ clearSearchBar: true });
+  } catch (error) {
+    await showFailureToast(error, { title: "ImprovMX Error" });
+    return;
+  }
 }

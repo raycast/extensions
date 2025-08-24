@@ -5,10 +5,22 @@
   "description": "Just add your desired image size (width & height), and you'll get a stylish placeholder.",
   "icon": "placeholder-icon.png",
   "author": "koinzhang",
+  "contributors": [
+    "j3lte"
+  ],
   "categories": [
     "Design Tools",
     "Developer Tools",
     "Media"
+  ],
+  "keywords": [
+    "Lorem",
+    "picsum",
+    "placeholder",
+    "image",
+    "photo",
+    "design",
+    "media"
   ],
   "license": "MIT",
   "commands": [
@@ -22,7 +34,7 @@
           "name": "layout",
           "type": "dropdown",
           "description": "Set the layout of the image items.",
-          "required": true,
+          "required": false,
           "title": "Image Layout",
           "default": "Grid",
           "data": [
@@ -41,7 +53,7 @@
           "type": "dropdown",
           "description": "Set the number of columns of the image items. (Only works with Grid layout)",
           "required": false,
-          "title": "Image Item Coloums",
+          "title": "Image Item Columns",
           "default": "5",
           "data": [
             {
@@ -107,24 +119,6 @@
               "value": "100"
             }
           ]
-        },
-        {
-          "name": "applyTo",
-          "title": "Apply Wallpaper To",
-          "description": "Apply the wallpaper to which monitor. Valid only when you are using an extended monitor.",
-          "type": "dropdown",
-          "data": [
-            {
-              "title": "Current Monitor",
-              "value": "current"
-            },
-            {
-              "title": "Every Monitor",
-              "value": "every"
-            }
-          ],
-          "required": false,
-          "default": "every"
         }
       ]
     },
@@ -132,16 +126,78 @@
       "name": "random-placeholder-image",
       "title": "Random Placeholder Image",
       "description": "Just add your desired image size (width & height), and get a random stylish placeholder.",
-      "mode": "view",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "width",
+          "type": "text",
+          "required": false,
+          "placeholder": "Width"
+        },
+        {
+          "name": "height",
+          "type": "text",
+          "required": false,
+          "placeholder": "Height"
+        }
+      ],
       "preferences": [
         {
-          "name": "autoRefresh",
-          "type": "checkbox",
-          "description": "Automatically refresh image URL after copying or downloading images.",
+          "name": "defaultWidth",
+          "title": "Image Width",
+          "type": "textfield",
+          "description": "Set the default width of the image.",
           "required": false,
-          "title": "Advanced Preferences",
-          "default": true,
-          "label": "Auto Refresh"
+          "default": "300"
+        },
+        {
+          "name": "defaultHeight",
+          "title": "Image Height",
+          "type": "textfield",
+          "description": "Set the default height of the image.",
+          "required": false,
+          "default": "300"
+        },
+        {
+          "name": "blur",
+          "title": "Image Style",
+          "label": "Blur",
+          "type": "textfield",
+          "description": "Level of image blurriness form 0-10",
+          "required": false,
+          "default": "0"
+        },
+        {
+          "name": "jpg",
+          "label": "JPG",
+          "type": "checkbox",
+          "description": "Get image url as .jpg",
+          "required": false,
+          "default": false
+        },
+        {
+          "name": "grayscale",
+          "label": "Grayscale",
+          "type": "checkbox",
+          "description": "Image grayscale or normal",
+          "required": false,
+          "default": false
+        },
+        {
+          "name": "noCache",
+          "label": "No Cache",
+          "type": "checkbox",
+          "description": "Prevent the image from being cached",
+          "required": false,
+          "default": false
+        },
+        {
+          "name": "staticRandom",
+          "label": "Static Random",
+          "type": "checkbox",
+          "description": "Get the same random image every time based on a seed",
+          "required": false,
+          "default": true
         }
       ]
     }
@@ -167,27 +223,28 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
-    "fs-extra": "^10.1.0",
-    "picsum-photos": "^3.0.10",
-    "run-applescript": "^6.0.0",
-    "axios": "^0.27.2"
+    "@raycast/api": "^1.79.1",
+    "@raycast/utils": "^1.16.2",
+    "fs-extra": "^11.2.0",
+    "node-fetch": "^3.3.2",
+    "picsum-photos": "^3.0.10"
   },
   "devDependencies": {
-    "@types/fs-extra": "^9.0.13",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "20.12.7",
+    "@types/react": "18.2.79",
+    "eslint": "^8.51.0",
+    "prettier": "^3.3.1",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx -y @raycast/api@latest publish"
   }
 }

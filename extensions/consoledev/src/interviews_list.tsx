@@ -1,4 +1,4 @@
-import { List, showToast, ToastStyle } from "@raycast/api";
+import { Icon, List, showToast, ToastStyle } from "@raycast/api";
 import { isLeft } from "fp-ts/lib/Either";
 import { useEffect, useState } from "react";
 import FeedItem from "./components/FeedItem";
@@ -40,7 +40,7 @@ export default function InterviewsList() {
       searchBarPlaceholder="Filter interviews by name..."
     >
       {state.feed?.items.map((interview) => (
-        <FeedItem item={formatInterview(interview)} key={interview.link} type="interviews" />
+        <FeedItem item={formatInterview(interview)} key={interview.link} icon={Icon.Person} />
       ))}
     </List>
   );
@@ -54,7 +54,7 @@ const formatInterview = (interview: Interview): Interview => ({
     S.split(","),
     (a) => a.slice(1).join(", "),
     S.trim,
-    S.replace("&amp;", "&")
+    S.replace("&amp;", "&"),
     // truncate( 40 )
   ),
 });

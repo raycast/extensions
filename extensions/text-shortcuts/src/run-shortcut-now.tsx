@@ -1,12 +1,12 @@
+import { ActionPanel, Color, Form, getPreferenceValues, Icon } from "@raycast/api";
 import React, { useState } from "react";
-import { ActionPanel, Form, getPreferenceValues } from "@raycast/api";
-import { Taction } from "./util/shortcut";
-import { tactionForms } from "./create-shortcut";
-import { shortcutTips } from "./util/constants";
-import { ActionRunShortcut } from "./components/action-run-shortcut";
 import { ActionOnTactions } from "./components/action-on-tactions";
 import { ActionOpenPreferences } from "./components/action-open-preferences";
+import { ActionRunShortcut } from "./components/action-run-shortcut";
+import { tactionForms } from "./create-shortcut";
 import { Preferences } from "./types/preferences";
+import { shortcutTips } from "./util/constants";
+import { Shortcut, ShortcutInfo, ShortcutSource, Taction } from "./util/shortcut";
 
 export default function CreateShortcut() {
   const [tactions, setTactions] = useState<Taction[]>([]);
@@ -37,10 +37,25 @@ function RunShortcutActions(props: {
   closeMainWindow: boolean;
 }) {
   const { primaryAction, tactions, setTactions, closeMainWindow } = props;
-  console.debug(primaryAction);
+  const shortcutInfo: ShortcutInfo = {
+    name: "test",
+    tag: ["other"],
+    icon: Icon.Star,
+    iconColor: Color.Yellow,
+    source: ShortcutSource.USER,
+    id: "user_" + new Date().getTime(),
+    visibility: false,
+  };
+  const shortcut: Shortcut = new Shortcut(shortcutInfo, tactions);
+
   return (
     <ActionPanel>
-      <ActionRunShortcut primaryAction={primaryAction} closeMainWindow={closeMainWindow} tactions={tactions} />
+      <ActionRunShortcut
+        primaryAction={primaryAction}
+        closeMainWindow={closeMainWindow}
+        shortcut={shortcut}
+        visitItem={() => {}}
+      />
 
       <ActionOnTactions tactions={tactions} setTactions={setTactions} />
       <ActionOpenPreferences />

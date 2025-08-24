@@ -1,5 +1,45 @@
 # Library Genesis Changelog
 
+## [Fix Search + Modernize] - 2025-07-30
+
+- fix: search was not working due to site changes (ref: [Issue #20481](https://github.com/raycast/extensions/issues/20481))
+- ⚠️ only downloads from default gateway
+- automatically searches again on type change
+- added: `libgen.bz`, `libgen.li`
+- removed: `libgen.is`, `libgen.st`
+- **Fiction** titles now support same items as all other
+- Modernize to use latest Raycast config
+
+## [Experimental Fiction Search] - 2024-10-22
+
+- You can now choose to search for Fiction or Non-Fiction (default) titles every time. Fiction search results currently have the following:
+  1. ⚠️ do not yet support your Language and Format Preferences
+  2. ⚠️ do not show all the information e.g. no dates
+  3. ✅ supports downloading
+  4. ✅ supports opening in browser
+  5. ⚠️ no book cover
+- NOTE: Changing the type will not trigger the search again - you will need to re-type to get new results
+- removed `libgen.rs` as it seems to be inactive - may be brought back in future
+
+## [Ignore HTTPS Errors] - 2024-02-17
+
+- Fixed an issue where `library.lol` gives certificate errors (ignore SSL errors) (#10798)
+- Added an extra description in download error where the user is instructed to either choose a different mirror or ignore https errors
+- Bump dependencies to latest version
+
+## [Housekeeping] - 2023-12-05
+
+- Removed [libgen](https://www.npmjs.com/package/libgen) dependency
+  - The library is not maintained and had issues with old mirrors
+- Removed `axios` because we can use `node-fetch` instead
+- Updated all (dev) dependencies to latest version
+- Added better code formatting and linting, cleaned up code
+- Updated download controller, this is now cancellable
+- Add Mirror List to the extension
+  - This is a list of all mirrors that are currently available in the extension
+- Cached fastest mirror
+  - This is now cached for 1 hour, so we don't have to check for the fastest mirror every time
+
 ## [Feature Updates] - 2022-07-21
 
 - Supported downloading to a default directory

@@ -1,8 +1,9 @@
 import { ActionPanel, Icon } from "@raycast/api";
-import { usePages } from "../hooks/usePages";
-import { Application } from "@raycast/api";
-
-import { File } from "../types";
+import type { Application } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { useState } from "react";
+import { fetchPages } from "../api";
+import type { File } from "../types";
 import { OpenPageAction } from "./OpenPageAction";
 
 export function OpenPageSubmenuAction(props: {
@@ -10,10 +11,19 @@ export function OpenPageSubmenuAction(props: {
   desktopApp: Application | undefined;
   onVisit: (file: File) => void;
 }) {
-  const pages = usePages(props.file);
+  const [shouldFetch, setShouldFetch] = useState(false);
+  const { data: pages, isLoading } = useCachedPromise((fileKey) => fetchPages(fileKey), [props.file.key], {
+    execute: shouldFetch,
+  });
 
   return (
-    <ActionPanel.Submenu icon={Icon.Document} title="Open Page" shortcut={{ modifiers: ["cmd"], key: "g" }}>
+    <ActionPanel.Submenu
+      icon={Icon.Document}
+      title="Open Page"
+      shortcut={{ modifiers: ["cmd"], key: "g" }}
+      isLoading={isLoading}
+      onOpen={() => setShouldFetch(true)}
+    >
       {pages?.map((p) => (
         <OpenPageAction
           key={p.id}

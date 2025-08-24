@@ -10,7 +10,7 @@ interface RepositoryArgument {
 
 export default function SearchGoogleMavenRepository(props: { arguments: RepositoryArgument }) {
   const { repository } = props.arguments;
-  const [searchContent, setSearchContent] = useState<string>(repository);
+  const [searchContent, setSearchContent] = useState<string>(repository ? repository.trim() : "");
   const [filter, setFilter] = useState<string>("All");
   const { artifactInfo, loading } = searchArtifacts(searchContent.trim());
 

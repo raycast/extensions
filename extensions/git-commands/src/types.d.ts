@@ -5,12 +5,20 @@ export type Alias = {
   main: string;
   type: AliasType;
   description: string;
+  pin?: boolean;
+  recent?: boolean;
 };
 
 /**
  * Type according to the impact the alias may have.
- * - show: The command only shows information, no changes are made.
- * - default: The command can edit, move or delete files.
- * - delete: The command is directly related to the deletion information.
+ * - show: Only shows information.
+ * - default: Can edit, move or delete.
+ * - delete: Related to information deletion.
  */
 export type AliasType = "show" | "default" | "delete";
+
+export interface Data {
+  aliases: Alias[];
+  pins: Alias[];
+  recent: Alias[];
+}

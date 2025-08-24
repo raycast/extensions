@@ -5,6 +5,13 @@
   "description": "Convert timestamps and datetime strings into various formats.",
   "icon": "command-icon.png",
   "author": "yangxy",
+  "contributors": [
+    "yifengkuaijian",
+    "pernielsentikaer",
+    "hemang_kinra",
+    "jose-elias-alvarez",
+    "bestemic"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -12,27 +19,172 @@
       "title": "Format Date",
       "description": "Convert timestamps and datetime strings into various formats.",
       "mode": "view"
+    },
+    {
+      "name": "insert-natural-language-date",
+      "title": "Insert Natural Language Date",
+      "description": "Convert a natural language prompt into a formatted date and insert it into the frontmost application",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "placeholder": "Date Prompt",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "format",
+          "placeholder": "Date Format",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "isoDate",
+      "title": "Select Preferred Date Time Formats",
+      "type": "checkbox",
+      "required": false,
+      "label": "YYYY-MM-DD",
+      "description": "2024-11-01",
+      "default": true
+    },
+    {
+      "name": "isoDateTime",
+      "type": "checkbox",
+      "required": false,
+      "label": "YYYY-MM-DD HH:mm:ss",
+      "description": "2024-11-01 01:56:27",
+      "default": true
+    },
+    {
+      "name": "formatWithMillis",
+      "type": "checkbox",
+      "required": false,
+      "label": "YYYY-MM-DD HH:mm:ss.SSS",
+      "description": "2024-11-01 01:56:27.000",
+      "default": true
+    },
+    {
+      "name": "formatWithTimezone",
+      "type": "checkbox",
+      "required": false,
+      "label": "YYYY-MM-DD HH:mm:ssZ",
+      "description": "2024-11-01 01:56:27+05:30",
+      "default": true
+    },
+    {
+      "name": "isoFormat",
+      "type": "checkbox",
+      "required": false,
+      "label": "ISO 8601 (default)",
+      "description": "2024-11-01T01:56:27+05:30",
+      "default": true
+    },
+    {
+      "name": "utcIsoFormat",
+      "type": "checkbox",
+      "required": false,
+      "label": "UTC ISO 8601",
+      "description": "2024-10-31T20:26:27Z",
+      "default": true
+    },
+    {
+      "name": "unixTimestamp",
+      "type": "checkbox",
+      "required": false,
+      "label": "Unix Timestamp (seconds)",
+      "description": "1730406387",
+      "default": true
+    },
+    {
+      "name": "unixMillis",
+      "type": "checkbox",
+      "required": false,
+      "label": "Unix Timestamp (milliseconds)",
+      "description": "1730406387000",
+      "default": true
+    },
+    {
+      "name": "localizedShortDate",
+      "type": "checkbox",
+      "required": false,
+      "label": "Localized (L)",
+      "description": "11/01/2024",
+      "default": true
+    },
+    {
+      "name": "localizedShortDateTime",
+      "type": "checkbox",
+      "required": false,
+      "label": "Localized (L LT)",
+      "description": "11/01/2024 1:56 AM",
+      "default": true
+    },
+    {
+      "name": "localizedFullDateTime",
+      "type": "checkbox",
+      "required": false,
+      "label": "Localized (LLL)",
+      "description": "November 1, 2024 1:56 AM",
+      "default": true
+    },
+    {
+      "name": "localizedLongDateTime",
+      "type": "checkbox",
+      "required": false,
+      "label": "Localized (LLLL)",
+      "description": "Friday, November 1, 2024 1:56 AM",
+      "default": true
+    },
+    {
+      "name": "localizedTime",
+      "type": "checkbox",
+      "required": false,
+      "label": "Localized Time (LT)",
+      "description": "1:56 AM‎",
+      "default": true
+    },
+    {
+      "name": "localizedSecondsTime",
+      "type": "checkbox",
+      "required": false,
+      "label": "Localized Time with Seconds (LTS)",
+      "description": "1:56:27 AM",
+      "default": true
+    },
+    {
+      "name": "naturalLanguageDateFormat",
+      "title": "Default Natural Language Date Format",
+      "type": "textfield",
+      "default": "YYYY-MM-DD",
+      "description": "Default date format string to use when converting natural language dates.",
+      "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.30.2",
+    "@raycast/api": "^1.72.1",
+    "chrono-node": "^2.7.7",
     "dayjs": "^1.10.8"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
+    "react": "18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

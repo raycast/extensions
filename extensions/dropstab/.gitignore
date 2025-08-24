@@ -1,0 +1,24 @@
+# Exclude the node_modules folder
+node_modules/
+
+# Exclude the build folder (if any)
+dist/
+build/
+
+# Exclude environment configuration files
+.env
+.env.local
+.env.*.local
+
+# Exclude logs and temporary files
+logs/
+*.log
+*.tmp
+
+# Exclude operating system files
+.DS_Store
+
+# Exclude editor/IDE files
+.vscode/
+.idea/
+*.swp

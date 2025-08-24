@@ -1,6 +1,8 @@
-import { IIconBase, IIconConfig } from "@icon-park/svg/lib/runtime";
+import { IIconConfig } from "@icon-park/svg/lib/runtime";
+import { homedir } from "os";
 
 export const iconParkCategory = [
+  "All",
   "Abstract",
   "Animals",
   "Arrows",
@@ -44,6 +46,8 @@ export enum LocalStorageKey {
   ICON_CONFIG = "Icon Config",
 }
 
+export const filePath = homedir() + "/Downloads";
+
 export const configDefault: IIconConfig = {
   theme: "outline",
   size: "12em",
@@ -71,6 +75,15 @@ export const configDefault: IIconConfig = {
       innerFillColor: "#FF5675",
     },
   },
+};
+
+export const iconBaseDefault = {
+  size: configDefault.size,
+  strokeWidth: configDefault.strokeWidth,
+  strokeLinecap: configDefault.strokeLinecap,
+  strokeLinejoin: configDefault.strokeLinejoin,
+  theme: configDefault.theme,
+  fill: configDefault.colors.outline.fill,
 };
 
 export const configTheme = [

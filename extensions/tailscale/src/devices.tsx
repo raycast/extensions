@@ -1,8 +1,17 @@
-import { ActionPanel, List, Action, Icon, Image } from "@raycast/api";
+import { List, Icon, Image } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { Device, getStatus, getDevices, getErrorDetails, ErrorDetails } from "./shared";
+import {
+  Device,
+  getStatus,
+  getDevices,
+  getErrorDetails,
+  sortDevices,
+  ErrorDetails,
+  MULLVAD_DEVICE_TAG,
+} from "./shared";
+import CopyActions from "./components/CopyActions";
 
-function DeviceList() {
+export default function DeviceList() {
   const [devices, setDevices] = useState<Device[]>();
   const [error, setError] = useState<ErrorDetails>();
   useEffect(() => {
@@ -10,7 +19,15 @@ function DeviceList() {
       try {
         const status = getStatus();
         const _list = getDevices(status);
-        setDevices(_list);
+        const _filteredList = _list.filter((device) => {
+          // mullvad devices should not be shown in the devices list - this mirrors the behavior of tailscale cli and client apps
+          if (device.tags?.includes(MULLVAD_DEVICE_TAG)) {
+            return false;
+          }
+          return true;
+        });
+        sortDevices(_filteredList);
+        setDevices(_filteredList);
       } catch (error) {
         setError(getErrorDetails(error, "Couldn’t load device list."));
       }
@@ -59,22 +76,12 @@ function DeviceList() {
                     },
                   ]
             }
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard content={device.ipv4} title="Copy IPv4" />
-                <Action.CopyToClipboard content={device.dns} title="Copy MagicDNS" />
-                <Action.CopyToClipboard content={device.ipv6} title="Copy IPv6" />
-              </ActionPanel>
-            }
+            actions={<CopyActions device={device} />}
           />
         ))
       )}
     </List>
   );
-}
-
-export default function Command() {
-  return <DeviceList />;
 }
 
 function formatDate(d: Date) {

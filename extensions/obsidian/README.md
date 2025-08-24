@@ -23,10 +23,10 @@ This is a raycast extension with commands for the note taking and knowledge mana
 
 ## Search Note
 
-This command allows for quick access to all of your notes. By default you can search notes by title. Enabeling content search in the commands preferences allows you to search for notes by their content and title. If there doesn't exist a note with the title you searched for you can create a new note with that title right from the command.
+This command allows for quick access to all of your notes. By default you can search notes by title. Enabling content search in the commands preferences allows you to search for notes by their content and title. If there doesn't exist a note with the title you searched for you can create a new note with that title right from the command.
 Use the tag filter in the top right corner to filter notes based on their tags (both YAML frontmatter and inline tags).
 
-Enabeling `Show Detail` and `Show Metadata` in the extensions preferences will show a sidebar view with the following information:
+Enabling `Show Detail` and `Show Metadata` in the extensions preferences will show a sidebar view with the following information:
 
 - Note content
 - Character Count
@@ -58,6 +58,7 @@ Depending on the primary action set in preferences, the keyboard shortcuts can b
 - `opt + a` will let you append text to the note (supports templates)
 - `opt + s` will append selected text to the note (supports templates)
 - `opt + c` will copy the notes content to your clipboard
+- `opt + t` will copy the notes title to your clipboard
 - `opt + v` will paste the notes content to the app you used before raycast
 - `opt + l` will copy a markdown link for the note to your clipboard
 - `opt + u` will copy the obsidian URI for the note to your clipboard (see: [Obsidian URI](https://help.obsidian.md/Advanced+topics/Using+obsidian+URI))
@@ -119,7 +120,10 @@ Both the note name and note content support these templates:
 - `{millisecond}`
 - `{timestamp}`, `{zettelkastenID}`
 - `{clipboard}`, `{clip}`
+- `{selection}`, `{selected}`
 - `{\n}`, `{nl}`, `{newline}`
+
+But also the table of tokens defined in the [luxon documentation](https://moment.github.io/luxon/#/formatting?id=table-of-tokens) (such as dd, MM, YYYY,...).
 
 <img width="1000" alt="Create Note Command" src="https://user-images.githubusercontent.com/67844154/178248345-bb1718d9-1c29-44b1-b50b-87286e121003.png">
 

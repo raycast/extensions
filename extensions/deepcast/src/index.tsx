@@ -1,7 +1,28 @@
-import { Form, ActionPanel, Action, showToast, Toast, Icon, LaunchProps, getPreferenceValues } from "@raycast/api";
-import { useState } from "react";
-import { SourceLanguage, TargetLanguage, sendTranslateRequest, source_languages, target_languages } from "./utils";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  showToast,
+  Toast,
+  Icon,
+  LaunchProps,
+  getPreferenceValues,
+  Clipboard,
+} from "@raycast/api";
+import { useEffect, useState } from "react";
+import {
+  Formality,
+  SUPPORTED_FORMALITY_LANGUAGES,
+  SourceLanguage,
+  TargetLanguage,
+  getSelection,
+  sendTranslateRequest,
+  source_languages,
+  target_languages,
+  delayedCloseWindow,
+} from "./utils";
 import TranslationView from "./components/TranslationView";
+import transliterate from "@sindresorhus/transliterate";
 
 interface Values {
   key?: string;
@@ -9,12 +30,13 @@ interface Values {
   to?: TargetLanguage;
   text?: string;
   translation?: string;
+  formality?: Formality;
 }
 
 function SwitchLanguagesAction(props: { onSwitchLanguages: () => void }) {
   return (
     <Action
-      icon={Icon.ChevronUp}
+      icon={Icon.Switch}
       title="Switch Languages"
       shortcut={{ modifiers: ["ctrl"], key: "x" }}
       onAction={props.onSwitchLanguages}
@@ -22,20 +44,41 @@ function SwitchLanguagesAction(props: { onSwitchLanguages: () => void }) {
   );
 }
 
-const Command = (props: LaunchProps) => {
+type LaunchContext = {
+  translation?: string;
+  sourceLanguage?: SourceLanguage;
+};
+
+const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
   // Check whether component is called with an existing value for translation
   if (props?.launchContext?.translation) {
     const translation = props?.launchContext?.translation;
     const sourceLanguage = props?.launchContext?.sourceLanguage;
     return <TranslationView translation={translation} sourceLanguage={sourceLanguage} />;
   }
-  const { defaultTargetLanguage } = getPreferenceValues<Preferences>();
+  const {
+    defaultTargetLanguage,
+    showTransliteration,
+    showFormalityConfig,
+    closeRaycastAfterTranslation,
+    defaultFormality,
+  } = getPreferenceValues<Preferences>();
   const [loading, setLoading] = useState(false);
-  const [sourceText, setSourceText] = useState("");
+  const [sourceText, setSourceText] = useState(props.fallbackText ?? "");
   const [translation, setTranslation] = useState("");
   const [sourceLanguage, setSourceLanguage] = useState<SourceLanguage | "">("");
   const [targetLanguage, setTargetLanguage] = useState<TargetLanguage>(defaultTargetLanguage);
   const [detectedSourceLanguage, setDetectedSourceLanguage] = useState<SourceLanguage>();
+  const [formality, setFormality] = useState<Formality>(defaultFormality ?? "default");
+
+  // set the source text to the selected text if no fallback text is provided
+  // if there is no selected text, then just leave the source text empty
+  useEffect(() => {
+    if (props.fallbackText) return;
+    getSelection().then((content) => {
+      setSourceText(content ?? "");
+    });
+  }, []);
 
   const submit = async (values: Values) => {
     if (!values.text || !values.to) return;
@@ -46,6 +89,7 @@ const Command = (props: LaunchProps) => {
       targetLanguage: values.to,
       sourceLanguage: values.from && values.from.length > 0 ? values.from : undefined,
       onTranslateAction: "none",
+      formality: values.formality ?? "default",
     });
 
     setLoading(false);
@@ -94,13 +138,73 @@ const Command = (props: LaunchProps) => {
     }
   };
 
+  const _t = transliterate(translation);
+  const transliteration = _t == translation ? "" : _t;
+
+  const handleCopyToClipboard = async () => {
+    try {
+      await Clipboard.copy(translation);
+      await showToast(Toast.Style.Success, "Translation copied to clipboard!");
+      await delayedCloseWindow(closeRaycastAfterTranslation);
+    } catch (error) {
+      console.error("Failed to copy to clipboard:", error);
+      await showToast(Toast.Style.Failure, "Failed to copy to clipboard");
+    }
+  };
+
+  const handlePasteInFrontmostApp = async () => {
+    try {
+      await Clipboard.paste(translation);
+      await showToast(Toast.Style.Success, "Translation pasted!");
+      await delayedCloseWindow(closeRaycastAfterTranslation);
+    } catch (error) {
+      console.error("Failed to paste:", error);
+      await showToast(Toast.Style.Failure, "Failed to paste in frontmost app");
+    }
+  };
+
+  const handleCopyTransliteration = async () => {
+    try {
+      await Clipboard.copy(transliteration);
+      await showToast(Toast.Style.Success, "Transliteration copied to clipboard!");
+      await delayedCloseWindow(closeRaycastAfterTranslation);
+    } catch (error) {
+      console.error("Failed to copy transliteration:", error);
+      await showToast(Toast.Style.Failure, "Failed to copy transliteration");
+    }
+  };
+
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Translate" onSubmit={submit} />
-          <Action.OpenInBrowser title="Free API Key" url="https://www.deepl.com/pro-api" />
-          <SwitchLanguagesAction onSwitchLanguages={switchLanguages} />
+          <ActionPanel.Section>
+            <Action.SubmitForm icon={Icon.ArrowRightCircle} title="Translate" onSubmit={submit} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action
+              icon={Icon.CopyClipboard}
+              title="Copy Translation"
+              shortcut={{ modifiers: ["cmd"], key: "." }}
+              onAction={handleCopyToClipboard}
+            />
+            <Action
+              icon={Icon.Document}
+              title="Paste in Frontmost App"
+              shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+              onAction={handlePasteInFrontmostApp}
+            />
+            <Action
+              icon={Icon.CopyClipboard}
+              title="Copy Transliteration"
+              shortcut={{ modifiers: ["cmd"], key: "t" }}
+              onAction={handleCopyTransliteration}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.OpenInBrowser title="Free API Key" url="https://www.deepl.com/pro-api" />
+            <SwitchLanguagesAction onSwitchLanguages={switchLanguages} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
       isLoading={loading}
@@ -130,7 +234,29 @@ const Command = (props: LaunchProps) => {
           <Form.Dropdown.Item value={value} title={title} key={value} />
         ))}
       </Form.Dropdown>
+      {SUPPORTED_FORMALITY_LANGUAGES.includes(targetLanguage) && showFormalityConfig && (
+        <>
+          <Form.Separator />
+          <Form.Dropdown
+            id="formality"
+            value={formality}
+            onChange={(value) => setFormality(value as Formality)}
+            storeValue={true}
+            title="Formality"
+          >
+            <Form.Dropdown.Item value="default" title="Default" />
+            <Form.Dropdown.Item value="prefer_more" title={(targetLanguage === "JA" && "Polite") || "More Formal"} />
+            <Form.Dropdown.Item value="prefer_less" title={(targetLanguage === "JA" && "Plain") || "Less Formal"} />
+          </Form.Dropdown>
+        </>
+      )}
       <Form.TextArea id="translation" value={translation} />
+      {(showTransliteration == "always" || (showTransliteration == "whenProvided" && transliteration.length > 0)) && (
+        <>
+          <Form.TextArea id="translation" value={translation} />
+          <Form.Description title="Transliteration" text={transliteration} />
+        </>
+      )}
     </Form>
   );
 };

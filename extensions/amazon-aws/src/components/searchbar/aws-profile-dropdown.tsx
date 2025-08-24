@@ -1,14 +1,28 @@
-import { Icon, List } from "@raycast/api";
+import { Icon, List, getPreferenceValues } from "@raycast/api";
 import { useEffect } from "react";
-import { loadSharedConfigFiles } from "@aws-sdk/shared-ini-file-loader";
+import { loadSharedConfigFiles, loadSsoSessionData } from "@aws-sdk/shared-ini-file-loader";
 import { useCachedPromise, useCachedState, useExec } from "@raycast/utils";
+
+interface Preferences {
+  useAWSVault: boolean;
+}
+
+interface AwsVaultProps {
+  shouldUseAwsVault: boolean;
+  selectedProfile: string | undefined;
+  profileOptions: ProfileOption[];
+  onProfileSelected?: VoidFunction;
+}
 
 interface Props {
   onProfileSelected?: VoidFunction;
 }
 
 export default function AWSProfileDropdown({ onProfileSelected }: Props) {
+  const preferences = getPreferenceValues<Preferences>();
+
   const [selectedProfile, setSelectedProfile] = useCachedState<string>("aws_profile");
+
   const profileOptions = useProfileOptions();
 
   useEffect(() => {
@@ -20,12 +34,11 @@ export default function AWSProfileDropdown({ onProfileSelected }: Props) {
     }
   }, [profileOptions]);
 
-  const vaultSessions = useVaultSessions();
-  const isUsingAwsVault = !!vaultSessions;
-
-  useAwsVault({
-    profile: vaultSessions?.includes(selectedProfile || "") ? selectedProfile : undefined,
-    onUpdate: () => onProfileSelected?.(),
+  const { isUsingAwsVault, vaultSessions } = useAwsVault({
+    shouldUseAwsVault: preferences.useAWSVault,
+    selectedProfile: selectedProfile,
+    profileOptions: profileOptions,
+    onProfileSelected: onProfileSelected,
   });
 
   useEffect(() => {
@@ -36,7 +49,19 @@ export default function AWSProfileDropdown({ onProfileSelected }: Props) {
     }
 
     if (selectedProfile) {
-      process.env.AWS_REGION = profileOptions.find((profile) => profile.name === selectedProfile)?.region;
+      const profile = profileOptions.find((profile) => profile.name === selectedProfile);
+      if (profile?.region) {
+        process.env.AWS_REGION = profile.region;
+      }
+      if (profile?.sso_start_url) {
+        process.env.AWS_SSO_START_URL = profile.sso_start_url;
+      }
+      if (profile?.sso_account_id) {
+        process.env.AWS_SSO_ACCOUNT_ID = profile.sso_account_id;
+      }
+      if (profile?.sso_role_name) {
+        process.env.AWS_SSO_ROLE_NAME = profile.sso_role_name;
+      }
     }
 
     if (!vaultSessions?.includes(selectedProfile || "")) {
@@ -59,7 +84,7 @@ export default function AWSProfileDropdown({ onProfileSelected }: Props) {
           title={profile.name}
           icon={
             isUsingAwsVault
-              ? vaultSessions.some((session) => session === profile.name)
+              ? vaultSessions?.some((session) => session === profile.name)
                 ? Icon.LockUnlocked
                 : Icon.LockDisabled
               : undefined
@@ -70,8 +95,7 @@ export default function AWSProfileDropdown({ onProfileSelected }: Props) {
   );
 }
 
-const useVaultSessions = (): string[] | undefined => {
-  const profileOptions = useProfileOptions();
+const useVaultSessions = (profileOptions: ProfileOption[]): string[] | undefined => {
   const { data: awsVaultSessions } = useExec("aws-vault", ["list"], {
     env: { PATH: "/opt/homebrew/bin" },
     onError: () => undefined,
@@ -89,7 +113,17 @@ const useVaultSessions = (): string[] | undefined => {
   return activeSessions && [...activeSessions, ...activeSessionsFromMasterProfile];
 };
 
-const useAwsVault = ({ profile, onUpdate }: { profile?: string; onUpdate: VoidFunction }) => {
+const useAwsVault = ({ shouldUseAwsVault, selectedProfile, profileOptions, onProfileSelected }: AwsVaultProps) => {
+  if (!shouldUseAwsVault) {
+    return { isUsingAwsVault: false, vaultSessions: undefined };
+  }
+
+  const vaultSessions = useVaultSessions(profileOptions);
+
+  const isUsingAwsVault = !!vaultSessions;
+
+  const profile = isUsingAwsVault && vaultSessions?.includes(selectedProfile || "") ? selectedProfile : undefined;
+
   const { revalidate } = useExec("aws-vault", ["exec", profile as string, "--json"], {
     execute: !!profile,
     env: { PATH: "/opt/homebrew/bin" },
@@ -106,7 +140,7 @@ const useAwsVault = ({ profile, onUpdate }: { profile?: string; onUpdate: VoidFu
         process.env.AWS_SECRET_ACCESS_KEY = SecretAccessKey;
         process.env.AWS_SESSION_TOKEN = SessionToken;
 
-        onUpdate();
+        onProfileSelected?.();
       }
     },
   });
@@ -115,16 +149,23 @@ const useAwsVault = ({ profile, onUpdate }: { profile?: string; onUpdate: VoidFu
     delete process.env.AWS_VAULT;
     revalidate();
   }, [profile]);
+
+  return { isUsingAwsVault, vaultSessions };
 };
 
-type ProfileOption = {
+export type ProfileOption = {
   name: string;
   region?: string;
   source_profile?: string;
+  sso_start_url?: string;
+  sso_account_id?: string;
+  sso_role_name?: string;
+  sso_session?: string;
 };
 
 const useProfileOptions = (): ProfileOption[] => {
   const { data: configs = { configFile: {}, credentialsFile: {} } } = useCachedPromise(loadSharedConfigFiles);
+  const { data: ssoSessions = {} } = useCachedPromise(loadSsoSessionData);
   const { configFile, credentialsFile } = configs;
 
   const profileOptions =
@@ -132,12 +173,15 @@ const useProfileOptions = (): ProfileOption[] => {
 
   return profileOptions.map(([name, config]) => {
     const includeProfile = configFile[name]?.include_profile;
-    const region =
-      configFile[name]?.region ||
-      credentialsFile[name]?.region ||
-      (includeProfile && configFile[includeProfile]?.region);
-
-    return { ...config, region, name };
+    const region = configFile[name]?.region || (includeProfile && configFile[includeProfile]?.region);
+    const sso_start_url =
+      configFile[name]?.sso_start_url ||
+      (configFile[name]?.sso_session && ssoSessions[configFile[name].sso_session!]?.sso_start_url);
+    const sso_account_id =
+      configFile[name]?.sso_account_id || (includeProfile && configFile[includeProfile]?.sso_account_id);
+    const sso_role_name =
+      configFile[name]?.sso_role_name || (includeProfile && configFile[includeProfile]?.sso_role_name);
+    return { ...config, region, name, sso_start_url, sso_account_id, sso_role_name };
   });
 };
 

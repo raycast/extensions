@@ -1,5 +1,13 @@
 # Terminal Finder Changelog
 
+## [Update] - 2024-12-29
+
+- Added support for Ghostty
+
+## [Update] - 2024-02-05
+
+- Added support for WezTerm
+
 ## [Update] - 2023-03-02
 
 - Updated `@raycast/api`

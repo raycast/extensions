@@ -4,10 +4,15 @@
   "title": "Bob - Control Bob Translate",
   "description": "Control the Bob Translate app for macOS with your keyboard.",
   "categories": [
-    "Other"
+    "Applications"
   ],
   "icon": "icon.png",
   "author": "ViGeng",
+  "contributors": [
+    "thuggyduck",
+    "xxxbrian",
+    "EdwardW"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -23,11 +28,75 @@
       "subtitle": "Bob",
       "description": "Translate latest text in clipboard",
       "mode": "no-view"
+    },
+    {
+      "name": "captureText",
+      "title": "Capture Text (OCR)",
+      "subtitle": "Bob",
+      "description": "Capture text using Bob's OCR",
+      "mode": "no-view"
+    },
+    {
+      "name": "captureTextSilently",
+      "title": "Capture Text Silently (OCR)",
+      "subtitle": "Bob",
+      "description": "Capture text using Bob's OCR without Bob's Main Window",
+      "mode": "no-view"
+    },
+    {
+      "name": "captureTextfromFinder",
+      "title": "Capture File's Text from Finder",
+      "subtitle": "Bob",
+      "description": "Capture File's text from your Finder",
+      "mode": "no-view"
+    },
+    {
+      "name": "selectTranslate",
+      "title": "Translate Selected",
+      "subtitle": "Bob",
+      "description": "Translate what is selected",
+      "mode": "no-view"
+    },
+    {
+      "name": "captureTranslate",
+      "title": "Translate Captured",
+      "subtitle": "Bob",
+      "description": "Translate what is captured",
+      "mode": "no-view"
+    },
+    {
+      "name": "showTransWindow",
+      "title": "Show Translate Window",
+      "subtitle": "Bob",
+      "description": "Show Bob's Main Window",
+      "mode": "no-view"
+    },
+    {
+      "name": "showOcrWindow",
+      "title": "Show OCR Window",
+      "subtitle": "Bob",
+      "description": "Show Bob's OCR Result Window",
+      "mode": "no-view"
+    },
+    {
+      "name": "transArgument",
+      "title": "Translate",
+      "subtitle": "Bob",
+      "description": "Translate the given text",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "src",
+          "placeholder": "Text to translate",
+          "required": true,
+          "type": "text"
+        }
+      ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.28.0",
-    "run-applescript": "^6.0.0"
+    "@raycast/utils": "^1.13.1"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
@@ -43,6 +112,10 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
-  }
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

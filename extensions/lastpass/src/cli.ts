@@ -34,24 +34,28 @@ const execute = async (command: string) => {
   const startTimestamp = Date.now();
 
   return new Promise<string>((res, rej) =>
-    exec(wrappedCommand, (error: ExecException | null, stdout: string, stderr: string) => {
-      const tookSeconds = (Date.now() - startTimestamp) / 1000;
-      if (error) {
-        console.error(`[${tookSeconds}s] Failed:\n${stderr}`);
-        rej({
-          ...error,
-          message: error.message,
-        });
+    exec(
+      wrappedCommand,
+      { maxBuffer: 4 * 1024 * 1024 }, // 4 times bigger stdout buffer size for large sets of credentials
+      (error: ExecException | null, stdout: string, stderr: string) => {
+        const tookSeconds = (Date.now() - startTimestamp) / 1000;
+        if (error) {
+          console.error(`[${tookSeconds}s] Failed:\n${stderr}`);
+          rej({
+            ...error,
+            message: error.message,
+          });
+        }
+        console.log(`[${tookSeconds}s] Success:\n${stdout}`);
+        res(stdout.trim());
       }
-      console.log(`[${tookSeconds}s] Success:\n${stdout}`);
-      res(stdout.trim());
-    })
+    )
   );
 };
 
 const authorize = (subcommand: string, opts: { password: string }) => {
   const { password } = opts;
-  const quote = password.includes('"') ? "'" : '"';
+  const quote = password?.includes('"') ? "'" : '"';
   const maskedCommand = `echo ${quote}${password}${quote} | LPASS_DISABLE_PINENTRY=1 lpass ${subcommand}`;
   return maskedCommand;
 };

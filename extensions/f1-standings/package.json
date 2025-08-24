@@ -7,12 +7,18 @@
   "author": "csigritz",
   "contributors": [
     "sxn",
-    "qeude"
+    "qeude",
+    "chetan_goti",
+    "drillprop"
   ],
   "categories": [
     "Fun"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "driver",
@@ -42,30 +48,3276 @@
       "mode": "view",
       "keywords": [
         "formula"
+      ],
+      "preferences": [
+        {
+          "required": false,
+          "description": "Choose date format",
+          "type": "dropdown",
+          "title": "Date Format",
+          "name": "dateFormat",
+          "data": [
+            {
+              "title": "MM/DD/YYYY",
+              "value": "MM/dd/yyyy"
+            },
+            {
+              "title": "MM.DD.YYYY",
+              "value": "MM.dd.yyyy"
+            },
+            {
+              "title": "DD/MM/YYYY",
+              "value": "dd/MM/yyyy"
+            },
+            {
+              "title": "DD.MM.YYYY",
+              "value": "dd.MM.yyyy"
+            }
+          ],
+          "default": "MM/dd/yyyy"
+        },
+        {
+          "required": false,
+          "description": "Choose time format",
+          "type": "dropdown",
+          "title": "Time Format",
+          "name": "timeFormat",
+          "data": [
+            {
+              "title": "24-Hour Time (eg 16:00)",
+              "value": "HH:mm"
+            },
+            {
+              "title": "12-Hour Time (eg 4:00 PM)",
+              "value": "h:mm a"
+            }
+          ],
+          "default": "HH:mm"
+        }
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "current-season",
+      "title": "Current Season",
+      "description": "Get the current Formula 1 season."
+    },
+    {
+      "name": "driver-standings",
+      "title": "Driver Standings",
+      "description": "Get Formula 1 driver standings for a season"
+    },
+    {
+      "name": "constructor-standings",
+      "title": "Constructor Standings",
+      "description": "Get Formula 1 constructor standings for a season"
+    },
+    {
+      "name": "drivers",
+      "title": "Drivers",
+      "description": "Get all drivers attending a season by year"
+    },
+    {
+      "name": "constructors",
+      "title": "Constructors",
+      "description": "Get all constructors attending a season by year"
+    },
+    {
+      "name": "race-schedule",
+      "title": "Race Schedule",
+      "description": "Get the race schedule and rounds for a season by year"
+    },
+    {
+      "name": "race-results",
+      "title": "Race Results",
+      "description": "Get the results for a race by year and round"
+    },
+    {
+      "name": "qualifying-results",
+      "title": "Qualifying Results",
+      "description": "Get the results for a qualifying by year and round"
+    }
+  ],
+  "ai": {
+    "instructions": "\n\n- **Never guess or infer round numbers. Never!!!**\n- If the user requests **qualifying results, race results, or any round- or race-specific information** by mentioning a **race name, location, season, year, or country**, you MUST follow these steps strictly in order:\n1. First, call the tool `f1-standings-race-schedule` to retrieve the exact round number.\n2. ONLY THEN call the appropriate results-related tool (`f1-standings-qualifying-results` or `f1-standings-race-results`) using the round number provided by `f1-standings-race-schedule`.\n**Never(!!!)** try to guess the round by your own knowledge\n\n- When asked about the current season, use the tool 'f1-standings-current-season' first!",
+    "evals": [
+      {
+        "input": "@f1-standings who won the driver championship in 2024?",
+        "mocks": {
+          "driver-standings": [
+            {
+              "Constructors": [
+                {
+                  "constructorId": "red_bull",
+                  "name": "Red Bull",
+                  "nationality": "Austrian",
+                  "url": "http://en.wikipedia.org/wiki/Red_Bull_Racing"
+                }
+              ],
+              "Driver": {
+                "code": "VER",
+                "dateOfBirth": "1997-09-30",
+                "driverId": "max_verstappen",
+                "familyName": "Verstappen",
+                "givenName": "Max",
+                "nationality": "Dutch",
+                "permanentNumber": "33",
+                "url": "http://en.wikipedia.org/wiki/Max_Verstappen"
+              },
+              "points": "437",
+              "position": "1",
+              "positionText": "1",
+              "wins": "9"
+            },
+            {
+              "Constructors": [
+                {
+                  "constructorId": "mclaren",
+                  "name": "McLaren",
+                  "nationality": "British",
+                  "url": "http://en.wikipedia.org/wiki/McLaren"
+                }
+              ],
+              "Driver": {
+                "code": "NOR",
+                "dateOfBirth": "1999-11-13",
+                "driverId": "norris",
+                "familyName": "Norris",
+                "givenName": "Lando",
+                "nationality": "British",
+                "permanentNumber": "4",
+                "url": "http://en.wikipedia.org/wiki/Lando_Norris"
+              },
+              "points": "374",
+              "position": "2",
+              "positionText": "2",
+              "wins": "4"
+            },
+            {
+              "Constructors": [
+                {
+                  "constructorId": "ferrari",
+                  "name": "Ferrari",
+                  "nationality": "Italian",
+                  "url": "http://en.wikipedia.org/wiki/Scuderia_Ferrari"
+                }
+              ],
+              "Driver": {
+                "code": "LEC",
+                "dateOfBirth": "1997-10-16",
+                "driverId": "leclerc",
+                "familyName": "Leclerc",
+                "givenName": "Charles",
+                "nationality": "Monegasque",
+                "permanentNumber": "16",
+                "url": "http://en.wikipedia.org/wiki/Charles_Leclerc"
+              },
+              "points": "356",
+              "position": "3",
+              "positionText": "3",
+              "wins": "3"
+            },
+            {
+              "Constructors": [
+                {
+                  "constructorId": "mclaren",
+                  "name": "McLaren",
+                  "nationality": "British",
+                  "url": "http://en.wikipedia.org/wiki/McLaren"
+                }
+              ],
+              "Driver": {
+                "code": "PIA",
+                "dateOfBirth": "2001-04-06",
+                "driverId": "piastri",
+                "familyName": "Piastri",
+                "givenName": "Oscar",
+                "nationality": "Australian",
+                "permanentNumber": "81",
+                "url": "http://en.wikipedia.org/wiki/Oscar_Piastri"
+              },
+              "points": "292",
+              "position": "4",
+              "positionText": "4",
+              "wins": "2"
+            },
+            {
+              "Constructors": [
+                {
+                  "constructorId": "ferrari",
+                  "name": "Ferrari",
+                  "nationality": "Italian",
+                  "url": "http://en.wikipedia.org/wiki/Scuderia_Ferrari"
+                }
+              ],
+              "Driver": {
+                "code": "SAI",
+                "dateOfBirth": "1994-09-01",
+                "driverId": "sainz",
+                "familyName": "Sainz",
+                "givenName": "Carlos",
+                "nationality": "Spanish",
+                "permanentNumber": "55",
+                "url": "http://en.wikipedia.org/wiki/Carlos_Sainz_Jr."
+              },
+              "points": "290",
+              "position": "5",
+              "positionText": "5",
+              "wins": "2"
+            },
+            {
+              "Constructors": [
+                {
+                  "constructorId": "mercedes",
+                  "name": "Mercedes",
+                  "nationality": "German",
+                  "url": "http://en.wikipedia.org/wiki/Mercedes-Benz_in_Formula_One"
+                }
+              ],
+              "Driver": {
+                "code": "RUS",
+                "dateOfBirth": "1998-02-15",
+                "driverId": "russell",
+                "familyName": "Russell",
+                "givenName": "George",
+                "nationality": "British",
+                "permanentNumber": "63",
+                "url": "http://en.wikipedia.org/wiki/George_Russell_(racing_driver)"
+              },
+              "points": "245",
+              "position": "6",
+              "positionText": "6",
+              "wins": "2"
+            },
+            {
+              "Constructors": [
+                {
+                  "constructorId": "mercedes",
+                  "name": "Mercedes",
+                  "nationality": "German",
+                  "url": "http://en.wikipedia.org/wiki/Mercedes-Benz_in_Formula_One"
+                }
+              ],
+              "Driver": {
+                "code": "HAM",
+                "dateOfBirth": "1985-01-07",
+                "driverId": "hamilton",
+                "familyName": "Hamilton",
+                "givenName": "Lewis",
+                "nationality": "British",
+                "permanentNumber": "44",
+                "url": "http://en.wikipedia.org/wiki/Lewis_Hamilton"
+              },
+              "points": "223",
+              "position": "7",
+              "positionText": "7",
+              "wins": "2"
+            },
+            {
+              "Constructors": [
+                {
+                  "constructorId": "red_bull",
+                  "name": "Red Bull",
+                  "nationality": "Austrian",
+                  "url": "http://en.wikipedia.org/wiki/Red_Bull_Racing"
+                }
+              ],
+              "Driver": {
+                "code": "PER",
+                "dateOfBirth": "1990-01-26",
+                "driverId": "perez",
+                "familyName": "Pérez",
+                "givenName": "Sergio",
+                "nationality": "Mexican",
+                "permanentNumber": "11",
+                "url": "http://en.wikipedia.org/wiki/Sergio_P%C3%A9rez"
+              },
+              "points": "152",
+              "position": "8",
+              "positionText": "8",
+              "wins": "0"
+            },
+            {
+              "Constructors": [
+                {
+                  "constructorId": "aston_martin",
+                  "name": "Aston Martin",
+                  "nationality": "British",
+                  "url": "http://en.wikipedia.org/wiki/Aston_Martin_in_Formula_One"
+                }
+              ],
+              "Driver": {
+                "code": "ALO",
+                "dateOfBirth": "1981-07-29",
+                "driverId": "alonso",
+                "familyName": "Alonso",
+                "givenName": "Fernando",
+                "nationality": "Spanish",
+                "permanentNumber": "14",
+                "url": "http://en.wikipedia.org/wiki/Fernando_Alonso"
+              },
+              "points": "70",
+              "position": "9",
+              "positionText": "9",
+              "wins": "0"
+            },
+            {
+              "Constructors": [
+                {
+                  "constructorId": "alpine",
+                  "name": "Alpine F1 Team",
+                  "nationality": "French",
+                  "url": "http://en.wikipedia.org/wiki/Alpine_F1_Team"
+                }
+              ],
+              "Driver": {
+                "code": "GAS",
+                "dateOfBirth": "1996-02-07",
+                "driverId": "gasly",
+                "familyName": "Gasly",
+                "givenName": "Pierre",
+                "nationality": "French",
+                "permanentNumber": "10",
+                "url": "http://en.wikipedia.org/wiki/Pierre_Gasly"
+              },
+              "points": "42",
+              "position": "10",
+              "positionText": "10",
+              "wins": "0"
+            },
+            {
+              "Constructors": [
+                {
+                  "constructorId": "haas",
+                  "name": "Haas F1 Team",
+                  "nationality": "American",
+                  "url": "http://en.wikipedia.org/wiki/Haas_F1_Team"
+                }
+              ],
+              "Driver": {
+                "code": "HUL",
+                "dateOfBirth": "1987-08-19",
+                "driverId": "hulkenberg",
+                "familyName": "Hülkenberg",
+                "givenName": "Nico",
+                "nationality": "German",
+                "permanentNumber": "27",
+                "url": "http://en.wikipedia.org/wiki/Nico_H%C3%BClkenberg"
+              },
+              "points": "41",
+              "position": "11",
+              "positionText": "11",
+              "wins": "0"
+            },
+            {
+              "Constructors": [
+                {
+                  "constructorId": "rb",
+                  "name": "RB F1 Team",
+                  "nationality": "Italian",
+                  "url": "http://en.wikipedia.org/wiki/RB_Formula_One_Team"
+                }
+              ],
+              "Driver": {
+                "code": "TSU",
+                "dateOfBirth": "2000-05-11",
+                "driverId": "tsunoda",
+                "familyName": "Tsunoda",
+                "givenName": "Yuki",
+                "nationality": "Japanese",
+                "permanentNumber": "22",
+                "url": "http://en.wikipedia.org/wiki/Yuki_Tsunoda"
+              },
+              "points": "30",
+              "position": "12",
+              "positionText": "12",
+              "wins": "0"
+            },
+            {
+              "Constructors": [
+                {
+                  "constructorId": "aston_martin",
+                  "name": "Aston Martin",
+                  "nationality": "British",
+                  "url": "http://en.wikipedia.org/wiki/Aston_Martin_in_Formula_One"
+                }
+              ],
+              "Driver": {
+                "code": "STR",
+                "dateOfBirth": "1998-10-29",
+                "driverId": "stroll",
+                "familyName": "Stroll",
+                "givenName": "Lance",
+                "nationality": "Canadian",
+                "permanentNumber": "18",
+                "url": "http://en.wikipedia.org/wiki/Lance_Stroll"
+              },
+              "points": "24",
+              "position": "13",
+              "positionText": "13",
+              "wins": "0"
+            },
+            {
+              "Constructors": [
+                {
+                  "constructorId": "alpine",
+                  "name": "Alpine F1 Team",
+                  "nationality": "French",
+                  "url": "http://en.wikipedia.org/wiki/Alpine_F1_Team"
+                }
+              ],
+              "Driver": {
+                "code": "OCO",
+                "dateOfBirth": "1996-09-17",
+                "driverId": "ocon",
+                "familyName": "Ocon",
+                "givenName": "Esteban",
+                "nationality": "French",
+                "permanentNumber": "31",
+                "url": "http://en.wikipedia.org/wiki/Esteban_Ocon"
+              },
+              "points": "23",
+              "position": "14",
+              "positionText": "14",
+              "wins": "0"
+            },
+            {
+              "Constructors": [
+                {
+                  "constructorId": "haas",
+                  "name": "Haas F1 Team",
+                  "nationality": "American",
+                  "url": "http://en.wikipedia.org/wiki/Haas_F1_Team"
+                }
+              ],
+              "Driver": {
+                "code": "MAG",
+                "dateOfBirth": "1992-10-05",
+                "driverId": "kevin_magnussen",
+                "familyName": "Magnussen",
+                "givenName": "Kevin",
+                "nationality": "Danish",
+                "permanentNumber": "20",
+                "url": "http://en.wikipedia.org/wiki/Kevin_Magnussen"
+              },
+              "points": "16",
+              "position": "15",
+              "positionText": "15",
+              "wins": "0"
+            },
+            {
+              "Constructors": [
+                {
+                  "constructorId": "williams",
+                  "name": "Williams",
+                  "nationality": "British",
+                  "url": "http://en.wikipedia.org/wiki/Williams_Grand_Prix_Engineering"
+                }
+              ],
+              "Driver": {
+                "code": "ALB",
+                "dateOfBirth": "1996-03-23",
+                "driverId": "albon",
+                "familyName": "Albon",
+                "givenName": "Alexander",
+                "nationality": "Thai",
+                "permanentNumber": "23",
+                "url": "http://en.wikipedia.org/wiki/Alexander_Albon"
+              },
+              "points": "12",
+              "position": "16",
+              "positionText": "16",
+              "wins": "0"
+            },
+            {
+              "Constructors": [
+                {
+                  "constructorId": "rb",
+                  "name": "RB F1 Team",
+                  "nationality": "Italian",
+                  "url": "http://en.wikipedia.org/wiki/RB_Formula_One_Team"
+                }
+              ],
+              "Driver": {
+                "code": "RIC",
+                "dateOfBirth": "1989-07-01",
+                "driverId": "ricciardo",
+                "familyName": "Ricciardo",
+                "givenName": "Daniel",
+                "nationality": "Australian",
+                "permanentNumber": "3",
+                "url": "http://en.wikipedia.org/wiki/Daniel_Ricciardo"
+              },
+              "points": "12",
+              "position": "17",
+              "positionText": "17",
+              "wins": "0"
+            },
+            {
+              "Constructors": [
+                {
+                  "constructorId": "ferrari",
+                  "name": "Ferrari",
+                  "nationality": "Italian",
+                  "url": "http://en.wikipedia.org/wiki/Scuderia_Ferrari"
+                },
+                {
+                  "constructorId": "haas",
+                  "name": "Haas F1 Team",
+                  "nationality": "American",
+                  "url": "http://en.wikipedia.org/wiki/Haas_F1_Team"
+                }
+              ],
+              "Driver": {
+                "code": "BEA",
+                "dateOfBirth": "2005-05-08",
+                "driverId": "bearman",
+                "familyName": "Bearman",
+                "givenName": "Oliver",
+                "nationality": "British",
+                "permanentNumber": "38",
+                "url": "http://en.wikipedia.org/wiki/Oliver_Bearman"
+              },
+              "points": "7",
+              "position": "18",
+              "positionText": "18",
+              "wins": "0"
+            },
+            {
+              "Constructors": [
+                {
+                  "constructorId": "williams",
+                  "name": "Williams",
+                  "nationality": "British",
+                  "url": "http://en.wikipedia.org/wiki/Williams_Grand_Prix_Engineering"
+                }
+              ],
+              "Driver": {
+                "code": "COL",
+                "dateOfBirth": "2003-05-27",
+                "driverId": "colapinto",
+                "familyName": "Colapinto",
+                "givenName": "Franco",
+                "nationality": "Argentine",
+                "permanentNumber": "43",
+                "url": "http://en.wikipedia.org/wiki/Franco_Colapinto"
+              },
+              "points": "5",
+              "position": "19",
+              "positionText": "19",
+              "wins": "0"
+            },
+            {
+              "Constructors": [
+                {
+                  "constructorId": "sauber",
+                  "name": "Sauber",
+                  "nationality": "Swiss",
+                  "url": "http://en.wikipedia.org/wiki/Sauber_Motorsport"
+                }
+              ],
+              "Driver": {
+                "code": "ZHO",
+                "dateOfBirth": "1999-05-30",
+                "driverId": "zhou",
+                "familyName": "Zhou",
+                "givenName": "Guanyu",
+                "nationality": "Chinese",
+                "permanentNumber": "24",
+                "url": "http://en.wikipedia.org/wiki/Zhou_Guanyu"
+              },
+              "points": "4",
+              "position": "20",
+              "positionText": "20",
+              "wins": "0"
+            },
+            {
+              "Constructors": [
+                {
+                  "constructorId": "rb",
+                  "name": "RB F1 Team",
+                  "nationality": "Italian",
+                  "url": "http://en.wikipedia.org/wiki/RB_Formula_One_Team"
+                }
+              ],
+              "Driver": {
+                "code": "LAW",
+                "dateOfBirth": "2002-02-11",
+                "driverId": "lawson",
+                "familyName": "Lawson",
+                "givenName": "Liam",
+                "nationality": "New Zealander",
+                "permanentNumber": "30",
+                "url": "http://en.wikipedia.org/wiki/Liam_Lawson"
+              },
+              "points": "4",
+              "position": "21",
+              "positionText": "21",
+              "wins": "0"
+            },
+            {
+              "Constructors": [
+                {
+                  "constructorId": "sauber",
+                  "name": "Sauber",
+                  "nationality": "Swiss",
+                  "url": "http://en.wikipedia.org/wiki/Sauber_Motorsport"
+                }
+              ],
+              "Driver": {
+                "code": "BOT",
+                "dateOfBirth": "1989-08-28",
+                "driverId": "bottas",
+                "familyName": "Bottas",
+                "givenName": "Valtteri",
+                "nationality": "Finnish",
+                "permanentNumber": "77",
+                "url": "http://en.wikipedia.org/wiki/Valtteri_Bottas"
+              },
+              "points": "0",
+              "position": "22",
+              "positionText": "22",
+              "wins": "0"
+            },
+            {
+              "Constructors": [
+                {
+                  "constructorId": "williams",
+                  "name": "Williams",
+                  "nationality": "British",
+                  "url": "http://en.wikipedia.org/wiki/Williams_Grand_Prix_Engineering"
+                }
+              ],
+              "Driver": {
+                "code": "SAR",
+                "dateOfBirth": "2000-12-31",
+                "driverId": "sargeant",
+                "familyName": "Sargeant",
+                "givenName": "Logan",
+                "nationality": "American",
+                "permanentNumber": "2",
+                "url": "http://en.wikipedia.org/wiki/Logan_Sargeant"
+              },
+              "points": "0",
+              "position": "23",
+              "positionText": "23",
+              "wins": "0"
+            },
+            {
+              "Constructors": [
+                {
+                  "constructorId": "alpine",
+                  "name": "Alpine F1 Team",
+                  "nationality": "French",
+                  "url": "http://en.wikipedia.org/wiki/Alpine_F1_Team"
+                }
+              ],
+              "Driver": {
+                "code": "DOO",
+                "dateOfBirth": "2003-01-20",
+                "driverId": "doohan",
+                "familyName": "Doohan",
+                "givenName": "Jack",
+                "nationality": "Australian",
+                "permanentNumber": "61",
+                "url": "http://en.wikipedia.org/wiki/Jack_Doohan"
+              },
+              "points": "0",
+              "position": "24",
+              "positionText": "24",
+              "wins": "0"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "year": 2024
+              },
+              "name": "driver-standings"
+            }
+          },
+          {
+            "includes": "Max Verstappen"
+          }
+        ]
+      },
+      {
+        "input": "@f1-standings what is the current season?",
+        "usedAsExample": false,
+        "mocks": {
+          "current-season": {
+            "season": "2025",
+            "url": "https://en.wikipedia.org/wiki/2025_Formula_One_World_Championship"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "current-season"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@f1-standings who was the constructors champion in 1982?",
+        "mocks": {
+          "constructor-standings": [
+            {
+              "Constructor": {
+                "constructorId": "ferrari",
+                "name": "Ferrari",
+                "nationality": "Italian",
+                "url": "http://en.wikipedia.org/wiki/Scuderia_Ferrari"
+              },
+              "points": "74",
+              "position": "1",
+              "positionText": "1",
+              "wins": "3"
+            },
+            {
+              "Constructor": {
+                "constructorId": "mclaren",
+                "name": "McLaren",
+                "nationality": "British",
+                "url": "http://en.wikipedia.org/wiki/McLaren"
+              },
+              "points": "69",
+              "position": "2",
+              "positionText": "2",
+              "wins": "4"
+            },
+            {
+              "Constructor": {
+                "constructorId": "renault",
+                "name": "Renault",
+                "nationality": "French",
+                "url": "http://en.wikipedia.org/wiki/Renault_in_Formula_One"
+              },
+              "points": "62",
+              "position": "3",
+              "positionText": "3",
+              "wins": "4"
+            },
+            {
+              "Constructor": {
+                "constructorId": "williams",
+                "name": "Williams",
+                "nationality": "British",
+                "url": "http://en.wikipedia.org/wiki/Williams_Grand_Prix_Engineering"
+              },
+              "points": "58",
+              "position": "4",
+              "positionText": "4",
+              "wins": "1"
+            },
+            {
+              "Constructor": {
+                "constructorId": "brabham",
+                "name": "Brabham",
+                "nationality": "British",
+                "url": "http://en.wikipedia.org/wiki/Brabham"
+              },
+              "points": "41",
+              "position": "5",
+              "positionText": "5",
+              "wins": "2"
+            },
+            {
+              "Constructor": {
+                "constructorId": "team_lotus",
+                "name": "Team Lotus",
+                "nationality": "British",
+                "url": "http://en.wikipedia.org/wiki/Team_Lotus"
+              },
+              "points": "30",
+              "position": "6",
+              "positionText": "6",
+              "wins": "1"
+            },
+            {
+              "Constructor": {
+                "constructorId": "tyrrell",
+                "name": "Tyrrell",
+                "nationality": "British",
+                "url": "http://en.wikipedia.org/wiki/Tyrrell_Racing"
+              },
+              "points": "25",
+              "position": "7",
+              "positionText": "7",
+              "wins": "1"
+            },
+            {
+              "Constructor": {
+                "constructorId": "ligier",
+                "name": "Ligier",
+                "nationality": "French",
+                "url": "http://en.wikipedia.org/wiki/Ligier"
+              },
+              "points": "20",
+              "position": "8",
+              "positionText": "8",
+              "wins": "0"
+            },
+            {
+              "Constructor": {
+                "constructorId": "alfa",
+                "name": "Alfa Romeo",
+                "nationality": "Swiss",
+                "url": "http://en.wikipedia.org/wiki/Alfa_Romeo_in_Formula_One"
+              },
+              "points": "7",
+              "position": "9",
+              "positionText": "9",
+              "wins": "0"
+            },
+            {
+              "Constructor": {
+                "constructorId": "arrows",
+                "name": "Arrows",
+                "nationality": "British",
+                "url": "http://en.wikipedia.org/wiki/Arrows_Grand_Prix_International"
+              },
+              "points": "5",
+              "position": "10",
+              "positionText": "10",
+              "wins": "0"
+            },
+            {
+              "Constructor": {
+                "constructorId": "ats",
+                "name": "ATS",
+                "nationality": "Italian",
+                "url": "http://en.wikipedia.org/wiki/ATS_(wheels)"
+              },
+              "points": "4",
+              "position": "11",
+              "positionText": "11",
+              "wins": "0"
+            },
+            {
+              "Constructor": {
+                "constructorId": "osella",
+                "name": "Osella",
+                "nationality": "Italian",
+                "url": "http://en.wikipedia.org/wiki/Osella"
+              },
+              "points": "3",
+              "position": "12",
+              "positionText": "12",
+              "wins": "0"
+            },
+            {
+              "Constructor": {
+                "constructorId": "fittipaldi",
+                "name": "Fittipaldi",
+                "nationality": "Brazilian",
+                "url": "http://en.wikipedia.org/wiki/Fittipaldi_%28constructor%29"
+              },
+              "points": "1",
+              "position": "13",
+              "positionText": "13",
+              "wins": "0"
+            },
+            {
+              "Constructor": {
+                "constructorId": "march",
+                "name": "March",
+                "nationality": "British",
+                "url": "http://en.wikipedia.org/wiki/March_Engineering"
+              },
+              "points": "0",
+              "positionText": "-",
+              "wins": "0"
+            },
+            {
+              "Constructor": {
+                "constructorId": "ensign",
+                "name": "Ensign",
+                "nationality": "British",
+                "url": "http://en.wikipedia.org/wiki/Ensign_%28racing_team%29"
+              },
+              "points": "0",
+              "positionText": "-",
+              "wins": "0"
+            },
+            {
+              "Constructor": {
+                "constructorId": "toleman",
+                "name": "Toleman",
+                "nationality": "British",
+                "url": "http://en.wikipedia.org/wiki/Toleman"
+              },
+              "points": "0",
+              "positionText": "-",
+              "wins": "0"
+            },
+            {
+              "Constructor": {
+                "constructorId": "theodore",
+                "name": "Theodore",
+                "nationality": "Hong Kong",
+                "url": "http://en.wikipedia.org/wiki/Theodore_Racing"
+              },
+              "points": "0",
+              "positionText": "-",
+              "wins": "0"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "year": 1982
+              },
+              "name": "constructor-standings"
+            }
+          },
+          {
+            "includes": "Ferrari"
+          }
+        ]
+      },
+      {
+        "input": "@f1-standings when is the next race?",
+        "mocks": {
+          "current-season": {
+            "season": "2025",
+            "url": "https://en.wikipedia.org/wiki/2025_Formula_One_World_Championship"
+          },
+          "race-schedule": [
+            {
+              "Circuit": {
+                "circuitId": "albert_park",
+                "circuitName": "Albert Park Grand Prix Circuit",
+                "Location": {
+                  "country": "Australia",
+                  "lat": "-37.8497",
+                  "locality": "Melbourne",
+                  "long": "968"
+                },
+                "url": "https://en.wikipedia.org/wiki/Albert_Park_Circuit"
+              },
+              "date": "2025-03-16",
+              "FirstPractice": {
+                "date": "2025-03-14",
+                "time": "01:30:00Z"
+              },
+              "Qualifying": {
+                "date": "2025-03-15",
+                "time": "05:00:00Z"
+              },
+              "raceName": "Australian Grand Prix",
+              "round": "1",
+              "season": "2025",
+              "SecondPractice": {
+                "date": "2025-03-14",
+                "time": "05:00:00Z"
+              },
+              "ThirdPractice": {
+                "date": "2025-03-15",
+                "time": "01:30:00Z"
+              },
+              "time": "04:00:00Z"
+            },
+            {
+              "Circuit": {
+                "circuitId": "shanghai",
+                "circuitName": "Shanghai International Circuit",
+                "Location": {
+                  "country": "China",
+                  "lat": "3389",
+                  "locality": "Shanghai",
+                  "long": "22"
+                },
+                "url": "https://en.wikipedia.org/wiki/Shanghai_International_Circuit"
+              },
+              "date": "2025-03-23",
+              "FirstPractice": {
+                "date": "2025-03-21",
+                "time": "03:30:00Z"
+              },
+              "Qualifying": {
+                "date": "2025-03-22",
+                "time": "07:00:00Z"
+              },
+              "raceName": "Chinese Grand Prix",
+              "round": "2",
+              "season": "2025",
+              "Sprint": {
+                "date": "2025-03-22",
+                "time": "03:00:00Z"
+              },
+              "SprintQualifying": {
+                "date": "2025-03-21",
+                "time": "07:30:00Z"
+              },
+              "time": "07:00:00Z"
+            },
+            {
+              "Circuit": {
+                "circuitId": "suzuka",
+                "circuitName": "Suzuka Circuit",
+                "Location": {
+                  "country": "Japan",
+                  "lat": "843100000000014",
+                  "locality": "Suzuka",
+                  "long": "541"
+                },
+                "url": "https://en.wikipedia.org/wiki/Suzuka_International_Racing_Course"
+              },
+              "date": "2025-04-06",
+              "FirstPractice": {
+                "date": "2025-04-04",
+                "time": "03:30:00Z"
+              },
+              "Qualifying": {
+                "date": "2025-04-05",
+                "time": "07:00:00Z"
+              },
+              "raceName": "Japanese Grand Prix",
+              "round": "3",
+              "season": "2025",
+              "SecondPractice": {
+                "date": "2025-04-04",
+                "time": "07:00:00Z"
+              },
+              "ThirdPractice": {
+                "date": "2025-04-05",
+                "time": "03:30:00Z"
+              },
+              "time": "06:00:00Z"
+            },
+            {
+              "Circuit": {
+                "circuitId": "bahrain",
+                "circuitName": "Bahrain International Circuit",
+                "Location": {
+                  "country": "Bahrain",
+                  "lat": "0325",
+                  "locality": "Sakhir",
+                  "long": "5106"
+                },
+                "url": "https://en.wikipedia.org/wiki/Bahrain_International_Circuit"
+              },
+              "date": "2025-04-13",
+              "FirstPractice": {
+                "date": "2025-04-11",
+                "time": "12:30:00Z"
+              },
+              "Qualifying": {
+                "date": "2025-04-12",
+                "time": "17:00:00Z"
+              },
+              "raceName": "Bahrain Grand Prix",
+              "round": "4",
+              "season": "2025",
+              "SecondPractice": {
+                "date": "2025-04-11",
+                "time": "16:00:00Z"
+              },
+              "ThirdPractice": {
+                "date": "2025-04-12",
+                "time": "13:30:00Z"
+              },
+              "time": "16:00:00Z"
+            },
+            {
+              "Circuit": {
+                "circuitId": "jeddah",
+                "circuitName": "Jeddah Corniche Circuit",
+                "Location": {
+                  "country": "Saudi Arabia",
+                  "lat": "631899999999998",
+                  "locality": "Jeddah",
+                  "long": "1044"
+                },
+                "url": "https://en.wikipedia.org/wiki/Jeddah_Corniche_Circuit"
+              },
+              "date": "2025-04-20",
+              "FirstPractice": {
+                "date": "2025-04-18",
+                "time": "14:30:00Z"
+              },
+              "Qualifying": {
+                "date": "2025-04-19",
+                "time": "18:00:00Z"
+              },
+              "raceName": "Saudi Arabian Grand Prix",
+              "round": "5",
+              "season": "2025",
+              "SecondPractice": {
+                "date": "2025-04-18",
+                "time": "18:00:00Z"
+              },
+              "ThirdPractice": {
+                "date": "2025-04-19",
+                "time": "14:30:00Z"
+              },
+              "time": "18:00:00Z"
+            },
+            {
+              "Circuit": {
+                "circuitId": "miami",
+                "circuitName": "Miami International Autodrome",
+                "Location": {
+                  "country": "USA",
+                  "lat": "9581",
+                  "locality": "Miami",
+                  "long": "-80.2389"
+                },
+                "url": "https://en.wikipedia.org/wiki/Miami_International_Autodrome"
+              },
+              "date": "2025-05-04",
+              "FirstPractice": {
+                "date": "2025-05-02",
+                "time": "17:30:00Z"
+              },
+              "Qualifying": {
+                "date": "2025-05-03",
+                "time": "21:00:00Z"
+              },
+              "raceName": "Miami Grand Prix",
+              "round": "6",
+              "season": "2025",
+              "Sprint": {
+                "date": "2025-05-03",
+                "time": "17:00:00Z"
+              },
+              "SprintQualifying": {
+                "date": "2025-05-02",
+                "time": "21:30:00Z"
+              },
+              "time": "21:00:00Z"
+            },
+            {
+              "Circuit": {
+                "circuitId": "imola",
+                "circuitName": "Autodromo Enzo e Dino Ferrari",
+                "Location": {
+                  "country": "Italy",
+                  "lat": "343899999999984",
+                  "locality": "Imola",
+                  "long": "7167"
+                },
+                "url": "https://en.wikipedia.org/wiki/Imola_Circuit"
+              },
+              "date": "2025-05-18",
+              "FirstPractice": {
+                "date": "2025-05-16",
+                "time": "12:30:00Z"
+              },
+              "Qualifying": {
+                "date": "2025-05-17",
+                "time": "15:00:00Z"
+              },
+              "raceName": "Emilia Romagna Grand Prix",
+              "round": "7",
+              "season": "2025",
+              "SecondPractice": {
+                "date": "2025-05-16",
+                "time": "16:00:00Z"
+              },
+              "ThirdPractice": {
+                "date": "2025-05-17",
+                "time": "11:30:00Z"
+              },
+              "time": "14:00:00Z"
+            },
+            {
+              "Circuit": {
+                "circuitId": "monaco",
+                "circuitName": "Circuit de Monaco",
+                "Location": {
+                  "country": "Monaco",
+                  "lat": "7347",
+                  "locality": "Monte-Carlo",
+                  "long": "42056"
+                },
+                "url": "https://en.wikipedia.org/wiki/Circuit_de_Monaco"
+              },
+              "date": "2025-05-25",
+              "FirstPractice": {
+                "date": "2025-05-23",
+                "time": "12:30:00Z"
+              },
+              "Qualifying": {
+                "date": "2025-05-24",
+                "time": "15:00:00Z"
+              },
+              "raceName": "Monaco Grand Prix",
+              "round": "8",
+              "season": "2025",
+              "SecondPractice": {
+                "date": "2025-05-23",
+                "time": "16:00:00Z"
+              },
+              "ThirdPractice": {
+                "date": "2025-05-24",
+                "time": "11:30:00Z"
+              },
+              "time": "14:00:00Z"
+            },
+            {
+              "Circuit": {
+                "circuitId": "catalunya",
+                "circuitName": "Circuit de Barcelona-Catalunya",
+                "Location": {
+                  "country": "Spain",
+                  "lat": "57",
+                  "locality": "Montmeló",
+                  "long": "26111"
+                },
+                "url": "https://en.wikipedia.org/wiki/Circuit_de_Barcelona-Catalunya"
+              },
+              "date": "2025-06-01",
+              "FirstPractice": {
+                "date": "2025-05-30",
+                "time": "12:30:00Z"
+              },
+              "Qualifying": {
+                "date": "2025-05-31",
+                "time": "15:00:00Z"
+              },
+              "raceName": "Spanish Grand Prix",
+              "round": "9",
+              "season": "2025",
+              "SecondPractice": {
+                "date": "2025-05-30",
+                "time": "16:00:00Z"
+              },
+              "ThirdPractice": {
+                "date": "2025-05-31",
+                "time": "11:30:00Z"
+              },
+              "time": "14:00:00Z"
+            },
+            {
+              "Circuit": {
+                "circuitId": "villeneuve",
+                "circuitName": "Circuit Gilles Villeneuve",
+                "Location": {
+                  "country": "Canada",
+                  "lat": "5",
+                  "locality": "Montreal",
+                  "long": "-73.5228"
+                },
+                "url": "https://en.wikipedia.org/wiki/Circuit_Gilles_Villeneuve"
+              },
+              "date": "2025-06-15",
+              "FirstPractice": {
+                "date": "2025-06-13",
+                "time": "18:30:00Z"
+              },
+              "Qualifying": {
+                "date": "2025-06-14",
+                "time": "21:00:00Z"
+              },
+              "raceName": "Canadian Grand Prix",
+              "round": "10",
+              "season": "2025",
+              "SecondPractice": {
+                "date": "2025-06-13",
+                "time": "22:00:00Z"
+              },
+              "ThirdPractice": {
+                "date": "2025-06-14",
+                "time": "17:30:00Z"
+              },
+              "time": "19:00:00Z"
+            },
+            {
+              "Circuit": {
+                "circuitId": "red_bull_ring",
+                "circuitName": "Red Bull Ring",
+                "Location": {
+                  "country": "Austria",
+                  "lat": "2197",
+                  "locality": "Spielberg",
+                  "long": "7647"
+                },
+                "url": "https://en.wikipedia.org/wiki/Red_Bull_Ring"
+              },
+              "date": "2025-06-29",
+              "FirstPractice": {
+                "date": "2025-06-27",
+                "time": "12:30:00Z"
+              },
+              "Qualifying": {
+                "date": "2025-06-28",
+                "time": "15:00:00Z"
+              },
+              "raceName": "Austrian Grand Prix",
+              "round": "11",
+              "season": "2025",
+              "SecondPractice": {
+                "date": "2025-06-27",
+                "time": "16:00:00Z"
+              },
+              "ThirdPractice": {
+                "date": "2025-06-28",
+                "time": "11:30:00Z"
+              },
+              "time": "14:00:00Z"
+            },
+            {
+              "Circuit": {
+                "circuitId": "silverstone",
+                "circuitName": "Silverstone Circuit",
+                "Location": {
+                  "country": "UK",
+                  "lat": "0786",
+                  "locality": "Silverstone",
+                  "long": "-1.01694"
+                },
+                "url": "https://en.wikipedia.org/wiki/Silverstone_Circuit"
+              },
+              "date": "2025-07-06",
+              "FirstPractice": {
+                "date": "2025-07-04",
+                "time": "12:30:00Z"
+              },
+              "Qualifying": {
+                "date": "2025-07-05",
+                "time": "15:00:00Z"
+              },
+              "raceName": "British Grand Prix",
+              "round": "12",
+              "season": "2025",
+              "SecondPractice": {
+                "date": "2025-07-04",
+                "time": "16:00:00Z"
+              },
+              "ThirdPractice": {
+                "date": "2025-07-05",
+                "time": "11:30:00Z"
+              },
+              "time": "15:00:00Z"
+            },
+            {
+              "Circuit": {
+                "circuitId": "spa",
+                "circuitName": "Circuit de Spa-Francorchamps",
+                "Location": {
+                  "country": "Belgium",
+                  "lat": "4372",
+                  "locality": "Spa",
+                  "long": "97139"
+                },
+                "url": "https://en.wikipedia.org/wiki/Circuit_de_Spa-Francorchamps"
+              },
+              "date": "2025-07-27",
+              "FirstPractice": {
+                "date": "2025-07-25",
+                "time": "11:30:00Z"
+              },
+              "Qualifying": {
+                "date": "2025-07-26",
+                "time": "15:00:00Z"
+              },
+              "raceName": "Belgian Grand Prix",
+              "round": "13",
+              "season": "2025",
+              "Sprint": {
+                "date": "2025-07-26",
+                "time": "11:00:00Z"
+              },
+              "SprintQualifying": {
+                "date": "2025-07-25",
+                "time": "15:30:00Z"
+              },
+              "time": "14:00:00Z"
+            },
+            {
+              "Circuit": {
+                "circuitId": "hungaroring",
+                "circuitName": "Hungaroring",
+                "Location": {
+                  "country": "Hungary",
+                  "lat": "5789",
+                  "locality": "Budapest",
+                  "long": "2486"
+                },
+                "url": "https://en.wikipedia.org/wiki/Hungaroring"
+              },
+              "date": "2025-08-03",
+              "FirstPractice": {
+                "date": "2025-08-01",
+                "time": "12:30:00Z"
+              },
+              "Qualifying": {
+                "date": "2025-08-02",
+                "time": "15:00:00Z"
+              },
+              "raceName": "Hungarian Grand Prix",
+              "round": "14",
+              "season": "2025",
+              "SecondPractice": {
+                "date": "2025-08-01",
+                "time": "16:00:00Z"
+              },
+              "ThirdPractice": {
+                "date": "2025-08-02",
+                "time": "11:30:00Z"
+              },
+              "time": "14:00:00Z"
+            },
+            {
+              "Circuit": {
+                "circuitId": "zandvoort",
+                "circuitName": "Circuit Park Zandvoort",
+                "Location": {
+                  "country": "Netherlands",
+                  "lat": "3888",
+                  "locality": "Zandvoort",
+                  "long": "54092"
+                },
+                "url": "https://en.wikipedia.org/wiki/Circuit_Zandvoort"
+              },
+              "date": "2025-08-31",
+              "FirstPractice": {
+                "date": "2025-08-29",
+                "time": "11:30:00Z"
+              },
+              "Qualifying": {
+                "date": "2025-08-30",
+                "time": "14:00:00Z"
+              },
+              "raceName": "Dutch Grand Prix",
+              "round": "15",
+              "season": "2025",
+              "SecondPractice": {
+                "date": "2025-08-29",
+                "time": "15:00:00Z"
+              },
+              "ThirdPractice": {
+                "date": "2025-08-30",
+                "time": "10:30:00Z"
+              },
+              "time": "14:00:00Z"
+            },
+            {
+              "Circuit": {
+                "circuitId": "monza",
+                "circuitName": "Autodromo Nazionale di Monza",
+                "Location": {
+                  "country": "Italy",
+                  "lat": "615599999999986",
+                  "locality": "Monza",
+                  "long": "28111"
+                },
+                "url": "https://en.wikipedia.org/wiki/Monza_Circuit"
+              },
+              "date": "2025-09-07",
+              "FirstPractice": {
+                "date": "2025-09-05",
+                "time": "12:30:00Z"
+              },
+              "Qualifying": {
+                "date": "2025-09-06",
+                "time": "15:00:00Z"
+              },
+              "raceName": "Italian Grand Prix",
+              "round": "16",
+              "season": "2025",
+              "SecondPractice": {
+                "date": "2025-09-05",
+                "time": "16:00:00Z"
+              },
+              "ThirdPractice": {
+                "date": "2025-09-06",
+                "time": "11:30:00Z"
+              },
+              "time": "14:00:00Z"
+            },
+            {
+              "Circuit": {
+                "circuitId": "baku",
+                "circuitName": "Baku City Circuit",
+                "Location": {
+                  "country": "Azerbaijan",
+                  "lat": "3725",
+                  "locality": "Baku",
+                  "long": "8533"
+                },
+                "url": "https://en.wikipedia.org/wiki/Baku_City_Circuit"
+              },
+              "date": "2025-09-21",
+              "FirstPractice": {
+                "date": "2025-09-19",
+                "time": "09:30:00Z"
+              },
+              "Qualifying": {
+                "date": "2025-09-20",
+                "time": "13:00:00Z"
+              },
+              "raceName": "Azerbaijan Grand Prix",
+              "round": "17",
+              "season": "2025",
+              "SecondPractice": {
+                "date": "2025-09-19",
+                "time": "13:00:00Z"
+              },
+              "ThirdPractice": {
+                "date": "2025-09-20",
+                "time": "09:30:00Z"
+              },
+              "time": "12:00:00Z"
+            },
+            {
+              "Circuit": {
+                "circuitId": "marina_bay",
+                "circuitName": "Marina Bay Street Circuit",
+                "Location": {
+                  "country": "Singapore",
+                  "lat": "2914",
+                  "locality": "Marina Bay",
+                  "long": "864"
+                },
+                "url": "https://en.wikipedia.org/wiki/Marina_Bay_Street_Circuit"
+              },
+              "date": "2025-10-05",
+              "FirstPractice": {
+                "date": "2025-10-03",
+                "time": "10:30:00Z"
+              },
+              "Qualifying": {
+                "date": "2025-10-04",
+                "time": "14:00:00Z"
+              },
+              "raceName": "Singapore Grand Prix",
+              "round": "18",
+              "season": "2025",
+              "SecondPractice": {
+                "date": "2025-10-03",
+                "time": "14:00:00Z"
+              },
+              "ThirdPractice": {
+                "date": "2025-10-04",
+                "time": "10:30:00Z"
+              },
+              "time": "13:00:00Z"
+            },
+            {
+              "Circuit": {
+                "circuitId": "americas",
+                "circuitName": "Circuit of the Americas",
+                "Location": {
+                  "country": "USA",
+                  "lat": "1328",
+                  "locality": "Austin",
+                  "long": "-97.6411"
+                },
+                "url": "https://en.wikipedia.org/wiki/Circuit_of_the_Americas"
+              },
+              "date": "2025-10-19",
+              "FirstPractice": {
+                "date": "2025-10-17",
+                "time": "18:30:00Z"
+              },
+              "Qualifying": {
+                "date": "2025-10-18",
+                "time": "22:00:00Z"
+              },
+              "raceName": "United States Grand Prix",
+              "round": "19",
+              "season": "2025",
+              "Sprint": {
+                "date": "2025-10-18",
+                "time": "18:00:00Z"
+              },
+              "SprintQualifying": {
+                "date": "2025-10-17",
+                "time": "22:30:00Z"
+              },
+              "time": "20:00:00Z"
+            },
+            {
+              "Circuit": {
+                "circuitId": "rodriguez",
+                "circuitName": "Autódromo Hermanos Rodríguez",
+                "Location": {
+                  "country": "Mexico",
+                  "lat": "4042",
+                  "locality": "Mexico City",
+                  "long": "-99.0907"
+                },
+                "url": "https://en.wikipedia.org/wiki/Aut%C3%B3dromo_Hermanos_Rodr%C3%ADguez"
+              },
+              "date": "2025-10-26",
+              "FirstPractice": {
+                "date": "2025-10-24",
+                "time": "19:30:00Z"
+              },
+              "Qualifying": {
+                "date": "2025-10-25",
+                "time": "22:00:00Z"
+              },
+              "raceName": "Mexico City Grand Prix",
+              "round": "20",
+              "season": "2025",
+              "SecondPractice": {
+                "date": "2025-10-24",
+                "time": "23:00:00Z"
+              },
+              "ThirdPractice": {
+                "date": "2025-10-25",
+                "time": "18:30:00Z"
+              },
+              "time": "20:00:00Z"
+            },
+            {
+              "Circuit": {
+                "circuitId": "interlagos",
+                "circuitName": "Autódromo José Carlos Pace",
+                "Location": {
+                  "country": "Brazil",
+                  "lat": "-23.7036",
+                  "locality": "São Paulo",
+                  "long": "-46.69969999999999"
+                },
+                "url": "https://en.wikipedia.org/wiki/Interlagos_Circuit"
+              },
+              "date": "2025-11-09",
+              "FirstPractice": {
+                "date": "2025-11-07",
+                "time": "14:30:00Z"
+              },
+              "Qualifying": {
+                "date": "2025-11-08",
+                "time": "18:00:00Z"
+              },
+              "raceName": "São Paulo Grand Prix",
+              "round": "21",
+              "season": "2025",
+              "Sprint": {
+                "date": "2025-11-08",
+                "time": "14:00:00Z"
+              },
+              "SprintQualifying": {
+                "date": "2025-11-07",
+                "time": "18:30:00Z"
+              },
+              "time": "17:00:00Z"
+            },
+            {
+              "Circuit": {
+                "circuitId": "vegas",
+                "circuitName": "Las Vegas Strip Street Circuit",
+                "Location": {
+                  "country": "USA",
+                  "lat": "11469999999999",
+                  "locality": "Las Vegas",
+                  "long": "-115.17300000000002"
+                },
+                "url": "https://en.wikipedia.org/wiki/Las_Vegas_Grand_Prix#Circuit"
+              },
+              "date": "2025-11-22",
+              "FirstPractice": {
+                "date": "2025-11-21",
+                "time": "00:30:00Z"
+              },
+              "Qualifying": {
+                "date": "2025-11-22",
+                "time": "04:00:00Z"
+              },
+              "raceName": "Las Vegas Grand Prix",
+              "round": "22",
+              "season": "2025",
+              "SecondPractice": {
+                "date": "2025-11-21",
+                "time": "04:00:00Z"
+              },
+              "ThirdPractice": {
+                "date": "2025-11-22",
+                "time": "00:30:00Z"
+              },
+              "time": "04:00:00Z"
+            },
+            {
+              "Circuit": {
+                "circuitId": "losail",
+                "circuitName": "Losail International Circuit",
+                "Location": {
+                  "country": "Qatar",
+                  "lat": "48999999999998",
+                  "locality": "Al Daayen",
+                  "long": "4542"
+                },
+                "url": "https://en.wikipedia.org/wiki/Lusail_International_Circuit"
+              },
+              "date": "2025-11-30",
+              "FirstPractice": {
+                "date": "2025-11-28",
+                "time": "13:30:00Z"
+              },
+              "Qualifying": {
+                "date": "2025-11-29",
+                "time": "18:00:00Z"
+              },
+              "raceName": "Qatar Grand Prix",
+              "round": "23",
+              "season": "2025",
+              "Sprint": {
+                "date": "2025-11-29",
+                "time": "14:00:00Z"
+              },
+              "SprintQualifying": {
+                "date": "2025-11-28",
+                "time": "17:30:00Z"
+              },
+              "time": "16:00:00Z"
+            },
+            {
+              "Circuit": {
+                "circuitId": "yas_marina",
+                "circuitName": "Yas Marina Circuit",
+                "Location": {
+                  "country": "UAE",
+                  "lat": "4672",
+                  "locality": "Abu Dhabi",
+                  "long": "6031"
+                },
+                "url": "https://en.wikipedia.org/wiki/Yas_Marina_Circuit"
+              },
+              "date": "2025-12-07",
+              "FirstPractice": {
+                "date": "2025-12-05",
+                "time": "09:30:00Z"
+              },
+              "Qualifying": {
+                "date": "2025-12-06",
+                "time": "14:00:00Z"
+              },
+              "raceName": "Abu Dhabi Grand Prix",
+              "round": "24",
+              "season": "2025",
+              "SecondPractice": {
+                "date": "2025-12-05",
+                "time": "13:00:00Z"
+              },
+              "ThirdPractice": {
+                "date": "2025-12-06",
+                "time": "10:30:00Z"
+              },
+              "time": "13:00:00Z"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "current-season"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "year": 2025
+              },
+              "name": "race-schedule"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@f1-standings who won the german grand prix in 2013?",
+        "mocks": {
+          "race-results": [
+            {
+              "Constructor": {
+                "constructorId": "red_bull",
+                "name": "Red Bull",
+                "nationality": "Austrian",
+                "url": "http://en.wikipedia.org/wiki/Red_Bull_Racing"
+              },
+              "Driver": {
+                "code": "VET",
+                "dateOfBirth": "1987-07-03",
+                "driverId": "vettel",
+                "familyName": "Vettel",
+                "givenName": "Sebastian",
+                "nationality": "German",
+                "permanentNumber": "5",
+                "url": "http://en.wikipedia.org/wiki/Sebastian_Vettel"
+              },
+              "FastestLap": {
+                "AverageSpeed": {
+                  "speed": "814",
+                  "units": "kph"
+                },
+                "lap": "59",
+                "rank": "5",
+                "Time": {
+                  "time": "1:34.164"
+                }
+              },
+              "grid": "2",
+              "laps": "60",
+              "number": "1",
+              "points": "25",
+              "position": "1",
+              "positionText": "1",
+              "status": "Finished",
+              "Time": {
+                "millis": "6074711",
+                "time": "1:41:14.711"
+              }
+            },
+            {
+              "Constructor": {
+                "constructorId": "lotus_f1",
+                "name": "Lotus F1",
+                "nationality": "British",
+                "url": "http://en.wikipedia.org/wiki/Lotus_F1"
+              },
+              "Driver": {
+                "code": "RAI",
+                "dateOfBirth": "1979-10-17",
+                "driverId": "raikkonen",
+                "familyName": "Räikkönen",
+                "givenName": "Kimi",
+                "nationality": "Finnish",
+                "permanentNumber": "7",
+                "url": "http://en.wikipedia.org/wiki/Kimi_R%C3%A4ikk%C3%B6nen"
+              },
+              "FastestLap": {
+                "AverageSpeed": {
+                  "speed": "647",
+                  "units": "kph"
+                },
+                "lap": "57",
+                "rank": "2",
+                "Time": {
+                  "time": "1:33.767"
+                }
+              },
+              "grid": "4",
+              "laps": "60",
+              "number": "7",
+              "points": "18",
+              "position": "2",
+              "positionText": "2",
+              "status": "Finished",
+              "Time": {
+                "millis": "6075719",
+                "time": "+1.008"
+              }
+            },
+            {
+              "Constructor": {
+                "constructorId": "lotus_f1",
+                "name": "Lotus F1",
+                "nationality": "British",
+                "url": "http://en.wikipedia.org/wiki/Lotus_F1"
+              },
+              "Driver": {
+                "code": "GRO",
+                "dateOfBirth": "1986-04-17",
+                "driverId": "grosjean",
+                "familyName": "Grosjean",
+                "givenName": "Romain",
+                "nationality": "French",
+                "permanentNumber": "8",
+                "url": "http://en.wikipedia.org/wiki/Romain_Grosjean"
+              },
+              "FastestLap": {
+                "AverageSpeed": {
+                  "speed": "956",
+                  "units": "kph"
+                },
+                "lap": "57",
+                "rank": "10",
+                "Time": {
+                  "time": "1:34.576"
+                }
+              },
+              "grid": "5",
+              "laps": "60",
+              "number": "8",
+              "points": "15",
+              "position": "3",
+              "positionText": "3",
+              "status": "Finished",
+              "Time": {
+                "millis": "6080541",
+                "time": "+5.830"
+              }
+            },
+            {
+              "Constructor": {
+                "constructorId": "ferrari",
+                "name": "Ferrari",
+                "nationality": "Italian",
+                "url": "http://en.wikipedia.org/wiki/Scuderia_Ferrari"
+              },
+              "Driver": {
+                "code": "ALO",
+                "dateOfBirth": "1981-07-29",
+                "driverId": "alonso",
+                "familyName": "Alonso",
+                "givenName": "Fernando",
+                "nationality": "Spanish",
+                "permanentNumber": "14",
+                "url": "http://en.wikipedia.org/wiki/Fernando_Alonso"
+              },
+              "FastestLap": {
+                "AverageSpeed": {
+                  "speed": "279",
+                  "units": "kph"
+                },
+                "lap": "51",
+                "rank": "1",
+                "Time": {
+                  "time": "1:33.468"
+                }
+              },
+              "grid": "8",
+              "laps": "60",
+              "number": "3",
+              "points": "12",
+              "position": "4",
+              "positionText": "4",
+              "status": "Finished",
+              "Time": {
+                "millis": "6082432",
+                "time": "+7.721"
+              }
+            },
+            {
+              "Constructor": {
+                "constructorId": "mercedes",
+                "name": "Mercedes",
+                "nationality": "German",
+                "url": "http://en.wikipedia.org/wiki/Mercedes-Benz_in_Formula_One"
+              },
+              "Driver": {
+                "code": "HAM",
+                "dateOfBirth": "1985-01-07",
+                "driverId": "hamilton",
+                "familyName": "Hamilton",
+                "givenName": "Lewis",
+                "nationality": "British",
+                "permanentNumber": "44",
+                "url": "http://en.wikipedia.org/wiki/Lewis_Hamilton"
+              },
+              "FastestLap": {
+                "AverageSpeed": {
+                  "speed": "830",
+                  "units": "kph"
+                },
+                "lap": "57",
+                "rank": "4",
+                "Time": {
+                  "time": "1:34.156"
+                }
+              },
+              "grid": "1",
+              "laps": "60",
+              "number": "10",
+              "points": "10",
+              "position": "5",
+              "positionText": "5",
+              "status": "Finished",
+              "Time": {
+                "millis": "6101638",
+                "time": "+26.927"
+              }
+            },
+            {
+              "Constructor": {
+                "constructorId": "mclaren",
+                "name": "McLaren",
+                "nationality": "British",
+                "url": "http://en.wikipedia.org/wiki/McLaren"
+              },
+              "Driver": {
+                "code": "BUT",
+                "dateOfBirth": "1980-01-19",
+                "driverId": "button",
+                "familyName": "Button",
+                "givenName": "Jenson",
+                "nationality": "British",
+                "permanentNumber": "22",
+                "url": "http://en.wikipedia.org/wiki/Jenson_Button"
+              },
+              "FastestLap": {
+                "AverageSpeed": {
+                  "speed": "736",
+                  "units": "kph"
+                },
+                "lap": "49",
+                "rank": "7",
+                "Time": {
+                  "time": "1:34.201"
+                }
+              },
+              "grid": "9",
+              "laps": "60",
+              "number": "5",
+              "points": "8",
+              "position": "6",
+              "positionText": "6",
+              "status": "Finished",
+              "Time": {
+                "millis": "6102707",
+                "time": "+27.996"
+              }
+            },
+            {
+              "Constructor": {
+                "constructorId": "red_bull",
+                "name": "Red Bull",
+                "nationality": "Austrian",
+                "url": "http://en.wikipedia.org/wiki/Red_Bull_Racing"
+              },
+              "Driver": {
+                "code": "WEB",
+                "dateOfBirth": "1976-08-27",
+                "driverId": "webber",
+                "familyName": "Webber",
+                "givenName": "Mark",
+                "nationality": "Australian",
+                "url": "http://en.wikipedia.org/wiki/Mark_Webber_(racing_driver)"
+              },
+              "FastestLap": {
+                "AverageSpeed": {
+                  "speed": "530",
+                  "units": "kph"
+                },
+                "lap": "55",
+                "rank": "11",
+                "Time": {
+                  "time": "1:34.782"
+                }
+              },
+              "grid": "3",
+              "laps": "60",
+              "number": "2",
+              "points": "6",
+              "position": "7",
+              "positionText": "7",
+              "status": "Finished",
+              "Time": {
+                "millis": "6112273",
+                "time": "+37.562"
+              }
+            },
+            {
+              "Constructor": {
+                "constructorId": "mclaren",
+                "name": "McLaren",
+                "nationality": "British",
+                "url": "http://en.wikipedia.org/wiki/McLaren"
+              },
+              "Driver": {
+                "code": "PER",
+                "dateOfBirth": "1990-01-26",
+                "driverId": "perez",
+                "familyName": "Pérez",
+                "givenName": "Sergio",
+                "nationality": "Mexican",
+                "permanentNumber": "11",
+                "url": "http://en.wikipedia.org/wiki/Sergio_P%C3%A9rez"
+              },
+              "FastestLap": {
+                "AverageSpeed": {
+                  "speed": "780",
+                  "units": "kph"
+                },
+                "lap": "50",
+                "rank": "15",
+                "Time": {
+                  "time": "1:36.134"
+                }
+              },
+              "grid": "13",
+              "laps": "60",
+              "number": "6",
+              "points": "4",
+              "position": "8",
+              "positionText": "8",
+              "status": "Finished",
+              "Time": {
+                "millis": "6113017",
+                "time": "+38.306"
+              }
+            },
+            {
+              "Constructor": {
+                "constructorId": "mercedes",
+                "name": "Mercedes",
+                "nationality": "German",
+                "url": "http://en.wikipedia.org/wiki/Mercedes-Benz_in_Formula_One"
+              },
+              "Driver": {
+                "code": "ROS",
+                "dateOfBirth": "1985-06-27",
+                "driverId": "rosberg",
+                "familyName": "Rosberg",
+                "givenName": "Nico",
+                "nationality": "German",
+                "permanentNumber": "6",
+                "url": "http://en.wikipedia.org/wiki/Nico_Rosberg"
+              },
+              "FastestLap": {
+                "AverageSpeed": {
+                  "speed": "778",
+                  "units": "kph"
+                },
+                "lap": "55",
+                "rank": "6",
+                "Time": {
+                  "time": "1:34.181"
+                }
+              },
+              "grid": "11",
+              "laps": "60",
+              "number": "9",
+              "points": "2",
+              "position": "9",
+              "positionText": "9",
+              "status": "Finished",
+              "Time": {
+                "millis": "6121532",
+                "time": "+46.821"
+              }
+            },
+            {
+              "Constructor": {
+                "constructorId": "sauber",
+                "name": "Sauber",
+                "nationality": "Swiss",
+                "url": "http://en.wikipedia.org/wiki/Sauber_Motorsport"
+              },
+              "Driver": {
+                "code": "HUL",
+                "dateOfBirth": "1987-08-19",
+                "driverId": "hulkenberg",
+                "familyName": "Hülkenberg",
+                "givenName": "Nico",
+                "nationality": "German",
+                "permanentNumber": "27",
+                "url": "http://en.wikipedia.org/wiki/Nico_H%C3%BClkenberg"
+              },
+              "FastestLap": {
+                "AverageSpeed": {
+                  "speed": "647",
+                  "units": "kph"
+                },
+                "lap": "58",
+                "rank": "8",
+                "Time": {
+                  "time": "1:34.244"
+                }
+              },
+              "grid": "10",
+              "laps": "60",
+              "number": "11",
+              "points": "1",
+              "position": "10",
+              "positionText": "10",
+              "status": "Finished",
+              "Time": {
+                "millis": "6124603",
+                "time": "+49.892"
+              }
+            },
+            {
+              "Constructor": {
+                "constructorId": "force_india",
+                "name": "Force India",
+                "nationality": "Indian",
+                "url": "http://en.wikipedia.org/wiki/Racing_Point_Force_India"
+              },
+              "Driver": {
+                "code": "DIR",
+                "dateOfBirth": "1986-04-16",
+                "driverId": "resta",
+                "familyName": "di Resta",
+                "givenName": "Paul",
+                "nationality": "British",
+                "permanentNumber": "40",
+                "url": "http://en.wikipedia.org/wiki/Paul_di_Resta"
+              },
+              "FastestLap": {
+                "AverageSpeed": {
+                  "speed": "918",
+                  "units": "kph"
+                },
+                "lap": "43",
+                "rank": "16",
+                "Time": {
+                  "time": "1:36.566"
+                }
+              },
+              "grid": "12",
+              "laps": "60",
+              "number": "14",
+              "points": "0",
+              "position": "11",
+              "positionText": "11",
+              "status": "Finished",
+              "Time": {
+                "millis": "6128482",
+                "time": "+53.771"
+              }
+            },
+            {
+              "Constructor": {
+                "constructorId": "toro_rosso",
+                "name": "Toro Rosso",
+                "nationality": "Italian",
+                "url": "http://en.wikipedia.org/wiki/Scuderia_Toro_Rosso"
+              },
+              "Driver": {
+                "code": "RIC",
+                "dateOfBirth": "1989-07-01",
+                "driverId": "ricciardo",
+                "familyName": "Ricciardo",
+                "givenName": "Daniel",
+                "nationality": "Australian",
+                "permanentNumber": "3",
+                "url": "http://en.wikipedia.org/wiki/Daniel_Ricciardo"
+              },
+              "FastestLap": {
+                "AverageSpeed": {
+                  "speed": "086",
+                  "units": "kph"
+                },
+                "lap": "58",
+                "rank": "14",
+                "Time": {
+                  "time": "1:35.982"
+                }
+              },
+              "grid": "6",
+              "laps": "60",
+              "number": "19",
+              "points": "0",
+              "position": "12",
+              "positionText": "12",
+              "status": "Finished",
+              "Time": {
+                "millis": "6131686",
+                "time": "+56.975"
+              }
+            },
+            {
+              "Constructor": {
+                "constructorId": "force_india",
+                "name": "Force India",
+                "nationality": "Indian",
+                "url": "http://en.wikipedia.org/wiki/Racing_Point_Force_India"
+              },
+              "Driver": {
+                "code": "SUT",
+                "dateOfBirth": "1983-01-11",
+                "driverId": "sutil",
+                "familyName": "Sutil",
+                "givenName": "Adrian",
+                "nationality": "German",
+                "permanentNumber": "99",
+                "url": "http://en.wikipedia.org/wiki/Adrian_Sutil"
+              },
+              "FastestLap": {
+                "AverageSpeed": {
+                  "speed": "420",
+                  "units": "kph"
+                },
+                "lap": "60",
+                "rank": "13",
+                "Time": {
+                  "time": "1:35.816"
+                }
+              },
+              "grid": "15",
+              "laps": "60",
+              "number": "15",
+              "points": "0",
+              "position": "13",
+              "positionText": "13",
+              "status": "Finished",
+              "Time": {
+                "millis": "6132449",
+                "time": "+57.738"
+              }
+            },
+            {
+              "Constructor": {
+                "constructorId": "sauber",
+                "name": "Sauber",
+                "nationality": "Swiss",
+                "url": "http://en.wikipedia.org/wiki/Sauber_Motorsport"
+              },
+              "Driver": {
+                "code": "GUT",
+                "dateOfBirth": "1991-08-05",
+                "driverId": "gutierrez",
+                "familyName": "Gutiérrez",
+                "givenName": "Esteban",
+                "nationality": "Mexican",
+                "permanentNumber": "21",
+                "url": "http://en.wikipedia.org/wiki/Esteban_Guti%C3%A9rrez"
+              },
+              "FastestLap": {
+                "AverageSpeed": {
+                  "speed": "469",
+                  "units": "kph"
+                },
+                "lap": "56",
+                "rank": "12",
+                "Time": {
+                  "time": "1:35.792"
+                }
+              },
+              "grid": "14",
+              "laps": "60",
+              "number": "12",
+              "points": "0",
+              "position": "14",
+              "positionText": "14",
+              "status": "Finished",
+              "Time": {
+                "millis": "6134871",
+                "time": "+1:00.160"
+              }
+            },
+            {
+              "Constructor": {
+                "constructorId": "williams",
+                "name": "Williams",
+                "nationality": "British",
+                "url": "http://en.wikipedia.org/wiki/Williams_Grand_Prix_Engineering"
+              },
+              "Driver": {
+                "code": "MAL",
+                "dateOfBirth": "1985-03-09",
+                "driverId": "maldonado",
+                "familyName": "Maldonado",
+                "givenName": "Pastor",
+                "nationality": "Venezuelan",
+                "permanentNumber": "13",
+                "url": "http://en.wikipedia.org/wiki/Pastor_Maldonado"
+              },
+              "FastestLap": {
+                "AverageSpeed": {
+                  "speed": "544",
+                  "units": "kph"
+                },
+                "lap": "56",
+                "rank": "9",
+                "Time": {
+                  "time": "1:34.293"
+                }
+              },
+              "grid": "18",
+              "laps": "60",
+              "number": "16",
+              "points": "0",
+              "position": "15",
+              "positionText": "15",
+              "status": "Finished",
+              "Time": {
+                "millis": "6136640",
+                "time": "+1:01.929"
+              }
+            },
+            {
+              "Constructor": {
+                "constructorId": "williams",
+                "name": "Williams",
+                "nationality": "British",
+                "url": "http://en.wikipedia.org/wiki/Williams_Grand_Prix_Engineering"
+              },
+              "Driver": {
+                "code": "BOT",
+                "dateOfBirth": "1989-08-28",
+                "driverId": "bottas",
+                "familyName": "Bottas",
+                "givenName": "Valtteri",
+                "nationality": "Finnish",
+                "permanentNumber": "77",
+                "url": "http://en.wikipedia.org/wiki/Valtteri_Bottas"
+              },
+              "FastestLap": {
+                "AverageSpeed": {
+                  "speed": "216",
+                  "units": "kph"
+                },
+                "lap": "56",
+                "rank": "3",
+                "Time": {
+                  "time": "1:33.972"
+                }
+              },
+              "grid": "17",
+              "laps": "59",
+              "number": "17",
+              "points": "0",
+              "position": "16",
+              "positionText": "16",
+              "status": "+1 Lap"
+            },
+            {
+              "Constructor": {
+                "constructorId": "caterham",
+                "name": "Caterham",
+                "nationality": "Malaysian",
+                "url": "http://en.wikipedia.org/wiki/Caterham_F1"
+              },
+              "Driver": {
+                "code": "PIC",
+                "dateOfBirth": "1990-02-15",
+                "driverId": "pic",
+                "familyName": "Pic",
+                "givenName": "Charles",
+                "nationality": "French",
+                "url": "http://en.wikipedia.org/wiki/Charles_Pic"
+              },
+              "FastestLap": {
+                "AverageSpeed": {
+                  "speed": "916",
+                  "units": "kph"
+                },
+                "lap": "51",
+                "rank": "17",
+                "Time": {
+                  "time": "1:37.584"
+                }
+              },
+              "grid": "22",
+              "laps": "59",
+              "number": "20",
+              "points": "0",
+              "position": "17",
+              "positionText": "17",
+              "status": "+1 Lap"
+            },
+            {
+              "Constructor": {
+                "constructorId": "caterham",
+                "name": "Caterham",
+                "nationality": "Malaysian",
+                "url": "http://en.wikipedia.org/wiki/Caterham_F1"
+              },
+              "Driver": {
+                "code": "VDG",
+                "dateOfBirth": "1985-04-25",
+                "driverId": "garde",
+                "familyName": "van der Garde",
+                "givenName": "Giedo",
+                "nationality": "Dutch",
+                "url": "http://en.wikipedia.org/wiki/Giedo_van_der_Garde"
+              },
+              "FastestLap": {
+                "AverageSpeed": {
+                  "speed": "133",
+                  "units": "kph"
+                },
+                "lap": "40",
+                "rank": "19",
+                "Time": {
+                  "time": "1:38.509"
+                }
+              },
+              "grid": "20",
+              "laps": "59",
+              "number": "21",
+              "points": "0",
+              "position": "18",
+              "positionText": "18",
+              "status": "+1 Lap"
+            },
+            {
+              "Constructor": {
+                "constructorId": "marussia",
+                "name": "Marussia",
+                "nationality": "Russian",
+                "url": "http://en.wikipedia.org/wiki/Marussia_F1"
+              },
+              "Driver": {
+                "code": "CHI",
+                "dateOfBirth": "1991-04-21",
+                "driverId": "chilton",
+                "familyName": "Chilton",
+                "givenName": "Max",
+                "nationality": "British",
+                "permanentNumber": "4",
+                "url": "http://en.wikipedia.org/wiki/Max_Chilton"
+              },
+              "FastestLap": {
+                "AverageSpeed": {
+                  "speed": "374",
+                  "units": "kph"
+                },
+                "lap": "47",
+                "rank": "18",
+                "Time": {
+                  "time": "1:38.383"
+                }
+              },
+              "grid": "21",
+              "laps": "59",
+              "number": "23",
+              "points": "0",
+              "position": "19",
+              "positionText": "19",
+              "status": "+1 Lap"
+            },
+            {
+              "Constructor": {
+                "constructorId": "toro_rosso",
+                "name": "Toro Rosso",
+                "nationality": "Italian",
+                "url": "http://en.wikipedia.org/wiki/Scuderia_Toro_Rosso"
+              },
+              "Driver": {
+                "code": "VER",
+                "dateOfBirth": "1990-04-25",
+                "driverId": "vergne",
+                "familyName": "Vergne",
+                "givenName": "Jean-Éric",
+                "nationality": "French",
+                "permanentNumber": "25",
+                "url": "http://en.wikipedia.org/wiki/Jean-%C3%89ric_Vergne"
+              },
+              "FastestLap": {
+                "AverageSpeed": {
+                  "speed": "670",
+                  "units": "kph"
+                },
+                "lap": "12",
+                "rank": "21",
+                "Time": {
+                  "time": "1:39.281"
+                }
+              },
+              "grid": "16",
+              "laps": "22",
+              "number": "18",
+              "points": "0",
+              "position": "20",
+              "positionText": "R",
+              "status": "Hydraulics"
+            },
+            {
+              "Constructor": {
+                "constructorId": "marussia",
+                "name": "Marussia",
+                "nationality": "Russian",
+                "url": "http://en.wikipedia.org/wiki/Marussia_F1"
+              },
+              "Driver": {
+                "code": "BIA",
+                "dateOfBirth": "1989-08-03",
+                "driverId": "jules_bianchi",
+                "familyName": "Bianchi",
+                "givenName": "Jules",
+                "nationality": "French",
+                "permanentNumber": "17",
+                "url": "http://en.wikipedia.org/wiki/Jules_Bianchi"
+              },
+              "FastestLap": {
+                "AverageSpeed": {
+                  "speed": "617",
+                  "units": "kph"
+                },
+                "lap": "20",
+                "rank": "22",
+                "Time": {
+                  "time": "1:39.844"
+                }
+              },
+              "grid": "19",
+              "laps": "21",
+              "number": "22",
+              "points": "0",
+              "position": "21",
+              "positionText": "R",
+              "status": "Engine"
+            },
+            {
+              "Constructor": {
+                "constructorId": "ferrari",
+                "name": "Ferrari",
+                "nationality": "Italian",
+                "url": "http://en.wikipedia.org/wiki/Scuderia_Ferrari"
+              },
+              "Driver": {
+                "code": "MAS",
+                "dateOfBirth": "1981-04-25",
+                "driverId": "massa",
+                "familyName": "Massa",
+                "givenName": "Felipe",
+                "nationality": "Brazilian",
+                "permanentNumber": "19",
+                "url": "http://en.wikipedia.org/wiki/Felipe_Massa"
+              },
+              "FastestLap": {
+                "AverageSpeed": {
+                  "speed": "408",
+                  "units": "kph"
+                },
+                "lap": "3",
+                "rank": "20",
+                "Time": {
+                  "time": "1:38.890"
+                }
+              },
+              "grid": "7",
+              "laps": "3",
+              "number": "4",
+              "points": "0",
+              "position": "22",
+              "positionText": "R",
+              "status": "Spun off"
+            }
+          ],
+          "race-schedule": [
+            {
+              "Circuit": {
+                "circuitId": "albert_park",
+                "circuitName": "Albert Park Grand Prix Circuit",
+                "Location": {
+                  "country": "Australia",
+                  "lat": "-37.8497",
+                  "locality": "Melbourne",
+                  "long": "968"
+                },
+                "url": "https://en.wikipedia.org/wiki/Albert_Park_Circuit"
+              },
+              "date": "2013-03-17",
+              "FirstPractice": {
+                "date": "2013-03-15"
+              },
+              "Qualifying": {
+                "date": "2013-03-16"
+              },
+              "raceName": "Australian Grand Prix",
+              "round": "1",
+              "season": "2013",
+              "SecondPractice": {
+                "date": "2013-03-15"
+              },
+              "ThirdPractice": {
+                "date": "2013-03-16"
+              },
+              "time": "06:00:00Z",
+              "url": "https://en.wikipedia.org/wiki/2013_Australian_Grand_Prix"
+            },
+            {
+              "Circuit": {
+                "circuitId": "sepang",
+                "circuitName": "Sepang International Circuit",
+                "Location": {
+                  "country": "Malaysia",
+                  "lat": "76083",
+                  "locality": "Kuala Lumpur",
+                  "long": "738"
+                },
+                "url": "https://en.wikipedia.org/wiki/Sepang_International_Circuit"
+              },
+              "date": "2013-03-24",
+              "FirstPractice": {
+                "date": "2013-03-22"
+              },
+              "Qualifying": {
+                "date": "2013-03-23"
+              },
+              "raceName": "Malaysian Grand Prix",
+              "round": "2",
+              "season": "2013",
+              "SecondPractice": {
+                "date": "2013-03-22"
+              },
+              "ThirdPractice": {
+                "date": "2013-03-23"
+              },
+              "time": "08:00:00Z",
+              "url": "https://en.wikipedia.org/wiki/2013_Malaysian_Grand_Prix"
+            },
+            {
+              "Circuit": {
+                "circuitId": "shanghai",
+                "circuitName": "Shanghai International Circuit",
+                "Location": {
+                  "country": "China",
+                  "lat": "3389",
+                  "locality": "Shanghai",
+                  "long": "22"
+                },
+                "url": "https://en.wikipedia.org/wiki/Shanghai_International_Circuit"
+              },
+              "date": "2013-04-14",
+              "FirstPractice": {
+                "date": "2013-04-12"
+              },
+              "Qualifying": {
+                "date": "2013-04-13"
+              },
+              "raceName": "Chinese Grand Prix",
+              "round": "3",
+              "season": "2013",
+              "SecondPractice": {
+                "date": "2013-04-12"
+              },
+              "ThirdPractice": {
+                "date": "2013-04-13"
+              },
+              "time": "07:00:00Z",
+              "url": "https://en.wikipedia.org/wiki/2013_Chinese_Grand_Prix"
+            },
+            {
+              "Circuit": {
+                "circuitId": "bahrain",
+                "circuitName": "Bahrain International Circuit",
+                "Location": {
+                  "country": "Bahrain",
+                  "lat": "0325",
+                  "locality": "Sakhir",
+                  "long": "5106"
+                },
+                "url": "https://en.wikipedia.org/wiki/Bahrain_International_Circuit"
+              },
+              "date": "2013-04-21",
+              "FirstPractice": {
+                "date": "2013-04-19"
+              },
+              "Qualifying": {
+                "date": "2013-04-20"
+              },
+              "raceName": "Bahrain Grand Prix",
+              "round": "4",
+              "season": "2013",
+              "SecondPractice": {
+                "date": "2013-04-19"
+              },
+              "ThirdPractice": {
+                "date": "2013-04-20"
+              },
+              "time": "12:00:00Z",
+              "url": "https://en.wikipedia.org/wiki/2013_Bahrain_Grand_Prix"
+            },
+            {
+              "Circuit": {
+                "circuitId": "catalunya",
+                "circuitName": "Circuit de Barcelona-Catalunya",
+                "Location": {
+                  "country": "Spain",
+                  "lat": "57",
+                  "locality": "Montmeló",
+                  "long": "26111"
+                },
+                "url": "https://en.wikipedia.org/wiki/Circuit_de_Barcelona-Catalunya"
+              },
+              "date": "2013-05-12",
+              "FirstPractice": {
+                "date": "2013-05-10"
+              },
+              "Qualifying": {
+                "date": "2013-05-11"
+              },
+              "raceName": "Spanish Grand Prix",
+              "round": "5",
+              "season": "2013",
+              "SecondPractice": {
+                "date": "2013-05-10"
+              },
+              "ThirdPractice": {
+                "date": "2013-05-11"
+              },
+              "time": "12:00:00Z",
+              "url": "https://en.wikipedia.org/wiki/2013_Spanish_Grand_Prix"
+            },
+            {
+              "Circuit": {
+                "circuitId": "monaco",
+                "circuitName": "Circuit de Monaco",
+                "Location": {
+                  "country": "Monaco",
+                  "lat": "7347",
+                  "locality": "Monte-Carlo",
+                  "long": "42056"
+                },
+                "url": "https://en.wikipedia.org/wiki/Circuit_de_Monaco"
+              },
+              "date": "2013-05-26",
+              "FirstPractice": {
+                "date": "2013-05-23"
+              },
+              "Qualifying": {
+                "date": "2013-05-25"
+              },
+              "raceName": "Monaco Grand Prix",
+              "round": "6",
+              "season": "2013",
+              "SecondPractice": {
+                "date": "2013-05-23"
+              },
+              "ThirdPractice": {
+                "date": "2013-05-25"
+              },
+              "time": "12:00:00Z",
+              "url": "https://en.wikipedia.org/wiki/2013_Monaco_Grand_Prix"
+            },
+            {
+              "Circuit": {
+                "circuitId": "villeneuve",
+                "circuitName": "Circuit Gilles Villeneuve",
+                "Location": {
+                  "country": "Canada",
+                  "lat": "5",
+                  "locality": "Montreal",
+                  "long": "-73.5228"
+                },
+                "url": "https://en.wikipedia.org/wiki/Circuit_Gilles_Villeneuve"
+              },
+              "date": "2013-06-09",
+              "FirstPractice": {
+                "date": "2013-06-07"
+              },
+              "Qualifying": {
+                "date": "2013-06-08"
+              },
+              "raceName": "Canadian Grand Prix",
+              "round": "7",
+              "season": "2013",
+              "SecondPractice": {
+                "date": "2013-06-07"
+              },
+              "ThirdPractice": {
+                "date": "2013-06-08"
+              },
+              "time": "18:00:00Z",
+              "url": "https://en.wikipedia.org/wiki/2013_Canadian_Grand_Prix"
+            },
+            {
+              "Circuit": {
+                "circuitId": "silverstone",
+                "circuitName": "Silverstone Circuit",
+                "Location": {
+                  "country": "UK",
+                  "lat": "0786",
+                  "locality": "Silverstone",
+                  "long": "-1.01694"
+                },
+                "url": "https://en.wikipedia.org/wiki/Silverstone_Circuit"
+              },
+              "date": "2013-06-30",
+              "FirstPractice": {
+                "date": "2013-06-28"
+              },
+              "Qualifying": {
+                "date": "2013-06-29"
+              },
+              "raceName": "British Grand Prix",
+              "round": "8",
+              "season": "2013",
+              "SecondPractice": {
+                "date": "2013-06-28"
+              },
+              "ThirdPractice": {
+                "date": "2013-06-29"
+              },
+              "time": "12:00:00Z",
+              "url": "https://en.wikipedia.org/wiki/2013_British_Grand_Prix"
+            },
+            {
+              "Circuit": {
+                "circuitId": "nurburgring",
+                "circuitName": "Nürburgring",
+                "Location": {
+                  "country": "Germany",
+                  "lat": "3356",
+                  "locality": "Nürburg",
+                  "long": "9475"
+                },
+                "url": "https://en.wikipedia.org/wiki/N%C3%BCrburgring"
+              },
+              "date": "2013-07-07",
+              "FirstPractice": {
+                "date": "2013-07-05"
+              },
+              "Qualifying": {
+                "date": "2013-07-06"
+              },
+              "raceName": "German Grand Prix",
+              "round": "9",
+              "season": "2013",
+              "SecondPractice": {
+                "date": "2013-07-05"
+              },
+              "ThirdPractice": {
+                "date": "2013-07-06"
+              },
+              "time": "12:00:00Z",
+              "url": "https://en.wikipedia.org/wiki/2013_German_Grand_Prix"
+            },
+            {
+              "Circuit": {
+                "circuitId": "hungaroring",
+                "circuitName": "Hungaroring",
+                "Location": {
+                  "country": "Hungary",
+                  "lat": "5789",
+                  "locality": "Budapest",
+                  "long": "2486"
+                },
+                "url": "https://en.wikipedia.org/wiki/Hungaroring"
+              },
+              "date": "2013-07-28",
+              "FirstPractice": {
+                "date": "2013-07-26"
+              },
+              "Qualifying": {
+                "date": "2013-07-27"
+              },
+              "raceName": "Hungarian Grand Prix",
+              "round": "10",
+              "season": "2013",
+              "SecondPractice": {
+                "date": "2013-07-26"
+              },
+              "ThirdPractice": {
+                "date": "2013-07-27"
+              },
+              "time": "12:00:00Z",
+              "url": "https://en.wikipedia.org/wiki/2013_Hungarian_Grand_Prix"
+            },
+            {
+              "Circuit": {
+                "circuitId": "spa",
+                "circuitName": "Circuit de Spa-Francorchamps",
+                "Location": {
+                  "country": "Belgium",
+                  "lat": "4372",
+                  "locality": "Spa",
+                  "long": "97139"
+                },
+                "url": "https://en.wikipedia.org/wiki/Circuit_de_Spa-Francorchamps"
+              },
+              "date": "2013-08-25",
+              "FirstPractice": {
+                "date": "2013-08-23"
+              },
+              "Qualifying": {
+                "date": "2013-08-24"
+              },
+              "raceName": "Belgian Grand Prix",
+              "round": "11",
+              "season": "2013",
+              "SecondPractice": {
+                "date": "2013-08-23"
+              },
+              "ThirdPractice": {
+                "date": "2013-08-24"
+              },
+              "time": "12:00:00Z",
+              "url": "https://en.wikipedia.org/wiki/2013_Belgian_Grand_Prix"
+            },
+            {
+              "Circuit": {
+                "circuitId": "monza",
+                "circuitName": "Autodromo Nazionale di Monza",
+                "Location": {
+                  "country": "Italy",
+                  "lat": "6156",
+                  "locality": "Monza",
+                  "long": "28111"
+                },
+                "url": "https://en.wikipedia.org/wiki/Monza_Circuit"
+              },
+              "date": "2013-09-08",
+              "FirstPractice": {
+                "date": "2013-09-06"
+              },
+              "Qualifying": {
+                "date": "2013-09-07"
+              },
+              "raceName": "Italian Grand Prix",
+              "round": "12",
+              "season": "2013",
+              "SecondPractice": {
+                "date": "2013-09-06"
+              },
+              "ThirdPractice": {
+                "date": "2013-09-07"
+              },
+              "time": "12:00:00Z",
+              "url": "https://en.wikipedia.org/wiki/2013_Italian_Grand_Prix"
+            },
+            {
+              "Circuit": {
+                "circuitId": "marina_bay",
+                "circuitName": "Marina Bay Street Circuit",
+                "Location": {
+                  "country": "Singapore",
+                  "lat": "2914",
+                  "locality": "Marina Bay",
+                  "long": "864"
+                },
+                "url": "https://en.wikipedia.org/wiki/Marina_Bay_Street_Circuit"
+              },
+              "date": "2013-09-22",
+              "FirstPractice": {
+                "date": "2013-09-20"
+              },
+              "Qualifying": {
+                "date": "2013-09-21"
+              },
+              "raceName": "Singapore Grand Prix",
+              "round": "13",
+              "season": "2013",
+              "SecondPractice": {
+                "date": "2013-09-20"
+              },
+              "ThirdPractice": {
+                "date": "2013-09-21"
+              },
+              "time": "12:00:00Z",
+              "url": "https://en.wikipedia.org/wiki/2013_Singapore_Grand_Prix"
+            },
+            {
+              "Circuit": {
+                "circuitId": "yeongam",
+                "circuitName": "Korean International Circuit",
+                "Location": {
+                  "country": "Korea",
+                  "lat": "7333",
+                  "locality": "Yeongam County",
+                  "long": "417"
+                },
+                "url": "https://en.wikipedia.org/wiki/Korea_International_Circuit"
+              },
+              "date": "2013-10-06",
+              "FirstPractice": {
+                "date": "2013-10-04"
+              },
+              "Qualifying": {
+                "date": "2013-10-05"
+              },
+              "raceName": "Korean Grand Prix",
+              "round": "14",
+              "season": "2013",
+              "SecondPractice": {
+                "date": "2013-10-04"
+              },
+              "ThirdPractice": {
+                "date": "2013-10-05"
+              },
+              "time": "06:00:00Z",
+              "url": "https://en.wikipedia.org/wiki/2013_Korean_Grand_Prix"
+            },
+            {
+              "Circuit": {
+                "circuitId": "suzuka",
+                "circuitName": "Suzuka Circuit",
+                "Location": {
+                  "country": "Japan",
+                  "lat": "8431",
+                  "locality": "Suzuka",
+                  "long": "541"
+                },
+                "url": "https://en.wikipedia.org/wiki/Suzuka_International_Racing_Course"
+              },
+              "date": "2013-10-13",
+              "FirstPractice": {
+                "date": "2013-10-11"
+              },
+              "Qualifying": {
+                "date": "2013-10-12"
+              },
+              "raceName": "Japanese Grand Prix",
+              "round": "15",
+              "season": "2013",
+              "SecondPractice": {
+                "date": "2013-10-11"
+              },
+              "ThirdPractice": {
+                "date": "2013-10-12"
+              },
+              "time": "06:00:00Z",
+              "url": "https://en.wikipedia.org/wiki/2013_Japanese_Grand_Prix"
+            },
+            {
+              "Circuit": {
+                "circuitId": "buddh",
+                "circuitName": "Buddh International Circuit",
+                "Location": {
+                  "country": "India",
+                  "lat": "3487",
+                  "locality": "Uttar Pradesh",
+                  "long": "5331"
+                },
+                "url": "https://en.wikipedia.org/wiki/Buddh_International_Circuit"
+              },
+              "date": "2013-10-27",
+              "FirstPractice": {
+                "date": "2013-10-25"
+              },
+              "Qualifying": {
+                "date": "2013-10-26"
+              },
+              "raceName": "Indian Grand Prix",
+              "round": "16",
+              "season": "2013",
+              "SecondPractice": {
+                "date": "2013-10-25"
+              },
+              "ThirdPractice": {
+                "date": "2013-10-26"
+              },
+              "time": "09:30:00Z",
+              "url": "https://en.wikipedia.org/wiki/2013_Indian_Grand_Prix"
+            },
+            {
+              "Circuit": {
+                "circuitId": "yas_marina",
+                "circuitName": "Yas Marina Circuit",
+                "Location": {
+                  "country": "UAE",
+                  "lat": "4672",
+                  "locality": "Abu Dhabi",
+                  "long": "6031"
+                },
+                "url": "https://en.wikipedia.org/wiki/Yas_Marina_Circuit"
+              },
+              "date": "2013-11-03",
+              "FirstPractice": {
+                "date": "2013-11-01"
+              },
+              "Qualifying": {
+                "date": "2013-11-02"
+              },
+              "raceName": "Abu Dhabi Grand Prix",
+              "round": "17",
+              "season": "2013",
+              "SecondPractice": {
+                "date": "2013-11-01"
+              },
+              "ThirdPractice": {
+                "date": "2013-11-02"
+              },
+              "time": "13:00:00Z",
+              "url": "https://en.wikipedia.org/wiki/2013_Abu_Dhabi_Grand_Prix"
+            },
+            {
+              "Circuit": {
+                "circuitId": "americas",
+                "circuitName": "Circuit of the Americas",
+                "Location": {
+                  "country": "USA",
+                  "lat": "1328",
+                  "locality": "Austin",
+                  "long": "-97.6411"
+                },
+                "url": "https://en.wikipedia.org/wiki/Circuit_of_the_Americas"
+              },
+              "date": "2013-11-17",
+              "FirstPractice": {
+                "date": "2013-11-15"
+              },
+              "Qualifying": {
+                "date": "2013-11-16"
+              },
+              "raceName": "United States Grand Prix",
+              "round": "18",
+              "season": "2013",
+              "SecondPractice": {
+                "date": "2013-11-15"
+              },
+              "ThirdPractice": {
+                "date": "2013-11-16"
+              },
+              "time": "19:00:00Z",
+              "url": "https://en.wikipedia.org/wiki/2013_United_States_Grand_Prix"
+            },
+            {
+              "Circuit": {
+                "circuitId": "interlagos",
+                "circuitName": "Autódromo José Carlos Pace",
+                "Location": {
+                  "country": "Brazil",
+                  "lat": "-23.7036",
+                  "locality": "São Paulo",
+                  "long": "-46.6997"
+                },
+                "url": "https://en.wikipedia.org/wiki/Interlagos_Circuit"
+              },
+              "date": "2013-11-24",
+              "FirstPractice": {
+                "date": "2013-11-22"
+              },
+              "Qualifying": {
+                "date": "2013-11-23"
+              },
+              "raceName": "Brazilian Grand Prix",
+              "round": "19",
+              "season": "2013",
+              "SecondPractice": {
+                "date": "2013-11-22"
+              },
+              "ThirdPractice": {
+                "date": "2013-11-23"
+              },
+              "time": "16:00:00Z",
+              "url": "https://en.wikipedia.org/wiki/2013_Brazilian_Grand_Prix"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "year": 2013
+              },
+              "name": "race-schedule"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "round": 9,
+                "year": 2013
+              },
+              "name": "race-results"
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.48.8",
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.19.1",
     "cheerio": "^1.0.0-rc.10",
-    "moment": "^2.29.3",
-    "node-fetch": "^3.0.0",
-    "raycast-toolkit": "^1.0.3",
-    "run-applescript": "^6.0.0"
+    "date-fns": "^4.1.0",
+    "moment": "^2.30.1",
+    "node-fetch": "^3.3.2",
+    "raycast-toolkit": "^1.0.6",
+    "run-applescript": "^7.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.5",
-    "@types/node": "^18.8.3",
-    "eslint": "^7.32.0",
-    "eslint-plugin-react-hooks": "^4.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.10",
+    "@types/react": "18.2.79",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "pull-contributions": "ray pull-contributions"
   }
 }

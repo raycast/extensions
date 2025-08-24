@@ -1,5 +1,27 @@
 # Harvest Changelog
 
+
+## [Fixes] - 2024-06-07
+
+- Fix: on New timer entry, date will now default to the current date instead of "No Date"
+
+## [Cache Improvements] - 2024-05-28
+
+- Improve caching for projects and time entries throughout the extenstion and menu bar. Thanks @klmz for helping me disagnose this!
+- Better parsing of decimals to hours/minute format
+- Removed callback URLs in the menu bar command (use "Status Folder" feature instaed, see README)
+- Added "Stop Timer" option to menu bar widget
+
+## [Fixes] - 2024-04-08
+
+- Improved cache for projects and tasks
+
+## [Toggle Timer Entry Command] - 2024-01-02
+
+- Added: New command to toggle the timer on the most recent time entry
+- Added: New preference to save the currently running timer to a JSON file of the user's choice. This can be used to trigger other apps or scripts when a timer is started or stopped without using the callback URL feature (which takes away Raycast from the foreground)
+- Fixed: Check for when the extentions is rate-limited by Harvest and automatically retry after the timeout
+
 ## [Menu Bar Fixes] - 2023-07-24
 
 - Fix: Menu bar widget snows the running timer in the format based on the user's preference

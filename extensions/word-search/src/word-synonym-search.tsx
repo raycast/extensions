@@ -1,6 +1,9 @@
-import { SearchType } from "./types";
-import SearchResults from "./search-results";
+import type { LaunchProps } from "@raycast/api";
 
-export default function SearchSynonym() {
-  return SearchResults(SearchType.SYNONYM, "Search for synonyms");
+import { SearchType } from "@/types";
+
+import SearchResults from "@/components/SearchResults";
+
+export default function SearchSynonym(props: LaunchProps) {
+  return SearchResults(SearchType.SYNONYM, "Search for synonyms", props);
 }

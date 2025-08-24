@@ -114,7 +114,7 @@ function getBookmarks(foldres: Folder[], bookmark: BookmarkItem): Bookmark[] {
   const bookmarks = [];
 
   if (isBookmarkURL(bookmark)) {
-    const bookmarkTitle = bookmark.title || bookmark.data.tab.savedTitle;
+    const bookmarkTitle = bookmark.title || bookmark.data.tab.savedTitle || "";
     const hierarchy = foldres.find((folder) => folder.childrenIds.includes(bookmark.id))?.title ?? "";
 
     bookmarks.push({
@@ -180,7 +180,7 @@ async function getArcProfiles() {
 
   const defaultProfile = localState.profile?.last_used?.length > 0 ? localState.profile.last_used : profiles[0].path;
 
-  profiles.sort((a, b) => a.name.localeCompare(b.name));
+  profiles.sort((a, b) => a.name?.localeCompare(b.name));
   return { profiles, defaultProfile };
 }
 

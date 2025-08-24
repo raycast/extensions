@@ -6,15 +6,13 @@ import type { File } from "../types";
 const VISITED_FIGMA_FILES_KEY = "VISITED_FIGMA_FILES";
 const VISITED_FIGMA_FILES_LENGTH = 5;
 
-//functions for visited files
 async function loadVisitedFiles() {
   const item = await LocalStorage.getItem<string>(VISITED_FIGMA_FILES_KEY);
   if (item) {
     const parsed = JSON.parse(item) as File[];
     return parsed;
-  } else {
-    return [];
   }
+  return [];
 }
 
 async function saveVisitedFiles(file: File[]) {
@@ -42,5 +40,5 @@ export function useVisitedFiles() {
     await saveVisitedFiles(nextFiles);
   }
 
-  return { files, visitFile, isLoading: !files };
+  return { files, visitFile, isLoading: !files, revalidate: () => loadVisitedFiles().then(setFiles) };
 }

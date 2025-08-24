@@ -25,4 +25,4 @@ resources.
    [API Key page](https://app.datadoghq.com/organization-settings/api-keys).
 2. Create an application key on the
    [Application Keys page](https://app.datadoghq.com/organization-settings/application-keys).
-3. For environments, provide a comma-separated list of enviroments that you want to query.
+3. For environments, provide a comma-separated list of environments that you want to query.

@@ -1,30 +1,33 @@
 /* eslint-disable camelcase */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Provider } from "../base";
+import { Provider, Message } from "../base";
 import { Prompt } from "../prompt";
-import { TranslateQuery } from "../types";
-import { fetchSSE, getErrorText } from "../utils";
+import { TranslateQuery, ProviderProps } from "../types";
+import { fetchSSE, SSETransform } from "../utils";
+/* @ts-expect-error: has no exported member 'compose' */
+import { compose } from "stream";
 
 export default class extends Provider {
-  protected model: string;
+  protected model: string | undefined;
   protected entrypoint: string;
-  protected apikey: string; //
+  protected apikey: string | undefined; //
 
-  constructor({ apiModel, entrypoint, apikey }: { apiModel: string; entrypoint: string; apikey: string }) {
-    super();
-    this.model = apiModel;
-    this.entrypoint = entrypoint;
-    this.apikey = apikey;
+  constructor(props: ProviderProps) {
+    super(props);
+    this.model = props.apiModel;
+    this.entrypoint = props.entrypoint;
+    this.apikey = props.apikey;
   }
 
-  async doTranslate(query: TranslateQuery, prompt: Prompt): Promise<void> {
+  protected async *doTranslate(query: TranslateQuery, prompt: Prompt): AsyncGenerator<Message> {
     const body = this.body(query, prompt);
     const messages = this.messages(query, prompt);
     const headers = this.headers(query, prompt);
-    const onMessage = this.handleMessage(query, prompt);
 
     const isFirst = true;
+
+    const messageParser = this.handleMessage(prompt);
 
     body["messages"] = messages;
 
@@ -32,16 +35,17 @@ export default class extends Provider {
       ...this.options(query, prompt),
       body: JSON.stringify(body),
       headers,
-      onMessage,
     };
-    await fetchSSE(`${this.entrypoint}`, options);
+    const source = fetchSSE(`${this.entrypoint}`, options);
+
+    yield* compose(source, new SSETransform(), messageParser);
   }
 
   headers(query: TranslateQuery, prompt: Prompt): Record<string, string> {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
-    if (this.apikey != "none") {
+    if (this.apikey && this.apikey != "none") {
       headers["Authorization"] = `Bearer ${this.apikey}`;
     }
     return headers;
@@ -84,39 +88,46 @@ export default class extends Provider {
     ];
   }
 
-  handleMessage(query: TranslateQuery, prompt: Prompt): (msg: string) => void {
-    return (msg: string) => {
-      const { quoteProcessor, meta } = prompt;
-      const { isWordMode } = meta;
+  handleMessage(prompt: Prompt): (source: any) => AsyncGenerator<Message> {
+    return async function* (source) {
+      for await (const chunk of source) {
+        // console.debug(chunk)
+        if (chunk) {
+          const { quoteProcessor, meta } = prompt;
+          const { isWordMode } = meta;
+          let resp;
+          try {
+            // console.debug("=====parse=====");
+            // console.debug(chunk.data);
+            resp = JSON.parse(chunk.data);
+            const { choices } = resp;
+            if (!choices || choices.length === 0) {
+              console.debug({ error: "No result" });
+            } else {
+              const { finish_reason: finishReason } = choices[0];
+              if (finishReason) {
+                yield finishReason;
+              } else {
+                let targetTxt = "";
+                const { content = "", role } = choices[0].delta;
 
-      let resp;
-      try {
-        resp = JSON.parse(msg);
-        // eslint-disable-next-line no-empty
-      } catch (error) {
-        query.onFinish("stop");
-        return;
+                targetTxt = content ? content : "";
+
+                if (quoteProcessor) {
+                  targetTxt = quoteProcessor.processText(targetTxt);
+                }
+                yield { content: targetTxt, role, isWordMode };
+              }
+            }
+          } catch (error) {
+            console.debug({ error: "Parse error" });
+            yield "stop";
+          }
+        } else {
+          // TODO: find out why chunk is null
+          console.debug("chunk is null");
+        }
       }
-
-      const { choices } = resp;
-      if (!choices || choices.length === 0) {
-        return { error: "No result" };
-      }
-      const { finish_reason: finishReason } = choices[0];
-      if (finishReason) {
-        query.onFinish(finishReason);
-        return;
-      }
-
-      let targetTxt = "";
-      const { content = "", role } = choices[0].delta;
-
-      targetTxt = content;
-
-      if (quoteProcessor) {
-        targetTxt = quoteProcessor.processText(targetTxt);
-      }
-      query.onMessage({ content: targetTxt, role, isWordMode });
     };
   }
 
@@ -125,9 +136,6 @@ export default class extends Provider {
       method: "POST",
       signal: query.signal,
       agent: query.agent,
-      onError: (err: any) => {
-        query.onError(getErrorText(err));
-      },
     };
   }
 }

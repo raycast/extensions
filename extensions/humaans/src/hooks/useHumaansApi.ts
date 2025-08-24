@@ -1,17 +1,16 @@
 import { useEffect } from "react";
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import get from "lodash/get";
 import startCase from "lodash/startCase";
-
-const BASE_URL = "https://app.humaans.io/api/";
+import { BASE_URL, USER_AGENT } from "../constants";
+import { getApiKey } from "../api/api";
 
 type ToastResolveProps = {
   isLoading: boolean;
   data: any;
   error: any;
   endpoint: string;
-  apiKey: string;
 };
 
 const resolveToastOptions = ({
@@ -19,20 +18,12 @@ const resolveToastOptions = ({
   data,
   error,
   endpoint,
-  apiKey,
 }: ToastResolveProps): {
   style: Toast.Style;
   title: string;
   message?: string;
 } => {
   const { Animated, Failure, Success } = Toast.Style;
-
-  if (!apiKey) {
-    return {
-      style: Failure,
-      title: "Humaans API Key is not configured",
-    };
-  }
 
   if (isLoading) {
     return {
@@ -50,9 +41,10 @@ const resolveToastOptions = ({
   }
 
   if (data) {
+    const startCased = startCase(endpoint);
     return {
       style: Success,
-      title: `${startCase(endpoint)} Loaded`,
+      title: `${startCased[0] + startCased.slice(1).toLowerCase()} loaded`,
     };
   }
 
@@ -76,7 +68,7 @@ const resolveData = (data: any, error: any, isList: boolean) => {
   return data;
 };
 export const useHumaansApi = (endpoint: string, { isList = false, shouldShowToast = true }) => {
-  const { apiKey } = getPreferenceValues();
+  const apiKey = getApiKey();
 
   const fetch = useFetch(BASE_URL + endpoint, {
     initialData: {
@@ -85,6 +77,7 @@ export const useHumaansApi = (endpoint: string, { isList = false, shouldShowToas
     keepPreviousData: false,
     headers: {
       Authorization: `Bearer ${apiKey}`,
+      "User-Agent": USER_AGENT,
     },
   });
 
@@ -96,7 +89,6 @@ export const useHumaansApi = (endpoint: string, { isList = false, shouldShowToas
       data,
       error,
       endpoint,
-      apiKey,
     });
 
     if (shouldShowToast) {

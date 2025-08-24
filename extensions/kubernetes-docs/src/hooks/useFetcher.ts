@@ -3,13 +3,7 @@ import axios, { AxiosResponse } from "axios";
 import { FetcherArgs } from "../types";
 
 const instance = axios.create({
-  baseURL: "https://api.cognitive.microsoft.com/bingcustomsearch/v7.0/search",
-  headers: {
-    "ocp-apim-subscription-key": "51efd23677624e04b4abe921225ea7ec",
-  },
-  params: {
-    customConfig: "320659264",
-  },
+  baseURL: "https://kubernetes-io-search.azurewebsites.net/api/bingsearchproxy",
 });
 
 const useFetcher = () => {
@@ -20,9 +14,8 @@ const useFetcher = () => {
 
     return instance({
       params: {
-        q: `site:kubernetes.io ${query}`,
+        q: query,
         offset,
-        responseFilter: "webPages",
       },
     }).finally(() => setLoading(false));
   };

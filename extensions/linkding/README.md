@@ -1,26 +1,28 @@
 # Linkding
 
-Uses Raycast to search through Linking Bookmarks.
+Uses Raycast to search through Linking bookmarks.
 
 ## Screenshots
 
 ![raycast-linkding-1.png](metadata/raycast-linkding-1.png)
 ![raycast-linkding-2.png](metadata/raycast-linkding-2.png)
-![raycast-linkding-3.png](metadata/raycast-linkding-3.png)
-![raycast-linkding-4.png](metadata/raycast-linkding-4.png)
 
 ## Features
 
-- Support Bookmark search through multiple Linkding Accounts and Servers
-- Open Bookmarks in the Browser
+- Search bookmarks
+- Open bookmarks in the browser
+- Copy bookmarks to clipboard
+- Create and delete bookmarks in the extension
+- Save current browser tab
 
 ## Notice
 
-The Linkding API Key and Server URL from your Linkding instance are needed to use this extension.
+- The Linkding API key and server URL from your Linkding instance are needed to use this extension.
+- Due to Firefox's lack of scripting support, the Save current browser tab command is not supported in Firefox.
 
 ## Planned Features
 
-- Create, Update, Delete Bookmarks in extension
+- Update bookmarks in extension
 
 ## Contributing
 

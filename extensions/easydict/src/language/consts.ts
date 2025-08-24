@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-05 10:56
  * @lastEditor: tisfeng
- * @lastEditTime: 2023-03-15 18:34
+ * @lastEditTime: 2023-10-12 16:42
  * @fileName: consts.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -240,6 +240,7 @@ export const languageItemList: LanguageItem[] = [
     volcanoLangCode: "ar",
     bingLangCode: "ar",
     appleLangCode: "ar_AE",
+    deepLSourceId: "AR",
     francLangCode: "arb",
     aliyunLangCode: "ar",
     tencentLangCode: "ar",
@@ -317,6 +318,7 @@ export const languageItemList: LanguageItem[] = [
     youdaoLangCode: "nl",
     volcanoLangCode: "nl",
     bingLangCode: "nl",
+    appleLangCode: "nl_NL",
     deepLSourceId: "NL",
     francLangCode: "nld",
     aliyunLangCode: "nl",
@@ -471,6 +473,7 @@ export const languageItemList: LanguageItem[] = [
     youdaoLangCode: "uk",
     volcanoLangCode: "uk",
     bingLangCode: "uk",
+    appleLangCode: "uk_UA",
     deepLSourceId: "UK",
     francLangCode: "ukr",
     aliyunLangCode: "uk",

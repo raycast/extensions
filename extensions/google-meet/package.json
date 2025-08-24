@@ -20,8 +20,8 @@
     },
     {
       "name": "manual-profile",
-      "title": "Create Meet With Specified Profile",
-      "subtitle": "Google Meet with specified profile",
+      "title": "Create Meet with Specified Profile",
+      "subtitle": "Google Meet",
       "description": "Creates a new meeting room with your default browser and copy the link to your clipboard.",
       "mode": "view"
     }
@@ -56,5 +56,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -1,18 +1,18 @@
+import { open } from "@raycast/api";
+import * as fs from "fs";
 import { existsSync } from "fs";
 import { URL } from "url";
 import { isDeepStrictEqual } from "util";
+import { getBuildScheme } from "./lib/vscode";
 import {
-  EntryType,
   EntryLike,
+  EntryType,
   FileEntry,
   FolderEntry,
   RemoteEntry,
-  WorkspaceEntry,
   RemoteWorkspaceEntry,
+  WorkspaceEntry,
 } from "./types";
-import { open } from "@raycast/api";
-import * as fs from "fs";
-import { getBuildScheme } from "./lib/vscode";
 
 // Type Guards
 
@@ -69,6 +69,22 @@ export function isRemoteEntry(entry: EntryLike): entry is RemoteEntry {
 export function isRemoteWorkspaceEntry(entry: EntryLike): entry is RemoteWorkspaceEntry {
   const { workspace, remoteAuthority } = entry as RemoteWorkspaceEntry;
   return workspace !== undefined && remoteAuthority !== undefined;
+}
+
+export function isSameEntry(a: EntryLike, b: EntryLike) {
+  if ("fileUri" in a && "fileUri" in b) {
+    return a.fileUri === b.fileUri;
+  }
+
+  if ("folderUri" in a && "folderUri" in b) {
+    return a.folderUri === b.folderUri;
+  }
+
+  if ("workspace" in a && "workspace" in b) {
+    return a.workspace.configPath === b.workspace.configPath;
+  }
+
+  return false;
 }
 
 // Filters
@@ -141,4 +157,8 @@ export function raycastForVSCodeURI(uri: string) {
 
 export async function openURIinVSCode(uri: string) {
   await open(raycastForVSCodeURI(uri));
+}
+
+export function isValidHexColor(color: string): boolean {
+  return /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(color);
 }

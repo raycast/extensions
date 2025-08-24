@@ -5,8 +5,12 @@
   "description": "Search review requests on GitHub and listing them.",
   "icon": "icon.png",
   "author": "resessh",
+  "categories": [
+    "Productivity"
+  ],
   "contributors": [
-    "bgnfu7re"
+    "bgnfu7re",
+    "miao_cai"
   ],
   "license": "MIT",
   "commands": [
@@ -19,8 +23,9 @@
     },
     {
       "name": "actionablePullRequests",
-      "title": "Pending Pull Requests",
-      "description": "List actionable pending pull requests",
+      "title": "My Pull Requests",
+      "subtitle": "GitHub",
+      "description": "See your GitHub pull requests at a glance",
       "mode": "menu-bar",
       "interval": "5m"
     }
@@ -32,6 +37,14 @@
       "required": true,
       "title": "Personal Access Token",
       "description": "Create a token with repository access"
+    },
+    {
+      "name": "owners",
+      "type": "textfield",
+      "required": false,
+      "title": "Organizations/Owners",
+      "description": "Please specify the organizations or owners to include, separated by commas.",
+      "placeholder": "(Optional) Leave empty to get all owners."
     }
   ],
   "dependencies": {
@@ -42,24 +55,26 @@
     "octokit": "^2.0.4"
   },
   "devDependencies": {
-    "@graphql-codegen/cli": "2.5.0",
-    "@graphql-codegen/near-operation-file-preset": "^2.2.4",
-    "@graphql-codegen/typescript": "2.4.3",
-    "@graphql-codegen/typescript-graphql-request": "^4.5.8",
-    "@graphql-codegen/typescript-operations": "2.2.4",
+    "@graphql-codegen/cli": "^4.0.1",
+    "@graphql-codegen/near-operation-file-preset": "^3.0.0",
+    "@graphql-codegen/typescript": "^4.0.6",
+    "@graphql-codegen/typescript-graphql-request": "^4.5.9",
+    "@graphql-codegen/typescript-operations": "^4.2.0",
+    "@types/lodash": "^4.14.202",
     "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
+    "@types/react": "^18.2.64",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.57.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
     "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "typescript": "^5.4.2"
   },
   "scripts": {
     "gen": "graphql-codegen --config codegen.yml",
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "lint": "ray lint"
   }
 }

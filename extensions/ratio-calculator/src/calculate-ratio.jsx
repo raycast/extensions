@@ -1,6 +1,15 @@
 import { List, ActionPanel, Action, Icon } from "@raycast/api";
 import { useState } from "react";
 
+function actionPanel(text) {
+  return (
+    <ActionPanel>
+      <Action.CopyToClipboard title="Copy Result" content={text} />
+      <Action.Paste content={text} />
+    </ActionPanel>
+  );
+}
+
 export default function calculateRatio() {
   const [answers, setAnswers] = useState([]);
 
@@ -13,15 +22,7 @@ export default function calculateRatio() {
         {answers.map((answer, index) => (
           <List.Item
             key={index}
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard
-                  title="Copy Result"
-                  content={answer.value ? answer.value.toString() : answer.variable}
-                />
-                <Action.Paste content={answer.value ? answer.value.toString() : answer.variable} />
-              </ActionPanel>
-            }
+            actions={actionPanel(answer.value ? answer.value.toString() : answer.variable)}
             title={
               answer.value
                 ? `${capitalizeFirstLetter(answer.variable)} = ${answer.value.toFixed(2)}`
@@ -41,6 +42,33 @@ export default function calculateRatio() {
   );
 }
 
+function getFactors(number) {
+  var factors = [];
+  for (var i = 1; i <= number; i++) {
+    if (number % i == 0) {
+      factors.push(i);
+    }
+  }
+  return factors;
+}
+
+function getGCF(ratio) {
+  // Gets the greatest common factor of the two ratios
+
+  var factors1 = getFactors(ratio[0]);
+  var factors2 = getFactors(ratio[1]);
+
+  var gcf = 0;
+
+  factors1.forEach((factor) => {
+    if (factors2.includes(factor)) {
+      gcf = Math.max(gcf, factor);
+    }
+  });
+
+  return gcf == 1 ? false : gcf;
+}
+
 function getEquivalentRatio(text, setAnswers) {
   const answerList = [];
 
@@ -53,6 +81,40 @@ function getEquivalentRatio(text, setAnswers) {
   }
 
   if (splitEquation.length != 2) {
+    if (splitEquation.length != 1) {
+      setAnswers([]);
+      return;
+    }
+    var oldRatio = splitEquation[0].split("/");
+    var simplifiedRatio = oldRatio.slice();
+
+    if (oldRatio.length != 2 && oldRatio[1] != "") {
+      setAnswers([]);
+      return;
+    }
+
+    var isSimplified = false;
+    var iters = 0;
+    while (!isSimplified) {
+      iters++;
+      if (iters > 50) {
+        console.log("THAT was close");
+        return;
+      }
+      var gcf = getGCF(simplifiedRatio);
+      if (gcf == false) {
+        isSimplified = true;
+        break;
+      }
+      simplifiedRatio = [oldRatio[0] / gcf, oldRatio[1] / gcf];
+    }
+
+    answerList.push({
+      variable: simplifiedRatio.join(":"),
+      value: "",
+    });
+
+    setAnswers(answerList);
     return;
   }
 

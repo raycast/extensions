@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, useNavigation } from "@raycast/api";
-import type { NoteEntity } from "crossbell.js";
+import type { NoteEntity } from "crossbell";
 import { composeNoteUrl } from "../utils/url";
 import CharacterDetail from "./CharacterDetail";
 import IpfsDetail from "./IpfsDetail";

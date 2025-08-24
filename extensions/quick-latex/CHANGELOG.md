@@ -1,5 +1,9 @@
 # Quick LaTeX Changelog
 
+## [Support for background color] - 2024-06-04
+
+ - Add support for background color change
+
 ## [Support for more formats] - 2023-09-14
 
 - Add support for PNG, GIF, SVG, EMF and PDF

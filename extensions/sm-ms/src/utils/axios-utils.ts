@@ -1,8 +1,8 @@
 import axios from "axios";
 import { SM_MS_BASE_URL } from "./costants";
 import { ImageData, SMMSResponse } from "../types/types";
-import { Clipboard, showHUD, showToast, Toast } from "@raycast/api";
-import { isEmpty, isUrl, titleCase } from "./common-utils";
+import { showHUD, showToast, Toast } from "@raycast/api";
+import { copyLinkWithForm, isEmpty, isUrl, titleCase } from "./common-utils";
 import { secretToken } from "../hooks/hooks";
 import fse from "fs-extra";
 import { Dispatch, SetStateAction } from "react";
@@ -33,7 +33,7 @@ export const deleteImageByHash = async (hash: string) => {
 
 export const uploadImage = async (
   imagePath: string,
-  setImagePathError: Dispatch<SetStateAction<string | undefined>>
+  setImagePathError: Dispatch<SetStateAction<string | undefined>>,
 ) => {
   const formData = new FormData();
   let imageStream;
@@ -69,7 +69,7 @@ export const uploadImage = async (
       if (smmsResponse.success) {
         showToast(Style.Success, titleCase(smmsResponse.code), "URL is copied to clipboard.");
         const imageData = smmsResponse.data as ImageData;
-        Clipboard.copy(imageData.url);
+        copyLinkWithForm(imageData.url);
         return { success: smmsResponse.success, code: smmsResponse.code, message: imageData.url };
       } else {
         showToast(Style.Failure, titleCase(smmsResponse.code), smmsResponse.message);
@@ -116,7 +116,7 @@ export const uploadImageFromClipboard = async (imagePath: string) => {
       if (smmsResponse.success) {
         showHUD("URL is copied to clipboard.");
         const imageData = smmsResponse.data as ImageData;
-        Clipboard.copy(imageData.url);
+        copyLinkWithForm(imageData.url);
         return { success: smmsResponse.success, code: smmsResponse.code, message: imageData.url };
       } else {
         showHUD(smmsResponse.message);

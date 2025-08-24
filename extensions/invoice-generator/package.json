@@ -1,0 +1,845 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "invoice-generator",
+  "title": "Invoice Generator",
+  "description": "Create invoices using the Invoice Generator API.",
+  "icon": "command-icon.png",
+  "author": "alexs",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "generate-invoice",
+      "title": "Generate Invoice",
+      "description": "Generate an invoice.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your API key for the Invoice Generator API.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "name",
+      "title": "Name",
+      "description": "The name of the sender.",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "address",
+      "title": "Address",
+      "description": "The address of the sender. Use commas to separate new lines.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "logoUrl",
+      "title": "Logo URL",
+      "description": "The URL of the sender's logo.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "invoiceNumberPrefix",
+      "title": "Invoice Number Prefix",
+      "description": "The prefix for the invoice number.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "invoiceDateFormat",
+      "title": "Invoice Date Format",
+      "description": "The format for the invoice date. Uses moment.js format.",
+      "type": "textfield",
+      "required": true,
+      "default": "MMMM D, YYYY"
+    },
+    {
+      "name": "defaultCurrency",
+      "title": "Default Currency",
+      "description": "The default currency for your invoices.",
+      "type": "dropdown",
+      "required": false,
+      "default": "USD",
+      "data": [
+        {
+          "title": "ADB Unit of Account",
+          "value": "XUA"
+        },
+        {
+          "title": "Afghani",
+          "value": "AFN"
+        },
+        {
+          "title": "Algerian Dinar",
+          "value": "DZD"
+        },
+        {
+          "title": "Argentine Peso",
+          "value": "ARS"
+        },
+        {
+          "title": "Armenian Dram",
+          "value": "AMD"
+        },
+        {
+          "title": "Aruban Florin",
+          "value": "AWG"
+        },
+        {
+          "title": "Australian Dollar",
+          "value": "AUD"
+        },
+        {
+          "title": "Azerbaijan Manat",
+          "value": "AZN"
+        },
+        {
+          "title": "Bahamian Dollar",
+          "value": "BSD"
+        },
+        {
+          "title": "Bahraini Dinar",
+          "value": "BHD"
+        },
+        {
+          "title": "Baht",
+          "value": "THB"
+        },
+        {
+          "title": "Balboa",
+          "value": "PAB"
+        },
+        {
+          "title": "Barbados Dollar",
+          "value": "BBD"
+        },
+        {
+          "title": "Belarusian Ruble",
+          "value": "BYN"
+        },
+        {
+          "title": "Belize Dollar",
+          "value": "BZD"
+        },
+        {
+          "title": "Bermudian Dollar",
+          "value": "BMD"
+        },
+        {
+          "title": "Bolívar Soberano",
+          "value": "VES"
+        },
+        {
+          "title": "Bolívar Soberano",
+          "value": "VED"
+        },
+        {
+          "title": "Boliviano",
+          "value": "BOB"
+        },
+        {
+          "title": "Brazilian Real",
+          "value": "BRL"
+        },
+        {
+          "title": "Brunei Dollar",
+          "value": "BND"
+        },
+        {
+          "title": "Bulgarian Lev",
+          "value": "BGN"
+        },
+        {
+          "title": "Burundi Franc",
+          "value": "BIF"
+        },
+        {
+          "title": "Cabo Verde Escudo",
+          "value": "CVE"
+        },
+        {
+          "title": "Canadian Dollar",
+          "value": "CAD"
+        },
+        {
+          "title": "Cayman Islands Dollar",
+          "value": "KYD"
+        },
+        {
+          "title": "CFA Franc BCEAO",
+          "value": "XOF"
+        },
+        {
+          "title": "CFA Franc BEAC",
+          "value": "XAF"
+        },
+        {
+          "title": "CFP Franc",
+          "value": "XPF"
+        },
+        {
+          "title": "Chilean Peso",
+          "value": "CLP"
+        },
+        {
+          "title": "Colombian Peso",
+          "value": "COP"
+        },
+        {
+          "title": "Comorian Franc",
+          "value": "KMF"
+        },
+        {
+          "title": "Congolese Franc",
+          "value": "CDF"
+        },
+        {
+          "title": "Convertible Mark",
+          "value": "BAM"
+        },
+        {
+          "title": "Cordoba Oro",
+          "value": "NIO"
+        },
+        {
+          "title": "Costa Rican Colon",
+          "value": "CRC"
+        },
+        {
+          "title": "Cuban Peso",
+          "value": "CUP"
+        },
+        {
+          "title": "Czech Koruna",
+          "value": "CZK"
+        },
+        {
+          "title": "Dalasi",
+          "value": "GMD"
+        },
+        {
+          "title": "Danish Krone",
+          "value": "DKK"
+        },
+        {
+          "title": "Denar",
+          "value": "MKD"
+        },
+        {
+          "title": "Djibouti Franc",
+          "value": "DJF"
+        },
+        {
+          "title": "Dobra",
+          "value": "STN"
+        },
+        {
+          "title": "Dominican Peso",
+          "value": "DOP"
+        },
+        {
+          "title": "Dong",
+          "value": "VND"
+        },
+        {
+          "title": "East Caribbean Dollar",
+          "value": "XCD"
+        },
+        {
+          "title": "Egyptian Pound",
+          "value": "EGP"
+        },
+        {
+          "title": "El Salvador Colon",
+          "value": "SVC"
+        },
+        {
+          "title": "Ethiopian Birr",
+          "value": "ETB"
+        },
+        {
+          "title": "Euro",
+          "value": "EUR"
+        },
+        {
+          "title": "Falkland Islands Pound",
+          "value": "FKP"
+        },
+        {
+          "title": "Fiji Dollar",
+          "value": "FJD"
+        },
+        {
+          "title": "Forint",
+          "value": "HUF"
+        },
+        {
+          "title": "Ghana Cedi",
+          "value": "GHS"
+        },
+        {
+          "title": "Gibraltar Pound",
+          "value": "GIP"
+        },
+        {
+          "title": "Gourde",
+          "value": "HTG"
+        },
+        {
+          "title": "Guarani",
+          "value": "PYG"
+        },
+        {
+          "title": "Guinean Franc",
+          "value": "GNF"
+        },
+        {
+          "title": "Guyana Dollar",
+          "value": "GYD"
+        },
+        {
+          "title": "Hong Kong Dollar",
+          "value": "HKD"
+        },
+        {
+          "title": "Hryvnia",
+          "value": "UAH"
+        },
+        {
+          "title": "Iceland Krona",
+          "value": "ISK"
+        },
+        {
+          "title": "Indian Rupee",
+          "value": "INR"
+        },
+        {
+          "title": "Iranian Rial",
+          "value": "IRR"
+        },
+        {
+          "title": "Iraqi Dinar",
+          "value": "IQD"
+        },
+        {
+          "title": "Jamaican Dollar",
+          "value": "JMD"
+        },
+        {
+          "title": "Jordanian Dinar",
+          "value": "JOD"
+        },
+        {
+          "title": "Kenyan Shilling",
+          "value": "KES"
+        },
+        {
+          "title": "Kina",
+          "value": "PGK"
+        },
+        {
+          "title": "Kuwaiti Dinar",
+          "value": "KWD"
+        },
+        {
+          "title": "Kwanza",
+          "value": "AOA"
+        },
+        {
+          "title": "Kyat",
+          "value": "MMK"
+        },
+        {
+          "title": "Lao Kip",
+          "value": "LAK"
+        },
+        {
+          "title": "Lari",
+          "value": "GEL"
+        },
+        {
+          "title": "Lebanese Pound",
+          "value": "LBP"
+        },
+        {
+          "title": "Lek",
+          "value": "ALL"
+        },
+        {
+          "title": "Lempira",
+          "value": "HNL"
+        },
+        {
+          "title": "Leone",
+          "value": "SLE"
+        },
+        {
+          "title": "Liberian Dollar",
+          "value": "LRD"
+        },
+        {
+          "title": "Libyan Dinar",
+          "value": "LYD"
+        },
+        {
+          "title": "Lilangeni",
+          "value": "SZL"
+        },
+        {
+          "title": "Loti",
+          "value": "LSL"
+        },
+        {
+          "title": "Malagasy Ariary",
+          "value": "MGA"
+        },
+        {
+          "title": "Malawi Kwacha",
+          "value": "MWK"
+        },
+        {
+          "title": "Malaysian Ringgit",
+          "value": "MYR"
+        },
+        {
+          "title": "Mauritius Rupee",
+          "value": "MUR"
+        },
+        {
+          "title": "Mexican Peso",
+          "value": "MXN"
+        },
+        {
+          "title": "Mexican Unidad de Inversion (UDI)",
+          "value": "MXV"
+        },
+        {
+          "title": "Moldovan Leu",
+          "value": "MDL"
+        },
+        {
+          "title": "Moroccan Dirham",
+          "value": "MAD"
+        },
+        {
+          "title": "Mozambique Metical",
+          "value": "MZN"
+        },
+        {
+          "title": "Mvdol",
+          "value": "BOV"
+        },
+        {
+          "title": "Naira",
+          "value": "NGN"
+        },
+        {
+          "title": "Nakfa",
+          "value": "ERN"
+        },
+        {
+          "title": "Namibia Dollar",
+          "value": "NAD"
+        },
+        {
+          "title": "Nepalese Rupee",
+          "value": "NPR"
+        },
+        {
+          "title": "Netherlands Antillean Guilder",
+          "value": "ANG"
+        },
+        {
+          "title": "New Israeli Sheqel",
+          "value": "ILS"
+        },
+        {
+          "title": "New Taiwan Dollar",
+          "value": "TWD"
+        },
+        {
+          "title": "New Zealand Dollar",
+          "value": "NZD"
+        },
+        {
+          "title": "Ngultrum",
+          "value": "BTN"
+        },
+        {
+          "title": "North Korean Won",
+          "value": "KPW"
+        },
+        {
+          "title": "Norwegian Krone",
+          "value": "NOK"
+        },
+        {
+          "title": "Ouguiya",
+          "value": "MRU"
+        },
+        {
+          "title": "Pa’anga",
+          "value": "TOP"
+        },
+        {
+          "title": "Pakistan Rupee",
+          "value": "PKR"
+        },
+        {
+          "title": "Pataca",
+          "value": "MOP"
+        },
+        {
+          "title": "Peso Convertible",
+          "value": "CUC"
+        },
+        {
+          "title": "Peso Uruguayo",
+          "value": "UYU"
+        },
+        {
+          "title": "Philippine Peso",
+          "value": "PHP"
+        },
+        {
+          "title": "Pound Sterling",
+          "value": "GBP"
+        },
+        {
+          "title": "Pula",
+          "value": "BWP"
+        },
+        {
+          "title": "Qatari Rial",
+          "value": "QAR"
+        },
+        {
+          "title": "Quetzal",
+          "value": "GTQ"
+        },
+        {
+          "title": "Rand",
+          "value": "ZAR"
+        },
+        {
+          "title": "Rial Omani",
+          "value": "OMR"
+        },
+        {
+          "title": "Riel",
+          "value": "KHR"
+        },
+        {
+          "title": "Romanian Leu",
+          "value": "RON"
+        },
+        {
+          "title": "Rufiyaa",
+          "value": "MVR"
+        },
+        {
+          "title": "Rupiah",
+          "value": "IDR"
+        },
+        {
+          "title": "Russian Ruble",
+          "value": "RUB"
+        },
+        {
+          "title": "Rwanda Franc",
+          "value": "RWF"
+        },
+        {
+          "title": "Saint Helena Pound",
+          "value": "SHP"
+        },
+        {
+          "title": "Saudi Riyal",
+          "value": "SAR"
+        },
+        {
+          "title": "SDR (Special Drawing Right)",
+          "value": "XDR"
+        },
+        {
+          "title": "Serbian Dinar",
+          "value": "RSD"
+        },
+        {
+          "title": "Seychelles Rupee",
+          "value": "SCR"
+        },
+        {
+          "title": "Singapore Dollar",
+          "value": "SGD"
+        },
+        {
+          "title": "Sol",
+          "value": "PEN"
+        },
+        {
+          "title": "Solomon Islands Dollar",
+          "value": "SBD"
+        },
+        {
+          "title": "Som",
+          "value": "KGS"
+        },
+        {
+          "title": "Somali Shilling",
+          "value": "SOS"
+        },
+        {
+          "title": "Somoni",
+          "value": "TJS"
+        },
+        {
+          "title": "South Sudanese Pound",
+          "value": "SSP"
+        },
+        {
+          "title": "Sri Lanka Rupee",
+          "value": "LKR"
+        },
+        {
+          "title": "Sucre",
+          "value": "XSU"
+        },
+        {
+          "title": "Sudanese Pound",
+          "value": "SDG"
+        },
+        {
+          "title": "Surinam Dollar",
+          "value": "SRD"
+        },
+        {
+          "title": "Swedish Krona",
+          "value": "SEK"
+        },
+        {
+          "title": "Swiss Franc",
+          "value": "CHF"
+        },
+        {
+          "title": "Syrian Pound",
+          "value": "SYP"
+        },
+        {
+          "title": "Taka",
+          "value": "BDT"
+        },
+        {
+          "title": "Tala",
+          "value": "WST"
+        },
+        {
+          "title": "Tanzanian Shilling",
+          "value": "TZS"
+        },
+        {
+          "title": "Tenge",
+          "value": "KZT"
+        },
+        {
+          "title": "Trinidad and Tobago Dollar",
+          "value": "TTD"
+        },
+        {
+          "title": "Tugrik",
+          "value": "MNT"
+        },
+        {
+          "title": "Tunisian Dinar",
+          "value": "TND"
+        },
+        {
+          "title": "Turkish Lira",
+          "value": "TRY"
+        },
+        {
+          "title": "Turkmenistan New Manat",
+          "value": "TMT"
+        },
+        {
+          "title": "UAE Dirham",
+          "value": "AED"
+        },
+        {
+          "title": "Uganda Shilling",
+          "value": "UGX"
+        },
+        {
+          "title": "Unidad de Fomento",
+          "value": "CLF"
+        },
+        {
+          "title": "Unidad de Valor Real",
+          "value": "COU"
+        },
+        {
+          "title": "Unidad Previsional",
+          "value": "UYW"
+        },
+        {
+          "title": "Uruguay Peso en Unidades Indexadas (UI)",
+          "value": "UYI"
+        },
+        {
+          "title": "US Dollar",
+          "value": "USD"
+        },
+        {
+          "title": "Uzbekistan Sum",
+          "value": "UZS"
+        },
+        {
+          "title": "Vatu",
+          "value": "VUV"
+        },
+        {
+          "title": "WIR Euro",
+          "value": "CHE"
+        },
+        {
+          "title": "WIR Franc",
+          "value": "CHW"
+        },
+        {
+          "title": "Won",
+          "value": "KRW"
+        },
+        {
+          "title": "Yemeni Rial",
+          "value": "YER"
+        },
+        {
+          "title": "Yen",
+          "value": "JPY"
+        },
+        {
+          "title": "Yuan Renminbi",
+          "value": "CNY"
+        },
+        {
+          "title": "Zambian Kwacha",
+          "value": "ZMW"
+        },
+        {
+          "title": "Zimbabwe Dollar",
+          "value": "ZWL"
+        },
+        {
+          "title": "Zloty",
+          "value": "PLN"
+        }
+      ]
+    },
+    {
+      "name": "defaultLocale",
+      "title": "Default Locale",
+      "description": "The default locale for your invoices.",
+      "type": "dropdown",
+      "required": false,
+      "default": "en-US",
+      "data": [
+        {
+          "title": "English",
+          "value": "en-US"
+        },
+        {
+          "title": "French",
+          "value": "fr-FR"
+        },
+        {
+          "title": "German",
+          "value": "de-DE"
+        },
+        {
+          "title": "Spanish",
+          "value": "es-ES"
+        },
+        {
+          "title": "Thai",
+          "value": "th-TH"
+        }
+      ]
+    },
+    {
+      "name": "termsAndConditions",
+      "title": "Terms and Conditions",
+      "description": "Terms and conditions for your invoices.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "defaultIncludeAddress",
+      "label": "Default Include Address",
+      "description": "Include address in the invoice form by default.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "defaultIncludeTax",
+      "label": "Default Include Tax",
+      "description": "Include tax in the invoice form by default.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "includeAmountPaid",
+      "label": "Include Amount Paid",
+      "description": "Include amount paid field in invoice form.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "includePaymentTerms",
+      "label": "Include Payment Terms",
+      "description": "Include payment terms field in invoice form.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "includeShipping",
+      "label": "Include Shipping",
+      "description": "Include shipping field in invoice form.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.75.2",
+    "@raycast/utils": "^1.15.0",
+    "axios": "^1.8.4",
+    "fs": "^0.0.1-security",
+    "moment": "^2.30.1",
+    "os": "^0.1.2",
+    "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

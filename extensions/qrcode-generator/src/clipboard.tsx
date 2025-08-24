@@ -1,40 +1,45 @@
-import { Detail, Clipboard, Toast, showToast } from "@raycast/api";
+import { Clipboard, showToast, Toast, ActionPanel, Action, Detail } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { toDataURL } from "qrcode";
+import { generateQRCode, getQRCodePath } from "./utils";
+import fs from "fs";
 
 export default function Command() {
   const [qrData, setQrData] = useState<string>();
-
-  async function generateQRCode() {
-    const toast = await showToast({
-      title: "Generating",
-      message: "Reading System Clipboard...",
-      style: Toast.Style.Animated,
-    });
-
-    // read clipboard content and ensure it's of type string
-    const content = await Clipboard.readText();
-    if (typeof content !== "string") {
-      toast.style = Toast.Style.Failure;
-      toast.message = "Content is not text";
-      return;
-    }
-    toast.message = "Generating QR Code...";
-
-    const res = await toDataURL(content);
-    setQrData(res);
-
-    toast.style = Toast.Style.Success;
-    toast.message = "Created QR Code";
-  }
+  const [clipboardText, setClipboardText] = useState<string>("");
 
   useEffect(() => {
-    generateQRCode();
-  });
+    (async () => {
+      const clipboard = await Clipboard.readText();
+      setClipboardText(clipboard || "");
+      const qrData = await generateQRCode({ URL: clipboard, preview: true });
+      setQrData(qrData);
+      showToast(Toast.Style.Success, "Success", "Created QR Code");
+    })();
+  }, []);
+
+  async function handleSave() {
+    if (!qrData) return;
+    try {
+      // qrData is a data URL: data:image/png;base64,...
+      const base64 = qrData.split(",")[1];
+      const buffer = Buffer.from(base64, "base64");
+      const filePath = getQRCodePath(clipboardText, "png");
+      fs.writeFileSync(filePath, buffer);
+      await showToast(Toast.Style.Success, "Saved to Downloads", filePath);
+    } catch (error) {
+      await showToast(Toast.Style.Failure, "Failed to Save", error instanceof Error ? error.message : String(error));
+    }
+  }
 
   return (
-    <>
-      <Detail isLoading={!qrData} markdown={`![qrcode](${qrData})`} />
-    </>
+    <Detail
+      isLoading={!qrData}
+      markdown={`![qrcode](${qrData || ""}?raycast-height=350)`}
+      actions={
+        <ActionPanel>
+          <Action title="Save to Downloads" onAction={handleSave} shortcut={{ modifiers: ["cmd"], key: "s" }} />
+        </ActionPanel>
+      }
+    />
   );
 }

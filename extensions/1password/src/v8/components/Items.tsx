@@ -2,34 +2,56 @@ import { Color, Icon, List } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 
 import { Categories, DEFAULT_CATEGORY } from "./Categories";
-import { Item, User } from "../types";
-import { getCategoryIcon, ITEMS_CACHE_NAME, ACCOUNT_CACHE_NAME, useOp, actionsForItem } from "../utils";
-import { Guide } from "./Guide";
+import { Item } from "../types";
+import {
+  getCategoryIcon,
+  actionsForItem,
+  useAccount,
+  CommandLineMissingError,
+  ConnectionError,
+  ExtensionError,
+  usePasswords2,
+} from "../utils";
+import { Error as ErrorGuide } from "./Error";
 import { ItemActionPanel } from "./ItemActionPanel";
+import { useMemo, useState } from "react";
 
-export function Items() {
+export function Items({ flags }: { flags?: string[] }) {
   const [category, setCategory] = useCachedState<string>("selected_category", DEFAULT_CATEGORY);
+  const [passwords, setPasswords] = useState<Item[]>([]);
 
-  const {
-    data: account,
-    error: accountError,
-    isLoading: accountIsLoading,
-  } = useOp<User>(["whoami"], ACCOUNT_CACHE_NAME);
+  const { data: account, error: accountError, isLoading: accountIsLoading } = useAccount();
   const {
     data: items,
     error: itemsError,
     isLoading: itemsIsLoading,
-  } = useOp<Item[]>(["item", "list", "--long"], ITEMS_CACHE_NAME);
+  } = usePasswords2({ flags, account: account?.account_uuid ?? "", execute: !accountError && !accountIsLoading });
 
-  const categoryItems =
-    category === DEFAULT_CATEGORY
-      ? items
-      : items?.filter((item) => item.category === category.replaceAll(" ", "_").toUpperCase());
+  useMemo(() => {
+    if (!items) return;
+    if (category === DEFAULT_CATEGORY) return setPasswords(items);
+    setPasswords(items?.filter((item) => item.category === category.replaceAll(" ", "_").toUpperCase()));
+  }, [items, category]);
+
   const onCategoryChange = (newCategory: string) => {
     category !== newCategory && setCategory(newCategory);
   };
 
-  if (itemsError || accountError) return <Guide />;
+  if (itemsError instanceof CommandLineMissingError || accountError instanceof CommandLineMissingError)
+    return <ErrorGuide />;
+
+  if (itemsError instanceof ConnectionError || accountError instanceof ConnectionError) {
+    return (
+      <List>
+        <List.EmptyView
+          title={(itemsError as ExtensionError)?.title || (accountError as ExtensionError)?.title}
+          description={itemsError?.message || accountError?.message}
+          icon={Icon.WifiDisabled}
+        />
+      </List>
+    );
+  }
+
   return (
     <List
       searchBarAccessory={<Categories onCategoryChange={onCategoryChange} />}
@@ -40,11 +62,9 @@ export function Items() {
         icon="1password-noview.png"
         description="Any items you have added in 1Password app will be listed here."
       />
-      <List.Section title="Items" subtitle={`${categoryItems?.length}`}>
-        {categoryItems?.length &&
-          categoryItems
-            .sort((a, b) => a.title.localeCompare(b.title))
-            .map((item) => (
+      <List.Section title="Items" subtitle={`${passwords?.length}`}>
+        {passwords?.length
+          ? passwords.map((item) => (
               <List.Item
                 key={item.id}
                 id={item.id}
@@ -60,9 +80,11 @@ export function Items() {
                     : {},
                   { text: item.vault?.name },
                 ]}
-                actions={<ItemActionPanel account={account!} item={item} actions={actionsForItem(item)} />}
+                keywords={item.additional_information ? [item.additional_information] : []}
+                actions={<ItemActionPanel account={account} item={item} actions={actionsForItem(item)} />}
               />
-            ))}
+            ))
+          : null}
       </List.Section>
     </List>
   );

@@ -15,6 +15,11 @@ const taskObject2Task = (object: Record<string, unknown>): Task => {
     items: object.items as Task["items"],
     kind: object.kind as Task["kind"],
     tags: (object.tags || []) as Task["tags"],
+    startDate: object.startDate as Task["startDate"],
+    dueDate: object.dueDate as Task["dueDate"],
+    isAllDay: object.isAllDay as Task["isAllDay"],
+    isFloating: object.isFloating as Task["isFloating"],
+    timeZone: object.timeZone as Task["timeZone"],
   };
 };
 
@@ -174,9 +179,10 @@ export const addTask = async (data: {
   title: string;
   description: string;
   dueDate?: string;
-  isAllDay: boolean;
+  isAllDay?: boolean;
+  priority?: string;
 }) => {
-  const { projectId, title, description, dueDate, isAllDay } = data;
+  const { projectId, title, description, dueDate, isAllDay, priority } = data;
   const installed = await checkAppInstalled();
   if (!installed) return undefined;
 
@@ -185,10 +191,9 @@ export const addTask = async (data: {
     set result to ""
     tell application "TickTick"
       set result to add task to list "${projectId}" title "${title}" description "${description}"${
-      dueDate ? ` due date "${dueDate}"` : ""
-    } from "raycast" ${isAllDay ? "with" : "without"} allday
+      dueDate ? ` due date "${dueDate}" is allday ${isAllDay}` : ""
+    } ${priority ? ` priority "${priority}"` : ""} from "raycast"
     end tell
-
   `)) as string;
     if (result === "missing value") {
       return false;

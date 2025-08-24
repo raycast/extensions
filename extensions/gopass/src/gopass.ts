@@ -2,7 +2,7 @@ import { homedir } from "os";
 import { spawn } from "child_process";
 import { sortDirectoriesFirst } from "./utils";
 
-function gopass(args: string[]): Promise<string> {
+function gopass(args: string[], stdin?: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const cli = spawn("gopass", args, {
       env: {
@@ -13,9 +13,14 @@ function gopass(args: string[]): Promise<string> {
           "/usr/local/bin", // gpg
           "/usr/local/MacGPG2/bin", // gpg
           "/opt/homebrew/bin", // homebrew on macOS Apple Silicon
+          "/run/current-system/sw/bin", // Nix
         ].join(":"),
       },
     });
+    if (stdin) {
+      cli.stdin.write(stdin);
+      cli.stdin.end();
+    }
 
     cli.on("error", reject);
 
@@ -38,6 +43,29 @@ async function list({ limit = -1, prefix = "", directoriesFirst = false, stripPr
     .then((data) => (directoriesFirst ? sortDirectoriesFirst(data) : data));
 }
 
+async function pwgen(
+  type: string,
+  length: number,
+  symbols: boolean,
+  digits: boolean,
+  capitalize: boolean,
+  numbers: boolean
+): Promise<string[]> {
+  if (type === "xkcd") {
+    return gopass([
+      "pwgen",
+      "--xkcd",
+      `--sep=-`,
+      `--xkcdcapitalize=${capitalize}`,
+      `--xkcdnumbers=${numbers}`,
+      `${length}`,
+    ]).then((data) => data.split(`\n`).slice(0, -1)); // last line is empty
+  }
+  return gopass(["pwgen", `--symbols=${symbols}`, `--no-numerals=${!digits}`, `${length}`]).then((data) =>
+    data.split(`\n`).slice(0, -1)
+  ); // last line is empty
+}
+
 async function password(entry: string): Promise<string> {
   return gopass(["show", "--password", entry]);
 }
@@ -46,16 +74,46 @@ async function otp(entry: string): Promise<string> {
   return gopass(["otp", "--password", entry]);
 }
 
+async function exists(entry: string): Promise<boolean> {
+  // gopass has no exist command - we can use `list` and base the result on catching the error (doesnt exist)
+  try {
+    await gopass(["list", entry]);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+async function sync(): Promise<void> {
+  await gopass(["sync"]);
+}
+
 async function clip(entry: string): Promise<void> {
   await gopass(["show", "--clip", entry]);
 }
 
-async function show(entry: string): Promise<string[]> {
-  // gopass has no option to disable printing the password in the first, therefor we use `slice`
-  return await gopass(["show", entry])
-    .then((data) => data.split(`\n`).slice(1))
-    // Filter out details not in YAML colon syntax "key: value", such as GOPASS-SECRET-1.0
-    .then((data) => data.filter((item) => item.includes(":")));
+async function remove(entry: string, force = false): Promise<void> {
+  await gopass(["remove", `--force=${force}`, entry]);
 }
 
-export default { list, password, clip, show, otp };
+async function move(from: string, to: string, force = false): Promise<void> {
+  await gopass(["move", `--force=${force}`, from, to]);
+}
+
+async function insert(entry: string, data: string, force = false): Promise<void> {
+  await gopass(["insert", `--force=${force}`, entry], data);
+}
+
+interface showResponse {
+  password: string;
+  attributes: string[];
+}
+async function show(entry: string): Promise<showResponse> {
+  const data = await gopass(["show", entry]).then((data) => data.split(`\n`));
+  return {
+    password: data[0],
+    attributes: data.slice(1).filter((item) => item.includes(":")),
+  };
+}
+
+export default { list, password, clip, show, otp, sync, pwgen, insert, remove, move, exists };

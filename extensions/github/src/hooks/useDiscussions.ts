@@ -1,7 +1,7 @@
 import { useCachedPromise } from "@raycast/utils";
 
+import { getGitHubClient } from "../api/githubClient";
 import { getBoundedPreferenceNumber } from "../components/Menu";
-import { getGitHubClient } from "../helpers/withGithubClient";
 
 export function useDiscussions(query: string) {
   const { github } = getGitHubClient();

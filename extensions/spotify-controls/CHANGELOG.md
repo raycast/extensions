@@ -1,5 +1,23 @@
 # Spotify Controls Changelog
 
+## [Routine Maintenance] - 2025-03-20
+
+- Migrate to `@raycast/api@1.94.0`
+- Use ESLint 9 flag config
+- Bump all dependencies to the latest
+
+## [Enhancement] - 2025-01-19
+
+Allow the user to dynamically enter the steps when increasing or decreasing the volume.
+
+## [Enhancement] - 2024-05-06
+
+Add Mute Volume command.
+
+## [Enhancement] - 2024-04-19
+
+Show current track in HUD instead of alert.
+
 ## [Fix] - 2023-08-02
 
 - Added better error handling by making sure that Spotify is installed for the majority of the Spotify Controls commands. If not installed, a HUD is shown.

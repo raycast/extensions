@@ -13,22 +13,28 @@ import {
   selectTab,
 } from "./arc";
 import { Space, Tab } from "./types";
-import { getSpaceTitle, showFailureToast, isTab } from "./utils";
+import { getSpaceTitle, isTab, showFailureToast } from "./utils";
 
 function OpenInArcAction(props: { tabOrUrl: Tab | string }) {
   async function handleAction() {
     try {
-      if (isTab(props.tabOrUrl)) {
-        const tab = props.tabOrUrl;
-        await closeMainWindow();
-        await selectTab(tab);
-        return;
+      if (typeof props.tabOrUrl === "string") {
+        await open(props.tabOrUrl, "company.thebrowser.Browser");
       } else {
-        await open(props.tabOrUrl as string, "company.thebrowser.Browser");
+        await closeMainWindow();
+        try {
+          await selectTab(props.tabOrUrl);
+        } catch (e) {
+          if (props.tabOrUrl.url) {
+            await open(props.tabOrUrl.url, "company.thebrowser.Browser");
+          } else {
+            throw e;
+          }
+        }
       }
     } catch (e) {
       console.error(e);
-      await open(props.tabOrUrl as string, "company.thebrowser.Browser");
+      await showFailureToast(e, { title: "Failed opening in Arc" });
     }
   }
 
@@ -109,9 +115,7 @@ function OpenInSpaceAction(props: { url: string }) {
       shortcut={{ modifiers: ["cmd", "opt"], key: "enter" }}
       onOpen={() => setOpen(true)}
     >
-      {data?.map((space) => (
-        <Action key={space.id} title={getSpaceTitle(space)} onAction={() => openSpace(space)} />
-      ))}
+      {data?.map((space) => <Action key={space.id} title={getSpaceTitle(space)} onAction={() => openSpace(space)} />)}
     </ActionPanel.Submenu>
   );
 }
@@ -239,7 +243,7 @@ function CloseTabAction(props: { tab: Tab; mutate: MutatePromise<Tab[] | undefin
             return;
           }
 
-          return data.filter((t) => !(t.windowId === props.tab.windowId && t.tabId === props.tab.tabId));
+          return data.filter((t) => !(t.id === props.tab.id));
         },
       });
 
@@ -266,12 +270,15 @@ export function OpenLinkActionSections(props: { tabOrUrl: Tab | string; searchTe
 
   if (isTab(props.tabOrUrl)) {
     url = props.tabOrUrl.url;
+  } else {
+    const hasProto = /^https?:\/\//i.test(url);
+    url = hasProto ? url : "https://" + url;
   }
 
   return (
     <>
       <ActionPanel.Section>
-        <OpenInArcAction tabOrUrl={props.tabOrUrl} />
+        <OpenInArcAction tabOrUrl={isTab(props.tabOrUrl) ? props.tabOrUrl : url} />
         <OpenInLittleArc url={url} />
       </ActionPanel.Section>
       <ActionPanel.Section>

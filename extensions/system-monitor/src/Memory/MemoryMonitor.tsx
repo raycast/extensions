@@ -1,8 +1,9 @@
-import { List } from "@raycast/api";
-import { getFreeDiskSpace, getTopRamProcess, getTotalDiskSpace, getMemoryUsage } from "./MemoryUtils";
+import { Icon, List } from "@raycast/api";
 import { useInterval } from "usehooks-ts";
-import { Actions } from "../components/Actions";
 import { usePromise } from "@raycast/utils";
+
+import { Actions } from "../components/Actions";
+import { getTopRamProcess, getMemoryUsage } from "./MemoryUtils";
 
 export default function MemoryMonitor() {
   const { data, revalidate } = usePromise(async () => {
@@ -21,21 +22,20 @@ export default function MemoryMonitor() {
   useInterval(revalidate, 1000);
 
   return (
-    <>
-      <List.Item
-        id="memory"
-        title="📝  Memory"
-        accessories={[{ text: !data ? "Loading…" : `${data.freeMemPercentage}% (~ ${data.freeMem} GB)` }]}
-        detail={
-          <MemoryMonitorDetail
-            freeMem={data?.freeMem || ""}
-            freeMemPercentage={data?.freeMemPercentage || ""}
-            totalMem={data?.totalMem || ""}
-          />
-        }
-        actions={<Actions />}
-      />
-    </>
+    <List.Item
+      id="memory"
+      title="Memory"
+      icon={Icon.MemoryChip}
+      accessories={[{ text: !data ? "Loading…" : `${data.freeMemPercentage} % (~ ${data.freeMem} GB)` }]}
+      detail={
+        <MemoryMonitorDetail
+          freeMem={data?.freeMem || ""}
+          freeMemPercentage={data?.freeMemPercentage || ""}
+          totalMem={data?.totalMem || ""}
+        />
+      }
+      actions={<Actions radioButtonNumber={2} />}
+    />
   );
 }
 
@@ -48,37 +48,31 @@ function MemoryMonitorDetail({
   freeMem: string;
   totalMem: string;
 }) {
-  const { data: totalDisk, isLoading: isLoadingTotalDisk } = usePromise(getTotalDiskSpace);
   const {
     data: topProcess,
     isLoading: isLoadingTopProcess,
     revalidate: revalidateTopProcess,
   } = usePromise(getTopRamProcess);
-  useInterval(revalidateTopProcess, 5000);
 
-  const { data: freeDisk, isLoading: isLoadingFreeDisk, revalidate: revalidateFreeDisk } = usePromise(getFreeDiskSpace);
-  useInterval(revalidateFreeDisk, 1000 * 60);
+  useInterval(revalidateTopProcess, 5000);
 
   return (
     <List.Item.Detail
-      isLoading={isLoadingTotalDisk || isLoadingTopProcess || isLoadingFreeDisk}
+      isLoading={isLoadingTopProcess}
       metadata={
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="Total Disk Space" text={totalDisk} />
-          <List.Item.Detail.Metadata.Label title="Free Disk Space" text={freeDisk} />
-          <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label title="Total RAM" text={`${totalMem} GB`} />
           <List.Item.Detail.Metadata.Label title="Free RAM" text={`${freeMem} GB`} />
           <List.Item.Detail.Metadata.Label title="Free RAM %" text={`${freeMemPercentage} %`} />
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label title="Process Name" text="RAM" />
           {topProcess &&
-            topProcess.length > 0 &&
+            topProcess.length &&
             topProcess.map((element, index) => {
               return (
                 <List.Item.Detail.Metadata.Label
                   key={index}
-                  title={index + 1 + ".    " + element[0]}
+                  title={`${index + 1} -> ${element[0]}`}
                   text={element[1]}
                 />
               );

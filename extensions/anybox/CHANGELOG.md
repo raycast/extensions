@@ -1,5 +1,26 @@
 # Anybox Changelog
 
+## [Bug Fix] - 2024-11-26
+
+- Fix Search Links command when searching for Tags and Folders names
+
+## [Bug Fix] - 2024-07-27
+
+- Fix Search Links command not working with Kagi Search Safari Extesnion (https://github.com/raycast/extensions/issues/13700)
+
+## [Bug Fix] - 2024-07-16
+
+- Fix typo in command description
+
+## [New Feature] - 2024-04-19
+
+- Add options to show folders and tags next to URL in Search Links command.
+
+## [Bug Fixes] - 2023-12-01
+
+- Fix some issues reported by Raycast.
+- Update Raycast API version to the latest.
+
 ## [New Feature] - 2023-11-01
 
 - Option to show search resutls as icons.

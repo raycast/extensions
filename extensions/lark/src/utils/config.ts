@@ -28,3 +28,4 @@ export function getDomain(sub?: string): string {
 }
 
 export const GENERAL_DOMAIN = getDomain('www');
+export const TENANT_DOMAIN = getDomain('tenant');

@@ -15,25 +15,25 @@ export default function Command() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<THistoryFilter>("all");
   const { token, isTokenLoading } = useToken();
-  const { historyPage, isLoadingHistoryPage, historyPageError } = useHistory({ search, token, filter });
+  const { page, isLoadingPage, pageError } = useHistory({ search, token, filter });
 
   const searchBarAccessory = <SearchBarAccessory setFilter={setFilter} />;
 
   if (isTokenLoading) return <LoadingToken />;
-  if (historyPageError) return <GridError error={historyPageError.message} searchBarAccessory={searchBarAccessory} />;
-  if (historyPage === undefined) return <GridSearchingPlaceholder searchBarAccessory={searchBarAccessory} />;
-  if (historyPage.hits.length === 0) return <GridNoItemsPlaceholder searchBarAccessory={searchBarAccessory} />;
+  if (pageError) return <GridError error={pageError.message} searchBarAccessory={searchBarAccessory} />;
+  if (page === undefined) return <GridSearchingPlaceholder searchBarAccessory={searchBarAccessory} />;
+  if (page.outputs.length === 0) return <GridNoItemsPlaceholder searchBarAccessory={searchBarAccessory} />;
 
   return (
     <Grid
       searchBarPlaceholder="Search your history..."
       onSearchTextChange={setSearch}
-      isLoading={isLoadingHistoryPage}
+      isLoading={isLoadingPage}
       columns={defaultGridColumns}
       throttle={true}
       searchBarAccessory={searchBarAccessory}
     >
-      {historyPage.hits.map((hit) => (
+      {page.outputs.map((hit) => (
         <Grid.Item
           key={hit.id}
           actions={<GalleryItemActions item={hit} />}

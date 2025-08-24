@@ -13,9 +13,9 @@ import {
   injectQueryNamedParameters,
 } from "./issues";
 
-/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-export function SearchMyIssues(): JSX.Element {
+export function SearchMyIssues() {
   const [scope, setScope] = useState<string>(IssueScope.created_by_me);
   const state = IssueState.all;
   const [search, setSearch] = useState<string>();
@@ -35,7 +35,7 @@ export function SearchMyIssues(): JSX.Element {
       deps: [scope, state, search],
       secondsToRefetch: 1,
       secondsToInvalid: daysInSeconds(7),
-    }
+    },
   );
   if (error) {
     showErrorToast(getErrorMessage(error), "Could not fetch Issues");
@@ -51,8 +51,9 @@ export function SearchMyIssues(): JSX.Element {
       onSearchTextChange={setSearch}
       throttle
       searchBarAccessory={
-        <List.Dropdown tooltip="Scope" onChange={setScope}>
+        <List.Dropdown tooltip="Scope" onChange={setScope} storeValue>
           <List.Dropdown.Item title="Created By Me" value={IssueScope.created_by_me} />
+          <List.Dropdown.Item title="Assigned To Me" value={IssueScope.assigned_to_me} />
           <List.Dropdown.Item title="All" value={IssueScope.all} />
         </List.Dropdown>
       }

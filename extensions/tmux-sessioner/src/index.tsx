@@ -1,8 +1,6 @@
-import { useState, useEffect } from "react";
-
-import { List, Icon, Action, ActionPanel, Detail, useNavigation } from "@raycast/api";
-import { SelectTerminalApp } from "./SelectTermnialApp";
-import { RenameTmuxSession } from "./RenameTmuxSession";
+import { Action, ActionPanel, Icon, launchCommand, LaunchType, List, useNavigation } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { RenameTmux } from "./RenameTmux";
 import { deleteSession, getAllSession, switchToSession } from "./utils/sessionUtils";
 import { checkTerminalSetup } from "./utils/terminalUtils";
 
@@ -54,6 +52,18 @@ export default function Command() {
     setupListSesssions();
   }, [isTerminalSetup]);
 
+  useEffect(() => {
+    if (!isTerminalSetup && !isLoading) {
+      launchCommand({
+        type: LaunchType.UserInitiated,
+        name: "choose_terminal_app",
+        extensionName: "tmux-sessioner",
+        ownerOrAuthorName: "louishuyng",
+        context: { launcherCommand: "index" },
+      });
+    }
+  }, [isTerminalSetup, isLoading]);
+
   return (
     <>
       <List isLoading={isLoading}>
@@ -66,35 +76,31 @@ export default function Command() {
               <ActionPanel>
                 <Action title="Switch to Selected Session" onAction={() => switchToSession(session, setIsLoading)} />
                 <Action
+                  title="Rename this Session"
+                  onAction={() => {
+                    push(
+                      <RenameTmux
+                        sessionName={session}
+                        windowName=""
+                        type="Session"
+                        callback={() => setupListSesssions()}
+                      />,
+                    );
+                  }}
+                  shortcut={{ modifiers: ["cmd", "opt"], key: "r" }}
+                />
+                <Action
                   title="Delete This Session"
                   onAction={() =>
                     deleteSession(session, setIsLoading, () => setSessions(sessions.filter((s) => s !== session)))
                   }
-                  shortcut={{ modifiers: ["cmd"], key: "d" }}
-                />
-                <Action
-                  title="Rename This Session"
-                  onAction={() => {
-                    push(<RenameTmuxSession session={session} callback={() => setupListSesssions()} />);
-                  }}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  shortcut={{ modifiers: ["cmd", "opt"], key: "x" }}
                 />
               </ActionPanel>
             }
           />
         ))}
       </List>
-
-      {!isTerminalSetup && !isLoading && (
-        <Detail
-          markdown="**Setup Default Terminal App Before Usage** `Go to Actions or using Cmd + k`"
-          actions={
-            <ActionPanel>
-              <Action.Push title="Setup Here" target={<SelectTerminalApp setIsTerminalSetup={setIsTerminalSetup} />} />
-            </ActionPanel>
-          }
-        />
-      )}
     </>
   );
 }

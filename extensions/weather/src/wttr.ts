@@ -1,7 +1,7 @@
 import fetch from "cross-fetch";
-import { UnitSystem, getTemperatureUnit, getUnitSystem, getWindUnit, getWttrWindPostfix } from "./unit";
 import { getWindDirectionIcon } from "./icons";
-import { getErrorMessage } from "./utils";
+import { UnitSystem, getTemperatureUnit, getUnitSystem, getWindUnit, getWttrWindPostfix } from "./unit";
+import { clockFormat, getErrorMessage } from "./utils";
 
 export interface Hourly {
   DewPointC: string;
@@ -511,4 +511,21 @@ export function getHourlyThunder(hour: Hourly | undefined) {
   const unit = "%";
   const valueAndUnit = `${valueText} ${unit}`;
   return { value, unit, valueAndUnit };
+}
+
+/**
+ * Convert the  given time to the user preferences time
+ * @param text Can be 12 or 24 hour time like 11:00 PM, 11:00 AM or 11:00
+ * @returns
+ */
+export function convertToTimeString(text: string) {
+  const t = text.trim();
+  if (clockFormat() === "12h") {
+    return t;
+  }
+  if (t.endsWith("AM") || t.endsWith("PM")) {
+    const d = new Date("1/1/2000 " + t);
+    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  }
+  return t;
 }

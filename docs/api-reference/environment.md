@@ -15,6 +15,7 @@ import { environment } from "@raycast/api";
 
 export default async function Command() {
   console.log(`Raycast version: ${environment.raycastVersion}`);
+  console.log(`Owner or Author name: ${environment.ownerOrAuthorName}`);
   console.log(`Extension name: ${environment.extensionName}`);
   console.log(`Command name: ${environment.commandName}`);
   console.log(`Command mode: ${environment.commandMode}`);
@@ -31,7 +32,7 @@ export default async function Command() {
 
 <InterfaceTableFromJSDoc name="Environment" />
 
-## environment.canAccess
+### environment.canAccess
 
 Checks whether the user can access a specific API or not.
 

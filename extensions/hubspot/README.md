@@ -16,12 +16,13 @@
   - `e-commerce`
   - `crm.lists.read`
   - `crm.objects.contacts.read`
+  - `crm.objects.companies.read`
+  - `crm.objects.deals.read`
   - `crm.objects.custom.read`
   - `crm.objects.custom.write`
   - `media_bridge.read`
-  - `crm.objects.deals.read `
 
-Copy the AccessTokeny that is generated. This is your HubSpot accessToken.
+Copy the AccessToken that is generated. This is your HubSpot accessToken.
 
 In your extension's preferences, paste the accessToken under "HubSpot AccessToken".
 

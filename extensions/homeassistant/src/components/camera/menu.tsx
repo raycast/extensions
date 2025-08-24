@@ -1,10 +1,12 @@
-import { CopyToClipboardMenubarItem, MenuBarSubmenu, OpenInBrowserMenubarItem } from "@components/menu";
-import { capitalizeFirstLetter, getFriendlyName } from "@lib/utils";
-import { State } from "@lib/haapi";
-import { getVideoStreamUrlFromCamera } from "./utils";
+import { LastUpdateChangeMenubarItem, MenuBarSubmenu, OpenInMenubarItem } from "@components/menu";
 import { getIcon } from "@components/state/utils";
+import { State } from "@lib/haapi";
+import { capitalizeFirstLetter, getFriendlyName } from "@lib/utils";
+import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
+import React from "react";
+import { getVideoStreamUrlFromCamera } from "./utils";
 
-function CameraOpenStreamInBrowserMenubarItem(props: { state: State }): JSX.Element | null {
+function CameraOpenStreamInBrowserMenubarItem(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   if (!s.entity_id.startsWith("camera")) {
     return null;
@@ -13,10 +15,10 @@ function CameraOpenStreamInBrowserMenubarItem(props: { state: State }): JSX.Elem
   if (!url) {
     return null;
   }
-  return <OpenInBrowserMenubarItem shortcut={{ modifiers: ["cmd"], key: "b" }} url={url} />;
+  return <OpenInMenubarItem shortcut={{ modifiers: ["cmd"], key: "b" }} url={url} />;
 }
 
-export function CameraMenubarItem(props: { state: State }): JSX.Element | null {
+export function CameraMenubarItem(props: { state: State }): React.ReactElement | null {
   const s = props.state;
   const friendlyName = getFriendlyName(s);
   const title = () => {
@@ -34,7 +36,8 @@ export function CameraMenubarItem(props: { state: State }): JSX.Element | null {
   return (
     <MenuBarSubmenu key={s.entity_id} title={title()} subtitle={subtitle()} icon={getIcon(s)}>
       <CameraOpenStreamInBrowserMenubarItem state={s} />
-      <CopyToClipboardMenubarItem title="Copy Entity ID" content={s.entity_id} tooltip={s.entity_id} />
+      <LastUpdateChangeMenubarItem state={s} />
+      <RUIMenuBarExtra.CopyToClipboard title="Copy Entity ID" content={s.entity_id} tooltip={s.entity_id} />
     </MenuBarSubmenu>
   );
 }

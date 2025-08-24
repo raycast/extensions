@@ -1,11 +1,13 @@
-import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
-import { useEffect, useMemo, useState } from "react";
+import "./initSentry";
 
-import { useTask } from "./hooks/useTask";
-import { Task, TaskStatus } from "./types/task";
-import { TIME_BLOCK_IN_MINUTES, formatStrDuration, formatPriority, formatPriorityIcon } from "./utils/dates";
-import { addDays, addMinutes } from "date-fns";
+import { withRAIErrorBoundary } from "./components/RAIErrorBoundary";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { useEffect, useMemo, useState } from "react";
+import { useCallbackSafeRef } from "./hooks/useCallbackSafeRef";
+import { useTaskActions, useTasks } from "./hooks/useTask";
 import { useUser } from "./hooks/useUser";
+import { Task, TaskStatus } from "./types/task";
+import { formatPriority, formatPriorityIcon, formatStrDuration, TIME_BLOCK_IN_MINUTES } from "./utils/dates";
 
 type DropdownStatus = "OPEN" | "DONE";
 
@@ -27,9 +29,10 @@ type StatusDropdownProps = {
   onStatusChange: (newValue: DropdownStatus) => void;
 };
 
+const STATUS_TYPES: readonly DropdownStatus[] = ["OPEN", "DONE"];
+
 const StatusDropdown = (props: StatusDropdownProps) => {
   const { onStatusChange } = props;
-  const statusTypes = useMemo<DropdownStatus[]>(() => ["OPEN", "DONE"], []);
 
   return (
     <List.Dropdown
@@ -37,19 +40,33 @@ const StatusDropdown = (props: StatusDropdownProps) => {
       storeValue={true}
       onChange={(value) => onStatusChange(value as DropdownStatus)}
     >
-      {statusTypes.map((statusType) => (
+      {STATUS_TYPES.map((statusType) => (
         <List.Dropdown.Item key={statusType} title={DROPDOWN_STATUS[statusType]} value={statusType} />
       ))}
     </List.Dropdown>
   );
 };
 
-// Main Function
 function TaskList() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState<DropdownStatus | undefined>();
-  const [tasks, setTasks] = useState<Task[]>([]);
+  /********************/
+  /*   custom hooks   */
+  /********************/
+
   const { currentUser } = useUser();
+  const { tasks: sourceTasks, isLoading } = useTasks();
+  const { addTime, updateTask, doneTask, incompleteTask } = useTaskActions();
+
+  /********************/
+  /*     useState     */
+  /********************/
+
+  const [selectedStatus, setSelectedStatus] = useState<DropdownStatus | undefined>();
+  const [tasks, setTasks] = useState<Task[]>(sourceTasks ?? []);
+
+  /********************/
+  /* useMemo & consts */
+  /********************/
+
   const defaults = useMemo(
     () => ({
       schedulerVersion: currentUser?.features.scheduler || 14,
@@ -57,114 +74,13 @@ function TaskList() {
     [currentUser]
   );
 
-  const { getAllTasks, addTime, updateTask, doneTask, incompleteTask } = useTask();
-
-  // Get tasks via API
-  useEffect(() => {
-    const getTasks = async () => {
-      try {
-        setIsLoading(true);
-        const tasks = await getAllTasks();
-        setTasks(tasks ? tasks : []);
-      } catch (error) {
-        console.error("Error while fetching tasks", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    void getTasks();
-  }, []);
-
-  const handleUpdatePriority = async (task: Task, priority: string) => {
-    await showToast(Toast.Style.Animated, "Updating priority...");
-    try {
-      task.priority = priority;
-      const updatedPriority = await updateTask(task);
-      if (updatedPriority) {
-        showToast(Toast.Style.Success, `Updated priority successfully!`);
-      } else {
-        throw new Error("Update task priority failed.");
-      }
-    } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: "Error while updating priority", message: String(error) });
-    }
-  };
-
-  // Add time to task function
-  const handleAddTime = async (task: Task, time: number) => {
-    await showToast(Toast.Style.Animated, "Adding time...");
-    try {
-      const updatedTime = await addTime(task, time);
-      if (updatedTime) {
-        showToast(Toast.Style.Success, `Added ${formatStrDuration(time + "m")} to "${task.title}" successfully!`);
-      } else {
-        throw new Error("Update time request failed.");
-      }
-    } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: "Error while updating time", message: String(error) });
-    }
-  };
-
-  // Set task to done
-  const handleDoneTask = async (task: Task) => {
-    await showToast(Toast.Style.Animated, "Updating task...");
-    try {
-      const setTaskDone = await doneTask(task);
-      if (setTaskDone) {
-        showToast(Toast.Style.Success, `Task '${task.title}' marked done. Nice work!`);
-      } else {
-        throw new Error("Update task request failed.");
-      }
-    } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: "Error while updating task", message: String(error) });
-    }
-  };
-
-  // Set task to incomplete
-  const handleIncompleteTask = async (task: Task) => {
-    await showToast(Toast.Style.Animated, "Updating task...");
-    try {
-      const setTaskDone = await incompleteTask(task);
-      if (setTaskDone) {
-        showToast(Toast.Style.Success, `Task '${task.title}' marked incomplete!`);
-      } else {
-        throw new Error("Update task request failed.");
-      }
-    } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: "Error while updating task", message: String(error) });
-    }
-  };
-
-  // Update due date
-  const handleUpdateTask = async (task: Task) => {
-    await showToast(Toast.Style.Animated, "Updating due date...");
-    try {
-      const updatedTask = await updateTask(task);
-      if (updatedTask) {
-        showToast(Toast.Style.Success, `Updated due date for "${task.title}" successfully!`);
-      } else {
-        throw new Error("Update due date request failed.");
-      }
-    } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error while updating due date",
-        message: String(error),
-      });
-    }
-  };
-
-  // Filter tasks by status
-  const filteredTasks = useMemo(() => {
-    if (selectedStatus === "DONE") {
-      return tasks.filter((task) => task.status === "ARCHIVED" || task.status === "COMPLETE");
-    }
-    return tasks.filter((task) => task.status !== "ARCHIVED" && task.status !== "COMPLETE");
-  }, [tasks, selectedStatus]);
-
   // Group tasks by status
   const groupedTasks = useMemo(() => {
+    const filteredTasks =
+      selectedStatus === "DONE"
+        ? tasks.filter((task) => task.status === "ARCHIVED")
+        : tasks.filter((task) => task.status !== "ARCHIVED");
+
     const groups: { [key: string]: Task[] } = {};
 
     filteredTasks.forEach((task) => {
@@ -175,28 +91,91 @@ function TaskList() {
     });
 
     return groups;
-  }, [filteredTasks]);
+  }, [tasks, selectedStatus]);
 
-  const getListAccessories = (task: Task) => {
+  /********************/
+  /*    useCallback   */
+  /********************/
+
+  // Add time to task function
+  const handleAddTime = useCallbackSafeRef(async (task: Task, time: number) => {
+    await showToast(Toast.Style.Animated, "Adding time...");
+    try {
+      await addTime(task, time);
+    } catch (error) {
+      showToast({ style: Toast.Style.Failure, title: "Error while updating time", message: String(error) });
+      return;
+    }
+    // optimistic update
+    const updatedTime = task.timeChunksRemaining + time / TIME_BLOCK_IN_MINUTES;
+    setTasks((prevTasks) => prevTasks.map((t) => (t.id === task.id ? { ...t, timeChunksRemaining: updatedTime } : t)));
+    showToast(Toast.Style.Success, `Added ${formatStrDuration(time + "m")} to "${task.title}" successfully!`);
+  });
+
+  // Set task to done
+  const handleDoneTask = useCallbackSafeRef(async (task: Task) => {
+    await showToast(Toast.Style.Animated, "Updating task...");
+    try {
+      await doneTask(task);
+    } catch (error) {
+      showToast({ style: Toast.Style.Failure, title: "Error while updating task", message: String(error) });
+      return;
+    }
+    // optimistic update
+    setTasks((prevTasks) => prevTasks.map((t) => (t.id === task.id ? { ...t, status: "ARCHIVED" } : t)));
+    showToast(Toast.Style.Success, `Task '${task.title}' marked done. Nice work!`);
+  });
+
+  // Set task to incomplete
+  const handleIncompleteTask = useCallbackSafeRef(async (task: Task) => {
+    await showToast(Toast.Style.Animated, "Updating task...");
+    try {
+      await incompleteTask(task);
+    } catch (error) {
+      showToast({ style: Toast.Style.Failure, title: "Error while updating task", message: String(error) });
+      return;
+    }
+    // optimistic update
+    setTasks((prevTasks) => prevTasks.map((t) => (t.id === task.id ? { ...t, status: "NEW" } : t)));
+    showToast(Toast.Style.Success, `Task '${task.title}' marked incomplete!`);
+  });
+
+  // Update tasks
+  const handleUpdateTask = useCallbackSafeRef(async (task: Partial<Task>, payload: Partial<Task>) => {
+    await showToast(Toast.Style.Animated, `Updating '${task.title}'...`);
+    try {
+      await updateTask(task, payload);
+    } catch (error) {
+      showToast({ style: Toast.Style.Failure, title: `Error while updating '${task.title}'!`, message: String(error) });
+      return;
+    }
+    // optimistic update
+    setTasks((prevTasks) => prevTasks.map((t) => (t.id === task.id ? { ...t, ...payload } : t)));
+    showToast(Toast.Style.Success, `Updated '${task.title}'!`);
+  });
+
+  const getListAccessories = useCallbackSafeRef((task: Task) => {
     const list = [];
+
+    if (task.status !== "ARCHIVED" && task.atRisk) {
+      list.push({
+        tag: {
+          value: "",
+          color: Color.Red,
+        },
+        icon: Icon.ExclamationMark,
+        tooltip: "Task at risk!",
+      });
+    }
 
     if (defaults.schedulerVersion > 14) {
       if (task.onDeck) {
         list.push({
           tag: {
             value: "",
-            color: Color.Green,
+            color: Color.Yellow,
           },
-          tooltip: "Remove from Up Next",
-          icon: Icon.ArrowNe,
-        });
-      } else {
-        list.push({
-          tag: {
-            value: "",
-            color: Color.SecondaryText,
-          },
-          tooltip: "Send to Up Next",
+          tooltip: "Task is Up Next",
           icon: Icon.ArrowNe,
         });
       }
@@ -264,7 +243,19 @@ function TaskList() {
     }
 
     return list;
-  };
+  });
+
+  /********************/
+  /*    useEffects    */
+  /********************/
+
+  useEffect(() => {
+    if (sourceTasks) setTasks(sourceTasks);
+  }, [sourceTasks]);
+
+  /********************/
+  /*       JSX        */
+  /********************/
 
   return (
     <List
@@ -275,7 +266,7 @@ function TaskList() {
     >
       {Object.entries(groupedTasks)
         .sort(([statusA], [statusB]) => {
-          const statusOrder: TaskStatus[] = ["NEW", "IN_PROGRESS", "SCHEDULED", "COMPLETE", "CANCELLED", "ARCHIVED"];
+          const statusOrder: TaskStatus[] = ["IN_PROGRESS", "SCHEDULED", "NEW", "COMPLETE", "CANCELLED", "ARCHIVED"];
           return statusOrder.indexOf(statusA as TaskStatus) - statusOrder.indexOf(statusB as TaskStatus);
         })
         .map(([status, tasks]) => {
@@ -315,8 +306,8 @@ function TaskList() {
                                 icon={{ source: Icon.FullSignal }}
                                 title="Critical"
                                 onAction={() => {
-                                  const priority = "P1";
-                                  handleUpdatePriority(task, priority);
+                                  const payload = { priority: "P1" };
+                                  handleUpdateTask(task, payload);
                                 }}
                               />
 
@@ -324,8 +315,8 @@ function TaskList() {
                                 icon={{ source: Icon.Signal3 }}
                                 title="High Priority"
                                 onAction={() => {
-                                  const priority = "P2";
-                                  handleUpdatePriority(task, priority);
+                                  const payload = { priority: "P2" };
+                                  handleUpdateTask(task, payload);
                                 }}
                               />
 
@@ -333,16 +324,16 @@ function TaskList() {
                                 icon={{ source: Icon.Signal2 }}
                                 title="Medium Priority"
                                 onAction={() => {
-                                  const priority = "P3";
-                                  handleUpdatePriority(task, priority);
+                                  const payload = { priority: "P3" };
+                                  handleUpdateTask(task, payload);
                                 }}
                               />
                               <Action
                                 icon={{ source: Icon.Signal1 }}
                                 title="Low Priority"
                                 onAction={() => {
-                                  const priority = "P1";
-                                  handleUpdatePriority(task, priority);
+                                  const payload = { priority: "P4" };
+                                  handleUpdateTask(task, payload);
                                 }}
                               />
                             </ActionPanel.Submenu>
@@ -354,7 +345,7 @@ function TaskList() {
                           >
                             <Action
                               icon={{ source: Icon.Circle }}
-                              title="Add 15min"
+                              title="Add 15Min"
                               onAction={() => {
                                 const time = 15;
                                 handleAddTime(task, time);
@@ -362,7 +353,7 @@ function TaskList() {
                             />
                             <Action
                               icon={{ source: Icon.CircleProgress25 }}
-                              title="Add 30min"
+                              title="Add 30Min"
                               onAction={() => {
                                 const time = 30;
                                 handleAddTime(task, time);
@@ -370,7 +361,7 @@ function TaskList() {
                             />
                             <Action
                               icon={{ source: Icon.CircleProgress50 }}
-                              title="Add 1h"
+                              title="Add 1H"
                               onAction={() => {
                                 const time = 60;
                                 handleAddTime(task, time);
@@ -378,7 +369,7 @@ function TaskList() {
                             />
                             <Action
                               icon={{ source: Icon.CircleProgress75 }}
-                              title="Add 2h"
+                              title="Add 2H"
                               onAction={() => {
                                 const time = 120;
                                 handleAddTime(task, time);
@@ -387,7 +378,7 @@ function TaskList() {
                             />
                             <Action
                               icon={{ source: Icon.CircleProgress100 }}
-                              title="Add 4h"
+                              title="Add 4H"
                               onAction={() => {
                                 const time = 240;
                                 handleAddTime(task, time);
@@ -399,12 +390,34 @@ function TaskList() {
                             shortcut={{ modifiers: ["cmd"], key: "d" }}
                             onChange={(date: Date | null) => {
                               if (date) {
-                                handleUpdateTask({ ...task, due: date.toISOString() });
+                                const payload = { due: date.toISOString() };
+                                handleUpdateTask(task, payload);
                               }
                             }}
                           />
+                          {task.onDeck ? (
+                            <Action
+                              icon={{ source: Icon.ArrowDown, tintColor: Color.Red }}
+                              // eslint-disable-next-line @raycast/prefer-title-case
+                              title="Remove from Up Next"
+                              onAction={() => {
+                                const payload = { onDeck: false };
+                                handleUpdateTask(task, payload);
+                              }}
+                            />
+                          ) : (
+                            <Action
+                              icon={{ source: Icon.ArrowNe, tintColor: Color.Yellow }}
+                              // eslint-disable-next-line @raycast/prefer-title-case
+                              title="Send to Up Next"
+                              onAction={() => {
+                                const payload = { onDeck: true };
+                                handleUpdateTask(task, payload);
+                              }}
+                            />
+                          )}
                           <Action
-                            icon={Icon.Checkmark}
+                            icon={{ source: Icon.Checkmark, tintColor: Color.Green }}
                             title="Mark as Done"
                             onAction={() => {
                               handleDoneTask(task);
@@ -437,6 +450,8 @@ function TaskList() {
   );
 }
 
-export default function Command() {
+function Command() {
   return <TaskList />;
 }
+
+export default withRAIErrorBoundary(Command);

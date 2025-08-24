@@ -1,4 +1,4 @@
-# NextJS Docs
+# Next.js Documentation
 
 Efficiently search NextJS documentation from Raycast.
 

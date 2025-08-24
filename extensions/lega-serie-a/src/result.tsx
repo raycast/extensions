@@ -30,7 +30,8 @@ export default function Fixture() {
         setMatchdays(data);
         const currentDay = data.find(
           (d) =>
-            d.category_status === "LIVE" || d.category_status === "TO BE PLAYED"
+            d.category_status === "LIVE" ||
+            d.category_status === "TO BE PLAYED",
         );
         if (currentDay) {
           setMatchday(currentDay);
@@ -54,13 +55,13 @@ export default function Fixture() {
             title: "Completed",
             style: Toast.Style.Success,
           });
-        }
+        },
       );
     }
   }, [matchday]);
 
   const categories = groupBy(matches, (m) =>
-    format(new Date(m.date_time), "dd MMM yyyy")
+    format(new Date(m.date_time), "dd MMM yyyy"),
   );
 
   const actionPanel = (

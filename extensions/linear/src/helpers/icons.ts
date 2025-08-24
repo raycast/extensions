@@ -1,6 +1,7 @@
-import { Image, environment } from "@raycast/api";
-import emojis from "node-emoji";
 import fs from "fs";
+
+import { Image, environment } from "@raycast/api";
+import * as emojis from "node-emoji";
 
 type GetIconParams = {
   icon?: string;
@@ -17,7 +18,7 @@ export function getIcon({ icon, color, fallbackIcon }: GetIconParams) {
   if (emojiRegex.test(icon)) {
     const emoji = emojis.get(icon);
     // if there's no corresponding emoji, the same emoji code is returned
-    return emoji === icon ? fallbackIcon : emoji;
+    return emoji ?? fallbackIcon;
   }
 
   // Linear can add new icons from time to time so some icons may not be in the file system

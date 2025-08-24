@@ -10,14 +10,14 @@ The source code of the example can be found [here](https://github.com/raycast/ex
 
 Who doesn't like a good morning read on [Hacker News](https://news.ycombinator.com) with a warm coffee?! In this example, we create a simple list with the top stories on the frontpage.
 
-![Example: Read frontpage of Hacker News](../.gitbook/assets/example-hacker-news.png)
+![Example: Read frontpage of Hacker News](../.gitbook/assets/example-hacker-news.webp)
 
 ## Load top stories
 
 First, let's get the latest top stories. For this we use a [RSS feed](https://hnrss.org):
 
 ```typescript
-import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, List, showToast, Toast, Keyboard } from "@raycast/api";
 import { useEffect, useState } from "react";
 import Parser from "rss-parser";
 
@@ -143,7 +143,7 @@ function Actions(props: { item: Parser.Item }) {
           <Action.CopyToClipboard
             content={props.item.link}
             title="Copy Link"
-            shortcut={{ modifiers: ["cmd"], key: "." }}
+            shortcut={Keyboard.Shortcut.Common.Copy}
           />
         )}
       </ActionPanel.Section>

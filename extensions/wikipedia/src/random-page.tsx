@@ -1,4 +1,5 @@
 import { closeMainWindow, open } from "@raycast/api";
+
 import { getRandomPageUrl } from "./utils/api";
 import { getStoredLanguage } from "./utils/language";
 import { openInBrowser } from "./utils/preferences";

@@ -1,0 +1,77 @@
+fragment ExtendedRepositoryFields on Repository {
+  id
+  nameWithOwner
+  name
+  owner {
+    login
+    avatarUrl(size: 64)
+  }
+  url
+  mergeCommitAllowed
+  squashMergeAllowed
+  rebaseMergeAllowed
+  updatedAt
+  pushedAt
+  stargazerCount
+  isArchived
+  isFork
+  viewerHasStarred
+  primaryLanguage {
+    id
+    name
+    color
+  }
+  hasIssuesEnabled
+  hasWikiEnabled
+  hasProjectsEnabled
+  hasDiscussionsEnabled
+  releases {
+    totalCount
+  }
+}
+
+query searchRepositories($query: String!, $numberOfItems: Int!) {
+  search(query: $query, first: $numberOfItems, type: REPOSITORY) {
+    nodes {
+      ...ExtendedRepositoryFields
+    }
+  }
+}
+
+query myLatestRepositories($numberOfItems: Int!) {
+  viewer {
+    repositories(first: $numberOfItems, orderBy: { field: PUSHED_AT, direction: DESC }) {
+      nodes {
+        ...ExtendedRepositoryFields
+      }
+    }
+  }
+}
+
+query milestonesForRepository($owner: String!, $name: String!) {
+  repository(owner: $owner, name: $name) {
+    milestones(first: 25, orderBy: { field: DUE_DATE, direction: ASC }) {
+      totalCount
+      nodes {
+        id
+        title
+        number
+      }
+    }
+  }
+}
+
+query commentsForPullRequest($owner: String!, $name: String!, $number: Int!) {
+  repository(owner: $owner, name: $name) {
+    pullRequest(number: $number) {
+      comments(first: 100) {
+        nodes {
+          author {
+            login
+          }
+          body
+        }
+      }
+    }
+  }
+}

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "easy-new-file",
   "title": "Easy New File",
-  "description": "Quickly create file in the current Finder window or on the desktop.",
+  "description": "Quickly create file in the open Finder window.",
   "icon": "easy-new-file-icon.png",
   "author": "koinzhang",
   "categories": [
@@ -12,18 +12,182 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "new-file-here",
-      "icon": "new-file-here-icon.png",
-      "title": "New File Here",
+      "name": "new-file-now",
+      "icon": "new-file-now.png",
+      "title": "New File Now",
       "subtitle": "Easy New File",
-      "description": "Create a new file in the current Finder window or on the desktop.",
+      "description": "Create a new file with selected or clipboard text now.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "fileName",
+          "type": "text",
+          "required": false,
+          "placeholder": "txt, .txt or filename.txt"
+        },
+        {
+          "name": "fileContent",
+          "type": "text",
+          "required": false,
+          "placeholder": "file content"
+        }
+      ],
+      "preferences": [
+        {
+          "name": "nullArgumentsAction",
+          "type": "dropdown",
+          "required": false,
+          "title": "Action When Empty Arguments",
+          "description": "Action when the file name and file contents (all arguments of the command) are empty.",
+          "default": "createWithTemplate",
+          "data": [
+            {
+              "title": "Open New File With Template",
+              "value": "createWithTemplate"
+            },
+            {
+              "title": "Create With Default File Type",
+              "value": "createWithDefault"
+            }
+          ]
+        },
+        {
+          "name": "defaultFileType",
+          "type": "dropdown",
+          "required": false,
+          "title": "Default File Type",
+          "description": "Default file type when the file name (the first argument of the command) is empty.",
+          "default": "txt",
+          "data": [
+            {
+              "title": "Text",
+              "value": "txt"
+            },
+            {
+              "title": "Markdown",
+              "value": "md"
+            },
+            {
+              "title": "Java",
+              "value": "java"
+            },
+            {
+              "title": "Javascript",
+              "value": "js"
+            },
+            {
+              "title": "Typescript",
+              "value": "ts"
+            },
+            {
+              "title": "Json",
+              "value": "json"
+            },
+            {
+              "title": "XML",
+              "value": "xml"
+            },
+            {
+              "title": "CSS",
+              "value": "css"
+            },
+            {
+              "title": "Html",
+              "value": "html"
+            },
+            {
+              "title": "SVG",
+              "value": "svg"
+            },
+            {
+              "title": "Apple",
+              "value": "applescript"
+            },
+            {
+              "title": "Groovy",
+              "value": "groovy"
+            },
+            {
+              "title": "Perl",
+              "value": "pl"
+            },
+            {
+              "title": "PHP",
+              "value": "php"
+            },
+            {
+              "title": "Python",
+              "value": "py"
+            },
+            {
+              "title": "Ruby",
+              "value": "rb"
+            },
+            {
+              "title": "Shell",
+              "value": "sh"
+            }
+          ]
+        },
+        {
+          "name": "defaultFileContent",
+          "type": "dropdown",
+          "required": false,
+          "title": "Default File Content",
+          "description": "Default file content when the file content (the second argument of the command)  is empty.",
+          "default": "selectedFirst",
+          "data": [
+            {
+              "title": "Empty",
+              "value": "empty"
+            },
+            {
+              "title": "Selected First",
+              "value": "selectedFirst"
+            },
+            {
+              "title": "Clipboard First",
+              "value": "clipboardFirst"
+            }
+          ]
+        },
+        {
+          "name": "createdAction",
+          "type": "dropdown",
+          "required": false,
+          "title": "Action After Creation",
+          "description": "Action after the file is created.",
+          "default": "show",
+          "data": [
+            {
+              "title": "No Action",
+              "value": "no"
+            },
+            {
+              "title": "Open File",
+              "value": "open"
+            },
+            {
+              "title": "Show in Finder",
+              "value": "show"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "new-file-with-template",
+      "icon": "new-file-with-template-icon.png",
+      "title": "New File with Template",
+      "subtitle": "Easy New File",
+      "description": "Create a new file with templates in the open Finder window.",
       "mode": "view",
       "preferences": [
         {
           "name": "layout",
           "type": "dropdown",
           "description": "Set the layout of the file items.",
-          "required": true,
+          "required": false,
           "title": "File Layout",
           "default": "Grid",
           "data": [
@@ -34,6 +198,10 @@
             {
               "title": "List",
               "value": "List"
+            },
+            {
+              "title": "Form",
+              "value": "Form"
             }
           ]
         },
@@ -155,148 +323,49 @@
       ]
     },
     {
-      "name": "new-file-with-text",
-      "icon": "new-file-with-text-icon.png",
-      "title": "New File With Text",
-      "subtitle": "Easy New File",
-      "description": "Create a new file with selected or clipboard text now.",
-      "mode": "no-view",
-      "preferences": [
-        {
-          "name": "createdActions",
-          "type": "dropdown",
-          "required": false,
-          "title": "Actions after Creation",
-          "description": "Operations after file creation.",
-          "default": "show",
-          "data": [
-            {
-              "title": "No Action",
-              "value": "no"
-            },
-            {
-              "title": "Open File",
-              "value": "open"
-            },
-            {
-              "title": "Show in Finder",
-              "value": "show"
-            }
-          ]
-        },
-        {
-          "name": "fileType",
-          "type": "dropdown",
-          "required": true,
-          "title": "File Type",
-          "description": "Type of the new file created.",
-          "default": "txt",
-          "data": [
-            {
-              "title": "Text",
-              "value": "txt"
-            },
-            {
-              "title": "Markdown",
-              "value": "md"
-            },
-            {
-              "title": "Java",
-              "value": "java"
-            },
-            {
-              "title": "Javascript",
-              "value": "js"
-            },
-            {
-              "title": "Typescript",
-              "value": "ts"
-            },
-            {
-              "title": "Json",
-              "value": "json"
-            },
-            {
-              "title": "XML",
-              "value": "xml"
-            },
-            {
-              "title": "CSS",
-              "value": "css"
-            },
-            {
-              "title": "Html",
-              "value": "html"
-            },
-            {
-              "title": "SVG",
-              "value": "svg"
-            },
-            {
-              "title": "Apple",
-              "value": "applescript"
-            },
-            {
-              "title": "Groovy",
-              "value": "groovy"
-            },
-            {
-              "title": "Perl",
-              "value": "pl"
-            },
-            {
-              "title": "PHP",
-              "value": "php"
-            },
-            {
-              "title": "Python",
-              "value": "py"
-            },
-            {
-              "title": "Ruby",
-              "value": "rb"
-            },
-            {
-              "title": "Shell",
-              "value": "sh"
-            }
-          ]
-        },
-        {
-          "name": "saveDirectory",
-          "title": "Save Directory",
-          "description": "The directory of file to save. Path format: /Users/Username/Downloads or ~/Desktop.",
-          "type": "textfield",
-          "required": true,
-          "placeholder": "~/Desktop",
-          "default": "~/Desktop"
-        }
-      ]
-    },
-    {
       "name": "add-file-template",
       "icon": "add-file-template-icon.png",
       "title": "Add File Template",
       "subtitle": "Easy New File",
-      "description": "Add a file template that you can use in the New File Here command.",
+      "description": "Add a file template that you can use in the New File With Template command.",
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "title": "Notification",
+      "name": "showTips",
+      "label": "Show Tips",
+      "type": "checkbox",
+      "description": "Show tips when running the command",
+      "required": false,
+      "default": true
+    },
+    {
+      "title": "Default Directory",
+      "name": "defaultDirectory",
+      "label": "Default Directory",
+      "type": "directory",
+      "description": "Default directory to create files in. If the directory is not set, it will use the Desktop.",
+      "required": false,
+      "default": "~/Desktop"
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.47.1",
-    "fs-extra": "^10.1.0",
-    "run-applescript": "^6.0.0",
-    "xlsx": "^0.18.5"
+    "@raycast/api": "^1.100.3",
+    "fs-extra": "^11.3.0",
+    "@raycast/utils": "^2.2.0",
+    "xlsx": "^0.18.5",
+    "file-url": "^4.0.0"
   },
   "devDependencies": {
-    "@types/fs-extra": "^9.0.13",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@types/fs-extra": "^11.0.4",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "24.0.14",
+    "@types/react": "19.1.8",
+    "eslint": "^9.31.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",

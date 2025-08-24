@@ -5,6 +5,10 @@
   "description": "Start something .new! .new links are shortcuts to your favorite actions on the websites you love",
   "icon": "command-icon.png",
   "author": "natterstefan",
+  "contributors": [
+    "xmok",
+    "ViGeng"
+  ],
   "categories": [
     "Web",
     "Productivity"
@@ -24,22 +28,21 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0",
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.19.0",
     "fuse.js": "^6.5.3"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "lodash": "^4.17.21",
     "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
+    "react": "^18.2.0",
     "tabletojson": "^2.0.7",
-    "ts-node": "^10.7.0",
-    "typescript": "^4.4.3"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
   },
   "scripts": {
     "generate-dataset": "ts-node ./scripts/generate-dataset.ts",

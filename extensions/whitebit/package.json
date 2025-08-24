@@ -71,7 +71,7 @@
     {
       "name": "code_create",
       "title": "Create Code",
-      "description": "Apply WhiteBIT code",
+      "description": "Create WhiteBIT code",
       "mode": "view",
       "arguments": [
         {
@@ -96,7 +96,7 @@
     {
       "name": "code_list",
       "title": "My Codes",
-      "description": "Apply WhiteBIT code",
+      "description": "Get WhiteBIT codes history on my account",
       "mode": "view"
     }
   ],

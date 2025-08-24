@@ -8,7 +8,7 @@ export type RepromptFormProps = {
 const RepromptForm = (props: RepromptFormProps) => {
   const { description, onConfirm } = props;
 
-  async function onSubmit(values: { password: string }) {
+  function onSubmit(values: { password: string }) {
     onConfirm(values.password);
   }
 
@@ -17,7 +17,7 @@ const RepromptForm = (props: RepromptFormProps) => {
       navigationTitle="Confirmation Required"
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Confirm" onSubmit={onSubmit} shortcut={{ key: "enter", modifiers: [] }} />
+          <Action.SubmitForm title="Confirm" onSubmit={onSubmit} />
         </ActionPanel>
       }
     >

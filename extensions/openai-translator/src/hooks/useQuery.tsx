@@ -108,21 +108,21 @@ export function useQuery(props: UseQueryProps): QueryHook {
     async (text: string) => {
       setText(text);
     },
-    [setText, text]
+    [setText, text],
   );
 
   const updateTo = useCallback(
     async (_to: string) => {
       setTo(_to);
     },
-    [setTo, to]
+    [setTo, to],
   );
 
   const updateFrom = useCallback(
     async (value: string) => {
       setFrom(value);
     },
-    [setFrom, from]
+    [setFrom, from],
   );
 
   const updateQuerying = useCallback(
@@ -132,21 +132,21 @@ export function useQuery(props: UseQueryProps): QueryHook {
       }
       setQuerying(value);
     },
-    [setQuerying, querying]
+    [setQuerying, querying],
   );
 
   const updateLangType = useCallback(
     async (value: string) => {
       setLangType(value);
     },
-    [setLangType, langType]
+    [setLangType, langType],
   );
 
   const updateOcr = useCallback(
     async (value: string | undefined) => {
       setOcrImage(value);
     },
-    [setOcrImage, ocrImage]
+    [setOcrImage, ocrImage],
   );
 
   return useMemo(
@@ -179,6 +179,6 @@ export function useQuery(props: UseQueryProps): QueryHook {
       updateLangType,
       ocrImage,
       updateOcr,
-    ]
+    ],
   );
 }

@@ -4,7 +4,7 @@ import _ from "lodash";
 import { editingAtom, newTodoTextAtom, searchBarTextAtom, searchModeAtom, todoAtom } from "./atoms";
 import DeleteAllAction from "./delete_all";
 import SearchModeAction from "./search_mode_action";
-import { compare, insertIntoSection } from "./utils";
+import { compare, insertIntoSection, parseTodoItem } from "./utils";
 
 const ListActions = () => {
   const [searchMode] = useAtom(searchModeAtom);
@@ -18,17 +18,8 @@ const ListActions = () => {
       await showToast(Toast.Style.Failure, "Empty todo", "Todo items cannot be empty.");
       return;
     }
-    todoSections.todo = [
-      ...insertIntoSection(
-        todoSections.todo,
-        {
-          title: newTodoText,
-          completed: false,
-          timeAdded: Date.now(),
-        },
-        compare
-      ),
-    ];
+    const newItem = parseTodoItem(newTodoText);
+    todoSections.todo = [...insertIntoSection(todoSections.todo, newItem, compare)];
     await clearSearchBar();
     setTodoSections(_.cloneDeep(todoSections));
   };
@@ -50,24 +41,24 @@ const ListActions = () => {
     return (
       <ActionPanel>
         <Action
-          title="Apply Edits"
-          onAction={() => editTodo()}
           icon={{ source: Icon.Checkmark, tintColor: Color.Green }}
+          onAction={() => editTodo()}
+          title="Apply Edits"
         />
         <Action
-          title="Cancel"
+          icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
           onAction={() => {
             setEditing(false);
             setSearchBarText("");
           }}
-          icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+          title="Cancel"
         />
       </ActionPanel>
     );
   }
   return (
     <ActionPanel>
-      {!searchMode && <Action title="Create Todo" onAction={() => addTodo()} icon={Icon.Plus} />}
+      {!searchMode && <Action icon={Icon.Plus} onAction={() => addTodo()} title="Create Todo" />}
       <SearchModeAction />
       <DeleteAllAction />
     </ActionPanel>

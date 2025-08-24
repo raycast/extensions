@@ -7,7 +7,8 @@
   "author": "danieldbird",
   "contributors": [
     "alexstrnik",
-    "zach"
+    "zach",
+    "gnostic"
   ],
   "categories": [
     "Media",
@@ -22,6 +23,36 @@
       "type": "appPicker",
       "default": "Safari",
       "required": true
+    },
+    {
+      "name": "urlPreference",
+      "title": "URL Preference",
+      "description": "Choose which YouTube URLs to control",
+      "type": "dropdown",
+      "default": "music",
+      "required": true,
+      "data": [
+        {
+          "title": "YouTube Music Only",
+          "value": "music"
+        },
+        {
+          "title": "YouTube Only",
+          "value": "youtube"
+        },
+        {
+          "title": "Both YouTube and Music",
+          "value": "both"
+        }
+      ]
+    },
+    {
+      "name": "ff-rew-seconds",
+      "title": "Number of seconds to fast forward or rewind.",
+      "default": "10",
+      "type": "textfield",
+      "description": "Number of seconds to fast forward or rewind.",
+      "required": false
     }
   ],
   "commands": [
@@ -54,11 +85,50 @@
       "mode": "no-view"
     },
     {
+      "name": "remove-like",
+      "title": "Remove Like",
+      "subtitle": "YouTube Music",
+      "description": "Removes the current track from your liked songs in YouTube Music.",
+      "mode": "no-view"
+    },
+    {
       "name": "dislike",
       "title": "Dislike",
       "subtitle": "YouTube Music",
       "description": "Removes current track from \"Liked\" collection in YouTube Music.",
       "mode": "no-view"
+    },
+    {
+      "name": "fast-forward",
+      "title": "Fast Forward",
+      "subtitle": "YouTube Music",
+      "description": "Fast forwards the current track in YouTube Music.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "rewind",
+      "title": "Rewind",
+      "subtitle": "YouTube Music",
+      "description": "Rewinds the current track in YouTube Music.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "next-chapter",
+      "title": "Next Chapter",
+      "subtitle": "YouTube Music",
+      "description": "Skips to the next chapter in YouTube Music.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "previous-chapter",
+      "title": "Previous Chapter",
+      "subtitle": "YouTube Music",
+      "description": "Skips to the previous chapter in YouTube Music.",
+      "mode": "no-view",
+      "disabledByDefault": true
     }
   ],
   "dependencies": {
@@ -80,5 +150,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

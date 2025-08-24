@@ -26,7 +26,7 @@ export default {
     },
     {
       url: "https://chakra-ui.com/docs/components/simple-grid",
-      title: "Simple Grid",
+      title: "SimpleGrid",
     },
     {
       url: "https://chakra-ui.com/docs/components/stack",
@@ -52,7 +52,7 @@ export default {
     },
     {
       url: "https://chakra-ui.com/docs/components/form-control",
-      title: "From Control",
+      title: "Form Control",
     },
     {
       url: "https://chakra-ui.com/docs/components/icon-button",
@@ -101,8 +101,16 @@ export default {
       title: "Badge",
     },
     {
+      url: "https://chakra-ui.com/docs/components/card",
+      title: "Card",
+    },
+    {
       url: "https://chakra-ui.com/docs/components/code",
       title: "Code",
+    },
+    {
+      url: "https://chakra-ui.com/docs/components/divider",
+      title: "Divider",
     },
     {
       url: "https://chakra-ui.com/docs/components/kbd",
@@ -175,6 +183,10 @@ export default {
       title: "Drawer",
     },
     {
+      url: "https://chakra-ui.com/docs/components/menu",
+      title: "Menu",
+    },
+    {
       url: "https://chakra-ui.com/docs/components/modal",
       title: "Modal",
     },
@@ -212,14 +224,18 @@ export default {
     },
     {
       url: "https://chakra-ui.com/docs/components/link-overlay",
-      title: "Link Overlay",
+      title: "LinkOverlay",
     },
     {
       url: "https://chakra-ui.com/docs/components/skip-nav",
       title: "SkipNav",
     },
+    {
+      url: "https://chakra-ui.com/docs/components/stepper",
+      title: "StepperNew",
+    },
   ],
-  "Media And Icons": [
+  "Media and icons": [
     {
       url: "https://chakra-ui.com/docs/components/avatar",
       title: "Avatar",

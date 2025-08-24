@@ -1,7 +1,11 @@
 import { showHUD } from "@raycast/api";
-import { $ } from "zx";
+import { execPromise, getEspansoCmd } from "./lib/utils";
 
 export default async function main() {
-  const result = await $`espanso cmd toggle`;
-  await showHUD("Espanso toggled");
+  try {
+    await execPromise(`${getEspansoCmd()} cmd toggle`);
+    await showHUD("Espanso toggled");
+  } catch (error) {
+    await showHUD(`Error: ${error instanceof Error ? error.message : String(error)}`);
+  }
 }

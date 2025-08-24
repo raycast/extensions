@@ -10,6 +10,7 @@ import type {
   Build,
   Pagination,
   CreateEnvironment,
+  Domain,
 } from "./types";
 
 export const token = getPreferenceValues().accessToken;
@@ -17,7 +18,7 @@ const headers = new Headers({
   Authorization: "Bearer " + token,
 });
 
-export const FetchHeaders = headers;
+export const FetchHeaders = [...headers];
 
 const apiURL = "https://api.vercel.com/";
 
@@ -79,7 +80,7 @@ export async function deleteProjectById(projectId: Project["id"], teamId?: Team[
 
 export async function deleteEnvironmentVariableById(
   projectId: Project["id"],
-  envId: Environment["id"]
+  envId: Environment["id"],
 ): Promise<Environment> {
   try {
     const response = await fetch(apiURL + `v8/projects/${projectId}/env/${envId}`, {
@@ -145,7 +146,7 @@ export async function fetchDeployments(teamId?: string, limit = 100, maxToFetch 
 export function getFetchDeploymentBuildsURL(
   deploymentId: Deployment["uid"] | string,
   teamId?: Team["id"],
-  limit = 100
+  limit = 100,
 ) {
   return apiURL + `v11/deployments/${deploymentId}/builds?limit=${limit}&teamId=${teamId ?? ""}`;
 }
@@ -178,6 +179,15 @@ export function getFetchProjectsURL(teamId?: string, limit = 100) {
   return apiURL + `v8/projects?teamId=${teamId ?? ""}&limit=${limit}`;
 }
 
+export async function fetchProjects(teamId?: string, limit = 100): Promise<Project[]> {
+  const response = await fetch(getFetchProjectsURL(teamId, limit), {
+    method: "get",
+    headers: headers,
+  });
+  const json = (await response.json()) as { projects: Project[] };
+  return json.projects;
+}
+
 // Raw function for fetching project environment variable
 async function _rawFetchProjectEnvironmentVariables(projectId: string, teamId?: string): Promise<Environment[]> {
   try {
@@ -202,7 +212,7 @@ async function _rawFetchProjectEnvironmentVariables(projectId: string, teamId?: 
 export async function updateEnvironmentVariable(
   projectId: Project["id"],
   envId: Environment["id"],
-  envVar: Partial<Environment>
+  envVar: Partial<Environment>,
 ): Promise<Environment> {
   const environmentVariable: Environment = await _rawUpdateProjectEnvironmentVariable(projectId, envId, envVar);
   return environmentVariable;
@@ -212,7 +222,7 @@ export async function updateEnvironmentVariable(
 export async function createEnvironmentVariable(
   projectId: Project["id"],
   envVar: CreateEnvironment,
-  teamId?: Team["id"]
+  teamId?: Team["id"],
 ): Promise<CreateEnvironmentVariableResponse> {
   envVar["type"] = "encrypted";
 
@@ -237,7 +247,7 @@ export async function createEnvironmentVariable(
 async function _rawUpdateProjectEnvironmentVariable(
   projectId: Project["id"],
   envId: Environment["id"],
-  envVar: Partial<Environment>
+  envVar: Partial<Environment>,
 ): Promise<Environment> {
   try {
     const response = await fetch(apiURL + `v8/projects/${projectId}/env/${envId}`, {
@@ -266,21 +276,29 @@ function arrayBufferToBase64(buffer: ArrayBuffer) {
   return btoa(binary);
 }
 
-export async function getScreenshotImageURL(deploymentId: Deployment["uid"]) {
-  const theme = environment.theme === "light" ? "0" : "1";
-  const image = await fetch(
-    `https://vercel.com/api/screenshot?dark=${theme}&deploymentId=${deploymentId}&withStatus=false`,
-    {
-      method: "get",
-      headers: headers,
+export async function getScreenshotImageURL(deploymentId: Deployment["uid"], teamId?: string) {
+  try {
+    const theme = environment.appearance === "light" ? "0" : "1";
+    const response = await fetch(
+      `https://vercel.com/api/screenshot?dark=${theme}&deploymentId=${deploymentId}&withStatus=false&teamId=${teamId ?? ""}`,
+      {
+        method: "get",
+        headers: headers,
+      },
+    );
+
+    if (response.status !== 200) {
+      return null;
     }
-  );
 
-  const arrayBuffer = await image.arrayBuffer();
-  const base64Flag = "data:image/png;base64,";
-  const imageStr = base64Flag + arrayBufferToBase64(arrayBuffer);
-
-  return imageStr;
+    const arrayBuffer = await response.arrayBuffer();
+    const base64Flag = "data:image/png;base64,";
+    const imageStr = base64Flag + arrayBufferToBase64(arrayBuffer);
+    return imageStr;
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
 }
 
 export function getDeploymentURL(userOrTeamSlug: string, projectName: string, deploymentId: Deployment["uid"]) {
@@ -289,4 +307,29 @@ export function getDeploymentURL(userOrTeamSlug: string, projectName: string, de
   }
 
   return `https://vercel.com/${userOrTeamSlug}/${projectName}/${deploymentId}`;
+}
+
+export function getFetchDomainsURL(teamId?: string, limit = 100) {
+  return apiURL + `v5/domains?teamId=${teamId ?? ""}&limit=${limit}`;
+}
+
+export async function fetchDomains(teamId?: string, limit = 100) {
+  const response = await fetch(getFetchDomainsURL(teamId, limit), {
+    method: "get",
+    headers: headers,
+  });
+  const json = (await response.json()) as { domains: Domain[] };
+  return json.domains;
+}
+
+export async function checkDomainAvailability(domain: string) {
+  const response = await fetch(apiURL + `v4/domains/status?name=${domain}`, {
+    method: "get",
+    headers: headers,
+  });
+  const json = (await response.json()) as { available: string; error?: { code: string; message: string } };
+  if (json.error) {
+    return "Check domain availability failed. Please verify that the domain is valid or try again later.";
+  }
+  return json.available;
 }

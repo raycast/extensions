@@ -1,40 +1,46 @@
-import parsedGithubRepoUrl, { Result } from 'parse-github-url'
-import parsedGitlabRepoUrl, { ParseGitlabUrl } from 'gitlab-url-parse'
+import gitUrlParse from 'git-url-parse'
+import { cleanGitUrl } from './cleanGitUrl'
 
 interface ParseRepoUrlResponse {
-  owner: string | null
-  name: string | null
+  owner: string | null | undefined
+  name: string | null | undefined
   type?: 'github' | 'gitlab'
+  repoUrl?: string
 }
 
 export const parseRepoUrl = (repoUrl?: string): ParseRepoUrlResponse => {
-  if (!repoUrl) {
-    return {
-      owner: null,
-      name: null,
-      type: undefined,
-    }
+  const invalidUrl = {
+    owner: null,
+    name: null,
+    type: undefined,
+    repoUrl: undefined,
   }
+  if (!repoUrl) return invalidUrl
 
-  const isGithubRepo = repoUrl.includes('github.com')
-  const isGitlabRepo = repoUrl.includes('gitlab.com')
-  const parsedRepo = isGithubRepo
-    ? parsedGithubRepoUrl(repoUrl)
-    : isGitlabRepo
-    ? parsedGitlabRepoUrl(repoUrl)
-    : null
+  try {
+    try {
+      const url = new URL(repoUrl)
+      url.protocol = 'https:'
+      repoUrl = url.toString()
+    } catch {
+      // `get-url-parse` doesn't support some protocols like `git+https`.
+      // So we force replaced the protocol to `https:`.
+    }
+    const parsedUrl = gitUrlParse(repoUrl)
+    const cleanedUrl = cleanGitUrl(parsedUrl.toString('https'))
+    const isGithubRepo = cleanedUrl.includes('github.com')
+    const isGitlabRepo = cleanedUrl.includes('gitlab.com')
+    const owner = parsedUrl.owner
+    const name = parsedUrl.name
+    const type = isGithubRepo ? 'github' : isGitlabRepo ? 'gitlab' : undefined
 
-  return {
-    owner: isGithubRepo
-      ? (parsedRepo as Result).owner
-      : isGitlabRepo
-      ? (parsedRepo as ParseGitlabUrl).user
-      : null,
-    name: isGithubRepo
-      ? (parsedRepo as Result).name
-      : isGitlabRepo
-      ? (parsedRepo as ParseGitlabUrl).project
-      : null,
-    type: isGithubRepo ? 'github' : isGitlabRepo ? 'gitlab' : undefined,
+    return {
+      owner,
+      name,
+      type,
+      repoUrl: cleanedUrl,
+    }
+  } catch {
+    return invalidUrl
   }
 }

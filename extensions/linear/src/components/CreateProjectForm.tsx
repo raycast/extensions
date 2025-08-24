@@ -1,32 +1,37 @@
 import { Action, ActionPanel, Form, Icon, open, Toast, showToast } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
+import { useState } from "react";
 
-import useTeams from "../hooks/useTeams";
-import useUsers from "../hooks/useUsers";
-
-import { getLinearClient } from "../helpers/withLinearClient";
-import { getTeamIcon } from "../helpers/teams";
-import { getUserIcon } from "../helpers/users";
-import { projectStatuses, projectStatusIcon, projectStatusText } from "../helpers/projects";
+import { getLinearClient } from "../api/linearClient";
 import { getErrorMessage } from "../helpers/errors";
 import { isLinearInstalled } from "../helpers/isLinearInstalled";
+import { projectStatusIcon } from "../helpers/projects";
+import { getTeamIcon } from "../helpers/teams";
+import { getUserIcon } from "../helpers/users";
+import useProjectStatuses from "../hooks/useProjectStatuses";
+import useTeams from "../hooks/useTeams";
+import useUsers from "../hooks/useUsers";
 
 export type CreateProjectValues = {
   teamIds: string[];
   name: string;
   description: string;
-  state: string;
   leadId: string;
   memberIds: string[];
   startDate: Date | null;
   targetDate: Date | null;
+  statusId: string;
 };
 
 export default function CreateProjectForm({ draftValues }: { draftValues?: CreateProjectValues }) {
   const { linearClient } = getLinearClient();
 
-  const { teams, isLoadingTeams } = useTeams();
+  const { teams, org, isLoadingTeams } = useTeams();
   const { users, isLoadingUsers } = useUsers();
+
+  const [leadQuery, setLeadQuery] = useState<string>("");
+  const { users: leads, supportsUserTypeahead, isLoadingUsers: isLoadingLeads } = useUsers(leadQuery);
+  const { states, isLoadingStates } = useProjectStatuses();
 
   const { handleSubmit, itemProps, focus, reset } = useForm<CreateProjectValues>({
     async onSubmit(values) {
@@ -37,7 +42,7 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
           teamIds: values.teamIds,
           name: values.name,
           description: values.description,
-          state: values.state,
+          statusId: values.statusId,
           ...(values.leadId ? { leadId: values.leadId } : {}),
           memberIds: values.memberIds,
           ...(values.startDate ? { startDate: values.startDate } : {}),
@@ -54,7 +59,11 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
             title: isLinearInstalled ? "Open Project in Linear" : "Open Project in Browser",
             shortcut: { modifiers: ["cmd", "shift"], key: "o" },
             onAction: () => {
-              isLinearInstalled ? open(projectResult.url, "Linear") : open(projectResult.url);
+              if (isLinearInstalled) {
+                open(projectResult.url, "Linear");
+              } else {
+                open(projectResult.url);
+              }
             },
           };
 
@@ -83,7 +92,7 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
       teamIds: draftValues?.teamIds || [],
       name: draftValues?.name,
       description: draftValues?.description,
-      state: draftValues?.state,
+      statusId: draftValues?.statusId,
       leadId: draftValues?.leadId,
       memberIds: draftValues?.memberIds || [],
       startDate: draftValues?.startDate,
@@ -93,8 +102,8 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
 
   return (
     <Form
-      enableDrafts={true}
-      isLoading={isLoadingTeams || isLoadingUsers}
+      enableDrafts
+      isLoading={isLoadingTeams || isLoadingUsers || isLoadingLeads || isLoadingStates}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Project" onSubmit={handleSubmit} />
@@ -103,7 +112,7 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
     >
       <Form.TagPicker title="Team(s)" placeholder="Add team" {...itemProps.teamIds}>
         {teams?.map((team) => (
-          <Form.TagPicker.Item key={team.id} value={team.id} title={team.name} icon={getTeamIcon(team)} />
+          <Form.TagPicker.Item key={team.id} value={team.id} title={team.name} icon={getTeamIcon(team, org)} />
         ))}
       </Form.TagPicker>
 
@@ -119,26 +128,29 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
 
       <Form.Separator />
 
-      <Form.Dropdown title="Status" storeValue {...itemProps.state}>
-        {projectStatuses.map((status) => (
+      <Form.Dropdown title="Status" storeValue {...itemProps.statusId}>
+        {states?.map((status) => (
           <Form.Dropdown.Item
-            key={status}
-            value={status}
-            title={projectStatusText[status]}
-            icon={{ source: projectStatusIcon[status] }}
+            key={status.id}
+            value={status.id}
+            title={status.name}
+            icon={{ source: projectStatusIcon[status.type], tintColor: status.color }}
           />
         ))}
       </Form.Dropdown>
 
-      {users && users.length > 0 ? (
-        <Form.Dropdown title="Lead" storeValue {...itemProps.leadId}>
-          <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
+      <Form.Dropdown
+        title="Lead"
+        storeValue
+        {...itemProps.leadId}
+        {...(supportsUserTypeahead && { onSearchTextChange: setLeadQuery, throttle: true, isLoading: isLoadingLeads })}
+      >
+        <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
 
-          {users?.map((user) => {
-            return <Form.Dropdown.Item title={user.name} value={user.id} key={user.id} icon={getUserIcon(user)} />;
-          })}
-        </Form.Dropdown>
-      ) : null}
+        {leads?.map((user) => {
+          return <Form.Dropdown.Item title={user.name} value={user.id} key={user.id} icon={getUserIcon(user)} />;
+        })}
+      </Form.Dropdown>
 
       {users && users.length > 0 ? (
         <Form.TagPicker title="Members" placeholder="Add members" {...itemProps.memberIds}>

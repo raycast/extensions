@@ -1,89 +1,75 @@
-import { Action, ActionPanel, List } from "@raycast/api";
-import { useMemo, useState, useEffect } from "react";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { useMemo, useState } from "react";
 
 import { getActiveCycleIssues } from "./api/getIssues";
-
-import useIssues from "./hooks/useIssues";
-import useTeams from "./hooks/useTeams";
-import usePriorities from "./hooks/usePriorities";
-import useMe from "./hooks/useMe";
-import useUsers from "./hooks/useUsers";
-
-import { getTeamIcon } from "./helpers/teams";
-
-import StateIssueList from "./components/StateIssueList";
 import CreateIssueForm from "./components/CreateIssueForm";
+import StateIssueList from "./components/StateIssueList";
 import View from "./components/View";
+import { getTeamIcon } from "./helpers/teams";
+import useIssues from "./hooks/useIssues";
+import useMe from "./hooks/useMe";
+import usePriorities from "./hooks/usePriorities";
+import useTeams from "./hooks/useTeams";
 
 function ActiveCycle() {
-  const { teamsWithCycles, isLoadingTeams } = useTeams();
-  const [selectedTeam, setSelectedTeam] = useState<string | undefined>(
-    teamsWithCycles && teamsWithCycles.length === 1 ? teamsWithCycles[0].id : undefined
-  );
+  const [teamQuery, setTeamQuery] = useState<string>("");
+  const { teams, org, supportsTeamTypeahead, isLoadingTeams } = useTeams(teamQuery);
+  const [selectedTeam, setSelectedTeam] = useState<string>("");
 
   const { priorities, isLoadingPriorities } = usePriorities();
   const { me, isLoadingMe } = useMe();
-  const { users, isLoadingUsers } = useUsers();
 
   const cycleId = useMemo(() => {
-    if (teamsWithCycles?.length === 1) {
-      return teamsWithCycles[0].activeCycle?.id;
-    }
-
-    const correspondingTeam = teamsWithCycles?.find((team) => team.id === selectedTeam);
-    return correspondingTeam?.activeCycle?.id;
+    return teams?.find((team) => team.id === selectedTeam)?.activeCycle?.id;
   }, [selectedTeam]);
 
-  const { issues, isLoadingIssues, mutateList } = useIssues(
-    (cycleId: string | undefined) => getActiveCycleIssues(cycleId),
-    [cycleId],
-    { execute: !!cycleId }
-  );
-
-  useEffect(() => {
-    if (teamsWithCycles && teamsWithCycles.length === 1 && teamsWithCycles[0].id !== selectedTeam) {
-      setSelectedTeam(teamsWithCycles[0].id);
-    }
-  }, [teamsWithCycles, selectedTeam]);
+  const { issues, isLoadingIssues, mutateList } = useIssues(getActiveCycleIssues, [cycleId], {
+    execute: !!cycleId && cycleId.trim().length > 0,
+  });
 
   return (
     <List
-      {...(teamsWithCycles && teamsWithCycles.length > 1
-        ? {
-            searchBarAccessory: (
-              <List.Dropdown tooltip="Change Team" onChange={setSelectedTeam} storeValue>
-                {teamsWithCycles?.map((team) => (
-                  <List.Dropdown.Item key={team.id} value={team.id} title={team.name} icon={getTeamIcon(team)} />
-                ))}
-              </List.Dropdown>
-            ),
-          }
-        : {})}
-      isLoading={isLoadingIssues || isLoadingTeams || isLoadingPriorities || isLoadingMe || isLoadingUsers}
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Change Team"
+          onChange={setSelectedTeam}
+          storeValue
+          {...(supportsTeamTypeahead && {
+            throttle: true,
+            onSearchTextChange: setTeamQuery,
+            isLoading: isLoadingTeams,
+          })}
+        >
+          {(!teams || teams.length === 0) && (
+            <List.Dropdown.Item title="No team" value="-" key="-" icon={Icon.TwoPeople} />
+          )}
+          {teams?.map((team) => (
+            <List.Dropdown.Item key={team.id} value={team.id} title={team.name} icon={getTeamIcon(team, org)} />
+          ))}
+        </List.Dropdown>
+      }
+      isLoading={isLoadingIssues || isLoadingTeams || isLoadingPriorities || isLoadingMe}
       searchBarPlaceholder="Filter by ID, title, status, assignee or priority"
       filtering={{ keepSectionOrder: true }}
     >
       <List.EmptyView
-        title="No issues"
-        description="There are no issues in the active cycle."
-        actions={
-          <ActionPanel>
-            <Action.Push
-              title="Create Issue"
-              target={
-                <CreateIssueForm
-                  cycleId={cycleId}
-                  teamId={selectedTeam}
-                  priorities={priorities}
-                  users={users}
-                  me={me}
+        title={cycleId ? "No issues" : "No active cycles"}
+        description={cycleId ? "There are no issues in the active cycle." : "This team does not have active cycles."}
+        {...{
+          ...((cycleId && {
+            actions: (
+              <ActionPanel>
+                <Action.Push
+                  title="Create Issue"
+                  target={<CreateIssueForm cycleId={cycleId} teamId={selectedTeam} priorities={priorities} me={me} />}
                 />
-              }
-            />
-          </ActionPanel>
-        }
+              </ActionPanel>
+            ),
+          }) ||
+            {}),
+        }}
       />
-      <StateIssueList issues={issues} mutateList={mutateList} priorities={priorities} users={users} me={me} />
+      <StateIssueList issues={issues} mutateList={mutateList} priorities={priorities} me={me} />
     </List>
   );
 }

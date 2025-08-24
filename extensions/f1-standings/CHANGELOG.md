@@ -1,5 +1,35 @@
 # F1 Standings Changelog
 
+## [🏃‍♂️‍➡️ Added Sprint Qualifying Times] - 2025-07-05
+
+- Added Sprint Qualifying Times
+- Choose Time Format in Race Schedule Command (16:00 or 4:00 PM)
+
+## [🐞 Fixed default values for AI tools] - 2025-05-02
+
+- Fixed default values for AI tools
+
+## [🧠 Added AI Extensions] - 2025-04-28
+
+- Added AI extensions to Formula 1
+
+## [🌐 Switched to new API] - 2025-01-28
+
+- Due to deprecation of the Ergast API now using the replacement: https://api.jolpi.ca/ergast/f1/
+
+## [📆 Add change date format option] - 2024-05-19
+
+- Add the option to change the date format from `MM:DD:YYYY` to `DD:MM:YYYY`.
+- Move upcoming races to the top and past races to the bottom of the table.
+
+## [🕦 Show Weekday with date and time] - 2024-03-05
+
+- Show weekday along with date and time as there are many races which does not start on usual weekend schedule
+
+## [🕦 Show Fastest Lap] - 2024-02-26
+
+- Fixed an error when displaying DriverStats for not started seasons
+
 ## [🕦 Show Fastest Lap] - 2023-03-20
 
 - If available the fastest lap is now shown in race results

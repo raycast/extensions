@@ -1,12 +1,333 @@
 # Changelog
 
+## 1.98.0 - 2025-05-08
+
+### ✨ New
+
+- New `Action.InstallMCPServer` to push a MCP installation form
+
+### 💎 Improvements
+
+- **Shortcuts**: It’s now possible to provide platform-specific shortcuts.
+
+### 🐞 Fixes
+
+- Fixed an issue that caused extensions containing Swift code to not compile.
+
+## 1.94.0 - 2025-03-19
+
+### ✨ New
+
+- The extensions now run on Nodejs 22 and react 19. Among other benefits, this makes `fetch` globally available. There shouldn’t be any breaking change - but if you find some, please let us know!
+  Additionally, new extensions will be bootstrapped with ESLint 9
+- **Tools**: Tools can now specify some preferences, the same way Commands can
+
+### 💎 Improvements
+
+- **CLI**: When a tool or a command (when running in the background) times out, an error message will be printed in the terminal
+- **CLI**: When publishing an extension, the PR to the extensions repository will be created as draft so you can fill the description up before submitting it
+
+## 1.93.0 - 2025-02-26
+
+### ✨ New
+
+- **Tools**: We are introducing a new type of entry points for extensions: Tools. They turn a regular extension into an AI Extension. As opposed to a command, they don’t show up in the root search and the user can’t directly interact with them. Instead, they are functionalities that the AI can use to interact with an extension.
+
+## 1.91.0 - 2025-02-05
+
+### ✨ New
+
+- **AI**: The models added in [Raycast 1.90.0](https://www.raycast.com/changelog/1-90-0) are now also part of the API
+  - DeepSeek R1² reasoning model (powered by Together AI) and its distilled version¹ (powered by Groq)
+  - OpenAI o1-mini² and o1-preview² reasoning models
+  - OpenAI o3-mini¹
+  - Google Gemini 1.5 Flash¹ and Gemini 1.5 Pro², Gemini 2.0 Flash¹ and Gemini 2.0 Flash Thinking¹ models
+  - xAI Grok-2² model
+  - Perplexity Sonar¹, Sonar Pro² and Sonar Reasoning¹ models
+
+¹ available with Raycast Pro
+² available with Raycast Pro + Advanced AI
+
+### 🐞 Fixes
+
+- **Window Management**: Added missing types for `getActiveWindow`.
+
+## 1.89.0 - 2025-01-15
+
+### 💎 Improvements
+
+- **Cache**: Clearing the cache will now delete all the files in the cache folder instead of the entire folder.
+
+## 1.88.0 - 2024-12-16
+
+### 🐞 Fixes
+
+- **Markdown**: Fixed a crash when trying to print invalid surrogate code points
+- **Types**: Fixed an issue when generating the TypeScript definition for the preferences when one of their descriptions contained `*/`
+
+## 1.87.0 - 2024-12-04
+
+### ✨ New
+
+- **Docs**: You can now find a few txt files containing all the docs that you can feed to LLMs:
+  - [https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-full.txt](https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-full.txt) → All the docs
+  - [https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-api.txt](https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-api.txt) → The API docs
+  - [https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-utils.txt](https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-utils.txt) → The utils docs
+
+### 🐞 Fixes
+
+- **CLI**: Fix a couple of issues when trying to publish an extension or pull contributions
+
+## 1.86.0 - 2024-11-20
+
+### 💎 Improvements
+
+- **CLI**: The CLI that comes with `@raycast/api` does not use a platform/architecture-specific binary anymore. This should fix some issues that people encountered when trying to install the API.
+
+## 1.84.0 - 2024-10-09
+
+### 💎 Improvements
+
+- When running a no-view command with arguments, only clear the argument inputs instead of clearing the entire search bar (which brings the behaviour in line with other no-view commands)
+
+### 🐞 Fixes
+
+- Fixed a regression where `selectedItemId` wouldn’t be respected
+- Fixed a typo in the extension template’s build script
+
+## 1.81.0 - 2024-08-13
+
+### ✨ New
+
+- **Detail:** You can now render LaTeX in the Detail views. We support the following delimiters:
+  - Inline math: `\(...\)` and `\begin{math}...\end{math}`
+  - Display math: `\[...\]`, `$$...$$` and `\begin{equation}...\end{equation}`
+
+### 💎 Improvements
+
+- You can now pick a different command template for each command that you add in the `Create Extension` command’s form.
+- Added a new `Add Command` action for local extensions in the `Manage Extensions` command.
+
+## 1.80.0 - 2024-07-31
+
+### ✨ New
+
+- **AI:** OpenAI GPT-4o Mini can now be used in the API.
+- **Quicklinks:** `CreateQuickLink` now accepts an `icon` prop that allows you to customize the icon of your Quicklink.
+
+### 💎 Improvements
+
+- **Menu Bar Commands** now show a confirmation toast when activated or refreshed.
+
+## 1.79.0 - 2024-07-17
+
+### ✨ New
+
+- **Navigation**: Added a second argument to `useNavigation().push` to specify a callback called when the pushed view will be popped. You can use it to update the current view when it will become active again. There’s also a new `onPop` prop on `Action.Push` to do the same thing.
+
+### 💎 Improvements
+
+- When creating or forking an extension, an alert will be shown if you specify an existing folder (and thus avoid overwriting files without warning)
+
+## 1.78.0 - 2024-07-03
+
+### ✨ New
+
+- In addition to the new Custom Window Management commands, we are introducing a `WindowManagement` API to give you total control to move your windows depending on any kind of logic you can imagine.
+- You can now access the `ownerOrAuthorName` in the `environment`, useful for re-usable libraries.
+
+### 🐞 Fixes
+
+- **Pagination**: Fixed the TypeScript definition of the `onLoadMore` callback.
+
+## 1.77.0 - 2024-06-19
+
+### ✨ New
+
+- Updated React version to 18.3.1 to prepare for the next major version of React. This shouldn't impact any extensions but let us know if you find any unexpected behaviour.
+
+### 🐞 Fixes
+
+- **Menu Bar Extra**: fixed an issue where `Submenu` icons changed appearance based on Raycast's appearance, instead of the system's.
+
+## 1.76.0 - 2024-06-05
+
+### 💎 Improvements
+
+- Some companies requires all package.json’s names to be name-spaced (eg. `@foo/bar`). However, Raycast only understands names that _aren’t_ name-spaced. This prevented some people from creating internal extensions. In order to workaround this issue, you can now use the `@workaround` namespace in extension names (eg. `@workaround/bar`).
+
+### 🐞 Fixes
+
+- **Clipboard**: Fixed an issue where 2 items were added to the pasteboard when copying a file (one with the file name, and one with the file url). It now correctly adds 1 item with 2 representations.
+
+## 1.74.0 - 2024-05-15
+
+### ✨ New
+
+- **AI:** The models available in the API now matches the ones available in the app (eg. GPt-4o, Llama-3, etc.). As part of this, the models are now part of an enum `AI.Model` which will make it easier to add and deprecate them as time goes on.
+- **Utils:** we’ve added a new React hook called `useLocalStorage`. This hook simplifies managing a value in `LocalStorage`. Take a look at the [developer docs](https://developers.raycast.com/utilities/react-hooks/uselocalstorage) to learn more.
+
+### 💎 Improvements
+
+- **DX**: Improved the precision of warning messages when trying to add children to a react component that can’t accept them.
+
+## 1.72.0 - 2024-04-24
+
+### ✨ New
+
+- **Browser Extension**: You can now access the context of the focused browser via the Raycast Browser Extension. You can get the list of open tabs as well as the content of a tab.
+
+### 🐞 Fixes
+
+- **Grid**: Fixed a bug that caused the selected Grid item to be brought into focus when paginating.
+
+## 1.71.0 - 2024-04-10
+
+### ✨ New
+
+- **Developer Hub:** you can now programmatically send error reports using the new `captureException` function.
+- **Utils**: we’ve added a new React hook, `useStreamJSON`. The new hook simplifies the process of streaming through large JSON data sources, which normally would not fit in the extension’s memory. Take a look at the [developer docs](https://developers.raycast.com/utilities/react-hooks/usestreamjson) to learn more.
+- **AI**: All the new models are also available in the API.
+
+### 💎 Improvements
+
+- `getApplications`, `getDefaultApplication`, and `Action.OpenWith` now support remote URLs and will return the installed Applications that can open remote URLs (usually browsers)
+
+### 🐞 Fixes
+
+- **Pagination**: Fixed a bug that could cause pagination to not work when `filtering` was set to true.
+- **CLI**: Fixed the cursor being kept hidden when interrupting a command
+
+## 1.70.0 - 2024-03-20
+
+### 💎 Improvements
+
+- **Grid & List:** The placeholders shown while waiting for the next page to load are now animated
+- **Application info:** Application object now returns the localized name if the application is running
+
+### 🐞 Fixes
+
+- **Forms:** Fixed an issue which made it impossible to select a value of a controlled Dropdown after changing its value programmatically
+- **Grid:** Fixed an issue where pagination would not work when scrolling to the bottom while `isLoading` is initially false
+- **List:** Fixed an issue where pagination would not work if there was an empty section at the end
+- Fixed a rare case where, when an extension throws an error, a different error saying “Could not communicate with command worker” would be thrown instead
+
+## 1.69.0 - 2024-03-07
+
+### ✨ New
+
+- `List` and `Grid` now have native pagination support! 🎉 If you want to update your extension to support pagination, head over to the [docs](https://developers.raycast.com/api-reference/user-interface/list#pagination) for instructions on how to get your extension to use pagination.
+- Markdown: Added support for specifying a tint color in the url of a markdown image by adding a `raycast-tint-color` query string
+
+### 💎 Improvements
+
+- Lint: The eslint plugin and `ray` CLI has been updated to have the same algorithm to check if a string is in Title Case (using the definition from Apple)
+- `getApplications` (and `Action.OpenWith`) will now show `Terminal` when using a path to a directory
+
+### 🐞 Fixes
+
+- Fixed an issue where, when the user would change the selection in a List or Grid and rapidly trigger an action, the action of the previously selected item would execute instead
+
+## 1.67.0 - 2024-02-07
+
+### 🐞 Fixes
+
+- Fix a crash that could happen when exporting a function that would return another function.
+- **Menu Bar Extra:** Fixed a bug that caused the text in text-only extras to be offset.
+
+## 1.66.0 - 2024-01-24
+
+### 💎 Improvements
+
+- Improved some error messages in the `ray` CLI.
+
+### 🐞 Fixes
+
+- **Form**: Fixed the display of full-day dates in the Date Picker.
+
+## 1.65.0 - 2024-01-10
+
+### ✨ New
+
+- **Developer Tools**: we've introduced a new developer option, `Use file logging instead of OSLog`, to work around an OS issue that causes some users to not see any extension logs in the terminal during development.
+
+### 💎 Improvements
+
+- **Form's Date Picker:** Future dates will be prioritised when parsing the date, f.e. if you type "8am" and itrs already "10am", then the parsed date will be "tomorrow 8am".
+
+### 🐞 Fixes
+
+- Fixed an issue where the `ray` CLI could not communicate with the app.
+- Fixed an issue where an OAuth authorization session triggered by a menu bar command would not be able to complete if a `background` launch was triggered between authorization starting and completing.
+- Fixed an issue on multi-monitor setups, where sometimes MenuBarExtra icons would not appear dimmed on inactive displays.
+
+## 1.64.0 - 2023-12-13
+
+### ✨ New
+
+- **Form**: Introduced a new component `Form.LinkAccessory` to render a link displayed in the right-hand side of the search bar.
+- **Arguments**: Introduced a new Argument type: `dropdown`. You can now [specify a list of options](https://developers.raycast.com/information/manifest#argument-properties) for the user choose from.
+- **Developer Hub**: User preferences are now included in error reports. Password and text preferences will be replaced with `[REDACTED]`, file/directory/appPicker preferences will be scrubbed of PII, and dropdown/checkbox preferences will be sent as-is.
+
+### 💎 Improvements
+
+- **Window Capture**: Added a warning when trying to take a screenshot of Raycast if that screenshot won't match the requirement for the Store's extensions guidelines (eg. if Raycast is too close to an edge or if the screen doesn't have a high enough resolution).
+
+### 🐞 Fixes
+
+- **Types generation**: Fixed the type of a required `appPicker` preference (even if it is `required`, the app might be undefined because it is missing).
+- **Empty View**: Fixed an issue where the Empty View might not be showing in a certain case.
+- **Menu Bar Extra**: \*\*\*\*icons tinted with `Color.PrimaryText` and `Color.SecondaryText` should now change based on the menu bar's appearance.
+- **List Metadata:** `Link`s should be properly aligned again.
+
+## 1.63.0 - 2023-11-29
+
+### 💎 Improvements
+
+- Improved runtime error handling when using a Swift project
+
+### 🐞 Fixes
+
+- **Lists**: Fixed a race condition where the selected item would not be the first one after a list items update
+
+- **MenuBarExtra:** `alternate` are no longer supported on pre-Sonoma versions of macOS, as they would often appear alongside their parent items.
+
+## 1.62.0 - 2023-11-15
+
+### ✨ New
+
+- **Menu Bar:** `MenuBarExtra.Item`s have a new prop, `alternate`. If an `alternate` is defined, it will replace its parent `MenuBarExtra.Item` when the user presses the ⌥ (option) key.
+- The Node runtime has been updated to [Node 20](https://nodejs.org/en/blog/announcements/v20-release-announce/), the [current](https://github.com/nodejs/Release#release-schedule) Long-term Support (LTS) release.
+- **AI**: You can now use the `gpt-4` model with `AI.ask`. If a user does not have access to this model, it will gracefully fall back to an available model. You can check if a user has access using `environment.canAccess('gpt-4')`.
+
+### 💎 Improvements
+
+- **Error Handling:** `Could not communicate with command worker` errors should not be reported anymore.
+
+### 🐞 Fixes
+
+- **Toast:** Fixed an issue that caused toast actions to not work after a toast was updated.
+- **Error Handling:** Fixed an edge case that could cause an out-of-memory error while an uncaught exception was processed, obfuscating the original error.
+- **Performance**: Fixed an issue where some keyboard events would be dropped while an extension was loading.
+- **Markdown**: Fixed a regression where HTML comments would show up in the rendered Markdown.
+
+## 1.61.0 - 2023-11-02
+
+### 💎 Improvements
+
+- **Date Picker**: When specifying a min and/or max date, the suggestion will now always be within those bounds
+
+### 🐞 Fixes
+
+- Fixed a bug that previously could cause a `no-view` command to display an error icon in the root search, with no means of removing the error.
+
 ## 1.60.0 - 2023-10-18
 
 ## Introducing the Extension Issues Dashboard
 
-![](.gitbook/assets/extension-issues.png)
+![](.gitbook/assets/extension-issues.webp)
 
-The new Extension Issues Dashboard is designed to help you quickly troubleshoot and resolve issues in any of your extensions by providing real-time visibility into errors encountered by users. You can access it at https://www.raycast.com/extension-issues, or by using the new `View Issues` action.
+The new Extension Issues Dashboard is designed to help you quickly troubleshoot and resolve issues in any of your extensions by providing real-time visibility into errors encountered by users. You can access it at <https://www.raycast.com/extension-issues>, or by using the new `View Issues` action.
 
 ### ✨ New
 
@@ -44,15 +365,15 @@ The new Extension Issues Dashboard is designed to help you quickly troubleshoot 
 
 ### 💎 Improvements
 
-- The “Fork Extension” action is now also available in the Store for installed extensions.
+- The "Fork Extension" action is now also available in the Store for installed extensions.
 - All the APIs that accepts a file path will now resolve `~` if necessary.
 
 ### 🐞 Fixes
 
 - Fix an issue where some Toasts would not disappear after the command was terminated.
-- Fix an issue where List Item’s accessories with an icon could have their text cut off.
+- Fix an issue where List Item's accessories with an icon could have their text cut off.
 - Fix `getFrontmostApplication` failing for some applications.
-- The “Fork Extension” will now be more robust dealing with unexpected `package.json` formats.
+- The "Fork Extension" will now be more robust dealing with unexpected `package.json` formats.
 - Fixed an issue where newly created Extensions would not use the correct username after it had been updated.
 - Fix an issue where it was possible to set a multiline `searchText`
 
@@ -92,13 +413,13 @@ The new Extension Issues Dashboard is designed to help you quickly troubleshoot 
 
 ### 💎 Improvements
 
-- **Fallback Commands**: Local commands will now have an indicator so that it’s possible to differentiate them from the commands installed from the Store
+- **Fallback Commands**: Local commands will now have an indicator so that it's possible to differentiate them from the commands installed from the Store
 - The NodeJS process used for Raycast extensions will now be named `Raycast Helper (Extensions)`
 - Active menu bar commands will now be displayed in `Extension Diagnostics`.
 
 ### 🐞 Fixes
 
-- Fix an issue where Metadata’s Tag items would sometimes not be updated
+- Fix an issue where Metadata's Tag items would sometimes not be updated
 - Fix a bug where renamed commands appear in the root search with both the original and the updated name after an extension update.
 
 ## 1.54.0 - 2023-06-21
@@ -113,7 +434,7 @@ The new Extension Issues Dashboard is designed to help you quickly troubleshoot 
 ### 🐞 Fixes
 
 - Fix a performance issue on the first render of Lists and Grids
-- Fix an issue where required arguments wouldn’t be required when launching a command right after installing it
+- Fix an issue where required arguments wouldn't be required when launching a command right after installing it
 - Fix a regression where the deprecated `render` method would not work anymore
 - Fix an edge case where some Form items would not be updated if some items would be added at the same time
 
@@ -130,7 +451,7 @@ The new Extension Issues Dashboard is designed to help you quickly troubleshoot 
 ### 💎 Improvements
 
 - Updated NodeJS to 18.16.0
-- Improve the “Fork Extension” action to avoid modifying the manifest as much as possible.
+- Improve the "Fork Extension" action to avoid modifying the manifest as much as possible.
 
 ### 🐞 Fixes
 
@@ -173,7 +494,7 @@ The new Extension Issues Dashboard is designed to help you quickly troubleshoot 
 
 - **Forms**: Fixed an issue where drafts would not save the value of a File Picker.
 - **Forms**: Fixed an issue where `onChange` would not be triggered in certain cases for a File Picker.
-- **Lists**: Fixed an issue that caused a List’s section to re-render whenever an action panel’s submenu was updated.
+- **Lists**: Fixed an issue that caused a List's section to re-render whenever an action panel's submenu was updated.
 - **Colors:** Fixed a crash that could sometimes occur when using `adjustContrast` on a dynamic color.
 
 ## 1.50.0 - 2023-04-27
@@ -303,7 +624,7 @@ The new Extension Issues Dashboard is designed to help you quickly troubleshoot 
 
 ### 💎 Improvements
 
-- **Pop To Root Behavior**: `closeMainWindow` accepts a new parameter `popToRootType` that lets you control when Raycast pops back to root: the default is as-is and respects the user's "Pop to Root Search" preference in Raycast. `PopToRootType.Immediate` closes the window _and_ immediately pops back to root, regardless of the user's setting (so you can get rid of an additional `popToRoot()` call). The new mode `PopToRootType.Suspended` temporarily prevents Raycast from automatically popping back to root; this is useful for situations where a command needs to interact with an external system utility and then return the user back to the launching command.
+- **Pop To Root Behavior**: `closeMainWindow` accepts a new parameter `popToRootType` that lets you control when Raycast pops back to root: the default is as-is and respects the user's "Pop to Root Search" preference in Raycast. `PopToRootType.Immediate` closes the window _and_ immediately pops back to root, regardless of the user's setting (so you can get rid of an additional `popToRoot()` call). The new mode `PopToRootType.Suspended` temporarily prevents Raycast from automatically popping back to root; this is useful for situations where a command needs to interact with an external system 00ity and then return the user back to the launching command.
 - **Clipboard:** We added new options to copy and paste HTML content, which is useful for sharing formatted text, e.g. a link to a Notion page in Slack.
 - **Markdown**: Markdown in a `Detail` component now supports convenience image references for icons and asset folder files such as:
   `![built-in icon](${Icon.AddPerson})` or `![local-assets-image](example.png)` (absolute URLs and user folder paths via `~` are also supported)
@@ -362,7 +683,7 @@ The new Extension Issues Dashboard is designed to help you quickly troubleshoot 
 
 - **Grid**: the `Grid` component accepts three new props that should give extension authors more flexibility: `columns`, `fit` and `aspectRatio`.
 
-![](.gitbook/assets/grid-styled-sections.png)
+![](.gitbook/assets/grid-styled-sections.webp)
 
 - **Grid Sections** don't all have to look the same anymore! The grid `Section` component now _also_ accepts the `columns`, `fit` and `aspectRatio` props. When specified, they will override the value of the parent `Grid` component's prop.
 - **List**: The list supports a new property for configuring how sections are ordered. Setting `filtering={{ keepSectionOrder: true }}` ensures that the section order is not changed based on items' ranking values; this can be useful for use cases where a small number of fix sections should always appear in the same order when the user filters the list. We are deprecating the `enableFiltering` property.
@@ -529,7 +850,7 @@ The new Extension Issues Dashboard is designed to help you quickly troubleshoot 
 
 The `<Grid />` component's made its way to our API. It's perfect to layout media-heavy information, such as icons, images or colors. The component allows you to layout differently sized items. We designed [its API](https://developers.raycast.com/api-reference/user-interface/list) close to the `<List />` component for smooth adoption.
 
-![](.gitbook/assets/grid.png)
+![](.gitbook/assets/grid.webp)
 
 ### 🐞 Fixes
 
@@ -854,6 +1175,6 @@ The `<Grid />` component's made its way to our API. It's perfect to layout media
 
 It's happening! We're opening up our API and store for public beta.
 
-![](.gitbook/assets/changelog-hello-world.png)
+![](.gitbook/assets/changelog-hello-world.webp)
 
 This is a big milestone for our community. We couldn't have pulled it off without our alpha testers. A massive shoutout to everybody who helped us shape the API. Now let's start building. We can't wait to see what you will come up with.

@@ -1,57 +1,99 @@
-import { ActionPanel, Color, List } from "@raycast/api";
-import { useState } from "react";
-import { githubGists } from "./util/gist-utils";
-import { getGistDetailContent, preference } from "./util/utils";
-import { getGistContent, showGists } from "./hooks/hooks";
+import { ActionPanel, Application, Color, Icon, List } from "@raycast/api";
+import { useMemo, useState } from "react";
+import { formatGistContentDetail } from "./util/utils";
 import { GistAction } from "./components/gist-action";
-import { GistEmptyView } from "./components/gist-empty-view";
-import { ActionOpenPreferences } from "./components/action-open-preferences";
+import { ActionSettings } from "./components/action-settings";
+import { perPage, rememberTag, showDetail, defaultGistTag } from "./types/preferences";
+import { useFrontmostApp } from "./hooks/useFrontmostApp";
+import { withGitHubClient } from "./components/with-github-client";
+import { useCachedPromise } from "@raycast/utils";
+import { getGitHubClient } from "./api/oauth";
+import { GithubGistTag, githubGistTags } from "./util/gist-utils";
 
-export default function main() {
-  const [page, setPage] = useState<number>(1);
-  const [route, setRoute] = useState<string>("");
-  const [gistParams, setGistParams] = useState<{ route: string; page: number }>({ route: "", page: 1 });
-  const [rawURL, setRawURL] = useState<string>("");
-  const [refresh, setRefresh] = useState<number>(0);
+function SearchGists() {
+  const client = getGitHubClient();
+  const [tag, setTag] = useState<GithubGistTag>(GithubGistTag.MY_GISTS);
+  const [gistId, setGistId] = useState<string>("");
 
-  const { gists, loading } = showGists(gistParams, refresh);
-  const { gistFileContent } = getGistContent(rawURL);
+  const { data: frontmostAppData } = useFrontmostApp();
+
+  const {
+    data: gistsData,
+    isLoading: gistsLoading,
+    mutate: gistMutate,
+    pagination,
+  } = useCachedPromise(
+    (t: string) => async (options) => {
+      const data = await client.requestGist(t, options.page + 1, parseInt(perPage));
+      const hasMore = data[data.length - 1] != options.lastItem && options.page < 50;
+      return { data, hasMore };
+    },
+    [tag],
+    { keepPreviousData: true, failureToastOptions: { title: "Failed to load gists" } },
+  );
+
+  const { data: gistContentData, isLoading: gistContentLoading } = useCachedPromise(
+    (rawUrl: string) => {
+      return client.octokit.request(`${rawUrl}`).then((response) => {
+        return response.data;
+      }) as Promise<string>;
+    },
+    [gistId],
+    { failureToastOptions: { title: "Failed to load gist content" } },
+  );
+
+  const frontmostApp = useMemo(() => {
+    return frontmostAppData as Application;
+  }, [frontmostAppData]);
+
+  const gists = useMemo(() => {
+    if (!gistsData) {
+      return [];
+    }
+    return gistsData;
+  }, [gistsData]);
+
+  const gistContent = useMemo(() => {
+    if (!gistContentData) {
+      return "";
+    }
+    return gistContentData.toString();
+  }, [gistContentData]);
 
   return (
     <List
-      isShowingDetail={preference.detail}
-      isLoading={loading}
+      isShowingDetail={showDetail}
+      isLoading={gistsLoading}
+      pagination={pagination}
       searchBarPlaceholder={"Search gists"}
       onSelectionChange={(id) => {
-        if (typeof id !== "undefined" && id != null) {
-          const { url, gistId } = JSON.parse(id);
-          setRawURL(url + "");
-          if (gistId === gists[gists.length - 1]?.gist_id) {
-            setGistParams({ route: route, page: page + 1 });
-            setPage(page + 1);
-          }
+        if (id) {
+          const { url } = JSON.parse(id);
+          setGistId(url);
         }
       }}
       searchBarAccessory={
         <List.Dropdown
           tooltip="GitHub Gist"
-          storeValue={preference.rememberTag}
+          storeValue={rememberTag}
           onChange={(newValue) => {
-            setGistParams({ route: newValue, page: 1 });
-            setRoute(newValue);
+            setTag(newValue as GithubGistTag);
           }}
         >
-          {githubGists.map((value) => {
-            return <List.Dropdown.Item key={value} title={value} value={value} />;
+          {[
+            ...githubGistTags.filter((tag) => tag.value === defaultGistTag),
+            ...githubGistTags.filter((tag) => tag.value !== defaultGistTag),
+          ].map((tag) => {
+            return <List.Dropdown.Item key={tag.title} title={tag.title} value={tag.value} icon={tag.icon} />;
           })}
         </List.Dropdown>
       }
     >
-      <GistEmptyView title={""} description={"No gist found"} />
-      {gists.map((gist, gistIndex, gistArray) => {
+      <List.EmptyView title={"No Gists"} icon={Icon.CodeBlock} />
+      {gists?.map((gist, gistIndex) => {
         return (
           <List.Section key={"gist" + gistIndex + gist.gist_id} title={gist.description}>
-            {gistArray[gistIndex].file.map((gistFile, gistFileIndex, gistFileArray) => {
+            {gist.file.map((gistFile, gistFileIndex, gistFileArray) => {
               return (
                 <List.Item
                   id={JSON.stringify({
@@ -61,26 +103,35 @@ export default function main() {
                     gistId: gist.gist_id,
                   })}
                   key={"gistFile" + gistIndex + gistFileIndex}
-                  icon={{ source: "gist-icon.svg", tintColor: Color.SecondaryText }}
-                  title={gistFile.filename}
-                  accessories={[{ text: gistFile.language == "null" ? "Binary" : gistFile.language }]}
+                  icon={{ source: Icon.CodeBlock, tintColor: Color.SecondaryText }}
+                  title={{
+                    value: gistFile?.filename,
+                    tooltip: `${gistFile?.filename}
+Size: ${gistFile.size}`,
+                  }}
+                  accessories={[
+                    {
+                      text: gistFile.language == "null" ? "Binary" : gistFile.language,
+                      tooltip: gistFile.type,
+                    },
+                  ]}
                   detail={
                     <List.Item.Detail
-                      isLoading={gistFileContent.length === 0}
-                      markdown={getGistDetailContent(gistFile, gistFileContent)}
+                      isLoading={gistContentLoading}
+                      markdown={formatGistContentDetail(gistFile, gistContent)}
                     />
                   }
                   actions={
                     <ActionPanel>
                       <GistAction
-                        gistArray={gistArray}
-                        gistIndex={gistIndex}
+                        gist={gist}
                         gistFileName={gistFile.filename}
-                        gistFileContent={gistFileContent}
-                        route={route}
-                        setRefresh={setRefresh}
+                        gistFileContent={gistContent}
+                        tag={tag}
+                        gistMutate={gistMutate}
+                        frontmostApp={frontmostApp}
                       />
-                      <ActionOpenPreferences command={true} />
+                      <ActionSettings command={true} />
                     </ActionPanel>
                   }
                 />
@@ -92,3 +143,5 @@ export default function main() {
     </List>
   );
 }
+
+export default withGitHubClient(SearchGists);

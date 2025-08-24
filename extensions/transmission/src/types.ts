@@ -32,6 +32,7 @@ export type Torrent = {
   rateDownload: number;
   rateUpload: number;
   files: { name: string; bytesCompleted: number; length: number }[];
+  fileStats: { bytesCompleted: number; wanted: boolean; priority: number }[];
   pieces: string;
   pieceCount: number;
   pieceSize: number;
@@ -48,6 +49,8 @@ export type Torrent = {
   uploadLimit: number;
   seedRatioMode: SeedRatioMode;
   seedRatioLimit: number;
+  wanted: number[];
+  priorities: number[];
   trackerStats: {
     tier: number;
     host: string;

@@ -284,7 +284,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.51.1",
-    "axios": "^1.4.0",
+    "axios": "^1.8.4",
     "fuse.js": "^6.6.2"
   },
   "devDependencies": {

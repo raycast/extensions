@@ -1,9 +1,10 @@
-import { Project, User } from "@linear/sdk";
-import { getLinearClient } from "../helpers/withLinearClient";
+import { Project, ProjectStatus, ProjectUpdate, User } from "@linear/sdk";
+
+import { getLinearClient } from "../api/linearClient";
 
 export type ProjectResult = Pick<
   Project,
-  "id" | "name" | "description" | "icon" | "color" | "state" | "progress" | "url" | "targetDate"
+  "id" | "name" | "description" | "icon" | "color" | "progress" | "url" | "targetDate"
 > & {
   // Linear doesn't seem to expose the startDate property even though we can retrieve it
   startDate?: string;
@@ -13,6 +14,39 @@ export type ProjectResult = Pick<
   members: { nodes: { id: string }[] };
 } & {
   teams: { nodes: { id: string; key: string }[] };
+} & {
+  status: Pick<ProjectStatus, "id" | "name" | "type" | "color">;
+};
+
+type PageInfo = {
+  endCursor: string;
+  hasNextPage: boolean;
+};
+
+type PaginatedResponse<Node> = {
+  nodes: Node[];
+  pageInfo: PageInfo;
+};
+
+type ProjectsResponse = {
+  projects: PaginatedResponse<ProjectResult>;
+};
+
+type TeamProjectsResponse = {
+  team: ProjectsResponse;
+};
+
+type GetProjectsOptions = {
+  teamId?: string;
+  searchText?: string;
+  first?: number | null;
+  after?: string | null;
+};
+
+type GetProjectsResult = {
+  data: ProjectResult[];
+  hasMore: boolean;
+  cursor: string | null;
 };
 
 const projectFragment = `
@@ -21,9 +55,14 @@ const projectFragment = `
   description
   icon
   color
-  state
   progress
   url
+  status {
+    id
+    name
+    type
+    color
+  }
   lead {
     id
     displayName
@@ -45,72 +84,103 @@ const projectFragment = `
   }
 `;
 
-export async function getProjects(teamId?: string) {
+export async function getProjects({
+  teamId,
+  searchText = "",
+  after = null,
+  first = null,
+}: GetProjectsOptions): Promise<GetProjectsResult> {
   const { graphQLClient } = getLinearClient();
+
+  const projectsQueryFragment = `
+    projects(first: $first, after: $after, filter: { name: { containsIgnoreCase: $searchText } }) {
+      nodes {
+        ${projectFragment}
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  `;
 
   if (!teamId) {
-    const { data } = await graphQLClient.rawRequest<{ projects: { nodes: ProjectResult[] } }, Record<string, unknown>>(
+    const { data } = await graphQLClient.rawRequest<ProjectsResponse, Omit<GetProjectsOptions, "teamId">>(
       `
-        query {
-          projects {
-            nodes {
-              ${projectFragment}
-            }
-          }
-        }
-      `
-    );
-
-    return data?.projects.nodes;
-  } else {
-    const { data } = await graphQLClient.rawRequest<
-      { team: { projects: { nodes: ProjectResult[] } } },
-      Record<string, unknown>
-    >(
-      `
-        query($teamId: String!) {
-          team(id: $teamId) {
-            projects {
-              nodes {
-                ${projectFragment}
-              }
-            }
-          }
+        query($first: Int, $after: String, $searchText: String) {
+          ${projectsQueryFragment}
         }
       `,
-      { teamId }
+      { first, after, searchText },
     );
 
-    return data?.team.projects.nodes;
+    const projects = data?.projects;
+
+    return {
+      data: projects?.nodes ?? [],
+      hasMore: !!projects?.pageInfo.hasNextPage,
+      cursor: projects?.pageInfo.endCursor || null,
+    };
   }
+
+  const { data } = await graphQLClient.rawRequest<TeamProjectsResponse, GetProjectsOptions>(
+    `
+      query($teamId: String!, $first: Int, $after: String, $searchText: String) {
+        team(id: $teamId) {
+          ${projectsQueryFragment}
+        }
+      }
+    `,
+    { teamId, first, after, searchText },
+  );
+
+  const projects = data?.team?.projects;
+
+  return {
+    data: projects?.nodes ?? [],
+    hasMore: !!projects?.pageInfo.hasNextPage,
+    cursor: projects?.pageInfo.endCursor || null,
+  };
 }
 
-type Roadmap = {
-  id: string;
-  name: string;
-  projects: { nodes: { id: string }[] };
+export type ProjectUpdateResult = Pick<ProjectUpdate, "id" | "body" | "url" | "health" | "createdAt"> & {
+  user: Pick<User, "id" | "displayName" | "avatarUrl" | "email">;
 };
 
-export async function getRoadmaps() {
+const projectUpdateFragment = `
+  id
+  body
+  url
+  health
+  createdAt
+  user {
+    id
+    displayName
+    avatarUrl
+    email
+  }
+`;
+
+export async function getProjectUpdates(projectId: string) {
   const { graphQLClient } = getLinearClient();
 
-  const { data } = await graphQLClient.rawRequest<{ roadmaps: { nodes: Roadmap[] } }, Record<string, unknown>>(
+  const { data } = await graphQLClient.rawRequest<
+    { project: { projectUpdates: { nodes: ProjectUpdateResult[] } } },
+    { projectId: string }
+  >(
     `
-      query {
-        roadmaps {
-          nodes {
-            id
-            name
-            projects {
-              nodes {
-                id
-              }
+      query($projectId: String!) {
+        project(id: $projectId) {
+          projectUpdates {
+            nodes {
+              ${projectUpdateFragment}
             }
           }
         }
       }
-    `
+    `,
+    { projectId },
   );
 
-  return data?.roadmaps.nodes;
+  return data?.project.projectUpdates.nodes;
 }

@@ -2,7 +2,7 @@
 // All important constants for all commands should be defined here.
 //--------------------------------------------------------------------------------
 
-import { Color, Image } from "@raycast/api";
+import { Image } from "@raycast/api";
 
 export const MAX_RENDERED_NOTES = 1000;
 export const BYTES_PER_KILOBYTE = 1024;
@@ -21,6 +21,7 @@ export enum PrimaryAction {
   QuickLook = "quicklook",
   OpenInObsidian = "obsidian",
   OpenInObsidianNewPane = "newpane",
+  OpenInDefaultApp = "defaultapp",
 }
 
 export const APPLICATION_UUID = "49acc9ee-69a0-4419-9aad-5c2689ff0119";

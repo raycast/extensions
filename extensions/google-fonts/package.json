@@ -5,6 +5,9 @@
   "description": "Search and use fonts from Google Fonts",
   "icon": "icon.png",
   "author": "GastroGeek",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "categories": [
     "Design Tools",
@@ -16,6 +19,10 @@
     "fonts",
     "google",
     "web"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "commands": [
     {

@@ -165,3 +165,5 @@ export const scriptFileTypes: FileType[] = [
     inputContent: true,
   },
 ];
+
+export const allFileTypes = documentFileTypes.concat(codeFileTypes).concat(scriptFileTypes);

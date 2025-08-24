@@ -1,0 +1,80 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "brand-dev",
+  "title": "Brand.dev",
+  "description": "Get a company's brand logos, colors, slogan, socials, and more.",
+  "icon": "brand-dev-purple.png",
+  "author": "xmok",
+  "categories": [
+    "Data",
+    "Design Tools",
+    "Web"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "api_key",
+      "title": "API Key",
+      "description": "API Key from Brand.dev Dashboard",
+      "placeholder": "brand__3ZY...jJ",
+      "required": true,
+      "type": "password"
+    }
+  ],
+  "commands": [
+    {
+      "name": "retrieve-brands",
+      "title": "Retrieve Brands",
+      "description": "Get a company's brand logos, colors, slogan, socials, and more",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "brand.dev",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "action",
+          "title": "Secondary Action",
+          "description": "Set your Secondary Action",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Delete",
+              "value": "del"
+            },
+            {
+              "title": "New",
+              "value": "new"
+            }
+          ],
+          "default": "del",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.4",
+    "@raycast/utils": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

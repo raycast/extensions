@@ -1,5 +1,29 @@
 # YouVersion Bible Suggest Changelog
 
+## [v3.6.0] - 2025-07-31
+
+- Adopted more modern engine for fetching Bible data
+- Removed obsolete code and packages
+
+## [v3.5.0] - 2024-06-17
+
+- Added language support for Filipino (tgl)
+  - The default version is Magandang Balita Biblia 2005 (MBB05)
+- Tweaked the casing of the "Look up Bible Reference" command per Raycast's conventions
+
+## [v3.4.1] - 2024-02-20
+
+- Fixed a bug where verses containing line breaks (e.g. Psalm 23:1 NASB1995)
+  could not be copied to the clipboard
+
+## [v3.4.0] - 2024-01-09
+
+- Added language support for Ukrainian (ukr)
+  - To use, look for Українська in the Language dropdown for the _Set Bible
+    Preferences_ command
+  - CUV has been set as the default version/translation for this language, but
+    if you want to change it, feel free
+
 ## [v3.3.0] - 2023-06-17
 
 - Fixed a bug where "Search the Bible by Phrase" results were always in English

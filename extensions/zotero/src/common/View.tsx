@@ -47,6 +47,7 @@ const pasteRefShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: 
 const pasteBibShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "6" };
 
 const copyURLShortcut: Keyboard.Shortcut = { modifiers: ["cmd"], key: "." };
+const copyPDFURLShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "p" };
 const copyTitleShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "." };
 const copyAuthorsShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "b" };
 const copyZoteroUrlShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "c" };
@@ -195,16 +196,20 @@ export const View = ({
   const [urls, onOpen] = useVisitedUrls();
   const [collection, setCollection] = useState<string>("All");
   const preferences: Preferences = getPreferenceValues();
+  const [searchText, setSearchText] = useState<string>("");
   return (
     <List
       isShowingDetail={queryResults[0].length > 0}
       isLoading={isLoading}
-      onSearchTextChange={onSearchTextChange}
+      onSearchTextChange={(text) => {
+        setSearchText(text);
+        onSearchTextChange?.(text);
+      }}
       throttle={throttle}
       searchBarPlaceholder="Search Zotero..."
       searchBarAccessory={<CollectionDropdown onSelection={setCollection} collections={collections} />}
     >
-      {queryResults[0].length < 1 ? (
+      {searchText.length === 0 ? (
         <List.EmptyView icon={{ source: "no-view.png" }} title="Type something to search Zotero Database!" />
       ) : (
         sectionNames.map((sectionName, sectionIndex) => (
@@ -256,6 +261,11 @@ export const View = ({
                       {preferences.use_bibtex && <BibPasteAction selected={item.citekey} />}
 
                       <ActionPanel.Section>
+                        {item.attachment && item.attachment.key && item.attachment.key !== `` && (
+                          <PDFURLCopyToClipboardAction
+                            itemURL={`zotero://open-pdf/library/items/${item.attachment.key}`}
+                          />
+                        )}
                         {getURL(item) !== "" && <URLCopyToClipboardAction itemURL={getURL(item)} />}
                         {getItemTitle(item) !== "" && <TitleCopyToClipboardAction itemTitle={getItemTitle(item)} />}
                         {getItemAuthors(item) !== "" && <AuthorsCopyToClipboardAction authors={getItemAuthors(item)} />}
@@ -281,6 +291,18 @@ function URLCopyToClipboardAction({ itemURL }: { itemURL: string }) {
       title="Copy Original Link"
       shortcut={copyURLShortcut}
       message="Copied original URL to clipboard"
+    />
+  );
+}
+
+function PDFURLCopyToClipboardAction({ itemURL }: { itemURL: string }) {
+  return (
+    <CopyToClipboard
+      content={itemURL}
+      icon={Icon.Clipboard}
+      title="Copy PDF Link"
+      shortcut={copyPDFURLShortcut}
+      message="Copied PDF URL to clipboard"
     />
   );
 }

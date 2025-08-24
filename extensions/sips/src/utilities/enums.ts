@@ -5,7 +5,7 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-06 00:52:09
- * Last modified  : 2023-07-06 15:48:29
+ * Last modified  : 2024-06-26 21:37:46
  */
 
 /**
@@ -14,6 +14,19 @@
 export enum Direction {
   HORIZONTAL = 0,
   VERTICAL = 1,
+}
+
+/**
+ * The source of the input image(s).
+ */
+export enum ImageInputSource {
+  FinderSelection = "Finder",
+  PathFinderSelection = "Path Finder",
+  NeoFinderSelection = "NeoFinder",
+  HoudahSpotSelection = "HoudahSpot",
+  QSpaceSelection = "QSpace Pro",
+  ForkLiftSelection = "ForkLift",
+  Clipboard = "Clipboard",
 }
 
 /**
@@ -26,4 +39,12 @@ export enum ImageResultHandling {
   OpenInPreview = "openInPreview",
   SaveToDownloads = "saveToDownloads",
   SaveToDesktop = "saveToDesktop",
+}
+
+/**
+ * The place to look for the ExifTool binary.
+ */
+export enum ExifToolLocation {
+  ON_PATH = "path",
+  SUPPORT_DIR = "support",
 }

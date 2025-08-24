@@ -3,7 +3,7 @@ import { OAuth } from "@raycast/api";
 import { prefs } from "./preferences";
 import { cacheCurrentUserId } from "./user";
 
-const scope = "offline_access user.read Presence.ReadWrite";
+const scope = "offline_access user.read Presence.ReadWrite Chat.Read Presence.Read.All";
 const oauthClient = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Microsoft",

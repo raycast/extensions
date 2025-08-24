@@ -3,16 +3,15 @@ import {
   ADVANCED_SETTINGS_FILENAME,
   CUSTOM_PLACEHOLDERS_FILENAME,
   PLACEHOLDERS_GUIDE_FILENAME,
-} from "../../utils/constants";
+} from "../../lib/common/constants";
 import path from "path";
 import { defaultAdvancedSettings } from "../../data/default-advanced-settings";
-import { getActionShortcut, isActionEnabled } from "../../utils/action-utils";
+import { getActionShortcut, isActionEnabled } from "../../lib/actions";
 
 /**
  * Action to open the placeholders guide in the default markdown text editor.
- * @returns {JSX.Element} The action component.
  */
-export function OpenPlaceholdersGuideAction(props: { settings: typeof defaultAdvancedSettings }): JSX.Element | null {
+export function OpenPlaceholdersGuideAction(props: { settings: typeof defaultAdvancedSettings }) {
   const { settings } = props;
 
   if (!isActionEnabled("OpenPlaceholdersGuideAction", settings)) {
@@ -34,9 +33,8 @@ export function OpenPlaceholdersGuideAction(props: { settings: typeof defaultAdv
 
 /**
  * Action to open the custom placeholders file in the default JSON text editor.
- * @returns {JSX.Element} The action component.
  */
-export function EditCustomPlaceholdersAction(props: { settings: typeof defaultAdvancedSettings }): JSX.Element | null {
+export function EditCustomPlaceholdersAction(props: { settings: typeof defaultAdvancedSettings }) {
   const { settings } = props;
 
   if (!isActionEnabled("EditCustomPlaceholdersAction", settings)) {
@@ -59,9 +57,8 @@ export function EditCustomPlaceholdersAction(props: { settings: typeof defaultAd
 
 /**
  * Action to open the advanced settings file in the default JSON text editor.
- * @returns {JSX.Element} The action component.
  */
-export function OpenAdvancedSettingsAction(props: { settings: typeof defaultAdvancedSettings }): JSX.Element | null {
+export function OpenAdvancedSettingsAction(props: { settings: typeof defaultAdvancedSettings }) {
   const { settings } = props;
 
   if (!isActionEnabled("OpenAdvancedSettingsAction", settings)) {

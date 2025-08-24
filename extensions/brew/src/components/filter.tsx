@@ -27,7 +27,7 @@ export function placeholder(filter: InstallableFilterType): string {
     filter === InstallableFilterType.all
       ? "formulae or casks"
       : filter === InstallableFilterType.casks
-      ? "casks"
-      : "formulae"
+        ? "casks"
+        : "formulae"
   } by name${String.ellipsis}`;
 }

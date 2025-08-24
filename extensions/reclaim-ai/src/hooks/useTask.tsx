@@ -1,139 +1,117 @@
+import { showHUD } from "@raycast/api";
+import { RequestInit } from "node-fetch";
 import { Task } from "../types/task";
-import { axiosPromiseData } from "../utils/axiosPromise";
-import reclaimApi from "./useApi";
-import { ApiResponseTasks, CreateTaskProps } from "./useTask.types";
+import useApi from "./useApi";
+import { CreateTaskProps, PlannerActionIntermediateResult } from "./useTask.types";
+import { fetchPromise } from "../utils/fetcher";
 
-const useTask = () => {
-  const { fetcher } = reclaimApi();
+export const useTasks = () => {
+  const { data: tasks, error, isLoading } = useApi<Task[]>("/tasks?instances=true");
+
+  return {
+    tasks,
+    isLoading,
+    error,
+  };
+};
+
+export const useTaskActions = () => {
+  const executeTaskAction = async <T,>(url: string, options?: RequestInit, payload?: unknown): Promise<T> => {
+    const [response, error] = await fetchPromise<T>(url, { init: options, payload });
+    if (error) throw error;
+    if (!response) throw new Error("No response");
+    return response;
+  };
 
   const createTask = async (task: CreateTaskProps) => {
-    try {
-      const data = {
-        eventCategory: "WORK",
-        timeSchemeId: task.timePolicy,
-        title: task.title,
-        timeChunksRequired: task.timeNeeded,
-        snoozeUntil: task.snoozeUntil,
-        due: task.due,
-        minChunkSize: task.durationMin,
-        maxChunkSize: task.durationMax,
-        notes: task.notes,
-        alwaysPrivate: true,
-        priority: task.priority,
-        onDeck: task.onDeck,
-      };
+    const data = {
+      eventCategory: task.category,
+      timeSchemeId: task.timePolicy,
+      title: task.title,
+      timeChunksRequired: task.timeNeeded,
+      snoozeUntil: task.snoozeUntil,
+      due: task.due,
+      minChunkSize: task.durationMin,
+      maxChunkSize: task.durationMax,
+      notes: task.notes,
+      alwaysPrivate: task.alwaysPrivate,
+      priority: task.priority,
+      onDeck: task.onDeck,
+    };
 
-      const [createdTask, error] = await axiosPromiseData<Task>(
-        fetcher("/tasks", {
-          method: "POST",
-          data,
-        })
-      );
-      if (!createTask && error) throw error;
-
-      return createdTask;
-    } catch (error) {
-      console.error("Error while creating task", error);
-    }
+    return await executeTaskAction<Task>("/tasks", { method: "POST" }, data);
   };
 
-  const handleStartTask = async (id: string) => {
-    try {
-      const [task, error] = await axiosPromiseData(fetcher(`/planner/start/task/${id}`, { method: "POST" }));
-      if (!task || error) throw error;
-      return task;
-    } catch (error) {
-      console.error("Error while starting task", error);
-    }
+  const startTask = async (id: string) => {
+    const response = await executeTaskAction<PlannerActionIntermediateResult>(`/planner/start/task/${id}`, {
+      method: "POST",
+    });
+    await showHUD("Started Task");
+    return response;
   };
 
-  const handleStopTask = async (id: string) => {
-    try {
-      const [task, error] = await axiosPromiseData(fetcher(`/planner/stop/task/${id}`, { method: "POST" }));
-      if (!task || error) throw error;
-      return task;
-    } catch (error) {
-      console.error("Error while stopping task", error);
-    }
+  const restartTask = async (id: string) => {
+    const response = await executeTaskAction<PlannerActionIntermediateResult>(`/planner/restart/task/${id}`, {
+      method: "POST",
+    });
+    await showHUD("Restarted Task");
+    return response;
   };
 
-  const getAllTasks = async () => {
-    try {
-      const [tasks, error] = await axiosPromiseData<ApiResponseTasks>(fetcher("/tasks"));
-      if (!tasks && error) throw error;
-      return tasks;
-    } catch (error) {
-      console.error("Error while fetching tasks", error);
-    }
+  const stopTask = async (id: string) => {
+    const response = await executeTaskAction<PlannerActionIntermediateResult>(`/planner/stop/task/${id}`, {
+      method: "POST",
+    });
+    await showHUD("Stopped Task");
+    return response;
   };
 
   // Add time
   const addTime = async (task: Task, time: number) => {
-    try {
-      const [updatedTime, error] = await axiosPromiseData(
-        fetcher(`/planner/add-time/task/${task.id}?minutes=${time}`, { method: "POST", responseType: "json" })
-      );
-      if (!updatedTime || error) throw error;
-      return updatedTime;
-    } catch (error) {
-      console.error("Error while adding time", error);
-    }
+    return await executeTaskAction<PlannerActionIntermediateResult>(
+      `/planner/add-time/task/${task.id}?minutes=${time}`,
+      { method: "POST" }
+    );
   };
 
   // Update task
-  const updateTask = async (task: Task) => {
-    try {
-      const [updatedTask, error] = await axiosPromiseData(
-        fetcher(`/tasks/${task.id}`, {
-          method: "PUT",
-          responseType: "json",
-          data: task,
-        })
-      );
-
-      if (!updatedTask || error) throw error;
-      return updatedTask;
-    } catch (error) {
-      console.error("Error while updating task", error);
-    }
+  const updateTask = async (task: Partial<Task>, payload: Partial<Task>) => {
+    return await executeTaskAction<Task>(`/tasks/${task.id}`, { method: "PATCH" }, payload);
   };
 
   // Set task to done
   const doneTask = async (task: Task) => {
-    try {
-      const [updatedStatus, error] = await axiosPromiseData(
-        fetcher(`/planner/done/task/${task.id}`, { method: "POST", responseType: "json" })
-      );
-      if (!updatedStatus || error) throw error;
-      return updatedStatus;
-    } catch (error) {
-      console.error("Error while updating task", error);
-    }
+    return await executeTaskAction<PlannerActionIntermediateResult>(`/planner/done/task/${task.id}`, {
+      method: "POST",
+    });
   };
 
   // Set task to incomplete
   const incompleteTask = async (task: Task) => {
-    try {
-      const [updatedStatus, error] = await axiosPromiseData(
-        fetcher(`/planner/unarchive/task/${task.id}`, { method: "POST", responseType: "json" })
-      );
-      if (!updatedStatus || error) throw error;
-      return updatedStatus;
-    } catch (error) {
-      console.error("Error while updating task", error);
-    }
+    return await executeTaskAction<PlannerActionIntermediateResult>(`/planner/unarchive/task/${task.id}`, {
+      method: "POST",
+    });
+  };
+
+  // Snooze Task
+  const rescheduleTask = async (taskId: string, rescheduleCommand: string, relativeFrom?: string) => {
+    return await executeTaskAction<PlannerActionIntermediateResult>(
+      `/planner/task/${taskId}/snooze?snoozeOption=${rescheduleCommand}&relativeFrom=${
+        relativeFrom ? relativeFrom : null
+      }`,
+      { method: "POST" }
+    );
   };
 
   return {
     createTask,
-    handleStartTask,
-    handleStopTask,
-    getAllTasks,
+    startTask,
+    restartTask,
+    stopTask,
     addTime,
     updateTask,
     doneTask,
     incompleteTask,
+    rescheduleTask,
   };
 };
-
-export { useTask };

@@ -1,4 +1,4 @@
-import { Grid } from "@raycast/api";
+import { Grid, Icon } from "@raycast/api";
 import React, { useState } from "react";
 import { BingImage, DownloadedBingImage } from "../types/types";
 import { WallpaperTag, wallpaperTags } from "../utils/constants";
@@ -6,25 +6,24 @@ import { ListEmptyView } from "./list-empty-view";
 import { buildBingImageURL, getPictureName } from "../utils/bing-wallpaper-utils";
 import { ActionsOnlineBingWallpaper } from "./actions-online-bing-wallpaper";
 import { ActionsDownloadedBingWallpaper } from "./actions-downloaded-bing-wallpaper";
-import { Preferences } from "../types/preferences";
+import { columns, includeDownloadedWallpapers, layout } from "../types/preferences";
 
 export function WallpaperGridLayout(props: {
-  preferences: Preferences;
   isLoading: boolean;
   bingWallpaperHD: BingImage[];
   downloadedBingWallpapers: DownloadedBingImage[];
 }) {
   const [tag, setTag] = useState<string>("");
-  const { preferences, isLoading, bingWallpaperHD, downloadedBingWallpapers } = props;
+  const { isLoading, bingWallpaperHD, downloadedBingWallpapers } = props;
   return (
     <Grid
       isLoading={isLoading}
-      columns={parseInt(preferences.columns)}
+      columns={parseInt(columns)}
       aspectRatio={"16/9"}
       fit={Grid.Fit.Fill}
       searchBarPlaceholder={"Search wallpapers"}
       searchBarAccessory={
-        preferences.includeDownloadedWallpapers ? (
+        includeDownloadedWallpapers ? (
           <Grid.Dropdown onChange={setTag} tooltip={"Wallpaper type"} storeValue={true}>
             {wallpaperTags.map((value, index) => {
               return <Grid.Dropdown.Item key={index + "_" + value[0]} title={value[1]} value={value[1]} />;
@@ -33,7 +32,7 @@ export function WallpaperGridLayout(props: {
         ) : null
       }
     >
-      <ListEmptyView layout={preferences.layout} />
+      <ListEmptyView layout={layout} />
       {(tag === WallpaperTag.ALL || tag === WallpaperTag.ONLINE || tag === "") && (
         <Grid.Section title={"Online Wallpapers"}>
           {bingWallpaperHD.map((bingImage, index) => {
@@ -41,18 +40,15 @@ export function WallpaperGridLayout(props: {
               <Grid.Item
                 id={index + bingImage.url}
                 key={index + bingImage.startdate}
-                content={{
-                  value: buildBingImageURL(bingImage.url, "icon", 960, 540),
-                  tooltip: bingImage.title + "\n" + bingImage.copyright,
-                }}
+                content={buildBingImageURL(bingImage.url, "icon", 960, 540)}
                 title={getPictureName(bingImage.url)}
+                accessory={{ icon: Icon.Info, tooltip: bingImage.copyright }}
                 actions={
                   <ActionsOnlineBingWallpaper
                     index={index}
                     bingImage={bingImage}
                     onlineImages={bingWallpaperHD}
                     downloadedImages={downloadedBingWallpapers}
-                    downloadSize={preferences.downloadSize}
                   />
                 }
               />
@@ -60,7 +56,7 @@ export function WallpaperGridLayout(props: {
           })}
         </Grid.Section>
       )}
-      {preferences.includeDownloadedWallpapers && (tag === WallpaperTag.ALL || tag === WallpaperTag.DOWNLOADED) && (
+      {includeDownloadedWallpapers && (tag === WallpaperTag.ALL || tag === WallpaperTag.DOWNLOADED) && (
         <Grid.Section title={"Downloaded Wallpapers"}>
           {downloadedBingWallpapers?.map((bingImage, index) => {
             return (

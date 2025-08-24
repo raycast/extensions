@@ -1,5 +1,28 @@
 # Wi-Fi Changelog
 
+## [Removed Exception Capture] - 2024-08-05
+
+## [Bug Fix] - 2024-07-29
+
+- Fixing Menubar Wi-Fi bugs
+
+## [Show IP Address] - 2024-07-26
+
+- Menubar Wi-Fi command supports show IP Address in the menu bar
+
+## [Goodbye, Scan Wi-Fi command] - 2024-07-24
+
+- The airport command line tool is deprecated and the Scan Wi-Fi command based on it is removed.
+
+## [Fix crash] - 2024-02-05
+
+- Fix potential crash issues
+- Fix the issue of menu bar icon not updating
+
+## [Optimize UI display] - 2024-01-19
+
+- When the Toggle Wi-Fi command is run, the menu bar icons are immediately updated
+
 ## [Added Menubar Command] - 2023-10-09
 
 - Wi-Fi Signal: Show Wi-Fi signal strength in the menubar

@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "say",
+  "title": "Say - Text to Speech",
+  "type": "module",
+  "description": "Use the macOS built-in TTS (Spoken Content) to say the text you provide.",
+  "icon": "say-icon.png",
+  "author": "litomore",
+  "categories": [
+    "Communication",
+    "Productivity",
+    "System",
+    "Fun"
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "configureSay",
+      "title": "Configure Say",
+      "description": "Configure the Say extension.",
+      "mode": "view"
+    },
+    {
+      "name": "selectedTextToSay",
+      "title": "Selected Text to Say",
+      "description": "Say the selected text on any application.",
+      "mode": "no-view"
+    },
+    {
+      "name": "textToSay",
+      "title": "Text to Say",
+      "description": "Input your text or paragraph and say.",
+      "mode": "view"
+    },
+    {
+      "name": "typeToSay",
+      "title": "Type to Say",
+      "description": "Quick type your text and say.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "type": "text",
+          "name": "content",
+          "placeholder": "Type to Say",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.5",
+    "@raycast/utils": "^2.2.1",
+    "bplist-parser": "^0.3.2",
+    "lodash": "^4.17.21",
+    "mac-say": "^0.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/lodash": "^4.17.20",
+    "@types/node": "^24.3.0",
+    "@types/react": "^19.1.10",
+    "eslint": "^9.33.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  }
+}

@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Clipboard, Form, Icon, useNavigation, Toast, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Form,
+  Icon,
+  useNavigation,
+  Toast,
+  showToast,
+  getPreferenceValues,
+  closeMainWindow,
+} from "@raycast/api";
 import { format } from "date-fns";
 import { FormValidation, getAvatarIcon, useCachedState, useForm } from "@raycast/utils";
 import { useMemo, useEffect } from "react";
@@ -23,6 +34,7 @@ export default function CreateTaskForm(props: {
 
   const [lastWorkspace, setLastWorkspace] = useCachedState<string>("last-workspace");
 
+  const { shouldCloseMainWindow } = getPreferenceValues<Preferences.CreateTask>();
   const { handleSubmit, itemProps, values, focus, reset } = useForm<TaskFormValues>({
     async onSubmit(values) {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Creating task" });
@@ -31,7 +43,7 @@ export default function CreateTaskForm(props: {
         const htmlNotes = `<body>${values.description}</body>`;
 
         const customFieldsEntries = Object.entries(values).filter(
-          ([key, value]) => key.startsWith("field-") && value !== ""
+          ([key, value]) => key.startsWith("field-") && value !== "",
         );
         const customFields = customFieldsEntries.reduce((acc, field) => {
           const fieldId = field[0].split("-")[1];
@@ -48,6 +60,12 @@ export default function CreateTaskForm(props: {
           ...(values.start_date ? { start_on: format(values.start_date, "yyyy-MM-dd") } : {}),
           ...(values.due_date ? { due_on: format(values.due_date, "yyyy-MM-dd") } : {}),
         });
+
+        if (shouldCloseMainWindow) {
+          await closeMainWindow();
+          await showToast({ style: Toast.Style.Success, title: "Task created" });
+          return;
+        }
 
         toast.style = Toast.Style.Success;
         toast.title = "Created task";
@@ -122,6 +140,7 @@ export default function CreateTaskForm(props: {
 
   const hasCustomFields = customFields && customFields.length > 0;
   const selectedWorkspace = workspaces?.find((workspace) => values.workspace === workspace.gid);
+  const { showStartDate } = getPreferenceValues<Preferences.CreateTask>();
 
   return (
     <Form
@@ -172,7 +191,7 @@ export default function CreateTaskForm(props: {
           );
         })}
       </Form.Dropdown>
-      {selectedWorkspace?.is_organization ? (
+      {selectedWorkspace?.is_organization && showStartDate ? (
         <Form.DatePicker title="Start Date" type={Form.DatePicker.Type.Date} {...itemProps.start_date} />
       ) : null}
       <Form.DatePicker title="Due Date" type={Form.DatePicker.Type.Date} {...itemProps.due_date} />

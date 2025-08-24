@@ -11,14 +11,42 @@ import {
   AI,
   Icon,
 } from "@raycast/api";
-import { useForm } from "@raycast/utils";
+import { useForm, withAccessToken } from "@raycast/utils";
 import { parseHTML } from "linkedom";
 import fetch from "node-fetch";
 import { useState, useEffect } from "react";
 
-import { View } from "./components";
 import { useSearchPages } from "./hooks";
-import { appendToPage, createDatabasePage, getPageIcon } from "./utils/notion";
+import {
+  appendToPage,
+  createDatabasePage,
+  fetchDatabase,
+  fetchPage,
+  getPageIcon,
+  getPageName,
+  Page,
+  PageContent,
+} from "./utils/notion";
+import { notionService } from "./utils/notion/oauth";
+import { Quicklink } from "./utils/types";
+
+type QuickCaptureFormValues = {
+  url: string;
+  captureAs: string;
+  page: string;
+};
+
+type LaunchContext = {
+  defaults?: {
+    captureAs?: string;
+    pageId?: string;
+    objectType?: Page["object"];
+  };
+};
+
+type QuickCaptureProps = {
+  launchContext?: LaunchContext;
+};
 
 const getPageDetail = async (url: string) => {
   try {
@@ -43,33 +71,8 @@ function validateUrl(input: string) {
   return urlPattern.test(input);
 }
 
-function QuickCapture() {
-  const [searchText, setSearchText] = useState<string>("");
-
-  const { data: searchPages, isLoading } = useSearchPages(searchText);
-
-  const { itemProps, handleSubmit, setValue } = useForm<{
-    url: string;
-    captureAs: string;
-    page: string;
-  }>({
-    async onSubmit(values) {
-      try {
-        await closeMainWindow();
-
-        await showToast({ style: Toast.Style.Animated, title: "Capturing content to page" });
-
-        const result = await getPageDetail(values.url);
-        const url = result ? `[${result.title}](${values.url})` : values.url;
-        let content = url;
-
-        if (result && values.captureAs === "full") {
-          content += `\n\n${result?.content}`;
-        }
-
-        if (result && values.captureAs === "ai") {
-          const summary = await AI.ask(
-            `Summarize the page content surrounded by triple quotes. Please use the following template:
+function getSummaryPrompt(content: string) {
+  return `Summarize the page content surrounded by triple quotes. Please use the following template:
 
 # {Heading of the page}
 
@@ -77,21 +80,82 @@ function QuickCapture() {
 
 Here's the content:
 """
-${result?.content}
-"""`,
-          );
+${content}
+"""`;
+}
 
-          content += `\n\n${summary}`;
+function QuickCapture({ launchContext }: QuickCaptureProps) {
+  const [searchText, setSearchText] = useState<string>("");
+
+  const { data, isLoading } = useSearchPages(searchText);
+
+  const searchPages = data?.pages;
+
+  const { itemProps, handleSubmit, setValue } = useForm<QuickCaptureFormValues>({
+    initialValues: {
+      captureAs: launchContext?.defaults?.captureAs,
+    },
+    async onSubmit(values) {
+      try {
+        await closeMainWindow();
+
+        await showToast({ style: Toast.Style.Animated, title: "Capturing content to page" });
+
+        const pageDetail = await getPageDetail(values.url);
+        const pageLink = pageDetail ? `[${pageDetail.title}](${values.url})` : values.url;
+
+        let content: PageContent;
+
+        switch (values.captureAs) {
+          case "url": {
+            content = [{ type: "bookmark", bookmark: { url: values.url } }];
+            break;
+          }
+
+          case "full": {
+            content = pageLink;
+            if (pageDetail) content += `\n\n${pageDetail.content}`;
+            break;
+          }
+
+          case "ai": {
+            content = pageLink;
+            if (pageDetail) {
+              const summary = await AI.ask(getSummaryPrompt(pageDetail.content));
+              content += `\n\n${summary}`;
+            }
+            break;
+          }
+
+          default: {
+            content = pageLink;
+          }
         }
 
-        const selectedPage = searchPages?.find((page) => page.id === values.page);
+        let selectedPage: Page | undefined;
 
-        if (selectedPage?.object === "page") {
+        if (launchContext?.defaults?.pageId) {
+          const { pageId, objectType = "page" } = launchContext.defaults;
+          selectedPage = objectType === "page" ? await fetchPage(pageId) : await fetchDatabase(pageId);
+        } else {
+          selectedPage = searchPages?.find((page) => page.id === values.page);
+        }
+
+        if (!selectedPage) {
+          await showToast({ style: Toast.Style.Failure, title: "Could not find page" });
+          return;
+        }
+
+        if (selectedPage.object === "page") {
           await appendToPage(selectedPage.id, { content });
         }
 
-        if (selectedPage?.object === "database") {
-          await createDatabasePage({ database: selectedPage.id, content, "property::title::title": result?.title });
+        if (selectedPage.object === "database") {
+          await createDatabasePage({
+            database: selectedPage.id,
+            content,
+            "property::title::title": pageDetail?.title,
+          });
         }
 
         await showToast({ style: Toast.Style.Success, title: "Captured content to page" });
@@ -133,11 +197,29 @@ ${result?.content}
     getText();
   }, []);
 
+  function getQuicklink(): Quicklink {
+    const url = "raycast://extensions/notion/notion/quick-capture";
+    const page = searchPages?.find((page) => page.id === itemProps.page.value);
+    const launchContext: LaunchContext = {
+      defaults: {
+        captureAs: itemProps.captureAs.value,
+        pageId: page?.id,
+        objectType: page?.object,
+      },
+    };
+
+    return {
+      name: page ? `Quick capture to ${getPageName(page)}` : "Quick capture",
+      link: url + "?launchContext=" + encodeURIComponent(JSON.stringify(launchContext)),
+    };
+  }
+
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} title="Capture" />
+          <Action.SubmitForm onSubmit={handleSubmit} title="Capture" icon={Icon.SaveDocument} />
+          <Action.CreateQuicklink title="Create Quicklink" quicklink={getQuicklink()} />
         </ActionPanel>
       }
     >
@@ -153,32 +235,32 @@ ${result?.content}
         <Form.Dropdown.Item title="Summarize Page with AI" value="ai" icon={Icon.Stars} />
       </Form.Dropdown>
 
-      <Form.Dropdown
-        {...itemProps.page}
-        title="Notion Page"
-        isLoading={isLoading}
-        onSearchTextChange={setSearchText}
-        storeValue
-      >
-        {searchPages?.map((page) => {
-          return (
-            <Form.Dropdown.Item
-              key={page.id}
-              title={page.title || "Untitled"}
-              value={page.id}
-              icon={getPageIcon(page)}
-            />
-          );
-        })}
-      </Form.Dropdown>
+      {/*
+        When a default page/database is specified in the LaunchContext, we will fetch it directly instead
+        of adding an option for it in the dropdown
+      */}
+      {launchContext?.defaults?.pageId ? null : (
+        <Form.Dropdown
+          {...itemProps.page}
+          title="Notion Page"
+          isLoading={isLoading}
+          onSearchTextChange={setSearchText}
+          storeValue
+        >
+          {searchPages?.map((page) => {
+            return (
+              <Form.Dropdown.Item
+                key={page.id}
+                title={page.title || "Untitled"}
+                value={page.id}
+                icon={getPageIcon(page)}
+              />
+            );
+          })}
+        </Form.Dropdown>
+      )}
     </Form>
   );
 }
 
-export default function Command() {
-  return (
-    <View>
-      <QuickCapture />
-    </View>
-  );
-}
+export default withAccessToken(notionService)(QuickCapture);

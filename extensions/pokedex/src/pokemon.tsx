@@ -1,29 +1,50 @@
-import { Action, ActionPanel, Grid, Icon } from "@raycast/api";
-import { useMemo, useState } from "react";
+import {
+  Action,
+  ActionPanel,
+  Grid,
+  Icon,
+  getPreferenceValues,
+} from "@raycast/api";
 import groupBy from "lodash.groupby";
-import PokemonDetail from "./components/detail";
+import orderBy from "lodash.orderby";
+import shuffle from "lodash.shuffle";
+import { useEffect, useState } from "react";
+import PokeProfile from "./components/profile";
 import TypeDropdown from "./components/type_dropdown";
+import pokedex from "./statics/pokedex.json";
+import { getContentImg, localeName, nationalDexNumber } from "./utils";
 
-import pokemons from "./statics/pokemons.json";
+const { language } = getPreferenceValues();
 
-export default function SearchPokemon() {
+export default function NationalPokedex() {
   const [type, setType] = useState<string>("all");
+  const [sort, setSort] = useState<string>("lowest");
+  const [randomization, setRandomization] = useState<boolean>(false);
+  const [pokemons, setPokemons] = useState(pokedex);
 
-  const listing = useMemo(() => {
-    return type != "all"
-      ? pokemons.filter((p) => p.types.includes(type))
-      : pokemons;
-  }, [type]);
+  useEffect(() => {
+    const shuffled = shuffle(pokemons);
+    setPokemons(shuffled);
+  }, [randomization]);
+
+  useEffect(() => {
+    const sorted = orderBy(pokedex, ...sort.split("|"));
+    const filtered =
+      type != "all" ? sorted.filter((p) => p.types.includes(type)) : sorted;
+
+    setPokemons(filtered);
+  }, [type, sort]);
 
   return (
     <Grid
       throttle
-      searchBarPlaceholder="Search Pokémon by name or number..."
+      columns={6}
+      searchBarPlaceholder="Search for Pokémon by name or Pokédex number"
       searchBarAccessory={
         <TypeDropdown type="grid" command="Pokémon" onSelectType={setType} />
       }
     >
-      {Object.entries(groupBy(listing, "generation")).map(
+      {Object.entries(groupBy(pokemons, "generation")).map(
         ([generation, pokemonList]) => {
           return (
             <Grid.Section title={generation} key={generation}>
@@ -31,17 +52,48 @@ export default function SearchPokemon() {
                 return (
                   <Grid.Item
                     key={pokemon.id}
-                    content={pokemon.artwork}
-                    title={pokemon.name}
-                    subtitle={`#${pokemon.id.toString().padStart(3, "0")}`}
+                    content={getContentImg(pokemon.id)}
+                    title={localeName(pokemon, language)}
+                    subtitle={nationalDexNumber(pokemon.id)}
                     keywords={[pokemon.id.toString(), pokemon.name]}
                     actions={
                       <ActionPanel>
-                        <Action.Push
-                          title="Show Details"
-                          icon={Icon.Sidebar}
-                          target={<PokemonDetail id={pokemon.id} />}
-                        />
+                        <ActionPanel.Section title="Information">
+                          <Action.Push
+                            title="Pokémon Profile"
+                            icon={Icon.Sidebar}
+                            target={<PokeProfile id={pokemon.id} />}
+                          />
+                        </ActionPanel.Section>
+                        <ActionPanel.Section title="Randomize">
+                          <Action
+                            title="Surprise Me!"
+                            icon={Icon.Shuffle}
+                            onAction={() => setRandomization(!randomization)}
+                          />
+                        </ActionPanel.Section>
+                        <ActionPanel.Section title="Sort By">
+                          <Action
+                            title="Number (Lowest First)"
+                            icon={Icon.ArrowUp}
+                            onAction={() => setSort("id|asc")}
+                          />
+                          <Action
+                            title="Number (Highest First)"
+                            icon={Icon.ArrowDown}
+                            onAction={() => setSort("id|desc")}
+                          />
+                          <Action
+                            title="Name (A-Z)"
+                            icon={Icon.Text}
+                            onAction={() => setSort("name|asc")}
+                          />
+                          <Action
+                            title="Name (Z-A)"
+                            icon={Icon.Text}
+                            onAction={() => setSort("name|desc")}
+                          />
+                        </ActionPanel.Section>
                       </ActionPanel>
                     }
                   />
@@ -49,7 +101,7 @@ export default function SearchPokemon() {
               })}
             </Grid.Section>
           );
-        }
+        },
       )}
     </Grid>
   );

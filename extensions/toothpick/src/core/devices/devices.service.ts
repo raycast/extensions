@@ -11,7 +11,9 @@ export interface DevicesService {
 let currentServiceType: string;
 let devicesService: DevicesService;
 
-export function getDevicesService(serviceType?: ServiceType): DevicesService {
+export function getDevicesService(
+  serviceType?: ServiceType | ExtensionPreferences["bluetoothBackend"]
+): DevicesService {
   if (serviceType && currentServiceType !== serviceType) {
     currentServiceType = serviceType;
     switch (serviceType) {

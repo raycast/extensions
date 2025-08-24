@@ -1,21 +1,40 @@
-import { Action, ActionPanel, Icon, List, open, showToast, Toast } from "@raycast/api";
-import React, { useState } from "react";
-import { alertDialog, getShortLinks } from "./hooks/hooks";
-import { isEmpty } from "./utils/common-utils";
+import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { useState } from "react";
+import { formatISODate, isEmpty } from "./utils/common-utils";
 import { ActionOpenPreferences } from "./components/action-open-preferences";
 import { ActionGoShortIo } from "./components/action-go-short-io";
 import { ListEmptyView } from "./components/list-empty-view";
 import { deleteShortLink } from "./utils/axios-utils";
-import Style = Toast.Style;
 import EditLink from "./edit-link";
-import { ShortLink } from "./types/types";
+import { alertDialog } from "./components/alert-dialog";
+import { useShortLinks } from "./hooks/useShortLinks";
+import Style = Toast.Style;
+import { useDomains } from "./hooks/useDomains";
+import { getFavicon } from "@raycast/utils";
 
 export default function SearchLinks() {
-  const [refresh, setRefresh] = useState<number>(0);
-  const { shortLinks, setShortLinks, loading } = getShortLinks(refresh);
+  const [domainId, setDomainId] = useState("");
+  const { data: domains, isLoading: isLoadingDomains } = useDomains();
+  const { data: shortLinks, isLoading: isLoadingLinks, mutate } = useShortLinks(domainId);
 
   return (
-    <List isLoading={loading} isShowingDetail={shortLinks.length !== 0 && true} searchBarPlaceholder={"Search links"}>
+    <List
+      isLoading={isLoadingLinks || isLoadingDomains}
+      isShowingDetail={shortLinks.length !== 0}
+      searchBarPlaceholder={"Search links"}
+      searchBarAccessory={
+        <List.Dropdown tooltip="Domain" onChange={setDomainId} storeValue>
+          {domains?.map((domain) => (
+            <List.Dropdown.Item
+              key={domain.id}
+              icon={getFavicon(`https://${domain.hostname}`)}
+              title={domain.hostname}
+              value={domain.id.toString()}
+            />
+          ))}
+        </List.Dropdown>
+      }
+    >
       <ListEmptyView
         title={"No Link"}
         icon={{ source: { light: "empty-link-icon.svg", dark: "empty-link-icon@dark.svg" } }}
@@ -42,16 +61,14 @@ export default function SearchLinks() {
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label title={"Source"} text={value.source} />
                     <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label
-                      title={"Created At"}
-                      text={value.createdAt.substring(0, 19).replace("T", " ")}
-                    />
+                    <List.Item.Detail.Metadata.Label title={"Created At"} text={formatISODate(value.createdAt)} />
                     <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label
-                      title={"Updated At"}
-                      text={value.updatedAt.substring(0, 19).replace("T", " ")}
-                    />
-                    <List.Item.Detail.Metadata.Separator />
+                    {value.updatedAt && (
+                      <>
+                        <List.Item.Detail.Metadata.Label title={"Updated At"} text={formatISODate(value.updatedAt)} />
+                        <List.Item.Detail.Metadata.Separator />
+                      </>
+                    )}
                   </List.Item.Detail.Metadata>
                 }
               />
@@ -65,7 +82,7 @@ export default function SearchLinks() {
                     icon={Icon.Pencil}
                     title={"Edit Link"}
                     shortcut={{ modifiers: ["cmd"], key: "e" }}
-                    target={<EditLink shortLink={value} setRefresh={setRefresh} />}
+                    target={<EditLink shortLink={value} mutate={mutate} />}
                   />
                   <Action
                     icon={Icon.Trash}
@@ -83,12 +100,12 @@ export default function SearchLinks() {
                           if (deleteResult.success) {
                             const _shortLinks = [...shortLinks];
                             _shortLinks.splice(index, 1);
-                            setShortLinks(_shortLinks);
+                            await mutate();
                             await showToast(Style.Success, "Success.", "Link deleted successfully");
                           } else {
                             await showToast(Style.Failure, "Error.", deleteResult.message);
                           }
-                        }
+                        },
                       );
                     }}
                   />

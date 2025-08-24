@@ -1,0 +1,92 @@
+[
+  {
+    "Name": "Arcana Pack",
+    "Appearance": "arcana.png",
+    "Cost": "$4",
+    "Effect": "Choose 1 of up to 3 Tarot cards to be used immediately"
+  },
+  {
+    "Name": "Jumbo Arcana Pack",
+    "Appearance": "arcana_jumbo.png",
+    "Cost": "$6",
+    "Effect": "Choose 1 of up to 5 Tarot cards to be used immediately"
+  },
+  {
+    "Name": "Mega Arcana Pack",
+    "Appearance": "arcana_mega.png",
+    "Cost": "$8",
+    "Effect": "Choose 2 of up to 5 Tarot cards to be used immediately"
+  },
+  {
+    "Name": "Celestial Pack",
+    "Appearance": "celestial.png",
+    "Cost": "$4",
+    "Effect": "Choose 1 of up to 3 Planet cards to be used immediately"
+  },
+  {
+    "Name": "Jumbo Celestial Pack",
+    "Appearance": "celestial_jumbo.png",
+    "Cost": "$6",
+    "Effect": "Choose 1 of up to 5 Planet cards to be used immediately"
+  },
+  {
+    "Name": "Mega Celestial Pack",
+    "Appearance": "celestial_mega.png",
+    "Cost": "$8",
+    "Effect": "Choose 2 of up to 5 Planet cards to be used immediately"
+  },
+  {
+    "Name": "Standard Pack",
+    "Appearance": "standard.png",
+    "Cost": "$4",
+    "Effect": "Choose 1 of up to 3 Playing cards to add to your deck"
+  },
+  {
+    "Name": "Jumbo Standard Pack",
+    "Appearance": "standard_jumbo.png",
+    "Cost": "$6",
+    "Effect": "Choose 1 of up to 5 Playing cards to add to your deck"
+  },
+  {
+    "Name": "Mega Standard Pack",
+    "Appearance": "standard_mega.png",
+    "Cost": "$8",
+    "Effect": "Choose 2 of up to 5 Playing cards to add to your deck"
+  },
+  {
+    "Name": "Buffoon Pack",
+    "Appearance": "buffoon.png",
+    "Cost": "$4",
+    "Effect": "Choose 1 of up to 2 Joker cards"
+  },
+  {
+    "Name": "Jumbo Buffoon Pack",
+    "Appearance": "buffoon_jumbo.png",
+    "Cost": "$6",
+    "Effect": "Choose 1 of up to 4 Joker cards"
+  },
+  {
+    "Name": "Mega Buffoon Pack",
+    "Appearance": "buffoon_mega.png",
+    "Cost": "$8",
+    "Effect": "Choose 2 of up to 4 Joker cards"
+  },
+  {
+    "Name": "Spectral Pack",
+    "Appearance": "spectral.png",
+    "Cost": "$4",
+    "Effect": "Choose 1 of up to 2 Spectral cards to be used immediately"
+  },
+  {
+    "Name": "Jumbo Spectral Pack",
+    "Appearance": "spectral_jumbo.png",
+    "Cost": "$6",
+    "Effect": "Choose 1 of up to 4 Spectral cards to be used immediately"
+  },
+  {
+    "Name": "Mega Spectral Pack",
+    "Appearance": "spectral_mega.png",
+    "Cost": "$8",
+    "Effect": "Choose 2 of up to 4 Spectral cards to be used immediately"
+  }
+]

@@ -1,4 +1,6 @@
 {
   "printWidth": 120,
-  "singleQuote": false
+  "singleQuote": false,
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true
 }

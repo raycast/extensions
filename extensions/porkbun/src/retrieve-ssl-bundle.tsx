@@ -1,98 +1,58 @@
-import { Form, Action, ActionPanel, Detail, Icon, Toast, showToast } from "@raycast/api";
-import { useForm, FormValidation } from "@raycast/utils";
-import { useState } from "react";
-import { retrieveSSLBundle } from "./utils/api";
-import { RetrieveSSLBundleResponse } from "./utils/types";
+import { Action, ActionPanel, Detail, LaunchProps } from "@raycast/api";
+import { useRetrieveSSLBundle } from "./utils/api";
+import { API_DOCS_URL } from "./utils/constants";
+import ErrorComponent from "./components/ErrorComponent";
 
-export default function RetrieveBundle() {
-  type RetrieveSSLFormValues = {
-    domain: string;
-  };
-  const [isLoading, setIsLoading] = useState(false);
-  const [ssl, setSSL] = useState<RetrieveSSLBundleResponse>();
-  const { handleSubmit, itemProps } = useForm<RetrieveSSLFormValues>({
-    async onSubmit(values) {
-      setIsLoading(true);
-      const { domain } = values;
-      const response = (await retrieveSSLBundle(domain)) as RetrieveSSLBundleResponse;
-      if (response.status === "SUCCESS") {
-        setSSL(response);
-        showToast({
-          style: Toast.Style.Success,
-          title: "SUCCESS",
-          message: `Retrieved SSL bundle for '${domain}'`,
-        });
-      }
-      setIsLoading(false);
-    },
-    validation: {
-      domain: FormValidation.Required,
-    },
-  });
+export default function RetrieveBundle(props: LaunchProps<{ arguments: Arguments.RetrieveSslBundle }>) {
+  const { domain } = props.arguments;
 
-  return !ssl ? (
-    <Form
+  const { isLoading, data: ssl, error } = useRetrieveSSLBundle(domain);
+
+  const markdown = !ssl
+    ? `# ${domain}`
+    : `# ${domain} | ${ssl.status}
+---
+## Intermediate Certificate
+
+${ssl.intermediatecertificate}
+
+## Certificate Chain
+
+${ssl.certificatechain}
+
+## Private Key
+
+${ssl.privatekey}
+
+## Public Key
+
+${ssl.publickey}`;
+
+  return error ? (
+    <ErrorComponent error={error} />
+  ) : (
+    <Detail
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm icon={Icon.Check} title="Submit" onSubmit={handleSubmit} />
-          <Action.OpenInBrowser
-            icon={Icon.Globe}
-            title="Go to API Reference"
-            url="https://porkbun.com/api/json/v3/documentation#SSL%20Retrieve%20Bundle%20by%20Domain"
-          />
+          {ssl && (
+            <>
+              <Action.CopyToClipboard title="Copy Entire SSL Bundle" content={markdown} />
+              <Action.CopyToClipboard title="Copy Intermediate Certificate" content={ssl.intermediatecertificate} />
+              <Action.CopyToClipboard title="Copy Certificate Chain" content={ssl.certificatechain} />
+              <Action.CopyToClipboard title="Copy Private Key" content={ssl.privatekey} />
+              <Action.CopyToClipboard title="Copy Public Key" content={ssl.publickey} />
+            </>
+          )}
+          <ActionPanel.Section>
+            <Action.OpenInBrowser
+              title="Go to API Reference"
+              url={`${API_DOCS_URL}SSL%20Retrieve%20Bundle%20by%20Domain`}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
-    >
-      <Form.TextField title="Domain" placeholder="Enter domain" {...itemProps.domain} />
-    </Form>
-  ) : (
-    <Detail
-      actions={
-        <ActionPanel>
-          <Action.CopyToClipboard
-            title="Copy Entire SSL Bundle"
-            content={`
-# Intermediate Certificate
-
-${ssl.intermediatecertificate}
-
-# Certificate Chain
-
-${ssl.certificatechain}
-
-# Private Key
-
-${ssl.privatekey}
-
-# Public Key
-
-${ssl.publickey}
-`}
-          />
-          <Action.CopyToClipboard title="Copy Intermediate Certificate" content={ssl.intermediatecertificate} />
-          <Action.CopyToClipboard title="Copy Certificate Chain" content={ssl.certificatechain} />
-          <Action.CopyToClipboard title="Copy Private Key" content={ssl.privatekey} />
-          <Action.CopyToClipboard title="Copy Public Key" content={ssl.publickey} />
-        </ActionPanel>
-      }
-      markdown={`
-# Intermediate Certificate
-
-${ssl.intermediatecertificate}
-
-# Certificate Chain
-
-${ssl.certificatechain}
-
-# Private Key
-
-${ssl.privatekey}
-
-# Public Key
-
-${ssl.publickey}
-`}
+      markdown={markdown}
     />
   );
 }

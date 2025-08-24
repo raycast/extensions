@@ -6,11 +6,15 @@ import { operationWithUserFeedback } from "../../shared/operation-with-user-feed
 import { XcodeSwiftPlaygroundCreationParameters } from "../../models/swift-playground/xcode-swift-playground-creation-parameters.model";
 import tildify from "tildify";
 import { useState } from "react";
+import {
+  xcodeSwiftPlaygroundLatestSwiftVersion,
+  xcodeSwiftPlaygroundSwiftVersions,
+} from "../../models/swift-playground/xcode-swift-playground-swift-version.model";
 
 /**
  * Xcode create Swift Playground Form
  */
-export function XcodeCreateSwiftPlaygroundForm(): JSX.Element {
+export function XcodeCreateSwiftPlaygroundForm() {
   const navigation = useNavigation();
   const [nameError, setNameError] = useState<string | undefined>();
   const [locationError, setLocationError] = useState<string | undefined>();
@@ -71,6 +75,11 @@ export function XcodeCreateSwiftPlaygroundForm(): JSX.Element {
           .map((platform) => (
             <Form.Dropdown.Item key={platform} value={platform} title={platform.replace("os", "OS")} />
           ))}
+      </Form.Dropdown>
+      <Form.Dropdown id="swiftVersion" title="Swift Version" defaultValue={xcodeSwiftPlaygroundLatestSwiftVersion}>
+        {xcodeSwiftPlaygroundSwiftVersions.map((swiftVersion) => (
+          <Form.Dropdown.Item key={swiftVersion} value={swiftVersion} title={swiftVersion} />
+        ))}
       </Form.Dropdown>
       <Form.Dropdown id="template" title="Template" defaultValue={XcodeSwiftPlaygroundTemplate.Empty}>
         {Object.keys(XcodeSwiftPlaygroundTemplate).map((template) => (

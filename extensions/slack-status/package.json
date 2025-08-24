@@ -6,7 +6,11 @@
   "icon": "slack-icon.png",
   "author": "petr",
   "contributors": [
-    "jhjr"
+    "jhjr",
+    "thomas",
+    "pernielsentikaer",
+    "ramsay",
+    "henrik"
   ],
   "license": "MIT",
   "commands": [
@@ -22,10 +26,10 @@
     {
       "name": "accessToken",
       "type": "password",
-      "required": true,
       "title": "Access Token",
-      "description": "Your Slack access token.",
-      "placeholder": "See tinyurl.com/raycast-slack-status"
+      "description": "Your Slack access token for manual installation of the extension",
+      "placeholder": "See README.md for manual setup",
+      "required": false
     }
   ],
   "categories": [
@@ -33,18 +37,21 @@
     "Productivity"
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.60.0",
+    "@raycast/utils": "^1.14.1",
     "@slack/web-api": "^6.4.0",
-    "moment": "^2.29.1"
+    "moment": "^2.29.1",
+    "nanoid": "^5.0.5",
+    "node-fetch": "^3.3.2",
+    "pluralize": "^8.0.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^18.8.4",
+    "@types/pluralize": "^0.0.30",
+    "@types/react": "^18.2.27",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {

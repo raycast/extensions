@@ -4,7 +4,11 @@ When an asynchronous operation is happening or when an error is thrown, it's usu
 
 Additionally, Toasts can have some actions associated to the action they are about. For example, you could provide a way to cancel an asynchronous operation, undo an action, or copy the stack trace of an error.
 
-![](../../.gitbook/assets/toast.png)
+{% hint style="info" %}
+The `showToast()` will fallback to [showHUD()](./hud.md#showhud) if the Raycast window is closed.
+{% endhint %}
+
+![](../../.gitbook/assets/toast.webp)
 
 ## API Reference
 
@@ -133,11 +137,11 @@ You can hide it later by using [Toast.hide](#toast) or update the properties of 
 
 #### Enumeration members
 
-| Name     | Value                                         |
-| :------- | :-------------------------------------------- |
-| Animated | ![](../../.gitbook/assets/toast-animated.png) |
-| Success  | ![](../../.gitbook/assets/toast-success.png)  |
-| Failure  | ![](../../.gitbook/assets/toast-failure.png)  |
+| Name     | Value                                          |
+| :------- | :--------------------------------------------- |
+| Animated | ![](../../.gitbook/assets/toast-animated.webp) |
+| Success  | ![](../../.gitbook/assets/toast-success.webp)  |
+| Failure  | ![](../../.gitbook/assets/toast-failure.webp)  |
 
 ### Toast.ActionOptions
 

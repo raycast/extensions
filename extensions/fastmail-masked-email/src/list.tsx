@@ -1,127 +1,211 @@
-import { useEffect, useState } from "react";
-import { Color, List, Icon, Image, ActionPanel, Action } from "@raycast/api";
-import { APIRequest, makeRequest, getSession } from "./api";
+import { Action, ActionPanel, Color, Icon, Image, List, Toast, showToast } from "@raycast/api";
+import { useEffect, useMemo, useState } from "react";
+import { MaskedEmail, MaskedEmailState, updateMaskedEmailState, retrieveAllMaskedEmails } from "./fastmail";
 
-type ListMaskedEmail = {
-  accountId?: string;
-  get: {
-    ids: [string] | null;
-  };
-};
-
-type MaskedEmail = {
-  id: string;
-  email: string;
-  state: "pending" | "enabled" | "disabled" | "deleted";
-  forDomain: string;
-  description: string;
-  url: string | null;
-  lastMessageAt: string;
-};
-
-type MaskedEmailGet = {
-  list: [MaskedEmail];
-};
-
-const MaskedEmailCapability = "https://www.fastmail.com/dev/maskedemail";
+type MaskedEmailStateFilter = MaskedEmailState | "";
 
 export default function Command() {
   const [maskedEmails, setMaskedEmails] = useState<MaskedEmail[]>([]);
+  const [filter, setFilter] = useState<MaskedEmailStateFilter>("");
+
+  const updateMaskedEmail = async (email: MaskedEmail, state: MaskedEmailState) => {
+    await updateMaskedEmailState(email, state);
+
+    setMaskedEmails(maskedEmails.map((e) => (e.id === email.id ? { ...e, state } : e)));
+  };
+
+  const toggleMaskedEmail = async (email: MaskedEmail) => {
+    const state = email.state === MaskedEmailState.Enabled ? MaskedEmailState.Disabled : MaskedEmailState.Enabled;
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: `${state === MaskedEmailState.Disabled ? "Blocking" : "Unblocking"} masked email...`,
+    });
+
+    try {
+      await updateMaskedEmail(email, state);
+
+      toast.style = Toast.Style.Success;
+      toast.title = `Masked email ${state === MaskedEmailState.Disabled ? "blocked" : "unblocked"}`;
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = `Failed to ${state === MaskedEmailState.Disabled ? "block" : "unblock"} masked email`;
+      toast.message =
+        error instanceof Error
+          ? error.message
+          : "An error occurred while updating the masked email, please try again later";
+    }
+  };
+
+  const deleteMaskedEmail = async (email: MaskedEmail) => {
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Deleting masked email..." });
+
+    try {
+      await updateMaskedEmail(email, MaskedEmailState.Deleted);
+
+      toast.style = Toast.Style.Success;
+      toast.title = "Masked email deleted";
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed to delete masked email";
+      toast.message =
+        error instanceof Error
+          ? error.message
+          : "An error occurred while updating the masked email, please try again later";
+    }
+  };
+
+  const restoreMaskedEmail = async (email: MaskedEmail) => {
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Restoring masked email..." });
+
+    try {
+      await updateMaskedEmail(email, MaskedEmailState.Enabled);
+
+      toast.style = Toast.Style.Success;
+      toast.title = "Masked email restored";
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed to restore masked email";
+      toast.message =
+        error instanceof Error
+          ? error.message
+          : "An error occurred while updating the masked email, please try again later";
+    }
+  };
 
   useEffect(() => {
     const listMaskedEmails = async () => {
-      const session = await getSession();
-      const request: APIRequest<ListMaskedEmail> = {
-        using: ["urn:ietf:params:jmap:core", MaskedEmailCapability],
-        methodCalls: [
-          [
-            "MaskedEmail/get",
-            {
-              accountId: session.primaryAccounts[MaskedEmailCapability],
-              get: {
-                ids: null,
-              },
-            },
-            "0",
-          ],
-        ],
-      };
+      const emails = await retrieveAllMaskedEmails();
 
-      try {
-        const response = await makeRequest<ListMaskedEmail, MaskedEmailGet>({ request });
-        const emails: MaskedEmail[] = response.methodResponses[0][1].list;
-
-        const sortOrder: { [key in MaskedEmail["state"]]: number } = {
-          deleted: 0,
-          disabled: 1,
-          pending: 2,
-          enabled: 3,
-        };
-        emails.sort((lhs, rhs) => sortOrder[rhs.state] - sortOrder[lhs.state]);
-        setMaskedEmails(emails);
-      } catch (error) {
-        throw new Error(`Failed to list masked emails: ${error}`);
-      }
+      setMaskedEmails(emails);
     };
 
     listMaskedEmails().catch(console.error);
   }, []);
 
+  const filteredSortedMaskedEmails = useMemo(() => {
+    const sortOrder: { [key in MaskedEmailState]: number } = {
+      [MaskedEmailState.Deleted]: 0,
+      [MaskedEmailState.Disabled]: 1,
+      [MaskedEmailState.Pending]: 2,
+      [MaskedEmailState.Enabled]: 3,
+    };
+
+    return maskedEmails
+      .filter((email) => {
+        if (filter === "") {
+          return true;
+        }
+
+        return email.state === filter;
+      })
+      .sort((lhs, rhs) => new Date(rhs.createdAt).getTime() - new Date(lhs.createdAt).getTime())
+      .sort((lhs, rhs) => sortOrder[rhs.state] - sortOrder[lhs.state]);
+  }, [maskedEmails, filter]);
+
   return (
-    <List isLoading={maskedEmails.length <= 0}>
-      {maskedEmails.map((email) => (
-        <List.Item
-          icon={iconForMaskedEmail(email)}
-          key={email.id}
-          title={email.email}
-          subtitle={email.forDomain || email.description}
-          keywords={[email.description]}
-          accessories={[accessoryForMaskedEmail(email)]}
-          actions={
-            <ActionPanel title={email.email}>
-              <Action.CopyToClipboard title="Copy Masked Email" content={email.email} />
-            </ActionPanel>
-          }
-        />
-      ))}
+    <List
+      isLoading={maskedEmails.length <= 0}
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Select Masked Email State"
+          onChange={(value) => {
+            setFilter(value as MaskedEmailStateFilter);
+          }}
+        >
+          <List.Dropdown.Item title="All" value={""} />
+          <List.Dropdown.Item title="Active" value={MaskedEmailState.Enabled} />
+          <List.Dropdown.Item title="Blocked" value={MaskedEmailState.Disabled} />
+          <List.Dropdown.Item title="Pending" value={MaskedEmailState.Pending} />
+          <List.Dropdown.Item title="Deleted" value={MaskedEmailState.Deleted} />
+        </List.Dropdown>
+      }
+    >
+      {filteredSortedMaskedEmails.map((email) => {
+        const canBlockUnblock = [MaskedEmailState.Enabled, MaskedEmailState.Disabled].includes(email.state);
+        const canRestore = email.state === MaskedEmailState.Deleted;
+        const canView = email.state !== MaskedEmailState.Pending;
+
+        return (
+          <List.Item
+            icon={iconForMaskedEmail(email)}
+            key={email.id}
+            title={email.email}
+            subtitle={email.forDomain || email.description}
+            keywords={[email.description, email.forDomain]}
+            accessories={[
+              { date: new Date(email.createdAt), tooltip: `Created ${new Date(email.createdAt).toLocaleString()}` },
+              accessoryForMaskedEmail(email),
+            ]}
+            actions={
+              <ActionPanel title={email.email}>
+                <Action.CopyToClipboard title="Copy Masked Email" content={email.email} />
+                {canBlockUnblock && (
+                  <Action
+                    icon={email.state === MaskedEmailState.Enabled ? Icon.Stop : Icon.Play}
+                    title={`${email.state === MaskedEmailState.Enabled ? "Block" : "Unblock"} Masked Email`}
+                    onAction={() => toggleMaskedEmail(email)}
+                  />
+                )}
+                {canBlockUnblock && (
+                  <Action icon={Icon.Trash} title="Delete Masked Email" onAction={() => deleteMaskedEmail(email)} />
+                )}
+                {canRestore && (
+                  <Action icon={Icon.Undo} title="Restore Masked Email" onAction={() => restoreMaskedEmail(email)} />
+                )}
+                {canView && (
+                  <Action.OpenInBrowser
+                    title="View in Fastmail"
+                    url={`https://app.fastmail.com/settings/masked/${email.id}`}
+                  />
+                )}
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 }
 
 const iconForMaskedEmail: (maskedEmail: MaskedEmail) => Image = (maskedEmail) => {
   switch (maskedEmail.state) {
-    case "pending":
+    case MaskedEmailState.Pending:
       return { source: Icon.Pause, tintColor: Color.Blue };
 
-    case "deleted":
+    case MaskedEmailState.Deleted:
       return { source: Icon.Trash, tintColor: Color.Red };
 
-    case "enabled":
+    case MaskedEmailState.Enabled:
       return { source: Icon.Check, tintColor: Color.Green };
 
-    case "disabled":
+    case MaskedEmailState.Disabled:
       return { source: Icon.Stop, tintColor: Color.Orange };
   }
 };
 
 const accessoryForMaskedEmail: (maskedEmail: MaskedEmail) => List.Item.Accessory = (maskedEmail) => {
   let color: Color;
+  let value: string;
 
   switch (maskedEmail.state) {
-    case "pending":
+    case MaskedEmailState.Pending:
       color = Color.Blue;
+      value = "Pending";
       break;
 
-    case "deleted":
+    case MaskedEmailState.Deleted:
       color = Color.Red;
+      value = "Deleted";
       break;
 
-    case "enabled":
+    case MaskedEmailState.Enabled:
       color = Color.Green;
+      value = "Active";
       break;
 
-    case "disabled":
+    case MaskedEmailState.Disabled:
       color = Color.Orange;
+      value = "Blocked";
       break;
   }
 
@@ -130,5 +214,5 @@ const accessoryForMaskedEmail: (maskedEmail: MaskedEmail) => List.Item.Accessory
   // color to the provided color and sets a transparent background with the
   // same color. Whereas text only sets the text color. We add a `null` tooltip
   // to make TypeScript happy.
-  return { tag: { value: maskedEmail.state, color }, tooltip: null };
+  return { tag: { value, color }, tooltip: null };
 };

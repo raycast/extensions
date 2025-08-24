@@ -1,5 +1,18 @@
 # Wireguard Changelog
 
+## [Add Toasts and Huds] - 2024-12-03
+
+- `showToast` then `showHud` on **toggle**
+- `showToast` then `showHud` on **disconnectAll**
+
+## [Fixed] - 2023-11-28
+
+- Fixed VPN not starting via `scutil` with too long a name
+
+## [Fixed] - 2023-11-23
+
+- Fixed the issue where quotes at the end of a name were omitted when the name was more than 30 characters long
+
 ## [Feature] - 2023-04-26
 
 - Add the feature of displaying national flags.
@@ -10,7 +23,7 @@
 
 ## [Feature] - 2023-03-24
 
-- Add disconnectAllWireguardConnections command.
+- Add `disconnectAllWireguardConnections` command.
 
 ## [Fixed] - 2023-03-23
 

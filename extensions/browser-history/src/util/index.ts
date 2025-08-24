@@ -13,6 +13,7 @@ import {
   defaultProfilePathSafari,
   defaultProfilePathVivaldi,
   defaultProfilePathOrion,
+  defaultProfilePathSidekick,
 } from "../constants";
 
 const userLibraryDirectoryPath = () => {
@@ -46,6 +47,7 @@ export const getHistoryDbPath = (browser: SupportedBrowsers) => {
     profilePathOpera,
     profilePathIridium,
     profilePathOrion,
+    profilePathSidekick,
   } = getPreferenceValues<Preferences>();
   const userDataDirectory = userLibraryDirectoryPath();
   let profilePath, profileName;
@@ -96,6 +98,10 @@ export const getHistoryDbPath = (browser: SupportedBrowsers) => {
       return profilePathOrion
         ? path.join(profilePathOrion, "history")
         : path.join(userDataDirectory, ...defaultProfilePathOrion);
+    case SupportedBrowsers.Sidekick:
+      return profilePathSidekick
+        ? path.join(profilePathSidekick, "History")
+        : path.join(userDataDirectory, ...defaultProfilePathSidekick);
     default:
       throw new Error("Unsupported browser.");
   }

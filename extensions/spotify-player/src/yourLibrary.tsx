@@ -7,7 +7,8 @@ import { AlbumsSection } from "./components/AlbumsSection";
 import { TracksSection } from "./components/TracksSection";
 import { PlaylistsSection } from "./components/PlaylistsSection";
 import { ShowsSection } from "./components/ShowsSection";
-import { EpisodesSection } from "./components/EpisodessSection";
+import { EpisodesSection } from "./components/EpisodesSection";
+import { getPreferenceValues } from "@raycast/api";
 
 const filters = {
   all: "All",
@@ -23,9 +24,9 @@ type FilterValue = keyof typeof filters;
 
 function YourLibraryCommand() {
   const [searchText, setSearchText] = useState("");
-  const [searchFilter, setSearchFilter] = useState<FilterValue>("all");
+  const [searchFilter, setSearchFilter] = useState<FilterValue>(getPreferenceValues()["Default-View"] ?? filters.all);
   const { myLibraryData, myLibraryIsLoading } = useYourLibrary({
-    options: { keepPreviousData: true },
+    keepPreviousData: true,
   });
 
   const sharedProps: ComponentProps<typeof List> = {
@@ -70,7 +71,6 @@ function YourLibraryCommand() {
               limit={searchText ? undefined : 6}
               tracks={myLibraryData?.tracks?.items}
               title="Liked Songs"
-              queueTracks
             />
             <ShowsSection type="list" limit={searchText ? undefined : 6} shows={myLibraryData?.shows?.items} />
             <EpisodesSection
@@ -81,9 +81,7 @@ function YourLibraryCommand() {
           </>
         )}
 
-        {searchFilter === "tracks" && (
-          <TracksSection tracks={myLibraryData?.tracks?.items} title="Liked Songs" queueTracks />
-        )}
+        {searchFilter === "tracks" && <TracksSection tracks={myLibraryData?.tracks?.items} title="Liked Songs" />}
         {searchFilter === "episodes" && (
           <EpisodesSection episodes={myLibraryData?.episodes?.items} title="Saved Episodes" />
         )}

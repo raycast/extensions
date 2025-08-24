@@ -1,14 +1,14 @@
 import { ActionPanel, Action, Icon, Form, showToast, Toast, LaunchProps } from "@raycast/api";
-import { useState } from "react";
-import { DNSRecord, DNSRecordType } from "./utils/types";
-import { editRecordByDomainAndId, editRecordByDomainSubdomainAndType } from "./utils/api";
-import { DNS_RECORD_TYPES } from "./utils/constants";
-import { FormValidation, useForm } from "@raycast/utils";
+import { useEffect, useState } from "react";
+import { DNSRecord, DNSRecordType, Domain } from "./utils/types";
+import { editRecordByDomainAndId, editRecordByDomainSubdomainAndType, retrieveAllDomains } from "./utils/api";
+import { API_DOCS_URL, DNS_RECORD_TYPES, MINIMUM_TTL } from "./utils/constants";
+import { FormValidation, getFavicon, useCachedState, useForm } from "@raycast/utils";
 
 type EditRecordProps = {
   domain: string;
 } & DNSRecord;
-export default function EditDNSRecord(props: LaunchProps<{ arguments: EditRecordProps }>) {
+export default function EditDNSRecord(props: LaunchProps<{ launchContext: EditRecordProps }>) {
   interface FormValues {
     id: string;
     domain: string;
@@ -19,18 +19,31 @@ export default function EditDNSRecord(props: LaunchProps<{ arguments: EditRecord
     prio?: string;
   }
 
-  const propDomain = props.arguments.domain;
+  const propDomain = props.launchContext?.domain;
+  const propName = props.launchContext?.name;
 
-  const propName = props.arguments.name;
-  const nameWithoutDomain = propDomain ? propName?.slice(0, -propDomain.length) : "";
-  const initialName = nameWithoutDomain
-    ? ""
-    : nameWithoutDomain[nameWithoutDomain.length - 1] === "."
-    ? nameWithoutDomain.slice(0, -1)
-    : nameWithoutDomain;
+  const initialName = propDomain && propName ? propName.slice(0, -propDomain.length - 1) : "";
 
   const [isLoading, setIsLoading] = useState(false);
   const [edit, setEdit] = useState("domainAndID");
+
+  const [domains, setDomains] = useCachedState<Domain[]>("domains");
+  async function getDomainsFromApi() {
+    setIsLoading(true);
+    const response = await retrieveAllDomains();
+    if (response.status === "SUCCESS") {
+      setDomains(response.domains);
+      showToast({
+        style: Toast.Style.Success,
+        title: "SUCCESS",
+        message: `Fetched ${response.domains.length} domains`,
+      });
+    }
+    setIsLoading(false);
+  }
+  useEffect(() => {
+    if (!domains) getDomainsFromApi();
+  }, []);
 
   const navigationTitle = "Edit DNS Record";
   const { handleSubmit, itemProps } = useForm<FormValues>({
@@ -91,7 +104,7 @@ export default function EditDNSRecord(props: LaunchProps<{ arguments: EditRecord
       ttl: (value) => {
         if (value) {
           if (Number(value)) {
-            if (Number(value) < 600) return "Minimum TTL is 600";
+            if (Number(value) < MINIMUM_TTL) return `Minimum TTL is ${MINIMUM_TTL}`;
           } else {
             return "TTL must be a number";
           }
@@ -102,12 +115,12 @@ export default function EditDNSRecord(props: LaunchProps<{ arguments: EditRecord
     },
     initialValues: {
       domain: propDomain || "",
-      id: props.arguments.id || "",
+      id: props.launchContext?.id || "",
       name: initialName,
-      type: (props.arguments.type as string) || DNS_RECORD_TYPES[0].type,
-      content: props.arguments.content || "",
-      ttl: props.arguments.ttl || "600",
-      prio: props.arguments.prio || "",
+      type: (props.launchContext?.type as string) || DNS_RECORD_TYPES[0].type,
+      content: props.launchContext?.content || "",
+      ttl: props.launchContext?.ttl || MINIMUM_TTL.toString(),
+      prio: props.launchContext?.prio || "",
     },
   });
 
@@ -126,7 +139,7 @@ export default function EditDNSRecord(props: LaunchProps<{ arguments: EditRecord
           <Action.OpenInBrowser
             icon={Icon.Globe}
             title="Go to API Reference"
-            url="https://porkbun.com/api/json/v3/documentation#DNS%20Edit%20Record%20by%20Domain%20and%20ID"
+            url={`${API_DOCS_URL}DNS%20Edit%20Record%20by%20Domain%20and%20ID`}
           />
         </ActionPanel>
       }
@@ -138,13 +151,22 @@ export default function EditDNSRecord(props: LaunchProps<{ arguments: EditRecord
       <Form.Description text={description} />
       <Form.Separator />
 
-      <Form.TextField title="Domain" placeholder="Enter domain" {...itemProps.domain} />
+      <Form.Dropdown title="Domain" {...itemProps.domain}>
+        {domains?.map((item) => (
+          <Form.Dropdown.Item
+            key={item.domain}
+            title={item.domain}
+            value={item.domain}
+            icon={getFavicon(`https://${item.domain}`)}
+          />
+        ))}
+      </Form.Dropdown>
       {edit === "domainAndID" && <Form.TextField title="ID" placeholder="Enter id" {...itemProps.id} />}
       {edit === "domainAndID" && <Form.Separator />}
       <Form.Dropdown
         title="Type"
         info={`The type of record being created. Valid types are: ${DNS_RECORD_TYPES.map((record) => record.type).join(
-          ", "
+          ", ",
         )}`}
         {...itemProps.type}
       >
@@ -153,7 +175,7 @@ export default function EditDNSRecord(props: LaunchProps<{ arguments: EditRecord
         ))}
       </Form.Dropdown>
       <Form.TextField
-        title="Name"
+        title="Name (optional)"
         placeholder="_port._protocol (_100._tcp)"
         info="The subdomain for the record being created, not including the domain itself. Leave blank to create a record on the root domain. Use * to create a wildcard record."
         {...itemProps.name}
@@ -178,7 +200,7 @@ export default function EditDNSRecord(props: LaunchProps<{ arguments: EditRecord
       <Form.TextField
         title="TTL"
         placeholder="Enter TTL"
-        info="The time to live in seconds for the record. The minimum and the default is 600 seconds."
+        info={`The time to live in seconds for the record. The minimum and the default is ${MINIMUM_TTL} seconds.`}
         {...itemProps.ttl}
       />
       {DNS_RECORD_TYPES.some((record) => record.type === itemProps.type.value && record.hasPriority) && (

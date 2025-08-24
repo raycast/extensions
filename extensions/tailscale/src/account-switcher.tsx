@@ -21,19 +21,33 @@ interface User {
 function loadUsers(unparsedUsers: string[]) {
   const users: User[] = [];
 
+  if (unparsedUsers[0]?.startsWith("ID")) {
+    // skip 'ID Tailnet Account' header if present
+    unparsedUsers = unparsedUsers.slice(1);
+  }
+
   for (const unparsedUser of unparsedUsers as string[]) {
-    const unparsedUserList: string[] = unparsedUser.split(" ");
+    const unparsedUserList: string[] = unparsedUser.split(" ").filter(Boolean);
     let user = {} as User;
 
-    if (unparsedUserList.length == 2) {
+    if (unparsedUserList.length == 3) {
+      // accounts with 'ID Tailnet Account'
       user = {
-        active: true,
-        name: unparsedUserList[0],
+        name: unparsedUserList[1],
+        active: unparsedUserList[2].includes("*"),
       };
-    } else if (unparsedUserList.length == 1) {
+    } else if (unparsedUserList.length == 2) {
+      // accounts with empty tailnet name
       user = {
-        active: false,
-        name: unparsedUserList[0],
+        name: unparsedUserList[1].replace(/\*$/, ""),
+        active: unparsedUserList[1].includes("*"),
+      };
+    }
+    if (unparsedUserList.length == 1) {
+      // older clients
+      user = {
+        name: unparsedUserList[0].replace(/\*$/, ""),
+        active: unparsedUserList[0].includes("*"),
       };
     }
 
@@ -42,7 +56,7 @@ function loadUsers(unparsedUsers: string[]) {
   return users;
 }
 
-function AccountSwitchList() {
+export default function AccountSwitchList() {
   const [users, setUsers] = useState<User[]>();
   const [error, setError] = useState<ErrorDetails>();
   useEffect(() => {
@@ -53,7 +67,7 @@ function AccountSwitchList() {
         const _list = loadUsers(data);
         setUsers(_list);
       } catch (error) {
-        setError(getErrorDetails(error, "Couldn't load users."));
+        setError(getErrorDetails(error, "Couldn’t load users."));
       }
     }
     fetch();
@@ -105,8 +119,4 @@ function AccountSwitchList() {
       )}
     </List>
   );
-}
-
-export default function Command() {
-  return <AccountSwitchList />;
 }

@@ -47,7 +47,7 @@ export function getWorkflowStatus(workflow_run: WorkflowRun): List.Item.Props["i
           };
         case "cancelled":
           return {
-            value: { source: Icon.MinusCircle, tintColor: Color.Red },
+            value: { source: Icon.MinusCircle, tintColor: Color.SecondaryText },
             tooltip: `Status: Cancelled`,
           };
         case "skipped":

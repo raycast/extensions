@@ -1,6 +1,16 @@
 # Slack
 
+This Raycast extension is the perfect companion for Slack users. It allows you to:
+
+- Quickly open Slack channels
+- Search for messages
+- See unread messages,
+- Snooze notifications
+- Set your presence status
+
 ## How to get an access token?
+
+If you don't want to log in through OAuth, you can use an access token instead. Here's how to get one:
 
 1. Open https://api.slack.com/apps/
 2. Click Button `Create New App`
@@ -15,44 +25,50 @@
     oauth_config:
       scopes:
         user:
-          # Command: Search & Unread Messages & Set Presence
-          - users:read
+         # Command: Search & Unread Messages & Set Presence
+         - users:read
 
-          # Command: Search & Unread Messages
-          - channels:read
-          - groups:read
-          - im:read
-          - mpim:read
+         # Command: Search & Unread Messages
+         - channels:read
+         - groups:read
+         - im:read
+         - mpim:read
 
-          # Command: Unread Messages
-          - channels:history
-          - groups:history
-          - im:history
-          - mpim:history
+         # Command: Search
+         - search:read
 
-          # Command: Unread Messages (optional - needed for marking conversations as read)
-          - channels:write
-          - groups:write
-          - im:write
-          - mpim:write
+         # Command: Unread Messages
+         - channels:history
+         - groups:history
+         - im:history
+         - mpim:history
 
-          # Command: Set Presence
-          - users:write
+         # Command: Unread Messages (optional - needed for marking conversations as read)
+         - channels:write
+         - groups:write
+         - im:write
+         - mpim:write
 
-          # Command: Set Snooze
-          - dnd:read
-          - dnd:write
-    settings:
-      org_deploy_enabled: false
-      socket_mode_enabled: false
-      token_rotation_enabled: false
-    ```
+         # Command: Set Presence
+         - users:write
+
+         # Command: Set Snooze
+         - dnd:read
+         - dnd:write
+
+         # Command: Send Message
+         - chat:write
+
+         # Command: Search Emojis
+         - emoji:read
+
+   settings:
+     org_deploy_enabled: false
+     socket_mode_enabled: false
+     token_rotation_enabled: false
+   ```
 
 6. Confirm creation of app
 7. Press `Install to Workspace`
 8. Get your personal access token from `Features -> OAuth & Permissions` (section `OAuth Tokens for Your Workspace`).  
    Your personal access token will start with `xoxp-`.
-
-## Validate your Slack API Token after extension updates
-
-After extension updates in which new features were introduced you might be kindly asked for validating the permission scopes of your Slack API Token. If they differ from those scopes that are mentioned in this README your action is required: To get the extension running again you need to update the permission scopes of your existing Slack API Token or create a completely new Token by following the instructions above.

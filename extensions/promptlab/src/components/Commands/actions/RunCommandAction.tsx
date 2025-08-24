@@ -1,21 +1,22 @@
 import { Action, Icon } from "@raycast/api";
-import { Command, StoreCommand, isCommand, isTrueStr } from "../../../utils/types";
+import { isTrueStr } from "../../../lib/common/types";
+import { Command, PLCommandRunProperties, StoreCommand, isCommand } from "../../../lib/commands/types";
 import CommandResponse from "../CommandResponse";
-import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";
-import { getActionShortcut, isActionEnabled } from "../../../utils/action-utils";
+import { getActionShortcut, isActionEnabled } from "../../../lib/actions";
+import { AdvancedSettings } from "../../../data/default-advanced-settings";
 
 /**
  * Action to run a command.
  * @param props.command The command to run.
  * @param props.setCommands The function to update the list of installed commands.
- * @returns {JSX.Element} The action component.
  */
 export default function RunCommandAction(props: {
   command: Command | StoreCommand;
-  setCommands?: React.Dispatch<React.SetStateAction<Command[]>>;
-  settings: typeof defaultAdvancedSettings;
-}): JSX.Element | null {
-  const { command, setCommands, settings } = props;
+  setCommands?: (commands: Command[]) => void;
+  settings: AdvancedSettings;
+  onCompletion?: (newRun: PLCommandRunProperties) => void;
+}) {
+  const { command, setCommands, settings, onCompletion } = props;
 
   if (!isActionEnabled("RunCommandAction", settings)) {
     return null;
@@ -26,7 +27,7 @@ export default function RunCommandAction(props: {
       title="Run PromptLab Command"
       target={
         <CommandResponse
-          commandName={command.name}
+          command={command as Command}
           prompt={command.prompt}
           options={{
             minNumFiles: parseInt(command.minNumFiles as string),
@@ -52,12 +53,13 @@ export default function RunCommandAction(props: {
             setupConfig: isCommand(command)
               ? command.setupConfig
               : command.setupConfig
-              ? JSON.parse(command.setupConfig)
-              : undefined,
+                ? JSON.parse(command.setupConfig)
+                : undefined,
             useSpeech: isTrueStr(command.useSpeech),
             speakResponse: isTrueStr(command.speakResponse),
           }}
           setCommands={setCommands}
+          onCompletion={onCompletion}
         />
       }
       icon={Icon.ArrowRight}

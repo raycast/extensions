@@ -1,5 +1,158 @@
 # Todoist Changelog
 
+## [Fixed Create Task Project and Assignee Assignment] - 2025-08-22
+
+- **Fixed Create Task API Issue**: Switched from `quickAddTask` to `addTask` API to use structured parameters instead of relying on server-side NLP parsing
+- **Direct Parameter Passing**: Form selections (project, assignee, labels, priority, dates) are now passed directly to the API instead of being embedded in text content
+- **Content Cleaning**: Automatically removes embedded project references (like "#ProjectName") from task content when projects are selected via dropdown, preventing duplication and keeping task titles clean
+- **Fixed Date Handling**: Resolved timezone issue where selected dates were shifting to the wrong day by using local date format instead of UTC conversion
+- **Maintained NLP Fallback**: Natural language parsing still works when users type project names and assignees in the content field
+- **Resolved Issue #21076**: Tasks created through Raycast now properly assign to selected projects and assignees instead of ending up in Inbox with "#ProjectName" appended to titles
+
+## [Fix Today view showing tomorrow's tasks] - 2025-08-19
+
+- **Fixed Today view filtering**: Resolved an issue where recurring tasks due tomorrow were incorrectly appearing in the Today view
+- **Improved date comparison logic**: Enhanced the date filtering algorithm to properly handle timezone differences and recurring task dates
+- **Fixed task grouping**: Ensured that filtered tasks are properly grouped without including unfiltered future tasks
+- **Better timezone handling**: Tasks are now compared at midnight in local timezone to avoid time-of-day confusion
+
+## [Enhanced Natural Language Task Creation] - 2025-08-13
+
+- **Smart NLP Parsing**: Added comprehensive natural language parsing for task creation with real-time form updates
+- **Bidirectional Sync**: Type parameters in the title OR use dropdowns - both update each other seamlessly
+- **Priority Support**: Use p1-p4 notation (p1=urgent, p2=high, p3=medium, p4=low) that maps to Todoist priority values
+- **Project Recognition**: Support for #ProjectName or #"Project Name" (with quotes for spaces) with smart shortest-first matching
+- **Label Detection**: Support for @label or @"Label Name" (with quotes for spaces) with intelligent case-insensitive matching
+- **Natural Date Parsing**: Advanced date recognition using chrono-node library supporting patterns like:
+  - Simple dates: "tomorrow", "next monday", "march 15"
+  - Times: "tomorrow at 3pm", "monday at 12:30"
+  - Relative: "in 3 days", "in 2 weeks"
+  - Complex: "next friday at 2pm", "monday morning"
+- **Deadline Support**: Use {date} notation for deadline parsing (e.g., {march 30}, {next month})
+- **Tiered Matching System**: Advanced matching algorithm with 4-tier priority:
+  1. Exact match (case-sensitive, with emojis)
+  2. Case-insensitive match (with emojis)
+  3. Emoji-insensitive match (case-sensitive)
+  4. Fully normalized match (case-insensitive, no emojis)
+- **Conflict Resolution**: "Last action wins" timestamp-based resolution for competing updates
+- **Smart Text Preservation**: Precise parameter replacement that maintains original text structure
+- **Todoist-Style API**: Always uses quickAddTask API for consistent behavior with native Todoist
+- **Enhanced User Experience**: Updated info message with clear examples and emoji-enhanced formatting
+
+## [Windows support] - 2025-07-24
+
+- Added Windows support
+
+## [Add task priority mapping for Todoist API] - 2025-06-12
+ - Add a priority mapping function to ensure the user-selected priority aligns with the priority value used in the backend.
+
+## [Use confetti when completing tasks] - 2025-05-28
+- Add option to use the Raycast confetti command when completing tasks.
+
+## [Automatically create labels on quick add command] - 2025-05-09
+
+- Add option to automatically crete labels in the quick add command
+
+## [AI Fix] - 2025-04-15
+
+- Fixed AI not being able to get tasks
+
+## [New API] - 2025-04-14
+
+- Used new Todoist API
+- Renamed `Home` to `My Tasks`
+- Improved error handling
+- Improved app detection
+- Upgraded dependencies
+- Fixed a few bugs
+
+## [Add Default Sorting in Menu Bar] - 2025-03-31
+
+Added same sorting order as Todoist home and web app.
+
+## [Support Commas in Filters] - 2025-03-28
+
+Add support for commas in filter strings.
+
+## [Added Inbox View in Menu Bar] - 2025-03-25
+
+Added a new option for Inbox in View under Menu Bar Tasks.
+
+## [Added contributors] - 2025-03-15
+
+## [Removal of Deadline Feature for Non-Premium Users] - 2025-02-28
+
+The deadline field has been removed from the task creation process for users without a premium subscription.
+
+## [Close Window When Creating a Task] - 2025-02-28
+
+Added an option to close the window immediately after creating a task with the `Create Task` command.
+
+## [AI Extension Improvements] - 2025-02-27
+
+Improve the AI Extension to only retrieve relevant tasks, comments, projects, and sections from the REST API to avoid bloating the AI with too much data.
+
+## [Add Schedule Task Deadline Actions] - 2025-02-26
+
+It's now possible to adjust a task's deadline from the actions menu and the menubar. You can use the following shortcut from a task list item: `⌥` + `⇧` + `D`.
+
+## [✨ AI Enhancements] - 2025-02-21
+
+## [Add Next Task as Title in Menu Bar] - 2025-02-20
+
+Added option to display the next upcoming task in the menu bar title when no task is selected. This can be enabled in preferences.
+
+## [Fix Default Sorting] - 2025-02-20
+
+Change the default sorting to align with the task order in Todoist.
+
+## [Add time format preference from Todoist preferences] - 2025-02-17
+
+- Raycast now pulls your preferred time format preference from the Todoist user account's settings and then uses that when displaying time
+
+## [Add Complete Task Shortcut Preferences] - 2025-01-31
+
+- Adjusting shortcuts for the following task actions:
+  - Complete Task - Now `⌘` + `Enter` (previously `shift` + `⌘` + `E`)
+  - Open Task in Todoist - Now `⌘` + `O` (previously `⌘` + `Enter`)
+
+## [Add Support for Task Deadlines] - 2025-01-31
+
+It's now possible to specify a deadline when using the `Create Task` command. Deadlines are displayed in the task list and task details views.
+
+## [Quick Add Task Improvement] - 2024-12-02
+
+Added a pop to the root and cleared the search bar after creating a task for the `close window immediately` preference.
+
+## [Menu Bar Command Fixes] - 2024-08-05
+
+Changed Menu bar icon color contrast issue with certain wallpapers in light mode.
+
+## [Focus Label] - 2024-07-12
+
+Adds a preference to set a specified label for the task in focus. The label will be removed when the task is not in focus.
+This helps filter in-focus tasks on Todoist UI. The label will only be applied if the preference textfield is not empty.
+
+## [Todoist Quicklinks] - 2024-07-09
+
+- Added a new action to create quicklinks for various views in Todoist (e.g., Today, specific projects, etc.).
+
+## [Fixes] - 2024-07-03
+
+Completing tasks or other action no longer throw errors if menu bar command is not activated.
+
+## [Add time to Schedule Task action] - 2024-01-25
+
+It's now possible to specify a time when scheduling a task from the list item.
+
+## [Change Menu Bar Icon Color in Dark Mode] - 2024-01-22
+
+Changed Menu bar icon color in dark mode to #e5e5e5.
+
+## [Show filters and filter tasks] - 2023-12-18
+
+You can now view your Todoist filters and see all tasks associated with a selected filter.
+
 ## [Focused task] - 2023-10-30
 
 You can now directly open the focused task via a Raycast command.

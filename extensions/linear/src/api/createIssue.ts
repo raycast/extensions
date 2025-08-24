@@ -1,11 +1,12 @@
+import { getLinearClient } from "../api/linearClient";
+
 import { IssueFragment, IssueResult } from "./getIssues";
-import { getLinearClient } from "../helpers/withLinearClient";
 
 export type CreateIssuePayload = {
   title: string;
   description?: string;
-  stateId: string;
-  labelIds: string[];
+  stateId?: string;
+  labelIds?: string[];
   priority: number;
   teamId: string;
   dueDate: Date | null;
@@ -21,9 +22,13 @@ export async function createIssue(payload: CreateIssuePayload) {
   const { graphQLClient } = getLinearClient();
 
   const title = payload.title.replace(/"/g, "\\$&");
-  const description = payload.description?.replace(/\n/g, "\\n").replace(/"/g, "\\$&");
+  const description = payload.description?.replace(/\n/g, "\\n")?.replace(/"/g, "\\$&");
 
-  let issueCreateInput = `teamId: "${payload.teamId}", title: "${title}", description: "${description}", priority: ${payload.priority}, stateId: "${payload.stateId}"`;
+  let issueCreateInput = `teamId: "${payload.teamId}", title: "${title}", description: "${description}", priority: ${payload.priority}`;
+
+  if (payload.stateId) {
+    issueCreateInput += `, stateId: "${payload.stateId}"`;
+  }
 
   if (payload.estimate) {
     issueCreateInput += `, estimate: ${payload.estimate}`;
@@ -70,7 +75,7 @@ export async function createIssue(payload: CreateIssuePayload) {
           }
         }
       }
-    `
+    `,
   );
 
   return { success: data?.issueCreate.success, issue: data?.issueCreate.issue };
@@ -103,7 +108,7 @@ export async function createSubIssue(payload: CreateSubIssuePayload) {
           success
         }
       }
-    `
+    `,
   );
 
   return { success: data?.issueCreate.success };

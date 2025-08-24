@@ -1,5 +1,34 @@
 # Toothpick Changelog
 
+## [AI Tools] - 2025-02-21
+
+- Added AI tools for viewing, connecting and disconnecting Bluetooth devices.
+
+## [Hotfix] - 2025-01-21
+
+- Add an action for copying the device name
+
+## [Hotfix] - 2024-05-15
+
+- Fixed device not disconnecting sometimes on AppleScript backend.
+
+## [QoL Improvements] - 2024-05-06
+
+- Extended favorite devices functionality to toggle specific devices
+
+## [Update] - 2024-05-02
+
+- Fixed an error when using deeplink in background
+
+## [Update] - 2024-04-22
+
+- Updated dependencies
+- Fixed an error when using deeplink in background
+
+## [QoL Improvements] - 2023-11-30
+
+- Extended favorite devices functionality to disconnecting from specific devices
+
 ## [QoL Improvements and Device Additions] - 2023-10-13
 
 - Added rudimentary mappings for the following devices:

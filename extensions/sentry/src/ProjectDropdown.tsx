@@ -1,16 +1,10 @@
 import { List } from "@raycast/api";
-import { getAvatarIcon } from "@raycast/utils";
 import { useProjects } from "./sentry";
 import { Project } from "./types";
 
 function ProjectDropdownItem(props: { project: Project }) {
-  return (
-    <List.Dropdown.Item
-      value={props.project.slug}
-      title={props.project.slug}
-      icon={getAvatarIcon(props.project.name, { background: props.project.color })}
-    />
-  );
+  const slug = `${props.project.organization.slug}/${props.project.slug}`;
+  return <List.Dropdown.Item value={slug} title={slug} />;
 }
 
 export function ProjectDropdown(props: {
@@ -19,8 +13,9 @@ export function ProjectDropdown(props: {
 }) {
   const { data, error } = useProjects();
 
-  function handleProjectChange(projectSlug: string) {
-    const project = data?.find((p) => p.slug === projectSlug);
+  function handleProjectChange(slug: string) {
+    const [orgSlug, projectSlug] = slug.split("/");
+    const project = data?.find((p) => p.organization.slug === orgSlug && p.slug === projectSlug);
     if (project) {
       props.onProjectChange(project);
     } else {

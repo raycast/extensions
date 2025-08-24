@@ -5,6 +5,9 @@
   "description": "Converts LaTeX text to image. Copy the image to the Clipboard.",
   "icon": "bird.png",
   "author": "Noamko",
+  "contributors": [
+    "FariaF22"
+  ],
   "categories": [
     "Design Tools",
     "Web",
@@ -22,6 +25,14 @@
       "description": "Quickly convert LaTeX to image and copy the image to the Clipboard.",
       "mode": "view",
       "preferences": [
+        {
+          "name": "background",
+          "title": "Background Color",
+          "description": "Background Color of the image.",
+          "type": "textfield",
+          "default": "transparent",
+          "required": true
+        },
         {
           "name": "svgWidth",
           "title": "SVG Width",

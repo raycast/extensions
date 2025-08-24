@@ -1,13 +1,14 @@
 import { ActionPanel, Action, Clipboard, Icon, List, showToast, Toast, Color, useNavigation } from "@raycast/api";
-import { useState, useEffect, useMemo } from "react";
+import { useAI } from "@raycast/utils";
 import { nanoid } from "nanoid";
-import { IssueResult } from "../api/getIssues";
-import useIssueDetail from "../hooks/useIssueDetail";
+import { useState, useEffect, useMemo } from "react";
+
 import { createSubIssue } from "../api/createIssue";
-import useStates from "../hooks/useStates";
+import { IssueResult } from "../api/getIssues";
 import { getErrorMessage } from "../helpers/errors";
 import { StateType } from "../helpers/states";
-import { useAI } from "@raycast/utils";
+import useIssueDetail from "../hooks/useIssueDetail";
+import useStates from "../hooks/useStates";
 
 type CreateSubIssues = {
   issue: IssueResult;
@@ -59,7 +60,7 @@ ${
 }
 
 Break down the Linear issue with this title: "${issue.title}"`,
-    { execute: !!issue && !isLoadingIssue, creativity: 0.5 }
+    { execute: !!issue && !isLoadingIssue, creativity: 0.5 },
   );
 
   // We need to wait for the initial data to be processed before rendering the list
@@ -111,8 +112,8 @@ Break down the Linear issue with this title: "${issue.title}"`,
             description: i.description,
             parentId: issue.id,
             stateId: firstUnstartedState?.id,
-          })
-        )
+          }),
+        ),
       );
 
       await showToast({ style: Toast.Style.Success, title: "Created sub-issues" });
@@ -143,7 +144,7 @@ Break down the Linear issue with this title: "${issue.title}"`,
                       }
 
                       return i;
-                    })
+                    }),
                   )
                 }
               />

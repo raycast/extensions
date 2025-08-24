@@ -1,5 +1,5 @@
 import { List } from '@raycast/api'
-import { getPreferenceUser } from 'providers'
+import { getPreferenceUser } from 'helpers/getPreferenceUser'
 import { useReducer, useState } from 'react'
 import { POLLING_INTERVAL } from '../../constants'
 import { ImageAction, ImageDetail } from './pages/images'

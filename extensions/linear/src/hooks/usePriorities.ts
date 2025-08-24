@@ -1,5 +1,6 @@
-import { getLinearClient } from "../helpers/withLinearClient";
 import { useCachedPromise } from "@raycast/utils";
+
+import { getLinearClient } from "../api/linearClient";
 
 export default function usePriorities() {
   const { linearClient } = getLinearClient();

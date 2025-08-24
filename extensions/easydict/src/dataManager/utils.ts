@@ -19,7 +19,7 @@ import {
   maxLineLengthOfChineseTextDisplay,
   maxLineLengthOfEnglishTextDisplay,
 } from "../language/languages";
-import { AppKeyStore, myPreferences } from "../preferences";
+import { myPreferences } from "../preferences";
 import {
   DictionaryType,
   ListDisplayItem,
@@ -68,7 +68,9 @@ export function getSortOrder(): string[] {
     DictionaryType.Linguee,
 
     TranslationType.OpenAI,
+    TranslationType.Gemini,
     TranslationType.DeepL,
+    TranslationType.DeepLX,
     TranslationType.Google,
     TranslationType.Bing,
     TranslationType.Apple,
@@ -355,14 +357,4 @@ export function checkIfEnableYoudaoDictionary(queryWordInfo: QueryWordInfo) {
   const enableYoudaoDictionary = myPreferences.enableYoudaoDictionary && isValidYoudaoDictionaryLanguageQuery && isWord;
   console.log(`---> enable Youdao Dictionary: ${enableYoudaoDictionary}`);
   return enableYoudaoDictionary;
-}
-
-/**
- * Check if enable Youdao API translation.
- */
-export function hasYoudaoAppKey() {
-  if (AppKeyStore.youdaoAppId && AppKeyStore.youdaoAppSecret) {
-    return true;
-  }
-  return false;
 }

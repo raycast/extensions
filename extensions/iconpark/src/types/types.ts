@@ -7,6 +7,7 @@ export interface IconInfo {
   author: string;
   tag: string[];
   rtl: boolean;
+  svgCode?: string;
 }
 
 export interface IconConfig {

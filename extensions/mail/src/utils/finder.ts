@@ -1,4 +1,4 @@
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 import { existsSync, statSync, readdirSync } from "fs";
 import { readdir, stat } from "fs/promises";
 import { join } from "path";

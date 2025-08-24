@@ -1,5 +1,6 @@
 import { LocalStorage, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { useState } from "react";
 
 import {
   fetchDatabaseProperties,
@@ -9,6 +10,7 @@ import {
   search,
   fetchPage,
   fetchDatabase,
+  isType,
   type Page,
   type DatabaseProperty,
 } from "../utils/notion";
@@ -27,9 +29,11 @@ export function useRelations(properties: DatabaseProperty[]) {
 
       await Promise.all(
         properties.map(async (property) => {
-          if (property.type !== "relation" || !property.relation_id) return null;
-          const pages = await queryDatabase(property.relation_id, undefined);
-          relationPages[property.relation_id] = pages;
+          if (!isType(property, "relation")) return null;
+          const relationId = property.config.database_id;
+          if (!relationId) return null;
+          const pages = await queryDatabase(relationId, undefined);
+          relationPages[relationId] = pages;
           return pages;
         }),
       );
@@ -46,17 +50,45 @@ export function useDatabases() {
   return { ...value, data: value.data ?? [] };
 }
 
-export function useDatabaseProperties(databaseId: string | null) {
-  const value = useCachedPromise((id) => fetchDatabaseProperties(id), [databaseId], { execute: !!databaseId });
+export function useDatabaseProperties(databaseId: string | null, filter?: (value: DatabaseProperty) => boolean) {
+  const value = useCachedPromise(
+    (id): Promise<DatabaseProperty[]> =>
+      fetchDatabaseProperties(id).then((databaseProperties) => {
+        if (databaseProperties && filter) {
+          return databaseProperties.filter(filter);
+        }
+        return databaseProperties;
+      }),
+    [databaseId],
+    { execute: !!databaseId },
+  );
 
   return { ...value, data: value.data ?? [] };
 }
 
+export function useVisibleDatabasePropIds(
+  databaseId: string,
+  quicklinkProps?: string[],
+): {
+  visiblePropIds?: string[];
+  isLoading: boolean;
+  setVisiblePropIds: (value: string[]) => Promise<void> | void;
+} {
+  if (quicklinkProps) {
+    const [visiblePropIds, setVisiblePropIds] = useState(quicklinkProps);
+    return { visiblePropIds, isLoading: false, setVisiblePropIds };
+  } else {
+    const { data, isLoading, setDatabaseView } = useDatabasesView(databaseId);
+    const setVisiblePropIds = (props?: string[]) => setDatabaseView({ ...data, create_properties: props });
+    return { visiblePropIds: data.create_properties, isLoading, setVisiblePropIds };
+  }
+}
+
 export function useDatabasesView(databaseId: string) {
   const { data, isLoading, mutate } = useCachedPromise(async () => {
-    const data = await LocalStorage.getItem("DATABASES_VIEWS");
+    const data = await LocalStorage.getItem<string>("DATABASES_VIEWS");
 
-    if (!data || typeof data !== "string") return {};
+    if (!data) return {};
 
     return JSON.parse(data) as { [databaseId: string]: DatabaseView | undefined };
   });
@@ -70,9 +102,8 @@ export function useDatabasesView(databaseId: string) {
   }
 
   return {
-    data: data?.[databaseId],
+    data: data?.[databaseId] || {},
     isLoading,
-    mutate,
     setDatabaseView,
   };
 }
@@ -121,10 +152,11 @@ export function useRecentPages() {
       await Promise.all(
         recentPages.map((p) => {
           // convert each RecentPage object into a Page object
+          // don't error if the page is not found
           if (p.type === "page") {
-            return fetchPage(p.id);
+            return fetchPage(p.id, true);
           } else {
-            return fetchDatabase(p.id);
+            return fetchDatabase(p.id, true);
           }
         }),
       )
@@ -181,7 +213,7 @@ export function useRecentPages() {
 }
 
 export function useSearchPages(query: string) {
-  return useCachedPromise((query) => search(query), [query], {
+  return useCachedPromise(search, [query], {
     keepPreviousData: true,
   });
 }

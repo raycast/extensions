@@ -1,15 +1,15 @@
-import { Clipboard, closeMainWindow, PopToRootType, showHUD, Toast } from "@raycast/api";
+import { Clipboard, closeMainWindow, getPreferenceValues, PopToRootType, showHUD, Toast } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import download from "image-downloader";
-import tempfile from "tempfile";
 import isUrl from "is-url";
+import tempfile from "tempfile";
+export default async function copyFavicon(props: { arguments: Arguments.Copy }) {
+  const preferences = await getPreferenceValues();
 
-interface Arguments {
-  url: string;
-}
-
-export default async function copyFavicon(props: { arguments: Arguments }) {
-  const url = props.arguments.url;
+  let url = props.arguments.url;
+  if (!url.includes("https://")) {
+    url = "https://" + url;
+  }
 
   const toast = new Toast({
     title: "Copying favicon...",
@@ -26,7 +26,7 @@ export default async function copyFavicon(props: { arguments: Arguments }) {
   }
 
   const destination = tempfile(".png");
-  const favicon = await getFavicon(url);
+  const favicon = await getFavicon(url, { size: preferences.defaultIconSize });
 
   await download.image({
     url: (favicon as any).source,

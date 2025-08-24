@@ -37,3 +37,14 @@ query searchDiscussions($query: String!, $numberOfOpenItems: Int!) {
     }
   }
 }
+
+query getGitHubDiscussionNumber($filter: String!) {
+  search(query: $filter, type: DISCUSSION, first: 1) {
+    nodes {
+      ... on Discussion {
+        number
+        url
+      }
+    }
+  }
+}

@@ -1,22 +1,35 @@
 # Remove Paywall
 
-Remove the paywall from the specified URL. It can be passed as an argument, taken from the currently selected text, from the search bar's text or taken from the clipboard, in this order.
+Remove paywalls from URLs using multiple methods and services. Works with most popular browsers and provides both manual and automatic URL detection.
 
-## List of commands
+## Features
 
-- `Remove Paywall` - Remove the paywall from the specified URL.
-- `Remove Paywall Using` - Remove the paywall from the the URL using a specific service; useful if you want to use a service that is not the default one.
+- **Multiple Input Methods**: Manual URL entry, selected text, clipboard, or active browser tab
+- **Smart Service Selection**: Automatically uses the best service (freedium.cfd for Medium, selected service for others)
+- **Browser Support**: Works with Safari, Chrome, Firefox, Edge, Arc, Brave, Vivaldi, Orion, Zen and others.
+- **Multiple Services**: 12ft.io, archive.is, removepaywall.com, and freedium.cfd
 
-## Available services
+## Commands
 
-- [12ft](https://12ft.io)
-- [Archive](https://archive.is)
-- [RemovePaywall](https://www.removepaywall.com)
+- `Remove Paywall` - Remove paywall from manual URL, selected text, or clipboard
+- `Remove Paywall from Current Tab` - Automatically detect and remove paywall from active browser tab
+- `Remove Paywall from Clipboard` - Process clipboard URL and copy the paywall-free version back
 
-## Author
+## Available Services
 
-**Alan Sprecacenere**
+- [12ft](https://12ft.io) - Default service for most websites
+- [Archive](https://archive.is) - Archive-based paywall removal
+- [RemovePaywall](https://www.removepaywall.com) - Dedicated paywall removal service
+- [Freedium](https://freedium.cfd) - Specialized for Medium articles
 
+## Authors
+
+**Alan Sprecacenere** - Original author
 - [GitHub](https://github.com/tegola)
 - [Twitter](https://twitter.com/tegola)
 - [Website](https://www.qreate.it)
+
+**Max Oliinyk** - Browser integration and advanced features
+- [GitHub](https://github.com/maxoliinyk)
+- [Twitter](https://twitter.com/aerarchy)
+- [Website](https://maxoliinyk.dev/)

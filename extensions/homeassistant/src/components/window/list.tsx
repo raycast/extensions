@@ -1,10 +1,10 @@
-import { showToast, Toast, List } from "@raycast/api";
-import { useState } from "react";
 import { useHAStates } from "@components/hooks";
-import { StateListItem } from "@components/state/list";
 import { useStateSearch } from "@components/state/hooks";
+import { StateListItem } from "@components/state/list";
+import { List, Toast, showToast } from "@raycast/api";
+import React, { useState } from "react";
 
-export function WindowsList(): JSX.Element {
+export function WindowsList(): React.ReactElement {
   const [searchText, setSearchText] = useState<string>();
   const { states: allStates, error, isLoading } = useHAStates();
   const { states } = useStateSearch(searchText, "binary_sensor", "window", allStates);

@@ -8,7 +8,12 @@
   "contributors": [
     "bibixx",
     "GastroGeek",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "oasaleh",
+    "xilopaint",
+    "ridemountainpig",
+    "zakj",
+    "Visual-Studio-Coder"
   ],
   "license": "MIT",
   "commands": [
@@ -35,11 +40,22 @@
     },
     {
       "name": "index",
-      "title": "Caffeinate Status Menubar",
+      "title": "Caffeinate Status Menu Bar",
       "subtitle": "Coffee",
-      "description": "Get the status of the current caffeination in your menubar",
+      "description": "Get the status of the current caffeination in your menu bar",
       "mode": "menu-bar",
-      "interval": "1m"
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "hidenWhenDecaffeinated",
+          "description": "Hide the icon when decaffeinated",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "title": "When Decaffeinated",
+          "label": "Hide the icon"
+        }
+      ]
     },
     {
       "name": "caffeinateToggle",
@@ -53,7 +69,87 @@
       "title": "Caffeinate For",
       "subtitle": "Coffee",
       "description": "Prevent your Mac from sleeping for a certain time",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "hours",
+          "placeholder": "Hours",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "minutes",
+          "placeholder": "Minutes",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "seconds",
+          "placeholder": "Seconds",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "caffeinateUntil",
+      "title": "Caffeinate Until",
+      "subtitle": "Coffee",
+      "description": "Prevent your Mac from sleeping until a certain time",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "time",
+          "placeholder": "Time",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "addSchedule",
+      "title": "Schedule Caffeination",
+      "description": "Schedule caffeination",
       "mode": "view"
+    },
+    {
+      "name": "status",
+      "title": "Caffeinate Status",
+      "description": "Show the current caffeination status",
+      "mode": "no-view",
+      "interval": "15s"
+    }
+  ],
+  "tools": [
+    {
+      "name": "caffeinate-for",
+      "title": "Caffeinate for Duration",
+      "description": "Keeps your Mac awake for a specified duration"
+    },
+    {
+      "name": "caffeinate",
+      "title": "Caffeinate",
+      "description": "Keep Mac awake for unspecified duration."
+    },
+    {
+      "name": "check-caffeination-status",
+      "title": "Check Caffeination Status",
+      "description": "Check if your Mac is currently caffeinated or not."
+    },
+    {
+      "name": "decaffeinate",
+      "title": "Decaffeinate",
+      "description": "Turn off your Mac's sleep prevention."
+    },
+    {
+      "name": "schedule-caffeination",
+      "title": "Schedule Caffeination",
+      "description": "Add a schedule for your caffeination using AI."
+    },
+    {
+      "name": "caffeinate-while-app-is-running",
+      "title": "Caffeinate While App Is Running",
+      "description": "While an app is running, turn on caffeination."
     }
   ],
   "preferences": [
@@ -64,8 +160,7 @@
       "required": false,
       "default": true,
       "title": "Options",
-      "placeholder": "Prevent Display Sleep",
-      "label": "Prevent Display Sleep"
+      "label": "Prevent display sleep"
     },
     {
       "name": "preventSystem",
@@ -73,40 +168,222 @@
       "type": "checkbox",
       "required": false,
       "default": true,
-      "title": "Options",
-      "placeholder": "Prevent System Sleep",
-      "label": "Prevent System Sleep"
+      "label": "Prevent system sleep"
     },
     {
       "name": "preventDisk",
-      "description": "Prevent the disc from sleeping",
+      "description": "Prevent the disk from sleeping",
       "type": "checkbox",
       "required": false,
       "default": true,
-      "title": "Options",
-      "placeholder": "Prevent Disk Sleep",
-      "label": "Prevent Disk Sleep"
+      "label": "Prevent disk sleep"
+    },
+    {
+      "name": "icon",
+      "description": "Select icon set for Menu Bar",
+      "type": "dropdown",
+      "required": false,
+      "default": "pot",
+      "title": "Menu Bar Icon",
+      "data": [
+        {
+          "title": "Pot",
+          "value": "pot"
+        },
+        {
+          "title": "Mug",
+          "value": "mug"
+        },
+        {
+          "title": "Cup",
+          "value": "cup"
+        },
+        {
+          "title": "Paper Cup",
+          "value": "paper-cup"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
-    "@raycast/utils": "^1.4.11",
-    "run-applescript": "^6.1.0"
+    "@raycast/api": "^1.91.0",
+    "@raycast/utils": "^1.12.5"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.11.19",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
-  }
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "ai": {
+    "instructions": "Before running any tool, always run check-caffeination-status before to check the status",
+    "evals": [
+      {
+        "input": "@coffee keep my mac awake for 2 hours",
+        "mocks": {
+          "check-caffeination-status": {
+            "isCaffeinated": false,
+            "isScheduled": false
+          },
+          "caffeinate-for": {
+            "success": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "caffeinate-for",
+              "arguments": {
+                "hours": 2
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Confirms the duration Mac will stay awake"
+          }
+        ]
+      },
+      {
+        "input": "@coffee caffeinate while Zoom is running",
+        "mocks": {
+          "check-caffeination-status": {
+            "isCaffeinated": false,
+            "isScheduled": false
+          },
+          "caffeinate-while-app-is-running": {
+            "success": true,
+            "application": "Zoom",
+            "processId": "12345"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "check-caffeination-status"
+          },
+          {
+            "callsTool": {
+              "name": "caffeinate-while-app-is-running",
+              "arguments": {
+                "application": {
+                  "includes": "zoom"
+                }
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Confirms that Mac will stay awake while Zoom is running"
+          }
+        ]
+      },
+      {
+        "input": "@coffee stop keeping my mac awake",
+        "mocks": {
+          "check-caffeination-status": {
+            "isCaffeinated": true,
+            "isScheduled": false
+          },
+          "decaffeinate": {
+            "success": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "check-caffeination-status"
+          },
+          {
+            "callsTool": "decaffeinate"
+          },
+          {
+            "meetsCriteria": "Confirms that sleep prevention has been disabled"
+          }
+        ]
+      },
+      {
+        "input": "@coffee is my mac preventing sleep?",
+        "mocks": {
+          "check-caffeination-status": {
+            "isCaffeinated": true,
+            "isScheduled": false
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "check-caffeination-status"
+          },
+          {
+            "meetsCriteria": "Clearly states whether the Mac is currently caffeinated or not"
+          }
+        ]
+      },
+      {
+        "input": "@coffee schedule caffeination for weekdays from 09:00 to 17:00",
+        "mocks": {
+          "check-caffeination-status": {
+            "isCaffeinated": false,
+            "isScheduled": false
+          },
+          "schedule-caffeination": {
+            "success": true,
+            "days": [
+              "monday",
+              "tuesday",
+              "wednesday",
+              "thursday",
+              "friday"
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "schedule-caffeination",
+              "arguments": {
+                "schedule": {
+                  "includes": "weekdays"
+                }
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Confirms the caffeination schedule was created"
+          }
+        ]
+      },
+      {
+        "input": "@coffee prevent my mac from sleeping",
+        "mocks": {
+          "check-caffeination-status": {
+            "isCaffeinated": false,
+            "isScheduled": false
+          },
+          "caffeinate": {
+            "success": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "check-caffeination-status"
+          },
+          {
+            "callsTool": "caffeinate"
+          },
+          {
+            "meetsCriteria": "Confirms that Mac will stay awake"
+          }
+        ]
+      }
+    ]
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
-import { getFileSize, RenameForm, deleteFile } from "../utils";
+import { getFileSize, RenameForm, deleteFile, handleSetWallpaper, isImageFile } from "../utils";
 import { FileDataType } from "../types";
 
 export function FileItem(props: {
@@ -22,6 +22,7 @@ export function FileItem(props: {
       icon={{ fileIcon: filePath }}
       quickLook={{ path: filePath, name: props.fileData.name }}
       subtitle={props.preferences.showFilePermissions ? props.fileData.permissions : ""}
+      keywords={props.preferences.searchByPermissions ? [props.fileData.permissions] : undefined}
       accessories={
         props.preferences.showFileSize
           ? [
@@ -39,6 +40,14 @@ export function FileItem(props: {
             <Action.OpenWith path={filePath} />
             <Action.ShowInFinder path={filePath} shortcut={{ modifiers: ["cmd"], key: "f" }} />
             <Action.ToggleQuickLook title="Quick Look" shortcut={{ modifiers: ["cmd"], key: "y" }} />
+            {isImageFile(props.fileData) && (
+              <Action
+                title="Set as Wallpaper"
+                icon={Icon.Desktop}
+                onAction={() => handleSetWallpaper(filePath)}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+              />
+            )}
             <Action.CopyToClipboard
               title={`Copy ${typeName} Path`}
               content={filePath}

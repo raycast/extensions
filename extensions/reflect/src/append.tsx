@@ -1,8 +1,18 @@
 import { appendToDailyNote, getGraphs, Graph, ReflectApiError } from "./helpers/api";
+import { prependNote } from "./helpers/dates";
 import { authorize } from "./helpers/oauth";
-import { prependTimestampIfSelected } from "./helpers/dates";
 
-import { Action, ActionPanel, closeMainWindow, Form, popToRoot, showToast, Toast, LocalStorage } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  Form,
+  getPreferenceValues,
+  LocalStorage,
+  popToRoot,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
@@ -12,6 +22,7 @@ interface FormValues {
   parentList: string;
   graphId: string;
   timestampFormat?: string;
+  isTask: boolean;
 }
 
 export default function Command() {
@@ -24,7 +35,8 @@ export default function Command() {
 
       try {
         const authorizationToken = await authorize();
-        const text = prependTimestampIfSelected(values.note, {
+        const text = prependNote(values.note, {
+          isTask: values.isTask,
           prependTimestamp: values.prependTimestamp,
           timestampFormat: values.timestampFormat as "12" | "24" | undefined,
         });
@@ -68,6 +80,10 @@ export default function Command() {
 
   const showTimestampFormat: boolean = itemProps.prependTimestamp.value ?? false;
 
+  const { parentLists = "" } = getPreferenceValues<ExtensionPreferences>();
+
+  const parentListOptions = parentLists.split(",").map((item) => item.trim());
+
   return (
     <Form
       actions={
@@ -77,6 +93,7 @@ export default function Command() {
       }
     >
       <Form.TextArea {...itemProps.note} title="Note" />
+      <Form.Checkbox {...itemProps.isTask} label="Task" storeValue={true} />
       <Form.Checkbox {...itemProps.prependTimestamp} label="Prepend Timestamp" storeValue={true} />
       {showTimestampFormat ? (
         <Form.Dropdown {...itemProps.timestampFormat} storeValue={true}>
@@ -84,12 +101,14 @@ export default function Command() {
           <Form.Dropdown.Item value="24" title="24 hour" />
         </Form.Dropdown>
       ) : null}
-      <Form.TextField
-        {...itemProps.parentList}
-        title="Parent List (Optional)"
-        placeholder="i.e. 🗓 Daily Log"
-        storeValue={true}
-      />
+      {parentListOptions.length > 0 ? (
+        <Form.Dropdown storeValue={true} title="Parent List (Optional)" {...itemProps.parentList}>
+          <Form.Dropdown.Item value="" title="-" />
+          {parentListOptions.map((opt) => {
+            return <Form.Dropdown.Item key={opt} value={opt} title={opt.replaceAll("[", "").replaceAll("]", "")} />;
+          })}
+        </Form.Dropdown>
+      ) : null}
       <Form.Separator />
       <Form.Dropdown {...itemProps.graphId} title="Graph" value={graphId} onChange={setGraphId}>
         {graphs.map((graph) => (

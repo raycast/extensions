@@ -1,7 +1,25 @@
 import { getPreferenceValues } from "@raycast/api";
 
-export interface Preferences {
+interface Preferences {
   rememberTag: boolean;
+  trendsNumber: string;
+  showTrendsTitle: boolean;
+  showWeibo: boolean;
+  showBaiDu: boolean;
+  showZhiHu: boolean;
+  showDouYin: boolean;
+  showBiliBili: boolean;
+  showTouTiao: boolean;
 }
 
-export const { rememberTag } = getPreferenceValues<Preferences>();
+export const {
+  rememberTag,
+  trendsNumber,
+  showTrendsTitle,
+  showWeibo,
+  showBaiDu,
+  showZhiHu,
+  showDouYin,
+  showBiliBili,
+  showTouTiao,
+} = getPreferenceValues<Preferences>();

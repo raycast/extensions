@@ -5,7 +5,7 @@ import { MailIcon } from "./presets";
 
 const MAILBOXES = ["inbox", "important", "starred", "drafts", "outbox", "junk", "trash", "archive"] as const;
 
-const MAILBOX_ICONS = {
+const MAILBOX_ICONS: Record<string, Image.ImageLike> = {
   inbox: MailIcon.Inbox,
   important: MailIcon.Important,
   starred: MailIcon.Starred,
@@ -21,6 +21,8 @@ const INBOX_ALIAS = [
   "inbox",
   // chinese
   "收件箱",
+  // russian
+  "входящие",
 ];
 
 const IMPORTANT_ALIAS = [
@@ -29,6 +31,8 @@ const IMPORTANT_ALIAS = [
   // chinese
   "重要",
   "重要邮件",
+  // russian
+  "важные",
 ];
 
 const STARRED_ALIAS = [
@@ -39,6 +43,8 @@ const STARRED_ALIAS = [
   "星标",
   "星标邮件",
   "已加星标",
+  // russian
+  "избранное",
 ];
 
 const DRAFTS_ALIAS = [
@@ -47,6 +53,8 @@ const DRAFTS_ALIAS = [
   // chinese
   "草稿",
   "草稿箱",
+  // russian
+  "черновики",
 ];
 
 const OUTBOX_ALIAS = [
@@ -60,6 +68,8 @@ const OUTBOX_ALIAS = [
   "已发送",
   "发件箱",
   "已发邮件",
+  // russian
+  "отправленные",
 ];
 
 const JUNK_ALIAS = [
@@ -69,6 +79,9 @@ const JUNK_ALIAS = [
   "junk email",
   // chinese
   "垃圾邮件",
+  // russian
+  "спам",
+  "нежелательная почта",
 ];
 
 const TRASH_ALIAS = [
@@ -84,14 +97,21 @@ const TRASH_ALIAS = [
   "回收站",
   "已删除",
   "已删除邮件",
+  // russian
+  "корзина",
+  "удаленные",
 ];
 
 const ARCHIVE_ALIAS = [
   // english
   "archive",
+  "[gmail]", // gmail archive
   // chinese
   "归档",
   "存档",
+  // russian
+  "архив",
+  "вся почта",
 ];
 
 export const translateMailboxName = (name: string): string => {
@@ -129,6 +149,10 @@ export const isInbox = (mailbox: Mailbox) => {
 
 export const isImportantMailbox = (mailbox: Mailbox) => {
   return IMPORTANT_ALIAS.includes(mailbox.name.toLowerCase());
+};
+
+export const isArchiveMailbox = (mailbox: Mailbox) => {
+  return ARCHIVE_ALIAS.includes(mailbox.name.toLowerCase());
 };
 
 export const isJunkMailbox = (mailbox: Mailbox) => {

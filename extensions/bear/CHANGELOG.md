@@ -1,5 +1,26 @@
 # Bear Changelog
 
+## [✨ AI Enhancements] - 2025-02-21
+
+- Add AI Tool to "Create Note"
+- Add AI Tool to "Search Notes"
+- chore: update deps
+
+## [Fixes] - 2024-07-03
+
+- Tags don't appear in dropdown if all associated notes are either trashed or archived: [#13297](https://github.com/raycast/extensions/issues/13297)
+
+## [Connect note pinning form value to API call] - 2024-06-08
+- When creating a new note, checking the option to "pin to top" is now taken into account within the API call
+- When hovering over the preference for "Pin note in notes list", the description is now accurate to the purpose
+- Fixes issue where a note's title, body and tags would show as URL encoded
+
+## [Menu Bar Command and Improvements] - 2024-06-04
+
+- Added a menu bar command to easily open notes.
+- Improved notes sorting so pinned notes appear at the top.
+- Updated the Bear icon.
+
 ## [Create new note configurations and new search feature] - 2023-07-09
 
 - When creating a new note, you can choose default options that you don't have to pick in the form. Options are: opening the note in the main window, in a new window, or don't open it at all.
@@ -60,7 +81,7 @@
   - Embedded files will be converted to `file://path/to/file.txt` links to the locally stored files and open in Finder when clicked. Do **not change** the files, only view/copy them
   - Embedded images will be converted to markdown images embeds `![](~/path/to/image.png)` which point to the image file locally on your file system
 - Copy note text as HTML with <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>C</kbd>
-  - Converted with [commonmark.js](https://github.com/commonmark/commonmark.js/), which is not fully compatible with bear markdown compatibility mode/polar. But bear will switch to commonmark when they ship their [new editor](https://bear.app/panda/) in Bear
+  - Converted with [commonmark.js](https://github.com/commonmark/commonmark.js/), which is not fully compatible with Bear markdown compatibility mode/polar. But Bear will switch to commonmark when they ship their [new editor](https://bear.app/panda/) in Bear
   - Embedded files will be converted to `file://path/to/file.txt` links to the locally stored files and open in Finder when clicked. Do **not change** the files, only view/copy them
   - Embedded images will be converted to markdown images embeds `![](~/path/to/image.png)` which point to the image file locally on your file system
 

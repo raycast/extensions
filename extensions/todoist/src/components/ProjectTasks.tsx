@@ -5,7 +5,7 @@ import { QuickLinkView, ViewMode } from "../home";
 import useCachedData from "../hooks/useCachedData";
 import useViewTasks from "../hooks/useViewTasks";
 
-import CreateViewAction from "./CreateViewAction";
+import CreateViewActions from "./CreateViewActions";
 import TaskListSections from "./TaskListSections";
 
 type ProjectTasksProps = { projectId: string; quickLinkView?: QuickLinkView };
@@ -43,7 +43,7 @@ function ProjectTasks({ projectId, quickLinkView }: ProjectTasksProps) {
         ...allSections.map((section) => ({
           name: section.name,
           tasks: sortedTasks?.filter((task) => task.section_id === section.id) || [],
-        }))
+        })),
       );
     }
   } else {
@@ -71,7 +71,11 @@ function ProjectTasks({ projectId, quickLinkView }: ProjectTasksProps) {
               shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
             />
 
-            {quickLinkView ? <CreateViewAction {...quickLinkView} /> : null}
+            {quickLinkView ? (
+              <ActionPanel.Section>
+                <CreateViewActions {...quickLinkView} />
+              </ActionPanel.Section>
+            ) : null}
           </ActionPanel>
         }
       />

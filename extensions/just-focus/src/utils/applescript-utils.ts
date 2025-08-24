@@ -6,6 +6,7 @@ export const startPomodoro = async () => {
 end tell`;
 
   try {
+    await stop();
     await runAppleScript(script);
   } catch (e) {
     console.error(String(e));
@@ -30,6 +31,7 @@ export const shortBreak = async () => {
 end tell`;
 
   try {
+    await stop();
     await runAppleScript(script);
   } catch (e) {
     console.error(String(e));
@@ -42,6 +44,7 @@ export const longBreak = async () => {
 end tell`;
 
   try {
+    await stop();
     await runAppleScript(script);
   } catch (e) {
     console.error(String(e));

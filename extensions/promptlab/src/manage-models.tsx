@@ -3,7 +3,7 @@ import { useModels } from "./hooks/useModels";
 import ModelForm from "./components/Models/ModelForm";
 import { useAdvancedSettings } from "./hooks/useAdvancedSettings";
 import ManageModelsActionPanel from "./components/Models/actions/ManageModelsActionsPanel";
-import { Model } from "./utils/types";
+import { Model } from "./lib/models/types";
 
 export default function ManageModels() {
   const models = useModels();
@@ -33,10 +33,11 @@ export default function ManageModels() {
 
   const [favorites, otherModels] = models.models.reduce(
     (acc, model) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       model.favorited ? acc[0].push(model) : acc[1].push(model);
       return acc;
     },
-    [[], []] as [Model[], Model[]]
+    [[], []] as [Model[], Model[]],
   );
 
   return (

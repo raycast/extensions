@@ -1,13 +1,13 @@
 <p align="center">
-  <img src="assets/popcorn-small.png">
+  <img src="assets/icon.png" width="64" alt="">
   <h1 align="center">IMDb Search</h1>
 </p>
 
-A [Raycast](https://raycast.com/) extenstion that lets you easily open your favorite film or tv series on [IMDb](https://imdb.com/).
+A [Raycast](https://raycast.com/) extension that lets you easily open your favorite film or tv series on [IMDb](https://imdb.com/).
 
 This extension is made by [Ryan Voevodin](https://twitter.com/RyanVoevodin) and uses [The Open Movie Database API](https://www.omdbapi.com/) (OMDb) by Brian Fritz.
 
-## Getting your API Token
+## Getting Your API Token
 
 1. Visit the [OMDb website](https://www.omdbapi.com/apikey.aspx).
 2. Sign up to the `Free (1000 Daily Limit)` option with your email address.
@@ -36,9 +36,7 @@ If any other issues persist, feel free to [contact me](https://twitter.com/RyanV
 
 ### Credits
 
-- Popcorn and YouTube icon by [Freepik](https://www.flaticon.com/de/kostenlose-icons/popcorn)
 - Director icon by [www.wishforge.games](https://www.iconfinder.com/bitfreak86)
-- Number icon by [Travis Avery](https://thenounproject.com/icon/number-2342369/)
 
 ## Notes
 

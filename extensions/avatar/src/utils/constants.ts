@@ -1,6 +1,6 @@
 export const DICEBEAR_AVATARS = "https://avatars.dicebear.com";
 export const DICEBEAR_AVATARS_LICENSE = "https://avatars.dicebear.com/licenses";
-export const AVATAR_URL = "https://avatars.dicebear.com/api";
+export const AVATAR_URL = "https://api.dicebear.com/8.x/";
 
 export const MULTI_AVATAR = "https://multiavatar.com";
 export const MULTI_AVATAR_URL = "https://api.multiavatar.com";

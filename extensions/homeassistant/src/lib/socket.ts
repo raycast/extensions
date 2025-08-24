@@ -5,10 +5,10 @@ https://github.com/keesschollaart81/vscode-home-assistant/blob/master/src/langua
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { Auth } from "home-assistant-js-websocket/dist/auth";
 import { ERR_INVALID_AUTH } from "home-assistant-js-websocket";
+import type { Auth } from "home-assistant-js-websocket/dist/auth";
 
-import WebSocket = require("ws");
+import WebSocket from "ws";
 
 const MSG_TYPE_AUTH_REQUIRED = "auth_required";
 const MSG_TYPE_AUTH_INVALID = "auth_invalid";
