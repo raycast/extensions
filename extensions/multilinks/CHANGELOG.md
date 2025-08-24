@@ -1,5 +1,9 @@
 # Multi Links Changelog
 
+## [Enhancements] - 2025-08-24
+
+- Added Dia browser support
+
 ## [Enhancements] - 2023-10-29
 
 - Added Arc, vivaldi, and sigmaos browser support
