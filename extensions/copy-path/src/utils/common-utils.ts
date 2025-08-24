@@ -3,6 +3,7 @@ import {
   copySafariWebAppPath,
   getChromiumBrowserPath,
   getFocusFinderPath,
+  getFocusWindowPath,
   getFocusWindowTitle,
   getWebkitBrowserPath,
 } from "./applescript-utils";
@@ -70,6 +71,15 @@ export const copyFinderPath = async () => {
     console.error(String(e));
   }
 };
+
+export const copyWindowPath = async (app: Application) => {
+  let path = await getFocusWindowPath(app)
+  if (!isEmpty(path)) {
+    await Clipboard.copy(path)
+    await showSuccessHUD("📂 " + path)
+  }
+  return path
+}
 
 const tryCopyBrowserUrl = async (app: Application) => {
   // get extra browser web page url

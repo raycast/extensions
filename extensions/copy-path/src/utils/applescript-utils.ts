@@ -38,21 +38,21 @@ end try
 return windowTitle
 `;
 
-export const scriptWindowURL = (app: Application) => `
-set windowURL to ""
+export const scriptWindowPath = (app: Application) => `
+set windowPath to ""
 tell application "System Events"
 	tell process "${app.name}"
 		tell (1st window whose value of attribute "AXMain" is true)
 			try
-				set windowURL to value of attribute "AXDocument"
+				set windowPath to value of attribute "AXDocument"
 			on error
-				set windowURL to ""
+				set windowPath to ""
 			end try
 		end tell
 	end tell
 end tell
 
-return windowURL
+return windowPath
 `
 
 export const getFocusWindowTitle = async (app: Application) => {
@@ -63,9 +63,9 @@ export const getFocusWindowTitle = async (app: Application) => {
   }
 };
 
-export const getFocusWindowURL = async (app: Application) => {
+export const getFocusWindowPath = async (app: Application) => {
   try {
-    return await runAppleScript(scriptWindowURL(app));
+    return await runAppleScript(scriptWindowPath(app));
   } catch (e) {
     return "";
   }
