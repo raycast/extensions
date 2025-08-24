@@ -95,17 +95,10 @@
       "mode": "no-view"
     },
     {
-      "name": "manage-subscriptions",
-      "title": "Manage Subscriptions",
-      "subtitle": "Stripe",
-      "description": "View and manage your active Stripe subscriptions with options to cancel or refund",
-      "mode": "view"
-    },
-    {
       "name": "manage-customers",
-      "title": "Manage Customers",
+      "title": "Manage Customers & Subscriptions",
       "subtitle": "Stripe",
-      "description": "Search and view your Stripe customers with their subscription details",
+      "description": "Search and manage your Stripe customers and their active subscriptions",
       "mode": "view"
     }
   ],
