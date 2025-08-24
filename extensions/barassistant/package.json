@@ -19,7 +19,7 @@
   "preferences": [
     {
       "name": "API_URL",
-  "type": "textfield",
+      "type": "textfield",
       "title": "Bar Assistant API URL",
       "description": "Example API URL: https://barassistant.domain.com",
       "required": true
