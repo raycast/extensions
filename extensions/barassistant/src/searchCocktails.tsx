@@ -1,5 +1,5 @@
 import { List, ActionPanel, Action, showToast, Toast, Clipboard, getPreferenceValues } from "@raycast/api";
-async function getOrCreatePublicUrl(cocktailId: number): Promise<string | undefined> {
+async function getOrCreatePublicUrl(cocktailId: number, cocktailName: string): Promise<string | undefined> {
   // First, try to fetch cocktail details to see if a public link exists
   const detailsRes = await fetch(`${API_URL}/${cocktailId}`, {
     method: "GET",
@@ -72,25 +72,7 @@ async function getOrCreatePublicUrl(cocktailId: number): Promise<string | undefi
     showToast({ style: Toast.Style.Failure, title: "Error", message: "No public ID found in response" });
     return undefined;
   }
-  // Slugify cocktail name for URL
-  // Fetch cocktail details to get the name
-  const cocktailRes = await fetch(`${API_URL}/${cocktailId}`, {
-    method: "GET",
-    headers: {
-      Accept: "application/json",
-      Authorization: `Bearer ${TOKEN}`,
-      "Bar-Assistant-Bar-Id": BAR_ID,
-    },
-  });
-  let cocktailName = "";
-  if (cocktailRes.ok) {
-    const cocktailData = (await cocktailRes.json()) as {
-      name?: string;
-      data?: { name?: string };
-    };
-    cocktailName = cocktailData.name || (cocktailData.data && cocktailData.data.name) || "";
-  }
-  // Slugify name
+  // Slugify cocktail name for URL - use passed name instead of fetching
   const slug = cocktailName
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
