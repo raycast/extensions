@@ -4,7 +4,6 @@ import { formatAddress } from "../utils/format";
 import { canMoveUp, canMoveDown } from "../utils/entity";
 import EntityActions from "./EntityActions";
 import FavoriteActions from "./FavoriteActions";
-import { useEntityActions } from "../hooks/useEntityActions";
 
 interface FavoritesListProps {
   favorites: Enhet[];
@@ -31,19 +30,18 @@ export default function FavoritesList({
   onMoveDown,
   onToggleMoveMode,
 }: FavoritesListProps) {
-  const { handleCopyOrgNumber, handleCopyAddress } = useEntityActions();
   if (favorites.length === 0) {
     return (
-      <List.Section title="Welcome to Brreg Search">
+      <List.Section title="Favorites">
         <List.Item
           title="No favorites yet"
-          subtitle="Start building your collection of companies"
+          subtitle="Search and ⌘F to add favorites "
           icon="⭐"
-          accessories={[
-            { text: "Search above to find companies" },
-            { text: "Use ⌘F to add to favorites" },
-            { text: "Organize with custom emojis" },
-          ]}
+          // accessories={[
+          //   { text: "Search above to find companies" },
+          //   { text: "Use ⌘F to add to favorites" },
+          //   { text: "Organize with custom emojis" },
+          // ]}
         />
       </List.Section>
     );
@@ -89,8 +87,12 @@ export default function FavoritesList({
                   entity={entity}
                   addressString={addressString}
                   onViewDetails={onViewDetails}
-                  onCopyOrgNumber={() => handleCopyOrgNumber()}
-                  onCopyAddress={() => handleCopyAddress()}
+                  onCopyOrgNumber={() => {
+                    // Show success toast - clipboard is handled by Action.CopyToClipboard
+                  }}
+                  onCopyAddress={() => {
+                    // Show success toast - clipboard is handled by Action.CopyToClipboard
+                  }}
                   onOpenInBrowser={() => showToast(Toast.Style.Success, "Opening in browser")}
                 />
                 <FavoriteActions
