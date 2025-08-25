@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Include option to prevent duplicate songs in Add to Playlist command] - {PR_MERGE_DATE}
+## [Include option to prevent duplicate songs in Add to Playlist command] - 2025-08-25
 
 - Introduced an option allowing users to choose whether to allow duplicate songs to be added to their playlists
 
