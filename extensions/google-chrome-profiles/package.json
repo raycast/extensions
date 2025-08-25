@@ -17,6 +17,22 @@
       "subtitle": "Google Chrome",
       "description": "Navigate though your Google Chrome profiles and bookmarks, open and focus the right window.",
       "mode": "view"
+    },
+    {
+      "name": "open-profile",
+      "title": "Open Profile",
+      "subtitle": "Google Chrome",
+      "description": "Open a Chrome profile",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "open-profile-url",
+      "title": "Open Profile with URL",
+      "subtitle": "Google Chrome",
+      "description": "Open a Chrome profile with a specific URL",
+      "mode": "no-view",
+      "disabledByDefault": true
     }
   ],
   "preferences": [
@@ -40,15 +56,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.59.0",
+    "@raycast/api": "^1.94.0",
     "@raycast/utils": "^1.10.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.6",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
     "eslint": "^7.32.0",
     "prettier": "^3.0.2",
+    "react": "^18.2.0",
+    "react-devtools": "^6.1.1",
     "typescript": "^4.7.4"
   },
   "scripts": {
