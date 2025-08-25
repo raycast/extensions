@@ -3,6 +3,7 @@ import {
   copySafariWebAppPath,
   getChromiumBrowserPath,
   getFocusFinderPath,
+  getFocusWindowPath,
   getFocusWindowTitle,
   getWebkitBrowserPath,
 } from "./applescript-utils";
@@ -69,6 +70,20 @@ export const copyFinderPath = async () => {
   } catch (e) {
     console.error(String(e));
   }
+};
+
+export const copyWindowPath = async (app: Application) => {
+  const { useTildeForHome } = await getPreferenceValues();
+  let path = await getFocusWindowPath(app);
+  if (useTildeForHome) {
+    path = path.replace(os.homedir(), "~");
+  }
+  if (!isEmpty(path)) {
+    await Clipboard.copy(path);
+    await showSuccessHUD("📂 " + path);
+    await customUpdateCommandMetadata(path);
+  }
+  return path;
 };
 
 const tryCopyBrowserUrl = async (app: Application) => {
