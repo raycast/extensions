@@ -51,6 +51,7 @@ async function callApi(
     headers,
     body: body ? JSON.stringify(body) : undefined,
   });
+  if (response.status === 204) return;
   const result = await response.json();
   if (!response.ok) {
     const err = result as { message: string } | string;
@@ -173,6 +174,7 @@ export default function ListWatches() {
                         },
                       })
                     }
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                   />
                   <Action.Push
                     icon={Icon.Plus}
