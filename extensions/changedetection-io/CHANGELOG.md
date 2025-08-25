@@ -1,6 +1,6 @@
 # changedetection.io Changelog
 
-## [Create + Delete] - {PR_MERGE_DATE}
+## [Create + Delete] - 2025-08-25
 
 - feat: **Create** new watch
 - feat: **Delete** existing watch
