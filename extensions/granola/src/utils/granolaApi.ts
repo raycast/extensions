@@ -15,7 +15,7 @@ interface UserInfo {
 const API_CONFIG = {
   API_URL: "https://api.granola.ai/v1",
   STREAM_API_URL: "https://stream.api.granola.ai/v1",
-  CLIENT_VERSION: "6.72.0",
+  CLIENT_VERSION: "6.157.0",
   getUserAgent(): string {
     return `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Granola/${this.CLIENT_VERSION} Chrome/136.0.7103.115 Electron/36.3.2 Safari/537.36`;
   },

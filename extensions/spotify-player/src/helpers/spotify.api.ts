@@ -4,6 +4,7 @@
  * DO NOT MODIFY - This file has been generated using oazapfts.
  * See https://www.npmjs.com/package/oazapfts
  */
+/* eslint @typescript-eslint/ban-ts-comment: off, @typescript-eslint/no-explicit-any: off */
 // @ts-nocheck
 import * as Oazapfts from "oazapfts/lib/runtime";
 import * as QS from "oazapfts/lib/runtime/query";

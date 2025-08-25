@@ -33,7 +33,7 @@ If you run into any issues, please verify the following:
 
 ## Developer Notes / Privacy
 *How does this extension work?*
-This extension reads local data from your `~/Library/Application Support/Granola` folder (macOS) or `%APPDATA%\Granola` folder (Windows). It also grabs your Granola API `access_token` from the same folder. When pulling AI notes, this extension uses that token to make API calls to the private Granola API on your behalf; same as if you were opening the note directly in the Granola app. This `access_token` changes every 24 hours or so (at least from my initial testing) so pulling it dynamically this way will keep the extension working. If not, you may need to launch Granola and re-sign in if your session has expired.
+This extension reads local data from your `~/Library/Application Support/Granola` folder (macOS) or `%APPDATA%\Granola` folder (Windows). It also grabs your Granola API `access_token` from the same folder using WorkOS authentication tokens. When pulling AI notes, this extension uses that token to make API calls to the private Granola API on your behalf; same as if you were opening the note directly in the Granola app. This `access_token` changes periodically so pulling it dynamically this way will keep the extension working. If not, you may need to launch Granola and re-sign in if your session has expired.
 
 *What data does this extension collect?*
 This extension does not collect any data. It only reads data from your local Granola app data, or directly from the Granola API, the same way the Granola app does behind the scenes.

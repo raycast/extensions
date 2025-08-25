@@ -10,6 +10,11 @@ This is a Raycast extension for [Keygen](https://keygen.sh/) - Open, enterprise-
     - Create License
 - View Policies
     - Create Policy
+- View Products
+    - Create Product
+- View Users
+    - Create User
+    - Delete User
 
 ## 🚀 Getting Started
 
@@ -47,7 +52,7 @@ Keygen has a lot to offer and there will be commands and "AI Tools" to deal with
 - Machines
 - Components
 - Processes
-- Users
+- Users (WIP)
 
 ... and more.
 
