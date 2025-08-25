@@ -81,16 +81,24 @@ export default function ControlLuxafor() {
   }, []);
 
   const handleAction = async (action: () => Promise<{ success: boolean; error?: string }>, actionName: string) => {
-    if (!preferences.userId) {
-      showToast(Toast.Style.Failure, "Error", "Please set your Luxafor User ID in preferences");
-      return;
-    }
+          if (!preferences.userId) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Error",
+          message: "Please set your Luxafor User ID in preferences",
+        });
+        return;
+      }
 
     setIsLoading(true);
     try {
       const result = await action();
       if (result.success) {
-        showToast(Toast.Style.Success, "Success", `${actionName} executed successfully`);
+        showToast({
+          style: Toast.Style.Success,
+          title: "Success",
+          message: `${actionName} executed successfully`,
+        });
 
         // Update local state with the action name
         setLastAction(actionName);
@@ -99,7 +107,11 @@ export default function ControlLuxafor() {
         const globalStatus = luxaforState.getStatus();
         setLastAction(globalStatus.lastAction);
       } else {
-        showToast(Toast.Style.Failure, "Error", result.error || "Unknown error occurred");
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Error",
+          message: result.error || "Unknown error occurred",
+        });
       }
     } catch (error) {
       showFailureToast(error, { title: "Failed to execute action" });
@@ -171,9 +183,17 @@ export default function ControlLuxafor() {
     try {
       const isOnline = await luxaforState.forceHealthCheck();
       if (isOnline) {
-        showToast(Toast.Style.Success, "Success", "Device is online and webhook is live");
+        showToast({
+          style: Toast.Style.Success,
+          title: "Success",
+          message: "Device is online and webhook is live",
+        });
       } else {
-        showToast(Toast.Style.Failure, "Error", "Device is offline or webhook is not responding");
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Error",
+          message: "Device is offline or webhook is not responding",
+        });
       }
     } catch (error) {
       showFailureToast(error, { title: "Failed to check connection health" });
@@ -334,7 +354,11 @@ export default function ControlLuxafor() {
                     title="View Debug Details"
                     icon={Icon.Bug}
                     onAction={() => {
-                      showToast(Toast.Style.Success, "Debug Info", "Debug information available");
+                      showToast({
+                        style: Toast.Style.Success,
+                        title: "Debug Info",
+                        message: "Debug information available",
+                      });
                       // Debug info available for development purposes
                     }}
                   />

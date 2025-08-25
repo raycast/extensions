@@ -20,7 +20,11 @@ export default function LuxaforStatus() {
   const handleColorChange = useCallback(
     async (newColor: LuxaforColor) => {
       if (!preferences.userId) {
-        showToast(Toast.Style.Failure, "Error", "Please set your Luxafor User ID in preferences");
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Error",
+          message: "Please set your Luxafor User ID in preferences",
+        });
         return;
       }
 
@@ -30,9 +34,16 @@ export default function LuxaforStatus() {
       try {
         const result = await luxaforService.setSolidColor(newColor);
         if (result.success) {
-          showToast(Toast.Style.Success, "Success", `Changed to ${newColor}`);
+          showToast({
+            style: Toast.Style.Success,
+            title: `Success: Changed to ${newColor}`,
+          });
         } else {
-          showToast(Toast.Style.Failure, "Error", result.error || "Failed to change color");
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Error",
+            message: result.error || "Failed to change color",
+          });
         }
       } catch (error) {
         showFailureToast(error, { title: "Failed to change color" });
@@ -93,7 +104,11 @@ export default function LuxaforStatus() {
   // Optimized toggle function
   const toggleColor = useCallback(async () => {
     if (!preferences.userId) {
-      showToast(Toast.Style.Failure, "Error", "Please set your Luxafor User ID in preferences");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: "Please set your Luxafor User ID in preferences",
+      });
       return;
     }
 
@@ -152,7 +167,7 @@ export default function LuxaforStatus() {
         icon={{ source: Icon.Circle, tintColor: getToggleTarget() === "Green" ? Color.Green : Color.Red }}
         onAction={toggleColor}
       />
-      <MenuBarExtra.Separator />
+      <MenuBarExtra.Section title="" />
       <MenuBarExtra.Item
         title={`Status: ${currentStatus.isOnline ? "Online" : "Offline"}`}
         icon={{
@@ -208,24 +223,36 @@ export default function LuxaforStatus() {
         onAction={() => handleColorChange("white")}
       />
 
-      <MenuBarExtra.Separator />
+      <MenuBarExtra.Section title="" />
 
       <MenuBarExtra.Item
         title="Turn Off"
         icon={{ source: Icon.Power, tintColor: Color.SecondaryText }}
         onAction={async () => {
           if (!preferences.userId) {
-            showToast(Toast.Style.Failure, "Error", "Please set your Luxafor User ID in preferences");
+            showToast({
+              style: Toast.Style.Failure,
+              title: "Error",
+              message: "Please set your Luxafor User ID in preferences",
+            });
             return;
           }
           setIsLoading(true);
           try {
             const result = await luxaforService.turnOff();
-            if (result.success) {
-              showToast(Toast.Style.Success, "Success", "Turned off");
-            } else {
-              showToast(Toast.Style.Failure, "Error", result.error || "Failed to turn off");
-            }
+                    if (result.success) {
+          showToast({
+            style: Toast.Style.Success,
+            title: "Success",
+            message: "Turned off",
+          });
+        } else {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Error",
+            message: result.error || "Failed to turn off",
+          });
+        }
           } catch (error) {
             showFailureToast(error, { title: "Failed to turn off" });
           } finally {
@@ -233,7 +260,7 @@ export default function LuxaforStatus() {
           }
         }}
       />
-      <MenuBarExtra.Separator />
+      <MenuBarExtra.Section title="" />
       <MenuBarExtra.Item
         title={`Status: ${currentStatus.isOnline ? "Online" : "Offline"}`}
         icon={{
