@@ -9,6 +9,7 @@
     "stelo",
     "thomaslombart",
     "Rob",
+    "pedram_navid",
     "syh"
   ],
   "pastContributors": [
@@ -40,6 +41,18 @@
           "default": false
         }
       ]
+    },
+    {
+      "name": "lookup-email",
+      "title": "Lookup Email",
+      "subtitle": "Slack",
+      "keywords": [
+        "email",
+        "user",
+        "contact"
+      ],
+      "description": "Search for users by name and copy their email address. Requires users:read.email Slack permission scope.",
+      "mode": "view"
     },
     {
       "name": "search-messages",
