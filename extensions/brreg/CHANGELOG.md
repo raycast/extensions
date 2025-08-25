@@ -1,6 +1,6 @@
 # BRREG Search Changelog
 
-## [Version 2.0.2 – New keyboard shortcuts for financial data] - {PR_MERGE_DATE}
+## [Version 2.0.2 – New keyboard shortcuts for financial data] - 2025-08-25
 - Added keyboard shortcuts for copying revenue (⌘⇧R) and net result (⌘⇧N)
 - Refactored all keyboard shortcuts to use centralized constants for better maintainability
 
