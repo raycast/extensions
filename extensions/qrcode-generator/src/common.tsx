@@ -14,7 +14,8 @@ export default function Common({ from }: { from: "clipboard" | "selection" }) {
       setSourceText(currentText || "");
 
       if (!currentText?.trim()) {
-        const errorText = from === "clipboard" ? "No text found in clipboard" : "You need to select an URL to generate the qrcode";
+        const errorText =
+          from === "clipboard" ? "No text found in clipboard" : "You need to select an URL to generate the qrcode";
         await showToast(Toast.Style.Failure, "Failed", errorText);
         return;
       }
