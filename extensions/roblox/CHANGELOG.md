@@ -1,5 +1,9 @@
 # Roblox Changelog
 
+## [Windows Support] - {PR_MERGE_DATE}
+
+- feat: Added Windows support.
+
 ## [Show Image Command] - 2024-11-22
 
 - feat: New command to view an image from Roblox using its Image ID.
