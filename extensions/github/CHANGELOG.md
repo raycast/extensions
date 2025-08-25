@@ -1,5 +1,11 @@
 # GitHub Changelog
 
+## [Add My Starred Repositories command] - 2025-08-25
+
+- Add new "My Starred Repositories" command to view starred repositories
+- Displays starred repositories with support for sorting and visiting history
+- Integrated with existing repository list components for consistent experience
+
 ## [Issue type specification] - 2025-08-22
 
 - Adds the ability to specify the issue type when creating a new issue.
