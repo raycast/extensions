@@ -1,6 +1,6 @@
 # Ente Auth Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2025-08-25
 
 - Added windows support
 
