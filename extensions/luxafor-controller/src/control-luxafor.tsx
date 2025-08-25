@@ -81,14 +81,14 @@ export default function ControlLuxafor() {
   }, []);
 
   const handleAction = async (action: () => Promise<{ success: boolean; error?: string }>, actionName: string) => {
-          if (!preferences.userId) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Error",
-          message: "Please set your Luxafor User ID in preferences",
-        });
-        return;
-      }
+    if (!preferences.userId) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: "Please set your Luxafor User ID in preferences",
+      });
+      return;
+    }
 
     setIsLoading(true);
     try {

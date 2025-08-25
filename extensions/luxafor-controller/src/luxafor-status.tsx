@@ -240,19 +240,19 @@ export default function LuxaforStatus() {
           setIsLoading(true);
           try {
             const result = await luxaforService.turnOff();
-                    if (result.success) {
-          showToast({
-            style: Toast.Style.Success,
-            title: "Success",
-            message: "Turned off",
-          });
-        } else {
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Error",
-            message: result.error || "Failed to turn off",
-          });
-        }
+            if (result.success) {
+              showToast({
+                style: Toast.Style.Success,
+                title: "Success",
+                message: "Turned off",
+              });
+            } else {
+              showToast({
+                style: Toast.Style.Failure,
+                title: "Error",
+                message: result.error || "Failed to turn off",
+              });
+            }
           } catch (error) {
             showFailureToast(error, { title: "Failed to turn off" });
           } finally {
