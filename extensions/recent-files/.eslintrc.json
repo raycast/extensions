@@ -1,0 +1,24 @@
+{
+  "root": true,
+  "extends": [
+    "@raycast"
+  ],
+  "rules": {
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }
+    ],
+    "react/prop-types": "off",
+    "react/react-in-jsx-scope": "off",
+    "no-console": [
+      "warn",
+      {
+        "allow": ["warn", "error"]
+      }
+    ]
+  }
+}
