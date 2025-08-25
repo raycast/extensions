@@ -61,19 +61,19 @@ export function useAsyncState<T>(options: UseAsyncStateOptions<T> = {}): [
     formatError = (error: unknown) => String(error),
   } = options;
 
-  const [state, setState] = useState<AsyncState<T>>({
+  const [state, setState] = useState<AsyncState<T>>(() => ({
     data: initialData,
     loading: initialLoading,
     error: null,
-  });
+  }));
 
   const cancelledRef = useRef(false);
   const currentOperationRef = useRef<Promise<T | null> | null>(null);
 
   // Use refs to store the latest state setters to avoid dependency issues
-  const setDataRef = useRef<(data: T | null) => void>();
-  const setErrorRef = useRef<(error: string | null) => void>();
-  const setLoadingRef = useRef<(loading: boolean) => void>();
+  const setDataRef = useRef<(data: T | null) => void | undefined>(undefined);
+  const setErrorRef = useRef<(error: string | null) => void | undefined>(undefined);
+  const setLoadingRef = useRef<(loading: boolean) => void | undefined>(undefined);
 
   const setData = useCallback((data: T | null) => {
     setState((prev) => ({ ...prev, data, error: null }));
