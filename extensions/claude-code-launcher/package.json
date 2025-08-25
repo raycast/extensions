@@ -22,7 +22,7 @@
       "name": "claudeBinaryPath",
       "title": "Claude Binary Path",
       "description": "Path to the Claude executable",
-      "type": "textfield",
+      "type": "directory",
       "required": false,
       "default": "~/.claude/local/claude",
       "placeholder": "~/.claude/local/claude"
