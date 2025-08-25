@@ -184,6 +184,8 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
       sectionId: draftValues?.sectionId ?? "",
       responsibleUid: draftValues?.responsibleUid ?? "",
       labels: draftValues?.labels ?? (fromLabel ? [fromLabel] : []),
+      files: draftValues?.files ?? [],
+      parentId: draftValues?.parentId ?? "",
     },
     validation: {
       content: FormValidation.Required,

@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+## [Fixed Create Task Form Initialization Error] - 2025-08-25
+
+- **Fixed TypeError on Task Creation**: Resolved intermittent `TypeError: Cannot read properties of undefined (reading 'length')` error when submitting the Create Task form
+
 ## [Fixed Create Task Project and Assignee Assignment] - 2025-08-22
 
 - **Fixed Create Task API Issue**: Switched from `quickAddTask` to `addTask` API to use structured parameters instead of relying on server-side NLP parsing
