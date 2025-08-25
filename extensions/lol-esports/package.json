@@ -258,21 +258,42 @@
       }
     ]
   },
+  "preferences": [
+    {
+      "name": "spoilerFree",
+      "type": "checkbox",
+      "label": "Spoiler Free",
+      "description": "Hide match scores for completed games",
+      "required": false,
+      "title": "Match Score",
+      "default": true
+    },
+    {
+      "name": "timezone",
+      "type": "textfield",
+      "label": "Timezone",
+      "description": "Settings to show correct date and time",
+      "required": false,
+      "title": "Timezone Location",
+      "default": ""
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.93.0",
-    "@raycast/utils": "^1.19.0",
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.0.1",
     "date-fns": "^3.3.1",
+    "date-fns-tz": "^3.2.0",
     "p-min-delay": "^4.0.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/lodash": "^4.14.202",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/lodash": "^4.17.19",
+    "@types/node": "^24.0.7",
+    "@types/react": "^19.1.8",
+    "eslint": "^9.30.0",
     "lodash": "^4.17.21",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",

@@ -21,12 +21,12 @@ export interface ScheduleResponse {
   };
 }
 
-interface Pages {
+export interface Pages {
   older: string;
   newer: null;
 }
 
-interface Event {
+export interface Event {
   startTime: string;
   state: string;
   type: string;
@@ -35,19 +35,19 @@ interface Event {
   match: Match;
 }
 
-interface League {
+export interface League {
   name: string;
   slug: string;
 }
 
-interface Match {
+export interface Match {
   id: string;
   flags: string[];
   teams: TeamsItem[];
   strategy: Strategy;
 }
 
-interface TeamsItem {
+export interface TeamsItem {
   name: string;
   code: string;
   image: string;
@@ -55,17 +55,17 @@ interface TeamsItem {
   record: Record | null;
 }
 
-interface Result {
+export interface Result {
   outcome: string | null;
   gameWins: number;
 }
 
-interface Record {
+export interface Record {
   wins: number;
   losses: number;
 }
 
-interface Strategy {
+export interface Strategy {
   type: string;
   count: number;
 }
