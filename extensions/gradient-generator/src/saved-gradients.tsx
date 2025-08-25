@@ -55,7 +55,7 @@ export default function SavedGradients() {
         dismissAction: { title: 'Cancel' },
       });
       if (!ok) return;
-      
+
       // Remove the existing gradient when overwriting
       const next = [...saved];
       next.splice(existingIndex, 1);

@@ -259,17 +259,19 @@ export default function PreviewGradient(props: Props) {
                 g.angle === gradient.angle &&
                 JSON.stringify(g.stops) === JSON.stringify(gradient.stops),
             ) && (
-                              <Action.Push
-                  icon={Icon.Text}
-                  title="Rename Gradient"
-                  shortcut={{ modifiers: ['cmd', 'shift'], key: 'r' } as Keyboard.Shortcut}
-                  target={
-                    <QuickRenameForm
-                      initialLabel={gradient.label}
-                      onSubmit={onRename}
-                    />
-                  }
-                />
+              <Action.Push
+                icon={Icon.Text}
+                title="Rename Gradient"
+                shortcut={
+                  { modifiers: ['cmd', 'shift'], key: 'r' } as Keyboard.Shortcut
+                }
+                target={
+                  <QuickRenameForm
+                    initialLabel={gradient.label}
+                    onSubmit={onRename}
+                  />
+                }
+              />
             )}
             {hasEnoughStops && (
               <>
