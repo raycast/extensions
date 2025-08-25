@@ -99,7 +99,9 @@ export function CameraGrid(): React.ReactElement {
       columns={3}
       fit={Grid.Fit.Fill}
     >
-      {states?.map((s) => <CameraGridItem key={s.entity_id} state={s} />)}
+      {states?.map((s) => (
+        <CameraGridItem key={s.entity_id} state={s} />
+      ))}
     </Grid>
   );
 }
