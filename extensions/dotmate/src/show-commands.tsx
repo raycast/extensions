@@ -1,33 +1,33 @@
-import { ActionPanel, Action, List } from '@raycast/api';
-import { runCommand } from './utils';
+import { ActionPanel, Action, List } from "@raycast/api";
+import { runCommand } from "./utils";
 
 export default function Command() {
   const commands = [
     {
-      id: 'backup-configs',
-      title: 'Backup Configs',
-      subtitle: 'Backup Config Files in Repo',
+      id: "backup-configs",
+      title: "Backup Configs",
+      subtitle: "Backup Config Files in Repo",
     },
     {
-      id: 'restore-configs',
-      title: 'Restore Configs',
-      subtitle: 'Restore Config Files to Local',
+      id: "restore-configs",
+      title: "Restore Configs",
+      subtitle: "Restore Config Files to Local",
     },
     {
-      id: 'show-diffs',
-      title: 'Show Diffs',
-      subtitle: 'Displays Diffs Among Config',
+      id: "show-diffs",
+      title: "Show Diffs",
+      subtitle: "Displays Diffs Among Config",
     },
     {
-      id: 'show-status',
-      title: 'Show Status',
-      subtitle: 'Displays Status Between Configs',
+      id: "show-status",
+      title: "Show Status",
+      subtitle: "Displays Status Between Configs",
     },
   ];
 
   return (
     <List>
-      {commands.map(command => (
+      {commands.map((command) => (
         <List.Item
           key={command.id}
           title={command.title}
