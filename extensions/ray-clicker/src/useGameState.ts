@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import { showToast, Toast, LocalStorage } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import {
   GameState,
   INITIAL_STATE,
@@ -419,28 +419,9 @@ export function useGameState(): UseGameStateReturn {
 
     const interval = setInterval(() => {
       (async () => {
-        const menuBarActive = await LocalStorage.getItem("idle-menu-bar-active");
         const now = Date.now();
         const prev = lastUpdateRef.current;
         const deltaTime = (now - prev) / 1000; // seconds
-
-        // If the menu bar is accruing, sync from storage so UI reflects gains and skip local accrual
-        if (menuBarActive) {
-          try {
-            const stored = await loadGameState();
-            setGameState((prevState) => {
-              const incomingTs = typeof stored.lastUpdate === "number" ? stored.lastUpdate : 0;
-              const prevTs = typeof prevState.lastUpdate === "number" ? prevState.lastUpdate : 0;
-              if (incomingTs > prevTs) {
-                return calculateDerivedState(stored);
-              }
-              return prevState;
-            });
-          } finally {
-            lastUpdateRef.current = now;
-          }
-          return;
-        }
 
         if (deltaTime > 0) {
           setGameState((prevState) => {

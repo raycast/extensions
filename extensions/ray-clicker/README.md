@@ -58,7 +58,6 @@ Use Raycast Window Capture (Preferences → Advanced):
 
 ## Notes
 
-- Design overview lives in `design doc.md` (truncated summary)
 - CHANGELOG in root tracks version history
 
 ## License
