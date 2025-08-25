@@ -1,10 +1,14 @@
-/// <reference path="../raycast-env.d.ts" />
 import { getPreferenceValues, MenuBarExtra, Icon, open } from "@raycast/api";
 import FathomRequest from "./utils/api";
 import { LiveData } from "./types/LiveData";
 
+type MenuBarPreferences = {
+  apiToken: string;
+  siteId: string;
+};
+
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences.CurrentVisitorsMenuBar>();
+  const preferences = getPreferenceValues<MenuBarPreferences>();
 
   const { data, isLoading } = FathomRequest({
     endpoint: "/current_visitors",
