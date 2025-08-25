@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Add My Starred Repositories command] - {PR_MERGE_DATE}
+## [Add My Starred Repositories command] - 2025-08-25
 
 - Add new "My Starred Repositories" command to view starred repositories
 - Displays starred repositories with support for sorting and visiting history
