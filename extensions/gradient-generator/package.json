@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "name": "gradient-generator",
   "title": "Gradient Generator",
   "description": "Create, preview, randomize, save and export gradients, using them in your next project.",
@@ -23,17 +23,10 @@
       "mode": "view"
     },
     {
-      "name": "preview-gradient",
-      "title": "Preview Gradient",
-      "subtitle": "Gradient Generator",
-      "description": "Preview a gradient with copy actions.",
-      "mode": "view"
-    },
-    {
       "name": "random-gradient",
       "title": "Random Gradient",
       "subtitle": "Gradient Generator",
-      "description": "Show a random gradient.",
+      "description": "Show a random gradient with options for 2 or 3 stops.",
       "mode": "view"
     },
     {
@@ -42,6 +35,42 @@
       "subtitle": "Gradient Generator",
       "description": "View and manage saved gradients.",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "svgExportDirectory",
+      "type": "directory",
+      "required": true,
+      "title": "SVG Export Directory",
+      "description": "Choose the directory where SVG files will be saved",
+      "default": "~/Downloads"
+    },
+    {
+      "name": "pngExportDirectory",
+      "type": "directory",
+      "required": true,
+      "title": "PNG Export Directory",
+      "description": "Choose the directory where PNG files will be saved",
+      "default": "~/Downloads"
+    },
+    {
+      "name": "tailwindOutputMode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Tailwind Output Mode",
+      "description": "Choose default Tailwind output format",
+      "default": "utility",
+      "data": [
+        {
+          "title": "Utility Classes (bg-[...])",
+          "value": "utility"
+        },
+        {
+          "title": "Raw CSS",
+          "value": "css"
+        }
+      ]
     }
   ],
   "dependencies": {

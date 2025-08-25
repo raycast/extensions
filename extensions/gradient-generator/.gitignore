@@ -4,4 +4,3 @@ dist/
 *.log
 .env
 .raycast/
-PRD.md
