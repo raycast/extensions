@@ -29,6 +29,12 @@ import { isTodoistInstalled } from "./hooks/useIsTodoistInstalled";
 import { useNLPParser } from "./hooks/useNLPParser";
 import useSyncData from "./hooks/useSyncData";
 
+// Local interface to work around TypeScript language server not recognizing
+// the global Preferences.CreateTask namespace from raycast-env.d.ts
+interface CreateTaskPreferences {
+  shouldCloseMainWindow: boolean;
+}
+
 type CreateTaskValues = {
   content: string;
   description: string;
@@ -52,7 +58,7 @@ type CreateTaskProps = {
 };
 
 function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues }: CreateTaskProps) {
-  const { shouldCloseMainWindow } = getPreferenceValues<Preferences.CreateTask>();
+  const { shouldCloseMainWindow } = getPreferenceValues<CreateTaskPreferences>();
 
   const { push, pop } = useNavigation();
 
@@ -96,7 +102,7 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
             description: values.description || undefined,
             project_id: values.projectId || undefined,
             responsible_uid: values.responsibleUid || undefined,
-            labels: values.labels.length > 0 ? values.labels : undefined,
+            labels: Array.isArray(values.labels) && values.labels.length > 0 ? values.labels : undefined,
             priority: parseInt(values.priority),
             section_id: values.sectionId || undefined,
             parent_id: values.parentId || undefined,
@@ -134,7 +140,7 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
             },
           };
 
-          if (values.files.length > 0) {
+          if (Array.isArray(values.files) && values.files.length > 0) {
             try {
               toast.message = "Uploading file and adding to comment…";
               const file = await uploadFile(values.files[0]);
