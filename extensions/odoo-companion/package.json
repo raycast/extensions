@@ -15,14 +15,14 @@
     {
       "name": "search-projects",
       "title": "Search Projects",
-      "subtitle": "Search between all your projects",
+      "subtitle": "Odoo Companion",
       "description": "Query your Odoo projects to access directly the project in your browser, no more clicks !",
       "mode": "view"
     },
     {
       "name": "search-helpdesk",
       "title": "Search Helpdesk",
-      "subtitle": "Search between all your helpdesk",
+      "subtitle": "Odoo Companion",
       "description": "Query your Odoo helpdesk to access directly the helpdesk in your browser, no more clicks !",
       "mode": "view"
     }
