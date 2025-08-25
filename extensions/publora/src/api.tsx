@@ -33,5 +33,5 @@ export const schedulePost = async (api_key: string, post: Post) => {
     throw new Error(`Error scheduling post: ${errorData.message}`);
   }
 
-  return await response.json();
+  return response.json();
 };

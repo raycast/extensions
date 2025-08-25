@@ -19,7 +19,7 @@ export default function Command(props: LaunchProps<{ draftValues: Post }>) {
     }
   }
 
-  const api_key = getPreferenceValues<{ api_key: string }>().api_key;
+  const api_key = getPreferenceValues<ExtensionPreferences>().api_key;
 
   const [allPlatforms, setAllPlatforms] = useCachedState<Platform[]>("platforms", [
     {
