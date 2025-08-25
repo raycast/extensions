@@ -1,137 +1,55 @@
-<a name="readme-top"></a>
+# Cheatsheets Remastered
 
-<!-- PROJECT LOGO -->
-<br />
-<div align="center">
-    <img src="media/logo.png" alt="Logo" width="80" height="80">
+Access a curated collection of [DevHints](https://devhints.io/) cheatsheets plus the ability to create and manage your own custom sheets — all without leaving your keyboard. Search is smart and fast, prioritizing titles over content, so you find what you need instantly.
 
-<h3 align="center">Cheatsheets Remastered</h3>
+## Key Features
 
-  <p align="center">
-    A remastered Cheatsheets extension with enhanced functionality, custom sheet creation, and an improved browsing experience.
-    <br />
-    <a href="./ROADMAP.md"><strong>Explore the roadmap »</strong></a>
-    <br />
+* Built-in collection of DevHints cheatsheets
+* Create and edit your own custom sheets
+* Organize with tags and favorites
+* Local storage for offline access
+* Smarter search with title-first matching
 
-  </p>
-</div>
+## What Makes It Different
 
-<details>
-  <summary>Table of Contents</summary>
+Unlike the original Cheatsheets extension, **Cheatsheets Remastered** comes with cheatsheets ready to use out of the box, no internet required. You can fully customize your own sheets with tags, descriptions, and icons — while enjoying enhanced search for faster discovery.
 
-_Last Updated 2025-08-16_
-<!-- toc -->
+## Frequently Asked Questions
 
-- [About The Project](#about-the-project)
-  - [Features](#features)
-  - [Built with](#built-with)
-- [Getting started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Install](#install)
-  - [Usage](#usage)
-- [Back Matter](#back-matter)
-  - [Roadmap](#roadmap)
-  - [Contributing](#contributing)
-  - [License](#license)
+**Do I need an internet connection?**
 
-<!-- tocstop -->
-  
-</details>
+No. The built-in cheatsheets work completely offline. You only need internet if you want to pull updates to the extension or use the enhanced content search feature.
 
-<!-- ABOUT THE PROJECT -->
-## About The Project
-<div align="center">
-    <img src="media/cheatsheets-remastered-1.png" alt="Screenshot" width="100%" height="auto">
-  </div>
-  
-**Cheatsheets Remastered** is a modern [Raycast extension](https://github.com/raycast/extensions) to quickly search, create, and manage cheatsheets. It ships with curated [DevHints](https://devhints.io/) content and lets you keep your own sheets locally. Perfect for fast recall without leaving your keyboard.
+**Can I add my own cheatsheets?**
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+Yes. You can create, edit, and tag custom sheets directly inside Raycast with full markdown support, custom icons, and descriptions.
 
-### Features
+**Are my custom cheatsheets synced?**
 
-- Search across custom and DevHints cheatsheets with fast filtering and tags
-- Create, edit, copy, and organise markdown cheatsheets
-- Local-first storage for your custom content.
-- Large base of sheets integrated out of the box
-- Rich tagging and favouriting with icon mapping for quick discovery
+All custom sheets are stored locally in Raycast's storage. They're not synced across devices right now, but this is planned for future releases.
 
-### Built with
+**How does the search work?**
 
-- Raycast API
-- TypeScript + React
-- Node.js / npm
+Search prioritizes title matches first, then content matches. This means cheatsheets with your search term in the title appear before those with it in the content, making results more relevant.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+## Troubleshooting
 
-## Getting started
+**I can't find a cheatsheet.**
 
-### Prerequisites
+Try searching by the title first. The extension prioritizes title matches over content for speed. Also check that you haven't accidentally filtered by type (custom vs default).
 
-- macOS with Raycast installed
+**My custom sheet isn't showing up.**
 
-### Install
+Make sure it has a title and at least one content entry saved. Unsaved drafts won't appear in search. Check the filter dropdown isn't set to "Default Only".
 
-#### From Raycast Store (production):
-Install via [Raycast Store](https://www.raycast.com/smcnab1/cheatsheet-remastered)
+**Search feels slow.**
 
-#### From source (development):
+Performance is local and should be fast. If it feels sluggish, try reducing the number of large custom sheets or check that Raycast is up to date. Large markdown files with many images can impact performance.
 
-```bash
-npm install
-npm run dev
-```
+**I can't see the built-in cheatsheets.**
 
-Build locally:
+Ensure you're not filtered to "Custom Only". The built-in cheatsheets are marked as "Default" type and should appear when the filter is set to "All" or "Default".
 
-```bash
-npm run build
-```
+**Content search isn't working.**
 
-### Usage
-
-- Show Cheatsheets: browse all
-- Search Cheatsheets: search with filters and tags
-- Create Custom Cheatsheet: compose new markdown
-- Manage Custom Cheatsheets: edit, duplicate, delete, export
-- Copy Cheatsheet: quick search and copy to clipboard
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Back Matter
-
-<!-- ROADMAP -->
-### Roadmap
-
-See [ROADMAP.md](./ROADMAP.md) for planned work.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- CONTRIBUTING -->
-
-<a name="contributing"></a>
-
-### Contributing
-
-Contributions welcome — especially to expand and improve the default cheatsheets.
-
-- Add/Update default cheatsheets: edit markdown under `assets/cheatsheets/`
-- Tag updates: map new tags in `src/default-tags.ts`
-- Icons: add topic icons under `assets/` and optionally run `npm run normalize:icons`
-
-PRs should briefly state:
-- What changed and why
-- Which cheatsheets were added/updated
-- Any new tags introduced
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-### License
-
-This project is licensed under the [MIT License](LICENSE).
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+Content search requires a GitHub token in preferences for enhanced results. Without it, only local content search is available, which is more limited but still functional.

@@ -79,12 +79,32 @@ function Command() {
   >({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [contentResults, setContentResults] = useState<string[]>([]);
 
   useEffect(() => {
     loadData();
     // Trigger background offline update if preferences allow
     Service.updateOfflineIfNeeded();
   }, []);
+
+  // Add content search effect
+  useEffect(() => {
+    let mounted = true;
+    async function run() {
+      const q = searchQuery.trim();
+      if (!q) {
+        setContentResults([]);
+        return;
+      }
+      const res = await Service.searchDefaultContent(q);
+      if (mounted) setContentResults(res);
+    }
+    run();
+    return () => {
+      mounted = false;
+    };
+  }, [searchQuery]);
 
   async function loadData() {
     try {
@@ -197,18 +217,86 @@ function Command() {
 
   // Filter the sorted data
   const filteredData = sortedData.filter((item) => {
+    // First apply type filter
+    let typeMatch = false;
     switch (filter) {
       case 'custom':
-        return item.type === 'custom';
+        typeMatch = item.type === 'custom';
+        break;
       case 'default':
-        return item.type === 'default';
+        typeMatch = item.type === 'default';
+        break;
       default:
-        return true;
+        typeMatch = true;
     }
+
+    if (!typeMatch) return false;
+
+    // Then apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+
+      // For custom sheets, search in title, content, tags, and description
+      if (item.type === 'custom') {
+        const customSheet = customSheets.find((s) => s.id === item.id);
+        if (customSheet) {
+          return (
+            customSheet.title.toLowerCase().includes(query) ||
+            customSheet.content.toLowerCase().includes(query) ||
+            customSheet.tags?.some((tag) =>
+              tag.toLowerCase().includes(query),
+            ) ||
+            customSheet.description?.toLowerCase().includes(query)
+          );
+        }
+      }
+
+      // For default sheets, search in title and content results
+      if (item.type === 'default') {
+        return (
+          Service.defaultMatchesQuery(item.slug, searchQuery) ||
+          contentResults.includes(item.slug)
+        );
+      }
+    }
+
+    return true;
   });
 
+  // Separate title matches from content matches for better search results
+  const titleMatches: UnifiedCheatsheet[] = [];
+  const contentMatches: UnifiedCheatsheet[] = [];
+
+  if (searchQuery.trim()) {
+    const query = searchQuery.toLowerCase();
+
+    filteredData.forEach((item) => {
+      let isTitleMatch = false;
+
+      if (item.type === 'custom') {
+        const customSheet = customSheets.find((s) => s.id === item.id);
+        if (customSheet) {
+          isTitleMatch = customSheet.title.toLowerCase().includes(query);
+        }
+      } else if (item.type === 'default') {
+        isTitleMatch = Service.defaultMatchesQuery(item.slug, searchQuery);
+      }
+
+      if (isTitleMatch) {
+        titleMatches.push(item);
+      } else {
+        contentMatches.push(item);
+      }
+    });
+  }
+
+  // Combine results: title matches first, then content matches
+  const searchResults = searchQuery.trim()
+    ? [...titleMatches, ...contentMatches]
+    : filteredData;
+
   // Build recent list (top 3: prefer lastViewed, fallback to mostViewed if none)
-  let recentItems = [...filteredData]
+  let recentItems = [...searchResults]
     .sort((a, b) => {
       const aKey = `${a.type}-${a.slug}`;
       const bKey = `${b.type}-${b.slug}`;
@@ -220,7 +308,7 @@ function Command() {
     .filter((item) => !!viewStats[`${item.type}-${item.slug}`]?.lastViewedAt)
     .slice(0, 3);
   if (recentItems.length === 0) {
-    recentItems = [...filteredData]
+    recentItems = [...searchResults]
       .sort((a, b) => {
         const aKey = `${a.type}-${a.slug}`;
         const bKey = `${b.type}-${b.slug}`;
@@ -350,6 +438,8 @@ function Command() {
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search cheatsheets..."
+      searchText={searchQuery}
+      onSearchTextChange={setSearchQuery}
       searchBarAccessory={
         <>
           <List.Dropdown
@@ -418,8 +508,40 @@ function Command() {
     >
       <List.Section
         title="Overview"
-        subtitle={`${filteredData.length} items • ${filter} • ${sort}`}
+        subtitle={`${searchResults.length} items • ${filter} • ${sort}`}
       />
+
+      {searchQuery && (
+        <>
+          {titleMatches.length > 0 && (
+            <List.Section
+              title="Title Matches"
+              subtitle={`${titleMatches.length} cheatsheets with matching titles`}
+            />
+          )}
+
+          {contentMatches.length > 0 && (
+            <List.Section
+              title="Content Matches"
+              subtitle={`${contentMatches.length} cheatsheets with matching content`}
+            />
+          )}
+
+          {titleMatches.length === 0 && contentMatches.length === 0 && (
+            <List.Section
+              title="Search Results"
+              subtitle={`No cheatsheets found for "${searchQuery}"`}
+            >
+              <List.Item
+                title="No results found"
+                subtitle={`Try a different search term or check your spelling`}
+                icon={Icon.MagnifyingGlass}
+              />
+            </List.Section>
+          )}
+        </>
+      )}
+
       {recentItems.length > 0 && (
         <List.Section
           title="Recently Viewed"
@@ -462,7 +584,7 @@ function Command() {
         </List.Section>
       )}
 
-      {filteredData.map((item) => (
+      {searchResults.map((item) => (
         <List.Item
           key={item.id}
           title={item.title}

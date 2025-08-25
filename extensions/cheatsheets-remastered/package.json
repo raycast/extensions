@@ -42,15 +42,7 @@
       "name": "copy-cheatsheet",
       "title": "Copy Cheatsheet",
       "subtitle": "Cheatsheets Remastered",
-      "subtitle": "Cheatsheets Remastered",
       "description": "Search and copy cheatsheet content to clipboard",
-      "mode": "view"
-    },
-    {
-      "name": "search-cheatsheets",
-      "title": "Search Cheatsheets",
-      "subtitle": "Cheatsheets Remastered",
-      "description": "Search across all cheatsheets with advanced filtering",
       "mode": "view"
     }
   ],
