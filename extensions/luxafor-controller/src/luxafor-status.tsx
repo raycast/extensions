@@ -35,7 +35,7 @@ export default function LuxaforStatus() {
           showToast(Toast.Style.Failure, "Error", result.error || "Failed to change color");
         }
       } catch (error) {
-        showToast(Toast.Style.Failure, "Error", "Failed to change color");
+        showFailureToast(error, { title: "Failed to change color" });
       } finally {
         setIsLoading(false);
       }
