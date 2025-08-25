@@ -1,4 +1,5 @@
 import { Detail, ActionPanel, Action, Icon } from "@raycast/api";
+import KeyboardShortcutsHelp from "./KeyboardShortcutsHelp";
 import { Company } from "../types";
 import { useState, useEffect } from "react";
 
@@ -6,9 +7,19 @@ interface CompanyDetailsViewProps {
   company: Company;
   isLoading: boolean;
   onBack: () => void;
+  isFavorite: boolean;
+  onAddFavorite: () => void;
+  onRemoveFavorite: () => void;
 }
 
-export default function CompanyDetailsView({ company, isLoading, onBack }: CompanyDetailsViewProps) {
+export default function CompanyDetailsView({
+  company,
+  isLoading,
+  onBack,
+  isFavorite,
+  onAddFavorite,
+  onRemoveFavorite,
+}: CompanyDetailsViewProps) {
   const [activeTab, setActiveTab] = useState<"overview" | "financials" | "map">("overview");
   const [mapImageUrl, setMapImageUrl] = useState<string | undefined>(undefined);
   const [mapImageDataUri, setMapImageDataUri] = useState<string | undefined>(undefined);
@@ -136,6 +147,9 @@ ${formattedAddress ? `**Address:** ${formattedAddress}\n\n` : ""}${mapImageDataU
     if (activeTab === "overview") {
       return (
         <Detail.Metadata>
+          <Detail.Metadata.TagList title="Favorite">
+            <Detail.Metadata.TagList.Item text={isFavorite ? "Yes" : "No"} color={isFavorite ? "green" : "gray"} />
+          </Detail.Metadata.TagList>
           {company.organizationNumber && (
             <Detail.Metadata.Label title="Organization Number" text={company.organizationNumber} />
           )}
@@ -179,6 +193,9 @@ ${formattedAddress ? `**Address:** ${formattedAddress}\n\n` : ""}${mapImageDataU
       );
       return (
         <Detail.Metadata>
+          <Detail.Metadata.TagList title="Favorite">
+            <Detail.Metadata.TagList.Item text={isFavorite ? "Yes" : "No"} color={isFavorite ? "green" : "gray"} />
+          </Detail.Metadata.TagList>
           {hasFinancials && (
             <>
               {company.accountingYear && (
@@ -209,6 +226,9 @@ ${formattedAddress ? `**Address:** ${formattedAddress}\n\n` : ""}${mapImageDataU
       )}`;
       return (
         <Detail.Metadata>
+          <Detail.Metadata.TagList title="Favorite">
+            <Detail.Metadata.TagList.Item text={isFavorite ? "Yes" : "No"} color={isFavorite ? "green" : "gray"} />
+          </Detail.Metadata.TagList>
           {formattedAddress && <Detail.Metadata.Label title="Address" text={formattedAddress} />}
           <Detail.Metadata.Link title="Directions" target={directionsUrl} text="Open in Google Maps" />
         </Detail.Metadata>
@@ -233,7 +253,27 @@ ${formattedAddress ? `**Address:** ${formattedAddress}\n\n` : ""}${mapImageDataU
             />
           )}
           {company.organizationNumber && (
-            <Action.CopyToClipboard title="Copy Organization Number" content={company.organizationNumber} />
+            <Action.CopyToClipboard
+              title="Copy Organization Number"
+              content={company.organizationNumber}
+              shortcut={{ modifiers: ["cmd"], key: "o" }}
+            />
+          )}
+          {formattedAddress && (
+            <Action.CopyToClipboard
+              title="Copy Business Address"
+              content={formattedAddress}
+              shortcut={{ modifiers: ["cmd"], key: "b" }}
+            />
+          )}
+          {isFavorite ? (
+            <Action
+              title="Remove from Favorites"
+              onAction={onRemoveFavorite}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+            />
+          ) : (
+            <Action title="Add to Favorites" onAction={onAddFavorite} shortcut={{ modifiers: ["cmd"], key: "f" }} />
           )}
           <ActionPanel.Section title="Tabs">
             <Action
@@ -262,6 +302,7 @@ ${formattedAddress ? `**Address:** ${formattedAddress}\n\n` : ""}${mapImageDataU
             />
           </ActionPanel.Section>
           {mapImageUrl && <Action.OpenInBrowser title="Open Static Map Image" url={mapImageUrl} />}
+          <Action.Push title="Keyboard Shortcuts" target={<KeyboardShortcutsHelp />} />
           <Action title="Go Back" onAction={onBack} shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }} />
         </ActionPanel>
       }

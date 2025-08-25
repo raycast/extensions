@@ -48,6 +48,13 @@ export const UI_TEXT = {
   },
 } as const;
 
+// Project Links
+export const GITHUB_REPO_URL = "https://github.com/kyndig/brreg-search" as const;
+
+// Markdown Content
+export const WELCOME_MARKDOWN =
+  `**Welcome to Brreg Search**\n\n- 🔍 Search for companies\n- ⭐ Favorite (⌘F) or remove (⌘⇧F) companies\n- 📑 See details (⌘↵) and cycle tabs (⌘1/2/3)\n\nHave feature requests or improvements? [Open an issue on GitHub](${GITHUB_REPO_URL}).` as const;
+
 // Error Messages
 export const ERROR_MESSAGES = {
   FETCH_ENTITIES: "Failed to fetch legal entities",

@@ -75,7 +75,7 @@ const SHORTCUT_GROUPS: ShortcutGroup[] = [
       },
       {
         action: "Copy Address",
-        shortcut: "No shortcut",
+        shortcut: "⌘B",
         description: "Copy business address to clipboard",
       },
     ],
