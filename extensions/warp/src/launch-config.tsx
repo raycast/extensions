@@ -20,8 +20,19 @@ interface SearchResult {
   path: string;
 }
 
-const configPath = ".warp/launch_configurations";
-const fullPath = path.join(os.homedir(), configPath);
+const getConfigPath = (): string => {
+  if (process.platform === "win32") {
+    return path.join(os.homedir(), "AppData", "Roaming", "warp", "Warp", "data", "launch_configurations");
+  } else if (process.platform === "linux") {
+    const xdgDataHome = process.env.XDG_DATA_HOME;
+    const dataDir = xdgDataHome || path.join(os.homedir(), ".local", "share");
+    return path.join(dataDir, "warp-terminal", "launch_configurations");
+  } else {
+    return path.join(os.homedir(), ".warp", "launch_configurations");
+  }
+};
+
+const fullPath = getConfigPath();
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -48,7 +59,15 @@ export default function Command() {
     const exists = await fs.stat(fullPath).catch(() => false);
 
     if (exists === false) {
-      return showError("Launch Configuration directory missing", `~/${configPath} wasn't found on your computer!`);
+      let configPathDisplay: string;
+      if (process.platform === "win32") {
+        configPathDisplay = "%APPDATA%\\warp\\Warp\\data\\launch_configurations\\";
+      } else if (process.platform === "linux") {
+        configPathDisplay = "${XDG_DATA_HOME:-$HOME/.local/share}/warp-terminal/launch_configurations/";
+      } else {
+        configPathDisplay = "~/.warp/launch_configurations";
+      }
+      return showError("Launch Configuration directory missing", `${configPathDisplay} wasn't found on your computer!`);
     }
 
     const files = await fs.readdir(fullPath).catch(() => null);
@@ -56,7 +75,7 @@ export default function Command() {
     if (files === null || typeof files === "undefined") {
       return showError(
         "Error reading Launch Configuration directory",
-        "Something went wrong while reading the Launch Configuration directory."
+        "Something went wrong while reading the Launch Configuration directory.",
       );
     }
 
@@ -68,7 +87,7 @@ export default function Command() {
           const yaml = YAML.parse(contents);
 
           return { name: yaml.name, path: path.join(fullPath, file) };
-        })
+        }),
     );
 
     if (fileList.length === 0) {
@@ -77,10 +96,10 @@ export default function Command() {
 
     const allFileNames = fileList.map(({ name }) => name);
     const resultsOrderListFilteredFromStaleFiles = resultsOrderList.filter(
-      (fileName) => allFileNames.indexOf(fileName) !== -1
+      (fileName) => allFileNames.indexOf(fileName) !== -1,
     );
     const newFileNamesNotPresentOnResultsOrderList = allFileNames.filter(
-      (fileName) => resultsOrderList.indexOf(fileName) === -1
+      (fileName) => resultsOrderList.indexOf(fileName) === -1,
     );
 
     const currentOrderList = [...resultsOrderListFilteredFromStaleFiles, ...newFileNamesNotPresentOnResultsOrderList];
@@ -88,7 +107,7 @@ export default function Command() {
     setResults(
       [...fileList].sort((fileA, fileB) => {
         return currentOrderList.indexOf(fileA.name) - currentOrderList.indexOf(fileB.name);
-      })
+      }),
     );
   };
 
@@ -211,7 +230,7 @@ function SearchListItem({
                   icon={Icon.ArrowUp}
                 />
                 <Action
-                  title="Move down"
+                  title="Move Down"
                   shortcut={Keyboard.Shortcut.Common.MoveDown}
                   onAction={moveSearchResultDown}
                   icon={Icon.ArrowDown}
