@@ -195,8 +195,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.10.0",
+    "@raycast/api": "^1.101.0",
+    "@raycast/utils": "^1.17.0",
     "cache-func": "^1.0.2",
     "lodash.get": "^4.4.2",
     "prettier": "^2.8.1",
@@ -222,6 +222,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

@@ -3,7 +3,7 @@ import * as child_process from "child_process";
 import * as afs from "fs/promises";
 import * as os from "os";
 import path from "path";
-import { fileExists } from "../utils";
+import { fileExists, isWin } from "../utils";
 
 interface ExtensionMetaRoot {
   identifier: ExtensionIdentifier;
@@ -78,7 +78,27 @@ const cliPaths: Record<string, string> = {
   Windsurf: "/Applications/Windsurf.app/Contents/Resources/app/bin/windsurf",
 };
 
+const cliPathsWindows: Record<string, string> = {
+  Code: `${os.homedir()}\\AppData\\Local\\Programs\\Microsoft VS Code\\bin\\code.cmd`,
+  "Code - Insiders": "C:\\Program Files\\Microsoft VS Code Insiders\\bin\\code-insiders.cmd",
+  Cursor: "C:\\Program Files\\Cursor\\bin\\cursor.cmd",
+  Kiro: "C:\\Program Files\\Kiro\\bin\\kiro.cmd",
+  Positron: "C:\\Program Files\\Positron\\bin\\code.cmd",
+  Trae: "C:\\Program Files\\Trae\\bin\\marscode.cmd",
+  "Trae CN": "C:\\Program Files\\Trae CN\\bin\\marscode.cmd",
+  VSCodium: "C:\\Program Files\\VSCodium\\bin\\codium.cmd",
+  "VSCodium - Insiders": "C:\\Program Files\\VSCodium - Insiders\\bin\\codium-insiders.cmd",
+  Windsurf: "C:\\Program Files (x86)\\Windsurf IDE for JavaScript and TypeScript (x64)\\bin\\windsurf.cmd",
+};
+
 export function getVSCodeCLIFilename(): string {
+  if (isWin) {
+    const name = cliPathsWindows[getBuildNamePreference()];
+    if (!name || name.length <= 0) {
+      return cliPaths.Code;
+    }
+    return name;
+  }
   const name = cliPaths[getBuildNamePreference()];
   if (!name || name.length <= 0) {
     return cliPaths.Code;

@@ -4,8 +4,9 @@ import fs from "fs";
 import { homedir } from "os";
 import { build } from "./preferences";
 import { EntryLike, RecentEntries } from "./types";
-import { isSameEntry } from "./utils";
+import { isSameEntry, isWin } from "./utils";
 import { execFilePromise } from "./utils/exec";
+import { getBuildNamePreference } from "./lib/vscode";
 
 export type RemoveMethods = {
   removeEntry: (entry: EntryLike) => Promise<void>;
@@ -83,6 +84,10 @@ export function useRecentEntries() {
 }
 
 function getPath() {
+  const build = getBuildNamePreference();
+  if (isWin) {
+    return `${homedir()}\\AppData\\Roaming\\Code\\User\\globalStorage\\state.vscdb`;
+  }
   return `${homedir()}/Library/Application Support/${build}/User/globalStorage/state.vscdb`;
 }
 

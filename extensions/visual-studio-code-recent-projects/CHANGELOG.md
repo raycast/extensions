@@ -1,5 +1,9 @@
 # Visual Studio Code Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Added Windows support
+
 ## [Update] - 2025-08-04
 
 - Added support for Kiro.
