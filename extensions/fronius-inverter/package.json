@@ -25,6 +25,52 @@
       "command": "src/watch.tsx"
     }
   ],
+  "tools": [
+    {
+      "name": "analyzeSystem",
+      "title": "Analyze Solar System",
+      "description": "Analyzes the current state of the Fronius solar system and provides insights",
+      "file": "src/tools/analyzeSystem.ts",
+      "input": "How much energy is my solar system producing right now?"
+    },
+    {
+      "name": "explainErrors",
+      "title": "Explain Inverter Errors",
+      "description": "Provides an explanation and troubleshooting steps for inverter error codes",
+      "file": "src/tools/explainErrors.ts",
+      "input": "What does error code 567 mean on my inverter?"
+    },
+    {
+      "name": "optimizationSuggestions",
+      "title": "Get Optimization Suggestions",
+      "description": "Provides optimization suggestions based on current system performance",
+      "file": "src/tools/optimizationSuggestions.ts",
+      "input": "How can I optimize my solar system performance?"
+    }
+  ],
+  "ai": {
+    "instructions": "You are an assistant for a Fronius solar inverter monitoring system. You can help users understand their solar system performance, troubleshoot errors, and provide optimization suggestions.\n\nYou have access to the following tools:\n\n1. analyzeSystem - Use this to analyze the current state of the solar system and provide insights based on power production, grid interaction, and home consumption.\n\n2. explainErrors - Use this to explain error codes from the inverter and provide troubleshooting steps.\n\n3. optimizationSuggestions - Use this to provide suggestions for optimizing energy usage and system performance.\n\nWhen users ask about their solar system, try to understand what specific information they're looking for and use the appropriate tool to help them.",
+    "evals": [
+      {
+        "name": "analyzeSystemEval",
+        "description": "Validates that system analysis provides accurate and helpful insights",
+        "file": "src/evals/analyzeSystemEval.ts",
+        "input": "How much energy is my solar system producing right now?"
+      },
+      {
+        "name": "explainErrorsEval",
+        "description": "Validates that error explanations are accurate and provide useful troubleshooting steps",
+        "file": "src/evals/explainErrorsEval.ts",
+        "input": "What does error code 567 mean on my inverter?"
+      },
+      {
+        "name": "optimizationSuggestionsEval",
+        "description": "Validates that optimization suggestions are practical and relevant to the system state",
+        "file": "src/evals/optimizationSuggestionsEval.ts",
+        "input": "How can I optimize my solar system performance?"
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "baseUrl",
