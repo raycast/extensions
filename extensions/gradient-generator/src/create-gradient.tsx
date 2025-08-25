@@ -11,11 +11,8 @@ import {
 import React, { useState, useMemo, useCallback } from 'react';
 import PreviewGradient from './gradient-preview';
 import { GradType, ValidationError } from './types';
-import { randomHex, validateGradient } from './lib/grad';
+import { randomHex, validateGradient, isValidHex } from './lib/grad';
 import { getPresets } from './lib/presets';
-
-const isValidHex = (s: string): boolean =>
-  /^#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})$/.test(s.trim());
 
 export default function CreateGradient() {
   const { push } = useNavigation();

@@ -18,7 +18,7 @@ A minimalist, local-first Raycast extension for crafting gradients. Create a gra
 
 * **Create Gradient**: Form to define type, colors, and angle; pushes to Preview
 * **Random Gradient**: Generates a random 2–3 stop gradient and shows Preview
-* **Saved Gradients**: List of saved gradients with color tags; open Preview; delete
+* **Saved Gradients**: List of saved gradients with color tags; open Preview; rename labels (Quick Rename or Edit Label); delete
 
 ## Preferences
 

@@ -55,11 +55,20 @@ export default function SavedGradients() {
         dismissAction: { title: 'Cancel' },
       });
       if (!ok) return;
+      
+      // Remove the existing gradient when overwriting
+      const next = [...saved];
+      next.splice(existingIndex, 1);
+      // Adjust the index if the removed item was before the current one
+      const adjustedIndex = existingIndex < index ? index - 1 : index;
+      next[adjustedIndex] = { ...next[adjustedIndex], label: trimmedLabel };
+      await setSaved(next);
+    } else {
+      // No collision, just rename
+      const next = [...saved];
+      next[index] = { ...next[index], label: trimmedLabel };
+      await setSaved(next);
     }
-
-    const next = [...saved];
-    next[index] = { ...next[index], label: trimmedLabel };
-    await setSaved(next);
     await showToast({
       style: Toast.Style.Success,
       title: 'Gradient renamed',
