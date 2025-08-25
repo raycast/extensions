@@ -70,6 +70,8 @@ The extension provides a comprehensive company details view with three interacti
 - **⌘⇧F**: Remove company from favorites  
 - **⌘O**: Copy organization number
 - **⌘B**: Copy business address
+- **⌘⇧R**: Copy revenue
+- **⌘⇧N**: Copy net result
 - **⌘⇧Enter**: Open company in Brønnøysundregistrene
 - **⌘⇧↑**: Move favorite up in list
 - **⌘⇧↓**: Move favorite down in list
