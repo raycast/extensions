@@ -1,0 +1,34 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+STAGED_FILES=$(git diff --cached --name-only)
+if [ -z "$STAGED_FILES" ]; then
+  exit 0
+fi
+
+only_docs=true
+for file in $STAGED_FILES; do
+  case "$file" in
+    *.md)
+      continue
+      ;;
+  esac
+
+  git diff --cached -U0 "$file" | grep '^+' | grep -v '^+++' | while IFS= read -r line; do
+    l=${line#?}
+    if echo "$l" | grep -Eq '^[[:space:]]*(//|/\*|\*/|\*)'; then
+      continue
+    fi
+    if [ -n "$(echo "$l" | tr -d '[:space:]')" ]; then
+      only_docs=false
+      break 2
+    fi
+  done
+done
+
+if [ "$only_docs" = true ]; then
+  exit 0
+fi
+
+npm run lint
+npx ts-node run-tests.tsx
