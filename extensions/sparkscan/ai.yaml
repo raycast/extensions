@@ -1,0 +1,48 @@
+evals:
+  - input: "@sparkscan what are the stats?"
+    mocks:
+      get-stats:
+        network: MAINNET
+        totalValueLockedSats: 5371934022
+        totalValueLockedUsd: 6347154.92435388
+        activeAccounts: 12556
+        transactions24h: 1407
+        currentBtcPriceUsd: 118154.0
+    expected:
+      - callsTool:
+          name: get-stats
+          arguments:
+            network: MAINNET
+      - meetsCriteria: Returns the latest statistics for the Spark network
+  - input: "@sparkscan what are the stats for regtest?"
+    mocks:
+      get-stats:
+        network: REGTEST
+        totalValueLockedSats: 3339632760
+        totalValueLockedUsd: 3947111.959044
+        activeAccounts: 7152
+        transactions24h: 65
+        currentBtcPriceUsd: 118190.0
+    expected:
+      - callsTool:
+          name: get-stats
+          arguments:
+            network: REGTEST
+      - meetsCriteria: Returns the latest statistics for the Spark Regtest network
+  - input: "@sparkscan what is the status?"
+    mocks:
+      get-status:
+        status: operational
+    expected:
+      - callsTool:
+          name: get-status
+      - meetsCriteria: Returns the status of the Sparkscan API as operational
+  - input: "@sparkscan what is the status?"
+    mocks:
+      get-status:
+        status: unknown
+    expected:
+      - callsTool:
+          name: get-status
+      - callsTool:
+          name: get-status
