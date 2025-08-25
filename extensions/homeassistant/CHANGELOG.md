@@ -1,6 +1,6 @@
 # Home Assistant Changelog
 
-## [Windows] - {PR_MERGE_DATE}
+## [Windows] - 2025-08-25
 
 Add Windows support
 
