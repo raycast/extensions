@@ -235,3 +235,26 @@ mutation removeStar($repositoryId: ID!) {
     clientMutationId # Placeholder
   }
 }
+
+query myStarredRepositories(
+  $numberOfItems: Int!
+  $after: String
+  $orderByField: StarOrderField!
+  $orderByDirection: OrderDirection!
+) {
+  viewer {
+    starredRepositories(
+      first: $numberOfItems
+      after: $after
+      orderBy: { field: $orderByField, direction: $orderByDirection }
+    ) {
+      nodes {
+        ...ExtendedRepositoryFields
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+}
