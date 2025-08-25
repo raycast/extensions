@@ -11,9 +11,8 @@ interface VpnStatus {
 // Execute a shell command and return the promise with the output
 export const executeCommand = (command: string): Promise<string> => {
   return new Promise((resolve, reject) => {
-    exec(command, (error, stdout, stderr) => {
+    exec(command, (error, stdout) => {
       if (error) {
-        console.error('Execution error:', stderr);
         reject(new Error(`Execution failed: ${error.message}`));
         return;
       }
@@ -29,11 +28,10 @@ export const runCommand = (
   const command = `/Applications/Mozilla\\ VPN.app/Contents/MacOS/Mozilla\\ VPN ${action}`;
   return executeCommand(command)
     .then(() => {
-      console.log(`VPN ${action} command executed successfully.`);
+      // Command executed successfully, no logging needed
     })
     .catch((err) => {
-      console.error(`Failed to ${action} VPN:`, err);
-      throw err; // Re-throw the error to be handled or logged by the caller
+      throw err; // Re-throw the error to be handled by the caller
     });
 };
 
@@ -43,9 +41,6 @@ export const checkVpnStatus = async (): Promise<VpnStatus> => {
     const stdout = await executeCommand(
       '/Applications/Mozilla\\ VPN.app/Contents/MacOS/Mozilla\\ VPN status'
     );
-
-    // Log the full output for debugging
-    console.log(`Raw VPN status output:\n${stdout}`);
 
     const isActive = stdout.includes('VPN state: on');
     const isAuthenticated = !stdout.includes('User status: not authenticated');
@@ -91,13 +86,8 @@ export const checkVpnStatus = async (): Promise<VpnStatus> => {
       }
     }
 
-    console.log(
-      `Parsed server info: City=${serverCity}, Country=${serverCountry}, Active=${isActive}`
-    );
-
     return { isActive, serverCity, serverCountry, isAuthenticated };
   } catch (err) {
-    console.error('Error checking VPN status:', err);
     throw new Error('Failed to retrieve VPN status');
   }
 };

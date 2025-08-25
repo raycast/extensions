@@ -1,0 +1,125 @@
+{
+  "instructions": "You are an assistant for Mozilla VPN Control. Always use explicit action parameters:\n\n• action='connect' - Connect to VPN (optionally with country/city)\n• action='disconnect' - Disconnect VPN\n• action='status' - Show VPN status and IP\n• action='list' - List all available countries\n• action='list_cities' - List cities in a country (requires country parameter)\n• action='list_servers' - List servers (requires country, optionally city)\n• action='change_server' - Change server without connecting\n\nWhen users specify both country and city with connect, always connect to that exact location.",
+  "evals": [
+    {
+      "input": "Connect to VPN",
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "connect" } } }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "Disconnect VPN",
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "disconnect" } } }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "VPN status",
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "status" } } }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "List countries",
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "list" } } }
+      ]
+    },
+    {
+      "input": "Show cities in USA",
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "list_cities", "country": "USA" } } }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "Show servers in UK",
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "list_servers", "country": "UK" } } }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "Connect to Seattle, USA",
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "connect", "country": "USA", "city": "Seattle" } } }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "Change server to Germany",
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "change_server", "country": "Germany" } } }
+      ]
+    },
+    {
+      "input": "Connect to Germany",
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "connect", "country": "Germany" } } }
+      ]
+    },
+    {
+      "input": "Turn off VPN",
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "disconnect" } } }
+      ]
+    },
+    {
+      "input": "What is my IP?",
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "status" } } }
+      ]
+    },
+    {
+      "input": "Cities in UK",
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "list_cities", "country": "UK" } } }
+      ]
+    },
+    {
+      "input": "Servers in London, UK",
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "list_servers", "country": "UK", "city": "London" } } }
+      ]
+    },
+    {
+      "input": "What countries are available?",
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "list" } } }
+      ]
+    },
+    {
+      "input": "Switch server to Germany",
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "change_server", "country": "Germany" } } }
+      ]
+    },
+    {
+      "input": "Enable VPN",
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "connect" } } }
+      ]
+    },
+    {
+      "input": "Stop VPN",
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "disconnect" } } }
+      ]
+    },
+    {
+      "input": "What's my IP address?",
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "status" } } }
+      ]
+    },
+    {
+      "input": "Is VPN connected?",
+      "expected": [
+        { "callsTool": { "name": "mozilla-vpn-control", "arguments": { "action": "status" } } }
+      ]
+    }
+  ]
+}
