@@ -167,7 +167,7 @@ export default function LuxaforStatus() {
         icon={{ source: Icon.Circle, tintColor: getToggleTarget() === "Green" ? Color.Green : Color.Red }}
         onAction={toggleColor}
       />
-      <MenuBarExtra.Section title="" />
+      <MenuBarExtra.Section title="Status" />
       <MenuBarExtra.Item
         title={`Status: ${currentStatus.isOnline ? "Online" : "Offline"}`}
         icon={{
@@ -260,7 +260,7 @@ export default function LuxaforStatus() {
           }
         }}
       />
-      <MenuBarExtra.Section title="" />
+      <MenuBarExtra.Section title="Status" />
       <MenuBarExtra.Item
         title={`Status: ${currentStatus.isOnline ? "Online" : "Offline"}`}
         icon={{
