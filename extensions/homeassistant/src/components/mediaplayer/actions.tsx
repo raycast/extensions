@@ -87,7 +87,7 @@ export function MediaPlayerTurnOnAction(props: { state: State }): React.ReactEle
 
   return (
     <Action
-      title="Turn on"
+      title="Turn On"
       onAction={handle}
       shortcut={{ modifiers: ["cmd"], key: "o" }}
       icon={{ source: "power-on.svg", tintColor: Color.PrimaryText }}
@@ -107,7 +107,7 @@ export function MediaPlayerTurnOffAction(props: { state: State }): React.ReactEl
 
   return (
     <Action
-      title="Turn off"
+      title="Turn Off"
       onAction={handle}
       shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
       icon={{ source: "power-off.svg", tintColor: Color.PrimaryText }}

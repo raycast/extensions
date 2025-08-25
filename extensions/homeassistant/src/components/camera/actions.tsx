@@ -33,7 +33,7 @@ export function CameraTurnOnAction(props: { state: State }): React.ReactElement 
   };
   return (
     <Action
-      title="Turn on"
+      title="Turn On"
       onAction={handle}
       shortcut={{ modifiers: ["cmd"], key: "o" }}
       icon={{ source: "power-on.svg", tintColor: Color.PrimaryText }}
@@ -51,7 +51,7 @@ export function CameraTurnOffAction(props: { state: State }): React.ReactElement
   };
   return (
     <Action
-      title="Turn off"
+      title="Turn Off"
       onAction={handle}
       shortcut={{ modifiers: ["cmd"], key: "f" }}
       icon={{ source: "power.svg", tintColor: Color.PrimaryText }}
@@ -87,7 +87,7 @@ export function CameraOpenStreamInVLCAction(props: { state: State }): React.Reac
   }
   return (
     <Action.Open
-      title="Open in Vlc"
+      title="Open in VLC"
       target={url}
       application="VLC"
       shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}

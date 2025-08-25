@@ -25,7 +25,7 @@ export function AutomationTurnOnAction(props: { state: State }): React.ReactElem
   if (s.entity_id.startsWith("automation") && s.state === "off") {
     return (
       <Action
-        title="Turn on"
+        title="Turn On"
         onAction={() => callAutomationTurnOnService(s)}
         icon={{ source: "power-on.svg", tintColor: Color.PrimaryText }}
       />
@@ -39,7 +39,7 @@ export function AutomationTurnOffAction(props: { state: State }): React.ReactEle
   if (s.entity_id.startsWith("automation") && s.state === "on") {
     return (
       <Action
-        title="Turn off"
+        title="Turn Off"
         onAction={() => callAutomationTurnOffService(s)}
         icon={{ source: "power-off.svg", tintColor: Color.PrimaryText }}
       />

@@ -228,13 +228,13 @@ export function LightActionPanel(props: { state: State }) {
           icon={{ source: "cached.svg", tintColor: Color.PrimaryText }}
         />
         <Action
-          title="Turn on"
+          title="Turn On"
           shortcut={{ modifiers: ["cmd"], key: "o" }}
           onAction={async () => await ha.turnOnLight(props.state.entity_id)}
           icon={{ source: "power-on.svg", tintColor: Color.PrimaryText }}
         />
         <Action
-          title="Turn off"
+          title="Turn Off"
           shortcut={{ modifiers: ["cmd"], key: "f" }}
           onAction={async () => await ha.turnOffLight(props.state.entity_id)}
           icon={{ source: "power-off.svg", tintColor: Color.PrimaryText }}

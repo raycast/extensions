@@ -30,7 +30,7 @@ type Input = {
  * @param {Input} input The input object containing the service operation
  * @returns {Promise<object>} An empty object if successful, throws an error otherwise
  * @example
- * // Turn on multiple air conditioners
+ * // Turn On multiple air conditioners
  * {
  *   service: "turn_on",
  *   data: { entity_id: ["climate.ac1", "climate.ac2"] }

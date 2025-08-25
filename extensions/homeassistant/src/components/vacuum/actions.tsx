@@ -78,7 +78,7 @@ export function VacuumTurnOnAction(props: { state: State }): React.ReactElement 
   }
   return (
     <Action
-      title="Turn on"
+      title="Turn On"
       onAction={() => callVacuumTurnOnService(s)}
       shortcut={{ modifiers: ["cmd"], key: "o" }}
       icon={{ source: "power-on.svg", tintColor: Color.PrimaryText }}
@@ -93,7 +93,7 @@ export function VacuumTurnOffAction(props: { state: State }): React.ReactElement
   }
   return (
     <Action
-      title="Turn off"
+      title="Turn Off"
       onAction={() => callVacuumTurnOffService(s)}
       shortcut={{ modifiers: ["cmd"], key: "f" }}
       icon={{ source: "power-off.svg", tintColor: Color.PrimaryText }}
