@@ -39,7 +39,7 @@ let slackWebClient: WebClient | null = null;
 
 export const slack = OAuthService.slack({
   scope:
-    "users:read channels:read groups:read im:read mpim:read channels:history groups:history im:history mpim:history channels:write groups:write im:write mpim:write users:write dnd:read dnd:write search:read users.profile:write emoji:read",
+    "users:read channels:read groups:read im:read mpim:read chat:write channels:history groups:history im:history mpim:history channels:write groups:write im:write mpim:write users:write dnd:read dnd:write search:read users.profile:write emoji:read",
   personalAccessToken: accessToken,
   onAuthorize({ token }) {
     slackWebClient = new WebClient(token, { rejectRateLimitedCalls: true });
