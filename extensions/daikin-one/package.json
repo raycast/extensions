@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "daikin-one",
+  "title": "Daikin One+",
+  "description": "Controls the Daikin One+ thermostat",
+  "icon": "extension-icon.png",
+  "author": "abvthecity",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "turn-on-thermostat",
+      "title": "Turn On Thermostat",
+      "description": "Turn on your Daikin One thermostat",
+      "mode": "no-view"
+    },
+    {
+      "name": "turn-off-thermostat",
+      "title": "Turn Off Thermostat",
+      "description": "Turn off your Daikin One thermostat",
+      "mode": "no-view"
+    },
+    {
+      "name": "set-cool-mode",
+      "title": "Set Cool Mode",
+      "description": "Set thermostat to cool mode",
+      "mode": "no-view"
+    },
+    {
+      "name": "set-heat-mode",
+      "title": "Set Heat Mode",
+      "description": "Set thermostat to heat mode",
+      "mode": "no-view"
+    },
+    {
+      "name": "set-auto-mode",
+      "title": "Set Auto Mode",
+      "description": "Set thermostat to auto mode",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "daikinEmail",
+      "type": "textfield",
+      "required": true,
+      "title": "Daikin One Email",
+      "description": "Your Daikin One account email address",
+      "placeholder": "Enter your email"
+    },
+    {
+      "name": "daikinPassword",
+      "type": "password",
+      "required": true,
+      "title": "Daikin One Password",
+      "description": "Your Daikin One account password",
+      "placeholder": "Enter your password"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.101.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
