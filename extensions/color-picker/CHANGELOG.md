@@ -1,5 +1,12 @@
 # Color Picker Changelog
 
+## [Multi-Color Selection] - {PR_MERGE_DATE}
+
+- Add multi-color selection functionality to the Organize Colors and Generate Colors commands
+- Select multiple colors using keyboard shortcuts (Cmd+S to toggle, Cmd+Shift+A to select all, Cmd+Shift+Z to clear)
+- Copy selected colors in multiple formats: JSON, CSS Classes, and CSS Variables
+- Visual indicators show selected colors with checkmarks in the grid view
+
 ## [Bugfix & Maintenance] - 2025-08-13
 
 - Fix the incorrect subtitle content in the `Convert Color` command
