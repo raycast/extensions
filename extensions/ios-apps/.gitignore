@@ -1,0 +1,14 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+
+# raycast specific
+raycast-env.d.ts
+dist/
+build/
+
+# misc
+.DS_Store
+WARP.md
+/docs/2fa-plan.md

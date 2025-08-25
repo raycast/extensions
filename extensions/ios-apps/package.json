@@ -1,0 +1,274 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ios-apps",
+  "title": "iOS Apps",
+  "description": "Search, download, and view iOS apps from the App Store.",
+  "icon": "extension-icon.png",
+  "author": "chrismessina",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search iOS Apps",
+      "subtitle": "iOS App Search",
+      "description": "Search for iOS apps on the App Store",
+      "mode": "view"
+    },
+    {
+      "name": "logout",
+      "title": "Logout",
+      "subtitle": "Apple ID",
+      "description": "Revoke ipatool auth and clear stored credentials",
+      "mode": "no-view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-apps",
+      "title": "Search iOS Apps",
+      "description": "Search for iOS apps on the App Store by name or keyword",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "string",
+          "description": "The search query for finding iOS apps",
+          "required": true
+        },
+        {
+          "name": "limit",
+          "type": "number",
+          "description": "Maximum number of results to return (default: 10, max: 20)",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "get-app-details",
+      "title": "Get iOS App Details",
+      "description": "Get detailed information about an iOS app by name or search term",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "string",
+          "description": "The name or search term for the iOS app",
+          "required": true
+        },
+        {
+          "name": "bundleId",
+          "type": "string",
+          "description": "Optional bundle ID if known (will skip search step)",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "download-app",
+      "title": "Download iOS App",
+      "description": "Download an iOS app",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "string",
+          "description": "The name or search term for the iOS app",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "get-current-version",
+      "title": "Get Current Version",
+      "description": "Lookup an app's current version.",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "string",
+          "description": "The name or search term for the iOS app",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "download-app-screenshots",
+      "title": "Download App Screenshots",
+      "description": "Download the screenshots for an app."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "downloadPath",
+      "title": "Download Path",
+      "description": "Path to download app files",
+      "type": "directory",
+      "default": "~/Downloads",
+      "required": false
+    },
+    {
+      "name": "homebrewPath",
+      "title": "Homebrew Path",
+      "description": "Path to the Homebrew executable. You can enter `which brew` in terminal to find its path.",
+      "type": "textfield",
+      "default": "/opt/homebrew/bin/brew",
+      "required": false
+    },
+    {
+      "name": "ipatoolPath",
+      "title": "ipatool Path",
+      "description": "Path to the ipatool executable. You can enter `which ipatool` in terminal to find its path.",
+      "type": "textfield",
+      "default": "/opt/homebrew/bin/ipatool",
+      "required": false
+    },
+    {
+      "name": "includeIPhone",
+      "title": "Include Screenshots From:",
+      "description": "Download screenshots for iPhone devices",
+      "type": "checkbox",
+      "label": "iPhone",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "includeIPad",
+      "title": "",
+      "description": "Download screenshots for iPad devices",
+      "type": "checkbox",
+      "label": "iPad",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "includeMac",
+      "title": "",
+      "description": "Download screenshots for Mac devices",
+      "type": "checkbox",
+      "label": "Mac",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "includeAppleTV",
+      "title": "",
+      "description": "Download screenshots for Apple TV devices",
+      "type": "checkbox",
+      "label": "Apple TV",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "includeAppleWatch",
+      "title": "",
+      "description": "Download screenshots for Apple Watch devices",
+      "type": "checkbox",
+      "label": "Apple Watch",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "includeVisionPro",
+      "title": "",
+      "description": "Download screenshots for Vision Pro devices",
+      "type": "checkbox",
+      "label": "Vision Pro",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "downloadTimeoutSeconds",
+      "title": "Download Timeout (in seconds)",
+      "description": "Timeout for individual screenshot downloads",
+      "type": "textfield",
+      "default": "90",
+      "required": false
+    },
+    {
+      "name": "maxConcurrentDownloads",
+      "title": "Max Concurrent Downloads",
+      "description": "Maximum number of concurrent screenshot downloads",
+      "type": "textfield",
+      "default": "5",
+      "required": false
+    },
+    {
+      "name": "maxStallTimeout",
+      "title": "Max Stall Timeout (in milliseconds)",
+      "description": "Timeout when no progress is made during downloads",
+      "type": "textfield",
+      "default": "30000",
+      "required": false
+    },
+    {
+      "name": "tempCleanupOnExit",
+      "title": "Cleanup Temporary Files",
+      "description": "Automatically clean up temporary files when the extension exits",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "integrityVerification",
+      "title": "Integrity Verification",
+      "description": "Level of file integrity verification to perform",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Basic",
+          "value": "basic"
+        },
+        {
+          "title": "Checksum",
+          "value": "checksum"
+        },
+        {
+          "title": "Off",
+          "value": "off"
+        }
+      ],
+      "default": "basic",
+      "required": false
+    },
+    {
+      "name": "verboseLogging",
+      "title": "Verbose Logging",
+      "description": "Enable detailed console logging for debugging purposes",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.1",
+    "@raycast/utils": "^1.17.0",
+    "adm-zip": "^0.5.16",
+    "lodash": "^4.17.21",
+    "node-fetch": "^3.3.2",
+    "p-limit": "^6.2.0",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/adm-zip": "^0.5.5",
+    "@types/lodash": "^4.17.16",
+    "@types/node": "^20.10.2",
+    "@types/p-limit": "^2.1.0",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "evals": "ray evals",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
