@@ -2,9 +2,11 @@
  * https://github.com/solidtime-io/solidtime/tree/main/resources/js/packages/api/src
  * Modified the client to include the API key
  */
+const { url } = getPreferenceValues<Preferences>();
 
 import type { ApiOf, ZodiosBodyByAlias, ZodiosQueryParamsByAlias, ZodiosResponseByAlias } from "@zodios/core";
 import { createApiClient } from "./openapi.json.client";
+import { getPreferenceValues } from "@raycast/api";
 
 export type SolidTimeApi = ApiOf<typeof api>;
 
@@ -103,7 +105,9 @@ export type ApiTokenIndexResponse = ZodiosResponseByAlias<SolidTimeApi, "getApiT
 export type CreateApiTokenBody = ZodiosBodyByAlias<SolidTimeApi, "createApiToken">;
 export type ApiToken = ApiTokenIndexResponse["data"][0];
 
-const api = createApiClient("https://app.solidtime.io/api", {
+const base = url.startsWith("http") ? url : `https://${url}`;
+const solidtimeUrl = new URL("api", base).toString();
+const api = createApiClient(solidtimeUrl, {
   validate: "none",
 });
 
