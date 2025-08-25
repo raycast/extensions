@@ -117,27 +117,31 @@ function usePreferences() {
   });
 
   useEffect(() => {
-    getPreferenceFormData().then((newState) => {
+    (async () => {
+      const newState = await getPreferenceFormData();
       setState({ isLoading: false, ...newState });
+    })();
+  }, []);
+
+  const onChangeLanguage = useCallback((newValue: string) => {
+    setPreferredLanguage(newValue);
+    setState((currentState) => {
+      return { ...currentState, isLoading: false, currentLanguage: newValue };
     });
   }, []);
 
-  const onChangeLanguage = useCallback(async (newValue: string) => {
-    await setPreferredLanguage(newValue);
-    const newState = await getPreferenceFormData();
-    setState({ isLoading: false, ...newState });
-  }, []);
-
-  const onChangeVersion = useCallback(async (newValue: string) => {
-    await setPreferredVersion(Number(newValue));
-    const newState = await getPreferenceFormData();
-    setState({ isLoading: false, ...newState });
+  const onChangeVersion = useCallback((newValue: string) => {
+    setPreferredVersion(Number(newValue));
+    setState((currentState) => {
+      return { ...currentState, isLoading: false, currentVersion: Number(newValue) };
+    });
   }, []);
 
   const onChangeReferenceFormat = useCallback(async (newValue: string) => {
-    await setPreferredReferenceFormat(newValue);
-    const newState = await getPreferenceFormData();
-    setState({ isLoading: false, ...newState });
+    setPreferredReferenceFormat(newValue);
+    setState((currentState) => {
+      return { ...currentState, isLoading: false, currentReferenceFormat: newValue };
+    });
   }, []);
 
   const onChangeVerseNumbersSetting = useCallback(async (newValue: boolean) => {
