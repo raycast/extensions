@@ -1,6 +1,6 @@
 # Endel Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-08-25
 
 - Launch Endel soundscapes directly from Raycast
 - Autoplay support - soundscapes start playing automatically
