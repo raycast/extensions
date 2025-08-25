@@ -17,6 +17,7 @@ _Please note that the `fork` we mention here is not the same as Git's `fork`._
 - [x] Explorer full extension list
 - [x] Sparse-checkout an extension
 - [x] Remove an extension from forked list
+- [x] Synchronizes the forked repository with the upstream repository on local
 
 ## Hint
 
