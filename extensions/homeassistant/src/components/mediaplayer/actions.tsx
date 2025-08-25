@@ -159,7 +159,7 @@ export function MediaPlayerActionPanel(props: { state: State }) {
       </ActionPanel.Section>
       <ActionPanel.Section title="Volume">
         <Action
-          title="Volume up"
+          title="Volume Up"
           shortcut={{ modifiers: ["cmd"], key: "+" }}
           onAction={async () => await ha.volumeUpMedia(entityID)}
           icon={{ source: Icon.SpeakerUp, tintColor: Color.PrimaryText }}
