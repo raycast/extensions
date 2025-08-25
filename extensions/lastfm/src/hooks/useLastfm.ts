@@ -1,68 +1,140 @@
-import { useState } from "react";
-import fetch from "node-fetch";
-import useSWR from "swr";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { LastFmMethod, ExtensionPreferences, UseLastFmResult, LastFmParams } from "@/types";
+import { getErrorMessage } from "../utils/utils";
 
-// Functions
-import { getErrorMessage } from "../functions/getErrorMessage";
+const API = new URL(`https://ws.audioscrobbler.com/2.0/`);
 
-// Types
-import type { SongResponse, Track, TopTrack } from "@/types/SongResponse";
-
-interface Props {
-  username: string;
-  apikey: string;
-  period: string;
-  method: "top" | "recent";
-  limit: string;
+interface LastFmErrorResponse {
+  error: number;
+  message: string;
 }
 
-const useLastFm = (props: Props) => {
-  try {
-    const method = props.method === "top" ? "gettoptracks" : "getrecenttracks";
+function isLastFmErrorResponse(data: unknown): data is LastFmErrorResponse {
+  return (
+    typeof data === "object" &&
+    data !== null &&
+    "error" in data &&
+    typeof (data as LastFmErrorResponse).error === "number"
+  );
+}
 
-    const [songs, setSongs] = useState<Track[] | TopTrack[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<any>(null);
+async function fetchLastFmData<T>(method: LastFmMethod, params?: LastFmParams): Promise<T> {
+  const { username, apikey, limit } = getPreferenceValues<ExtensionPreferences>();
 
-    const handleError = (err: unknown) => {
-      setError(err);
-      setLoading(false);
-    };
-
-    const fetcher = (url: string) => fetch(url).then((r) => r.json() as Promise<SongResponse>);
-    useSWR(
-      `https://ws.audioscrobbler.com/2.0/?method=user.${method}&user=${props.username}&api_key=${
-        props.apikey
-      }&format=json&period=${props.period}&limit=${props.limit || 24}`,
-      fetcher,
-      {
-        onSuccess: (data) => {
-          if (data.error) {
-            const message = getErrorMessage(data.error);
-            handleError(new Error(message));
-          } else {
-            const tracks = data.recenttracks?.track || data.toptracks?.track || [];
-
-            setSongs(tracks);
-            setLoading(false);
-          }
-        },
-        onError: handleError,
-      }
-    );
-
-    return {
-      loading,
-      error: error?.message || null,
-      songs,
-    };
-  } catch (err: unknown) {
-    return {
-      loading: false,
-      error: (err as any)?.mesage || null,
-      songs: [],
-    };
+  if (!username || !apikey) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Configuration Error",
+      message: "Please set your Last.fm username and API key in the extension preferences.",
+    });
+    throw new Error("Last.fm username or API key is missing from preferences.");
   }
-};
 
-export default useLastFm;
+  const fields: URLSearchParams = new URLSearchParams({
+    method,
+    user: username,
+    api_key: apikey,
+    format: "json",
+  });
+
+  if (limit) {
+    fields.append("limit", limit);
+  } else {
+    fields.append("limit", "24"); // Default limit if not provided
+  }
+
+  if (params) {
+    Object.keys(params).forEach((key) => {
+      fields.append(key, params[key]);
+    });
+  }
+
+  API.search = fields.toString();
+
+  try {
+    const response = await fetch(API);
+    if (!response.ok) {
+      await showToast(Toast.Style.Failure, "Network Error", `HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+
+    if (isLastFmErrorResponse(data)) {
+      const message = getErrorMessage(data.error);
+      await showToast(Toast.Style.Failure, "Last.fm API Error", message);
+      throw new Error(message);
+    }
+
+    return data as T;
+  } catch (e: unknown) {
+    let errorMessage = "An unexpected error occurred.";
+
+    if (e instanceof Error) {
+      errorMessage = e.message;
+    } else if (typeof e === "string") {
+      errorMessage = e;
+    }
+
+    if (!errorMessage.includes("Last.fm API Error") && !errorMessage.includes("Configuration Error")) {
+      await showToast(Toast.Style.Failure, "Fetching Error", errorMessage);
+    }
+
+    throw e;
+  }
+}
+
+export function useLastFm<T>(method: LastFmMethod, params?: LastFmParams): UseLastFmResult<T> {
+  const { username, apikey, limit, period } = getPreferenceValues<ExtensionPreferences>();
+
+  const [data, setData] = useState<T | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [timestamp, setTimestamp] = useState(Date.now());
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const fetchData = useCallback(async () => {
+    // Clear any existing timer
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+
+    // Debounce API calls by 500ms to prevent rapid successive requests
+    debounceTimer.current = setTimeout(async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const result = await fetchLastFmData<T>(method, params);
+        setData(result);
+      } catch (err: unknown) {
+        let errorMessage = "An unknown error occurred.";
+        if (err instanceof Error) {
+          errorMessage = err.message;
+        } else if (typeof err === "string") {
+          errorMessage = err;
+        }
+        setError(errorMessage);
+        setData(null);
+      } finally {
+        setLoading(false);
+      }
+    }, 500);
+  }, [method, params]);
+
+  useEffect(() => {
+    fetchData();
+
+    // Cleanup timer on unmount
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+    };
+  }, [method, username, apikey, period, limit, timestamp, fetchData]);
+
+  const revalidate = () => {
+    setTimestamp(Date.now());
+  };
+
+  return { data, loading, error, revalidate };
+}

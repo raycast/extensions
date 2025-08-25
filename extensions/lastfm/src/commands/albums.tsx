@@ -2,15 +2,15 @@ import React, { useState } from "react";
 import { ActionPanel, showToast, Toast, getPreferenceValues, List, Grid, Action } from "@raycast/api";
 
 // Hooks
-import { useTopAlbums } from "./hooks/useTopAlbums";
+import { useTopAlbums } from "../hooks/useTopAlbums";
 
 // Types
 import type { Album } from "@/types/AlbumResponse";
-import { periodTypes } from "./types";
-import { PeriodDropdown } from "./components/period";
-import { ListResults } from "./components/list";
-import { GridResults } from "./components/grid";
-import { generateMusicServiceAction } from "./utils/utils";
+import { periodTypes } from "../types";
+import { PeriodDropdown } from "../components/period";
+import { ListResults } from "../components/list";
+import { GridResults } from "../components/grid";
+import { generateMusicServiceAction } from "../utils/utils";
 
 interface AlbumItemProps {
   key: string;
