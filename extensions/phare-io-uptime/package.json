@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "phare-io-uptime",
+  "title": "Phare.io Uptime",
+  "description": "Manages and shows uptime status for services using Phare.io",
+  "icon": "phare.io-black.png",
+  "author": "ApopeOS",
+  "categories": [
+    "Data",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "show-all-monitors",
+      "title": "Show All Monitors",
+      "subtitle": "Phare.io",
+      "description": "Shows all monitors and their current status.",
+      "mode": "view"
+    },
+    {
+      "name": "create-monitor",
+      "title": "Create Monitor",
+      "subtitle": "Phare.io",
+      "description": "Create a new monitor for a service.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "phareApiKey",
+      "type": "password",
+      "title": "Phare.io API Key",
+      "description": "Enter your Phare.io API key. You can find it in your Phare.io dashboard.",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.101.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
