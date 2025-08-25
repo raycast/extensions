@@ -34,7 +34,9 @@ export function BatteryMenubarSection(props: {
   }
   return (
     <MenuBarExtra.Section title={props.title}>
-      {states?.map((b) => <BatteryMenubarItem key={b.entity_id} state={b} />)}
+      {states?.map((b) => (
+        <BatteryMenubarItem key={b.entity_id} state={b} />
+      ))}
     </MenuBarExtra.Section>
   );
 }
