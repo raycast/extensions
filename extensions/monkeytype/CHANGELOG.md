@@ -1,8 +1,9 @@
-# Changelog
+# Monkeytype Changelog
 
 ## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
+
 - Initial release of Monkeytype extension
 - Quick access to 5 key Monkeytype sections:
   - Start Typing Test - Direct access to typing tests
@@ -15,6 +16,7 @@
 - Instant browser opening with confirmation HUD messages
 
 ### Features
+
 - Fast access to Monkeytype without navigation friction
 - No external dependencies or API complexity
 - Follows Raycast design guidelines and best practices
