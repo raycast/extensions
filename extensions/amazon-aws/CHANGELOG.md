@@ -1,6 +1,6 @@
 # Amazon AWS Changelog
 
-## [API Gateway, AppSync & Amplify Enhancements] - {PR_MERGE_DATE}
+## [API Gateway, AppSync & Amplify Enhancements] - 2025-08-25
 
 - Add API Gateway command to manage REST and HTTP APIs
   - Browse and search API resources, methods, and integrations
