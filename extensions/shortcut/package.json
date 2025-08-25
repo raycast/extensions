@@ -51,6 +51,893 @@
       "subtitle": "Shortcut"
     }
   ],
+  "tools": [
+    {
+      "name": "search-stories",
+      "title": "Search Stories",
+      "description": "Search Stories on Shortcut"
+    },
+    {
+      "name": "current-member-info",
+      "title": "Current User Info",
+      "description": "Get the currently authenticated Shortcut user"
+    },
+    {
+      "name": "get-members",
+      "title": "Get Members",
+      "description": "Get members in current workspace"
+    },
+    {
+      "name": "get-epics",
+      "title": "Get Epics",
+      "description": "Get Epics in current workspace"
+    },
+    {
+      "name": "get-iterations",
+      "title": "Get Iterations",
+      "description": "Get iterations in current workspace"
+    },
+    {
+      "name": "get-groups",
+      "title": "Get Groups",
+      "description": "Get groups in current workspace"
+    },
+    {
+      "name": "get-projects",
+      "title": "Get Projects",
+      "description": "Get list of Projects in current workspace"
+    },
+    {
+      "name": "get-workflows",
+      "title": "Get Workflows",
+      "description": "Get the Workflows in current workspace"
+    },
+    {
+      "name": "create-story",
+      "title": "Create Story",
+      "description": "Creates a Shortcut story"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input" : "@shortcut give me all my stories",
+        "mocks" : {
+          "current-member-info" : {
+            "id" : "65e92776-6c3b-4626-ae4e-75a5ffc0a6f6",
+            "mention_name" : "john-doe-test99",
+            "name" : "John Doe",
+            "workspace2" : {
+              "estimate_scale" : [
+                0,
+                1,
+                2,
+                4,
+                8
+              ],
+              "url_slug" : "raycast-test",
+              "utc_offset" : "-05:00"
+            }
+          },
+          "search-stories" : {
+            "data" : {
+              "epics" : {
+                "data" : [
+                  {
+                    "app_url" : "https://app.shortcut.com/raycast-test/epic/28",
+                    "archived" : false,
+                    "associated_groups" : null,
+                    "comments" : [
+      
+                    ],
+                    "completed" : false,
+                    "completed_at" : null,
+                    "completed_at_override" : null,
+                    "created_at" : "2024-03-07T02:33:26Z",
+                    "deadline" : "2024-04-06T02:33:26Z",
+                    "description" : "An **Epic** is a collection of Stories that make up a larger deliverable of work, like a feature.\n\n**🏁 Tips for Epics:**\n- Include Stories for product, design, and marketing efforts in your Epic, alongside the engineering work.\n- Working collaboratively with another team on a feature? Use filters, sorting, and group-by to view Stories by team or owner.",
+                    "entity_type" : "epic",
+                    "epic_state_id" : 500000002,
+                    "external_id" : null,
+                    "follower_ids" : [
+                      "65e92776-6c3b-4626-ae4e-75a5ffc0a6f6"
+                    ],
+                    "global_id" : "v2:e:65e92776-8a54-4c23-8aaa-f75b4f0506e5:28",
+                    "group_id" : "65e92776-0227-47f8-acb7-16b8eb2c2508",
+                    "group_ids" : [
+                      "65e92776-0227-47f8-acb7-16b8eb2c2508"
+                    ],
+                    "group_mention_ids" : [
+      
+                    ],
+                    "id" : 28,
+                    "label_ids" : [
+      
+                    ],
+                    "labels" : [
+      
+                    ],
+                    "member_mention_ids" : [
+      
+                    ],
+                    "mention_ids" : [
+      
+                    ],
+                    "milestone_id" : 26,
+                    "name" : "🏁 Our second Epic",
+                    "objective_ids" : [
+                      26
+                    ],
+                    "owner_ids" : [
+                      "65e92776-6c3b-4626-ae4e-75a5ffc0a6f6"
+                    ],
+                    "planned_start_date" : "2024-03-07T02:33:26Z",
+                    "position" : 2,
+                    "productboard_id" : null,
+                    "productboard_name" : null,
+                    "productboard_plugin_id" : null,
+                    "productboard_url" : null,
+                    "project_ids" : [
+      
+                    ],
+                    "requested_by_id" : "65e92776-6c3b-4626-ae4e-75a5ffc0a6f6",
+                    "started" : false,
+                    "started_at" : null,
+                    "started_at_override" : null,
+                    "state" : "to do",
+                    "stats" : {
+                      "num_points" : 0,
+                      "num_points_backlog" : 0,
+                      "num_points_done" : 0,
+                      "num_points_started" : 0,
+                      "num_points_unstarted" : 0,
+                      "num_related_documents" : 0,
+                      "num_stories_backlog" : 0,
+                      "num_stories_done" : 0,
+                      "num_stories_started" : 0,
+                      "num_stories_total" : 0,
+                      "num_stories_unestimated" : 0,
+                      "num_stories_unstarted" : 0
+                    },
+                    "stories_without_projects" : 0,
+                    "updated_at" : "2024-03-07T02:33:26Z"
+                  },
+                  {
+                    "app_url" : "https://app.shortcut.com/raycast-test/epic/27",
+                    "archived" : false,
+                    "associated_groups" : null,
+                    "comments" : [
+      
+                    ],
+                    "completed" : false,
+                    "completed_at" : null,
+                    "completed_at_override" : null,
+                    "created_at" : "2024-03-07T02:33:26Z",
+                    "deadline" : "2024-04-06T02:33:26Z",
+                    "description" : "An **Epic** is a collection of Stories that make up a larger deliverable of work, like a feature.\n\n**🏁 Tips for Epics:**\n- Include Stories for product, design, and marketing efforts in your Epic, alongside the engineering work.\n- Working collaboratively with another team on a feature? Use filters, sorting, and group-by to view Stories by team or owner.",
+                    "entity_type" : "epic",
+                    "epic_state_id" : 500000002,
+                    "external_id" : null,
+                    "follower_ids" : [
+                      "65e92776-6c3b-4626-ae4e-75a5ffc0a6f6"
+                    ],
+                    "global_id" : "v2:e:65e92776-8a54-4c23-8aaa-f75b4f0506e5:27",
+                    "group_id" : "65e92776-0227-47f8-acb7-16b8eb2c2508",
+                    "group_ids" : [
+                      "65e92776-0227-47f8-acb7-16b8eb2c2508"
+                    ],
+                    "group_mention_ids" : [
+      
+                    ],
+                    "id" : 27,
+                    "label_ids" : [
+      
+                    ],
+                    "labels" : [
+      
+                    ],
+                    "member_mention_ids" : [
+      
+                    ],
+                    "mention_ids" : [
+      
+                    ],
+                    "milestone_id" : 25,
+                    "name" : "🏁 Our first Epic",
+                    "objective_ids" : [
+                      25
+                    ],
+                    "owner_ids" : [
+                      "65e92776-6c3b-4626-ae4e-75a5ffc0a6f6"
+                    ],
+                    "planned_start_date" : "2024-03-07T02:33:26Z",
+                    "position" : 1,
+                    "productboard_id" : null,
+                    "productboard_name" : null,
+                    "productboard_plugin_id" : null,
+                    "productboard_url" : null,
+                    "project_ids" : [
+      
+                    ],
+                    "requested_by_id" : "65e92776-6c3b-4626-ae4e-75a5ffc0a6f6",
+                    "started" : false,
+                    "started_at" : null,
+                    "started_at_override" : null,
+                    "state" : "to do",
+                    "stats" : {
+                      "last_story_update" : "2025-04-12T20:40:01Z",
+                      "num_points" : 2,
+                      "num_points_backlog" : 0,
+                      "num_points_done" : 0,
+                      "num_points_started" : 2,
+                      "num_points_unstarted" : 0,
+                      "num_related_documents" : 0,
+                      "num_stories_backlog" : 0,
+                      "num_stories_done" : 0,
+                      "num_stories_started" : 1,
+                      "num_stories_total" : 2,
+                      "num_stories_unestimated" : 1,
+                      "num_stories_unstarted" : 1
+                    },
+                    "stories_without_projects" : 2,
+                    "updated_at" : "2024-03-07T02:33:26Z"
+                  }
+                ],
+                "next" : null,
+                "total" : 2
+              },
+              "stories" : {
+                "data" : [
+                  {
+                    "app_url" : "https://app.shortcut.com/raycast-test/story/32",
+                    "archived" : false,
+                    "blocked" : false,
+                    "blocker" : false,
+                    "branches" : [
+      
+                    ],
+                    "comments" : [
+      
+                    ],
+                    "commits" : [
+      
+                    ],
+                    "completed" : false,
+                    "completed_at" : null,
+                    "completed_at_override" : null,
+                    "created_at" : "2024-03-07T02:33:26Z",
+                    "custom_fields" : [
+      
+                    ],
+                    "deadline" : null,
+                    "description" : "➡️ **User Story**\nx\n\n\n**Acceptance Criteria**\n- x\n- x",
+                    "entity_type" : "story",
+                    "epic_id" : 27,
+                    "estimate" : null,
+                    "external_id" : null,
+                    "external_links" : [
+      
+                    ],
+                    "files" : [
+      
+                    ],
+                    "follower_ids" : [
+                      "65e92776-6c3b-4626-ae4e-75a5ffc0a6f6"
+                    ],
+                    "formatted_vcs_branch_name" : null,
+                    "global_id" : "v2:s:65e92776-8a54-4c23-8aaa-f75b4f0506e5:32",
+                    "group_id" : "65e92776-0227-47f8-acb7-16b8eb2c2508",
+                    "group_mention_ids" : [
+      
+                    ],
+                    "id" : 32,
+                    "iteration_id" : 29,
+                    "label_ids" : [
+      
+                    ],
+                    "labels" : [
+      
+                    ],
+                    "linked_files" : [
+      
+                    ],
+                    "member_mention_ids" : [
+      
+                    ],
+                    "mention_ids" : [
+      
+                    ],
+                    "moved_at" : "2024-03-07T02:33:26Z",
+                    "name" : "Sample Story 2",
+                    "owner_ids" : [
+                      "65e92776-6c3b-4626-ae4e-75a5ffc0a6f6"
+                    ],
+                    "position" : 22147483648,
+                    "previous_iteration_ids" : [
+      
+                    ],
+                    "project_id" : null,
+                    "pull_requests" : [
+      
+                    ],
+                    "requested_by_id" : "65e92776-6c3b-4626-ae4e-75a5ffc0a6f6",
+                    "started" : false,
+                    "started_at" : null,
+                    "started_at_override" : null,
+                    "stats" : {
+                      "num_related_documents" : 0
+                    },
+                    "story_links" : [
+      
+                    ],
+                    "story_template_id" : null,
+                    "story_type" : "bug",
+                    "tasks" : [
+      
+                    ],
+                    "updated_at" : "2025-04-12T20:40:01Z",
+                    "workflow_id" : 500000005,
+                    "workflow_state_id" : 500000007
+                  },
+                  {
+                    "app_url" : "https://app.shortcut.com/raycast-test/story/30",
+                    "archived" : false,
+                    "blocked" : false,
+                    "blocker" : false,
+                    "branches" : [
+      
+                    ],
+                    "comments" : [
+                      {
+                        "app_url" : "https://app.shortcut.com/raycast-test/story/30/sample-story-1#activity-34",
+                        "author_id" : "65e92776-6c3b-4626-ae4e-75a5ffc0a6f6",
+                        "created_at" : "2024-03-07T02:33:26Z",
+                        "deleted" : false,
+                        "entity_type" : "story-comment",
+                        "external_id" : null,
+                        "group_mention_ids" : [
+      
+                        ],
+                        "id" : 34,
+                        "linked_to_slack" : false,
+                        "member_mention_ids" : [
+                          "65e92776-6c3b-4626-ae4e-75a5ffc0a6f6"
+                        ],
+                        "mention_ids" : [
+                          "65e92776-6c3b-4626-ae4e-75a5ffc0a6f6"
+                        ],
+                        "parent_id" : null,
+                        "position" : 1,
+                        "reactions" : [
+      
+                        ],
+                        "story_id" : 30,
+                        "text" : "Welcome to Shortcut [@john-doe-test99](shortcutapp://members/65e92776-6c3b-4626-ae4e-75a5ffc0a6f6)! This is where you'll see all mentions and activities",
+                        "updated_at" : "2024-03-07T02:33:26Z"
+                      }
+                    ],
+                    "commits" : [
+      
+                    ],
+                    "completed" : false,
+                    "completed_at" : null,
+                    "completed_at_override" : null,
+                    "created_at" : "2024-03-07T02:33:26Z",
+                    "custom_fields" : [
+      
+                    ],
+                    "deadline" : "2024-03-14T02:33:26Z",
+                    "description" : "**Stories** are the standard unit of work in Shortcut representing individual features, bugs, and chores.\n\n## Here's an example:\n\n➡️ **User Story**\nAs a user, I want to see the news on my home screen.\n\n\n**Acceptance Criteria**\n- Given a user is logged in, when they click home on the nav\n- News modal appear in the left hand corner of the home screen\n\n---\n\n✅ Add **Tasks** (below) to Stories to break down the work granularly, or assign those smaller tasks to other users.",
+                    "entity_type" : "story",
+                    "epic_id" : 27,
+                    "estimate" : 2,
+                    "external_id" : null,
+                    "external_links" : [
+      
+                    ],
+                    "files" : [
+      
+                    ],
+                    "follower_ids" : [
+                      "65e92776-6c3b-4626-ae4e-75a5ffc0a6f6"
+                    ],
+                    "formatted_vcs_branch_name" : null,
+                    "global_id" : "v2:s:65e92776-8a54-4c23-8aaa-f75b4f0506e5:30",
+                    "group_id" : "65e92776-0227-47f8-acb7-16b8eb2c2508",
+                    "group_mention_ids" : [
+      
+                    ],
+                    "id" : 30,
+                    "iteration_id" : 29,
+                    "label_ids" : [
+      
+                    ],
+                    "labels" : [
+      
+                    ],
+                    "linked_files" : [
+      
+                    ],
+                    "member_mention_ids" : [
+      
+                    ],
+                    "mention_ids" : [
+      
+                    ],
+                    "moved_at" : "2024-03-07T02:33:26Z",
+                    "name" : "Sample Story 1",
+                    "owner_ids" : [
+                      "65e92776-6c3b-4626-ae4e-75a5ffc0a6f6"
+                    ],
+                    "position" : 32147483648,
+                    "previous_iteration_ids" : [
+      
+                    ],
+                    "project_id" : null,
+                    "pull_requests" : [
+      
+                    ],
+                    "requested_by_id" : "65e92776-6c3b-4626-ae4e-75a5ffc0a6f6",
+                    "started" : true,
+                    "started_at" : "2024-03-07T02:33:26Z",
+                    "started_at_override" : null,
+                    "stats" : {
+                      "num_related_documents" : 0
+                    },
+                    "story_links" : [
+      
+                    ],
+                    "story_template_id" : null,
+                    "story_type" : "chore",
+                    "tasks" : [
+                      {
+                        "complete" : false,
+                        "completed_at" : null,
+                        "created_at" : "2024-03-07T02:33:26Z",
+                        "description" : "Your first task",
+                        "entity_type" : "story-task",
+                        "external_id" : null,
+                        "global_id" : "v2:ta:65e92776-8a54-4c23-8aaa-f75b4f0506e5:31",
+                        "group_mention_ids" : [
+      
+                        ],
+                        "id" : 31,
+                        "member_mention_ids" : [
+      
+                        ],
+                        "mention_ids" : [
+      
+                        ],
+                        "owner_ids" : [
+                          "65e92776-6c3b-4626-ae4e-75a5ffc0a6f6"
+                        ],
+                        "position" : 1,
+                        "story_id" : 30,
+                        "updated_at" : "2024-03-07T02:33:26Z"
+                      }
+                    ],
+                    "updated_at" : "2024-03-07T02:33:26Z",
+                    "workflow_id" : 500000005,
+                    "workflow_state_id" : 500000008
+                  }
+                ],
+                "next" : null,
+                "total" : 2
+              }
+            },
+            "searchQuery" : "owner:john-doe-test99"
+          }
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+      
+              },
+              "name" : "current-member-info"
+            }
+          },
+          {
+            "callsTool" : {
+              "arguments" : {
+                "searchQuery" : "owner:john-doe-test99"
+              },
+              "name" : "search-stories"
+            }
+          }
+        ]
+      },
+      {
+        "input" : "@shortcut Create story 'Implement user profile page' ",
+        "mocks" : {
+          "create-story" : {
+            "app_url" : "https://app.shortcut.com/raycast-test/story/53",
+            "archived" : false,
+            "blocked" : false,
+            "blocker" : false,
+            "branches" : [
+      
+            ],
+            "comments" : [
+      
+            ],
+            "commits" : [
+      
+            ],
+            "completed" : false,
+            "completed_at" : null,
+            "completed_at_override" : null,
+            "created_at" : "2025-04-12T20:48:56Z",
+            "custom_fields" : [
+      
+            ],
+            "deadline" : null,
+            "description" : "",
+            "entity_type" : "story",
+            "epic_id" : null,
+            "estimate" : null,
+            "external_id" : null,
+            "external_links" : [
+      
+            ],
+            "files" : [
+      
+            ],
+            "follower_ids" : [
+              "65e92776-6c3b-4626-ae4e-75a5ffc0a6f6"
+            ],
+            "formatted_vcs_branch_name" : null,
+            "global_id" : "v2:s:65e92776-8a54-4c23-8aaa-f75b4f0506e5:53",
+            "group_id" : null,
+            "group_mention_ids" : [
+      
+            ],
+            "id" : 53,
+            "iteration_id" : null,
+            "label_ids" : [
+      
+            ],
+            "labels" : [
+      
+            ],
+            "linked_files" : [
+      
+            ],
+            "member_mention_ids" : [
+      
+            ],
+            "mention_ids" : [
+      
+            ],
+            "moved_at" : "2025-04-12T20:48:56Z",
+            "name" : "Implement user profile page",
+            "owner_ids" : [
+      
+            ],
+            "position" : 22148401152,
+            "previous_iteration_ids" : [
+      
+            ],
+            "project_id" : null,
+            "pull_requests" : [
+      
+            ],
+            "requested_by_id" : "65e92776-6c3b-4626-ae4e-75a5ffc0a6f6",
+            "started" : false,
+            "started_at" : null,
+            "started_at_override" : null,
+            "stats" : {
+              "num_related_documents" : 0
+            },
+            "story_links" : [
+      
+            ],
+            "story_template_id" : null,
+            "story_type" : "feature",
+            "tasks" : [
+      
+            ],
+            "updated_at" : "2025-04-12T20:48:56Z",
+            "workflow_id" : 500000005,
+            "workflow_state_id" : 500000007
+          },
+          "get-workflows" : [
+            {
+              "auto_assign_owner" : true,
+              "created_at" : "2024-03-07T02:33:26Z",
+              "default_state_id" : 500000007,
+              "description" : "Our default workflow, designed for product and engineering teams. Add to or edit these States to customize your team's workflow.",
+              "entity_type" : "workflow",
+              "id" : 500000005,
+              "name" : "Standard",
+              "project_ids" : [
+      
+              ],
+              "states" : [
+                {
+                  "created_at" : "2024-03-07T02:33:26Z",
+                  "description" : "",
+                  "entity_type" : "workflow-state",
+                  "global_id" : "v2:wfs:65e92776-8a54-4c23-8aaa-f75b4f0506e5:500000006",
+                  "id" : 500000006,
+                  "name" : "Backlog",
+                  "num_stories" : 1,
+                  "num_story_templates" : 0,
+                  "position" : 1,
+                  "type" : "backlog",
+                  "updated_at" : "2024-03-07T02:33:26Z",
+                  "verb" : null
+                },
+                {
+                  "created_at" : "2024-03-07T02:33:26Z",
+                  "description" : "",
+                  "entity_type" : "workflow-state",
+                  "global_id" : "v2:wfs:65e92776-8a54-4c23-8aaa-f75b4f0506e5:500000007",
+                  "id" : 500000007,
+                  "name" : "To Do",
+                  "num_stories" : 13,
+                  "num_story_templates" : 0,
+                  "position" : 2,
+                  "type" : "unstarted",
+                  "updated_at" : "2024-03-07T02:33:26Z",
+                  "verb" : null
+                },
+                {
+                  "created_at" : "2024-03-07T02:33:26Z",
+                  "description" : "",
+                  "entity_type" : "workflow-state",
+                  "global_id" : "v2:wfs:65e92776-8a54-4c23-8aaa-f75b4f0506e5:500000008",
+                  "id" : 500000008,
+                  "name" : "In Progress",
+                  "num_stories" : 1,
+                  "num_story_templates" : 0,
+                  "position" : 3,
+                  "type" : "started",
+                  "updated_at" : "2024-03-07T02:33:26Z",
+                  "verb" : "start"
+                },
+                {
+                  "created_at" : "2024-03-07T02:33:26Z",
+                  "description" : "",
+                  "entity_type" : "workflow-state",
+                  "global_id" : "v2:wfs:65e92776-8a54-4c23-8aaa-f75b4f0506e5:500000009",
+                  "id" : 500000009,
+                  "name" : "In Review",
+                  "num_stories" : 0,
+                  "num_story_templates" : 0,
+                  "position" : 4,
+                  "type" : "started",
+                  "updated_at" : "2024-03-07T02:33:26Z",
+                  "verb" : null
+                },
+                {
+                  "created_at" : "2024-03-07T02:33:26Z",
+                  "description" : "",
+                  "entity_type" : "workflow-state",
+                  "global_id" : "v2:wfs:65e92776-8a54-4c23-8aaa-f75b4f0506e5:500000010",
+                  "id" : 500000010,
+                  "name" : "Done",
+                  "num_stories" : 1,
+                  "num_story_templates" : 0,
+                  "position" : 5,
+                  "type" : "done",
+                  "updated_at" : "2024-03-07T02:33:26Z",
+                  "verb" : "finish"
+                }
+              ],
+              "team_id" : 1,
+              "updated_at" : "2024-03-07T02:33:26Z"
+            }
+          ]
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+      
+              },
+              "name" : "get-workflows"
+            }
+          },
+          {
+            "callsTool" : {
+              "arguments" : {
+                "name" : "Implement user profile page",
+                "workflow_state_id" : "500000007"
+              },
+              "name" : "create-story"
+            }
+          }
+        ]
+      },
+      {
+        "input" : "@shortcut Which stories were completed by John in the past 2 weeks? ",
+        "mocks" : {
+          "current-member-info" : {
+            "id" : "65e92776-6c3b-4626-ae4e-75a5ffc0a6f6",
+            "mention_name" : "john-doe-test99",
+            "name" : "John Doe",
+            "workspace2" : {
+              "estimate_scale" : [
+                0,
+                1,
+                2,
+                4,
+                8
+              ],
+              "url_slug" : "raycast-test",
+              "utc_offset" : "-05:00"
+            }
+          },
+          "get-members" : [
+            {
+              "created_at" : "2024-03-07T02:33:26Z",
+              "created_without_invite" : false,
+              "disabled" : false,
+              "entity_type" : "member",
+              "global_id" : "v2:p:65e92776-8a54-4c23-8aaa-f75b4f0506e5:65e92776-6c3b-4626-ae4e-75a5ffc0a6f6",
+              "group_ids" : [
+                "65e92776-0227-47f8-acb7-16b8eb2c2508"
+              ],
+              "id" : "65e92776-6c3b-4626-ae4e-75a5ffc0a6f6",
+              "profile" : {
+                "deactivated" : false,
+                "display_icon" : null,
+                "email_address" : "johdoe@email.com",
+                "entity_type" : "profile",
+                "gravatar_hash" : "6b962a84122618b09a736f03c2ef5f31",
+                "id" : "65e92776-0869-44d6-b28c-d5149ebb24ac",
+                "is_owner" : true,
+                "mention_name" : "john-doe-test99",
+                "name" : "John Doe",
+                "two_factor_auth_activated" : false
+              },
+              "role" : "admin",
+              "state" : "full",
+              "updated_at" : "2024-03-07T02:33:26Z"
+            }
+          ],
+          "search-stories" : {
+            "data" : {
+              "epics" : {
+                "data" : [
+      
+                ],
+                "next" : null,
+                "total" : 0
+              },
+              "stories" : {
+                "data" : [
+                  {
+                    "app_url" : "https://app.shortcut.com/raycast-test/story/54",
+                    "archived" : false,
+                    "blocked" : false,
+                    "blocker" : false,
+                    "branches" : [
+      
+                    ],
+                    "comments" : [
+      
+                    ],
+                    "commits" : [
+      
+                    ],
+                    "completed" : true,
+                    "completed_at" : "2025-04-12T20:52:42Z",
+                    "completed_at_override" : null,
+                    "created_at" : "2025-04-12T20:52:30Z",
+                    "custom_fields" : [
+      
+                    ],
+                    "cycle_time" : 4,
+                    "deadline" : null,
+                    "description" : "This is a test story",
+                    "entity_type" : "story",
+                    "epic_id" : null,
+                    "estimate" : 2,
+                    "external_id" : null,
+                    "external_links" : [
+      
+                    ],
+                    "files" : [
+      
+                    ],
+                    "follower_ids" : [
+                      "65e92776-6c3b-4626-ae4e-75a5ffc0a6f6"
+                    ],
+                    "formatted_vcs_branch_name" : null,
+                    "global_id" : "v2:s:65e92776-8a54-4c23-8aaa-f75b4f0506e5:54",
+                    "group_id" : "65e92776-0227-47f8-acb7-16b8eb2c2508",
+                    "group_mention_ids" : [
+      
+                    ],
+                    "id" : 54,
+                    "iteration_id" : null,
+                    "label_ids" : [
+      
+                    ],
+                    "labels" : [
+      
+                    ],
+                    "lead_time" : 11,
+                    "linked_files" : [
+      
+                    ],
+                    "member_mention_ids" : [
+      
+                    ],
+                    "mention_ids" : [
+      
+                    ],
+                    "moved_at" : "2025-04-12T20:52:42Z",
+                    "name" : "Sample Story 6",
+                    "owner_ids" : [
+                      "65e92776-6c3b-4626-ae4e-75a5ffc0a6f6"
+                    ],
+                    "position" : 52147483647,
+                    "previous_iteration_ids" : [
+      
+                    ],
+                    "project_id" : null,
+                    "pull_requests" : [
+      
+                    ],
+                    "requested_by_id" : "65e92776-6c3b-4626-ae4e-75a5ffc0a6f6",
+                    "started" : true,
+                    "started_at" : "2025-04-12T20:52:37Z",
+                    "started_at_override" : null,
+                    "stats" : {
+                      "num_related_documents" : 0
+                    },
+                    "story_links" : [
+      
+                    ],
+                    "story_template_id" : null,
+                    "story_type" : "feature",
+                    "tasks" : [
+      
+                    ],
+                    "updated_at" : "2025-04-12T20:52:42Z",
+                    "workflow_id" : 500000005,
+                    "workflow_state_id" : 500000010
+                  }
+                ],
+                "next" : null,
+                "total" : 1
+              }
+            },
+            "searchQuery" : "owner:john-doe-test99 completed:2025-03-29..2025-04-12"
+          }
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+      
+              },
+              "name" : "current-member-info"
+            }
+          },
+          {
+            "callsTool" : {
+              "arguments" : {
+      
+              },
+              "name" : "get-members"
+            }
+          },
+          {
+            "callsTool" : {
+              "arguments" : {
+                "searchQuery" : "owner:john-doe-test99 completed:2025-03-29..2025-04-12"
+              },
+              "name" : "search-stories"
+            }
+          }
+        ]
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "apiToken",
@@ -61,8 +948,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.1",
-    "@raycast/utils": "^1.0.6",
+    "@raycast/api": "^1.94.3",
+    "@raycast/utils": "^1.17.0",
     "@useshortcut/client": "^1.0.0"
   },
   "devDependencies": {
