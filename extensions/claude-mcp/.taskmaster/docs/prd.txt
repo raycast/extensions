@@ -1,0 +1,151 @@
+<context>
+# Overview  
+Claude MCP is a Raycast extension that allows developers to manage multiple configurations of MCP (Model Context Protocol) servers for Claude Desktop. This extension solves the problem of manually switching between different MCP server configurations when working on different projects or contexts. Instead of manually editing the `claude_desktop_config.json` file each time, users can create, store, and switch between predefined profiles with a single command, making Claude Desktop more flexible and project-aware.
+
+# Core Features  
+- **Profile Management**: Create, store, and organize multiple MCP server configurations as named profiles
+- **Quick Profile Switching**: Switch between profiles with a single Raycast command, automatically updating Claude Desktop's configuration
+- **Automatic Restart**: Seamlessly restart Claude Desktop after profile switching to apply new configurations
+- **Current Profile Display**: Always show which profile is currently active across all commands
+- **Profile Creation**: Create new profiles from current Claude Desktop configuration or build from scratch
+- **Configuration Validation**: Ensure profile configurations are valid before applying them to prevent Claude Desktop corruption
+
+# User Experience  
+**Primary User Personas**:
+- Software developers working on multiple projects with different MCP server requirements
+- AI researchers needing different tool configurations for various experiments
+- Power users who want to optimize Claude Desktop for specific workflows
+
+**Key User Flows**:
+1. **Profile Switching**: User opens Raycast → types "Switch MCP Profile" → selects desired profile → Claude Desktop restarts with new configuration
+2. **Profile Creation**: User opens Raycast → types "Create MCP Profile" → names profile → optionally imports current config or builds new one
+3. **Profile Management**: User can list, edit, and delete profiles through dedicated commands
+
+**UI/UX Considerations**:
+- Show current active profile in all command interfaces
+- Provide clear feedback during profile switching operations
+- Handle long-running operations (restart) with progress indicators
+- Use intuitive icons and descriptions for profiles
+</context>
+<PRD>
+# Technical Architecture  
+**System Components**:
+- **Profile Storage**: Utilize Raycast's built-in LocalStorage API to store profile configurations
+- **Configuration Manager**: Handle reading/writing to Claude Desktop's config file at `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Process Manager**: Manage Claude Desktop application lifecycle (quit/restart)
+- **Validation Engine**: Validate MCP server configurations before applying
+
+**Data Models**:
+```typescript
+interface MCPProfile {
+  id: string;
+  name: string;
+  description?: string;
+  mcpServers: MCPServersConfig;
+  createdAt: Date;
+  lastUsed?: Date;
+}
+
+interface MCPServersConfig {
+  [serverName: string]: {
+    command: string;
+    args: string[];
+    env?: Record<string, string>;
+  };
+}
+```
+
+**APIs and Integrations**:
+- Raycast API for UI components (List, Form, Action Panel)
+- Node.js fs module for file system operations
+- Shell commands for process management (AppleScript/kill commands)
+- Raycast LocalStorage for profile persistence
+
+**Infrastructure Requirements**:
+- macOS-specific implementation (Claude Desktop paths and process management)
+- File system permissions for Claude Desktop config directory
+- Process management permissions for application control
+
+# Development Roadmap  
+**MVP Phase 1**:
+- Basic profile storage system using Raycast LocalStorage
+- List Profiles command showing all profiles with current active one
+- Switch Profile command with profile selection and automatic restart
+- Create Profile command to create new profiles from current Claude Desktop config
+- Basic error handling and validation
+
+**Phase 2 - Enhanced Management**:
+- Edit Profile command with form-based interface for modifying MCP servers
+- Delete Profile command with confirmation
+- Import Profile command to create profiles from external JSON files
+- Export Profile command to save profiles for sharing
+- Enhanced validation with specific error messages
+
+**Phase 3 - Advanced Features**:
+- Profile templates for common MCP server setups (filesystem, git, web search, etc.)
+- Backup/restore functionality for Claude Desktop configurations
+- Profile sharing capabilities with import/export to clipboard
+- Auto-detection of MCP server changes and profile synchronization
+- Bulk profile operations
+
+# Logical Dependency Chain
+**Foundation (Must be built first)**:
+1. Profile data model and storage implementation
+2. Claude Desktop config file read/write operations
+3. Basic profile validation system
+
+**Core Functionality (Build for immediate usability)**:
+4. List Profiles command (provides visibility into system)
+5. Switch Profile command (core value proposition)
+6. Create Profile command (enables profile creation)
+
+**Enhancement Layer (Iterative improvements)**:
+7. Edit Profile command (improves profile management)
+8. Delete Profile command (completes CRUD operations)
+9. Enhanced error handling and user feedback
+
+**Advanced Features (Future iterations)**:
+10. Profile templates and sharing
+11. Backup/restore functionality
+12. Auto-detection and synchronization
+
+# Risks and Mitigations  
+**Technical Challenges**:
+- **Risk**: Corrupting Claude Desktop configuration file
+- **Mitigation**: Always backup current config before switching, validate JSON structure, implement rollback mechanism
+
+- **Risk**: Claude Desktop fails to restart properly
+- **Mitigation**: Implement retry logic, provide manual restart instructions, graceful error handling
+
+- **Risk**: File permission issues accessing Claude Desktop config
+- **Mitigation**: Check permissions before operations, provide clear error messages with resolution steps
+
+**MVP Definition**:
+- **Risk**: Feature creep leading to delayed delivery
+- **Mitigation**: Focus on core switching functionality first, ensure basic profile management works before adding advanced features
+
+**Platform Compatibility**:
+- **Risk**: macOS-specific implementation limits portability
+- **Mitigation**: Design modular architecture to support future Windows/Linux implementations
+
+# Appendix  
+**Research Findings**:
+- Claude Desktop config located at `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Configuration format uses `mcpServers` object with command, args, and env properties
+- Claude Desktop must be restarted for configuration changes to take effect
+- MCP servers are started automatically when Claude Desktop launches
+
+**Technical Specifications**:
+- TypeScript for type safety and better development experience
+- Raycast API version 1.x for extension framework
+- Node.js fs module for file operations
+- Shell commands for process management (preference for AppleScript on macOS)
+- JSON schema validation for MCP server configurations
+
+**Implementation Notes**:
+- Use Raycast's built-in storage rather than file system for profile storage
+- Implement atomic operations for config switching to prevent corruption
+- Provide clear user feedback during all operations
+- Handle edge cases like missing Claude Desktop installation
+- Consider implementing profile versioning for future compatibility
+</PRD>

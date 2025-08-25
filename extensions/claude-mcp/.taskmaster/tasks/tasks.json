@@ -1,0 +1,147 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Setup Raycast Extension Project Structure",
+        "description": "Initialize the Raycast extension project with proper TypeScript configuration, dependencies, and basic file structure",
+        "details": "Create new Raycast extension using `npm create raycast-extension` or similar. Set up TypeScript configuration, install necessary dependencies including @raycast/api, @raycast/utils, and Node.js built-in modules. Create basic folder structure with commands/, utils/, and types/ directories. Configure package.json with proper metadata and Raycast extension manifest.",
+        "testStrategy": "Verify project builds successfully with `npm run build` and extension loads in Raycast development mode without errors",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Implement Core Data Models and Types",
+        "description": "Define TypeScript interfaces and types for MCP profiles, server configurations, and related data structures",
+        "details": "Create types/index.ts with MCPProfile and MCPServersConfig interfaces as specified in PRD. Include id, name, description, mcpServers, createdAt, and lastUsed fields. Define additional utility types for profile operations and validation. Implement proper TypeScript strict mode compliance and export all types for use across the extension.",
+        "testStrategy": "Create unit tests to verify type definitions compile correctly and interface properties are properly typed. Test with sample data objects.",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Implement Profile Storage System",
+        "description": "Create profile storage layer using Raycast LocalStorage API for persistent profile management",
+        "details": "Create utils/storage.ts with functions for CRUD operations on profiles: saveProfile(), getProfile(), getAllProfiles(), deleteProfile(), and setActiveProfile(). Use Raycast's LocalStorage API for persistence. Implement proper error handling and data serialization/deserialization. Include functions to track current active profile and profile usage statistics.",
+        "testStrategy": "Unit tests for all storage operations, including edge cases like missing profiles, corrupted data, and storage limits. Mock LocalStorage API for testing.",
+        "priority": "high",
+        "dependencies": [
+          2
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Create Configuration File Manager",
+        "description": "Implement system to read and write Claude Desktop configuration file with proper error handling and backup mechanism",
+        "details": "Create utils/config-manager.ts with functions to read/write ~/Library/Application Support/Claude/claude_desktop_config.json. Implement readClaudeConfig(), writeClaudeConfig(), backupConfig(), and restoreConfig() functions. Use Node.js fs module with proper async/await patterns. Include file existence checks, permission validation, and atomic write operations to prevent corruption.",
+        "testStrategy": "Unit tests with mocked file system operations. Integration tests with temporary config files. Test backup/restore functionality and error scenarios like permission issues.",
+        "priority": "high",
+        "dependencies": [
+          2
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Implement Profile Validation System",
+        "description": "Create validation engine to ensure MCP server configurations are valid before applying them",
+        "details": "Create utils/validation.ts with functions to validate MCPProfile objects and MCP server configurations. Implement validateProfile(), validateMCPServers(), and validateConfiguration() functions. Check for required fields, valid command paths, proper environment variables, and JSON schema compliance. Include specific error messages for different validation failures.",
+        "testStrategy": "Unit tests with valid and invalid profile configurations. Test edge cases like missing commands, invalid paths, and malformed JSON structures.",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          4
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "Create List Profiles Command",
+        "description": "Implement Raycast command to display all stored profiles with current active profile highlighted",
+        "details": "Create commands/list-profiles.tsx using Raycast's List component. Display profile name, description, creation date, and last used date. Highlight current active profile with distinctive icon/styling. Include action panel with options to switch, edit, or delete profiles. Implement proper loading states and error handling for empty profile lists.",
+        "testStrategy": "UI testing in Raycast development mode. Test with various profile configurations, empty states, and long profile lists. Verify active profile highlighting works correctly.",
+        "priority": "medium",
+        "dependencies": [
+          3,
+          5
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Implement Switch Profile Command",
+        "description": "Create core profile switching functionality with automatic Claude Desktop restart",
+        "details": "Create commands/switch-profile.tsx with profile selection list and switching logic. Implement profile switching workflow: backup current config, validate target profile, write new configuration, restart Claude Desktop. Use AppleScript or shell commands for process management. Include progress indicators and error handling with rollback capability.",
+        "testStrategy": "Integration tests with Claude Desktop installation. Test successful switches, error scenarios, and rollback functionality. Mock process management for unit tests.",
+        "priority": "high",
+        "dependencies": [
+          3,
+          4,
+          5
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Create Profile Creation Command",
+        "description": "Implement command to create new profiles from current Claude Desktop configuration or build from scratch",
+        "details": "Create commands/create-profile.tsx using Raycast's Form component. Implement profile creation workflow with options to import current Claude Desktop config or create empty profile. Include form fields for profile name, description, and MCP server configurations. Add validation and duplicate name checking. Support for adding/removing MCP servers dynamically.",
+        "testStrategy": "UI testing for form validation and submission. Test profile creation from current config and from scratch. Verify proper error handling and success feedback.",
+        "priority": "medium",
+        "dependencies": [
+          3,
+          4,
+          5
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Implement Process Management System",
+        "description": "Create system to manage Claude Desktop application lifecycle for seamless profile switching",
+        "details": "Create utils/process-manager.ts with functions to quit and restart Claude Desktop. Implement isClaudeRunning(), quitClaude(), and restartClaude() functions using AppleScript or shell commands. Include retry logic, timeout handling, and graceful failure modes. Provide user feedback during restart process with progress indicators.",
+        "testStrategy": "Integration tests with Claude Desktop application. Test restart scenarios, error handling for when Claude Desktop is not installed, and timeout conditions.",
+        "priority": "medium",
+        "dependencies": [
+          4
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "Add Profile Management Commands",
+        "description": "Implement edit and delete profile commands to complete basic CRUD operations",
+        "details": "Create commands/edit-profile.tsx and commands/delete-profile.tsx. Edit command should use Form component with pre-populated fields from existing profile. Delete command should include confirmation dialog and proper cleanup. Both commands should update the active profile state if necessary and provide appropriate user feedback.",
+        "testStrategy": "UI testing for edit and delete workflows. Test edge cases like editing active profile, deleting non-existent profiles, and proper confirmation dialogs.",
+        "priority": "low",
+        "dependencies": [
+          3,
+          5,
+          6
+        ],
+        "status": "done",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-07-09T06:21:53.561Z",
+      "updated": "2025-07-10T13:46:54.787Z",
+      "description": "Tasks for master context"
+    }
+  }
+}
