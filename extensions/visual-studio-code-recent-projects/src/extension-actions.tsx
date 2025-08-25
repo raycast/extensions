@@ -9,7 +9,7 @@ export function InstallExtensionByIDAction(props: { extensionID: string; afterIn
     try {
       await showToast({ style: Toast.Style.Animated, title: "Install Extension" });
       const cli = getVSCodeCLI();
-      cli.installExtensionByIDSync(props.extensionID);
+      await cli.installExtensionByID(props.extensionID);
       await showToast({ style: Toast.Style.Success, title: "Install Successful" });
       if (props.afterInstall) {
         props.afterInstall();
@@ -37,7 +37,7 @@ export function UninstallExtensionByIDAction(props: {
       ) {
         await showToast({ style: Toast.Style.Animated, title: "Uninstall Extension" });
         const cli = getVSCodeCLI();
-        cli.uninstallExtensionByIDSync(props.extensionID);
+        await cli.uninstallExtensionByID(props.extensionID);
         await showToast({ style: Toast.Style.Success, title: "Uninstall Successful" });
         if (props.afterUninstall) {
           props.afterUninstall();

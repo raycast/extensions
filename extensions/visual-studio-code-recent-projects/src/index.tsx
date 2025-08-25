@@ -1,8 +1,7 @@
 import { Action, ActionPanel, Color, Grid, Icon, open, openExtensionPreferences, showToast, Toast } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { runAppleScript, runPowerShellScript, usePromise } from "@raycast/utils";
 import { basename, dirname } from "path";
 import { useEffect, useState } from "react";
-import { runAppleScriptSync } from "run-applescript";
 import tildify from "tildify";
 import { fileURLToPath } from "url";
 import { RemoveMethods, useRecentEntries } from "./db";
@@ -19,7 +18,6 @@ import { getBuildScheme } from "./lib/vscode";
 import { usePinnedEntries } from "./pinned";
 import {
   build,
-  bundleIdentifier,
   closeOtherWindows,
   gitBranchColor,
   keepSectionOrder,
@@ -36,6 +34,7 @@ import {
   isRemoteEntry,
   isRemoteWorkspaceEntry,
   isValidHexColor,
+  isWin,
   isWorkspaceEntry,
 } from "./utils";
 import { getEditorApplication } from "./utils/editor";
@@ -182,9 +181,18 @@ function LocalItem(
   };
 
   const getAction = (revert = false) => {
-    return () => {
+    return async () => {
       if (closeOtherWindows !== revert) {
-        runAppleScriptSync(`
+        if (isWin) {
+          await runPowerShellScript(`
+        $AppName = "${build}"
+
+        while (Get-Process -Name $AppName -ErrorAction SilentlyContinue | Where-Object {$_.MainWindowTitle}) {
+          Get-Process -Name $AppName | Where-Object {$_.MainWindowTitle} | Select-Object -First 1 | ForEach-Object {$_.CloseMainWindow()}
+        }
+          `);
+        } else {
+          await runAppleScript(`
         tell application "System Events"
           tell process "${build}"
             repeat while window 1 exists
@@ -193,8 +201,11 @@ function LocalItem(
           end tell
         end tell
         `);
+        }
       }
-      open(props.uri, bundleIdentifier);
+
+      if (isWin) open(path, editorApp);
+      else open(props.uri, editorApp);
     };
   };
 
@@ -232,7 +243,7 @@ function LocalItem(
               icon={editorApp ? { fileIcon: editorApp.path } : "action-icon.png"}
               onAction={getAction()}
             />
-            <Action.ShowInFinder path={path} />
+            <Action.Open title={isWin ? `Show in File Explorer` : `Open in Finder`} target={path} />
             <Action
               title={getTitle(true)}
               icon={editorApp ? { fileIcon: editorApp.path } : "action-icon.png"}
