@@ -1,6 +1,6 @@
 # Copy Path Changelog
 
-## [Support document windows] - {PR_MERGE_DATE}
+## [Support document windows] - 2025-08-25
 
 - Copy document paths from document windows.
 
