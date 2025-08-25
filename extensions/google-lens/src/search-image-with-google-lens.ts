@@ -36,7 +36,7 @@ export default async () => {
       !(await confirmAlert({
         title: "Are you sure upload image?",
         message:
-          "The image will be uploaded to a third-party server to generate a public URL, which is then sent to Google Lens. Please avoid uploading sensitive or private content. (You can disable this warning in the extension preferences)",
+          "The image will be uploaded to a third-party server maintained by the extension author to generate a public URL for Google Lens. Please avoid uploading sensitive content. (You can disable this warning in preferences)",
       }))
     ) {
       return;
@@ -72,10 +72,13 @@ export default async () => {
       usedScreenshot = true;
       tempScreenshot = true;
       filePath = join(tmpdir(), `screenshot-${Date.now()}.png`);
-      await showToast({
+      const toast = await showToast({
         style: Toast.Style.Animated,
         title: "No image selected, please take a screenshot...",
       });
+      setTimeout(() => {
+        toast.hide();
+      }, 1500);
       await closeMainWindow();
       await exec(`/usr/sbin/screencapture -i ${filePath}`);
       if (!existsSync(filePath)) {

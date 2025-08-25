@@ -80,20 +80,6 @@ npm run build
 npm run lint
 ```
 
-## Version History
-
-### [Initial Version] - 2023-05-15
-
-- Upload files to MinIO server
-- Browse and list files in MinIO buckets
-- Download files from MinIO
-
-### [Added Temporary Links] - 2023-05-30
-
-- Generate temporary pre-signed URLs with 1-hour validity
-- Open files directly in browser
-- Improved file management capabilities
-
 ## Requirements
 
 - MinIO server (self-hosted or cloud service)

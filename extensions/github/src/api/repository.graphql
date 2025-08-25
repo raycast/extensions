@@ -110,6 +110,15 @@ query dataForRepository($owner: String!, $name: String!) {
         ...CommitFields
       }
     }
+    issueTypes(orderBy: { direction: ASC, field: NAME }, first: 50) {
+      totalCount
+      nodes {
+        id
+        name
+        color
+        isEnabled
+      }
+    }
     refs(refPrefix: "refs/heads/", direction: ASC, first: 50) {
       totalCount
       nodes {
@@ -224,5 +233,28 @@ mutation addStar($repositoryId: ID!) {
 mutation removeStar($repositoryId: ID!) {
   removeStar(input: { starrableId: $repositoryId }) {
     clientMutationId # Placeholder
+  }
+}
+
+query myStarredRepositories(
+  $numberOfItems: Int!
+  $after: String
+  $orderByField: StarOrderField!
+  $orderByDirection: OrderDirection!
+) {
+  viewer {
+    starredRepositories(
+      first: $numberOfItems
+      after: $after
+      orderBy: { field: $orderByField, direction: $orderByDirection }
+    ) {
+      nodes {
+        ...ExtendedRepositoryFields
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
   }
 }
