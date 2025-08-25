@@ -1,15 +1,16 @@
 import {
   Action,
   ActionPanel,
+  Application,
+  Clipboard,
   Color,
   Icon,
   List,
-  getPreferenceValues,
-  Clipboard,
-  showHUD,
-  openExtensionPreferences,
   getDefaultApplication,
-  Application,
+  getPreferenceValues,
+  open,
+  openExtensionPreferences,
+  showHUD,
 } from "@raycast/api";
 import { useCachedPromise, showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
@@ -30,7 +31,7 @@ async function getPackageJsonFiles() {
         try {
           await fs.access(packageJsonPath, fs.constants.F_OK);
           return packageJsonPath;
-        } catch (e) {
+        } catch {
           return null;
         }
       }),
@@ -87,15 +88,16 @@ export default function IndexCommand() {
         return {
           path: cleanedPath,
           name,
-          author: author,
+          author,
           icon: json.icon,
           commandCount: json.commands.length,
           owner,
           access,
           title: json.title,
+          handle: `${owner ?? author}/${name}`,
           link,
           created: stats.ctime,
-          isLocalExtension: !cleanedPath.match(/[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}/gi),
+          isLocalExtension: !/[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}/gi.test(cleanedPath),
         };
       }),
     );
@@ -190,6 +192,13 @@ export default function IndexCommand() {
                 actions={
                   <ActionPanel>
                     <ActionPanel.Section title="Extension">
+                      <Action
+                        icon={Icon.Play}
+                        title="Launch Extension"
+                        onAction={() => {
+                          open(`raycast://extensions/${item.handle}`);
+                        }}
+                      />
                       <Action.OpenInBrowser url={item.link} />
                       <Action
                         onAction={() => {

@@ -7,7 +7,8 @@
   "author": "pernielsentikaer",
   "contributors": [
     "erics118",
-    "tonka3000"
+    "tonka3000",
+    "litomore"
   ],
   "categories": [
     "Fun"
@@ -59,16 +60,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.62.0",
-    "@raycast/utils": "^1.10.0"
+    "@raycast/api": "^1.102.5",
+    "@raycast/utils": "^2.2.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^20.8.10",
-    "@types/react": "18.2.33",
-    "eslint": "^8.52.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^24.3.0",
+    "@types/react": "19.1.11",
+    "eslint": "^9.34.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
   },
   "scripts": {
     "build": "ray build -e dist",

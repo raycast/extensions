@@ -9,6 +9,7 @@ export type ExtensionMetadata = {
   commandCount: number;
   created: Date;
   isLocalExtension: boolean;
+  handle: string;
   link: string;
 };
 
