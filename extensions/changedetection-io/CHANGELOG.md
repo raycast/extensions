@@ -1,6 +1,13 @@
 # changedetection.io Changelog
 
-## [] - {PR_MERGE_DATE}
+## [Create + Delete] - {PR_MERGE_DATE}
+
+- feat: **Create** new watch
+- feat: **Delete** existing watch
+- show: `last_error` if exists
+- add: `EmptyView` when no watches
+- fix: would show *1970* when no `last_checked`
+- modernize: use latest Raycast config
 
 ## [Initial Version] - 2024-11-27
 
