@@ -2,6 +2,7 @@
 
 ## [v3.7.0] - {PR_MERGE_DATE}
 
+- Fixed a bug where the Reference Format field was not properly editable in the Set Bible Preferences UI
 - Refactored command code to follow Raycast best practices
 - Updated all dependencies to their latest versions
 
