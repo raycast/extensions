@@ -11,7 +11,7 @@
     {
       "name": "search",
       "title": "Search Crypto Address or Transaction",
-      "subtitle": "Search on GMGN or Block Explorers",
+      "subtitle": "Crypto Search",
       "description": "Search for Solana/EVM addresses or transaction hashes",
       "mode": "view"
     }

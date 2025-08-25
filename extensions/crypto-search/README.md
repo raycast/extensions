@@ -13,14 +13,6 @@ A Raycast extension for quickly searching crypto addresses and transactions acro
 - **Transaction Support**: Direct links to block explorers for transaction hashes
 - **Configurable**: Choose between GMGN or block explorer as default target
 
-## Installation
-
-1. Clone this repository
-2. Navigate to the extension directory
-3. Install dependencies: `npm install`
-4. Build the extension: `npm run build`
-5. Import into Raycast: `npm run publish`
-
 ## Usage
 
 1. Open Raycast
