@@ -64,8 +64,9 @@ export function StatesList(props: {
   );
 }
 
-export function StateListItem(props: { state: State }): React.ReactElement {
+export function StateListItem(props: { state: State; showAccessory?: boolean }): React.ReactElement {
   const state = props.state;
+  const showAccessory = props.showAccessory === undefined ? true : props.showAccessory;
 
   let icon: Image.ImageLike | undefined;
   const subtitle = (state: State): string | undefined => {
@@ -141,18 +142,22 @@ export function StateListItem(props: { state: State }): React.ReactElement {
       subtitle={subtitle(state)}
       actions={<StateActionPanel state={state} />}
       icon={icon || getIcon(state)}
-      accessories={[
-        {
-          text: firstAccessoryTitle(state),
-          icon: firstAccessoryIcon(state),
-          tooltip: getStateTooltip(state),
-        },
-        {
-          text: getStateValue(state),
-          icon: secondAccessoryIcon(state),
-          tooltip: getStateTooltip(state),
-        },
-      ]}
+      accessories={
+        showAccessory
+          ? [
+              {
+                text: firstAccessoryTitle(state),
+                icon: firstAccessoryIcon(state),
+                tooltip: getStateTooltip(state),
+              },
+              {
+                text: getStateValue(state),
+                icon: secondAccessoryIcon(state),
+                tooltip: getStateTooltip(state),
+              },
+            ]
+          : []
+      }
     />
   );
 }
