@@ -1,6 +1,6 @@
 # BRREG Search Changelog
 
-## Version 2.0.1 – Minor updates and typography fixes {PR_MERGE_DATE}
+## Version 2.0.1 – Minor updates and typography fixes 2025-08-25
 - Updated Welcome message
 - Added Keyboard Shortcuts to the Welcome screen and made it available from all views
 - Companies can now be added (⌘F) or removed (⌘⇧F) from Favorites, including from the Detail view
