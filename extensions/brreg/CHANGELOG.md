@@ -1,6 +1,10 @@
 # BRREG Search Changelog
 
-## Version 2.0.1 – Minor updates and typography fixes 2025-08-25
+## [Version 2.0.2 – New keyboard shortcuts for financial data] - 2025-08-25
+- Added keyboard shortcuts for copying revenue (⌘⇧R) and net result (⌘⇧N)
+- Refactored all keyboard shortcuts to use centralized constants for better maintainability
+
+## [Version 2.0.1 – Minor updates and typography fixes] - 2025-08-25
 - Updated Welcome message
 - Added Keyboard Shortcuts to the Welcome screen and made it available from all views
 - Companies can now be added (⌘F) or removed (⌘⇧F) from Favorites, including from the Detail view
@@ -11,7 +15,7 @@
 - Removed uncessecary settings view
 - Fixed some links not working as intended
 
-## Version 2.0.0 - Major Refactoring & Enhancement Release 2025-08-19
+## [Version 2.0.0 - Major Refactoring & Enhancement Release] - 2025-08-19
 🚀 **What's New?**
 
 ### ✨ **Enhanced User Experience**

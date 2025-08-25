@@ -1,6 +1,7 @@
 import { Detail, ActionPanel, Action, Icon } from "@raycast/api";
 import KeyboardShortcutsHelp from "./KeyboardShortcutsHelp";
 import { Company } from "../types";
+import { KEYBOARD_SHORTCUTS } from "../constants";
 import { useState, useEffect } from "react";
 
 interface CompanyDetailsViewProps {
@@ -256,54 +257,68 @@ ${formattedAddress ? `**Address:** ${formattedAddress}\n\n` : ""}${mapImageDataU
             <Action.CopyToClipboard
               title="Copy Organization Number"
               content={company.organizationNumber}
-              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              shortcut={KEYBOARD_SHORTCUTS.COPY_ORG_NUMBER}
             />
           )}
           {formattedAddress && (
             <Action.CopyToClipboard
               title="Copy Business Address"
               content={formattedAddress}
-              shortcut={{ modifiers: ["cmd"], key: "b" }}
+              shortcut={KEYBOARD_SHORTCUTS.COPY_ADDRESS}
+            />
+          )}
+          {company.revenue && (
+            <Action.CopyToClipboard
+              title="Copy Revenue"
+              content={company.revenue}
+              shortcut={KEYBOARD_SHORTCUTS.COPY_REVENUE}
+            />
+          )}
+          {company.result && (
+            <Action.CopyToClipboard
+              title="Copy Net Result"
+              content={company.result}
+              shortcut={KEYBOARD_SHORTCUTS.COPY_NET_RESULT}
             />
           )}
           {isFavorite ? (
             <Action
               title="Remove from Favorites"
               onAction={onRemoveFavorite}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+              shortcut={KEYBOARD_SHORTCUTS.REMOVE_FROM_FAVORITES}
             />
           ) : (
-            <Action title="Add to Favorites" onAction={onAddFavorite} shortcut={{ modifiers: ["cmd"], key: "f" }} />
+            <Action title="Add to Favorites" onAction={onAddFavorite} shortcut={KEYBOARD_SHORTCUTS.ADD_TO_FAVORITES} />
           )}
           <ActionPanel.Section title="Tabs">
             <Action
               title="Show Overview"
               onAction={() => setActiveTab("overview")}
               icon={Icon.AlignLeft}
-              shortcut={{ modifiers: ["cmd"], key: "1" }}
+              shortcut={KEYBOARD_SHORTCUTS.SHOW_OVERVIEW}
             />
             <Action
               title="Show Financials"
               onAction={() => setActiveTab("financials")}
               icon={Icon.Coins}
-              shortcut={{ modifiers: ["cmd"], key: "2" }}
+              shortcut={KEYBOARD_SHORTCUTS.SHOW_FINANCIALS}
             />
             <Action
               title="Show Map"
               onAction={() => setActiveTab("map")}
               icon={Icon.Map}
-              shortcut={{ modifiers: ["cmd"], key: "3" }}
+              shortcut={KEYBOARD_SHORTCUTS.SHOW_MAP}
             />
             <Action
               title="Previous Tab"
               onAction={goToPreviousTab}
               icon={Icon.ChevronLeft}
-              shortcut={{ modifiers: [], key: "backspace" }}
+              shortcut={KEYBOARD_SHORTCUTS.PREVIOUS_TAB}
             />
           </ActionPanel.Section>
           {mapImageUrl && <Action.OpenInBrowser title="Open Static Map Image" url={mapImageUrl} />}
           <Action.Push title="Keyboard Shortcuts" target={<KeyboardShortcutsHelp />} />
-          <Action title="Go Back" onAction={onBack} shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }} />
+          <Action title="Go Back" onAction={onBack} shortcut={KEYBOARD_SHORTCUTS.GO_BACK} />
         </ActionPanel>
       }
     />

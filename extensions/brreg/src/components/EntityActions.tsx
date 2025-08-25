@@ -1,6 +1,7 @@
 import { Action, Icon } from "@raycast/api";
 import KeyboardShortcutsHelp from "./KeyboardShortcutsHelp";
 import { Enhet } from "../types";
+import { KEYBOARD_SHORTCUTS } from "../constants";
 import React from "react";
 
 /**
@@ -41,19 +42,19 @@ function EntityActions({
       <Action.CopyToClipboard
         content={entity.organisasjonsnummer}
         title="Copy Organization Number"
-        shortcut={{ modifiers: ["cmd"], key: "o" }}
+        shortcut={KEYBOARD_SHORTCUTS.COPY_ORG_NUMBER}
         onCopy={() => onCopyOrgNumber(entity.organisasjonsnummer)}
       />
       {addressString && (
         <Action.CopyToClipboard
           content={addressString}
           title="Copy Business Address"
-          shortcut={{ modifiers: ["cmd"], key: "b" }}
+          shortcut={KEYBOARD_SHORTCUTS.COPY_ADDRESS}
           onCopy={() => onCopyAddress(addressString)}
         />
       )}
       <Action.OpenInBrowser
-        shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+        shortcut={KEYBOARD_SHORTCUTS.OPEN_IN_BROWSER}
         title="Open in Brønnøysundregistrene"
         url={bregUrl}
         onOpen={() => onOpenInBrowser(bregUrl)}
