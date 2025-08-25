@@ -47,7 +47,7 @@ export const fileExists = async (input: string) =>
  */
 export const getExtensionList = async () => {
   const repositoryExists = await fileExists(repositoryPath);
-  if (!repositoryExists) throw new Error(`Repository does not exist: ${repositoryPath}`);
+  if (!repositoryExists) return [];
 
   const extensionsFolder = path.join(repositoryPath, "extensions");
   const extensionsFolderExists = await fileExists(extensionsFolder);
