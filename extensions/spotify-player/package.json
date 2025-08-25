@@ -247,7 +247,39 @@
       "subtitle": "Spotify",
       "description": "Adds the current song to a playlist of your choice.",
       "mode": "view",
-      "disabledByDefault": true
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "duplicateSongCheck",
+          "description": "Prevents duplicate song addition. Significantly slows performance of non cached playlists.",
+          "type": "checkbox",
+          "label": "Check for duplicate songs",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "cacheRefreshTime",
+          "title": "Cache Refresh Rate",
+          "description": "How often to refresh cached playlists",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "7 Days",
+              "value": "7"
+            },
+            {
+              "title": "14 Days",
+              "value": "14"
+            },
+            {
+              "title": "1 Month",
+              "value": "30"
+            }
+          ],
+          "required": false,
+          "default": "30"
+        }
+      ]
     },
     {
       "name": "removeSongFromPlaylist",

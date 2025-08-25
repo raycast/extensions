@@ -7,6 +7,7 @@ import {
   LaunchType,
   List,
   Toast,
+  getPreferenceValues,
   launchCommand,
   popToRoot,
   showHUD,
@@ -21,6 +22,8 @@ import { addToPlaylist } from "./api/addToPlaylist";
 import { useMyPlaylists } from "./hooks/useMyPlaylists";
 import { getError } from "./helpers/getError";
 import { CreateQuicklink } from "./components/CreateQuicklink";
+import getAllPlaylistItems from "./helpers/getAllPlaylistItems";
+import addTrackToPlaylistCache from "./helpers/addTrackToPlaylistCache";
 
 type LaunchContextData = {
   playlistId?: string;
@@ -29,6 +32,13 @@ type LaunchContextData = {
 type AddToPlaylistCommandProps = {
   playlistId?: string;
 };
+
+type AddToPlaylistCommandPreferences = {
+  duplicateSongCheck: boolean;
+};
+
+const preferences: AddToPlaylistCommandPreferences = getPreferenceValues();
+const DUPLICATE_SONG_CHECK = preferences.duplicateSongCheck;
 
 function AddToPlaylistCommand(props: AddToPlaylistCommandProps) {
   const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying();
@@ -124,12 +134,48 @@ function AddToPlaylistCommand(props: AddToPlaylistCommandProps) {
                         return;
                       }
                       try {
-                        await addToPlaylist({
-                          playlistId: playlist.id,
-                          trackUris: [currentlyPlayingData.item?.uri as string],
-                        });
-                        await showHUD(`Added to ${playlist.name}`);
-                        await popToRoot();
+                        const addTrack = async () => {
+                          await addToPlaylist({
+                            playlistId: playlist.id!,
+                            trackUris: [currentlyPlayingData.item?.uri as string],
+                          });
+                          await addTrackToPlaylistCache(playlist.id!, currentlyPlayingData.item);
+                          await showHUD(`Added to ${playlist.name}`);
+                          await popToRoot();
+                        };
+
+                        if (DUPLICATE_SONG_CHECK) {
+                          await showToast({
+                            title: "Checking for duplicates",
+                            style: Toast.Style.Animated,
+                          });
+
+                          const playlistItems = await getAllPlaylistItems(playlist);
+                          let isInPlaylist = false;
+
+                          for (const uri of playlistItems) {
+                            if (uri === currentlyPlayingData.item?.uri) {
+                              isInPlaylist = true;
+                              break;
+                            }
+                          }
+
+                          if (isInPlaylist) {
+                            await showToast({
+                              title: "Duplicate found",
+                              style: Toast.Style.Failure,
+                              primaryAction: {
+                                async onAction() {
+                                  await addTrack();
+                                },
+                                title: "Add to playlist anyways",
+                              },
+                            });
+                            return;
+                          }
+                        }
+
+                        await addTrack();
                       } catch (err) {
                         const error = getError(err);
                         await showToast({
