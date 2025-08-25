@@ -1,6 +1,6 @@
 # ChatGPT search Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-08-25
 
 Introducing ChatGPT search functionality to Raycast.
 
