@@ -1,6 +1,6 @@
 # Ray.so Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-08-25
 
 - Added Windows support
 - Migrated to the new ESLint configuration format
