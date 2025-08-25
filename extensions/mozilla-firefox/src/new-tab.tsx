@@ -1,7 +1,7 @@
 import { useState, ReactElement } from "react";
 import { List } from "@raycast/api";
 import { useHistorySearch } from "./hooks/useHistorySearch";
-import { FirefoxListEntries } from "./components";
+import { NewTabEntry, HistoryListEntry } from "./components";
 
 export default function Command(): ReactElement {
   const [searchText, setSearchText] = useState<string>();
@@ -14,11 +14,11 @@ export default function Command(): ReactElement {
   return (
     <List onSearchTextChange={setSearchText} isLoading={isLoadingHistory} throttle={false}>
       <List.Section title="New Tab" key="new-tab">
-        <FirefoxListEntries.NewTabEntry searchText={searchText} />
+        <NewTabEntry searchText={searchText} />
       </List.Section>
       <List.Section title="Recently Closed" key="recently-closed">
         {entriesHistory?.map((e) => (
-          <FirefoxListEntries.HistoryEntry entry={e} key={e.id} />
+          <HistoryListEntry entry={e} key={e.id} />
         ))}
       </List.Section>
     </List>

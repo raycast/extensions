@@ -7,7 +7,8 @@
   "author": "crisboarna",
   "contributors": [
     "serhii_kravchenko",
-    "Laptop765"
+    "Laptop765",
+    "kud"
   ],
   "categories": [
     "Applications",
@@ -72,6 +73,32 @@
   ],
   "preferences": [
     {
+      "name": "browserApp",
+      "title": "Firefox Application",
+      "default": "Firefox",
+      "description": "Which Firefox application to use",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        {
+          "title": "Firefox",
+          "value": "Firefox"
+        },
+        {
+          "title": "Firefox Nightly",
+          "value": "Firefox Nightly"
+        },
+        {
+          "title": "Firefox ESR",
+          "value": "Firefox ESR"
+        },
+        {
+          "title": "Firefox Developer Edition",
+          "value": "Firefox Developer Edition"
+        }
+      ]
+    },
+    {
       "name": "profileDirectorySuffix",
       "title": "Profile Directory Suffix",
       "default": "default-release",
@@ -82,8 +109,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.59.0",
-    "@raycast/utils": "^1.4.13",
-    "run-applescript": "6.0.0"
+    "@raycast/utils": "^1.4.13"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.6",

@@ -2,13 +2,11 @@ import { Action, ActionPanel, closeMainWindow, Icon } from "@raycast/api";
 import { openHistoryTab, openNewTab, setActiveTab } from "../actions";
 import { HistoryEntry, Tab } from "../interfaces";
 
-export class FirefoxActions {
-  public static NewTab = NewTabAction;
-  public static HistoryItem = HistoryItemAction;
-  public static TabListItem = TabListItemAction;
-}
+export const NewTabAction = NewTabActionComponent;
+export const HistoryItemAction = HistoryItemActionComponent;
+export const TabListItemAction = TabListItemActionComponent;
 
-function NewTabAction({ query }: { query?: string }) {
+function NewTabActionComponent({ query }: { query?: string }) {
   return (
     <ActionPanel title="New Tab">
       <ActionPanel.Item onAction={() => openNewTab(query)} title={query ? `Search "${query}"` : "Open Empty Tab"} />
@@ -16,7 +14,7 @@ function NewTabAction({ query }: { query?: string }) {
   );
 }
 
-function HistoryItemAction({ entry: { title, url } }: { entry: HistoryEntry }) {
+function HistoryItemActionComponent({ entry: { title, url } }: { entry: HistoryEntry }) {
   return (
     <ActionPanel title={title}>
       <MozillaFirefoxHistoryTab url={url} />
@@ -26,7 +24,7 @@ function HistoryItemAction({ entry: { title, url } }: { entry: HistoryEntry }) {
   );
 }
 
-function TabListItemAction(props: { tab: Tab }) {
+function TabListItemActionComponent(props: { tab: Tab }) {
   return (
     <ActionPanel title={props.tab.title}>
       <MozillaFirefoxGoToTab tab={props.tab} />
