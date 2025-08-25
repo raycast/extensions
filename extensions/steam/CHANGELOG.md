@@ -1,5 +1,10 @@
 # Steam Changelog
 
+## [Routine Maintenance] - {PR_MERGE_DATE}
+
+- Remove the typo dependency `data-fns`
+- Bump all dependencies to the latest
+
 ## [New Feature] - 2024-10-14
 
 - Add support for browsing ProtonDB scores
