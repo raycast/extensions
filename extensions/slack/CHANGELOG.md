@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [Fix Send Message Missing Scope Error] - {PR_MERGE_DATE}
+## [Fix Send Message Missing Scope Error] - 2025-08-25
 - Add missing `chat:write` scope to fix “missing_scope” error when using the **Send Message** command.
 
 ## [Channel, Channel History bug fixes and "Search Message" to Tools] - 2025-07-10
