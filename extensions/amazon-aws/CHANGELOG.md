@@ -1,5 +1,21 @@
 # Amazon AWS Changelog
 
+## [API Gateway, AppSync & Amplify Enhancements] - 2025-08-25
+
+- Add API Gateway command to manage REST and HTTP APIs
+  - Browse and search API resources, methods, and integrations
+  - View and manage deployment stages and API keys
+  - Monitor usage plans and quotas
+- Add AppSync command for GraphQL API management
+  - View and manage GraphQL schemas, data sources, and resolvers
+  - Generate and manage API keys with expiration tracking
+  - Quick access to GraphQL endpoint and console
+- Add AI-powered tools for AWS Amplify automation
+  - Automate project discovery and branch management
+  - Streamline webhook operations and build triggers
+  - Enhanced job monitoring with intelligent insights
+- Add Amplify build log download with improved error handling
+
 ## [Amplify command] - 2025-08-11
 
 - Add notification management for AWS Amplify branches

@@ -4,6 +4,7 @@ import {
   Branch,
   CustomRule,
   GetAppCommand,
+  GetJobCommand,
   JobSummary,
   ListAppsCommand,
   ListArtifactsCommand,
@@ -20,7 +21,12 @@ import { useCachedPromise } from "@raycast/utils";
 import { isReadyToFetch } from "../util";
 
 /**
- * Hook to fetch and manage Amplify apps
+ * Hook to fetch and manage all Amplify applications in the current AWS account
+ * @returns Object containing apps array, error state, loading state, and revalidate function
+ * @example
+ * ```tsx
+ * const { apps, error, isLoading, revalidate } = useAmplifyApps();
+ * ```
  */
 export function useAmplifyApps() {
   const {
@@ -60,7 +66,13 @@ async function fetchAmplifyApps(toast: Toast, nextToken?: string, aggregate?: Ap
 }
 
 /**
- * Hook to fetch branches for a specific Amplify app
+ * Hook to fetch all branches for a specific Amplify application
+ * @param appId - The unique identifier of the Amplify app
+ * @returns Object containing branches array, error state, and loading state
+ * @example
+ * ```tsx
+ * const { branches, error, isLoading } = useAmplifyBranches("d123456789");
+ * ```
  */
 export function useAmplifyBranches(appId: string) {
   const {
@@ -104,7 +116,13 @@ async function fetchAmplifyBranches(
 }
 
 /**
- * Hook to fetch details for a specific Amplify app
+ * Hook to fetch detailed information for a specific Amplify application
+ * @param appId - The unique identifier of the Amplify app
+ * @returns Object containing app details, error state, and loading state
+ * @example
+ * ```tsx
+ * const { app, error, isLoading } = useAmplifyAppDetails("d123456789");
+ * ```
  */
 export function useAmplifyAppDetails(appId: string) {
   const {
@@ -125,7 +143,13 @@ export function useAmplifyAppDetails(appId: string) {
 }
 
 /**
- * Hook to fetch webhooks for a specific Amplify app
+ * Hook to fetch all webhooks configured for a specific Amplify application
+ * @param appId - The unique identifier of the Amplify app
+ * @returns Object containing webhooks array, error state, and loading state
+ * @example
+ * ```tsx
+ * const { webhooks, error, isLoading } = useAmplifyWebhooks("d123456789");
+ * ```
  */
 export function useAmplifyWebhooks(appId: string) {
   const {
@@ -169,7 +193,14 @@ async function fetchAmplifyWebhooks(
 }
 
 /**
- * Hook to fetch build jobs for a specific Amplify app and branch
+ * Hook to fetch build job history for a specific Amplify application branch
+ * @param appId - The unique identifier of the Amplify app
+ * @param branchName - The name of the branch (e.g., "main", "develop")
+ * @returns Object containing jobs array, error state, loading state, and revalidate function
+ * @example
+ * ```tsx
+ * const { jobs, error, isLoading, revalidate } = useAmplifyJobs("d123456789", "main");
+ * ```
  */
 export function useAmplifyJobs(appId: string, branchName: string) {
   const {
@@ -220,7 +251,15 @@ async function fetchAmplifyJobs(
 }
 
 /**
- * Hook to fetch artifacts for a specific job
+ * Hook to fetch build artifacts for a specific Amplify build job
+ * @param appId - The unique identifier of the Amplify app
+ * @param branchName - The name of the branch (e.g., "main", "develop")
+ * @param jobId - The unique identifier of the build job
+ * @returns Object containing artifacts array, error state, and loading state
+ * @example
+ * ```tsx
+ * const { artifacts, error, isLoading } = useAmplifyArtifacts("d123456789", "main", "1234");
+ * ```
  */
 export function useAmplifyArtifacts(appId: string, branchName: string, jobId: string) {
   const {
@@ -244,7 +283,19 @@ export function useAmplifyArtifacts(appId: string, branchName: string, jobId: st
 }
 
 /**
- * Start a new build job for an Amplify branch
+ * Initiates a new build job for a specific Amplify application branch
+ * @param appId - The unique identifier of the Amplify app
+ * @param branchName - The name of the branch to build
+ * @param sourceUrl - Optional source URL override for the build
+ * @param commitId - Optional specific commit ID to build
+ * @param commitMessage - Optional commit message for the build
+ * @returns Promise resolving to JobSummary if successful, undefined otherwise
+ * @throws Error if the build fails to start
+ * @example
+ * ```tsx
+ * await startAmplifyBuild("d123456789", "main");
+ * await startAmplifyBuild("d123456789", "main", undefined, "abc123", "Fix bug");
+ * ```
  */
 export async function startAmplifyBuild(
   appId: string,
@@ -285,7 +336,16 @@ export async function startAmplifyBuild(
 }
 
 /**
- * Cancel a running build job
+ * Cancels a currently running build job for an Amplify application branch
+ * @param appId - The unique identifier of the Amplify app
+ * @param branchName - The name of the branch
+ * @param jobId - The unique identifier of the build job to cancel
+ * @returns Promise resolving to JobSummary if successful, undefined otherwise
+ * @throws Error if the build fails to cancel
+ * @example
+ * ```tsx
+ * await stopAmplifyBuild("d123456789", "main", "1234");
+ * ```
  */
 export async function stopAmplifyBuild(
   appId: string,
@@ -321,7 +381,16 @@ export async function stopAmplifyBuild(
 }
 
 /**
- * Update custom headers and rules for an Amplify app
+ * Updates custom redirect and rewrite rules for an Amplify application
+ * @param appId - The unique identifier of the Amplify app
+ * @param customRules - Array of custom rules to apply to the application
+ * @returns Promise resolving to updated App object if successful, undefined otherwise
+ * @throws Error if the update fails
+ * @example
+ * ```tsx
+ * const rules = [{ source: "/<*>", target: "/index.html", status: "200" }];
+ * await updateAmplifyCustomRules("d123456789", rules);
+ * ```
  */
 export async function updateAmplifyCustomRules(appId: string, customRules: CustomRule[]): Promise<App | undefined> {
   const toast = await showToast({
@@ -350,7 +419,16 @@ export async function updateAmplifyCustomRules(appId: string, customRules: Custo
 }
 
 /**
- * Update environment variables for an Amplify app
+ * Updates environment variables for an Amplify application
+ * @param appId - The unique identifier of the Amplify app
+ * @param environmentVariables - Record of environment variable key-value pairs
+ * @returns Promise resolving to updated App object if successful, undefined otherwise
+ * @throws Error if the update fails
+ * @example
+ * ```tsx
+ * const envVars = { "API_URL": "https://api.example.com", "DEBUG": "true" };
+ * await updateAmplifyEnvironmentVariables("d123456789", envVars);
+ * ```
  */
 export async function updateAmplifyEnvironmentVariables(
   appId: string,
@@ -376,6 +454,96 @@ export async function updateAmplifyEnvironmentVariables(
   } catch (error) {
     toast.style = Toast.Style.Failure;
     toast.title = "❌ Failed to update environment variables";
+    toast.message = error instanceof Error ? error.message : "Unknown error";
+    throw error;
+  }
+}
+
+/**
+ * Downloads build logs for a specific Amplify build job to the user's Downloads folder
+ * @param appId - The unique identifier of the Amplify app
+ * @param branchName - The name of the branch
+ * @param jobId - The unique identifier of the build job
+ * @returns Promise that resolves when logs are downloaded successfully
+ * @throws Error if the download fails or logs are not available
+ * @example
+ * ```tsx
+ * await downloadAmplifyBuildLogs("d123456789", "main", "1234");
+ * ```
+ */
+export async function downloadAmplifyBuildLogs(appId: string, branchName: string, jobId: string): Promise<void> {
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: "Downloading build logs",
+    message: `Job ID: ${jobId}`,
+  });
+
+  try {
+    const client = new AmplifyClient({});
+    const { job } = await client.send(
+      new GetJobCommand({
+        appId,
+        branchName,
+        jobId,
+      }),
+    );
+
+    if (!job || !job.steps) {
+      throw new Error("No job details or steps found");
+    }
+
+    // Extract log URLs from execution steps
+    const logUrls = job.steps
+      .filter((step) => step.logUrl)
+      .map((step, index) => ({
+        stepName: step.stepName || `step-${index}`,
+        logUrl: step.logUrl as string, // Safe since we filtered for step.logUrl above
+        status: step.status,
+      }));
+
+    if (logUrls.length === 0) {
+      throw new Error("No log URLs found for this job");
+    }
+
+    // Import Node.js modules for file operations
+    const { writeFile, mkdir } = await import("fs/promises");
+    const { join } = await import("path");
+    const { homedir } = await import("os");
+
+    // Create logs directory in user's Downloads folder
+    const logsDir = join(homedir(), "Downloads", "amplify-logs");
+    await mkdir(logsDir, { recursive: true });
+
+    // Download each log file
+    for (const logInfo of logUrls) {
+      try {
+        const response = await fetch(logInfo.logUrl);
+
+        if (!response.ok) {
+          console.warn(`Failed to download log for ${logInfo.stepName}: ${response.status}`);
+          continue;
+        }
+
+        const logContent = await response.text();
+        const fileName = `${jobId}-${logInfo.stepName}.log`;
+        const filePath = join(logsDir, fileName);
+
+        await writeFile(filePath, logContent);
+      } catch (error) {
+        // Log download failed for this step, continue with others
+      }
+    }
+
+    // Show logs directory in Finder
+    const { showInFinder } = await import("@raycast/api");
+    await showInFinder(logsDir);
+
+    toast.style = Toast.Style.Success;
+    toast.title = "✅ Build logs downloaded";
+    toast.message = `${logUrls.length} log files saved`;
+  } catch (error) {
+    toast.style = Toast.Style.Failure;
+    toast.title = "❌ Failed to download build logs";
     toast.message = error instanceof Error ? error.message : "Unknown error";
     throw error;
   }
