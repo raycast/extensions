@@ -1,3 +1,5 @@
+import { API_HEADERS, API_ENDPOINTS, API_CONFIG, buildApiUrl } from "./utils/api-config";
+
 export type LocationResult = {
   id: string;
   displayName: string;
@@ -9,12 +11,14 @@ export type LocationResult = {
 export async function searchLocations(query: string): Promise<LocationResult[]> {
   const trimmed = query.trim();
   if (!trimmed) return [];
-  const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(trimmed)}&limit=10&addressdetails=0`;
-  const res = await fetch(url, {
-    headers: {
-      "User-Agent": "raycast-yr-extension/1.0 (https://github.com/kyndig/raycast-yr; contact: raycast@kynd.no)",
-    },
+
+  const url = buildApiUrl(API_ENDPOINTS.NOMINATIM.SEARCH, {
+    format: "json",
+    q: trimmed,
+    addressdetails: API_CONFIG.NOMINATIM.ADDRESS_DETAILS,
   });
+
+  const res = await fetch(url, { headers: API_HEADERS });
   if (!res.ok) {
     throw new Error(`nominatim responded ${res.status} ${res.statusText}`);
   }

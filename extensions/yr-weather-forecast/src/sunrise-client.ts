@@ -1,8 +1,5 @@
 import { getCached, setCached } from "./cache";
-
-const headers = {
-  "User-Agent": "raycast-yr-extension/1.0 (https://github.com/kyndig/raycast-yr; contact: raycast@kynd.no)",
-};
+import { API_HEADERS, API_ENDPOINTS, API_CONFIG, buildApiUrl } from "./utils/api-config";
 
 export type SunTimes = {
   sunrise?: string; // ISO time
@@ -16,17 +13,15 @@ type SunriseApiResponse = {
   };
 };
 
-const SIX_HOURS_MS = 6 * 60 * 60 * 1000;
-
 export async function getSunTimes(lat: number, lon: number, dateISO?: string): Promise<SunTimes> {
   const dateRaw = dateISO ?? new Date().toISOString().slice(0, 10);
   const date = dateRaw.includes("T") ? dateRaw.split("T")[0] : dateRaw;
   const cacheKey = `sun:${lat.toFixed(3)},${lon.toFixed(3)}:${date}`;
-  const cached = await getCached<SunTimes>(cacheKey, SIX_HOURS_MS);
+  const cached = await getCached<SunTimes>(cacheKey, API_CONFIG.CACHE_TTL.SUNRISE);
   if (cached) return cached;
 
-  const url = `https://api.met.no/weatherapi/sunrise/3.0/sun?lat=${lat}&lon=${lon}&date=${date}`;
-  const res = await fetch(url, { headers });
+  const url = buildApiUrl(API_ENDPOINTS.MET.SUNRISE_SUNSET, { lat, lon, date });
+  const res = await fetch(url, { headers: API_HEADERS });
   if (!res.ok) {
     // Don't throw; return empty so UI can continue
     return {};

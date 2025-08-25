@@ -1,9 +1,5 @@
 import { getCached, setCached } from "./cache";
-
-const THIRTY_MIN_MS = 30 * 60 * 1000;
-const headers = {
-  "User-Agent": "raycast-yr-extension/1.0 (https://github.com/kyndig/raycast-yr; contact: raycast@kynd.no)",
-};
+import { API_HEADERS, API_ENDPOINTS, API_CONFIG, buildApiUrl } from "./utils/api-config";
 
 export type TimeseriesEntry = {
   time: string;
@@ -38,10 +34,11 @@ type LocationForecastResponse = {
 
 export async function getWeather(lat: number, lon: number): Promise<TimeseriesEntry> {
   const cacheKey = `weather:${lat.toFixed(3)},${lon.toFixed(3)}`;
-  const cached = await getCached<TimeseriesEntry>(cacheKey, THIRTY_MIN_MS);
+  const cached = await getCached<TimeseriesEntry>(cacheKey, API_CONFIG.CACHE_TTL.WEATHER);
   if (cached) return cached;
-  const url = `https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=${lat}&lon=${lon}`;
-  const res = await fetch(url, { headers });
+
+  const url = buildApiUrl(API_ENDPOINTS.MET.WEATHER_FORECAST, { lat, lon });
+  const res = await fetch(url, { headers: API_HEADERS });
   if (!res.ok) {
     throw new Error(`met.no responded ${res.status} ${res.statusText}`);
   }
@@ -57,10 +54,11 @@ export async function getWeather(lat: number, lon: number): Promise<TimeseriesEn
 
 export async function getForecast(lat: number, lon: number): Promise<TimeseriesEntry[]> {
   const cacheKey = `forecast:${lat.toFixed(3)},${lon.toFixed(3)}`;
-  const cached = await getCached<TimeseriesEntry[]>(cacheKey, THIRTY_MIN_MS);
+  const cached = await getCached<TimeseriesEntry[]>(cacheKey, API_CONFIG.CACHE_TTL.WEATHER);
   if (cached) return cached;
-  const url = `https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=${lat}&lon=${lon}`;
-  const res = await fetch(url, { headers });
+
+  const url = buildApiUrl(API_ENDPOINTS.MET.WEATHER_FORECAST, { lat, lon });
+  const res = await fetch(url, { headers: API_HEADERS });
   if (!res.ok) {
     throw new Error(`met.no responded ${res.status} ${res.statusText}`);
   }

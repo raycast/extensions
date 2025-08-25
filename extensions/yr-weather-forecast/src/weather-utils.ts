@@ -1,6 +1,8 @@
 import type { TimeseriesEntry } from "./weather-client";
 import { precipitationAmount, symbolCode } from "./utils-forecast";
 import { formatPrecip, formatTemperatureCelsius, formatWindSpeed } from "./units";
+import { symbolToEmoji } from "./utils/weather-symbols";
+import { formatDate, formatTime as formatTimeUtil, getPeriodName } from "./utils/date-utils";
 
 /**
  * Convert wind direction degrees to compass direction with arrow
@@ -41,12 +43,7 @@ export function filterToDate(series: TimeseriesEntry[], targetDate: Date): Times
  */
 export function groupByDay(series: TimeseriesEntry[]): Record<string, TimeseriesEntry[]> {
   return series.reduce<Record<string, TimeseriesEntry[]>>((acc, ts) => {
-    const day = new Date(ts.time).toLocaleDateString(undefined, {
-      weekday: "short",
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+    const day = formatDate(ts.time, "FULL_DATE");
     (acc[day] ||= []).push(ts);
     return acc;
   }, {});
@@ -54,20 +51,18 @@ export function groupByDay(series: TimeseriesEntry[]): Record<string, Timeseries
 
 /**
  * Get period name from hour (Night, Morning, Afternoon, Evening)
+ * @deprecated Use getPeriodName from ./utils/date-utils instead
  */
 export function periodNameFromHour(hour: number): "Night" | "Morning" | "Afternoon" | "Evening" {
-  if (hour < 6) return "Night";
-  if (hour < 12) return "Morning";
-  if (hour < 18) return "Afternoon";
-  return "Evening";
+  return getPeriodName(hour);
 }
 
 /**
  * Format time from ISO string
+ * @deprecated Use formatTime from ./utils/date-utils instead
  */
 export function formatTime(iso: string): string {
-  const d = new Date(iso);
-  return d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+  return formatTimeUtil(iso, "STANDARD");
 }
 
 /**
@@ -134,33 +129,7 @@ export function buildWeatherTable(
 
     // Weather column
     const symbol = symbolCode(ts);
-    const emoji = symbol
-      ? symbol.includes("thunder")
-        ? "⛈️"
-        : symbol.includes("sleet")
-          ? "🌨️"
-          : symbol.includes("snow")
-            ? "🌨️"
-            : symbol.includes("rain")
-              ? symbol.includes("showers")
-                ? "🌦️"
-                : "🌧️"
-              : symbol.includes("fog")
-                ? "🌫️"
-                : symbol.includes("partlycloudy")
-                  ? "🌤️"
-                  : symbol.includes("cloudy")
-                    ? "☁️"
-                    : symbol.includes("fair")
-                      ? symbol.includes("night")
-                        ? "🌙"
-                        : "🌤️"
-                      : symbol.includes("clearsky")
-                        ? symbol.includes("night")
-                          ? "🌙"
-                          : "☀️"
-                        : ""
-      : "";
+    const emoji = symbolToEmoji(symbol);
     parts.push(emoji);
 
     // Temperature column

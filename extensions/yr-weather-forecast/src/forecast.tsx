@@ -1,114 +1,78 @@
-import { Action, ActionPanel, Detail } from "@raycast/api";
-import { useEffect, useMemo, useState } from "react";
-import { getForecast, type TimeseriesEntry } from "./weather-client";
+import { Action, ActionPanel, Detail, showToast, Toast, Icon } from "@raycast/api";
+import { useMemo, useState, useEffect } from "react";
+import { type TimeseriesEntry } from "./weather-client";
 import { buildGraphMarkdown } from "./graph";
 import { groupByDay, reduceToDayPeriods, buildWeatherTable } from "./weather-utils";
+import { useWeatherData } from "./hooks/useWeatherData";
+import { generateNoForecastDataMessage } from "./utils/error-messages";
+import { addFavorite, removeFavorite, isFavorite as checkIsFavorite, type FavoriteLocation } from "./storage";
 
 export default function ForecastView(props: { name: string; lat: number; lon: number }) {
   const { name, lat, lon } = props;
-  const [items, setItems] = useState<TimeseriesEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [showError, setShowError] = useState(false);
-  const [showNoData, setShowNoData] = useState(false);
   const [mode, setMode] = useState<"detailed" | "summary">("detailed");
+  const [isFavorite, setIsFavorite] = useState<boolean>(false);
+  const { series: items, loading, showNoData } = useWeatherData(lat, lon);
 
+  // Check if current location is in favorites
   useEffect(() => {
-    let cancelled = false;
-    let errorTimeout: NodeJS.Timeout;
-    let noDataTimeout: NodeJS.Timeout;
-
-    async function fetchData() {
-      setLoading(true);
-      setError(null);
-      setShowError(false);
-      setShowNoData(false);
-
-      try {
-        const series = await getForecast(lat, lon);
-        if (!cancelled) {
-          setItems(series);
-          setError(null);
-          setShowError(false);
-          setShowNoData(false);
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setItems([]); // Clear existing weather forecasts
-          const errorMessage = err instanceof Error ? err.message : "Failed to fetch weather data";
-          setError(errorMessage);
-
-          // Delay showing error message by 150ms to give API time to catch up
-          errorTimeout = setTimeout(() => {
-            if (!cancelled) {
-              setShowError(true);
-            }
-          }, 150);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-
-          // Delay showing "no data" message by 150ms to give API time to catch up
-          if (items.length === 0) {
-            noDataTimeout = setTimeout(() => {
-              if (!cancelled) {
-                setShowNoData(true);
-              }
-            }, 150);
-          }
-        }
-      }
-    }
-    fetchData();
-    return () => {
-      cancelled = true;
-      if (errorTimeout) clearTimeout(errorTimeout);
-      if (noDataTimeout) clearTimeout(noDataTimeout);
+    const checkFavoriteStatus = async () => {
+      const favLocation: FavoriteLocation = { name, lat, lon };
+      const favorite = await checkIsFavorite(favLocation);
+      setIsFavorite(favorite);
     };
-  }, [lat, lon]);
+    checkFavoriteStatus();
+  }, [name, lat, lon]);
 
   const byDay = useMemo(() => groupByDay(items), [items]);
   const reduced = useMemo(() => reduceToDayPeriods(items, 9), [items]);
   const displaySeries = mode === "detailed" ? items.slice(0, 48) : reduced;
 
   const graph = useMemo(() => {
-    if ((error && showError) || (displaySeries.length === 0 && showNoData)) return "";
+    if (displaySeries.length === 0 && showNoData) return "";
     const title = mode === "detailed" ? "48h forecast" : "9-day summary";
     const smooth = true; // smooth both 48h detailed and 9-day summary
     return buildGraphMarkdown(name, displaySeries, displaySeries.length, { title, smooth }).markdown;
-  }, [name, displaySeries, mode, error, showError, showNoData]);
+  }, [name, displaySeries, mode, showNoData]);
 
   const listMarkdown = useMemo(() => {
-    if (error && showError) {
-      return `## ⚠️ Data Fetch Failed
-
-Unable to retrieve weather forecast data from the MET API.
-
-**Error details:**
-${error}
-
-**Available options:**
-- Check your internet connection
-- Try again later
-- Verify the location coordinates are correct`;
-    }
-
     if (displaySeries.length === 0 && showNoData) {
-      return `## ⚠️ No Forecast Data Available
-
-No weather forecast data is currently available for this location.
-
-**Available options:**
-- Check the location coordinates
-- Try refreshing the data
-- Contact support if the issue persists`;
+      return generateNoForecastDataMessage({ locationName: name });
     }
 
     return mode === "detailed" ? buildListMarkdown(byDay) : buildSummaryListMarkdown(reduced);
-  }, [mode, byDay, reduced, error, showError, displaySeries.length, showNoData]);
+  }, [mode, byDay, reduced, displaySeries.length, showNoData, name]);
 
   const markdown = [graph, "\n---\n", listMarkdown].join("\n");
+
+  const handleFavoriteToggle = async () => {
+    const favLocation: FavoriteLocation = { name, lat, lon };
+
+    try {
+      if (isFavorite) {
+        await removeFavorite(favLocation);
+        setIsFavorite(false);
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Removed from Favorites",
+          message: `${name} has been removed from your favorites`,
+        });
+      } else {
+        await addFavorite(favLocation);
+        setIsFavorite(true);
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Added to Favorites",
+          message: `${name} has been added to your favorites`,
+        });
+      }
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to update favorites",
+        message: String(error),
+      });
+    }
+  };
 
   return (
     <Detail
@@ -120,6 +84,21 @@ No weather forecast data is currently available for this location.
             <Action title="Show 9-Day Summary" onAction={() => setMode("summary")} />
           ) : (
             <Action title="Show 2-Day Detailed" onAction={() => setMode("detailed")} />
+          )}
+          {isFavorite ? (
+            <Action
+              title="Remove from Favorites"
+              icon={Icon.StarDisabled}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+              onAction={handleFavoriteToggle}
+            />
+          ) : (
+            <Action
+              title="Add to Favorites"
+              icon={Icon.Star}
+              shortcut={{ modifiers: ["cmd"], key: "f" }}
+              onAction={handleFavoriteToggle}
+            />
           )}
         </ActionPanel>
       }
