@@ -150,11 +150,13 @@ export default function SearchHelpdesk() {
       isLoading={isLoading}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search helpdesk teams by name..."
-      throttle>
+      throttle
+    >
       <List.Section
         title="Helpdesk Teams"
-        subtitle={`${helpdeskTeams.length} team${helpdeskTeams.length !== 1 ? "s" : ""}`}>
-        {helpdeskTeams.map(team => (
+        subtitle={`${helpdeskTeams.length} team${helpdeskTeams.length !== 1 ? "s" : ""}`}
+      >
+        {helpdeskTeams.map((team) => (
           <List.Item
             key={team.id}
             title={team.display_name || team.name}

@@ -154,9 +154,10 @@ export default function SearchProjects() {
       isLoading={isLoading}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search projects by name..."
-      throttle>
+      throttle
+    >
       <List.Section title="Projects" subtitle={`${projects.length} project${projects.length !== 1 ? "s" : ""}`}>
-        {projects.map(project => (
+        {projects.map((project) => (
           <List.Item
             key={project.id}
             title={project.display_name || project.name}

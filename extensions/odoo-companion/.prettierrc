@@ -1,15 +1,4 @@
 {
-    "arrowParens": "avoid",
-    "bracketSpacing": true,
-    "bracketSameLine": true,
-    "htmlWhitespaceSensitivity": "css",
-    "printWidth": 120,
-    "proseWrap": "always",
-    "quoteProps": "consistent",
-    "singleQuote": false,
-    "tabWidth": 2,
-    "trailingComma": "all",
-    "useTabs": false,
-    "semi": true,
-    "vueIndentScriptAndStyle": false
+  "printWidth": 120,
+  "singleQuote": false
 }
