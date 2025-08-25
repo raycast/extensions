@@ -1,3 +1,5 @@
+import { type PreferenceValues } from "@raycast/api";
+
 type Range<
   START extends number,
   END extends number,
@@ -408,10 +410,33 @@ export function getMediaType(extension: string): MediaType | null {
   return null;
 }
 
-// This function should only ever be called for audio/video
-export function getQualitySettingsFromSimple(extension: OutputAudioExtension | OutputVideoExtension) {
-  if (extension in SIMPLE_QUALITY_MAPPINGS) {
-    return SIMPLE_QUALITY_MAPPINGS[extension][DEFAULT_SIMPLE_QUALITY];
+type SimpleQualityMappingExtension = keyof typeof SIMPLE_QUALITY_MAPPINGS;
+
+export function getDefaultQuality(
+  format: AllOutputExtension,
+  preferences: PreferenceValues,
+  qualityLevel?: QualityLevel,
+): QualitySettings {
+  // For images or when advanced settings are enabled, use DEFAULT_QUALITIES
+  if (!preferences) {
+    throw new Error(`fn getDefaultQuality: Provide preferences`);
   }
-  throw new Error(`Unsupported format: ${extension}`);
+
+  if (getMediaType(format) === "image" || preferences.moreConversionSettings) {
+    return {
+      [format]: DEFAULT_QUALITIES[format],
+    } as QualitySettings;
+  }
+
+  if (!qualityLevel) {
+    throw new Error(`fn getDefaultQuality: Simple quality mapping is true, provide qualityLevel`);
+  }
+
+  if ((format as SimpleQualityMappingExtension) in SIMPLE_QUALITY_MAPPINGS) {
+    return {
+      [format]: SIMPLE_QUALITY_MAPPINGS[format as SimpleQualityMappingExtension][qualityLevel],
+    } as QualitySettings;
+  }
+
+  throw new Error(`Unsupported format for simple quality mapping: ${format}`);
 }

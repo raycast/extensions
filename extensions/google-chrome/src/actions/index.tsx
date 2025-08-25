@@ -140,6 +140,19 @@ export async function closeActiveTab(tab: Tab): Promise<void> {
   `);
 }
 
+export async function reloadTab(tab: Tab): Promise<void> {
+  await runAppleScript(`
+    tell application "Google Chrome"
+      activate
+      set _wnd to first window where id is ${tab.windowsId}
+      set index of _wnd to 1
+      set active tab index of _wnd to ${tab.tabIndex}
+      tell active tab of _wnd to reload
+    end tell
+    return true
+  `);
+}
+
 const checkAppInstalled = async () => {
   const installed = await LocalStorage.getItem("is-installed");
   if (installed) return;

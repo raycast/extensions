@@ -12,6 +12,7 @@ import { loadGameState, saveGameState, resetGameState } from "./storage";
 import { PRESTIGE_UPGRADES, calculatePrestigeUpgradeCost, calculatePrestigeUpgradeEffect } from "./prestigeUpgrades";
 import { ACHIEVEMENTS } from "./achievements";
 import { PRESTIGE_PP_DIVISOR } from "./constants";
+import { calculatePrestigePoints } from "./utils";
 
 // Only trigger UI updates when the gain exceeds this epsilon to avoid noisy re-renders
 const MIN_GAIN_EPS = 0.01;
@@ -423,9 +424,21 @@ export function useGameState(): UseGameStateReturn {
         const prev = lastUpdateRef.current;
         const deltaTime = (now - prev) / 1000; // seconds
 
-        // If menu bar is driving idle accrual, do not trigger React renders here
+        // If the menu bar is accruing, sync from storage so UI reflects gains and skip local accrual
         if (menuBarActive) {
-          lastUpdateRef.current = now;
+          try {
+            const stored = await loadGameState();
+            setGameState((prevState) => {
+              const incomingTs = typeof stored.lastUpdate === "number" ? stored.lastUpdate : 0;
+              const prevTs = typeof prevState.lastUpdate === "number" ? prevState.lastUpdate : 0;
+              if (incomingTs > prevTs) {
+                return calculateDerivedState(stored);
+              }
+              return prevState;
+            });
+          } finally {
+            lastUpdateRef.current = now;
+          }
           return;
         }
 
@@ -705,7 +718,7 @@ export function useGameState(): UseGameStateReturn {
   // Handle prestige action
   const prestige = useCallback(() => {
     setGameState((prev) => {
-      const gained = Math.floor(Math.sqrt((prev.prestige.totalEarned || 0) / PRESTIGE_PP_DIVISOR));
+      const gained = calculatePrestigePoints(prev.prestige.totalEarned || 0, PRESTIGE_PP_DIVISOR);
       if (gained <= 0) {
         showToast({ style: Toast.Style.Failure, title: "Not enough to prestige" });
         return prev;
@@ -792,71 +805,74 @@ export function useGameState(): UseGameStateReturn {
     }
   };
 
-  // Handle prestige upgrade purchase
+  // Handle prestige upgrade purchase (atomic inside updater to avoid race conditions)
   const purchasePrestigeUpgrade = useCallback(
     (upgradeId: string) => {
       const upgrade = PRESTIGE_UPGRADES[upgradeId];
       if (!upgrade) return false;
 
-      const currentLevel = gameState.prestige.upgrades[upgradeId] || 0;
+      let purchased = false;
 
-      // Check if already at max level
-      if (currentLevel >= upgrade.maxLevel) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Maximum level reached",
-          message: `${upgrade.name} is already at maximum level`,
-        });
-        return false;
-      }
-
-      const cost = calculatePrestigeUpgradeCost(upgrade, currentLevel);
-
-      // Check if can afford
-      if (gameState.prestige.prestigePoints < cost) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Not enough prestige points",
-          message: `You need ${cost - gameState.prestige.prestigePoints} more prestige points`,
-        });
-        return false;
-      }
-
-      // Purchase the upgrade
       setGameState((prev) => {
-        const newPrestigeUpgrades = { ...prev.prestige.upgrades };
-        newPrestigeUpgrades[upgradeId] = (newPrestigeUpgrades[upgradeId] || 0) + 1;
+        const currentLevelPrev = prev.prestige.upgrades[upgradeId] || 0;
 
-        const newState = {
+        // Already maxed
+        if (currentLevelPrev >= upgrade.maxLevel) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Maximum level reached",
+            message: `${upgrade.name} is already at maximum level`,
+          });
+          return prev;
+        }
+
+        const costPrev = calculatePrestigeUpgradeCost(upgrade, currentLevelPrev);
+
+        // Affordability check against CURRENT state inside updater
+        if (prev.prestige.prestigePoints < costPrev) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Not enough prestige points",
+            message: `You need ${costPrev - prev.prestige.prestigePoints} more prestige points`,
+          });
+          return prev;
+        }
+
+        // Perform purchase
+        const newPrestigeUpgrades = { ...prev.prestige.upgrades, [upgradeId]: currentLevelPrev + 1 };
+        const newState: GameState = {
           ...prev,
           prestige: {
             ...prev.prestige,
-            prestigePoints: prev.prestige.prestigePoints - cost,
+            prestigePoints: prev.prestige.prestigePoints - costPrev,
             upgrades: newPrestigeUpgrades,
           },
         };
 
         // Apply special effects based on the upgrade
         if (upgradeId === "bulkBuyerPro") {
-          newState.settings.bulkBuyEnabled = true;
+          newState.settings = { ...newState.settings, bulkBuyEnabled: true };
         } else if (upgradeId === "fasterTick") {
-          newState.settings.offlineProgressEnabled = true;
+          newState.settings = { ...newState.settings, offlineProgressEnabled: true };
         }
+
+        purchased = true;
 
         // Persist immediately so prestige upgrades and setting toggles aren't lost
         void saveGameState(newState);
+
+        showToast({
+          style: Toast.Style.Success,
+          title: `${upgrade.name} Purchased!`,
+          message: `Level ${currentLevelPrev + 1}/${upgrade.maxLevel}`,
+        });
+
         return calculateDerivedState(newState);
       });
 
-      showToast({
-        style: Toast.Style.Success,
-        title: `${upgrade.name} Purchased!`,
-        message: `Level ${(gameState.prestige.upgrades[upgradeId] || 0) + 1}/${upgrade.maxLevel}`,
-      });
-
-      return true;
+      return purchased;
     },
-    [gameState, calculateDerivedState],
+    [calculateDerivedState],
   );
 
   // Return the game state and actions

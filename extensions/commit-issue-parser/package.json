@@ -80,6 +80,24 @@
           "value": "gitmoji"
         }
       ]
+    },
+    {
+      "name": "commitFormat",
+      "title": "Commit Format",
+      "description": "Customizes the format of the commit. The available parameters are {type}, {scope}, and {message}. Use \\ to remove the following character when no scope is present. Leave blank to revert to the default format.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "{type}\\({scope}\\): {message}",
+      "default": "{type}\\({scope}\\): {message}"
+    },
+    {
+      "name": "bodyFormat",
+      "title": "Body Format",
+      "description": "Customizes the format of the body. The available parameters are {scope}, {body}. Leave blank to revert to the default format.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Issue: {scope}\\n\\n{body}",
+      "default": "Issue: {scope}\\n\\n{body}"
     }
   ],
   "dependencies": {

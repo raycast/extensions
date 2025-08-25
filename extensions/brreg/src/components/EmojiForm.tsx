@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
 import { useState } from "react";
+import { KEYBOARD_SHORTCUTS } from "../constants";
 
 export default function EmojiForm({
   initialEmoji,
@@ -21,7 +22,7 @@ export default function EmojiForm({
             }}
             title="Save Emoji"
           />
-          <Action title="Back" onAction={() => navigation.pop()} shortcut={{ modifiers: [], key: "backspace" }} />
+          <Action title="Back" onAction={() => navigation.pop()} shortcut={KEYBOARD_SHORTCUTS.PREVIOUS_TAB} />
         </ActionPanel>
       }
     >

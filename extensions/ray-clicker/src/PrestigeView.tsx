@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List, Color, showToast, Toast } from "@raycast/api";
-import { useState, useMemo } from "react";
-import { formatNumber } from "./utils";
+import { useState, useMemo, useEffect } from "react";
+import { formatNumber, calculatePrestigePoints } from "./utils";
 import { GameState } from "./types";
 import {
   PrestigeUpgrade,
@@ -12,17 +12,33 @@ import { PRESTIGE_PP_DIVISOR } from "./constants";
 
 type PrestigeViewProps = {
   gameState: GameState;
-  onPurchasePrestigeUpgrade: (id: string) => void;
+  onPurchasePrestigeUpgrade: (id: string) => boolean;
+  onPrestige: () => Promise<boolean>;
 };
 
-export function PrestigeView({ gameState, onPurchasePrestigeUpgrade }: PrestigeViewProps) {
+export function PrestigeView({ gameState, onPurchasePrestigeUpgrade, onPrestige }: PrestigeViewProps) {
   const [searchText, setSearchText] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<PrestigeUpgrade["category"] | "all">("all");
 
-  // Get current prestige level and points
-  const { level: prestigeLevel, prestigePoints } = gameState.prestige;
+  // Local reactive mirrors so the view updates immediately while mounted
+  const [localPrestigeLevel, setLocalPrestigeLevel] = useState<number>(gameState.prestige.level);
+  const [localPrestigePoints, setLocalPrestigePoints] = useState<number>(gameState.prestige.prestigePoints);
+  const [localUpgrades, setLocalUpgrades] = useState<Record<string, number>>({
+    ...gameState.prestige.upgrades,
+  });
+
+  // Keep local mirrors in sync with incoming game state updates
+  useEffect(() => {
+    setLocalPrestigeLevel(gameState.prestige.level);
+  }, [gameState.prestige.level]);
+  useEffect(() => {
+    setLocalPrestigePoints(gameState.prestige.prestigePoints);
+  }, [gameState.prestige.prestigePoints]);
+  useEffect(() => {
+    setLocalUpgrades({ ...gameState.prestige.upgrades });
+  }, [gameState.prestige.upgrades]);
   const estimatedPrestigePoints = useMemo(() => {
-    return Math.floor(Math.sqrt((gameState.prestige.totalEarned || 0) / PRESTIGE_PP_DIVISOR));
+    return calculatePrestigePoints(gameState.prestige.totalEarned || 0, PRESTIGE_PP_DIVISOR);
   }, [gameState.prestige.totalEarned]);
 
   // Get all upgrades and split into unlocked/locked per category
@@ -30,7 +46,7 @@ export function PrestigeView({ gameState, onPurchasePrestigeUpgrade }: PrestigeV
     const unlocked: { [key: string]: PrestigeUpgrade[] } = { production: [], efficiency: [], special: [] };
     const locked: { [key: string]: PrestigeUpgrade[] } = { production: [], efficiency: [], special: [] };
 
-    const availableUpgrades = getAvailablePrestigeUpgrades(prestigeLevel);
+    const availableUpgrades = getAvailablePrestigeUpgrades(localPrestigeLevel);
 
     availableUpgrades.forEach((upgrade) => {
       const passesCategory = selectedCategory === "all" || upgrade.category === selectedCategory;
@@ -40,7 +56,7 @@ export function PrestigeView({ gameState, onPurchasePrestigeUpgrade }: PrestigeV
         upgrade.description.toLowerCase().includes(searchText.toLowerCase());
       if (!passesCategory || !passesSearch) return;
 
-      if (upgrade.unlockLevel <= prestigeLevel) {
+      if (upgrade.unlockLevel <= localPrestigeLevel) {
         unlocked[upgrade.category].push(upgrade);
       } else {
         locked[upgrade.category].push(upgrade);
@@ -50,8 +66,8 @@ export function PrestigeView({ gameState, onPurchasePrestigeUpgrade }: PrestigeV
     const sortFn = (a: PrestigeUpgrade, b: PrestigeUpgrade) => {
       if (a.unlockLevel !== b.unlockLevel) return a.unlockLevel - b.unlockLevel;
       return (
-        calculatePrestigeUpgradeCost(a, gameState.prestige.upgrades[a.id] || 0) -
-        calculatePrestigeUpgradeCost(b, gameState.prestige.upgrades[b.id] || 0)
+        calculatePrestigeUpgradeCost(a, localUpgrades[a.id] || 0) -
+        calculatePrestigeUpgradeCost(b, localUpgrades[b.id] || 0)
       );
     };
 
@@ -59,7 +75,7 @@ export function PrestigeView({ gameState, onPurchasePrestigeUpgrade }: PrestigeV
     Object.values(locked).forEach((arr) => arr.sort(sortFn));
 
     return { unlockedByCategory: unlocked, lockedByCategory: locked };
-  }, [prestigeLevel, selectedCategory, searchText, gameState.prestige.upgrades]);
+  }, [localPrestigeLevel, selectedCategory, searchText, localUpgrades]);
 
   // Check if there are any upgrades in the selected category
   const hasAnyUnlocked = useMemo(() => {
@@ -71,9 +87,9 @@ export function PrestigeView({ gameState, onPurchasePrestigeUpgrade }: PrestigeV
 
   // Handle purchase of a prestige upgrade
   const handlePurchase = (upgrade: PrestigeUpgrade) => {
-    const currentLevel = gameState.prestige.upgrades[upgrade.id] || 0;
+    const currentLevel = localUpgrades[upgrade.id] || 0;
     if (currentLevel >= upgrade.maxLevel) return;
-    if (upgrade.unlockLevel > prestigeLevel) {
+    if (upgrade.unlockLevel > localPrestigeLevel) {
       showToast({
         style: Toast.Style.Failure,
         title: "Locked",
@@ -83,8 +99,15 @@ export function PrestigeView({ gameState, onPurchasePrestigeUpgrade }: PrestigeV
     }
 
     const cost = calculatePrestigeUpgradeCost(upgrade, currentLevel);
-    if (prestigePoints >= cost) {
-      onPurchasePrestigeUpgrade(upgrade.id);
+    if (localPrestigePoints >= cost) {
+      const ok = onPurchasePrestigeUpgrade(upgrade.id);
+      if (!ok) {
+        // Hook rejected due to race/affordability; rely on its toasts
+        return;
+      }
+      // Update local mirrors immediately
+      setLocalPrestigePoints((p) => p - cost);
+      setLocalUpgrades((u) => ({ ...u, [upgrade.id]: currentLevel + 1 }));
       showToast({
         style: Toast.Style.Success,
         title: "Upgrade Purchased!",
@@ -94,9 +117,17 @@ export function PrestigeView({ gameState, onPurchasePrestigeUpgrade }: PrestigeV
       showToast({
         style: Toast.Style.Failure,
         title: "Not enough prestige points!",
-        message: `You need ${formatNumber(cost - prestigePoints)} more prestige points.`,
+        message: `You need ${formatNumber(cost - localPrestigePoints)} more prestige points.`,
       });
     }
+  };
+
+  // Trigger prestige and update local mirrors immediately on success
+  const handlePrestigeNow = async () => {
+    const ok = await onPrestige();
+    if (!ok) return;
+    setLocalPrestigePoints((p) => p + estimatedPrestigePoints);
+    setLocalPrestigeLevel((l) => l + 1);
   };
 
   // Get category icon
@@ -141,14 +172,19 @@ export function PrestigeView({ gameState, onPurchasePrestigeUpgrade }: PrestigeV
     >
       <List.Section title="Prestige Information">
         <List.Item
-          title={`Prestige Level: ${prestigeLevel}`}
-          subtitle={`Prestige Points: ${formatNumber(prestigePoints)}`}
+          title={`Prestige Level: ${localPrestigeLevel}`}
+          subtitle={`Prestige Points: ${formatNumber(localPrestigePoints)}`}
           icon={Icon.StarCircle}
         />
         <List.Item
           title="Estimated PP if Prestiged Now"
           subtitle={`${formatNumber(estimatedPrestigePoints)} PP`}
           icon={Icon.Stars}
+          actions={
+            <ActionPanel>
+              <Action title="Prestige Now" onAction={handlePrestigeNow} icon={Icon.Star} />
+            </ActionPanel>
+          }
         />
       </List.Section>
 
@@ -169,11 +205,11 @@ export function PrestigeView({ gameState, onPurchasePrestigeUpgrade }: PrestigeV
             return (
               <List.Section key={`unlocked-${category}`} title={`${getCategoryTitle(category)} (Unlocked)`}>
                 {upgrades.map((upgrade) => {
-                  const currentLevel = gameState.prestige.upgrades[upgrade.id] || 0;
+                  const currentLevel = localUpgrades[upgrade.id] || 0;
                   const nextLevel = currentLevel + 1;
                   const maxed = currentLevel >= upgrade.maxLevel;
                   const cost = calculatePrestigeUpgradeCost(upgrade, currentLevel);
-                  const canAfford = prestigePoints >= cost;
+                  const canAfford = localPrestigePoints >= cost;
                   const effect = calculatePrestigeUpgradeEffect(upgrade, nextLevel);
 
                   const effectLabel =
@@ -231,7 +267,7 @@ export function PrestigeView({ gameState, onPurchasePrestigeUpgrade }: PrestigeV
               return (
                 <List.Section key={`locked-${category}`} title={`${getCategoryTitle(category)} (Locked)`}>
                   {upgrades.map((upgrade) => {
-                    const currentLevel = gameState.prestige.upgrades[upgrade.id] || 0;
+                    const currentLevel = localUpgrades[upgrade.id] || 0;
                     const cost = calculatePrestigeUpgradeCost(upgrade, currentLevel);
                     return (
                       <List.Item
