@@ -2,13 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { MenuBarExtra, getPreferenceValues, showToast, Toast, Color, Icon } from "@raycast/api";
 import { LuxaforService, LuxaforColor } from "./luxafor-service";
 import { luxaforState, DeviceStatus } from "./luxafor-state";
-
-interface Preferences {
-  userId: string;
-  apiEndpoint: "com" | "co.uk";
-  menubarMode: "simple" | "full";
-  debugMode: boolean;
-}
+import { showFailureToast } from "@raycast/utils";
 
 export default function LuxaforStatus() {
   const [isLoading, setIsLoading] = useState(false);
@@ -75,7 +69,7 @@ export default function LuxaforStatus() {
         try {
           const status = luxaforState.getStatus();
           setCurrentStatus(status);
-        } catch (error) {
+        } catch {
           // Silent error handling in production
         }
       }, 30000); // 30 seconds
@@ -87,7 +81,7 @@ export default function LuxaforStatus() {
         try {
           const status = luxaforState.getStatus();
           setCurrentStatus(status);
-        } catch (error) {
+        } catch {
           // Development error handling
         }
       }, 5000); // 5 seconds
@@ -233,7 +227,7 @@ export default function LuxaforStatus() {
               showToast(Toast.Style.Failure, "Error", result.error || "Failed to turn off");
             }
           } catch (error) {
-            showToast(Toast.Style.Failure, "Error", "Failed to turn off");
+            showFailureToast(error, { title: "Failed to turn off" });
           } finally {
             setIsLoading(false);
           }

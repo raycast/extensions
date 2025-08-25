@@ -14,6 +14,7 @@ import {
 } from "@raycast/api";
 import { LuxaforService, LuxaforColor } from "./luxafor-service";
 import { luxaforState, DeviceStatus } from "./luxafor-state";
+import { showFailureToast } from "@raycast/utils";
 
 interface Preferences {
   userId: string;
@@ -101,7 +102,7 @@ export default function ControlLuxafor() {
         showToast(Toast.Style.Failure, "Error", result.error || "Unknown error occurred");
       }
     } catch (error) {
-      showToast(Toast.Style.Failure, "Error", "Failed to execute action");
+      showFailureToast(error, { title: "Failed to execute action" });
     } finally {
       setIsLoading(false);
     }
@@ -175,7 +176,7 @@ export default function ControlLuxafor() {
         showToast(Toast.Style.Failure, "Error", "Device is offline or webhook is not responding");
       }
     } catch (error) {
-      showToast(Toast.Style.Failure, "Error", "Failed to check connection health");
+      showFailureToast(error, { title: "Failed to check connection health" });
     } finally {
       setIsLoading(false);
     }
@@ -220,7 +221,7 @@ export default function ControlLuxafor() {
             <ActionPanel>
               <ActionPanel.Section title="Light Controls">
                 <Action
-                  title="Turn Off"
+                  title="Turn off"
                   icon={Icon.Power}
                   onAction={() => handleAction(() => luxaforService.turnOff(), "Turn Off")}
                 />

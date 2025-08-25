@@ -19,13 +19,6 @@ interface StoredStatus {
   lastUpdated: number;
 }
 
-interface Preferences {
-  userId: string;
-  apiEndpoint: "com" | "co.uk";
-  menubarMode: "simple" | "full";
-  debugMode: boolean;
-}
-
 const STORAGE_KEY = "luxafor-global-status";
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 const HEALTH_CHECK_INTERVAL = 30 * 1000; // 30 seconds
@@ -98,7 +91,7 @@ class LuxaforStateManager {
       if (!this.status.isOnline) {
         await this.setOnline(true);
       }
-    } catch (error) {
+    } catch {
       // Network error, but don't mark as offline if we have recent successful actions
       // Check if we've had successful actions recently
       const now = Date.now();
@@ -145,7 +138,7 @@ class LuxaforStateManager {
       const isOnline: boolean = timeSinceLastAction < 5 * 60 * 1000 && !!this.status.lastAction;
       await this.setOnline(isOnline);
       return isOnline;
-    } catch (error) {
+    } catch {
       await this.setOnline(false);
       return false;
     }
@@ -193,7 +186,7 @@ class LuxaforStateManager {
           this.selectedColor = parsed.selectedColor;
         }
       }
-    } catch (error) {
+    } catch {
       // Silent error handling for storage loading
     }
     this.initialized = true;
@@ -211,7 +204,7 @@ class LuxaforStateManager {
         lastUpdated: Date.now(),
       };
       await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
-    } catch (error) {
+    } catch {
       // Silent error handling for storage saving
     }
   }
@@ -291,7 +284,7 @@ class LuxaforStateManager {
     try {
       await LocalStorage.removeItem(STORAGE_KEY);
       this.selectedColor = null;
-    } catch (error) {
+    } catch {
       // Silent error handling for storage clearing
     }
   }
@@ -308,7 +301,7 @@ class LuxaforStateManager {
     this.listeners.forEach((listener) => {
       try {
         listener(this.getStatus());
-      } catch (error) {
+      } catch {
         // Silent error handling for listener notifications
       }
     });

@@ -199,7 +199,7 @@ export class LuxaforService {
         await luxaforState.setOnline(false);
         return luxaforState.getStatus();
       }
-    } catch (error) {
+    } catch {
       this.isRefreshing = false;
       await luxaforState.setOnline(false);
       return luxaforState.getStatus();
@@ -223,7 +223,7 @@ export class LuxaforService {
         await luxaforState.setOnline(false);
         return luxaforState.getStatus();
       }
-    } catch (error) {
+    } catch {
       await luxaforState.setOnline(false);
       return luxaforState.getStatus();
     } finally {

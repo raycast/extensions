@@ -1,14 +1,4 @@
-# Changelog
-
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/2.0.0.html).
-
-## [Unreleased]
-
-### Added
-- (placeholder) Add new entries here for the next release
+# Luxafor Changelog
 
 ## [1.0.0] - {PR_MERGE_DATE}
 
@@ -24,3 +14,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/2.0.0.
 - API endpoint selection (US/UK)
 - Debug mode for development and troubleshooting
 - Comprehensive error handling and user feedback
+- (placeholder) Add new entries here for the next release
