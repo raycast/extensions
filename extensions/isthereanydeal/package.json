@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "isthereanydeal",
+  "title": "Isthereanydeal",
+  "description": "Search for game deals and track prices across multiple stores",
+  "icon": "ITAD-logo.png",
+  "author": "gabeperez",
+  "license": "MIT",
+  "version": "1.0.1",
+  "changelog": "Fixed template variables in package.json metadata",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gabeperez/isthereanydeal.git"
+  },
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "games",
+    "deals",
+    "pricing",
+    "steam",
+    "gog",
+    "humble",
+    "discounts",
+    "gaming",
+    "isthereanydeal",
+    "price-tracking"
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search IsThereAnyDeal",
+      "subtitle": "Find game deals",
+      "description": "Search for game deals using IsThereAnyDeal",
+      "mode": "view",
+      "src": "search.tsx"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ITAD_API_KEY",
+      "title": "Is There Any Deal API Key",
+      "type": "password",
+      "required": true,
+      "description": "Enter your IsThereAnyDeal API key"
+    },
+    {
+      "name": "country",
+      "title": "Country (for currency/prices)",
+      "type": "textfield",
+      "required": false,
+      "description": "Enter your country code (ISO 3166-1 alpha-2, e.g. US, JP, GB, DE, FR, etc.)",
+      "placeholder": "US",
+      "default": "US"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
