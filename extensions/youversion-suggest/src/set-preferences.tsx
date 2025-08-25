@@ -137,7 +137,7 @@ function usePreferences() {
     });
   }, []);
 
-  const onChangeReferenceFormat = useCallback(async (newValue: string) => {
+  const onChangeReferenceFormat = useCallback((newValue: string) => {
     setPreferredReferenceFormat(newValue);
     setState((currentState) => {
       return { ...currentState, isLoading: false, currentReferenceFormat: newValue };
