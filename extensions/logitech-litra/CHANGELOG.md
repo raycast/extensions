@@ -1,6 +1,6 @@
 # Logitech Litra Changelog
 
-## [Add support for Litra devices which don't expose a serial number] - 2025-08-24
+## [Add support for Litra devices which don't expose a serial number] - {PR_MERGE_DATE}
 
 - __BREAKING CHANGE__: Require at least v2.4.0 of the [`litra` CLI](https://github.com/timrogers/litra-rs)
 - Target Litra devices based on their device path rather than their serial number, to handle some devices which don't expose a serial number (fixes https://github.com/raycast/extensions/issues/20332)
