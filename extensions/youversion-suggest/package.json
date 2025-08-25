@@ -36,16 +36,12 @@
     "youversion-suggest": "^3.0.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.33.0",
     "@raycast/eslint-config": "^2.0.4",
     "@types/react": "19.1.10",
     "@types/react-dom": "^19.1.7",
     "eslint": "^9.33.0",
-    "eslint-config-prettier": "^10.1.8",
-    "globals": "^16.3.0",
     "prettier": "^3.6.2",
-    "typescript": "^5.9.2",
-    "typescript-eslint": "^8.40.0"
+    "typescript": "^5.9.2"
   },
   "scripts": {
     "build": "ray build -e dist",
