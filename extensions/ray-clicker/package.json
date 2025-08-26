@@ -14,14 +14,6 @@
       "subtitle": "Idle Clicker Game",
       "description": "Play the idle clicker game with upgrades",
       "mode": "view"
-    },
-    {
-      "name": "menu-bar",
-      "title": "Ray Clicker (Menu Bar)",
-      "subtitle": "Background Idle Progress",
-      "description": "Run Ray Clicker in the menu bar to accrue idle progress while Raycast runs.",
-      "mode": "menu-bar",
-      "interval": "1m"
     }
   ],
   "dependencies": {
