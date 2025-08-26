@@ -2,113 +2,123 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-calendar",
   "title": "Google Calendar",
-  "description": "Manage your Google calendar easily. Create events, search contacts, and check out your upcoming schedule.",
-  "icon": "icon.png",
-  "author": "thomas",
-  "contributors": [
-    "j3lte",
-    "markusjura",
-    "fabitosh"
-  ],
-  "categories": [
-    "Productivity",
-    "Applications"
-  ],
+  "description": "Create Google Calendar events using natural language powered by Raycast AI",
+  "icon": "gcal-icon1.png",
+  "author": "ben_aguirre",
   "license": "MIT",
   "commands": [
     {
       "name": "create-event",
       "title": "Create Event",
-      "subtitle": "Google Calendar",
-      "description": "Creates an event in your Google Calendar",
-      "mode": "view",
-      "preferences": [
+      "subtitle": "Quick event creation",
+      "description": "Type your event in plain English and AI creates it instantly - 'meeting tomorrow 3pm' or 'dinner friday 7pm'",
+      "mode": "no-view",
+      "keywords": [
+        "event",
+        "calendar",
+        "schedule",
+        "create"
+      ],
+      "arguments": [
         {
-          "name": "addSignature",
-          "type": "checkbox",
-          "title": "Advanced",
-          "label": "Add Signature",
-          "description": "Add a signature that the event was created using Raycast to the description of the event",
-          "default": true,
-          "required": false
+          "name": "eventDetails",
+          "placeholder": "friday 4pm game",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "color",
+          "type": "dropdown",
+          "placeholder": "Event Color",
+          "required": false,
+          "data": [
+            {
+              "title": "Lavender",
+              "value": "1"
+            },
+            {
+              "title": "Sage",
+              "value": "2"
+            },
+            {
+              "title": "Grape",
+              "value": "3"
+            },
+            {
+              "title": "Flamingo",
+              "value": "4"
+            },
+            {
+              "title": "Banana",
+              "value": "5"
+            },
+            {
+              "title": "Tangerine",
+              "value": "6"
+            },
+            {
+              "title": "Peacock",
+              "value": "7"
+            },
+            {
+              "title": "Graphite",
+              "value": "8"
+            },
+            {
+              "title": "Blueberry",
+              "value": "9"
+            },
+            {
+              "title": "Basil",
+              "value": "10"
+            },
+            {
+              "title": "Tomato",
+              "value": "11"
+            }
+          ]
         }
-      ]
+      ],
+      "shortcut": {
+        "key": "k",
+        "modifiers": [
+          "cmd",
+          "shift"
+        ]
+      },
+      "path": "src/create-event.tsx"
     },
     {
-      "name": "search-contacts",
-      "title": "Search Contacts",
-      "description": "Search your Google Contacts",
+      "name": "select-default-calendar",
+      "title": "Select Default Calendar",
+      "subtitle": "Choose your default calendar",
+      "description": "Choose which calendar to use as default for new events",
       "mode": "view",
-      "subtitle": "Google Calendar"
-    },
-    {
-      "name": "list-events",
-      "title": "List Events",
-      "description": "View your upcoming Google Calendar events",
-      "mode": "view",
-      "subtitle": "Google Calendar"
-    },
-    {
-      "name": "list-calendars",
-      "title": "List Calendars",
-      "description": "View your Google Calendars",
-      "mode": "view",
-      "subtitle": "Google Calendar"
-    }
-  ],
-  "tools": [
-    {
-      "name": "create-event",
-      "title": "Create Event",
-      "description": "Creates a new event in the user's Google Calendar"
-    },
-    {
-      "name": "search-contacts",
-      "title": "Search Contacts",
-      "description": "Searches the user's Google Contacts"
-    },
-    {
-      "name": "delete-event",
-      "title": "Delete Event",
-      "description": "Deletes an event from the user's Google Calendar"
-    },
-    {
-      "name": "edit-event",
-      "title": "Edit Event",
-      "description": "Edits an existing event in the user's Google Calendar"
-    },
-    {
-      "name": "search-events",
-      "title": "Search Events",
-      "description": "Searches events from the user's Google Calendar"
-    },
-    {
-      "name": "check-availability",
-      "title": "Check Availability",
-      "description": "Checks the availability of potential attendees for a given time period"
-    },
-    {
-      "name": "get-current-user",
-      "title": "Get Current User",
-      "description": "Returns information about the currently authenticated user"
-    },
-    {
-      "name": "get-current-time",
-      "title": "Get Current Time",
-      "description": "Returns the current time of the user in the user's timezone"
-    },
-    {
-      "name": "list-calendars",
-      "title": "List Calendars",
-      "description": "Lists the user's Google Calendars"
+      "keywords": [
+        "calendar",
+        "default",
+        "select",
+        "settings"
+      ],
+      "path": "src/select-default-calendar.tsx"
     }
   ],
   "preferences": [
     {
-      "name": "defaultEventDuration",
+      "name": "defaultCalendar",
+      "title": "Default Calendar",
+      "description": "Choose which calendar to create events in (use 'Select Default Calendar' command to easily pick from your calendars)",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Leave empty to use primary calendar"
+    },
+    {
+      "name": "defaultDuration",
       "title": "Default Event Duration",
-      "description": "The default duration for new events",
+      "description": "How long should events be when you don't specify a duration?",
       "type": "dropdown",
+      "required": false,
+      "default": "60",
       "data": [
         {
           "title": "15 minutes",
@@ -117,10 +127,6 @@
         {
           "title": "30 minutes",
           "value": "30"
-        },
-        {
-          "title": "45 minutes",
-          "value": "45"
         },
         {
           "title": "1 hour",
@@ -134,28 +140,133 @@
           "title": "2 hours",
           "value": "120"
         }
-      ],
-      "default": "30",
-      "required": false
+      ]
+    },
+    {
+      "name": "defaultColor",
+      "title": "Default Event Color",
+      "description": "What color should new events have by default?",
+      "type": "dropdown",
+      "required": false,
+      "default": "1",
+      "data": [
+        {
+          "title": "Lavender",
+          "value": "1"
+        },
+        {
+          "title": "Sage",
+          "value": "2"
+        },
+        {
+          "title": "Grape",
+          "value": "3"
+        },
+        {
+          "title": "Flamingo",
+          "value": "4"
+        },
+        {
+          "title": "Banana",
+          "value": "5"
+        },
+        {
+          "title": "Tangerine",
+          "value": "6"
+        },
+        {
+          "title": "Peacock",
+          "value": "7"
+        },
+        {
+          "title": "Graphite",
+          "value": "8"
+        },
+        {
+          "title": "Blueberry",
+          "value": "9"
+        },
+        {
+          "title": "Basil",
+          "value": "10"
+        },
+        {
+          "title": "Tomato",
+          "value": "11"
+        }
+      ]
+    },
+    {
+      "name": "includeDescription",
+      "title": "Auto-Generate Event Descriptions",
+      "description": "Let AI automatically create helpful descriptions for your events based on the title",
+      "type": "checkbox",
+      "label": "Enable smart descriptions",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "enableNotifications",
+      "title": "Event Reminders",
+      "description": "Add notification reminders to new events so you never miss them",
+      "type": "checkbox",
+      "label": "Enable reminders",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "defaultReminderMinutes",
+      "title": "Reminder Time",
+      "description": "How early should you be reminded about events?",
+      "type": "dropdown",
+      "required": false,
+      "default": "15",
+      "data": [
+        {
+          "title": "5 minutes before",
+          "value": "5"
+        },
+        {
+          "title": "10 minutes before",
+          "value": "10"
+        },
+        {
+          "title": "15 minutes before",
+          "value": "15"
+        },
+        {
+          "title": "30 minutes before",
+          "value": "30"
+        },
+        {
+          "title": "1 hour before",
+          "value": "60"
+        },
+        {
+          "title": "1 day before",
+          "value": "1440"
+        }
+      ]
     }
   ],
+  "oauth": {
+    "clientId": "1020774972971-ah78vboj2tucn69aj74rtkog8cm9hsep.apps.googleusercontent.com",
+    "scope": "https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.readonly",
+    "authorizeUrl": "https://accounts.google.com/o/oauth2/v2/auth",
+    "tokenUrl": "https://oauth2.googleapis.com/token"
+  },
   "dependencies": {
-    "@googleapis/calendar": "^9.8.0",
-    "@googleapis/people": "^3.0.9",
-    "@raycast/api": "^1.94.2",
+    "@raycast/api": "^1.102.5",
     "@raycast/utils": "^1.19.1",
-    "date-fns": "^4.1.0",
-    "humanize-duration": "^3.32.1",
-    "nanoid": "^5.1.5",
-    "parse-duration": "^2.1.4"
+    "axios": "^1.11.0",
+    "dotenv": "^17.2.1",
+    "googleapis": "^157.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
-    "@types/humanize-duration": "^3.27.4",
-    "@types/node": "22.13.14",
-    "@types/parse-duration": "^0.1.0",
-    "@types/react": "19.0.12",
-    "eslint": "^9.23.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
   },
@@ -164,7 +275,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
 }
