@@ -1,6 +1,6 @@
 # Fathom Analytics Changelog
 
-## Updated icon and shortcut - {PR_MERGE_DATE}
+## Updated icon and shortcut - 2025-08-26
 
 - Updated menu bar icon
 - Added shortcut to open in Fathom
