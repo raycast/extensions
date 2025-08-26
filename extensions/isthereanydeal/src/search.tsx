@@ -6,6 +6,7 @@ import React from "react";
 import { COMMON_COUNTRIES } from "./constants";
 import { logBoth, getDefaultCountry, validateApiKey, getStorageKey } from "./utils";
 import { ITADGame, ITADDeal } from "./types";
+import { popToRoot, openExtensionPreferences } from "@raycast/api";
 
 // Fetch the plain string for a game, fallback to slug if lookup fails
 async function fetchPlainString(id: string, slug: string): Promise<string> {
@@ -209,12 +210,6 @@ export default function Command() {
   );
   const safeData: ITADGame[] = Array.isArray(data) ? data : [];
 
-  // Function to handle API key being saved
-  const handleApiKeySaved = () => {
-    // Note: In Raycast, we can't force a reload, so the user needs to restart the command
-    // or we could implement a state refresh mechanism here if needed
-  };
-
   // Map of id to plain (use slug as default, only call lookup if needed)
   React.useEffect(() => {
     if (safeData.length === 0) return;
@@ -266,7 +261,7 @@ export default function Command() {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search for Games..." onSearchTextChange={setSearchText} throttle>
       {/* Show API key input if no API key is found */}
-      {missingApiKey && <ApiKeyInput onApiKeySaved={handleApiKeySaved} />}
+      {missingApiKey && <ApiKeyInput />}
 
       {/* Show search results if API key is available */}
       {!missingApiKey &&
