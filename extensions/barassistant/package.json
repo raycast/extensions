@@ -41,7 +41,6 @@
       "description": "Enter your Bar Assistant API token with Read Access",
       "required": true
     },
-
     {
       "name": "BAR_ID",
       "type": "textfield",
