@@ -1,6 +1,6 @@
 # Quit Applications Changelog
 
-## [Bug fix] - {PR_MERGED_DATE}
+## [Bug fix] - {PR_MERGE_DATE}
 
 - Fixed Apple Events authorization error (-1743) by adding fallback to `ps` command when System Events permission is not granted
 
