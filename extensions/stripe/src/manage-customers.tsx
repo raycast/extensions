@@ -1,19 +1,8 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  List,
-  showToast,
-  Toast,
-  Color,
-  getPreferenceValues,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Color, getPreferenceValues, useNavigation } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { withEnvContext, ListContainer } from "./components";
 import { useStripeDashboard, useEnvContext } from "./hooks";
-import { convertTimestampToDate } from "./utils";
 import SubscriptionList from "./manage-subscriptions";
 import Stripe from "stripe";
 
@@ -100,7 +89,6 @@ function CustomerList() {
       onSearchTextChange={setSearchQuery}
     >
       {data?.map((customer: Stripe.Customer) => {
-        const createdDate = convertTimestampToDate(customer.created);
         const subscriptions = customer.subscriptions as Stripe.ApiList<Stripe.Subscription> | undefined;
         const hasSubscriptions = subscriptions?.data && subscriptions.data.length > 0;
         const subscriptionCount = subscriptions?.data?.length || 0;

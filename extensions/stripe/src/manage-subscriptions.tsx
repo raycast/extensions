@@ -13,8 +13,6 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useState } from "react";
-import { useCachedPromise } from "@raycast/utils";
 import { withEnvContext, ListContainer } from "./components";
 import { useStripeDashboard, useEnvContext } from "./hooks";
 import { convertAmount, convertTimestampToDate } from "./utils";
@@ -269,8 +267,6 @@ function SubscriptionList({ customerId }: SubscriptionListProps = {}) {
         const amount = price?.unit_amount || 0;
         const currency = subscription.currency?.toUpperCase() || "USD";
         const interval = price?.recurring?.interval || "month";
-        const createdDate = convertTimestampToDate(subscription.created);
-        const nextBillingDate = convertTimestampToDate(subscription.current_period_end);
 
         return (
           <List.Item
