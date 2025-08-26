@@ -74,16 +74,23 @@ async function getOrCreatePublicUrl(cocktailId: number, cocktailName: string): P
     return undefined;
   }
   // Slugify cocktail name for URL - use passed name instead of fetching
-  const slug = cocktailName
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
+  const slug = slugifyCocktailName(cocktailName);
   // Compose correct public URL
   return `${APP_URL}/e/cocktail/${publicId}/${slug}-${BAR_ID}`;
 }
 import { useEffect, useState } from "react";
 import fs from "fs";
 import path from "path";
+
+function slugifyCocktailName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[']/g, "") // Remove apostrophes
+    .replace(/\s+/g, "-") // Replace spaces with dashes
+    .replace(/[^a-z0-9-]/g, "") // Remove any remaining non-alphanumeric characters except dashes
+    .replace(/-+/g, "-") // Replace multiple consecutive dashes with a single dash
+    .replace(/(^-|-$)/g, ""); // Remove leading/trailing dashes
+}
 
 const preferences = getPreferenceValues<{
   API_URL: string;
@@ -195,10 +202,7 @@ export default function Command() {
               <ActionPanel>
                 <Action.OpenInBrowser
                   title="Open Cocktail Page"
-                  url={`${APP_URL}/cocktails/${cocktail.name
-                    .toLowerCase()
-                    .replace(/[^a-z0-9]+/g, "-")
-                    .replace(/(^-|-$)/g, "")}-${BAR_ID}`}
+                  url={`${APP_URL}/cocktails/${slugifyCocktailName(cocktail.name)}-${BAR_ID}`}
                 />
                 <Action
                   title="📋   Copy Public URL"
