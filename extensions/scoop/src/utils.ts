@@ -1,4 +1,5 @@
 import { Toast, showToast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 export async function withToast(
   action: () => Promise<void>,
