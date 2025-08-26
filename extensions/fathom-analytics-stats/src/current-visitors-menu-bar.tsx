@@ -2,13 +2,8 @@ import { getPreferenceValues, MenuBarExtra, Icon, open } from "@raycast/api";
 import FathomRequest from "./utils/api";
 import { LiveData } from "./types/LiveData";
 
-type MenuBarPreferences = {
-  apiToken: string;
-  siteId: string;
-};
-
 export default function Command() {
-  const preferences = getPreferenceValues<MenuBarPreferences>();
+  const preferences = getPreferenceValues<ExtensionPreferences>();
 
   const { data, isLoading } = FathomRequest({
     endpoint: "/current_visitors",
