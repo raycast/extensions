@@ -1,6 +1,6 @@
 # Cheatsheets Remastered Changelog
 
-## [1.0.0 - Initial Release] - {PR_MERGE_DATE}
+## [1.0.0 - Initial Release] - 2025-08-26
 
 ### Added
 - Initial public release of Cheatsheets Remastered
