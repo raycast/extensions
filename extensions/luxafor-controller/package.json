@@ -18,7 +18,6 @@
     {
       "name": "control-luxafor",
       "title": "Control Luxafor",
-      "subtitle": "Luxafor Controller",
       "description": "Control your Luxafor device",
       "mode": "view"
     },
