@@ -4,6 +4,7 @@
   "title": "Start Mail Time Tracking",
   "description": "Start time tracking from the current email thread.",
   "author": "carstena1994",
+  "organization": "mcb-a-s",
   "icon": "extension-icon.png",
   "contributors": [],
   "categories": [
