@@ -63,33 +63,3 @@ async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse>
   tokenResponse.refresh_token = tokenResponse.refresh_token ?? refreshToken;
   return tokenResponse;
 }
-
-// API
-
-export async function fetchItems(): Promise<{ id: string; title: string }[]> {
-  const params = new URLSearchParams();
-  params.append("q", "trashed = false");
-  params.append("fields", "files(id, name, mimeType, iconLink, modifiedTime, webViewLink, webContentLink, size)");
-  params.append("orderBy", "recency desc");
-  params.append("pageSize", "100");
-
-  const response = await fetch("https://www.googleapis.com/drive/v3/files?" + params.toString(), {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
-    },
-  });
-  if (!response.ok) {
-    console.error("fetch items error:", await response.text());
-    throw new Error(response.statusText);
-  }
-  const json = (await response.json()) as { files: { id: string; name: string }[] };
-  return json.files.map((item) => ({ id: item.id, title: item.name }));
-}
-
-export async function forceReauth(): Promise<void> {
-  // Remove any stored tokens to force a new OAuth flow
-  if (typeof client?.removeTokens === "function") {
-    await client.removeTokens();
-  }
-}

@@ -1,4 +1,5 @@
 import { Toast, showToast, getPreferenceValues, LocalStorage } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { LaunchProps } from "@raycast/api";
 import { parseEventDetails } from "./services/llm";
 import { createGoogleCalendarEvent } from "./services/calendar";
@@ -32,10 +33,6 @@ export default async function CreateEvent(props: LaunchProps<{ arguments: Create
       message: event.start?.dateTime ?? "",
     });
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to create event",
-      message: error instanceof Error ? error.message : String(error),
-    });
+    showFailureToast(error, { title: "Failed to create event" });
   }
 }

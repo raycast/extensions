@@ -1,4 +1,5 @@
 import { List, ActionPanel, Action, Toast, showToast, LocalStorage, popToRoot } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { authorize } from "./utils/oauth";
 import { getCalendarList } from "./services/calendar";
@@ -32,11 +33,7 @@ export default function SelectDefaultCalendar() {
         const calendarList = await getCalendarList(token);
         setCalendars(calendarList);
       } catch (error) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to fetch calendars",
-          message: error instanceof Error ? error.message : String(error),
-        });
+        showFailureToast(error, { title: "Failed to fetch calendars" });
       } finally {
         setIsLoading(false);
       }
@@ -55,11 +52,7 @@ export default function SelectDefaultCalendar() {
       });
       await popToRoot();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to update default calendar",
-        message: error instanceof Error ? error.message : String(error),
-      });
+      showFailureToast(error, { title: "Failed to update default calendar" });
     }
   };
 
@@ -85,11 +78,7 @@ export default function SelectDefaultCalendar() {
         message: `"${calendarName}" has been hidden from the list`,
       });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to hide calendar",
-        message: error instanceof Error ? error.message : String(error),
-      });
+      showFailureToast(error, { title: "Failed to hide calendar" });
     }
   };
 
