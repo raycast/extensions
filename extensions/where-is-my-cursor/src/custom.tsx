@@ -1,6 +1,6 @@
 import { Form, ActionPanel, Action, environment } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { join } from "path";
 
 const helperPath = join(environment.assetsPath, "LocateCursor");
@@ -86,10 +86,8 @@ function handleSubmit(values: FormValues) {
   };
 
   const jsonString = JSON.stringify(presetConfig);
-  const escapedJsonString = jsonString.replace(/(["])/g, "\\$1");
-  const command = `"${helperPath}" -c "${escapedJsonString}"`;
 
-  exec(command, (error) => {
+  execFile(helperPath, ["-c", jsonString], (error) => {
     if (error) {
       showFailureToast(error, { title: "Failed to locate cursor" });
     }

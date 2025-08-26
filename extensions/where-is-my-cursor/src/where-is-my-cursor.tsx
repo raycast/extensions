@@ -1,4 +1,4 @@
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { showToast, Toast } from "@raycast/api";
 import { join } from "path";
 
@@ -6,7 +6,7 @@ import { join } from "path";
 const helperPath = join(__dirname, ".", "assets", "LocateCursor");
 
 export default function main() {
-  exec(helperPath, (error) => {
+  execFile(helperPath, (error) => {
     if (error) {
       showToast({
         style: Toast.Style.Failure,
