@@ -1,21 +1,21 @@
-import { File } from './service';
+import { File } from "./service";
 
 function getFileName(path: string): string {
-  const tokens = path.split('.');
+  const tokens = path.split(".");
   return tokens[0];
 }
 
 function getFileExtension(path: string): string {
-  const tokens = path.split('.');
+  const tokens = path.split(".");
   return tokens[1];
 }
 
 function getSheets(files: File[]): string[] {
   return files
     .filter((file) => {
-      const isDir = file.type === 'tree';
-      const isMarkdown = getFileExtension(file.path) === 'md';
-      const adminFiles = ['CONTRIBUTING', 'README', 'index', 'index@2016'];
+      const isDir = file.type === "tree";
+      const isMarkdown = getFileExtension(file.path) === "md";
+      const adminFiles = ["CONTRIBUTING", "README", "index", "index@2016"];
       const isAdminFile = adminFiles.includes(getFileName(file.path));
       return !isDir && isMarkdown && !isAdminFile;
     })
@@ -23,8 +23,8 @@ function getSheets(files: File[]): string[] {
 }
 
 function stripFrontmatter(markdown: string): string {
-  const frontmatterStart = markdown.indexOf('---');
-  const frontmatterEnd = markdown.indexOf('---', frontmatterStart + 1);
+  const frontmatterStart = markdown.indexOf("---");
+  const frontmatterEnd = markdown.indexOf("---", frontmatterStart + 1);
   return markdown.substring(frontmatterEnd + 3);
 }
 
@@ -48,14 +48,12 @@ function stripFrontmatter(markdown: string): string {
 */
 function stripTemplateTags(markdown: string): string {
   return markdown
-    .split('\n')
+    .split("\n")
     .filter((line) => {
-      const isTag =
-        (line[0] === '{' && line[1] === ':') ||
-        (line[1] === '%' && line[line.length - 1] === '}');
+      const isTag = (line[0] === "{" && line[1] === ":") || (line[1] === "%" && line[line.length - 1] === "}");
       return !isTag;
     })
-    .join('\n');
+    .join("\n");
 }
 
 /*
@@ -64,14 +62,14 @@ function stripTemplateTags(markdown: string): string {
   Wraps table content into code tags (```) to render them verbatim.
 */
 function formatTables(markdown: string): string {
-  const lines = markdown.split('\n');
+  const lines = markdown.split("\n");
   return lines
     .map((line, index) => {
-      const prevLine = index > 0 ? lines[index - 1] : '';
-      const nextLine = index < lines.length - 1 ? lines[index + 1] : '';
+      const prevLine = index > 0 ? lines[index - 1] : "";
+      const nextLine = index < lines.length - 1 ? lines[index + 1] : "";
       const isPrevLineEmpty = prevLine.trim().length === 0;
       const isNextLineEmpty = nextLine.trim().length === 0;
-      const isLineTable = line[0] === '|' && line[line.length - 1] === '|';
+      const isLineTable = line[0] === "|" && line[line.length - 1] === "|";
       if (isLineTable && isPrevLineEmpty && isNextLineEmpty) {
         return `\`\`\`\n${line}\n\`\`\``;
       }
@@ -83,7 +81,7 @@ function formatTables(markdown: string): string {
       }
       return line;
     })
-    .join('\n');
+    .join("\n");
 }
 
 export { getSheets, stripFrontmatter, stripTemplateTags, formatTables };

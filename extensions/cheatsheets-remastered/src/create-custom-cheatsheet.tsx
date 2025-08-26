@@ -1,16 +1,8 @@
-import React from 'react';
-import {
-  Form,
-  ActionPanel,
-  Action,
-  Icon,
-  showToast,
-  Toast,
-  LocalStorage,
-  useNavigation,
-} from '@raycast/api';
-import { useState } from 'react';
-import Service from './service';
+import React from "react";
+import { Form, ActionPanel, Action, Icon, showToast, Toast, LocalStorage, useNavigation } from "@raycast/api";
+import { useState } from "react";
+import Service from "./service";
+import { showFailureToast } from "@raycast/utils";
 
 type CreateFormValues = {
   title: string;
@@ -47,11 +39,7 @@ function useDraftPersistence(key: string, defaultValue: string) {
   return { value, updateValue, clearDraft };
 }
 
-export function CreateCustomCheatsheet({
-  onCreated,
-}: {
-  onCreated?: () => void;
-}) {
+export function CreateCustomCheatsheet({ onCreated }: { onCreated?: () => void }) {
   const { pop } = useNavigation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
@@ -60,30 +48,30 @@ export function CreateCustomCheatsheet({
     value: title,
     updateValue: updateTitle,
     clearDraft: clearTitleDraft,
-  } = useDraftPersistence('create-custom-sheet-title', '');
+  } = useDraftPersistence("create-custom-sheet-title", "");
 
   const {
     value: content,
     updateValue: updateContent,
     clearDraft: clearContentDraft,
-  } = useDraftPersistence('create-custom-sheet-content', '');
+  } = useDraftPersistence("create-custom-sheet-content", "");
 
   const {
     value: tags,
     updateValue: updateTags,
     clearDraft: clearTagsDraft,
-  } = useDraftPersistence('create-custom-sheet-tags', '');
+  } = useDraftPersistence("create-custom-sheet-tags", "");
 
   const {
     value: description,
     updateValue: updateDescription,
     clearDraft: clearDescriptionDraft,
-  } = useDraftPersistence('create-custom-sheet-description', '');
+  } = useDraftPersistence("create-custom-sheet-description", "");
   const {
     value: icon,
     updateValue: updateIcon,
     clearDraft: clearIconDraft,
-  } = useDraftPersistence('create-custom-sheet-icon', '');
+  } = useDraftPersistence("create-custom-sheet-icon", "");
 
   const handleSubmit = async (values: CreateFormValues) => {
     try {
@@ -98,18 +86,12 @@ export function CreateCustomCheatsheet({
 
       const tagsArray = values.tags
         ? values.tags
-            .split(',')
+            .split(",")
             .map((tag: string) => tag.trim())
             .filter(Boolean)
         : [];
 
-      await Service.createCustomCheatsheet(
-        values.title,
-        values.content,
-        tagsArray,
-        values.description,
-        values.icon,
-      );
+      await Service.createCustomCheatsheet(values.title, values.content, tagsArray, values.description, values.icon);
 
       // Clear drafts after successful submission
       clearTitleDraft();
@@ -125,15 +107,11 @@ export function CreateCustomCheatsheet({
 
       showToast({
         style: Toast.Style.Success,
-        title: 'Created',
+        title: "Created",
         message: `"${values.title}" has been added to your custom cheatsheets`,
       });
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: 'Error',
-        message: 'Failed to create cheatsheet',
-      });
+      showFailureToast(error, { title: "Failed to create cheatsheet" });
     } finally {
       setIsSubmitting(false);
     }
@@ -144,11 +122,7 @@ export function CreateCustomCheatsheet({
       isLoading={isSubmitting}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Create Custom Cheatsheet"
-            onSubmit={handleSubmit}
-            icon={Icon.Document}
-          />
+          <Action.SubmitForm title="Create Custom Cheatsheet" onSubmit={handleSubmit} icon={Icon.Document} />
           <Action
             title="Reset Draft"
             icon={Icon.Trash}
@@ -158,7 +132,7 @@ export function CreateCustomCheatsheet({
               clearContentDraft();
               clearTagsDraft();
               clearDescriptionDraft();
-              showToast({ style: Toast.Style.Success, title: 'Draft Cleared' });
+              showToast({ style: Toast.Style.Success, title: "Draft Cleared" });
             }}
           />
         </ActionPanel>
@@ -175,7 +149,7 @@ export function CreateCustomCheatsheet({
         placeholder="Enter cheatsheet title (e.g., 'My Git Workflow')"
         value={title}
         onChange={updateTitle}
-        error={showErrors && !title.trim() ? 'Title is required' : undefined}
+        error={showErrors && !title.trim() ? "Title is required" : undefined}
       />
 
       <Form.TextArea
@@ -184,9 +158,7 @@ export function CreateCustomCheatsheet({
         placeholder="Enter cheatsheet content (Markdown supported)"
         value={content}
         onChange={updateContent}
-        error={
-          showErrors && !content.trim() ? 'Content is required' : undefined
-        }
+        error={showErrors && !content.trim() ? "Content is required" : undefined}
       />
 
       <Form.TextField

@@ -1,31 +1,22 @@
-import axios from 'axios';
-import {
-  LocalStorage,
-  showToast,
-  Toast,
-  getPreferenceValues,
-  Icon,
-  Image,
-  Color,
-  environment,
-} from '@raycast/api';
-import fs from 'fs';
-import path from 'path';
-import { DEFAULT_SHEET_METADATA, DefaultMetadata } from './default-tags';
+import axios from "axios";
+import { LocalStorage, showToast, Toast, getPreferenceValues, Icon, Image, Color, environment } from "@raycast/api";
+import fs from "fs";
+import path from "path";
+import { DEFAULT_SHEET_METADATA, DefaultMetadata } from "./default-tags";
 
 interface ExtendedPreferences extends Preferences {
   githubToken?: string;
-  iconSource?: 'raycast' | 'custom';
+  iconSource?: "raycast" | "custom";
   customIconDirectory?: string;
 }
 
-const BRANCH = 'master';
-const OWNER = 'rstacruz';
-const REPO = 'cheatsheets';
+const BRANCH = "master";
+const OWNER = "rstacruz";
+const REPO = "cheatsheets";
 
 interface Preferences {
   enableOfflineStorage: boolean;
-  updateFrequency: 'every-use' | 'weekly' | 'monthly' | 'never';
+  updateFrequency: "every-use" | "weekly" | "monthly" | "never";
   autoUpdate: boolean;
 }
 
@@ -37,7 +28,7 @@ interface OfflineCheatsheet {
 
 interface FavoriteCheatsheet {
   id: string;
-  type: 'custom' | 'default';
+  type: "custom" | "default";
   slug: string;
   title: string;
   favoritedAt: number;
@@ -45,7 +36,7 @@ interface FavoriteCheatsheet {
 
 interface ViewRecord {
   key: string; // `${type}:${slug}`
-  type: 'custom' | 'default';
+  type: "custom" | "default";
   slug: string;
   title: string;
   count: number;
@@ -57,8 +48,8 @@ const listClient = axios.create({
   baseURL: `https://api.github.com/repos/${OWNER}/${REPO}/git/trees`,
   timeout: 10000,
   headers: {
-    Accept: 'application/vnd.github.v3+json',
-    'User-Agent': 'Cheatsheets-Remastered-Raycast',
+    Accept: "application/vnd.github.v3+json",
+    "User-Agent": "Cheatsheets-Remastered-Raycast",
   },
 });
 
@@ -66,8 +57,8 @@ const searchClient = axios.create({
   baseURL: `https://api.github.com/search/code`,
   timeout: 10000,
   headers: {
-    Accept: 'application/vnd.github.text-match+json',
-    'User-Agent': 'Cheatsheets-Remastered-Raycast',
+    Accept: "application/vnd.github.text-match+json",
+    "User-Agent": "Cheatsheets-Remastered-Raycast",
   },
 });
 
@@ -75,8 +66,8 @@ const fileClient = axios.create({
   baseURL: `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}`,
   timeout: 15000,
   headers: {
-    Accept: 'text/plain',
-    'User-Agent': 'Cheatsheets-Remastered-Raycast',
+    Accept: "text/plain",
+    "User-Agent": "Cheatsheets-Remastered-Raycast",
   },
 });
 
@@ -89,7 +80,7 @@ interface ListResponse {
 interface File {
   path: string;
   mode: string;
-  type: 'tree' | 'blob';
+  type: "tree" | "blob";
   sha: string;
   size: number;
   url: string;
@@ -108,14 +99,14 @@ interface CustomCheatsheet {
 
 // Type guards for untyped JSON
 function isCustomCheatsheet(value: unknown): value is CustomCheatsheet {
-  if (!value || typeof value !== 'object') return false;
+  if (!value || typeof value !== "object") return false;
   const v = value as Record<string, unknown>;
   return (
-    typeof v.id === 'string' &&
-    typeof v.title === 'string' &&
-    typeof v.content === 'string' &&
-    typeof v.createdAt === 'number' &&
-    typeof v.updatedAt === 'number'
+    typeof v.id === "string" &&
+    typeof v.title === "string" &&
+    typeof v.content === "string" &&
+    typeof v.createdAt === "number" &&
+    typeof v.updatedAt === "number"
   );
 }
 
@@ -129,12 +120,10 @@ interface ImportedCheatsheetInput {
   updatedAt?: number;
 }
 
-function isImportedCheatsheetInput(
-  value: unknown,
-): value is ImportedCheatsheetInput {
-  if (!value || typeof value !== 'object') return false;
+function isImportedCheatsheetInput(value: unknown): value is ImportedCheatsheetInput {
+  if (!value || typeof value !== "object") return false;
   const v = value as Record<string, unknown>;
-  return typeof v.title === 'string' && typeof v.content === 'string';
+  return typeof v.title === "string" && typeof v.content === "string";
 }
 
 const mockSheets = {
@@ -246,10 +235,7 @@ class Service {
   private static RATE_TOAST_COOLDOWN_MS = 60 * 1000; // 1 minute
   private static DEVHINTS_SITEMAP_CACHE: string[] | null = null;
   private static DEVHINTS_SITEMAP_CACHE_AT_MS = 0;
-  private static LOCAL_SHEETS_DIR = path.join(
-    environment.assetsPath,
-    'cheatsheets',
-  );
+  private static LOCAL_SHEETS_DIR = path.join(environment.assetsPath, "cheatsheets");
 
   // Preferences management using Raycast's built-in system
   static getPreferences(): Preferences {
@@ -257,42 +243,42 @@ class Service {
       const prefs = getPreferenceValues<Preferences>();
       return {
         enableOfflineStorage: prefs.enableOfflineStorage || false,
-        updateFrequency: prefs.updateFrequency || 'never',
+        updateFrequency: prefs.updateFrequency || "never",
         autoUpdate: prefs.autoUpdate || false,
       };
     } catch (error) {
-      console.warn('Failed to load preferences:', error);
+      console.warn("Failed to load preferences:", error);
       // Default preferences
       return {
         enableOfflineStorage: false,
-        updateFrequency: 'never',
+        updateFrequency: "never",
         autoUpdate: false,
       };
     }
   }
 
   // Auto-update helpers for offline cache
-  private static frequencyToMs(freq: Preferences['updateFrequency']): number {
+  private static frequencyToMs(freq: Preferences["updateFrequency"]): number {
     switch (freq) {
-      case 'every-use':
+      case "every-use":
         return 0;
-      case 'weekly':
+      case "weekly":
         return 7 * 24 * 60 * 60 * 1000;
-      case 'monthly':
+      case "monthly":
         return 30 * 24 * 60 * 60 * 1000;
-      case 'never':
+      case "never":
       default:
         return Number.POSITIVE_INFINITY;
     }
   }
 
   static async getLastOfflineUpdate(): Promise<number> {
-    const ts = await LocalStorage.getItem<number>('last-offline-update');
-    return typeof ts === 'number' ? ts : 0;
+    const ts = await LocalStorage.getItem<number>("last-offline-update");
+    return typeof ts === "number" ? ts : 0;
   }
 
   static async setLastOfflineUpdate(timestamp: number): Promise<void> {
-    await LocalStorage.setItem('last-offline-update', timestamp);
+    await LocalStorage.setItem("last-offline-update", timestamp);
   }
 
   static async shouldUpdateOffline(): Promise<boolean> {
@@ -310,7 +296,7 @@ class Service {
       if (await this.shouldUpdateOffline()) {
         showToast({
           style: Toast.Style.Animated,
-          title: 'Updating Offline Cache',
+          title: "Updating Offline Cache",
         });
         const { success } = await this.downloadAllForOffline();
         await this.setLastOfflineUpdate(Date.now());
@@ -320,32 +306,25 @@ class Service {
         });
       }
     } catch (e) {
-      console.warn('Auto-update offline failed:', e);
+      console.warn("Auto-update offline failed:", e);
     }
   }
 
   // Offline storage management
   static async getOfflineCheatsheets(): Promise<OfflineCheatsheet[]> {
     try {
-      const offlineData = await LocalStorage.getItem<string>(
-        'offline-cheatsheets',
-      );
+      const offlineData = await LocalStorage.getItem<string>("offline-cheatsheets");
       return offlineData ? JSON.parse(offlineData) : [];
     } catch (error) {
-      console.warn('Failed to load offline cheatsheets:', error);
+      console.warn("Failed to load offline cheatsheets:", error);
       return [];
     }
   }
 
-  static async saveOfflineCheatsheet(
-    slug: string,
-    content: string,
-  ): Promise<void> {
+  static async saveOfflineCheatsheet(slug: string, content: string): Promise<void> {
     try {
       const offlineSheets = await this.getOfflineCheatsheets();
-      const existingIndex = offlineSheets.findIndex(
-        (sheet) => sheet.slug === slug,
-      );
+      const existingIndex = offlineSheets.findIndex((sheet) => sheet.slug === slug);
 
       const offlineSheet: OfflineCheatsheet = {
         slug,
@@ -359,38 +338,33 @@ class Service {
         offlineSheets.push(offlineSheet);
       }
 
-      await LocalStorage.setItem(
-        'offline-cheatsheets',
-        JSON.stringify(offlineSheets),
-      );
+      await LocalStorage.setItem("offline-cheatsheets", JSON.stringify(offlineSheets));
     } catch (error) {
-      console.error('Failed to save offline cheatsheet:', error);
+      console.error("Failed to save offline cheatsheet:", error);
       throw error;
     }
   }
 
-  static async getOfflineCheatsheet(
-    slug: string,
-  ): Promise<OfflineCheatsheet | null> {
+  static async getOfflineCheatsheet(slug: string): Promise<OfflineCheatsheet | null> {
     try {
       const offlineSheets = await this.getOfflineCheatsheets();
       return offlineSheets.find((sheet) => sheet.slug === slug) || null;
     } catch (error) {
-      console.error('Failed to get offline cheatsheet:', error);
+      console.error("Failed to get offline cheatsheet:", error);
       return null;
     }
   }
 
   static async clearOfflineStorage(): Promise<void> {
     try {
-      await LocalStorage.removeItem('offline-cheatsheets');
+      await LocalStorage.removeItem("offline-cheatsheets");
       showToast({
         style: Toast.Style.Success,
-        title: 'Cleared',
-        message: 'Offline storage has been cleared',
+        title: "Cleared",
+        message: "Offline storage has been cleared",
       });
     } catch (error) {
-      console.error('Failed to clear offline storage:', error);
+      console.error("Failed to clear offline storage:", error);
       throw error;
     }
   }
@@ -409,21 +383,21 @@ class Service {
           if (prefs.enableOfflineStorage && offline.length > 0) {
             showToast({
               style: Toast.Style.Animated,
-              title: 'Offline Mode',
+              title: "Offline Mode",
               message: `Using ${offline.length} cached cheatsheets`,
             });
             const offlineAsFiles: File[] = offline.map((s) => ({
               path: `${s.slug}.md`,
-              mode: '100644',
-              type: 'blob',
+              mode: "100644",
+              type: "blob",
               sha: `offline-${s.slug}`,
               size: s.size,
-              url: '',
+              url: "",
             }));
             return offlineAsFiles;
           }
         } catch (e) {
-          console.warn('Failed to use offline list fallback:', e);
+          console.warn("Failed to use offline list fallback:", e);
         }
         return this.staticFileList();
       }
@@ -440,7 +414,7 @@ class Service {
       return response.data.tree;
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
-      console.warn('Failed to fetch from GitHub API:', msg);
+      console.warn("Failed to fetch from GitHub API:", msg);
       // Surface a helpful message on rate limit
       try {
         let status: number | undefined;
@@ -449,16 +423,12 @@ class Service {
         }
         if (status === 403) {
           this.RATE_LIMIT_UNTIL_MS = Date.now() + 15 * 60 * 1000; // back off for 15 minutes
-          if (
-            Date.now() - this.LAST_RATE_TOAST_AT_MS >
-            this.RATE_TOAST_COOLDOWN_MS
-          ) {
+          if (Date.now() - this.LAST_RATE_TOAST_AT_MS > this.RATE_TOAST_COOLDOWN_MS) {
             this.LAST_RATE_TOAST_AT_MS = Date.now();
             showToast({
               style: Toast.Style.Failure,
-              title: 'GitHub Rate Limited',
-              message:
-                'Falling back to built-in list. Add a token in preferences to avoid limits.',
+              title: "GitHub Rate Limited",
+              message: "Falling back to built-in list. Add a token in preferences to avoid limits.",
             });
           }
         }
@@ -473,22 +443,22 @@ class Service {
         if (prefs.enableOfflineStorage && offline.length > 0) {
           showToast({
             style: Toast.Style.Animated,
-            title: 'Offline Mode',
+            title: "Offline Mode",
             message: `Using ${offline.length} cached cheatsheets`,
           });
           // Map offline slugs to File-like objects (only fields we use)
           const offlineAsFiles: File[] = offline.map((s) => ({
             path: `${s.slug}.md`,
-            mode: '100644',
-            type: 'blob',
+            mode: "100644",
+            type: "blob",
             sha: `offline-${s.slug}`,
             size: s.size,
-            url: '',
+            url: "",
           }));
           return offlineAsFiles;
         }
       } catch (e) {
-        console.warn('Failed to use offline list fallback:', e);
+        console.warn("Failed to use offline list fallback:", e);
       }
 
       // Fallback to a richer static list based on known metadata keys
@@ -512,40 +482,34 @@ class Service {
         try {
           await this.saveOfflineCheatsheet(slug, content);
         } catch (error) {
-          console.warn('Failed to save to offline storage:', error);
+          console.warn("Failed to save to offline storage:", error);
         }
       }
 
       return content;
     } catch (error) {
-      console.warn(
-        `Failed to fetch sheet ${slug}, trying offline storage:`,
-        error,
-      );
+      console.warn(`Failed to fetch sheet ${slug}, trying offline storage:`, error);
       // Fallback 1: Fetch from devhints.io and convert basic HTML → Markdown
       try {
-        const htmlResp = await axios.get<string>(
-          `https://devhints.io/${slug}`,
-          {
-            timeout: 10000,
-            headers: { 'User-Agent': 'Cheatsheets-Remastered-Raycast' },
-          },
-        );
-        const html = htmlResp.data || '';
+        const htmlResp = await axios.get<string>(`https://devhints.io/${slug}`, {
+          timeout: 10000,
+          headers: { "User-Agent": "Cheatsheets-Remastered-Raycast" },
+        });
+        const html = htmlResp.data || "";
         const md = this.convertDevHintsHtmlToMarkdown(html, slug);
         if (md && md.trim()) {
           const preferences = this.getPreferences();
           if (preferences.enableOfflineStorage) {
             try {
               await this.saveOfflineCheatsheet(slug, md);
-            } catch (saveErr) {
+            } catch {
               void 0;
             }
           }
           return md;
         }
       } catch (e) {
-        console.warn('devhints fallback failed:', e);
+        console.warn("devhints fallback failed:", e);
       }
 
       // Try offline storage as fallback only if enabled
@@ -563,7 +527,7 @@ class Service {
       if (mockContent) {
         showToast({
           style: Toast.Style.Failure,
-          title: 'Offline Mode',
+          title: "Offline Mode",
           message: `Using mock data for ${slug}`,
         });
         return mockContent;
@@ -573,18 +537,15 @@ class Service {
     }
   }
 
-  private static convertDevHintsHtmlToMarkdown(
-    html: string,
-    slug: string,
-  ): string {
+  private static convertDevHintsHtmlToMarkdown(html: string, slug: string): string {
     function stripTags(x: string): string {
-      return x.replace(/<[^>]+>/g, '');
+      return x.replace(/<[^>]+>/g, "");
     }
     function decodeHtml(x: string): string {
       return x
-        .replace(/&amp;/g, '&')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
+        .replace(/&amp;/g, "&")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">")
         .replace(/&quot;/g, '"')
         .replace(/&#39;/g, "'");
     }
@@ -592,54 +553,39 @@ class Service {
     try {
       let s = html;
       // Remove scripts/styles
-      s = s
-        .replace(/<script[\s\S]*?<\/script>/gi, '')
-        .replace(/<style[\s\S]*?<\/style>/gi, '');
+      s = s.replace(/<script[\s\S]*?<\/script>/gi, "").replace(/<style[\s\S]*?<\/style>/gi, "");
       // Extract main content (best-effort)
       const mainMatch =
-        s.match(/<main[\s\S]*?>([\s\S]*?)<\/main>/i) ||
-        s.match(/<article[\s\S]*?>([\s\S]*?)<\/article>/i);
+        s.match(/<main[\s\S]*?>([\s\S]*?)<\/main>/i) || s.match(/<article[\s\S]*?>([\s\S]*?)<\/article>/i);
       s = mainMatch ? mainMatch[1] : s;
       // Code blocks
       s = s.replace(
         /<pre[^>]*><code[^>]*>([\s\S]*?)<\/code><\/pre>/gi,
-        (_m, p1) => '```\n' + decodeHtml(p1).trim() + '\n```',
+        (_m, p1) => "```\n" + decodeHtml(p1).trim() + "\n```",
       );
       // Headings
       for (let i = 6; i >= 1; i--) {
-        const re = new RegExp(`<h${i}[^>]*>([\n\\s\\S]*?)<\\/h${i}>`, 'gi');
-        s = s.replace(
-          re,
-          (_m, p1) =>
-            `${'#'.repeat(i)} ${stripTags(decodeHtml(p1)).trim()}\n\n`,
-        );
+        const re = new RegExp(`<h${i}[^>]*>([\n\\s\\S]*?)<\\/h${i}>`, "gi");
+        s = s.replace(re, (_m, p1) => `${"#".repeat(i)} ${stripTags(decodeHtml(p1)).trim()}\n\n`);
       }
       // Lists
-      s = s.replace(
-        /<li[^>]*>([\s\S]*?)<\/li>/gi,
-        (_m, p1) => `- ${stripTags(decodeHtml(p1)).trim()}\n`,
-      );
-      s = s.replace(/<ul[^>]*>/gi, '\n').replace(/<\/ul>/gi, '\n');
-      s = s.replace(/<ol[^>]*>/gi, '\n').replace(/<\/ol>/gi, '\n');
+      s = s.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_m, p1) => `- ${stripTags(decodeHtml(p1)).trim()}\n`);
+      s = s.replace(/<ul[^>]*>/gi, "\n").replace(/<\/ul>/gi, "\n");
+      s = s.replace(/<ol[^>]*>/gi, "\n").replace(/<\/ol>/gi, "\n");
       // Paragraphs and line breaks
-      s = s.replace(
-        /<p[^>]*>([\s\S]*?)<\/p>/gi,
-        (_m, p1) => `${stripTags(decodeHtml(p1)).trim()}\n\n`,
-      );
-      s = s.replace(/<br\s*\/>/gi, '\n');
+      s = s.replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, (_m, p1) => `${stripTags(decodeHtml(p1)).trim()}\n\n`);
+      s = s.replace(/<br\s*\/>/gi, "\n");
       // Links → just keep text
-      s = s.replace(/<a[^>]*>([\s\S]*?)<\/a>/gi, (_m, p1) =>
-        stripTags(decodeHtml(p1)),
-      );
+      s = s.replace(/<a[^>]*>([\s\S]*?)<\/a>/gi, (_m, p1) => stripTags(decodeHtml(p1)));
       // Strip remaining tags
       s = stripTags(s);
       // Title header
-      const title = slug.split('/').pop() || slug;
-      const out = `# ${title}\n\n${s}`.replace(/\n{3,}/g, '\n\n').trim();
+      const title = slug.split("/").pop() || slug;
+      const out = `# ${title}\n\n${s}`.replace(/\n{3,}/g, "\n\n").trim();
       return out;
     } catch (e) {
-      console.warn('convertDevHintsHtmlToMarkdown failed:', e);
-      return '';
+      console.warn("convertDevHintsHtmlToMarkdown failed:", e);
+      return "";
     }
   }
 
@@ -651,13 +597,13 @@ class Service {
     try {
       const preferences = this.getPreferences();
       if (!preferences.enableOfflineStorage) {
-        throw new Error('Offline storage is disabled');
+        throw new Error("Offline storage is disabled");
       }
 
       showToast({
         style: Toast.Style.Animated,
-        title: 'Downloading',
-        message: 'Fetching all cheatsheets for offline use...',
+        title: "Downloading",
+        message: "Fetching all cheatsheets for offline use...",
       });
 
       const files = await this.listFiles();
@@ -678,17 +624,17 @@ class Service {
 
       showToast({
         style: Toast.Style.Success,
-        title: 'Download Complete',
+        title: "Download Complete",
         message: `${success} cheatsheets downloaded, ${failed} failed`,
       });
 
       return { success, failed };
     } catch (error) {
-      console.error('Failed to download all cheatsheets:', error);
+      console.error("Failed to download all cheatsheets:", error);
       showToast({
         style: Toast.Style.Failure,
-        title: 'Download Failed',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        title: "Download Failed",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
       throw error;
     }
@@ -701,7 +647,7 @@ class Service {
   // Default cheatsheet metadata (tags/aliases/description)
   static getDefaultMetadata(slug: string): DefaultMetadata {
     const key = slug.toLowerCase();
-    const base = key.split('/').pop() || key;
+    const base = key.split("/").pop() || key;
     const byKey = DEFAULT_SHEET_METADATA[key];
     const byBase = DEFAULT_SHEET_METADATA[base];
     if (byKey) return byKey;
@@ -717,15 +663,15 @@ class Service {
       .filter((t) => t.length >= 2);
 
     const aliasMap: Record<string, string[]> = {
-      js: ['javascript'],
-      ts: ['typescript'],
-      k8s: ['kubernetes'],
-      psql: ['postgres', 'postgresql'],
-      mac: ['macos'],
-      osx: ['macos'],
-      sh: ['shell'],
-      cli: ['terminal'],
-      node: ['nodejs'],
+      js: ["javascript"],
+      ts: ["typescript"],
+      k8s: ["kubernetes"],
+      psql: ["postgres", "postgresql"],
+      mac: ["macos"],
+      osx: ["macos"],
+      sh: ["shell"],
+      cli: ["terminal"],
+      node: ["nodejs"],
     };
 
     const tokens = new Set<string>();
@@ -739,12 +685,10 @@ class Service {
 
     // Provide a couple of generic buckets so default sheets always have some tags
     const generics: string[] = [];
-    if (tokens.has('git')) generics.push('vcs');
-    if (tokens.has('docker')) generics.push('containers');
-    if (tokens.has('npm') || tokens.has('yarn') || tokens.has('pnpm'))
-      generics.push('packages');
-    if (tokens.has('bash') || tokens.has('zsh') || tokens.has('fish'))
-      generics.push('shell');
+    if (tokens.has("git")) generics.push("vcs");
+    if (tokens.has("docker")) generics.push("containers");
+    if (tokens.has("npm") || tokens.has("yarn") || tokens.has("pnpm")) generics.push("packages");
+    if (tokens.has("bash") || tokens.has("zsh") || tokens.has("fish")) generics.push("shell");
     generics.forEach((g) => tokens.add(g));
 
     return { tags: Array.from(tokens) };
@@ -766,51 +710,41 @@ class Service {
     const md = this.getDefaultMetadata(slug);
     if (md?.iconKey) return md.iconKey;
     const key = slug.toLowerCase();
-    if (
-      /((^|[-_/])js($|[-_/])|typescript|ts|react|vue|angular|svelte|graphql)/.test(
-        key,
-      )
-    )
-      return 'Code';
-    if (
-      /(python|bash|zsh|fish|linux|shell|vim|tmux|sed|awk|grep|curl|ssh)/.test(
-        key,
-      )
-    )
-      return 'Terminal';
-    if (/(docker|kubernetes|git|github|box)/.test(key)) return 'Box';
-    if (/(sql|postgres|mysql|sqlite|redis|mongo)/.test(key)) return 'Document';
-    if (/(aws|cloud|terraform)/.test(key)) return 'Cloud';
-    if (/(http|nginx)/.test(key)) return 'Globe';
-    return 'Document';
+    if (/((^|[-_/])js($|[-_/])|typescript|ts|react|vue|angular|svelte|graphql)/.test(key)) return "Code";
+    if (/(python|bash|zsh|fish|linux|shell|vim|tmux|sed|awk|grep|curl|ssh)/.test(key)) return "Terminal";
+    if (/(docker|kubernetes|git|github|box)/.test(key)) return "Box";
+    if (/(sql|postgres|mysql|sqlite|redis|mongo)/.test(key)) return "Document";
+    if (/(aws|cloud|terraform)/.test(key)) return "Cloud";
+    if (/(http|nginx)/.test(key)) return "Globe";
+    return "Document";
   }
 
   static iconForKey(key?: string): Icon {
-    switch ((key || '').toLowerCase()) {
-      case 'code':
+    switch ((key || "").toLowerCase()) {
+      case "code":
         return Icon.Code;
-      case 'terminal':
+      case "terminal":
         return Icon.Terminal;
-      case 'document':
+      case "document":
         return Icon.Document;
-      case 'cloud':
+      case "cloud":
         return Icon.Cloud;
-      case 'globe':
+      case "globe":
         return Icon.Globe;
-      case 'box':
+      case "box":
         return Icon.Box;
-      case 'gear':
+      case "gear":
         return Icon.Gear;
-      case 'window':
+      case "window":
         return Icon.Window;
-      case 'keyboard':
+      case "keyboard":
         return Icon.Keyboard;
-      case 'link':
+      case "link":
         return Icon.Link;
-      case 'star':
+      case "star":
         return Icon.Star;
-      case 'stardisabled':
-      case 'star_disabled':
+      case "stardisabled":
+      case "star_disabled":
         return Icon.StarDisabled;
       default:
         return Icon.Document;
@@ -820,7 +754,7 @@ class Service {
   // Resolve icon for a slug or key considering preferences and bundled media
   static resolveIconForSlug(slugOrKey: string): Image.ImageLike {
     const prefs = this.getPreferences() as ExtendedPreferences;
-    const base = (slugOrKey.split('/').pop() || slugOrKey).toLowerCase();
+    const base = (slugOrKey.split("/").pop() || slugOrKey).toLowerCase();
     const aliasBase = this.alias(base);
     const isTerminal = this.isTerminalTool(base);
     // Build candidate names from slug tokens + aliases, then base/alias, and finally terminal fallback
@@ -833,50 +767,40 @@ class Service {
     const tokenCandidates = Array.from(tokenSet);
     const baseCandidates = [base, aliasBase].filter(Boolean);
     const candidates = isTerminal
-      ? [...tokenCandidates, ...baseCandidates, 'terminal']
+      ? [...tokenCandidates, ...baseCandidates, "terminal"]
       : [...tokenCandidates, ...baseCandidates];
-    if (prefs.iconSource === 'raycast') {
+    if (prefs.iconSource === "raycast") {
       return this.iconForKey(this.getDefaultIconKey(aliasBase));
     }
-    if (prefs.iconSource === 'custom' && prefs.customIconDirectory) {
+    if (prefs.iconSource === "custom" && prefs.customIconDirectory) {
       for (const c of candidates) {
         const png = path.join(prefs.customIconDirectory, `${c}.png`);
-        if (fs.existsSync(png))
-          return { source: png, tintColor: Color.PrimaryText };
+        if (fs.existsSync(png)) return { source: png, tintColor: Color.PrimaryText };
         const svg = path.join(prefs.customIconDirectory, `${c}.svg`);
-        if (fs.existsSync(svg))
-          return { source: svg, tintColor: Color.PrimaryText };
+        if (fs.existsSync(svg)) return { source: svg, tintColor: Color.PrimaryText };
       }
     }
     // Built-in media fallback
     for (const c of candidates) {
       const pPng = path.join(environment.assetsPath, `${c}.png`);
       const pSvg = path.join(environment.assetsPath, `${c}.svg`);
-      if (fs.existsSync(pPng))
-        return { source: pPng, tintColor: Color.PrimaryText };
-      if (fs.existsSync(pSvg))
-        return { source: pSvg, tintColor: Color.PrimaryText };
+      if (fs.existsSync(pPng)) return { source: pPng, tintColor: Color.PrimaryText };
+      if (fs.existsSync(pSvg)) return { source: pSvg, tintColor: Color.PrimaryText };
     }
     // Finally, Raycast icon from metadata
     return this.iconForKey(this.getDefaultIconKey(aliasBase));
   }
 
   private static alias(name: string): string {
-    if (name === 'js' || name === 'javascript') return 'javascript';
-    if (name === 'ts' || name === 'typescript') return 'typescript';
-    if (name === 'nodejs' || name === 'node') return 'node';
-    if (name === 'psql' || name === 'postgresql') return 'postgres';
-    if (name === 'k8s' || name === 'kubernetes') return 'kubernetes';
-    if (name === 'css' || name.startsWith('css-')) return 'css';
-    if (name === 'git' || name.startsWith('git-')) return 'git';
-    if (
-      name === 'gh' ||
-      name.startsWith('gh-') ||
-      name === 'github' ||
-      name.startsWith('github-')
-    )
-      return 'github';
-    if (name === 'angularjs' || name.startsWith('angularjs-')) return 'angular';
+    if (name === "js" || name === "javascript") return "javascript";
+    if (name === "ts" || name === "typescript") return "typescript";
+    if (name === "nodejs" || name === "node") return "node";
+    if (name === "psql" || name === "postgresql") return "postgres";
+    if (name === "k8s" || name === "kubernetes") return "kubernetes";
+    if (name === "css" || name.startsWith("css-")) return "css";
+    if (name === "git" || name.startsWith("git-")) return "git";
+    if (name === "gh" || name.startsWith("gh-") || name === "github" || name.startsWith("github-")) return "github";
+    if (name === "angularjs" || name.startsWith("angularjs-")) return "angular";
     return name;
   }
 
@@ -888,10 +812,10 @@ class Service {
   }
 
   private static tokenize(name: string): string[] {
-    const raw = (name || '').toLowerCase();
+    const raw = (name || "").toLowerCase();
     const tokens = raw.split(/[\s/_.-]+/).filter(Boolean);
     // Filter out plain 'js' unless it's explicitly bounded by separators (handled in getDefaultIconKey)
-    return tokens.filter((t) => t !== 'js');
+    return tokens.filter((t) => t !== "js");
   }
 
   // Fast content search across default cheatsheets using GitHub code search
@@ -901,35 +825,27 @@ class Service {
       // Try local content search first
       const localResults = this.searchLocalContent(query);
       if (localResults.length > 0) return localResults;
-      if (!prefs.githubToken || Date.now() < this.RATE_LIMIT_UNTIL_MS)
-        return [];
+      if (!prefs.githubToken || Date.now() < this.RATE_LIMIT_UNTIL_MS) return [];
       if (!query || query.trim().length < 3) return [];
-      const safe = query.replace(/[@#]/g, ' ').replace(/\s+/g, ' ').trim();
+      const safe = query.replace(/[@#]/g, " ").replace(/\s+/g, " ").trim();
       const q = `${JSON.stringify(safe)} repo:${OWNER}/${REPO} in:file extension:md`;
-      const resp = await searchClient.get<{ items: Array<{ path: string }> }>(
-        ``,
-        {
-          params: { q, per_page: 50 },
-          headers: { Authorization: `Bearer ${prefs.githubToken}` },
-        },
-      );
+      const resp = await searchClient.get<{ items: Array<{ path: string }> }>(``, {
+        params: { q, per_page: 50 },
+        headers: { Authorization: `Bearer ${prefs.githubToken}` },
+      });
       const items = resp.data.items || [];
       const slugs = items
         .map((it) => it.path)
-        .filter(
-          (p) => !/(^README|^CONTRIBUTING|^index|^index@2016)\.md/i.test(p),
-        )
+        .filter((p) => !/(^README|^CONTRIBUTING|^index|^index@2016)\.md/i.test(p))
         // Exclude underscore directories like _includes, _layouts, etc.
         .filter((p) => !/(^|\/)_[^/]+\//.test(p))
-        .map((p) => p.replace(/\.md$/i, ''));
+        .map((p) => p.replace(/\.md$/i, ""));
       // De-duplicate while preserving order
       const seen = new Set<string>();
-      const unique = slugs.filter((s) =>
-        seen.has(s) ? false : (seen.add(s), true),
-      );
+      const unique = slugs.filter((s) => (seen.has(s) ? false : (seen.add(s), true)));
       return unique;
     } catch (error) {
-      console.warn('Default content search failed:', error);
+      console.warn("Default content search failed:", error);
       return [];
     }
   }
@@ -938,17 +854,11 @@ class Service {
     // Build a larger static list by scraping devhints sitemap (best-effort, cached in memory)
     let slugs: string[] = [];
     const now = Date.now();
-    if (
-      this.DEVHINTS_SITEMAP_CACHE &&
-      now - this.DEVHINTS_SITEMAP_CACHE_AT_MS < 24 * 60 * 60 * 1000
-    ) {
+    if (this.DEVHINTS_SITEMAP_CACHE && now - this.DEVHINTS_SITEMAP_CACHE_AT_MS < 24 * 60 * 60 * 1000) {
       slugs = this.DEVHINTS_SITEMAP_CACHE;
     } else {
       try {
-        const resp = fs.readFileSync(
-          path.join(environment.assetsPath, 'devhints-sitemap.txt'),
-          'utf8',
-        );
+        const resp = fs.readFileSync(path.join(environment.assetsPath, "devhints-sitemap.txt"), "utf8");
         slugs = resp
           .split(/\r?\n/)
           .map((l) => l.trim())
@@ -957,60 +867,60 @@ class Service {
         // Fallback to baked-in set if sitemap not available
         slugs = [
           ...Object.keys(DEFAULT_SHEET_METADATA),
-          'javascript',
-          'typescript',
-          'python',
-          'ruby',
-          'go',
-          'rust',
-          'php',
-          'java',
-          'kotlin',
-          'swift',
-          'html',
-          'css',
-          'react',
-          'nextjs',
-          'vue',
-          'svelte',
-          'angular',
-          'bash',
-          'zsh',
-          'fish',
-          'linux',
-          'mac',
-          'tmux',
-          'vim',
-          'emacs',
-          'git',
-          'github',
-          'docker',
-          'kubernetes',
-          'npm',
-          'yarn',
-          'pnpm',
-          'node',
-          'nvm',
-          'brew',
-          'jq',
-          'curl',
-          'http',
-          'ssh',
-          'sed',
-          'awk',
-          'grep',
-          'make',
-          'sql',
-          'postgres',
-          'mysql',
-          'sqlite',
-          'redis',
-          'mongodb',
-          'graphql',
-          'aws',
-          'terraform',
-          'nginx',
-          '101',
+          "javascript",
+          "typescript",
+          "python",
+          "ruby",
+          "go",
+          "rust",
+          "php",
+          "java",
+          "kotlin",
+          "swift",
+          "html",
+          "css",
+          "react",
+          "nextjs",
+          "vue",
+          "svelte",
+          "angular",
+          "bash",
+          "zsh",
+          "fish",
+          "linux",
+          "mac",
+          "tmux",
+          "vim",
+          "emacs",
+          "git",
+          "github",
+          "docker",
+          "kubernetes",
+          "npm",
+          "yarn",
+          "pnpm",
+          "node",
+          "nvm",
+          "brew",
+          "jq",
+          "curl",
+          "http",
+          "ssh",
+          "sed",
+          "awk",
+          "grep",
+          "make",
+          "sql",
+          "postgres",
+          "mysql",
+          "sqlite",
+          "redis",
+          "mongodb",
+          "graphql",
+          "aws",
+          "terraform",
+          "nginx",
+          "101",
         ];
       }
       this.DEVHINTS_SITEMAP_CACHE = Array.from(new Set(slugs));
@@ -1019,11 +929,11 @@ class Service {
     const staticSlugs = Array.from(new Set(slugs));
     return staticSlugs.map((slug) => ({
       path: `${slug}.md`,
-      mode: '100644',
-      type: 'blob',
+      mode: "100644",
+      type: "blob",
       sha: `static-${slug}`,
       size: 0,
-      url: '',
+      url: "",
     }));
   }
 
@@ -1042,21 +952,19 @@ class Service {
       };
       walk(this.LOCAL_SHEETS_DIR);
       return entries.map((abs) => {
-        const rel = path
-          .relative(this.LOCAL_SHEETS_DIR, abs)
-          .replace(/\\/g, '/');
-        const slug = rel.replace(/\.md$/i, '');
+        const rel = path.relative(this.LOCAL_SHEETS_DIR, abs).replace(/\\/g, "/");
+        const slug = rel.replace(/\.md$/i, "");
         return {
           path: `${slug}.md`,
-          mode: '100644',
-          type: 'blob',
+          mode: "100644",
+          type: "blob",
           sha: `local-${slug}`,
           size: fs.statSync(abs).size,
-          url: '',
+          url: "",
         } as File;
       });
     } catch (e) {
-      console.warn('listLocalCheatsheets failed:', e);
+      console.warn("listLocalCheatsheets failed:", e);
       return [];
     }
   }
@@ -1064,7 +972,7 @@ class Service {
   private static readLocalCheatsheet(slug: string): string | null {
     try {
       const p = path.join(this.LOCAL_SHEETS_DIR, `${slug}.md`);
-      if (fs.existsSync(p)) return fs.readFileSync(p, 'utf8');
+      if (fs.existsSync(p)) return fs.readFileSync(p, "utf8");
       return null;
     } catch {
       return null;
@@ -1083,14 +991,14 @@ class Service {
 
   private static searchLocalContent(query: string): string[] {
     try {
-      const q = (query || '').trim();
+      const q = (query || "").trim();
       if (q.length < 3) return [];
       const files = this.listLocalCheatsheets();
       const results: string[] = [];
       for (const f of files) {
-        const content = this.readLocalCheatsheet(f.path.replace(/\.md$/i, ''));
+        const content = this.readLocalCheatsheet(f.path.replace(/\.md$/i, ""));
         if (content && content.toLowerCase().includes(q.toLowerCase())) {
-          results.push(f.path.replace(/\.md$/i, ''));
+          results.push(f.path.replace(/\.md$/i, ""));
         }
       }
       return Array.from(new Set(results));
@@ -1102,19 +1010,15 @@ class Service {
   // View history management
   static async getViewHistory(): Promise<ViewRecord[]> {
     try {
-      const json = await LocalStorage.getItem<string>('cheatsheet-views');
+      const json = await LocalStorage.getItem<string>("cheatsheet-views");
       return json ? (JSON.parse(json) as ViewRecord[]) : [];
     } catch (error) {
-      console.warn('Failed to load view history:', error);
+      console.warn("Failed to load view history:", error);
       return [];
     }
   }
 
-  static async recordView(
-    type: 'custom' | 'default',
-    slug: string,
-    title: string,
-  ): Promise<void> {
+  static async recordView(type: "custom" | "default", slug: string, title: string): Promise<void> {
     try {
       const key = `${type}:${slug}`;
       const views = await this.getViewHistory();
@@ -1127,15 +1031,13 @@ class Service {
       } else {
         views.push({ key, type, slug, title, count: 1, lastViewedAt: now });
       }
-      await LocalStorage.setItem('cheatsheet-views', JSON.stringify(views));
+      await LocalStorage.setItem("cheatsheet-views", JSON.stringify(views));
     } catch (error) {
-      console.warn('Failed to record view:', error);
+      console.warn("Failed to record view:", error);
     }
   }
 
-  static async getViewStatsMap(): Promise<
-    Record<string, { count: number; lastViewedAt: number }>
-  > {
+  static async getViewStatsMap(): Promise<Record<string, { count: number; lastViewedAt: number }>> {
     const views = await this.getViewHistory();
     return views.reduce(
       (acc, v) => {
@@ -1149,18 +1051,17 @@ class Service {
   // Enhanced custom cheatsheet methods with validation
   static async getCustomCheatsheets(): Promise<CustomCheatsheet[]> {
     try {
-      const customSheetsJson =
-        await LocalStorage.getItem<string>('custom-cheatsheets');
+      const customSheetsJson = await LocalStorage.getItem<string>("custom-cheatsheets");
       const sheets = customSheetsJson ? JSON.parse(customSheetsJson) : [];
 
       // Validate and clean data
       return (sheets as unknown[]).filter(isCustomCheatsheet);
     } catch (error) {
-      console.warn('Failed to get custom cheatsheets:', error);
+      console.warn("Failed to get custom cheatsheets:", error);
       showToast({
         style: Toast.Style.Failure,
-        title: 'Storage Error',
-        message: 'Failed to load custom cheatsheets',
+        title: "Storage Error",
+        message: "Failed to load custom cheatsheets",
       });
       return [];
     }
@@ -1176,7 +1077,7 @@ class Service {
     try {
       // Validate input
       if (!title.trim() || !content.trim()) {
-        throw new Error('Title and content are required');
+        throw new Error("Title and content are required");
       }
 
       const customSheets = await this.getCustomCheatsheets();
@@ -1192,20 +1093,17 @@ class Service {
       };
 
       customSheets.push(newSheet);
-      await LocalStorage.setItem(
-        'custom-cheatsheets',
-        JSON.stringify(customSheets),
-      );
+      await LocalStorage.setItem("custom-cheatsheets", JSON.stringify(customSheets));
 
       showToast({
         style: Toast.Style.Success,
-        title: 'Created',
+        title: "Created",
         message: `"${title}" has been added`,
       });
 
       return newSheet;
     } catch (error) {
-      console.error('Failed to create custom cheatsheet:', error);
+      console.error("Failed to create custom cheatsheet:", error);
       throw error;
     }
   }
@@ -1220,7 +1118,7 @@ class Service {
   ): Promise<CustomCheatsheet | null> {
     try {
       if (!title.trim() || !content.trim()) {
-        throw new Error('Title and content are required');
+        throw new Error("Title and content are required");
       }
 
       const customSheets = await this.getCustomCheatsheets();
@@ -1238,20 +1136,17 @@ class Service {
         iconKey: iconKey?.trim() || customSheets[index].iconKey,
       };
 
-      await LocalStorage.setItem(
-        'custom-cheatsheets',
-        JSON.stringify(customSheets),
-      );
+      await LocalStorage.setItem("custom-cheatsheets", JSON.stringify(customSheets));
 
       showToast({
         style: Toast.Style.Success,
-        title: 'Updated',
+        title: "Updated",
         message: `"${title}" has been modified`,
       });
 
       return customSheets[index];
     } catch (error) {
-      console.error('Failed to update custom cheatsheet:', error);
+      console.error("Failed to update custom cheatsheet:", error);
       throw error;
     }
   }
@@ -1263,33 +1158,26 @@ class Service {
 
       if (filteredSheets.length === customSheets.length) return false;
 
-      await LocalStorage.setItem(
-        'custom-cheatsheets',
-        JSON.stringify(filteredSheets),
-      );
+      await LocalStorage.setItem("custom-cheatsheets", JSON.stringify(filteredSheets));
       return true;
     } catch (error) {
-      console.error('Failed to delete custom cheatsheet:', error);
+      console.error("Failed to delete custom cheatsheet:", error);
       throw error;
     }
   }
 
-  static async getCustomCheatsheet(
-    id: string,
-  ): Promise<CustomCheatsheet | null> {
+  static async getCustomCheatsheet(id: string): Promise<CustomCheatsheet | null> {
     try {
       const customSheets = await this.getCustomCheatsheets();
       return customSheets.find((sheet) => sheet.id === id) || null;
     } catch (error) {
-      console.error('Failed to get custom cheatsheet:', error);
+      console.error("Failed to get custom cheatsheet:", error);
       return null;
     }
   }
 
   // Search functionality
-  static async searchCustomCheatsheets(
-    query: string,
-  ): Promise<CustomCheatsheet[]> {
+  static async searchCustomCheatsheets(query: string): Promise<CustomCheatsheet[]> {
     try {
       const customSheets = await this.getCustomCheatsheets();
       const lowerQuery = query.toLowerCase();
@@ -1302,7 +1190,7 @@ class Service {
           sheet.description?.toLowerCase().includes(lowerQuery),
       );
     } catch (error) {
-      console.error('Failed to search custom cheatsheets:', error);
+      console.error("Failed to search custom cheatsheets:", error);
       return [];
     }
   }
@@ -1313,7 +1201,7 @@ class Service {
       const customSheets = await this.getCustomCheatsheets();
       return JSON.stringify(customSheets, null, 2);
     } catch (error) {
-      console.error('Failed to export custom cheatsheets:', error);
+      console.error("Failed to export custom cheatsheets:", error);
       throw error;
     }
   }
@@ -1322,14 +1210,14 @@ class Service {
     try {
       const data = JSON.parse(jsonData);
       if (!Array.isArray(data)) {
-        throw new Error('Invalid data format');
+        throw new Error("Invalid data format");
       }
 
       // Validate each cheatsheet
       const validSheets = (data as unknown[]).filter(isImportedCheatsheetInput);
 
       if (validSheets.length === 0) {
-        throw new Error('No valid cheatsheets found');
+        throw new Error("No valid cheatsheets found");
       }
 
       // Add import timestamp and generate new IDs
@@ -1347,20 +1235,17 @@ class Service {
       const existingSheets = await this.getCustomCheatsheets();
       const allSheets = [...existingSheets, ...importedSheets];
 
-      await LocalStorage.setItem(
-        'custom-cheatsheets',
-        JSON.stringify(allSheets),
-      );
+      await LocalStorage.setItem("custom-cheatsheets", JSON.stringify(allSheets));
 
       showToast({
         style: Toast.Style.Success,
-        title: 'Imported',
+        title: "Imported",
         message: `${importedSheets.length} cheatsheets imported`,
       });
 
       return importedSheets.length;
     } catch (error) {
-      console.error('Failed to import custom cheatsheets:', error);
+      console.error("Failed to import custom cheatsheets:", error);
       throw error;
     }
   }
@@ -1368,26 +1253,18 @@ class Service {
   // Favorite management
   static async getFavorites(): Promise<FavoriteCheatsheet[]> {
     try {
-      const favoritesJson = await LocalStorage.getItem<string>(
-        'favorite-cheatsheets',
-      );
+      const favoritesJson = await LocalStorage.getItem<string>("favorite-cheatsheets");
       return favoritesJson ? JSON.parse(favoritesJson) : [];
     } catch (error) {
-      console.warn('Failed to load favorites:', error);
+      console.warn("Failed to load favorites:", error);
       return [];
     }
   }
 
-  static async addToFavorites(
-    type: 'custom' | 'default',
-    slug: string,
-    title: string,
-  ): Promise<void> {
+  static async addToFavorites(type: "custom" | "default", slug: string, title: string): Promise<void> {
     try {
       const favorites = await this.getFavorites();
-      const existingIndex = favorites.findIndex(
-        (fav) => fav.slug === slug && fav.type === type,
-      );
+      const existingIndex = favorites.findIndex((fav) => fav.slug === slug && fav.type === type);
 
       if (existingIndex >= 0) {
         // Update existing favorite
@@ -1404,53 +1281,35 @@ class Service {
         favorites.push(newFavorite);
       }
 
-      await LocalStorage.setItem(
-        'favorite-cheatsheets',
-        JSON.stringify(favorites),
-      );
+      await LocalStorage.setItem("favorite-cheatsheets", JSON.stringify(favorites));
     } catch (error) {
-      console.error('Failed to add to favorites:', error);
+      console.error("Failed to add to favorites:", error);
       throw error;
     }
   }
 
-  static async removeFromFavorites(
-    type: 'custom' | 'default',
-    slug: string,
-  ): Promise<void> {
+  static async removeFromFavorites(type: "custom" | "default", slug: string): Promise<void> {
     try {
       const favorites = await this.getFavorites();
-      const filtered = favorites.filter(
-        (fav) => !(fav.slug === slug && fav.type === type),
-      );
-      await LocalStorage.setItem(
-        'favorite-cheatsheets',
-        JSON.stringify(filtered),
-      );
+      const filtered = favorites.filter((fav) => !(fav.slug === slug && fav.type === type));
+      await LocalStorage.setItem("favorite-cheatsheets", JSON.stringify(filtered));
     } catch (error) {
-      console.error('Failed to remove from favorites:', error);
+      console.error("Failed to remove from favorites:", error);
       throw error;
     }
   }
 
-  static async isFavorited(
-    type: 'custom' | 'default',
-    slug: string,
-  ): Promise<boolean> {
+  static async isFavorited(type: "custom" | "default", slug: string): Promise<boolean> {
     try {
       const favorites = await this.getFavorites();
       return favorites.some((fav) => fav.slug === slug && fav.type === type);
     } catch (error) {
-      console.error('Failed to check favorite status:', error);
+      console.error("Failed to check favorite status:", error);
       return false;
     }
   }
 
-  static async toggleFavorite(
-    type: 'custom' | 'default',
-    slug: string,
-    title: string,
-  ): Promise<boolean> {
+  static async toggleFavorite(type: "custom" | "default", slug: string, title: string): Promise<boolean> {
     try {
       const isFavorited = await this.isFavorited(type, slug);
 
@@ -1462,7 +1321,7 @@ class Service {
         return true;
       }
     } catch (error) {
-      console.error('Failed to toggle favorite:', error);
+      console.error("Failed to toggle favorite:", error);
       throw error;
     }
   }
@@ -1472,24 +1331,16 @@ class Service {
 function getSheets(files: File[]): string[] {
   return files
     .filter((file) => {
-      const isDir = file.type === 'tree';
-      const isMarkdown = file.path.endsWith('.md');
-      const adminFiles = ['CONTRIBUTING', 'README', 'index', 'index@2016'];
-      const isAdminFile = adminFiles.some((adminFile) =>
-        file.path.startsWith(adminFile),
-      );
+      const isDir = file.type === "tree";
+      const isMarkdown = file.path.endsWith(".md");
+      const adminFiles = ["CONTRIBUTING", "README", "index", "index@2016"];
+      const isAdminFile = adminFiles.some((adminFile) => file.path.startsWith(adminFile));
       // Exclude Jekyll/include dirs like _includes, _layouts, etc.
       const inUnderscoreDir = /(^|\/)_[^/]+/.test(file.path);
       return !isDir && isMarkdown && !isAdminFile && !inUnderscoreDir;
     })
-    .map((file) => file.path.replace('.md', ''));
+    .map((file) => file.path.replace(".md", ""));
 }
 
 export default Service;
-export type {
-  File,
-  CustomCheatsheet,
-  Preferences,
-  OfflineCheatsheet,
-  FavoriteCheatsheet,
-};
+export type { File, CustomCheatsheet, Preferences, OfflineCheatsheet, FavoriteCheatsheet };
