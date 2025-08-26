@@ -1,6 +1,6 @@
 # Ray Clicker Changelog
 
-## [Stability: Render Loop Fix & Persistence Hardening] - {PR_MERGE_DATE}
+## [Stability: Render Loop Fix & Persistence Hardening] - 2025-08-26
 
 - fix: Prevent redundant renders by skipping idle tick state updates when estimated gain < 0.01; only advance `lastUpdateRef` (`src/useGameState.ts`).
 - fix: Align `lastUpdateRef` to `now` immediately after initial load to avoid an inflated first-tick delta (`src/useGameState.ts`).
