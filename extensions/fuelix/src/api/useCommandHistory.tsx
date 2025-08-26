@@ -66,7 +66,7 @@ export function useCommandHistory() {
       const isDuplicate = currentHistory.some(
         (entry) =>
           entry.prompt === prompt &&
-          // Only consider entries from the last 5 minutes as potential duplicates
+          // Only consider entries from the last 1 second as potential duplicates
           entry.timestamp > second,
       );
 
