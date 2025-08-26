@@ -79,10 +79,6 @@ export function isBirthdayISO(dateString: string, today: Date = new Date()): boo
 /**
  * Find a stat block by type and group from a player's stat array.
  */
-export function getStatsByType(
-  stats: Stat[] | undefined,
-  type: string,
-  group: string = "hitting"
-): Stat | undefined {
+export function getStatsByType(stats: Stat[] | undefined, type: string, group = "hitting"): Stat | undefined {
   return stats?.find((s) => s.type.displayName === type && s.group.displayName === group);
 }

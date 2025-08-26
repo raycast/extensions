@@ -40,13 +40,13 @@ export default function SearchPlayers() {
         throw new Error(`Network response was not ok: ${response.status}`);
       }
 
-      const data = await response.json() as PlayerSearchResponse;
-      
+      const data = (await response.json()) as PlayerSearchResponse;
+
       // Sort the hits by lastUpdatedDate in descending order (most recent first)
       if (data.results[0]?.hits) {
         data.results[0].hits.sort((a, b) => b.lastUpdatedDate - a.lastUpdatedDate);
       }
-      
+
       setSearchResults(data);
     } catch (error) {
       console.error("Error fetching player data:", error);
@@ -96,7 +96,9 @@ export default function SearchPlayers() {
           accessories={[
             {
               icon: player.lastUpdatedDate ? Icon.Clock : undefined,
-              tooltip: player.lastUpdatedDate ? `Last updated: ${new Date(player.lastUpdatedDate).toLocaleDateString()}` : undefined,
+              tooltip: player.lastUpdatedDate
+                ? `Last updated: ${new Date(player.lastUpdatedDate).toLocaleDateString()}`
+                : undefined,
               text: player.lastUpdatedDate ? new Date(player.lastUpdatedDate).toLocaleDateString() : "",
             },
           ]}

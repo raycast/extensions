@@ -181,7 +181,7 @@ export interface SplitStat {
   hits: number;
   hitByPitch: number;
   numberOfPitches: number;
-  
+
   // Hitting stats
   avg?: string;
   atBats?: number;
@@ -223,7 +223,7 @@ export interface SplitStat {
   popHits?: number;
   lineHits?: number;
   groundHits?: number;
-  
+
   // Pitching stats
   wins?: number;
   losses?: number;
