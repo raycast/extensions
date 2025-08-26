@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, Icon, List, Toast, showToast, useNavigation } from "@raycast/api";
-import { showFailureToast, useCachedState } from "@raycast/utils";
-import { getAllExtensions } from "../api.js";
-import { sparseCheckoutAdd } from "../git.js";
+import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
+import * as api from "../api.js";
+import operation from "../operation.js";
 import { ExtentionNameFolder } from "../types.js";
 
 export default function ValidExtensions({
@@ -20,27 +20,13 @@ export default function ValidExtensions({
     const foldersSet = new Set(forkedExtensionFolders);
     const loadAllExtensions = async () => {
       setIsLoading(true);
-      const allExtensions = await getAllExtensions();
+      const allExtensions = await api.getAllExtensions();
       const filteredExtensions = allExtensions.filter((x) => !foldersSet.has(x.folder));
       setAllExtension(filteredExtensions);
       setIsLoading(false);
     };
     loadAllExtensions();
   }, [forkedExtensionFolders]);
-
-  const fork = async (extensionFolder: string) => {
-    try {
-      const toast = await showToast({
-        style: Toast.Style.Animated,
-        title: "Forking extension",
-      });
-      await sparseCheckoutAdd(extensionFolder);
-      toast.style = Toast.Style.Success;
-      toast.title = `Forked successfully`;
-    } catch (error) {
-      showFailureToast(error);
-    }
-  };
 
   return (
     <List isLoading={isLoading}>
@@ -56,7 +42,7 @@ export default function ValidExtensions({
                 icon={Icon.NewDocument}
                 title="Fork"
                 onAction={async () => {
-                  await fork(x.folder);
+                  await operation.fork(x.folder);
                   onPop();
                   pop();
                 }}
