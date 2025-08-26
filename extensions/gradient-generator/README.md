@@ -1,101 +1,76 @@
-<a name="readme-top"></a>
+# Gradient Generator
 
-<div align="center">
-    <img src="media/icon.png" alt="Logo" width="80" height="80" />
-  <h3 align="center">Gradient Generator</h3>
-  <p align="center">
-    A Raycast extension to create, preview, randomize, save and export gradients, using them in your next project.
-    <br />
-    <a href="./ROADMAP.md"><strong>Explore the roadmap »</strong></a>
-    <br />
-  </p>
-</div>
+A minimalist, local-first Raycast extension for crafting gradients. Create a gradient, preview it in a large panel, copy ready-to-use snippets (CSS, SwiftUI, Tailwind arbitrary value), generate random gradients, save your favorites locally, and export as SVG or PNG files.
 
-<details>
-  <summary>Table of Contents</summary>
+## Key Features
 
-- [About The Project](#about-the-project)
-  - [Features](#features)
-  - [Built With](#built-with)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Install](#install)
-  - [Usage](#usage)
-- [Back Matter](#back-matter)
-  - [Roadmap](#roadmap)
-  - [Contributing](#contributing)
-  - [License](#license)
+* Create linear, radial, or conic gradients (with angle for linear)
+* Large preview and gradient metadata
+* Copy snippets: CSS, SwiftUI, Tailwind arbitrary value
+* Random gradient generator (2–3 stops)
+* Saved gradients list with quick preview and delete
+* Export gradients as SVG or PNG files with customizable settings
+* Enhanced validation with error checking and warnings
+* Configurable export directories and Tailwind output preferences
+* Local storage only (no network calls)
 
-</details>
+## Commands
 
-## About The Project
-<div align="center">
-    <img src="metadata/gradient-generator-2.png" alt="Screenshot" width="100%" height="auto">
-  </div>
+* **Create Gradient**: Form to define type, colors, and angle; pushes to Preview
+* **Random Gradient**: Generates a random 2–3 stop gradient and shows Preview
+* **Saved Gradients**: List of saved gradients with color tags; open Preview; rename labels (Quick Rename or Edit Label); delete
 
-**Gradient Generator** is a minimalist, local-first Raycast extension for crafting gradients. Create a gradient, preview it in a large panel, copy ready-to-use snippets (CSS, SwiftUI, Tailwind arbitrary value), generate random gradients, and save your favorites locally.
+## Preferences
 
-### Features
+* **SVG Export Directory**: Choose where SVG files are saved (default: ~/Downloads)
+* **PNG Export Directory**: Choose where PNG files are saved (default: ~/Downloads)
+* **Tailwind Output Mode**: Choose between utility classes (bg-[...]) or raw CSS output
 
-- Create linear, radial, or conic gradients (with angle for linear)
-- Large preview and gradient metadata
-- Copy snippets: CSS, SwiftUI, Tailwind arbitrary value
-- Random gradient generator (2–3 stops)
-- Saved gradients list with quick preview and delete
-- Local storage only (no network calls)
+## Export Features
 
-### Built With
+* **SVG Export**: Save gradients as scalable vector graphics with customizable dimensions
+* **PNG Export**: Export as high-quality PNG images with multiple size presets (HD, Full HD, 2K, 4K)
 
-- TypeScript + React
-- `@raycast/api`, `@raycast/utils`
+## Frequently Asked Questions
 
-## Getting started
+**Do I need an internet connection?**
 
-### Prerequisites
+No. The extension works completely offline with no network calls required.
 
-- macOS with Raycast installed
+**Can I export my gradients?**
 
-### Install
+Yes. You can copy CSS, SwiftUI, and Tailwind snippets directly from the preview panel, or export as SVG/PNG files to your chosen directory.
 
-#### From Raycast Store (production):
-Install via [Raycast Store](https://www.raycast.com/smcnab1/gradient-generator)
+**Are my saved gradients synced?**
 
-#### From source (development):
+All gradients are stored locally in Raycast's storage. They're not synced across devices right now.
 
-```bash
-npm install
-npm run dev
-```
+**How does the random generator work?**
 
-Build locally:
+It creates gradients with 2–3 color stops using random colors and positions, perfect for inspiration and quick mockups.
 
-```bash
-npm run build
-```
+**What export formats are supported?**
 
-### Commands
+SVG (scalable vector) and PNG (raster) formats are supported. PNG exports include multiple size presets and optional transparency.
 
-- Create Gradient: form to define type, colors, and angle; pushes to Preview
-- Preview Gradient: detail view with large preview, metadata, and copy actions (CSS, SwiftUI, Tailwind)
-- Random Gradient: generates a random 2–3 stop gradient and shows Preview
-- Saved Gradients: list of saved gradients with color tags; open Preview; delete
+## Troubleshooting
 
-## Back Matter
+**I can't see my saved gradients.**
 
-### Roadmap
+Make sure you've actually saved gradients using the save button in the preview panel. Check that the filter isn't set incorrectly.
 
-See [ROADMAP.md](./ROADMAP.md) for planned work and MVP scope.
+**The preview isn't showing.**
 
-### Contributing
+Try refreshing the extension or restarting Raycast. The preview requires the gradient data to be properly formatted.
 
-Contributions welcome. Please open an issue to discuss changes first.
+**Copy actions aren't working.**
 
-1. Fork the project
-2. Create a feature branch (`git checkout -b feature/my-change`)
-3. Commit your changes (`git commit -m 'feat: ...'`)
-4. Push to your branch (`git push origin feature/my-change`)
-5. Open a Pull Request
+Ensure you're using the latest version of Raycast. The copy functionality depends on Raycast's clipboard API.
 
-### License
+**Export isn't working.**
 
-MIT — see [LICENSE](./LICENSE) for details.
+Make sure you've set the export directory preferences in Raycast settings. The extension needs to know where to save your exported files.
+
+**Validation errors appear.**
+
+The extension now includes enhanced validation. Check that your hex colors are valid (e.g., #ff0000) and that you have at least 2 color stops.
