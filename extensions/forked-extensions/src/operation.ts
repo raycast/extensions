@@ -1,5 +1,6 @@
 import { Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+import * as api from "./api.js";
 import * as git from "./git.js";
 
 /**
@@ -39,10 +40,18 @@ class Operation {
   };
 
   /**
-   * Synchronizes the forked repository with the upstream repository on local.
+   * Synchronizes the forked repository with the upstream repository both on GitHub and local.
    * @remarks This will checkout to main branch and merge the upstream main branch into it.
    */
-  sync = async () => this.spawn(git.syncFork, "Syncing repository", "Synced successfully");
+  sync = async () =>
+    this.spawn(
+      async () => {
+        await api.syncFork();
+        await git.syncFork();
+      },
+      "Syncing repository",
+      "Synced successfully",
+    );
 
   /**
    * Forks an extension by adding it to the sparse-checkout list.
