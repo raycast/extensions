@@ -14,8 +14,6 @@ interface User {
 }
 
 export const baseURI = "https://api.awork.com/api/v1";
-export let authorizationInProgress = false;
-export let revalidating = false;
 
 const preferences = getPreferenceValues<Preferences>();
 
@@ -41,12 +39,6 @@ const authorizeClient = async () => {
     return;
   }
 
-  if (authorizationInProgress) {
-    console.log("Already trying to login!");
-    return;
-  }
-  authorizationInProgress = true;
-
   const authRequest = await client.authorizationRequest({
     endpoint: `${baseURI}/accounts/authorize`,
     clientId: preferences.clientId,
@@ -67,15 +59,25 @@ const authorizeClient = async () => {
         return await response.text();
       }
     })
-    .then((result) => {
-      client.setTokens(<OAuth.TokenResponse>JSON.parse(result));
+    .then(async (result) => {
+      const newTokens = <OAuth.TokenResponse>JSON.parse(result);
+      try {
+        await client.setTokens(newTokens);
+      } catch (_) {
+        confirmAlert({
+          title: "Something went wrong",
+          message: "Please try again.",
+          primaryAction: {
+            title: "Ok",
+            style: Alert.ActionStyle.Default,
+          },
+        });
+      }
     })
     .catch((error: Error) => console.error(error));
   if (await client.getTokens()) {
     console.log("Logged in successfully!");
     await getUserData();
-
-    authorizationInProgress = false;
 
     return await client.getTokens();
   }
@@ -86,10 +88,6 @@ export const refreshToken = async () => {
   if (!tokens) {
     return await authorizeClient();
   } else {
-    if (revalidating) {
-      return;
-    }
-    revalidating = true;
     if (!tokens.refreshToken) {
       confirmAlert({
         title: "Couldn't refresh token",
@@ -126,14 +124,26 @@ export const refreshToken = async () => {
               },
             },
           });
-          return;
         }
         return response.text();
       })
       .then(async (result) => {
-        if (result) {
-          const newTokens = <OAuth.TokenResponse>JSON.parse(result);
+        const newTokens = <OAuth.TokenResponse>JSON.parse(result);
+        try {
           await client.setTokens(newTokens);
+        } catch (_) {
+          confirmAlert({
+            title: "Couldn't refresh token",
+            message: "To continue using this extension please re-authorize.",
+            primaryAction: {
+              title: "Authorize",
+              style: Alert.ActionStyle.Default,
+              onAction: async () => {
+                await client.removeTokens();
+                await authorizeClient();
+              },
+            },
+          });
         }
       })
       .catch((error: Error) => console.error(error));
@@ -141,8 +151,6 @@ export const refreshToken = async () => {
     if (tokens.accessToken !== (await client.getTokens())?.accessToken) {
       console.log("Refreshed Token");
       await getUserData();
-
-      revalidating = false;
 
       return await client.getTokens();
     }
@@ -178,15 +186,6 @@ const getUserData = async () => {
 };
 
 export const getTokens = async () => {
-  if (authorizationInProgress) {
-    console.log("Currently authorizing");
-    return;
-  }
-  if (revalidating) {
-    console.log("Currently refreshing token");
-    return;
-  }
-
   if (!(await client.getTokens())) {
     console.log("Authorize Client");
     return await authorizeClient();
