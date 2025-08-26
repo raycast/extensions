@@ -20,6 +20,7 @@
     {
       "name": "menu-bar",
       "title": "Menu Bar",
+      "subtitle": "leap.new",
       "description": "Quick access to leap.new from menu bar",
       "mode": "menu-bar"
     }

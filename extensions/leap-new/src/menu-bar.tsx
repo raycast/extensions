@@ -16,9 +16,10 @@ export default function MenuBar() {
         icon={Icon.Rocket}
         onAction={() => open("raycast://extensions/andoutenc/leap-new/generate-app")}
       />
-      <MenuBarExtra.Separator />
-      <MenuBarExtra.Item title="View Documentation" icon={Icon.Book} onAction={() => open("https://docs.leap.new")} />
-      <MenuBarExtra.Item title="Open leap.new" icon={Icon.Globe} onAction={() => open("https://leap.new")} />
+      <MenuBarExtra.Section title="Links">
+        <MenuBarExtra.Item title="View Documentation" icon={Icon.Book} onAction={() => open("https://docs.leap.new")} />
+        <MenuBarExtra.Item title="Open leap.new" icon={Icon.Globe} onAction={() => open("https://leap.new")} />
+      </MenuBarExtra.Section>
     </MenuBarExtra>
   );
 }

@@ -202,6 +202,7 @@ export default function GenerateApp() {
               .map((example, index) => (
                 <Action
                   key={index}
+                  /* eslint-disable-next-line @raycast/prefer-title-case */
                   title={`"${example.slice(0, 50)}..."`}
                   icon={Icon.LightBulb}
                   onAction={() => handleExampleSelect(example)}
