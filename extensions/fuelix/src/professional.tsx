@@ -1,7 +1,7 @@
 import useFuelIX from "./api/useFuelIX";
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, LaunchProps } from "@raycast/api";
 
-export default function Longer(props) {
+export default function Professional(props: LaunchProps<{ arguments: Arguments.Professional }>) {
   const { prompt } = getPreferenceValues();
   return useFuelIX(props, {
     context: prompt,

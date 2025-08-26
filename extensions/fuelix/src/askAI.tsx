@@ -1,7 +1,16 @@
 import useFuelIX from "./api/useFuelIX";
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, LaunchProps } from "@raycast/api";
 
-export default function AskAI(props) {
+interface AskAIProps extends LaunchProps<{ arguments: Arguments.AskAI }> {
+  launchContext?: {
+    buffer?: Buffer[];
+    args?: Arguments.AskAI;
+    context?: string;
+    useSelected?: boolean;
+  };
+}
+
+export default function AskAI(props: AskAIProps) {
   const { prompt } = getPreferenceValues();
   if (props?.launchContext?.buffer) {
     return useFuelIX(

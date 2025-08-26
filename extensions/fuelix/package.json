@@ -516,16 +516,16 @@
     }
   ],
   "dependencies": {
-    "@ai-sdk/openai-compatible": "^1.0.7",
-    "@raycast/api": "^1.102.4",
-    "@raycast/utils": "^2.2.0",
-    "ai": "^5.0.15"
+    "@ai-sdk/openai-compatible": "^1.0.12",
+    "@raycast/api": "^1.102.5",
+    "@raycast/utils": "^2.2.1",
+    "ai": "^5.0.24"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "24.3.0",
-    "@types/react": "19.1.10",
-    "eslint": "^9.33.0",
+    "@types/react": "19.1.11",
+    "eslint": "^9.34.0",
     "prettier": "^3.6.2",
     "typescript": "^5.9.2"
   },

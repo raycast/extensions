@@ -1,7 +1,7 @@
 import useFuelIX from "./api/useFuelIX";
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, LaunchProps } from "@raycast/api";
 
-export default function Grammar(props) {
+export default function Friendly(props: LaunchProps<{ arguments: Arguments.Friendly }>) {
   const { prompt } = getPreferenceValues();
   return useFuelIX(props, {
     context: prompt,
