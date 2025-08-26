@@ -437,6 +437,35 @@ function Command() {
     >
       <List.Section title="Overview" subtitle={`${searchResults.length} items • ${filter} • ${sort}`} />
 
+      {searchResults.length === 0 && !isLoading && !error && (
+        <List.EmptyView
+          icon={Icon.MagnifyingGlass}
+          title="No cheatsheets found"
+          description={
+            searchQuery
+              ? `No cheatsheets match "${searchQuery}"`
+              : "No cheatsheets available yet. Try refreshing or check your connection."
+          }
+          actions={
+            <ActionPanel>
+              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={handleRefresh} />
+              <Action.Push
+                title="Create Custom Cheatsheet"
+                icon={Icon.Plus}
+                target={
+                  <CreateCustomSheetForm
+                    onCreated={async () => {
+                      const updated = await Service.getCustomCheatsheets();
+                      setCustomSheets(updated);
+                    }}
+                  />
+                }
+              />
+            </ActionPanel>
+          }
+        />
+      )}
+
       {searchQuery && (
         <>
           {titleMatches.length > 0 && (
@@ -635,28 +664,30 @@ function Command() {
         />
       ))}
 
-      <List.Item
-        title="Create New Custom Cheatsheet"
-        subtitle="Add your own cheatsheet"
-        icon={Icon.Plus}
-        accessories={[{ text: "New", icon: Icon.Star }]}
-        actions={
-          <ActionPanel>
-            <Action.Push
-              title="Create New"
-              icon={Icon.Plus}
-              target={
-                <CreateCustomSheetForm
-                  onCreated={async () => {
-                    const updated = await Service.getCustomCheatsheets();
-                    setCustomSheets(updated);
-                  }}
-                />
-              }
-            />
-          </ActionPanel>
-        }
-      />
+      {!isLoading && searchResults.length > 0 && (
+        <List.Item
+          title="Create New Custom Cheatsheet"
+          subtitle="Add your own cheatsheet"
+          icon={Icon.Plus}
+          accessories={[{ text: "New", icon: Icon.Star }]}
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="Create New"
+                icon={Icon.Plus}
+                target={
+                  <CreateCustomSheetForm
+                    onCreated={async () => {
+                      const updated = await Service.getCustomCheatsheets();
+                      setCustomSheets(updated);
+                    }}
+                  />
+                }
+              />
+            </ActionPanel>
+          }
+        />
+      )}
     </List>
   );
 }

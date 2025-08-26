@@ -144,6 +144,11 @@ export default function CopyCheatsheet({ arguments: args }: CopyCheatsheetProps)
           icon={Icon.Document}
           title="No cheatsheets found"
           description={searchQuery ? `No cheatsheets match "${searchQuery}"` : "No cheatsheets available"}
+          actions={
+            <ActionPanel>
+              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={loadData} />
+            </ActionPanel>
+          }
         />
       ) : (
         <>

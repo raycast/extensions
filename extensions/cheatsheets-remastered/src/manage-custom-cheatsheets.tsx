@@ -87,6 +87,7 @@ export default function ManageCustomCheatsheets() {
           }
           actions={
             <ActionPanel>
+              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={loadCustomSheets} />
               <Action
                 title="Create New"
                 icon={Icon.Plus}
