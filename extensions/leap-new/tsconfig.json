@@ -1,26 +1,16 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "display": "Raycast",
+  "include": ["src/**/*", "raycast-env.d.ts"],
   "compilerOptions": {
-    "target": "ES2020",
-    "lib": ["ES2020"],
+    "lib": ["ES2023"],
     "module": "commonjs",
-    "moduleResolution": "node",
-    "declaration": false,
-    "strict": false,
-    "noImplicitAny": false,
+    "target": "ES2023",
+    "strict": true,
+    "isolatedModules": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
-    "jsx": "react-jsx"
-  },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+    "jsx": "react-jsx",
+    "resolveJsonModule": true
+  }
 }

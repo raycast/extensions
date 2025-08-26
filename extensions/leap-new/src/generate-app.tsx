@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Form, Icon, open, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 
 interface FormValues {
@@ -139,11 +140,7 @@ export default function GenerateApp() {
         message: "Generating your app...",
       });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to Launch",
-        message: "Could not open leap.new",
-      });
+      showFailureToast(error, { title: "Failed to Launch" });
     }
   }
 
