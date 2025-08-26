@@ -13,6 +13,7 @@ import { useWeatherData } from "./hooks/useWeatherData";
 import { generateNoForecastDataMessage } from "./utils/error-messages";
 import { formatDate, formatTime } from "./utils/date-utils";
 import { addFavorite, removeFavorite, isFavorite as checkIsFavorite, type FavoriteLocation } from "./storage";
+import { FavoriteToggleAction } from "./components/FavoriteToggleAction";
 
 export default function GraphView(props: { name: string; lat: number; lon: number; hours?: number }) {
   const { name, lat, lon, hours = 48 } = props;
@@ -108,21 +109,7 @@ export default function GraphView(props: { name: string; lat: number; lon: numbe
       markdown={markdown}
       actions={
         <ActionPanel>
-          {isFavorite ? (
-            <Action
-              title="Remove from Favorites"
-              icon={Icon.StarDisabled}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-              onAction={handleFavoriteToggle}
-            />
-          ) : (
-            <Action
-              title="Add to Favorites"
-              icon={Icon.Star}
-              shortcut={{ modifiers: ["cmd"], key: "f" }}
-              onAction={handleFavoriteToggle}
-            />
-          )}
+          <FavoriteToggleAction isFavorite={isFavorite} onToggle={handleFavoriteToggle} />
         </ActionPanel>
       }
     />

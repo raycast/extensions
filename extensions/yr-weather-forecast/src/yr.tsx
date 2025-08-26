@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { Action, ActionPanel, List, showToast, Toast, Icon, Image } from "@raycast/api";
 import { formatPrecip, formatTemperatureCelsius, formatWindSpeed, getUnits, getFeatureFlags } from "./units";
+import { FavoriteToggleAction } from "./components/FavoriteToggleAction";
 import ForecastView from "./forecast";
 import GraphView from "./graph";
 import { searchLocations, type LocationResult } from "./location-search";
@@ -290,9 +291,10 @@ export default function Command() {
     onFavoriteToggle: () => void,
   ) => (
     <ActionPanel>
-      <Action.Push title="Open Forecast" target={<ForecastView name={name} lat={lat} lon={lon} />} />
+      <Action.Push title="Open Forecast" icon={Icon.Sun} target={<ForecastView name={name} lat={lat} lon={lon} />} />
       <Action
         title="Show Current Weather"
+        icon={Icon.Sun}
         onAction={async () => {
           try {
             const ts: TimeseriesEntry = await getWeather(lat, lon);
@@ -316,23 +318,11 @@ export default function Command() {
         shortcut={{ modifiers: ["cmd"], key: "g" }}
         target={<GraphView name={name} lat={lat} lon={lon} />}
       />
-      {isFavorite ? (
-        <Action
-          title="Remove from Favorites"
-          icon={Icon.StarDisabled}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-          onAction={onFavoriteToggle}
-        />
-      ) : (
-        <Action
-          title="Add to Favorites"
-          icon={Icon.Star}
-          shortcut={{ modifiers: ["cmd"], key: "f" }}
-          onAction={onFavoriteToggle}
-        />
-      )}
+      <FavoriteToggleAction isFavorite={isFavorite} onToggle={onFavoriteToggle} />
     </ActionPanel>
   );
+
+  console.log({ isLoading });
 
   return (
     <List

@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Detail, showToast, Toast, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, showToast, Toast } from "@raycast/api";
+import { FavoriteToggleAction } from "./components/FavoriteToggleAction";
 import { useMemo, useState, useEffect } from "react";
 import { type TimeseriesEntry } from "./weather-client";
 import { buildGraphMarkdown } from "./graph";
@@ -85,21 +86,7 @@ export default function ForecastView(props: { name: string; lat: number; lon: nu
           ) : (
             <Action title="Show 2-Day Detailed" onAction={() => setMode("detailed")} />
           )}
-          {isFavorite ? (
-            <Action
-              title="Remove from Favorites"
-              icon={Icon.StarDisabled}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-              onAction={handleFavoriteToggle}
-            />
-          ) : (
-            <Action
-              title="Add to Favorites"
-              icon={Icon.Star}
-              shortcut={{ modifiers: ["cmd"], key: "f" }}
-              onAction={handleFavoriteToggle}
-            />
-          )}
+          <FavoriteToggleAction isFavorite={isFavorite} onToggle={handleFavoriteToggle} />
         </ActionPanel>
       }
     />

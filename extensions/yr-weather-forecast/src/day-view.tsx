@@ -1,4 +1,5 @@
-import { Detail, Action, ActionPanel, showToast, Toast, Icon } from "@raycast/api";
+import { Detail, Action, ActionPanel, showToast, Toast } from "@raycast/api";
+import { FavoriteToggleAction } from "./components/FavoriteToggleAction";
 import { useMemo, useState, useEffect } from "react";
 import { buildGraphMarkdown } from "./graph";
 import { generateDaySummary, formatSummary } from "./weather-summary";
@@ -89,21 +90,7 @@ export default function DayQuickView(props: { name: string; lat: number; lon: nu
       markdown={markdown}
       actions={
         <ActionPanel>
-          {isFavorite ? (
-            <Action
-              title="Remove from Favorites"
-              icon={Icon.StarDisabled}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-              onAction={handleFavoriteToggle}
-            />
-          ) : (
-            <Action
-              title="Add to Favorites"
-              icon={Icon.Star}
-              shortcut={{ modifiers: ["cmd"], key: "f" }}
-              onAction={handleFavoriteToggle}
-            />
-          )}
+          <FavoriteToggleAction isFavorite={isFavorite} onToggle={handleFavoriteToggle} />
         </ActionPanel>
       }
     />
