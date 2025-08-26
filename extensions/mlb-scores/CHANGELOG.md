@@ -1,6 +1,6 @@
 # MLB Scores Changelog
 
-## [Add player search, standings, and bug fixes] - {PR_MERGE_DATE}
+## [Add player search, standings, and bug fixes] - 2025-08-26
 - Fixed pre-game box scores from erroring out
 - Added player search
 - Added standings
