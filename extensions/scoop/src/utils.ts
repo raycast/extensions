@@ -16,10 +16,6 @@ export async function withToast(
       title: options.success,
     });
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: options.failure,
-      message: error instanceof Error ? error.message : "An unknown error occurred",
-    });
+    await showFailureToast(error, { title: options.failure });
   }
 }
