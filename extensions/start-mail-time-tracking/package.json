@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "start-mail-time-tracking",
+  "title": "Start Mail Time Tracking",
+  "description": "Start time tracking from the current email thread.",
+  "author": "carstena1994",
+  "icon": "extension-icon.png",
+  "contributors": [],
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "System"
+  ],
+  "keywords": [
+    "email",
+    "gmail",
+    "time tracking",
+    "productivity",
+    "mail"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "start-mail-time-tracking",
+      "title": "Start Mail Time Tracking",
+      "description": "Start time tracking from the current email thread.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "prefix",
+          "placeholder": "Optional prefix",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "getMetadata": "./dist/get-command-metadata.js"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.6",
+    "@raycast/utils": "^1.18.0",
+    "parse-url": "^9.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.8.2",
+    "@types/react": "18.3.12",
+    "eslint": "^8.57.1",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
+  },
+  "scripts": {
+    "publish": "npx @raycast/api@latest publish",
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
