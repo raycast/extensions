@@ -18,17 +18,24 @@ export default function SearchCommand() {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
     const search = async () => {
       if (query) {
         setIsLoading(true);
         const pkgs = await scoopSearch(query);
-        setPackages(pkgs);
-        setIsLoading(false);
+        if (!cancelled) {
+          setPackages(pkgs);
+          setIsLoading(false);
+        }
       } else {
         setPackages([]);
+        setIsLoading(false);
       }
     };
     search();
+    return () => {
+      cancelled = true;
+    };
   }, [query]);
 
   const refreshInstalled = async () => {
