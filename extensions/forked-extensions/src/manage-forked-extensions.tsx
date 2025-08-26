@@ -85,7 +85,11 @@ function ManageForkedExtensions() {
             <ActionPanel>
               <Action icon={Icon.Eye} title="Show Details" onAction={() => setIsShowingDetail(!isShowingDetail)} />
               <Action.OpenWith path={x.folderPath} />
-              <Action.CopyToClipboard title="Copy Extension Path to Clipboard" content={x.folderName} shortcut={Keyboard.Shortcut.Common.Copy} />
+              <Action.CopyToClipboard
+                title="Copy Extension Path to Clipboard"
+                content={x.folderName}
+                shortcut={Keyboard.Shortcut.Common.Copy}
+              />
               <Action.Push
                 icon={Icon.NewDocument}
                 title="Fork an Extension"
