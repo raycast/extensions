@@ -167,6 +167,7 @@ export interface Split {
 }
 
 export interface SplitStat {
+  // Shared stats
   gamesPlayed: number;
   groundOuts: number;
   airOuts: number;
@@ -179,26 +180,28 @@ export interface SplitStat {
   intentionalWalks: number;
   hits: number;
   hitByPitch: number;
-  avg: string;
-  atBats: number;
-  obp: string;
-  slg: string;
-  ops: string;
-  caughtStealing: number;
-  stolenBases: number;
-  stolenBasePercentage: string;
-  groundIntoDoublePlay: number;
   numberOfPitches: number;
-  plateAppearances: number;
-  totalBases: number;
-  rbi: number;
-  leftOnBase: number;
-  sacBunts: number;
-  sacFlies: number;
-  babip: string;
-  groundOutsToAirouts: string;
-  catchersInterference: number;
-  atBatsPerHomeRun: string;
+  
+  // Hitting stats
+  avg?: string;
+  atBats?: number;
+  obp?: string;
+  slg?: string;
+  ops?: string;
+  caughtStealing?: number;
+  stolenBases?: number;
+  stolenBasePercentage?: string;
+  groundIntoDoublePlay?: number;
+  plateAppearances?: number;
+  totalBases?: number;
+  rbi?: number;
+  leftOnBase?: number;
+  sacBunts?: number;
+  sacFlies?: number;
+  babip?: string;
+  groundOutsToAirouts?: string;
+  catchersInterference?: number;
+  atBatsPerHomeRun?: string;
   extraBaseHits?: number;
   gidp?: number;
   gidpOpp?: number;
@@ -220,6 +223,40 @@ export interface SplitStat {
   popHits?: number;
   lineHits?: number;
   groundHits?: number;
+  
+  // Pitching stats
+  wins?: number;
+  losses?: number;
+  era?: string;
+  whip?: string;
+  inningsPitched?: string;
+  earnedRuns?: number;
+  gamesStarted?: number;
+  strikeoutsPer9Inn?: string;
+  walksPer9Inn?: string;
+  homeRunsPer9?: string;
+  saves?: number;
+  saveOpportunities?: number;
+  holds?: number;
+  blownSaves?: number;
+  completeGames?: number;
+  shutouts?: number;
+  wildPitches?: number;
+  balks?: number;
+  hitBatsmen?: number;
+  inheritedRunners?: number;
+  inheritedRunnersScored?: number;
+  battersFaced?: number;
+  outs?: number;
+  gamesPitched?: number;
+  qualityStarts?: number;
+  pitchesThrown?: number;
+  balls?: number;
+  strikes?: number;
+  strikePercentage?: string;
+  pitchesPerInning?: string;
+  runsScoredPer9?: string;
+  strikeoutWalkRatio?: string;
 }
 
 export interface Player {

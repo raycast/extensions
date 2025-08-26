@@ -1,54 +1,8 @@
-import { Action, ActionPanel, Color, Detail, Icon, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
-import PlayerDetailsResponse, { Person, Split } from "../interfaces/playerDetails";
-
-// Utility function to convert HTML to Markdown
-function convertHtmlToMarkdown(html: string): string {
-  if (!html) return "";
-  
-  let markdown = html
-    // Replace paragraph tags
-    .replace(/<p>(.*?)<\/p>/g, "$1\n\n")
-    // Replace strong/bold tags
-    .replace(/<(strong|b)>(.*?)<\/(strong|b)>/g, "**$2**")
-    // Replace emphasis/italic tags
-    .replace(/<(em|i)>(.*?)<\/(em|i)>/g, "*$2*")
-    // Replace heading tags
-    .replace(/<h1>(.*?)<\/h1>/g, "# $1\n\n")
-    .replace(/<h2>(.*?)<\/h2>/g, "## $1\n\n")
-    .replace(/<h3>(.*?)<\/h3>/g, "### $1\n\n")
-    // Replace anchor tags
-    .replace(/<a href="(.*?)">(.*?)<\/a>/g, "[$2]($1)")
-    // Replace unordered list items
-    .replace(/<li>(.*?)<\/li>/g, "- $1\n")
-    // Replace ordered list items
-    .replace(/<ol>([\s\S]*?)<\/ol>/g, (match: string, content: string) => {
-      let counter = 1;
-      return content.replace(/<li>(.*?)<\/li>/g, (m: string, item: string) => `${counter++}. ${item}\n`);
-    })
-    // Remove list tags (after processing list items)
-    .replace(/<\/?ul>/g, "\n")
-    // Replace line breaks
-    .replace(/<br\s*\/?>/g, "\n")
-    // Replace div tags
-    .replace(/<div>(.*?)<\/div>/g, "$1\n")
-    // Replace span tags
-    .replace(/<span.*?>(.*?)<\/span>/g, "$1")
-    // Remove any remaining HTML tags
-    .replace(/<[^>]*>/g, "");
-  
-  // Replace HTML entities
-  markdown = markdown
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'");
-  
-  return markdown;
-}
+import PlayerDetailsResponse, { Split } from "../interfaces/playerDetails";
+import { convertHtmlToMarkdown, playerHeadshotUrl, formatISODate, isBirthdayISO, getStatsByType } from "../lib/utils";
 
 interface Highlight {
   contentText: string;
@@ -66,7 +20,7 @@ export default function PlayerDetail({ playerId, biography, highlights, prospect
   const [selectedStat, setSelectedStat] = useState<string>("yearByYear");
   
   const { data, isLoading, error } = useFetch<PlayerDetailsResponse>(
-    `https://statsapi.mlb.com/api/v1/people/${playerId}?hydrate=currentTeam,team,stats(group=%5Bhitting%5D,type=%5ByearByYear,yearByYearAdvanced,careerRegularSeason,careerAdvanced,availableStats%5D,team(league),leagueListId=mlb_hist)&site=en`
+    `https://statsapi.mlb.com/api/v1/people/${playerId}?hydrate=currentTeam,team,stats(group=%5Bhitting,pitching%5D,type=%5ByearByYear,yearByYearAdvanced,careerRegularSeason,careerAdvanced,availableStats%5D,team(league),leagueListId=mlb_hist)&site=en`
   );
 
   if (isLoading) {
@@ -88,86 +42,119 @@ export default function PlayerDetail({ playerId, biography, highlights, prospect
 
   const player = data.people[0];
   
-  // Get player headshot URL
-  const getPlayerHeadshot = (playerId: number, size = 200) => {
-    return `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:83:current.png,w_${size},q_auto:best/v1/people/${playerId}/headshot/83/current`;
-  };
+  // Utility helpers moved to src/lib/utils.ts
 
-  // Find stats by type
-  const getStatsByType = (type: string) => {
-    return player.stats.find((stat) => stat.type.displayName === type);
-  };
-
-  // Format date string
-  const formatDate = (dateString: string) => {
-    // Parse the date parts to avoid timezone issues
-    const [year, month, day] = dateString.split('-').map(num => parseInt(num));
-    // Create date with local timezone (months are 0-indexed in JS Date)
-    const date = new Date(year, month - 1, day);
-    return date.toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' });
-  };
+  // Check if player is a pitcher
+  const isPitcher = player.primaryPosition?.abbreviation === "P";
   
-  // Check if today is the player's birthday
-  const isBirthday = (birthDateString: string) => {
-    const today = new Date();
-    // Parse the date parts to avoid timezone issues
-    const [year, month, day] = birthDateString.split('-').map(num => parseInt(num));
-    // Create date with local timezone (months are 0-indexed in JS Date)
-    const birthDate = new Date(year, month - 1, day);
-    return today.getMonth() === birthDate.getMonth() && today.getDate() === birthDate.getDate();
-  };
-
-  // Get career stats
-  const careerStats = getStatsByType("career")?.splits[0]?.stat;
+  // Get career stats based on player type
+  const careerHittingStats = getStatsByType(player.stats, "career", "hitting")?.splits[0]?.stat;
+  const careerPitchingStats = isPitcher ? getStatsByType(player.stats, "career", "pitching")?.splits[0]?.stat : null;
   
-  // Get yearly stats
-  const yearlyStats = getStatsByType(selectedStat)?.splits || [];
+  // Get yearly stats based on player type
+  const yearlyHittingStats = getStatsByType(player.stats, selectedStat, "hitting")?.splits || [];
+  const yearlyPitchingStats = isPitcher ? getStatsByType(player.stats, selectedStat, "pitching")?.splits || [] : [];
 
   // Sort yearly stats by season in descending order (most recent first)
-  const sortedYearlyStats = [...yearlyStats].sort((a, b) => parseInt(b.season) - parseInt(a.season));
+  const sortedYearlyHittingStats = [...yearlyHittingStats].sort((a, b) => parseInt(b.season) - parseInt(a.season));
+  const sortedYearlyPitchingStats = isPitcher ? [...yearlyPitchingStats].sort((a, b) => parseInt(b.season) - parseInt(a.season)) : [];
 
   // Generate markdown for player details
   const markdown = `
-# <img src="${getPlayerHeadshot(player.id, 75)}" style="height:75px; width: 75px;" /> ${player.fullName || ""} ${player.primaryNumber ? `#${player.primaryNumber}` : ""}
+# <img src="${playerHeadshotUrl(player.id, 75)}" style="height:75px; width: 75px;" /> ${player.fullName || ""} ${player.primaryNumber ? `#${player.primaryNumber}` : ""}
 
-${careerStats ? `
+${isPitcher && careerPitchingStats ? `
+| Games | W | L | ERA | IP | SO |
+| ----- | --- | --- | --- | --- | --- |
+| ${careerPitchingStats.gamesPlayed || '-'} | ${careerPitchingStats.wins || '0'} | ${careerPitchingStats.losses || '0'} | ${careerPitchingStats.era || '0.00'} | ${careerPitchingStats.inningsPitched || '0.0'} | ${careerPitchingStats.strikeOuts || '0'} |` : 
+    careerHittingStats ? `
 | Games | AB | AVG | HR | RBI | OPS |
 | ----- | --- | --- | --- | --- | --- |
-| ${careerStats.gamesPlayed || '-'} | ${careerStats.atBats || '0'} | ${careerStats.avg || '.000'} | ${careerStats.homeRuns || '0'} | ${careerStats.rbi || '0'} | ${careerStats.ops || '.000'} |` : ""}`;
+| ${careerHittingStats.gamesPlayed || '-'} | ${careerHittingStats.atBats || '0'} | ${careerHittingStats.avg || '.000'} | ${careerHittingStats.homeRuns || '0'} | ${careerHittingStats.rbi || '0'} | ${careerHittingStats.ops || '.000'} |` : ""}`;
 
-  // Generate stats table for the selected season
-  const renderStatsTable = (split: Split) => {
+  // Generate stats table for the selected season based on player type
+  const renderStatsTable = (split: Split, isPitchingStats: boolean = false) => {
     const stat = split.stat;
     if (!stat) return null;
     
-    return (
-      <>
-        <List.Item.Detail.Metadata.Label title="Games" text={stat.gamesPlayed?.toString() || "0"} />
-        <List.Item.Detail.Metadata.Label title="Batting Avg" text={stat.avg || ".000"} />
-        <List.Item.Detail.Metadata.Label title="OBP" text={stat.obp || ".000"} />
-        <List.Item.Detail.Metadata.Label title="SLG" text={stat.slg || ".000"} />
-        <List.Item.Detail.Metadata.Label title="OPS" text={stat.ops || ".000"} />
-        <List.Item.Detail.Metadata.Separator />
-        <List.Item.Detail.Metadata.Label title="At Bats" text={stat.atBats?.toString() || "0"} />
-        <List.Item.Detail.Metadata.Label title="Hits" text={stat.hits?.toString() || "0"} />
-        <List.Item.Detail.Metadata.Label title="Doubles" text={stat.doubles?.toString() || "0"} />
-        <List.Item.Detail.Metadata.Label title="Triples" text={stat.triples?.toString() || "0"} />
-        <List.Item.Detail.Metadata.Label title="Home Runs" text={stat.homeRuns?.toString() || "0"} />
-        <List.Item.Detail.Metadata.Label title="RBI" text={stat.rbi?.toString() || "0"} />
-        <List.Item.Detail.Metadata.Label title="Runs" text={stat.runs?.toString() || "0"} />
-        <List.Item.Detail.Metadata.Separator />
-        <List.Item.Detail.Metadata.Label title="Walks" text={stat.baseOnBalls?.toString() || "0"} />
-        <List.Item.Detail.Metadata.Label title="Strikeouts" text={stat.strikeOuts?.toString() || "0"} />
-        <List.Item.Detail.Metadata.Label title="Stolen Bases" text={stat.stolenBases?.toString() || "0"} />
-        <List.Item.Detail.Metadata.Label title="Caught Stealing" text={stat.caughtStealing?.toString() || "0"} />
-        {stat.babip && (
-          <List.Item.Detail.Metadata.Label title="BABIP" text={stat.babip} />
-        )}
-        {stat.groundOutsToAirouts && (
-          <List.Item.Detail.Metadata.Label title="GO/AO" text={stat.groundOutsToAirouts} />
-        )}
-      </>
-    );
+    // Create arrays to hold metadata items
+    const metadataItems: JSX.Element[] = [];
+    
+    if (isPitchingStats) {
+      // Basic pitching stats
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="games" title="Games" text={stat.gamesPlayed?.toString() || "0"} />);
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="gamesStarted" title="Games Started" text={stat.gamesStarted?.toString() || "0"} />);
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="wl" title="W-L" text={`${stat.wins || 0}-${stat.losses || 0}`} />);
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="era" title="ERA" text={stat.era || "0.00"} />);
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="whip" title="WHIP" text={stat.whip || "0.00"} />);
+      metadataItems.push(<List.Item.Detail.Metadata.Separator key="sep1" />);
+      
+      // Detailed pitching stats
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="ip" title="IP" text={stat.inningsPitched || "0.0"} />);
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="hits" title="Hits" text={stat.hits?.toString() || "0"} />);
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="runs" title="Runs" text={stat.runs?.toString() || "0"} />);
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="earnedRuns" title="Earned Runs" text={stat.earnedRuns?.toString() || "0"} />);
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="homeRuns" title="Home Runs" text={stat.homeRuns?.toString() || "0"} />);
+      metadataItems.push(<List.Item.Detail.Metadata.Separator key="sep2" />);
+      
+      // Advanced pitching stats
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="strikeouts" title="Strikeouts" text={stat.strikeOuts?.toString() || "0"} />);
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="walks" title="Walks" text={stat.baseOnBalls?.toString() || "0"} />);
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="k9" title="K/9" text={stat.strikeoutsPer9Inn || "0.00"} />);
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="bb9" title="BB/9" text={stat.walksPer9Inn || "0.00"} />);
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="hr9" title="HR/9" text={stat.homeRunsPer9 || "0.00"} />);
+      metadataItems.push(<List.Item.Detail.Metadata.Separator key="sep3" />);
+      
+      // Relief pitching stats
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="saves" title="Saves" text={stat.saves?.toString() || "0"} />);
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="saveOpps" title="Save Opps" text={stat.saveOpportunities?.toString() || "0"} />);
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="holds" title="Holds" text={stat.holds?.toString() || "0"} />);
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="blownSaves" title="Blown Saves" text={stat.blownSaves?.toString() || "0"} />);
+      
+      // Optional stats
+      if (stat.completeGames) {
+        metadataItems.push(<List.Item.Detail.Metadata.Label key="cg" title="Complete Games" text={stat.completeGames.toString()} />);
+      }
+      
+      if (stat.shutouts) {
+        metadataItems.push(<List.Item.Detail.Metadata.Label key="shutouts" title="Shutouts" text={stat.shutouts.toString()} />);
+      }
+    } else {
+      // Basic hitting stats
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="games" title="Games" text={stat.gamesPlayed?.toString() || "0"} />);
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="avg" title="Batting Avg" text={stat.avg || ".000"} />);
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="obp" title="OBP" text={stat.obp || ".000"} />);
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="slg" title="SLG" text={stat.slg || ".000"} />);
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="ops" title="OPS" text={stat.ops || ".000"} />);
+      metadataItems.push(<List.Item.Detail.Metadata.Separator key="sep1" />);
+      
+      // Detailed hitting stats
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="atBats" title="At Bats" text={stat.atBats?.toString() || "0"} />);
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="hits" title="Hits" text={stat.hits?.toString() || "0"} />);
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="doubles" title="Doubles" text={stat.doubles?.toString() || "0"} />);
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="triples" title="Triples" text={stat.triples?.toString() || "0"} />);
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="homeRuns" title="Home Runs" text={stat.homeRuns?.toString() || "0"} />);
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="rbi" title="RBI" text={stat.rbi?.toString() || "0"} />);
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="runs" title="Runs" text={stat.runs?.toString() || "0"} />);
+      metadataItems.push(<List.Item.Detail.Metadata.Separator key="sep2" />);
+      
+      // Advanced hitting stats
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="walks" title="Walks" text={stat.baseOnBalls?.toString() || "0"} />);
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="strikeouts" title="Strikeouts" text={stat.strikeOuts?.toString() || "0"} />);
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="stolenBases" title="Stolen Bases" text={stat.stolenBases?.toString() || "0"} />);
+      metadataItems.push(<List.Item.Detail.Metadata.Label key="caughtStealing" title="Caught Stealing" text={stat.caughtStealing?.toString() || "0"} />);
+      
+      // Optional stats
+      if (stat.babip) {
+        metadataItems.push(<List.Item.Detail.Metadata.Label key="babip" title="BABIP" text={stat.babip} />);
+      }
+      
+      if (stat.groundOutsToAirouts) {
+        metadataItems.push(<List.Item.Detail.Metadata.Label key="goao" title="GO/AO" text={stat.groundOutsToAirouts} />);
+      }
+    }
+    
+    return <>{metadataItems}</>;
   };
 
   return (
@@ -176,10 +163,11 @@ ${careerStats ? `
       searchBarPlaceholder="Filter seasons..."
       navigationTitle={`${player.fullName} - Player Details`}
       isShowingDetail
-      selectedItemId={sortedYearlyStats.length > 0 ? `season-${sortedYearlyStats[0].season}-${sortedYearlyStats[0].team?.abbreviation || ""}` : undefined}
-      onSelectionChange={(id) => {
-        // No need to do anything here as we're just using the list for display
-      }}
+      selectedItemId={isPitcher && sortedYearlyPitchingStats.length > 0 ? 
+        `pitching-season-${sortedYearlyPitchingStats[0].season}-${sortedYearlyPitchingStats[0].team?.abbreviation || ""}` : 
+        sortedYearlyHittingStats.length > 0 ? 
+        `hitting-season-${sortedYearlyHittingStats[0].season}-${sortedYearlyHittingStats[0].team?.abbreviation || ""}` : 
+        undefined}
       throttle
     >
       <List.Section title="Player Information" subtitle={player.currentTeam ? player.currentTeam.name : "Retired/Not Active"}>
@@ -187,7 +175,7 @@ ${careerStats ? `
           id="overview"
           title="Overview"
           subtitle={`${player.primaryPosition?.abbreviation || ""} ${player.primaryNumber ? `| #${player.primaryNumber}` : ""}`}
-          accessories={[{ text: `${player.birthCity || ""}, ${player.birthStateProvince || ""}` }]}
+          accessories={[{ text: `${player.birthCity || ""}, ${player.birthStateProvince || player.birthCountry}` }]}
           detail={
             <List.Item.Detail
               markdown={markdown}
@@ -208,10 +196,10 @@ ${careerStats ? `
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label 
                     title="Birth Date" 
-                    text={`${formatDate(player.birthDate)}${isBirthday(player.birthDate) ? ' 🎂' : ''}`}
-                    icon={isBirthday(player.birthDate) ? { source: Icon.Gift, tintColor: Color.Yellow } : undefined}
+                    text={`${formatISODate(player.birthDate)}${isBirthdayISO(player.birthDate) ? ' 🎂' : ''}`}
+                    icon={isBirthdayISO(player.birthDate) ? { source: Icon.Gift, tintColor: Color.Yellow } : undefined}
                   />
-                  <List.Item.Detail.Metadata.Label title="Birthplace" text={`${player.birthCity || ""}, ${player.birthStateProvince || ""}, ${player.birthCountry || ""}`} />
+                  <List.Item.Detail.Metadata.Label title="Birthplace" text={`${player.birthCity || ""}, ${player.birthStateProvince || ""} ${player.birthCountry || ""}`} />
                 </List.Item.Detail.Metadata>
               }
             />
@@ -220,7 +208,6 @@ ${careerStats ? `
             <ActionPanel>
               <Action.OpenInBrowser title="View on MLB.com" url={`https://www.mlb.com/player/${player.id}`} />
               <Action.CopyToClipboard title="Copy Player ID" content={player.id.toString()} />
-              <Action.CopyToClipboard title="Copy Player Name" content={player.fullName} />
             </ActionPanel>
           }
         />
@@ -271,16 +258,63 @@ ${careerStats ? `
         ) : null}
       </List.Section>
 
-      <List.Section title="Season Stats" subtitle={`${selectedStat === "yearByYearAdvanced" ? "Advanced" : "Regular"}`}>
-        {sortedYearlyStats.map((split) => {
+      {isPitcher && (
+        <List.Section title="Pitching Stats" subtitle={`${selectedStat === "yearByYearAdvanced" ? "Advanced" : "Regular"}`}>
+          {sortedYearlyPitchingStats.map((split) => {
+            // Make sure team data exists and has required properties
+            const teamName = split.team ? (split.team.name || "Unknown Team") : "";
+            const teamAbbr = split.team ? (split.team.abbreviation || teamName) : "";
+            
+            return (
+              <List.Item
+                key={`pitching-${split.season}-${teamAbbr}`}
+                id={`pitching-season-${split.season}-${teamAbbr}`}
+                title={split.season}
+                subtitle={teamAbbr}
+                accessories={[
+                  { text: `${split.stat?.wins || 0}-${split.stat?.losses || 0}` },
+                  { text: `${split.stat?.era || "0.00"} ERA` },
+                  { text: `${split.stat?.inningsPitched || "0.0"} IP` },
+                ]}
+                detail={
+                  <List.Item.Detail
+                    markdown={`# ${split.season} Pitching Season - ${teamName}`}
+                    metadata={
+                      <List.Item.Detail.Metadata>
+                        {renderStatsTable(split, true)}
+                      </List.Item.Detail.Metadata>
+                    }
+                  />
+                }
+                actions={
+                  <ActionPanel>
+                    <Action.OpenInBrowser
+                      title="View Season Stats on MLB.com"
+                      url={`https://www.mlb.com/player/${player.id}/stats/${split.season}`}
+                    />
+                    <Action.CopyToClipboard
+                      title="Copy Season Stats"
+                      content={`${player.fullName} ${split.season} Pitching Stats: ${split.stat?.gamesPlayed || 0} G, ${split.stat?.wins || 0}-${split.stat?.losses || 0}, ${split.stat?.era || "0.00"} ERA, ${split.stat?.inningsPitched || "0.0"} IP, ${split.stat?.strikeOuts || 0} K`}
+                    />
+                    <Action.OpenInBrowser title="View on MLB.com" url={`https://www.mlb.com/player/${player.id}`} />
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
+        </List.Section>
+      )}
+
+      <List.Section title="Hitting Stats" subtitle={`${selectedStat === "yearByYearAdvanced" ? "Advanced" : "Regular"}`}>
+        {sortedYearlyHittingStats.map((split) => {
           // Make sure team data exists and has required properties
           const teamName = split.team ? (split.team.name || "Unknown Team") : "";
           const teamAbbr = split.team ? (split.team.abbreviation || teamName) : "";
           
           return (
             <List.Item
-              key={`${split.season}-${teamAbbr}`}
-              id={`season-${split.season}-${teamAbbr}`}
+              key={`hitting-${split.season}-${teamAbbr}`}
+              id={`hitting-season-${split.season}-${teamAbbr}`}
               title={split.season}
               subtitle={teamAbbr}
               accessories={[
@@ -290,7 +324,7 @@ ${careerStats ? `
               ]}
               detail={
                 <List.Item.Detail
-                  markdown={`# ${split.season} Season - ${teamName}`}
+                  markdown={`# ${split.season} ${isPitcher ? "Hitting" : ""} Season - ${teamName}`}
                   metadata={
                     <List.Item.Detail.Metadata>
                       {renderStatsTable(split)}
@@ -306,7 +340,7 @@ ${careerStats ? `
                   />
                   <Action.CopyToClipboard
                     title="Copy Season Stats"
-                    content={`${player.fullName} ${split.season} Stats: ${split.stat?.gamesPlayed || 0} G, ${split.stat?.avg || ".000"} AVG, ${split.stat?.homeRuns || 0} HR, ${split.stat?.rbi || 0} RBI, ${split.stat?.ops || ".000"} OPS`}
+                    content={`${player.fullName} ${split.season} ${isPitcher ? "Hitting" : ""} Stats: ${split.stat?.gamesPlayed || 0} G, ${split.stat?.avg || ".000"} AVG, ${split.stat?.homeRuns || 0} HR, ${split.stat?.rbi || 0} RBI, ${split.stat?.ops || ".000"} OPS`}
                   />
                   <Action.OpenInBrowser title="View on MLB.com" url={`https://www.mlb.com/player/${player.id}`} />
                 </ActionPanel>
