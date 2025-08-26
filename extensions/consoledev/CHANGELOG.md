@@ -1,6 +1,6 @@
 # Consoledev changelog
 
-## [Major Rewrite + Support Windows] - {PR_MERGE_DATE}
+## [Major Rewrite + Support Windows] - 2025-08-26
 - Fix extension was no longer working
 - Description shown in Detail panel w/ Markdown formatting
 - Simplify parser to directly expose objects
