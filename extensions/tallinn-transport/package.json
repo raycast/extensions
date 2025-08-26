@@ -7,7 +7,7 @@
     "Web"
   ],
   "icon": "extension-icon.png",
-  "author": "jramirezs",
+  "author": "joramser",
   "license": "MIT",
   "commands": [
     {
@@ -35,6 +35,7 @@
   "dependencies": {
     "@raycast/api": "^1.101.1",
     "@raycast/utils": "^2.2.0",
+    "axios": "^1.11.0",
     "date-fns": "^4.1.0",
     "papaparse": "^5.5.3",
     "turndown": "^7.2.0"

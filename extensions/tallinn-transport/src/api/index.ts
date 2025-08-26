@@ -1,3 +1,5 @@
+import axios from "axios";
+
 const BASE_URL = "https://transport.tallinn.ee";
 
 export type RouteBase = {
@@ -46,35 +48,41 @@ export type AnnouncementRaw = {
 };
 
 export const HEADERS = {
-  Accept: "*/*",
-  "Sec-Fetch-Site": "same-origin",
-  "Sec-Fetch-Dest": "empty",
-  "Accept-Language": "en-US,en;q=0.9",
-  "Sec-Fetch-Mode": "cors",
+  Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+  "Accept-Encoding": "gzip, deflate, br, zstd",
+  "Accept-Language": "en-US,en;q=0.8",
+  Connection: "keep-alive",
+  Host: "transport.tallinn.ee",
+  "sec-ch-ua": '"Not;A=Brand";v="99", "Brave";v="139", "Chromium";v="139"',
+  "sec-ch-ua-mobile": "?0",
+  "sec-ch-ua-platform": '"macOS"',
+  "Sec-Fetch-Dest": "document",
+  "Sec-Fetch-Mode": "navigate",
+  "Sec-Fetch-Site": "none",
+  "Sec-Fetch-User": "?1",
+  "Sec-GPC": "1",
+  "Upgrade-Insecure-Requests": "1",
   "User-Agent":
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Safari/605.1.15",
-  "Accept-Encoding": "gzip, deflate, br",
-  Referer: `${BASE_URL}/`,
-  Priority: "u=3, i",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
 };
 
 export async function fetchRoutes() {
-  const res = await fetch(`${BASE_URL}/data/routes.txt?${Date.now()}`, { headers: HEADERS });
-  return res.text();
+  const res = await axios.get(`${BASE_URL}/data/routes.txt?1756195200000`, { headers: HEADERS });
+  return res.data;
 }
 
 export async function fetchStops() {
-  const res = await fetch(`${BASE_URL}/data/stops.txt?${Date.now()}`, { headers: HEADERS });
-  return res.text();
+  const res = await axios.get(`${BASE_URL}/data/stops.txt?${Date.now()}`, { headers: HEADERS });
+  return res.data;
 }
 
 export async function fetchAnnouncements() {
-  const res = await fetch(`${BASE_URL}/announcements.json?${Date.now()}`, { headers: HEADERS });
-  return res.json();
+  const res = await axios.get(`${BASE_URL}/announcements.json?${Date.now()}`, { headers: HEADERS });
+  return res.data;
 }
 
 export async function fetchDeparturesForStop(siriId: string) {
   const url = `${BASE_URL}/siri-stop-departures.php?stopid=${siriId}&time=${Date.now()}`;
-  const res = await fetch(url, { headers: HEADERS });
-  return res.text();
+  const res = await axios.get(url, { headers: HEADERS });
+  return res.data;
 }
