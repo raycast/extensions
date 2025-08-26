@@ -1,6 +1,6 @@
 # Leap.new Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2025-08-26
 
 - Generate production-ready fullstack apps with leap.new AI platform
 - Use case templates: Personal App, Internal Tool, Customer-Facing Product, SaaS Product, Marketplace/Platform, Content/Media Site, Prototype/MVP
