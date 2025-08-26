@@ -68,9 +68,10 @@ const useDomainOrIp = (input: string) => {
   if (error) {
     showFailureToast(error, {
       title: "Error fetching URL",
-      message: process.platform === "darwin"
-        ? "Please make sure you have a browser open with a valid URL."
-        : "Please provide a domain or IP address as input.",
+      message:
+        process.platform === "darwin"
+          ? "Please make sure you have a browser open with a valid URL."
+          : "Please provide a domain or IP address as input.",
     });
   }
 
