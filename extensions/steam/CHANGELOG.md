@@ -1,6 +1,6 @@
 # Steam Changelog
 
-## [Routine Maintenance] - {PR_MERGE_DATE}
+## [Routine Maintenance] - 2025-08-26
 
 - Remove the typo dependency `data-fns`
 - Drop redundant `node-fetch` dependency
