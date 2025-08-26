@@ -32,6 +32,9 @@ All custom sheets are stored locally in Raycast's storage. They're not synced ac
 
 Search prioritizes title matches first, then content matches. This means cheatsheets with your search term in the title appear before those with it in the content, making results more relevant.
 
+## Screenshot
+![Screenshot](./metadata/cheatsheets-remastered-1.png)
+
 ## Troubleshooting
 
 **I can't find a cheatsheet.**
