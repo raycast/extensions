@@ -121,36 +121,37 @@ func colorFromString(_ colorString: String) -> NSColor {
 
 class OverlayView: NSView {
     let config: PresetConfig
-    
+
     init(frame: NSRect, config: PresetConfig) {
         self.config = config
         super.init(frame: frame)
     }
-    
+
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        print("Error: init(coder:) is not implemented.")
+        return nil
     }
-    
+
     override func draw(_ dirtyRect: NSRect) {
         guard let context = NSGraphicsContext.current?.cgContext else { return }
-        
+
         let mouseLocation = NSEvent.mouseLocation
         guard let screenContainingMouse = NSScreen.screens.first(where: { $0.frame.contains(mouseLocation) }) else { return }
         let screenFrame = screenContainingMouse.frame
-        
+
         let cursorInWindow = CGPoint(x: mouseLocation.x - screenFrame.origin.x, y: mouseLocation.y - screenFrame.origin.y)
-        
+
         let circleRect = CGRect(
             x: cursorInWindow.x - config.circle.radius,
             y: cursorInWindow.y - config.circle.radius,
             width: config.circle.radius * 2,
             height: config.circle.radius * 2
         )
-        
+
         // Fill the background with the screen opacity
         context.setFillColor(NSColor.black.withAlphaComponent(config.screenOpacity).cgColor)
         context.fill(bounds)
-        
+
         if config.circle.color.lowercased() == "clear" {
             context.saveGState()
             context.addEllipse(in: circleRect)
@@ -162,7 +163,7 @@ class OverlayView: NSView {
             context.setFillColor(circleColor.withAlphaComponent(config.circle.opacity).cgColor)
             context.fillEllipse(in: circleRect)
         }
-        
+
         if let border = config.circle.border {
             let borderColor = colorFromString(border.color)
             context.setStrokeColor(borderColor.cgColor)
@@ -174,22 +175,24 @@ class OverlayView: NSView {
 
 
 class LocateCursorTool: NSObject, NSApplicationDelegate {
-    var window: OverlayWindow!
+    var window: OverlayWindow?
     var mouseMoveMonitor: Any?
     var keyDownMonitor: Any?
 
-    private var lockFileURL: URL = {
+    private var lockFileURL: URL? = {
         guard let appSupportURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
-            fatalError("Unable to find Application Support directory.")
+            print("Error: Unable to find Application Support directory.")
+            return nil
         }
         let directoryURL = appSupportURL.appendingPathComponent("com.raycast.where-is-my-cursor")
-        try? FileManager.default.createDirectory(at: directoryURL, withIntermediateDirectories: true, attributes: nil)
-        return directoryURL.appendingPathComponent("LocateCursor.lock")
+        do {
+            try FileManager.default.createDirectory(at: directoryURL, withIntermediateDirectories: true, attributes: nil)
+            return directoryURL.appendingPathComponent("LocateCursor.lock")
+        } catch {
+            print("Error: Unable to create directory \(directoryURL): \(error)")
+            return nil
+        }
     }()
-
-    private var lockFilePath: String {
-        return lockFileURL.path
-    }
 
     func run() {
         if isAnotherInstanceRunning() {
@@ -249,7 +252,7 @@ class LocateCursorTool: NSObject, NSApplicationDelegate {
         }
 
         startSession(with: preset, duration: duration)
-        
+
         let app = NSApplication.shared
         app.delegate = self
         app.run()
@@ -267,12 +270,13 @@ class LocateCursorTool: NSObject, NSApplicationDelegate {
     }
 
     private func writeLockFile() {
+        guard let lockURL = lockFileURL else { return }
         let pid = ProcessInfo.processInfo.processIdentifier
-        try? String(pid).write(to: lockFileURL, atomically: true, encoding: .utf8)
+        try? String(pid).write(to: lockURL, atomically: true, encoding: .utf8)
     }
 
     private func readLockFile() -> Int32? {
-        guard let pidString = try? String(contentsOf: lockFileURL, encoding: .utf8) else { return nil }
+        guard let lockURL = lockFileURL, let pidString = try? String(contentsOf: lockURL, encoding: .utf8) else { return nil }
         return Int32(pidString)
     }
 
@@ -286,12 +290,16 @@ class LocateCursorTool: NSObject, NSApplicationDelegate {
         if let runningApp = NSRunningApplication(processIdentifier: pid) {
             runningApp.terminate()
         }
-        try? FileManager.default.removeItem(at: lockFileURL)
+        if let lockURL = lockFileURL {
+            try? FileManager.default.removeItem(at: lockURL)
+        }
     }
 
     private func cleanupAndTerminate() {
         removeMonitors()
-        try? FileManager.default.removeItem(at: lockFileURL)
+        if let lockURL = lockFileURL {
+            try? FileManager.default.removeItem(at: lockURL)
+        }
         NSApp.terminate(nil)
     }
 
@@ -317,7 +325,7 @@ class LocateCursorTool: NSObject, NSApplicationDelegate {
 
     private func startMonitors() {
         mouseMoveMonitor = NSEvent.addGlobalMonitorForEvents(matching: .mouseMoved) { [weak self] _ in
-            self?.window.contentView?.needsDisplay = true
+            self?.window?.contentView?.needsDisplay = true
         }
 
         /// The keycode for the Escape key on macOS keyboards.
@@ -325,13 +333,6 @@ class LocateCursorTool: NSObject, NSApplicationDelegate {
 
         keyDownMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
             if event.keyCode == escapeKeyCode {
-            self?.cleanupAndTerminate()
-            }
-        }
-
-
-        keyDownMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
-            if event.keyCode == 53 { // 53 is the keycode for Escape
                 self?.cleanupAndTerminate()
             }
         }
