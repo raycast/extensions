@@ -9,6 +9,10 @@
   "contributors": [
     "pernielsentikaer"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Communication",
     "Productivity",
@@ -33,24 +37,41 @@
   ],
   "preferences": [
     {
+      "name": "githubPersonalAccessToken",
+      "title": "GitHub Personal Access Token",
+      "description": "Optional. Your GitHub's personal access token. Required scope is: 'repo'.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Your personal access token"
+    },
+    {
       "name": "repositoryConfigurationPath",
       "title": "Repository Path",
       "description": "Path to the repository where the extension is located.",
       "type": "directory",
       "required": true,
-      "default": "~/Documents"
+      "default": "~/.config/raycast/forked-extensions"
     },
     {
-      "name": "forkedRepository",
-      "title": "Forked Repository",
-      "placeholder": "e.g. LitoMore/raycast-extensions",
-      "description": "The repository where the forked extensions are stored. The format should be 'username/repository'.",
-      "type": "textfield",
-      "required": true
+      "name": "gitRemoteType",
+      "title": "Git Remote Type",
+      "description": "Choose the type of Git remote to use for the repository.",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "value": "https",
+          "title": "HTTPS"
+        },
+        {
+          "value": "ssh",
+          "title": "SSH"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.4",
+    "@raycast/api": "^1.102.5",
     "got": "^14.4.7",
     "nano-spawn": "^1.0.2"
   },
@@ -58,8 +79,8 @@
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.33.0",
     "@raycast/eslint-config": "^2.0.4",
-    "@raycast/utils": "^2.2.0",
-    "@types/node": "^24.2.1",
+    "@raycast/utils": "^2.2.1",
+    "@types/node": "^24.3.0",
     "@types/react": "^19.1.10",
     "eslint": "^9.33.0",
     "prettier": "^3.6.2",
