@@ -24,7 +24,7 @@ export async function authorize(): Promise<string> {
   const authRequest = await client.authorizationRequest({
     endpoint: "https://accounts.google.com/o/oauth2/v2/auth",
     clientId: CLIENT_ID,
-    scope: "https://www.googleapis.com/auth/calendar.events",
+    scope: "https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.readonly",
   });
   const { authorizationCode } = await client.authorize(authRequest);
   const tokens = await fetchTokens(authRequest, authorizationCode);
