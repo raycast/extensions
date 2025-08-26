@@ -43,6 +43,9 @@ export const getFocusWindowPath = async (app: Application) => {
     if (path == "missing value" || path == "") {
       return "";
     }
+    if (!path.startsWith("file://") && !path.startsWith("/")) {
+      return "";
+    }
     if (path.startsWith("file://")) {
       path = path.replace("file://", "");
     }
