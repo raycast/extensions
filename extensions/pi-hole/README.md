@@ -110,3 +110,8 @@ When using the timed disable feature, you can use these formats:
 - Verify your API token is correct and has admin permissions
 - Check that your Pi-hole instance is running and responsive
 - Increase connection timeout if you experience timeout errors
+
+
+---
+
+Pi-hole® is a registered trademark of Pi-hole LLC. This project is not affiliated with, endorsed, or sponsored by Pi-hole LLC.
