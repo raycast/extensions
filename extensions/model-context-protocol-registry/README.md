@@ -70,6 +70,8 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [Anytype](https://github.com/anyproto/anytype-mcp) | A Model Context Protocol (MCP) server for Anytype that enables AI assistants to seamlessly interact with Anytype's API through natural language. Manage spaces, objects, properties, types and more in your knowledge base. |
 | [Gen-PDF](https://gen-pdf.com) | MCP server to generate professional looking PDF. Perfect for creating reports, invoices, contracts, and more. |
 | [Linear](https://linear.app/docs/mcp) | The Model Context Protocol (MCP) server provides a standardized interface that allows any compatible AI model or agent to access your Linear data in a simple and secure way. The Linear MCP server has tools available for finding, creating, and updating objects in Linear like issues, projects, and comments. |
+| [Rube](https://rube.composio.dev) |  Rube is a Model‑Context‑Protocol (MCP) server built on the Composio integration platform. It connects AI chat tools to more than 500 business and productivity applications – things like Gmail, Slack, Notion, GitHub, Linear, Airtable, and many others. |
+
 ### Community MCP Servers
 
 | Title | Description |

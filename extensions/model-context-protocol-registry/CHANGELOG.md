@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Rube MCP Server] - 2025-08-26
+
+Add official Rube MCP Server to registry to connect AI tools to 500+ apps
+
 ## [Add Linear MCP Server] - 2025-08-11
 
 Add official Linear MCP Server to registry to manage projects
