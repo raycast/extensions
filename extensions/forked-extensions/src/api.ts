@@ -65,7 +65,7 @@ export const getForkedRepository = async () => {
 };
 
 /**
- * Syncs the forked repository with the upstream repository.
+ * Syncs the forked repository with the upstream repository on GitHub.
  *
  * @returns A promise that resolves to the message from the GitHub API response.
  * @see {@link https://docs.github.com/en/rest/branches/branches?apiVersion=2022-11-28#sync-a-fork-branch-with-the-upstream-repository|Sync a fork branch with the upstream repository}
