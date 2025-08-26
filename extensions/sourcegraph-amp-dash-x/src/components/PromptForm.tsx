@@ -1,4 +1,3 @@
-// @ts-nocheck: Raycast API has fundamental React type compatibility issues
 import {
   Action,
   ActionPanel,
@@ -107,12 +106,9 @@ export default function PromptForm({ prompt, onSave }: PromptFormProps) {
   }
 
   return (
-    // @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues
     <Form
       actions={
-        // @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues
         <ActionPanel>
-          {/* @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues */}
           <Action.SubmitForm
             title={isEditing ? "Update Prompt" : "Save Prompt"}
             onSubmit={handleSubmit}
@@ -121,7 +117,6 @@ export default function PromptForm({ prompt, onSave }: PromptFormProps) {
       }
       isLoading={isLoading}
     >
-      {/* @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues */}
       <Form.TextField
         id="title"
         title="Title"
@@ -137,7 +132,6 @@ export default function PromptForm({ prompt, onSave }: PromptFormProps) {
         }}
       />
 
-      {/* @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues */}
       <Form.TextArea
         id="prompt"
         title="Prompt"
@@ -152,16 +146,13 @@ export default function PromptForm({ prompt, onSave }: PromptFormProps) {
         }}
       />
 
-      {/* @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues */}
       <Form.Dropdown
         id="category"
         title="Category"
         defaultValue={prompt?.category || "General"}
         info="Group similar prompts together. Use 'Manage Categories' command to add/edit categories."
       >
-        {/* @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues */}
         {categories.map((category) => (
-          // @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues
           <Form.Dropdown.Item
             key={category}
             value={category}
@@ -170,7 +161,6 @@ export default function PromptForm({ prompt, onSave }: PromptFormProps) {
         ))}
       </Form.Dropdown>
 
-      {/* @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues */}
       <Form.TextField
         id="description"
         title="Description"
@@ -181,9 +171,8 @@ export default function PromptForm({ prompt, onSave }: PromptFormProps) {
 
       {categories.length > 0 && (
         <>
-          {/* @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues */}
           <Form.Separator />
-          {/* @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues */}
+
           <Form.Description
             title="Existing Categories"
             text={categories.join(", ")}
@@ -193,9 +182,8 @@ export default function PromptForm({ prompt, onSave }: PromptFormProps) {
 
       {isEditing && (
         <>
-          {/* @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues */}
           <Form.Separator />
-          {/* @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues */}
+
           <Form.Description
             title="Last Updated"
             text={prompt?.updatedAt.toLocaleString()}

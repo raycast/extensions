@@ -1,4 +1,3 @@
-// @ts-nocheck: Raycast API has fundamental React type compatibility issues
 import {
   Action,
   ActionPanel,
@@ -9,6 +8,7 @@ import {
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { savePrompt, getPrompts } from "./lib/storage";
+import { showFailureToast } from "@raycast/utils";
 
 interface FormValues {
   title: string;
@@ -68,13 +68,11 @@ export default function AddPrompt() {
   return (
     <Form
       actions={
-        // @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues
         <ActionPanel>
           <Action.SubmitForm title="Save Prompt" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      {/* @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues */}
       <Form.TextField
         id="title"
         title="Title"
@@ -82,14 +80,12 @@ export default function AddPrompt() {
         info="A short, descriptive name for your prompt"
       />
 
-      {/* @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues */}
       <Form.TextArea
         id="prompt"
         title="Prompt"
         placeholder="Enter your amp prompt here..."
       />
 
-      {/* @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues */}
       <Form.TextField
         id="category"
         title="Category"
@@ -97,7 +93,6 @@ export default function AddPrompt() {
         info="Group similar prompts together"
       />
 
-      {/* @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues */}
       <Form.TextField
         id="description"
         title="Description"

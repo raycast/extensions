@@ -1,4 +1,3 @@
-// @ts-nocheck: Raycast API has fundamental React type compatibility issues
 import {
   Action,
   ActionPanel,
@@ -10,8 +9,9 @@ import {
   Toast,
   showToast,
   useNavigation,
+  Keyboard,
 } from "@raycast/api";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   getCategories,
   saveCategory,
@@ -68,18 +68,12 @@ export default function ManageCategories() {
   }
 
   return (
-    // @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues
     <List isLoading={isLoading} searchBarPlaceholder="Search categories...">
-      // @ts-expect-error: Raycast JSX components have Element/ReactNode type
-      compatibility issues
       <List.Item
         title="Add New Category"
         icon={Icon.Plus}
         actions={
-          // @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues
           <ActionPanel>
-            // @ts-expect-error: Raycast JSX components have Element/ReactNode
-            type compatibility issues
             <Action.Push
               title="Add Category"
               target={<AddCategoryForm onSave={loadCategories} />}
@@ -89,14 +83,12 @@ export default function ManageCategories() {
         }
       />
       {categories.map((category) => (
-        // @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues
         <List.Item
           key={category}
           title={category}
           icon={Icon.Folder}
           subtitle={category === "General" ? "Default category" : undefined}
           actions={
-            // @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues
             <ActionPanel>
               {category !== "General" && (
                 <>
@@ -109,24 +101,22 @@ export default function ManageCategories() {
                       />
                     }
                     icon={Icon.Pencil}
-                    shortcut={{ modifiers: ["cmd"], key: "e" }}
+                    shortcut={Keyboard.Shortcut.Common.Edit}
                   />
                   <Action
                     title="Delete Category"
                     onAction={() => handleDeleteCategory(category)}
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
-                    shortcut={{ modifiers: ["cmd"], key: "d" }}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                   />
                 </>
               )}
-              // @ts-expect-error: Raycast JSX components have Element/ReactNode
-              type compatibility issues
               <Action.Push
                 title="Add New Category"
                 target={<AddCategoryForm onSave={loadCategories} />}
                 icon={Icon.Plus}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={Keyboard.Shortcut.Common.New}
               />
             </ActionPanel>
           }
@@ -171,18 +161,14 @@ function AddCategoryForm({ onSave }: Pick<CategoryFormProps, "onSave">) {
   }
 
   return (
-    // @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues
     <Form
       actions={
-        // @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues
         <ActionPanel>
           <Action.SubmitForm title="Add Category" onSubmit={handleSubmit} />
         </ActionPanel>
       }
       isLoading={isLoading}
     >
-      // @ts-expect-error: Raycast JSX components have Element/ReactNode type
-      compatibility issues
       <Form.TextField
         id="name"
         title="Category Name"
@@ -228,18 +214,14 @@ function EditCategoryForm({ category, onSave }: CategoryFormProps) {
   }
 
   return (
-    // @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues
     <Form
       actions={
-        // @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues
         <ActionPanel>
           <Action.SubmitForm title="Update Category" onSubmit={handleSubmit} />
         </ActionPanel>
       }
       isLoading={isLoading}
     >
-      // @ts-expect-error: Raycast JSX components have Element/ReactNode type
-      compatibility issues
       <Form.TextField
         id="name"
         title="Category Name"

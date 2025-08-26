@@ -1,4 +1,3 @@
-import React from "react";
 import PromptList from "./components/PromptList";
 
 export default function ManagePrompts() {

@@ -1,4 +1,3 @@
-// @ts-nocheck: Raycast API has fundamental React type compatibility issues
 import {
   Action,
   ActionPanel,
@@ -11,6 +10,7 @@ import {
   confirmAlert,
   Alert,
   useNavigation,
+  Keyboard,
 } from "@raycast/api";
 import React, { useState, useEffect } from "react";
 import {
@@ -20,6 +20,7 @@ import {
   initializeDefaults,
 } from "./lib/storage";
 import PromptForm from "./components/PromptForm";
+import { showFailureToast } from "@raycast/utils";
 
 export default function AmpCommand() {
   const [prompts, setPrompts] = useState<Prompt[]>([]);
@@ -39,7 +40,7 @@ export default function AmpCommand() {
         stored.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()),
       );
     } catch (error) {
-      showToast(Toast.Style.Failure, "Failed to load prompts");
+      showFailureToast(error, { title: "Failed to load prompts" });
     } finally {
       setIsLoading(false);
     }
@@ -52,7 +53,7 @@ export default function AmpCommand() {
       await closeMainWindow();
       showToast(Toast.Style.Success, "Command pasted!");
     } catch (error) {
-      showToast(Toast.Style.Failure, "Failed to paste command");
+      showFailureToast(error, { title: "Failed to paste command" });
     }
   }
 
@@ -62,17 +63,15 @@ export default function AmpCommand() {
       await Clipboard.copy(command);
       showToast(Toast.Style.Success, "Command copied to clipboard!");
     } catch (error) {
-      showToast(Toast.Style.Failure, "Failed to copy command");
+      showFailureToast(error, { title: "Failed to copy command" });
     }
   }
 
   function addNewPrompt() {
-    // @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues
     push(<PromptForm onSave={loadPrompts} />);
   }
 
   function editPrompt(prompt: Prompt) {
-    // @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues
     push(<PromptForm prompt={prompt} onSave={loadPrompts} />);
   }
 
@@ -92,7 +91,7 @@ export default function AmpCommand() {
         await loadPrompts();
         showToast(Toast.Style.Success, "Prompt deleted successfully");
       } catch (error) {
-        showToast(Toast.Style.Failure, "Failed to delete prompt");
+        showFailureToast(error, { title: "Failed to delete prompt" });
       }
     }
   }
@@ -115,21 +114,16 @@ export default function AmpCommand() {
   );
 
   return (
-    // @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues
     <List
       isLoading={isLoading}
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search prompts..."
     >
-      {/* @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues */}
       {Object.entries(groupedPrompts).map(([category, categoryPrompts]) => (
-        // @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues
         <List.Section key={category} title={category}>
-          {/* @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues */}
           {categoryPrompts.map((prompt) => {
             return (
-              // @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues
               <List.Item
                 key={prompt.id}
                 title={prompt.title}
@@ -143,41 +137,38 @@ export default function AmpCommand() {
                   },
                 ]}
                 actions={
-                  // @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues
                   <ActionPanel>
-                    {/* @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues */}
                     <Action
                       title="Paste Command"
-                      shortcut={{ modifiers: ["cmd"], key: "p" }}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                       icon={Icon.Clipboard}
                       onAction={() => pasteAmpCommand(prompt)}
                     />
-                    {/* @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues */}
+
                     <Action
                       title="Copy Command"
                       icon={Icon.CopyClipboard}
                       onAction={() => copyAmpCommand(prompt)}
                     />
-                    {/* @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues */}
+
                     <ActionPanel.Section title="Manage">
-                      {/* @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues */}
                       <Action
                         title="Add New Prompt"
-                        shortcut={{ modifiers: ["cmd"], key: "n" }}
+                        shortcut={Keyboard.Shortcut.Common.New}
                         icon={Icon.Plus}
                         onAction={addNewPrompt}
                       />
-                      {/* @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues */}
+
                       <Action
                         title="Edit Prompt"
-                        shortcut={{ modifiers: ["cmd"], key: "e" }}
+                        shortcut={Keyboard.Shortcut.Common.Edit}
                         icon={Icon.Pencil}
                         onAction={() => editPrompt(prompt)}
                       />
-                      {/* @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues */}
+
                       <Action
                         title="Delete Prompt"
-                        shortcut={{ modifiers: ["cmd"], key: "d" }}
+                        shortcut={Keyboard.Shortcut.Common.Remove}
                         icon={Icon.Trash}
                         style={Action.Style.Destructive}
                         onAction={() => confirmDeletePrompt(prompt)}
@@ -191,18 +182,15 @@ export default function AmpCommand() {
         </List.Section>
       ))}
       {filteredPrompts.length === 0 && !isLoading && (
-        // @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues
         <List.EmptyView
           title="No prompts found"
           description="Add a new prompt or adjust your search"
           icon={Icon.Document}
           actions={
-            // @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues
             <ActionPanel>
-              {/* @ts-expect-error: Raycast JSX components have Element/ReactNode type compatibility issues */}
               <Action
                 title="Add New Prompt"
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={Keyboard.Shortcut.Common.New}
                 icon={Icon.Plus}
                 onAction={addNewPrompt}
               />
