@@ -1,6 +1,6 @@
 # Raycast Fork Extensions Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2025-08-26
 
 - Fix the missing syncing of the forked repository with upstream repository on GitHub
 
