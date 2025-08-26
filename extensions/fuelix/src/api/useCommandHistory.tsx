@@ -2,12 +2,20 @@ import { LocalStorage } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
+interface HistoryEntry {
+  id: number;
+  timestamp: string;
+  prompt: string;
+  response: string;
+  model: string;
+}
+
 /**
  * Custom hook to manage command history with proper React state management
  * @returns {Object} History management functions and state
  */
 export function useCommandHistory() {
-  const [history, setHistory] = useState([]);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Load history on component mount
@@ -22,7 +30,7 @@ export function useCommandHistory() {
     try {
       setIsLoading(true);
       const storedHistory = await LocalStorage.getItem("fuelix_command_history");
-      if (storedHistory) {
+      if (storedHistory && typeof storedHistory === "string") {
         setHistory(JSON.parse(storedHistory));
       }
       setIsLoading(false);
@@ -39,7 +47,7 @@ export function useCommandHistory() {
    * @param {string} response - Fuelix's response
    * @param {string} modelUsed - The model used for this query
    */
-  const addToHistory = async (prompt, response, modelUsed) => {
+  const addToHistory = async (prompt: string, response: string, modelUsed: string) => {
     try {
       // Use current history state instead of reading from LocalStorage
       // This avoids race conditions and improves performance

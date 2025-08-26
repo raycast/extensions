@@ -12,10 +12,17 @@ import {
 import getResponse from "./fuelix";
 import { useCommandHistory } from "./useCommandHistory";
 
-export default function useFuelIX(props, options = {}) {
+interface UseFuelIXOptions {
+  context?: string;
+  allowPaste?: boolean;
+  useSelected?: boolean;
+  buffer?: Buffer[] | null;
+}
+
+export default function useFuelIX(options: UseFuelIXOptions = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState("");
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [regenerateCounter, setRegenerateCounter] = useState(0);
   const { addToHistory } = useCommandHistory();
   const { defaultModel, apiKey, apiBaseURL } = getPreferenceValues();
@@ -67,11 +74,12 @@ export default function useFuelIX(props, options = {}) {
         });
       } catch (err) {
         console.error("Error generating response:", err);
-        setError(err.message || "Failed to generate response");
+        const errorMessage = err instanceof Error ? err.message : "Failed to generate response";
+        setError(errorMessage);
         await showToast({
           style: Toast.Style.Failure,
           title: "Error",
-          message: err.message || "Failed to generate response",
+          message: errorMessage,
         });
       } finally {
         setIsLoading(false);

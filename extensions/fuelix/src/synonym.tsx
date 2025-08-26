@@ -1,9 +1,9 @@
 import useFuelIX from "./api/useFuelIX";
-import { getPreferenceValues, LaunchProps } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 
-export default function FindSynonym(props: LaunchProps<{ arguments: Arguments.Synonym }>) {
+export default function FindSynonym() {
   const { prompt } = getPreferenceValues();
-  return useFuelIX(props, {
+  return useFuelIX({
     context: prompt,
     allowPaste: true,
     useSelected: true,

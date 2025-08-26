@@ -10,7 +10,7 @@ export default function Translate(props: LaunchProps<{ arguments: Arguments.Tran
     : `If the following text is in ${defaultTargetLanguage} then translate it to ${secondTargetLanguage}, otherwise Translate following text to ${defaultTargetLanguage}. ` +
       prompt;
 
-  return useFuelIX(props, {
+  return useFuelIX({
     context: prompts,
     allowPaste: true,
     useSelected: true,

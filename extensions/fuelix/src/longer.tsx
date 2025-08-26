@@ -1,9 +1,9 @@
 import useFuelIX from "./api/useFuelIX";
-import { getPreferenceValues, LaunchProps } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 
-export default function Longer(props: LaunchProps<{ arguments: Arguments.Longer }>) {
+export default function Longer() {
   const { prompt } = getPreferenceValues();
-  return useFuelIX(props, {
+  return useFuelIX({
     context: prompt,
     allowPaste: true,
     useSelected: true,

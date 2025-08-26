@@ -3,7 +3,12 @@ import { exec } from "child_process";
 import fs from "fs";
 import util from "util";
 
-export default async function askScreenshot(props, prompt, isSelecting) {
+interface AskScreenshotProps {
+  arguments?: { [key: string]: unknown };
+  [key: string]: unknown;
+}
+
+export default async function askScreenshot(props: AskScreenshotProps, prompt: string, isSelecting: boolean) {
   await closeMainWindow();
 
   const execPromise = util.promisify(exec);
@@ -23,7 +28,7 @@ export default async function askScreenshot(props, prompt, isSelecting) {
     await showToast({
       style: Toast.Style.Failure,
       title: "Failed to get screenshot",
-      message: error.message,
+      message: error instanceof Error ? error.message : "Unknown error occurred",
     });
     return;
   }
@@ -44,7 +49,7 @@ export default async function askScreenshot(props, prompt, isSelecting) {
     await showToast({
       style: Toast.Style.Failure,
       title: "Failed to launch askAI command",
-      message: error.message,
+      message: error instanceof Error ? error.message : "Unknown error occurred",
     });
   }
 }
