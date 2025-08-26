@@ -19,6 +19,16 @@ _Please note that the `fork` we mention here is not the same as Git's `fork`._
 - [x] Remove an extension from forked list
 - [x] Synchronizes the forked repository with the upstream repository on local
 
+## GitHub Permission Scopes
+
+This extension requires the following GitHub API permission scopes:
+
+- `repo`
+  - `api.getForkedRepository()` - Retrieves the full name of the user's forked repository
+  - `api.compareTwoCommits()` - Compares two commits in the user's forked repository
+- `workflow`
+  - `api.syncFork()` - Syncs the forked repository with the upstream repository on GitHub
+
 ## Hint
 
 You can always open your forked extension folder in the terminal to work with CLI commands directly.

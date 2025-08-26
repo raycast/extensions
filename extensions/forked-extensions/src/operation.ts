@@ -1,7 +1,10 @@
-import { Toast } from "@raycast/api";
+import { Toast, confirmAlert, openExtensionPreferences } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+import { HTTPError } from "got";
+import { SubprocessError } from "nano-spawn";
 import * as api from "./api.js";
 import * as git from "./git.js";
+import { handleGotHttpError, handleSubprocessError } from "./utils.js";
 
 /**
  * Class to manage operations related to forked extensions.
@@ -29,6 +32,22 @@ class Operation {
     if (this.isOperating) return;
     try {
       this.isOperating = true;
+      const gitInstalled = await git.checkIfGitIsValid();
+      if (!gitInstalled) {
+        const yes = await confirmAlert({
+          title: "Git not found",
+          message: "Please setup your Git executable file path manually in the extension preferences.",
+          primaryAction: {
+            title: "Open Extension Preferences",
+            onAction: async () => {
+              await openExtensionPreferences();
+            },
+          },
+        });
+        if (yes) await openExtensionPreferences();
+        return;
+      }
+
       this.showToast("Initializing repository");
       const forkedRepository = await git.initRepository();
       await git.setUpstream(forkedRepository);
@@ -106,7 +125,9 @@ class Operation {
         this.hideToast();
       }
     } catch (error) {
-      showFailureToast(error);
+      if (error instanceof HTTPError) handleGotHttpError(error);
+      else if (error instanceof SubprocessError) handleSubprocessError(error);
+      else showFailureToast(error);
     } finally {
       this.isOperating = false;
     }

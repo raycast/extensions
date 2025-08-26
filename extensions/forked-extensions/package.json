@@ -68,6 +68,13 @@
           "title": "SSH"
         }
       ]
+    },
+    {
+      "name": "gitExecutableFilePath",
+      "title": "Git Executable File Path",
+      "description": "Path to the Git executable file.",
+      "type": "file",
+      "required": false
     }
   ],
   "dependencies": {
