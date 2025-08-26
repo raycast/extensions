@@ -66,11 +66,10 @@
   "preferences": [
     {
       "name": "projectRoot",
-      "type": "textfield",
+      "type": "directory",
       "required": true,
       "title": "Project Root Directory",
-      "description": "Absolute path to your TaskMaster project root directory containing .taskmaster folder",
-      "placeholder": "/Users/username/my-project"
+      "description": "Absolute path to your TaskMaster project root directory containing .taskmaster folder"
     },
     {
       "name": "autoRefresh",
