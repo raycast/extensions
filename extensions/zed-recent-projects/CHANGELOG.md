@@ -1,5 +1,9 @@
 #  Zed Recent Projects Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+
+- Use latest Zed sqlite schema
+
 ## [Fixes] - 2025-07-16
 
 - Fix missing local projects

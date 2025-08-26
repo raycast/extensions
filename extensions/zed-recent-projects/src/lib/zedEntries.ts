@@ -38,10 +38,11 @@ interface LocalWorkspace extends BaseWorkspace {
 
 interface RemoteWorkspace extends BaseWorkspace {
   type: "remote";
-  remote_paths: string;
+  paths: string;
+  paths_order: string | null;
   host: string;
-  user: string;
-  port: string;
+  user: string | null;
+  port: number | null;
 }
 
 type Workspace = LocalWorkspace | RemoteWorkspace;
@@ -103,7 +104,23 @@ function parseLocalPaths(str: string): string[] | null {
 }
 
 function processLocalWorkspace(workspace: LocalWorkspace): ZedEntry | undefined {
-  const paths = parseLocalPaths(workspace.local_paths);
+  // For dev build, paths are JSON, not binary
+  if (!workspace.local_paths) {
+    return undefined;
+  }
+
+  let paths: string[] | null = null;
+
+  // Try parsing as JSON first (dev build format)
+  try {
+    const parsed = JSON.parse(workspace.local_paths);
+    if (Array.isArray(parsed)) {
+      paths = parsed;
+    }
+  } catch {
+    // If JSON parsing fails, try binary format (stable build)
+    paths = parseLocalPaths(workspace.local_paths);
+  }
   // TODO: Only support single path workspaces for now
   if (!paths || paths.length !== 1) {
     return undefined;
@@ -126,9 +143,12 @@ function processLocalWorkspace(workspace: LocalWorkspace): ZedEntry | undefined 
 
 function processRemoteWorkspace(workspace: RemoteWorkspace): ZedEntry | undefined {
   try {
-    const paths = JSON.parse(workspace.remote_paths);
+    if (!workspace.paths) {
+      return undefined;
+    }
+    const paths = JSON.parse(workspace.paths);
     if (!Array.isArray(paths) || paths.length === 0) {
-      throw new Error("Invalid remote paths format");
+      return undefined;
     }
     const path = paths[0].replace(/^\/+/, "");
     const uri = `ssh://${workspace.user ? workspace.user + "@" : ""}${workspace.host}${
@@ -143,7 +163,7 @@ function processRemoteWorkspace(workspace: RemoteWorkspace): ZedEntry | undefine
       host: workspace.host,
     };
   } catch (error) {
-    showFailureToast(error, { title: "Error processing workspace" });
+    console.error("Error processing remote workspace:", error);
     return undefined;
   }
 }
@@ -162,20 +182,20 @@ export function useZedRecentWorkspaces(): ZedRecentWorkspaces {
   const query = `
     SELECT
       CASE
-        WHEN local_paths IS NOT NULL THEN 'local'
+        WHEN ssh_connection_id IS NULL THEN 'local'
         ELSE 'remote'
       END as type,
       workspace_id as id,
-      local_paths,
-      paths AS remote_paths,
+      paths as local_paths,
+      paths,
+      paths_order,
       timestamp,
       host,
       user,
       port
     FROM workspaces
-    LEFT JOIN ssh_projects ON ssh_project_id = workspaces.ssh_project_id
-    WHERE (local_paths IS NOT NULL AND paths IS NULL)
-       OR (local_paths IS NULL AND paths IS NOT NULL)
+    LEFT JOIN ssh_connections ON ssh_connection_id = ssh_connections.id
+    WHERE paths IS NOT NULL AND paths != ''
     ORDER BY timestamp DESC
   `;
 
@@ -248,8 +268,8 @@ export const execFilePromise = util.promisify(execFile);
 
 async function deleteEntryById(id: number) {
   const deleteQuery = `
-DELETE FROM ssh_projects WHERE id = (
-  SELECT ssh_project_id FROM workspaces WHERE workspace_id = ${id}
+DELETE FROM ssh_connections WHERE id = (
+  SELECT ssh_connection_id FROM workspaces WHERE workspace_id = ${id}
 );
 DELETE FROM workspaces WHERE workspace_id = ${id}
 `;
@@ -257,5 +277,5 @@ DELETE FROM workspaces WHERE workspace_id = ${id}
 }
 
 async function deleteAllWorkspaces() {
-  await execFilePromise("sqlite3", [getPath(), "DELETE FROM ssh_projects;DELETE FROM workspaces;"]);
+  await execFilePromise("sqlite3", [getPath(), "DELETE FROM ssh_connections;DELETE FROM workspaces;"]);
 }
