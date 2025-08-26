@@ -1,5 +1,17 @@
 # Product Hunt Changelog
 
+## [2.2] - 2025-08-26
+
+### Added
+- Raycast-only structured logger with optional toasts (controlled by new "Verbose Logging" preference)
+- Lightweight session-start instrumentation on the frontpage command
+
+### Changed
+- Scraper now prefers Apollo push(rehydrate) parsing, with DOM fallbacks and last-resort RSS fallback
+- Added short-lived LocalStorage cache to reduce repeated network fetches
+- Improved error handling and logging in image utilities and imgix helpers
+- Non-error logs routed to console.log/console.warn to avoid Raycast error overlay
+
 ## [2.1] - 2025-04-09
 
 ### Added
