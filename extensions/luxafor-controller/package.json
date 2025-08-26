@@ -25,7 +25,6 @@
     {
       "name": "luxafor-status",
       "title": "Luxafor Status",
-      "subtitle": "Luxafor Status",
       "description": "Show Luxafor device status in menubar",
       "mode": "menu-bar",
       "interval": "5s"
