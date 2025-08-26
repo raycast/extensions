@@ -23,10 +23,10 @@
     },
     {
       "name": "luxafor-status",
-      "title": "Luxafor Status",
+      "title": "Luxafor Menu Bar Status",
       "description": "Show Luxafor device status in menubar",
       "mode": "menu-bar",
-      "interval": "5s"
+      "interval": "1m"
     }
   ],
   "preferences": [
