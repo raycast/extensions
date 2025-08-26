@@ -67,7 +67,7 @@ export const HEADERS = {
 };
 
 export async function fetchRoutes() {
-  const res = await axios.get(`${BASE_URL}/data/routes.txt?1756195200000`, { headers: HEADERS });
+  const res = await axios.get(`${BASE_URL}/data/routes.txt?${Date.now()}`, { headers: HEADERS });
   return res.data;
 }
 
