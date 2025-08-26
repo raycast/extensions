@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Icon, showToast, Toast, showHUD, openExtensionPreferences } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, showToast, Toast, showHUD, openExtensionPreferences, popToRoot } from "@raycast/api";
 import { useState } from "react";
 import { useCachedPromise, useLocalStorage } from "@raycast/utils";
 import GameDetail from "./GameDetail";
@@ -6,7 +6,6 @@ import React from "react";
 import { COMMON_COUNTRIES } from "./constants";
 import { logBoth, getDefaultCountry, validateApiKey, getStorageKey } from "./utils";
 import { ITADGame, ITADDeal } from "./types";
-import { popToRoot, openExtensionPreferences } from "@raycast/api";
 
 // Fetch the plain string for a game, fallback to slug if lookup fails
 async function fetchPlainString(id: string, slug: string): Promise<string> {
