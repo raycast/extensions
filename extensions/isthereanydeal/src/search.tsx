@@ -161,26 +161,9 @@ async function searchIsThereAnyDeal(query: string, country: string): Promise<ITA
 
 // API Key input component that appears inline when no API key is found
 function ApiKeyInput({ onApiKeySaved }: { onApiKeySaved: () => void }) {
-  const [isSaving, setIsSaving] = useState(false);
-
   async function handleSaveApiKey() {
-    setIsSaving(true);
-    try {
-      await openExtensionPreferences();
-      await showToast(Toast.Style.Success, "API Key Saved", "Please paste your API key in the preferences and save.");
-
-      // Wait a moment for user to see the success message
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // Notify parent that API key was saved
-      onApiKeySaved();
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logBoth("[ApiKeyInput] Error opening preferences:", errorMessage);
-      await showToast(Toast.Style.Failure, "Error", "Failed to open preferences. Please try again.");
-    } finally {
-      setIsSaving(false);
-    }
+    await openExtensionPreferences();
+    await popToRoot();
   }
 
   return (
@@ -191,8 +174,8 @@ function ApiKeyInput({ onApiKeySaved }: { onApiKeySaved: () => void }) {
       accessories={[{ text: "Required", icon: Icon.ExclamationMark }]}
       actions={
         <ActionPanel>
-          <Action title={isSaving ? "Saving…" : "Enter Api Key"} icon={Icon.Pencil} onAction={handleSaveApiKey} />
-          <Action.OpenInBrowser title="Get Api Key" url="https://isthereanydeal.com/app/" icon={Icon.Globe} />
+          <Action title="Enter API Key" icon={Icon.Pencil} onAction={handleSaveApiKey} />
+          <Action.OpenInBrowser title="Get API Key" url="https://isthereanydeal.com/app/" icon={Icon.Globe} />
         </ActionPanel>
       }
     />
