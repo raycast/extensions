@@ -55,7 +55,7 @@ export const DEVICE_COMMANDS: DeviceCommandDefinition[] = [
   {
     id: "set-speed",
     title: "Set Speed Level",
-    subtitle: "Set specific fan speed (1-5)",
+    subtitle: "Set specific fan speed (1-6)",
     icon: "gauge",
     command: "set_speed",
     description: "Set the fan to a specific speed level",

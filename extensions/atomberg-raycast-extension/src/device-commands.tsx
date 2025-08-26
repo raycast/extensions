@@ -7,8 +7,6 @@ import {
   getPreferenceValues,
   openExtensionPreferences,
   LaunchProps,
-  showToast,
-  Toast,
   useNavigation,
   Color,
 } from "@raycast/api";
@@ -22,6 +20,7 @@ import type { Preferences, Device, DeviceCommandDefinition, CommandParameters } 
 import { getAvailableCommandsForDevice, getCommandById } from "./config/device-commands";
 import { SetTimerForm } from "./components/SetTimerForm";
 import { SetSpeedForm } from "./components/SetSpeedForm";
+import { showFailureToast } from "@raycast/utils";
 
 interface DeviceCommandsArguments {
   deviceId: string;
@@ -57,8 +56,7 @@ function DeviceCommandsContent(
 
   const executeCommand = async (command: DeviceCommandDefinition, parameters?: CommandParameters) => {
     if (!credentialsValid) {
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "Authentication Required",
         message: "Please configure your API credentials",
       });
@@ -69,8 +67,7 @@ function DeviceCommandsContent(
       !deviceState &&
       (command.command === "toggle" || command.command === "sleep_mode" || command.command === "led_toggle")
     ) {
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast({
         title: "Device State Required",
         message: "Please wait for device state to load before using toggle commands",
       });

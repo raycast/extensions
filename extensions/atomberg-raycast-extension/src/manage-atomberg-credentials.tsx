@@ -20,6 +20,7 @@ import { apiServiceManager } from "./services/api-service";
 import { STORAGE_KEYS } from "./constants";
 import { logger } from "./utils/logger";
 import type { Preferences } from "./types";
+import { showFailureToast } from "@raycast/utils";
 
 interface CredentialInfo {
   key: string;
@@ -64,10 +65,8 @@ function CredentialsContent() {
         setCredentials(credentialData);
       } catch (error) {
         logger.error("Error loading credential info:", error);
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Error",
-          message: "Failed to load credential information",
+        showFailureToast(error, {
+          title: "Failed to load credential information",
         });
       } finally {
         setIsLoading(false);
@@ -83,8 +82,7 @@ function CredentialsContent() {
 
       // Check if credentials are provided
       if (!preferences.apiKey?.trim() || !preferences.refreshToken?.trim()) {
-        showToast({
-          style: Toast.Style.Failure,
+        showFailureToast({
           title: "Missing Credentials",
           message: "Please set both API Key and Refresh Token in extension preferences",
         });
@@ -112,10 +110,8 @@ function CredentialsContent() {
       }
     } catch (error) {
       logger.error("Error testing credentials:", error);
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Test Failed",
-        message: "Unable to connect to Atomberg API. Check your network connection.",
+      showFailureToast(error, {
+        title: "Unable to connect to Atomberg API",
       });
     } finally {
       setIsLoading(false);
@@ -141,10 +137,8 @@ function CredentialsContent() {
         showHUD("✅ Cached data cleared");
       } catch (error) {
         logger.error("Error clearing cached data:", error);
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Error",
-          message: "Failed to clear cached data",
+        showFailureToast({
+          title: "Failed to clear cached data",
         });
       }
     }
@@ -156,10 +150,8 @@ function CredentialsContent() {
       showHUD(`✅ ${credential.key} copied to clipboard`);
     } catch (error) {
       logger.error("Clipboard copy error:", error);
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Copy Failed",
-        message: `Failed to copy ${credential.key} to clipboard`,
+      showFailureToast(error, {
+        title: `Failed to copy ${credential.key} to clipboard`,
       });
     }
   }

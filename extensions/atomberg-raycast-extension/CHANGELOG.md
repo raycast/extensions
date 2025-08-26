@@ -1,6 +1,6 @@
 # Atomberg Extension Changelog
 
-## [1.0.0] - 2025-08-26
+## [First Release] - {PR_MERGE_DATE}
 
 ### Added
 

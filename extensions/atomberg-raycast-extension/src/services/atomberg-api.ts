@@ -18,6 +18,7 @@ import type {
   DeviceCommand,
   CommandParameters,
 } from "../types";
+import { showFailureToast } from "@raycast/utils";
 
 /**
  * Main service class for interacting with the Atomberg API
@@ -69,7 +70,11 @@ export class AtombergApiService {
       });
 
       logger.info("Auth response status:", response.status);
-      logger.info("Auth response headers:", Object.fromEntries(response.headers.entries()));
+      const headers: Record<string, string> = {};
+      response.headers.forEach((value, key) => {
+        headers[key] = value;
+      });
+      logger.info("Auth response headers:", headers);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -93,10 +98,8 @@ export class AtombergApiService {
       }
     } catch (error) {
       logger.error("Error getting access token:", error);
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast(error, {
         title: "Authentication Error",
-        message: "Failed to authenticate with Atomberg API. Please check your credentials.",
       });
       return null;
     }
@@ -192,10 +195,8 @@ export class AtombergApiService {
       return devices;
     } catch (error) {
       logger.error("Error fetching devices:", error);
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast(error, {
         title: "Failed to Load Devices",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
       });
 
       return null;
@@ -294,8 +295,7 @@ export class AtombergApiService {
         }
       }
 
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast(error, {
         title: errorTitle,
         message: errorMessage,
       });
@@ -604,10 +604,8 @@ export class AtombergApiService {
       return data.message.device_state?.[0] || null;
     } catch (error) {
       logger.error("Error fetching device state:", error);
-      showToast({
-        style: Toast.Style.Failure,
+      showFailureToast(error, {
         title: "Failed to Load Device State",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
       });
 
       return null;

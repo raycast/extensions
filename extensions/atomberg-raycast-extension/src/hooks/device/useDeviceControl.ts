@@ -4,6 +4,7 @@ import { apiServiceManager } from "../../services/api-service";
 import { queryKeys } from "../../lib/query-client";
 import { logger } from "../../utils/logger";
 import type { Device, Preferences, DeviceCommand, DeviceState, CommandParameters } from "../../types";
+import { showFailureToast } from "@raycast/utils";
 
 /**
  * Custom hook for controlling Atomberg devices with comprehensive state management
@@ -97,10 +98,8 @@ export function useDeviceControl(preferences: Preferences) {
     ) => {
       const commandName = typeof command === "string" ? command : command.command;
       logger.error("Device control error:", error);
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Command Failed",
-        message: `Failed to execute ${commandName} on ${device.name}`,
+      showFailureToast(error, {
+        title: `Failed to execute ${commandName} on ${device.name}`,
       });
     },
   });
