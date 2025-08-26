@@ -1,6 +1,6 @@
 # awork Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2025-08-26
 
 - Fix login
 
