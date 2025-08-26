@@ -49,10 +49,15 @@ const useDomainOrIp = (input: string) => {
     async (inputString): Promise<string> => {
       let domainOrIp = inputString;
 
-      // If no input is provided, fetch the URL from the frontmost browser
+      // If no input is provided, fetch the URL from the frontmost browser (only on macOS)
       if (!domainOrIp) {
-        const currentUrl = await getURL();
-        domainOrIp = new URL(currentUrl).hostname.replace("www.", "").toString();
+        if (process.platform === "darwin") {
+          const currentUrl = await getURL();
+          domainOrIp = new URL(currentUrl).hostname.replace("www.", "").toString();
+        } else {
+          // On non-macOS platforms, we can't get the browser URL, so return empty string
+          domainOrIp = "";
+        }
       }
 
       return domainOrIp;
@@ -63,7 +68,9 @@ const useDomainOrIp = (input: string) => {
   if (error) {
     showFailureToast(error, {
       title: "Error fetching URL",
-      message: "Please make sure you have a browser open with a valid URL.",
+      message: process.platform === "darwin"
+        ? "Please make sure you have a browser open with a valid URL."
+        : "Please provide a domain or IP address as input.",
     });
   }
 
