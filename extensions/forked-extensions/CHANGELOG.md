@@ -1,6 +1,6 @@
 # Raycast Fork Extensions Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-08-26
 
 - Add support for Windows
 - Polish code formatting and structure
