@@ -1,5 +1,9 @@
 # Copy Path Changelog
 
+## [Fix browser support] - {PR_MERGE_DATE}
+
+- Fix support for browsers.
+
 ## [Support document windows] - 2025-08-25
 
 - Copy document paths from document windows.
