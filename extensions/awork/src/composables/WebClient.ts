@@ -50,6 +50,7 @@ const authorizeClient = async () => {
   body.append("redirect_uri", "https://raycast.com/redirect?packageName=Extension");
   body.append("grant_type", "authorization_code");
   body.append("code", authorizationCode);
+  body.append("code_verifier", authRequest.codeVerifier);
 
   await fetch(`${baseURI}/accounts/token`, getRequestOptions(body))
     .then(async (response) => {
