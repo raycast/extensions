@@ -1,25 +1,22 @@
 import axios from "axios";
 import { luxaforState } from "./luxafor-state";
 
-export interface LuxaforConfig {
-  userId: string;
-  apiEndpoint: "com" | "co.uk";
-}
+export type LuxaforConfig = Pick<Preferences, "userId" | "apiEndpoint">;
 
 export type LuxaforColor = "red" | "green" | "yellow" | "blue" | "white" | "cyan" | "magenta";
 
-export interface DeviceStatus {
+export type DeviceStatus = {
   isOnline: boolean;
   currentColor: string;
   lastSeen: Date | null;
   lastAction: string;
-}
+};
 
-export interface ApiResponse {
+export type ApiResponse = {
   success: boolean;
   data?: Record<string, unknown>;
   error?: string;
-}
+};
 
 export class LuxaforService {
   private config: LuxaforConfig;
