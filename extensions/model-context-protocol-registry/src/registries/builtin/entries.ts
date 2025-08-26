@@ -279,7 +279,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "mcp-remote", "https://rube.composio.dev/mcp"],
       env: {
-        "npm_config_yes": "true"
+        npm_config_yes: "true",
       },
     },
   },
