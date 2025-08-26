@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "atomberg-raycast-extension",
+  "title": "Atomberg - Smart Home Control",
+  "description": "Control your Atomberg smart fans and appliances directly from Raycast",
+  "icon": "extension-icon.png",
+  "author": "gupta_ji",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-atomberg-devices",
+      "title": "My Atomberg Devices",
+      "subtitle": "View and control your Atomberg appliances",
+      "description": "List and control your Atomberg smart fans and appliances",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "manage-atomberg-credentials",
+      "title": "Manage Atomberg Credentials",
+      "subtitle": "View and reset your Atomberg API credentials",
+      "description": "View current API credentials and reset them if needed",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your Atomberg API Key from the developer portal",
+      "type": "password",
+      "required": false,
+      "placeholder": "Enter your Atomberg API Key"
+    },
+    {
+      "name": "refreshToken",
+      "title": "Refresh Token",
+      "description": "Your Atomberg Refresh Token from the developer portal",
+      "type": "password",
+      "required": false,
+      "placeholder": "Enter your Atomberg Refresh Token"
+    }
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.5",
+    "@raycast/utils": "^1.17.0",
+    "@tanstack/react-query": "^5.59.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "NODE_ENV=production ray build",
+    "dev": "NODE_ENV=development ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
