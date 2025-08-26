@@ -41,13 +41,7 @@
       "description": "Enter your Bar Assistant API token with Read Access",
       "required": true
     },
-    {
-      "name": "CACHE_DIR",
-      "type": "textfield",
-      "title": "Cache Directory",
-      "description": "Enter the directory path for cocktail cache storage",
-      "required": true
-    },
+
     {
       "name": "BAR_ID",
       "type": "textfield",

@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, showToast, Toast, Clipboard, getPreferenceValues } from "@raycast/api";
+import { List, ActionPanel, Action, showToast, Toast, Clipboard, getPreferenceValues, environment } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 async function getOrCreatePublicUrl(cocktailId: number, cocktailName: string): Promise<string | undefined> {
   // First, try to fetch cocktail details to see if a public link exists
@@ -89,14 +89,13 @@ const preferences = getPreferenceValues<{
   API_URL: string;
   TOKEN: string;
   BAR_ID: string;
-  CACHE_DIR: string;
   APP_URL: string;
 }>();
 const API_URL = `${preferences.API_URL}/api/cocktails`; // Example: https://api.barassistant.io/api/cocktails
 const TOKEN = preferences.TOKEN;
 const BAR_ID = preferences.BAR_ID;
-const CACHE_DIR = preferences.CACHE_DIR;
 const APP_URL = preferences.APP_URL;
+const CACHE_DIR = path.join(environment.supportPath, "barassistant");
 
 type Cocktail = {
   id: number;
