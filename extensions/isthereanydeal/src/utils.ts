@@ -13,10 +13,10 @@ export function getDefaultCountry(): string {
 }
 
 export function validateApiKey(): { isValid: boolean; apiKey: string } {
-  const preferences = getPreferenceValues();
-  const apiKey = preferences.ITAD_APIKEY;
-  const isValid = apiKey && typeof apiKey === "string" && apiKey.trim() !== "";
-  return { isValid, apiKey: apiKey || "" };
+  const preferences = getPreferenceValues<Preferences>();
+  const apiKey = typeof preferences.ITAD_API_KEY === "string" ? preferences.ITAD_API_KEY.trim() : "";
+  const isValid = apiKey.length > 0;
+  return { isValid, apiKey };
 }
 
 export function getStorageKey(key: string): string {
