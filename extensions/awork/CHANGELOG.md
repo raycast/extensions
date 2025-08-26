@@ -1,6 +1,6 @@
 # awork Changelog
 
-## [Improve User Interface] - {PR_MERGE_DATE}
+## [Improve User Interface] - 2025-08-26
 
 - Added option to show tasks with status done
 - Added option to show projects with status closed
