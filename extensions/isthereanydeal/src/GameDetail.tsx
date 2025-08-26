@@ -301,7 +301,7 @@ export default function GameDetail({
       }
       actions={
         <ActionPanel>
-          <ActionPanel.Submenu title="Set Country/Region" icon={Icon.Globe} shortcut={{ modifiers: ["cmd"], key: "t" }}>
+          <ActionPanel.Submenu title="Set Country/region" icon={Icon.Globe} shortcut={{ modifiers: ["cmd"], key: "t" }}>
             {COMMON_COUNTRIES.map((c) => (
               <Action
                 key={c.code}

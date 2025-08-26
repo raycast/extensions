@@ -1,4 +1,14 @@
-import { List, ActionPanel, Action, Icon, showToast, Toast, showHUD, openExtensionPreferences, popToRoot } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  Icon,
+  showToast,
+  Toast,
+  showHUD,
+  openExtensionPreferences,
+  popToRoot,
+} from "@raycast/api";
 import { useState } from "react";
 import { useCachedPromise, useLocalStorage } from "@raycast/utils";
 import GameDetail from "./GameDetail";
@@ -174,8 +184,8 @@ function ApiKeyInput() {
       accessories={[{ text: "Required", icon: Icon.ExclamationMark }]}
       actions={
         <ActionPanel>
-          <Action title="Enter API Key" icon={Icon.Pencil} onAction={handleSaveApiKey} />
-          <Action.OpenInBrowser title="Get API Key" url="https://isthereanydeal.com/app/" icon={Icon.Globe} />
+          <Action title="Enter Api Key" icon={Icon.Pencil} onAction={handleSaveApiKey} />
+          <Action.OpenInBrowser title="Get Api Key" url="https://isthereanydeal.com/app/" icon={Icon.Globe} />
         </ActionPanel>
       }
     />
