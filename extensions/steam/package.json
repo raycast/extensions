@@ -45,23 +45,21 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.83.1",
-    "@raycast/utils": "^1.17.0",
-    "data-fns": "^1.1.0",
-    "date-fns": "^2.30.0",
-    "node-fetch": "^3.3.2",
+    "@raycast/api": "^1.102.5",
+    "@raycast/utils": "^2.2.1",
+    "date-fns": "^4.1.0",
     "raycast-cross-extension": "^0.2.3",
-    "swr": "^2.2.5",
-    "turndown": "^7.2.0"
+    "swr": "^2.3.6",
+    "turndown": "^7.2.1"
   },
   "devDependencies": {
-    "@faker-js/faker": "^9.0.3",
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^22.7.4",
-    "@types/react": "^18.3.10",
-    "eslint": "^8.57.1",
-    "prettier": "^3.3.3",
-    "typescript": "^5.6.2"
+    "@faker-js/faker": "^10.0.0",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^24.3.0",
+    "@types/react": "^19.1.11",
+    "eslint": "^9.34.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
   },
   "scripts": {
     "build": "ray build -e dist",
