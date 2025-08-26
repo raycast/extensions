@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "scoop",
+  "title": "Scoop",
+  "description": "Manage Scoop, the command-line installer for Windows.",
+  "icon": "scoop.png",
+  "author": "zsombor_biro",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "System"
+  ],
+  "keywords": [
+    "scoop",
+    "windows",
+    "package manager",
+    "installer"
+  ],
+  "commands": [
+    {
+      "name": "installed",
+      "title": "Show Installed",
+      "subtitle": "Scoop",
+      "description": "List installed Scoop Packages",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search Packages",
+      "subtitle": "Scoop",
+      "description": "Search and Install Packages from Scoop",
+      "mode": "view"
+    },
+    {
+      "name": "outdated",
+      "title": "Show Outdated",
+      "subtitle": "Scoop",
+      "description": "List and Update Outdated Scoop Packages",
+      "mode": "view"
+    },
+    {
+      "name": "list-buckets",
+      "title": "List Buckets",
+      "subtitle": "Scoop",
+      "description": "List all installed Scoop buckets",
+      "mode": "view"
+    },
+    {
+      "name": "add-bucket",
+      "title": "Add Bucket",
+      "subtitle": "Scoop",
+      "description": "Add a new Scoop bucket",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.5",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
