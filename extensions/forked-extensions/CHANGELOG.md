@@ -1,5 +1,9 @@
 # Raycast Fork Extensions Changelog
 
+## [Bugfix] - 2025-08-26
+
+- Fix the missing syncing of the forked repository with upstream repository on GitHub
+
 ## [Maintenance] - 2025-08-26
 
 - Add support for Windows
