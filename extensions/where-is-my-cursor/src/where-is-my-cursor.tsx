@@ -5,8 +5,7 @@ import { join } from "path";
 // Helper path (relative to repo or installed path)
 const helperPath = join(__dirname, ".", "assets", "LocateCursor");
 
-export default async function main() {
-  export default function main() {
+export default function main() {
   exec(helperPath, (error) => {
     if (error) {
       showToast({
@@ -18,5 +17,4 @@ export default async function main() {
       showToast({ style: Toast.Style.Success, title: "Cursor located" });
     }
   });
-}
 }
