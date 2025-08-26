@@ -1,6 +1,6 @@
 # shopinfo.app Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-08-26
 
 Initial release of the shopinfo.app extension.
 
