@@ -1,6 +1,6 @@
 # Installed Extensions Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2025-08-26
 
 - Add support for launching target extension
 - Bump all dependencies to the latest
