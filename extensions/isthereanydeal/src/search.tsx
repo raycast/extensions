@@ -160,7 +160,7 @@ async function searchIsThereAnyDeal(query: string, country: string): Promise<ITA
 }
 
 // API Key input component that appears inline when no API key is found
-function ApiKeyInput({ onApiKeySaved }: { onApiKeySaved: () => void }) {
+function ApiKeyInput() {
   async function handleSaveApiKey() {
     await openExtensionPreferences();
     await popToRoot();
