@@ -1,9 +1,6 @@
-import { Form, ActionPanel, Action, environment } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { execFile } from "child_process";
-import { join } from "path";
-
-const helperPath = join(environment.assetsPath, "LocateCursor");
+import { locatecursor } from "swift:../swift/locatecursor";
 
 interface FormValues {
   duration: string;
@@ -32,8 +29,8 @@ const namedColors = [
   { title: "Clear", value: "clear" },
 ];
 
-function handleSubmit(values: FormValues) {
-  const circleColor = values.circleColorHex || values.circleColor || "yellow";
+async function handleSubmit(values: FormValues) {
+  const circleColor = values.circleColorHex || values.circleColor || "purple";
   const borderColor = values.borderColorHex || values.borderColor;
 
   // Input validation
@@ -87,11 +84,23 @@ function handleSubmit(values: FormValues) {
 
   const jsonString = JSON.stringify(presetConfig);
 
-  execFile(helperPath, ["-c", jsonString], (error) => {
-    if (error) {
-      showFailureToast(error, { title: "Failed to locate cursor" });
-    }
-  });
+  try {
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Custom Mode Activated",
+    });
+    const result = await locatecursor("-c", jsonString, "");
+    await showToast({
+        style: Toast.Style.Success,
+        title: "Custom Mode Deactivated",
+      });
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to run Custom Mode",
+      message: error instanceof Error ? error.message : String(error),
+    });
+  }
 }
 
 export default function Command() {
@@ -126,7 +135,7 @@ export default function Command() {
       <Form.Dropdown
         id="circleColor"
         title="Circle Color"
-        defaultValue="yellow"
+        defaultValue="purple"
       >
         {namedColors.map((color) => (
           <Form.Dropdown.Item

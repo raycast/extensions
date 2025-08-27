@@ -1,5 +1,6 @@
 import Cocoa
 import Foundation
+import RaycastSwiftMacros
 
 // MARK: - Data Structures
 struct CircleConfig: Codable {
@@ -29,7 +30,7 @@ struct Config: Codable {
 // MARK: - Configuration Loader
 class ConfigLoader {
     func loadConfig() -> Config? {
-        if let url = Bundle.main.url(forResource: "locatecursor", withExtension: "json") {
+        if let url = Bundle.main.url(forResource: "../locatecursor", withExtension: "json") {
             do {
                 let data = try Data(contentsOf: url)
                 let decoder = JSONDecoder()
@@ -42,7 +43,7 @@ class ConfigLoader {
             print("Warning: locatecursor.json not found. Using default configuration.")
             return Config(
                 default: PresetConfig(
-                    duration: 1,
+                    duration: 3,
                     screenOpacity: 0.5,
                     circle: CircleConfig(
                         radius: 80,
@@ -181,7 +182,7 @@ class LocateCursorTool: NSObject, NSApplicationDelegate {
 
     private var lockFileURL: URL? = {
         guard let appSupportURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
-            print("Error: Unable to find Application Support directory.")
+            NSLog("Error: Unable to find Application Support directory.")
             return nil
         }
         let directoryURL = appSupportURL.appendingPathComponent("com.raycast.where-is-my-cursor")
@@ -189,76 +190,16 @@ class LocateCursorTool: NSObject, NSApplicationDelegate {
             try FileManager.default.createDirectory(at: directoryURL, withIntermediateDirectories: true, attributes: nil)
             return directoryURL.appendingPathComponent("LocateCursor.lock")
         } catch {
-            print("Error: Unable to create directory \(directoryURL): \(error)")
+            NSLog("Error: Unable to create directory \(directoryURL): \(error)")
             return nil
         }
     }()
 
-    func run() {
+    func start(with config: PresetConfig, duration: TimeInterval) {
         if isAnotherInstanceRunning() {
             terminateRunningInstance()
-            return
         }
 
-        let args = CommandLine.arguments
-        let configLoader = ConfigLoader()
-        guard let config = configLoader.loadConfig() else {
-            print("Failed to load config.")
-            return
-        }
-
-        var preset: PresetConfig
-        var duration: TimeInterval
-
-        if args.count > 1 {
-            switch args[1] {
-            case "-p":
-                let presetName = args.count > 2 ? args[2] : "default"
-                switch presetName {
-                case "presentation":
-                    preset = config.presentation
-                case "simple":
-                    preset = config.simple
-                default:
-                    preset = config.default
-                }
-                duration = preset.duration
-            case "-c":
-                if args.count > 2 {
-                    let jsonString = args[2]
-                    let decoder = JSONDecoder()
-                    if let data = jsonString.data(using: .utf8), let customPreset = try? decoder.decode(PresetConfig.self, from: data) {
-                        preset = customPreset
-                        duration = customPreset.duration
-                    } else {
-                        print("Invalid custom config JSON.")
-                        preset = config.default
-                        duration = preset.duration
-                    }
-                } else {
-                    preset = config.default
-                    duration = preset.duration
-                }
-            case "off":
-                terminateRunningInstance()
-                return
-            default:
-                preset = config.default
-                duration = preset.duration
-            }
-        } else {
-            preset = config.default
-            duration = preset.duration
-        }
-
-        startSession(with: preset, duration: duration)
-
-        let app = NSApplication.shared
-        app.delegate = self
-        app.run()
-    }
-
-    private func startSession(with config: PresetConfig, duration: TimeInterval) {
         writeLockFile()
         setupOverlay(with: config)
 
@@ -266,6 +207,16 @@ class LocateCursorTool: NSObject, NSApplicationDelegate {
             DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
                 self.cleanupAndTerminate()
             }
+        }
+
+        let app = NSApplication.shared
+        app.delegate = self
+        app.run()
+    }
+
+    func stop() {
+        if isAnotherInstanceRunning() {
+            terminateRunningInstance()
         }
     }
 
@@ -288,7 +239,9 @@ class LocateCursorTool: NSObject, NSApplicationDelegate {
     private func terminateRunningInstance() {
         guard let pid = readLockFile() else { return }
         if let runningApp = NSRunningApplication(processIdentifier: pid) {
-            runningApp.terminate()
+            if runningApp.processIdentifier != ProcessInfo.processInfo.processIdentifier {
+                runningApp.terminate()
+            }
         }
         if let lockURL = lockFileURL {
             try? FileManager.default.removeItem(at: lockURL)
@@ -300,7 +253,11 @@ class LocateCursorTool: NSObject, NSApplicationDelegate {
         if let lockURL = lockFileURL {
             try? FileManager.default.removeItem(at: lockURL)
         }
-        NSApp.terminate(nil)
+        if NSApp.delegate === self {
+            DispatchQueue.main.async {
+                NSApp.terminate(nil)
+            }
+        }
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
@@ -328,7 +285,6 @@ class LocateCursorTool: NSObject, NSApplicationDelegate {
             self?.window?.contentView?.needsDisplay = true
         }
 
-        /// The keycode for the Escape key on macOS keyboards.
         let escapeKeyCode: UInt16 = 53
 
         keyDownMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
@@ -348,5 +304,48 @@ class LocateCursorTool: NSObject, NSApplicationDelegate {
     }
 }
 
-let tool = LocateCursorTool()
-tool.run()
+@raycast func locatecursor(arg1: String, arg2: String, arg3: String) {
+    let tool = LocateCursorTool()
+
+    if arg1 == "off" {
+        tool.stop()
+        return
+    }
+    
+    let configLoader = ConfigLoader()
+    guard let config = configLoader.loadConfig() else {
+        fatalError("Failed to load config.")
+    }
+
+    var preset: PresetConfig
+
+    if !arg1.isEmpty {
+        switch arg1 {
+        case "-p":
+            let presetName = arg2
+            switch presetName {
+            case "presentation":
+                preset = config.presentation
+            case "simple":
+                preset = config.simple
+            default:
+                preset = config.default
+            }
+        case "-c":
+            if !arg2.isEmpty,
+               let data = arg2.data(using: .utf8),
+               let customPreset = try? JSONDecoder().decode(PresetConfig.self, from: data) {
+                preset = customPreset
+            } else {
+                preset = config.default
+            }
+        default:
+            preset = config.default
+        }
+    } else {
+        preset = config.default
+    }
+
+    tool.start(with: preset, duration: preset.duration)
+}
+
