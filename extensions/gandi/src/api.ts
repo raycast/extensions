@@ -6,9 +6,6 @@ import { GandiDomain, DomainAvailability, DNSRecord, DNSZone, WebsiteMetadata } 
 const createRequest = async <T>(url: string, options: RequestInit = {}): Promise<T> => {
   const preferences = getPreferenceValues<Preferences>();
 
-  if (!preferences?.apiToken) {
-    throw new Error("API token is required");
-  }
 
   try {
     const response = await fetch(url, {
