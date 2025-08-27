@@ -1,5 +1,4 @@
 import { Action } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
 
 import { getPageName, Page } from "../../utils/notion";
 import { urlForPreferredMethod } from "../../utils/openPage";
