@@ -115,4 +115,4 @@ export type PackageResponse = GitHubEntity & {
 /**
  * Filter type for package types
  */
-export type FilterType = "npm" | "maven" | "rubygems" | "docker" | "nuget" | "container";
+export type FilterType = "npm" | "maven" | "rubygems" | "docker" | "nuget";

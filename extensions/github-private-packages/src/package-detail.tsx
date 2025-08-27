@@ -5,13 +5,13 @@ import { getPreferenceValues } from "@raycast/api";
 import VersionDetail from "./version-detail";
 
 export default function PackageDetail({ pack }: { pack: PackageResponse }) {
-  const { githubToken, npmPackageManager } = getPreferenceValues<{
+  const { githubToken, npmPackageManager, githubOrg } = getPreferenceValues<{
     githubToken: string;
     githubOrg: string;
     npmPackageManager: string;
   }>();
 
-  const versionsUrl = `https://api.github.com/orgs/${pack.owner.login}/packages/${pack.package_type}/${pack.name}/versions`;
+  const versionsUrl = `https://api.github.com/orgs/${githubOrg}/packages/${pack.package_type}/${pack.name}/versions`;
 
   const {
     data: versions,
@@ -30,15 +30,15 @@ export default function PackageDetail({ pack }: { pack: PackageResponse }) {
   function getInstallCommand(pack: PackageResponse, version: VersionResponse) {
     switch (pack.package_type) {
       case "npm":
-        return `${npmPackageManager} install ${pack.name}@${version.name}`;
+        return `${npmPackageManager ?? "npm"} install ${pack.name}@${version.name}`;
       case "rubygems":
         return `gem install ${pack.name} --version ${version.name}`;
       case "docker":
         return `docker pull ${pack.name}:${version.name}`;
       case "nuget":
         return `dotnet add package ${pack.name} --version ${version.name}`;
-      case "container":
-        return `docker pull ${pack.name}:${version.name}`;
+      case "maven":
+        return `mvn install:install-file -Dfile=${pack.name}-${version.name}.jar`;
       default:
         return `# Install command not available for package type: ${pack.package_type}`;
     }

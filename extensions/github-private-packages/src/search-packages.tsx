@@ -13,6 +13,19 @@ export default function Command() {
   }>();
   const [showFilter, setShowFilter] = useState<FilterType>("npm");
 
+  // Check if required preferences are set
+  if (!githubToken || !githubOrg) {
+    return (
+      <List>
+        <List.EmptyView
+          title="Missing Required Preferences"
+          description="Please set your GitHub API Token and Organization Name in the extension preferences"
+          icon={Icon.ExclamationMark}
+        />
+      </List>
+    );
+  }
+
   const { data, isLoading } = useFetch<PackageResponse[]>(
     `https://api.github.com/orgs/${githubOrg}/packages?package_type=${showFilter}`,
     {
@@ -49,8 +62,6 @@ export default function Command() {
         return `docker pull ${pack.name}`;
       case "nuget":
         return `dotnet add package ${pack.name}`;
-      case "container":
-        return `docker pull ${pack.name}`;
       default:
         return `# Install command not available for package type: ${pack.package_type}`;
     }
@@ -103,7 +114,6 @@ const iconMap: Record<FilterType, Icon> = {
   rubygems: Icon.Globe,
   docker: Icon.Box,
   nuget: Icon.CodeBlock,
-  container: Icon.Coin,
 };
 
 function FilterDropdown(props: { onChange: (newValue: FilterType) => void }) {
@@ -122,7 +132,6 @@ function FilterDropdown(props: { onChange: (newValue: FilterType) => void }) {
         <List.Dropdown.Item key="rubygems" title="Rubygems" value="rubygems" />
         <List.Dropdown.Item key="docker" title="Docker" value="docker" />
         <List.Dropdown.Item key="nuget" title="Nuget" value="nuget" />
-        <List.Dropdown.Item key="container" title="Container" value="container" />
       </List.Dropdown.Section>
     </List.Dropdown>
   );
