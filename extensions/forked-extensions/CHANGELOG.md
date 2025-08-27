@@ -1,5 +1,14 @@
 # Raycast Fork Extensions Changelog
 
+## [Bugfixes & Enhancements] - {PR_MERGE_DATE}
+
+- Re-organize the error handlers
+- Fix the `Sync Fork` action cannot rerendered after syncing the forked repository
+- Create a customized `showFailureToast` function to consume with the singleton toast instance
+- Fix the Git executable file path which contains spaces cannot be recognized on Windows
+- Change the `gitExecutableFilePath` preference field to `textfield` due to the `file` cannot be cleared from the UI
+- Check if the sync state is outdated before syncing the forked repository
+
 ## [Bugfix] - 2025-08-27
 
 - Fix the GitHub OAuth permission scope to include `repo` and `workflow`

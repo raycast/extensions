@@ -1,15 +1,25 @@
 import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import process from "node:process";
-import { getPreferenceValues } from "@raycast/api";
 import spawn from "nano-spawn";
 import * as api from "./api.js";
 import { defaultGitExecutableFilePath } from "./constants.js";
 import { ForkedExtension } from "./types.js";
-import { getRemoteUrl } from "./utils.js";
+import { gitExecutableFilePath, getRemoteUrl, repositoryConfigurationPath } from "./utils.js";
 
-const { gitExecutableFilePath = defaultGitExecutableFilePath, repositoryConfigurationPath } =
-  getPreferenceValues<ExtensionPreferences>();
+/**
+ * The path to the Git executable file.
+ * @remarks
+ * Windows does not support paths with spaces without quotes, like `C:\Program Files\Git\cmd\git.exe`.
+ * So we need to add quotes around the path if it contains spaces and is not already quoted.
+ */
+const gitFilePath =
+  os.platform() === "win32" &&
+  gitExecutableFilePath?.includes(" ") &&
+  !(gitExecutableFilePath?.startsWith('"') && gitExecutableFilePath?.endsWith('"'))
+    ? `"${gitExecutableFilePath}"`
+    : gitExecutableFilePath || defaultGitExecutableFilePath;
 
 /**
  * Resolves the path to the repository configuration.
@@ -70,7 +80,7 @@ export const getExtensionList = async () => {
  * @param args The arguments to pass to the git command.
  * @return The subprocess result of the git command execution.
  */
-export const git = async (args: string[]) => spawn(gitExecutableFilePath, args, { cwd: repositoryPath, shell: true });
+export const git = async (args: string[]) => spawn(gitFilePath, args, { cwd: repositoryPath, shell: true });
 
 /**
  * Checks if Git is valid by running `git --version`.
@@ -78,7 +88,7 @@ export const git = async (args: string[]) => spawn(gitExecutableFilePath, args, 
  */
 export const checkIfGitIsValid = async () => {
   try {
-    await spawn(gitExecutableFilePath, ["--version"], { shell: true });
+    await spawn(gitFilePath, ["--version"], { shell: true });
     return true;
   } catch {
     return false;
@@ -86,20 +96,39 @@ export const checkIfGitIsValid = async () => {
 };
 
 /**
+ * Gets the last full commit hash of the current branch.
+ */
+export const getLastCommitHash = async () => {
+  const { output } = await git(["rev-parse", "HEAD"]);
+  return output.trim();
+};
+
+/**
+ * Gets the forked repository full name and whether it's newly cloned.
+ * @returns An object containing the forked repository full name and a boolean indicating if it's newly cloned.
+ */
+export const getForkedRepository = async () => {
+  const gitExists = await fileExists(path.join(repositoryPath, ".git"));
+  if (gitExists) {
+    const { output } = await git(["remote", "get-url", "origin"]);
+    const existingRepository = output.replace(/^(https:\/\/github.com\/|git@github\.com:)/, "").replace(/\.git$/, "");
+    return { forkedRepository: existingRepository, isNew: false };
+  }
+
+  const forkedRepository = await api.getForkedRepository();
+  return { forkedRepository, isNew: true };
+};
+
+/**
  * Initializes the repository by cloning it if it doesn't exist.
  * @returns The full name of the forked repository.
  */
 export const initRepository = async () => {
-  const gitExists = await fileExists(path.join(repositoryPath, ".git"));
-  if (gitExists) {
-    const { output } = await git(["remote", "get-url", "origin"]);
-    const existiingRepository = output.replace(/^(https:\/\/github.com\/|git@github\.com:)/, "").replace(/\.git$/, "");
-    return existiingRepository;
-  }
+  const { forkedRepository, isNew } = await getForkedRepository();
+  if (!isNew) return forkedRepository;
 
-  const forkedRepository = await api.getForkedRepository();
   await spawn(
-    gitExecutableFilePath,
+    gitFilePath,
     ["clone", "--filter=blob:none", "--no-checkout", getRemoteUrl(forkedRepository), repositoryPath],
     {
       shell: true,

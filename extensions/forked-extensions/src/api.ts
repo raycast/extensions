@@ -1,9 +1,7 @@
-import { getPreferenceValues } from "@raycast/api";
 import { OAuthService, withAccessToken } from "@raycast/utils";
 import got, { Got } from "got";
 import { githubOauthScope } from "./constants.js";
-
-const { githubPersonalAccessToken } = getPreferenceValues<ExtensionPreferences>();
+import { githubPersonalAccessToken } from "./utils.js";
 
 /**
  * GitHub API client instance.
