@@ -1,6 +1,6 @@
 # FreeAgent Changelog
 
-## [Timezone Fix for Date Handling] - {PR_MERGE_DATE}
+## [Timezone Fix for Date Handling] - 2025-08-27
 
 - Fixed timezone issue where selecting "today" in timeslip and invoice creation would sometimes be saved as "yesterday" in FreeAgent
 - Users in timezones ahead of UTC (like BST/GMT+1) will now have their selected dates saved correctly
