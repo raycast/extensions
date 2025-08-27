@@ -10,9 +10,20 @@ export default function PackageDetail({ pack }: { pack: PackageResponse }) {
     githubOrg: string;
     npmPackageManager: string;
   }>();
-  const { data: versions, isLoading } = useFetch<VersionResponse[]>(`${pack.url}/versions`, {
+
+  const versionsUrl = `https://api.github.com/orgs/${pack.owner.login}/packages/${pack.package_type}/${pack.name}/versions`;
+
+  const {
+    data: versions,
+    isLoading,
+    error,
+  } = useFetch<VersionResponse[]>(versionsUrl, {
     headers: {
       Authorization: "token " + githubToken,
+    },
+    failureToastOptions: {
+      title: "Failed to fetch package versions",
+      message: "Please check your GitHub token and Organization Name in the preferences",
     },
   });
 
@@ -21,14 +32,48 @@ export default function PackageDetail({ pack }: { pack: PackageResponse }) {
       case "npm":
         return `${npmPackageManager} install ${pack.name}@${version.name}`;
       case "rubygems":
-        return `gem install ${pack.name}@${version.name}`;
+        return `gem install ${pack.name} --version ${version.name}`;
       case "docker":
-        return `docker pull ${pack.name}@${version.name}`;
+        return `docker pull ${pack.name}:${version.name}`;
       case "nuget":
-        return `dotnet add package ${pack.name}@${version.name}`;
+        return `dotnet add package ${pack.name} --version ${version.name}`;
+      case "container":
+        return `docker pull ${pack.name}:${version.name}`;
       default:
-        return "";
+        return `# Install command not available for package type: ${pack.package_type}`;
     }
+  }
+
+  // Handle API errors
+  if (error) {
+    return (
+      <List
+        navigationTitle={`Search ${pack.name} versions`}
+        searchBarPlaceholder="Search for a specific package version"
+      >
+        <List.EmptyView
+          title="Failed to load package versions"
+          description={error.message || "An error occurred while fetching versions"}
+          icon={Icon.ExclamationMark}
+        />
+      </List>
+    );
+  }
+
+  // Handle case when versions is null/undefined but not loading
+  if (!isLoading && !versions) {
+    return (
+      <List
+        navigationTitle={`Search ${pack.name} versions`}
+        searchBarPlaceholder="Search for a specific package version"
+      >
+        <List.EmptyView
+          title="No versions found"
+          description={`No versions available for ${pack.name}`}
+          icon={Icon.CircleDisabled}
+        />
+      </List>
+    );
   }
 
   return (
@@ -65,7 +110,13 @@ export default function PackageDetail({ pack }: { pack: PackageResponse }) {
           />
         ))}
       </List.Section>
-      <List.EmptyView title={`No packages details found for ${pack.name}`} icon={Icon.CircleDisabled}/>
+      {!isLoading && versions && versions.length === 0 && (
+        <List.EmptyView
+          title={`No versions found for ${pack.name}`}
+          description="This package doesn't have any published versions yet"
+          icon={Icon.CircleDisabled}
+        />
+      )}
     </List>
   );
 }

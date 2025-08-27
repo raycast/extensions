@@ -19,6 +19,10 @@ export default function Command() {
       headers: {
         Authorization: "token " + githubToken,
       },
+      failureToastOptions: {
+        title: "Failed to fetch packages",
+        message: "Please check your GitHub token and Organization Name in the preferences",
+      },
     },
   );
 
