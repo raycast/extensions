@@ -1,10 +1,8 @@
-import { Toast, confirmAlert, openExtensionPreferences } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
-import { HTTPError } from "got";
-import { SubprocessError } from "nano-spawn";
+import { Clipboard, Toast, confirmAlert, openExtensionPreferences } from "@raycast/api";
 import * as api from "./api.js";
 import * as git from "./git.js";
-import { handleGotHttpError, handleSubprocessError } from "./utils.js";
+import { handleError } from "./errors.js";
+import { getCommitsText } from "./utils.js";
 
 /**
  * Class to manage operations related to forked extensions.
@@ -48,7 +46,7 @@ class Operation {
         return;
       }
 
-      this.showToast("Initializing repository");
+      this.showToast({ title: "Initializing repository" });
       const forkedRepository = await git.initRepository();
       await git.setUpstream(forkedRepository);
       return forkedRepository;
@@ -77,7 +75,32 @@ class Operation {
    * @param extensionFolder The folder of the extension to fork.
    */
   fork = async (extensionFolder: string) =>
-    this.spawn(async () => git.sparseCheckoutAdd(extensionFolder), "Forking extension", "Forked successfully");
+    this.spawn(
+      async () => {
+        const { forkedRepository } = await git.getForkedRepository();
+        const commitsBehind = await api.compareTwoCommits(forkedRepository);
+        if (commitsBehind > 0) {
+          const yes = await confirmAlert({
+            title: "Repository Outdated",
+            message: `Your forked repository on GitHub is ${getCommitsText(commitsBehind)} behind the upstream repository. Do you want to sync it now?`,
+            primaryAction: {
+              title: "Sync Now",
+            },
+            dismissAction: {
+              title: "Fork Anyway",
+            },
+          });
+          if (yes) {
+            // Set the flag to false to allow re-entering the spawn method.
+            this.isOperating = false;
+            await this.sync();
+          }
+        }
+        await git.sparseCheckoutAdd(extensionFolder);
+      },
+      "Forking extension",
+      "Forked successfully",
+    );
 
   /**
    * Pulls the latest changes from the upstream repository.
@@ -100,6 +123,27 @@ class Operation {
     this.spawn(async () => git.sparseCheckoutRemove(extensionFolder), "Removing extension", "Removed successfully");
 
   /**
+   * The singleton instance version of the the `showFailureToast` method.
+   * @param error An unknown error to show in the failure toast.
+   * @param options Optional toast options to customize the failure toast.
+   */
+  showFailureToast = async (error: unknown, options?: Toast.Options) => {
+    const title = error instanceof Error ? error.name : "Error";
+    const message = error instanceof Error ? error.message : String(error);
+    const copyLogsAction = {
+      title: "Copy Logs",
+      onAction: () => Clipboard.copy([title, message].join("\n")),
+    };
+    return this.showToast({
+      title,
+      message,
+      style: options?.style ?? Toast.Style.Failure,
+      primaryAction: options?.primaryAction ?? copyLogsAction,
+      secondaryAction: options?.primaryAction ? copyLogsAction : undefined,
+    });
+  };
+
+  /**
    * Executes a task with a loading toast and handles success or failure.
    * @param task The task to execute, which returns a promise with void or string.
    * @param loadingMessage The message to show while the task is loading.
@@ -110,13 +154,13 @@ class Operation {
 
     const isClean = await git.isStatusClean();
     if (!isClean) {
-      showFailureToast("The repository is not clean. Please commit or stash your changes before proceeding.");
+      this.showFailureToast("The repository is not clean. Please commit or stash your changes before proceeding.");
       return;
     }
 
     try {
       this.isOperating = true;
-      this.showToast(loadingMessage);
+      this.showToast({ title: loadingMessage });
       const result = await task();
       const message = completedMessage ?? result;
       if (typeof message === "string") {
@@ -125,9 +169,7 @@ class Operation {
         this.hideToast();
       }
     } catch (error) {
-      if (error instanceof HTTPError) handleGotHttpError(error);
-      else if (error instanceof SubprocessError) handleSubprocessError(error);
-      else showFailureToast(error);
+      handleError(error);
     } finally {
       this.isOperating = false;
     }
@@ -137,10 +179,14 @@ class Operation {
    * Shows a loading toast with the specified title.
    * @param title The title of the toast to show.
    */
-  private showToast = (title: string) => {
-    this.toast.style = Toast.Style.Animated;
-    this.toast.title = title;
-    this.toast.show();
+  private showToast = async (options: Toast.Options = { title: "" }) => {
+    const { style, message, primaryAction, secondaryAction } = options;
+    this.toast.style = style ?? Toast.Style.Animated;
+    this.toast.title = options.title;
+    if (message) this.toast.message = message;
+    if (primaryAction) this.toast.primaryAction = primaryAction;
+    if (secondaryAction) this.toast.secondaryAction = secondaryAction;
+    await this.toast.show();
   };
 
   /**
@@ -153,10 +199,10 @@ class Operation {
   };
 
   /**
-   * Hides the current toast if it is visible.
+   * Hides the current toast if it's in an animated state.
    */
-  private hideToast = () => {
-    this.toast.hide();
+  private hideToast = async () => {
+    if (this.toast.style === Toast.Style.Animated) this.toast.hide();
   };
 }
 
