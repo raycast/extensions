@@ -91,4 +91,4 @@ We welcome contributions from the community! If you find any bugs, have feature 
 - **Submitting a pull request** to add improvements or fix issues
 - **Suggesting enhancements** for package registry support or user experience
 
-Whether it's adding support for additional package types, improving the search functionality, or enhancing the UI, your contributions help make this extension better for everyone. Check out our [issues page](https://github.com/Borgund/raycast-github-packages/issues) to see what's already being worked on or to start a new discussion.
+Whether it's adding support for additional package types, improving the search functionality, or enhancing the UI, your contributions help make this extension better for everyone.
