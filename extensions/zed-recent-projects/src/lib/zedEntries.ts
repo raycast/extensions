@@ -3,6 +3,7 @@ import { showFailureToast, useSQL } from "@raycast/utils";
 import { execFile } from "child_process";
 import fs from "fs";
 import { homedir } from "os";
+import { useEffect, useState } from "react";
 import util from "util";
 
 import { getZedDbName } from "./zed";
@@ -38,7 +39,7 @@ interface LocalWorkspace extends BaseWorkspace {
 
 interface RemoteWorkspace extends BaseWorkspace {
   type: "remote";
-  paths: string;
+  paths: string; // In new schema (26+) or old schema for remote
   paths_order: string | null;
   host: string;
   user: string | null;
@@ -168,25 +169,53 @@ function processRemoteWorkspace(workspace: RemoteWorkspace): ZedEntry | undefine
   }
 }
 
-export function useZedRecentWorkspaces(): ZedRecentWorkspaces {
-  const path = getPath();
+async function getSchemaVersion(dbPath: string): Promise<number> {
+  try {
+    const result = await execFilePromise("sqlite3", [
+      dbPath,
+      "SELECT MAX(step) FROM migrations WHERE domain = 'WorkspaceDb';",
+    ]);
+    const version = parseInt(result.stdout.trim(), 10);
+    return isNaN(version) ? 0 : version;
+  } catch (error) {
+    console.error("Failed to get schema version:", error);
+    return 0;
+  }
+}
 
-  if (!fs.existsSync(path)) {
-    return {
-      entries: {},
-      removeEntry: () => Promise.resolve(),
-      removeAllEntries: () => Promise.resolve(),
-    };
+function getQueryForSchema(schemaVersion: number): string {
+  // Schema version 26+ uses ssh_connections table and unified paths field
+  if (schemaVersion >= 26) {
+    return `
+      SELECT
+        CASE
+          WHEN ssh_connection_id IS NULL THEN 'local'
+          ELSE 'remote'
+        END as type,
+        workspace_id as id,
+        paths as local_paths,
+        paths,
+        paths_order,
+        timestamp,
+        host,
+        user,
+        port
+      FROM workspaces
+      LEFT JOIN ssh_connections ON ssh_connection_id = ssh_connections.id
+      WHERE paths IS NOT NULL AND paths != ''
+      ORDER BY timestamp DESC
+    `;
   }
 
-  const query = `
+  // Schema version 24 and below uses ssh_projects table and separate local_paths field
+  return `
     SELECT
       CASE
-        WHEN ssh_connection_id IS NULL THEN 'local'
+        WHEN local_paths IS NOT NULL THEN 'local'
         ELSE 'remote'
       END as type,
       workspace_id as id,
-      paths as local_paths,
+      local_paths,
       paths,
       paths_order,
       timestamp,
@@ -194,16 +223,42 @@ export function useZedRecentWorkspaces(): ZedRecentWorkspaces {
       user,
       port
     FROM workspaces
-    LEFT JOIN ssh_connections ON ssh_connection_id = ssh_connections.id
-    WHERE paths IS NOT NULL AND paths != ''
+    LEFT JOIN ssh_projects ON ssh_project_id = ssh_projects.id
+    WHERE (local_paths IS NOT NULL AND paths IS NULL)
+       OR (local_paths IS NULL AND paths IS NOT NULL)
     ORDER BY timestamp DESC
   `;
+}
 
-  const { data, isLoading, error, mutate } = useSQL<Workspace>(path, query);
+export function useZedRecentWorkspaces(): ZedRecentWorkspaces {
+  const path = getPath();
+  const [schemaVersion, setSchemaVersion] = useState<number | null>(null);
+  const [query, setQuery] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (fs.existsSync(path)) {
+      getSchemaVersion(path).then((version) => {
+        setSchemaVersion(version);
+        setQuery(getQueryForSchema(version));
+      });
+    }
+  }, [path]);
+
+  // Always call the hook, but use a dummy query if not ready
+  const { data, isLoading, error, mutate } = useSQL<Workspace>(path, query || "SELECT * FROM workspaces LIMIT 0");
+
+  if (!fs.existsSync(path) || !query) {
+    return {
+      entries: {},
+      removeEntry: () => Promise.resolve(),
+      removeAllEntries: () => Promise.resolve(),
+      isLoading: true,
+    };
+  }
 
   async function removeEntry(id: number) {
     try {
-      await mutate(deleteEntryById(id), { shouldRevalidateAfter: true });
+      await mutate(deleteEntryById(id, schemaVersion || 0), { shouldRevalidateAfter: true });
 
       showToast(Toast.Style.Success, "Entry removed");
     } catch (error) {
@@ -228,7 +283,7 @@ export function useZedRecentWorkspaces(): ZedRecentWorkspaces {
           },
         })
       ) {
-        await mutate(deleteAllWorkspaces(), { shouldRevalidateAfter: true });
+        await mutate(deleteAllWorkspaces(schemaVersion || 0), { shouldRevalidateAfter: true });
         showToast(Toast.Style.Success, "All entries removed");
       }
     } catch (error) {
@@ -266,16 +321,28 @@ export function useZedRecentWorkspaces(): ZedRecentWorkspaces {
 
 export const execFilePromise = util.promisify(execFile);
 
-async function deleteEntryById(id: number) {
-  const deleteQuery = `
+async function deleteEntryById(id: number, schemaVersion: number) {
+  const deleteQuery =
+    schemaVersion >= 26
+      ? `
 DELETE FROM ssh_connections WHERE id = (
   SELECT ssh_connection_id FROM workspaces WHERE workspace_id = ${id}
+);
+DELETE FROM workspaces WHERE workspace_id = ${id}
+`
+      : `
+DELETE FROM ssh_projects WHERE id = (
+  SELECT ssh_project_id FROM workspaces WHERE workspace_id = ${id}
 );
 DELETE FROM workspaces WHERE workspace_id = ${id}
 `;
   await execFilePromise("sqlite3", [getPath(), deleteQuery]);
 }
 
-async function deleteAllWorkspaces() {
-  await execFilePromise("sqlite3", [getPath(), "DELETE FROM ssh_connections;DELETE FROM workspaces;"]);
+async function deleteAllWorkspaces(schemaVersion: number) {
+  const deleteQuery =
+    schemaVersion >= 26
+      ? "DELETE FROM ssh_connections;DELETE FROM workspaces;"
+      : "DELETE FROM ssh_projects;DELETE FROM workspaces;";
+  await execFilePromise("sqlite3", [getPath(), deleteQuery]);
 }
