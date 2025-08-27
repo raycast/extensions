@@ -107,6 +107,10 @@ export interface Webhook {
   events: WebhookEventType[];
   name: string;
   enabled: boolean;
+  editable: boolean;
+  created_at: string;
+  updated_at: string;
+  domain: Domain;
 }
 
 export interface ErrorResult {

@@ -1,10 +1,11 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { useMailerSendPaginated } from "./mailersend";
-import { Activity, ActivityEventType, Domain, Webhook } from "./interfaces";
+import { Activity, ActivityEventType, Domain } from "./interfaces";
 import { useMemo, useState } from "react";
 import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
+import Webhooks from "./webhooks";
 dayjs.extend(localizedFormat);
 
 export default function Domains() {
@@ -101,15 +102,4 @@ function Activities({ domain }: { domain: Domain }) {
       </List.Section>
     </List>
   );
-}
-
-function Webhooks({domain}: {domain: Domain}) {
-  const {isLoading, data: webhooks} = useMailerSendPaginated<Webhook>(`webhooks?domain_id=${domain.id}`);
-  return <List isLoading={isLoading} isShowingDetail>
-    {webhooks.map(webhook => <List.Item key={webhook.id} icon={{source:Icon.Plug, tintColor: webhook.enabled ? Color.Green : Color.Red, tooltip: webhook.enabled ? "Enabled" : "Disabled"}} title={webhook.name} detail={<List.Item.Detail markdown={webhook.url} metadata={<List.Item.Detail.Metadata>
-      <List.Item.Detail.Metadata.TagList title="Events">
-        {webhook.events.map(event => <List.Item.Detail.Metadata.TagList.Item key={event} text={event} />)}
-      </List.Item.Detail.Metadata.TagList>
-    </List.Item.Detail.Metadata>} />} />)}
-  </List>
 }
