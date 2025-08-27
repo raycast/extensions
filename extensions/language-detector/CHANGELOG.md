@@ -1,6 +1,6 @@
 # Language Detector Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-08-27
 
 - Bump latest `raycast-language-detector` to support internet slangs
 - Bump latest `mac-say` to handle `SIGTERM` gracefully
