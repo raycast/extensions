@@ -5,6 +5,14 @@ Control your Atomberg smart appliances directly from Raycast with ease and secur
 > [!NOTE]
 > This is an unofficial extension not affiliated with Atomberg Technologies.
 
+## Demo
+
+### Video
+
+https://github.com/user-attachments/assets/a4d04adb-0e76-4fec-8e0b-5079610fc722
+
+### Screenshots
+
 ![Atomberg Device Screenshot 1](./demo/atomberg-1.png)
 
 ![Atomberg Device Screenshot 2](./demo/atomberg-2.png)
