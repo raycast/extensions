@@ -96,6 +96,7 @@ function ManageForkedExtensions() {
                 shortcut={Keyboard.Shortcut.Common.New}
                 target={<ValidExtensions forkedExtensionFolders={forkedExtensionFolders} onPop={revalidate} />}
               />
+              <SyncFork forkedRepository={forkedRepository} />
               <Action.ShowInFinder title="Show Extension in Finder" path={x.folderPath} />
               <Action.ShowInFinder title="Show Repository in Finder" path={git.repositoryPath} />
               <Action.OpenInBrowser url={extensionLink(x.author, x.name)} shortcut={Keyboard.Shortcut.Common.Open} />
