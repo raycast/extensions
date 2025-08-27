@@ -9,7 +9,7 @@ export default function VersionDetail({ version, pack }: { version: VersionRespo
           <Action.OpenInBrowser url={version.html_url} />
         </ActionPanel>
       }
-      markdown={`# [${pack.name}](${pack.html_url})@[${version.name}](${version.html_url}) \n\n## Details: \n- **package type**: ${pack.package_type} \n- **updated**: ${new Date(version.updated_at).toLocaleString()} \n- **created**: ${new Date(pack.created_at).toLocaleString()} \n- **repository**: ${pack.repository.html_url} \n- **package url**: ${pack.html_url} \n- **version url**: ${version.url}`}
+      markdown={`# [${pack.name}](${pack.html_url})@[${version.name}](${version.html_url}) \n\n## Details: \n- **package type**: ${pack.package_type} \n- **updated**: ${new Date(version.updated_at).toLocaleString()} \n- **created**: ${new Date(pack.created_at).toLocaleString()} \n- **repository**: ${pack.repository.html_url} \n- **package url**: ${pack.html_url} \n- **version url**: ${version.html_url}`}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Name" text={pack.name} />
