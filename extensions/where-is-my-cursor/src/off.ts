@@ -3,18 +3,11 @@ import { locatecursor } from "swift:../swift/locatecursor";
 
 export default async function main() {
   try {
-    const result = await locatecursor("off", "", "");
-    if (result === "deactivated") {
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Where Is My Cursor deactivated",
-      });
-    } else if (result === "not_running") {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "No Where Is My Cursor mode active",
-      });
-    }
+    await locatecursor("off", "", "");
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Where Is My Cursor deactivated",
+    });
   } catch (err) {
     await showToast({
       style: Toast.Style.Failure,

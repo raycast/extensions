@@ -89,11 +89,11 @@ async function handleSubmit(values: FormValues) {
       style: Toast.Style.Success,
       title: "Custom Mode Activated",
     });
-    const result = await locatecursor("-c", jsonString, "");
+    await locatecursor("-c", jsonString, "");
     await showToast({
-        style: Toast.Style.Success,
-        title: "Custom Mode Deactivated",
-      });
+      style: Toast.Style.Success,
+      title: "Custom Mode Deactivated",
+    });
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
