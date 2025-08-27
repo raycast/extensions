@@ -43,7 +43,7 @@ class ConfigLoader {
             print("Warning: locatecursor.json not found. Using default configuration.")
             return Config(
                 default: PresetConfig(
-                    duration: 3,
+                    duration: 2,
                     screenOpacity: 0.5,
                     circle: CircleConfig(
                         radius: 80,
@@ -196,8 +196,19 @@ class LocateCursorTool: NSObject, NSApplicationDelegate {
     }()
 
     func start(with config: PresetConfig, duration: TimeInterval) {
-        if isAnotherInstanceRunning() {
-            terminateRunningInstance()
+        if let pid = readLockFile() {
+            if let runningApp = NSRunningApplication(processIdentifier: pid) {
+                if runningApp.processIdentifier != ProcessInfo.processInfo.processIdentifier {
+                    runningApp.terminate()
+                    let start = Date()
+                    while !runningApp.isTerminated && Date().timeIntervalSince(start) < 0.1 {
+                        Thread.sleep(forTimeInterval: 0.05)
+                    }
+                    if !runningApp.isTerminated {
+                        runningApp.forceTerminate()
+                    }
+                }
+            }
         }
 
         writeLockFile()
@@ -241,6 +252,13 @@ class LocateCursorTool: NSObject, NSApplicationDelegate {
         if let runningApp = NSRunningApplication(processIdentifier: pid) {
             if runningApp.processIdentifier != ProcessInfo.processInfo.processIdentifier {
                 runningApp.terminate()
+                let start = Date()
+                while !runningApp.isTerminated && Date().timeIntervalSince(start) < 0.1 {
+                    Thread.sleep(forTimeInterval: 0.05)
+                }
+                if !runningApp.isTerminated {
+                    runningApp.forceTerminate()
+                }
             }
         }
         if let lockURL = lockFileURL {
@@ -250,8 +268,10 @@ class LocateCursorTool: NSObject, NSApplicationDelegate {
 
     private func cleanupAndTerminate() {
         removeMonitors()
-        if let lockURL = lockFileURL {
-            try? FileManager.default.removeItem(at: lockURL)
+        if let pid = readLockFile(), pid == ProcessInfo.processInfo.processIdentifier {
+            if let lockURL = lockFileURL {
+                try? FileManager.default.removeItem(at: lockURL)
+            }
         }
         if NSApp.delegate === self {
             DispatchQueue.main.async {

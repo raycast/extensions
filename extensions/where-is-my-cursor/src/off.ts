@@ -1,4 +1,4 @@
-import { showToast, Toast } from "@raycast/api";
+import { showToast, Toast, closeMainWindow } from "@raycast/api";
 import { locatecursor } from "swift:../swift/locatecursor";
 
 export default async function main() {
@@ -8,6 +8,7 @@ export default async function main() {
       style: Toast.Style.Success,
       title: "Where Is My Cursor deactivated",
     });
+    await closeMainWindow();
   } catch (err) {
     await showToast({
       style: Toast.Style.Failure,

@@ -1,4 +1,11 @@
-import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  showToast,
+  Toast,
+  closeMainWindow,
+} from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { locatecursor } from "swift:../swift/locatecursor";
 
@@ -89,11 +96,8 @@ async function handleSubmit(values: FormValues) {
       style: Toast.Style.Success,
       title: "Custom Mode Activated",
     });
-    await locatecursor("-c", jsonString, "");
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Custom Mode Deactivated",
-    });
+    locatecursor("-c", jsonString, "");
+    await closeMainWindow();
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,

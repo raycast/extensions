@@ -1,4 +1,4 @@
-import { showToast, Toast } from "@raycast/api";
+import { showToast, Toast, closeMainWindow } from "@raycast/api";
 import { locatecursor } from "swift:../swift/locatecursor";
 
 export default async function main() {
@@ -7,11 +7,8 @@ export default async function main() {
       style: Toast.Style.Success,
       title: "Presentation Mode Activated",
     });
-    await locatecursor("-p", "presentation", "");
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Presentation Mode Deactivated",
-    });
+    locatecursor("-p", "presentation", "");
+    await closeMainWindow();
   } catch (err) {
     await showToast({
       style: Toast.Style.Failure,
