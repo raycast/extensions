@@ -1,6 +1,6 @@
 # TablePlus
 
-Quickly connect to all your connections directly from Raycast.
+Browse, search, and connect to TablePlus databases in a snap.
 
 ## FAQ
 
