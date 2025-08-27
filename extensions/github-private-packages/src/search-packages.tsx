@@ -40,7 +40,7 @@ export default function Command() {
   }
 
   function getInstallCommand(pack: PackageResponse) {
-    switch (showFilter) {
+    switch (pack.package_type) {
       case "npm":
         return `${npmPackageManager} install ${pack.name}`;
       case "rubygems":
@@ -49,8 +49,10 @@ export default function Command() {
         return `docker pull ${pack.name}`;
       case "nuget":
         return `dotnet add package ${pack.name}`;
+      case "container":
+        return `docker pull ${pack.name}`;
       default:
-        return "";
+        return `# Install command not available for package type: ${pack.package_type}`;
     }
   }
 
