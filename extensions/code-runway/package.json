@@ -15,7 +15,7 @@
     },
     {
       "name": "directory-settings",
-      "title": "Directory Settings",
+      "title": "Project Directory Settings",
       "description": "Manage project directories, including adding, removing, and enabling/disabling them",
       "mode": "view"
     },

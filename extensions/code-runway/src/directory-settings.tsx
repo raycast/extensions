@@ -168,7 +168,7 @@ export default function DirectorySettings() {
                 accessories={getAccessories(directory)}
                 actions={
                   <ActionPanel>
-                    <ActionPanel.Section title="Directory Actions">
+                    <ActionPanel.Section title="Directory Status">
                       <Action
                         title={directory.enabled ? "Disable" : "Enable"}
                         icon={directory.enabled ? Icon.XMarkCircle : Icon.CheckCircle}

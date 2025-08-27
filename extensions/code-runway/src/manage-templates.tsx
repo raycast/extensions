@@ -1,36 +1,30 @@
 import { ActionPanel, Action, List, showToast, Toast, Icon, Form, useNavigation, showHUD, Color } from "@raycast/api";
-import { useState, useEffect, Fragment } from "react";
+import { useState, Fragment } from "react";
+import { useCachedPromise } from "@raycast/utils";
 import { WarpTemplate, TerminalCommand } from "./types";
 import { ProjectTemplateStorage } from "./utils/storage";
 
 export default function ManageTemplates() {
-  const [templates, setTemplates] = useState<WarpTemplate[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    loadTemplates();
-  }, []);
-
-  async function loadTemplates() {
-    try {
-      setIsLoading(true);
-      const loadedTemplates = await ProjectTemplateStorage.getTemplates();
-      setTemplates(loadedTemplates);
-    } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }
+  const {
+    isLoading,
+    data: templates = [],
+    revalidate,
+  } = useCachedPromise(
+    async () => {
+      return await ProjectTemplateStorage.getTemplates();
+    },
+    [],
+    {
+      failureToastOptions: {
+        title: "Failed to load templates",
+      },
+    },
+  );
 
   async function deleteTemplate(id: string) {
     try {
       await ProjectTemplateStorage.removeTemplate(id);
-      await loadTemplates();
+      revalidate();
       showHUD("Template deleted");
     } catch (error) {
       showToast({
@@ -45,7 +39,7 @@ export default function ManageTemplates() {
     try {
       const updatedTemplate = { ...template, isDefault: true };
       await ProjectTemplateStorage.addTemplate(updatedTemplate);
-      await loadTemplates();
+      revalidate();
       showHUD(`Set ${template.name} as default template`);
     } catch (error) {
       showToast({
@@ -81,7 +75,7 @@ export default function ManageTemplates() {
         <ActionPanel>
           <Action.Push
             title="Create New Template"
-            target={<EditTemplateForm onSaved={loadTemplates} />}
+            target={<EditTemplateForm onSaved={revalidate} />}
             icon={Icon.Plus}
             shortcut={{ modifiers: ["cmd"], key: "n" }}
           />
@@ -106,7 +100,7 @@ export default function ManageTemplates() {
               <ActionPanel.Section>
                 <Action.Push
                   title="Edit Template"
-                  target={<EditTemplateForm template={template} onSaved={loadTemplates} />}
+                  target={<EditTemplateForm template={template} onSaved={revalidate} />}
                   icon={Icon.Pencil}
                 />
                 {!template.isDefault && (
@@ -119,7 +113,7 @@ export default function ManageTemplates() {
                 )}
                 <Action.Push
                   title="Create New Template"
-                  target={<EditTemplateForm onSaved={loadTemplates} />}
+                  target={<EditTemplateForm onSaved={revalidate} />}
                   icon={Icon.Plus}
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
                 />
@@ -151,7 +145,7 @@ export default function ManageTemplates() {
             <ActionPanel>
               <Action.Push
                 title="Create New Template"
-                target={<EditTemplateForm onSaved={loadTemplates} />}
+                target={<EditTemplateForm onSaved={revalidate} />}
                 icon={Icon.Plus}
               />
             </ActionPanel>

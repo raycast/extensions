@@ -41,7 +41,7 @@ The extension will automatically scan these directories for projects.
    - **Simple Launch**: Open in a single Warp window
    - **Template Launch**: Choose from available templates
 
-![search-projects](./metadata/launch-templates.png)
+![search-projects](./metadata/code-runway-2.png)
 
 ### 3. Manage Templates
 
@@ -51,7 +51,7 @@ Create and customize launch templates:
 2. Create new templates or edit existing ones
 3. Set a template as default using the **"Set as Default"** action (`Cmd + D`)
 
-![manage-templates](./metadata/edit-template.png)
+![manage-templates](./metadata/code-runway-4.png)
 
 ## 🔍 Project Detection
 
@@ -71,7 +71,7 @@ Projects are automatically detected by the presence of these files:
 ## ⌨️ Keyboard Shortcuts
 
 - `Cmd + R`: Refresh project list
-- `Cmd + N`: Add new directory (in Directory Settings)
+- `Cmd + N`: Add new directory (in Project Directory Settings)
 - `Cmd + D`: Set template as default (in Template Management)
 - `Enter`: Launch with default template (or simple launch if no default)
 
@@ -83,7 +83,7 @@ Projects are automatically detected by the presence of these files:
 | **Project Directory Settings** | Manage project directories with full controls |
 | **Warp Launch Templates** | Create and manage custom launch templates |
 
-![available-commands](./metadata/settings.png)
+
 
 ## 🎨 Template Customization
 
@@ -119,7 +119,7 @@ Commands:
     Working Directory: (project root)
 ```
 
-![custom-template](./metadata/add-template.png)
+![custom-template](./metadata/code-runway-3.png)
 
 ## 🛠️ Warp Integration
 
