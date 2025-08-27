@@ -82,7 +82,7 @@
 /extensions/apple-books                                             @vimtor
 /extensions/apple-developer-docs                                    @CaliCastle
 /extensions/apple-devices                                           @madza91
-/extensions/apple-maps-search                                       @djpowers @ratoru
+/extensions/apple-maps-search                                       @djpowers @ratoru @sebdanielsson
 /extensions/apple-notes                                             @tumispro @ron-myers @mathieudutour @StevenRCE0 @SKaplanOfficial @tylerwince @thomaslombart @xilopaint @ridemountainpig @teemusuvinen @saldanaj97 @andreaselia @fanhefeng @charlesharries
 /extensions/apple-reminders                                         @thomaslombart @tmwrnr @irangarcia @jondelga @phil1995 @michalzuch @ridemountainpig @maxnyby @vmrjnvc
 /extensions/apple-stocks-search                                     @haydencbarnes
@@ -2133,7 +2133,7 @@
 /extensions/vault                                                   @fonimus @ricoberger @pernielsentikaer
 /extensions/vc-ru-news                                              @khlebobul
 /extensions/veganify-application                                    @philipbrembeck @pernielsentikaer
-/extensions/vercast                                                 @MaxLeiter @gleich @dgrcode @samuelkraft @xmok @ridemountainpig
+/extensions/vercast                                                 @MaxLeiter @gleich @dgrcode @samuelkraft @xmok @ridemountainpig @sebdanielsson
 /extensions/verify-number                                           @xmok
 /extensions/viacep                                                  @xilopaint
 /extensions/video-call-reactions                                    @yazanzaid00
