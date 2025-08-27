@@ -1,5 +1,10 @@
 # Installed Extensions Changelog
 
+## [Enhancement] - 2025-08-26
+
+- Add support for launching target extension
+- Bump all dependencies to the latest
+
 ## [Enhancement] - 2023-12-21
 
 - Add `Open Manifest in <App>` action to open the extension manifest in the default app

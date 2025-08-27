@@ -130,7 +130,7 @@ export function IssueDetails(props: {
             />
             <Action.Push
               title="Show Last Comment"
-              icon={Icon.Text}
+              icon={Icon.SpeechBubbleActive}
               target={
                 <CommentDetails
                   getLastCommentCb={props.getLastCommentCb}

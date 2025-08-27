@@ -20,6 +20,7 @@ import { ParcelDetails } from "./parcel-details";
 import { handleApiError } from "./utils/error-handler";
 import { Ship24ApiClient } from "./api";
 import { getPreferences } from "./preferences";
+import { Ship24TrackingRequest } from "./types";
 
 export default function Command() {
   const [parcels, setParcels] = useState<ParcelWithStatus[]>([]);
@@ -254,7 +255,20 @@ function AddPackageForm({ onPackageAdded }: AddPackageFormProps) {
       const { apiKey } = getPreferences();
       const apiClient = new Ship24ApiClient(apiKey);
 
-      // Test the tracking number by searching for results
+      // Create tracker first, then search for results
+      const trackingRequest: Ship24TrackingRequest = {
+        trackingNumber: trackingNumber.trim(),
+      };
+
+      try {
+        // Try to create the tracker first
+        await apiClient.trackShipment(trackingRequest);
+      } catch (error) {
+        // If tracker already exists, that's fine, we'll get results below
+        console.log("Tracker may already exist or creation failed:", error);
+      }
+
+      // Now get the tracking results
       const tracking = await apiClient.searchTrackingResults(trackingNumber.trim());
 
       // Save the parcel

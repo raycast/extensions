@@ -1,3 +1,5 @@
+import { BrowserExtension, environment } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import fetch from "node-fetch";
 import { CollectionCreationResponse, FormValues } from "../types";
 
@@ -59,21 +61,55 @@ export async function createBookmark({
   });
 }
 
+/**
+ * Retrieves the title of a web page from the given link.
+ *
+ * This function attempts to retrieve the title using the following methods in order:
+ * 1. Browser Extension API (if available and link matches active tab) - preferred method
+ * 2. Direct HTTP fetch - fallback method that fetches the page and parses HTML
+ *
+ * @param link - The URL to fetch the title from
+ * @returns The page title, or an empty string if fetching fails
+ */
 export async function getLinkTitle(link: string) {
+  // Check if Browser Extension API is available
+  if (environment.canAccess(BrowserExtension)) {
+    try {
+      const tabs = await BrowserExtension.getTabs();
+      const activeTab = tabs.find((tab) => tab.active && tab.url === link);
+
+      if (activeTab) {
+        // If the link matches the active tab, get title from browser extension
+        const title = await BrowserExtension.getContent({
+          cssSelector: "title",
+          format: "text",
+          tabId: activeTab.id,
+        });
+
+        if (title.trim()) {
+          return title.trim();
+        }
+      }
+    } catch (error) {
+      // Fallback to fetch if Browser Extension API fails
+      console.warn("Browser Extension API failed for title fetch:", error);
+    }
+  }
+
+  // Fallback: fetch-based processing
   let url = link.trim();
   if (!url.match(/^https?:\/\//)) {
     url = `https://${url}`;
   }
 
-  return fetch(url)
-    .then((response) => response.text())
-    .then((html) => {
-      const match = html.match(/<title>(.*?)<\/title>/i);
-      const title = match ? match[1] : "";
-      return title;
-    })
-    .catch((error) => {
-      console.error("Error fetching title:", error);
-      return "";
-    });
+  try {
+    const response = await fetch(url);
+    const html = await response.text();
+    const match = html.match(/<title>(.*?)<\/title>/i);
+    const title = match ? match[1] : "";
+    return title;
+  } catch (error) {
+    await showFailureToast(error, { title: "Failed to fetch title" });
+    return "";
+  }
 }

@@ -1,5 +1,9 @@
 # Copy Path Changelog
 
+## [Support document windows] - 2025-08-25
+
+- Copy document paths from document windows.
+
 ## [Update] - 2025-03-14
 
 - Update the Zen Browser name.

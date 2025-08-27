@@ -1,5 +1,12 @@
 # Aave Search Changelog
 
+## [1.1.3] - 2025-08-26
+
+### Maintenance
+
+- Add bob, plasma and ink icons
+- Improve sorting algorithm
+
 ## [1.1.2] - 2025-06-03
 
 ### Maintenance

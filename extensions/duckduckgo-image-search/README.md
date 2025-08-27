@@ -4,7 +4,7 @@ Search Images inside [Raycast](https://raycast.com) by [DuckDuckGo](https://duck
 
 ## Installation
 
-[![Install Duckduckgo Image Search Raycast Extension](https://www.raycast.com/jag-k/duckduckgo-image-search/install_button@2x.png)](https://www.raycast.com/jag-k/duckduckgo-image-search)
+[![Install Duckduckgo Image Search Raycast Extension](https://www.raycast.com/jag-k/duckduckgo-image-search/install_button@2x.png?v=1.1)](https://www.raycast.com/jag-k/duckduckgo-image-search)
 
 ## Screenshots
 

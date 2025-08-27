@@ -1,0 +1,98 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "version": "1.1.0",
+  "name": "gradient-generator",
+  "title": "Gradient Generator",
+  "description": "Create, preview, randomize, save and export gradients, using them in your next project.",
+  "icon": "icon.png",
+  "author": "smcnab1",
+  "contributors": [],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "create-gradient",
+      "title": "Create Gradient",
+      "subtitle": "Gradient Generator",
+      "description": "Create a gradient and preview it.",
+      "mode": "view"
+    },
+    {
+      "name": "random-gradient",
+      "title": "Random Gradient",
+      "subtitle": "Gradient Generator",
+      "description": "Show a random gradient with options for 2 or 3 stops.",
+      "mode": "view"
+    },
+    {
+      "name": "saved-gradients",
+      "title": "Saved Gradients",
+      "subtitle": "Gradient Generator",
+      "description": "View and manage saved gradients.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "svgExportDirectory",
+      "type": "directory",
+      "required": true,
+      "title": "SVG Export Directory",
+      "description": "Choose the directory where SVG files will be saved",
+      "default": "~/Downloads"
+    },
+    {
+      "name": "pngExportDirectory",
+      "type": "directory",
+      "required": true,
+      "title": "PNG Export Directory",
+      "description": "Choose the directory where PNG files will be saved",
+      "default": "~/Downloads"
+    },
+    {
+      "name": "tailwindOutputMode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Tailwind Output Mode",
+      "description": "Choose default Tailwind output format",
+      "default": "utility",
+      "data": [
+        {
+          "title": "Utility Classes (bg-[...])",
+          "value": "utility"
+        },
+        {
+          "title": "Raw CSS",
+          "value": "css"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.102.4",
+    "@raycast/utils": "2.2.0",
+    "pngjs": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.11",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.0.0",
+    "prettier": "^3.6.2",
+    "typescript": "^4.9.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,5 +1,15 @@
 # Vercast Changelog
 
+## [2.11] - 2025-08-27
+
+- Bump deps to latest
+- Upgrade eslint config to new flat format
+- Make available on Windows
+
+## [2.11] - 2025-08-14
+
+- Avoid broken links by removing personal account from the team switcher following Vercel's [personal team change](https://vercel.com/changelog/2024-01-account-changes).
+
 ## [2.10] - 2025-04-09
 
 - Added `Check Domain Availability` command and AI tool to check if a domain is available

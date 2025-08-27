@@ -1,5 +1,23 @@
 # Media Converter Changelog
 
+## [1.5.1] - 2025-08-25
+
+### Fixed
+
+- Simple quality not being properly applied
+
+## [1.5.0] - 2025-08-12
+
+### Added
+
+- Video conversion quality settings
+- "More Conversion Settings (Advanced)": by default, video and audio will only show "lowest", "low", "medium", "high" and "highest" quality settings. By enabling "More Conversion Settings (Advanced)" in the extension preferences, the user will be shown a more fully-featured quality settings page, including CRF/VBR/VBR-2-PASS encoding mode, bitrate and more for video; bitrate, sample rate, bit depth, and more for audio
+- Added lots more of supported formats as inputs
+
+### API Changes
+
+- New type system for centralized values
+
 ## [1.4.2] - 2025-06-27
 
 ### Added
