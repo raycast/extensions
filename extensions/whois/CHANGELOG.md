@@ -1,6 +1,6 @@
 # Whois Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2025-08-27
 
 - Added support for Windows
 - Updated dependencies
