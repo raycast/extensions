@@ -167,10 +167,10 @@ export default () => {
   const globalActions = (
     <ActionPanel.Section>
       <ActionPanel.Submenu title="Create New" icon={Icon.Plus} shortcut={{ modifiers: ['cmd'], key: 'n' }}>
-        <Action title="Scan a Qr Code" icon={Icon.Camera} onAction={() => scanQRCode('scan')} />
+        <Action title="Scan a QR Code" icon={Icon.Camera} onAction={() => scanQRCode('scan')} />
         <Action.Push title="Enter a Setup Key" icon={Icon.Keyboard} target={<SetupKey onSubmit={handleFormSubmit} />} />
         <Action
-          title="Select a Qr Code"
+          title="Select a QR Code"
           icon={Icon.Camera}
           shortcut={{ modifiers: ['cmd'], key: 'i' }}
           onAction={() => scanQRCode('select')}
