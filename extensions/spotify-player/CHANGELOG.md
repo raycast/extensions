@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Fix Add Playing Song to Playlist Command Using Cached Data] - 2025-08-28
+## [Fix Add Playing Song to Playlist Command Using Cached Data] - {PR_MERGE_DATE}
 
 - Fixed race condition in Add Playing Song to Playlist command to properly wait for currently playing data to load
 - Improved error handling with proper loading state checks to prevent using stale cached data
