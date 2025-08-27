@@ -1,6 +1,6 @@
 # Raycast Fork Extensions Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2025-08-27
 
 - Fix the GitHub OAuth permission scope to include `repo` and `workflow`
 - Add the missing "Sync Fork" action to the forked extensions list
