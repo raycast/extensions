@@ -1,6 +1,6 @@
 # Raycast Fork Extensions Changelog
 
-## [Bugfixes & Enhancements] - {PR_MERGE_DATE}
+## [Bugfixes & Enhancements] - 2025-08-27
 
 - Re-organize the error handlers
 - Fix the `Sync Fork` action cannot rerendered after syncing the forked repository
