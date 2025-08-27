@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tableplus",
   "title": "TablePlus",
-  "description": "Search and open database connections in TablePlus",
+  "description": "Instantly access your favorite TablePlus database connections with lightning speed",
   "version": "1.2.3",
   "icon": "icon.png",
   "author": "pernielsentikaer",
