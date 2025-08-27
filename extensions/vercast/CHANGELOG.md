@@ -1,6 +1,6 @@
 # Vercast Changelog
 
-## [2.11] - {PR_MERGE_DATE}
+## [2.11] - 2025-08-27
 
 - Bump deps to latest
 - Upgrade eslint config to new flat format
