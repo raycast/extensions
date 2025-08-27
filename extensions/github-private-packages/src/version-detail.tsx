@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
-import { PackageResponse } from "./search-packages";
+import { PackageResponse, VersionResponse } from "./types";
 
 export default function VersionDetail({ version, pack }: { version: VersionResponse; pack: PackageResponse }) {
   return (
@@ -27,19 +27,3 @@ export default function VersionDetail({ version, pack }: { version: VersionRespo
     />
   );
 }
-
-type VersionResponse = {
-  id: number;
-  name: string;
-  url: string;
-  package_html_url: string;
-  created_at: string;
-  updated_at: string;
-  html_url: string;
-  metadata: {
-    package_type: string;
-    container: {
-      tags: string[];
-    };
-  };
-};

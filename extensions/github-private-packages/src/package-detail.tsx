@@ -1,5 +1,5 @@
 import { useFetch } from "@raycast/utils";
-import { PackageResponse } from "./search-packages";
+import { PackageResponse, VersionResponse } from "./types";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { getPreferenceValues } from "@raycast/api";
 import VersionDetail from "./version-detail";
@@ -65,22 +65,7 @@ export default function PackageDetail({ pack }: { pack: PackageResponse }) {
           />
         ))}
       </List.Section>
+      <List.EmptyView title={`No packages details found for ${pack.name}`} icon={Icon.CircleDisabled}/>
     </List>
   );
 }
-
-export type VersionResponse = {
-  id: number;
-  name: string;
-  url: string;
-  package_html_url: string;
-  created_at: string;
-  updated_at: string;
-  html_url: string;
-  metadata: {
-    package_type: string;
-    container: {
-      tags: string[];
-    };
-  };
-};
