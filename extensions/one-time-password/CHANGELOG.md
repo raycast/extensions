@@ -1,6 +1,6 @@
 # One Time Password Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2025-08-27
 
 - Added Windows support.
 
