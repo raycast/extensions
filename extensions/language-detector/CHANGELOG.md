@@ -1,5 +1,11 @@
 # Language Detector Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Bump latest `raycast-language-detector` to support internet slangs
+- Bump latest `mac-say` to handle `SIGTERM` gracefully
+- Bump all dependencies to the latest
+
 ## [Maintenance] - 2025-08-18
 
 - Add support for Windows platform
