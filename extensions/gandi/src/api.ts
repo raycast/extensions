@@ -2,9 +2,6 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { GandiDomain, DomainAvailability, DNSRecord, DNSZone, WebsiteMetadata } from "./types";
 
-interface Preferences {
-  apiToken: string;
-}
 
 const createRequest = async <T>(url: string, options: RequestInit = {}): Promise<T> => {
   const preferences = getPreferenceValues<Preferences>();
