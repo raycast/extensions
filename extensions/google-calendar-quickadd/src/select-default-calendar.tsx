@@ -58,15 +58,11 @@ export default function SelectDefaultCalendar() {
 
   const removeCalendar = async (calendarId: string, calendarName: string) => {
     try {
-      // Add to hidden calendars
       const newHiddenCalendars = new Set(hiddenCalendars);
       newHiddenCalendars.add(calendarId);
       setHiddenCalendars(newHiddenCalendars);
 
-      // Save to local storage
       await LocalStorage.setItem("hiddenCalendars", JSON.stringify(Array.from(newHiddenCalendars)));
-
-      // If this was the current default, reset to primary
       if (currentDefault === calendarId) {
         await LocalStorage.setItem("defaultCalendar", "primary");
         setCurrentDefault("primary");
@@ -79,6 +75,19 @@ export default function SelectDefaultCalendar() {
       });
     } catch (error) {
       showFailureToast(error, { title: "Failed to hide calendar" });
+    }
+  };
+
+  const resetCalenders = async () => {
+    try {
+      await LocalStorage.setItem("hiddenCalendars", JSON.stringify([]));
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Calendars Reset",
+        message: "All calendars have been reset",
+      });
+    } catch (error) {
+      showFailureToast(error, { title: "Failed to reset calendars" });
     }
   };
 
@@ -108,6 +117,7 @@ export default function SelectDefaultCalendar() {
                     style={Action.Style.Destructive}
                     onAction={() => removeCalendar(calendar.id, calendar.summary)}
                   />
+                  <Action title="Reset Calendars" style={Action.Style.Destructive} onAction={resetCalenders} />
                   <Action.CopyToClipboard
                     title="Copy Calendar ID"
                     content={calendar.id}

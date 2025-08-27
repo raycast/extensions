@@ -15,13 +15,16 @@ CRITICAL TIME RULES:
 2. For times like "3pm", "1am", "2:30pm" - use EXACTLY what the user says
 3. "3pm" should be 15:00 (3:00 PM), "1am" should be 01:00 (1:00 AM)
 4. "1am" means 1:00 AM (early morning), NOT 11:00 PM
-5. Use simple ISO8601 format: YYYY-MM-DDTHH:mm:ss (no timezone needed)
-6. For relative dates like "tomorrow", calculate from today's date: ${currentDate.toISOString().split("T")[0]}
-7. If no duration is specified, use ${preferences.defaultDuration} minutes as the default event duration
-8. ${preferences.includeDescription ? "ALWAYS create a helpful description for the event with additional context or details" : "Only include a description if the user specifically provides description details"}
+5. If the user just says a number 1-10 without AM or PM assume that they mean PM rather than AM
+6. If the user says 10 - 11:59 without AM or PM assume that they mean AM rather than PM
+7. Use simple ISO8601 format: YYYY-MM-DDTHH:mm:ss (NO timezone offset needed)
+8. IMPORTANT: All times should be interpreted as local time in the user's timezone
+9. For relative dates like "tomorrow", calculate from today's date: ${currentDate.toISOString().split("T")[0]}
+10. If no duration is specified, use ${preferences.defaultDuration} minutes as the default event duration
+11. ${preferences.includeDescription ? "ALWAYS create a helpful description for the event with additional context or details" : "Only include a description if the user specifically provides description details"}
 
 LOCATION RULES:
-9. If there is a location mentioned (such as a city, state, or place), you MUST:
+12. If there is a location mentioned (such as a city, state, or place), you MUST:
    - Fill in the "location" field with the FULL, PROPER location name
    - Expand nicknames/abbreviations: "philly" → "Philadelphia, PA", "NYC" → "New York City, NY", "SF" → "San Francisco, CA"
    - Use proper city, state/country format when possible
