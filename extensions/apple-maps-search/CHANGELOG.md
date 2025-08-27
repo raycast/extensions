@@ -1,6 +1,6 @@
 # Apple Maps Search Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2025-08-27
 
 - Added support for Windows users to open Apple Maps links in the browser
 - Update dependencies to latest versions
