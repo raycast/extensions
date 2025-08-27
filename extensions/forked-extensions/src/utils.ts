@@ -1,5 +1,9 @@
 import path from "node:path";
-import { Cache, getPreferenceValues } from "@raycast/api";
+import { Cache, getPreferenceValues, open } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import { HTTPError } from "got";
+import { SubprocessError } from "nano-spawn";
+import * as api from "./api.js";
 import { ForkedExtension } from "./types.js";
 
 const { gitRemoteType } = getPreferenceValues<ExtensionPreferences>();
@@ -38,4 +42,38 @@ export const getRemoteUrl = (repository: string = "raycast/extensions") => {
   if (gitRemoteType === "https") return `https://github.com/${repository}.git`;
   if (gitRemoteType === "ssh") return `git@github.com:${repository}.git`;
   throw new Error("Invalid URL type. Use 'https' or 'ssh'.");
+};
+
+/**
+ * Handle Got HTTPError and show a failure toast with re-authorization action.
+ */
+export const handleGotHttpError = (error: HTTPError) => {
+  showFailureToast([error.message, error.response.body].join("\n"), {
+    title: error.message,
+    message: error.response.body,
+    primaryAction:
+      // [TODO] Needs a better way to detect if the permission scope is insufficient.
+      // For now, we just check if the status code is 422 Unprocessable Entity.
+      error.response.statusCode === 422
+        ? {
+            title: "Re-authorize GitHub",
+            onAction: async () => {
+              // Remove the stored tokens to force re-authorization.
+              await api.githubOauthService.client.removeTokens();
+              // Due to Raycast `launchCommand` cannot launch itself, we need to use the URL scheme to open the extension as a workaround.
+              await open("raycast://extensions/litomore/forked-extensions/manage-forked-extensions");
+            },
+          }
+        : undefined,
+  });
+};
+
+/**
+ * Handle nano-spawn SubprocessError and show a failure toast.
+ */
+export const handleSubprocessError = (error: SubprocessError) => {
+  showFailureToast([error.message, error.stderr].join("\n"), {
+    title: error.message,
+    message: error.stderr,
+  });
 };

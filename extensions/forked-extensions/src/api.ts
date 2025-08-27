@@ -1,6 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import { OAuthService, withAccessToken } from "@raycast/utils";
 import got, { Got } from "got";
+import { githubOauthScope } from "./constants.js";
 
 const { githubPersonalAccessToken } = getPreferenceValues<ExtensionPreferences>();
 
@@ -15,7 +16,7 @@ export let githubApi: Got;
  */
 export const githubOauthService = OAuthService.github({
   personalAccessToken: githubPersonalAccessToken,
-  scope: "repo",
+  scope: githubOauthScope,
   onAuthorize: async ({ token, type }) => {
     githubApi = got.extend({
       prefixUrl: "https://api.github.com",
@@ -48,6 +49,7 @@ export const getAllExtensions = async () => {
 
 /**
  * Retrieves the full name of the user's forked repository.
+ * @permissions `repo`
  * @remarks If the repository does not exist, it will create a new forked repository. Otherwise, it will return the existing repository full name.
  * @returns The full name of the user's forked repository. The format is `username/repository`.
  * @see {@link https://docs.github.com/en/rest/repos/forks?apiVersion=2022-11-28#create-a-fork|Create a fork}
@@ -66,7 +68,7 @@ export const getForkedRepository = async () => {
 
 /**
  * Syncs the forked repository with the upstream repository on GitHub.
- *
+ * @permissions `workflow`
  * @returns A promise that resolves to the message from the GitHub API response.
  * @see {@link https://docs.github.com/en/rest/branches/branches?apiVersion=2022-11-28#sync-a-fork-branch-with-the-upstream-repository|Sync a fork branch with the upstream repository}
  */
@@ -84,7 +86,7 @@ export const syncFork = async () => {
 
 /**
  * Compares two commits in the user's forked repository.
- *
+ * @permissions `repo`
  * @returns Commits behind count.
  * @see {@link https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28#compare-two-commits|Compare two commits}
  */

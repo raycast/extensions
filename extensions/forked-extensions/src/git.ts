@@ -4,10 +4,12 @@ import process from "node:process";
 import { getPreferenceValues } from "@raycast/api";
 import spawn from "nano-spawn";
 import * as api from "./api.js";
+import { defaultGitExecutableFilePath } from "./constants.js";
 import { ForkedExtension } from "./types.js";
 import { getRemoteUrl } from "./utils.js";
 
-const { repositoryConfigurationPath } = getPreferenceValues<ExtensionPreferences>();
+const { gitExecutableFilePath = defaultGitExecutableFilePath, repositoryConfigurationPath } =
+  getPreferenceValues<ExtensionPreferences>();
 
 /**
  * Resolves the path to the repository configuration.
@@ -22,13 +24,6 @@ const resolvePath = (input: string) =>
  * The path to the repository where forked extensions are managed.
  */
 export const repositoryPath = resolvePath(repositoryConfigurationPath);
-
-/**
- * Executes a git command in the repository root directory.
- * @param args The arguments to pass to the git command.
- * @return The subprocess result of the git command execution.
- */
-export const git = async (args: string[]) => spawn("git", args, { cwd: repositoryPath, shell: true });
 
 /**
  * Checks if a file or directory exists and is readable and writable.
@@ -71,6 +66,26 @@ export const getExtensionList = async () => {
 };
 
 /**
+ * Executes a git command in the repository root directory.
+ * @param args The arguments to pass to the git command.
+ * @return The subprocess result of the git command execution.
+ */
+export const git = async (args: string[]) => spawn(gitExecutableFilePath, args, { cwd: repositoryPath, shell: true });
+
+/**
+ * Checks if Git is valid by running `git --version`.
+ * @returns True if Git is installed, false otherwise.
+ */
+export const checkIfGitIsValid = async () => {
+  try {
+    await spawn(gitExecutableFilePath, ["--version"], { shell: true });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+/**
  * Initializes the repository by cloning it if it doesn't exist.
  * @returns The full name of the forked repository.
  */
@@ -83,9 +98,13 @@ export const initRepository = async () => {
   }
 
   const forkedRepository = await api.getForkedRepository();
-  await spawn("git", ["clone", "--filter=blob:none", "--no-checkout", getRemoteUrl(forkedRepository), repositoryPath], {
-    shell: true,
-  });
+  await spawn(
+    gitExecutableFilePath,
+    ["clone", "--filter=blob:none", "--no-checkout", getRemoteUrl(forkedRepository), repositoryPath],
+    {
+      shell: true,
+    },
+  );
   await git(["sparse-checkout", "set", "--cone"]);
   await git(["checkout", "main"]);
   return forkedRepository;
