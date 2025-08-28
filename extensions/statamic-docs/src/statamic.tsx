@@ -31,7 +31,7 @@ const client = new MeiliSearch({
   },
 });
 
-const index = client.index("default");
+const index = client.index("docs-5");
 
 export default function main() {
   const [isLoading, setIsLoading] = useState(false);

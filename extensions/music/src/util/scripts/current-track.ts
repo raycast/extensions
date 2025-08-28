@@ -204,3 +204,45 @@ export const removeCurrentTrackFromCurrentPlaylist = (): TE.TaskEither<
     TE.map(parseQueryString())
   );
 };
+
+export const removeFromLibrary = runScript(`
+  tell application "Music" to activate
+  delay 0.1
+  tell application "System Events"
+    tell process "Music"
+      if exists (menu item "Delete from Library" of menu "Song" of menu bar item "Song" of menu bar 1) then
+        click menu item "Delete from Library" of menu "Song" of menu bar item "Song" of menu bar 1
+      end if
+      if exists (button "Delete Song" of window 1) then
+        click button "Delete Song" of window 1
+      end if
+    end tell
+  end tell
+`);
+
+export const getCurrentTrackInfo = (): TE.TaskEither<
+  ScriptError,
+  Readonly<Pick<Track, "name" | "artist" | "album">>
+> => {
+  const querystring = createQueryString({
+    name: "tName",
+    artist: "tArtist",
+    album: "tAlbum",
+  });
+
+  // prettier-ignore
+  return pipe(
+    runScript(`
+      set output to ""
+        tell application "Music"
+          set t to (get current track)
+          set tName to name of t
+          set tArtist to artist of t
+          set tAlbum to album of t
+          set output to ${querystring}
+        end tell
+      return output
+    `),
+    TE.map(parseQueryString())
+  );
+};

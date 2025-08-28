@@ -37,7 +37,8 @@
     "luarmr",
     "nicolas-marien",
     "iontea",
-    "ridemountainpig"
+    "ridemountainpig",
+    "kud"
   ],
   "categories": [
     "Developer Tools",
@@ -216,6 +217,12 @@
       "name": "my-latest-repositories",
       "title": "My Latest Repositories",
       "description": "List your repositories by latest updated",
+      "mode": "view"
+    },
+    {
+      "name": "my-starred-repositories",
+      "title": "My Starred Repositories",
+      "description": "List repositories you have starred",
       "mode": "view"
     },
     {

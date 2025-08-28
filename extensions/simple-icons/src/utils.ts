@@ -6,6 +6,7 @@ import {
   AI,
   Cache,
   Clipboard,
+  LaunchType,
   Toast,
   confirmAlert,
   environment,
@@ -18,6 +19,7 @@ import { showFailureToast, useAI } from "@raycast/utils";
 import { Searcher } from "fast-fuzzy";
 import got from "got";
 import pacote from "pacote";
+import { crossLaunchCommand } from "raycast-cross-extension";
 import { getIconSlug } from "./vender/simple-icons-sdk.js";
 import { IconData, LaunchContext, Release } from "./types.js";
 
@@ -178,18 +180,18 @@ export const makeCopyToDownload = async ({
   icon: IconData;
   slug: string;
 }) => {
-  const { svg, path: savedPath, withBrandColor } = await loadSvg({ version, icon, slug });
-  const tmpPath = path.join(os.tmpdir(), `${slug}.svg`);
   try {
+    const { svg, path: savedPath, withBrandColor } = await loadSvg({ version, icon, slug });
+    const tmpPath = path.join(os.tmpdir(), `${slug}.svg`);
     if (withBrandColor) {
       await fs.writeFile(tmpPath, svg, "utf8");
     } else {
       await fs.copyFile(savedPath, tmpPath);
     }
+    return tmpPath;
   } catch (error) {
     showFailureToast(error, { title: "Failed to copy file" });
   }
-  return tmpPath;
 };
 
 export const getAliases = (icon: IconData) => {
@@ -199,7 +201,10 @@ export const getAliases = (icon: IconData) => {
   return [...new Set([...aka, ...dup, ...loc])];
 };
 
-export const getFileLink = (slug: string, version: string) => `pack/${version}/icons/${slug}.svg`;
+export const getRelativeFileLink = (slug: string, version: string) => `pack/${version}/icons/${slug}.svg`;
+
+export const getAbsoluteFileLink = (slug: string, version: string) =>
+  path.join(environment.assetsPath, getRelativeFileLink(slug, version));
 
 export const getKeywords = (icon: IconData) =>
   [
@@ -234,4 +239,31 @@ export const useSearch = ({ icons }: { icons: IconData[] }) => {
   const { data, isLoading: aiIsLoading } = useAI(searchPrompt, { execute, model: AI.Model["OpenAI_GPT4o-mini"] });
   const searchResult = execute ? icons.filter((icon) => data.split(",").includes(icon.slug)) : filteredIcons;
   return { aiIsLoading, searchResult, setSearchString };
+};
+
+export const launchSocialBadge = async (icon: IconData, version: string) => {
+  try {
+    await crossLaunchCommand(
+      {
+        name: "createSocialBadge",
+        type: LaunchType.UserInitiated,
+        extensionName: "badges",
+        ownerOrAuthorName: "litomore",
+        context: {
+          launchFromExtensionName: "simple-icons",
+          icon: { ...icon, file: getAbsoluteFileLink(icon.slug, version) },
+        },
+      },
+      false,
+    );
+  } catch {
+    const yes = await confirmAlert({
+      title: "Badges - shields.io extension not installed",
+      message:
+        "This feature requires 'Badges - shields.io' extension. Do you want to install the extension from the store?",
+    });
+    if (yes) {
+      await open("raycast://extensions/litomore/badges");
+    }
+  }
 };

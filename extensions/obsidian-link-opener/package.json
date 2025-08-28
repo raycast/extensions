@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "obsidian-link-opener",
+  "title": "Obsidian Link Opener",
+  "description": "Open URLs from Obsidian markdown files' frontmatter",
+  "icon": "command-icon.png",
+  "author": "osteele",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Open Link",
+      "description": "Open URLs from Obsidian notes' frontmatter",
+      "mode": "view"
+    },
+    {
+      "name": "select-vault",
+      "title": "Select Vault",
+      "description": "Choose which Obsidian vault to use",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "useFrecency",
+      "title": "Use Frecency Sorting",
+      "label": "Enable frecency-based sorting",
+      "description": "Sort notes by frequency and recency of use. When disabled, sorts alphabetically.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.92.1",
+    "@raycast/utils": "^1.18.1",
+    "fs-extra": "^11.3.0",
+    "glob": "^11.0.1",
+    "gray-matter": "^4.0.3",
+    "open": "^8.4.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.2.0",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "18.8.3",
+    "eslint": "^7.32.0",
+    "jsdom": "^26.0.0",
+    "memfs": "^4.17.0",
+    "mock-fs": "^5.5.0",
+    "prettier": "^2.8.8",
+    "typescript": "^4.9.5",
+    "vitest": "^3.0.7",
+    "vitest-mock-extended": "^3.0.1"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  }
+}

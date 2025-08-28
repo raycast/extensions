@@ -61,4 +61,5 @@ clipmate
 send-ai
 kaleidoscope
 exa
+v0-by-vercel
 pieces-raycast

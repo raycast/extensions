@@ -2,11 +2,11 @@
 
 <a title="Install wechat-devtool Raycast Extension" href="https://www.raycast.com/tofrankie/wechat-devtool"><img src="https://www.raycast.com/tofrankie/wechat-devtool/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 
-Quickly open WeChat Mini Program projects with plans to support additional features like Mini Program preview in the future.
+Quickly open WeChat mini program project with plans to support additional features like preview in the future.
 
 ## ✨ Features
 
-- **Quick Project Opening** - Open configured Mini Program projects via WeChat DevTool CLI.
+- **Quick Project Opening** - Open configured mini program project via WeChat DevTool CLI.
 - **Graphical Configuration** - Complete graphical interface for dynamic project management.
 
 ## 📦 Installation
@@ -19,9 +19,9 @@ Search for **WeChat DevTool** in the [Raycast Store](https://www.raycast.com/tof
 2. Configure CLI Path: WeChat DevTool CLI path, defaults to `/Applications/wechatwebdevtools.app/Contents/MacOS/cli`.
 3. Add one or more projects:
    - Project Name: Display name.
-   - Project Path: Complete path to the Mini Program project.
+   - Project Path: Complete path to the mini program project.
 
-### CLI Path Selection Tip
+### 🛠 CLI Path Selection Tips
 
 Since the official CLI tool is located inside the application bundle, Raycast's file picker may not be able to access files within the package. To resolve this:
 
@@ -32,11 +32,13 @@ Since the official CLI tool is located inside the application bundle, Raycast's 
 5. Add the MacOS folder to Finder's sidebar.
 6. Return to Raycast and select the MacOS folder from the sidebar to directly access the CLI location.
 
-## 🚀 Opening Projects
+### 🛠 Branch Display Tips
 
-1. Use the "Open Project" command.
-2. Find the project you want to open in the list and press Enter.
+Starting from v1.2.0, the extension supports displaying branches for both Git and Mercurial projects.
+
+- If you're upgrading from a version before v1.2.0, please open "Configure Projects" and Save once (no changes needed) to record the repository type.
+- If a project's repository type changes in the future, repeat the Save step in the "Configure Projects" to refresh detection.
 
 ## 💬 Support
 
-For questions, contact the [author](https://github.com/toFrankie/raycast-wechat-devtool) on GitHub.
+For questions, contact [author](https://github.com/toFrankie/raycast-wechat-devtool) on GitHub.
