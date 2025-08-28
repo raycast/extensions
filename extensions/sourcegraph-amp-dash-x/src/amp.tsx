@@ -11,6 +11,8 @@ import {
   Alert,
   useNavigation,
   Keyboard,
+  open,
+  environment,
 } from "@raycast/api";
 import React, { useState, useEffect } from "react";
 import {
@@ -64,6 +66,44 @@ export default function AmpCommand() {
       showToast(Toast.Style.Success, "Command copied to clipboard!");
     } catch (error) {
       showFailureToast(error, { title: "Failed to copy command" });
+    }
+  }
+
+  async function downloadAsMarkdown(prompt: Prompt) {
+    try {
+      const filename = prompt.title
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replace(/[^a-z0-9-]/g, "");
+      
+      const markdownContent = `# ${prompt.title}
+
+**Category:** ${prompt.category || "Uncategorized"}
+${prompt.description ? `\n**Description:** ${prompt.description}\n` : ""}
+**Prompt:**
+\`\`\`
+${prompt.prompt}
+\`\`\`
+
+**Command:**
+\`\`\`bash
+amp -x "${prompt.prompt}"
+\`\`\`
+`;
+
+      const fs = require("fs");
+      const os = require("os");
+      const path = require("path");
+      
+      const downloadsPath = path.join(os.homedir(), "Downloads");
+      const filePath = path.join(downloadsPath, `${filename}.md`);
+      
+      fs.writeFileSync(filePath, markdownContent);
+      
+      await open(filePath);
+      showToast(Toast.Style.Success, "Markdown file downloaded!");
+    } catch (error) {
+      showFailureToast(error, { title: "Failed to download markdown" });
     }
   }
 
@@ -149,6 +189,13 @@ export default function AmpCommand() {
                       title="Copy Command"
                       icon={Icon.CopyClipboard}
                       onAction={() => copyAmpCommand(prompt)}
+                    />
+
+                    <Action
+                      title="Download as Markdown"
+                      shortcut={{ modifiers: ["cmd"], key: "m" }}
+                      icon={Icon.Download}
+                      onAction={() => downloadAsMarkdown(prompt)}
                     />
 
                     <ActionPanel.Section title="Manage">
