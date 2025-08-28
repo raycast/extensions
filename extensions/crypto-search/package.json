@@ -13,7 +13,8 @@
       "title": "Search Crypto Address or Transaction",
       "subtitle": "Crypto Search",
       "description": "Search for Solana/EVM addresses or transaction hashes",
-      "mode": "view"
+      "mode": "view",
+      "main": "src/search.tsx"
     }
   ],
   "preferences": [
@@ -54,10 +55,10 @@
     "@types/react": "18.2.79"
   },
   "scripts": {
-    "build": "ray build -e dist --skip-types",
-    "dev": "ray develop",
-    "fix-lint": "ray lint --fix",
-    "lint": "ray lint",
+    "build": "npx @raycast/api@latest build -e dist -o dist",
+    "dev": "npx @raycast/api@latest develop",
+    "fix-lint": "npx @raycast/api@latest lint --fix",
+    "lint": "npx @raycast/api@latest lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
