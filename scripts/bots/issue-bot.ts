@@ -276,7 +276,9 @@ async function getGitHubFile(path: string, { github, context }: Pick<API, "githu
     path,
   });
 
-  return data as string;
+  // When using mediaType format "raw", the GitHub API returns the file content as a string
+  // but TypeScript doesn't know this, so we need to cast it properly
+  return data as unknown as string;
 }
 
 // Create a new comment or update the existing one
@@ -310,9 +312,10 @@ async function comment({ github, context, comment }: Pick<API, "github" | "conte
 
 function extensionLabel(extension: string, extensionName2Folder: { [key: string]: string }) {
   const names = Object.keys(extensionName2Folder).map((x) => x.split("/")[1]);
-  const multipleExtensionsWithTheSameName = names.filter((x) => x === extension).length > 1;
+  const extensionName = extension.split("/")[1];
+  const multipleExtensionsWithTheSameName = names.filter((x) => x === extensionName).length > 1;
 
-  const label = `extension: ${multipleExtensionsWithTheSameName ? extension : extension.split("/")[1]}`;
+  const label = `extension: ${multipleExtensionsWithTheSameName ? extension : extensionName}`;
 
   return label.length > 50 ? label.substring(0, 49) + "…" : label;
 }
