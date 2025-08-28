@@ -1,6 +1,6 @@
 # Crypto Search Changelog
 
-## [1.1.0] - 2025-08-28
+## [1.1.0] - {PR_MERGE_DATE}
 
 ### Added
 - Parallel transaction validation across all supported chains
