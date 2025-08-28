@@ -172,12 +172,3 @@ Some terminals accept commands via CLI args. See `AlacrittyAdapter` for an examp
 3. **Cleanup**: Remove temporary files if your implementation creates any (see TerminalAppAdapter for example)
 4. **Error Messages**: Provide clear error messages for common failures
 
-## Questions?
-
-For extension-related issues:
-- Open an issue in the [Raycast extensions repository](https://github.com/raycast/extensions/issues)
-- Use the extension name "Claude Code Launcher" in your issue title
-
-For development questions:
-- Check the [Raycast Developer Documentation](https://developers.raycast.com)
-- Join the [Raycast Slack Community](https://raycast.com/community)
