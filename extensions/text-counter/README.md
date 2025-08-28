@@ -8,11 +8,14 @@ A powerful Raycast extension to quickly count lines, words, characters, and toke
 
 - **Lines Count**: Count the number of lines in the text
 - **Words Count**: Count the number of words
+- **Sentences Count**: Count the number of sentences
+- **Paragraphs Count**: Count the number of paragraphs
 - **Characters Count**: Count total characters including spaces
 - **Characters (no spaces)**: Count characters excluding spaces
 - **Token Counts**: Support for multiple AI models:
-  - GPT-3.5 tokens
+  - GPT-4o tokens (~estimated)
   - GPT-4 tokens
+  - GPT-3.5-turbo tokens
   - Claude tokens
 
 ## Usage
