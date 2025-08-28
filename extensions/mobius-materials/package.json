@@ -10,7 +10,7 @@
     {
       "name": "search-for-parts",
       "title": "Search Parts",
-      "subtitle": "Search by MPN",
+      "subtitle": "Mobius Materials",
       "description": "Searches the Mobius Materials database for electronic components.",
       "mode": "view"
     }
