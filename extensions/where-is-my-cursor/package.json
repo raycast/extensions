@@ -43,9 +43,8 @@
       "description": "Run with custom parameters.",
       "mode": "view"
     }
-  
-      ],
-  
+  ],
+
   "dependencies": {
     "@raycast/api": "^1.102.3",
     "@raycast/utils": "^1.17.0"

@@ -334,7 +334,8 @@ class LocateCursorTool: NSObject, NSApplicationDelegate {
     
     let configLoader = ConfigLoader()
     guard let config = configLoader.loadConfig() else {
-        fatalError("Failed to load config.")
+        print("Failed to load config.")
+        return
     }
 
     var preset: PresetConfig
