@@ -19,7 +19,12 @@ export default async function tool(input: Input) {
   }
 
   // Validate repository format (should be owner/repo)
-  if (!repository.includes("/") || repository.split("/").length !== 2) {
+  if (!repository.includes("/")) {
+    throw new Error("Repository must be in 'owner/repo' format (e.g., 'raycast/extensions')");
+  }
+  
+  const parts = repository.split("/");
+  if (parts.length !== 2 || !parts[0] || !parts[1]) {
     throw new Error("Repository must be in 'owner/repo' format (e.g., 'raycast/extensions')");
   }
 

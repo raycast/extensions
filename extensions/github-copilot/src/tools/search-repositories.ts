@@ -22,21 +22,31 @@ type Input = {
 export default async function tool(input: Input = {}) {
   const { owner, query, limit = 20 } = input;
 
+  // Validate limit
+  if (limit && (limit < 1 || limit > 100)) {
+    throw new Error("Limit must be between 1 and 100");
+  }
+
   let repositories: Repository[] = [];
 
   try {
     if (owner) {
+      // Validate owner name (basic validation)
+      if (owner.trim().length === 0) {
+        throw new Error("Owner cannot be empty");
+      }
       // Search repositories by owner with optional query filter
-      repositories = await fetchRepositoriesByOwner(owner, query);
+      repositories = await fetchRepositoriesByOwner(owner.trim(), query?.trim() || undefined);
     } else {
       // Get recent repositories from user activity
       repositories = await fetchRecentRepositories();
       
       // Apply query filter if provided
-      if (query) {
+      if (query && query.trim()) {
+        const queryLower = query.trim().toLowerCase();
         repositories = repositories.filter(repo => 
-          repo.name.toLowerCase().includes(query.toLowerCase()) ||
-          repo.nameWithOwner.toLowerCase().includes(query.toLowerCase())
+          repo.name.toLowerCase().includes(queryLower) ||
+          repo.nameWithOwner.toLowerCase().includes(queryLower)
         );
       }
     }
@@ -55,8 +65,8 @@ export default async function tool(input: Input = {}) {
       totalFound: repositories.length,
       totalReturned: limitedRepositories.length,
       searchCriteria: {
-        owner: owner || null,
-        query: query || null,
+        owner: owner?.trim() || null,
+        query: query?.trim() || null,
         limit,
       },
     };
