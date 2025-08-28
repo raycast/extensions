@@ -1,46 +1,7 @@
-import { Action, ActionPanel, Alert, Color, confirmAlert, Form, getPreferenceValues, Icon, Image, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Form, Icon, Image, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, getFavicon, useFetch, useForm } from "@raycast/utils";
-
-enum DomainStatus {
-    PENDING="PENDING",
-    ACTIVE="ACTIVE",
-    ERROR="ERROR",
-    DELETING="DELETING",
-    DELETED="DELETED"
-}
-type Domain = {
-    id: string;
-    name: string;
-    status: DomainStatus;
-    updated_at: string;
-}
-type CreateDomain = {
-    name: string;
-    type: string;
-    app_id: string;
-}
-type ErrorResult = {
-    status: number;
-    code: string;
-    message: string;
-    fields?: Array<{ field: string; description: string; }>
-}
-
-const { api_key } = getPreferenceValues<Preferences>();
-const API_URL = "https://app.koyeb.com/v1/";
-const headers = {
-    Authorization: `Bearer ${api_key}`,
-    "Content-Type": "application/json"
-}
-async function parseResponse(response: Response) {
-    const result = await response.json();
-    if (!response.ok) {
-        const err = result as ErrorResult;
-        if (err.fields?.length) throw new Error(`${err.fields[0].field} ${err.fields[0].description}`);
-        throw new Error(err.message);
-    }
-    return result;
-}
+import { CreateDomain, Domain, DomainStatus } from "./types";
+import { API_URL, headers, parseResponse } from "./koyeb";
 
 export default function ManageDomains() {
     const { isLoading, data: domains, error, revalidate, mutate } = useFetch(API_URL + "domains", {
@@ -64,10 +25,11 @@ export default function ManageDomains() {
 
     async function confirmAndRemove(domain: Domain) {
         const options: Alert.Options = {
-            title: `Remove "${domain.name}"?`,
+            title: `Are you sure you want to delete the ${domain.name} domain?`,
+            message: "This can not be undone.",
             primaryAction: {
                 style: Alert.ActionStyle.Destructive,
-                title: "Remove"
+                title: "Delete domain"
             }
         }
         if (await confirmAlert(options)) {
@@ -107,9 +69,7 @@ export default function ManageDomains() {
 function AddDomain() {
     const {pop} = useNavigation();
     const { isLoading, data: apps } = useFetch("https://app.koyeb.com/v1/apps", {
-        headers: {
-            Authorization: `Bearer ${api_key}`
-        },
+        headers,
         mapResult(result: { apps: Array<{id: string; name: string;}> }) {
             return {
                 data: result.apps
