@@ -1,11 +1,12 @@
-import { Icon, List, useNavigation, showToast, Toast, confirmAlert } from "@raycast/api";
+import { Icon, List, useNavigation, showToast, Toast, confirmAlert, Action, ActionPanel } from "@raycast/api";
 import { useState, useRef, useCallback } from "react";
 import { GameView } from "./GameView";
 import { PrestigeView } from "./PrestigeView";
 import { useGameState } from "./useGameState";
 import { UPGRADES, UPGRADE_CATEGORIES } from "./types";
-import { ACHIEVEMENTS, type AchievementId } from "./achievements";
-import { formatNumber } from "./utils";
+import { ACHIEVEMENTS, type AchievementId, achievementWhy } from "./achievements";
+import { formatNumber, calculatePrestigePoints } from "./utils";
+import { PRESTIGE_PP_DIVISOR } from "./constants";
 
 // --- Main Clicker Game View ---
 export default function Command() {
@@ -192,7 +193,26 @@ export default function Command() {
                 title={a.def.name}
                 subtitle={new Date(a.unlockedAt).toLocaleString()}
                 icon={Icon.CheckCircle}
-                accessories={[{ tag: a.def.icon }]}
+                accessories={[
+                  { tag: a.def.icon, tooltip: a.def.name },
+                  { icon: Icon.Info, tooltip: achievementWhy(a.id) },
+                ]}
+                actions={
+                  <ActionPanel>
+                    <Action
+                      title="Show Why Unlocked"
+                      icon={Icon.Info}
+                      onAction={() =>
+                        showToast({
+                          style: Toast.Style.Success,
+                          title: a.def.name,
+                          message: achievementWhy(a.id),
+                        })
+                      }
+                    />
+                    <Action.CopyToClipboard title="Copy Why" content={achievementWhy(a.id)} />
+                  </ActionPanel>
+                }
               />
             ))
           )}
@@ -223,8 +243,27 @@ export default function Command() {
 
   // Handle showing prestige upgrades
   const handleShowPrestigeUpgrades = useCallback(() => {
-    push(<PrestigeView gameState={gameState} onPurchasePrestigeUpgrade={handlePrestigeUpgrade} />);
-  }, [gameState, handlePrestigeUpgrade, push]);
+    push(
+      <PrestigeView
+        gameState={gameState}
+        onPurchasePrestigeUpgrade={handlePrestigeUpgrade}
+        onPrestige={async () => {
+          const confirmed = await confirmAlert({
+            title: "Prestige Confirmation",
+            message: "Are you sure you want to prestige? This will reset your progress but give you permanent bonuses.",
+          });
+          if (!confirmed) return false;
+          const gained = calculatePrestigePoints((gameState.prestige.totalEarned || 0) as number, PRESTIGE_PP_DIVISOR);
+          if (gained <= 0) {
+            showToast({ style: Toast.Style.Failure, title: "Not enough to prestige" });
+            return false;
+          }
+          prestige();
+          return true;
+        }}
+      />,
+    );
+  }, [gameState, handlePrestigeUpgrade, push, prestige]);
 
   // Handle prestige
   const handlePrestige = useCallback(async () => {

@@ -29,9 +29,11 @@ export function AlbumActionPanel({ album }: AlbumActionPanelProps) {
         shortcut={{ modifiers: ["cmd", "shift"], key: isAlbumSaved ? "d" : "s" }}
         onAction={async () => {
           try {
-            isAlbumSaved
-              ? await removeFromMySavedAlbums({ albumIds: [album.id] })
-              : await addToMySavedAlbums({ albumIds: [album.id] });
+            if (isAlbumSaved) {
+              await removeFromMySavedAlbums({ albumIds: [album.id] });
+            } else {
+              await addToMySavedAlbums({ albumIds: [album.id] });
+            }
             await mutate();
             await showHUD(isAlbumSaved ? "Album removed from the library" : "Album added to the library");
             await popToRoot();

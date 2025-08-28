@@ -9,51 +9,81 @@ export default function MenuBar() {
   const [state, setState] = useState<GameState | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const lastUpdateRef = useRef<number>(Date.now());
+  const uiStateRef = useRef<GameState | null>(null);
 
-  // Single-run accrue on invocation; Raycast will re-run based on interval in manifest
+  // Continuous accrue on 1s cadence while menu bar is active
   useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
     (async () => {
       try {
         await LocalStorage.setItem("idle-menu-bar-active", "1");
         const loaded = await loadGameState();
         const now = Date.now();
-        const prevTs = loaded.lastUpdate || now;
-        const dt = Math.max(0, (now - prevTs) / 1000);
-        lastUpdateRef.current = now;
-
-        let next: GameState = loaded;
-        if (dt > 0) {
-          const gained = (loaded.idleRate || 0) * dt;
-          if (gained >= MIN_GAIN_EPS) {
-            next = {
-              ...loaded,
-              currency: loaded.currency + gained,
-              prestige: {
-                ...loaded.prestige,
-                totalEarned: loaded.prestige.totalEarned + gained,
-                lifetimeEarned: loaded.prestige.lifetimeEarned + gained,
-              },
-              lastUpdate: now,
-            };
-            await saveGameState(next);
-          } else {
-            // Still bump lastUpdate to avoid double counting on frequent runs
-            next = { ...loaded, lastUpdate: now } as GameState;
-            await saveGameState(next);
-          }
-        } else {
-          // Touch timestamp to ensure freshness
-          next = { ...loaded, lastUpdate: now } as GameState;
-          await saveGameState(next);
-        }
-
-        setState(next);
+        lastUpdateRef.current = loaded.lastUpdate || now;
+        setState(loaded);
+        uiStateRef.current = loaded;
       } finally {
         setIsLoading(false);
       }
+
+      interval = setInterval(async () => {
+        try {
+          await LocalStorage.setItem("idle-menu-bar-active", "1");
+          const current = await loadGameState();
+          const now = Date.now();
+          const prevTs = lastUpdateRef.current || current.lastUpdate || now;
+          const dt = Math.max(0, (now - prevTs) / 1000);
+          lastUpdateRef.current = now;
+
+          let next: GameState = current;
+          if (dt > 0) {
+            const gained = (current.idleRate || 0) * dt;
+            if (gained >= MIN_GAIN_EPS) {
+              next = {
+                ...current,
+                currency: current.currency + gained,
+                prestige: {
+                  ...current.prestige,
+                  totalEarned: current.prestige.totalEarned + gained,
+                  lifetimeEarned: current.prestige.lifetimeEarned + gained,
+                },
+                lastUpdate: now,
+              };
+              await saveGameState(next);
+              setState(next);
+              uiStateRef.current = next;
+            } else {
+              // Touch timestamp only; update UI only if visible values differ from what's shown
+              const touched = { ...current, lastUpdate: now } as GameState;
+              await saveGameState(touched);
+              const prevUI = uiStateRef.current;
+              const currencyChanged = !prevUI || Math.abs(current.currency - prevUI.currency) >= MIN_GAIN_EPS;
+              const ppsChanged = !prevUI || prevUI.idleRate !== current.idleRate;
+              if (currencyChanged || ppsChanged) {
+                setState(current);
+                uiStateRef.current = current;
+              }
+            }
+          } else {
+            // No time passed; avoid UI updates unless rate or displayed currency changed externally
+            const touched = { ...current, lastUpdate: now } as GameState;
+            await saveGameState(touched);
+            const prevUI = uiStateRef.current;
+            const currencyChanged = !prevUI || Math.abs(current.currency - prevUI.currency) >= MIN_GAIN_EPS;
+            const ppsChanged = !prevUI || prevUI.idleRate !== current.idleRate;
+            if (currencyChanged || ppsChanged) {
+              setState(current);
+              uiStateRef.current = current;
+            }
+          }
+        } catch {
+          // keep loop alive
+        }
+      }, 1000);
     })();
 
     return () => {
+      if (interval) clearInterval(interval);
       void LocalStorage.removeItem("idle-menu-bar-active");
     };
   }, []);

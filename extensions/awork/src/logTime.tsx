@@ -13,7 +13,7 @@ import { FormValidation, showFailureToast, useCachedPromise, useForm, usePromise
 import fetch from "node-fetch";
 import { getProjects, getTasks, getTypesOfWork, task } from "./composables/FetchData";
 import { convertDurationsToSeconds, validateDuration } from "./composables/ValidateDuration";
-import { authorizationInProgress, baseURI, getTokens } from "./composables/WebClient";
+import { baseURI, getTokens } from "./composables/WebClient";
 
 interface FormValues {
   note: string;
@@ -86,7 +86,7 @@ export default function Command(props: LaunchProps) {
   } = useCachedPromise(getProjects, [token?.accessToken as string, "", 1000], {
     execute: !!token?.accessToken && !token.isExpired(),
     onData: (data) => {
-      if ((!data || data.length === 0) && !authorizationInProgress) {
+      if (!data || data.length === 0) {
         revalidateProjects();
       }
       if (props.launchContext?.projectId) {
@@ -107,7 +107,7 @@ export default function Command(props: LaunchProps) {
   } = useCachedPromise(getTasks, [token?.accessToken as string, "", 1000], {
     execute: !!token?.accessToken && !token.isExpired(),
     onData: (data) => {
-      if ((!data || data.length === 0) && !authorizationInProgress) {
+      if (!data || data.length === 0) {
         revalidateTasks();
       }
       if (props.launchContext?.taskId) {
@@ -128,7 +128,7 @@ export default function Command(props: LaunchProps) {
   } = useCachedPromise(getTypesOfWork, [token?.accessToken as string], {
     execute: !!token?.accessToken && !token.isExpired(),
     onData: (data) => {
-      if (!Array.isArray(data) && !authorizationInProgress) {
+      if (!Array.isArray(data)) {
         revalidateTypesOfWork();
       }
       if (props.launchContext?.typeOfWorkId) {

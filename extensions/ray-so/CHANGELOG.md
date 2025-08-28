@@ -1,5 +1,15 @@
 # Ray.so Changelog
 
+## [Maintenance] - 2025-08-25
+
+- Added Windows support
+- Migrated to the new ESLint configuration format
+- Updated dependencies
+- Replaced the js-base64 library with the native Buffer for base64 encoding
+- Linting fixes (one contributor not found)
+- Removed some unused dependencies
+- Changed to open method from @raycast/api instead of the open library for opening URLs.
+
 ## [Fix submitting form] - 2024-12-29
 
 - Submitted form now is passing data that user sees.

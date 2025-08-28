@@ -5,6 +5,7 @@ import { Project, Task, TimeslipFormValues, User } from "./types";
 import { fetchProjects, fetchTasks, createTimeslip, getCurrentUser } from "./services/freeagent";
 import { useFreeAgent } from "./hooks/useFreeAgent";
 import { showFailureToast } from "@raycast/utils";
+import { formatDateForAPI } from "./utils/formatting";
 
 const CreateTimeslip = function Command() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -75,7 +76,7 @@ const CreateTimeslip = function Command() {
         task: values.task,
         user: currentUser.url,
         project: values.project,
-        dated_on: values.dated_on?.toISOString().split("T")[0] || new Date().toISOString().split("T")[0],
+        dated_on: values.dated_on ? formatDateForAPI(values.dated_on) : formatDateForAPI(new Date()),
         hours: parseFloat(values.hours) || 0,
         comment: values.comment,
       };

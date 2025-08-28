@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Icon } from "@raycast/api";
 import { Enhet } from "../types";
+import { KEYBOARD_SHORTCUTS } from "../constants";
 import EmojiActionMenu from "./EmojiActionMenu";
 import React from "react";
 
@@ -60,19 +61,19 @@ function FavoriteActions({
           title="Move Up"
           icon={Icon.ArrowUp}
           onAction={() => onMoveUp(entity)}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
+          shortcut={KEYBOARD_SHORTCUTS.MOVE_UP}
         />
         <Action
           title="Move Down"
           icon={Icon.ArrowDown}
           onAction={() => onMoveDown(entity)}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
+          shortcut={KEYBOARD_SHORTCUTS.MOVE_DOWN}
         />
       </ActionPanel.Section>
       <Action
         title="Remove from Favorites"
         onAction={() => onRemoveFavorite(entity)}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+        shortcut={KEYBOARD_SHORTCUTS.REMOVE_FROM_FAVORITES}
       />
       {index === 0 && (
         <ActionPanel.Section title="Move Mode">
@@ -80,7 +81,7 @@ function FavoriteActions({
             title={showMoveIndicators ? "Disable Move Mode" : "Enable Move Mode"}
             icon={showMoveIndicators ? Icon.EyeDisabled : Icon.Eye}
             onAction={onToggleMoveMode}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+            shortcut={KEYBOARD_SHORTCUTS.TOGGLE_MOVE_MODE}
           />
         </ActionPanel.Section>
       )}

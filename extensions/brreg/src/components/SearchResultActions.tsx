@@ -1,5 +1,6 @@
 import { Action } from "@raycast/api";
 import { Enhet } from "../types";
+import { KEYBOARD_SHORTCUTS } from "../constants";
 import EmojiActionMenu from "./EmojiActionMenu";
 import React from "react";
 
@@ -30,7 +31,7 @@ function SearchResultActions({
         <Action
           title="Remove from Favorites"
           onAction={() => onRemoveFavorite(entity)}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+          shortcut={KEYBOARD_SHORTCUTS.REMOVE_FROM_FAVORITES}
         />
         <EmojiActionMenu
           entity={entity}
@@ -47,7 +48,7 @@ function SearchResultActions({
     <Action
       title="Add to Favorites"
       onAction={() => onAddFavorite(entity)}
-      shortcut={{ modifiers: ["cmd"], key: "f" }}
+      shortcut={KEYBOARD_SHORTCUTS.ADD_TO_FAVORITES}
     />
   );
 }

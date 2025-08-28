@@ -5,6 +5,7 @@ import { Activity, ActivityEventType, Domain } from "./interfaces";
 import { useMemo, useState } from "react";
 import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
+import Webhooks from "./webhooks";
 dayjs.extend(localizedFormat);
 
 export default function Domains() {
@@ -26,6 +27,7 @@ export default function Domains() {
           actions={
             <ActionPanel>
               <Action.Push icon={Icon.Envelope} title="Activities" target={<Activities domain={domain} />} />
+              <Action.Push icon={Icon.Plug} title="Webhooks" target={<Webhooks domain={domain} />} />
             </ActionPanel>
           }
         />

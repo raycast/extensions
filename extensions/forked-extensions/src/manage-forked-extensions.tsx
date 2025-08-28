@@ -4,34 +4,52 @@ import {
   ActionPanel,
   Alert,
   Color,
-  confirmAlert,
   Icon,
   Keyboard,
   List,
+  confirmAlert,
   openExtensionPreferences,
 } from "@raycast/api";
-
+import { useCachedPromise } from "@raycast/utils";
+import { withGithubClient } from "./api.js";
 import Tags from "./components/tags.js";
+import SyncFork from "./components/sync-fork.js";
 import ValidExtensions from "./components/valid-extensions.js";
-import { getExtensionList, initRepository } from "./git.js";
+import { handleError } from "./errors.js";
+import * as git from "./git.js";
+import operation from "./operation.js";
 import { ForkedExtension } from "./types.js";
 import { extensionLink, getActualIconPath, userLink } from "./utils.js";
-import { useCachedPromise } from "@raycast/utils";
-import operation from "./operation.js";
 
-export default function ListExtensions() {
+function ManageForkedExtensions() {
   const [isShowingDetail, setIsShowingDetail] = useState(false);
+  const [forkedRepository, setForkedRepository] = useState<string>();
+  const [lastCommitHash, setLastCommitHash] = useState<string>();
 
   const {
-    data: { extensions = [], foredExtensionFolders = [] } = {},
+    data: { extensions = [], forkedExtensionFolders = [] } = {},
     isLoading,
     revalidate,
-  } = useCachedPromise(async (): Promise<{ extensions: ForkedExtension[]; foredExtensionFolders: string[] }> => {
-    await initRepository();
-    const extensions = await getExtensionList();
-    const foredExtensionFolders = extensions.map((x) => x.folderName);
-    return { extensions, foredExtensionFolders };
-  });
+  } = useCachedPromise(
+    async (): Promise<{
+      extensions: ForkedExtension[];
+      forkedExtensionFolders: string[];
+    }> => {
+      const forkedRepository = await operation.init();
+      setForkedRepository(forkedRepository);
+      const extensions = await git.getExtensionList();
+      const forkedExtensionFolders = extensions.map((x) => x.folderName);
+      const lastCommitHash = await git.getLastCommitHash();
+      setLastCommitHash(lastCommitHash);
+      return { extensions, forkedExtensionFolders };
+    },
+    [],
+    {
+      onError: (error) => {
+        handleError(error);
+      },
+    },
+  );
 
   return (
     <List
@@ -44,8 +62,10 @@ export default function ListExtensions() {
               title="Fork an Extension"
               shortcut={Keyboard.Shortcut.Common.New}
               icon={Icon.NewDocument}
-              target={<ValidExtensions forkedExtensionFolders={foredExtensionFolders} onPop={revalidate} />}
+              target={<ValidExtensions forkedExtensionFolders={forkedExtensionFolders} onPop={revalidate} />}
             />
+            <Action.ShowInFinder title="Show Repository in Finder" path={git.repositoryPath} />
+            <SyncFork forkedRepository={forkedRepository} lastCommitHash={lastCommitHash} onSyncFinished={revalidate} />
             <Action onAction={openExtensionPreferences} title="Open Extension Preferences" icon={Icon.Gear} />
           </ActionPanel>
         )
@@ -76,14 +96,24 @@ export default function ListExtensions() {
             <ActionPanel>
               <Action icon={Icon.Eye} title="Show Details" onAction={() => setIsShowingDetail(!isShowingDetail)} />
               <Action.OpenWith path={x.folderPath} />
-              <Action.ShowInFinder path={x.folderPath} />
-              <Action.CopyToClipboard title="Copy Extension Path to Clipboard" content={x.folderName} />
+              <Action.CopyToClipboard
+                title="Copy Extension Path to Clipboard"
+                content={x.folderName}
+                shortcut={Keyboard.Shortcut.Common.Copy}
+              />
               <Action.Push
                 icon={Icon.NewDocument}
                 title="Fork an Extension"
                 shortcut={Keyboard.Shortcut.Common.New}
-                target={<ValidExtensions forkedExtensionFolders={foredExtensionFolders} onPop={revalidate} />}
+                target={<ValidExtensions forkedExtensionFolders={forkedExtensionFolders} onPop={revalidate} />}
               />
+              <SyncFork
+                forkedRepository={forkedRepository}
+                lastCommitHash={lastCommitHash}
+                onSyncFinished={revalidate}
+              />
+              <Action.ShowInFinder title="Show Extension in Finder" path={x.folderPath} />
+              <Action.ShowInFinder title="Show Repository in Finder" path={git.repositoryPath} />
               <Action.OpenInBrowser url={extensionLink(x.author, x.name)} shortcut={Keyboard.Shortcut.Common.Open} />
               <Action
                 icon={Icon.DeleteDocument}
@@ -113,3 +143,5 @@ export default function ListExtensions() {
     </List>
   );
 }
+
+export default withGithubClient(ManageForkedExtensions);

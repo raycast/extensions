@@ -22,7 +22,7 @@ export default function Installer({ executable, onRefresh }: { executable: strin
 This extension depends on a command-line utility that is not detected on your system. You must install it continue.
 
 If you have homebrew installed, simply press **⏎** to have this extension install it for you. Since \`${executable}\` is a heavy library, 
-**it can take up 2 minutes to install**.
+**it can take up to 2 minutes to install**.
 
 **Please do not close Raycast while the installation is in progress.**
 

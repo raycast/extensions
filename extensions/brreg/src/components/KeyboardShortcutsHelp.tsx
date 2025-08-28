@@ -75,8 +75,18 @@ const SHORTCUT_GROUPS: ShortcutGroup[] = [
       },
       {
         action: "Copy Address",
-        shortcut: "No shortcut",
+        shortcut: "⌘B",
         description: "Copy business address to clipboard",
+      },
+      {
+        action: "Copy Revenue",
+        shortcut: "⌘⇧R",
+        description: "Copy revenue to clipboard",
+      },
+      {
+        action: "Copy Net Result",
+        shortcut: "⌘⇧N",
+        description: "Copy net result to clipboard",
       },
     ],
   },

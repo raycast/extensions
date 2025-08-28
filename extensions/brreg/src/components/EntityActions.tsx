@@ -1,5 +1,7 @@
 import { Action, Icon } from "@raycast/api";
+import KeyboardShortcutsHelp from "./KeyboardShortcutsHelp";
 import { Enhet } from "../types";
+import { KEYBOARD_SHORTCUTS } from "../constants";
 import React from "react";
 
 /**
@@ -39,23 +41,25 @@ function EntityActions({
       <Action title="View Details" icon={Icon.AppWindowSidebarLeft} onAction={() => onViewDetails(entity)} />
       <Action.CopyToClipboard
         content={entity.organisasjonsnummer}
-        title="Copy Org. Nr."
-        shortcut={{ modifiers: ["cmd"], key: "o" }}
+        title="Copy Organization Number"
+        shortcut={KEYBOARD_SHORTCUTS.COPY_ORG_NUMBER}
         onCopy={() => onCopyOrgNumber(entity.organisasjonsnummer)}
       />
       {addressString && (
         <Action.CopyToClipboard
           content={addressString}
           title="Copy Business Address"
+          shortcut={KEYBOARD_SHORTCUTS.COPY_ADDRESS}
           onCopy={() => onCopyAddress(addressString)}
         />
       )}
       <Action.OpenInBrowser
-        shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+        shortcut={KEYBOARD_SHORTCUTS.OPEN_IN_BROWSER}
         title="Open in Brønnøysundregistrene"
         url={bregUrl}
         onOpen={() => onOpenInBrowser(bregUrl)}
       />
+      <Action.Push title="Keyboard Shortcuts" target={<KeyboardShortcutsHelp />} />
     </>
   );
 }

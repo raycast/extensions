@@ -126,8 +126,13 @@ export const MY_REPO_SORT_TYPES_TO_QUERIES = [
   { title: "Name", value: "name:asc" },
   { title: "Stars", value: "stargazers:desc" },
 ];
+export const STARRED_REPO_SORT_TYPES_TO_QUERIES = [
+  { title: "Recently Starred", value: "starred_at:desc" },
+  { title: "Oldest Starred", value: "starred_at:asc" },
+];
 export const REPO_DEFAULT_SORT_QUERY = REPO_SORT_TYPES_TO_QUERIES[0].value;
 export const MY_REPO_DEFAULT_SORT_QUERY = MY_REPO_SORT_TYPES_TO_QUERIES[0].value;
+export const STARRED_REPO_DEFAULT_SORT_QUERY = STARRED_REPO_SORT_TYPES_TO_QUERIES[0].value;
 
 export const ACCEPTABLE_CLONE_PROTOCOLS = ["https", "ssh"] as const;
 export type AcceptableCloneProtocol = (typeof ACCEPTABLE_CLONE_PROTOCOLS)[number];

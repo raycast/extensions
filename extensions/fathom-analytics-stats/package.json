@@ -5,7 +5,14 @@
   "description": "A Raycast extension to browse your website analytics coming from Fathom.",
   "icon": "icon.png",
   "author": "yannglt",
-  "categories": ["Applications", "Developer Tools", "Data"],
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Applications",
+    "Developer Tools",
+    "Data"
+  ],
   "license": "MIT",
   "commands": [
     {
