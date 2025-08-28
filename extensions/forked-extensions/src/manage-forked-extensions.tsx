@@ -15,6 +15,7 @@ import { withGithubClient } from "./api.js";
 import Tags from "./components/tags.js";
 import SyncFork from "./components/sync-fork.js";
 import ValidExtensions from "./components/valid-extensions.js";
+import { handleError } from "./errors.js";
 import * as git from "./git.js";
 import operation from "./operation.js";
 import { ForkedExtension } from "./types.js";
@@ -22,21 +23,31 @@ import { extensionLink, getActualIconPath, userLink } from "./utils.js";
 
 function ManageForkedExtensions() {
   const [isShowingDetail, setIsShowingDetail] = useState(false);
+  const [forkedRepository, setForkedRepository] = useState<string>();
+  const [lastCommitHash, setLastCommitHash] = useState<string>();
 
   const {
-    data: { extensions = [], forkedExtensionFolders = [], forkedRepository } = {},
+    data: { extensions = [], forkedExtensionFolders = [] } = {},
     isLoading,
     revalidate,
   } = useCachedPromise(
     async (): Promise<{
       extensions: ForkedExtension[];
       forkedExtensionFolders: string[];
-      forkedRepository?: string;
     }> => {
       const forkedRepository = await operation.init();
+      setForkedRepository(forkedRepository);
       const extensions = await git.getExtensionList();
       const forkedExtensionFolders = extensions.map((x) => x.folderName);
-      return { extensions, forkedExtensionFolders, forkedRepository };
+      const lastCommitHash = await git.getLastCommitHash();
+      setLastCommitHash(lastCommitHash);
+      return { extensions, forkedExtensionFolders };
+    },
+    [],
+    {
+      onError: (error) => {
+        handleError(error);
+      },
     },
   );
 
@@ -54,7 +65,7 @@ function ManageForkedExtensions() {
               target={<ValidExtensions forkedExtensionFolders={forkedExtensionFolders} onPop={revalidate} />}
             />
             <Action.ShowInFinder title="Show Repository in Finder" path={git.repositoryPath} />
-            <SyncFork forkedRepository={forkedRepository} />
+            <SyncFork forkedRepository={forkedRepository} lastCommitHash={lastCommitHash} onSyncFinished={revalidate} />
             <Action onAction={openExtensionPreferences} title="Open Extension Preferences" icon={Icon.Gear} />
           </ActionPanel>
         )
@@ -96,7 +107,11 @@ function ManageForkedExtensions() {
                 shortcut={Keyboard.Shortcut.Common.New}
                 target={<ValidExtensions forkedExtensionFolders={forkedExtensionFolders} onPop={revalidate} />}
               />
-              <SyncFork forkedRepository={forkedRepository} />
+              <SyncFork
+                forkedRepository={forkedRepository}
+                lastCommitHash={lastCommitHash}
+                onSyncFinished={revalidate}
+              />
               <Action.ShowInFinder title="Show Extension in Finder" path={x.folderPath} />
               <Action.ShowInFinder title="Show Repository in Finder" path={git.repositoryPath} />
               <Action.OpenInBrowser url={extensionLink(x.author, x.name)} shortcut={Keyboard.Shortcut.Common.Open} />
