@@ -1,4 +1,6 @@
+import { withAccessToken } from "@raycast/utils";
 import { fetchRecentRepositories, fetchRepositoriesByOwner, Repository } from "../services/repositories";
+import { provider } from "../lib/oauth";
 
 type Input = {
   /**
@@ -19,7 +21,7 @@ type Input = {
  * Searches for GitHub repositories. Can search recent repositories, repositories by owner, or use a query filter.
  * Returns a list of repositories with their full names that can be used with other tools.
  */
-export default async function tool(input: Input = {}) {
+async function tool(input: Input = {}) {
   const { owner, query, limit = 20 } = input;
 
   // Validate limit
@@ -40,13 +42,13 @@ export default async function tool(input: Input = {}) {
     } else {
       // Get recent repositories from user activity
       repositories = await fetchRecentRepositories();
-      
+
       // Apply query filter if provided
       if (query && query.trim()) {
         const queryLower = query.trim().toLowerCase();
-        repositories = repositories.filter(repo => 
-          repo.name.toLowerCase().includes(queryLower) ||
-          repo.nameWithOwner.toLowerCase().includes(queryLower)
+        repositories = repositories.filter(
+          (repo) =>
+            repo.name.toLowerCase().includes(queryLower) || repo.nameWithOwner.toLowerCase().includes(queryLower),
         );
       }
     }
@@ -55,7 +57,7 @@ export default async function tool(input: Input = {}) {
     const limitedRepositories = repositories.slice(0, limit);
 
     return {
-      repositories: limitedRepositories.map(repo => ({
+      repositories: limitedRepositories.map((repo) => ({
         id: repo.id,
         name: repo.name,
         owner: repo.owner.login,
@@ -74,3 +76,5 @@ export default async function tool(input: Input = {}) {
     throw new Error(`Failed to search repositories: ${error}`);
   }
 }
+
+export default withAccessToken(provider)(tool);

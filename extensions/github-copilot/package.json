@@ -39,14 +39,9 @@
       "description": "Creates a GitHub Copilot coding task with a prompt, repository, and optional branch. If no branch is provided, uses the default branch of the repository."
     },
     {
-      "name": "search-repositories", 
+      "name": "search-repositories",
       "title": "Search GitHub Repositories",
       "description": "Searches for GitHub repositories. Can search recent repositories, repositories by owner, or use a query filter to find repositories."
-    },
-    {
-      "name": "get-repository-default-branch",
-      "title": "Get Repository Default Branch", 
-      "description": "Gets the default branch name for a GitHub repository. This is useful when you need to know what branch to use as a base for operations."
     }
   ],
   "dependencies": {
