@@ -8,10 +8,10 @@ export class AlacrittyAdapter implements TerminalAdapter {
   name = "Alacritty";
   bundleId = "org.alacritty";
 
-  async open(directory: string, claudeBinary: string): Promise<void> {
+  async open(directory: string): Promise<void> {
     const userShell = process.env.SHELL || "/bin/zsh";
 
-    const command = `cd ${this.shellEscape(directory)} && clear && ${this.shellEscape(claudeBinary)} ; exec ${userShell} -l`;
+    const command = `cd ${this.shellEscape(directory)} && clear && claude ; exec ${userShell} -l`;
 
     await execFileAsync("open", ["-n", "-a", "Alacritty", "--args", "-e", userShell, "-l", "-i", "-c", command]);
   }

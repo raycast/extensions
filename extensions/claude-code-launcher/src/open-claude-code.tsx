@@ -26,7 +26,6 @@ const STORAGE_KEY = "claude-code-favorites";
 const CURRENT_VERSION = 1;
 
 interface Preferences {
-  claudeBinaryPath: string;
   terminalApp: "Terminal" | "Alacritty";
   defaultFavoriteIcon: string;
 }
@@ -101,7 +100,6 @@ function getDirectoryName(dirPath: string): string {
 
 async function openInTerminal(favorite: Favorite, preferences: Preferences, onSuccess: () => void): Promise<void> {
   const expandedPath = expandTilde(favorite.path);
-  const claudeBinary = expandTilde(preferences.claudeBinaryPath);
 
   try {
     try {
@@ -110,19 +108,13 @@ async function openInTerminal(favorite: Favorite, preferences: Preferences, onSu
       throw new Error(`Cannot access directory: ${expandedPath}. It may have been moved or deleted.`);
     }
 
-    try {
-      await access(claudeBinary, constants.X_OK);
-    } catch {
-      throw new Error(`Claude binary not found at: ${claudeBinary}. Please check your preferences.`);
-    }
-
     const adapter = getTerminalAdapter(preferences.terminalApp);
 
     if (!adapter) {
       throw new Error(`Unsupported terminal: ${preferences.terminalApp}`);
     }
 
-    await adapter.open(expandedPath, claudeBinary);
+    await adapter.open(expandedPath);
     onSuccess();
     showSuccessToast("Opened in Terminal", favorite.name || getDirectoryName(favorite.path));
   } catch (error) {
@@ -339,14 +331,16 @@ function EditFavoriteForm({
 }
 
 async function checkDependencies(preferences: Preferences): Promise<void> {
-  const claudeBinary = expandTilde(preferences.claudeBinaryPath);
+  const { execFile } = await import("child_process");
+  const { promisify } = await import("util");
+  const execFileAsync = promisify(execFile);
 
   try {
-    await access(claudeBinary, constants.X_OK);
+    await execFileAsync("which", ["claude"]);
   } catch (error) {
-    await showFailureToast("Claude binary not found", {
+    await showFailureToast("Claude command not found", {
       title: "Claude Code Not Found",
-      message: `Could not find Claude at: ${claudeBinary}. Please check your preferences.`,
+      message: "The 'claude' command is not available in your PATH. Please ensure Claude Code is installed.",
       primaryAction: {
         title: "Open Preferences",
         onAction: openExtensionPreferences,
