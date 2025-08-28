@@ -3,6 +3,14 @@ import { FormValidation, getFavicon, useFetch, useForm } from "@raycast/utils";
 import { CreateDomain, Domain, DomainStatus } from "./types";
 import { API_URL, headers, parseResponse } from "./koyeb";
 
+const DOMAIN_STATUS_ICON: Record<DomainStatus, Image.ImageLike> = {
+    PENDING: {source: Icon.Hourglass, tintColor: Color.Yellow},
+    ACTIVE: {source: Icon.Check, tintColor: Color.Green},
+    ERROR: {source: Icon.Warning, tintColor: Color.Red},
+    DELETING: Icon.Clock,
+    DELETED: Icon.Trash,
+}
+
 export default function ManageDomains() {
     const { isLoading, data: domains, error, revalidate, mutate } = useFetch(API_URL + "domains", {
         headers,
@@ -14,14 +22,6 @@ export default function ManageDomains() {
         },
         initialData: []
     });
-
-    const DOMAIN_STATUS_ICON: Record<DomainStatus, Image.ImageLike> = {
-        PENDING: {source: Icon.Hourglass, tintColor: Color.Yellow},
-        ACTIVE: {source: Icon.Check, tintColor: Color.Green},
-        ERROR: {source: Icon.Warning, tintColor: Color.Red},
-        DELETING: Icon.Clock,
-        DELETED: Icon.Trash,
-    }
 
     async function confirmAndRemove(domain: Domain) {
         const options: Alert.Options = {
@@ -45,6 +45,7 @@ export default function ManageDomains() {
                         },
                     }
                 )
+                toast.style = Toast.Style.Success;
             } catch {
                 toast.style = Toast.Style.Failure;
                 toast.title = "Failed";
@@ -106,7 +107,7 @@ function AddDomain() {
         <Action.SubmitForm icon={Icon.Plus} title="Add Domain" onSubmit={handleSubmit} />
     </ActionPanel>}>
         <Form.Description text="Create a custom domain and assign it to one of your Koyeb app" />
-        <Form.TextField title="Domain name" {...itemProps.name} />
+        <Form.TextField title="Domain name" placeholder="example.com" {...itemProps.name} />
         <Form.Dropdown title="Type" {...itemProps.type} info="AUTOASSIGNED: Domain like <appName>-<orgName>.koyeb.app">
             <Form.Dropdown.Item title="AUTOASSIGNED" value="AUTOASSIGNED" />
             <Form.Dropdown.Item title="CUSTOM" value="CUSTOM" />

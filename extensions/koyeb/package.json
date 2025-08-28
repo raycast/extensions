@@ -18,6 +18,12 @@
   ],
   "commands": [
     {
+      "name": "list-activities",
+      "title": "List Activities",
+      "description": "",
+      "mode": "view"
+    },
+    {
       "name": "manage-domains",
       "title": "Manage Domains",
       "description": "",

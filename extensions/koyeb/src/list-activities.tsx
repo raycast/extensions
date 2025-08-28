@@ -3,6 +3,19 @@ import { API_URL, headers, parseResponse } from "./koyeb";
 import { Color, Icon, Image, List } from "@raycast/api";
 import { Activity } from "./types";
 
+const ACTIVITY_TYPE_ICONS: Record<string, Image.Source> = {
+    "domain": Icon.Globe,
+    "organization": Icon.Building,
+    "session": Icon.Person,
+    "subscription": Icon.CreditCard,
+};
+const ACTIVITY_VERB_COLORS: Record<string, Color.ColorLike> = {
+    "created": Color.Green,
+    "deleted": Color.Red,
+    "payment_succeeded": Color.Blue,
+    "updated": Color.Blue,
+};
+
 export default function ListActivities() {
     const {isLoading, data: activities} = useFetch(API_URL + "activities?limit=20", {
         headers,
@@ -16,42 +29,10 @@ export default function ListActivities() {
     })
 
     function getActivityIcon(activity: Activity): Image.ImageLike {
-        let source: Image.Source;
-        let tintColor: Color.ColorLike | undefined = undefined;
-        
-        switch (activity.object.type) {
-            case "domain":
-                source = Icon.Globe;
-                break;
-            case "organization":
-                source = Icon.Building;
-                break;
-            case "session":
-                source = Icon.Person;
-                break;
-            case "subscription":
-                source = Icon.CreditCard;
-                break;
-            default:
-                source = Icon.Heartbeat
-                break;
-        }
-        switch (activity.verb) {
-            case "created":
-                tintColor = Color.Green;
-                break;
-            case "deleted":
-                tintColor = Color.Red;
-                break;
-            case "updated":
-            case "payment_succeeded":
-                tintColor = Color.Blue;
-                break;
-            default:
-                break;
-        }
+        const source = ACTIVITY_TYPE_ICONS[activity.object.type] || Icon.Heartbeat;
+        const tintColor = ACTIVITY_VERB_COLORS[activity.verb];
 
-        return {source, tintColor};
+        return { source, tintColor };
     }
 
     function getTitle(activity: Activity) {
@@ -65,8 +46,6 @@ export default function ListActivities() {
                     return "Deleted domain";
                 case "updated":
                     return "Updated domain";
-                default:
-                    break;
             }
         }
 
@@ -78,8 +57,6 @@ export default function ListActivities() {
                     return activity.actor.name;
                 case "payment_succeeded":
                     return "A payment succeeded";
-                default:
-                    break;
             }
         }
 
@@ -121,16 +98,24 @@ export default function ListActivities() {
                 default:
                     if (activity.verb==="updated") return `Updated organization ${activity.object.name}`;
                     if (activity.verb==="created") return `Created organization ${activity.object.name}`;
-                    break;
             }
         }
 
         if (activity.object.type==="session") {
             if (activity.verb==="created") return "Logged in";
         }
+
+        return undefined;
+    }
+
+    function getAccessories(activity: Activity) {
+        const accessories: List.Item.Accessory[] = [];
+        if (activity.object.type==="domain") accessories.push({tag: activity.object.name});
+        accessories.push({icon:Icon.Clock, date: new Date(activity.created_at)});
+        return accessories;
     }
 
     return <List isLoading={isLoading}>
-        {activities.map(activity => <List.Item key={activity.id} icon={getActivityIcon(activity)} title={getTitle(activity)} subtitle={getSubtitle(activity)} />)}
+        {activities.map(activity => <List.Item key={activity.id} icon={getActivityIcon(activity)} title={getTitle(activity)} subtitle={getSubtitle(activity)} accessories={getAccessories(activity)} />)}
     </List>
 }

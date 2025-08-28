@@ -12,6 +12,7 @@ export type Activity = {
     metadata: {
         event?: string;
     }
+    created_at: string;
 }
 
 export enum DomainStatus {
