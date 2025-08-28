@@ -1,12 +1,11 @@
 import { Action, ActionPanel, getPreferenceValues, Icon, List, open } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
+import { type PaginationOptions } from "@raycast/utils/dist/types";
 import { useState } from "react";
 import { list } from "./api/list";
-import { titlecase } from "./utils/titlecase";
-import { type Document } from "./utils/document";
 import { type Category } from "./utils/category";
-import { type PaginationOptions } from "@raycast/utils/dist/types";
-import { getOpenUrl } from "./utils";
+import { type Document } from "./utils/document";
+import { titlecase } from "./utils/titlecase";
 
 function getProgressIcon(readingProgress: number) {
   const asPercentage = readingProgress * 100;
@@ -116,11 +115,7 @@ ${article.summary}
               icon={getProgressIcon(article.reading_progress)}
               actions={
                 <ActionPanel title={article.title}>
-                  <Action
-                    title="Open Article in Readwise"
-                    onAction={() => open(getOpenUrl(article.url))}
-                    icon={Icon.Globe}
-                  />
+                  <Action title="Open Article in Readwise" onAction={() => open(article.url)} icon={Icon.Globe} />
                   <Action.OpenInBrowser url={article.source_url} title="Open Article in Source Website" />
                   <ActionPanel.Submenu title="Filter by Category…" shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}>
                     <Action

@@ -1,5 +1,9 @@
 # Readwise Reader Changelog
 
+## Fix link url - {PR_MERGE_DATE}
+
+- Opening a link now uses the proper url
+
 ## [Add desktop app support] - 2025-07-14
 
 - Add option to open documents in Readwise Reader desktop app
