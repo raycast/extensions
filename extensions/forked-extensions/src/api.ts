@@ -1,6 +1,6 @@
 import { OAuthService, withAccessToken } from "@raycast/utils";
-import got, { Got } from "got";
-import { githubOauthScope } from "./constants.js";
+import got, { Got, HTTPError } from "got";
+import { githubOauthScope, upstreamRepository } from "./constants.js";
 import { githubPersonalAccessToken } from "./utils.js";
 
 /**
@@ -37,12 +37,29 @@ export const withGithubClient = withAccessToken(githubOauthService);
  * @returns A promise that resolves to an array of all extensions.
  */
 export const getAllExtensions = async () => {
-  const url = "https://raw.githubusercontent.com/raycast/extensions/refs/heads/main/.github/extensionName2Folder.json";
+  const url = `https://raw.githubusercontent.com/${upstreamRepository}/refs/heads/main/.github/extensionName2Folder.json`;
   const json = await got(url).json<Record<string, string>>();
   const extensions = Object.entries(json)
     .map(([name, folder]) => ({ name, folder }))
     .sort((a, b) => a.folder.localeCompare(b.folder));
   return extensions;
+};
+
+/**
+ * Checks if a repository exists on GitHub.
+ * @permissions `repo`
+ * @param repository The full name of the repository. The format is `username/repository`.
+ * @returns A promise that resolves to true if the repository exists, false otherwise.
+ * @see {@link https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#get-a-repository|Get a repository}
+ */
+export const repositoryExists = async (repository: string) => {
+  return githubApi
+    .get(`repos/${repository}`)
+    .then(() => true)
+    .catch((error) => {
+      if (error instanceof HTTPError && error.response.statusCode === 404) return false;
+      throw error;
+    });
 };
 
 /**
@@ -54,7 +71,7 @@ export const getAllExtensions = async () => {
  */
 export const getForkedRepository = async () => {
   const response = await githubApi
-    .post("repos/raycast/extensions/forks", {
+    .post(`repos/${upstreamRepository}/forks`, {
       json: {
         name: "raycast-extensions",
         default_branch_only: true,
@@ -91,7 +108,7 @@ export const syncFork = async () => {
 export const compareTwoCommits = async (forkedRepository: string) => {
   const [forkUser] = forkedRepository.split("/");
   const response = await githubApi
-    .get(`repos/raycast/extensions/compare/raycast:main...${forkUser}:main`)
+    .get(`repos/${upstreamRepository}/compare/raycast:main...${forkUser}:main`)
     .json<{ behind_by: number }>();
   return response.behind_by;
 };

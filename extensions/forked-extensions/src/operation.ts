@@ -1,7 +1,6 @@
 import { Clipboard, Toast, confirmAlert, openExtensionPreferences } from "@raycast/api";
 import * as api from "./api.js";
 import * as git from "./git.js";
-import { handleError } from "./errors.js";
 import { getCommitsText } from "./utils.js";
 
 /**
@@ -32,7 +31,7 @@ class Operation {
       this.isOperating = true;
       const gitInstalled = await git.checkIfGitIsValid();
       if (!gitInstalled) {
-        const yes = await confirmAlert({
+        confirmAlert({
           title: "Git not found",
           message: "Please setup your Git executable file path manually in the extension preferences.",
           primaryAction: {
@@ -42,7 +41,6 @@ class Operation {
             },
           },
         });
-        if (yes) await openExtensionPreferences();
         return;
       }
 
@@ -77,43 +75,37 @@ class Operation {
   fork = async (extensionFolder: string) =>
     this.spawn(
       async () => {
-        const { forkedRepository } = await git.getForkedRepository();
+        const forkedRepository = await git.getForkedRepository();
+        if (!forkedRepository)
+          throw new Error(
+            "Forked repository not found. Please try to rerun the extension to initialize the repository.",
+          );
         const commitsBehind = await api.compareTwoCommits(forkedRepository);
         if (commitsBehind > 0) {
-          const yes = await confirmAlert({
+          await confirmAlert({
             title: "Repository Outdated",
             message: `Your forked repository on GitHub is ${getCommitsText(commitsBehind)} behind the upstream repository. Do you want to sync it now?`,
             primaryAction: {
               title: "Sync Now",
+              onAction: async () => {
+                // Set `isOperating` to false to allow `sync` to run.
+                this.isOperating = false;
+                await this.sync();
+                await git.sparseCheckoutAdd(extensionFolder);
+              },
             },
             dismissAction: {
               title: "Fork Anyway",
+              onAction: async () => {
+                await git.sparseCheckoutAdd(extensionFolder);
+              },
             },
           });
-          if (yes) {
-            // Set the flag to false to allow re-entering the spawn method.
-            this.isOperating = false;
-            await this.sync();
-          }
         }
-        await git.sparseCheckoutAdd(extensionFolder);
       },
       "Forking extension",
       "Forked successfully",
     );
-
-  /**
-   * Pulls the latest changes from the upstream repository.
-   *
-   * [TODO] We should check if the repository is clean before pulling
-   *
-   * @remarks
-   *
-   * - If the local branch is outdated, fast-forward it;
-   * - If the local branch contains unpushed work, warn about it;
-   * - If the branch seems merged and its upstream branch was deleted, delete it.
-   */
-  pull = async () => this.spawn(git.pull, "Pulling contributions", "Pulled successfully");
 
   /**
    * Removes an extension from the sparse-checkout list.
@@ -134,13 +126,16 @@ class Operation {
       title: "Copy Logs",
       onAction: () => Clipboard.copy([title, message].join("\n")),
     };
-    return this.showToast({
-      title,
-      message,
-      style: options?.style ?? Toast.Style.Failure,
-      primaryAction: options?.primaryAction ?? copyLogsAction,
-      secondaryAction: options?.primaryAction ? copyLogsAction : undefined,
-    });
+    return this.showToast(
+      {
+        title,
+        message,
+        style: options?.style ?? Toast.Style.Failure,
+        primaryAction: options?.primaryAction ?? copyLogsAction,
+        secondaryAction: options?.primaryAction ? copyLogsAction : undefined,
+      },
+      true, // Create a new toast instance to ensure the `primaryAction.onAction` works as expected.
+    );
   };
 
   /**
@@ -149,27 +144,25 @@ class Operation {
    * @param loadingMessage The message to show while the task is loading.
    * @param completedMessage Optional message to show when the task completes successfully. If not provided, the string result of the task will be used. Otherwise, the toast will be hidden.
    */
-  private spawn = async <T>(task: () => Promise<T>, loadingMessage: string, completedMessage?: string) => {
+  private spawn = async <T>(
+    task: () => Promise<T>,
+    loadingMessage: string,
+    completedMessage?: string | Toast.Options,
+  ) => {
     if (this.isOperating) return;
-
-    const isClean = await git.isStatusClean();
-    if (!isClean) {
-      this.showFailureToast("The repository is not clean. Please commit or stash your changes before proceeding.");
-      return;
-    }
-
     try {
       this.isOperating = true;
+      await git.isStatusClean();
       this.showToast({ title: loadingMessage });
       const result = await task();
-      const message = completedMessage ?? result;
-      if (typeof message === "string") {
-        this.completeToast(message);
+      if (completedMessage) {
+        if (typeof completedMessage === "string") this.completeToast(completedMessage);
+        else this.showToast(completedMessage, true);
+      } else if (typeof result === "string") {
+        this.completeToast(result);
       } else {
         this.hideToast();
       }
-    } catch (error) {
-      handleError(error);
     } finally {
       this.isOperating = false;
     }
@@ -177,15 +170,19 @@ class Operation {
 
   /**
    * Shows a loading toast with the specified title.
-   * @param title The title of the toast to show.
+   * @param toastOptions The options for the toast to show.
+   * @param newToast Whether to create a new toast instance. If false, it will update the existing toast instance. This is a workaround for the issue that the `Toast` instance cannot set the `primaryAction.onAction` for some unknown reason.
    */
-  private showToast = async (options: Toast.Options = { title: "" }) => {
-    const { style, message, primaryAction, secondaryAction } = options;
-    this.toast.style = style ?? Toast.Style.Animated;
-    this.toast.title = options.title;
-    if (message) this.toast.message = message;
-    if (primaryAction) this.toast.primaryAction = primaryAction;
-    if (secondaryAction) this.toast.secondaryAction = secondaryAction;
+  private showToast = async (toastOptions: Toast.Options = { title: "" }, newToast?: boolean) => {
+    const { style, message, primaryAction, secondaryAction } = toastOptions;
+    if (newToast) this.toast = new Toast(toastOptions);
+    else {
+      this.toast.title = toastOptions.title;
+      this.toast.style = style ?? Toast.Style.Animated;
+      if (message) this.toast.message = message;
+      if (primaryAction) this.toast.primaryAction = primaryAction;
+      if (secondaryAction) this.toast.secondaryAction = secondaryAction;
+    }
     await this.toast.show();
   };
 
