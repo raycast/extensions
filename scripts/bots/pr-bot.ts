@@ -19,7 +19,7 @@ export default async ({ github, context }: API) => {
         owner: context.repo.owner,
         repo: context.repo.repo,
         issue_number: context.issue.number,
-        assignees: [assignReadyForReviewTo]
+        assignees: [assignReadyForReviewTo],
       });
       console.log(`Successfully assigned PR to ${assignReadyForReviewTo}`);
     } catch (error) {
@@ -36,7 +36,7 @@ export default async ({ github, context }: API) => {
   const touchedExtensions = new Set(
     process.env.CHANGED_EXTENSIONS?.split(",")
       .map((x) => x.split("extensions/").filter(Boolean)[1])
-      .map((x) => x.split("/")[0])
+      .map((x) => x.split("/")[0]),
   );
   console.log("changed extensions", touchedExtensions);
 
@@ -46,7 +46,8 @@ export default async ({ github, context }: API) => {
   }
 
   // You can expect an initial review within five business days.
-  const expectations = "Due to our current reduced availability during summer, the initial review may take up to 10-15 business days.";
+  const expectations =
+    "Due to our current reduced availability during summer, the initial review may take up to 10-15 business days.";
 
   const codeowners = await getCodeOwners({ github, context });
 
@@ -211,7 +212,9 @@ This is especially helpful since there were no maintainers for this extension :p
 
 🔔 ${[...new Set(owners.filter((x) => x !== sender))]
         .map((x) => `@${x}`)
-        .join(" ")} you might want to have a look.\n\nYou can use [this guide](https://developers.raycast.com/basics/review-pullrequest) to learn how to check out the Pull Request locally in order to test it.\n\n${expectations}`,
+        .join(
+          " ",
+        )} you might want to have a look.\n\nYou can use [this guide](https://developers.raycast.com/basics/review-pullrequest) to learn how to check out the Pull Request locally in order to test it.\n\n${expectations}`,
     });
 
     return;
@@ -248,11 +251,15 @@ async function getGitHubFile(path: string, { github, context }: Pick<API, "githu
     path,
   });
 
-  // @ts-ignore
-  return data as string;
+  // When using mediaType format "raw", the GitHub API returns the file content as a string
+  // but TypeScript doesn't know this, so we need to cast it properly
+  return data as unknown as string;
 }
 
-async function checkForAiInPullRequestDiff(extensionFolder: string, { github, context }: Pick<API, "github" | "context">) {
+async function checkForAiInPullRequestDiff(
+  extensionFolder: string,
+  { github, context }: Pick<API, "github" | "context">,
+) {
   const { data: files } = await github.rest.pulls.listFiles({
     owner: context.repo.owner,
     repo: context.repo.repo,
@@ -272,7 +279,7 @@ async function checkForAiInPullRequestDiff(extensionFolder: string, { github, co
     if (filePath === `extensions/${extensionFolder}/package.json`) {
       try {
         // because it's a new extension, we need to get the content from the PR itself
-        if (file.status === 'added' || file.status === 'modified') {
+        if (file.status === "added" || file.status === "modified") {
           const { data: content } = await github.rest.repos.getContent({
             mediaType: {
               format: "raw",
@@ -292,10 +299,10 @@ async function checkForAiInPullRequestDiff(extensionFolder: string, { github, co
       }
     }
 
-    if (file.status === 'added' || file.status === 'modified') {
-      const aiFiles = ['ai.json', 'ai.yaml', 'ai.json5'];
+    if (file.status === "added" || file.status === "modified") {
+      const aiFiles = ["ai.json", "ai.yaml", "ai.json5"];
 
-      if (aiFiles.some(filename => filePath === `extensions/${extensionFolder}/${filename}`)) {
+      if (aiFiles.some((filename) => filePath === `extensions/${extensionFolder}/${filename}`)) {
         aiFilesOrToolsExist = true;
       }
     }
