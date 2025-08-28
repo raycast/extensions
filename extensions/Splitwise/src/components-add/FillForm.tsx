@@ -104,10 +104,9 @@ export const FillForm = (props: FriendOrGroupProps) => {
       <Form.Dropdown
         id="category"
         title="Category"
-        value={itemProps.category_id?.value?.toString() || ""}
+        value={itemProps.category?.value?.toString() || ""}
         onChange={(value) => {
-          const categoryId = value ? Number(value) : undefined;
-          itemProps.category_id?.onChange?.(categoryId);
+          itemProps.category?.onChange?.(value);
         }}
         isLoading={loadingCategories}
         placeholder="Select a category"
