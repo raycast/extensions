@@ -1,6 +1,6 @@
 # MailerSend Changelog
 
-## [View Webhooks] - {PR_MERGE_DATE}
+## [View Webhooks] - 2025-08-28
 
 - View Domain Webhooks
 
