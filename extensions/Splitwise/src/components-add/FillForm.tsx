@@ -1,16 +1,19 @@
 import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { postExpense } from "../hooks/useFriends_Groups";
+import { getCategories } from "../hooks/useList";
 import { GetCurrentUser } from "../hooks/useCurrentUser";
 import { getCurrency_code } from "../utils/utils";
 import { currencyCodes } from "../utils/constants";
 
-import { ExpenseParams, FriendOrGroupProps } from "../types/friends_groups.types";
+import { FriendOrGroupProps } from "../types/friends_groups.types";
+import { Category, ExpenseParams } from "../types/get_expenses.types";
 
 export const FillForm = (props: FriendOrGroupProps) => {
   const { pop } = useNavigation();
   const currentUser = GetCurrentUser(); // fetch current user details
   const revalidate = props.friend ? props.revalidateFriends : props.revalidateGroups;
+  const [categories, loadingCategories] = getCategories();
 
   const defaultCurrency = String(currentUser?.default_currency);
   const { symbol: defaultSymbol, emoji: defaultEmoji } = getCurrency_code(defaultCurrency);
@@ -26,6 +29,7 @@ export const FillForm = (props: FriendOrGroupProps) => {
         date: values.date,
         cost: values.cost,
         currency_code: values.currency_code,
+        category_id: values.category ? Number(values.category) : undefined,
         ...(props.friend
           ? {
               users__0__user_id: currentUser?.id,
@@ -56,6 +60,33 @@ export const FillForm = (props: FriendOrGroupProps) => {
     },
   });
 
+  // Helper function to render category options recursively
+  const renderCategoryOptions = (categories: Category[], level = 0): JSX.Element[] => {
+    return categories
+      .map((category) => {
+        const indent = "  ".repeat(level);
+        const items: JSX.Element[] = [];
+
+        // If category has subcategories, only render the subcategories
+        if (category.subcategories && category.subcategories.length > 0) {
+          items.push(...renderCategoryOptions(category.subcategories, level + 1));
+        } else {
+          // Add leaf category (no subcategories) - selectable with icon
+          items.push(
+            <Form.Dropdown.Item
+              key={category.id}
+              value={category.id.toString()}
+              title={`${indent}${category.name}`}
+              icon={{ source: category.icon }}
+            />
+          );
+        }
+
+        return items;
+      })
+      .flat();
+  };
+
   return (
     <Form
       navigationTitle="Add Expense"
@@ -70,6 +101,19 @@ export const FillForm = (props: FriendOrGroupProps) => {
         text={props.friend ? [props.friend.first_name, props.friend.last_name].join(" ") : props.group.name}
       />
       <Form.TextField title="Description" {...itemProps.description} />
+      <Form.Dropdown
+        id="category"
+        title="Category"
+        value={itemProps.category_id?.value?.toString() || ""}
+        onChange={(value) => {
+          const categoryId = value ? Number(value) : undefined;
+          itemProps.category_id?.onChange?.(categoryId);
+        }}
+        isLoading={loadingCategories}
+        placeholder="Select a category"
+      >
+        {categories.length > 0 && renderCategoryOptions(categories)}
+      </Form.Dropdown>
       <Form.DatePicker title="Date of Expense" {...itemProps.date} />
       <Form.Dropdown title="Currency Code" {...itemProps.currency_code}>
         <Form.Dropdown.Item
