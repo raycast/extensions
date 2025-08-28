@@ -1,5 +1,11 @@
 # Readwise Reader Changelog
 
+## Minor fixes - {PR_MERGE_DATE}
+
+- Use correct URL when opening an article.
+- Update the Search command to respect preferences.
+- Add Archive to default search location preferences.
+
 ## [Add desktop app support] - 2025-07-14
 
 - Add option to open documents in Readwise Reader desktop app
