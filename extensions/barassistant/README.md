@@ -13,8 +13,6 @@ To set up the extension, you’ll need the following values from your Bar Assist
 - **APP_URL** – Application URL  
 - **Token** – Authentication token  
 - **Bar ID** – Your specific bar identifier  
-- **Cache Location** – Local cache path used to maintain fast search results  
-  - The cache size is typically under **2 MB**
 
 For detailed instructions on retrieving these values, refer to the official [Bar Assistant Documentation](https://docs.barassistant.app/).
 
