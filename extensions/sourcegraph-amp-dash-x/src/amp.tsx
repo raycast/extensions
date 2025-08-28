@@ -12,7 +12,6 @@ import {
   useNavigation,
   Keyboard,
   open,
-  environment,
 } from "@raycast/api";
 import React, { useState, useEffect } from "react";
 import {
@@ -23,6 +22,9 @@ import {
 } from "./lib/storage";
 import PromptForm from "./components/PromptForm";
 import { showFailureToast } from "@raycast/utils";
+import fs from "fs";
+import os from "os";
+import path from "path";
 
 export default function AmpCommand() {
   const [prompts, setPrompts] = useState<Prompt[]>([]);
@@ -75,7 +77,7 @@ export default function AmpCommand() {
         .toLowerCase()
         .replace(/\s+/g, "-")
         .replace(/[^a-z0-9-]/g, "");
-      
+
       const markdownContent = `# ${prompt.title}
 
 **Category:** ${prompt.category || "Uncategorized"}
@@ -91,15 +93,11 @@ amp -x "${prompt.prompt}"
 \`\`\`
 `;
 
-      const fs = require("fs");
-      const os = require("os");
-      const path = require("path");
-      
       const downloadsPath = path.join(os.homedir(), "Downloads");
       const filePath = path.join(downloadsPath, `${filename}.md`);
-      
+
       fs.writeFileSync(filePath, markdownContent);
-      
+
       await open(filePath);
       showToast(Toast.Style.Success, "Markdown file downloaded!");
     } catch (error) {
