@@ -19,5 +19,5 @@ let package = Package(
           .product(name: "RaycastTypeScriptPlugin", package: "extensions-swift-tools"),
         ]
       ),
-    ],
+    ]
 )
