@@ -1,5 +1,9 @@
 # Installed Extensions Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Use the Raycast built-in `Action.CopyToClipboard` instead of manually copying to clipboard and showing HUD
+
 ## [Enhancement] - 2025-08-26
 
 - Add support for launching target extension
