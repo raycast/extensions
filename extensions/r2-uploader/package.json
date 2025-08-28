@@ -1,0 +1,105 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "r2-uploader",
+  "title": "Image to R2 Uploader",
+  "description": "Upload images to Cloudflare R2 with optional AVIF conversion. After upload, the Markdown formatted link will be copied to clipboard.",
+  "icon": "extension-icon.png",
+  "author": "Silas",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "r2-uploader",
+      "title": "Upload Image to R2",
+      "subtitle": "Cloudflare R2",
+      "description": "Upload images to Cloudflare R2 with optional AVIF conversion. After upload, the Markdown formatted link will be copied to clipboard.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "r2BucketName",
+      "type": "textfield",
+      "required": true,
+      "title": "R2 Bucket Name",
+      "description": "Your Cloudflare R2 bucket name",
+      "placeholder": "my-bucket"
+    },
+    {
+      "name": "r2AccessKeyId",
+      "type": "password",
+      "required": true,
+      "title": "R2 Access Key ID",
+      "description": "Your Cloudflare R2 access key ID"
+    },
+    {
+      "name": "r2SecretAccessKey",
+      "type": "password",
+      "required": true,
+      "title": "R2 Secret Access Key",
+      "description": "Your Cloudflare R2 secret access key"
+    },
+    {
+      "name": "r2AccountId",
+      "type": "textfield",
+      "required": true,
+      "title": "R2 Account ID",
+      "description": "Your Cloudflare account ID",
+      "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    },
+    {
+      "name": "customDomain",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Domain",
+      "description": "Your custom domain for accessing files (optional)",
+      "placeholder": "https://images.example.com"
+    },
+    {
+      "name": "fileNameFormat",
+      "type": "textfield",
+      "required": false,
+      "title": "File Name Format",
+      "description": "Custom file name format (optional). Available variables: {name}, {ext}, {year}, {month}, {day}, {hours}, {minutes}, {seconds}",
+      "placeholder": "{name}_{year}{month}{day}_{hours}{minutes}{seconds}.{ext}"
+    },
+    {
+      "name": "convertToAvif",
+      "type": "checkbox",
+      "required": false,
+      "title": "Convert to AVIF",
+      "description": "Convert images to AVIF format before uploading",
+      "default": true,
+      "label": "Convert to AVIF"
+    },
+    {
+      "name": "avifencPath",
+      "type": "textfield",
+      "required": false,
+      "title": "AVIF Encoder Path",
+      "description": "Path to avifenc command (optional)",
+      "placeholder": "/opt/homebrew/bin/avifenc",
+      "default": "/opt/homebrew/bin/avifenc"
+    }
+  ],
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.864.0",
+    "@raycast/api": "^1.102.4",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
