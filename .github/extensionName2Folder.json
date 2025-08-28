@@ -704,6 +704,7 @@
   "raycast/github": "github",
   "demartini/github-cli-manual": "github-cli-manual",
   "michael.wang/github-codespaces": "github-codespaces",
+  "github/github-copilot": "github-copilot",
   "Kinbaum/github-for-enterprise": "github-for-enterprise",
   "koinzhang/github-gist": "github-gist",
   "fe9lix/github-menu-bar": "github-menu-bar",
