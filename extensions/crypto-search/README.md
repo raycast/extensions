@@ -14,7 +14,7 @@ A powerful Raycast extension for instantly searching cryptocurrency addresses an
   - Falls back to checking native balance if not a token
 - **🔍 Transaction Support**: 
   - Direct links to block explorers for transaction hashes
-  - Supports both short (64 char) and long (87-88 char) Solana signatures
+  - Supports both EVM (64 char) and Solana (87-88 char) transaction signatures
   - Automatic chain detection for EVM transactions
 - **⚙️ Configurable**: Choose between GMGN or block explorer as default target
 - **🛡️ Reliable**: Graceful fallbacks for network timeouts and errors
