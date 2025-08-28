@@ -276,7 +276,6 @@ async function getGitHubFile(path: string, { github, context }: Pick<API, "githu
     path,
   });
 
-  // @ts-ignore
   return data as string;
 }
 
