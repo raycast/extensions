@@ -1,6 +1,6 @@
 # Copy Path Changelog
 
-## [Fix browser support] - {PR_MERGE_DATE}
+## [Fix browser support] - 2025-08-28
 
 - Fix support for browsers.
 
