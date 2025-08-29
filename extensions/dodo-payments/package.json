@@ -1,0 +1,129 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dodo-payments",
+  "title": "Dodo Payments",
+  "description": "Manage all your Dodo Payments orders, payments, subscriptions, discounts, license keys, disputes, refunds and payouts, right from your keyboard.",
+  "icon": "command-icon.png",
+  "author": "dodopayments",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Finance", 
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "view-payments",
+      "title": "View Payments",
+      "subtitle": "Dodo Payments",
+      "description": "View and manage your Dodo Payments transactions",
+      "mode": "view"
+    },
+    {
+      "name": "view-subscriptions",
+      "title": "View Subscriptions",
+      "subtitle": "Dodo Payments",
+      "description": "View and manage your recurring subscriptions",
+      "mode": "view"
+    },
+    {
+      "name": "view-customers",
+      "title": "View Customers",
+      "subtitle": "Dodo Payments",
+      "description": "View and manage your customer database",
+      "mode": "view"
+    },
+    {
+      "name": "view-products",
+      "title": "View Products",
+      "subtitle": "Dodo Payments",
+      "description": "View and manage your product catalog",
+      "mode": "view"
+    },
+    {
+      "name": "view-discounts",
+      "title": "View Discount Codes",
+      "subtitle": "Dodo Payments",
+      "description": "View and manage your discount codes",
+      "mode": "view"
+    },
+    {
+      "name": "view-license-keys",
+      "title": "View License Keys",
+      "subtitle": "Dodo Payments",
+      "description": "View and manage your license keys",
+      "mode": "view"
+    },
+    {
+      "name": "view-disputes",
+      "title": "View Disputes",
+      "subtitle": "Dodo Payments",
+      "description": "View and manage payment disputes",
+      "mode": "view"
+    },
+    {
+      "name": "view-refunds",
+      "title": "View Refunds",
+      "subtitle": "Dodo Payments",
+      "description": "View and manage payment refunds",
+      "mode": "view"
+    },
+    {
+      "name": "view-payouts",
+      "title": "View Payouts",
+      "subtitle": "Dodo Payments",
+      "description": "View and manage your payouts",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your Dodo Payments API key",
+      "type": "password",
+      "required": true,
+      "placeholder": "Enter your API key"
+    },
+    {
+      "name": "apiMode",
+      "title": "API Mode",
+      "description": "Select the API environment",
+      "type": "dropdown",
+      "required": true,
+      "default": "live",
+      "data": [
+        {
+          "title": "Test",
+          "value": "test"
+        },
+        {
+          "title": "Live",
+          "value": "live"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.101.1",
+    "@raycast/utils": "^1.17.0",
+    "@tanstack/react-query": "^5.83.0",
+    "dodopayments": "^1.42.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.32.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

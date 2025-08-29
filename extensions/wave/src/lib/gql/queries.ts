@@ -90,4 +90,23 @@ export const QUERIES = {
             }
         }
     `,
+  getValidIncomeAccounts: `
+        query ($businessId: ID!, $subtypes: [AccountSubtypeValue!]) {
+            business(id: $businessId) {
+                id
+                accounts(subtypes: $subtypes) {
+                    edges {
+                        node {
+                            id
+                            name
+                            subtype {
+                                name
+                                value
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    `,
 };

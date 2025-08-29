@@ -11,11 +11,11 @@ interface AwsVaultProps {
   shouldUseAwsVault: boolean;
   selectedProfile: string | undefined;
   profileOptions: ProfileOption[];
-  onProfileSelected?: VoidFunction;
+  onProfileSelected?: () => void;
 }
 
 interface Props {
-  onProfileSelected?: VoidFunction;
+  onProfileSelected?: () => void;
 }
 
 export default function AWSProfileDropdown({ onProfileSelected }: Props) {

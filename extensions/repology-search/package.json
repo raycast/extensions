@@ -4,7 +4,7 @@
   "title": "Repology Search",
   "description": "Search packages from repology.org",
   "icon": "icon.png",
-  "author": "SebDanielsson",
+  "author": "sebdanielsson",
   "categories": [
     "Developer Tools",
     "Web"

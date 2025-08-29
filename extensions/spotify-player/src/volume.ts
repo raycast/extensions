@@ -23,7 +23,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
   try {
     await changeVolume(volume);
     await showHUD(`Volume set to ${volume}%`);
-  } catch (error) {
+  } catch {
     await showHUD("No active device");
   }
 }

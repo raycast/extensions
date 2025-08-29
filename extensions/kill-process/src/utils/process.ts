@@ -1,5 +1,6 @@
 import { exec } from "child_process";
 import { Process } from "../types";
+import { getProcessListCommand, parseProcessLine, getProcessType, getAppName } from "./platform";
 
 /**
  * Get all processes from the system
@@ -7,7 +8,9 @@ import { Process } from "../types";
  */
 export async function fetchRunningProcesses(): Promise<Process[]> {
   return new Promise((resolve, reject) => {
-    exec(`ps -eo pid,ppid,pcpu,rss,comm`, (err, stdout) => {
+    const command = getProcessListCommand();
+
+    exec(command, (err, stdout) => {
       if (err != null) {
         reject(err);
         return;
@@ -16,25 +19,25 @@ export async function fetchRunningProcesses(): Promise<Process[]> {
       const processes = stdout
         .split("\n")
         .map((line) => {
-          const defaultValue = ["", "", "", "", "", ""];
-          const regex = /(\d+)\s+(\d+)\s+(\d+[.|,]\d+)\s+(\d+)\s+(.*)/;
-          const [, id, pid, cpu, mem, path] = line.match(regex) ?? defaultValue;
-          const processName = path.match(/[^/]*[^/]*$/i)?.[0] ?? "";
-          const isPrefPane = path.includes(".prefPane");
-          const isApp = path.includes(".app/");
+          const parsed = parseProcessLine(line);
+          if (!parsed || !parsed.processName) return null;
+
+          const type = getProcessType(parsed.path || "");
+          const appName = type === "app" ? getAppName(parsed.path || "", parsed.processName || "") : undefined;
 
           return {
-            id: parseInt(id),
-            pid: parseInt(pid),
-            cpu: parseFloat(cpu),
-            mem: parseInt(mem),
-            type: isPrefPane ? "prefPane" : isApp ? "app" : "binary",
-            path,
-            processName,
-            appName: isApp ? path.match(/(?<=\/)[^/]+(?=\.app\/)/)?.[0] : undefined,
+            id: parsed.id || 0,
+            pid: parsed.pid || 0,
+            cpu: parsed.cpu || 0,
+            mem: parsed.mem || 0,
+            type,
+            path: parsed.path || "",
+            processName: parsed.processName || "",
+            appName,
           } as Process;
         })
-        .filter((process) => process.processName !== "");
+        .filter((process): process is Process => process !== null && process.processName !== "");
+
       resolve(processes);
     });
   });

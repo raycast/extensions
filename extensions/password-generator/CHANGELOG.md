@@ -1,5 +1,9 @@
 # Password Generator Changelog
 
+## [Guarantee presence of special characters] - 2025-08-20
+
+If "Use numbers?" and/or "Use special characters?" are selected, the password is guaranteed to have at least one of each of those characters.
+
 ## [Generate memorable passwords] - 2024-09-23
 
 There's now a command called "Generate Memorable Password". It will create an easier-to-type-and-remember password and can be fully customized.

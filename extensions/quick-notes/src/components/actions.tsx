@@ -9,6 +9,7 @@ import { useAtom } from "jotai";
 import DeleteTags from "./deleteTags";
 import { useCachedState } from "@raycast/utils";
 import { useResetAtom } from "jotai/utils";
+import slugify from "slugify";
 
 const Actions = ({
   noNotes,
@@ -80,7 +81,7 @@ const Actions = ({
               icon={{ source: Icon.Folder, tintColor: getTintColor("turquoise") }}
               shortcut={{ modifiers: ["cmd"], key: "o" }}
               onAction={() => {
-                open(`${preferences.fileLocation}/${title}.md`);
+                open(`${preferences.fileLocation}/${slugify(`${title}`)}.md`);
               }}
             />
           </>

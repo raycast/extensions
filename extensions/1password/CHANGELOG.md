@@ -1,5 +1,9 @@
 # 1Password Changelog
 
+## [Enhancements] - 2025-08-25
+
+- Fixed "Enter Vault" misleading icon
+
 ## [Moved contributor] - 2025-02-24
 
 ## [Moved contributor] - 2025-02-03

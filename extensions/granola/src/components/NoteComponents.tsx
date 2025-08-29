@@ -73,6 +73,28 @@ export const NoteActions = ({ doc, panels, children }: NoteActionsProps) => {
   return (
     <>
       {children}
+      {doc.notes_markdown && (
+        <Action.Push
+          title="View My Notes"
+          icon={Icon.Text}
+          target={
+            <Detail
+              markdown={`# ${doc.title || "My Notes"}\n\n---\n\n${doc.notes_markdown}`}
+              navigationTitle="My Notes"
+              actions={
+                <ActionPanel>
+                  <Action.CopyToClipboard
+                    title="Copy My Notes"
+                    content={doc.notes_markdown}
+                    shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  />
+                </ActionPanel>
+              }
+            />
+          }
+          shortcut={{ modifiers: ["cmd"], key: "m" }}
+        />
+      )}
       <Action
         title="Save to Notion"
         icon={Icon.Document}

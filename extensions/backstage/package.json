@@ -35,6 +35,13 @@
     },
     {
       "type": "textfield",
+      "name": "backstageApiUrl",
+      "title": "Backstage API URL",
+      "description": "Backstage API URL, if different from Backstage URL",
+      "required": false
+    },
+    {
+      "type": "textfield",
       "name": "iapOAuthClientId",
       "title": "Google OAuth Client ID for IAP",
       "description": "Google Oauth Client ID for Cloud IAP (Web Application)",

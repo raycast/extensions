@@ -9,7 +9,7 @@ import { TraktSeasonListItem } from "../lib/schema";
 import { EpisodeGrid } from "./episode-grid";
 import { GenericGrid } from "./generic-grid";
 
-export const SeasonGrid = ({ showId, slug, imdbId }: { showId: number; slug: string; imdbId: string }) => {
+export const SeasonGrid = ({ showId, slug, imdbId }: { showId: number; slug?: string; imdbId: string }) => {
   const abortable = useRef<AbortController>();
   const [actionLoading, setActionLoading] = useState(false);
   const traktClient = initTraktClient();
@@ -100,18 +100,9 @@ export const SeasonGrid = ({ showId, slug, imdbId }: { showId: number; slug: str
       actions={(item) => (
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser
-              icon={getFavicon(TRAKT_APP_URL)}
-              title="Open in Trakt"
-              url={getTraktUrl("season", slug, item.number)}
-            />
-            <Action.OpenInBrowser icon={getFavicon(IMDB_APP_URL)} title="Open in IMDb" url={getIMDbUrl(imdbId)} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
             <Action.Push
               icon={Icon.Switch}
               title="Browse Episodes"
-              shortcut={Keyboard.Shortcut.Common.Open}
               target={<EpisodeGrid showId={showId} seasonNumber={item.number} slug={slug} />}
             />
             <Action
@@ -120,6 +111,14 @@ export const SeasonGrid = ({ showId, slug, imdbId }: { showId: number; slug: str
               shortcut={Keyboard.Shortcut.Common.Duplicate}
               onAction={() => handleAction(item, addSeasonToHistory, "Season added to history")}
             />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.OpenInBrowser
+              icon={getFavicon(TRAKT_APP_URL)}
+              title="Open in Trakt"
+              url={getTraktUrl("season", slug, item.number)}
+            />
+            <Action.OpenInBrowser icon={getFavicon(IMDB_APP_URL)} title="Open in Imdb" url={getIMDbUrl(imdbId)} />
           </ActionPanel.Section>
         </ActionPanel>
       )}

@@ -1,5 +1,9 @@
 # Arc Changelog
 
+## [Improvements] - 2025-08-04
+
+- Added preferences to order the tabs in the search results for the `Search Arc` command.
+
 ## [Chore: Moved contributor] - 2025-06-03
 
 ## [New Features] - 2025-05-12
