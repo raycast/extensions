@@ -10,21 +10,12 @@ import {
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { clearUserData } from "./userHelpers";
+import { buildApiUrl, API_ENDPOINTS } from "./env";
 
 // Constants
-const PARSE_APP_ID = "J8V1hqSGBZeZ02hwvACtYzHw62SEgzuAYv6nqVgT";
-const PARSE_SERVER_URL = "https://webbites.b4a.io";
-const PARSE_JS_KEY = "b6oQSrCZaYbH089xsDLmbkcBolaeyHXVVhf54pOz";
 const SESSION_TOKEN_KEY = "webbites_session_token";
 const USER_DATA_KEY = "webbites_user_data";
 
-/**
- * Initialize Parse SDK with application credentials
- */
-export const initializeParse = () => {
-  Parse.initialize(PARSE_APP_ID, PARSE_JS_KEY);
-  Parse.serverURL = PARSE_SERVER_URL;
-};
 
 /**
  * Check if user is currently logged in
@@ -44,22 +35,6 @@ export const isLoggedIn = async (): Promise<boolean> => {
       return false;
     }
 
-    // Try to refresh credentials with stored preferences
-    try {
-      const preferences = getPreferenceValues<{
-        email: string;
-        password: string;
-      }>();
-
-      if (preferences.email && preferences.password) {
-        await login(preferences.email, preferences.password);
-      }
-    } catch (loginError) {
-      console.error("Error refreshing login:", loginError);
-      throw loginError;
-      // Continue with the function even if refresh fails
-    }
-
     // We have both token and user data - consider the user logged in
     return true;
   } catch (error) {
@@ -69,7 +44,7 @@ export const isLoggedIn = async (): Promise<boolean> => {
 };
 
 /**
- * Login with username and password
+ * Login with username and password using backend API
  * @param username User's email or username
  * @param password User's password
  * @returns Promise resolving to the Parse.User
@@ -79,15 +54,43 @@ export const login = async (
   password: string,
 ): Promise<Parse.User> => {
   try {
-    // Use the normal login process
-    const user = await Parse.User.logIn(username, password);
+    // Call backend API for login
+    const response = await fetch(buildApiUrl(API_ENDPOINTS.LOGIN), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username,
+        password,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: "Login failed" }));
+      throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const loginData = await response.json();
+
+    if (!loginData.success) {
+      throw new Error(loginData.message || "Login failed");
+    }
+
+    // Create a Parse.User-like object from the response
+    const user = new Parse.User();
+    user.id = loginData.user.id;
+    user.set("username", loginData.user.username);
+    user.set("email", loginData.user.email);
+    // Set session token using Parse's internal method
+    (user as any)._sessionToken = loginData.sessionToken;
 
     try {
       const isFirstLogin = await LocalStorage.getItem<string>("is_first_login");
       if (isFirstLogin == undefined || isFirstLogin == "true") {
         showToast({
           title: "Logged in",
-          message: "Successfully logged in, loading your boookmarks...",
+          message: "Successfully logged in, loading your bookmarks...",
           style: Toast.Style.Success,
         });
         await LocalStorage.setItem("is_first_login", "false");
@@ -97,7 +100,7 @@ export const login = async (
     }
 
     // Store session token and user data
-    await storeAuthData(user);
+    await storeAuthDataFromBackend(loginData);
 
     return user;
   } catch (error) {
@@ -109,20 +112,22 @@ export const login = async (
 };
 
 /**
- * Store authentication data in LocalStorage
- * @param user Parse User object
+ * Store authentication data from backend API response
+ * @param loginData Backend API response data
  */
-async function storeAuthData(user: Parse.User): Promise<void> {
+async function storeAuthDataFromBackend(loginData: {
+  sessionToken: string;
+  user: { id: string; username: string; email: string };
+}): Promise<void> {
   // Store session token
-  const sessionToken = user.getSessionToken();
-  await LocalStorage.setItem(SESSION_TOKEN_KEY, sessionToken);
+  await LocalStorage.setItem(SESSION_TOKEN_KEY, loginData.sessionToken);
 
   // Store user data
   const userData = {
-    objectId: user.id,
-    username: user.getUsername(),
-    email: user.getEmail(),
-    createdAt: user.createdAt,
+    objectId: loginData.user.id,
+    username: loginData.user.username,
+    email: loginData.user.email,
+    createdAt: new Date(), // Use current date since backend doesn't provide it
   };
   await LocalStorage.setItem(USER_DATA_KEY, JSON.stringify(userData));
 }
@@ -137,7 +142,7 @@ export const getSessionToken = async (): Promise<string | null> => {
 };
 
 /**
- * Logout the current user
+ * Logout the current user using backend API
  */
 export const logout = async (): Promise<void> => {
   try {
@@ -146,8 +151,19 @@ export const logout = async (): Promise<void> => {
 
     // Perform server-side logout if we have a token
     if (sessionToken) {
-      // Use Parse.User.logOut() which doesn't require becoming a user
-      await Parse.User.logOut();
+      try {
+        // Call backend API for logout
+        await fetch(buildApiUrl(API_ENDPOINTS.LOGOUT), {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${sessionToken}`,
+          },
+        });
+      } catch (logoutError) {
+        console.error("Backend logout error:", logoutError);
+        // Continue with local cleanup even if backend logout fails
+      }
     }
 
     // Clear local storage
@@ -173,7 +189,7 @@ export const logout = async (): Promise<void> => {
 };
 
 /**
- * Get current user without using become() or setting readonly sessionToken
+ * Get current user using backend API
  * @returns Promise resolving to Parse.User or null
  */
 export const getCurrentUser = async (): Promise<Parse.User | null> => {
@@ -199,40 +215,36 @@ export const getCurrentUser = async (): Promise<Parse.User | null> => {
       return null;
     }
 
-    // Create a new User query to fetch the current user with the session token
-    const query = new Parse.Query(Parse.User);
-    query.equalTo("objectId", userData.objectId);
-
-    // Make API request with the session token in headers
-    const requestOptions = {
-      sessionToken: sessionToken,
-    };
-
-    // Try to fetch the latest user data from server
+    // Try to fetch the latest user data from backend API
     try {
-      const user = await query.first(requestOptions);
-      if (user) {
-        return user;
+      const response = await fetch(buildApiUrl(API_ENDPOINTS.USER), {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${sessionToken}`,
+        },
+      });
+
+      if (response.ok) {
+        const backendUserData = await response.json();
+        if (backendUserData.success && backendUserData.user) {
+          // Create Parse.User from backend response
+          const user = new Parse.User();
+          user.id = backendUserData.user.id;
+          user.set("username", backendUserData.user.username);
+          user.set("email", backendUserData.user.email);
+          (user as any)._sessionToken = sessionToken;
+          return user;
+        }
       }
     } catch (error) {
       console.error(
-        "Error fetching user from server, falling back to stored data:",
+        "Error fetching user from backend, falling back to stored data:",
         error,
       );
     }
 
-    // If server fetch fails, create a user from stored data
-    try {
-      // Try to use Parse.User.fromJSON if available
-      if (typeof Parse.User.fromJSON === "function") {
-        const user = Parse.User.fromJSON(userData);
-        return user;
-      }
-    } catch (e) {
-      console.error("Could not use Parse.User.fromJSON:", e);
-    }
-
-    // Fallback: create user manually
+    // If backend fetch fails, create a user from stored data
     const user = new Parse.User();
     user.id = userData.objectId;
 
@@ -240,7 +252,7 @@ export const getCurrentUser = async (): Promise<Parse.User | null> => {
     const userKeys = Object.keys(userData);
     for (const key of userKeys) {
       // Skip special Parse keys that should not be set directly
-      if (["objectId", "createdAt", "updatedAt", "ACL"].includes(key)) {
+      if (["objectId", "createdAt", "updatedAt", "ACL", "_sessionToken"].includes(key)) {
         continue;
       }
 
@@ -251,15 +263,8 @@ export const getCurrentUser = async (): Promise<Parse.User | null> => {
       }
     }
 
-    // If there's an ACL, try to set it
-    if (userData.ACL) {
-      try {
-        const acl = new Parse.ACL(userData.ACL);
-        user.setACL(acl);
-      } catch (e) {
-        console.error("Could not set ACL:", e);
-      }
-    }
+    // Set session token
+    (user as any)._sessionToken = sessionToken;
 
     return user;
   } catch (error) {

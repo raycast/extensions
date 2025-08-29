@@ -15,7 +15,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { showFailureToast, getFavicon } from "@raycast/utils";
-import { isLoggedIn, logout, login, initializeParse } from "./utils/auth";
+import { isLoggedIn, logout, login } from "./utils/auth";
 import { search } from "./utils/search";
 import { getSimpleCurrentUser, clearUserData } from "./utils/userHelpers";
 import { saveTabToQstash, isValidUrl } from "./utils/qstash";
@@ -81,9 +81,6 @@ export default function Command() {
     try {
       // Load cached results first for faster initial rendering
       await loadCachedResults();
-
-      // Initialize Parse
-      initializeParse();
 
       // Handle authentication
       const authenticated = await checkAuthStatus();
@@ -531,7 +528,7 @@ export default function Command() {
       description = "Please wait...";
     }
 
-    if (isAuthenticated == false) {
+    if (isAuthenticated === false) {
       title = "Login required";
       description = "Please log in to access your bookmarks";
     }

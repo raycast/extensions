@@ -6,7 +6,6 @@ import {
   closeMainWindow,
 } from "@raycast/api";
 import {
-  initializeParse,
   isLoggedIn,
   login,
   getCurrentUser,
@@ -25,9 +24,6 @@ export default async function SaveToWebBites(
   try {
     // Close the main window immediately
     await closeMainWindow();
-
-    // Initialize Parse
-    initializeParse();
 
     // Check if user is authenticated
     const authenticated = await isLoggedIn();
@@ -66,41 +62,53 @@ export default async function SaveToWebBites(
     // Determine if content is a URL or text note
     const isUrl = isValidUrl(content);
 
-    // Only allow saving websites
-    if (!isUrl) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Invalid Content",
-        message: "Only websites can be saved. Please enter a valid URL.",
-      });
-      return;
+    let data;
+    
+    if (isUrl) {
+      // Handle URL saving
+      const url =
+        content.startsWith("http://") || content.startsWith("https://")
+          ? content
+          : `https://${content}`;
+      const title = content;
+
+      // Prepare data for backend API - URL
+      data = {
+        url,
+        title,
+        userId: currentUser.id,
+        topic: "website-save-requests",
+        siteNotes: "",
+        tags: [],
+        customId: null,
+      };
+    } else {
+      // Handle text note saving
+      data = {
+        textNote: content,
+        title: content.substring(0, 50) + (content.length > 50 ? "..." : ""), // Use first 50 chars as title
+        userId: currentUser.id,
+        topic: "text-note-save-requests",
+        siteNotes: "",
+        tags: [],
+        customId: null,
+      };
     }
 
-    // Add protocol if missing
-    const url =
-      content.startsWith("http://") || content.startsWith("https://")
-        ? content
-        : `https://${content}`;
-    const title = content;
+    // Show immediate feedback to user
+    await showToast({
+      style: Toast.Style.Animated,
+      title: isUrl ? "Saving bookmark..." : "Saving note...",
+      message: "Please wait while we process your request",
+    });
 
-    // Prepare data for QStash
-    const data = {
-      url,
-      title,
-      userId: currentUser.id,
-      topic: "website-save-requests",
-      siteNotes: "",
-      tags: [],
-      customId: null,
-    };
-
-    // Send to QStash
+    // Send to backend API
     await saveTabToQstash(data);
 
     await showToast({
       style: Toast.Style.Success,
-      title: "Saved to WebBites",
-      message: `"${content}" has been saved successfully`,
+      title: isUrl ? "Bookmark saved to WebBites" : "Note saved to WebBites",
+      message: isUrl ? `URL "${content}" has been saved successfully` : `Text note has been saved successfully`,
     });
   } catch (error) {
     console.error("Error saving to WebBites:", error);

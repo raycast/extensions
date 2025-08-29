@@ -1,4 +1,5 @@
-import { Client } from "@upstash/qstash";
+import { LocalStorage } from "@raycast/api";
+import { buildApiUrl, API_ENDPOINTS } from "./env";
 
 // URL validation helper
 export const isValidUrl = (text: string): boolean => {
@@ -16,9 +17,10 @@ export const isValidUrl = (text: string): boolean => {
   }
 };
 
-// Save to WebBites via Qstash
+// Save to WebBites via Backend API
 export const saveTabToQstash = async (data: {
-  url: string;
+  url?: string;
+  textNote?: string;
   title?: string;
   userId: string;
   topic: string;
@@ -28,51 +30,66 @@ export const saveTabToQstash = async (data: {
   customId?: string | null;
 }) => {
   try {
-    const { url, title, userId, topic, queueName, siteNotes, tags, customId } =
-      data;
+    const { url, textNote, title, siteNotes, tags, customId } = data;
 
-    console.log("Saving tab to Qstash:", {
+    console.log("Saving bookmark to backend API:", {
       url,
+      textNote,
       title,
-      userId,
-      topic,
-      queueName,
       siteNotes,
       tags,
       customId,
     });
 
-    const QSTASH_TOKEN =
-      "eyJVc2VySUQiOiI1ZGM3MGU3Ny03N2RjLTQ4MzctYTExOS0xZDVhNTY0NjhlYTAiLCJQYXNzd29yZCI6IjJjOWVlOWY5ZjAxZTRjZTY4NTY2N2ZhN2JiNWM3NzAxIn0=";
+    // Get session token from local storage
+    const sessionToken = await LocalStorage.getItem<string>("webbites_session_token");
+    if (!sessionToken) {
+      throw new Error("No session token available. Please log in first.");
+    }
 
-    // Initialize QStash client with token
-    const client = new Client({
-      token: QSTASH_TOKEN,
-    });
-
-    const payload = {
-      data: {
-        url,
-        siteTitle: title || "",
-        userId,
-        type: "website",
-        customId: customId || null,
-        siteNotes: siteNotes || "",
-        tags: tags || [],
-        savedAt: new Date().toISOString(),
-      },
-      userId,
-      type: topic,
+    // Prepare request body according to API specification
+    const requestBody: any = {
+      title: title || "",
+      description: "", // Can be enhanced later if needed
+      tags: tags || [],
+      siteNotes: siteNotes || "",
+      customId: customId || `raycast-bookmark-${Date.now()}`,
     };
 
-    const result = await client.publishJSON({
-      url: "https://api.webbites.io/qstash-webhook",
-      body: payload,
+    // Add either url or textNote based on the data type
+    if (url) {
+      requestBody.url = url;
+    } else if (textNote) {
+      requestBody.textNote = textNote;
+    } else {
+      throw new Error("Either url or textNote must be provided");
+    }
+
+    // Make request to backend API
+    const response = await fetch(buildApiUrl(API_ENDPOINTS.BOOKMARKS), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${sessionToken}`,
+      },
+      body: JSON.stringify(requestBody),
     });
 
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ statusMessage: "Unknown error" }));
+      throw new Error(errorData.statusMessage || `HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(result.message || "Failed to save bookmark");
+    }
+
+    console.log("Bookmark saved successfully:", result);
     return result;
   } catch (error) {
-    console.error("Error saving tab to Qstash:", error);
+    console.error("Error saving bookmark to backend:", error);
     throw error;
   }
 };

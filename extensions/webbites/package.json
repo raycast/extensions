@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "webbites",
-  "title": "Webbites",
+  "title": "WebBites",
   "subtitle": "WebBites, the AI based bookmark manager",
   "description": "Search your WebBites.io bookmarks",
   "icon": "webbites-extension-icon.png",
@@ -27,12 +27,12 @@
       "type": "password",
       "required": true,
       "placeholder": "Enter your password"
-    } 
+    }
   ],
   "commands": [
     {
       "name": "webbites",
-      "title": "Webbites",
+      "title": "WebBites",
       "description": "Search your WebBites.io bookmarks",
       "mode": "view"
     },
@@ -54,7 +54,6 @@
   "dependencies": {
     "@raycast/api": "^1.93.2",
     "@raycast/utils": "^1.17.0",
-    "@upstash/qstash": "^2.8.1",
     "axios": "^1.8.2",
     "parse": "^6.0.0"
   },

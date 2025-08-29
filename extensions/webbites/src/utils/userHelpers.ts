@@ -1,9 +1,8 @@
 // utils/userHelpers.ts - Refactored
-
-import Parse from "parse/node.js";
 import { LocalStorage } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { UserData } from "../types";
+import { BACKEND_API_URL } from "./env";
 
 // Constants
 const SESSION_TOKEN_KEY = "webbites_session_token";
@@ -91,7 +90,7 @@ export const getUserData = async (): Promise<UserData | null> => {
 };
 
 /**
- * Make an authenticated request to the Parse API
+ * Make an authenticated request to the backend API
  * @param endpoint API endpoint
  * @param method HTTP method
  * @param data Request data
@@ -108,20 +107,14 @@ export const makeAuthenticatedRequest = async (
       throw new Error("No session token available");
     }
 
-    // Set up headers
+    // Set up headers for backend API
     const headers: Record<string, string> = {
-      "X-Parse-Application-Id": Parse.applicationId,
       "Content-Type": "application/json",
+      "Authorization": `Bearer ${sessionToken}`,
     };
 
-    if (Parse.javaScriptKey) {
-      headers["X-Parse-REST-API-Key"] = Parse.javaScriptKey;
-    }
-
-    headers["X-Parse-Session-Token"] = sessionToken;
-
-    // Make the request
-    const url = `${Parse.serverURL}/${endpoint}`;
+    // Make the request to backend API
+    const url = `${BACKEND_API_URL}/${endpoint}`;
     const options: RequestInit = {
       method,
       headers,
