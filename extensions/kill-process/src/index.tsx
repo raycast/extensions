@@ -92,7 +92,7 @@ export default function ProcessList() {
     exec(command, (error) => {
       if (error) {
         const errorHelp = getPlatformSpecificErrorHelp(force);
-        
+
         if (force && errorHelp.helpUrl) {
           confirmAlert({
             title: errorHelp.title,
@@ -111,13 +111,13 @@ export default function ProcessList() {
         }
         return;
       }
-      
+
       showToast({
         title: `Killed ${processName}`,
         style: Toast.Style.Success,
       });
     });
-    
+
     setFetchResult(state.filter((p) => p.id !== process.id));
     if (closeWindowAfterKill) {
       closeMainWindow();
