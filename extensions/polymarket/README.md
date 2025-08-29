@@ -1,4 +1,4 @@
-# Polymarket Raycast Extension
+# Polymarket
 
 A Raycast extension for searching, viewing, and analyzing markets on Polymarket.com. View market prices, statistics, and trading data directly from Raycast.
 
