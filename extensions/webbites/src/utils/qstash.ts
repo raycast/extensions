@@ -42,13 +42,25 @@ export const saveTabToQstash = async (data: {
     });
 
     // Get session token from local storage
-    const sessionToken = await LocalStorage.getItem<string>("webbites_session_token");
+    const sessionToken = await LocalStorage.getItem<string>(
+      "webbites_session_token",
+    );
     if (!sessionToken) {
       throw new Error("No session token available. Please log in first.");
     }
 
     // Prepare request body according to API specification
-    const requestBody: any = {
+    interface BookmarkRequestBody {
+      title: string;
+      description: string;
+      tags: string[];
+      siteNotes: string;
+      customId: string;
+      url?: string;
+      textNote?: string;
+    }
+
+    const requestBody: BookmarkRequestBody = {
       title: title || "",
       description: "", // Can be enhanced later if needed
       tags: tags || [],
@@ -70,14 +82,19 @@ export const saveTabToQstash = async (data: {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${sessionToken}`,
+        Authorization: `Bearer ${sessionToken}`,
       },
       body: JSON.stringify(requestBody),
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ statusMessage: "Unknown error" }));
-      throw new Error(errorData.statusMessage || `HTTP ${response.status}: ${response.statusText}`);
+      const errorData = await response
+        .json()
+        .catch(() => ({ statusMessage: "Unknown error" }));
+      throw new Error(
+        errorData.statusMessage ||
+          `HTTP ${response.status}: ${response.statusText}`,
+      );
     }
 
     const result = await response.json();

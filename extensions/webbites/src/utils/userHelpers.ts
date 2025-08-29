@@ -110,7 +110,7 @@ export const makeAuthenticatedRequest = async (
     // Set up headers for backend API
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${sessionToken}`,
+      Authorization: `Bearer ${sessionToken}`,
     };
 
     // Make the request to backend API

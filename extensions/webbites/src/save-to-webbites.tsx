@@ -5,11 +5,7 @@ import {
   LaunchProps,
   closeMainWindow,
 } from "@raycast/api";
-import {
-  isLoggedIn,
-  login,
-  getCurrentUser,
-} from "./utils/auth";
+import { isLoggedIn, login, getCurrentUser } from "./utils/auth";
 import { saveTabToQstash, isValidUrl } from "./utils/qstash";
 
 interface Arguments {
@@ -63,7 +59,7 @@ export default async function SaveToWebBites(
     const isUrl = isValidUrl(content);
 
     let data;
-    
+
     if (isUrl) {
       // Handle URL saving
       const url =
@@ -108,7 +104,9 @@ export default async function SaveToWebBites(
     await showToast({
       style: Toast.Style.Success,
       title: isUrl ? "Bookmark saved to WebBites" : "Note saved to WebBites",
-      message: isUrl ? `URL "${content}" has been saved successfully` : `Text note has been saved successfully`,
+      message: isUrl
+        ? `URL "${content}" has been saved successfully`
+        : `Text note has been saved successfully`,
     });
   } catch (error) {
     console.error("Error saving to WebBites:", error);

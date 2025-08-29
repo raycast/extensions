@@ -3,7 +3,6 @@
 import Parse from "parse/node.js";
 import {
   LocalStorage,
-  getPreferenceValues,
   openExtensionPreferences,
   showToast,
   Toast,
@@ -15,7 +14,6 @@ import { buildApiUrl, API_ENDPOINTS } from "./env";
 // Constants
 const SESSION_TOKEN_KEY = "webbites_session_token";
 const USER_DATA_KEY = "webbites_user_data";
-
 
 /**
  * Check if user is currently logged in
@@ -67,8 +65,12 @@ export const login = async (
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ message: "Login failed" }));
-      throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+      const errorData = await response
+        .json()
+        .catch(() => ({ message: "Login failed" }));
+      throw new Error(
+        errorData.message || `HTTP ${response.status}: ${response.statusText}`,
+      );
     }
 
     const loginData = await response.json();
@@ -83,7 +85,8 @@ export const login = async (
     user.set("username", loginData.user.username);
     user.set("email", loginData.user.email);
     // Set session token using Parse's internal method
-    (user as any)._sessionToken = loginData.sessionToken;
+    (user as Parse.User & { _sessionToken: string })._sessionToken =
+      loginData.sessionToken;
 
     try {
       const isFirstLogin = await LocalStorage.getItem<string>("is_first_login");
@@ -157,7 +160,7 @@ export const logout = async (): Promise<void> => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${sessionToken}`,
+            Authorization: `Bearer ${sessionToken}`,
           },
         });
       } catch (logoutError) {
@@ -221,7 +224,7 @@ export const getCurrentUser = async (): Promise<Parse.User | null> => {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${sessionToken}`,
+          Authorization: `Bearer ${sessionToken}`,
         },
       });
 
@@ -233,7 +236,8 @@ export const getCurrentUser = async (): Promise<Parse.User | null> => {
           user.id = backendUserData.user.id;
           user.set("username", backendUserData.user.username);
           user.set("email", backendUserData.user.email);
-          (user as any)._sessionToken = sessionToken;
+          (user as Parse.User & { _sessionToken: string })._sessionToken =
+            sessionToken;
           return user;
         }
       }
@@ -252,7 +256,11 @@ export const getCurrentUser = async (): Promise<Parse.User | null> => {
     const userKeys = Object.keys(userData);
     for (const key of userKeys) {
       // Skip special Parse keys that should not be set directly
-      if (["objectId", "createdAt", "updatedAt", "ACL", "_sessionToken"].includes(key)) {
+      if (
+        ["objectId", "createdAt", "updatedAt", "ACL", "_sessionToken"].includes(
+          key,
+        )
+      ) {
         continue;
       }
 
@@ -264,7 +272,8 @@ export const getCurrentUser = async (): Promise<Parse.User | null> => {
     }
 
     // Set session token
-    (user as any)._sessionToken = sessionToken;
+    (user as Parse.User & { _sessionToken: string })._sessionToken =
+      sessionToken;
 
     return user;
   } catch (error) {
