@@ -60,5 +60,9 @@
       "default": "",
       "placeholder": "Fuel Wallet Private Key"
     }
-  ]
+  ],
+  "overrides": {
+    "@coinbase/wallet-sdk": "^4.3.7",
+    "cbw-sdk": "npm:@coinbase/wallet-sdk@4.3.7"
+  }
 }
