@@ -52,14 +52,7 @@ export function useSearchResults({
       setResults([]);
       setHasSearched(false);
     }
-  }, [searchText, searchScope]);
-
-  // Separate effect for pinned results filtering when in pinned scope
-  useEffect(() => {
-    if (searchScope === "pinned") {
-      setResults(pinnedResults.filter((pin) => matchesSearchQuery(pin.kMDItemFSName, searchText)));
-    }
-  }, [pinnedResults, searchScope, searchText]);
+  }, [searchText, searchScope, pinnedResults]);
 
   // Perform spotlight search
   const performSearch = useCallback(async (search: string, scope: string) => {
@@ -140,10 +133,7 @@ export function useSearchResults({
   return {
     searchText,
     setSearchText,
-    results:
-      searchScope === "pinned"
-        ? pinnedResults.filter((pin) => matchesSearchQuery(pin.kMDItemFSName, searchText))
-        : results,
+    results,
     isQuerying,
     hasSearched,
     performSearch,
