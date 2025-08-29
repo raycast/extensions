@@ -223,4 +223,3 @@ class BaseLogger implements Logger {
 export function getLogger(component: string): Logger {
   return new BaseLogger(component);
 }
-

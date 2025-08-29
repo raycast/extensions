@@ -194,11 +194,21 @@ async function fetchPage(url: string): Promise<string> {
   return await res.text();
 }
 
+// Types for Apollo push payload parsing (avoid `any`)
+type JsonObject = Record<string, unknown>;
+interface RehydrateValue {
+  data?: unknown;
+  result?: { data?: unknown };
+}
+interface PushPayload {
+  rehydrate?: Record<string, RehydrateValue>;
+}
+
 // Parse new ApolloSSRDataTransport push({ rehydrate: {...} }) blobs and extract Post-like items
-function extractApolloPushPayloads(html: string): any[] {
+function extractApolloPushPayloads(html: string): PushPayload[] {
   const $ = cheerio.load(html);
   const scripts = $("script").toArray();
-  const pushPayloads: any[] = [];
+  const pushPayloads: PushPayload[] = [];
 
   function extractObjectFromPush(content: string, pushIndex: number): string | null {
     const braceStart = content.indexOf("{", pushIndex);
@@ -247,8 +257,9 @@ function extractApolloPushPayloads(html: string): any[] {
       if (!objStr) continue;
       try {
         const sanitized = objStr.replace(/:undefined/g, ":null").replace(/\bundefined\b/g, "null");
-        const parsed = JSON.parse(sanitized);
-        pushPayloads.push(parsed);
+        const parsed = JSON.parse(sanitized) as unknown;
+        // Best-effort cast; structure validated at use sites
+        pushPayloads.push(parsed as PushPayload);
       } catch {
         void 0;
       }
@@ -291,10 +302,10 @@ function collectPostItemsFromApolloPush(html: string): ApolloPostItem[] {
   };
 
   for (const payload of pushPayloads) {
-    const rehydrate = (payload as any)?.rehydrate;
+    const rehydrate = payload?.rehydrate;
     if (rehydrate && typeof rehydrate === "object") {
       for (const value of Object.values(rehydrate)) {
-        const data = (value as any)?.data ?? (value as any)?.result?.data;
+        const data = value?.data ?? value?.result?.data;
         if (data) visit(data);
       }
     }
@@ -307,23 +318,31 @@ function collectHomefeedByIdsFromApolloPush(html: string, ids: string[]): Apollo
   const posts: ApolloPostItem[] = [];
   const seen = new Set<string>();
   for (const payload of pushPayloads) {
-    const rehydrate = (payload as any)?.rehydrate;
+    const rehydrate = payload?.rehydrate;
     if (!rehydrate || typeof rehydrate !== "object") continue;
+
     for (const value of Object.values(rehydrate)) {
-      const data = (value as any)?.data ?? (value as any)?.result?.data;
-      const homefeed = (data as any)?.homefeed;
-      if (!homefeed || !Array.isArray(homefeed.edges)) continue;
-      for (const edge of homefeed.edges as any[]) {
-        const node = edge?.node;
+      const data = value?.data ?? value?.result?.data;
+      const homefeed =
+        typeof data === "object" && data ? ((data as JsonObject)["homefeed"] as JsonObject | undefined) : undefined;
+      const edges = typeof homefeed === "object" && homefeed ? (homefeed as JsonObject)["edges"] : undefined;
+      if (!Array.isArray(edges)) continue;
+
+      for (const edge of edges as unknown[]) {
+        const edgeObj = typeof edge === "object" && edge ? (edge as JsonObject) : undefined;
+        const node = edgeObj ? (edgeObj["node"] as JsonObject | undefined) : undefined;
         if (!node) continue;
-        if (ids.includes(node.id) || (ids.includes("FEATURED-0") && node.title?.includes("Top Products"))) {
-          const items = node.items || [];
+        const nodeId = node["id"] as string | undefined;
+        const nodeTitle = node["title"] as string | undefined;
+        if (nodeId && (ids.includes(nodeId) || (ids.includes("FEATURED-0") && nodeTitle?.includes("Top Products")))) {
+          const items = (node["items"] as unknown[]) || [];
           for (const it of items) {
-            if (it?.__typename === "Post" && it.slug && it.name) {
-              const id = typeof it.id === "string" ? it.id : it.slug;
-              if (!seen.has(id)) {
-                seen.add(id);
-                posts.push(it as ApolloPostItem);
+            const itObj = typeof it === "object" && it ? (it as JsonObject) : undefined;
+            if (itObj && itObj["__typename"] === "Post" && itObj["slug"] && itObj["name"]) {
+              const itId = typeof itObj["id"] === "string" ? (itObj["id"] as string) : (itObj["slug"] as string);
+              if (!seen.has(itId)) {
+                seen.add(itId);
+                posts.push(itObj as unknown as ApolloPostItem);
               }
             }
           }
@@ -409,7 +428,7 @@ export async function getFrontpageProducts(): Promise<{ products: Product[]; err
     const html = await fetchPage(HOST_URL);
     const $ = cheerio.load(html);
 
-    const debugBlob: Record<string, unknown> = {
+    const debugBlob: { ts: string; url: string; strategy: string; counts: Record<string, unknown> } = {
       ts: new Date().toISOString(),
       url: HOST_URL,
       strategy: "",
@@ -509,9 +528,11 @@ export async function getFrontpageProducts(): Promise<{ products: Product[]; err
       void 0;
     }
     try {
-      debugBlob.counts = { ...(debugBlob.counts as any), items: products.length };
+      debugBlob.counts = { ...debugBlob.counts, items: products.length };
       await log.blobSet("debug:last_frontpage", debugBlob);
-    } catch {}
+    } catch {
+      /* ignore */
+    }
 
     return { products };
   } catch (error) {

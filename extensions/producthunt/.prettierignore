@@ -1,0 +1,16 @@
+# Keep Prettier focused on shipping code
+
+# Exclude docs and saved HTML fixtures
+/docs/
+/docs/**
+/docs/fixtures/
+/docs/fixtures/**
+/docs/fixtures/html/
+/docs/fixtures/html/**
+
+# Raw HTML files (non-source)
+*.html
+
+# Non-shipping config
+.eslintrc.json
+
