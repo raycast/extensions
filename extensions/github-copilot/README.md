@@ -28,14 +28,6 @@ Searches for GitHub repositories. Can search recent repositories, repositories b
 @github-copilot Search for repositories in the raycast organization
 ```
 
-#### `get-repository-default-branch`
-Gets the default branch name for a GitHub repository.
-
-**Example usage:**
-```
-@github-copilot What's the default branch for raycast/extensions?
-```
-
 ### Requirements
 
 - **Access to [GitHub Copilot coding agent](https://docs.github.com/en/enterprise-cloud@latest/copilot/concepts/coding-agent/coding-agent)**, available for Copilot Pro, Pro+, Business and Enterprise users. If you're a Business or Enterprise subscriber, an administrator will have to [enable](https://docs.github.com/en/enterprise-cloud@latest/copilot/concepts/coding-agent/enable-coding-agent) the feature.
