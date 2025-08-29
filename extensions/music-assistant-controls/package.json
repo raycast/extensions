@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "music-assistant-controls",
+  "title": "Music Assistant Controls",
+  "description": "Control music assistant and displays current song in the menu bar",
+  "icon": "logo.png",
+  "author": "yoerivd",
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "menu-bar",
+      "title": "Menu Bar Player",
+      "description": "Toggle the visibility of the menu bar",
+      "mode": "menu-bar",
+      "interval": "10s"
+    },
+    {
+      "name": "next-song",
+      "title": "Next Song",
+      "description": "Play the next song",
+      "mode": "no-view"
+    },
+    {
+      "name": "play-pause",
+      "title": "Toggle",
+      "subtitle": "Toggle play/pause",
+      "description": "pause the currently playing song or resume",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "host",
+      "type": "textfield",
+      "required": true,
+      "title": "Music Assistant Host",
+      "placeholder": "http://192.168.0.166:8095",
+      "description": "Enter the local address (IP, mDNS does not work well inside raycast) of your Music Assistant instance. This is usually the same as your Home Assistant URL, but with the port changed to 8095."
+    },
+    {
+      "name": "playerId",
+      "type": "textfield",
+      "required": true,
+      "title": "Default Player ID",
+      "description": "Enter the player ID of your Music Assistant player to control."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^1.17.0",
+    "home-assistant-js-websocket": "^9.5.0",
+    "isomorphic-ws": "^5.0.0",
+    "websocket-ts": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
