@@ -9,7 +9,7 @@ export const fetchPlatforms = async (api_key: string): Promise<Platform[]> => {
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(`Error fetching platforms: ${errorData.message}`);
+    throw new Error(`${errorData.error}`);
   }
 
   const data = await response.json();
@@ -27,10 +27,9 @@ export const schedulePost = async (api_key: string, post: Post) => {
     },
     body: body,
   });
-
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(`Error scheduling post: ${errorData.message}`);
+    throw new Error(`${errorData.error}`);
   }
 
   return response.json();
