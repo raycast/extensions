@@ -1,5 +1,10 @@
 # Polymarket Changelog
 
+## [Fix Broken API] - 2025-08-29
+- Removed outdated API
+- Combined commands into one
+- Improved chart layout
+
 ## [Market Details] - 2025-05-19
 - Added Market Details screen showing the price history of a market.
 - Added Raw data view to see Market JSON.

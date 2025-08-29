@@ -4,7 +4,7 @@
   "title": "FuelX",
   "description": "FUEL AI Agent in Raycast",
   "icon": "extension-icon.png",
-  "author": "nazeeh21",
+  "author": "naz3eh",
   "license": "MIT",
   "commands": [
     {
@@ -60,5 +60,9 @@
       "default": "",
       "placeholder": "Fuel Wallet Private Key"
     }
-  ]
+  ],
+  "overrides": {
+    "@coinbase/wallet-sdk": "^4.3.7",
+    "cbw-sdk": "npm:@coinbase/wallet-sdk@4.3.7"
+  }
 }

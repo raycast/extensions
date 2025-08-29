@@ -1295,5 +1295,8 @@
     "prettier": "^3.3.3",
     "typescript": "^5.5.4",
     "react-devtools": "^5.2.0"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
