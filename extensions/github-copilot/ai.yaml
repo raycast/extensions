@@ -60,3 +60,90 @@ instructions: |
   - Confirm important details before creating tasks
   - Provide the pull request URL when a task is successfully created
   - Suggest next steps or related actions when appropriate
+evals:
+  - input: "@github-copilot Create a task for raycast/extensions to fix the search bug"
+    mocks:
+      create-task:
+        branch: "main"
+        prompt: "fix the search bug"
+        pullRequestUrl: "https://github.com/raycast/extensions/pull/21242"
+        repository: "raycast/extensions"
+        success: true
+    expected:
+      - callsTool:
+          name: "create-task"
+          arguments:
+            prompt: "fix the search bug"
+            repository: "raycast/extensions"
+  - input: "@github-copilot I want to add a new feature but I'm not sure which repo"
+    mocks:
+      search-repositories:
+        repositories:
+          - name: "extensions"
+            fullName: "raycast/extensions"
+            description: "Everything you need to extend Raycast"
+          - name: "raycast-macos"
+            fullName: "raycast/raycast-macos"
+            description: "Raycast for macOS"
+    expected:
+      - callsTool:
+          name: "search-repositories"
+  - input: "@github-copilot Create a task for the extensions repo to improve performance"
+    mocks:
+      search-repositories:
+        repositories:
+          - name: "extensions"
+            fullName: "raycast/extensions"
+            description: "Everything you need to extend Raycast"
+          - name: "my-extensions"
+            fullName: "user/my-extensions"
+            description: "Personal extensions"
+    expected:
+      - callsTool:
+          name: "search-repositories"
+          arguments:
+            query:
+              includes: "extensions"
+  - input: "@github-copilot Create a task for raycast/extensions on the feature/new-ui branch to update the interface"
+    mocks:
+      create-task:
+        branch: "feature/new-ui"
+        prompt: "update the interface"
+        pullRequestUrl: "https://github.com/raycast/extensions/pull/21243"
+        repository: "raycast/extensions"
+        success: true
+    expected:
+      - callsTool:
+          name: "create-task"
+          arguments:
+            prompt: "update the interface"
+            repository: "raycast/extensions"
+            branch: "feature/new-ui"
+  - input: "@github-copilot What repos can I work on?"
+    mocks:
+      search-repositories:
+        repositories:
+          - name: "extensions"
+            fullName: "raycast/extensions"
+            description: "Everything you need to extend Raycast"
+          - name: "api"
+            fullName: "raycast/api"
+            description: "Raycast API for developers"
+    expected:
+      - callsTool:
+          name: "search-repositories"
+  - input: "@github-copilot Create a task to refactor the authentication module for microsoft/vscode"
+    mocks:
+      create-task:
+        branch: "main"
+        prompt: "refactor the authentication module"
+        pullRequestUrl: "https://github.com/microsoft/vscode/pull/12345"
+        repository: "microsoft/vscode"
+        success: true
+    expected:
+      - callsTool:
+          name: "create-task"
+          arguments:
+            prompt:
+              includes: "refactor the authentication module"
+            repository: "microsoft/vscode"
