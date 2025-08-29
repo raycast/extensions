@@ -1,0 +1,156 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "chartmogul",
+  "title": "ChartMogul",
+  "description": "A Raycast extension that gives you quick access to key business metrics from ChartMogul right from your command bar. Instantly view MRR, ARR, churn, customer counts, and more without leaving your workflow.",
+  "icon": "extension_icon.png",
+  "author": "mattdelliott",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Finance"
+  ],
+  "commands": [
+    {
+      "name": "metrics",
+      "title": "Subscription Metrics",
+      "subtitle": "Get a snapshot of your most important subscription metrics",
+      "description": "See revenue, customer, and churn data all in one place. This gives you a high-level view of your SaaS performance in seconds.",
+      "mode": "view",
+      "keywords": [
+        "cm",
+        "key metrics",
+        "metrics",
+        "revenue",
+        "customer",
+        "churn"
+      ]
+    },
+    {
+      "name": "mrr-movements",
+      "title": "Recent MRR Movements",
+      "subtitle": "Stay on top of recent MRR movements",
+      "description": "Browse the latest customer actions like new signups, upgrades, and cancellations. Keep a finger on the pulse of your business in real time.",
+      "mode": "view",
+      "keywords": [
+        "cm",
+        "movements",
+        "activities"
+      ]
+    }
+  ],
+  "ai": {
+    "instructions": "All currency numbers are in cents. Don't display the calculation, just display the number.",
+    "evals": [
+      {
+        "input": "What is my current MRR?"
+      },
+      {
+        "input": "What was the churn rate for the last 30 days?"
+      },
+      {
+        "input": "Tell me about the customer john@example.com"
+      },
+      {
+        "input": "What are the latest activities?"
+      }
+    ]
+  },
+  "tools": [
+    {
+      "name": "search-customers-by-email",
+      "title": "Search Customers by Email",
+      "description": "Locate customers by email."
+    },
+    {
+      "name": "list-customers",
+      "title": "List Customers",
+      "description": "List customers by data source uuid, status, or external ID."
+    },
+    {
+      "name": "list-movements",
+      "title": "List Movements",
+      "description": "List movements by movement type, start date, and end date."
+    },
+    {
+      "name": "list-data-sources",
+      "title": "List Data Sources",
+      "description": "List data sources for the configured account."
+    },
+    {
+      "name": "list-customer-activities",
+      "title": "List Customer Activities",
+      "description": "List activities for a customer by uuid."
+    },
+    {
+      "name": "retrieve-account-details",
+      "title": "Retrieve Account Details",
+      "description": "Retrieve account details for the configured account."
+    },
+    {
+      "name": "metrics",
+      "title": "Metrics",
+      "description": "Retrieve subscription metrics, such as MRR, ARR, customer churn rate, LTV, ARPA, ASP, and more for a given date range."
+    },
+    {
+      "name": "list-opportunities",
+      "title": "List Opportunities",
+      "description": "List opportunities by customer uuid, owner, pipeline, stage, or close date."
+    },
+    {
+      "name": "list-call-logs",
+      "title": "List Notes & Call Logs",
+      "description": "List notes and call logs by customer uuid, type, or author email."
+    },
+    {
+      "name": "list-contacts",
+      "title": "List Contacts",
+      "description": "List contacts by email or customer external ID."
+    },
+    {
+      "name": "list-customer-subscriptions",
+      "title": "List Customer Subscriptions",
+      "description": "List subscriptions for a customer."
+    },
+    {
+      "name": "list-plans",
+      "title": "List Plans",
+      "description": "List plans by data source or external ID."
+    },
+    {
+      "name": "list-tasks",
+      "title": "List Tasks",
+      "description": "List tasks by customer uuid, assignee, due date, close date, or completed."
+    }
+  ],
+  "preferences": [
+    {
+      "type": "password",
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "The API key for your ChartMogul account. You can find it in the ChartMogul dashboard under Profile -> API Keys. It's highly recommended to use a dedicated READONLY API Key for this extension.",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.6",
+    "@raycast/utils": "^1.17.0",
+    "date-fns": "^4.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
