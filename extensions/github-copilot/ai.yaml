@@ -12,7 +12,6 @@ instructions: |
 
   3. If the user doesn't specify a branch:
      - The create-task tool will automatically use the default branch
-     - You can optionally use get-repository-default-branch to check what the default branch is
      - Most repositories use "main" as default, but some use "master" or other names
 
   4. When creating a task:
@@ -34,13 +33,11 @@ instructions: |
 
   BRANCH HANDLING:
   - If no branch is specified, the create-task tool automatically uses the default branch
-  - You can use get-repository-default-branch to check what the default branch is
   - Common default branch names are "main" (newer repositories) or "master" (older repositories)
   - Users can specify any branch name, but it must exist in the repository
 
   ERROR HANDLING:
   - If a repository doesn't exist or the user doesn't have access, suggest using search-repositories
-  - If a branch doesn't exist, you can suggest using get-repository-default-branch
   - Always provide helpful error messages and next steps
 
   EXAMPLE CONVERSATIONS:
