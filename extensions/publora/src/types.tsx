@@ -1,6 +1,6 @@
 export interface Post {
   content: string;
-  scheduledTime: Date;
+  scheduledTime: Date | null;
   platforms: string[];
 }
 
