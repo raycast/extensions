@@ -1,6 +1,6 @@
 # Polymarket Changelog
 
-## [Fix Broken API] - 2025-08-28
+## [Fix Broken API] - {PR_MERGE_DATE}
 - Removed outdated API
 - Combined commands into one
 - Improved chart layout
