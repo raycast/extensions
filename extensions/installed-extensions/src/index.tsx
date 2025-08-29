@@ -2,7 +2,6 @@ import {
   Action,
   ActionPanel,
   Application,
-  Clipboard,
   Color,
   Icon,
   List,
@@ -10,7 +9,6 @@ import {
   getPreferenceValues,
   open,
   openExtensionPreferences,
-  showHUD,
 } from "@raycast/api";
 import { useCachedPromise, showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
@@ -200,29 +198,19 @@ export default function IndexCommand() {
                         }}
                       />
                       <Action.OpenInBrowser url={item.link} />
-                      <Action
-                        onAction={() => {
-                          Clipboard.copy(formatItem(item, preferences.format));
-                          showHUD("Copied to Clipboard");
-                        }}
+                      <Action.CopyToClipboard
                         title="Copy Item to Clipboard"
-                        icon={Icon.Clipboard}
+                        content={formatItem(item, preferences.format)}
                         shortcut={{ modifiers: ["cmd"], key: "." }}
                       />
-                      <Action
-                        onAction={() => {
-                          Clipboard.copy(
-                            formatOutput(
-                              installedExtensions,
-                              preferences.format,
-                              preferences.separator,
-                              preferences.prepend,
-                            ),
-                          );
-                          showHUD("Copied to Clipboard");
-                        }}
+                      <Action.CopyToClipboard
                         title="Copy Extension List to Clipboard"
-                        icon={Icon.Clipboard}
+                        content={formatOutput(
+                          installedExtensions,
+                          preferences.format,
+                          preferences.separator,
+                          preferences.prepend,
+                        )}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
                       />
                     </ActionPanel.Section>
