@@ -24,7 +24,7 @@ function renderGraphToSVG(
       smooth: true,
       symbol: "none",
       data: data.map((point) => [point.x, point.y]),
-      lineStyle: { width: 3.5 },
+      lineStyle: { width: 4 },
     }));
 
     // Validate data
@@ -50,36 +50,110 @@ function renderGraphToSVG(
       yDomain[1] ?? Math.max(...allYValues),
     ];
 
-    // Configure chart options
+    // Configure chart options with improved styling
     const option: EChartsOption = {
-      legend: {
-        show: true,
+      grid: {
+        left: "3%",
+        right: "3%",
         top: "5%",
-        textStyle: { fontSize: 30 },
+        bottom: "10%",
+        containLabel: true,
       },
       xAxis: {
         type: "time",
         min: chartXDomain[0],
         max: chartXDomain[1],
+        axisLine: {
+          lineStyle: { color: "#666666", width: 2 },
+        },
+        axisTick: {
+          lineStyle: { color: "#666666", width: 1 },
+        },
         axisLabel: {
-          fontSize: 15,
-          formatter: (value: number) => {
-            const date = new Date(value);
-            return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+          fontSize: 33,
+          color: "#ffffff",
+          fontWeight: "bold",
+          margin: 25,
+          formatter: (value: number | string | { value: number }) => {
+            // Handle different value types and ensure proper date formatting
+            let timestamp: number;
+
+            if (typeof value === "number") {
+              timestamp = value;
+            } else if (typeof value === "string") {
+              timestamp = parseInt(value);
+            } else if (value && typeof value === "object" && value.value !== undefined) {
+              timestamp = value.value;
+            } else {
+              return "Invalid Date";
+            }
+
+            // Check if timestamp is valid
+            if (isNaN(timestamp) || timestamp <= 0) {
+              return "Invalid Date";
+            }
+
+            // Convert from seconds to milliseconds if timestamp is small (Unix epoch in seconds)
+            if (timestamp < 10000000000) {
+              // Less than year 2286 in seconds
+              timestamp = timestamp * 1000;
+            }
+
+            try {
+              const date = new Date(timestamp);
+
+              if (isNaN(date.getTime())) {
+                return "Invalid Date";
+              }
+
+              // Format the date properly
+              return date.toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+              });
+            } catch (error) {
+              return "Error";
+            }
           },
+        },
+        splitLine: {
+          show: true,
+          lineStyle: { color: "#444444", width: 1, type: "dashed" },
         },
       },
       yAxis: {
         type: "value",
         min: chartYDomain[0],
         max: chartYDomain[1],
+        axisLine: {
+          lineStyle: { color: "#666666", width: 2 },
+        },
+        axisTick: {
+          lineStyle: { color: "#666666", width: 1 },
+        },
         axisLabel: {
-          fontSize: 15,
+          fontSize: 18,
+          color: "#ffffff",
+          fontWeight: "bold",
           formatter: (value: number) => "$" + value.toFixed(2),
+        },
+        splitLine: {
+          show: true,
+          lineStyle: { color: "#444444", width: 1, type: "dashed" },
         },
       },
       series: seriesData,
       backgroundColor: "transparent",
+      color: ["#4CAF50", "#2196F3", "#FF9800", "#E91E63", "#9C27B0"],
+      tooltip: {
+        trigger: "axis",
+        backgroundColor: "rgba(0, 0, 0, 0.8)",
+        borderColor: "#666666",
+        textStyle: {
+          color: "#ffffff",
+          fontSize: 14,
+        },
+      },
     };
 
     // Render SVG
