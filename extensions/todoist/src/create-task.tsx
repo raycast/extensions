@@ -29,12 +29,6 @@ import { isTodoistInstalled } from "./hooks/useIsTodoistInstalled";
 import { useNLPParser } from "./hooks/useNLPParser";
 import useSyncData from "./hooks/useSyncData";
 
-// Local interface to work around TypeScript language server not recognizing
-// the global Preferences.CreateTask namespace from raycast-env.d.ts
-interface CreateTaskPreferences {
-  shouldCloseMainWindow: boolean;
-}
-
 type CreateTaskValues = {
   content: string;
   description: string;
@@ -58,7 +52,7 @@ type CreateTaskProps = {
 };
 
 function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues }: CreateTaskProps) {
-  const { shouldCloseMainWindow } = getPreferenceValues<CreateTaskPreferences>();
+  const { shouldCloseMainWindow } = getPreferenceValues<Preferences.CreateTask>();
 
   const { push, pop } = useNavigation();
 
