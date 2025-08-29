@@ -19,6 +19,7 @@ import { useEffect, useState } from "react";
 import useInterval from "./hooks/use-interval";
 import { Process } from "./types";
 import { getFileIcon, getKillCommand, getPlatformSpecificErrorHelp } from "./utils/platform";
+import { fetchRunningProcesses } from "./utils/process";
 
 export default function ProcessList() {
   const [fetchResult, setFetchResult] = useState<Process[]>([]);
@@ -38,19 +39,19 @@ export default function ProcessList() {
   const [sortBy, setSortBy] = useState<"cpu" | "memory">(preferences.sortByMem ? "memory" : "cpu");
   const [aggregateApps, setAggregateApps] = useState<boolean>(preferences.aggregateApps);
 
-  const fetchProcesses = async () => {
-    try {
-      const { fetchRunningProcesses } = await import("./utils/process");
-      const processes = await fetchRunningProcesses();
-      setFetchResult(processes);
-    } catch (err) {
-      console.error("Failed to fetch processes:", err);
-      showToast({
-        title: "Failed to fetch processes",
-        style: Toast.Style.Failure,
-        message: err instanceof Error ? err.message : "Unknown error",
+  const fetchProcesses = () => {
+    fetchRunningProcesses()
+      .then((processes) => {
+        setFetchResult(processes);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch processes:", err);
+        showToast({
+          title: "Failed to fetch processes",
+          style: Toast.Style.Failure,
+          message: err instanceof Error ? err.message : "Unknown error",
+        });
       });
-    }
   };
 
   useInterval(fetchProcesses, refreshDuration);

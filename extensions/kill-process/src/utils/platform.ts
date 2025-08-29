@@ -106,7 +106,7 @@ export function getAppName(path: string, processName: string): string | undefine
     return path.match(/(?<=\/)[^/]+(?=\.app\/)/)?.[0];
   } else if (isWindows) {
     // Windows: Use process name without .exe extension
-    return processName.replace(/\\.exe$/i, "");
+    return processName.replace(/\.exe$/i, "");
   } else {
     // Fallback for unsupported platforms
     return processName;
@@ -121,12 +121,12 @@ export function getFileIcon(process: Process): Image.ImageLike {
     // macOS-specific icon handling
     if (process.type === "prefPane") {
       return {
-        fileIcon: process.path?.replace(/(.+\\.prefPane)(.+)/, "$1") ?? "",
+        fileIcon: process.path?.replace(/(.+\.prefPane)(.+)/, "$1") ?? "",
       };
     }
 
     if (process.type === "app" || process.type === "aggregatedApp") {
-      return { fileIcon: process.path?.replace(/(.+\\.app)(.+)/, "$1") ?? "" };
+      return { fileIcon: process.path?.replace(/(.+\.app)(.+)/, "$1") ?? "" };
     }
 
     return "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/ExecutableBinaryIcon.icns";
