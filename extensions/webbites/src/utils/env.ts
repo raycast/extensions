@@ -3,7 +3,7 @@
 /**
  * Backend API base URL
  */
-export const BACKEND_API_URL = "http://localhost:3003";
+export const BACKEND_API_URL = "https://api.webbites.io/";
 
 /**
  * API endpoints
