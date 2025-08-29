@@ -17,7 +17,7 @@ export class TerminalAppAdapter implements TerminalAdapter {
         set shellPath to item 2 of argv
         
         tell application "Terminal"
-          do script "cd " & quoted form of targetDir & " && clear && claude ; exec " & shellPath
+          do script "cd " & quoted form of targetDir & " && clear && claude ; exec " & quoted form of shellPath
           activate
         end tell
       end run

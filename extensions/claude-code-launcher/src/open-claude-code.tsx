@@ -11,7 +11,6 @@ import {
   useNavigation,
   confirmAlert,
   Alert,
-  openExtensionPreferences,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { FAVORITE_ICON_NAMES, getIcon } from "./favorite-icons";
@@ -331,24 +330,6 @@ function EditFavoriteForm({
 }
 
 async function checkDependencies(preferences: Preferences): Promise<void> {
-  const { execFile } = await import("child_process");
-  const { promisify } = await import("util");
-  const execFileAsync = promisify(execFile);
-
-  try {
-    await execFileAsync("which", ["claude"]);
-  } catch (error) {
-    await showFailureToast("Claude command not found", {
-      title: "Claude Code Not Found",
-      message: "The 'claude' command is not available in your PATH. Please ensure Claude Code is installed.",
-      primaryAction: {
-        title: "Open Preferences",
-        onAction: openExtensionPreferences,
-      },
-    });
-    throw error;
-  }
-
   const adapter = getTerminalAdapter(preferences.terminalApp);
   if (!adapter) {
     await showFailureToast(`Unsupported terminal: ${preferences.terminalApp}`, {
