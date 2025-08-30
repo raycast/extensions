@@ -276,9 +276,9 @@ function AddServer({ mutate }: { mutate: MutatePromise<Server[]> }) {
           next_due_date: values.next_due_date?.toISOString().split("T")[0],
           show_public: +values.show_public as Server["show_public"],
           ram,
-          ram_as_mb: values.ram_type === "MB" ? ram : ram * 1000,
+          ram_as_mb: values.ram_type === "MB" ? ram : ram * 1024,
           disk,
-          disk_as_gb: values.disk_type === "GB" ? disk : disk * 1000,
+          disk_as_gb: values.disk_type === "GB" ? disk : disk * 1024,
         };
         await mutate(addServer(body));
         pop();
