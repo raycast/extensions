@@ -5,6 +5,8 @@ import { Action, ActionPanel, Color, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { format, formatDistanceToNow } from "date-fns";
 
+const MAX_TAGS = 6;
+
 function StopsList() {
   const { data, isLoading } = usePromise(() => getAllRoutesData(), [], {
     failureToastOptions: {
@@ -19,13 +21,14 @@ function StopsList() {
         .map((stop) => {
           const routes = data?.routes.filter((route) => route.stopIds.includes(stop.id));
 
-          const tags = routes?.slice(0, 10).map((route) => ({
+          const tags = routes?.slice(0, MAX_TAGS).map((route) => ({
             tag: {
               value: route.number,
               color: route.type === "bus" ? Color.Blue : Color.Red,
             },
           }));
-          if (routes && routes.length > 10) {
+
+          if (routes && routes.length > MAX_TAGS) {
             tags?.push({
               tag: {
                 value: "...",
