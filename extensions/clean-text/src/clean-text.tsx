@@ -319,7 +319,7 @@ export default function Command(props: LaunchProps) {
   };
 
   return (
-    <List isShowingDetail={true} isLoading={!cacheLoaded} selectedItemId={recent[0]}>
+    <List isShowingDetail={true} isLoading={!cacheLoaded} selectedItemId={recent.length > 0 ? recent[0] : undefined}>
       <List.Section title="Pinned">
         {pinned?.map((key) => {
           const modified = modifyTextWrapper(content, key);
