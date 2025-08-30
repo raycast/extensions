@@ -1,9 +1,15 @@
 import { showToast, Toast } from "@raycast/api";
 import { BookmarkForm } from "./components/BookmarkForm";
+import { LaunchProps } from "@raycast/api";
 
-const AddBookmarks = () => {
+function AddBookmarks(props: LaunchProps<{ launchContext?: { url?: string; title?: string } }>) {
+  const defaultLink = props.launchContext?.url;
+  const defaultValues = props.launchContext?.title ? { title: props.launchContext.title } : undefined;
+
   return (
     <BookmarkForm
+      defaultLink={defaultLink}
+      defaultValues={defaultValues}
       onWillSave={() => {
         showToast(Toast.Style.Animated, "Adding Link...");
       }}
@@ -15,6 +21,6 @@ const AddBookmarks = () => {
       }}
     />
   );
-};
+}
 
 export default AddBookmarks;
