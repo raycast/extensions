@@ -1,4 +1,4 @@
-# Clean Text – Raycast Extension
+# Clean Text
 
 Copying text from PDFs, OCR, academic papers, or certain websites often leaves you with broken lines, weird spaces, fancy quotes, or invisible characters. Clean Text fixes all of that in one place.
 
