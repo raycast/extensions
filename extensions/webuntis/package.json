@@ -25,7 +25,7 @@
     {
       "name": "login",
       "title": "Login",
-      "description": "Logge dich in dein WebUntis-Konto ein.",
+      "description": "Log in to your WebUntis account.",
       "mode": "view",
       "arguments": []
     }
