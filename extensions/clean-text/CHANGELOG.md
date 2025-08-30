@@ -1,7 +1,8 @@
 # Clean Text Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
-## [1.0.0] - 2025-08-13
+## [Initial Version] - {PR_MERGE_DATE}
+### First Release
 ### First Release
 
 - Initial release of Clean Text Raycast Extension
