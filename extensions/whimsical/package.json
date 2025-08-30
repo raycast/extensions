@@ -37,6 +37,165 @@
       "description": "Generate flowcharts, mindmaps, or sequence diagrams using AI. Just describe what you want and the AI will choose the best diagram type and create it for you."
     }
   ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@whimsical create a flowchart for a user login process with email and password validation",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "diagram"
+            }
+          }
+        ],
+        "mocks": {
+          "diagram": {
+            "content": [
+              {
+                "type": "text",
+                "text": "✨ **Flowchart Generated**\n\nA flowchart showing the user authentication process with login validation steps.\n\n🔗 **Diagram URL:** https://whimsical.com/example-login-flowchart"
+              },
+              {
+                "type": "text", 
+                "text": "## Mermaid preview\n\n```mermaid\nflowchart TD\n  Start --> Login\n  Login --> Validate\n  Validate --> Success\n```"
+              },
+              {
+                "type": "resource",
+                "resource": {
+                  "uri": "https://whimsical.com/example-login-flowchart",
+                  "text": "Open in Whimsical"
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "input": "@whimsical generate a mindmap about project planning with branches for timeline, resources, and deliverables",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "diagram"
+            }
+          }
+        ],
+        "mocks": {
+          "diagram": {
+            "content": [
+              {
+                "type": "text",
+                "text": "✨ **Mindmap Generated**\n\nA mindmap outlining project planning with timeline, resources, and deliverables.\n\n🔗 **Diagram URL:** https://whimsical.com/example-project-mindmap"
+              },
+              {
+                "type": "text",
+                "text": "## Mermaid preview\n\n```mermaid\nmindmap\n  root\n    Project Planning\n      Timeline\n      Resources\n      Deliverables\n```"
+              },
+              {
+                "type": "resource",
+                "resource": {
+                  "uri": "https://whimsical.com/example-project-mindmap",
+                  "text": "Open in Whimsical"
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "input": "@whimsical make a sequence diagram showing the interaction between a client, server, and database for an API request",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "diagram"
+            }
+          }
+        ],
+        "mocks": {
+          "diagram": {
+            "content": [
+              {
+                "type": "text",
+                "text": "✨ **Sequence Diagram Generated**\n\nA sequence diagram illustrating the API interaction flow for client-server-database communication.\n\n🔗 **Diagram URL:** https://whimsical.com/example-api-sequence"
+              },
+              {
+                "type": "text",
+                "text": "## Mermaid preview\n\n```mermaid\nsequenceDiagram\n  Client->>Server: API Request\n  Server->>Database: Query\n  Database->>Server: Result\n  Server->>Client: Response\n```"
+              },
+              {
+                "type": "resource",
+                "resource": {
+                  "uri": "https://whimsical.com/example-api-sequence",
+                  "text": "Open in Whimsical"
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "input": "@whimsical design a flowchart for an e-commerce checkout process including cart review, payment, and order confirmation",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "diagram"
+            }
+          }
+        ],
+        "mocks": {
+          "diagram": {
+            "content": [
+              {
+                "type": "text",
+                "text": "✨ **Flowchart Generated**\n\nA flowchart detailing the e-commerce checkout process from cart to confirmation.\n\n🔗 **Diagram URL:** https://whimsical.com/example-checkout-flowchart"
+              },
+              {
+                "type": "text",
+                "text": "## Mermaid preview\n\n```mermaid\nflowchart TD\n  Cart --> Payment\n  Payment --> Confirmation\n```"
+              },
+              {
+                "type": "resource",
+                "resource": {
+                  "uri": "https://whimsical.com/example-checkout-flowchart",
+                  "text": "Open in Whimsical"
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "input": "@whimsical create a mindmap for learning Python programming with main topics and subtopics",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "diagram"
+            }
+          }
+        ],
+        "mocks": {
+          "diagram": {
+            "content": [
+              {
+                "type": "text",
+                "text": "✨ **Mindmap Generated**\n\nA mindmap for learning Python programming with core concepts and topics.\n\n🔗 **Diagram URL:** https://whimsical.com/example-python-mindmap"
+              },
+              {
+                "type": "text",
+                "text": "## Mermaid preview\n\n```mermaid\nmindmap\n  root\n    Python\n      Basics\n      Data Structures\n      Functions\n```"
+              },
+              {
+                "type": "resource",
+                "resource": {
+                  "uri": "https://whimsical.com/example-python-mindmap",
+                  "text": "Open in Whimsical"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
   "dependencies": {
     "@raycast/api": "1.101.1",
     "@raycast/utils": "2.2.0",
