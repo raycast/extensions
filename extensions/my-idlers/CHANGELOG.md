@@ -1,6 +1,6 @@
 # MyIdlers Changelog
 
-## [] - {PR_MERGE_DATE}
+## [Add Server] - {PR_MERGE_DATE}
 
 ## [Separate Active and Inactive Items] - 2025-06-23
 

@@ -19,6 +19,7 @@ import { addServer, deleteServer, numOrUnlimited } from "../utils";
 import { FormValidation, MutatePromise, showFailureToast, useForm } from "@raycast/utils";
 import { useState } from "react";
 import useGet, { usePut } from "../hooks";
+import dayjs from "dayjs";
 
 export default function ServerItem({ server, mutate }: { server: Server; mutate: MutatePromise<Server[]> }) {
   async function confirmAndDeleteServer(server: Server) {
@@ -275,13 +276,11 @@ function AddServer({ mutate }: { mutate: MutatePromise<Server[]> }) {
           next_due_date: values.next_due_date?.toISOString().split("T")[0],
           show_public: +values.show_public as Server["show_public"],
           ram,
-          ram_as_mb: values.ram_type==="MB" ? ram : ram*1000,
+          ram_as_mb: values.ram_type === "MB" ? ram : ram * 1000,
           disk,
-          disk_as_gb: values.disk_type==="GB" ? disk : disk*1000
+          disk_as_gb: values.disk_type === "GB" ? disk : disk * 1000,
         };
-        await mutate(
-          addServer(body)
-        )
+        await mutate(addServer(body));
         pop();
       } catch (error) {
         await showFailureToast(error);
@@ -295,15 +294,17 @@ function AddServer({ mutate }: { mutate: MutatePromise<Server[]> }) {
       bandwidth: "1000",
       ram: "2024",
       disk: "10",
-      cpu: "2"
+      cpu: "2",
+      owned_since: new Date(),
+      next_due_date: dayjs(new Date()).add(365, "day").toDate(),
     },
     validation: {
       hostname: FormValidation.Required,
       ip1: FormValidation.Required,
       ip2: FormValidation.Required,
       owned_since: FormValidation.Required,
-      next_due_date: FormValidation.Required
-    }
+      next_due_date: FormValidation.Required,
+    },
   });
 
   const isLoading = isLoadingProviders || isLoadingLocations || isLoadingOS || isLoadingLabels || isAdding;
@@ -320,7 +321,11 @@ function AddServer({ mutate }: { mutate: MutatePromise<Server[]> }) {
     >
       <Form.TextField title="Hostname" placeholder="Enter server.hostname" {...itemProps.hostname} />
       <Form.Dropdown title="Server type" {...itemProps.server_type}>
-        {Object.entries(ServerType).filter(([key]) => isNaN(Number(key))).map(([key, val]) => <Form.Dropdown.Item key={key} title={key} value={val.toString()} />)}
+        {Object.entries(ServerType)
+          .filter(([key]) => isNaN(Number(key)))
+          .map(([key, val]) => (
+            <Form.Dropdown.Item key={key} title={key} value={val.toString()} />
+          ))}
       </Form.Dropdown>
       <Form.Dropdown title="OS" {...itemProps.os_id}>
         {os.map((item) => (
@@ -344,10 +349,18 @@ function AddServer({ mutate }: { mutate: MutatePromise<Server[]> }) {
       </Form.Dropdown>
       <Form.TextField title="Price" {...itemProps.price} />
       <Form.Dropdown title="Term" {...itemProps.payment_term}>
-        {Object.entries(Term).filter(([key]) => isNaN(Number(key))).map(([key, val]) => <Form.Dropdown.Item key={key} title={key} value={val.toString()} />)}
+        {Object.entries(Term)
+          .filter(([key]) => isNaN(Number(key)))
+          .map(([key, val]) => (
+            <Form.Dropdown.Item key={key} title={key} value={val.toString()} />
+          ))}
       </Form.Dropdown>
       <Form.Dropdown title="Currency" {...itemProps.currency}>
-        {Object.entries(Currency).filter(([key]) => isNaN(Number(key))).map(([key, val]) => <Form.Dropdown.Item key={key} title={key} value={val} />)}
+        {Object.entries(Currency)
+          .filter(([key]) => isNaN(Number(key)))
+          .map(([key, val]) => (
+            <Form.Dropdown.Item key={key} title={key} value={val} />
+          ))}
       </Form.Dropdown>
       <Form.TextField title="RAM" {...itemProps.ram} />
       <Form.Dropdown title="RAM type" {...itemProps.ram_type}>
@@ -368,7 +381,9 @@ function AddServer({ mutate }: { mutate: MutatePromise<Server[]> }) {
       <Form.DatePicker title="Owned since" type={Form.DatePicker.Type.Date} {...itemProps.owned_since} />
       <Form.DatePicker title="Next due date" type={Form.DatePicker.Type.Date} {...itemProps.next_due_date} />
       <Form.TagPicker title="Label" {...itemProps.labels}>
-        {labels.map(label => <Form.TagPicker.Item key={label.id} title={label.label} value={label.id.toString()} />)}
+        {labels.map((label) => (
+          <Form.TagPicker.Item key={label.id} title={label.label} value={label.id.toString()} />
+        ))}
       </Form.TagPicker>
       <Form.Checkbox label="Allow some of this data to be public" {...itemProps.show_public} />
     </Form>

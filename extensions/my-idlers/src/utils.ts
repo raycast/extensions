@@ -48,7 +48,7 @@ export async function addServer(server: Record<string, string | number | boolean
       "Content-Type": "application/json",
       Authorization: `Bearer ${api_key}`,
     },
-    body: JSON.stringify(server)
+    body: JSON.stringify(server),
   });
   if (!response.ok) {
     const result = await response.json();
