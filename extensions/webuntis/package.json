@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "webuntis",
   "title": "WebUntis",
-  "description": "A Extension to view hourplans and map aliases to names.",
+  "description": "An extension to view hour plans and map aliases to names.",
   "icon": "extension-icon.png",
   "author": "developer-07",
   "license": "MIT",
