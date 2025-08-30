@@ -55,9 +55,8 @@ export function getStatusIcon(statusName: string, index = 0): string {
   const groupName = getStatusGroup(statusName)
   const icons = STATUS_ICONS[groupName]
 
-  if (!icons) {
-    return DEFAULT_STATUS_ICONS.pending
-  }
+  // Return the icon at the specified index, or the last one if index is out of bounds
+  return icons[index] || icons[icons.length - 1]
 
   // Return the icon at the specified index, or the last one if index is out of bounds
   return icons[index] || icons[icons.length - 1]
