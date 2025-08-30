@@ -1,10 +1,13 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { Action, ActionPanel, Form, LocalStorage, showToast, Toast } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 
 export default function Login() {
-  const { handleSubmit, itemProps } = useForm<any>({
+  const { handleSubmit, itemProps } = useForm<{
+    username: string;
+    password: string;
+    school: string;
+    server: string;
+  }>({
     onSubmit(values) {
       showToast({
         style: Toast.Style.Success,
