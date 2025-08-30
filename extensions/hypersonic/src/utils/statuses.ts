@@ -57,9 +57,6 @@ export function getStatusIcon(statusName: string, index = 0): string {
 
   // Return the icon at the specified index, or the last one if index is out of bounds
   return icons[index] || icons[icons.length - 1]
-
-  // Return the icon at the specified index, or the last one if index is out of bounds
-  return icons[index] || icons[icons.length - 1]
 }
 
 // Simple utility function to get status color
