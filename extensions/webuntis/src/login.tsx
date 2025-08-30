@@ -8,8 +8,8 @@ export default function Login() {
     onSubmit(values) {
       showToast({
         style: Toast.Style.Success,
-        title: "Erfolg!",
-        message: `Logindaten wurden gespeichert.`,
+        title: "Success!",
+        message: `Login credentials saved.`,
       });
       LocalStorage.setItem("credentials", JSON.stringify(values));
     },
