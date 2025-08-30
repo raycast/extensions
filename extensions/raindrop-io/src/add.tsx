@@ -1,4 +1,3 @@
-import { showToast, Toast } from "@raycast/api";
 import { BookmarkForm } from "./components/BookmarkForm";
 import { showToast, Toast, LaunchProps } from "@raycast/api";
 
