@@ -2,7 +2,7 @@
 
 All notable changes to the Qovery Services Raycast Extension will be documented in this file.
 
-## [1.0.0] - 2024-12-01
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 
@@ -41,7 +41,7 @@ All notable changes to the Qovery Services Raycast Extension will be documented 
 - Demo documentation with examples
 - Security and troubleshooting information
 
-## [0.1.0] - 2024-12-01
+## [0.1.0] - {PR_MERGE_DATE}
 
 ### Development
 

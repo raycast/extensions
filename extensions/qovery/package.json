@@ -3,7 +3,24 @@
   "name": "qovery",
   "title": "Qovery",
   "description": "Interact with your Qovery organization",
-  "icon": "/icon.png",
+  "icon": "/extension-icon.png",
+  "screenshots": [
+    {
+      "title": "Qovery Services List",
+      "description": "View all services in your Qovery organization",
+      "path": "metadata/services-list.png"
+    },
+    {
+      "title": "Service Actions",
+      "description": "Quick actions for each service including opening in console and viewing links",
+      "path": "metadata/service-actions.png"
+    },
+    {
+      "title": "Service Links",
+      "description": "View and manage service links",
+      "path": "metadata/service-links.png"
+    }
+  ],
   "author": "RemiBonnet",
   "categories": [
     "Developer Tools"
@@ -17,15 +34,18 @@
       "mode": "view"
     }
   ],
+  "main": "src/index.jsx",
   "dependencies": {
     "@raycast/api": "^1.64.4"
   },
   "devDependencies": {
+    "@babel/eslint-parser": "^7.28.0",
+    "@babel/preset-react": "^7.27.1",
     "@eslint/js": "^9.34.0",
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^2.0.4",
     "@types/node": "^20.8.10",
     "@types/react": "^18.2.27",
-    "eslint": "^8.57.1",
+    "eslint": "^8.56.0",
     "globals": "^16.3.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"

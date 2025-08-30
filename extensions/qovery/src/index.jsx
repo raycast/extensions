@@ -184,8 +184,7 @@ export default function Command() {
       return null;
     }
 
-    const serviceType =
-      service.service_type === "DATABASE" ? "database" : "application";
+    const serviceType = service.service_type?.toLowerCase() || "application";
     const url = `https://console.qovery.com/organization/${organizationId}/project/${service.project_id}/environment/${service.environment_id}/${serviceType}/${service.id}/general`;
     return url;
   };
