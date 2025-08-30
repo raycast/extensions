@@ -23,7 +23,6 @@
 2. Run the command
 3. You'll see a form asking for your credentials:
    - **Qovery API Token**: Your personal API token from Qovery
-   - **Organization ID**: Your Qovery organization ID
 4. Fill in both fields and click "Save and Load Services"
 
 ### 3. Get Your Qovery API Token

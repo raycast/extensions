@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Find services",
+      "title": "Find Qovery services",
       "description": "Interact with your Qovery organization",
       "mode": "view"
     }
