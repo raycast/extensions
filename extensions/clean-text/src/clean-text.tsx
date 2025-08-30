@@ -89,18 +89,26 @@ export default function Command(props: LaunchProps) {
   const applyModification = props.launchContext?.modification;
   if (applyModification) {
     (async () => {
-      const content = await readContent(preferredSource);
-      const modified = convert(content, applyModification);
+      try {
+        const content = await readContent(preferredSource);
+        const modified = convert(content, applyModification);
 
-      if (preferredAction === "paste") {
-        Clipboard.paste(modified);
-        Clipboard.copy(modified);
-      } else {
-        Clipboard.copy(modified);
+        if (preferredAction === "paste") {
+          Clipboard.paste(modified);
+          Clipboard.copy(modified);
+        } else {
+          Clipboard.copy(modified);
+        }
+
+        showHUD(`Applied ${applyModification}`);
+        popToRoot();
+      } catch (error) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to apply modification",
+          message: error instanceof Error ? error.message : "Unknown error",
+        });
       }
-
-      showHUD(`Applied ${applyModification}`);
-      popToRoot();
     })();
     return;
   }
