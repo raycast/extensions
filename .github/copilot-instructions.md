@@ -214,7 +214,16 @@ If missing evals, reference: [AI Evals Documentation](https://developers.raycast
   }
   ```
 
-## 8. Documentation References
+## 8. Lock files & Registries
+
+### Preferred Lock Files
+- Project should only use `package-lock.json` as lock file, other lock files like `yarn.lock`, `bun.lock`, or `pnpm-lock.yaml` are not allowed
+
+### Official Registry Only
+- Ensure the project only uses the official npm registry (`https://registry.npmjs.org`), other third-party registries are not permitted
+- Should also check the `.npmrc` if it contains any global registry or scoped registry configurations
+
+## 9. Documentation References
 
 ### Primary Reference
 Always reference the [Raycast Developer Documentation](https://developers.raycast.com/) for guidelines and best practices when providing feedback.
@@ -243,6 +252,7 @@ When reviewing a PR, systematically check:
 - [ ] Tools extensions include AI evals
 - [ ] No custom localization (use preferences for locale-dependent features)
 - [ ] .prettierrc follows Raycast standards (don't suggest changes)
+- [ ] Project lock file should be `package-lock.json` and registry should be only `https://registry.npmjs.org`
 
 ## Tone and Approach
 
