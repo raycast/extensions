@@ -32,7 +32,7 @@ export function getCachedBaseList(): Array<AirtableBaseMetadata> {
 }
 
 export async function fetchBaseListPage(offset?: string): Promise<AirtableMetadataApiBaseListResponse> {
-  const {token} = getAccessToken();
+  const { token } = getAccessToken();
   const offsetParam = offset ? `?offset=${offset}` : "";
   const response = await fetch(`${airtableApiBaseUrl}/v0/meta/bases${offsetParam}`, {
     method: "GET",
@@ -88,7 +88,7 @@ export function getCachedBaseSchemaIfExists(baseId: string): AirtableMetadataApi
 }
 
 export async function fetchBaseSchema(baseId: string): Promise<AirtableMetadataApiBaseSchemaResponse> {
-  const {token} = getAccessToken();
+  const { token } = getAccessToken();
   const response = await fetch(`${airtableApiBaseUrl}/v0/meta/bases/${baseId}/tables`, {
     method: "GET",
     headers: {
@@ -97,7 +97,7 @@ export async function fetchBaseSchema(baseId: string): Promise<AirtableMetadataA
     },
   });
 
-    await throwIfError(response);
+  await throwIfError(response);
 
   const baseSchema = (await response.json()) as AirtableMetadataApiBaseSchemaResponse;
   cache.set(getBaseSchemaCacheKey(baseId), JSON.stringify(baseSchema));
@@ -105,7 +105,7 @@ export async function fetchBaseSchema(baseId: string): Promise<AirtableMetadataA
 }
 
 export async function fetchBaseRecords(baseId: string, tableId: string) {
-  const {token} = getAccessToken();
+  const { token } = getAccessToken();
   const response = await fetch(`${airtableApiBaseUrl}/v0/${baseId}/${tableId}`, {
     method: "GET",
     headers: {
@@ -124,9 +124,9 @@ export async function updateBaseRecord(
   baseId: string,
   tableId: string,
   recordId: string,
-  fields: Record<string, string>
+  fields: Record<string, string>,
 ) {
-  const {token} = getAccessToken();
+  const { token } = getAccessToken();
   const response = await fetch(`${airtableApiBaseUrl}/v0/${baseId}/${tableId}/${recordId}`, {
     method: "PATCH",
     headers: {

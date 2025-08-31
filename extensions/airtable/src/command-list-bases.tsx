@@ -9,12 +9,13 @@ import { showFailureToast, useCachedPromise, usePromise, withAccessToken } from 
 export default withAccessToken(airtable.provider)(Command);
 
 function Command() {
-  const { isLoading: isLoadingClicksByBase, data: numberOfClicksByBaseId = {} } = usePromise(getNumberOfClicksByBaseIdAsync)
+  const { isLoading: isLoadingClicksByBase, data: numberOfClicksByBaseId = {} } =
+    usePromise(getNumberOfClicksByBaseIdAsync);
 
   const { isLoading, data: bases } = useCachedPromise(api.fetchBaseList, [], {
     initialData: api.getCachedBaseList(),
     async onError(error) {
-      await showFailureToast("", {title: error.message});
+      await showFailureToast("", { title: error.message });
     },
   });
 

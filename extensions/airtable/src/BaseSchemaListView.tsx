@@ -100,7 +100,7 @@ function AirtableTableListItem(props: { baseMetadata: AirtableBaseMetadata; tabl
 const FIELD_TYPE_ICONS: Record<string, Image.ImageLike> = {
   checkbox: Icon.CheckCircle,
   createdTime: Icon.Clock,
-  date: {source:Icon.Calendar, mask: Image.Mask.Circle},
+  date: { source: Icon.Calendar, mask: Image.Mask.Circle },
   dateTime: Icon.Calendar,
   email: Icon.AtSymbol,
   formula: Icon.Code,
@@ -112,7 +112,7 @@ const FIELD_TYPE_ICONS: Record<string, Image.ImageLike> = {
   singleLineText: Icon.ShortParagraph,
   singleSelect: Icon.Circle,
   url: Icon.Link,
-}
+};
 
 export function AirtableBaseSchemaFieldsList(props: {
   baseMetadata: AirtableBaseMetadata;
@@ -120,7 +120,6 @@ export function AirtableBaseSchemaFieldsList(props: {
   fields: Field[];
 }) {
   const { baseMetadata, tableId, fields } = props;
-
 
   return (
     <List
