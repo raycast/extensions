@@ -4,6 +4,7 @@ import { AirtableBaseSchemaTableListView } from "./BaseSchemaListView";
 import { incrementNumberOfClicksOnDetailForBaseAsync, NumberOfClicksByBase } from "./LocalStorageWrapper";
 import { AirtableBaseMetadata } from "./types";
 import { Fragment } from "react";
+import { getAvatarIcon } from "@raycast/utils";
 
 export function BaseList(props: {
   isLoading: boolean;
@@ -35,6 +36,7 @@ function AirtableBaseListItem(props: { baseMetadata: AirtableBaseMetadata }) {
   return (
     <List.Item
       id={baseMetadata.id}
+      icon={getAvatarIcon(baseMetadata.title)}
       title={baseMetadata.title}
       // accessories={[{ icon: Icon.Binoculars, text: `${baseMetadata.permissionLevel} permission` }]}
       actions={

@@ -1,5 +1,14 @@
 # Airtable Changelog
 
+## [Optionally Authenticate w/ PAT] - {PR_MERGE_DATE}
+
+-  More precise errors shown
+- `Add` Icon to **Bases**
+- `Add` some Icon to **Fields**
+- `Add` support for **Personal Access Token**
+- `Simplify` OAuth code
+- `Modernize` to use latest Raycast `eslint` config
+
 ## [Update OAuth ID] - 2024-11-05
 
 - Switched to a different Airtable OAuth app with the proper scopes
