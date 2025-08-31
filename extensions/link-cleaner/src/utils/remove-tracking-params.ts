@@ -1,6 +1,15 @@
-import { Clipboard, getFrontmostApplication, showHUD, showToast, Toast } from "@raycast/api";
+import {
+  Clipboard,
+  closeMainWindow,
+  getFrontmostApplication,
+  PopToRootType,
+  showHUD,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { rules } from "./rules";
 import { findURLs, removeQueryParams, replaceURLs } from "./url-utils";
+import { getPreferences } from "./preferences";
 
 export default async function removeTrackingParams(rawText: string) {
   // detect urls in text
@@ -31,6 +40,11 @@ export default async function removeTrackingParams(rawText: string) {
   // finishing touches
   await Clipboard.copy(newText);
   const frontmostApp = await getFrontmostApplication();
+
+  const { exitAfterCleaning } = getPreferences();
+  if (exitAfterCleaning) {
+    await closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Suspended });
+  }
 
   await showToast({
     title: "Tracking parameters removed",
