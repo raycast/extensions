@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Detail, Icon, showToast, Toast, confirmAlert, Alert, Color } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { GandiDomain, WebsiteMetadata } from "../types";
 import * as gandiAPI from "../api";
 import { useEffect, useState } from "react";
@@ -67,10 +68,8 @@ export default function DomainDetail({ domain }: Readonly<Props>) {
           title: `Domain ${action}ed successfully`,
         });
       } catch (error) {
-        await showToast({
-          style: Toast.Style.Failure,
+        await showFailureToast(error, {
           title: `Failed to ${action} domain`,
-          message: error instanceof Error ? error.message : "Unknown error",
         });
       }
     }
