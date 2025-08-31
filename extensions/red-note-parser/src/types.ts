@@ -1,7 +1,3 @@
-export interface ExtensionPreferences {
-  cookies: string;
-}
-
 export interface BaseResponse<T> {
   code: number;
   message: string;

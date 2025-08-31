@@ -4,21 +4,14 @@ import path from "node:path";
 import vm from "node:vm";
 import { DetailData, ImageInfo, Sandbox, Tag } from "./types.js";
 import { getMeApi, getNoteApi } from "./api.js";
-import {
-  environment,
-  getPreferenceValues,
-  LocalStorage,
-  open,
-  openExtensionPreferences,
-  showToast,
-} from "@raycast/api";
+import { environment, getPreferenceValues, open, openExtensionPreferences, showToast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { BASE_URL, COMMON_HEADER } from "./constants.js";
-import { ExtensionPreferences } from "./types.js";
 
 class XhsClient {
   private sandbox: vm.Context | null = null;
   private cookie: string | null = null;
+  private isCookieValid: boolean = false;
 
   constructor() {
     this.init();
@@ -45,7 +38,7 @@ class XhsClient {
     this.checkCookie();
   }
 
-  private checkCookie() {
+  private async checkCookie() {
     const { cookies } = getPreferenceValues<ExtensionPreferences>();
     if (!cookies) {
       showFailureToast("Cookie not found", {
@@ -59,11 +52,28 @@ class XhsClient {
       return;
     }
 
+    try {
+      await getMeApi(cookies);
+      this.isCookieValid = true;
+      showToast({
+        title: "Cookie is valid",
+      });
+    } catch {
+      this.isCookieValid = false;
+      showFailureToast("Cookie not valid", {
+        title: "Cookie not valid",
+        message: "Please update your cookie in extension preferences",
+        primaryAction: {
+          title: "Update Cookie",
+          onAction: openExtensionPreferences,
+        },
+      });
+    }
+
     this.cookie = cookies;
   }
 
   private getHeader(uri: string, data: unknown) {
-    this.checkCookie();
     return this.sandbox?.getXsXt(uri, data, this.cookie!);
   }
 
@@ -75,20 +85,9 @@ class XhsClient {
     return `${BASE_URL}/explore/${noteId}?xsec_token=${xToken}&xsec_source=pc_user`;
   }
 
-  public setCookie(cookie: string) {
-    this.cookie = cookie;
-    LocalStorage.setItem("USER_COOKIE", cookie);
-  }
-
-  public async checkCookieValid() {
-    this.checkCookie();
-    try {
-      await getMeApi(this.cookie!);
-      showToast({
-        title: "Cookie is valid",
-      });
-    } catch (error) {
-      showFailureToast(error, {
+  public async getNoteInfo(noteId: string, xToken: string) {
+    if (!this.isCookieValid) {
+      showFailureToast("Cookie not valid", {
         title: "Cookie not valid",
         message: "Please update your cookie in extension preferences",
         primaryAction: {
@@ -96,11 +95,8 @@ class XhsClient {
           onAction: openExtensionPreferences,
         },
       });
+      return;
     }
-  }
-
-  public async getNoteInfo(noteId: string, xToken: string) {
-    this.checkCookie();
 
     const uri = "/api/sns/web/v1/feed";
     const data = {
@@ -167,7 +163,8 @@ class XhsClient {
       fs.mkdirSync(destination, { recursive: true });
     }
 
-    const markdownFile = path.join(destination, "output.md");
+    const filename = `${details.title}.md`;
+    const markdownFile = path.join(destination, filename);
     fs.writeFileSync(markdownFile, markdown);
 
     // TODO: download image/video if needed

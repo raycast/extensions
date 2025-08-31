@@ -20,7 +20,7 @@ Parse RedNote post link and save to Downloads as markdown file
 
 This extension is not affiliated, endorsed, or sponsored by RedNote.
 
-This extension is designed for personal use only.
+This extension is designed for personal use only. Any use of this extension is at your own risk.
 
 ## License
 

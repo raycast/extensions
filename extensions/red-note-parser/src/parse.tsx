@@ -13,11 +13,6 @@ export default function Command() {
   const [title, setTitle] = useState("Paste RedNote post link");
   const [description, setDescription] = useState("Please paste a valid RedNote post link");
 
-  // check if cookie is valid
-  useEffect(() => {
-    client.checkCookieValid();
-  }, []);
-
   useEffect(() => {
     if (!searchText) {
       setTitle("Paste RedNote post link");
