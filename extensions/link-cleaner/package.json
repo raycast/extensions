@@ -33,9 +33,9 @@
       "type": "checkbox",
       "required": false,
       "default": false,
-      "description": "Wheter to exit Raycast after cleaning the link",
+      "description": "Whether to exit Raycast after cleaning the link",
       "name": "exitAfterCleaning",
-      "label": "Exit after cleaning"
+      "label": "Exit After Cleaning"
     }
   ],
   "dependencies": {
