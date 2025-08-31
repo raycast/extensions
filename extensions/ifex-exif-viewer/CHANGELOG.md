@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial] - 2025-08-31
+## [Initial] - {PR_MERGE_DATE}
 
 ### Added
 
