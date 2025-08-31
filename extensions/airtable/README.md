@@ -6,7 +6,7 @@
 
 [Airtable](https://www.airtable.com) is a connected apps platform for building collaborative app. It allows you to create (data)bases to organize your data in tables and fields -- as well as build interfaces to display information to users and automations to automate processes.
 
-This extension uses Airtable's [OAuth support](https://airtable.com/developers/web/guides/oauth-integrations) and/or [Personal access tokes](https://airtable.com/developers/web/guides/personal-access-tokens) to allow a user to browse the bases, tables, fields, and views they granted the application access to (a part of the Airtable OAuth flow).
+This extension uses Airtable's [OAuth support](https://airtable.com/developers/web/guides/oauth-integrations) and/or [Personal access tokens](https://airtable.com/developers/web/guides/personal-access-tokens) to allow a user to browse the bases, tables, fields, and views they granted the application access to (a part of the Airtable OAuth flow).
 
 ---
 
