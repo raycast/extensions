@@ -21,21 +21,16 @@ const normalizeStops = (rawStops: StopRaw[]) => {
 export const extractAllStops = (rawStops: StopRaw[], relevantStopIds: Set<string>) => {
   const normalizedStops = normalizeStops(rawStops);
 
-  const stops = new Map<string, Stop>(
-    normalizedStops
-      .filter((stop) => stop.SiriID && relevantStopIds.has(stop.ID))
-      .map((stop) => [
-        stop.ID,
-        {
-          id: stop.ID,
-          name: stop.Name,
-          siriId: stop.SiriID,
-          neighborStopIds: stop.Stops?.split(",") || [],
-          latitude: Number(stop.Lat) / 100000,
-          longitude: Number(stop.Lng) / 100000,
-        },
-      ]),
-  );
+  const stops = normalizedStops
+    .filter((stop) => stop.SiriID && relevantStopIds.has(stop.ID))
+    .map<Stop>((stop) => ({
+      id: stop.ID,
+      name: stop.Name,
+      siriId: stop.SiriID,
+      neighborStopIds: stop.Stops?.split(",") || [],
+      latitude: Number(stop.Lat) / 100000,
+      longitude: Number(stop.Lng) / 100000,
+    }));
 
   return { stops };
 };

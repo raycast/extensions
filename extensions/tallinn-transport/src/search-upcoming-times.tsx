@@ -5,11 +5,11 @@ import { useMemo } from "react";
 import type { Route } from "@/lib/routes";
 import type { Stop } from "@/lib/stops";
 import { getTimetables, getWorkdayType, type Timetable } from "@/lib/timetables";
-import { getAllRoutesData } from "@/service/all-routes";
+import { getAllCachedRoutesData } from "@/service/all-routes";
 import { formatDistanceToNow, isAfter } from "date-fns";
 
 function RoutesList() {
-  const { data, isLoading } = usePromise(() => getAllRoutesData(), [], {
+  const { data, isLoading } = usePromise(() => getAllCachedRoutesData(), [], {
     failureToastOptions: {
       title: "Error fetching routes from Tallinn Transport",
     },
@@ -34,7 +34,7 @@ function RoutesList() {
           ]}
           actions={
             <ActionPanel>
-              <Action.Push title="Show Stops" target={<StopsList route={route} stopsMap={data?.stops} />} />
+              <Action.Push title="Show Stops" target={<StopsList route={route} stops={data?.stops} />} />
             </ActionPanel>
           }
         />
@@ -43,14 +43,14 @@ function RoutesList() {
   );
 }
 
-export function StopsList({ route, stopsMap }: { route: Route; stopsMap: Map<string, Stop> }) {
+export function StopsList({ route, stops }: { route: Route; stops: Stop[] }) {
   const timetable = useMemo(() => getTimetables(route.times), [route.times]);
 
   return (
     <List navigationTitle={`Stops for route: ${route.number} - ${route.name}`} searchBarPlaceholder="Search stop name">
       {route.stopIds.map((stopId, index) => {
         const currentStopTimetable = timetable.filter((t) => t.stopIndex === index);
-        const stopName = stopsMap.get(stopId)?.name || "Unknown stop";
+        const stopName = stops.find((stop) => stop.id === stopId)?.name || "Unknown stop";
 
         return (
           <List.Item

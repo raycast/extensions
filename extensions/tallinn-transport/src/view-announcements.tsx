@@ -1,4 +1,4 @@
-import { getAnnouncements } from "@/service/announcements";
+import { getCachedAnnouncements } from "@/service/announcements";
 import { ActionPanel, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
@@ -7,7 +7,7 @@ import TurndownService from "turndown";
 const turndownService = new TurndownService();
 
 function AnnouncementsList() {
-  const { data, isLoading } = usePromise(() => getAnnouncements(), [], {
+  const { data, isLoading } = usePromise(() => getCachedAnnouncements(), [], {
     failureToastOptions: {
       title: "Error fetching announcements",
     },

@@ -1,5 +1,5 @@
 import type { Stop } from "@/lib/stops";
-import { getAllRoutesData } from "@/service/all-routes";
+import { getAllCachedRoutesData } from "@/service/all-routes";
 import { getDeparturesForStop } from "@/service/departures";
 import { Action, ActionPanel, Color, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
@@ -8,7 +8,7 @@ import { format, formatDistanceToNow } from "date-fns";
 const MAX_TAGS = 6;
 
 function StopsList() {
-  const { data, isLoading } = usePromise(() => getAllRoutesData(), [], {
+  const { data, isLoading } = usePromise(() => getAllCachedRoutesData(), [], {
     failureToastOptions: {
       title: "Error fetching stops",
     },
@@ -16,7 +16,7 @@ function StopsList() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search stop name...">
-      {Array.from(data?.stops.values() || [])
+      {data?.stops
         .sort((a, b) => a.name.localeCompare(b.name))
         .map((stop) => {
           const routes = data?.routes.filter((route) => route.stopIds.includes(stop.id));
