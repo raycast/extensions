@@ -16,19 +16,25 @@ A Raycast extension that displays EXIF metadata from image files using the ifex 
 
 ## Installation
 
-1. Install the ifex CLI tool
+1. Install the ifex CLI tool:
+
+```bash
+brew tap danielfilho/ifex
+brew install ifex
+```
+
 2. Install this Raycast extension
 3. Select image files in Finder and run the "View EXIF Data" command
 
 ## Usage
 
 1. Select one or more image files in Finder
-2. Open Raycast and search for "View EXIF Data"
+2. Open Raycast and type "ifex", or search for "View Exif Data"
 3. View the EXIF metadata in a clean, organized format
 
 ## Development
 
 ```bash
-pnpm install
-pnpm run dev
+npm install
+npm run dev
 ```
