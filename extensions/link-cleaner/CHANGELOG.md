@@ -1,5 +1,7 @@
 # Link Cleaner Changelog
 
+## [Add options to close Raycast after cleaning] - 2025-08-31
+
 ## [Added Clean Selected Text Functionality] - 2025-04-15
 
 - Add new command `clean-selected-text.ts`
