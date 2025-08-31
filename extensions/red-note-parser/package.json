@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "red-note-parser",
+  "title": "Red-note Parser",
+  "type": "module",
+  "description": "Parse Red-note post link and save to Downloads as markdown file",
+  "icon": "red-note-icon.png",
+  "author": "orangelckc",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Fun",
+    "Productivity"
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "parse",
+      "title": "Parse Red-note Post Link",
+      "description": "Easy to parse Red-note post link",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cookies",
+      "title": "Red-note Cookies",
+      "type": "password",
+      "required": true,
+      "description": "Please copy your cookie from browser"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.2.1",
+    "got": "^14.4.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^24.0.12",
+    "@types/react": "^19.1.8",
+    "eslint": "^9.30.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3"
+  }
+}
