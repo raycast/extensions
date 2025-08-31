@@ -3,12 +3,12 @@
   "name": "qovery",
   "title": "Qovery",
   "description": "Interact with your Qovery organization",
-  "icon": "/extension-icon.png",
+  "icon": "extension-icon.png",
   "screenshots": [
     {
       "title": "Qovery Services List",
       "description": "View all services in your Qovery organization",
-      "path": "metadata/services-list.png"
+      "path": "metadata/service-list.png"
     },
     {
       "title": "Service Actions",
@@ -34,21 +34,18 @@
       "mode": "view"
     }
   ],
-  "main": "src/index.jsx",
+  "main": "src/index.tsx",
   "dependencies": {
-    "@raycast/api": "^1.64.4"
+    "@raycast/api": "^1.83.2",
+    "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
-    "@babel/eslint-parser": "^7.28.0",
-    "@babel/preset-react": "^7.27.1",
-    "@eslint/js": "^9.34.0",
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.2.27",
-    "eslint": "^8.56.0",
-    "globals": "^16.3.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "^19.0.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",

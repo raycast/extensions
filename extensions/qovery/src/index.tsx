@@ -1,28 +1,41 @@
 import { useState, useEffect } from "react";
-import {
-  List,
-  ActionPanel,
-  Action,
-  showToast,
-  Toast,
-  Form,
-  LocalStorage,
-  Icon,
-} from "@raycast/api";
+import { List, ActionPanel, Action, showToast, Toast, Form, LocalStorage, Icon } from "@raycast/api";
+
+interface Service {
+  id: string;
+  name: string;
+  service_type: string;
+  project_id: string;
+  project_name: string;
+  environment_id: string;
+  environment_name: string;
+  updated_at: string;
+}
+
+interface Organization {
+  id: string;
+  name: string;
+  description?: string;
+  updated_at: string;
+}
+
+interface ServiceLink {
+  url: string;
+}
 
 export default function Command() {
-  const [services, setServices] = useState([]);
+  const [services, setServices] = useState<Service[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [showConfig, setShowConfig] = useState(false);
   const [apiToken, setApiToken] = useState("");
   const [organizationId, setOrganizationId] = useState("");
-  const [organizations, setOrganizations] = useState([]);
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [showOrganizations, setShowOrganizations] = useState(false);
   const [isLoadingOrgs, setIsLoadingOrgs] = useState(false);
   const [showLinks, setShowLinks] = useState(false);
-  const [selectedService, setSelectedService] = useState(null);
-  const [serviceLinks, setServiceLinks] = useState([]);
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [serviceLinks, setServiceLinks] = useState<ServiceLink[]>([]);
   const [isLoadingLinks, setIsLoadingLinks] = useState(false);
 
   useEffect(() => {
@@ -35,9 +48,9 @@ export default function Command() {
       const storedOrgId = await LocalStorage.getItem("qovery_organization_id");
 
       if (storedApiToken && storedOrgId) {
-        setApiToken(storedApiToken);
-        setOrganizationId(storedOrgId);
-        fetchServices(storedApiToken, storedOrgId);
+        setApiToken(storedApiToken as string);
+        setOrganizationId(storedOrgId as string);
+        fetchServices(storedApiToken as string, storedOrgId as string);
       } else {
         setShowConfig(true);
         setIsLoading(false);
@@ -48,7 +61,7 @@ export default function Command() {
     }
   };
 
-  const fetchOrganizations = async (token) => {
+  const fetchOrganizations = async (token: string) => {
     if (!token) {
       setError("API Token is required to fetch organizations.");
       return;
@@ -73,7 +86,7 @@ export default function Command() {
         }
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as { results?: Organization[] };
       setOrganizations(data.results || []);
       setShowOrganizations(true);
 
@@ -85,8 +98,7 @@ export default function Command() {
         });
       }
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Unknown error occurred";
+      const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       setError(errorMessage);
       showToast({
         style: Toast.Style.Failure,
@@ -98,7 +110,7 @@ export default function Command() {
     }
   };
 
-  const saveCredentials = async (token, orgId) => {
+  const saveCredentials = async (token: string, orgId: string) => {
     try {
       await LocalStorage.setItem("qovery_api_token", token);
       await LocalStorage.setItem("qovery_organization_id", orgId);
@@ -128,29 +140,24 @@ export default function Command() {
     setError(null);
 
     try {
-      const response = await fetch(
-        `https://api.qovery.com/organization/${orgId}/services`,
-        {
-          headers: {
-            Authorization: `Token ${token}`,
-            "Content-Type": "application/json",
-          },
+      const response = await fetch(`https://api.qovery.com/organization/${orgId}/services`, {
+        headers: {
+          Authorization: `Token ${token}`,
+          "Content-Type": "application/json",
         },
-      );
+      });
 
       if (!response.ok) {
         if (response.status === 401) {
           throw new Error("Invalid API token. Please check your credentials.");
         } else if (response.status === 404) {
-          throw new Error(
-            "Organization not found. Please check your organization ID.",
-          );
+          throw new Error("Organization not found. Please check your organization ID.");
         } else {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as { results?: Service[] };
       setServices(data.results || []);
 
       if (data.results && data.results.length === 0) {
@@ -161,8 +168,7 @@ export default function Command() {
         });
       }
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Unknown error occurred";
+      const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       setError(errorMessage);
       showToast({
         style: Toast.Style.Failure,
@@ -174,13 +180,8 @@ export default function Command() {
     }
   };
 
-  const openInQovery = (service) => {
-    if (
-      !service ||
-      !service.project_id ||
-      !service.environment_id ||
-      !service.id
-    ) {
+  const openInQovery = (service: Service) => {
+    if (!service || !service.project_id || !service.environment_id || !service.id) {
       return null;
     }
 
@@ -189,13 +190,8 @@ export default function Command() {
     return url;
   };
 
-  const fetchServiceLinks = async (service) => {
-    if (
-      !service ||
-      !service.id ||
-      !service.project_id ||
-      !service.environment_id
-    ) {
+  const fetchServiceLinks = async (service: Service) => {
+    if (!service || !service.id || !service.project_id || !service.environment_id) {
       showToast({
         style: Toast.Style.Failure,
         title: "Error",
@@ -246,7 +242,7 @@ export default function Command() {
         }
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as { results?: ServiceLink[] };
       setServiceLinks(data.results || []);
       setShowLinks(true);
 
@@ -260,12 +256,11 @@ export default function Command() {
         showToast({
           style: Toast.Style.Success,
           title: "Links loaded",
-          message: `Found ${data.results.length} link(s)`,
+          message: `Found ${data?.results?.length} link(s)`,
         });
       }
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Unknown error occurred";
+      const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       showToast({
         style: Toast.Style.Failure,
         title: "Error",
@@ -309,11 +304,7 @@ export default function Command() {
       <List isLoading={isLoadingLinks}>
         <List.Section title={`Links for ${selectedService?.name || "Service"}`}>
           {serviceLinks.length === 0 && !isLoadingLinks && (
-            <List.EmptyView
-              icon="🔗"
-              title="No Links Found"
-              description="This service has no configured links"
-            />
+            <List.EmptyView icon="🔗" title="No Links Found" description="This service has no configured links" />
           )}
           {serviceLinks.map((link, index) => (
             <List.Item
@@ -322,13 +313,8 @@ export default function Command() {
               title={link.url}
               actions={
                 <ActionPanel>
-                  {link.url && (
-                    <Action.OpenInBrowser title="Open Link" url={link.url} />
-                  )}
-                  <Action.CopyToClipboard
-                    title="Copy Link URL"
-                    content={link.url || ""}
-                  />
+                  {link.url && <Action.OpenInBrowser title="Open Link" url={link.url} />}
+                  <Action.CopyToClipboard title="Copy Link URL" content={link.url || ""} />
                   <Action
                     title="Back to Services"
                     onAction={() => {
@@ -402,16 +388,12 @@ export default function Command() {
           <ActionPanel>
             <Action.SubmitForm
               title="Fetch Organizations"
-              onSubmit={async (values) => {
+              onSubmit={async (values: { apiToken: string }) => {
                 setApiToken(values.apiToken);
                 fetchOrganizations(values.apiToken);
               }}
             />
-            <Action
-              title="Clear Stored Credentials"
-              onAction={clearCredentials}
-              style={Action.Style.Destructive}
-            />
+            <Action title="Clear Stored Credentials" onAction={clearCredentials} style={Action.Style.Destructive} />
           </ActionPanel>
         }
       >
@@ -435,11 +417,7 @@ export default function Command() {
           description={error}
           actions={
             <ActionPanel>
-              <Action
-                title="Retry"
-                onAction={() => fetchServices()}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-              />
+              <Action title="Retry" onAction={() => fetchServices()} shortcut={{ modifiers: ["cmd"], key: "r" }} />
               <Action
                 title="Change Credentials"
                 onAction={() => {
@@ -449,11 +427,7 @@ export default function Command() {
                 }}
                 shortcut={{ modifiers: ["cmd"], key: "c" }}
               />
-              <Action
-                title="Clear Credentials"
-                onAction={clearCredentials}
-                style={Action.Style.Destructive}
-              />
+              <Action title="Clear Credentials" onAction={clearCredentials} style={Action.Style.Destructive} />
             </ActionPanel>
           }
         />
@@ -472,10 +446,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               {openInQovery(service) && (
-                <Action.OpenInBrowser
-                  title="Open in Qovery Console"
-                  url={openInQovery(service)}
-                />
+                <Action.OpenInBrowser title="Open in Qovery Console" url={openInQovery(service) as string} />
               )}
               <Action
                 title="View Service Links"
@@ -483,22 +454,10 @@ export default function Command() {
                 onAction={() => fetchServiceLinks(service)}
                 shortcut={{ modifiers: ["cmd"], key: "l" }}
               />
-              <Action.CopyToClipboard
-                title="Copy Project ID"
-                content={service.project_id}
-              />
-              <Action.CopyToClipboard
-                title="Copy Environment ID"
-                content={service.environment_id}
-              />
-              <Action.CopyToClipboard
-                title="Copy Service ID"
-                content={service.id}
-              />
-              <Action.CopyToClipboard
-                title="Copy Service Name"
-                content={service.name}
-              />
+              <Action.CopyToClipboard title="Copy Project Id to Clipboard" content={service.project_id} />
+              <Action.CopyToClipboard title="Copy Environment Id to Clipboard" content={service.environment_id} />
+              <Action.CopyToClipboard title="Copy Service Id to Clipboard" content={service.id} />
+              <Action.CopyToClipboard title="Copy Service Name" content={service.name} />
               <Action
                 title="Refresh Services"
                 onAction={() => fetchServices()}
@@ -513,11 +472,7 @@ export default function Command() {
                 }}
                 shortcut={{ modifiers: ["cmd"], key: "c" }}
               />
-              <Action
-                title="Clear Credentials"
-                onAction={clearCredentials}
-                style={Action.Style.Destructive}
-              />
+              <Action title="Clear Credentials" onAction={clearCredentials} style={Action.Style.Destructive} />
             </ActionPanel>
           }
         />

@@ -5,10 +5,8 @@ This Raycast extension displays all services from a Qovery organization with dyn
 ## Features
 
 - **Dynamic Credentials**: Enter your API token and organization ID directly in the extension
-- **Secure Storage**: Credentials are stored locally and securely
 - **Easy Management**: Change credentials anytime with keyboard shortcuts
 - **Service List**: View all services in your Qovery organization
-- **Status Indicators**: Visual status indicators for each service
 - **Quick Actions**:
   - Open services directly in Qovery Console
   - Copy service IDs and names to clipboard
