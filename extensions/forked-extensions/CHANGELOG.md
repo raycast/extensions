@@ -1,6 +1,6 @@
 # Raycast Fork Extensions Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-09-01
 
 - Improve error handling by creating a "catchError" utility function to avoid running rest of the code when an error occurs
 - Use a workaround to fix the issue that the "Toast" instance cannot set the "primaryAction.onAction" for some unknown reason
