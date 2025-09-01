@@ -39,6 +39,6 @@ The GrammariX extension seamlessly integrates with Raycaster, enabling you to en
 - **Tone Change**: Adjust the tone of your writing, whether it's happy, friendly, romantic, and more.
 - **Integrated Workflow**: Enhance your writing within your familiar Raycaster environment.
 
-## We are using the GPT-4o mini model, so each request will incur a cost. Please refer to the [price list ](https://openai.com/pricing) for details
+## We are using the GPT-5 nano model, so each request will incur a cost. Please refer to the [price list ](https://openai.com/pricing) for details
 
 ## If you have a Raycast Pro subscription, you don't need to provide openAIKey.

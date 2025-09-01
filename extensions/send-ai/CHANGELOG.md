@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.0.4] - 2025-08-05
+
+- Auto logout and redirect to login page if token is expired
+
 ## [0.0.3] - 2025-07-08
 
 - Fixed typescript errors - no new features added

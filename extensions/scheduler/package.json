@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "scheduler",
+  "title": "Command Scheduler",
+  "description": "Allows you to schedule Raycast commands to run at specific times ⏰.",
+  "icon": "extension-icon.png",
+  "author": "cps",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Scheduled Commands",
+      "description": "View and manage your scheduled commands.",
+      "mode": "view"
+    },
+    {
+      "name": "create-new-scheduled",
+      "title": "Create New Scheduled Command",
+      "description": "Create a new scheduled command.",
+      "mode": "view"
+    },
+    {
+      "name": "view-logs",
+      "title": "View Execution Logs",
+      "description": "View logs of scheduled command executions.",
+      "mode": "view"
+    },
+    {
+      "name": "execute-due-commands",
+      "title": "Execute Due Commands",
+      "description": "Check for due scheduled commands.",
+      "mode": "no-view",
+      "interval": "1m"
+    }
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.4",
+    "@raycast/utils": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "24.3.0",
+    "@types/react": "19.1.10",
+    "eslint": "^9.33.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

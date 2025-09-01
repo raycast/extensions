@@ -1,5 +1,9 @@
 # End Of Life Changelog
 
+## [Windows Support] - 2025-08-04
+
+- Added support for Windows
+
 ## [Use official API] - 2025-07-29
 
 - **Major Refactor**: Migrated to use the official endoflife.date API

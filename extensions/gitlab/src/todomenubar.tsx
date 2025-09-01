@@ -23,7 +23,7 @@ function getMaxTodosPreference(): number {
   return getBoundedPreferenceNumber({ name: "maxtodos" });
 }
 
-export default function TodosMenuBarCommand(): JSX.Element | null {
+export default function TodosMenuBarCommand(): React.ReactNode | null {
   const { todos, error, isLoading } = useTodos();
   const { grayicon, alwaysshow, showtext } = getPreferenceValues<Preferences.Todomenubar>();
 

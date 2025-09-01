@@ -1,5 +1,9 @@
 # Unicode Symbols
 
+## [Improvements] - 2025-07-20
+
+- Added the "CHARACTER TABULATION" (tab whitespace character) to the datasets.
+
 ## [Improvements] - 2024-12-17
 
 - Added option to set Primary Action (`copy`/`paste`) - ([#15901](https://github.com/raycast/extensions/issues/15901))

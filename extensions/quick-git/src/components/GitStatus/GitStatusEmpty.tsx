@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { List } from "@raycast/api";
-import type { BranchInfo } from "../../utils/branch.js";
+import type { BranchInfo } from "../../utils/git-status/branch.js";
 import { useRepo } from "../../hooks/useRepo.js";
 
 interface Props {

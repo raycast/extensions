@@ -4,11 +4,21 @@ import { setMaxListeners } from "node:events";
 import { useCallback, useRef, useState } from "react";
 import { initTraktClient } from "../lib/client";
 import { APP_MAX_LISTENERS, IMDB_APP_URL, TRAKT_APP_URL } from "../lib/constants";
+import { createEpisodeMarkdown, createEpisodeMetadata } from "../lib/detail-helpers";
 import { getIMDbUrl, getScreenshotUrl, getTraktUrl } from "../lib/helper";
-import { TraktEpisodeListItem } from "../lib/schema";
+import { TraktEpisodeListItem, TraktShowBaseItem } from "../lib/schema";
+import { GenericDetail } from "./generic-detail";
 import { GenericGrid } from "./generic-grid";
 
-export const EpisodeGrid = ({ showId, seasonNumber, slug }: { showId: number; seasonNumber: number; slug: string }) => {
+export const EpisodeGrid = ({
+  showId,
+  seasonNumber,
+  slug,
+}: {
+  showId: number;
+  seasonNumber: number;
+  slug?: string;
+}) => {
   const abortable = useRef<AbortController>();
   const traktClient = initTraktClient();
   const [actionLoading, setActionLoading] = useState(false);
@@ -102,6 +112,18 @@ export const EpisodeGrid = ({ showId, seasonNumber, slug }: { showId: number; se
     [],
   );
 
+  const episodeMarkdown = useCallback(
+    (episode: TraktEpisodeListItem) =>
+      createEpisodeMarkdown(episode, { ids: { slug: slug ?? "" }, title: slug ?? "Unknown Show" } as TraktShowBaseItem),
+    [slug],
+  );
+
+  const episodeMetadata = useCallback(
+    (episode: TraktEpisodeListItem) =>
+      createEpisodeMetadata(episode, { ids: { slug: slug ?? "" }, title: slug ?? "Unknown Show" } as TraktShowBaseItem),
+    [slug],
+  );
+
   return (
     <GenericGrid
       isLoading={isLoading || actionLoading}
@@ -117,22 +139,56 @@ export const EpisodeGrid = ({ showId, seasonNumber, slug }: { showId: number; se
       actions={(item) => (
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser
-              icon={getFavicon(TRAKT_APP_URL)}
-              title="Open in Trakt"
-              url={getTraktUrl("episode", slug, seasonNumber, item.number)}
-            />
-            <Action.OpenInBrowser
-              icon={getFavicon(IMDB_APP_URL)}
-              title="Open in IMDb"
-              url={getIMDbUrl(item.ids.imdb)}
+            <Action.Push
+              icon={Icon.Eye}
+              title="View Details"
+              target={
+                <GenericDetail
+                  item={item}
+                  isLoading={false}
+                  markdown={episodeMarkdown}
+                  metadata={episodeMetadata}
+                  navigationTitle={(episode) => `${episode.title} • S${episode.season}E${episode.number}`}
+                  actions={(episode) => (
+                    <ActionPanel>
+                      <ActionPanel.Section>
+                        <Action
+                          title="Check-in"
+                          icon={Icon.Checkmark}
+                          onAction={() => handleAction(episode, checkInEpisode, "Episode checked-in")}
+                        />
+                        <Action
+                          title="Add to History"
+                          icon={Icon.Clock}
+                          shortcut={Keyboard.Shortcut.Common.Duplicate}
+                          onAction={() => handleAction(episode, addEpisodeToHistory, "Episode added to history")}
+                        />
+                      </ActionPanel.Section>
+                      <ActionPanel.Section>
+                        <Action.OpenInBrowser
+                          icon={getFavicon(TRAKT_APP_URL)}
+                          title="Open in Trakt"
+                          shortcut={Keyboard.Shortcut.Common.Open}
+                          url={getTraktUrl("episode", slug, episode.season, episode.number)}
+                        />
+                        <Action.OpenInBrowser
+                          icon={getFavicon(IMDB_APP_URL)}
+                          title="Open in Imdb"
+                          shortcut={{ modifiers: ["cmd"], key: "i" }}
+                          url={getIMDbUrl(episode.ids.imdb)}
+                        />
+                      </ActionPanel.Section>
+                    </ActionPanel>
+                  )}
+                />
+              }
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action
               title="Check-in"
               icon={Icon.Checkmark}
-              shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
+              shortcut={Keyboard.Shortcut.Common.Edit}
               onAction={() => handleAction(item, checkInEpisode, "Episode checked-in")}
             />
             <Action

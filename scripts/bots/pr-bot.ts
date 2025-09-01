@@ -11,7 +11,7 @@ type API = {
 };
 
 export default async ({ github, context }: API) => {
-  const assignReadyForReviewTo = "andreaselia";
+  const assignReadyForReviewTo = "pernielsentikaer";
 
   if (context.payload.action === "ready_for_review" && !context.payload.pull_request.draft) {
     try {

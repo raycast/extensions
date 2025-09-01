@@ -55,6 +55,23 @@
       "required": true,
       "title": "Client Secret",
       "placeholder": "my-client-secret"
+    },
+    {
+      "name": "showDoneTasks",
+      "title": "Preferences",
+      "label": "Show done tasks",
+      "description": "Show tasks marked as done",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "showDoneProjects",
+      "label": "Show closed projects",
+      "description": "Show projects marked as closed",
+      "type": "checkbox",
+      "required": false,
+      "default": false
     }
   ],
   "dependencies": {

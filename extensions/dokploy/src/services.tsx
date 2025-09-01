@@ -85,7 +85,7 @@ export default function Services({ project }: { project: Project }) {
           body: JSON.stringify(body),
         });
         if (!response.ok) {
-          const err: ErrorResult = await response.json();
+          const err = (await response.json()) as ErrorResult;
           throw new Error(err.message);
         }
         toast.style = Toast.Style.Success;
@@ -112,7 +112,7 @@ export default function Services({ project }: { project: Project }) {
   const totalServices = getProjectTotalServices(project);
 
   return (
-    <List isShowingDetail={totalServices > 0}>
+    <List navigationTitle="Services" isShowingDetail={totalServices > 0}>
       {!totalServices ? (
         <List.EmptyView
           icon="folder-input.svg"
@@ -210,7 +210,7 @@ function CreateApplication({ project }: { project: Project }) {
           body: JSON.stringify({ ...values, projectId: project.projectId }),
         });
         if (!response.ok) {
-          const err: ErrorResult = await response.json();
+          const err = (await response.json()) as ErrorResult;
           throw new Error(err.message);
         }
         toast.style = Toast.Style.Success;
@@ -232,6 +232,7 @@ function CreateApplication({ project }: { project: Project }) {
   });
   return (
     <Form
+      navigationTitle="Services"
       isLoading={isLoading}
       actions={
         <ActionPanel>
@@ -307,7 +308,7 @@ function CreateDatabase({ project }: { project: Project }) {
           body: JSON.stringify({ ...db, projectId: project.projectId }),
         });
         if (!response.ok) {
-          const err: ErrorResult = await response.json();
+          const err = (await response.json()) as ErrorResult;
           throw new Error(err.message);
         }
         toast.style = Toast.Style.Success;
@@ -339,6 +340,7 @@ function CreateDatabase({ project }: { project: Project }) {
   });
   return (
     <Form
+      navigationTitle="Services"
       isLoading={isLoading}
       actions={
         <ActionPanel>

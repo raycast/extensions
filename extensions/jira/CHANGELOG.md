@@ -1,5 +1,11 @@
 # Jira Changelog
 
+## [Fix deprecated Jira search API] - 2025-08-20
+
+- Replaced removed `/search` endpoint with the new enhanced search-based API (`POST /search/jql`).
+- Added response-shape compatibility for `searchResults` / `values`.
+- Updated `src/api/issues.ts` and related hooks to prevent runtime errors after Atlassian CHANGE-2046.
+
 ## [Update Markdown library] - 2025-06-25
 
 - Migrated to a new Markdown to ADF library as the old one was no longer being maintained.
