@@ -7,7 +7,7 @@ export const normalizeStatus = (
   statusIdWithGroupName: Record<string, { name: string; index: number }>
 ): Status => {
   const statusName = status.name
-  const index = statusIdWithGroupName[status.id]?.index || 0
+  const index = statusIdWithGroupName[status.id]?.index ?? 0
 
   // Get status configuration using the status name (group mapping is handled automatically)
   const statusConfig = getStatusConfig(statusName, index)

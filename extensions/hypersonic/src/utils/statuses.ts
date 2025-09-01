@@ -38,10 +38,10 @@ export const DEFAULT_STATUS_ICONS = {
 
 // Function to get the group name from a status name
 export function getStatusGroup(statusName: string): keyof typeof STATUS_ICONS {
-  const normalizedName = statusName.toLowerCase()
+  const normalizedName = statusName.toLowerCase().trim()
 
   for (const [groupName, keywords] of Object.entries(STATUS_GROUPS)) {
-    if (keywords.some((keyword) => normalizedName.includes(keyword))) {
+    if (keywords.some((keyword) => normalizedName === keyword)) {
       return groupName as keyof typeof STATUS_ICONS
     }
   }
