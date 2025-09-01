@@ -1,6 +1,6 @@
 # Raycast Fork Extensions Changelog
 
-## [Bugfixes] - {PR_MERGE_DATE}
+## [Bugfixes] - 2025-09-01
 
 - Fix the missing sparse-checkout-add action when the repository is synced
 - Add a toast message when forking an extension when the repository is outdated
