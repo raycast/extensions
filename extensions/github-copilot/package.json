@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "github-copilot",
+  "title": "GitHub Copilot",
+  "description": "Delegate tasks to GitHub Copilot coding agent and track progress from Raycast",
+  "icon": "icon.png",
+  "author": "timrogers",
+  "contributors": [
+    "pernielsentikaer",
+    "thomas"
+  ],
+  "owner": "github",
+  "access": "public",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "view-tasks",
+      "title": "View Tasks",
+      "subtitle": "GitHub Copilot",
+      "description": "Track Copilot coding agent tasks",
+      "mode": "view"
+    },
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "subtitle": "GitHub Copilot",
+      "description": "Delegate a task to Copilot coding agent to work on in the background",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "create-task",
+      "title": "Create GitHub Copilot Task",
+      "description": "Creates a GitHub Copilot coding task with a prompt, repository, and optional branch. If no branch is provided, uses the default branch of the repository."
+    },
+    {
+      "name": "search-repositories",
+      "title": "Search GitHub Repositories",
+      "description": "Searches for GitHub repositories. Can search recent repositories, repositories by owner, or use a query filter to find repositories."
+    }
+  ],
+  "dependencies": {
+    "@msgpack/msgpack": "^3.1.2",
+    "@octokit/core": "^7.0.2",
+    "@octokit/rest": "^22.0.0",
+    "@raycast/api": "^1.102.5",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

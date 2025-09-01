@@ -1,13 +1,25 @@
 import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import process from "node:process";
-import { getPreferenceValues } from "@raycast/api";
 import spawn from "nano-spawn";
 import * as api from "./api.js";
+import { defaultGitExecutableFilePath } from "./constants.js";
 import { ForkedExtension } from "./types.js";
-import { getRemoteUrl } from "./utils.js";
+import { gitExecutableFilePath, getRemoteUrl, repositoryConfigurationPath } from "./utils.js";
 
-const { repositoryConfigurationPath } = getPreferenceValues<ExtensionPreferences>();
+/**
+ * The path to the Git executable file.
+ * @remarks
+ * Windows does not support paths with spaces without quotes, like `C:\Program Files\Git\cmd\git.exe`.
+ * So we need to add quotes around the path if it contains spaces and is not already quoted.
+ */
+const gitFilePath =
+  os.platform() === "win32" &&
+  gitExecutableFilePath?.includes(" ") &&
+  !(gitExecutableFilePath?.startsWith('"') && gitExecutableFilePath?.endsWith('"'))
+    ? `"${gitExecutableFilePath}"`
+    : gitExecutableFilePath || defaultGitExecutableFilePath;
 
 /**
  * Resolves the path to the repository configuration.
@@ -22,13 +34,6 @@ const resolvePath = (input: string) =>
  * The path to the repository where forked extensions are managed.
  */
 export const repositoryPath = resolvePath(repositoryConfigurationPath);
-
-/**
- * Executes a git command in the repository root directory.
- * @param args The arguments to pass to the git command.
- * @return The subprocess result of the git command execution.
- */
-export const git = async (args: string[]) => spawn("git", args, { cwd: repositoryPath, shell: true });
 
 /**
  * Checks if a file or directory exists and is readable and writable.
@@ -71,21 +76,62 @@ export const getExtensionList = async () => {
 };
 
 /**
+ * Executes a git command in the repository root directory.
+ * @param args The arguments to pass to the git command.
+ * @return The subprocess result of the git command execution.
+ */
+export const git = async (args: string[]) => spawn(gitFilePath, args, { cwd: repositoryPath, shell: true });
+
+/**
+ * Checks if Git is valid by running `git --version`.
+ * @returns True if Git is installed, false otherwise.
+ */
+export const checkIfGitIsValid = async () => {
+  try {
+    await spawn(gitFilePath, ["--version"], { shell: true });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Gets the last full commit hash of the current branch.
+ * @remarks Returns an empty string if the repository is not initialized.
+ * @returns The last commit hash as a string.
+ */
+export const getLastCommitHash = async () => {
+  const { output } = await git(["rev-parse", "HEAD"]).catch(() => ({ output: "" }));
+  return output.trim();
+};
+
+/**
+ * Gets the forked repository full name and whether it's newly cloned.
+ * @returns An object containing the forked repository full name and a boolean indicating if it's newly cloned.
+ */
+export const getForkedRepository = async () => {
+  const gitExists = await fileExists(path.join(repositoryPath, ".git"));
+  if (!gitExists) return "";
+  const { output } = await git(["remote", "get-url", "origin"]);
+  const existingRepository = output.replace(/^(https:\/\/github.com\/|git@github\.com:)/, "").replace(/\.git$/, "");
+  return existingRepository;
+};
+
+/**
  * Initializes the repository by cloning it if it doesn't exist.
  * @returns The full name of the forked repository.
  */
 export const initRepository = async () => {
-  const gitExists = await fileExists(path.join(repositoryPath, ".git"));
-  if (gitExists) {
-    const { output } = await git(["remote", "get-url", "origin"]);
-    const existiingRepository = output.replace(/^(https:\/\/github.com\/|git@github\.com:)/, "").replace(/\.git$/, "");
-    return existiingRepository;
-  }
-
+  const localForkedRepository = await getForkedRepository();
+  if (localForkedRepository) return localForkedRepository;
   const forkedRepository = await api.getForkedRepository();
-  await spawn("git", ["clone", "--filter=blob:none", "--no-checkout", getRemoteUrl(forkedRepository), repositoryPath], {
-    shell: true,
-  });
+  await spawn(
+    gitFilePath,
+    ["clone", "--filter=blob:none", "--no-checkout", getRemoteUrl(forkedRepository), repositoryPath],
+    {
+      shell: true,
+    },
+  );
   await git(["sparse-checkout", "set", "--cone"]);
   await git(["checkout", "main"]);
   return forkedRepository;
@@ -108,7 +154,8 @@ export const setUpstream = async (forkedRepository: string) => {
  */
 export const isStatusClean = async () => {
   const { output } = await git(["status", "--porcelain"]);
-  return output.trim() === "";
+  if (output.trim() === "") return;
+  throw new Error("The repository is not clean. Please commit or stash your changes before proceeding.");
 };
 
 /**
@@ -123,21 +170,6 @@ export const syncFork = async () => {
   if (currentBranch !== "main") await git(["checkout", "main"]);
   await git(["merge", "--ff-only", "upstream/main"]);
   if (currentBranch !== "main") await git(["checkout", currentBranch]);
-};
-
-/**
- * Pulls the latest changes from the upstream repository.
- *
- * [TODO] We should check if the repository is clean before pulling
- *
- * @remarks
- *
- * - If the local branch is outdated, fast-forward it;
- * - If the local branch contains unpushed work, warn about it;
- * - If the branch seems merged and its upstream branch was deleted, delete it.
- */
-export const pull = async () => {
-  await git(["pull"]);
 };
 
 /**

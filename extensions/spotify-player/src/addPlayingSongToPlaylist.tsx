@@ -81,27 +81,30 @@ function AddToPlaylistCommand(props: AddToPlaylistCommandProps) {
   }
 
   useEffect(() => {
-    if (props?.playlistId) {
-      try {
-        addToPlaylist({
-          playlistId: props.playlistId,
-          trackUris: [currentlyPlayingData.item?.uri as string],
-        });
-        const playlist = myPlaylistsData?.items?.find((p) => p.id == props.playlistId);
-        if (!playlist) {
-          showHUD("Playlist not found");
-          popToRoot();
-          return;
+    if (props?.playlistId && currentlyPlayingData?.item?.uri && !currentlyPlayingIsLoading) {
+      const addToPlaylistAsync = async () => {
+        try {
+          await addToPlaylist({
+            playlistId: props.playlistId!,
+            trackUris: [currentlyPlayingData.item.uri!],
+          });
+          const playlist = myPlaylistsData?.items?.find((p) => p.id == props.playlistId);
+          if (!playlist) {
+            showHUD("Playlist not found");
+            popToRoot();
+            return;
+          }
+          showHUD(`Added to ${playlist?.name}`);
+        } catch (err) {
+          const error = getError(err);
+          showHUD(`Error adding song to playlist: ${error.message}`);
         }
-        showHUD(`Added to ${playlist?.name}`);
-      } catch (err) {
-        const error = getError(err);
-        showHUD(`Error adding song to playlist: ${error.message}`);
-      }
-      popToRoot();
-      return;
+        popToRoot();
+      };
+
+      addToPlaylistAsync();
     }
-  }, []);
+  }, [props?.playlistId, currentlyPlayingData?.item?.uri, currentlyPlayingIsLoading]);
 
   return (
     <List
@@ -109,6 +112,7 @@ function AddToPlaylistCommand(props: AddToPlaylistCommandProps) {
       searchText={searchText}
       onSearchTextChange={setSearchText}
       filtering={true}
+      isLoading={currentlyPlayingIsLoading}
     >
       <ListOrGridSection type="list" title="Playlists">
         {myPlaylistsData?.items
@@ -125,6 +129,15 @@ function AddToPlaylistCommand(props: AddToPlaylistCommandProps) {
                     icon={Icon.Plus}
                     title="Add Current Song to Playlist"
                     onAction={async () => {
+                      if (currentlyPlayingIsLoading) {
+                        showToast({
+                          title: "Please wait",
+                          message: "Fetching currently playing track",
+                          style: Toast.Style.Failure,
+                        });
+                        return;
+                      }
+
                       if (playlist.id === undefined) {
                         showToast({
                           title: "Error adding song to playlist",
