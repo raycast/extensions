@@ -214,7 +214,40 @@ If missing evals, reference: [AI Evals Documentation](https://developers.raycast
   }
   ```
 
-## 8. Documentation References
+## 8. ESLint Configuration
+
+### Import Path for defineConfig
+- The correct import path for `defineConfig` is `"eslint/config"`, not `"eslint"`
+- **Do NOT suggest** changing imports from `"eslint/config"` to `"eslint"`
+- Both CommonJS and ES module patterns should use the `/config` subpath
+
+### Correct Examples
+```javascript
+// ✅ Correct - CommonJS
+const { defineConfig } = require("eslint/config");
+
+// ✅ Correct - ES Modules  
+import { defineConfig } from "eslint/config";
+
+// ❌ Incorrect
+const { defineConfig } = require("eslint");
+import { defineConfig } from "eslint";
+```
+
+### Standard Raycast ESLint Configuration
+Extensions should follow the established pattern:
+
+```javascript
+const { defineConfig } = require("eslint/config");
+const raycastConfig = require("@raycast/eslint-config");
+
+module.exports = defineConfig([
+  ...raycastConfig,
+  // Additional rules if needed
+]);
+```
+
+## 9. Documentation References
 
 ### Primary Reference
 Always reference the [Raycast Developer Documentation](https://developers.raycast.com/) for guidelines and best practices when providing feedback.
@@ -243,6 +276,7 @@ When reviewing a PR, systematically check:
 - [ ] Tools extensions include AI evals
 - [ ] No custom localization (use preferences for locale-dependent features)
 - [ ] .prettierrc follows Raycast standards (don't suggest changes)
+- [ ] ESLint configuration uses correct import path `"eslint/config"` (don't suggest changing to `"eslint"`)
 
 ## Tone and Approach
 
