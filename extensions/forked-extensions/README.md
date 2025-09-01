@@ -24,6 +24,7 @@ _Please note that the `fork` we mention here is not the same as Git's `fork`._
 This extension requires the following GitHub API permission scopes:
 
 - `repo`
+  - `api.repositoryExists()` - Checks if the user's forked repository exists
   - `api.getForkedRepository()` - Retrieves the full name of the user's forked repository
   - `api.compareTwoCommits()` - Compares two commits in the user's forked repository
 - `workflow`

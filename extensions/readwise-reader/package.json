@@ -132,6 +132,10 @@
             {
               "title": "Later",
               "value": "later"
+            },
+            {
+              "title": "Archive",
+              "value": "archive"
             }
           ],
           "required": false,

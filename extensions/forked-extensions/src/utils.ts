@@ -1,5 +1,6 @@
 import path from "node:path";
 import { Cache, getPreferenceValues } from "@raycast/api";
+import { upstreamRepository } from "./constants.js";
 import { ForkedExtension } from "./types.js";
 
 export const { gitExecutableFilePath, gitRemoteType, githubPersonalAccessToken, repositoryConfigurationPath } =
@@ -32,10 +33,10 @@ export const extensionLink = (username: string, extension: string) => `https://r
 
 /**
  * Returns the remote URL for the repository based on the configured remote type in extension preferences.
- * @param repository Optional. The full repository name. Defaults to `"raycast/extensions"`.
+ * @param repository Optional. The full repository name. Defaults to the upstream repository - `"raycast/extensions"`.
  * @returns The remote URL for the repository.
  */
-export const getRemoteUrl = (repository: string = "raycast/extensions") => {
+export const getRemoteUrl = (repository: string = upstreamRepository) => {
   if (gitRemoteType === "https") return `https://github.com/${repository}.git`;
   if (gitRemoteType === "ssh") return `git@github.com:${repository}.git`;
   throw new Error("Invalid URL type. Use 'https' or 'ssh'.");
@@ -46,5 +47,4 @@ export const getRemoteUrl = (repository: string = "raycast/extensions") => {
  * @param commitsCount The number of commits.
  * @returns The human-readable text for the number of commits.
  */
-export const getCommitsText = (commitsCount: number, prependSpace?: boolean) =>
-  (prependSpace ? " " : "") + (commitsCount === 1 ? "1 commit" : `${commitsCount} commits`);
+export const getCommitsText = (commitsCount: number) => (commitsCount === 1 ? "1 commit" : `${commitsCount} commits`);
