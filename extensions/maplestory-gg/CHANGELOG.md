@@ -1,6 +1,6 @@
 # MapleStory.gg
 
-## [Routine Maintenance] - {PR_MERGE_DATE}
+## [Routine Maintenance] - 2025-09-01
 
 - Handle HTTP request errors gracefully
 - Bump all dependencies to the latest
