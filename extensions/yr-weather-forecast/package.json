@@ -1,0 +1,102 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "yr-weather-forecast",
+  "title": "Weather Forecast",
+  "description": "Weather forecast using the Norwegian Meteorological Institute's API",
+  "icon": "extension-icon.png",
+  "author": "kakaoduft",
+  "access": "public",
+  "license": "MIT",
+  "keywords": [
+    "weather",
+    "forecast",
+    "yr",
+    "institute of meteorology",
+    "met.no",
+    "met"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "yr",
+      "title": "Yr",
+      "description": "Search and show weather",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "units",
+          "label": "Units",
+          "title": "Units",
+          "description": "Choose metric or imperial units",
+          "type": "dropdown",
+          "required": false,
+          "default": "metric",
+          "data": [
+            {
+              "title": "Metric (°C, m/s, mm)",
+              "value": "metric"
+            },
+            {
+              "title": "Imperial (°F, mph, in)",
+              "value": "imperial"
+            }
+          ]
+        },
+        {
+          "name": "showWindDirection",
+          "label": "Show Wind Direction",
+          "title": "Show Wind Direction",
+          "description": "Display wind direction arrows in the main view",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "showSunTimes",
+          "label": "Show Sunrise/Sunset",
+          "title": "Show Sunrise/Sunset",
+          "description": "Display sunrise and sunset times in the main view",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "debugMode",
+          "label": "Debug Mode",
+          "title": "Debug Mode",
+          "description": "Show detailed console output for debugging API calls and network tests",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.3",
+    "@raycast/utils": "^1.17.0",
+    "d3-array": "^3.2.4",
+    "d3-scale": "^4.0.2",
+    "d3-shape": "^3.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/d3-scale": "^4.0.9",
+    "@types/d3-shape": "^3.1.7",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
