@@ -32,6 +32,23 @@ export type DomainDetails = Omit<Domain, "zone_id"> & {
   glue_records: string[] | null;
 };
 
+export type DNSZone = {
+  zone_id: number
+  zone: string;
+  status: "ACTIVE" | "INACTIVE";
+  ns_resource_records: string;
+}
+export type DNSRecord = {
+    zone_id: number;
+    dns_record_id: number;
+    zone: string;
+    name: string;
+    type: string;
+    content: string;
+    ttl: number;
+    prio: number;
+  }
+
 export type DomainEvent = {
   domain: string;
   status: string;
