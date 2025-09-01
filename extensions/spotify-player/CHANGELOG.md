@@ -1,5 +1,7 @@
 # Spotify Player Changelog
 
+## [Chore: Contributor has become inactive] - {PR_MERGE_DATE}
+
 ## [Fix Add Playing Song to Playlist Command Using Cached Data] - 2025-08-28
 
 - Fixed race condition in Add Playing Song to Playlist command to properly wait for currently playing data to load
