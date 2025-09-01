@@ -1,6 +1,6 @@
 import StatsListItem from "./StatsListItem";
 
-const ChargeItem = (props: { currentCapacity: number; maxCapacity: number; chargerWattage: number | undefined }) => {
+const ChargeItem = (props: { currentCapacity: number; maxCapacity: number; chargerWattage?: number }) => {
   const formattedCapacity =
     props.currentCapacity && props.maxCapacity ? `${props.currentCapacity} mAh / ${props.maxCapacity} mAh` : "--";
 
