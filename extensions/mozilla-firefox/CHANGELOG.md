@@ -1,6 +1,6 @@
 # Mozilla Firefox Changelog
 
-## [Major Refactor & Bug Fixes] - {PR_MERGE_DATE}
+## [Major Refactor & Bug Fixes] - 2025-09-01
 
 - **BREAKING**: Refactored all classes to functional components
 - **NEW**: Added browser selection preference (Firefox, Firefox Nightly, Firefox ESR, Firefox Developer Edition)
