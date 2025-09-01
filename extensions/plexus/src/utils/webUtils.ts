@@ -1,4 +1,4 @@
-export async function getFavicon(url: string): Promise<string | undefined> {
+export async function getServiceIcon(url: string): Promise<string | undefined> {
   try {
     // Try the most common favicon path first
     const faviconUrl = `${url}/favicon.ico`;

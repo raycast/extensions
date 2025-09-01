@@ -1,7 +1,7 @@
 import { LocalhostItem } from "../types/LocalhostItem";
 import { findNodeProcesses, getProcessCommand, getWorkingDirectory } from "../utils/processUtils";
 import { detectFramework, getProjectName, getProjectPath, createDisplayName } from "../utils/projectUtils";
-import { getFavicon, getPageTitle } from "../utils/webUtils";
+import { getPageTitle, getServiceIcon } from "../utils/webUtils";
 
 export async function getLocalhostItems(): Promise<LocalhostItem[]> {
   const output = await findNodeProcesses();
@@ -35,7 +35,7 @@ export async function getLocalhostItems(): Promise<LocalhostItem[]> {
       const displayName = createDisplayName(projectName, framework);
 
       // Try to get favicon
-      const favicon = await getFavicon(url);
+      const favicon = await getServiceIcon(url);
 
       items.push({
         id: pid,

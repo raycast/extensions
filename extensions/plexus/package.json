@@ -9,6 +9,7 @@
   "engines": {
     "node": ">=20.15.1"
   },
+  "platforms": ["macOS"],
   "commands": [
     {
       "name": "plexus",
