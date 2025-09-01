@@ -1,5 +1,13 @@
 # Spotify Player Changelog
 
+## [Chore: Contributor has become inactive] - 2025-09-01
+
+## [Fix Add Playing Song to Playlist Command Using Cached Data] - 2025-08-28
+
+- Fixed race condition in Add Playing Song to Playlist command to properly wait for currently playing data to load
+- Improved error handling with proper loading state checks to prevent using stale cached data
+- Enhanced user feedback with loading indicators and error messages
+
 ## [Include option to prevent duplicate songs in Add to Playlist command] - 2025-08-25
 
 - Introduced an option allowing users to choose whether to allow duplicate songs to be added to their playlists

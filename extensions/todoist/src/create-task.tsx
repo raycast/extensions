@@ -96,7 +96,7 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
             description: values.description || undefined,
             project_id: values.projectId || undefined,
             responsible_uid: values.responsibleUid || undefined,
-            labels: values.labels.length > 0 ? values.labels : undefined,
+            labels: Array.isArray(values.labels) && values.labels.length > 0 ? values.labels : undefined,
             priority: parseInt(values.priority),
             section_id: values.sectionId || undefined,
             parent_id: values.parentId || undefined,
@@ -134,7 +134,7 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
             },
           };
 
-          if (values.files.length > 0) {
+          if (Array.isArray(values.files) && values.files.length > 0) {
             try {
               toast.message = "Uploading file and adding to comment…";
               const file = await uploadFile(values.files[0]);
