@@ -13,7 +13,9 @@ export default function Command() {
 
       try {
         const localhostItems = await getLocalhostItems();
-        setItems(localhostItems);
+        // Sort items by port number (ascending)
+        const sortedItems = localhostItems.sort((a, b) => parseInt(a.port) - parseInt(b.port));
+        setItems(sortedItems);
       } catch (error) {
         showToast({
           style: Toast.Style.Failure,
