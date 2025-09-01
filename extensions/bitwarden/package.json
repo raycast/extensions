@@ -403,7 +403,7 @@
       "default": true,
       "title": "Performance",
       "label": "Enable Caching",
-      "description": "Whether to cache vault items for faster access. This will NOT cache the actual passwords and other sensitive values, only usernames/emails and other non-sensitive labels."
+      "description": "Whether to cache vault items for faster load times. This will NOT cache the actual passwords and other sensitive values, only usernames/emails and other non-sensitive labels."
     }
   ],
   "dependencies": {
