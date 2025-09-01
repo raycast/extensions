@@ -1,6 +1,6 @@
 # Readwise Reader Changelog
 
-## Minor fixes - {PR_MERGE_DATE}
+## Minor fixes - 2025-09-01
 
 - Use correct URL when opening an article.
 - Update the Search command to respect preferences.
