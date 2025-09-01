@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Rocket + cloud icon (dark-optimized) -->
+  <rect width="1024" height="1024" fill="none"/>
+  <g transform="translate(180,80) rotate(-15 332 432)">
+    <g>
+      <path d="M332 96c74 78 126 174 126 274 0 162-120 292-126 298-6-6-126-136-126-298 0-100 52-196 126-274Z" fill="#7C6CFF"/>
+      <circle cx="332" cy="300" r="54" fill="#0B0F19" stroke="#E2E8F0" stroke-width="12"/>
+      <path d="M240 460c-56 22-92 70-106 138 62-26 113-25 154 4 6-40-10-96-48-142Z" fill="#B6AEFF"/>
+      <path d="M424 460c56 22 92 70 106 138-62-26-113-25-154 4-6-40 10-96 48-142Z" fill="#B6AEFF"/>
+      <path d="M332 690c-26 40-40 78-44 114 30-10 56-10 88 0-4-36-18-74-44-114Z" fill="#FFB561"/>
+    </g>
+    <ellipse cx="332" cy="840" rx="120" ry="28" fill="#000" opacity=".18"/>
+    <g transform="translate(410,540)">
+      <path d="M160 84a52 52 0 0 0-96-28 60 60 0 0 0-96 32 44 44 0 1 0-8 88h184a52 52 0 0 0 16-100Z" fill="#F8FAFC"/>
+      <path d="M160 84a52 52 0 0 0-96-28 60 60 0 0 0-96 32 44 44 0 1 0-8 88h184a52 52 0 0 0 16-100Z" fill="none" stroke="#CBD5E1" stroke-width="8"/>
+    </g>
+  </g>
+</svg>
+
