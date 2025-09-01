@@ -1,6 +1,6 @@
 # Where's Cursor Changelog
 
-## [Big update] - {PR_MERGE_DATE}
+## [Big update] - 2025-09-01
 
 General improvement with revised binary code and Raycast extension options of "Where's My Cursor" extension.
 
