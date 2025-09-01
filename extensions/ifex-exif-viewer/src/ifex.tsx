@@ -1,15 +1,8 @@
-import { execSync } from 'node:child_process';
-import os from 'node:os';
-import path from 'node:path';
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  getSelectedFinderItems,
-  showToast,
-  Toast,
-} from '@raycast/api';
-import { useCallback, useEffect, useState } from 'react';
+import { execSync } from "node:child_process";
+import os from "node:os";
+import path from "node:path";
+import { Action, ActionPanel, Detail, getSelectedFinderItems, showToast, Toast } from "@raycast/api";
+import { useCallback, useEffect, useState } from "react";
 
 interface ExifData {
   [key: string]: unknown;
@@ -32,13 +25,13 @@ const getSelectedFilePaths = async (): Promise<string[]> => {
 };
 
 const getErrorMessage = (error: unknown): string => {
-  if (!(error instanceof Error)) return 'Failed to read EXIF data';
+  if (!(error instanceof Error)) return "Failed to read EXIF data";
 
-  if (error.message.includes('command not found')) {
-    return 'ifex CLI tool not found. Please install ifex first.';
+  if (error.message.includes("command not found")) {
+    return "ifex CLI tool not found. Please install ifex first.";
   }
-  if (error.message.includes('No such file')) {
-    return 'File not found';
+  if (error.message.includes("No such file")) {
+    return "File not found";
   }
   return error.message;
 };
@@ -47,7 +40,7 @@ const processExifFile = (filePath: string, envPath: string): FileExifData => {
   try {
     const command = `ifex read --json "${filePath}"`;
     const output = execSync(command, {
-      encoding: 'utf8',
+      encoding: "utf8",
       env: { ...process.env, PATH: envPath },
     });
     const exifData = JSON.parse(output);
@@ -81,8 +74,8 @@ export default function ViewExifCommand() {
       if (filePaths.length === 0) {
         await showToast({
           style: Toast.Style.Failure,
-          title: 'No files found',
-          message: 'Please select image files in Finder first',
+          title: "No files found",
+          message: "Please select image files in Finder first",
         });
         setIsLoading(false);
         return;
@@ -93,8 +86,8 @@ export default function ViewExifCommand() {
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: 'Error loading files',
-        message: error instanceof Error ? error.message : 'Unknown error occurred',
+        title: "Error loading files",
+        message: error instanceof Error ? error.message : "Unknown error occurred",
       });
     } finally {
       setIsLoading(false);
@@ -134,13 +127,13 @@ export default function ViewExifCommand() {
       // Format key names to be more readable
       const formatKey = (key: string) => {
         return key
-          .replace(/\[Tag.*?\]/g, '') // Remove [Tag(...)] parts
-          .replace(/IPTC:\s*/, '') // Remove IPTC: prefix
+          .replace(/\[Tag.*?\]/g, "") // Remove [Tag(...)] parts
+          .replace(/IPTC:\s*/, "") // Remove IPTC: prefix
           .trim();
       };
 
       const formatFraction = (str: string): string => {
-        const parts = str.split('/');
+        const parts = str.split("/");
         if (parts.length !== 2) return str;
 
         const num1 = Number(parts[0]);
@@ -154,13 +147,13 @@ export default function ViewExifCommand() {
 
       // Format values to be more readable
       const formatValue = (value: unknown) => {
-        if (typeof value === 'object') {
+        if (typeof value === "object") {
           return JSON.stringify(value);
         }
 
         const str = String(value);
 
-        if (str.includes('/')) {
+        if (str.includes("/")) {
           return formatFraction(str);
         }
 
@@ -169,18 +162,14 @@ export default function ViewExifCommand() {
 
       // Group EXIF data by category
       const cameraInfo = exifEntries.filter(
-        ([key]) => key.includes('Make') || key.includes('Model') || key.includes('Lens')
+        ([key]) => key.includes("Make") || key.includes("Model") || key.includes("Lens")
       );
 
       const exposureInfo = exifEntries.filter(
-        ([key]) =>
-          key.includes('ISO') ||
-          key.includes('Focal') ||
-          key.includes('Aperture') ||
-          key.includes('Speed')
+        ([key]) => key.includes("ISO") || key.includes("Focal") || key.includes("Aperture") || key.includes("Speed")
       );
 
-      const dateInfo = exifEntries.filter(([key]) => key.includes('Date') || key.includes('Time'));
+      const dateInfo = exifEntries.filter(([key]) => key.includes("Date") || key.includes("Time"));
 
       const otherInfo = exifEntries.filter(
         ([key]) =>
@@ -188,15 +177,15 @@ export default function ViewExifCommand() {
             cameraInfo.some(([k]) => k === key) ||
             exposureInfo.some(([k]) => k === key) ||
             dateInfo.some(([k]) => k === key) ||
-            key.includes('file')
+            key.includes("file")
           )
       );
 
       const renderSection = (title: string, entries: [string, unknown][]) => {
-        if (entries.length === 0) return '';
+        if (entries.length === 0) return "";
 
         const rows = entries.map(([key, value]) => `| ${formatKey(key)} | ${formatValue(value)} |`);
-        const table = ['| Property | Value |', '|:---------|:------|', ...rows].join('\n');
+        const table = ["| Property | Value |", "|:---------|:------|", ...rows].join("\n");
 
         return `### ${title}\n\n${table}\n\n`;
       };
@@ -205,18 +194,18 @@ export default function ViewExifCommand() {
 
 ![${fileData.file}](file://${fileData.filePath})
 
-${exifEntries.length === 0 ? 'No EXIF data found in this file.' : ''}
+${exifEntries.length === 0 ? "No EXIF data found in this file." : ""}
 
-${renderSection('📷 Camera & Lens', cameraInfo)}
-${renderSection('⚙️ Exposure Settings', exposureInfo)}
-${renderSection('📅 Date & Time', dateInfo)}
-${renderSection('📋 Other Information', otherInfo)}
+${renderSection("📷 Camera & Lens", cameraInfo)}
+${renderSection("⚙️ Exposure Settings", exposureInfo)}
+${renderSection("📅 Date & Time", dateInfo)}
+${renderSection("📋 Other Information", otherInfo)}
 
 ---
 
 `;
     })
-    .join('');
+    .join("");
 
   return (
     <Detail
@@ -224,9 +213,7 @@ ${renderSection('📋 Other Information', otherInfo)}
       actions={
         <ActionPanel>
           <Action title="Refresh" onAction={loadExifData} />
-          {files.length > 0 && !files[0].error && (
-            <Action.OpenWith title="Open First Image" path={files[0].filePath} />
-          )}
+          {files.length > 0 && !files[0].error && <Action.OpenWith title="Open First Image" path={files[0].filePath} />}
         </ActionPanel>
       }
     />
