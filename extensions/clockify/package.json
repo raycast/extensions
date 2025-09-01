@@ -63,6 +63,13 @@
       "subtitle": "Clockify",
       "description": "Manage Clockify time entries with Raycast",
       "mode": "view"
+    },
+    {
+      "name": "activeTimeEntries",
+      "title": "Active Time Entries",
+      "subtitle": "Clockify",
+      "description": "View and manage currently running time entries",
+      "mode": "view"
     }
   ],
   "dependencies": {

@@ -13,7 +13,8 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import isEmpty from "lodash.isempty";
 import useConfig from "./useConfig";
-import { fetcher, formatElapsedTime, isInProgress, getTimeEntries } from "./utils";
+import { fetcher, showElapsedTime, isInProgress } from "./utils";
+import { getTimeEntries } from "./index";
 import { TimeEntry } from "./types";
 
 function OpenWebPage() {
@@ -21,12 +22,12 @@ function OpenWebPage() {
 }
 
 function useClock(entry: TimeEntry) {
-  const [time, setTime] = useState(formatElapsedTime(entry.timeInterval?.start || ""));
+  const [time, setTime] = useState(showElapsedTime(entry));
 
   useEffect(() => {
-    const interval = setInterval(() => setTime(formatElapsedTime(entry.timeInterval?.start || "")), 1000);
+    const interval = setInterval(() => setTime(showElapsedTime(entry)), 1000);
     return () => clearInterval(interval);
-  }, [entry.timeInterval?.start]);
+  }, [entry]);
 
   return time;
 }
@@ -78,7 +79,7 @@ function ActiveTimeEntryItem({ entry, updateActiveEntries }: { entry: TimeEntry;
             title="Cancel Entry"
             style={Action.Style.Destructive}
             onAction={handleCancelTimer}
-            shortcut={{ modifiers: ["cmd"], key: "delete" }}
+            shortcut={{ modifiers: ["cmd"], key: "backspace" }}
           />
           <OpenWebPage />
         </ActionPanel>
