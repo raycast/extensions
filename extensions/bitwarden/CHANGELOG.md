@@ -3,7 +3,7 @@
 ## [Improvements] - {PR_MERGE_DATE}
 
 - Sync vault on command launch
-- Reoganize preferences
+- Reorganize preferences
 
 ## [Fix] - 2025-06-26
 
