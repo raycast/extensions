@@ -9,7 +9,8 @@
   "icon": "extension-icon.png",
   "author": "nyatinte",
   "contributors": [
-    "bohdan_zhuravel"
+    "bohdan_zhuravel",
+    "zzyfisher"
   ],
   "license": "MIT",
   "commands": [
@@ -62,6 +63,14 @@
       "title": "Custom npx Path",
       "description": "Override the default npx path if needed (optional)",
       "placeholder": "e.g., /usr/local/bin/npx"
+    },
+    {
+      "name": "useDirectCcusageCommand",
+      "type": "checkbox",
+      "required": false,
+      "label": "Use Direct 'ccusage' Command",
+      "description": "Use 'ccusage' command directly instead of 'npx ccusage@latest' (useful when npx has network issues)",
+      "default": false
     }
   ],
   "tools": [

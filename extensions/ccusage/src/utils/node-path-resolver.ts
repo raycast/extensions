@@ -12,11 +12,25 @@ const getAppleSiliconStatus = (): boolean => {
   return cachedIsAppleSilicon;
 };
 
+// Parse Node.js version string to comparable number (e.g., "18.17.1" -> 18017001)
+const parseVersion = (version: string): number => {
+  const versionMatch = version.match(/^v?(\d+)\.(\d+)\.(\d+)/);
+  if (!versionMatch) return 0;
+
+  const [, major, minor, patch] = versionMatch;
+  return parseInt(major) * 1000000 + parseInt(minor) * 1000 + parseInt(patch);
+};
+
+const sortPathsByVersion = (paths: Array<{ path: string; version: string }>): string[] => {
+  return paths.sort((a, b) => parseVersion(b.version) - parseVersion(a.version)).map((item) => item.path);
+};
+
 export const resolveVersionManagerPaths = (): string[] => {
-  const paths: string[] = [];
+  const versionedPaths: Array<{ path: string; version: string }> = [];
+  const staticPaths: string[] = [];
   const home = process.env.HOME;
 
-  if (!home) return paths;
+  if (!home) return [];
 
   const nvmVersionsDir = join(home, ".nvm", "versions", "node");
   try {
@@ -24,7 +38,7 @@ export const resolveVersionManagerPaths = (): string[] => {
     for (const version of nodeVersions) {
       const binPath = join(nvmVersionsDir, version, "bin");
       if (existsSync(binPath)) {
-        paths.push(binPath);
+        versionedPaths.push({ path: binPath, version });
       }
     }
   } catch {
@@ -37,22 +51,24 @@ export const resolveVersionManagerPaths = (): string[] => {
     for (const version of nodeVersions) {
       const binPath = join(fnmVersionsDir, version, "installation", "bin");
       if (existsSync(binPath)) {
-        paths.push(binPath);
+        versionedPaths.push({ path: binPath, version });
       }
     }
   } catch {
     // Directory doesn't exist or no permissions - continue silently
   }
 
-  const staticPaths = [join(home, ".n", "bin"), join(home, ".volta", "bin")];
+  const staticPathCandidates = [join(home, ".n", "bin"), join(home, ".volta", "bin")];
 
-  for (const path of staticPaths) {
+  for (const path of staticPathCandidates) {
     if (existsSync(path)) {
-      paths.push(path);
+      staticPaths.push(path);
     }
   }
 
-  return paths;
+  // Sort versioned paths by version (newest first) and append static paths
+  const sortedVersionedPaths = sortPathsByVersion(versionedPaths);
+  return [...sortedVersionedPaths, ...staticPaths];
 };
 
 /**
