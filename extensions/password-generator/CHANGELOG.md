@@ -1,6 +1,6 @@
 # Password Generator Changelog
 
-## [Windows Support & Dependency Updates] - 2025-09-01
+## [Windows Support & Dependency Updates] - {PR_MERGE_DATE}
 
 - Added support for Raycast on Windows.
 - Updated dependencies to their latest versions:
