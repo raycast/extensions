@@ -1,5 +1,10 @@
 # Raycast Fork Extensions Changelog
 
+## [Bugfixes] - {PR_MERGE_DATE}
+
+- Fix the missing sparse-checkout-add action when the repository is synced
+- Add a toast message when forking an extension when the repository is outdated
+
 ## [Improvements] - 2025-09-01
 
 - Improve error handling by creating a "catchError" utility function to avoid running rest of the code when an error occurs

@@ -91,7 +91,10 @@ class Operation {
                 // Set `isOperating` to false to allow `sync` to run.
                 this.isOperating = false;
                 await this.sync();
+                // Manually show the toast again because the previous sync operation completed the toast.
+                await this.showToast({ title: "Forking extension" });
                 await git.sparseCheckoutAdd(extensionFolder);
+                this.completeToast("Forked successfully");
               },
             },
             dismissAction: {
@@ -101,6 +104,8 @@ class Operation {
               },
             },
           });
+        } else {
+          await git.sparseCheckoutAdd(extensionFolder);
         }
       },
       "Forking extension",
