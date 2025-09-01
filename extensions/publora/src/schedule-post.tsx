@@ -1,6 +1,6 @@
 import { Form, ActionPanel, Action, LaunchProps, Toast, showToast, getPreferenceValues } from "@raycast/api";
 import { useCachedState, useForm, FormValidation } from "@raycast/utils";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { Post, Platform } from "./types";
 import { fetchPlatforms, schedulePost } from "./api";
@@ -10,6 +10,8 @@ export default function Command(props: LaunchProps<{ draftValues: Post }>) {
 
   const api_key = getPreferenceValues<ExtensionPreferences>().api_key;
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [canSubmit, setCanSubmit] = useState(false);
   const [allPlatforms, setAllPlatforms] = useCachedState<Platform[]>("platforms", [
     {
       platformId: "loading",
@@ -19,11 +21,17 @@ export default function Command(props: LaunchProps<{ draftValues: Post }>) {
     },
   ]);
 
-  const { handleSubmit, itemProps, values } = useForm<Post>({
+  const { handleSubmit, itemProps, values, reset } = useForm<Post>({
     initialValues: draftPost || { content: "" },
     async onSubmit(post: Post) {
+      if (!canSubmit) {
+        showToast({ title: "Error", message: "Please fetch platforms first", style: Toast.Style.Failure });
+        return;
+      }
+
       try {
         await schedulePost(api_key, post);
+        reset({ content: "", platforms: [], scheduledTime: undefined });
         showToast({ title: "Submitted form", message: "Your post scheduled successfully" });
         return true;
       } catch (error) {
@@ -60,22 +68,31 @@ export default function Command(props: LaunchProps<{ draftValues: Post }>) {
 
   useEffect(() => {
     const getPlatforms = async () => {
+      setIsLoading(true);
       try {
         const platforms = await fetchPlatforms(api_key);
         setAllPlatforms(platforms);
+        setCanSubmit(true);
+        setIsLoading(false);
       } catch (error) {
         console.error("Error fetching platforms:", error);
-        showToast({ title: "Error", message: `${error}`, style: Toast.Style.Failure });
+        showToast({ title: "Error", message: "Error fetching platforms, check API key", style: Toast.Style.Failure });
+        setCanSubmit(false);
+        setIsLoading(false);
       }
     };
 
     getPlatforms();
-  }, [api_key]);
+  }, []);
+
+  // console.log(allPlatforms);
+  console.log(isLoading);
 
   return (
     <Form
       enableDrafts
       navigationTitle={`Total characters: ${values.content.length}`}
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm onSubmit={handleSubmit} title="Schedule Post" />
