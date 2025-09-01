@@ -5,7 +5,8 @@ Ever lost your cursor in the vast expanse of your multi-monitor setup? 😥 One 
 It calls a small Swift app that dims the screen where the cursor is and puts a spotlight on its location.
 
 ### Default mode
-![where is my cursor presentation mode](/metadata/LocateCursor_defaultmode.gif)
+
+![where is my cursor presentation mode](/metadata/default_mode.gif)
 
 ## ✨ Features
 
@@ -15,10 +16,10 @@ This extension comes with a few commands to help you out:
 - **Simple Mode:** A simple visual aid to find the cursor. It shows a red circle with a yellow border around the cursor for 5 seconds.
 - **Presentation Mode:** A persistent yellow-tinted circle around your cursor to make it easier to follow during presentations.
 - **Custom Mode:** This command opens a form that lets you create a custom, temporary or persistent locator. You can configure things like:
-    - Duration (set to 0 for persistent)
-    - Screen Opacity
-    - Circle Radius, Opacity, and Color
-    - Border Width and Color
+  - Duration (set to 0 for persistent)
+  - Screen Opacity
+  - Circle Radius, Opacity, and Color
+  - Border Width and Color
 - **Turn Off Cursor Highlight:** This command immediately stops any running cursor highlight effect.
 
 ## 🛠️ Setup
@@ -38,7 +39,8 @@ This extension works completely offline and does not collect, store, or transmit
 ## 🖼️ Examples
 
 ### Presentation mode
-![where is my cursor presentation mode](/metadata/LocateCursor_presentationmode.gif)
+
+![where is my cursor presentation mode](/media/presentation_mode.gif)
 
 ---
 
