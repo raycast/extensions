@@ -1,6 +1,6 @@
 # Link Cleaner Changelog
 
-## [Add options to close Raycast after cleaning] - 2025-08-31
+## [Add options to close Raycast after cleaning] - {PR_MERGE_DATE}
 
 ## [Added Clean Selected Text Functionality] - 2025-04-15
 
