@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Chore: Contributor has become inactive] - {PR_MERGE_DATE}
+## [Chore: Contributor has become inactive] - 2025-09-01
 
 ## [Fix Add Playing Song to Playlist Command Using Cached Data] - 2025-08-28
 
