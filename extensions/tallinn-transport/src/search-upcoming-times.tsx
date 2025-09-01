@@ -34,7 +34,11 @@ function RoutesList() {
           ]}
           actions={
             <ActionPanel>
-              <Action.Push title="Show Stops" target={<StopsList route={route} stops={data?.stops} />} />
+              <Action.Push
+                title="Show Stops"
+                icon={Icon.Train}
+                target={<StopsList route={route} stops={data?.stops} />}
+              />
             </ActionPanel>
           }
         />

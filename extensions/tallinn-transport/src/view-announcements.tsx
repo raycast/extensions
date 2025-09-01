@@ -14,6 +14,7 @@ function AnnouncementsList() {
   });
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
+  console.log(isLoading);
   return (
     <List
       isLoading={isLoading}

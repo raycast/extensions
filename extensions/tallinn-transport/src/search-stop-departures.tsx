@@ -1,7 +1,7 @@
 import type { Stop } from "@/lib/stops";
 import { getAllCachedRoutesData } from "@/service/all-routes";
 import { getDeparturesForStop } from "@/service/departures";
-import { Action, ActionPanel, Color, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { format, formatDistanceToNow } from "date-fns";
 
@@ -45,7 +45,7 @@ function StopsList() {
               accessories={tags}
               actions={
                 <ActionPanel>
-                  <Action.Push title="Show Departures" target={<DeparturesList stop={stop} />} />
+                  <Action.Push title="Show Departures" icon={Icon.Train} target={<DeparturesList stop={stop} />} />
                   <Action.OpenInBrowser
                     title="Open in Google Maps"
                     url={`https://maps.google.com/?q=${stop.latitude},${stop.longitude}`}
