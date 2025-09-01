@@ -1,9 +1,9 @@
 import { Alert, confirmAlert, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
 import { showFailureToast, useSQL } from "@raycast/utils";
-import { execFile } from "child_process";
+import { execFile, execFileSync } from "child_process";
 import fs from "fs";
 import { homedir } from "os";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import util from "util";
 
 import { getZedDbName } from "./zed";
@@ -169,13 +169,12 @@ function processRemoteWorkspace(workspace: RemoteWorkspace): ZedEntry | undefine
   }
 }
 
-async function getSchemaVersion(dbPath: string): Promise<number> {
+function getSchemaVersionSync(dbPath: string): number {
   try {
-    const result = await execFilePromise("sqlite3", [
-      dbPath,
-      "SELECT MAX(step) FROM migrations WHERE domain = 'WorkspaceDb';",
-    ]);
-    const version = parseInt(result.stdout.trim(), 10);
+    const result = execFileSync("sqlite3", [dbPath, "SELECT MAX(step) FROM migrations WHERE domain = 'WorkspaceDb';"], {
+      encoding: "utf8",
+    });
+    const version = parseInt(result.trim(), 10);
     return isNaN(version) ? 0 : version;
   } catch (error) {
     console.error("Failed to get schema version:", error);
@@ -232,16 +231,17 @@ function getQueryForSchema(schemaVersion: number): string {
 
 export function useZedRecentWorkspaces(): ZedRecentWorkspaces {
   const path = getPath();
-  const [schemaVersion, setSchemaVersion] = useState<number | null>(null);
-  const [query, setQuery] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (fs.existsSync(path)) {
-      getSchemaVersion(path).then((version) => {
-        setSchemaVersion(version);
-        setQuery(getQueryForSchema(version));
-      });
+  // Use useMemo to compute schema version and query only when path changes
+  const { schemaVersion, query } = useMemo(() => {
+    if (!fs.existsSync(path)) {
+      return { schemaVersion: 0, query: null };
     }
+    const version = getSchemaVersionSync(path);
+    return {
+      schemaVersion: version,
+      query: getQueryForSchema(version),
+    };
   }, [path]);
 
   // Always call the hook, but use a dummy query if not ready
