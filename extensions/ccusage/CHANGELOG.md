@@ -1,5 +1,22 @@
 # Claude Code Usage (ccusage) Changelog
 
+## [v2.0.3] - {PR_MERGE_DATE}
+
+### Added
+
+- Direct ccusage command execution option for network environments with npx connectivity issues
+- Node.js version sorting in PATH resolution to prioritize latest versions
+- Enhanced PATH resolution for improved npx binary discovery across Node.js installations
+
+### Changed
+
+- Simplified project dependencies by removing usehooks-ts package
+- Improved CLI execution flexibility with configurable command options
+
+### Fixed
+
+- Enhanced compatibility with various Node.js version managers (nvm, fnm, volta)
+
 ## [v2.0.2] - 2025-07-07
 
 ### Fixed
