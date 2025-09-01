@@ -1,5 +1,12 @@
 # Raycast Fork Extensions Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Rename the "Sync Fork" action to "Sync Remote"
+- Add a new "Pull Changes" action to allow users to sync commits from remote forked repository
+- Add support for inspecting commits difference in "Run Diagnostics" action
+- Polish readme with more details about the extension's features and usage
+
 ## [Bugfixes] - 2025-09-01
 
 - Fix the missing sparse-checkout-add action when the repository is synced

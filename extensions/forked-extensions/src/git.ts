@@ -159,6 +159,16 @@ export const isStatusClean = async () => {
 };
 
 /**
+ * Gets the number of commits the current branch is ahead and behind the upstream branch.
+ * @returns An object containing the number of commits ahead and behind.
+ */
+export const getAheadBehindCommits = async () => {
+  const { output } = await git(["rev-list", "--left-right", "--count", "HEAD..@{u}"]);
+  const [ahead, behind] = output.split("\t").map(Number);
+  return { ahead, behind };
+};
+
+/**
  * Synchronizes the forked repository with the upstream repository on local.
  * @remarks This will checkout to main branch and merge the upstream main branch into it.
  * @see {@link https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork#syncing-a-fork-branch-from-the-command-line|Syncing a fork}

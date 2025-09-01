@@ -100,15 +100,15 @@ export const syncFork = async () => {
 };
 
 /**
- * Compares two commits in the user's forked repository.
+ * Compares two commits in the user's forked repository on GitHub.
  * @permissions `repo`
- * @returns Commits behind count.
+ * @returns An object containing ahead count and behind count.
  * @see {@link https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28#compare-two-commits|Compare two commits}
  */
 export const compareTwoCommits = async (forkedRepository: string) => {
   const [forkUser] = forkedRepository.split("/");
-  const response = await githubApi
+  const { ahead_by: ahead, behind_by: behind } = await githubApi
     .get(`repos/${upstreamRepository}/compare/raycast:main...${forkUser}:main`)
-    .json<{ behind_by: number }>();
-  return response.behind_by;
+    .json<{ ahead_by: number; behind_by: number }>();
+  return { ahead, behind };
 };

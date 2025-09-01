@@ -69,6 +69,12 @@ class Operation {
     );
 
   /**
+   * Pulls the latest changes from the remote forked repository.
+   * @remarks This will checkout to main branch and merge the forked main branch into it.
+   */
+  pull = async () => this.spawn(async () => git.syncFork(), "Pulling changes", "Pulled successfully");
+
+  /**
    * Forks an extension by adding it to the sparse-checkout list.
    * @param extensionFolder The folder of the extension to fork.
    */
@@ -80,11 +86,11 @@ class Operation {
           throw new Error(
             "Forked repository not found. Please try to rerun the extension to initialize the repository.",
           );
-        const commitsBehind = await api.compareTwoCommits(forkedRepository);
-        if (commitsBehind > 0) {
+        const { behind } = await api.compareTwoCommits(forkedRepository);
+        if (behind > 0) {
           await confirmAlert({
             title: "Repository Outdated",
-            message: `Your forked repository on GitHub is ${getCommitsText(commitsBehind)} behind the upstream repository. Do you want to sync it now?`,
+            message: `Your forked repository on GitHub is ${getCommitsText(behind)} behind the upstream repository. Do you want to sync it now?`,
             primaryAction: {
               title: "Sync Now",
               onAction: async () => {
