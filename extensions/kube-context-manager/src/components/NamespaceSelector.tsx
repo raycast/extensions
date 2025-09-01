@@ -44,11 +44,6 @@ export function NamespaceSelector({ namespaces, currentNamespace, onSelect }: Na
           title="No Namespaces Found"
           subtitle={searchText ? `No namespaces matching "${searchText}"` : "No namespaces available"}
           accessories={[{ text: "⚠️" }]}
-          actions={
-            <ActionPanel>
-              <Action title="No Action Available" onAction={() => {}} />
-            </ActionPanel>
-          }
         />
       )}
     </List>

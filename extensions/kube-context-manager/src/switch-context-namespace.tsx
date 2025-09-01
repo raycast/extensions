@@ -1,6 +1,6 @@
-import { List, ActionPanel, Action, useNavigation, Icon, popToRoot } from "@raycast/api";
+import { List, ActionPanel, Action, useNavigation, Icon, popToRoot, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useKubeconfig } from "./hooks/useKubeconfig";
-import { showSuccessToast, showErrorToast } from "./utils/errors";
 import { NamespaceSelector } from "./components/NamespaceSelector";
 import { ContextDetails } from "./components/ContextDetails";
 
@@ -23,12 +23,23 @@ export default function SwitchContextWithNamespace() {
     try {
       const success = await switchContextWithNamespace(contextName, namespace);
       if (success) {
-        await showSuccessToast("Context Switched", `Switched to: ${contextName} (namespace: ${namespace})`);
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Context Switched",
+          message: `Switched to: ${contextName} (namespace: ${namespace})`,
+        });
         // Go back to Raycast main command list
         await popToRoot();
+      } else {
+        await showFailureToast("Context switch failed", {
+          title: "Failed to switch context",
+          message: `Could not switch to context '${contextName}' with namespace '${namespace}'`,
+        });
       }
     } catch (err) {
-      await showErrorToast(err as Error);
+      await showFailureToast(err as Error, {
+        title: "Failed to switch context",
+      });
     }
   };
 
@@ -36,12 +47,23 @@ export default function SwitchContextWithNamespace() {
     try {
       const success = await switchContextWithNamespace(contextName);
       if (success) {
-        await showSuccessToast("Context Switched", `Switched to: ${contextName}`);
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Context Switched",
+          message: `Switched to: ${contextName}`,
+        });
         // Go back to Raycast main command list
         await popToRoot();
+      } else {
+        await showFailureToast("Context switch failed", {
+          title: "Failed to switch context",
+          message: `Could not switch to context '${contextName}'`,
+        });
       }
     } catch (err) {
-      await showErrorToast(err as Error);
+      await showFailureToast(err as Error, {
+        title: "Failed to switch context",
+      });
     }
   };
 

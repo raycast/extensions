@@ -1,7 +1,7 @@
-import { List, ActionPanel, Action, Icon, popToRoot } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, popToRoot, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useMemo } from "react";
 import { useKubeconfig } from "./hooks/useKubeconfig";
-import { showSuccessToast, showErrorToast } from "./utils/errors";
 import { searchAndFilterContexts, addRecentContext, SearchFilters } from "./utils/search-filter";
 import { ContextDetails } from "./components/ContextDetails";
 
@@ -20,12 +20,23 @@ export default function ListContexts() {
       const success = await switchContext(contextName);
       if (success) {
         addRecentContext(contextName);
-        await showSuccessToast("Context Switched", `Switched to: ${contextName}`);
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Context Switched",
+          message: `Switched to: ${contextName}`,
+        });
         // Go back to Raycast main command list
         await popToRoot();
+      } else {
+        await showFailureToast("Context switch failed", {
+          title: "Failed to switch context",
+          message: `Could not switch to context '${contextName}'`,
+        });
       }
     } catch (err) {
-      await showErrorToast(err as Error);
+      await showFailureToast(err as Error, {
+        title: "Failed to switch context",
+      });
     }
   };
 
@@ -59,23 +70,27 @@ export default function ListContexts() {
               text: context.userAuthMethod || "Unknown",
               tooltip: "Authentication Method",
             },
-            context.clusterDetails
-              ? {
-                  text: context.clusterDetails.protocol,
-                  tooltip: `${context.clusterDetails.isSecure ? "Secure" : "Insecure"} connection`,
-                }
-              : {},
-            searchQuery
-              ? {
-                  text: `${relevanceScore.toFixed(0)}%`,
-                  tooltip: `Relevance (matched: ${matchedFields.join(", ")})`,
-                }
-              : {},
+            ...(context.clusterDetails
+              ? [
+                  {
+                    text: context.clusterDetails.protocol,
+                    tooltip: `${context.clusterDetails.isSecure ? "Secure" : "Insecure"} connection`,
+                  },
+                ]
+              : []),
+            ...(searchQuery
+              ? [
+                  {
+                    text: `${relevanceScore.toFixed(0)}%`,
+                    tooltip: `Relevance (matched: ${matchedFields.join(", ")})`,
+                  },
+                ]
+              : []),
             {
               text: context.current ? "●" : "",
               tooltip: context.current ? "Current context" : undefined,
             },
-          ].filter((acc) => acc.text !== undefined)}
+          ]}
           actions={
             <ActionPanel>
               {!context.current && (
@@ -89,7 +104,13 @@ export default function ListContexts() {
                 <Action
                   title="Current Context"
                   icon={Icon.CheckCircle}
-                  onAction={() => showSuccessToast("Current Context", `Already using ${context.name}`)}
+                  onAction={() =>
+                    showToast({
+                      style: Toast.Style.Success,
+                      title: "Current Context",
+                      message: `Already using ${context.name}`,
+                    })
+                  }
                 />
               )}
               <Action.Push
