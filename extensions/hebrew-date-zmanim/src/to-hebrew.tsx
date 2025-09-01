@@ -22,7 +22,7 @@ export default function Command() {
     // Get parsha info - only relevant for Saturday
     const parshaNum = jc.getParsha();
     let parshaInfo = "";
-    if (jc.getDayOfWeek() === 7) {
+    if (jc.getDayOfWeek() === Calendar.SATURDAY) {
       // Saturday
       parshaInfo = parshaNum > 0 ? Parsha[parshaNum].replace(/_/g, " ") : "None";
     } else {
@@ -30,7 +30,7 @@ export default function Command() {
       const nextSat = new JewishCalendar();
       nextSat.setGregorianDate(d.getFullYear(), d.getMonth(), d.getDate());
       const daysToSat = (7 - nextSat.getDayOfWeek()) % 7;
-      if (daysToSat === 0 && nextSat.getDayOfWeek() !== 7) {
+      if (daysToSat === 0 && nextSat.getDayOfWeek() !== Calendar.SATURDAY) {
         // If today is not Saturday, add 7 days
         nextSat.forward(Calendar.DATE, 7);
       } else if (daysToSat > 0) {

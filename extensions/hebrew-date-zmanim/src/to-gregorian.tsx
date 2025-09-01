@@ -77,7 +77,7 @@ Please check that:
     // Get parsha info - only relevant for Saturday
     const parshaNum = jc.getParsha();
     let parshaInfo = "";
-    if (jc.getDayOfWeek() === 7) {
+    if (jc.getDayOfWeek() === Calendar.SATURDAY) {
       // Saturday
       parshaInfo = parshaNum > 0 ? Parsha[parshaNum].replace(/_/g, " ") : "None";
     } else {
@@ -85,7 +85,7 @@ Please check that:
       const nextSat = new JewishCalendar();
       nextSat.setJewishDate(jc.getJewishYear(), jc.getJewishMonth(), jc.getJewishDayOfMonth());
       const daysToSat = (7 - nextSat.getDayOfWeek()) % 7;
-      if (daysToSat === 0 && nextSat.getDayOfWeek() !== 7) {
+      if (daysToSat === 0 && nextSat.getDayOfWeek() !== Calendar.SATURDAY) {
         // If today is not Saturday, add 7 days
         nextSat.forward(Calendar.DATE, 7);
       } else if (daysToSat > 0) {
@@ -93,7 +93,7 @@ Please check that:
       }
       const nextParshaNum = nextSat.getParsha();
 
-      parshaInfo = nextParshaNum > 0 ? `${Parsha[nextParshaNum].replace(/_/g, " ")} ()` : "None this week";
+      parshaInfo = nextParshaNum > 0 ? `${Parsha[nextParshaNum].replace(/_/g, " ")} (On Shabbat)` : "None this week";
     }
 
     // Get special information

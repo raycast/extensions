@@ -1,5 +1,5 @@
 import { Action, ActionPanel, List, Toast, showToast, LocalStorage, Form, Icon, useNavigation } from "@raycast/api";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import Fuse from "fuse.js";
 import { getZmanimJson } from "kosher-zmanim";
 import { JewishDate } from "kosher-zmanim";
@@ -50,7 +50,7 @@ export default function ZmanimTodayCommand() {
     return fuse.search(query).map((r) => r.item);
   }, [query, fuse, allPairs]);
 
-  async function loadZmanim() {
+  const loadZmanim = useCallback(async () => {
     setIsLoading(true);
     try {
       const stored = await LocalStorage.getItem<string>("zmanim:lastLocation");
@@ -71,7 +71,7 @@ export default function ZmanimTodayCommand() {
         longitude: lon,
         timeZoneId: tz,
         elevation: 0,
-        //todo: make this configurable
+        // Note: complexZmanim is enabled by default for comprehensive calculations
         complexZmanim: true,
       } as {
         date: Date;
@@ -112,11 +112,11 @@ export default function ZmanimTodayCommand() {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [selectedDate]);
 
   useEffect(() => {
     loadZmanim();
-  }, [selectedDate]);
+  }, [selectedDate, loadZmanim]);
 
   function formatTimeOnly(s: string) {
     if (!s || s === "N/A") return s;
