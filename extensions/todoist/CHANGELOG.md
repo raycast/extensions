@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+## [Fixed Create Task TypeError] - 2025-09-01
+
+- **Fixed TypeError on Task Creation**: Resolved `TypeError: Cannot read properties of undefined (reading 'length')` error when submitting the Create Task form by adding defensive checks for undefined arrays
+
 ## [Fixed Create Task Form Initialization Error] - 2025-08-25
 
 - **Fixed TypeError on Task Creation**: Resolved intermittent `TypeError: Cannot read properties of undefined (reading 'length')` error when submitting the Create Task form
