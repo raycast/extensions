@@ -229,8 +229,8 @@ function SearchSendsCommandContent() {
         }
       } catch (error) {
         toast.style = Toast.Style.Failure;
-        toast.title = "Failed to sync Vault";
-        captureException(["Failed to sync Vault", isPeriodic && "periodically"], error);
+        toast.title = "Failed to sync vault";
+        captureException(["Failed to sync vault", isPeriodic && "periodically"], error);
       }
     });
   }
