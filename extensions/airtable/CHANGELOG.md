@@ -1,6 +1,6 @@
 # Airtable Changelog
 
-## [Optionally Authenticate w/ PAT] - {PR_MERGE_DATE}
+## [Optionally Authenticate w/ PAT] - 2025-09-01
 
 -  More precise errors shown
 - `Add` Icon to **Bases**
