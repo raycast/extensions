@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hebrew-date-zmanim",
+  "title": "Hebrew Date & Zmanim",
+  "description": "Hebrew date converter + full Kosher Zmanim with fuzzy search for Raycast.",
+  "icon": "extension-icon.png",
+  "author": "mendel_g",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "to-hebrew",
+      "title": "Gregorian → Hebrew",
+      "subtitle": "Convert a civil date to a Hebrew date",
+      "description": "Pick a date and get its Hebrew equivalent",
+      "mode": "view",
+      "keywords": [
+        "hebrew",
+        "jewish",
+        "luach",
+        "convert"
+      ],
+      "arguments": [],
+      "preferences": []
+    },
+    {
+      "name": "to-gregorian",
+      "title": "Hebrew → Gregorian",
+      "subtitle": "Convert a Hebrew date to a civil date",
+      "description": "Enter a Hebrew date (e.g., 7 Elul 5785 or כ\"\"ז בתמוז תשפ\"\"ג)",
+      "mode": "view",
+      "keywords": [
+        "hebrew",
+        "jewish",
+        "luach",
+        "convert"
+      ],
+      "arguments": []
+    },
+    {
+      "name": "setup-location",
+      "title": "Setup Location",
+      "subtitle": "Set your location for zmanim calculations",
+      "description": "Search and save your location for Today's Zmanim command.",
+      "mode": "view",
+      "keywords": [
+        "setup",
+        "location",
+        "address",
+        "configure"
+      ]
+    },
+    {
+      "name": "zmanim-today",
+      "title": "Zmanim for Date",
+      "subtitle": "All zmanim for any date.",
+      "description": "Shows all zmanim for today (or pick a date) using your saved location. Searchable and copyable.",
+      "mode": "view",
+      "keywords": [
+        "zmanim",
+        "today",
+        "alos",
+        "netz",
+        "shkia",
+        "tzais",
+        "plag",
+        "date"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.75.0",
+    "fuse.js": "^7.0.0",
+    "kosher-zmanim": "^0.6.0",
+    "tz-lookup": "^6.1.25"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^20.11.30",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "esbuild": "^0.25.9",
+    "prettier": "^3.6.2",
+    "typescript": "^5.4.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
