@@ -60,10 +60,6 @@ export default function Command() {
               state.batteryRegistry["AppleRawCurrentCapacity"] || state.batteryRegistry["CurrentCapacity"]
             }
             maxCapacity={state.batteryRegistry["AppleRawMaxCapacity"] || state.batteryRegistry["MaxCapacity"]}
-            chargerWattage={
-              state.batteryRegistry["AdapterDetails"]?.["Watts"] ||
-              state.batteryRegistry["AppleRawAdapterDetails"]?.[0]?.["Watts"]
-            }
           />
           <CycleCountItem cycles={state.batteryRegistry["CycleCount"]} />
           <MaxCapacityItem
