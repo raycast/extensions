@@ -3,7 +3,7 @@ import { showToast, Toast } from "@raycast/api";
 import { apiServiceManager } from "../../services/api-service";
 import { queryKeys } from "../../lib/query-client";
 import { logger } from "../../utils/logger";
-import type { Device, Preferences, DeviceCommand, DeviceState, CommandParameters } from "../../types";
+import type { Device, DeviceCommand, DeviceState, CommandParameters } from "../../types";
 import { showFailureToast } from "@raycast/utils";
 
 /**

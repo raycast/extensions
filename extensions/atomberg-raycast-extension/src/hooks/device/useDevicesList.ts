@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiServiceManager } from "../../services/api-service";
 import { queryKeys } from "../../lib/query-client";
-import type { Preferences } from "../../types";
 
 /**
  * Custom hook for managing the list of Atomberg devices

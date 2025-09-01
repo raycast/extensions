@@ -19,7 +19,7 @@ import { queryClient } from "./lib/query-client";
 import { apiServiceManager } from "./services/api-service";
 import { STORAGE_KEYS } from "./constants";
 import { logger } from "./utils/logger";
-import type { Preferences } from "./types";
+
 import { showFailureToast } from "@raycast/utils";
 
 interface CredentialInfo {

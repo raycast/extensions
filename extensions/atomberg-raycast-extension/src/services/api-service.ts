@@ -1,5 +1,4 @@
 import { AtombergApiService } from "./atomberg-api";
-import type { Preferences } from "../types";
 
 /**
  * Singleton manager for Atomberg API service instances

@@ -14,7 +14,6 @@ import type {
   DeviceControlResponse,
   DeviceState,
   DeviceStateResponse,
-  Preferences,
   DeviceCommand,
   CommandParameters,
 } from "../types";

@@ -16,7 +16,7 @@ import { queryClient } from "./lib/query-client";
 import { useDeviceState, useDeviceControl } from "./hooks";
 import { hasValidCredentials } from "./utils/device-utils";
 import { getIconFromString } from "./utils/icon-utils";
-import type { Preferences, Device, DeviceCommandDefinition, CommandParameters } from "./types";
+import type { Device, DeviceCommandDefinition, CommandParameters } from "./types";
 import { getAvailableCommandsForDevice, getCommandById } from "./config/device-commands";
 import { SetTimerForm } from "./components/SetTimerForm";
 import { SetSpeedForm } from "./components/SetSpeedForm";

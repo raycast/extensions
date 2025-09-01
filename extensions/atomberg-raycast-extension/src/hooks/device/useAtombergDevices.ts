@@ -2,7 +2,7 @@ import { useDevicesList } from "./useDevicesList";
 import { useDeviceControl } from "./useDeviceControl";
 import { apiServiceManager } from "../../services/api-service";
 import { logger } from "../../utils/logger";
-import type { Device, Preferences } from "../../types";
+import type { Device } from "../../types";
 
 /**
  * Main hook for managing Atomberg devices and their control operations

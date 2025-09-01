@@ -10,11 +10,6 @@ export interface Device {
   };
 }
 
-export interface Preferences {
-  apiKey?: string;
-  refreshToken?: string;
-}
-
 export interface AccessTokenResponse {
   status: string;
   message: {

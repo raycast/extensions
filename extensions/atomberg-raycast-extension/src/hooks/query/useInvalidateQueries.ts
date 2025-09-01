@@ -1,6 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "../../lib/query-client";
-import type { Preferences } from "../../types";
 
 /**
  * Custom hook for invalidating device-related queries in React Query cache
