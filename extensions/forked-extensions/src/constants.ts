@@ -1,12 +1,17 @@
 /**
+ * The upstream repository name for the Raycast extensions.
+ */
+export const upstreamRepository = "raycast/extensions";
+
+/**
  * The HTTPS remote URL for the Raycast extensions repository.
  */
-export const raycastGitRemoteHttps = "https://github.com/raycast/extensions.git";
+export const raycastGitRemoteHttps = `https://github.com/${upstreamRepository}.git`;
 
 /**
  * The SSH remote URL for the Raycast extensions repository.
  */
-export const raycastGitRemoteSsh = "git@github.com:raycast/extensions.git";
+export const raycastGitRemoteSsh = `git@github.com:${upstreamRepository}.git`;
 
 /**
  * The default Git executable file path.

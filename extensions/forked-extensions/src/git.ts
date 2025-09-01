@@ -97,9 +97,11 @@ export const checkIfGitIsValid = async () => {
 
 /**
  * Gets the last full commit hash of the current branch.
+ * @remarks Returns an empty string if the repository is not initialized.
+ * @returns The last commit hash as a string.
  */
 export const getLastCommitHash = async () => {
-  const { output } = await git(["rev-parse", "HEAD"]);
+  const { output } = await git(["rev-parse", "HEAD"]).catch(() => ({ output: "" }));
   return output.trim();
 };
 
@@ -109,14 +111,10 @@ export const getLastCommitHash = async () => {
  */
 export const getForkedRepository = async () => {
   const gitExists = await fileExists(path.join(repositoryPath, ".git"));
-  if (gitExists) {
-    const { output } = await git(["remote", "get-url", "origin"]);
-    const existingRepository = output.replace(/^(https:\/\/github.com\/|git@github\.com:)/, "").replace(/\.git$/, "");
-    return { forkedRepository: existingRepository, isNew: false };
-  }
-
-  const forkedRepository = await api.getForkedRepository();
-  return { forkedRepository, isNew: true };
+  if (!gitExists) return "";
+  const { output } = await git(["remote", "get-url", "origin"]);
+  const existingRepository = output.replace(/^(https:\/\/github.com\/|git@github\.com:)/, "").replace(/\.git$/, "");
+  return existingRepository;
 };
 
 /**
@@ -124,9 +122,9 @@ export const getForkedRepository = async () => {
  * @returns The full name of the forked repository.
  */
 export const initRepository = async () => {
-  const { forkedRepository, isNew } = await getForkedRepository();
-  if (!isNew) return forkedRepository;
-
+  const localForkedRepository = await getForkedRepository();
+  if (localForkedRepository) return localForkedRepository;
+  const forkedRepository = await api.getForkedRepository();
   await spawn(
     gitFilePath,
     ["clone", "--filter=blob:none", "--no-checkout", getRemoteUrl(forkedRepository), repositoryPath],
@@ -156,7 +154,8 @@ export const setUpstream = async (forkedRepository: string) => {
  */
 export const isStatusClean = async () => {
   const { output } = await git(["status", "--porcelain"]);
-  return output.trim() === "";
+  if (output.trim() === "") return;
+  throw new Error("The repository is not clean. Please commit or stash your changes before proceeding.");
 };
 
 /**
@@ -171,21 +170,6 @@ export const syncFork = async () => {
   if (currentBranch !== "main") await git(["checkout", "main"]);
   await git(["merge", "--ff-only", "upstream/main"]);
   if (currentBranch !== "main") await git(["checkout", currentBranch]);
-};
-
-/**
- * Pulls the latest changes from the upstream repository.
- *
- * [TODO] We should check if the repository is clean before pulling
- *
- * @remarks
- *
- * - If the local branch is outdated, fast-forward it;
- * - If the local branch contains unpushed work, warn about it;
- * - If the branch seems merged and its upstream branch was deleted, delete it.
- */
-export const pull = async () => {
-  await git(["pull"]);
 };
 
 /**
