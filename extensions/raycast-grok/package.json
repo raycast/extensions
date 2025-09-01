@@ -1,0 +1,283 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-grok",
+  "title": "Grok",
+  "description": "Access Grok AI conveniently through Raycast",
+  "icon": "grok-light.png",
+  "private": true,
+  "author": "caico_leung",
+  "license": "MIT",
+  "version": "0.0.1",
+  "commands": [
+    {
+      "name": "history",
+      "title": "History",
+      "description": "View your chat history",
+      "mode": "view",
+      "icon": "grok-light.png"
+    },
+    {
+      "name": "askAI",
+      "title": "Ask AI",
+      "subtitle": "Grok",
+      "description": "Ask Grok AI a question",
+      "mode": "view",
+      "icon": "grok-light.png",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "model",
+          "title": "Model",
+          "description": "Which model this command uses.",
+          "type": "dropdown",
+          "required": false,
+          "default": "grok-3-mini-beta",
+          "data": [
+            {
+              "title": "grok-3-beta (Our flagship model that excels at enterprise tasks like data extraction, programming, and text summarization.)",
+              "value": "grok-3-beta"
+            },
+            {
+              "title": "grok-3-mini-beta (A lightweight model that thinks before responding. Excels at quantitative tasks that involve math and reasoning.)",
+              "value": "grok-3-mini-beta"
+            },
+            {
+              "title": "grok-2-1212 (Our latest text model with improved efficiency, speed and capabilities.",
+              "value": "grok-2-1212"
+            }
+          ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "You may be given a text or a query or a picture as input, please provide a detailed and informative response."
+        }
+      ]
+    },
+    {
+      "name": "translate",
+      "title": "Translate",
+      "description": "Translate text from English to Chinese",
+      "mode": "view",
+      "icon": "grok-light.png"
+    },
+    {
+      "name": "lookup",
+      "title": "Lookup",
+      "description": "Lookup in the dictionary",
+      "mode": "view",
+      "icon": "grok-light.png"
+    },
+    {
+      "name": "explainIt",
+      "title": "Explain It",
+      "description": "Explain the text",
+      "mode": "view",
+      "icon": "grok-light.png"
+    },
+    {
+      "name": "refine",
+      "title": "Refine",
+      "description": "Refine the text",
+      "mode": "view",
+      "icon": "grok-light.png"
+    },
+    {
+      "name": "summarizeSite",
+      "title": "Summarize Site",
+      "description": "Summarize the site",
+      "mode": "view",
+      "icon": "grok-light.png"
+    },
+    {
+      "name": "askAboutSelectedScreenArea",
+      "title": "Ask About Selected Screen Area",
+      "description": "Ask Grok AI about the selected screen area",
+      "mode": "view",
+      "icon": "grok-light.png",
+      "preferences": [
+        {
+          "name": "model",
+          "title": "Model",
+          "description": "Which model this command uses.",
+          "type": "dropdown",
+          "required": false,
+          "default": "grok-2-vision-1212",
+          "data": [
+            {
+              "title": "grok-4 (Our latest multimodal model that processes documents, diagrams, charts, screenshots, and photographs.)",
+              "value": "grok-4"
+            },
+            {
+              "title": "grok-2-vision-1212 (Our latest multimodal which processes documents, diagrams, charts, screenshots, and photographs.)",
+              "value": "grok-2-vision-1212"
+            },
+            {
+              "title": "grok-beta (Our latest image understanding model that can process a wide variety of visual information, including documents, diagrams, charts, screenshots, and photographs.)",
+              "value": "grok-beta"
+            },
+            {
+              "title": "grok-vision-2 (xAI's best vision model with enhanced visual comprehension and reasoning capabilities.)",
+              "value": "grok-vision-2"
+            },
+            {
+              "title": "grok-vision-beta (Beta vision model for processing visual information and multimodal tasks.)",
+              "value": "grok-vision-beta"
+            }
+          ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "You are given a screenshot. Please analyze the image and provide a detailed and informative response to the user's question about what you see in the image."
+        }
+      ]
+    },
+    {
+      "name": "askAboutSelectedText",
+      "title": "Ask About Selected Text",
+      "description": "Ask Grok AI about the selected text",
+      "mode": "view",
+      "icon": "grok-light.png"
+    },
+    {
+      "name": "solidotDaily",
+      "title": "Solidot Daily",
+      "description": "Generate daily Solidot news summaries using Grok AI",
+      "mode": "view",
+      "icon": "grok-light.png"
+    }
+  ],
+  "preferences": [
+    {
+      "description": "Grok AI API Key",
+      "name": "apiKey",
+      "required": true,
+      "title": "Grok AI API Key",
+      "type": "password"
+    },
+    {
+      "description": "Which model Grok for Raycast uses by default (unless overriden by individual commands).",
+      "name": "defaultModel",
+      "title": "Model",
+      "type": "dropdown",
+      "required": false,
+      "default": "grok-3-mini-beta",
+      "data": [
+        {
+          "title": "grok-4 (Our latest multimodal model that processes documents, diagrams, charts, screenshots, and photographs.)",
+          "value": "grok-4"
+        },
+        {
+          "title": "grok-3-beta (Our flagship model that excels at enterprise tasks like data extraction, programming, and text summarization.)",
+          "value": "grok-3-beta"
+        },
+        {
+          "title": "grok-3-mini-beta (A lightweight model that thinks before responding. Excels at quantitative tasks that involve math and reasoning.)",
+          "value": "grok-3-mini-beta"
+        },
+        {
+          "title": "grok-2-vision-1212 (Our latest multimodal which processes documents, diagrams, charts, screenshots, and photographs.)",
+          "value": "grok-2-vision-1212"
+        },
+        {
+          "title": "grok-2-image-1212 (Our latest image generation model capable of generating multiple images from text prompt.",
+          "value": "grok-2-image-1212"
+        },
+        {
+          "title": "grok-2-1212 (Our latest text model with improved efficiency, speed and capabilities.",
+          "value": "grok-2-1212"
+        },
+        {
+          "title": "grok-beta (Our latest image understanding model that can process a wide variety of visual information, including documents, diagrams, charts, screenshots, and photographs.)",
+          "value": "grok-beta"
+        },
+        {
+          "title": "grok-vision-2 (xAI's best vision model with enhanced visual comprehension and reasoning capabilities.)",
+          "value": "grok-vision-2"
+        },
+        {
+          "title": "grok-vision-beta (Beta vision model for processing visual information and multimodal tasks.)",
+          "value": "grok-vision-beta"
+        }
+      ]
+    },
+    {
+      "name": "customModel",
+      "title": "Custom Model",
+      "description": "Custom model in case you use a special model that is not listed in the dropdown. It will override the default model. Keep this empty if you don't have a custom model.",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "pull": "ray pull-contributions",
+    "publish": "ray publish",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "lint:scripts": "eslint . --ext .ts",
+    "lint:styles": "stylelint ./**/*.{css,scss}",
+    "format:scripts": "prettier . --write",
+    "format:styles": "stylelint ./**/*.{css,scss} --fix",
+    "format": "npm run format:scripts && npm run format:styles",
+    "prepare": "husky && echo 'npx lint-staged' > .husky/pre-commit && git add .husky/pre-commit",
+    "uninstall-husky": "npm uninstall husky --no-save && git config --unset core.hooksPath && npx rimraf .husky"
+  },
+  "devDependencies": {
+    "@eslint/compat": "^1.3.2",
+    "@types/jsdom": "^21.1.7",
+    "@types/node": "^22.18.0",
+    "@vitest/coverage-v8": "^3.2.4",
+    "copyfiles": "^2.4.1",
+    "dts-bundle-generator": "^9.5.1",
+    "eslint": "^9.34.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "husky": "^9.1.7",
+    "jiti": "^2.5.1",
+    "lint-staged": "^15.5.2",
+    "postcss": "^8.5.6",
+    "postcss-scss": "^4.0.9",
+    "prettier": "^3.6.2",
+    "rimraf": "^6.0.1",
+    "stylelint": "^16.23.1",
+    "stylelint-config-recommended": "^15.0.0",
+    "stylelint-config-sass-guidelines": "^12.1.0",
+    "stylelint-order": "^6.0.4",
+    "stylelint-prettier": "^5.0.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.41.0",
+    "vite": "^6.3.5",
+    "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.102.5",
+    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/utils": "^1.19.1",
+    "@types/react": "^19.1.11",
+    "openai": "^4.104.0",
+    "react": "^19.1.1",
+    "rss-parser": "^3.13.0",
+    "usehooks-ts": "^3.1.1"
+  }
+}
