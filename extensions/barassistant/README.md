@@ -1,4 +1,4 @@
-# Raycast Extension – Bar Assistant
+# Bar Assistant
 
 This Raycast extension integrates with your self-hosted instance of [Bar Assistant](https://github.com/karlomikus/bar-assistant).  
 Once configured, it enables you to quickly search cocktails from your Bar Assistant database using the Bar Assistant API.
