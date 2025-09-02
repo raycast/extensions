@@ -1,12 +1,11 @@
-# Fzf File Search
+# Fuzzy File Search
 
-Search for files using their full-paths and fuzzy find algorithm.
+Search for files using their full paths with a fuzzy find algorithm.
 
-For example:
-TODO: insert photo of a search
+![screenshot](./metadata/fuzzy-file-search-1.png)
 
-It is meant as a replacement for builtin "Search Files".
-Raycast's builtin extension "Search Files" only searches for the filename which is not ideal when organizing files using directories.
+This extension is meant as a replacement/alternative for the built-in **Search Files**.  
+Raycast’s built-in extension _Search Files_ only searches for filenames, which is not ideal when organizing files using directories.  
 Imagine the following scenario:
 
 ```
@@ -17,22 +16,23 @@ Imagine the following scenario:
         homework.pdf
 ```
 
-Using Raycast's builtin "Search Files" you can look for `homework.pdf` but you will get both results.
-Using Fzf File Search you can search for `algo homework` and get directly find `~/algorithms/homework.pdf`.
-This functionality is very helpful for highly structured data in deep nested directories.
+Using Raycast’s built-in _Search Files_, you can search for `homework.pdf`, but you will get both files.  
+With **Fuzzy File Search**, you can search for `algo homework` and directly find `~/algorithms/homework.pdf`.  
+This functionality is very helpful for highly structured data in deeply nested directories.
 
-Raycast's "Search Files" allows to specify in which directory the file is supposed to be e.g., `homework in ~/algorithms/`
-This approach requires the user to know exactly in which directory to look for and provide the full path to the directory.
+Raycast’s _Search Files_ allows you to specify in which directory the file is located, e.g., `homework in ~/algorithms/`.  
+However, this approach requires the user to know the exact directory and provide the full path.
 
-The other solution is to put necessary info about the directory into the name of the files e.g., `algorithms_homework.pdf`, but this approach leads to extremely long file names and information duplication (directory path and filename).
-This plugin using Fzf approach avoids this issue.
+Another solution is to add directory information into filenames, e.g., `algorithms_homework.pdf`, but this leads to extremely long filenames and duplication of information (directory path + filename).  
+This plugin, using the **fzf** approach, avoids that issue.
 
 ## How does it work
 
-Under the hood this extensions runs `fd` to find all the files in the searched directories (by default home directory).
-I chose `fd` in order to ignore and filter out hidden files and files ignored by git, as well as for it's speed.
-This allows for a very fast lookup.
+Under the hood, this extension runs `fd` to find all the files in the searched directories (by default, the home directory).  
+I chose `fd` because it ignores hidden files and files ignored by Git, while also being fast.  
+This allows for very quick lookups.
 
-Afterwards the files are filtered using npm `fzf` package to provide user with fast results.
-`fd` doesn't support fuzzy searching so I chose to use this package.
+Afterwards, the files are filtered using the npm `fzf` package to provide the user with fast results.  
+Since `fd` doesn’t support fuzzy searching, I chose to use this package.
 
+> **Note:** This Raycast extension automatically installs `fd` on the first run.
