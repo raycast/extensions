@@ -1,10 +1,11 @@
 import { environment } from "@raycast/api";
 import axios from "axios";
 import fs from "fs";
-import afs, { FileHandle } from "fs/promises";
+import afs from "fs/promises";
 import path from "path";
 import { extract as extractTar } from "tar";
 import extractZip from "extract-zip";
+import lockfile from "proper-lockfile";
 
 const cliVersion = "10.3.0";
 const getCliFileInfo = () => {
@@ -34,13 +35,18 @@ const getCliFileInfo = () => {
   }
 };
 
-export function fdCLIDirectory(): string {
+export function fdCliDirectory(): string {
   return path.join(environment.supportPath, "fd-cli");
 }
 
-export function fdCLIFilepath(): string {
+export function fdCliFilepath(): string {
   const cliFileInfo = getCliFileInfo();
-  return path.join(fdCLIDirectory(), cliFileInfo.name);
+  return path.join(fdCliDirectory(), cliFileInfo.name);
+}
+
+export function fdCliArchive(): string {
+  const cliFileInfo = getCliFileInfo();
+  return path.join(fdCliDirectory(), cliFileInfo.pkg);
 }
 
 // Does the following:
@@ -51,35 +57,24 @@ export function fdCLIFilepath(): string {
 // - Extracts the executable
 // - Removes the archive
 export async function ensureFdCLI() {
-  const cliFileInfo = getCliFileInfo();
-  const cli = fdCLIFilepath();
+  await afs.mkdir(fdCliDirectory(), { recursive: true });
+  const release = await lockfile.lock(fdCliDirectory(), {
+    retries: 10,
+  });
 
-  if (fs.existsSync(cli)) {
-    // TODO: check for the hash
-    return cli;
-  }
-  // Download the cli
-  const binaryURL = `https://github.com/sharkdp/fd/releases/download/v${cliVersion}/${cliFileInfo.pkg}`;
-  const dir = path.join(environment.supportPath, "fd-cli");
-  await afs.mkdir(dir, { recursive: true });
-  const archivePath = path.join(dir, cliFileInfo.pkg);
-
-  let archiveFile: FileHandle;
   try {
-    archiveFile = await afs.open(archivePath, "wx");
-  } catch (err) {
-    // This weird syntax is needed to pass the linter
-    // "any" is not allowed, even in catch statements where only any or undefined is allowed
-    if ((err as { code?: string }).code === "EEXIST") {
-      console.warn(`Couldn't open an archive file for download as it is opened somewhere else: ${err}`);
+    const cliFileInfo = getCliFileInfo();
+    if (fs.existsSync(fdCliFilepath())) {
+      // TODO: check for the hash
+      console.log("already downloaded fd cli found");
+      return fdCliFilepath();
     }
-    throw err;
-  }
 
-  try {
+    // Download the cli
+    const binaryURL = `https://github.com/sharkdp/fd/releases/download/v${cliVersion}/${cliFileInfo.pkg}`;
     console.log("downloading archive");
     const response = await axios.get(binaryURL, { responseType: "stream" });
-    const writer = fs.createWriteStream(archivePath);
+    const writer = fs.createWriteStream(fdCliArchive());
 
     response.data.pipe(writer);
 
@@ -91,24 +86,22 @@ export async function ensureFdCLI() {
 
     console.log("fd archive downloaded");
 
-    await cliFileInfo.extract(archivePath, dir);
+    await cliFileInfo.extract(fdCliArchive(), fdCliDirectory());
     console.log("fd executable extracted from the archive");
 
-    await afs.chmod(cli, "755");
+    await afs.chmod(fdCliFilepath(), "755");
     console.log("set permissions to fd executable to 755");
+    return fdCliFilepath();
   } catch (error) {
-    if (fs.existsSync(cli)) {
-      await afs.rm(cli);
-    }
-
     console.error(`Could not download fd cli: ${error}`);
+    if (fs.existsSync(fdCliFilepath())) {
+      await afs.rm(fdCliFilepath());
+    }
     throw Error(`Could not download fd cli: ${error}`);
   } finally {
-    if (fs.existsSync(archivePath)) {
-      await afs.rm(archivePath);
+    if (fs.existsSync(fdCliArchive())) {
+      await afs.rm(fdCliArchive());
     }
-    await archiveFile?.close();
+    await release();
   }
-
-  return cli;
 }
