@@ -70,7 +70,7 @@
       "name": "capture-to-clipboard",
       "title": "Capture to Clipboard",
       "subtitle": "Screenshot",
-      "description": "Capture Screen to Clipboard",
+      "description": "Capture Area of Screen to Clipboard",
       "icon": "clipboard.png",
       "mode": "no-view"
     },
