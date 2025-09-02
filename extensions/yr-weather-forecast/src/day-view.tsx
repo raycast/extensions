@@ -1,4 +1,5 @@
 import { Detail, Action, ActionPanel, showToast, Toast, Icon } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useMemo, useState, useEffect } from "react";
 import { buildGraphMarkdown } from "./graph";
 import { generateDaySummary, formatSummary } from "./weather-summary";
@@ -109,11 +110,7 @@ export default function DayView(props: {
         });
       }
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to update favorites",
-        message: String(error),
-      });
+      await showFailureToast(error, { title: "Failed to update favorites" });
     }
   };
 

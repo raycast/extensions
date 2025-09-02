@@ -99,17 +99,24 @@ export default function ForecastView(props: {
   // Detect when graph is actually rendered to prevent visual jumping
   useEffect(() => {
     if (shouldShowContent && graph) {
-      // Longer delay to ensure browser actually renders the SVG image
-      // This accounts for markdown parsing + SVG rendering + layout calculation
-      const timer = setTimeout(() => {
-        setGraphRendered(true);
-      }, 200); // Increased from 100ms to 200ms for more reliable rendering
+      // Check if graph is already cached - if so, show immediately
+      const isGraphCached = mode === "detailed" ? !!graphCache.detailed : !!graphCache.summary;
 
-      return () => clearTimeout(timer);
+      if (isGraphCached) {
+        // Graph is cached, show immediately
+        setGraphRendered(true);
+      } else {
+        // Graph needs to be generated, apply delay for rendering
+        const timer = setTimeout(() => {
+          setGraphRendered(true);
+        }, 200); // Delay for markdown parsing + SVG rendering + layout calculation
+
+        return () => clearTimeout(timer);
+      }
     } else {
       setGraphRendered(false);
     }
-  }, [shouldShowContent, graph]);
+  }, [shouldShowContent, graph, mode, graphCache]);
 
   const handleFavoriteToggle = async () => {
     const favLocation: FavoriteLocation = { name, lat, lon };

@@ -126,12 +126,12 @@ export function parseQueryIntent(input: string, now = new Date()): QueryIntent {
       continue;
     }
     // "i morgen" (tomorrow)
-    if (t === "i" && tokens[i + 1] === "morgen") {
+    if (t === "i" && i + 1 < tokens.length && tokens[i + 1] === "morgen") {
       isTomorrow = true;
       i++;
       continue;
     }
-    if (t === "today" || t === "idag" || (t === "i" && tokens[i + 1] === "dag")) {
+    if (t === "today" || t === "idag" || (t === "i" && i + 1 < tokens.length && tokens[i + 1] === "dag")) {
       isToday = true;
       if (t === "i") i++;
       continue;
@@ -236,12 +236,12 @@ export function parseQueryIntent(input: string, now = new Date()): QueryIntent {
     const t = tokens[i];
     const original = originalTokens[i];
     if (nextTokens.has(t)) continue;
-    if (t === "i" && tokens[i + 1] === "morgen") {
+    if (t === "i" && i + 1 < tokens.length && tokens[i + 1] === "morgen") {
       i++;
       continue;
     }
     if (t === "today" || t === "idag") continue;
-    if (t === "i" && tokens[i + 1] === "dag") {
+    if (t === "i" && i + 1 < tokens.length && tokens[i + 1] === "dag") {
       i++;
       continue;
     }

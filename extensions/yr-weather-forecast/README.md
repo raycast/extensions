@@ -20,18 +20,17 @@ A modern, feature-rich [Raycast](https://www.raycast.com) extension for displayi
 - **Favorites System**: Save your most-used locations for instant access
 - **Recent Searches**: Intelligent caching and search history
 
-### 🎨 User Experience
+### 🎨 UX stuff
 - **Welcome System**: Helpful onboarding for new users
 - **Keyboard Shortcuts**: Quick actions for power users
 - **Units Support**: Metric (default) or Imperial units
-- **Responsive Design**: Optimized for Raycast's interface
-- **Debug Mode**: Optional console output for troubleshooting
 
-### 🚀 Technical Excellence
+### 🚀 Technicalities
 - **Fast Performance**: Intelligent caching reduces API calls
 - **Error Handling**: Graceful fallbacks and user-friendly error messages
 - **Network Testing**: Built-in connectivity diagnostics
 - **TypeScript**: Full type safety and modern development practices
+- **Debug Mode**: Optional console output for troubleshooting
 
 ## 🚀 Getting Started
 
@@ -59,7 +58,7 @@ A modern, feature-rich [Raycast](https://www.raycast.com) extension for displayi
 - **Date Queries**: 
   - "Oslo fredag" or "oslo friday" for upcoming Friday
   - "London next monday" for next Monday
-  - "Bergen 25" for December 25th
+  - "Bergen 25" for the 25th (if available within the 9 day forecast)
   - "Paris tomorrow" or "Paris i morgen"
 
 ### Navigation
@@ -154,11 +153,11 @@ npm run build
 
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+MIT License - see package.json for details.
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+We welcome contributions! Please open an issue or submit a pull request on GitHub.
 
 ### Development Guidelines
 - Follow TypeScript best practices

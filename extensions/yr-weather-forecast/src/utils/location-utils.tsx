@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Icon, showToast, Toast } from "@raycast/api";
 import ForecastView from "../forecast";
 import GraphView from "../graph";
+import DayView from "../day-view";
 import { getWeather } from "../weather-client";
 import { TimeseriesEntry } from "../weather-client";
 import { FavoriteLocation } from "../storage";
@@ -21,13 +22,29 @@ export class LocationUtils {
     isFavorite: boolean,
     onFavoriteToggle: () => void,
     onShowWelcome?: () => void,
+    targetDate?: Date,
   ) {
     return (
       <ActionPanel>
-        <Action.Push
-          title="Open Forecast"
-          target={<ForecastView name={name} lat={lat} lon={lon} onShowWelcome={onShowWelcome} />}
-        />
+        {targetDate ? (
+          <Action.Push
+            title="Open Day View"
+            target={
+              <DayView
+                name={name}
+                lat={lat}
+                lon={lon}
+                date={targetDate.toISOString().split("T")[0]}
+                onShowWelcome={onShowWelcome}
+              />
+            }
+          />
+        ) : (
+          <Action.Push
+            title="Open Forecast"
+            target={<ForecastView name={name} lat={lat} lon={lon} onShowWelcome={onShowWelcome} />}
+          />
+        )}
         <Action
           title="Show Current Weather"
           onAction={async () => {

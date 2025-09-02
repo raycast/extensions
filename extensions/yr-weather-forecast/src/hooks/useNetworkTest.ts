@@ -37,6 +37,26 @@ export function useNetworkTest() {
       },
     ];
 
+    // Run all tests in parallel
+    const testPromises = testConfigs.map(async (config) => {
+      try {
+        DebugLogger.log(`Testing ${config.name}...`);
+        const response = await fetch(config.url, { headers: config.headers });
+        const success = response.ok;
+        DebugLogger.log(`${config.name} test result:`, success);
+
+        return { success, name: config.name, error: undefined };
+      } catch (err) {
+        const errorMsg = `${config.name} failed: ${err instanceof Error ? err.message : String(err)}`;
+        DebugLogger.error(`${config.name} test failed:`, err);
+        return { success: false, name: config.name, error: errorMsg };
+      }
+    });
+
+    // Wait for all tests to complete and collect results
+    const testResults = await Promise.all(testPromises);
+
+    // Build final results object from collected results
     const results: { httpbin: boolean; metApi: boolean; nominatim: boolean; error: string | undefined } = {
       httpbin: false,
       metApi: false,
@@ -46,29 +66,16 @@ export function useNetworkTest() {
 
     const errors: string[] = [];
 
-    // Run all tests in parallel
-    const testPromises = testConfigs.map(async (config) => {
-      try {
-        DebugLogger.log(`Testing ${config.name}...`);
-        const response = await fetch(config.url, { headers: config.headers });
-        const success = response.ok;
-        DebugLogger.log(`${config.name} test result:`, success);
+    // Process each test result
+    for (const result of testResults) {
+      if (result.name === "httpbin") results.httpbin = result.success;
+      else if (result.name === "metApi") results.metApi = result.success;
+      else if (result.name === "nominatim") results.nominatim = result.success;
 
-        // Update results based on test name
-        if (config.name === "httpbin") results.httpbin = success;
-        else if (config.name === "metApi") results.metApi = success;
-        else if (config.name === "nominatim") results.nominatim = success;
-
-        return { success, name: config.name };
-      } catch (err) {
-        const errorMsg = `${config.name} failed: ${err instanceof Error ? err.message : String(err)}`;
-        DebugLogger.error(`${config.name} test failed:`, err);
-        errors.push(errorMsg);
-        return { success: false, name: config.name };
+      if (result.error) {
+        errors.push(result.error);
       }
-    });
-
-    await Promise.all(testPromises);
+    }
 
     // Combine all errors if any tests failed
     if (errors.length > 0) {

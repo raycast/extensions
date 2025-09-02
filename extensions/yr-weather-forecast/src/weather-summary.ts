@@ -11,6 +11,24 @@ export type WeatherSummary = {
   };
 };
 
+/**
+ * Precipitation intensity thresholds for determining precipitation chance levels.
+ * These values are based on meteorological standards for precipitation classification:
+ *
+ * - HIGH_THRESHOLD (5mm): Heavy precipitation intensity threshold
+ *   Used to classify periods with significant rainfall that would be considered "high" chance
+ *
+ * - MEDIUM_THRESHOLD (2mm): Moderate precipitation intensity threshold
+ *   Used to classify periods with moderate rainfall that would be considered "medium" chance
+ *
+ * Values below MEDIUM_THRESHOLD are considered "low" chance, and periods with no precipitation
+ * are classified as "none".
+ */
+const PRECIPITATION_THRESHOLDS = {
+  HIGH_THRESHOLD: 5, // mm - Heavy precipitation intensity
+  MEDIUM_THRESHOLD: 2, // mm - Moderate precipitation intensity
+} as const;
+
 // Use the centralized symbolToCondition function from weather-symbols utility
 
 function getPrecipitationChance(series: TimeseriesEntry[]): "none" | "low" | "medium" | "high" {
@@ -27,8 +45,8 @@ function getPrecipitationChance(series: TimeseriesEntry[]): "none" | "low" | "me
   const totalHours = series.length;
 
   // Consider both intensity and coverage
-  if (maxPrecip > 5 || precipHours > totalHours * 0.7) return "high";
-  if (maxPrecip > 2 || precipHours > totalHours * 0.4) return "medium";
+  if (maxPrecip > PRECIPITATION_THRESHOLDS.HIGH_THRESHOLD || precipHours > totalHours * 0.7) return "high";
+  if (maxPrecip > PRECIPITATION_THRESHOLDS.MEDIUM_THRESHOLD || precipHours > totalHours * 0.4) return "medium";
   return "low";
 }
 
@@ -37,7 +55,8 @@ function getTemperatureRange(series: TimeseriesEntry[]): { min: number | undefin
 
   const temps = series
     .map((ts) => ts.data?.instant?.details?.air_temperature)
-    .filter((temp): temp is number => temp !== undefined && Number.isFinite(temp));
+    .filter((temp): temp is NonNullable<typeof temp> => temp !== undefined && Number.isFinite(temp as number))
+    .map((temp) => temp as number); // Convert branded type to number for calculations
 
   if (temps.length === 0) return { min: undefined, max: undefined };
 

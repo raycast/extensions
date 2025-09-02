@@ -19,7 +19,7 @@ export default function WelcomeMessage({ showActions = true }: WelcomeMessagePro
                 title="Start Searching"
                 icon={Icon.MagnifyingGlass}
                 onAction={() => {
-                  // This will be handled by the parent component
+                  // Handled by the parent component
                   // We can emit an event or use a callback if needed
                 }}
               />
@@ -65,14 +65,14 @@ export default function WelcomeMessage({ showActions = true }: WelcomeMessagePro
                 title="Open Extension Preferences"
                 icon={Icon.Gear}
                 onAction={() => {
-                  // This will be handled by the parent component
+                  // Handled by the parent component
                 }}
               />
               <Action
                 title="Open Command Preferences"
                 icon={Icon.Gear}
                 onAction={() => {
-                  // This will be handled by the parent component
+                  // Handled by the parent component
                 }}
               />
             </ActionPanel>

@@ -2,16 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { getForecast, type TimeseriesEntry } from "../weather-client";
 import { DebugLogger } from "../utils/debug-utils";
 
-// Type declaration for navigator to handle browser environment
-declare global {
-  const navigator:
-    | {
-        userAgent?: string;
-        onLine?: boolean;
-      }
-    | undefined;
-}
-
 /**
  * Custom hook for managing weather data fetching
  */
@@ -32,14 +22,12 @@ export function useWeatherData(lat: number, lon: number) {
       setShowNoData(false);
 
       try {
-        const data = await getForecast(lat, lon);
+        const result = await getForecast(lat, lon);
         if (!cancelled) {
-          // Ensure data is always an array
-          const safeData = Array.isArray(data) ? data : [];
-          setSeries(safeData);
+          setSeries(result);
 
           // Only show no data if we actually have no data after fetching
-          if (safeData.length === 0) {
+          if (result.length === 0) {
             setShowNoData(true);
           }
         }
@@ -55,16 +43,10 @@ export function useWeatherData(lat: number, lon: number) {
             stack: err instanceof Error ? err.stack : undefined,
             timestamp: new Date().toISOString(),
             coordinates: { lat, lon },
-            userAgent:
-              typeof navigator !== "undefined" ? navigator.userAgent || "Raycast Extension" : "Raycast Extension",
+            userAgent: "Raycast Extension",
           };
 
           DebugLogger.error("Weather API fetch failed:", errorDetails);
-
-          // Log additional network info if available
-          if (typeof navigator !== "undefined" && "onLine" in navigator) {
-            DebugLogger.log("Network status:", navigator.onLine);
-          }
         }
       } finally {
         if (!cancelled) {
@@ -90,11 +72,8 @@ export function useWeatherData(lat: number, lon: number) {
     };
   }, [lat, lon]);
 
-  // Ensure series is always an array to prevent runtime errors
-  const safeSeries = Array.isArray(series) ? series : [];
-
   return {
-    series: safeSeries,
+    series,
     loading,
     showNoData,
   };

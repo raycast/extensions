@@ -6,6 +6,7 @@ import WelcomeMessage from "./components/welcome-message";
 
 import { searchLocations, type LocationResult } from "./location-search";
 import { getWeather, type TimeseriesEntry } from "./weather-client";
+import { parseQueryIntent, type QueryIntent } from "./query-intent";
 import {
   addFavorite,
   isFavorite,
@@ -38,24 +39,43 @@ export default function Command() {
   // Simple search state management to avoid infinite loops
   const [locations, setLocations] = useState<LocationResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [queryIntent, setQueryIntent] = useState<QueryIntent>({});
 
-  // Simple search function with debouncing
+  // Search function with query intent parsing and debouncing
   const performSearch = useCallback(async (query: string) => {
     const trimmed = query.trim();
     if (!trimmed) {
       setLocations([]);
+      setQueryIntent({});
       return;
     }
 
+    // Parse query intent to extract location and date information
+    const intent = parseQueryIntent(trimmed);
+    setQueryIntent(intent);
+
+    // Show toast notification if a date query was successfully parsed
+    if (intent.targetDate) {
+      const dateStr = intent.targetDate.toLocaleDateString();
+      showToast({
+        style: Toast.Style.Success,
+        title: "📅 Date query detected!",
+        message: `Found weather for ${dateStr} - tap a location to open day view`,
+      });
+    }
+
+    // Use the parsed location query if available, otherwise use the full query
+    const locationQuery = intent.locationQuery || trimmed;
+
     // Require minimum 3 characters before searching
-    if (trimmed.length < 3) {
+    if (locationQuery.length < 3) {
       setLocations([]);
       return;
     }
 
     setIsLoading(true);
     try {
-      const results = await searchLocations(trimmed);
+      const results = await searchLocations(locationQuery);
       setLocations(results);
     } catch (error) {
       DebugLogger.error("Search failed:", error);
@@ -146,14 +166,21 @@ export default function Command() {
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       const q = searchText.trim();
-      if (q && q.length >= 3) {
-        performSearch(q);
-      } else if (q && q.length > 0 && q.length < 3) {
-        // Clear locations but don't show toast feedback
-        setLocations([]);
-        setIsLoading(false);
+      if (q) {
+        // Parse query intent to check if we have a valid location query
+        const intent = parseQueryIntent(q);
+        const locationQuery = intent.locationQuery || q;
+
+        if (locationQuery.length >= 3) {
+          performSearch(q);
+        } else {
+          // Clear locations but keep query intent for display
+          setLocations([]);
+          setIsLoading(false);
+        }
       } else {
         setLocations([]);
+        setQueryIntent({});
         setIsLoading(false);
       }
     }, 300); // 300ms debounce
@@ -226,7 +253,7 @@ export default function Command() {
     <List
       isLoading={shouldShowLoading}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search for a location (min. 3 characters)..."
+      searchBarPlaceholder="Search for a location or try 'Oslo fredag', 'London tomorrow'..."
       throttle
       actions={
         <ActionPanel>
@@ -315,8 +342,8 @@ export default function Command() {
                       title="Retry Network Tests"
                       icon={Icon.ArrowClockwise}
                       onAction={() => {
-                        // Note: Network tests will re-run when the component re-mounts
-                        // For now, just show a toast message
+                        // Network tests will re-run when the component re-mounts
+                        // Show a toast message to indicate retry action
                         ToastMessages.networkTestsRetry();
                       }}
                     />
@@ -381,6 +408,7 @@ export default function Command() {
                       }
                     },
                     () => setShowWelcomeMessage(true),
+                    queryIntent.targetDate,
                   )}
                 />
               ))}

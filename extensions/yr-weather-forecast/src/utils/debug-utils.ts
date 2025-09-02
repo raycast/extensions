@@ -1,9 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  debugMode?: boolean;
-}
-
 /**
  * Debug utility for conditional console output
  * Only logs when debug mode is enabled in preferences
@@ -11,7 +7,7 @@ interface Preferences {
 export class DebugLogger {
   private static isDebugMode(): boolean {
     try {
-      const preferences = getPreferenceValues<Preferences>();
+      const preferences = getPreferenceValues<Preferences.Yr>();
       return preferences.debugMode === true;
     } catch {
       // Fallback to false if preferences can't be accessed
