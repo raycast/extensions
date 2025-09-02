@@ -12,11 +12,13 @@ export default function Command() {
 
   const handleSearch = async (text: string) => {
     if (!text.trim()) {
+      setSuggestions([]);
       setResults(null);
       setError(null);
       return;
     }
 
+    setSuggestions([]);
     setIsLoading(true);
     setError(null);
 

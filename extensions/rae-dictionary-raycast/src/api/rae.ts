@@ -123,6 +123,16 @@ async function makeApiRequest<T>(url: string): Promise<T> {
   const response = await fetch(url);
 
   if (!response.ok) {
+    try {
+      const errorData = (await response.json()) as ApiResponse<T>;
+      if (errorData.error === "NOT_FOUND") {
+        throw new ApiError("Word not found", errorData.suggestions);
+      }
+    } catch (parseError) {
+      if (parseError instanceof ApiError) {
+        throw parseError;
+      }
+    }
     throw new Error(`Request error: ${response.statusText}`);
   }
 
