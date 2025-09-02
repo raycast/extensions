@@ -2,6 +2,7 @@ import { Form, ActionPanel, Action, showToast, Toast, useNavigation } from "@ray
 import { showFailureToast } from "@raycast/utils";
 import { ZendeskTicketField, addTicketFieldOption } from "../../api/zendesk";
 import { ZendeskInstance } from "../../utils/preferences";
+import { truncateText } from "../../utils/formatters";
 
 interface AddTicketFieldOptionFormProps {
   ticketField: ZendeskTicketField;
@@ -12,9 +13,7 @@ export default function AddTicketFieldOptionForm({ ticketField, instance }: AddT
   const { pop } = useNavigation();
 
   const getNavigationTitle = () => {
-    const maxLen = 20;
-    const truncate = (str: string) => (str.length > maxLen ? str.slice(0, maxLen - 1) + "…" : str);
-    return `Add Option to ${truncate(ticketField.title || "Unknown Field")}`;
+    return `Add Option to ${truncateText(ticketField.title || "Unknown Field")}`;
   };
 
   async function handleSubmit(values: { label: string; tag: string }) {

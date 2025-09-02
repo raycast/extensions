@@ -2,6 +2,7 @@ import { List, ActionPanel, Action, Icon, Color, Keyboard } from "@raycast/api";
 import { ZendeskTicketField, ZendeskInstance } from "../../api/zendesk";
 import { useState, useMemo } from "react";
 import AddTicketFieldOptionForm from "../forms/AddTicketFieldOptionForm";
+import { truncateText } from "../../utils/formatters";
 
 interface TicketFieldOptionsListProps {
   ticketField: ZendeskTicketField;
@@ -25,15 +26,12 @@ export default function TicketFieldOptionsList({ ticketField, instance }: Ticket
     });
   }, [ticketField.custom_field_options, searchText]);
 
-  const maxLen = 20;
-  const truncate = (str: string) => (str.length > maxLen ? str.slice(0, maxLen - 1) + "…" : str);
-
   return (
     <List
       isLoading={!ticketField.custom_field_options}
       searchBarPlaceholder="Search options by name or value"
       onSearchTextChange={setSearchText}
-      navigationTitle={`${truncate(ticketField.title || "")} Options`}
+      navigationTitle={`${truncateText(ticketField.title || "")} Options`}
     >
       {filteredOptions.map((option) => (
         <List.Item

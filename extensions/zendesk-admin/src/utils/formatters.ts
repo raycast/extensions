@@ -199,3 +199,28 @@ function formatHtml(html: string): string {
 
   return formattedLines.filter((line) => line !== "").join("\n");
 }
+
+/**
+ * Constants for text truncation
+ */
+export const TRUNCATION_CONSTANTS = {
+  /** Maximum length before truncating text (default) */
+  MAX_LENGTH: 20,
+  /** Shorter length for more compact displays */
+  SHORT_LENGTH: 15,
+  /** Character used to indicate truncated text */
+  ELLIPSIS: "…",
+} as const;
+
+/**
+ * Truncates a string to a specified maximum length, adding an ellipsis if truncated
+ * @param str - The string to truncate
+ * @param maxLength - Maximum length before truncation (defaults to TRUNCATION_CONSTANTS.MAX_LENGTH)
+ * @returns The truncated string with ellipsis if needed
+ */
+export const truncateText = (str: string, maxLength: number = TRUNCATION_CONSTANTS.MAX_LENGTH): string => {
+  if (str.length <= maxLength) {
+    return str;
+  }
+  return str.slice(0, maxLength - 1) + TRUNCATION_CONSTANTS.ELLIPSIS;
+};

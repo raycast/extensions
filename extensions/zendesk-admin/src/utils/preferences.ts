@@ -10,15 +10,6 @@ export interface ZendeskInstance {
   production?: boolean;
 }
 
-interface Preferences {
-  instanceNames: string;
-  subdomains: string;
-  users: string;
-  apiKeys: string;
-  colors?: string;
-  productionFlags?: string;
-}
-
 function parseCommaSeparatedString(value: string): string[] {
   return value
     .split(",")

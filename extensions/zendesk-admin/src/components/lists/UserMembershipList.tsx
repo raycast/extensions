@@ -12,6 +12,7 @@ import {
 } from "../../api/zendesk";
 import { ZendeskActions } from "../actions/ZendeskActions";
 import { useState } from "react";
+import { truncateText, TRUNCATION_CONSTANTS } from "../../utils/formatters";
 
 interface UserMembershipListProps {
   entityId: number;
@@ -245,12 +246,10 @@ export default function UserMembershipList({ entityId, entityName, entityType, i
   };
 
   const getNavigationTitle = () => {
-    const maxLen = 15;
-    const truncate = (str: string) => (str.length > maxLen ? str.slice(0, maxLen - 1) + "…" : str);
     if (entityType === "group") {
-      return `Members of ${truncate(entityName)}`;
+      return `Members of ${truncateText(entityName, TRUNCATION_CONSTANTS.SHORT_LENGTH)}`;
     } else {
-      return `Users with Role: ${truncate(entityName)}`;
+      return `Users with Role: ${truncateText(entityName, TRUNCATION_CONSTANTS.SHORT_LENGTH)}`;
     }
   };
 

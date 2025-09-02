@@ -5,6 +5,7 @@ import { ZendeskInstance } from "../../utils/preferences";
 import { searchZendeskTickets, ZendeskTicket } from "../../api/zendesk";
 import { TicketListItem } from "./TicketListItem";
 import { useDebounce } from "../../hooks/useDebounce";
+import { truncateText } from "../../utils/formatters";
 
 interface EntityTicketsListProps {
   entityType: "user" | "group" | "organization" | "brand" | "form" | "recipient" | "role";
@@ -91,13 +92,10 @@ export default function EntityTicketsList({
   };
 
   const getNavigationTitle = () => {
-    const maxLen = 20;
-    const truncate = (str: string) => (str.length > maxLen ? str.slice(0, maxLen - 1) + "…" : str);
-
     const entityIdentifier = entityName || entityId || entityEmail || "Unknown";
     const entityTypeLabel = entityType.charAt(0).toUpperCase() + entityType.slice(1);
 
-    return `Tickets for ${entityTypeLabel}: ${truncate(entityIdentifier)}`;
+    return `Tickets for ${entityTypeLabel}: ${truncateText(entityIdentifier)}`;
   };
 
   return (
