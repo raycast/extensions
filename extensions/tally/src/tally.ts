@@ -9,6 +9,10 @@ export const API_HEADERS = {
   "Content-Type": "application/json",
   Authorization: `Bearer ${api_token}`,
 };
+export const useTally = <T>(endpoint: string) =>
+  useFetch<T>(API_URL + endpoint, {
+    headers: API_HEADERS,
+  });
 export const useTallyPaginated = <T>(endpoint: string) =>
   useFetch(API_URL + endpoint, {
     headers: API_HEADERS,
