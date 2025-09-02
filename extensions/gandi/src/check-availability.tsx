@@ -221,8 +221,6 @@ function AlternativesSection({
   );
 }
 
- 
-
 function buildAlternativePresentation(
   alt: DomainAvailability | null,
   formatPrice: (n: number, c: string) => string,
@@ -413,7 +411,6 @@ export default function CheckAvailability() {
       {!!availability.products?.length && <PricingSections availability={availability} formatPrice={formatPrice} />}
 
       {!!altData?.length && <AlternativesSection altData={altData} formatPrice={formatPrice} />}
-      
     </List>
   );
 }

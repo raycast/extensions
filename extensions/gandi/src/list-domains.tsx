@@ -13,8 +13,6 @@ export default function ListDomains() {
   const [filter, setFilter] = useState<FilterKey>("all");
   const [sort, setSort] = useState<SortKey>("days_asc");
 
-  
-
   const fetchDomains = useCallback(async () => {
     try {
       return await gandiAPI.getDomains();
@@ -67,8 +65,6 @@ export default function ListDomains() {
     return Color.Green;
   };
 
-  
-
   const toggleAutoRenew = async (domain: GandiDomain) => {
     try {
       await showToast({
@@ -91,7 +87,6 @@ export default function ListDomains() {
 
   const renderItem = (domain: GandiDomain) => {
     const expDate = new Date(domain.dates.registry_ends_at);
-    
 
     // Derive independent lock states
     const transferLocked = domain.is_locked || domain.status?.some((s) => s.includes("TransferProhibited")) || false;
