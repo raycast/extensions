@@ -18,3 +18,5 @@ export type ForkedExtension = {
 };
 
 export type ExtentionNameFolder = { name: string; folder: string };
+
+export type CommitDiff = { ahead: number; behind: number };
