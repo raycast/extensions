@@ -1,10 +1,10 @@
-import { Image } from '@raycast/api';
+import { Image, getPreferenceValues } from '@raycast/api';
 import { getAvatarIcon } from '@raycast/utils';
 import { Cast, CastAuthor } from './types';
 import Linkify from 'linkify-it';
 import tlds from 'tlds';
-import { preferences } from './preferences';
 
+const preferences = getPreferenceValues<Preferences>();
 const isEtherscan = preferences.walletAddressClient === 'etherscan';
 
 export function getUserIcon(user: Pick<CastAuthor, 'username' | 'pfp_url'>) {
@@ -18,7 +18,7 @@ export function getUserIcon(user: Pick<CastAuthor, 'username' | 'pfp_url'>) {
 export function truncateSolAddress(address: string) {
   const regex = /^[1-9A-HJ-NP-Za-km-z]{6}[1-9A-HJ-NP-Za-km-z]*[1-9A-HJ-NP-Za-km-z]{6}$/;
   if (!regex.test(address)) return address;
-  return `${address.substr(0, 6)}…${address.substr(-6)}`;
+  return `${address.slice(0, 6)}…${address.slice(-6)}`;
 }
 
 export function truncateEthAddress(address: string) {
