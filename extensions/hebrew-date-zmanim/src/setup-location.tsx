@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Form, LocalStorage, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, LocalStorage, popToRoot, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import tzLookup from "tz-lookup";
 
@@ -64,20 +65,18 @@ export default function SetupLocationCommand() {
         title: "Location Saved",
         message: `${locationName} saved for zmanim calculations`,
       });
-    } catch (e: unknown) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to save location",
-        message: String(e instanceof Error ? e.message : e),
-      });
+      await popToRoot();
+    } catch (e) {
+      await showFailureToast(e, { title: "Failed to save location" });
     }
   }
 
   return (
     <Form
+      isLoading={isSearching}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Save Location" onSubmit={saveLocation} />
+          <Action.SubmitForm title="Save Location" icon={Icon.Checkmark} onSubmit={saveLocation} />
         </ActionPanel>
       }
     >
