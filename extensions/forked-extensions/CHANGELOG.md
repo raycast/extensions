@@ -1,6 +1,6 @@
 # Raycast Fork Extensions Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-09-02
 
 - Rename the "Sync Fork" action to "Sync Remote"
 - Add a new "Pull Changes" action to allow users to sync commits from remote forked repository
