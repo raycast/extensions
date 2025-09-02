@@ -221,7 +221,7 @@ function AlternativesSection({
   );
 }
 
-// TaxesSection was intentionally removed from the UI to reduce confusion.
+ 
 
 function buildAlternativePresentation(
   alt: DomainAvailability | null,
@@ -413,7 +413,7 @@ export default function CheckAvailability() {
       {!!availability.products?.length && <PricingSections availability={availability} formatPrice={formatPrice} />}
 
       {!!altData?.length && <AlternativesSection altData={altData} formatPrice={formatPrice} />}
-      {/* Taxes section removed */}
+      
     </List>
   );
 }

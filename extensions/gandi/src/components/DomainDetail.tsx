@@ -38,9 +38,7 @@ export default function DomainDetail({ domain }: Readonly<Props>) {
     const days = Math.ceil((new Date(domain.dates.registry_ends_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
     return days;
   };
-  // Removed generic status mapping; we now focus on explicit Transfer/Edit lock states
-
-  // Reset Authorization Code action removed per user request.
+  
 
   const toggleTransferLock = async () => {
     const action = domain.is_locked ? "unlock" : "lock";
@@ -110,7 +108,7 @@ export default function DomainDetail({ domain }: Readonly<Props>) {
       navigationTitle={domain.fqdn}
       metadata={
         <Detail.Metadata>
-          {/* Top-level quick glance */}
+          
           <Detail.Metadata.TagList title="Expiry">
             <Detail.Metadata.TagList.Item
               text={expiryDays < 0 ? "Expired" : `In ${expiryDays} days`}
@@ -124,14 +122,14 @@ export default function DomainDetail({ domain }: Readonly<Props>) {
           />
           <Detail.Metadata.Separator />
 
-          {/* Identity */}
+          
           <Detail.Metadata.Label title="Domain" text={getSecondLevelName()} />
           <Detail.Metadata.Label title="TLD" text={domain.tld} />
           <Detail.Metadata.Label title="Owner" text={domain.owner} />
           {domain.sharing_id && <Detail.Metadata.Label title="Sharing ID" text={domain.sharing_id} />}
           <Detail.Metadata.Separator />
 
-          {/* Lock States */}
+          
           <Detail.Metadata.TagList title="Transfer">
             <Detail.Metadata.TagList.Item
               text={
@@ -158,7 +156,7 @@ export default function DomainDetail({ domain }: Readonly<Props>) {
               color={domain.autorenew ? Color.Green : Color.SecondaryText}
             />
           </Detail.Metadata.TagList>
-          {/* Keep legacy domain lock line for clarity by renaming */}
+          
           <Detail.Metadata.TagList title="Registrar Lock (Gandi Toggle)">
             <Detail.Metadata.TagList.Item
               text={domain.is_locked ? "On" : "Off"}
@@ -173,7 +171,7 @@ export default function DomainDetail({ domain }: Readonly<Props>) {
           </Detail.Metadata.TagList>
           <Detail.Metadata.Separator />
 
-          {/* Dates */}
+          
           <Detail.Metadata.Label title="Registry Created" text={formatDate(domain.dates.registry_created_at)} />
           {domain.dates.created_at && (
             <Detail.Metadata.Label title="Created (Account)" text={formatDate(domain.dates.created_at)} />
@@ -187,7 +185,7 @@ export default function DomainDetail({ domain }: Readonly<Props>) {
           )}
           <Detail.Metadata.Separator />
 
-          {/* DNS */}
+          
           <Detail.Metadata.Label title="Nameserver" text={domain.nameserver.current} icon={Icon.Network} />
           {domain.nameserver.hosts && domain.nameserver.hosts.length > 0 && (
             <Detail.Metadata.TagList title="NS Hosts">
@@ -198,7 +196,7 @@ export default function DomainDetail({ domain }: Readonly<Props>) {
           )}
           <Detail.Metadata.Separator />
 
-          {/* Extras */}
+          
           {domain.services && domain.services.length > 0 && (
             <Detail.Metadata.TagList title="Active Services">
               {domain.services.map((s) => (

@@ -13,7 +13,7 @@ export default function ListDomains() {
   const [filter, setFilter] = useState<FilterKey>("all");
   const [sort, setSort] = useState<SortKey>("days_asc");
 
-  // Subtitle and granular status mapping removed from list view to reduce redundancy with lock chips
+  
 
   const fetchDomains = useCallback(async () => {
     try {
@@ -67,7 +67,7 @@ export default function ListDomains() {
     return Color.Green;
   };
 
-  // Removed old text-based expiry accessory; now using date accessory for a richer UI.
+  
 
   const toggleAutoRenew = async (domain: GandiDomain) => {
     try {
@@ -91,7 +91,7 @@ export default function ListDomains() {
 
   const renderItem = (domain: GandiDomain) => {
     const expDate = new Date(domain.dates.registry_ends_at);
-    // Subtitle removed to avoid duplicating lock info now displayed as chips
+    
 
     // Derive independent lock states
     const transferLocked = domain.is_locked || domain.status?.some((s) => s.includes("TransferProhibited")) || false;

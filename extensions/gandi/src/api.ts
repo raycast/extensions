@@ -6,7 +6,6 @@ const createRequest = async <T>(url: string, options: RequestInit = {}): Promise
   const preferences = getPreferenceValues<Preferences>();
 
   try {
-    // Merge headers while preventing Authorization from being overridden.
     const additionalHeaders: Record<string, string> = {};
     const rawHeaders = (options.headers ?? {}) as any;
     if (Array.isArray(rawHeaders)) {
@@ -53,34 +52,28 @@ export const checkAvailability = async (domain: string): Promise<DomainAvailabil
   const params = new URLSearchParams({ name: domain });
   const raw = await createRequest<any>("https://api.gandi.net/v5/domain/check?" + params.toString());
 
-  // The API can return either an object or an array of results.
   const pickEntry = (r: any): any => {
     if (!Array.isArray(r)) return r;
     const lower = domain.toLowerCase();
     const lastDot = lower.lastIndexOf(".");
     const sld = lastDot > 0 ? lower.slice(0, lastDot) : lower;
     const tld = lastDot > 0 ? lower.slice(lastDot + 1) : "";
-    // 1) Exact fqdn match
     const byFqdn = r.find((e: any) => {
       const candidates = [e?.fqdn, e?.fqdn_unicode, e?.domain];
       return candidates.some((c) => typeof c === "string" && c.toLowerCase() === lower);
     });
     if (byFqdn) return byFqdn;
-    // 2) name + tld match when fields are separated
     const byNameTld = r.find((e: any) => {
       const name = typeof e?.name === "string" ? e.name.toLowerCase() : undefined;
       const etld = typeof e?.tld === "string" ? e.tld.toLowerCase() : undefined;
       return name === sld && etld === tld;
     });
     if (byNameTld) return byNameTld;
-    // 3) Any entry sharing the same tld (for pricing fallback)
     const byTld = r.find((e: any) => typeof e?.tld === "string" && e.tld.toLowerCase() === tld);
     return byTld ?? r[0];
   };
 
   const entry = pickEntry(raw) ?? {};
-
-  // Robust availability mapping per docs (2023-05-11 added notes on status)
   const asBool = (v: any) => (typeof v === "boolean" ? v : undefined);
   const asStr = (v: any) => (typeof v === "string" ? v.toLowerCase() : undefined);
 
@@ -98,12 +91,10 @@ export const checkAvailability = async (domain: string): Promise<DomainAvailabil
     available = /^(available|yes|true)$/i.test(String(entry.available));
   }
   available = available ?? asBool(entry.is_available);
-  // Some payloads expose "exists" (true if registered). If present, invert it.
   if (available === undefined && typeof entry.exists === "boolean") {
     available = !entry.exists;
   }
   if (available === undefined) {
-    // Guard against "unavailable" which contains the word "available"
     if (status === "unavailable" || status === "taken" || status === "invalid" || status === "reserved") {
       available = false;
     } else if (availableFromStatus) {
@@ -111,8 +102,6 @@ export const checkAvailability = async (domain: string): Promise<DomainAvailabil
     }
   }
 
-  // Merge potential pricing info if the selected entry doesn't have it. If raw is an array,
-  // try to find a sibling with the same TLD that carries the products list.
   let products = entry.products;
   let taxes = entry.taxes;
   let currency = entry.currency;
@@ -131,7 +120,6 @@ export const checkAvailability = async (domain: string): Promise<DomainAvailabil
     }
   }
 
-  // If availability still unknown, infer it from product processes and statuses
   if (available === undefined && Array.isArray(products)) {
     const prods = products as any[];
     const norm = (s: any) => String(s || "").toLowerCase();
@@ -144,13 +132,11 @@ export const checkAvailability = async (domain: string): Promise<DomainAvailabil
     if (hasCreateAvailable) available = true;
     else if (hasRenewAvailable) available = false;
     else {
-      // Fallback to presence of process
       const processes = new Set(prods.map((p) => norm(p?.process ?? p?.action)));
       if (processes.has("create")) available = true;
     }
   }
 
-  // Final fallback: rely on status-derived inference if still undefined
   available ??= availableFromStatus ?? false;
 
   return { ...entry, products, taxes, currency, available: Boolean(available) } as DomainAvailability;
@@ -192,9 +178,7 @@ export const updateTransferLock = (domain: string, locked: boolean): Promise<any
     body: JSON.stringify({ status: locked ? "lock" : "unlock" }),
   });
 
-// Lightweight Website Metadata fetcher (best-effort)
 export const fetchWebsiteMetadata = async (url: string): Promise<WebsiteMetadata | undefined> => {
-  // Ensure protocol
   let target = url;
   if (!/^https?:\/\//i.test(target)) {
     target = "https://" + target;
@@ -214,7 +198,6 @@ export const fetchWebsiteMetadata = async (url: string): Promise<WebsiteMetadata
     const image = pick(/meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)/i);
     const favicon = pick(/link[^>]*rel=["'](?:icon|shortcut icon)["'][^>]*href=["']([^"']+)/i);
 
-    // Resolve relative URLs
     const base = new URL(res.url || target);
     const resolve = (v?: string) => (v ? new URL(v, base).toString() : undefined);
 
