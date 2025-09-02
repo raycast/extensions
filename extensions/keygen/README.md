@@ -6,6 +6,9 @@
 
 This is a Raycast extension for [Keygen](https://keygen.sh/) - Open, enterprise-grade licensing & distribution. With this extension you can:
 
+- View API Token
+    - Revoke Token
+- View API Usage
 - View Licenses
     - Create License
 - View Policies

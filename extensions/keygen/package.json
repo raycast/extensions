@@ -26,6 +26,13 @@
   ],
   "commands": [
     {
+      "name": "api-tokens",
+      "title": "View API Tokens",
+      "subtitle": "Keygen",
+            "description": "List API Tokenss and Create new ones",
+"mode": "view"
+    },
+    {
       "name": "api-usage",
       "title": "API Usage",
       "subtitle": "Keygen",
@@ -43,7 +50,7 @@
       "name": "policies",
       "title": "View Policies",
       "subtitle": "Keygen",
-      "description": "View Policies and Create new ones",
+      "description": "List Policies and Create new ones",
       "mode": "view"
     },
     {
@@ -62,8 +69,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.3",
-    "@raycast/utils": "^2.2.0",
+    "@raycast/api": "^1.102.6",
+    "@raycast/utils": "^2.2.1",
     "dayjs": "^1.11.13"
   },
   "devDependencies": {
