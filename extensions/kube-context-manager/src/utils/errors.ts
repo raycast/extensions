@@ -166,7 +166,7 @@ export async function showLoadingToast(title: string, message?: string): Promise
 export class ValidationError extends Error {
   constructor(
     message: string,
-    public action?: string
+    public action?: string,
   ) {
     super(message);
     this.name = "ValidationError";
@@ -179,7 +179,7 @@ export class ValidationError extends Error {
 export class KubeconfigError extends Error {
   constructor(
     message: string,
-    public action?: string
+    public action?: string,
   ) {
     super(message);
     this.name = "KubeconfigError";

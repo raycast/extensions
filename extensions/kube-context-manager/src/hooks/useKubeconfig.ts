@@ -184,7 +184,7 @@ export function useContextSwitcher() {
       const success = switchToContextWithNamespace(contextName, namespace);
       if (!success) {
         throw new Error(
-          `Failed to switch to context: ${contextName}${namespace ? ` with namespace: ${namespace}` : ""}`
+          `Failed to switch to context: ${contextName}${namespace ? ` with namespace: ${namespace}` : ""}`,
         );
       }
       return true;
@@ -250,7 +250,7 @@ export function useKubeconfig() {
       }
       return success;
     },
-    [switcher, currentContext, contexts]
+    [switcher, currentContext, contexts],
   );
 
   const switchContextWithNamespace = useCallback(
@@ -264,7 +264,7 @@ export function useKubeconfig() {
       }
       return success;
     },
-    [switcher, currentContext, contexts, namespaces]
+    [switcher, currentContext, contexts, namespaces],
   );
 
   return {

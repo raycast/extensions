@@ -11,7 +11,7 @@ export function NamespaceSelector({ namespaces, currentNamespace, onSelect }: Na
   const [searchText, setSearchText] = useState("");
 
   const filteredNamespaces = namespaces.filter((namespace) =>
-    namespace.toLowerCase().includes(searchText.toLowerCase())
+    namespace.toLowerCase().includes(searchText.toLowerCase()),
   );
 
   return (

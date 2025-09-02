@@ -18,7 +18,7 @@ export default function ManageContexts() {
         context.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         context.cluster.toLowerCase().includes(searchQuery.toLowerCase()) ||
         context.user.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (context.namespace && context.namespace.toLowerCase().includes(searchQuery.toLowerCase()))
+        (context.namespace && context.namespace.toLowerCase().includes(searchQuery.toLowerCase())),
     );
   }, [contexts, searchQuery]);
 
@@ -183,7 +183,7 @@ function CreateContextForm({ onCreated }: { onCreated: () => void }) {
         clusterName,
         userName,
         values.namespace?.trim() || undefined,
-        useExistingCluster ? undefined : values.clusterServer?.trim()
+        useExistingCluster ? undefined : values.clusterServer?.trim(),
       );
 
       await showSuccessToast("Context Created", `Successfully created context: ${values.name}`);

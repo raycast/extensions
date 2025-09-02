@@ -62,7 +62,7 @@ export function readKubeconfig(): KubeConfig {
     if (!existsSync(kubeconfigPath)) {
       throw new KubeconfigError(
         `Kubeconfig file not found at ${kubeconfigPath}`,
-        "Create a kubeconfig file or set KUBECONFIG environment variable"
+        "Create a kubeconfig file or set KUBECONFIG environment variable",
       );
     }
 
@@ -87,14 +87,14 @@ export function readKubeconfig(): KubeConfig {
       if (error.message.includes("permission denied") || error.message.includes("EACCES")) {
         throw new KubeconfigError(
           "Permission denied accessing kubeconfig",
-          "Fix file permissions: chmod 600 ~/.kube/config"
+          "Fix file permissions: chmod 600 ~/.kube/config",
         );
       }
 
       if (error.message.includes("YAML")) {
         throw new KubeconfigError(
           "Invalid YAML syntax in kubeconfig",
-          "Check your kubeconfig syntax or regenerate the file"
+          "Check your kubeconfig syntax or regenerate the file",
         );
       }
     }
@@ -149,7 +149,7 @@ export function writeKubeconfig(config: KubeConfig): void {
       if (error.message.includes("permission denied") || error.message.includes("EACCES")) {
         throw new KubeconfigError(
           "Permission denied writing kubeconfig",
-          "Fix file permissions: chmod 600 ~/.kube/config"
+          "Fix file permissions: chmod 600 ~/.kube/config",
         );
       }
 
@@ -434,7 +434,7 @@ export function createContext(
   clusterName: string,
   userName: string,
   namespace?: string,
-  clusterServer?: string
+  clusterServer?: string,
 ): boolean {
   try {
     const config = readKubeconfig();
@@ -549,7 +549,7 @@ export function modifyContext(
     cluster?: string;
     user?: string;
     namespace?: string;
-  }
+  },
 ): boolean {
   try {
     const config = readKubeconfig();
