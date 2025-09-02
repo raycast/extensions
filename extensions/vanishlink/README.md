@@ -51,31 +51,6 @@ Search and manage saved links with editing capabilities.
 - Delete links via action panel
 - Add new bookmarks directly from empty state
 
-## Installation
-
-### Development Environment
-
-```bash
-# Install dependencies
-npm install
-
-# Start development mode
-npm run dev
-
-# Build
-npm run build
-
-# Run linter
-npm run lint
-
-# Auto-fix linting issues
-npm run fix-lint
-```
-
-### Raycast Store
-
-This extension is planned for publication on the Raycast Store.
-
 ## Usage
 
 1. **Adding links from clipboard**

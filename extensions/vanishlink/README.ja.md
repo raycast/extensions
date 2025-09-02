@@ -46,31 +46,6 @@ VanishLinkは、短期間だけ必要なリンクを効率的に管理するた�
 - Enterキーでリンクを開く
 - アクションパネルから削除も可能
 
-## インストール
-
-### 開発環境
-
-```bash
-# 依存関係のインストール
-npm install
-
-# 開発モードで起動
-npm run dev
-
-# ビルド
-npm run build
-
-# リンターの実行
-npm run lint
-
-# リンターの自動修正
-npm run fix-lint
-```
-
-### Raycast Store
-
-このExtensionはRaycast Storeで公開予定です。
-
 ## 使用方法
 
 1. **クリップボードからリンクの追加**
