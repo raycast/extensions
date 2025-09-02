@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "clipboard-to-obsidian",
+  "title": "Clipboard to Obsidian",
+  "description": "Create Obsidian notes from clipboard history",
+  "icon": "command-icon.png",
+  "author": "galexc",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-note",
+      "title": "Create Note from Clipboard",
+      "subtitle": "Clipboard to Obsidian",
+      "description": "Creates an Obsidian note using the last 2 clipboard items.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.82.5",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "vaultPath",
+      "title": "Obsidian Vault Path",
+      "description": "Path to your Obsidian vault",
+      "type": "textfield",
+      "required": true,
+      "default": "~/Library/CloudStorage/Dropbox/Obsidian"
+    },
+    {
+      "name": "notesSubfolder",
+      "title": "Notes Subfolder",
+      "description": "Subfolder within vault for new notes",
+      "type": "textfield",
+      "required": true,
+      "default": "Notes/Unsorted"
+    }
+  ]
+}
