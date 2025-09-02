@@ -4,6 +4,7 @@
 
 - Update packages
 - Fix typos
+- Remove support for multiple farcaster clients
 
 ## [Support for Nook] - 2024-05-01
 
