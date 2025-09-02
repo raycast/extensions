@@ -1,17 +1,17 @@
-import { Image, getPreferenceValues } from '@raycast/api';
-import { getAvatarIcon } from '@raycast/utils';
-import { Cast, CastAuthor } from './types';
-import Linkify from 'linkify-it';
-import tlds from 'tlds';
+import { Image, getPreferenceValues } from "@raycast/api";
+import { getAvatarIcon } from "@raycast/utils";
+import { Cast, CastAuthor } from "./types";
+import Linkify from "linkify-it";
+import tlds from "tlds";
 
 const preferences = getPreferenceValues<Preferences>();
-const isEtherscan = preferences.walletAddressClient === 'etherscan';
+const isEtherscan = preferences.walletAddressClient === "etherscan";
 
-export function getUserIcon(user: Pick<CastAuthor, 'username' | 'pfp_url'>) {
+export function getUserIcon(user: Pick<CastAuthor, "username" | "pfp_url">) {
   return {
     source: user.pfp_url ? encodeURI(user.pfp_url) : getAvatarIcon(user.username.toUpperCase()),
     mask: Image.Mask.RoundedRectangle,
-    fallback: 'ghost.png',
+    fallback: "ghost.png",
   };
 }
 
@@ -58,4 +58,4 @@ export function linkify(text: string): string {
   }, text);
 }
 
-export const headers = { accept: 'application/json', api_key: preferences.apiKey };
+export const headers = { accept: "application/json", api_key: preferences.apiKey };
