@@ -1,6 +1,6 @@
 # Farcaster Changelog
 
-## [Version Updates] - {PR_MERGE_DATE}
+## [Version Updates] - 2025-09-02
 
 - Update packages
 - Fix typos
