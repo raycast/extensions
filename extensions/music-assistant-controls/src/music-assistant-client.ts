@@ -231,7 +231,7 @@ export default class MusicAssistantClient {
    * ```
    */
   async showSelectionFeedback(displayName: string): Promise<void> {
-    await showHUD(`${displayName} selected, allow 10 seconds for the menubar to update!`);
+    await showHUD(this.formatSelectionMessage(displayName));
   }
 
   /**

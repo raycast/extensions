@@ -4,9 +4,8 @@ import { MusicAssistantApi } from "./external-code/music-assistant-api";
 import "./polyfills";
 import { Prefs } from "./preferences";
 
-const { host } = getPreferenceValues<Prefs>();
-
 export default function executeApiCommand<T>(command: (api: MusicAssistantApi) => Promise<T>) {
+  const { host } = getPreferenceValues<Prefs>();
   const api = new MusicAssistantApi();
   return new Promise<T>((res, rej) => {
     /* eslint-disable @typescript-eslint/no-explicit-any */
