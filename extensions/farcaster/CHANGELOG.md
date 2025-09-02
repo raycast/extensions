@@ -2,7 +2,7 @@
 
 ## [Version Updates] - 2025-01-09
 
-- Update pacakges
+- Update packages
 - Fix typos
 
 ## [Support for Nook] - 2024-05-01

@@ -30,38 +30,11 @@ export function truncateEthAddress(address: string) {
 }
 
 export function getCastUrl(cast: Cast) {
-  let baseUrl;
-  switch (preferences.farcasterClient) {
-    case 'supercast':
-      baseUrl = `https://www.supercast.xyz/c/${cast.hash}`;
-      break;
-    case 'nook':
-      baseUrl = `https://nook.social/casts/${cast.hash}`;
-      break;
-    case 'warpcast':
-    default:
-      baseUrl = `https://warpcast.com/${cast.author.username}/${cast.hash.substring(0, 8)}`;
-      break;
-  }
-
-  return baseUrl;
+  return `https://farcaster.xyz/${cast.author.username}/${cast.hash.substring(0, 8)}`;
 }
 
 export function getProfileUrl(author: CastAuthor) {
-  let baseUrl;
-  switch (preferences.farcasterClient) {
-    case 'supercast':
-      baseUrl = `https://www.supercast.xyz/${author.username}`;
-      break;
-    case 'nook':
-      baseUrl = `https://nook.social/users/${author.username}`;
-      break;
-    case 'warpcast':
-    default:
-      baseUrl = `https://warpcast.com/${author.username}`;
-      break;
-  }
-  return baseUrl;
+  return `https://farcaster.xyz/${author.username}`;
 }
 
 export function getEthAddressUrl(walletAddress: string) {

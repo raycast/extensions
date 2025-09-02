@@ -33,29 +33,7 @@
       "required": true,
       "title": "Neynar API Key",
       "placeholder": "Enter your API key",
-      "link": "https://dev.neynar.com"
-    },
-    {
-      "name": "farcasterClient",
-      "description": "Select Farcaster client to use",
-      "type": "dropdown",
-      "required": true,
-      "title": "Farcaster Client",
-      "default": "warpcast",
-      "data": [
-        {
-          "title": "Warpcast",
-          "value": "warpcast"
-        },
-        {
-          "title": "Supercast",
-          "value": "supercast"
-        },
-        {
-          "title": "Nook",
-          "value": "nook"
-        }
-      ]
+      "link": "https://neynar.com/"
     },
     {
       "name": "walletAddressClient",
