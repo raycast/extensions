@@ -14,21 +14,21 @@
     {
       "name": "list-domains",
       "title": "List Domains",
-      "subtitle": "View all your Gandi domains",
+      "subtitle": "Gandi",
       "description": "List all domains in your Gandi account with their status and expiration dates",
       "mode": "view"
     },
     {
       "name": "check-availability",
       "title": "Check Domain Availability",
-      "subtitle": "Check if a domain is available",
+      "subtitle": "Gandi",
       "description": "Check if a domain name is available for registration",
       "mode": "view"
     },
     {
       "name": "manage-dns",
       "title": "Manage DNS Records",
-      "subtitle": "View and manage DNS records",
+      "subtitle": "Gandi",
       "description": "Manage DNS records for your domains",
       "mode": "view"
     }

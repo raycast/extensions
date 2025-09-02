@@ -64,54 +64,12 @@ export interface DNSRecord {
   rrset_href?: string;
 }
 
-export interface DNSZone {
-  uuid: string;
-  name: string;
-  created_at?: number;
-  updated_at?: number;
-  apex_alias?: boolean;
-}
-
-export interface Certificate {
-  id: string;
-  cn: string;
-  dates: {
-    created_at: string;
-    ends_at: string;
-    starts_at: string;
-    updated_at: string;
-  };
-  package: string;
-  status: string;
-}
-
-export interface Organization {
-  id: string;
-  name: string;
-  firstname: string;
-  lastname: string;
-  email: string;
-  type: string;
-  corporate_name?: string;
-  reseller: boolean;
-}
-
 export interface WebsiteMetadata {
   finalUrl: string;
   title?: string;
   description?: string;
   image?: string;
   favicon?: string;
-}
-
-export interface Mailbox {
-  id: string;
-  address: string;
-  domain: string;
-  quota_used: number;
-  login: string;
-  mailbox_type: string;
-  aliases?: string[];
 }
 
 export interface GandiError {

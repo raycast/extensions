@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { GandiDomain, DomainAvailability, DNSRecord, DNSZone, WebsiteMetadata } from "./types";
+import { GandiDomain, DomainAvailability, DNSRecord, WebsiteMetadata } from "./types";
 
 const createRequest = async <T>(url: string, options: RequestInit = {}): Promise<T> => {
   const preferences = getPreferenceValues<Preferences>();
@@ -32,13 +32,8 @@ const createRequest = async <T>(url: string, options: RequestInit = {}): Promise
   }
 };
 
-export const validateToken = (): Promise<any> => createRequest("https://id.gandi.net/tokeninfo");
-
 export const getDomains = (): Promise<GandiDomain[]> =>
   createRequest<GandiDomain[]>("https://api.gandi.net/v5/domain/domains");
-
-export const getDomain = (domain: string): Promise<GandiDomain> =>
-  createRequest<GandiDomain>("https://api.gandi.net/v5/domain/domains/" + domain);
 
 export const checkAvailability = async (domain: string): Promise<DomainAvailability> => {
   const params = new URLSearchParams({ name: domain });
@@ -177,87 +172,11 @@ export const deleteDNSRecord = (domain: string, name: string, type: string): Pro
   createRequest("https://api.gandi.net/v5/livedns/domains/" + domain + "/records/" + name + "/" + type, {
     method: "DELETE",
   });
-
-export const getDNSZones = (): Promise<DNSZone[]> => createRequest<DNSZone[]>("https://api.gandi.net/v5/livedns/zones");
-
-export const renewDomain = (domain: string, duration = 1): Promise<any> =>
-  createRequest("https://api.gandi.net/v5/domain/domains/" + domain + "/renew", {
-    method: "POST",
-    body: JSON.stringify({ duration }),
-  });
-
-export const resetAuthCode = (domain: string): Promise<void> =>
-  createRequest("https://api.gandi.net/v5/domain/domains/" + domain + "/authinfo", {
-    method: "PUT",
-  });
-
-export const changeOwner = (domain: string, ownerData: any): Promise<any> =>
-  createRequest("https://api.gandi.net/v5/domain/changeowner/" + domain, {
-    method: "POST",
-    body: JSON.stringify(ownerData),
-  });
-
-export const getOwnerChangeStatus = (domain: string): Promise<any> =>
-  createRequest("https://api.gandi.net/v5/domain/changeowner/" + domain);
-
-export const checkTrademarkClaims = (domain: string): Promise<any> =>
-  createRequest("https://api.gandi.net/v5/domain/domains/" + domain + "/claims");
-
-// Domain Contacts Management
-export const getDomainContacts = (domain: string): Promise<any> =>
-  createRequest("https://api.gandi.net/v5/domain/domains/" + domain + "/contacts");
-
-export const updateDomainContacts = (domain: string, contacts: any): Promise<any> =>
-  createRequest("https://api.gandi.net/v5/domain/domains/" + domain + "/contacts", {
-    method: "PATCH",
-    body: JSON.stringify(contacts),
-  });
-
-// Nameserver Management
-export const getNameservers = (domain: string): Promise<any> =>
-  createRequest("https://api.gandi.net/v5/domain/domains/" + domain + "/nameservers");
-
-export const updateNameservers = (domain: string, nameservers: string[]): Promise<any> =>
-  createRequest("https://api.gandi.net/v5/domain/domains/" + domain + "/nameservers", {
-    method: "PUT",
-    body: JSON.stringify({ nameservers }),
-  });
-
-// Domain Lock Status
 export const updateTransferLock = (domain: string, locked: boolean): Promise<any> =>
   createRequest("https://api.gandi.net/v5/domain/domains/" + domain + "/status", {
     method: "PATCH",
     body: JSON.stringify({ status: locked ? "lock" : "unlock" }),
   });
-
-// Domain Renewal Information
-export const getRenewalInfo = (domain: string): Promise<any> =>
-  createRequest("https://api.gandi.net/v5/domain/domains/" + domain + "/renew");
-
-// Domain Tags Management
-export const getDomainTags = (domain: string): Promise<any> =>
-  createRequest("https://api.gandi.net/v5/domain/domains/" + domain + "/tags");
-
-export const updateDomainTags = (domain: string, tags: string[]): Promise<any> =>
-  createRequest("https://api.gandi.net/v5/domain/domains/" + domain + "/tags", {
-    method: "PUT",
-    body: JSON.stringify(tags),
-  });
-
-// Transfer Operations
-export const transferDomainIn = (domain: string, authcode: string, contacts: any): Promise<any> =>
-  createRequest("https://api.gandi.net/v5/domain/transferin", {
-    method: "POST",
-    body: JSON.stringify({ domain, authcode, ...contacts }),
-  });
-
-export const getTransferStatus = (domain: string): Promise<any> =>
-  createRequest("https://api.gandi.net/v5/domain/transferin/" + domain);
-
-// TLD Information
-export const getTLDs = (): Promise<any> => createRequest("https://api.gandi.net/v5/domain/tlds");
-
-export const getTLDInfo = (tld: string): Promise<any> => createRequest("https://api.gandi.net/v5/domain/tlds/" + tld);
 
 // Lightweight Website Metadata fetcher (best-effort)
 export const fetchWebsiteMetadata = async (url: string): Promise<WebsiteMetadata | undefined> => {
