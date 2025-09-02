@@ -1,6 +1,6 @@
 # Splitwise Changelog
 
-## [New Features] - {PR_MERGE_DATE}
+## [New Features] - 2025-09-02
 
 - Added category selection dropdown to the Add Expense form
 - Categories are fetched from Splitwise API and include both parent categories and subcategories
