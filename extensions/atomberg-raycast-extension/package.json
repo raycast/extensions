@@ -12,16 +12,14 @@
       "title": "My Atomberg Devices",
       "subtitle": "View and control your Atomberg appliances",
       "description": "List and control your Atomberg smart fans and appliances",
-      "mode": "view",
-      "icon": "extension-icon.png"
+      "mode": "view"
     },
     {
       "name": "manage-atomberg-credentials",
       "title": "Manage Atomberg Credentials",
       "subtitle": "View and reset your Atomberg API credentials",
       "description": "View current API credentials and reset them if needed",
-      "mode": "view",
-      "icon": "extension-icon.png"
+      "mode": "view"
     }
   ],
   "preferences": [
