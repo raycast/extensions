@@ -14,11 +14,11 @@ import {
 } from "@raycast/api";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-// Type assertions to fix React type conflicts
-const FormComponent = Form as any;
-const ActionComponent = Action as any;
-const ActionPanelComponent = ActionPanel as any;
-const ListComponent = List as any;
+// Use the components directly from @raycast/api
+const FormComponent = Form;
+const ActionComponent = Action;
+const ActionPanelComponent = ActionPanel;
+const ListComponent = List;
 import { useCachedPromise, CachedPromiseOptions } from "@raycast/utils";
 
 import {
