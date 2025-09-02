@@ -1,6 +1,6 @@
 # Bitwarden Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-09-02
 
 - Sync vault on command launch
 - Reorganize preferences
