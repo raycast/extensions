@@ -12,9 +12,12 @@ export interface Form {
 }
 interface FormSettings {
   hasProgressBar: boolean;
+  hasSelfEmailNotifications: boolean;
   password: string | null;
   isClosed: boolean;
   submissionsLimit: number | null;
+  pageAutoJump: boolean;
+  saveForLater: boolean;
 }
 export interface DetailedForm extends Form {
   settings: FormSettings;

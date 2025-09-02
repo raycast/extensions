@@ -34,9 +34,20 @@ export default function Forms() {
 
 function UpdateForm({ formId }: { formId: string }) {
   const { pop } = useNavigation();
-  const { isLoading, data: form } = useFetch<DetailedForm>(API_URL + `forms/${formId}`, {
+  const { isLoading } = useFetch<DetailedForm>(API_URL + `forms/${formId}`, {
     headers: API_HEADERS,
     keepPreviousData: false,
+    onData(data) {
+      if (data.name) setValue("name", data.name);
+      setValue("status", data.status);
+      setValue("hasProgressBar", data.settings.hasProgressBar);
+      setValue("hasSelfEmailNotifications", data.settings.hasSelfEmailNotifications);
+      if (data.settings.password) setValue("password", data.settings.password);
+      setValue("isClosed", data.settings.isClosed);
+      if (data.settings.submissionsLimit) setValue("submissionsLimit", data.settings.submissionsLimit.toString());
+      setValue("pageAutoJump", data.settings.pageAutoJump);
+      setValue("saveForLater", data.settings.saveForLater);
+    },
   });
 
   interface FormValues {
@@ -51,7 +62,7 @@ function UpdateForm({ formId }: { formId: string }) {
     pageAutoJump: boolean;
     saveForLater: boolean;
   }
-  const { handleSubmit, itemProps } = useForm<FormValues>({
+  const { handleSubmit, itemProps, setValue } = useForm<FormValues>({
     async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Updating", formId);
       try {
@@ -77,13 +88,6 @@ function UpdateForm({ formId }: { formId: string }) {
         toast.title = "Could not update";
         toast.message = `${error}`;
       }
-    },
-    initialValues: {
-      name: form?.name || undefined,
-      status: form?.status,
-      ...form?.settings,
-      password: form?.settings.password || undefined,
-      submissionsLimit: form?.settings.submissionsLimit?.toString(),
     },
     validation: {
       name: FormValidation.Required,
