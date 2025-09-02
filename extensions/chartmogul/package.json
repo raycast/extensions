@@ -13,8 +13,8 @@
   "commands": [
     {
       "name": "metrics",
-      "title": "Subscription Metrics",
-      "subtitle": "Get a snapshot of your most important subscription metrics",
+      "title": "View Subscription Metrics",
+      "subtitle": "ChartMogul",
       "description": "See revenue, customer, and churn data all in one place. This gives you a high-level view of your SaaS performance in seconds.",
       "mode": "view",
       "keywords": [
@@ -28,8 +28,8 @@
     },
     {
       "name": "mrr-movements",
-      "title": "Recent MRR Movements",
-      "subtitle": "Stay on top of recent MRR movements",
+      "title": "View Recent MRR Movements",
+      "subtitle": "ChartMogul",
       "description": "Browse the latest customer actions like new signups, upgrades, and cancellations. Keep a finger on the pulse of your business in real time.",
       "mode": "view",
       "keywords": [
