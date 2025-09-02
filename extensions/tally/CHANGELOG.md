@@ -1,6 +1,6 @@
 # Tally Changelog
 
-## [Update Form + Fix for Untitled Form] - {PR_MERGE_DATE}
+## [Update Form + Fix for Untitled Form] - 2025-09-02
 
 - update many settings of a Form
 - fix: crash when no Form title (ref: [Issue #21301](https://github.com/raycast/extensions/issues/21301))
