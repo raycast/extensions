@@ -1,6 +1,6 @@
 # Diccionario RAE Changelog
 
-## [Initial Version] - 2025-05-19
+## [Initial Version] - {PRE_MERGE_DATE}
 
 - Added Command `Query RAE word`
 - Added Command `Query random RAE word`
