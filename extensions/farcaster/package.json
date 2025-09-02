@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "farcaster",
   "title": "Farcaster",
-  "description": "Most comprehensive extension for Forecaster. Search for casts, profiles and more.",
+  "description": "Most comprehensive extension for Farcaster. Search for casts, profiles and explore details.",
   "icon": "command-icon.png",
   "author": "artivilla",
   "categories": [
