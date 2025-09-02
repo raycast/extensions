@@ -1,6 +1,6 @@
 # Solidtime Changelog
 
-## [Change solidtime URL + Handle Errors] - {PR_MERGE_DATE}
+## [Change solidtime URL + Handle Errors] - 2025-09-02
 
 - fix: **MembershipAccessory** would always be `isLoading`
 - add: `EmptyView` when no clients
