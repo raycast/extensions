@@ -2,7 +2,6 @@ import { getPreferenceValues } from '@raycast/api';
 
 interface Preferences {
   apiKey: string;
-  farcasterClient: string;
   walletAddressClient: string;
 }
 
