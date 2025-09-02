@@ -1,143 +1,63 @@
-import { showToast, Toast, getSelectedFinderItems, Clipboard, getPreferenceValues } from "@raycast/api";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import fs from "fs";
-import path from "path";
+import {
+  showToast,
+  Toast,
+  getSelectedFinderItems,
+  Clipboard,
+  getPreferenceValues,
+  openExtensionPreferences,
+  PreferenceValues,
+} from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { execFileSync } from "child_process";
+import { AVIFENC_DEFAULT_PATH } from "./utils/constants";
+import { isSupportedImageFormat } from "./utils/mime-types";
 import { convertToAvif } from "./utils/convert";
+import { uploadToR2 } from "./utils/uploadToR2";
+import { generateFileName } from "./utils/generate-fileName";
 
-interface Preferences {
-  r2BucketName: string;
-  r2AccessKeyId: string;
-  r2SecretAccessKey: string;
-  r2AccountId: string;
-  customDomain: string;
-  fileNameFormat: string;
-  convertToAvif: boolean;
-  avifencPath: string;
-}
-
-function isAvifencAvailable(customPath?: string): boolean {
-  const avifencPath = customPath || "/opt/homebrew/bin/avifenc";
-
+async function isAvifencAvailable(avifencPath: string): Promise<boolean> {
   try {
     execFileSync(avifencPath, ["--version"]);
     return true;
-  } catch {
+  } catch (error) {
+    await showFailureToast(error, { title: "execFileSync avifencPath" });
+
     try {
       execFileSync("avifenc", ["--version"]);
       return true;
-    } catch {
+    } catch (error) {
+      await showFailureToast(error, { title: "execFileSync avifenc" });
       return false;
     }
   }
 }
 
-async function generateFileName(originalPath: string, format: string, customExtension?: string): Promise<string> {
-  const ext = customExtension || path.extname(originalPath).toLowerCase();
-  const basename = path.basename(originalPath, path.extname(originalPath));
-
-  if (!format) {
-    if (customExtension) {
-      return basename + customExtension;
-    }
-    return path.basename(originalPath);
-  }
-
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  const hours = String(now.getHours()).padStart(2, "0");
-  const minutes = String(now.getMinutes()).padStart(2, "0");
-  const seconds = String(now.getSeconds()).padStart(2, "0");
-
-  let formattedName = format
-    .replace(/{name}/g, basename)
-    .replace(/{ext}/g, ext.substring(1))
-    .replace(/{year}/g, String(year))
-    .replace(/{month}/g, month)
-    .replace(/{day}/g, day)
-    .replace(/{hours}/g, hours)
-    .replace(/{minutes}/g, minutes)
-    .replace(/{seconds}/g, seconds);
-
-  if (!path.extname(formattedName)) {
-    formattedName += ext;
-  } else if (path.extname(formattedName) !== ext) {
-    formattedName = path.basename(formattedName, path.extname(formattedName)) + ext;
-  }
-
-  return formattedName;
-}
-
-async function uploadToR2(
-  filePath: string,
-  customFileName: string | undefined,
-): Promise<{ url: string; markdown: string }> {
-  const preferences = getPreferenceValues<Preferences>();
-  const {
-    r2BucketName: bucketName,
-    r2AccessKeyId: accessKeyId,
-    r2SecretAccessKey: secretAccessKey,
-    r2AccountId: accountId,
-    customDomain,
-    fileNameFormat,
-  } = preferences;
-
-  const endpoint = `https://${accountId}.r2.cloudflarestorage.com`;
-
-  const s3Client = new S3Client({
-    region: "auto",
-    endpoint,
-    credentials: {
-      accessKeyId,
-      secretAccessKey,
-    },
-    forcePathStyle: true,
-  });
-
-  const fileContent = await fs.promises.readFile(filePath);
-
-  const finalFileName =
-    customFileName || (await generateFileName(filePath, fileNameFormat || "", path.extname(filePath)));
-  const key = finalFileName;
-
-  const fileExt = path.extname(filePath).toLowerCase();
-  let contentType = "image/jpeg";
-  if (fileExt === ".png") {
-    contentType = "image/png";
-  } else if (fileExt === ".gif") {
-    contentType = "image/gif";
-  } else if (fileExt === ".webp") {
-    contentType = "image/webp";
-  } else if (fileExt === ".avif") {
-    contentType = "image/avif";
-  }
-
-  const putObjectCommand = new PutObjectCommand({
-    Bucket: bucketName,
-    Key: key,
-    Body: fileContent,
-    ContentType: contentType,
-  });
-
-  await s3Client.send(putObjectCommand);
-
-  let url: string;
-  if (customDomain) {
-    const cleanDomain = customDomain.replace(/\/$/, "");
-    url = `${cleanDomain}/${key}`;
-  } else {
-    url = `${endpoint}/${bucketName}/${key}`;
-  }
-
-  const markdown = `![${path.basename(key, path.extname(key))}](${url})`;
-
-  return { url, markdown };
+function isPreferencesConfigured(preferences: PreferenceValues): boolean {
+  return Boolean(
+    preferences.r2BucketName && preferences.r2AccessKeyId && preferences.r2SecretAccessKey && preferences.r2AccountId,
+  );
 }
 
 export default async function Command() {
   try {
+    const preferences = getPreferenceValues();
+
+    // 检查是否已配置必要参数
+    if (!isPreferencesConfigured(preferences)) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "R2 configuration required",
+        message: "Please configure your R2 credentials in extension preferences",
+        primaryAction: {
+          title: "Open Preferences",
+          onAction: () => {
+            openExtensionPreferences();
+          },
+        },
+      });
+      return;
+    }
+
     const selectedItems = await getSelectedFinderItems();
 
     if (!selectedItems || selectedItems.length === 0) {
@@ -147,15 +67,14 @@ export default async function Command() {
 
     const inputFilePath = selectedItems[0].path;
 
-    const preferences = getPreferenceValues<Preferences>();
-    const fileNameFormat = preferences.fileNameFormat;
-    const shouldConvertToAvif = preferences.convertToAvif;
+    const {
+      fileNameFormat,
+      convertToAvif: shouldConvertToAvif,
+      avifencPath: avifencPathPreference,
+      generateMarkdown: generateMarkdown,
+    } = preferences;
 
     let customFileName: string | undefined;
-
-    if (fileNameFormat) {
-      customFileName = await generateFileName(inputFilePath, fileNameFormat);
-    }
 
     const toastUploading = await showToast({
       style: Toast.Style.Animated,
@@ -164,8 +83,8 @@ export default async function Command() {
 
     let newFilePath = inputFilePath;
 
-    if (shouldConvertToAvif) {
-      const avifencPath = preferences.avifencPath || "/opt/homebrew/bin/avifenc";
+    if (isSupportedImageFormat(inputFilePath) && shouldConvertToAvif) {
+      const avifencPath = avifencPathPreference || AVIFENC_DEFAULT_PATH;
       if (!isAvifencAvailable(avifencPath)) {
         await showToast({
           style: Toast.Style.Failure,
@@ -174,33 +93,32 @@ export default async function Command() {
         });
       } else {
         try {
-          newFilePath = await convertToAvif(inputFilePath, avifencPath);
-        } catch (conversionError: unknown) {
-          const error = conversionError as Error;
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Conversion failed",
-            message: error.message,
-          });
+          const avifQuality = preferences.avifQuality ? parseInt(preferences.avifQuality, 10) : 80;
+          const quality = Math.max(0, Math.min(100, avifQuality));
+
+          newFilePath = await convertToAvif(inputFilePath, avifencPath, quality);
+        } catch (conversionError) {
+          await showFailureToast(conversionError, { title: "Conversion failed" });
           newFilePath = inputFilePath;
         }
       }
     }
 
+    if (fileNameFormat) {
+      customFileName = await generateFileName(newFilePath, fileNameFormat);
+    }
+
     const { url, markdown } = await uploadToR2(newFilePath, customFileName);
 
+    if (generateMarkdown) {
+      await Clipboard.copy(markdown);
+    } else {
+      await Clipboard.copy(url);
+    }
     toastUploading.style = Toast.Style.Success;
-    toastUploading.title = "Upload complete";
-    toastUploading.message = url;
-
-    Clipboard.copy(markdown);
+    toastUploading.title = "Upload completed!";
+    toastUploading.message = "URL copied to clipboard";
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred during upload";
-    console.error("Upload error:", errorMessage);
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Error",
-      message: errorMessage,
-    });
+    await showFailureToast(error, { title: "Error uploading to R2" });
   }
 }

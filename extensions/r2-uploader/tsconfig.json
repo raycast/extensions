@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "include": ["src/**/*", "raycast-env.d.ts"],
+  "include": ["src/**/*", "raycast-env.d.ts", "types/**/*"],
   "compilerOptions": {
     "lib": ["ES2023"],
     "module": "commonjs",
