@@ -12,7 +12,14 @@ import {
   LaunchProps,
   List,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+// Type assertions to fix React type conflicts
+const FormComponent = Form as any;
+const ActionComponent = Action as any;
+const ActionPanelComponent = ActionPanel as any;
+const ListComponent = List as any;
+import { useCachedPromise, CachedPromiseOptions } from "@raycast/utils";
 
 import {
   Preferences,
@@ -285,179 +292,174 @@ function PlaybackFormComponent({
 
   const maxEpisode = selectedAnime.episodes || 999;
 
-  return React.createElement(
-    Form,
-    {
-      navigationTitle: `${getBestTitle(selectedAnime)} - Actions`,
-      actions: React.createElement(
-        ActionPanel,
-        null,
-        React.createElement(
-          ActionPanel.Section,
-          { title: "Playback" },
-          React.createElement(Action, {
-            title: "Play Episode " + formData.episodeNumber + " (Sub)",
-            icon: Icon.Play,
-            onAction: () => executeOperation("play", "sub"),
-          }),
-          React.createElement(Action, {
-            title: "Play Episode " + formData.episodeNumber + " (Dub)",
-            icon: Icon.SpeechBubble,
-            onAction: () => executeOperation("play", "dub"),
-          }),
-        ),
-        React.createElement(
-          ActionPanel.Section,
-          { title: "Download Single Episode" },
-          React.createElement(Action, {
-            title: "Download Episode " + formData.episodeNumber + " (Sub)",
-            icon: Icon.Download,
-            onAction: () => executeOperation("download", "sub"),
-          }),
-          React.createElement(Action, {
-            title: "Download Episode " + formData.episodeNumber + " (Dub)",
-            icon: Icon.ArrowDownCircle,
-            onAction: () => executeOperation("download", "dub"),
-          }),
-        ),
-        isRangeValid &&
-          React.createElement(
-            ActionPanel.Section,
-            { title: "Download Series" },
-            React.createElement(Action, {
-              title: "Download Episodes " + formData.episodeRange + " (Sub)",
-              icon: Icon.Document,
-              onAction: () => executeOperation("downloadSeries", "sub"),
-            }),
-            React.createElement(Action, {
-              title: "Download Episodes " + formData.episodeRange + " (Dub)",
-              icon: Icon.SaveDocument,
-              onAction: () => executeOperation("downloadSeries", "dub"),
-            }),
-          ),
-        React.createElement(
-          ActionPanel.Section,
-          { title: "Copy Commands" },
-          React.createElement(Action, {
-            title: "Copy Play Command (Sub)",
-            icon: Icon.Clipboard,
-            onAction: () => handleCopyCommand("sub", false),
-          }),
-          React.createElement(Action, {
-            title: "Copy Download Command (Sub)",
-            icon: Icon.CopyClipboard,
-            onAction: () => handleCopyCommand("sub", true),
-          }),
-        ),
-        React.createElement(
-          ActionPanel.Section,
-          { title: "Navigation" },
-          React.createElement(Action, {
-            title: "Back to Search",
-            icon: Icon.ArrowLeft,
-            onAction: onBack,
-          }),
-        ),
-      ),
-    },
-    React.createElement(Form.Description, {
-      title: "Selected Anime",
-      text: `${getBestTitle(selectedAnime)} • ${getStudioName(selectedAnime)} • ${getSeasonString(selectedAnime)}`,
-    }),
-    React.createElement(Form.TextField, {
-      id: "episodeNumber",
-      title: "Episode Number",
-      placeholder: `1-${maxEpisode}`,
-      value: formData.episodeNumber,
-      onChange: (value: string) => handleFormChange("episodeNumber", value),
-      info: `Enter episode number (1-${maxEpisode})`,
-      error:
-        !isFormValid && formData.episodeNumber
-          ? "Please enter a valid episode number"
-          : undefined,
-    }),
-    React.createElement(Form.Separator, null),
-    React.createElement(Form.TextField, {
-      id: "episodeRange",
-      title: "Episode Range (for series download)",
-      placeholder: "e.g., 1-12, 1-24, 5-10",
-      value: formData.episodeRange,
-      onChange: (value: string) => handleFormChange("episodeRange", value),
-      info: "Download multiple episodes (e.g., 1-12 for episodes 1 through 12)",
-      error:
-        formData.episodeRange && !isRangeValid
-          ? "Please enter a valid range like '1-12'"
-          : undefined,
-    }),
-    React.createElement(Form.Separator, null),
-    React.createElement(Form.TextField, {
-      id: "downloadPath",
-      title: "Download Path (Optional)",
-      placeholder: "Leave empty for default location",
-      value: formData.downloadPath,
-      onChange: (value: string) => handleFormChange("downloadPath", value),
-      info: "Specify custom download directory (optional)",
-    }),
-    React.createElement(
-      Form.Dropdown,
-      {
-        id: "quality",
-        title: "Video Quality",
-        value: formData.quality,
-        onChange: (value: string) =>
-          handleFormChange("quality", value as PlaybackOptions["quality"]),
-      },
-      QUALITY_OPTIONS.map((quality) =>
-        React.createElement(Form.Dropdown.Item, {
-          key: quality,
-          value: quality,
-          title: quality === "best" ? "Best Available" : quality,
-          icon: quality === "best" ? Icon.Star : Icon.Video,
-        }),
-      ),
-    ),
-    React.createElement(Form.Separator, null),
-    React.createElement(Form.Description, {
-      title: "Anime Info",
-      text: `Status: ${formatAiringStatus(selectedAnime)} | Score: ${formatScore(selectedAnime.averageScore)} | Episodes: ${selectedAnime.episodes || "Unknown"}`,
-    }),
-    getNextEpisodeInfo(selectedAnime) &&
-      React.createElement(Form.Description, {
-        title: "Next Episode",
-        text: getNextEpisodeInfo(selectedAnime),
-      }),
-    lastOperation &&
-      React.createElement(Form.Description, {
-        title: "Last Operation",
-        text: `${lastOperation.operationType === "play" ? "Played" : "Downloaded"} ${
-          typeof lastOperation.episode === "string"
-            ? `episodes ${lastOperation.episode}`
-            : `episode ${lastOperation.episode}`
-        } (${lastOperation.audioType.toUpperCase()})${
-          lastOperation.matchedTitle
-            ? ` using "${lastOperation.matchedTitle}"`
-            : ""
-        }`,
-      }),
-    isProcessing &&
-      React.createElement(Form.Description, {
-        title: "Processing",
-        text: "Please wait while the operation is being executed...",
-      }),
+  return (
+    <FormComponent
+      navigationTitle={`${getBestTitle(selectedAnime)} - Actions`}
+      actions={
+        <ActionPanelComponent>
+          <ActionPanelComponent.Section title="Playback">
+            <ActionComponent
+              title={`Play Episode ${formData.episodeNumber} (Sub)`}
+              icon={Icon.Play}
+              onAction={() => executeOperation("play", "sub")}
+            />
+            <ActionComponent
+              title={`Play Episode ${formData.episodeNumber} (Dub)`}
+              icon={Icon.SpeechBubble}
+              onAction={() => executeOperation("play", "dub")}
+            />
+          </ActionPanelComponent.Section>
+          <ActionPanelComponent.Section title="Download Single Episode">
+            <ActionComponent
+              title={`Download Episode ${formData.episodeNumber} (Sub)`}
+              icon={Icon.Download}
+              onAction={() => executeOperation("download", "sub")}
+            />
+            <ActionComponent
+              title={`Download Episode ${formData.episodeNumber} (Dub)`}
+              icon={Icon.ArrowDownCircle}
+              onAction={() => executeOperation("download", "dub")}
+            />
+          </ActionPanelComponent.Section>
+          {isRangeValid && (
+            <ActionPanelComponent.Section title="Download Series">
+              <ActionComponent
+                title={`Download Episodes ${formData.episodeRange} (Sub)`}
+                icon={Icon.Document}
+                onAction={() => executeOperation("downloadSeries", "sub")}
+              />
+              <ActionComponent
+                title={`Download Episodes ${formData.episodeRange} (Dub)`}
+                icon={Icon.SaveDocument}
+                onAction={() => executeOperation("downloadSeries", "dub")}
+              />
+            </ActionPanelComponent.Section>
+          )}
+          <ActionPanelComponent.Section title="Copy Commands">
+            <ActionComponent
+              title="Copy Play Command (Sub)"
+              icon={Icon.Clipboard}
+              onAction={() => handleCopyCommand("sub", false)}
+            />
+            <ActionComponent
+              title="Copy Download Command (Sub)"
+              icon={Icon.CopyClipboard}
+              onAction={() => handleCopyCommand("sub", true)}
+            />
+          </ActionPanelComponent.Section>
+          <ActionPanelComponent.Section title="Navigation">
+            <ActionComponent
+              title="Back to Search"
+              icon={Icon.ArrowLeft}
+              onAction={onBack}
+            />
+          </ActionPanelComponent.Section>
+        </ActionPanelComponent>
+      }
+    >
+      <FormComponent.Description
+        title="Selected Anime"
+        text={`${getBestTitle(selectedAnime)} • ${getStudioName(selectedAnime)} • ${getSeasonString(selectedAnime)}`}
+      />
+      <FormComponent.TextField
+        id="episodeNumber"
+        title="Episode Number"
+        placeholder={`1-${maxEpisode}`}
+        value={formData.episodeNumber}
+        onChange={(value: string) => handleFormChange("episodeNumber", value)}
+        info={`Enter episode number (1-${maxEpisode})`}
+        error={
+          !isFormValid && formData.episodeNumber
+            ? "Please enter a valid episode number"
+            : undefined
+        }
+      />
+      <FormComponent.Separator />
+      <FormComponent.TextField
+        id="episodeRange"
+        title="Episode Range (for series download)"
+        placeholder="e.g., 1-12, 1-24, 5-10"
+        value={formData.episodeRange}
+        onChange={(value: string) => handleFormChange("episodeRange", value)}
+        info="Download multiple episodes (e.g., 1-12 for episodes 1 through 12)"
+        error={
+          formData.episodeRange && !isRangeValid
+            ? "Please enter a valid range like '1-12'"
+            : undefined
+        }
+      />
+      <FormComponent.Separator />
+      <FormComponent.TextField
+        id="downloadPath"
+        title="Download Path (Optional)"
+        placeholder="Leave empty for default location"
+        value={formData.downloadPath}
+        onChange={(value: string) => handleFormChange("downloadPath", value)}
+        info="Specify custom download directory (optional)"
+      />
+      <FormComponent.Dropdown
+        id="quality"
+        title="Video Quality"
+        value={formData.quality}
+        onChange={(value: string) =>
+          handleFormChange("quality", value as PlaybackOptions["quality"])
+        }
+      >
+        {QUALITY_OPTIONS.map((quality) => (
+          <FormComponent.Dropdown.Item
+            key={quality}
+            value={quality}
+            title={quality === "best" ? "Best Available" : quality}
+            icon={quality === "best" ? Icon.Star : Icon.Video}
+          />
+        ))}
+      </FormComponent.Dropdown>
+      <FormComponent.Separator />
+      <FormComponent.Description
+        title="Anime Info"
+        text={`Status: ${formatAiringStatus(selectedAnime)} | Score: ${formatScore(selectedAnime.averageScore)} | Episodes: ${selectedAnime.episodes || "Unknown"}`}
+      />
+      {getNextEpisodeInfo(selectedAnime) && (
+        <FormComponent.Description
+          title="Next Episode"
+          text={getNextEpisodeInfo(selectedAnime)}
+        />
+      )}
+      {lastOperation && (
+        <FormComponent.Description
+          title="Last Operation"
+          text={`${lastOperation.operationType === "play" ? "Played" : "Downloaded"} ${
+            typeof lastOperation.episode === "string"
+              ? `episodes ${lastOperation.episode}`
+              : `episode ${lastOperation.episode}`
+          } (${lastOperation.audioType.toUpperCase()})${
+            lastOperation.matchedTitle
+              ? ` using "${lastOperation.matchedTitle}"`
+              : ""
+          }`}
+        />
+      )}
+      {isProcessing && (
+        <FormComponent.Description
+          title="Processing"
+          text="Please wait while the operation is being executed..."
+        />
+      )}
+    </FormComponent>
   );
 }
 
 // Custom hook for installation checking
+
 function useInstallationCheck() {
-  return useCachedPromise(
-    async () => {
-      const result = await checkAniCliInstallation();
-      return result;
-    },
-    [],
-    {
-      failureToastOptions: false,
-    },
+  const options: CachedPromiseOptions<() => Promise<boolean>, boolean> = {
+    failureToastOptions: undefined,
+  };
+
+  return useCachedPromise<() => Promise<boolean>, boolean>(
+    checkAniCliInstallation,
+    [], // no arguments
+    options,
   );
 }
 
@@ -515,45 +517,46 @@ function AnimeListItem({
     ? anime.description.replace(/<[^>]*>/g, "").slice(0, 200) + "..."
     : "No description available.";
 
-  return React.createElement(List.Item, {
-    title,
-    subtitle: `${studio} • ${season}`,
-    accessories,
-    icon: anime.coverImage.medium
-      ? { source: anime.coverImage.medium }
-      : Icon.Play,
-    actions: React.createElement(
-      ActionPanel,
-      null,
-      React.createElement(
-        ActionPanel.Section,
-        { title: "Actions" },
-        React.createElement(Action, {
-          title: "Select This Anime",
-          icon: Icon.Check,
-          onAction: () => onSelect(anime),
-          shortcut: { modifiers: ["cmd"], key: "s" },
-        }),
-      ),
-      React.createElement(
-        ActionPanel.Section,
-        { title: "External Links" },
-        React.createElement(Action.OpenInBrowser, {
-          title: "View on Anilist",
-          url: `https://anilist.co/anime/${anime.id}`,
-          icon: Icon.Globe,
-          shortcut: { modifiers: ["cmd"], key: "o" },
-        }),
-        anime.title.english &&
-          React.createElement(Action.OpenInBrowser, {
-            title: "Search on Myanimelist",
-            url: `https://myanimelist.net/anime.php?q=${encodeURIComponent(anime.title.english)}`,
-            icon: Icon.MagnifyingGlass,
-          }),
-      ),
-    ),
-    detail: React.createElement(List.Item.Detail, {
-      markdown: `
+  return (
+    <ListComponent.Item
+      title={title}
+      subtitle={`${studio} • ${season}`}
+      accessories={accessories}
+      icon={
+        anime.coverImage.medium
+          ? { source: anime.coverImage.medium }
+          : Icon.Play
+      }
+      actions={
+        <ActionPanelComponent>
+          <ActionPanelComponent.Section title="Actions">
+            <ActionComponent
+              title="Select This Anime"
+              icon={Icon.Check}
+              onAction={() => onSelect(anime)}
+              shortcut={{ modifiers: ["cmd"], key: "s" }}
+            />
+          </ActionPanelComponent.Section>
+          <ActionPanelComponent.Section title="External Links">
+            <ActionComponent.OpenInBrowser
+              title="View on Anilist"
+              url={`https://anilist.co/anime/${anime.id}`}
+              icon={Icon.Globe}
+              shortcut={{ modifiers: ["cmd"], key: "o" }}
+            />
+            {anime.title.english && (
+              <ActionComponent.OpenInBrowser
+                title="Search on Myanimelist"
+                url={`https://myanimelist.net/anime.php?q=${encodeURIComponent(anime.title.english)}`}
+                icon={Icon.MagnifyingGlass}
+              />
+            )}
+          </ActionPanelComponent.Section>
+        </ActionPanelComponent>
+      }
+      detail={
+        <ListComponent.Item.Detail
+          markdown={`
 # ${title}
 
 ${description}
@@ -570,9 +573,11 @@ ${description}
 ${nextEpisode ? `- **Next Episode:** ${nextEpisode}` : ""}
 
 ${anime.coverImage.large ? `![Cover](${anime.coverImage.large})` : ""}
-        `,
-    }),
-  });
+        `}
+        />
+      }
+    />
+  );
 }
 
 // Installation error component
@@ -583,36 +588,37 @@ function InstallationError({
   error?: Error | null;
   onRecheck: () => void;
 }) {
-  return React.createElement(
-    List,
-    null,
-    React.createElement(List.Item, {
-      title: "ani-cli Not Found",
-      subtitle: "Please install ani-cli to use this extension",
-      icon: Icon.ExclamationMark,
-      actions: React.createElement(
-        ActionPanel,
-        null,
-        React.createElement(Action.OpenInBrowser, {
-          title: "View Installation Guide",
-          url: "https://github.com/pystardust/ani-cli#installation",
-          icon: Icon.Book,
-        }),
-        React.createElement(Action, {
-          title: "Recheck Installation",
-          icon: Icon.RotateClockwise,
-          onAction: onRecheck,
-          shortcut: { modifiers: ["cmd"], key: "r" },
-        }),
-        error &&
-          React.createElement(Action.CopyToClipboard, {
-            title: "Copy Error Details",
-            content: error.message,
-            icon: Icon.Clipboard,
-          }),
-      ),
-      detail: React.createElement(List.Item.Detail, {
-        markdown: `
+  return (
+    <ListComponent>
+      <ListComponent.Item
+        title="ani-cli Not Found"
+        subtitle="Please install ani-cli to use this extension"
+        icon={Icon.ExclamationMark}
+        actions={
+          <ActionPanelComponent>
+            <ActionComponent.OpenInBrowser
+              title="View Installation Guide"
+              url="https://github.com/pystardust/ani-cli#installation"
+              icon={Icon.Book}
+            />
+            <ActionComponent
+              title="Recheck Installation"
+              icon={Icon.RotateClockwise}
+              onAction={onRecheck}
+              shortcut={{ modifiers: ["cmd"], key: "r" }}
+            />
+            {error && (
+              <ActionComponent.CopyToClipboard
+                title="Copy Error Details"
+                content={error.message}
+                icon={Icon.Clipboard}
+              />
+            )}
+          </ActionPanelComponent>
+        }
+        detail={
+          <ListComponent.Item.Detail
+            markdown={`
 # ani-cli Installation Required
 
 This extension requires **ani-cli** to be installed on your system.
@@ -641,18 +647,20 @@ curl -sL github.com/pystardust/ani-cli/raw/master/ani-cli | sudo tee /usr/local/
 - Check the [official repository](https://github.com/pystardust/ani-cli) for more details
 
 ${error ? `\n## Error Details\n\`\`\`\n${error.message}\n\`\`\`` : ""}
-        `,
-      }),
-    }),
+        `}
+          />
+        }
+      />
+    </ListComponent>
   );
 }
 
 // Loading component
 function LoadingState({ message }: { message: string }) {
-  return React.createElement(
-    List,
-    { isLoading: true },
-    React.createElement(List.Item, { title: message, icon: Icon.Gear }),
+  return (
+    <ListComponent isLoading={true}>
+      <ListComponent.Item title={message} icon={Icon.Gear} />
+    </ListComponent>
   );
 }
 
@@ -661,32 +669,36 @@ function EmptySearchState({ query }: { query: string }) {
   const isQueryTooShort = query.trim().length < 2;
 
   if (isQueryTooShort) {
-    return React.createElement(List.Item, {
-      title: "Start typing to search",
-      subtitle: "Enter at least 2 characters to search for anime",
-      icon: Icon.MagnifyingGlass,
-    });
+    return (
+      <ListComponent.Item
+        title="Start typing to search"
+        subtitle="Enter at least 2 characters to search for anime"
+        icon={Icon.MagnifyingGlass}
+      />
+    );
   }
 
-  return React.createElement(List.Item, {
-    title: "No anime found",
-    subtitle: `No results found for "${query}". Try a different search term.`,
-    icon: Icon.QuestionMark,
-    actions: React.createElement(
-      ActionPanel,
-      null,
-      React.createElement(Action.OpenInBrowser, {
-        title: "Search on Anilist",
-        url: `https://anilist.co/search/anime?search=${encodeURIComponent(query)}`,
-        icon: Icon.Globe,
-      }),
-      React.createElement(Action.OpenInBrowser, {
-        title: "Search on Myanimelist",
-        url: `https://myanimelist.net/anime.php?q=${encodeURIComponent(query)}`,
-        icon: Icon.MagnifyingGlass,
-      }),
-    ),
-  });
+  return (
+    <ListComponent.Item
+      title="No anime found"
+      subtitle={`No results found for "${query}". Try a different search term.`}
+      icon={Icon.QuestionMark}
+      actions={
+        <ActionPanelComponent>
+          <ActionComponent.OpenInBrowser
+            title="Search on Anilist"
+            url={`https://anilist.co/search/anime?search=${encodeURIComponent(query)}`}
+            icon={Icon.Globe}
+          />
+          <ActionComponent.OpenInBrowser
+            title="Search on Myanimelist"
+            url={`https://myanimelist.net/anime.php?q=${encodeURIComponent(query)}`}
+            icon={Icon.MagnifyingGlass}
+          />
+        </ActionPanelComponent>
+      }
+    />
+  );
 }
 
 // Main component
@@ -702,6 +714,7 @@ export default function SearchAnime(
   // Installation check
   const installationResult = useInstallationCheck();
   const isInstalled = installationResult?.data ?? null;
+
   const checkingInstallation = installationResult?.isLoading ?? true;
   const installError = installationResult?.error ?? null;
   const recheckInstallation = installationResult?.revalidate ?? (() => {});
@@ -731,47 +744,48 @@ export default function SearchAnime(
 
   // Loading state
   if (checkingInstallation || isInstalled === null) {
-    return React.createElement(LoadingState, {
-      message: "Checking ani-cli installation...",
-    });
+    return <LoadingState message="Checking ani-cli installation..." />;
   }
 
   // Installation error state
-  if (installError || isInstalled === false) {
-    return React.createElement(InstallationError, {
-      error: installError,
-      onRecheck: recheckInstallation,
-    });
+  if (installError || !isInstalled) {
+    return (
+      <InstallationError error={installError} onRecheck={recheckInstallation} />
+    );
   }
 
   // Playback form state
   if (selectedAnime) {
-    return React.createElement(PlaybackFormComponent, {
-      selectedAnime,
-      onBack: handleBackToSearch,
-    });
+    return (
+      <PlaybackFormComponent
+        selectedAnime={selectedAnime}
+        onBack={handleBackToSearch}
+      />
+    );
   }
 
   // Search state
-  return React.createElement(
-    List,
-    {
-      searchBarPlaceholder:
-        "Search for anime (e.g., 'Attack on Titan', 'Naruto')",
-      onSearchTextChange: setSearchQuery,
-      isLoading: searching,
-      isShowingDetail: searchResults.length > 0,
-      throttle: true,
-      searchText: searchQuery,
-    },
-    searchQuery.trim().length < 2 || (searchResults.length === 0 && !searching)
-      ? React.createElement(EmptySearchState, { query: searchQuery })
-      : searchResults.map((anime) =>
-          React.createElement(AnimeListItem, {
-            key: anime.id,
-            anime,
-            onSelect: handleAnimeSelect,
-          }),
-        ),
+  return (
+    <ListComponent
+      searchBarPlaceholder="Search for anime (e.g., 'Attack on Titan', 'Naruto')"
+      onSearchTextChange={setSearchQuery}
+      isLoading={searching}
+      isShowingDetail={searchResults.length > 0}
+      throttle={true}
+      searchText={searchQuery}
+    >
+      {searchQuery.trim().length < 2 ||
+      (searchResults.length === 0 && !searching) ? (
+        <EmptySearchState query={searchQuery} />
+      ) : (
+        searchResults.map((anime) => (
+          <AnimeListItem
+            key={anime.id}
+            anime={anime}
+            onSelect={handleAnimeSelect}
+          />
+        ))
+      )}
+    </ListComponent>
   );
 }
