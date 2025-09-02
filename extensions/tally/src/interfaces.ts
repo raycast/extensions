@@ -10,8 +10,9 @@ export interface Form {
   status: FormStatus;
   updatedAt: string;
 }
-export interface FormSettings {
+interface FormSettings {
   hasProgressBar: boolean;
+  password: string | null;
   isClosed: boolean;
   submissionsLimit: number | null;
 }
