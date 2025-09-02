@@ -154,6 +154,10 @@ function DNSRecordsList({ domain }: { readonly domain: string }) {
         return Icon.Text;
       case "NS":
         return Icon.Globe;
+      case "CAA":
+        return Icon.Shield;
+      case "SRV":
+        return Icon.HardDrive;
       default:
         return Icon.Document;
     }
@@ -173,6 +177,10 @@ function DNSRecordsList({ domain }: { readonly domain: string }) {
         return Color.Yellow;
       case "NS":
         return Color.Red;
+      case "CAA":
+        return Color.Magenta;
+      case "SRV":
+        return Color.PrimaryText;
       default:
         return Color.SecondaryText;
     }
@@ -375,6 +383,12 @@ function AddDNSRecord({ domain, onAdd }: { readonly domain: string; readonly onA
         return "10 mail.example.com";
       case "TXT":
         return "v=spf1 include:_spf.google.com ~all";
+      case "NS":
+        return "ns1.example.com";
+      case "CAA":
+        return '0 issue "letsencrypt.org"';
+      case "SRV":
+        return "10 5 5060 sipserver.example.com";
       default:
         return "Enter record value";
     }
