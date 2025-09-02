@@ -1,19 +1,23 @@
-import { ComponentType, createContext, useContext } from "react";
+import { ComponentType, createContext, useContext, useMemo } from "react";
 import { List, Action, Application, getApplications, Detail, Icon, ActionPanel } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { existsSync } from "fs";
 import { URL } from "url";
 import { getEntry } from "./lib/entry";
 import { zedBuild } from "./lib/preferences";
 import { getZedBundleId } from "./lib/zed";
-import { useZedRecentWorkspaces, ZedEntry } from "./lib/zedEntries";
+import { useZedRecentWorkspaces, ZedEntry, getPath, getSchemaVersionSync, getQueryForSchema } from "./lib/zedEntries";
 import { usePinnedEntries } from "./hooks/usePinnedEntries";
 import { EntryItem } from "./components/EntryItem";
 
 const ZedContext = createContext<{
   zed?: Application;
+  schemaVersion?: number;
+  query?: string | null;
 }>({
   zed: undefined,
+  schemaVersion: undefined,
+  query: undefined,
 });
 
 function exists(p: string) {
@@ -26,16 +30,41 @@ function exists(p: string) {
 
 export const withZed = <P extends object>(Component: ComponentType<P>) => {
   return (props: P) => {
-    const { data: zed, isLoading } = usePromise(async () =>
-      (await getApplications()).find((a) => a.bundleId === getZedBundleId(zedBuild)),
+    const { data: zed, isLoading } = useCachedPromise(
+      async () => {
+        const applications = await getApplications();
+        const zedBundleId = getZedBundleId(zedBuild);
+        return applications.find((a) => a.bundleId === zedBundleId);
+      },
+      [],
+      {
+        keepPreviousData: true,
+      },
     );
+
+    const { schemaVersion, query } = useMemo(() => {
+      if (!zed) {
+        return { schemaVersion: undefined, query: undefined };
+      }
+
+      const path = getPath();
+      if (!existsSync(path)) {
+        return { schemaVersion: undefined, query: undefined };
+      }
+
+      const version = getSchemaVersionSync(path);
+      return {
+        schemaVersion: version,
+        query: getQueryForSchema(version),
+      };
+    }, [zed]);
 
     if (!zed) {
       return <Detail isLoading={isLoading} markdown={isLoading ? "" : `No Zed app detected`} />;
     }
 
     return (
-      <ZedContext.Provider value={{ zed }}>
+      <ZedContext.Provider value={{ zed, schemaVersion, query }}>
         <Component {...props} />
       </ZedContext.Provider>
     );
@@ -43,8 +72,8 @@ export const withZed = <P extends object>(Component: ComponentType<P>) => {
 };
 
 export function Command() {
-  const { zed } = useContext(ZedContext);
-  const { entries, isLoading, error, removeEntry, removeAllEntries } = useZedRecentWorkspaces();
+  const { zed, schemaVersion, query } = useContext(ZedContext);
+  const { entries, isLoading, error, removeEntry, removeAllEntries } = useZedRecentWorkspaces(schemaVersion, query);
   const { pinnedEntries, pinEntry, unpinEntry, unpinAllEntries, moveUp, moveDown } = usePinnedEntries();
 
   const pinned = Object.values(pinnedEntries)

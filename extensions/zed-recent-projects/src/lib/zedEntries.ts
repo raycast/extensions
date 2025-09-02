@@ -3,7 +3,6 @@ import { showFailureToast, useSQL } from "@raycast/utils";
 import { execFile, execFileSync } from "child_process";
 import fs from "fs";
 import { homedir } from "os";
-import { useMemo } from "react";
 import util from "util";
 
 import { getZedDbName } from "./zed";
@@ -22,7 +21,7 @@ export interface ZedEntry {
 
 export type ZedEntries = Record<string, ZedEntry>;
 
-function getPath() {
+export function getPath() {
   return `${homedir()}/Library/Application Support/Zed/db/${getZedDbName(zedBuild)}/db.sqlite`;
 }
 
@@ -164,12 +163,15 @@ function processRemoteWorkspace(workspace: RemoteWorkspace): ZedEntry | undefine
       host: workspace.host,
     };
   } catch (error) {
-    console.error("Error processing remote workspace:", error);
+    showFailureToast(error, {
+      title: "Error processing remote workspace",
+      message: "Failed to parse remote workspace data",
+    });
     return undefined;
   }
 }
 
-function getSchemaVersionSync(dbPath: string): number {
+export function getSchemaVersionSync(dbPath: string): number {
   try {
     const result = execFileSync("sqlite3", [dbPath, "SELECT MAX(step) FROM migrations WHERE domain = 'WorkspaceDb';"], {
       encoding: "utf8",
@@ -177,12 +179,15 @@ function getSchemaVersionSync(dbPath: string): number {
     const version = parseInt(result.trim(), 10);
     return isNaN(version) ? 0 : version;
   } catch (error) {
-    console.error("Failed to get schema version:", error);
+    showFailureToast(error, {
+      title: "Failed to get schema version",
+      message: "Unable to determine Zed database schema version",
+    });
     return 0;
   }
 }
 
-function getQueryForSchema(schemaVersion: number): string {
+export function getQueryForSchema(schemaVersion: number): string {
   // Schema version 26+ uses ssh_connections table and unified paths field
   if (schemaVersion >= 26) {
     return `
@@ -229,20 +234,8 @@ function getQueryForSchema(schemaVersion: number): string {
   `;
 }
 
-export function useZedRecentWorkspaces(): ZedRecentWorkspaces {
+export function useZedRecentWorkspaces(schemaVersion?: number, query?: string | null): ZedRecentWorkspaces {
   const path = getPath();
-
-  // Use useMemo to compute schema version and query only when path changes
-  const { schemaVersion, query } = useMemo(() => {
-    if (!fs.existsSync(path)) {
-      return { schemaVersion: 0, query: null };
-    }
-    const version = getSchemaVersionSync(path);
-    return {
-      schemaVersion: version,
-      query: getQueryForSchema(version),
-    };
-  }, [path]);
 
   // Always call the hook, but use a dummy query if not ready
   const { data, isLoading, error, mutate } = useSQL<Workspace>(path, query || "SELECT * FROM workspaces LIMIT 0");
@@ -258,7 +251,7 @@ export function useZedRecentWorkspaces(): ZedRecentWorkspaces {
 
   async function removeEntry(id: number) {
     try {
-      await mutate(deleteEntryById(id, schemaVersion || 0), { shouldRevalidateAfter: true });
+      await mutate(deleteEntryById(id, schemaVersion ?? 0), { shouldRevalidateAfter: true });
 
       showToast(Toast.Style.Success, "Entry removed");
     } catch (error) {
@@ -283,7 +276,7 @@ export function useZedRecentWorkspaces(): ZedRecentWorkspaces {
           },
         })
       ) {
-        await mutate(deleteAllWorkspaces(schemaVersion || 0), { shouldRevalidateAfter: true });
+        await mutate(deleteAllWorkspaces(schemaVersion ?? 0), { shouldRevalidateAfter: true });
         showToast(Toast.Style.Success, "All entries removed");
       }
     } catch (error) {
