@@ -85,7 +85,7 @@ export class ZendeskUrlBuilder {
   }
 
   getGroupsList(): string {
-    return `${this.getBaseUrl()}/admin/people/groups`;
+    return `${this.getBaseUrl()}/admin/people/team/groups`;
   }
 
   // Ticket URLs
@@ -107,7 +107,7 @@ export class ZendeskUrlBuilder {
   }
 
   getViewsList(): string {
-    return `${this.getBaseUrl()}/admin/objects-rules/rules/views`;
+    return `${this.getBaseUrl()}/admin/workspaces/agent-workspace/views`;
   }
 
   // Brand URLs
@@ -116,7 +116,7 @@ export class ZendeskUrlBuilder {
   }
 
   getBrandsList(): string {
-    return `${this.getBaseUrl()}/admin/brands`;
+    return `${this.getBaseUrl()}/admin/account/brand_management/brands`;
   }
 
   // Automation URLs
@@ -134,7 +134,7 @@ export class ZendeskUrlBuilder {
   }
 
   getCustomRolesList(): string {
-    return `${this.getBaseUrl()}/admin/people/roles`;
+    return `${this.getBaseUrl()}/admin/people/team/roles`;
   }
 }
 

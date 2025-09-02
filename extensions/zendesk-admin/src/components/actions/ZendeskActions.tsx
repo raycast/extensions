@@ -341,9 +341,9 @@ export function ZendeskActions({
             title="View Role Members"
             icon={Icon.Person}
             target={
-              <EntityTicketsList
+              <UserMembershipList
                 entityType="role"
-                entityId={customRole.id.toString()}
+                entityId={customRole.id}
                 entityName={customRole.name}
                 instance={instance}
               />
@@ -381,46 +381,46 @@ export function ZendeskActions({
     const actions = [];
 
     if (searchType === "users") {
-      generalConfigUrl = `${generalConfigUrl}/agent/user_filters`;
+      generalConfigUrl = urls.getUserFilters();
       configTitle = "Open User List";
     } else if (searchType === "organizations") {
-      generalConfigUrl = `${generalConfigUrl}/agent/organizations`;
+      generalConfigUrl = urls.getOrganizationsList();
       configTitle = "Open Organization List";
     } else if (searchType === "dynamic_content") {
-      generalConfigUrl = `${generalConfigUrl}/admin/workspaces/agent-workspace/dynamic_content`;
+      generalConfigUrl = urls.getDynamicContentList();
       configTitle = "Open Dynamic Content Config";
     } else if (searchType === "macros") {
-      generalConfigUrl = `${generalConfigUrl}/admin/workspaces/agent-workspace/macros`;
+      generalConfigUrl = urls.getMacrosList();
       configTitle = "Open Macros Config";
     } else if (searchType === "triggers") {
-      generalConfigUrl = `${generalConfigUrl}/admin/objects-rules/rules/triggers`;
+      generalConfigUrl = urls.getTriggersList();
       configTitle = "Open Triggers Config";
     } else if (searchType === "ticket_fields") {
-      generalConfigUrl = `${generalConfigUrl}/admin/objects-rules/tickets/ticket-fields`;
+      generalConfigUrl = urls.getTicketFieldsList();
       configTitle = "Open Ticket Fields Config";
     } else if (searchType === "support_addresses") {
-      generalConfigUrl = `${generalConfigUrl}/admin/channels/talk_and_email/email`;
+      generalConfigUrl = urls.getSupportAddressesList();
       configTitle = "Open Support Addresses Config";
     } else if (searchType === "ticket_forms") {
-      generalConfigUrl = `${generalConfigUrl}/admin/objects-rules/tickets/ticket-forms`;
+      generalConfigUrl = urls.getTicketFormsList();
       configTitle = "Open Ticket Forms Config";
     } else if (searchType === "groups") {
-      generalConfigUrl = `${generalConfigUrl}/admin/people/team/groups`;
+      generalConfigUrl = urls.getGroupsList();
       configTitle = "Open Groups Config";
     } else if (searchType === "tickets") {
-      generalConfigUrl = `${generalConfigUrl}/agent/filters`;
+      generalConfigUrl = urls.getTicketsList();
       configTitle = "Open Ticket List";
     } else if (searchType === "views") {
-      generalConfigUrl = `${generalConfigUrl}/admin/workspaces/agent-workspace/views`;
+      generalConfigUrl = urls.getViewsList();
       configTitle = "Open Views Config";
     } else if (searchType === "brands") {
-      generalConfigUrl = `${generalConfigUrl}/admin/account/brand_management/brands`;
+      generalConfigUrl = urls.getBrandsList();
       configTitle = "Open Brands Config";
     } else if (searchType === "automations") {
-      generalConfigUrl = `${generalConfigUrl}/admin/objects-rules/rules/automations`;
+      generalConfigUrl = urls.getAutomationsList();
       configTitle = "Open Automations Config";
     } else if (searchType === "custom_roles") {
-      generalConfigUrl = `${generalConfigUrl}/admin/people/team/roles`;
+      generalConfigUrl = urls.getCustomRolesList();
       configTitle = "Open Roles Config";
     }
 
