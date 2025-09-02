@@ -1,6 +1,6 @@
 import { ComponentType, createContext, useContext, useMemo } from "react";
 import { List, Action, Application, getApplications, Detail, Icon, ActionPanel } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import { existsSync } from "fs";
 import { URL } from "url";
 import { getEntry } from "./lib/entry";
@@ -30,17 +30,11 @@ function exists(p: string) {
 
 export const withZed = <P extends object>(Component: ComponentType<P>) => {
   return (props: P) => {
-    const { data: zed, isLoading } = useCachedPromise(
-      async () => {
-        const applications = await getApplications();
-        const zedBundleId = getZedBundleId(zedBuild);
-        return applications.find((a) => a.bundleId === zedBundleId);
-      },
-      [],
-      {
-        keepPreviousData: true,
-      },
-    );
+    const { data: zed, isLoading } = usePromise(async () => {
+      const applications = await getApplications();
+      const zedBundleId = getZedBundleId(zedBuild);
+      return applications.find((a) => a.bundleId === zedBundleId);
+    });
 
     const { schemaVersion, query } = useMemo(() => {
       if (!zed) {

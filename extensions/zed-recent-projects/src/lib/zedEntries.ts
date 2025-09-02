@@ -39,7 +39,6 @@ interface LocalWorkspace extends BaseWorkspace {
 interface RemoteWorkspace extends BaseWorkspace {
   type: "remote";
   paths: string; // In new schema (26+) or old schema for remote
-  paths_order: string | null;
   host: string;
   user: string | null;
   port: number | null;
@@ -199,7 +198,6 @@ export function getQueryForSchema(schemaVersion: number): string {
         workspace_id as id,
         paths as local_paths,
         paths,
-        paths_order,
         timestamp,
         host,
         user,
@@ -221,7 +219,6 @@ export function getQueryForSchema(schemaVersion: number): string {
       workspace_id as id,
       local_paths,
       paths,
-      paths_order,
       timestamp,
       host,
       user,
