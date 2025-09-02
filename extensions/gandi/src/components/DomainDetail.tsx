@@ -216,7 +216,7 @@ export default function DomainDetail({ domain }: Readonly<Props>) {
               icon={Icon.Globe}
             />
             <Action.OpenInBrowser
-              title="Manage Dns Records"
+              title="Manage DNS Records"
               url={`https://admin.gandi.net/domain/${domain.fqdn}/dns`}
               icon={Icon.Network}
             />

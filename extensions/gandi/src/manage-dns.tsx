@@ -77,7 +77,7 @@ export default function ManageDNS() {
             accessories={accessories}
             actions={
               <ActionPanel>
-                <Action title="Manage Dns Records" icon={Icon.Network} onAction={() => selectDomain(domain)} />
+                <Action title="Manage DNS Records" icon={Icon.Network} onAction={() => selectDomain(domain)} />
                 <Action.OpenInBrowser
                   title="Open in Gandi Dashboard"
                   url={`https://admin.gandi.net/domain/${domain.fqdn}/dns`}
@@ -194,7 +194,7 @@ function DNSRecordsList({ domain }: { readonly domain: string }) {
       actions={
         <ActionPanel>
           <Action
-            title="Add Dns Record"
+            title="Add DNS Record"
             icon={Icon.Plus}
             onAction={() =>
               push(
@@ -225,7 +225,7 @@ function DNSRecordsList({ domain }: { readonly domain: string }) {
           actions={
             <ActionPanel>
               <Action
-                title="Add Dns Record"
+                title="Add DNS Record"
                 icon={Icon.Plus}
                 onAction={() =>
                   push(
@@ -293,7 +293,7 @@ function DNSRecordsList({ domain }: { readonly domain: string }) {
                 />
                 <ActionPanel.Section>
                   <Action
-                    title="Add Dns Record"
+                    title="Add DNS Record"
                     icon={Icon.Plus}
                     onAction={() =>
                       push(
