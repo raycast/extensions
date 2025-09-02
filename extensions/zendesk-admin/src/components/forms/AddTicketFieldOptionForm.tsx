@@ -30,7 +30,7 @@ export default function AddTicketFieldOptionForm({ ticketField, instance }: AddT
         message: "Ticket field option added successfully.",
       });
       pop();
-    } catch (error) {
+    } catch {
       // Error toast is handled in the API function
     }
   }

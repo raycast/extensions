@@ -5,27 +5,23 @@
   "title": "Zendesk — Admin",
   "description": "Perform Zendesk Admin functions and access quickly any entity in Zendesk from Raycast.",
   "icon": "icon.png",
-  "categories": ["Productivity"],
+  "categories": [
+    "Productivity"
+  ],
   "author": "miguelcorderocollar",
   "license": "MIT",
-  "platforms": [
-    "macOS",
-    "Windows"
-  ],
   "commands": [
     {
       "name": "search-zendesk",
       "title": "Search Zendesk",
       "description": "Search for users and organizations in Zendesk.",
-      "mode": "view",
-      "entrypoint": "src/search-zendesk.tsx"
+      "mode": "view"
     },
     {
       "name": "open-zendesk-instance",
       "title": "Open Zendesk Instance",
       "description": "Open a Zendesk instance product.",
-      "mode": "view",
-      "entrypoint": "src/open-zendesk-instance.tsx"
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -74,23 +70,26 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.101.1",
-    "@raycast/utils": "^2.2.0",
-    "react": "^19.0.0",
-    "use-debounce": "^10.0.5"
+    "@raycast/utils": "^2.2.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.8.10",
-    "@types/react": "^19.0.0",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
-  }
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }
