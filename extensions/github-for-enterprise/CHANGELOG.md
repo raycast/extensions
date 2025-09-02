@@ -1,6 +1,6 @@
 # GitHub Enterprise Changelog
 
-## [Chore: Fixed typo while searching for issues] - {PR_MERGE_DATE}
+## [Chore: Fixed typo while searching for issues] - 2025-09-02
 
 ## [Add Github Notifications] - 2024-05-31
 
