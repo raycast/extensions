@@ -1,6 +1,6 @@
 # BRREG Search Changelog
 
-## [Version 2.0.3 – Updated README] - {PR_MERGE_DATE}
+## [Version 2.0.3 – Updated README] - 2025-09-02
 - Nothing big, just an absent-minded dev
 
 ## [Version 2.0.2 – New keyboard shortcuts for financial data] - 2025-08-25
