@@ -6,13 +6,27 @@ const createRequest = async <T>(url: string, options: RequestInit = {}): Promise
   const preferences = getPreferenceValues<Preferences>();
 
   try {
+    // Merge headers while preventing Authorization from being overridden.
+    const additionalHeaders: Record<string, string> = {};
+    const rawHeaders = (options.headers ?? {}) as any;
+    if (Array.isArray(rawHeaders)) {
+      for (const pair of rawHeaders) {
+        const [k, v] = pair as [string, string];
+        if (typeof k === "string" && k.toLowerCase() !== "authorization") additionalHeaders[k] = String(v);
+      }
+    } else if (rawHeaders && typeof rawHeaders === "object") {
+      for (const k of Object.keys(rawHeaders)) {
+        if (k.toLowerCase() !== "authorization") additionalHeaders[k] = String(rawHeaders[k]);
+      }
+    }
+
     const response = await fetch(url, {
       method: "GET",
       ...options,
       headers: {
         Authorization: `Bearer ${preferences.apiToken}`,
-        "Content-Type": "application/json",
-        ...options.headers,
+        ...(options.body ? { "Content-Type": "application/json" } : {}),
+        ...additionalHeaders,
       },
     });
 
