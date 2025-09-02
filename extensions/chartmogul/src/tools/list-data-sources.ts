@@ -1,10 +1,10 @@
-import { listDataSources } from "../api";
+import { DataSourcesResponse, listDataSources } from "../api";
 
 /**
  * List data sources in ChartMogul.
  * @returns {Promise<DataSourcesResponse>}
  */
-export default async function () {
+export default async function (): Promise<DataSourcesResponse> {
   const res = await listDataSources();
 
   if (!res.ok) {

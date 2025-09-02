@@ -43,16 +43,307 @@
     "instructions": "All currency numbers are in cents. Don't display the calculation, just display the number.",
     "evals": [
       {
-        "input": "What is my current MRR?"
+        "input": "@chartmogul What is my current MRR?",
+        "mocks": {
+          "metrics": {
+            "entries": [
+              {
+                "arpa": 18754,
+                "arpa-percentage-change": 1.23,
+                "arr": 29500123,
+                "arr-percentage-change": 2.15,
+                "asp": 1102,
+                "asp-percentage-change": -0.5,
+                "customer-churn-rate": 3.2,
+                "customer-churn-rate-percentage-change": 1.1,
+                "customers": 142,
+                "customers-percentage-change": 2.5,
+                "date": "2025-02-01",
+                "ltv": 712345,
+                "ltv-percentage-change": 4.7,
+                "mrr": 2456789,
+                "mrr-churn-rate": 1.8,
+                "mrr-churn-rate-percentage-change": 0.9,
+                "mrr-percentage-change": 1.2
+              },
+              {
+                "arpa": 19201,
+                "arpa-percentage-change": 2.45,
+                "arr": 29876543,
+                "arr-percentage-change": 1.98,
+                "asp": 1150,
+                "asp-percentage-change": 0.7,
+                "customer-churn-rate": 2.9,
+                "customer-churn-rate-percentage-change": -0.8,
+                "customers": 145,
+                "customers-percentage-change": 2.1,
+                "date": "2025-02-02",
+                "ltv": 725000,
+                "ltv-percentage-change": 1.8,
+                "mrr": 2498765,
+                "mrr-churn-rate": 1.5,
+                "mrr-churn-rate-percentage-change": -0.3,
+                "mrr-percentage-change": 1.7
+              }
+            ],
+            "summary": {
+              "arpa-percentage-change": 1.85,
+              "arr-percentage-change": 2.06,
+              "asp-percentage-change": 0.1,
+              "current-arpa": 19201,
+              "current-arr": 29876543,
+              "current-asp": 1150,
+              "current-customer-churn-rate": 2.9,
+              "current-customers": 145,
+              "current-ltv": 725000,
+              "current-mrr": 2498765,
+              "current-mrr-churn-rate": 1.5,
+              "customer-churn-rate-percentage-change": -0.8,
+              "customers-percentage-change": 2.1,
+              "ltv-percentage-change": 1.8,
+              "mrr-churn-rate-percentage-change": -0.3,
+              "mrr-percentage-change": 1.7,
+              "previous-arpa": 18754,
+              "previous-arr": 29500123,
+              "previous-asp": 1102,
+              "previous-customer-churn-rate": 3.2,
+              "previous-customers": 142,
+              "previous-ltv": 712345,
+              "previous-mrr": 2456789,
+              "previous-mrr-churn-rate": 1.8
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "end-date": "2025-02-10",
+                "start-date": "2025-02-01"
+              },
+              "name": "metrics"
+            }
+          }
+        ]
       },
       {
-        "input": "What was the churn rate for the last 30 days?"
+        "input": "@chartmogul What was the churn rate for the last 30 days?",
+        "mocks": {
+          "metrics": {
+            "entries": [
+              {
+                "arpa": 12345,
+                "arpa-percentage-change": 2.5,
+                "arr": 9876543,
+                "arr-percentage-change": 1.2,
+                "asp": 789,
+                "asp-percentage-change": 3.1,
+                "customer-churn-rate": 2.34,
+                "customer-churn-rate-percentage-change": 0.5,
+                "customers": 101,
+                "customers-percentage-change": 1,
+                "date": "2025-01-11",
+                "ltv": 543210,
+                "ltv-percentage-change": 2.2,
+                "mrr": 456789,
+                "mrr-churn-rate": 1.12,
+                "mrr-churn-rate-percentage-change": 0.8,
+                "mrr-percentage-change": 1.1
+              },
+              {
+                "arpa": 12567,
+                "arpa-percentage-change": 1.8,
+                "arr": 9900000,
+                "arr-percentage-change": 0.9,
+                "asp": 800,
+                "asp-percentage-change": 1.4,
+                "customer-churn-rate": 1.98,
+                "customer-churn-rate-percentage-change": -15.4,
+                "customers": 103,
+                "customers-percentage-change": 1.98,
+                "date": "2025-02-10",
+                "ltv": 550000,
+                "ltv-percentage-change": 1.25,
+                "mrr": 460000,
+                "mrr-churn-rate": 0.95,
+                "mrr-churn-rate-percentage-change": -15.2,
+                "mrr-percentage-change": 0.7
+              }
+            ],
+            "summary": {
+              "arpa-percentage-change": 1.9,
+              "arr-percentage-change": 1.05,
+              "asp-percentage-change": 2.25,
+              "current-arpa": 12567,
+              "current-arr": 9900000,
+              "current-asp": 800,
+              "current-customer-churn-rate": 1.98,
+              "current-customers": 103,
+              "current-ltv": 550000,
+              "current-mrr": 460000,
+              "current-mrr-churn-rate": 0.95,
+              "customer-churn-rate-percentage-change": -15.4,
+              "customers-percentage-change": 1.98,
+              "ltv-percentage-change": 1.25,
+              "mrr-churn-rate-percentage-change": -15.2,
+              "mrr-percentage-change": 0.7,
+              "previous-arpa": 12345,
+              "previous-arr": 9876543,
+              "previous-asp": 789,
+              "previous-customer-churn-rate": 2.34,
+              "previous-customers": 101,
+              "previous-ltv": 543210,
+              "previous-mrr": 456789,
+              "previous-mrr-churn-rate": 1.12
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "start-date": "2025-01-11",
+                "end-date": "2025-02-10"
+              },
+              "name": "metrics"
+            }
+          }
+        ]
       },
       {
-        "input": "Tell me about the customer john@example.com"
+        "input": "What is the MRR for someone@example.com?",
+        "mocks": {
+          "chartmogul-search-customers-by-email": {
+            "current_page": 1,
+            "cursor": "JjE5ODEyODY5MQ==",
+            "entries": [
+              {
+                "address": {
+                  "address_zip": null,
+                  "city": null,
+                  "country": "United States",
+                  "state": null
+                },
+                "arr": 60000,
+                "attributes": {
+                  "stripe": {},
+                  "tags": []
+                },
+                "billing-system-type": "Example",
+                "billing-system-url": "https://example.com",
+                "chartmogul-url": "https://app.chartmogul.com/#/customers/1234567890",
+                "city": null,
+                "company": "Example LLC",
+                "country": "US",
+                "currency": "USD",
+                "currency-sign": "$",
+                "customer-since": null,
+                "data_source_uuid": "ds_306c528e-7095-11eb-a04d-bbd5fdec3818",
+                "data_source_uuids": [
+                  "ds_306c528e-7095-11eb-a04d-bbd5fdec3818"
+                ],
+                "email": "someone@example.com",
+                "external_id": "cus_xxxxxx",
+                "external_ids": [
+                  "cus_xxxxxx"
+                ],
+                "free_trial_started_at": null,
+                "id": 113383578,
+                "lead_created_at": null,
+                "mrr": 5000,
+                "name": "Example",
+                "owner": null,
+                "state": null,
+                "status": "New Lead",
+                "uuid": "cus_0e4f5284-3bf7-11ec-8554-af4f4c6ed30a",
+                "website_url": "https://example.com",
+                "zip": null
+              }
+            ],
+            "has_more": false,
+            "page": 1,
+            "per_page": 200,
+            "total_pages": null
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "email": "someone@example.com"
+              },
+              "name": "search-customers-by-email"
+            }
+          }
+        ]
       },
       {
-        "input": "What are the latest activities?"
+        "input": "What are the latest MRR movements?",
+        "mocks": {
+          "chartmogul-list-movements": {
+            "cursor": "xxxxxx",
+            "entries": [
+              {
+                "activity-arr": 10956,
+                "activity-mrr": 913,
+                "activity-mrr-movement": 913,
+                "billing-connector-uuid": "ds_xxxxx",
+                "currency": "USD",
+                "customer-external-id": "cus_1234567890",
+                "customer-name": "ABC Company",
+                "customer-uuid": "cus_xxxxx",
+                "date": "2025-02-01T12:25:48+00:00",
+                "description": "subscribed to the Acme plan",
+                "plan-external-id": "price_1234567890",
+                "subscription-external-id": "si_1234567890",
+                "type": "new_biz",
+                "uuid": "xxxxx"
+              },
+              {
+                "activity-arr": 22800,
+                "activity-mrr": 1900,
+                "activity-mrr-movement": 1900,
+                "billing-connector-uuid": "ds_xxxxx",
+                "currency": "USD",
+                "customer-external-id": "cus_1234567890",
+                "customer-name": "XYZ LLC",
+                "customer-uuid": "cus_xxxxx",
+                "date": "2025-01-27T14:51:21+00:00",
+                "description": "subscribed to the Acme plan",
+                "plan-external-id": "price_1234567890",
+                "subscription-external-id": "si_1234567890",
+                "type": "new_biz",
+                "uuid": "xxxxx"
+              },
+              {
+                "activity-arr": 0,
+                "activity-mrr": 0,
+                "activity-mrr-movement": -10000,
+                "billing-connector-uuid": "ds_xxxxx",
+                "currency": "USD",
+                "customer-external-id": "cus_1234567890",
+                "customer-name": "ABC Company",
+                "customer-uuid": "cus_xxxxx",
+                "date": "2025-01-21T18:31:11+00:00",
+                "description": "cancelled their Acme plan",
+                "plan-external-id": "price_1234567890",
+                "subscription-external-id": "si_1234567890",
+                "type": "churn",
+                "uuid": "xxxxx"
+              }
+            ],
+            "has_more": true,
+            "per_page": 200
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "list-movements"
+            }
+          }
+        ]
       }
     ]
   },

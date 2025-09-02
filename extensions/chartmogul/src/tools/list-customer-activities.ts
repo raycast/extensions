@@ -16,7 +16,7 @@ type Input = {
 };
 
 /**
- * List activities for a customer in ChartMogul. UUID is Required.
+ * List activities for a customer in ChartMogul. UUID is Required. If asking in general and not for a specific customer, use the list-movements tool.
  * @param {Input} options
  * @returns {Promise<ActivitiesResponse>}
  */

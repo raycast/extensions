@@ -474,9 +474,9 @@ export default function Command() {
             {data.entries
               .slice()
               .reverse()
-              .map((entry, index) => (
+              .map((entry) => (
                 <List.Item
-                  key={index}
+                  key={entry.date}
                   title={formatDateByInterval(entry.date, interval)}
                   subtitle={`MRR: ${formatCurrency(entry.mrr / 100)} | Customers: ${entry.customers}`}
                   accessories={[

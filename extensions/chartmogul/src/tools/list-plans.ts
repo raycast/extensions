@@ -1,4 +1,4 @@
-import { listPlans } from "../api";
+import { listPlans, PlansResponse } from "../api";
 
 type Input = {
   /**
@@ -21,10 +21,10 @@ type Input = {
 
 /**
  * List plans in ChartMogul by data source and external ID.
- * @param {Input} param0
+ * @param {Input} options
  * @returns {Promise<PlansResponse>}
  */
-export default async function ({ cursor, per_page, data_source_uuid, external_id }: Input) {
+export default async function ({ cursor, per_page, data_source_uuid, external_id }: Input): Promise<PlansResponse> {
   const res = await listPlans({ cursor, per_page, data_source_uuid, external_id });
 
   if (!res.ok) {

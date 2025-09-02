@@ -1,4 +1,4 @@
-import { listOpportunities } from "../api";
+import { listOpportunities, OpportunitiesResponse } from "../api";
 
 type Input = {
   /**
@@ -33,7 +33,7 @@ type Input = {
 
 /**
  * List opportunities in ChartMogul by owner, stage, forecast category, and win likelihood.
- * @param {Input} param0
+ * @param {Input} options
  * @returns {Promise<OpportunitiesResponse>}
  */
 export default async function ({
@@ -44,7 +44,7 @@ export default async function ({
   forecast_category,
   win_likelihood_gte,
   win_likelihood_lte,
-}: Input) {
+}: Input): Promise<OpportunitiesResponse> {
   const res = await listOpportunities({
     cursor,
     per_page,
