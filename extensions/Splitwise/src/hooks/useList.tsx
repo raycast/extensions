@@ -21,15 +21,12 @@ export function GetExpense(limit: string): [Expense[], boolean, any, any] {
   return [fetchedExpenses, isLoading, revalidate, mutate];
 }
 
-export function getCategories(): [Category[], boolean, any] {
-  const { isLoading, data, error, revalidate } = useFetch<GetCategories>(
-    "https://secure.splitwise.com/api/v3.0/get_categories",
-    {
-      method: "GET",
-      ...HEADER,
-      keepPreviousData: true,
-    }
-  );
+export function getCategories(): [Category[], boolean] {
+  const { isLoading, data, error } = useFetch<GetCategories>("https://secure.splitwise.com/api/v3.0/get_categories", {
+    method: "GET",
+    ...HEADER,
+    keepPreviousData: true,
+  });
 
   const categories = data?.categories || [];
 
@@ -37,7 +34,7 @@ export function getCategories(): [Category[], boolean, any] {
     console.error(`Error while fetching categories: \n ${error}`);
   }
 
-  return [categories, isLoading, revalidate];
+  return [categories, isLoading];
 }
 
 export const DeleteExpense = async (id: number, mutate: any) => {
