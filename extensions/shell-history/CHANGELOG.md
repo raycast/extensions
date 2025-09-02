@@ -1,6 +1,6 @@
 # Shell History Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2025-09-02
 
 - Add an option to change the display order of the shell history.
 
