@@ -1,6 +1,6 @@
 # Brave Search with Results Changelog
 
-## [Updated Images] - {PR_MERGE_DATE}
+## [Updated Images] - 2025-09-02
 
 - New extension images for the store
 
