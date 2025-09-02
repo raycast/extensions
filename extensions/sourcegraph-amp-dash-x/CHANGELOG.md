@@ -1,5 +1,16 @@
 # Amp Dash X Changelog
 
+## [1.1.0] - {PR_MERGE_DATE}
+
+### Added
+- AI utilities: list-prompts, run-prompt, add-prompt, update-prompt, delete-prompt, list-categories, add-category, update-category, delete-category, generate-prompt.
+- AI evals for all utilities with mocks and example prompts; evals pass 100% via `npx ray evals`.
+- Example prompts surfaced as suggested prompts for users of the AI extension.
+
+### Changed
+
+- add-prompt tool now returns a rich Markdown summary (title, category, optional description, prompt block) and a ready-to-run `amp -x` command after saving.
+
 ## [1.0.0] - 2025-09-01
 
 ### Added

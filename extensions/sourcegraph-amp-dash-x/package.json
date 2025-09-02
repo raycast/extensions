@@ -5,6 +5,9 @@
   "description": "Organize and execute Amp prompts with execute mode (-x flag)",
   "icon": "command-icon.png",
   "author": "jdorfman",
+  "contributors": [
+    "erayack"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity"
@@ -46,6 +49,138 @@
       "placeholder": "--verbose"
     }
   ],
+  "tools": [
+    { "name": "list-prompts", "title": "List Saved Prompts", "description": "List saved prompts filtered by category or text" },
+    { "name": "run-prompt", "title": "Build Amp Command", "description": "Build and optionally copy/paste an `amp -x` command" },
+    { "name": "add-prompt", "title": "Add Saved Prompt", "description": "Create a new saved prompt with category and description" },
+    { "name": "update-prompt", "title": "Update Saved Prompt", "description": "Update title, text, category, or description of a prompt" },
+    { "name": "delete-prompt", "title": "Delete Saved Prompt", "description": "Delete a saved prompt by id or title (with confirmation)" },
+    { "name": "list-categories", "title": "List Categories", "description": "Show available prompt categories" },
+    { "name": "add-category", "title": "Add Category", "description": "Create a new prompt category" },
+    { "name": "update-category", "title": "Rename Category", "description": "Rename an existing category" },
+    { "name": "delete-category", "title": "Delete Category", "description": "Delete a category (prompts move to General)" },
+    { "name": "generate-prompt", "title": "Generate Task Prompt", "description": "Generate a high-quality Amp prompt for tasks like refactoring, tests, docs, or performance" }
+  ],
+  "ai": {
+    "instructions": "You provide utilities to manage and run Amp '-x' prompts. Prefer the tools for data retrieval and mutation. Be concise: return markdown with lists or code blocks. Ask for confirmation before any clipboard or deletion side-effects.",
+    "evals": [
+      {
+        "input": "@sourcegraph-amp-dash-x Show my saved prompts",
+        "mocks": {
+          "list-prompts": "# Saved Prompts\n\n| Title | Category | Updated | Description |\n|---|---|---|---|\n| Create README | Docs | 2025-01-01 | Generate a README |",
+          "sourcegraph-amp-dash-x-list-prompts": "# Saved Prompts\n\n| Title | Category | Updated | Description |\n|---|---|---|---|\n| Create README | Docs | 2025-01-01 | Generate a README |"
+        },
+        "expected": [ { "callsTool": "list-prompts" } ]
+      },
+      {
+        "input": "@sourcegraph-amp-dash-x Build an amp command for the 'Create README' prompt",
+        "mocks": {
+          "run-prompt": "Command prepared:\n\n```bash\namp -x \"Create README\"\n```",
+          "sourcegraph-amp-dash-x-run-prompt": "Command prepared:\n\n```bash\namp -x \"Create README\"\n```"
+        },
+        "expected": [
+          { "callsTool": { "name": "run-prompt", "arguments": { "title": { "includes": "Create README" } } } }
+        ]
+      },
+      {
+        "input": "@sourcegraph-amp-dash-x Generate a refactoring prompt",
+        "mocks": {
+          "generate-prompt": "# Generated Amp Prompt\n\n## Refactor Prompt (TypeScript)\n\nContext:\n- Scope: selection\n- Language/Stack: TypeScript\n- Change Intensity: moderate\n\nPrompt:\n```\nRefactor the selection in TypeScript. Apply the following guidelines:\n- Preserve external behavior and public APIs\n- Improve readability, maintainability, and cohesion\n```\n",
+          "sourcegraph-amp-dash-x-generate-prompt": "# Generated Amp Prompt\n\n## Refactor Prompt (TypeScript)\n\nContext:\n- Scope: selection\n- Language/Stack: TypeScript\n- Change Intensity: moderate\n\nPrompt:\n```\nRefactor the selection in TypeScript. Apply the following guidelines:\n- Preserve external behavior and public APIs\n- Improve readability, maintainability, and cohesion\n```\n"
+        },
+        "expected": [
+          { "callsTool": { "name": "generate-prompt", "arguments": { "purpose": { "includes": "refactor" } } } }
+        ]
+      },
+       {
+           "input": "@sourcegraph-amp-dash-x Add a prompt titled 'Hello World' in Docs",
+        "usedAsExample": true,
+        "mocks": {
+          "add-prompt": "Saved prompt: \"Hello World\" (Category: Docs)",
+          "sourcegraph-amp-dash-x-add-prompt": "Saved prompt: \"Hello World\" (Category: Docs)"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "add-prompt",
+              "arguments": {
+                "title": { "includes": "Hello World" },
+                "category": { "includes": "Docs" }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@sourcegraph-amp-dash-x Rename the 'Hello World' prompt to 'Hello Amp'",
+        "usedAsExample": true,
+        "mocks": {
+          "update-prompt": "Updated prompt: \"Hello Amp\" (Category: Docs)",
+          "sourcegraph-amp-dash-x-update-prompt": "Updated prompt: \"Hello Amp\" (Category: Docs)"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "update-prompt",
+              "arguments": {
+                "title": { "includes": "Hello World" },
+                "newTitle": { "includes": "Hello Amp" }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@sourcegraph-amp-dash-x Delete the 'Hello Amp' prompt",
+        "usedAsExample": true,
+        "mocks": {
+          "delete-prompt": "Prompt deleted.",
+          "sourcegraph-amp-dash-x-delete-prompt": "Prompt deleted."
+        },
+        "expected": [
+          { "callsTool": { "name": "delete-prompt", "arguments": { "title": { "includes": "Hello Amp" } } } }
+        ]
+      },
+      {
+        "input": "@sourcegraph-amp-dash-x List categories",
+        "usedAsExample": true,
+        "mocks": {
+          "list-categories": "# Categories\n\n- General\n- Docs\n- Documentation",
+          "sourcegraph-amp-dash-x-list-categories": "# Categories\n\n- General\n- Docs\n- Documentation"
+        },
+        "expected": [ { "callsTool": "list-categories" } ]
+      },
+      {
+        "input": "@sourcegraph-amp-dash-x Add a category 'Docs'",
+        "usedAsExample": true,
+        "mocks": {
+          "add-category": "Category added: Docs",
+          "sourcegraph-amp-dash-x-add-category": "Category added: Docs"
+        },
+        "expected": [ { "callsTool": { "name": "add-category", "arguments": { "name": { "includes": "Docs" } } } } ]
+      },
+      {
+        "input": "@sourcegraph-amp-dash-x Rename category 'Docs' to 'Documentation'",
+        "usedAsExample": true,
+        "mocks": {
+          "update-category": "Renamed category: Docs → Documentation",
+          "sourcegraph-amp-dash-x-update-category": "Renamed category: Docs → Documentation"
+        },
+        "expected": [
+          { "callsTool": { "name": "update-category", "arguments": { "oldName": "Docs", "newName": { "includes": "Documentation" } } } }
+        ]
+      },
+      {
+        "input": "@sourcegraph-amp-dash-x Delete the 'Documentation' category",
+        "usedAsExample": true,
+        "mocks": {
+          "delete-category": "Deleted category: Documentation",
+          "sourcegraph-amp-dash-x-delete-category": "Deleted category: Documentation"
+        },
+        "expected": [ { "callsTool": { "name": "delete-category", "arguments": { "name": { "includes": "Documentation" } } } } ]
+      }
+    ]
+  },
   "dependencies": {
     "@raycast/api": "^1.102.5",
     "@raycast/utils": "^2.2.1"
