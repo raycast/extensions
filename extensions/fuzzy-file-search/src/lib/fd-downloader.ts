@@ -49,24 +49,15 @@ export function fdCliArchive(): string {
   return path.join(fdCliDirectory(), cliFileInfo.pkg);
 }
 
-// Does the following:
-// 1. Checks if the executable with correct hash exists, if so, return it
-// 2. Checks if archive exists
-// - Downloads the archive as archive.tar
-// - Renames the archive.tar to archive
-// - Extracts the executable
-// - Removes the archive
 export async function ensureFdCLI() {
   await afs.mkdir(fdCliDirectory(), { recursive: true });
   const release = await lockfile.lock(fdCliDirectory(), {
-    retries: 10,
+    retries: 5,
   });
 
   try {
     const cliFileInfo = getCliFileInfo();
     if (fs.existsSync(fdCliFilepath())) {
-      // TODO: check for the hash
-      console.log("already downloaded fd cli found");
       return fdCliFilepath();
     }
 
@@ -75,9 +66,7 @@ export async function ensureFdCLI() {
     console.log("downloading archive");
     const response = await axios.get(binaryURL, { responseType: "stream" });
     const writer = fs.createWriteStream(fdCliArchive());
-
     response.data.pipe(writer);
-
     console.log("waiting for download finish");
     await new Promise((resolve, reject) => {
       response.data.on("end", resolve);
@@ -91,13 +80,14 @@ export async function ensureFdCLI() {
 
     await afs.chmod(fdCliFilepath(), "755");
     console.log("set permissions to fd executable to 755");
+
     return fdCliFilepath();
   } catch (error) {
-    console.error(`Could not download fd cli: ${error}`);
+    console.error(`error while downloading fd cli: ${error}`);
     if (fs.existsSync(fdCliFilepath())) {
       await afs.rm(fdCliFilepath());
     }
-    throw Error(`Could not download fd cli: ${error}`);
+    throw Error(`error while downloading fd cli: ${error}`);
   } finally {
     if (fs.existsSync(fdCliArchive())) {
       await afs.rm(fdCliArchive());

@@ -1,10 +1,10 @@
 import { ActionPanel, List, Action, getPreferenceValues } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { useCachedPromise, usePromise } from "@raycast/utils";
 import { exec } from "child_process";
 import { promisify } from "util";
 import { Fzf } from "fzf";
 import { basename } from "path";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ensureFdCLI } from "./lib/fd-downloader";
 
 const execAsync = promisify(exec);
@@ -19,8 +19,6 @@ export default function Command() {
   const prefs = getPreferenceValues<Prefs>();
 
   const [searchText, setSearchText] = useState("");
-  const [filteredPaths, filterPaths] = useState<string[]>([]);
-  const [fzf, setFzf] = useState(new Fzf([""]));
   const [searchRoot, setSearchRoot] = useState<string>("~");
 
   const homePath = process.env.HOME;
@@ -29,16 +27,17 @@ export default function Command() {
     throw new Error("$HOME environmental variable undefined");
   }
 
-  // Get the file list
-  const { isLoading, data } = usePromise(
-    async (searchRoot: string) => {
-      let fdPath: string = "";
-      try {
-        fdPath = await ensureFdCLI();
-      } catch (error) {
-        throw new Error(`Couldn't load the fd CLI: ${error}`);
-      }
+  const { data: fdPath, isLoading: isFdLoading } = useCachedPromise(async () => {
+    try {
+      return await ensureFdCLI();
+    } catch (error) {
+      throw new Error(`Couldn't load the fd CLI: ${error}`);
+    }
+  });
 
+  // Get all filepaths
+  const { data: fzf, isLoading: isFzfLoading } = usePromise(
+    async (searchRoot: string, fdPath: string | undefined) => {
       const { stdout, stderr } = await execAsync(
         `"${fdPath}" ${prefs.includeDirectories ? "" : "--type file"} --follow . ${searchRoot}`,
         {
@@ -47,34 +46,38 @@ export default function Command() {
       );
       if (stderr.length !== 0) {
         console.error(stderr);
-        return;
+        throw new Error(stderr);
       }
       const filepaths = stdout.split("\n");
-      setFzf(new Fzf(filepaths));
-      return filepaths;
+      return new Fzf(filepaths);
     },
-    [searchRoot],
+    [searchRoot, fdPath],
+    {
+      execute: !isFdLoading && fdPath !== undefined,
+    },
   );
 
-  // Filter file paths for search term
-  useEffect(() => {
-    if (data === undefined) {
-      filterPaths([]);
-      return;
-    }
-    if (searchText.length === 0) {
-      filterPaths(data);
-      return;
-    }
+  // Filter filepaths for search term using fzf
+  const { data: filteredPaths, isLoading: isFilteredPathsLoading } = usePromise(
+    async (searchText: string, fzf: Fzf<string[]> | undefined) => {
+      if (fzf === undefined) {
+        return [];
+      }
 
-    let searchTerm = searchText;
-    if (prefs.ignoreSpacesInSearch) {
-      searchTerm = searchText.replaceAll(" ", "");
-    }
+      let searchTerm = searchText;
+      if (prefs.ignoreSpacesInSearch) {
+        searchTerm = searchText.replaceAll(" ", "");
+      }
 
-    const newPaths = fzf.find(searchTerm).map((v) => v.item);
-    filterPaths(newPaths);
-  }, [searchText, searchRoot, isLoading]);
+      return fzf.find(searchTerm).map((v) => v.item);
+    },
+    [searchText, fzf],
+    {
+      execute: fzf !== undefined,
+    },
+  );
+
+  const isLoading = isFdLoading || isFzfLoading || isFilteredPathsLoading;
 
   return (
     <List
@@ -91,7 +94,7 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {filteredPaths.map((filepath) => (
+      {filteredPaths?.map((filepath) => (
         <List.Item
           key={filepath}
           title={filepath.startsWith(homePath) ? filepath.replace(homePath, "~") : filepath}
