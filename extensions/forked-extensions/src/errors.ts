@@ -4,16 +4,23 @@ import { SubprocessError } from "nano-spawn";
 import * as api from "./api.js";
 import operation from "./operation.js";
 
+/**
+ * Options for error handling.
+ */
 type HandlerOptions = {
+  /**
+   * Options for the primary action button in the error toast.
+   */
   primaryAction?: Toast.ActionOptions;
 };
 
 /**
  * Handle different types of errors and show appropriate failure toasts.
  * @param error An unknown error to handle.
+ * @param handlerOptions Options for error handling.
  */
-export const handleError = async (error: unknown, options?: HandlerOptions) => {
-  if (error instanceof HTTPError) return handleGotHttpError(error, options);
+export const handleError = async (error: unknown, handlerOptions?: HandlerOptions) => {
+  if (error instanceof HTTPError) return handleGotHttpError(error, handlerOptions);
   if (error instanceof SubprocessError) return handleSubprocessError(error);
   return operation.showFailureToast(error);
 };
@@ -21,20 +28,22 @@ export const handleError = async (error: unknown, options?: HandlerOptions) => {
 /**
  * Catch errors from an async task and handle them.
  * @param task The async task to execute.
+ * @param handlerOptions Options for error handling.
  */
-export const catchError = (task: () => Promise<void>) => async () => {
+export const catchError = (task: () => Promise<void>, handlerOptions?: HandlerOptions) => async () => {
   try {
     await task();
   } catch (error) {
-    handleError(error);
+    handleError(error, handlerOptions);
   }
 };
 
 /**
  * Handle Got HTTPError and show a failure toast with re-authorization action.
  * @param error The HTTPError to handle.
+ * @param handlerOptions Options for error handling.
  */
-export const handleGotHttpError = (error: HTTPError, options?: HandlerOptions) =>
+export const handleGotHttpError = (error: HTTPError, handlerOptions?: HandlerOptions) =>
   operation.showFailureToast([error.message, error.response.body].join("\n"), {
     title: error.message,
     message: error.response.body,
@@ -51,7 +60,7 @@ export const handleGotHttpError = (error: HTTPError, options?: HandlerOptions) =
               await open("raycast://extensions/litomore/forked-extensions/manage-forked-extensions");
             },
           }
-        : options?.primaryAction,
+        : handlerOptions?.primaryAction,
   });
 
 /**

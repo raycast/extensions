@@ -1,7 +1,7 @@
 import path from "node:path";
 import { Cache, getPreferenceValues } from "@raycast/api";
 import { upstreamRepository } from "./constants.js";
-import { ForkedExtension } from "./types.js";
+import { CommitDiff, ForkedExtension } from "./types.js";
 
 export const { gitExecutableFilePath, gitRemoteType, githubPersonalAccessToken, repositoryConfigurationPath } =
   getPreferenceValues<ExtensionPreferences>();
@@ -48,3 +48,32 @@ export const getRemoteUrl = (repository: string = upstreamRepository) => {
  * @returns The human-readable text for the number of commits.
  */
 export const getCommitsText = (commitsCount: number) => (commitsCount === 1 ? "1 commit" : `${commitsCount} commits`);
+
+/**
+ * Returns a message indicating how many commits the forked repository is ahead and behind.
+ * @param commitDiff The commit difference object.
+ * @param options Optional. Additional options for the message.
+ * @returns The message indicating the commit difference.
+ */
+export const getCommitDiffMessage = (
+  commitDiff: CommitDiff | undefined,
+  options?: {
+    prependSpace?: boolean;
+    includeAhead?: boolean;
+    includeParentheses?: boolean;
+    includeZeroAhead?: boolean;
+    alwaysShow?: boolean;
+  },
+) => {
+  if (!commitDiff) return "";
+  const prefix = options?.prependSpace ? " " : "";
+  const aheadMessage =
+    options?.includeAhead && (options.includeZeroAhead || commitDiff.ahead > 0)
+      ? `${getCommitsText(commitDiff.ahead)} ahead, `
+      : "";
+  const behindMessage = `${getCommitsText(commitDiff.behind)} behind`;
+  const hasDiff = options?.alwaysShow || commitDiff.behind > 0;
+  const leftParenthese = options?.includeParentheses ? "(" : "";
+  const rightParenthese = options?.includeParentheses ? ")" : "";
+  return hasDiff ? `${prefix}${leftParenthese}${aheadMessage}${behindMessage}${rightParenthese}` : "";
+};
