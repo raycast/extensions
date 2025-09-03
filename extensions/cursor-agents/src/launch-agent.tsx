@@ -195,7 +195,7 @@ export default function Command() {
       </Form.Dropdown>
       <Form.TextField
         title="Ref"
-        placeholder="Enter a branch or tag"
+        placeholder="Enter the base branch or tag."
         info="The branch or tag to work on, e.g. `main` or `v1.0.0`"
         storeValue
         {...itemProps.ref}
@@ -215,15 +215,11 @@ export default function Command() {
       <Form.TextField
         title="Branch name"
         placeholder="Enter a branch name"
-        info="Custom branch name for the agent to create"
+        info="Custom branch name for the agent to work on. If not provided, the agent will automatically create a branch."
         storeValue
         {...itemProps.branchName}
       />
-      <Form.Checkbox
-        label="Automatically create a PR when the agent completes"
-        storeValue
-        {...itemProps.autoCreatePR}
-      />
+      <Form.Checkbox label="Automatically create a PR when the agent is done" storeValue {...itemProps.autoCreatePR} />
     </Form>
   );
 }
