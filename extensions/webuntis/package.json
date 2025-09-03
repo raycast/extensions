@@ -44,8 +44,8 @@
   "commands": [
     {
       "name": "alias",
-      "title": "Globale Suche",
-      "description": "Suche nach Aliassen, IDs, Namen und weiterem.",
+      "title": "Global Search",
+      "description": "Search for aliases, IDs, names and more.",
       "mode": "view",
       "arguments": [
         {
