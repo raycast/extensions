@@ -20,6 +20,9 @@
     "drewbabel",
     "hayden_barnes"
   ],
+  "pastContributors": [
+    "jonasengelmann"
+  ],
   "license": "MIT",
   "commands": [
     {
