@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import * as api from "../api.js";
+import { catchError } from "../errors.js";
 import operation from "../operation.js";
 import { ExtentionNameFolder } from "../types.js";
 
@@ -18,13 +19,13 @@ export default function ValidExtensions({
 
   useEffect(() => {
     const foldersSet = new Set(forkedExtensionFolders);
-    const loadAllExtensions = async () => {
+    const loadAllExtensions = catchError(async () => {
       setIsLoading(true);
       const allExtensions = await api.getAllExtensions();
       const filteredExtensions = allExtensions.filter((x) => !foldersSet.has(x.folder));
       setAllExtension(filteredExtensions);
       setIsLoading(false);
-    };
+    });
     loadAllExtensions();
   }, [forkedExtensionFolders]);
 
@@ -41,11 +42,11 @@ export default function ValidExtensions({
               <Action
                 icon={Icon.NewDocument}
                 title="Fork"
-                onAction={async () => {
+                onAction={catchError(async () => {
                   await operation.fork(x.folder);
                   onPop();
                   pop();
-                }}
+                })}
               />
             </ActionPanel>
           }

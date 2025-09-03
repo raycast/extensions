@@ -1,5 +1,7 @@
 # Google Chrome Changelog
 
+## [Chore: Updated contributors] - 2025-09-03
+
 ## [Add Refresh Tab Command] - 2025-08-25
 
 - Add Reload Tab action to refresh a selected tab in the Search Tab command.

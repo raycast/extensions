@@ -118,7 +118,13 @@ export async function createTask(repository: string, prompt: string, branch: str
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to create task: ${response.statusText}`);
+    if (response.status === 403) {
+      throw new Error(
+        "Failed to create task. Please check if Copilot coding agent is enabled for your user at https://github.com/settings/copilot/features.",
+      );
+    } else {
+      throw new Error(`Failed to create task: ${response.statusText}`);
+    }
   }
 
   return (await response.json()) as CreateTaskResponse;
@@ -173,7 +179,7 @@ export const fetchSessions = async (): Promise<
 
   const octokit = getOctokit();
 
-  const pullRequests = await Promise.all(
+  const pullRequestResults = await Promise.allSettled(
     uniquePullRequestIdAndRepoIdPairs.map(async ({ pullRequestId, repoId }) => {
       const globalId = unsafelyGetGlobalIdForPullRequest(pullRequestId, repoId);
 
@@ -208,6 +214,11 @@ export const fetchSessions = async (): Promise<
     }),
   );
 
+  // Filter out failed pull request fetches and extract successful ones
+  const pullRequests = pullRequestResults
+    .filter((result) => result.status === "fulfilled")
+    .map((result) => result.value);
+
   const sessionsByResourceId = retrievedSessions.reduce((acc: Record<number, AgentSession[]>, session) => {
     if (session.resource_type !== "pull") return acc;
 
@@ -230,8 +241,9 @@ export const fetchSessions = async (): Promise<
       const lastUpdatedSession = sortedSessions[0];
       const pullRequest = pullRequests.find((pullRequest) => pullRequest.id.toString() === resourceId);
 
+      // If pull request couldn't be resolved, skip this session group silently
       if (!pullRequest) {
-        throw new Error(`Pull request not found for session ${lastUpdatedSession.id}`);
+        return null;
       }
 
       return {
@@ -240,6 +252,7 @@ export const fetchSessions = async (): Promise<
         pullRequest,
       };
     })
+    .filter((item) => item !== null)
     .sort((a, b) => new Date(b.sessions[0].created_at).getTime() - new Date(a.sessions[0].created_at).getTime());
 
   return transformedPullRequestsWithAgentSessions;
