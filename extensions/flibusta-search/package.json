@@ -19,6 +19,16 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "baseSiteUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "Base Site URL",
+      "description": "The base URL for the Flibusta site (e.g., https://flibusta.site)",
+      "default": "https://flibusta.is"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.94.2",
     "@raycast/utils": "^1.19.1",
