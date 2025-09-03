@@ -38,6 +38,9 @@ export default function Command() {
   // Get all filepaths
   const { data: fzf, isLoading: isFzfLoading } = usePromise(
     async (searchRoot: string, fdPath: string | undefined) => {
+      if (fdPath === undefined) {
+        return new Fzf([] as string[]);
+      }
       const { stdout, stderr } = await execAsync(
         `"${fdPath}" ${prefs.includeDirectories ? "" : "--type file"} --follow . ${searchRoot}`,
         {
@@ -52,9 +55,6 @@ export default function Command() {
       return new Fzf(filepaths);
     },
     [searchRoot, fdPath],
-    {
-      execute: !isFdLoading && fdPath !== undefined,
-    },
   );
 
   // Filter filepaths for search term using fzf
@@ -77,13 +77,11 @@ export default function Command() {
     },
   );
 
-  const isLoading = isFdLoading || isFzfLoading || isFilteredPathsLoading;
-
   return (
     <List
       navigationTitle="Search Files"
-      isLoading={isLoading}
-      searchBarPlaceholder={isLoading ? "Loading" : "Search for your files"}
+      isLoading={isFdLoading || isFzfLoading || isFilteredPathsLoading}
+      searchBarPlaceholder={"Search for your files"}
       onSearchTextChange={setSearchText}
       filtering={false} // disable builtin filtering as we use a custom one
       throttle // don't re-render on every key-press, adds delay
