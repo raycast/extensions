@@ -1,6 +1,6 @@
 # Send To Memos Changelog
 
-## [Update & Breaking Change] - {PR_MERGE_DATE}
+## [Update & Breaking Change] - 2025-09-03
 
 - support memos@0.25.0. 
 
