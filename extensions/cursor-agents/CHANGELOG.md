@@ -1,3 +1,3 @@
-# Cursor Background Agents Changelog
+# Cursor Agents Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
