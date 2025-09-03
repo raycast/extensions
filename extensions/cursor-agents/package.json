@@ -44,8 +44,33 @@
       "name": "launch-agent",
       "title": "Launch Agent",
       "description": "Launches a background agent to work on repository"
+    },
+    {
+      "name": "get-repositories",
+      "title": "Get Repositories",
+      "description": "Returns all available repositories configured by the user"
     }
   ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@cursor-agents find a bug in raycast/extensions",
+        "mocks": {
+          "launch-agent": "Agent launched with id: bc-f533dccc-0a4b-46dd-a8d9-63dd51a7ffdd. User can follow the progress at https://cursor.com/agents?id=bc-f533dccc-0a4b-46dd-a8d9-63dd51a7ffdd"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "repository": "https://github.com/raycast/extensions"
+              },
+              "name": "launch-agent"
+            }
+          }
+        ]
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "apiKey",

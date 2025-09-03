@@ -10,6 +10,8 @@ type Input = {
   prompt: string;
   /**
    * The repository to work on, must be a GitHub url, e.g. https://github.com/raycast/extensions
+   *
+   * @remarks Use the `get-repositories` tool to get the list of all available repositories.
    */
   repository: string;
   /**
