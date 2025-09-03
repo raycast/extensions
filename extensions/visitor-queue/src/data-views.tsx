@@ -48,7 +48,7 @@ export default function DataViews() {
     })
     return <List isLoading={isLoading}>
         {views.map(view => <List.Item key={view.id} icon="extension_icon.png" title={view.name} subtitle={view.id.toString()} actions={<ActionPanel>
-            <Action.Push title="Leads" target={<Leads gaViewId={view.id} />} />
+            <Action.Push icon={Icon.House} title="Leads" target={<Leads gaViewId={view.id} />} />
         </ActionPanel>} />)}
     </List>
 }
@@ -117,13 +117,22 @@ function Leads({gaViewId}: {gaViewId: number}) {
 
 </List.Item.Detail.Metadata>} />} actions={<ActionPanel>
     <Action icon={Icon.AppWindowSidebarLeft} title="Toggle Details" onAction={() => setIsShowingDetail(show => !show)} />
-        <Action.Push title="Contacts" target={<Contacts leadId={lead.id} />} />
+        <Action.Push icon={Icon.Person} title="Contacts" target={<Contacts lead={lead} />} />
 </ActionPanel>} />)}
     </List>
 }
 
-function Contacts({leadId}: {leadId: number}) {
-    const {isLoading,data: contacts} = useFetch(API_URL + `contacts?lead_id=${leadId}`, {
+function slugify(str: string) {
+  return str
+    .toLowerCase()              // Convert to lowercase
+    .trim()                     // Trim whitespace from both ends
+    .replace(/\s+/g, '-')       // Replace spaces with hyphens
+    .replace(/[^\w-]+/g, '')    // Remove all non-word characters (except for hyphens)
+    .replace(/--+/g, '-');      // Replace multiple hyphens with a single hyphen
+}
+
+function Contacts({lead}: {lead: Lead}) {
+    const {isLoading,data: contacts} = useFetch(API_URL + `contacts?lead_id=${lead.id}`, {
         headers,
         async parseResponse(response) {
             const result = await response.json();
@@ -134,6 +143,9 @@ function Contacts({leadId}: {leadId: number}) {
     })
 
     return <List isLoading={isLoading}>
-{contacts.map(contact => <List.Item key={contact.email} icon={Icon.AtSymbol} title={contact.email} />)}
+{!isLoading && !contacts.length ? <List.EmptyView icon="linkedin.svg" title="Find contacts on LinkedIn" actions={<ActionPanel>
+    <Action.OpenInBrowser title="People Search" url={`https://www.linkedin.com/search/results/people/?company=${slugify(lead.name)}`} />
+    <Action.OpenInBrowser title="Sales Navigator" url={`https://www.linkedin.com/sales/search/people?companyIncluded=${slugify(lead.name)}&companyTimeS`} />
+</ActionPanel>} /> : contacts.map(contact => <List.Item key={contact.email} icon={Icon.Person} title={contact.email} />)}
     </List>
 }
