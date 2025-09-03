@@ -69,7 +69,8 @@ export async function ensureFdCLI() {
     response.data.pipe(writer);
     console.log("waiting for download finish");
     await new Promise((resolve, reject) => {
-      response.data.on("end", resolve);
+      writer.on("finish", () => resolve("done"));
+      writer.on("error", reject);
       response.data.on("error", reject);
     });
 
