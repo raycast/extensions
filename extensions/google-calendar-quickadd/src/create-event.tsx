@@ -1,4 +1,4 @@
-import { Toast, showToast, getPreferenceValues, LocalStorage } from "@raycast/api";
+import { Toast, showToast, getPreferenceValues, LocalStorage, open } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { LaunchProps } from "@raycast/api";
 import { parseEventDetails } from "./services/llm";
@@ -30,7 +30,12 @@ export default async function CreateEvent(props: LaunchProps<{ arguments: Create
     await showToast({
       style: Toast.Style.Success,
       title: `Event Created: ${event.summary}`,
-      message: event.start?.dateTime ?? "",
+      primaryAction: {
+        title: "View Event",
+        onAction: () => {
+          open(event.htmlLink);
+        },
+      },
     });
   } catch (error) {
     showFailureToast(error, { title: "Failed to create event" });
