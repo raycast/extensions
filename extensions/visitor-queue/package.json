@@ -3,7 +3,7 @@
   "name": "visitor-queue",
   "title": "Visitor Queue",
   "categories": ["Data"],
-  "description": "",
+  "description": "Identify, personalize, convert",
   "icon": "extension_icon.png",
   "author": "xmok",
   "license": "MIT",
@@ -14,14 +14,14 @@
       "placeholder": "XXxXXxxXXXXxxxxXxXxxxxxx",
       "type": "password",
       "required": true,
-      "description": ""
+      "description": "API Key from Visitor Queue Integrations"
     }
   ],
   "commands": [
     {
       "name": "data-views",
       "title": "Data Views",
-      "description": "",
+      "description": "Data Views, Leads, Contacts",
       "mode": "view"
     }
   ],
