@@ -18,7 +18,7 @@ Works with:
 - A standalone Music Assistant server (`ws://HOST:8095/ws`)
 - The Home Assistant add-on (just expose port `8095` in the add-on’s settings)
 
-![Expose port 8095 in Home Assistant add-on settings](./expose-port.png)
+![Expose port 8095 in Home Assistant add-on settings](./media/expose-port.png)
 
 ## Configuration
 

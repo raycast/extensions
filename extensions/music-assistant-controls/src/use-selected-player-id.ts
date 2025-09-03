@@ -1,4 +1,5 @@
 import { showToast, launchCommand, LaunchType, LocalStorage } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 export const selectedPlayerKey = "queue_id";
 export type StoredQueue = { queue_id: string };
@@ -17,11 +18,18 @@ export async function getSelectedQueueID() {
         message: "Please select an active player first.",
         primaryAction: {
           title: "Set Active Player",
-          onAction: () =>
-            launchCommand({
-              name: "set-active-player",
-              type: LaunchType.UserInitiated,
-            }),
+          onAction: async () => {
+            try {
+              await launchCommand({
+                name: "set-active-player",
+                type: LaunchType.UserInitiated,
+              });
+            } catch (error) {
+              showFailureToast(error, {
+                title: "Failed to launch set-active-player command",
+              });
+            }
+          },
         },
       });
       return undefined;
@@ -34,11 +42,18 @@ export async function getSelectedQueueID() {
       message: "Please select an active player first.",
       primaryAction: {
         title: "Set Active Player",
-        onAction: () =>
-          launchCommand({
-            name: "set-active-player",
-            type: LaunchType.UserInitiated,
-          }),
+        onAction: async () => {
+          try {
+            await launchCommand({
+              name: "set-active-player",
+              type: LaunchType.UserInitiated,
+            });
+          } catch (error) {
+            showFailureToast(error, {
+              title: "Failed to launch set-active-player command",
+            });
+          }
+        },
       },
     });
     return undefined;
