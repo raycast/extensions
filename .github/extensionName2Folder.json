@@ -398,6 +398,7 @@
   "jonathangiardino/curl": "curl",
   "xeric/currency-exchange": "currency-exchange",
   "degouville/cursor": "cursor",
+  "anysphere/cursor-agents": "cursor-agents",
   "escwxyz/cursor-directory": "cursor-directory",
   "degouville/cursor-recent-projects": "cursor-recent-projects",
   "storm/cursors": "cursors",
