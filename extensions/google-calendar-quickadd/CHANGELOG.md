@@ -7,6 +7,5 @@
 - Add calendar selection with dynamic calendar list
 - Add configurable event reminders and notifications
 - Add smart defaults for event duration and colors
-- Add AI-generated event descriptions
 - Add support for location parsing and expansion
 - Add OAuth integration with Google Calendar API

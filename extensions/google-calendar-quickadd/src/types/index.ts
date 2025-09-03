@@ -16,20 +16,6 @@ export interface ParsedEventDetails {
 }
 
 // ===== GOOGLE CALENDAR API TYPES =====
-export interface GoogleCalendarEventRequest {
-  summary: string;
-  start: {
-    dateTime: string;
-    timeZone: string;
-  };
-  end: {
-    dateTime: string;
-    timeZone: string;
-  };
-  description?: string;
-  location?: string;
-}
-
 export interface GoogleCalendarEventResponse {
   id: string;
   summary: string;
@@ -110,76 +96,4 @@ export interface LLMServicePreferences {
 export interface CreateEventArguments {
   eventDetails: string;
   color: string;
-}
-
-// ===== OAUTH TYPES =====
-export interface OAuthTokens {
-  access_token: string;
-  refresh_token?: string;
-  expires_in?: number;
-  token_type: string;
-  scope?: string;
-}
-
-// ===== OPENAI/LLM TYPES =====
-export interface OpenAIEventFunction {
-  title: string;
-  start: string;
-  end: string;
-  description?: string;
-}
-
-export interface OpenAIToolCall {
-  type: "function";
-  function: {
-    name: string;
-    arguments: string;
-  };
-}
-
-export interface OpenAIResponse {
-  choices: Array<{
-    message: {
-      tool_calls?: OpenAIToolCall[];
-    };
-  }>;
-}
-
-// ===== VALIDATION TYPES =====
-export interface TimeValidation {
-  hours: number;
-  minutes: number;
-  isValid: boolean;
-  displayTime: string;
-}
-
-// ===== ERROR TYPES =====
-export class CalendarEventError extends Error {
-  constructor(
-    message: string,
-    public readonly code: string,
-  ) {
-    super(message);
-    this.name = "CalendarEventError";
-  }
-}
-
-export class ParseError extends Error {
-  constructor(
-    message: string,
-    public readonly input: string,
-  ) {
-    super(message);
-    this.name = "ParseError";
-  }
-}
-
-export class OAuthError extends Error {
-  constructor(
-    message: string,
-    public readonly statusCode?: number,
-  ) {
-    super(message);
-    this.name = "OAuthError";
-  }
 }

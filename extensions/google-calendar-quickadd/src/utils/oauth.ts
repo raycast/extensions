@@ -7,7 +7,7 @@ const client = new OAuth.PKCEClient({
   providerName: "Google",
   providerIcon: "google-logo.png",
   providerId: "google",
-  description: "Connect your Google account\n(Raycast Extension Demo)",
+  description: "Connect your Google account",
 });
 
 // Authorization

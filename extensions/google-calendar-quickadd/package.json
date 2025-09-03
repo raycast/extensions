@@ -22,7 +22,7 @@
       "arguments": [
         {
           "name": "eventDetails",
-          "placeholder": "friday 4pm game",
+          "placeholder": "Game today 4pm 2 hrs",
           "type": "text",
           "required": true
         },
