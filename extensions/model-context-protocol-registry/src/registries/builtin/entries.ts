@@ -269,6 +269,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "Rube",
+    title: "Rube - by Composio",
+    description:
+      "Rube is a MCP server that connects your AI tools to 500+ apps like Gmail, Slack, GitHub, and Notion. Simply install it in your AI client, authenticate once with your apps, and start asking your AI to perform real actions like 'Send an email' or 'Create a task.'",
+    icon: "https://files.buildwithfern.com/v3composio.docs.buildwithfern.com/2025-08-25T08:13:31.781Z/assets/logo.svg",
+    homepage: "https://rube.composio.dev",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://rube.composio.dev/mcp"],
+      env: {
+        npm_config_yes: "true",
+      },
+    },
+  },
+  {
     name: "sentry",
     title: "Sentry",
     description: "This service provides a Model Context Provider (MCP) for interacting with Sentry's API.",
@@ -571,6 +586,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://gen-pdf.com/mcp"],
+    },
+  },
+  {
+    name: "linear",
+    title: "Linear",
+    description:
+      "The Model Context Protocol (MCP) server provides a standardized interface that allows any compatible AI model or agent to access your Linear data in a simple and secure way. The Linear MCP server has tools available for finding, creating, and updating objects in Linear like issues, projects, and comments.",
+    icon: "https://svgl.app/library/linear.svg",
+    homepage: "https://linear.app/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.linear.app/sse"],
     },
   },
 ];

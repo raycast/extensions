@@ -1,5 +1,17 @@
 # Claude Code Cheatsheet Changelog
 
+## [1.2.0] - 2025-08-18
+
+- Add support for Claude Code v1.0.55 through v1.0.81 with 19+ new features
+- Add new CLI flag: `--settings` for loading additional settings from JSON file or string
+- Add 9 new environment variables including Claude 4.1 Opus region support and IDE configuration options
+- Add 9 comprehensive settings.json configuration options including hooks, model overrides, and AWS authentication
+- Enhance permissions system with `ask` option for confirmation-based access control
+- Improve data accuracy with dual-source verification using official documentation and actual CLI output
+- Expand total items from 121 to 140 comprehensive Claude Code references
+- Update version compatibility to support v1.0.55 - v1.0.81+
+- Refine data quality by removing standard environment variables and focusing on Claude Code-specific features
+
 ## [1.1.0] 2025-08-04
 
 ### Added

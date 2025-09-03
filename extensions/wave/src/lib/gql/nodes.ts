@@ -18,6 +18,7 @@ const Invoice = `
     amountDue {
         value
         currency {
+            code
             symbol
         }
     }

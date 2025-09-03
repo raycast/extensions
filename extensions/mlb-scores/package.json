@@ -18,6 +18,44 @@
       "title": "View MLB Scores",
       "description": "Get scores of today's MLB games.",
       "mode": "view"
+    },
+    {
+      "name": "searchPlayers",
+      "title": "Search MLB Players",
+      "description": "Search for MLB players by name",
+      "mode": "view"
+    },
+    {
+      "name": "standings",
+      "title": "View MLB Standings",
+      "description": "View MLB standings by league and division",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "firstLeague",
+          "type": "dropdown",
+          "placeholder": "Choose league",
+          "required": false,
+          "data": [
+            { "title": "American League (AL)", "value": "AL" },
+            { "title": "National League (NL)", "value": "NL" }
+          ]
+        }
+      ],
+      "preferences": [
+        {
+          "name": "firstLeague",
+          "type": "dropdown",
+          "title": "Show League First",
+          "description": "Which league to show first",
+          "data": [
+            { "title": "American League (AL)", "value": "AL" },
+            { "title": "National League (NL)", "value": "NL" }
+          ],
+          "default": "AL",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {
