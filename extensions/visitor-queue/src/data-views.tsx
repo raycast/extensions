@@ -109,7 +109,7 @@ function Leads({ gaViewId }: { gaViewId: number }) {
     initialData: [],
   });
   return (
-    <List isLoading={isLoading} isShowingDetail={isShowingDetail} pagination={pagination}>
+    <List isLoading={isLoading} isShowingDetail={isShowingDetail} pagination={pagination} navigationTitle="Leads">
       {leads.map((lead) => (
         <List.Item
           key={lead.id}
@@ -199,7 +199,7 @@ function Contacts({ lead }: { lead: Lead }) {
   });
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} navigationTitle="Contacts">
       {!isLoading && !contacts.length ? (
         <List.EmptyView
           icon="linkedin.svg"
@@ -220,7 +220,18 @@ function Contacts({ lead }: { lead: Lead }) {
           }
         />
       ) : (
-        contacts.map((contact) => <List.Item key={contact.email} icon={Icon.Person} title={contact.email} />)
+        contacts.map((contact) => (
+          <List.Item
+            key={contact.email}
+            icon={Icon.Person}
+            title={contact.email}
+            actions={
+              <ActionPanel>
+                <Action.CopyToClipboard content={contact.email} />
+              </ActionPanel>
+            }
+          />
+        ))
       )}
     </List>
   );
