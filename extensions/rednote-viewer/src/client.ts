@@ -191,7 +191,7 @@ class XhsClient {
       .then(() => true)
       .catch(() => false);
     if (!destinationExists) {
-      fs.mkdir(destination, { recursive: true });
+      await fs.mkdir(destination, { recursive: true });
     }
 
     const filename = `${details.title}.md`;
