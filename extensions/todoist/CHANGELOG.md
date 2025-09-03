@@ -1,5 +1,11 @@
 # Todoist Changelog
 
+## [Fixed Setting of Due Time] - 2025-09-03
+
+- **Due Time Missing After Converting to String**: Use toISOString() when converting date to string so that time is included as well
+- **Fixed Due Time Getting Overriden By Current Time**: Set the time from parsedData whenever there's updates from nlp
+- **Fixed Undefined Error If Title Is Set Before the Other Fields**: Resolved `TypeError: Cannot read properties of undefined (reading 'matchAll')` error during nlp parsing if title is not set prior to the other fields
+
 ## [Fixed Create Task TypeError] - 2025-09-01
 
 - **Fixed TypeError on Task Creation**: Resolved `TypeError: Cannot read properties of undefined (reading 'length')` error when submitting the Create Task form by adding defensive checks for undefined arrays
