@@ -136,7 +136,7 @@ export default function Command() {
             type: LaunchType.Background,
           });
         } catch {
-          // Silent ignore
+          // Silently ignoring that the menu bar is not running
         }
 
         reset();
