@@ -5,7 +5,7 @@ import { URLSearchParams } from "url";
 const { apiKey } = getPreferenceValues<ExtensionPreferences>();
 
 type ModelsResponse = {
-  models: [string];
+  models: string[];
 };
 
 export function useModels() {
