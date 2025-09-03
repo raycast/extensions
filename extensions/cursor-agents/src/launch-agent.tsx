@@ -130,10 +130,14 @@ export default function Command() {
           },
         });
 
-        await launchCommand({
-          name: "menu-bar",
-          type: LaunchType.Background,
-        });
+        try {
+          await launchCommand({
+            name: "menu-bar",
+            type: LaunchType.Background,
+          });
+        } catch {
+          // Silently ignoring that the menu bar is not running
+        }
 
         reset();
         focus("prompt");
