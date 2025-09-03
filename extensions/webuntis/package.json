@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "webuntis",
+  "title": "WebUntis",
+  "description": "A Extension to view hourplans and map aliases to names.",
+  "icon": "extension-icon.png",
+  "author": "developer-07",
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "username",
+      "title": "WebUntis Username",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "your.username",
+      "description": "Your WebUntis username."
+    },
+    {
+      "name": "password",
+      "title": "WebUntis Password",
+      "type": "password",
+      "required": true,
+      "placeholder": "yourpassword",
+      "description": "Your WebUntis password."
+    },
+    {
+      "name": "school",
+      "title": "WebUntis School",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "your_school",
+      "description": "Your WebUntis school."
+    },
+    {
+      "name": "server",
+      "title": "WebUntis Server",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "yourserver.webuntis.com",
+      "description": "Your WebUntis server."
+    }
+  ],
+  "categories": ["Productivity", "Applications", "Other"],
+  "commands": [
+    {
+      "name": "alias",
+      "title": "Globale Suche",
+      "description": "Suche nach Aliassen, IDs, Namen und weiterem.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "shortcut",
+          "placeholder": "Text",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.6",
+    "@raycast/utils": "^1.17.0",
+    "webuntis": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
