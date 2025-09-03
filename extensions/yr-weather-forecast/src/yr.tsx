@@ -91,6 +91,9 @@ export default function Command() {
   const [favoriteWeather, setFavoriteWeather] = useState<Record<string, TimeseriesEntry | undefined>>({});
   const [sunTimes, setSunTimes] = useState<Record<string, SunTimes>>({});
   const [favoriteErrors, setFavoriteErrors] = useState<Record<string, boolean>>({});
+  const [favoritesLoading, setFavoritesLoading] = useState<Record<string, boolean>>({});
+  const [weatherDataInitialized, setWeatherDataInitialized] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const networkTest = useNetworkTest();
 
   useEffect(() => {
@@ -98,6 +101,10 @@ export default function Command() {
       const favs = await getFavorites();
       setFavorites(favs);
       setFavoritesLoaded(true);
+      // If no favorites, we're done with initial load
+      if (favs.length === 0) {
+        setIsInitialLoad(false);
+      }
     })();
   }, []);
 
@@ -105,60 +112,76 @@ export default function Command() {
     if (favorites.length === 0) {
       setFavoriteWeather({});
       setFavoriteErrors({});
+      setFavoritesLoading({});
+      setWeatherDataInitialized(true); // No favorites to load, so we're "done"
       return;
     }
     let cancelled = false;
-    const errorTimeouts = new Map<string, NodeJS.Timeout>();
+    setWeatherDataInitialized(false); // Starting fresh data load
 
     async function fetchAll() {
+      // Reset states
       setFavoriteErrors({});
+
+      // Mark all favorites as loading
+      const loadingMap: Record<string, boolean> = {};
+      favorites.forEach((fav) => {
+        const key = LocationUtils.getLocationKey(fav.id, fav.lat, fav.lon);
+        loadingMap[key] = true;
+      });
+      setFavoritesLoading(loadingMap);
 
       try {
         const entries = await Promise.all(
           favorites.map(async (fav) => {
+            const key = LocationUtils.getLocationKey(fav.id, fav.lat, fav.lon);
             try {
               const ts = await getWeather(fav.lat, fav.lon);
-              const key = fav.id ?? (`${fav.lat},${fav.lon}` as string);
               const sun = await getSunTimes(fav.lat, fav.lon).catch(() => ({}) as SunTimes);
               return [key, ts, sun] as const;
             } catch (err) {
-              // Clear weather data for this favorite when API fails
-              const key = fav.id ?? (`${fav.lat},${fav.lon}` as string);
-              console.warn(`Failed to fetch weather for ${fav.name}:`, err);
-
-              // Delay showing error by 150ms to give API time to catch up
+              // Immediately mark error so UI doesn't stay stuck in "Loading..."
               if (!cancelled) {
-                const timeout = setTimeout(() => {
-                  if (!cancelled) {
-                    setFavoriteErrors((prev) => ({ ...prev, [key]: true }));
-                  }
-                }, 150);
-                errorTimeouts.set(key, timeout);
+                setFavoriteErrors((prev) => ({ ...prev, [key]: true }));
+                setFavoritesLoading((prev) => ({ ...prev, [key]: false }));
               }
-
               return [key, undefined, {} as SunTimes] as const;
             }
           }),
         );
         if (!cancelled) {
-          const weatherMap: Record<string, TimeseriesEntry | undefined> = {};
-          const sunMap: Record<string, SunTimes> = {};
+          // Set each entry individually to ensure React picks up the changes
           for (const [key, ts, sun] of entries) {
-            weatherMap[key] = ts;
-            sunMap[key] = sun;
+            if (ts) {
+              setFavoriteWeather((prev) => ({ ...prev, [key]: ts }));
+            }
+            setSunTimes((prev) => ({ ...prev, [key]: sun }));
+            // Mark as no longer loading
+            setFavoritesLoading((prev) => ({ ...prev, [key]: false }));
           }
-          setFavoriteWeather(weatherMap);
-          setSunTimes(sunMap);
+
+          // Add a small delay to ensure smooth transition without flashing
+          setTimeout(() => {
+            setWeatherDataInitialized(true);
+            setIsInitialLoad(false); // Mark initial load as complete
+          }, 100);
         }
       } catch (err) {
         DebugLogger.error("Error fetching favorites:", err);
+        // Mark all as no longer loading on general error
+        if (!cancelled) {
+          setFavoritesLoading({});
+          // Even on error, we're "done" trying - show with small delay
+          setTimeout(() => {
+            setWeatherDataInitialized(true);
+            setIsInitialLoad(false); // Mark initial load as complete
+          }, 100);
+        }
       }
     }
     fetchAll();
     return () => {
       cancelled = true;
-      // Clear all error timeouts
-      errorTimeouts.forEach((timeout) => clearTimeout(timeout));
     };
   }, [favorites]);
 
@@ -240,11 +263,12 @@ export default function Command() {
 
   const showEmpty = favoritesLoaded && favorites.length === 0 && safeLocations.length === 0 && !isLoading;
 
-  // Only show favorites when not actively searching or when search is empty
-  const shouldShowFavorites = favorites.length > 0 && (!searchText.trim() || safeLocations.length === 0);
+  // Only show favorites when not actively searching or when search is empty, AND when weather data is ready
+  const shouldShowFavorites =
+    favorites.length > 0 && (!searchText.trim() || safeLocations.length === 0) && weatherDataInitialized;
 
-  // Determine if we should show loading state
-  const shouldShowLoading = !favoritesLoaded || isLoading;
+  // Determine if we should show loading state - only true during initial load
+  const shouldShowLoading = isInitialLoad || isLoading;
 
   // Use the utility function to create location actions
   const createLocationActions = LocationUtils.createLocationActions;
@@ -426,113 +450,132 @@ export default function Command() {
           {/* Show favorites only when not actively searching or when no search results */}
           {shouldShowFavorites && (
             <List.Section title="Favorites">
-              {favorites.map((fav) => (
-                <List.Item
-                  key={fav.id ?? `${fav.lat},${fav.lon}`}
-                  title={fav.name}
-                  subtitle={
-                    favoriteWeather[fav.id ?? `${fav.lat},${fav.lon}`]
-                      ? formatTemp(favoriteWeather[fav.id ?? `${fav.lat},${fav.lon}`])
-                      : favoriteErrors[fav.id ?? `${fav.lat},${fav.lon}`]
-                        ? "⚠️ Data fetch failed"
-                        : "Loading..."
-                  }
-                  icon={
-                    favoriteWeather[fav.id ?? `${fav.lat},${fav.lon}`]
-                      ? iconForSymbol(favoriteWeather[fav.id ?? `${fav.lat},${fav.lon}`])
-                      : favoriteErrors[fav.id ?? `${fav.lat},${fav.lon}`]
-                        ? "⚠️"
-                        : "⏳"
-                  }
-                  accessories={
-                    favoriteWeather[fav.id ?? `${fav.lat},${fav.lon}`]
-                      ? formatAccessories(
-                          favoriteWeather[fav.id ?? `${fav.lat},${fav.lon}`],
-                          sunTimes[fav.id ?? `${fav.lat},${fav.lon}`],
-                        )
-                      : undefined
-                  }
-                  actions={
-                    <ActionPanel>
-                      <Action.Push
-                        title="Open Forecast"
-                        target={
-                          <ForecastView
-                            name={fav.name}
-                            lat={fav.lat}
-                            lon={fav.lon}
-                            onShowWelcome={() => setShowWelcomeMessage(true)}
-                          />
-                        }
-                      />
-                      <Action
-                        title="Show Current Weather"
-                        onAction={async () => {
-                          try {
-                            const ts: TimeseriesEntry = await getWeather(fav.lat, fav.lon);
-                            await showToast({
-                              style: Toast.Style.Success,
-                              title: `Now at ${fav.name}`,
-                              message: WeatherFormatters.formatWeatherToast(ts),
-                            });
-                          } catch (error) {
-                            await ToastMessages.weatherLoadFailed(error);
-                          }
-                        }}
-                      />
-                      <Action.Push
-                        title="Open Graph"
-                        icon={Icon.BarChart}
-                        shortcut={{ modifiers: ["cmd"], key: "g" }}
-                        target={
-                          <GraphView
-                            name={fav.name}
-                            lat={fav.lat}
-                            lon={fav.lon}
-                            onShowWelcome={() => setShowWelcomeMessage(true)}
-                          />
-                        }
-                      />
-                      <Action
-                        title="Remove from Favorites"
-                        icon={Icon.StarDisabled}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-                        onAction={async () => {
-                          await removeFavorite(fav);
-                          setFavorites(await getFavorites());
-                          if (fav.id) setFavoriteIds((m) => ({ ...m, [fav.id as string]: false }));
-                          await ToastMessages.favoriteRemoved(fav.name);
-                        }}
-                      />
-                      <Action
-                        title="Move up"
-                        icon={Icon.ArrowUp}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
-                        onAction={async () => {
-                          await moveFavoriteUp(fav);
-                          setFavorites(await getFavorites());
-                        }}
-                      />
-                      <Action
-                        title="Move Down"
-                        icon={Icon.ArrowDown}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
-                        onAction={async () => {
-                          await moveFavoriteDown(fav);
-                          setFavorites(await getFavorites());
-                        }}
-                      />
+              {favorites.map((fav) => {
+                const key = LocationUtils.getLocationKey(fav.id, fav.lat, fav.lon);
+                const hasWeather = !!favoriteWeather[key];
+                const hasError = !!favoriteErrors[key];
+                const isLoading = !!favoritesLoading[key];
 
-                      <Action
-                        title="Show Welcome Message"
-                        icon={Icon.Info}
-                        onAction={() => setShowWelcomeMessage(true)}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
-                      />
-                    </ActionPanel>
-                  }
-                />
-              ))}
+                return (
+                  <List.Item
+                    key={key}
+                    title={fav.name}
+                    subtitle={(() => {
+                      const weather = favoriteWeather[key];
+                      const error = favoriteErrors[key];
+                      const loading = favoritesLoading[key];
+
+                      if (weather) {
+                        const temp = formatTemp(weather);
+                        return temp || "⚠️ Temperature unavailable";
+                      }
+
+                      if (error) {
+                        return "⚠️ Data fetch failed";
+                      }
+
+                      if (loading) {
+                        return "Loading...";
+                      }
+
+                      return "No data";
+                    })()}
+                    icon={
+                      favoriteWeather[key]
+                        ? iconForSymbol(favoriteWeather[key])
+                        : favoriteErrors[key]
+                          ? "⚠️"
+                          : favoritesLoading[key]
+                            ? "⏳"
+                            : "❓"
+                    }
+                    accessories={
+                      favoriteWeather[key] ? formatAccessories(favoriteWeather[key], sunTimes[key]) : undefined
+                    }
+                    actions={
+                      <ActionPanel>
+                        <Action.Push
+                          title="Open Forecast"
+                          icon={Icon.Clock}
+                          target={
+                            <ForecastView
+                              name={fav.name}
+                              lat={fav.lat}
+                              lon={fav.lon}
+                              onShowWelcome={() => setShowWelcomeMessage(true)}
+                            />
+                          }
+                        />
+                        <Action
+                          title="Show Current Weather"
+                          icon={Icon.Wind}
+                          onAction={async () => {
+                            try {
+                              const ts: TimeseriesEntry = await getWeather(fav.lat, fav.lon);
+                              await showToast({
+                                style: Toast.Style.Success,
+                                title: `Now at ${fav.name}`,
+                                message: WeatherFormatters.formatWeatherToast(ts),
+                              });
+                            } catch (error) {
+                              await ToastMessages.weatherLoadFailed(error);
+                            }
+                          }}
+                        />
+                        <Action.Push
+                          title="Open Graph"
+                          icon={Icon.BarChart}
+                          shortcut={{ modifiers: ["cmd"], key: "g" }}
+                          target={
+                            <GraphView
+                              name={fav.name}
+                              lat={fav.lat}
+                              lon={fav.lon}
+                              onShowWelcome={() => setShowWelcomeMessage(true)}
+                            />
+                          }
+                        />
+                        <Action
+                          title="Remove from Favorites"
+                          icon={Icon.StarDisabled}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+                          onAction={async () => {
+                            await removeFavorite(fav);
+                            setFavorites(await getFavorites());
+                            if (fav.id) setFavoriteIds((m) => ({ ...m, [fav.id as string]: false }));
+                            await ToastMessages.favoriteRemoved(fav.name);
+                          }}
+                        />
+                        <Action
+                          title="Move up"
+                          icon={Icon.ArrowUp}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
+                          onAction={async () => {
+                            await moveFavoriteUp(fav);
+                            setFavorites(await getFavorites());
+                          }}
+                        />
+                        <Action
+                          title="Move Down"
+                          icon={Icon.ArrowDown}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
+                          onAction={async () => {
+                            await moveFavoriteDown(fav);
+                            setFavorites(await getFavorites());
+                          }}
+                        />
+
+                        <Action
+                          title="Show Welcome Message"
+                          icon={Icon.Info}
+                          onAction={() => setShowWelcomeMessage(true)}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+                        />
+                      </ActionPanel>
+                    }
+                  />
+                );
+              })}
             </List.Section>
           )}
         </>

@@ -44,12 +44,19 @@ export class WeatherFormatters {
     const units = getUnits();
     const flags = getFeatureFlags();
 
-    // Wind speed
+    // Wind speed - only show if we have meaningful wind data (> 0)
     const wind = formatWindSpeed(details.wind_speed, units);
-    if (wind) acc.push({ tag: `💨 ${wind}`, tooltip: "Wind" });
+    if (wind && details.wind_speed && details.wind_speed > 0) {
+      acc.push({ tag: `💨 ${wind}`, tooltip: "Wind" });
+    }
 
-    // Wind direction
-    if (flags.showWindDirection && typeof details.wind_from_direction === "number") {
+    // Wind direction - only show if we have meaningful wind speed AND direction
+    if (
+      flags.showWindDirection &&
+      typeof details.wind_from_direction === "number" &&
+      details.wind_speed &&
+      details.wind_speed > 0
+    ) {
       const dir = directionFromDegrees(details.wind_from_direction);
       acc.push({
         tag: `🧭 ${dir.arrow} ${dir.name}`,
@@ -57,25 +64,33 @@ export class WeatherFormatters {
       });
     }
 
-    // Precipitation
+    // Precipitation - show if we have valid precipitation data (including 0mm)
     const precip = precipitationAmount(ts);
     const p = formatPrecip(precip, units);
-    if (p) acc.push({ tag: `☔ ${p}`, tooltip: "Precipitation" });
+    if (p && typeof precip === "number") {
+      acc.push({ tag: `☔ ${p}`, tooltip: "Precipitation" });
+    }
 
-    // Sun times
-    if (flags.showSunTimes) {
-      const sr = sun?.sunrise ? new Date(sun.sunrise) : undefined;
-      const ss = sun?.sunset ? new Date(sun.sunset) : undefined;
-      if (sr)
+    // Sun times - only show if we have valid sunrise/sunset data
+    if (flags.showSunTimes && sun) {
+      const sr = sun.sunrise ? new Date(sun.sunrise) : undefined;
+      const ss = sun.sunset ? new Date(sun.sunset) : undefined;
+
+      // Only show sunrise if it's a valid date and not in the past relative to now
+      if (sr && !isNaN(sr.getTime())) {
         acc.push({
           tag: `🌅 ${formatTime(sr, "MILITARY")}`,
           tooltip: "Sunrise",
         });
-      if (ss)
+      }
+
+      // Only show sunset if it's a valid date and not in the past relative to now
+      if (ss && !isNaN(ss.getTime())) {
         acc.push({
           tag: `🌇 ${formatTime(ss, "MILITARY")}`,
           tooltip: "Sunset",
         });
+      }
     }
 
     return acc.length ? acc : undefined;
