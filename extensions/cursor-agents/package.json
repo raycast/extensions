@@ -49,6 +49,11 @@
       "name": "get-repositories",
       "title": "Get Repositories",
       "description": "Returns all available repositories configured by the user"
+    },
+    {
+      "name": "add-repository",
+      "title": "Add Repository",
+      "description": "Adds a new GitHub repository to the user's configured repositories"
     }
   ],
   "ai": {

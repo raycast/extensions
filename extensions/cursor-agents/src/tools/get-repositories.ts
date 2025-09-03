@@ -1,11 +1,5 @@
 import { Cache } from "@raycast/api";
 
-type Repository = {
-  id: string;
-  name: string;
-  url: string;
-};
-
 /**
  * Returns all available repositories that the user has configured in Cursor Agents.
  * This can be used to determine which repository the user might be referring to.
