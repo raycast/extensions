@@ -1,19 +1,7 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Form,
-  Icon,
-  launchCommand,
-  LaunchType,
-  open,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, Icon, open, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, showFailureToast, useCachedState, useForm } from "@raycast/utils";
 import { launchAgent, useModels } from "./cursor";
-import { processImages } from "./utils";
+import { processImages, refreshMenuBar } from "./utils";
 
 type Repository = {
   id: string;
@@ -130,10 +118,7 @@ export default function Command() {
           },
         });
 
-        await launchCommand({
-          name: "menu-bar",
-          type: LaunchType.Background,
-        });
+        await refreshMenuBar();
 
         reset();
         focus("prompt");
