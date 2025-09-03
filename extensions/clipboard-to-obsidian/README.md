@@ -13,6 +13,11 @@ This Raycast extension streamlines the process of creating Obsidian notes from c
 - Uses the longer text as the note content
 - Adds today's date to the filename
 - Opens the note in Obsidian automatically
+- Robust error handling for edge cases:
+  - Validates clipboard content for empty/whitespace-only items
+  - Handles file naming conflicts with automatic counter suffixes
+  - Content size limits to prevent filesystem issues
+  - Path security validation to prevent directory traversal
 
 ## Configuration
 
