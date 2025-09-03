@@ -13,7 +13,7 @@ type Input = {
    */
   repository: string;
   /**
-   * The Git ref (branch/tag) to use as the base branch, e.g. "main" or "v1.0.0". If not specifiec uses default branch of the repository.
+   * The Git ref (branch/tag) to use as the base branch, e.g. "main" or "v1.0.0". If not specified uses default branch of the repository.
    */
   ref?: string;
 };
