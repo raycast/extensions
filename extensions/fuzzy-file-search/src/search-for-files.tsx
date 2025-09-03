@@ -60,6 +60,7 @@ export default function Command() {
   // Filter filepaths for search term using fzf
   const { data: filteredPaths, isLoading: isFilteredPathsLoading } = usePromise(
     async (searchText: string, fzf: Fzf<string[]> | undefined) => {
+      const start = Date.now();
       if (fzf === undefined) {
         return [];
       }
@@ -69,7 +70,9 @@ export default function Command() {
         searchTerm = searchText.replaceAll(" ", "");
       }
 
-      return fzf.find(searchTerm).map((v) => v.item);
+      const filteredPaths = fzf.find(searchTerm).map((v) => v.item);
+      console.log(`Fzf filtered results for '${searchTerm}' in: ${Date.now() - start}`);
+      return filteredPaths;
     },
     [searchText, fzf],
     {
@@ -92,24 +95,29 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {filteredPaths?.map((filepath) => (
-        <List.Item
-          key={filepath}
-          title={filepath.startsWith(homePath) ? filepath.replace(homePath, "~") : filepath}
-          subtitle={basename(filepath)}
-          actions={
-            <ActionPanel>
-              <Action.Open title="Open" target={filepath} />
-              <Action.ShowInFinder title="Show in Finder" path={filepath} />
-              <Action.CopyToClipboard
-                title="Copy Path to Clipboard"
-                content={filepath}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+      {filteredPaths?.map((filepath) => {
+        const filename = basename(filepath);
+        return (
+          <List.Item
+            key={filepath}
+            title={filepath.startsWith(homePath) ? filepath.replace(homePath, "~") : filepath}
+            subtitle={filename}
+            quickLook={{ path: filepath, name: filename }}
+            actions={
+              <ActionPanel>
+                <Action.Open title="Open" target={filepath} />
+                <Action.ShowInFinder title="Show in Finder" path={filepath} />
+                <Action.CopyToClipboard
+                  title="Copy Path to Clipboard"
+                  content={filepath}
+                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                />
+                <Action.ToggleQuickLook shortcut={{ modifiers: ["cmd"], key: "y" }} />
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 }
