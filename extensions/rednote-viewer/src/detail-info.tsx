@@ -15,7 +15,7 @@ export default function DetailInfo({ details }: { details: DetailData }) {
 
   return (
     <Detail
-      markdown={markdown}
+      markdown={markdown.startsWith("#") ? `\\${markdown}` : markdown}
       isLoading={isDescLoading || isTitleLoading || isNicknameLoading}
       navigationTitle={translatedTitle || details.title}
       metadata={
