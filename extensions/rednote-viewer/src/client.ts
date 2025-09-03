@@ -1,10 +1,10 @@
-import fs from "node:fs";
+import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import vm from "node:vm";
 import { DetailData, HomeFeedRequest, ImageInfo, NoteItem, Sandbox, SearchRequest, Tag } from "./types.js";
 import { getHomeFeedApi, getMeApi, getNoteApi, searchPostApi } from "./api.js";
-import { environment, getPreferenceValues, open, openExtensionPreferences, showToast } from "@raycast/api";
+import { environment, getPreferenceValues, open, openExtensionPreferences } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { BASE_URL, COMMON_HEADER, HOME_PAGE_SIZE, SEARCH_PAGE_SIZE } from "./constants.js";
 
@@ -30,11 +30,10 @@ class XhsClient {
     sandbox.global = sandbox;
     this.sandbox = vm.createContext(sandbox);
     const rawPath = `${environment.assetsPath}/raw.min.js`;
-    const code = fs.readFileSync(rawPath, "utf-8");
+    const code = await fs.readFile(rawPath, "utf-8");
     vm.runInContext(code, this.sandbox, {
       filename: "raw.js",
     });
-    console.info("Sandbox initialized");
 
     await this.checkCookie();
     return this.isCookieValid;
@@ -63,9 +62,6 @@ class XhsClient {
       await getMeApi(cookies);
       this.isCookieValid = true;
       this.cookie = cookies;
-      showToast({
-        title: "Cookie is valid",
-      });
       return true;
     } catch {
       this.isCookieValid = false;
@@ -190,13 +186,17 @@ class XhsClient {
 
     const dir = details.noteId;
     const destination = path.join(os.homedir(), "Downloads", dir);
-    if (!fs.existsSync(destination)) {
-      fs.mkdirSync(destination, { recursive: true });
+    const destinationExists = await fs
+      .access(destination, fs.constants.R_OK | fs.constants.W_OK)
+      .then(() => true)
+      .catch(() => false);
+    if (!destinationExists) {
+      fs.mkdir(destination, { recursive: true });
     }
 
     const filename = `${details.title}.md`;
     const markdownFile = path.join(destination, filename);
-    fs.writeFileSync(markdownFile, markdown);
+    await fs.writeFile(markdownFile, markdown);
 
     // TODO: download image/video if needed
     // for (const image of details.images) {

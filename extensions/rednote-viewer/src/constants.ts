@@ -9,3 +9,5 @@ export const COMMON_HEADER = {
 };
 export const HOME_PAGE_SIZE = 8;
 export const SEARCH_PAGE_SIZE = 20;
+export const TRANSLATE_PROMPT =
+  "Translate the text to English, please reply with the translated text only (If provide you nothing, please reply with the empty string):\n\n";

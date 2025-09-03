@@ -3,22 +3,29 @@ import {
   Action,
   ActionPanel,
   Grid,
+  Icon,
+  clearSearchBar,
+  getPreferenceValues,
   openExtensionPreferences,
   showToast,
   Toast,
   useNavigation,
   Clipboard,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import client from "./client.js";
 import DetailInfo from "./detail-info.js";
+import GridItem from "./grid-item.js";
 import { PostItem } from "./types.js";
 import { BASE_URL, HOME_PAGE_SIZE, SEARCH_PAGE_SIZE } from "./constants.js";
 import { parseUrl } from "./utils.js";
 
+const { columnsOfGrid } = getPreferenceValues<ExtensionPreferences>();
+
 export default function Command() {
   const { push } = useNavigation();
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [posts, setPosts] = useState<PostItem[]>([]);
   const [mode, setMode] = useState<"homefeed" | "search">("homefeed");
   const [hasMore, setHasMore] = useState(true);
@@ -31,12 +38,16 @@ export default function Command() {
       const result = parseUrl(text);
       if (result) {
         previewDetail(result.noteId, result.xToken);
+        showToast({
+          title: "Loaded from Clipboard",
+        });
       }
     }
   };
 
   // home feed
-  const refresh = async () => {
+  const refresh = async (options?: { clearSearchBar?: boolean }) => {
+    if (options?.clearSearchBar) clearSearchBar();
     setIsLoading(true);
     const newPosts = await client.getHomeFeed();
     setMode("homefeed");
@@ -59,10 +70,13 @@ export default function Command() {
   };
 
   useEffect(() => {
-    client.ready().then(() => {
-      parseContext();
-      refresh();
-    });
+    client
+      .ready()
+      .then(() => {
+        parseContext();
+        refresh();
+      })
+      .catch(showFailureToast);
   }, []);
 
   const [searchText, setSearchText] = useState("");
@@ -83,9 +97,10 @@ export default function Command() {
       return;
     }
 
+    const currentPage = page + 1;
     setIsLoading(true);
-    setPage(page + 1);
-    const { items, hasMore } = await client.searchPost(searchText, page);
+    setPage(currentPage);
+    const { items, hasMore } = await client.searchPost(searchText, currentPage);
     setMode("search");
     setPosts([...posts, ...items]);
     setHasMore(hasMore);
@@ -138,9 +153,8 @@ export default function Command() {
 
   return (
     <Grid
-      columns={4}
+      columns={Number(columnsOfGrid)}
       aspectRatio="3/4"
-      navigationTitle="@半糖人类"
       fit={Grid.Fit.Fill}
       filtering={false}
       throttle={true}
@@ -153,26 +167,20 @@ export default function Command() {
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search topic, keyword or paste link"
       actions={
-        <ActionPanel>
-          <Action title="Change Cookie" onAction={openExtensionPreferences} />
-        </ActionPanel>
+        !isLoading && (
+          <ActionPanel>
+            <Action icon={Icon.Gear} title="Change Cookie" onAction={openExtensionPreferences} />
+          </ActionPanel>
+        )
       }
     >
-      <Grid.EmptyView title="Type to search or Paste to parse" icon={{ source: "red-note-icon.png" }} />
+      <Grid.EmptyView title="Type to search or Paste to parse" />
       {posts.map((post, index) => (
-        <Grid.Item
-          key={`${post.noteId}-${index}`}
-          title={post.title}
-          subtitle={post.user.nickname}
-          content={{
-            source: post.cover,
-          }}
-          actions={
-            <ActionPanel>
-              <Action title="Preview Detail" onAction={() => previewDetail(post.noteId, post.xsecToken)} />
-              <Action title="Refresh" onAction={refresh} />
-            </ActionPanel>
-          }
+        <GridItem
+          key={`post-${index}`}
+          post={post}
+          onPreview={() => previewDetail(post.noteId, post.xsecToken)}
+          onRefresh={() => refresh({ clearSearchBar: true })}
         />
       ))}
     </Grid>

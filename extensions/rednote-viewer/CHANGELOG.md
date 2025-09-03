@@ -1,8 +1,8 @@
-# Red-note Post Viewer Changelog
+# RedNote Post Viewer Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
-- Easy to view Red-note post like in browser
+- Easy to view RedNote post like in browser
 - Support home feed
 - Support search post
 - Support save post detail to Downloads as markdown file

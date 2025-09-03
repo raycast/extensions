@@ -1,6 +1,6 @@
-# Red-note Post Viewer
+# RedNote Post Viewer
 
-Easy to view Red-note post like in browser
+Easy to view RedNote post like in browser
 
 ## Usage
 
@@ -12,6 +12,15 @@ Easy to view Red-note post like in browser
 1. Open RedNote with browser([Link](https://www.xiaohongshu.com/explore))
 2. Login
 3. Open browser developer tools and copy cookie
+
+## Features
+
+- View RedNote posts in grid view
+- Search for posts by keywords or links
+- Preview post details
+- Load post detail from RedNote link in clipboard
+- Save post detail to local as a markdown file
+- Translate posts to English (require [Raycast Pro](https://raycast.com/pro))
 
 ## Declaration
 

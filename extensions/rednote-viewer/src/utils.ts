@@ -1,4 +1,9 @@
+import { AI, environment, getPreferenceValues } from "@raycast/api";
 import { BASE_URL } from "./constants.js";
+
+export const { translateToEnglish } = getPreferenceValues<ExtensionPreferences>();
+export const canAccessAI = environment.canAccess(AI);
+export const shouldTranslate = canAccessAI && translateToEnglish;
 
 export function parseUrl(url: string) {
   try {
@@ -27,4 +32,11 @@ export function parseUrl(url: string) {
   } catch {
     return null;
   }
+}
+
+export function ellipsis(text: string, maxLength = 15) {
+  if (text.length > maxLength) {
+    return text.slice(0, maxLength) + "…";
+  }
+  return text;
 }
