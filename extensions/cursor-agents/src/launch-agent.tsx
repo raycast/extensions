@@ -100,7 +100,6 @@ export default function Command() {
         return undefined;
       },
       repository: FormValidation.Required,
-      ref: FormValidation.Required,
     },
     onSubmit: async (values) => {
       await showToast({ style: Toast.Style.Animated, title: "Launching background agent" });
@@ -111,7 +110,7 @@ export default function Command() {
             text: values.prompt,
             images: processImages(values.images),
           },
-          source: { repository: values.repository, ref: values.ref },
+          source: { repository: values.repository, ref: values.ref === "" ? undefined : values.ref },
           model: values.model === "auto" ? undefined : values.model,
           target: {
             autoCreatePr: values.autoCreatePR,
