@@ -13,11 +13,13 @@ This Raycast extension streamlines the process of creating Obsidian notes from c
 - Uses the longer text as the note content
 - Adds today's date to the filename
 - Opens the note in Obsidian automatically
-- Robust error handling for edge cases:
-  - Validates clipboard content for empty/whitespace-only items
-  - Handles file naming conflicts with automatic counter suffixes
-  - Content size limits to prevent filesystem issues
-  - Path security validation to prevent directory traversal
+- **Comprehensive Error Handling & Validation**:
+  - Configuration validation (vault path verification)
+  - Clipboard content validation (empty/whitespace detection)
+  - File system error handling (permissions, disk space, naming conflicts)
+  - Content quality checks (size limits, meaningful text)
+  - Security validation (directory traversal prevention)
+  - Graceful fallbacks for all error conditions
 
 ## Configuration
 
@@ -44,6 +46,7 @@ npm run dev
 ```
 
 To publish to the Raycast store:
+
 ```bash
 npm run publish
 ```

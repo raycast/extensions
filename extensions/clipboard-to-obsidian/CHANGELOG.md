@@ -3,6 +3,7 @@
 ## [Initial Version] - {PR_MERGE_DATE}
 
 ### Added
+
 - Initial release of Clipboard to Obsidian extension
 - Create Obsidian notes from clipboard history
 - Automatically captures last two clipboard items
