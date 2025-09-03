@@ -139,7 +139,7 @@ export default function Command() {
               const ts = await getWeather(fav.lat, fav.lon);
               const sun = await getSunTimes(fav.lat, fav.lon).catch(() => ({}) as SunTimes);
               return [key, ts, sun] as const;
-            } catch (err) {
+            } catch {
               // Immediately mark error so UI doesn't stay stuck in "Loading..."
               if (!cancelled) {
                 setFavoriteErrors((prev) => ({ ...prev, [key]: true }));
@@ -452,9 +452,6 @@ export default function Command() {
             <List.Section title="Favorites">
               {favorites.map((fav) => {
                 const key = LocationUtils.getLocationKey(fav.id, fav.lat, fav.lon);
-                const hasWeather = !!favoriteWeather[key];
-                const hasError = !!favoriteErrors[key];
-                const isLoading = !!favoritesLoading[key];
 
                 return (
                   <List.Item
