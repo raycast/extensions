@@ -41,15 +41,7 @@ export function sortSectionsByRelevance(sections: ColorSection[], searchText: st
       );
 
     const scoreA = getBestScore(colorsA);
-
-    const scoreB = Math.min(
-      ...colorsB.map((color) => {
-        const nameScore = getMatchScore(color.name, searchText);
-        const hexScore = getMatchScore(color.hex, searchText);
-        const rgbScore = getMatchScore(color.rgb, searchText);
-        return Math.min(nameScore, hexScore, rgbScore);
-      }),
-    );
+    const scoreB = getBestScore(colorsB);
 
     // If scores are equal, sort by number of matches and then by static shade order
     if (scoreA === scoreB) {
