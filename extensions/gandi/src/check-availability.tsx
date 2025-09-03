@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { showFailureToast, usePromise } from "@raycast/utils";
 import * as gandiAPI from "./api";
