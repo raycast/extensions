@@ -1,19 +1,7 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Form,
-  Icon,
-  launchCommand,
-  LaunchType,
-  open,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, Icon, open, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, showFailureToast, useCachedState, useForm } from "@raycast/utils";
 import { launchAgent, useModels } from "./cursor";
-import { processImages } from "./utils";
+import { processImages, refreshMenuBar } from "./utils";
 
 type Repository = {
   id: string;
@@ -112,6 +100,7 @@ export default function Command() {
         return undefined;
       },
       repository: FormValidation.Required,
+      ref: FormValidation.Required,
     },
     onSubmit: async (values) => {
       await showToast({ style: Toast.Style.Animated, title: "Launching background agent" });
@@ -130,14 +119,7 @@ export default function Command() {
           },
         });
 
-        try {
-          await launchCommand({
-            name: "menu-bar",
-            type: LaunchType.Background,
-          });
-        } catch {
-          // Silently ignoring that the menu bar is not running
-        }
+        await refreshMenuBar();
 
         reset();
         focus("prompt");
@@ -213,7 +195,7 @@ export default function Command() {
       </Form.Dropdown>
       <Form.TextField
         title="Ref"
-        placeholder="Enter a branch or tag"
+        placeholder="Enter the base branch or tag."
         info="The branch or tag to work on, e.g. `main` or `v1.0.0`"
         storeValue
         {...itemProps.ref}
@@ -233,15 +215,11 @@ export default function Command() {
       <Form.TextField
         title="Branch name"
         placeholder="Enter a branch name"
-        info="Custom branch name for the agent to create"
+        info="Custom branch name for the agent to work on. If not provided, the agent will automatically create a branch."
         storeValue
         {...itemProps.branchName}
       />
-      <Form.Checkbox
-        label="Automatically create a PR when the agent completes"
-        storeValue
-        {...itemProps.autoCreatePR}
-      />
+      <Form.Checkbox label="Automatically create a PR when the agent is done" storeValue {...itemProps.autoCreatePR} />
     </Form>
   );
 }

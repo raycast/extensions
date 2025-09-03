@@ -1,4 +1,4 @@
-import { Color, Icon, List } from "@raycast/api";
+import { Color, Icon, launchCommand, LaunchType, List } from "@raycast/api";
 import { addDays, format, isToday, isYesterday, startOfToday } from "date-fns";
 import { readFileSync } from "fs";
 import imageSize from "image-size";
@@ -220,4 +220,15 @@ export function ensureProtocol(url: string): string {
     return url;
   }
   return `https://${url}`;
+}
+
+export async function refreshMenuBar(): Promise<void> {
+  try {
+    await launchCommand({
+      name: "menu-bar",
+      type: LaunchType.Background,
+    });
+  } catch {
+    // Silently ignoring that the menu bar is not running
+  }
 }

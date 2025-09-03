@@ -1,5 +1,5 @@
-import { LaunchType, launchCommand } from "@raycast/api";
 import { launchAgent } from "../cursor";
+import { refreshMenuBar } from "../utils";
 
 type Input = {
   /**
@@ -24,10 +24,7 @@ export default async function tool(input: Input) {
     source: { repository: input.repository, ref: input.ref },
   });
 
-  await launchCommand({
-    name: "menu-bar",
-    type: LaunchType.Background,
-  });
+  await refreshMenuBar();
 
   return `Agent launched with id: ${agent.id}. User can follow the progress at ${agent.target.url}`;
 }

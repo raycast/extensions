@@ -15,7 +15,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { Agent, addFollowup, deleteAgent, getAgentConversation, useAgents } from "./cursor";
-import { ensureProtocol, getAccessories, getStatusIcon, groupAgents } from "./utils";
+import { ensureProtocol, getAccessories, getStatusIcon, groupAgents, refreshMenuBar } from "./utils";
 
 import { FormValidation, showFailureToast, useCachedPromise, useCachedState, useForm } from "@raycast/utils";
 import { format } from "date-fns";
@@ -71,11 +71,7 @@ function FollowupInstruction(props: { agent: Agent }) {
           },
         });
 
-        try {
-          await launchCommand({ name: "menu-bar", type: LaunchType.Background });
-        } catch {
-          // Silently ignoring that the menu bar is not running
-        }
+        await refreshMenuBar();
 
         await showToast({ style: Toast.Style.Success, title: "Added follow-up instruction" });
         pop();
