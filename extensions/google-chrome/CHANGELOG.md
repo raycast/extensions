@@ -1,6 +1,6 @@
 # Google Chrome Changelog
 
-## [Chore: Updated contributors] - {PR_MERGE_DATE}
+## [Chore: Updated contributors] - 2025-09-03
 
 ## [Add Refresh Tab Command] - 2025-08-25
 
