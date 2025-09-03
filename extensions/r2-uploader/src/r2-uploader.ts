@@ -94,7 +94,7 @@ export default async function Command() {
       } else {
         try {
           const avifQuality = preferences.avifQuality ? parseInt(preferences.avifQuality, 10) : 80;
-          const quality = Math.max(0, Math.min(100, avifQuality));
+          const quality = Math.max(0, Math.min(100, isNaN(avifQuality) ? 80 : avifQuality));
 
           newFilePath = await convertToAvif(inputFilePath, avifencPath, quality);
         } catch (conversionError) {
