@@ -5,6 +5,10 @@
   "description": "The Raycast extension for Zeabur.",
   "icon": "extension-icon.png",
   "author": "ridemountainpig",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Documentation",
     "Data",
@@ -51,7 +55,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.81.2",
+    "@raycast/api": "^1.102.6",
     "@raycast/utils": "^1.16.3",
     "archiver": "^7.0.1",
     "date-fns": "^4.1.0",

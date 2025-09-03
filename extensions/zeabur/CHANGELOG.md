@@ -1,5 +1,9 @@
 # Zeabur Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Add support for Windows platform.
+
 ## [Fix] - 2025-06-30
 
 - Fixed the issue where the provider information in the project list may be null.
