@@ -24,7 +24,6 @@ export function BookListItem({ book }: BookListItemProps) {
     const filename = `${book.title}.${format}`;
     const baseSiteUrl = getBaseSiteUrl();
     const fullUrl = `${baseSiteUrl}${url}`;
-    console.log(`Downloading ${filename} from ${fullUrl}`);
     await downloadFile(fullUrl, filename);
   };
 
