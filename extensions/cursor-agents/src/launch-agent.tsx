@@ -3,7 +3,7 @@ import { FormValidation, showFailureToast, useCachedState, useForm } from "@rayc
 import { launchAgent, useModels } from "./cursor";
 import { processImages, refreshMenuBar } from "./utils";
 
-type Repository = {
+export type Repository = {
   id: string;
   name: string;
   url: string;
