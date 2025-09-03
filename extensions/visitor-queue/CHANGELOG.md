@@ -1,6 +1,6 @@
 # Visitor Queue Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-09-03
 
 - View "Data Views"
     1. View "Leads"
