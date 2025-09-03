@@ -100,7 +100,6 @@ export default function Command() {
         return undefined;
       },
       repository: FormValidation.Required,
-      ref: FormValidation.Required,
     },
     onSubmit: async (values) => {
       await showToast({ style: Toast.Style.Animated, title: "Launching background agent" });
@@ -111,7 +110,7 @@ export default function Command() {
             text: values.prompt,
             images: processImages(values.images),
           },
-          source: { repository: values.repository, ref: values.ref },
+          source: { repository: values.repository, ref: values.ref === "" ? undefined : values.ref },
           model: values.model === "auto" ? undefined : values.model,
           target: {
             autoCreatePr: values.autoCreatePR,
@@ -128,7 +127,7 @@ export default function Command() {
           style: Toast.Style.Success,
           title: "Launched background agent",
           primaryAction: {
-            title: "Open URL",
+            title: "Open in Browser",
             shortcut: { modifiers: ["cmd", "shift"], key: "o" },
             async onAction() {
               await open(response.target.url);
@@ -193,13 +192,6 @@ export default function Command() {
           <Form.Dropdown.Item key="add-new" value="__add_new__" title="Add Repository" icon={Icon.Plus} />
         </Form.Dropdown.Section>
       </Form.Dropdown>
-      <Form.TextField
-        title="Ref"
-        placeholder="Enter the base branch or tag."
-        info="The branch or tag to work on, e.g. `main` or `v1.0.0`"
-        storeValue
-        {...itemProps.ref}
-      />
       <Form.Separator />
       <Form.Description title="Advanced" text="Additional options for your background agents" />
       <Form.Dropdown title="Model" storeValue {...itemProps.model}>
@@ -213,8 +205,15 @@ export default function Command() {
         </Form.Dropdown.Section>
       </Form.Dropdown>
       <Form.TextField
-        title="Branch name"
-        placeholder="Enter a branch name"
+        title="Base branch"
+        placeholder="Enter the base branch or tag"
+        info="The branch or tag to base the feature branch on, e.g. `main` or `v1.0.0`. If not provided, the agent will automatically use the default branch of the repository."
+        storeValue
+        {...itemProps.ref}
+      />
+      <Form.TextField
+        title="Feature branch"
+        placeholder="Enter the feature branch name"
         info="Custom branch name for the agent to work on. If not provided, the agent will automatically create a branch."
         storeValue
         {...itemProps.branchName}
