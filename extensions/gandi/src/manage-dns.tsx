@@ -98,10 +98,8 @@ function DNSRecordsList({ domain }: { readonly domain: string }) {
     try {
       return await gandiAPI.getDNSRecords(d);
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(error, {
         title: "Failed to fetch DNS records",
-        message: error instanceof Error ? error.message : "Unknown error",
       });
       return [];
     }

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import * as gandiAPI from "./api";
 import type { DomainAvailability } from "./types";
 
@@ -273,10 +273,8 @@ export default function CheckAvailability() {
       try {
         return await gandiAPI.checkAvailability(name);
       } catch (error) {
-        await showToast({
-          style: Toast.Style.Failure,
+        await showFailureToast(error, {
           title: "Failed to check availability",
-          message: error instanceof Error ? error.message : "Unknown error",
         });
         return null;
       }
