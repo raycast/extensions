@@ -1,6 +1,6 @@
 # Google Chrome Profiles Changelog
 
-## [Refactor] - {PR_MERGE_DATE}
+## [Refactor] - 2025-09-03
 
 - Refactor the extension to use the new `open-profile` and `open-profile-url` commands.
 
