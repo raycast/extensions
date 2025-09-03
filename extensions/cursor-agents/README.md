@@ -1,4 +1,4 @@
-# Cursor Agents
+![Cursor Agents](./media/cursor.jpg)
 
 An extension that allows you to launch and manage Cursor agents from anywhere.
 
