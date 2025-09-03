@@ -100,6 +100,7 @@ export default function Command() {
         return undefined;
       },
       repository: FormValidation.Required,
+      ref: FormValidation.Required,
     },
     onSubmit: async (values) => {
       await showToast({ style: Toast.Style.Animated, title: "Launching background agent" });
