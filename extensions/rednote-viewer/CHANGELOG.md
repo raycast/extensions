@@ -2,8 +2,9 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
-- Easy to view RedNote post like in browser
-- Support home feed
-- Support search post
-- Support save post detail to Downloads as markdown file
-- Auto parse valid post link
+- View RedNote posts in grid view
+- Search for posts by keywords or links
+- Preview post details
+- Load post detail from RedNote link in clipboard
+- Save post detail to local as a markdown file
+- Translate posts to English (require [Raycast Pro](https://raycast.com/pro))
