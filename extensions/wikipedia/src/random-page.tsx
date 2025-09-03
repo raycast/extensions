@@ -1,4 +1,4 @@
-import { closeMainWindow, open } from "@raycast/api";
+import { closeMainWindow, launchCommand, open, LaunchType } from "@raycast/api";
 
 import { getRandomPageUrl } from "./utils/api";
 import { getStoredLanguage } from "./utils/language";
@@ -12,6 +12,6 @@ export default async function randomPage() {
     await open(url);
     await closeMainWindow({ clearRootSearch: true });
   } else {
-    await open(`raycast://extensions/vimtor/wikipedia/open-page?arguments=${encodeURI(JSON.stringify({ title }))}`);
+    await launchCommand({ type: LaunchType.UserInitiated, name: "open-page", arguments: { title } });
   }
 }
