@@ -23,7 +23,7 @@ export async function findNodeProcesses(): Promise<string> {
 
         if (networkField) {
           const portMatch = networkField.match(/:(\d+)$/);
-          if (portMatch) {
+          if (portMatch && portMatch[1]) {
             return `${pid}:${portMatch[1]}`;
           }
         }

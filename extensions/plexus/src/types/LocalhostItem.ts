@@ -1,6 +1,7 @@
 export type LocalhostItem = {
   id: string;
-  name: string;
+  projectPath: string;
+  framework: string;
   port: string;
   pid: string;
   url: string;
