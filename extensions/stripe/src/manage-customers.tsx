@@ -4,6 +4,7 @@ import { useState } from "react";
 import { withEnvContext, ListContainer } from "./components";
 import { useStripeDashboard, useEnvContext } from "./hooks";
 import SubscriptionList from "./manage-subscriptions";
+import CustomerPaymentsList from "./customer-payments";
 import Stripe from "stripe";
 
 const { stripeTestApiKey, stripeLiveApiKey } = getPreferenceValues();
@@ -124,6 +125,11 @@ function CustomerList() {
             ]}
             actions={
               <ActionPanel>
+                <Action
+                  title="View Payments"
+                  icon={Icon.Coins}
+                  onAction={() => push(<CustomerPaymentsList customerId={customer.id} />)}
+                />
                 <Action
                   title="View Subscriptions"
                   icon={Icon.Calendar}
