@@ -22,7 +22,7 @@ The exact steps may vary based on your Proxmox version. In **8.4.6.**:
 6. `Enter` optional comment (e.g. _API Token for Raycast_)
 7. `Click` **Add**
 8. `Copy` "Token ID" and `Paste` in **Preferences**
-8. `Copy` "Secret" and `Paste` in **Preferences**
+9. `Copy` "Secret" and `Paste` in **Preferences**
 
 ### HTTPS certificate
 You need to setup a trusted certificate to work properly. You can do this by following the instructions here:
