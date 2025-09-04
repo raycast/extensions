@@ -100,7 +100,7 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
             priority: parseInt(values.priority),
             section_id: values.sectionId || undefined,
             parent_id: values.parentId || undefined,
-            due: values.date ? { date: values.date.toLocaleDateString("en-CA") } : undefined,
+            due: values.date ? { date: values.date.toISOString() } : undefined,
             deadline: values.deadline ? { date: values.deadline.toLocaleDateString("en-CA") } : undefined,
             duration:
               values.duration && values.date && !values.date.toDateString().includes(":")
@@ -174,7 +174,7 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
       }
     },
     initialValues: {
-      content: draftValues?.content,
+      content: draftValues?.content ?? "",
       description: draftValues?.description,
       date: draftValues?.date ?? (fromTodayEmptyView ? new Date() : null),
       deadline: draftValues?.deadline ?? null,
@@ -670,7 +670,19 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
     // Only update if NLP parsing is more recent than last manual change
     if (nlpTimestamp > manualTimestamp) {
       if (parsedData.parsedDate) {
-        setValue("date", parsedData.parsedDate);
+        const newDate = parsedData.parsedDate;
+
+        if (
+          values.date &&
+          (values.date.getHours() !== 0 || values.date.getMinutes() !== 0) &&
+          newDate.toDateString() === values.date.toDateString()
+        ) {
+          newDate.setHours(values.date.getHours());
+          newDate.setMinutes(values.date.getMinutes());
+          newDate.setSeconds(values.date.getSeconds());
+        }
+
+        setValue("date", newDate);
         lastActionRef.current.date = { source: "nlp", timestamp: nlpTimestamp };
       } else {
         // Reset to null/empty when date parameter is removed from title
@@ -771,7 +783,7 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
 
       <Form.Separator />
 
-      <Form.DatePicker {...itemProps.date} title="Date" />
+      <Form.DatePicker {...itemProps.date} title="Date" type={Form.DatePicker.Type.DateTime} />
 
       {values.date && !Form.DatePicker.isFullDay(values.date) ? (
         <Form.TextField {...itemProps.duration} title="Duration (minutes)" />
