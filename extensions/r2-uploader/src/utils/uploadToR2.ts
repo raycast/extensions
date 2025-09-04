@@ -33,8 +33,7 @@ export async function uploadToR2(
 
   const fileContent = await fs.promises.readFile(filePath);
 
-  const finalFileName =
-    customFileName || (await generateFileName(filePath, fileNameFormat || "", path.extname(filePath)));
+  const finalFileName = customFileName || generateFileName(filePath, fileNameFormat || "", path.extname(filePath));
   const key = finalFileName;
 
   const contentType = getMimeType(filePath);

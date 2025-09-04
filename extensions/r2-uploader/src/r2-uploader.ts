@@ -105,7 +105,7 @@ export default async function Command() {
     }
 
     if (fileNameFormat) {
-      customFileName = await generateFileName(newFilePath, fileNameFormat);
+      customFileName = generateFileName(newFilePath, fileNameFormat);
     }
 
     const { url, markdown } = await uploadToR2(newFilePath, customFileName);
