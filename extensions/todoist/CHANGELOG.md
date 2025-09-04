@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [Improved Due Time Handling] - 2025-09-03
+## [Improved Due Time Handling] - {PR_MERGE_DATE}
 
 - **Preserved Due Time on Date Conversion**: Ensured that the time component of a due date is preserved by using `toISOString()` during date-to-string conversions
 - **Fixed Due Time Getting Overriden By Current Time**: Set the time from parsedData whenever there's updates from nlp
