@@ -276,6 +276,7 @@ function getMockData(): PveVm[] {
 const USE_MOCK_DATA = process.env.NODE_ENV === "development";
 
 export default function Command() {
+  // hook is not used directly to account for URL being invalid
   let vmListData;
   try {
     vmListData = useVmList();
