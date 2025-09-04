@@ -10580,9 +10580,10 @@ function validatePassword(value: string): boolean {
 
 Raycast provides several tools to smoothen your experience when building extensions:
 
-- `Manage Extensions` Command _- A Raycast command to manage your extensions, add new command, etc._
+- Manage Extensions Command _- A Raycast command to manage your extensions, add new command, etc._
 - CLI _- A CLI to build, develop, and lint your extension_
 - ESLint _- An ESLint configuration helping you follow best practices as you build your extension_
+- Forked Extensions (community tool) - _The extension for helping you manage your forked Raycast extensions_
 - VS Code (community tool) _- A VS Code extension to enhance your development experience_
 
 
@@ -10668,6 +10669,28 @@ To keep the consistency of development experiences across extensions, we don't e
 ## Migration
 
 Starting with version 1.48.8, the ESLint configuration is included automatically when creating a new extension using the `Create Extension` command. If your extension was created before this version, you can migrate following the steps outlined on the [v1.48.8](https://developers.raycast.com/migration/v1.48.8) page.
+
+
+# Forked Extensions (community tool)
+
+This extension leverages the [Git sparse-checkout](https://git-scm.com/docs/git-sparse-checkout) feature to efficiently manage your forked extensions. Our goal is to eliminate the need for cloning the entire repository, which can exceed 20 GB in size, by enabling sparse-checkout. With this extension, you can forgo Ray CLI's commands, allowing you to use Git commands directly and regular [GitHub flow](https://docs.github.com/en/get-started/using-github/github-flow) for managing your extensions.
+
+## Features
+
+- Explore full extension list
+- Only fork the extension you need to save space
+- Remove an extension from forked list
+- Synchronize the forked repository with the upstream repository on local
+
+## Install
+
+The extension is available on the [Raycast Store](https://www.raycast.com/litomore/forked-extensions).
+
+<p align="center"><a title="Install forked-extensions Raycast Extension" href="https://www.raycast.com/litomore/forked-extensions"><img src="https://www.raycast.com/litomore/forked-extensions/install_button@2x.png?v=1.1" height="64" style="height: 64px;" alt=""></a></p>
+
+## Hint
+
+Please note with this extension you no longer need to use Ray CLI's `pull-contributions` and `publish` commands. Just use Git commands or your favorite Git GUI tool to manage your forked extensions.
 
 
 # `Manage Extensions` Command
