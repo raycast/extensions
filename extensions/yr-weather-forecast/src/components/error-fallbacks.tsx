@@ -231,11 +231,12 @@ export function FavoritesErrorFallback({
  */
 export function GenericErrorFallback({
   componentName,
+  error,
   onRetry,
   onReset,
   retryCount = 0,
   maxRetries = 3,
-}: Omit<ErrorFallbackProps, "error">) {
+}: ErrorFallbackProps) {
   return (
     <List.Section title="⚠️ Error">
       <List.Item

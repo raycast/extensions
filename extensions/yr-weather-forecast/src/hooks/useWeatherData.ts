@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { getForecast, type TimeseriesEntry } from "../weather-client";
 import { DebugLogger } from "../utils/debug-utils";
+import { buildGraphMarkdown } from "../graph";
 
 /**
  * Custom hook for managing weather data fetching
  */
-export function useWeatherData(lat: number, lon: number) {
+export function useWeatherData(lat: number, lon: number, preGenerateGraph = false) {
   const [series, setSeries] = useState<TimeseriesEntry[]>([]);
   const [showNoData, setShowNoData] = useState(false);
+  const [preRenderedGraph, setPreRenderedGraph] = useState<string>("");
 
   const [loading, setLoading] = useState(true);
   const cancelledRef = useRef(false);
@@ -25,6 +27,15 @@ export function useWeatherData(lat: number, lon: number) {
         const result = await getForecast(lat, lon);
         if (!cancelled) {
           setSeries(result);
+
+          // Pre-generate graph if requested and we have data
+          if (preGenerateGraph && result.length > 0) {
+            const graphMarkdown = buildGraphMarkdown("Location", result, 48, {
+              title: "48h forecast",
+              smooth: true,
+            }).markdown;
+            setPreRenderedGraph(graphMarkdown);
+          }
 
           // Only show no data if we actually have no data after fetching
           if (result.length === 0) {
@@ -76,5 +87,6 @@ export function useWeatherData(lat: number, lon: number) {
     series,
     loading,
     showNoData,
+    preRenderedGraph,
   };
 }

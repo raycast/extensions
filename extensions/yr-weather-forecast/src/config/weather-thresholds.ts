@@ -252,6 +252,7 @@ export const TIMING_THRESHOLDS = {
   /**
    * Graph rendering delay (ms)
    * Used for: Smooth graph transitions and loading states
+   * Note: 100ms delay prevents text from appearing before SVG graph
    */
   GRAPH_RENDER_DELAY: 100,
 

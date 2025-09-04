@@ -20,7 +20,7 @@ function ForecastView(props: {
   const { name, lat, lon, preCachedGraph, onShowWelcome } = props;
   const [mode, setMode] = useState<"detailed" | "summary">("detailed");
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
-  const { series: items, loading, showNoData } = useWeatherData(lat, lon);
+  const { series: items, loading, showNoData, preRenderedGraph } = useWeatherData(lat, lon, true);
 
   // Check if current location is in favorites
   useEffect(() => {
@@ -45,9 +45,10 @@ function ForecastView(props: {
   // Generate and cache graphs when data changes
   useEffect(() => {
     if (items.length > 0) {
-      // Use pre-cached graph if available, otherwise generate new one
+      // Use pre-cached graph if available, otherwise use pre-rendered graph, otherwise generate new one
       const detailedGraph =
         preCachedGraph ||
+        preRenderedGraph ||
         buildGraphMarkdown(
           name,
           items.slice(0, getUIThresholds().DETAILED_FORECAST_HOURS),
@@ -69,7 +70,7 @@ function ForecastView(props: {
         summary: summaryGraph,
       });
     }
-  }, [items, reduced, name, preCachedGraph]);
+  }, [items, reduced, name, preCachedGraph, preRenderedGraph]);
 
   // Clear graph cache when component mounts to ensure fresh styling
   useEffect(() => {
@@ -93,38 +94,25 @@ function ForecastView(props: {
   // Only show content when not loading and we have data or know there's no data
   const shouldShowContent = !loading && (displaySeries.length > 0 || showNoData);
 
-  // Wait for graph to actually render before showing content to prevent visual jumping
-  const [graphRendered, setGraphRendered] = useState(false);
+  // Add a small delay to ensure SVG is fully rendered before showing content
+  // This prevents the text from appearing before the graph
+  const [svgReady, setSvgReady] = useState(false);
 
-  // Show content only when graph is fully rendered
-  const finalMarkdown = shouldShowContent && graphRendered ? [graph, "\n---\n", listMarkdown].join("\n") : "";
-
-  // Reset graphRendered immediately when mode changes to prevent flickering
-  useEffect(() => {
-    setGraphRendered(false);
-  }, [mode]);
-
-  // Detect when graph is actually rendered to prevent visual jumping
   useEffect(() => {
     if (shouldShowContent && graph) {
-      // Check if graph is already cached - if so, show immediately
-      const isGraphCached = mode === "detailed" ? !!graphCache.detailed : !!graphCache.summary;
+      // Use configurable delay to ensure SVG is fully rendered
+      const timer = setTimeout(() => {
+        setSvgReady(true);
+      }, getUIThresholds().GRAPH_RENDER_DELAY);
 
-      if (isGraphCached) {
-        // Graph is cached, show immediately
-        setGraphRendered(true);
-      } else {
-        // Graph needs to be generated, apply delay for rendering
-        const timer = setTimeout(() => {
-          setGraphRendered(true);
-        }, 200); // Delay for markdown parsing + SVG rendering + layout calculation
-
-        return () => clearTimeout(timer);
-      }
+      return () => clearTimeout(timer);
     } else {
-      setGraphRendered(false);
+      setSvgReady(false);
     }
-  }, [shouldShowContent, graph, mode, graphCache]);
+  }, [shouldShowContent, graph]);
+
+  // Only show content when SVG is ready
+  const finalMarkdown = shouldShowContent && svgReady ? [graph, "\n---\n", listMarkdown].join("\n") : "";
 
   const handleFavoriteToggle = async () => {
     const favLocation: FavoriteLocation = { name, lat, lon };

@@ -18,11 +18,18 @@ import { withErrorBoundary } from "./components/error-boundary";
 import { GraphErrorFallback } from "./components/error-fallbacks";
 import { getGraphThresholds, getUIThresholds, convertTemperature, convertPrecipitation } from "./config/weather-config";
 
-function GraphView(props: { name: string; lat: number; lon: number; hours?: number; onShowWelcome?: () => void }) {
-  const { name, lat, lon, hours = getUIThresholds().DEFAULT_FORECAST_HOURS, onShowWelcome } = props;
+function GraphView(props: {
+  name: string;
+  lat: number;
+  lon: number;
+  hours?: number;
+  onShowWelcome?: () => void;
+  preCachedGraph?: string;
+}) {
+  const { name, lat, lon, hours = getUIThresholds().DEFAULT_FORECAST_HOURS, onShowWelcome, preCachedGraph } = props;
   const [sunByDate, setSunByDate] = useState<Record<string, SunTimes>>({});
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
-  const { series, loading, showNoData } = useWeatherData(lat, lon);
+  const { series, loading, showNoData, preRenderedGraph } = useWeatherData(lat, lon, true);
 
   // Check if current location is in favorites
   useEffect(() => {
@@ -77,31 +84,39 @@ function GraphView(props: { name: string; lat: number; lon: number; hours?: numb
       };
     }
 
-    // Add a small delay to ensure graph generation is complete
-    // This prevents the table from appearing before the graph is ready
+    // Use pre-cached graph if available, otherwise use pre-rendered graph, otherwise generate new
+    if (preCachedGraph) {
+      return { markdown: preCachedGraph };
+    }
+    if (preRenderedGraph) {
+      return { markdown: preRenderedGraph };
+    }
+
+    // Generate graph immediately - no delay needed
     const graphMarkdown = buildGraphMarkdown(name, series, hours, { sunByDate });
 
     return graphMarkdown;
-  }, [name, series, hours, sunByDate, showNoData, loading]);
+  }, [name, series, hours, sunByDate, showNoData, loading, preCachedGraph, preRenderedGraph]);
 
-  // Add a small delay to ensure graph is fully rendered before showing content
-  const [graphReady, setGraphReady] = useState(false);
+  // Add a small delay to ensure SVG is fully rendered before showing content
+  // This prevents the title and summary text from appearing before the graph
+  const [svgReady, setSvgReady] = useState(false);
 
   useEffect(() => {
-    if (!loading && series.length > 0) {
-      // Small delay to ensure graph SVG is fully generated and rendered
+    if (!loading && series.length > 0 && markdown) {
+      // Use configurable delay to ensure SVG is fully rendered
       const timer = setTimeout(() => {
-        setGraphReady(true);
-      }, 100);
+        setSvgReady(true);
+      }, getUIThresholds().GRAPH_RENDER_DELAY);
 
       return () => clearTimeout(timer);
     } else {
-      setGraphReady(false);
+      setSvgReady(false);
     }
-  }, [loading, series.length]);
+  }, [loading, series.length, markdown]);
 
-  // Only show content when graph is ready
-  const finalMarkdown = graphReady ? markdown : "";
+  // Only show content when SVG is ready
+  const finalMarkdown = svgReady ? markdown : "";
 
   const handleFavoriteToggle = async () => {
     const favLocation: FavoriteLocation = { name, lat, lon };

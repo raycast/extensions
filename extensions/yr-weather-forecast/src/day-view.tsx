@@ -14,7 +14,7 @@ import { WeatherErrorFallback } from "./components/error-fallbacks";
 function DayView(props: { name: string; lat: number; lon: number; date: string; onShowWelcome?: () => void }) {
   const { name, lat, lon, date, onShowWelcome } = props;
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
-  const { series: items, loading, showNoData } = useWeatherData(lat, lon);
+  const { series: items, loading, showNoData, preRenderedGraph } = useWeatherData(lat, lon, true);
 
   // Check if current location is in favorites
   useEffect(() => {
@@ -39,8 +39,14 @@ function DayView(props: { name: string; lat: number; lon: number; date: string; 
     // Don't show graph until we have data or explicitly know there's no data
     if (loading) return "";
     if (daySeries.length === 0 && showNoData) return "";
+
+    // Use pre-rendered graph if available and it matches our day data, otherwise generate new
+    if (preRenderedGraph && daySeries.length > 0) {
+      return preRenderedGraph;
+    }
+
     return buildGraphMarkdown(name, daySeries, daySeries.length, { title, smooth: true }).markdown;
-  }, [name, daySeries, title, showNoData, loading]);
+  }, [name, daySeries, title, showNoData, loading, preRenderedGraph]);
 
   const summary = useMemo(() => {
     // Don't show summary until we have data or explicitly know there's no data
@@ -65,24 +71,25 @@ function DayView(props: { name: string; lat: number; lon: number; date: string; 
   const shouldShowContent = !loading && (daySeries.length > 0 || showNoData);
   const markdown = shouldShowContent ? [summarySection, graph, "\n---\n", list].join("\n") : "";
 
-  // Add a small delay to ensure graph is fully rendered before showing content
-  const [graphReady, setGraphReady] = useState(false);
+  // Add a small delay to ensure SVG is fully rendered before showing content
+  // This prevents the text from appearing before the graph
+  const [svgReady, setSvgReady] = useState(false);
 
   useEffect(() => {
-    if (shouldShowContent && daySeries.length > 0) {
-      // Small delay to ensure graph SVG is fully generated and rendered
+    if (shouldShowContent && daySeries.length > 0 && graph) {
+      // Use configurable delay to ensure SVG is fully rendered
       const timer = setTimeout(() => {
-        setGraphReady(true);
-      }, 100);
+        setSvgReady(true);
+      }, getUIThresholds().GRAPH_RENDER_DELAY);
 
       return () => clearTimeout(timer);
     } else {
-      setGraphReady(false);
+      setSvgReady(false);
     }
-  }, [shouldShowContent, daySeries.length]);
+  }, [shouldShowContent, daySeries.length, graph]);
 
-  // Only show content when graph is ready
-  const finalMarkdown = graphReady ? markdown : "";
+  // Only show content when SVG is ready
+  const finalMarkdown = svgReady ? markdown : "";
 
   const handleFavoriteToggle = async () => {
     const favLocation: FavoriteLocation = { name, lat, lon };
