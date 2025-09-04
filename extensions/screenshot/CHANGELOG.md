@@ -1,6 +1,6 @@
 # Screenshot Changelog
 
-## [Fix documentation and icon compliance] - 2025-09-04
+## [Fix documentation] - 2025-09-04
 
 - Fixed description for capture-to-clipboard command to be more accurate
 
