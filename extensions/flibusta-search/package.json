@@ -23,7 +23,7 @@
     {
       "name": "baseSiteUrl",
       "type": "textfield",
-      "required": true,
+      "required": false,
       "title": "Base Site URL",
       "description": "The base URL for the Flibusta site (e.g., https://flibusta.site)",
       "default": "https://flibusta.is"
