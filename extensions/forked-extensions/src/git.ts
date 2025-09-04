@@ -78,7 +78,7 @@ export const getExtensionList = async () => {
   const untrackedExtensions = validExtensions.filter(
     (x) => !sparseCheckoutExtensions.includes(`extensions/${x.folderName}`),
   );
-  if (untrackedExtensions.length > 9) await sparseCheckoutAdd(untrackedExtensions.map((x) => x.folderName));
+  if (untrackedExtensions.length > 0) await sparseCheckoutAdd(untrackedExtensions.map((x) => x.folderName));
   return validExtensions;
 };
 
@@ -202,8 +202,8 @@ export const sparseCheckoutList = async () => {
 };
 
 /**
- * Adds an extension folder to the sparse-checkout list.
- * @param extensionFolder The target extension folder name. The value should be folder name only, without the `extensions/` prefix and slashes.
+ * Adds extension folders to the sparse-checkout list.
+ * @param extensionFolders The target extension folder names. The values should be folder names only, without the `extensions/` prefix and slashes.
  */
 export const sparseCheckoutAdd = async (extensionFolders: string[]) => {
   const extensionPaths = extensionFolders.map((x) => path.join("extensions", x));
@@ -211,8 +211,8 @@ export const sparseCheckoutAdd = async (extensionFolders: string[]) => {
 };
 
 /**
- * Removes an extension folder from the sparse-checkout list.
- * @param extensionFolder The target extension folder name. The value should be folder name only, without the `extensions/` prefix and slashes.
+ * Removes extension folders from the sparse-checkout list.
+ * @param extensionFolders The target extension folder names. The values should be folder names only, without the `extensions/` prefix and slashes.
  */
 export const sparseCheckoutRemove = async (extensionFolders: string[]) => {
   const sparseCheckoutInfoPath = path.join(repositoryPath, ".git", "info", "sparse-checkout");
