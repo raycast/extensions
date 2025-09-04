@@ -449,7 +449,6 @@ export class Bitwarden {
       loginTemplate.password = password;
 
       itemTemplate.type = ItemType.LOGIN;
-      itemTemplate.type = loginItemType;
       itemTemplate.folderId = folderId || null;
       itemTemplate.login = loginTemplate;
 
