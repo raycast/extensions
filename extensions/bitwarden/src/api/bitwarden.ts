@@ -5,7 +5,7 @@ import { dirname } from "path/posix";
 import { LOCAL_STORAGE_KEY, DEFAULT_SERVER_URL, CACHE_KEYS } from "~/constants/general";
 import { VaultState, VaultStatus } from "~/types/general";
 import { PasswordGeneratorOptions } from "~/types/passwords";
-import { Folder, Item } from "~/types/vault";
+import { Folder, Item, ItemType } from "~/types/vault";
 import { getPasswordGeneratingArgs } from "~/utils/passwords";
 import { getServerUrlPreference } from "~/utils/preferences";
 import {
@@ -448,8 +448,7 @@ export class Bitwarden {
       loginTemplate.username = username;
       loginTemplate.password = password;
 
-      itemTemplate.name = name;
-      const loginItemType = 1;
+      itemTemplate.type = ItemType.LOGIN;
       itemTemplate.type = loginItemType;
       itemTemplate.folderId = folderId || null;
       itemTemplate.login = loginTemplate;
