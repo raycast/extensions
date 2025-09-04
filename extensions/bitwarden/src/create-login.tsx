@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Clipboard, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DebuggingBugReportingActionSection } from "~/components/actions";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
 import VaultListenersProvider from "~/components/searchVault/context/vaultListeners";
@@ -41,7 +41,16 @@ function CreateLoginComponent() {
   const { folders } = useVaultContext();
   const { formState, updateField, markFieldAsTouched, resetForm, getFieldError, isLoading, handleSubmit } =
     useCreateLoginForm();
+
   const [showPassword, setShowPassword] = useState(false);
+  const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
+  const PasswordField = showPassword ? Form.TextField : Form.PasswordField;
+
+  const nameFieldRef = useRef<Form.TextField>(null);
+
+  useEffect(() => {
+    nameFieldRef.current?.focus();
+  }, []);
 
   const onSubmit = async () => {
     const toast = await showToast({ title: "Creating Login...", style: Toast.Style.Animated });
@@ -62,8 +71,6 @@ function CreateLoginComponent() {
     }
   };
 
-  const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
-
   const generatePassword = async () => {
     if (isLoading) return;
 
@@ -81,8 +88,6 @@ function CreateLoginComponent() {
       toast.style = Toast.Style.Failure;
     }
   };
-
-  const PasswordField = showPassword ? Form.TextField : Form.PasswordField;
 
   return (
     <Form
@@ -114,7 +119,7 @@ function CreateLoginComponent() {
         onChange={updateField("name")}
         onBlur={markFieldAsTouched("name")}
         storeValue={false}
-        autoFocus
+        ref={nameFieldRef}
         error={getFieldError("name")}
       />
       <Form.Dropdown
