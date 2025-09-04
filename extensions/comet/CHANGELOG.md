@@ -1,5 +1,13 @@
 # Comet Browser Changelog
 
+## [1.0.1] - {PR_MERGE_DATE}
+
+### Fixed
+- Fixed "Command failed with exit code 1: osascript -e" error when no Comet windows are open
+- Resolved AppleScript race condition in window creation by adding proper delays and retry logic
+- Improved reliability of `new-tab` command when starting from zero open windows
+- Enhanced window initialization timing for `createNewTabWithProfile()`, `createNewTab()`, and window creation functions
+
 ## [Initial Release] - 2025-08-22
 
 - Search and navigate through open Comet tabs with fuzzy search
