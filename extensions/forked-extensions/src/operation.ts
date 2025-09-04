@@ -99,19 +99,19 @@ class Operation {
                 await this.sync();
                 // Manually show the toast again because the previous sync operation completed the toast.
                 await this.showToast({ title: "Forking extension" });
-                await git.sparseCheckoutAdd(extensionFolder);
+                await git.sparseCheckoutAdd([extensionFolder]);
                 this.completeToast("Forked successfully");
               },
             },
             dismissAction: {
               title: "Fork Anyway",
               onAction: async () => {
-                await git.sparseCheckoutAdd(extensionFolder);
+                await git.sparseCheckoutAdd([extensionFolder]);
               },
             },
           });
         } else {
-          await git.sparseCheckoutAdd(extensionFolder);
+          await git.sparseCheckoutAdd([extensionFolder]);
         }
       },
       "Forking extension",
@@ -123,7 +123,7 @@ class Operation {
    * @param extensionFolder The folder of the extension to remove.
    */
   remove = async (extensionFolder: string) =>
-    this.spawn(async () => git.sparseCheckoutRemove(extensionFolder), "Removing extension", "Removed successfully");
+    this.spawn(async () => git.sparseCheckoutRemove([extensionFolder]), "Removing extension", "Removed successfully");
 
   /**
    * The singleton instance version of the the `showFailureToast` method.

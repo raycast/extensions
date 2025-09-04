@@ -1,5 +1,14 @@
 # Raycast Fork Extensions Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Add support for creating extensions (macOS only due to Windows dose not support it yet)
+- Change the default repository path to "~/Documents/forked-extensions" for better compatibility
+- Add a cheatsheet for users to learn about the extension's Git commands
+- Polish Diagnostics action UI
+- Drop unused "assets/extension-icons" folder
+- Cleanup unused dependencies
+
 ## [Improvements] - 2025-09-02
 
 - Rename the "Sync Fork" action to "Sync Remote"

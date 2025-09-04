@@ -30,7 +30,7 @@ This extension requires the following GitHub API permission scopes:
 
 ## Hint
 
-You can always open your forked extension folder in the terminal to work with CLI commands directly.
+You can always open your forked extension folder in the terminal to work with CLI commands directly. We also prepared a [CHEATSHEET.md](https://github.com/raycast/extensions/tree/main/extensions/forked-extensions/CHEATSHEET.md) if you want to learn more about the Git commands used in this extension.
 
 ## License
 

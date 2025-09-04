@@ -50,7 +50,7 @@
       "description": "Path to the repository where the extension is located.",
       "type": "directory",
       "required": true,
-      "default": "~/.config/raycast/forked-extensions"
+      "default": "~/Documents/forked-extensions"
     },
     {
       "name": "gitRemoteType",
@@ -83,8 +83,6 @@
     "nano-spawn": "^1.0.2"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.1",
-    "@eslint/js": "^9.34.0",
     "@raycast/eslint-config": "^2.0.4",
     "@raycast/utils": "^2.2.1",
     "@types/node": "^24.3.0",

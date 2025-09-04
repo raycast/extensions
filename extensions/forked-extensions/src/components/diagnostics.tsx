@@ -41,14 +41,12 @@ export default function Diagnostics() {
 
       const status = [
         "## Diagnostics",
-        "### Git installed",
+        "### Git status",
         isGitInstalled
-          ? "- ✅ Good"
+          ? isStatusClean
+            ? "- ✅ Good"
+            : "- ⚠️ You have uncommitted changes. Please commit or stash them before performing operations."
           : "- ⚠️ Git is not installed or not found. Please set up your Git executable file path manually in the extension preferences.",
-        "### Git status clean",
-        isStatusClean
-          ? "- ✅ Good"
-          : "- ⚠️ You have uncommitted changes. Please commit or stash them before performing operations.",
         "### Local forked repository",
         localForkedRepository
           ? [

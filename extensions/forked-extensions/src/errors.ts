@@ -1,4 +1,4 @@
-import { open, Toast } from "@raycast/api";
+import { Toast, open } from "@raycast/api";
 import { HTTPError } from "got";
 import { SubprocessError } from "nano-spawn";
 import * as api from "./api.js";
