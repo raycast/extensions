@@ -1,17 +1,15 @@
 import Bonjour, { Service } from "bonjour-service";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 type BonjourOptions = { filter?: (service: Service) => boolean };
 
 export function useBonjour(opts: BonjourOptions = {}) {
   const [devices, setDevices] = useState<Service[]>([] as Service[]);
 
-  const bonjour = useMemo(() => {
-    return new Bonjour();
-  }, []);
-
   useEffect(() => {
-    bonjour.find({ type: "http" }, (service) => {
+    const bonjour = new Bonjour();
+
+    const browser = bonjour.find({ type: "http" }, (service) => {
       if (opts.filter && !opts.filter(service)) return;
       if (!service) return;
 
@@ -23,7 +21,12 @@ export function useBonjour(opts: BonjourOptions = {}) {
         return [...prevDevices, service];
       });
     });
-  }, [bonjour, opts]);
+
+    return () => {
+      browser.stop();
+      bonjour.destroy();
+    };
+  }, [opts]);
 
   return devices;
 }
