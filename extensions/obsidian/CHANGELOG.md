@@ -1,6 +1,6 @@
 # Obsidian Changelog
 
-## [Obsidian Callout Support] - 2025-09-03
+## [Obsidian Callout Support] - {PR_MERGE_DATE}
 
 - Adds support for Obsidian-style callouts with emoji icons
 - Displays 24 different callout types (note, warning, success, tip, etc.) with distinctive emojis
