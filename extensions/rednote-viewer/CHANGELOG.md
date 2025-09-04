@@ -1,6 +1,6 @@
 # RedNote Post Viewer Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-09-04
 
 - View RedNote posts in grid view
 - Search for posts by keywords or links
