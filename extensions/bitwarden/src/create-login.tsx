@@ -43,7 +43,12 @@ function CreateLoginComponent() {
     useCreateLoginForm();
 
   const [showPassword, setShowPassword] = useState(false);
-  const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
+  const passwordFieldRef = useRef<Form.TextField>(null);
+  const togglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev);
+    setTimeout(() => passwordFieldRef.current?.focus(), 0);
+  };
+
   const PasswordField = showPassword ? Form.TextField : Form.PasswordField;
 
   const nameFieldRef = useRef<Form.TextField>(null);
@@ -156,6 +161,7 @@ function CreateLoginComponent() {
         value={formState.password}
         onChange={updateField("password")}
         onBlur={markFieldAsTouched("password")}
+        ref={passwordFieldRef}
         storeValue={false}
         error={getFieldError("password")}
       />
