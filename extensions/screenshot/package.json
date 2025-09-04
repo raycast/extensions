@@ -15,7 +15,6 @@
       "title": "All in One",
       "subtitle": "Screenshot",
       "description": "Capture and Crop All in One",
-      "icon": "all-in-one.png",
       "mode": "no-view"
     },
     {
@@ -23,7 +22,6 @@
       "title": "Capture Area",
       "subtitle": "Screenshot",
       "description": "Capture Area of Screen",
-      "icon": "capture-area.png",
       "mode": "no-view"
     },
     {
@@ -31,7 +29,6 @@
       "title": "Capture Window",
       "subtitle": "Screenshot",
       "description": "Capture App Window",
-      "icon": "capture-window.png",
       "mode": "no-view"
     },
     {
@@ -39,7 +36,6 @@
       "title": "Capture Window To Clipboard",
       "subtitle": "Screenshot",
       "description": "Capture App Window To Clipboard",
-      "icon": "capture-window-to-clipboard.png",
       "mode": "no-view"
     },
     {
@@ -47,7 +43,6 @@
       "title": "Capture Screen",
       "subtitle": "Screenshot",
       "description": "Capture Screen",
-      "icon": "capture-fullscreen.png",
       "mode": "no-view"
     },
     {
@@ -55,7 +50,6 @@
       "title": "Capture Timer",
       "subtitle": "Screenshot",
       "description": "Capture Screen after a Timer (default 5 seconds)",
-      "icon": "capture-timer.png",
       "mode": "no-view",
       "arguments": [
         {
@@ -71,7 +65,6 @@
       "title": "Capture to Clipboard",
       "subtitle": "Screenshot",
       "description": "Capture Area of Screen to Clipboard",
-      "icon": "clipboard.png",
       "mode": "no-view"
     },
     {
@@ -79,7 +72,6 @@
       "title": "Capture and Annotate",
       "subtitle": "Screenshot",
       "description": "Capture Screen and Annotate",
-      "icon": "annotate.png",
       "mode": "no-view"
     }
   ],
