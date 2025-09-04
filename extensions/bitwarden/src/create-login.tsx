@@ -99,7 +99,7 @@ function CreateLoginComponent() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create Login" onSubmit={handleSubmit(onSubmit)} icon={Icon.AddPerson} />
+          <Action.SubmitForm title="Create Login" onSubmit={handleSubmit(onSubmit)} icon={Icon.NewDocument} />
           <Action
             icon={showPassword ? Icon.EyeDisabled : Icon.Eye}
             title={showPassword ? "Hide Password" : "Show Password"}
