@@ -1643,6 +1643,7 @@
 /extensions/redirect-trace                                          @nurkamol
 /extensions/redis                                                   @k8scat
 /extensions/redmine                                                 @jwickers
+/extensions/rednote-viewer                                          @orangelckc @LitoMore
 /extensions/reflect                                                 @RyonHuedepohl @joshknowles @tylerwince @ocavue @theomjones @ErBlack
 /extensions/refresh-browsers                                        @koinzhang
 /extensions/refresh-wifi                                            @natterstefan
