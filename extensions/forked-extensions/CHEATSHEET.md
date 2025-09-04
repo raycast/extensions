@@ -16,7 +16,7 @@ git checkout main
 git remote add upstream <upstream-repository-url>
 ```
 
-### Sync the forked repostiory with the upstream on lcoal
+### Sync the forked repository with the upstream on local
 
 ```shell
 git fetch upstream
@@ -24,7 +24,7 @@ git checkout main
 git merge --ff-only upstream/main
 ```
 
-### Add a sparce-checkout directory
+### Add a sparse-checkout directory
 
 ```shell
 git sparse-checkout add extensions/<your-extension>
