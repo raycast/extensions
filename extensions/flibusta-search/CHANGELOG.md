@@ -1,8 +1,8 @@
 # Flibusta Search Changelog
 
-- Make the flibusta site url configurable
+## [Fix] - {PR_MERGE_DATE}
 
-## Fix - {PR_MERGE_DATE}
+- Make the flibusta site URL configurable
 
 ## [Fix] - 2025-05-13
 
