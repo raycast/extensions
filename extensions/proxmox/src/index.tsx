@@ -276,19 +276,23 @@ function getMockData(): PveVm[] {
 const USE_MOCK_DATA = process.env.NODE_ENV === "development";
 
 export default function Command() {
-  const { isLoading, data, error, revalidate, mutate } = useVmList();
-
-  if (error)
+  let vmListData;
+  try {
+    vmListData = useVmList();
+  } catch (e) {
+    showFailureToast(e);
     return (
       <Detail
         markdown="Something went wrong, check your preferences."
         actions={
           <ActionPanel>
-            <Action title="Open Preferences" onAction={openExtensionPreferences} />
+            <Action icon={Icon.Gear} title="Open Extension Preferences" onAction={openExtensionPreferences} />
           </ActionPanel>
         }
       />
     );
+  }
+  const { isLoading, data, revalidate, mutate } = vmListData;
 
   const [type, setType] = useState<string>("all");
 
