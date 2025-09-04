@@ -1,6 +1,6 @@
 # Plexus Changelog
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [1.0.0] - 2025-09-04
 
 ### Added
 - **Initial release** of Plexus - Localhost Search extension
