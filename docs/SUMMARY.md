@@ -48,7 +48,7 @@
   - [Manage Extensions Command](information/developer-tools/manage-extensions-command.md)
   - [CLI](information/developer-tools/cli.md)
   - [ESLint](information/developer-tools/eslint.md)
-  - [Forked Extensions](information/developer-tools/forked-extensions.md)
+  - [Forked Extensions (community tool)](information/developer-tools/forked-extensions.md)
   - [VS Code (community tool)](information/developer-tools/vscode.md)
   - [Templates](information/developer-tools/templates.md)
 - [Security](information/security.md)
