@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, showToast, Toast } from "@raycast/api";
 import ForecastView from "../forecast";
-import GraphView from "../graph";
+import LazyGraphView from "../components/lazy-graph";
 import DayView from "../day-view";
 import { getWeather } from "../weather-client";
 import { TimeseriesEntry } from "../weather-client";
@@ -64,7 +64,7 @@ export class LocationUtils {
           title="Open Graph"
           icon={Icon.BarChart}
           shortcut={{ modifiers: ["cmd"], key: "g" }}
-          target={<GraphView name={name} lat={lat} lon={lon} onShowWelcome={onShowWelcome} />}
+          target={<LazyGraphView name={name} lat={lat} lon={lon} onShowWelcome={onShowWelcome} />}
         />
         {isFavorite ? (
           <Action

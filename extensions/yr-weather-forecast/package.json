@@ -91,7 +91,6 @@
   "dependencies": {
     "@raycast/api": "^1.102.3",
     "@raycast/utils": "^1.17.0",
-    "d3-array": "^3.2.4",
     "d3-scale": "^4.0.2",
     "d3-shape": "^3.2.0"
   },

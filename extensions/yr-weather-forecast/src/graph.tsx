@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { type TimeseriesEntry } from "./weather-client";
 import { precipitationAmount, symbolCode } from "./utils-forecast";
 import { getSunTimes, type SunTimes } from "./sunrise-client";
+// Import only the specific D3 functions we need for tree-shaking
 import { scaleLinear } from "d3-scale";
 import { line, curveMonotoneX } from "d3-shape";
 import { formatPrecip, formatTemperatureCelsius, getUnits } from "./units";
