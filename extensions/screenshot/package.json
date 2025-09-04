@@ -33,7 +33,7 @@
     },
     {
       "name": "capture-window-to-clipboard",
-      "title": "Capture Window To Clipboard",
+      "title": "Capture Window to Clipboard",
       "subtitle": "Screenshot",
       "description": "Capture App Window To Clipboard",
       "mode": "no-view"
