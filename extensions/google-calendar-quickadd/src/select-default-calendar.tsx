@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Toast, showToast, LocalStorage, popToRoot } from "@raycast/api";
+import { List, ActionPanel, Action, Toast, showToast, LocalStorage, popToRoot, Icon, Keyboard } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { authorize } from "./utils/oauth";
@@ -81,6 +81,7 @@ export default function SelectDefaultCalendar() {
   const resetCalenders = async () => {
     try {
       await LocalStorage.setItem("hiddenCalendars", JSON.stringify([]));
+      setHiddenCalendars(new Set());
       await showToast({
         style: Toast.Style.Success,
         title: "Calendars Reset",
@@ -110,19 +111,30 @@ export default function SelectDefaultCalendar() {
                 <ActionPanel>
                   <Action
                     title="Set as Default Calendar"
+                    icon={Icon.Checkmark}
                     onAction={() => selectCalendar(calendar.id, calendar.summary)}
                   />
-                  <Action
-                    title="Hide Calendar"
-                    style={Action.Style.Destructive}
-                    onAction={() => removeCalendar(calendar.id, calendar.summary)}
-                  />
-                  <Action title="Reset Calendars" style={Action.Style.Destructive} onAction={resetCalenders} />
                   <Action.CopyToClipboard
                     title="Copy Calendar ID"
                     content={calendar.id}
-                    shortcut={{ modifiers: ["cmd"], key: "c" }}
+                    shortcut={Keyboard.Shortcut.Common.Copy}
                   />
+                  <ActionPanel.Section>
+                    <Action
+                      title="Hide Calendar"
+                      icon={Icon.EyeDisabled}
+                      style={Action.Style.Destructive}
+                      shortcut={{ modifiers: ["cmd"], key: "h" }}
+                      onAction={() => removeCalendar(calendar.id, calendar.summary)}
+                    />
+                    <Action
+                      title={`Reset Calendars (${hiddenCalendars.size})`}
+                      icon={Icon.RotateClockwise}
+                      shortcut={Keyboard.Shortcut.Common.Remove}
+                      style={Action.Style.Destructive}
+                      onAction={resetCalenders}
+                    />
+                  </ActionPanel.Section>
                 </ActionPanel>
               }
             />
