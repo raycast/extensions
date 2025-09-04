@@ -66,8 +66,8 @@ function usePveFetch<T>(url: string, options?: RequestInit) {
     ...options,
     headers: buildHeaders(),
     mapResult(result) {
-      return {data: (result as ApiResponse<T>).data};
-    }
+      return { data: (result as ApiResponse<T>).data };
+    },
   };
 
   const result = useFetch<T>(fetchUrl, fetchOptions);

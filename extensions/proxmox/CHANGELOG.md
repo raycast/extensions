@@ -1,9 +1,10 @@
 # Proxmox Changelog
 
-## [] - {PR_MERGE_DATE}
+## [Maintenance Release] - {PR_MERGE_DATE}
 
+- show status in `tooltip`
 - token is now password
-- modernize
+- modernize to use latest Raycast config
 
 ## [Handle Errors] - 2024-07-17
 
