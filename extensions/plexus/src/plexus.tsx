@@ -58,7 +58,7 @@ function LocalhostListItem({ item }: { item: LocalhostItem }) {
         <ActionPanel>
           <Action.OpenInBrowser url={item.url} />
           <Action.CopyToClipboard content={item.url} title="Copy URL" />
-          <Action.CopyToClipboard content={item.pid} title="Copy Process Id" />
+          <Action.CopyToClipboard content={item.pid} title="Copy Process ID" />
         </ActionPanel>
       }
     />
