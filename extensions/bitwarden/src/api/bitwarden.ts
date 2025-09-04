@@ -432,6 +432,41 @@ export class Bitwarden {
     }
   }
 
+  async createLoginItem(
+    name: string,
+    username: string,
+    password: string,
+    folderId: string | null
+  ): Promise<MaybeError<Item>> {
+    try {
+      const { error: itemTemplateError, result: itemTemplate } = await this.getTemplate("item");
+      if (itemTemplateError) throw itemTemplateError;
+
+      const { error: loginTemplateError, result: loginTemplate } = await this.getTemplate("item.login");
+      if (loginTemplateError) throw loginTemplateError;
+
+      loginTemplate.username = username;
+      loginTemplate.password = password;
+
+      itemTemplate.name = name;
+      const loginItemType = 1;
+      itemTemplate.type = loginItemType;
+      itemTemplate.folderId = folderId || null;
+      itemTemplate.login = loginTemplate;
+
+      const { result: encodedItem, error: encodeError } = await this.encode(JSON.stringify(itemTemplate));
+      if (encodeError) throw encodeError;
+
+      const { stdout } = await this.exec(["create", "item", encodedItem], { resetVaultTimeout: true });
+      return { result: JSON.parse<Item>(stdout) };
+    } catch (execError) {
+      captureException("Failed to create login item", execError);
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
+  }
+
   async listFolders(): Promise<MaybeError<Folder[]>> {
     try {
       const { stdout } = await this.exec(["list", "folders"], { resetVaultTimeout: true });
