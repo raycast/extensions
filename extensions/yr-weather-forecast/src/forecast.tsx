@@ -6,8 +6,11 @@ import { groupByDay, reduceToDayPeriods, buildWeatherTable } from "./weather-uti
 import { useWeatherData } from "./hooks/useWeatherData";
 import { generateNoForecastDataMessage } from "./utils/error-messages";
 import { addFavorite, removeFavorite, isFavorite as checkIsFavorite, type FavoriteLocation } from "./storage";
+import { withErrorBoundary } from "./components/error-boundary";
+import { WeatherErrorFallback } from "./components/error-fallbacks";
+import { getUIThresholds } from "./config/weather-config";
 
-export default function ForecastView(props: {
+function ForecastView(props: {
   name: string;
   lat: number;
   lon: number;
@@ -30,8 +33,8 @@ export default function ForecastView(props: {
   }, [name, lat, lon]);
 
   const byDay = useMemo(() => groupByDay(items), [items]);
-  const reduced = useMemo(() => reduceToDayPeriods(items, 9), [items]);
-  const displaySeries = mode === "detailed" ? items.slice(0, 48) : reduced;
+  const reduced = useMemo(() => reduceToDayPeriods(items, getUIThresholds().SUMMARY_FORECAST_DAYS), [items]);
+  const displaySeries = mode === "detailed" ? items.slice(0, getUIThresholds().DETAILED_FORECAST_HOURS) : reduced;
 
   // Cache both graph types for instant switching
   const [graphCache, setGraphCache] = useState<{
@@ -45,10 +48,15 @@ export default function ForecastView(props: {
       // Use pre-cached graph if available, otherwise generate new one
       const detailedGraph =
         preCachedGraph ||
-        buildGraphMarkdown(name, items.slice(0, 48), 48, {
-          title: "48h forecast",
-          smooth: true,
-        }).markdown;
+        buildGraphMarkdown(
+          name,
+          items.slice(0, getUIThresholds().DETAILED_FORECAST_HOURS),
+          getUIThresholds().DETAILED_FORECAST_HOURS,
+          {
+            title: "48h forecast",
+            smooth: true,
+          },
+        ).markdown;
 
       // Cache summary graph (9-day)
       const summaryGraph = buildGraphMarkdown(name, reduced, reduced.length, {
@@ -188,6 +196,12 @@ export default function ForecastView(props: {
     />
   );
 }
+
+// Export with error boundary
+export default withErrorBoundary(ForecastView, {
+  componentName: "Forecast View",
+  fallback: <WeatherErrorFallback componentName="Forecast View" />,
+});
 
 function buildListMarkdown(byDay: Record<string, TimeseriesEntry[]>): string {
   const sections: string[] = [];

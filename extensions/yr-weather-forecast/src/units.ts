@@ -1,4 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
+import { convertTemperature, convertSpeed, convertPrecipitation } from "./config/weather-config";
 
 export type Units = "metric" | "imperial";
 
@@ -17,27 +18,25 @@ export function getFeatureFlags(): { showWindDirection: boolean; showSunTimes: b
 
 export function formatTemperatureCelsius(celsius?: number, units: Units = getUnits()): string | undefined {
   if (typeof celsius !== "number") return undefined;
-  if (units === "imperial") {
-    const f = celsius * (9 / 5) + 32;
-    return `${Math.round(f)} °F`;
-  }
-  return `${Math.round(celsius)} °C`;
+  const isImperial = units === "imperial";
+  const temp = convertTemperature(celsius, isImperial);
+  return `${Math.round(temp)} ${isImperial ? "°F" : "°C"}`;
 }
 
 export function formatWindSpeed(speedMs?: number, units: Units = getUnits()): string | undefined {
   if (typeof speedMs !== "number") return undefined;
-  if (units === "imperial") {
-    const mph = speedMs * 2.236936;
-    return `${Math.round(mph)} mph`;
-  }
-  return `${Math.round(speedMs)} m/s`;
+  const isImperial = units === "imperial";
+  const speed = convertSpeed(speedMs, isImperial);
+  return `${Math.round(speed)} ${isImperial ? "mph" : "m/s"}`;
 }
 
 export function formatPrecip(mm?: number, units: Units = getUnits()): string | undefined {
   if (typeof mm !== "number") return undefined;
-  if (units === "imperial") {
-    const inches = mm / 25.4;
-    const inchesText = inches.toFixed(2).replace(/\.?0+$/, "");
+  const isImperial = units === "imperial";
+  const precip = convertPrecipitation(mm, isImperial);
+
+  if (isImperial) {
+    const inchesText = precip.toFixed(2).replace(/\.?0+$/, "");
     return `${inchesText} in`;
   }
   return `${mm} mm`;

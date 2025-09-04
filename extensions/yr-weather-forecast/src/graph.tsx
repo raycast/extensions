@@ -13,15 +13,12 @@ import { useWeatherData } from "./hooks/useWeatherData";
 import { generateNoForecastDataMessage } from "./utils/error-messages";
 import { formatDate, formatTime } from "./utils/date-utils";
 import { addFavorite, removeFavorite, isFavorite as checkIsFavorite, type FavoriteLocation } from "./storage";
+import { withErrorBoundary } from "./components/error-boundary";
+import { GraphErrorFallback } from "./components/error-fallbacks";
+import { getGraphThresholds, getUIThresholds, convertTemperature, convertPrecipitation } from "./config/weather-config";
 
-export default function GraphView(props: {
-  name: string;
-  lat: number;
-  lon: number;
-  hours?: number;
-  onShowWelcome?: () => void;
-}) {
-  const { name, lat, lon, hours = 48, onShowWelcome } = props;
+function GraphView(props: { name: string; lat: number; lon: number; hours?: number; onShowWelcome?: () => void }) {
+  const { name, lat, lon, hours = getUIThresholds().DEFAULT_FORECAST_HOURS, onShowWelcome } = props;
   const [sunByDate, setSunByDate] = useState<Record<string, SunTimes>>({});
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const { series, loading, showNoData } = useWeatherData(lat, lon);
@@ -171,6 +168,12 @@ export default function GraphView(props: {
   );
 }
 
+// Export with error boundary
+export default withErrorBoundary(GraphView, {
+  componentName: "Graph View",
+  fallback: <GraphErrorFallback componentName="Graph View" />,
+});
+
 export function buildGraphMarkdown(
   name: string,
   series: TimeseriesEntry[],
@@ -178,20 +181,19 @@ export function buildGraphMarkdown(
   opts?: { sunByDate?: Record<string, SunTimes>; title?: string; smooth?: boolean },
 ): { markdown: string } {
   const subset = series.slice(0, hours);
-  const width = 800;
-  const height = 280;
-  const margin = { top: 28, right: 50, bottom: 48, left: 52 };
-  const innerWidth = width - margin.left - margin.right;
-  const innerHeight = height - margin.top - margin.bottom;
+  const graphConfig = getGraphThresholds();
+  const { WIDTH: width, HEIGHT: height, MARGIN: margin } = graphConfig;
+  const innerWidth = width - margin.LEFT - margin.RIGHT;
+  const innerHeight = height - margin.TOP - margin.BOTTOM;
 
   const units = getUnits();
   const times = subset.map((s) => new Date(s.time).getTime());
   const tempsC = subset.map((s) => s.data?.instant?.details?.air_temperature ?? NaN);
   const tempsDisplay = tempsC.map((c) =>
-    units === "imperial" && Number.isFinite(c) ? (c as number) * (9 / 5) + 32 : c,
+    units === "imperial" && Number.isFinite(c) ? convertTemperature(c as number, true) : c,
   );
   const precsMm = subset.map((s) => precipitationAmount(s) ?? 0);
-  const precsDisplay = precsMm.map((mm) => (units === "imperial" ? mm / 25.4 : mm));
+  const precsDisplay = precsMm.map((mm) => convertPrecipitation(mm, units === "imperial"));
   const dirs = subset.map((s) => s.data?.instant?.details?.wind_from_direction);
   const symbols = subset.map((s) => symbolCode(s) ?? "");
 
@@ -199,20 +201,20 @@ export function buildGraphMarkdown(
   const xMax = times[times.length - 1] ?? 1;
   const xScale = scaleLinear()
     .domain([xMin, xMax])
-    .range([margin.left, margin.left + innerWidth]);
+    .range([margin.LEFT, margin.LEFT + innerWidth]);
 
   const tMinDisp = minFinite(tempsDisplay) ?? 0;
   const tMaxDisp = maxFinite(tempsDisplay) ?? 1;
-  const tPad = 2;
+  const tPad = graphConfig.TEMPERATURE_PADDING;
   const yT = scaleLinear()
     .domain([tMinDisp - tPad, tMaxDisp + tPad])
-    .range([margin.top + innerHeight, margin.top]);
+    .range([margin.TOP + innerHeight, margin.TOP]);
   const ty = (v: number) => yT(v);
 
   const pMaxDisp = Math.max(1, maxFinite(precsDisplay) ?? 1);
   const yP = scaleLinear()
     .domain([0, pMaxDisp])
-    .range([margin.top + innerHeight, margin.top]);
+    .range([margin.TOP + innerHeight, margin.TOP]);
   const py = (v: number) => yP(v);
 
   // Build temperature path
@@ -246,7 +248,9 @@ export function buildGraphMarkdown(
       const x = xScale(t);
       const y = ty(tempsDisplay[i] ?? 0) - 12;
       const e = symbolToEmoji(symbols[i]);
-      return e ? `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" font-size="14" text-anchor="middle">${e}</text>` : "";
+      return e
+        ? `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" font-size="${graphConfig.FONT_SIZES.EMOJI}" text-anchor="middle">${e}</text>`
+        : "";
     })
     .join("");
 
@@ -264,8 +268,8 @@ export function buildGraphMarkdown(
       const label = formatDate(d, "SHORT_DAY");
       parts.push(
         `<g>
-          <line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${margin.top}" y2="${height - margin.bottom}" stroke="#ddd" stroke-dasharray="3 3" />
-          <text x="${x.toFixed(1)}" y="${margin.top - 8}" font-size="11" text-anchor="middle" fill="#666">${label}</text>
+          <line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${margin.TOP}" y2="${height - margin.BOTTOM}" stroke="#ddd" stroke-dasharray="3 3" />
+          <text x="${x.toFixed(1)}" y="${margin.TOP - 8}" font-size="${graphConfig.FONT_SIZES.LABEL}" text-anchor="middle" fill="#666">${label}</text>
         </g>`,
       );
     }
@@ -283,8 +287,8 @@ export function buildGraphMarkdown(
         const x = xScale(sr);
         parts.push(
           `<g>
-            <line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${margin.top}" y2="${height - margin.bottom}" stroke="#f0b429" stroke-dasharray="2 4" />
-            <text x="${x.toFixed(1)}" y="${margin.top + 12}" font-size="12" text-anchor="middle">🌅</text>
+            <line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${margin.TOP}" y2="${height - margin.BOTTOM}" stroke="#f0b429" stroke-dasharray="2 4" />
+            <text x="${x.toFixed(1)}" y="${margin.TOP + 12}" font-size="${graphConfig.FONT_SIZES.LABEL}" text-anchor="middle">🌅</text>
           </g>`,
         );
       }
@@ -292,8 +296,8 @@ export function buildGraphMarkdown(
         const x = xScale(ss);
         parts.push(
           `<g>
-            <line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${margin.top}" y2="${height - margin.bottom}" stroke="#a06cd5" stroke-dasharray="2 4" />
-            <text x="${x.toFixed(1)}" y="${margin.top + 12}" font-size="12" text-anchor="middle">🌇</text>
+            <line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${margin.TOP}" y2="${height - margin.BOTTOM}" stroke="#a06cd5" stroke-dasharray="2 4" />
+            <text x="${x.toFixed(1)}" y="${margin.TOP + 12}" font-size="${graphConfig.FONT_SIZES.LABEL}" text-anchor="middle">🌇</text>
           </g>`,
         );
       }
@@ -307,9 +311,9 @@ export function buildGraphMarkdown(
       const d = dirs[i];
       if (typeof d !== "number") return "";
       const x = xScale(t);
-      const y = height - margin.bottom + 20;
+      const y = height - margin.BOTTOM + 20;
       const { arrow } = directionFromDegrees(d);
-      return `<text x="${x.toFixed(1)}" y="${y}" font-size="12" text-anchor="middle" fill="#666">${arrow}</text>`;
+      return `<text x="${x.toFixed(1)}" y="${y}" font-size="${graphConfig.FONT_SIZES.LABEL}" text-anchor="middle" fill="#666">${arrow}</text>`;
     })
     .join("");
 
@@ -322,8 +326,8 @@ export function buildGraphMarkdown(
       const x = xScale(t);
       const label = formatTime(new Date(t), "HOUR_ONLY");
       return `\n  <g>
-    <line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${margin.top}" y2="${height - margin.bottom}" stroke="#eee" />
-    <text x="${x.toFixed(1)}" y="${height - margin.bottom + 36}" font-size="11" text-anchor="middle" fill="#888">${label}</text>
+    <line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${margin.TOP}" y2="${height - margin.BOTTOM}" stroke="#eee" />
+    <text x="${x.toFixed(1)}" y="${height - margin.BOTTOM + 36}" font-size="${graphConfig.FONT_SIZES.AXIS}" text-anchor="middle" fill="#888">${label}</text>
   </g>`;
     })
     .join("");
@@ -332,7 +336,7 @@ export function buildGraphMarkdown(
   const tempLabel = (v: number) => (units === "imperial" ? `${Math.round(v)} °F` : `${Math.round(v)} °C`);
   const yLabels = [tMinDisp, (tMinDisp + tMaxDisp) / 2, tMaxDisp].map((v) => {
     const y = ty(v);
-    return `<text x="${margin.left - 12}" y="${y.toFixed(1)}" font-size="11" text-anchor="end" alignment-baseline="middle" fill="#888">${tempLabel(
+    return `<text x="${margin.LEFT - 12}" y="${y.toFixed(1)}" font-size="${graphConfig.FONT_SIZES.AXIS}" text-anchor="end" alignment-baseline="middle" fill="#888">${tempLabel(
       v,
     )}</text>`;
   });
@@ -341,24 +345,24 @@ export function buildGraphMarkdown(
   const pLabel = (v: number) => (units === "imperial" ? `${Number(v.toFixed(2))} in` : `${v} mm`);
   const pLabels = [0, pMaxDisp / 2, pMaxDisp].map((v) => {
     const y = py(v);
-    return `<text x="${width - margin.right + 12}" y="${y.toFixed(1)}" font-size="11" text-anchor="start" alignment-baseline="middle" fill="#888" font-weight="500">${pLabel(
+    return `<text x="${width - margin.RIGHT + 12}" y="${y.toFixed(1)}" font-size="${graphConfig.FONT_SIZES.AXIS}" text-anchor="start" alignment-baseline="middle" fill="#888" font-weight="500">${pLabel(
       v,
     )}</text>`;
   });
 
   // Add precipitation axis line on the right
-  const precipAxisLine = `<line x1="${width - margin.right}" x2="${width - margin.right}" y1="${margin.top}" y2="${height - margin.bottom}" stroke="#1e90ff" stroke-width="1.5" opacity="0.8" />`;
+  const precipAxisLine = `<line x1="${width - margin.RIGHT}" x2="${width - margin.RIGHT}" y1="${margin.TOP}" y2="${height - margin.BOTTOM}" stroke="#1e90ff" stroke-width="${graphConfig.LINE_STYLES.AXIS_WIDTH}" opacity="${graphConfig.OPACITY.AXIS_LINE}" />`;
 
   // Add precipitation title on the right
-  const precipTitle = `<text x="${width - margin.right + 12}" y="${margin.top - 8}" font-size="12" text-anchor="start" fill="#1e90ff" font-weight="600">P (${units === "imperial" ? "in" : "mm"})</text>`;
+  const precipTitle = `<text x="${width - margin.RIGHT + 12}" y="${margin.TOP - 8}" font-size="${graphConfig.FONT_SIZES.TITLE}" text-anchor="start" fill="#1e90ff" font-weight="600">P (${units === "imperial" ? "in" : "mm"})</text>`;
 
   // Add temperature title on the left
-  const tempTitle = `<text x="${margin.left - 12}" y="${margin.top - 8}" font-size="12" text-anchor="end" fill="#ff6b6b" font-weight="600">T (${units === "imperial" ? "°F" : "°C"})</text>`;
+  const tempTitle = `<text x="${margin.LEFT - 12}" y="${margin.TOP - 8}" font-size="${graphConfig.FONT_SIZES.TITLE}" text-anchor="end" fill="#ff6b6b" font-weight="600">T (${units === "imperial" ? "°F" : "°C"})</text>`;
 
   // Add precipitation grid lines for better readability
   const precipGridLines = [0, pMaxDisp / 2, pMaxDisp].map((v) => {
     const y = py(v);
-    return `<line x1="${margin.left}" x2="${width - margin.right}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#e6f3ff" stroke-width="1" opacity="0.6" />`;
+    return `<line x1="${margin.LEFT}" x2="${width - margin.RIGHT}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#e6f3ff" stroke-width="${graphConfig.LINE_STYLES.GRID_WIDTH}" opacity="${graphConfig.OPACITY.GRID_LINES}" />`;
   });
 
   // Add precipitation data points for better visibility
@@ -367,7 +371,7 @@ export function buildGraphMarkdown(
       if (p > 0) {
         const x = xScale(times[i]);
         const y = py(p);
-        return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2" fill="#1e90ff" opacity="0.8" />`;
+        return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${graphConfig.PRECIPITATION_POINT_RADIUS}" fill="#1e90ff" opacity="${graphConfig.OPACITY.PRECIPITATION_POINTS}" />`;
       }
       return "";
     })
@@ -390,8 +394,8 @@ export function buildGraphMarkdown(
     ${precipTitle}
     ${tempTitle}
     ${precipAreaFill}
-    <path d="${precPath}" fill="none" stroke="#1e90ff" stroke-width="2" stroke-dasharray="4 4" opacity="0.9" stroke-linecap="round" stroke-linejoin="round" />
-    <path d="${tempPath}" fill="none" stroke="#ff6b6b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="${precPath}" fill="none" stroke="#1e90ff" stroke-width="${graphConfig.LINE_STYLES.PRECIPITATION_WIDTH}" stroke-dasharray="4 4" opacity="${graphConfig.OPACITY.PRECIPITATION_LINE}" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="${tempPath}" fill="none" stroke="#ff6b6b" stroke-width="${graphConfig.LINE_STYLES.TEMPERATURE_WIDTH}" stroke-linecap="round" stroke-linejoin="round" />
     ${emojiLabels}
     ${sunLines}
     ${windLabels}

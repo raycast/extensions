@@ -5,15 +5,29 @@
   "description": "Weather forecast using the Norwegian Meteorological Institute's API",
   "icon": "extension-icon.png",
   "author": "kakaoduft",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kyndig/raycast-yr"
+  },
+  "homepage": "https://www.kynd.no",
+  "bugs": {
+    "url": "https://github.com/kyndig/raycast-yr/issues"
+  },
   "access": "public",
   "license": "MIT",
   "keywords": [
     "weather",
     "forecast",
     "yr",
-    "institute of meteorology",
-    "met.no",
-    "met"
+    "meteorology",
+    "norway",
+    "temperature",
+    "precipitation",
+    "wind",
+    "sunrise",
+    "sunset",
+    "climate",
+    "atmospheric"
   ],
   "categories": [
     "Productivity"

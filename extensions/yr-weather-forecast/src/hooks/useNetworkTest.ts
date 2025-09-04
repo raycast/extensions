@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { DebugLogger } from "../utils/debug-utils";
+import { API_HEADERS } from "../utils/api-config";
 
 type NetworkTestConfig = {
   name: string;
@@ -31,9 +32,7 @@ export function useNetworkTest() {
       {
         name: "nominatim",
         url: "https://nominatim.openstreetmap.org/search?format=json&q=test&limit=1",
-        headers: {
-          "User-Agent": "raycast-yr-extension/1.0 (https://github.com/kyndig/raycast-yr; contact: raycast@kynd.no)",
-        },
+        headers: API_HEADERS,
       },
     ];
 
