@@ -3,6 +3,11 @@ import { LocalStorage } from "@raycast/api";
 import { Tab } from "../interfaces";
 import { NOT_INSTALLED_MESSAGE } from "../constants";
 
+// AppleScript timing constants
+const WINDOW_INIT_RETRY_LIMIT = 20;
+const WINDOW_INIT_RETRY_DELAY = 0.1;
+const WINDOW_ACTIVATION_DELAY = 0.2;
+
 export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
   const faviconFormula = useOriginalFavicon
     ? `execute t javascript ¬
@@ -72,7 +77,7 @@ export async function createNewWindow(): Promise<void> {
       make new window
       
       -- Small delay to ensure window is fully initialized before activation
-      delay 0.2
+      delay ${WINDOW_ACTIVATION_DELAY}
       activate
     end tell
     return true
@@ -91,15 +96,15 @@ export async function createNewTab(): Promise<void> {
         make new window
         
         -- Wait for window to be fully initialized
-        repeat with i from 1 to 20
+        repeat with i from 1 to ${WINDOW_INIT_RETRY_LIMIT}
             if (count of windows) > 0 then
                 exit repeat
             end if
-            delay 0.1
+            delay ${WINDOW_INIT_RETRY_DELAY}
         end repeat
         
         -- Additional small delay to ensure window is ready
-        delay 0.2
+        delay ${WINDOW_ACTIVATION_DELAY}
         activate
       end if
     end tell
@@ -134,15 +139,15 @@ export async function createNewTabWithProfile(website?: string): Promise<void> {
               make new window
               
               -- Wait for window to be fully initialized
-              repeat with i from 1 to 20
+              repeat with i from 1 to ${WINDOW_INIT_RETRY_LIMIT}
                   if (count of windows) > 0 then
                       exit repeat
                   end if
-                  delay 0.1
+                  delay ${WINDOW_INIT_RETRY_DELAY}
               end repeat
               
               -- Additional small delay to ensure window is ready
-              delay 0.2
+              delay ${WINDOW_ACTIVATION_DELAY}
           else
               activate
           end if
@@ -172,7 +177,7 @@ export async function createNewIncognitoWindow(): Promise<void> {
       make new window with properties {mode:"incognito"}
       
       -- Small delay to ensure window is fully initialized before activation
-      delay 0.2
+      delay ${WINDOW_ACTIVATION_DELAY}
       activate
     end tell
     return true
