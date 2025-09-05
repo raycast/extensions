@@ -1,6 +1,7 @@
 import { withAccessToken } from "./auth";
 
 const TEMBO_API_BASE = "https://api.tembo.io";
+const TEMBO_UI_BASE = "https://app.tembo.io";
 
 export type SolutionStatus = "Pending" | "Success" | "Failed";
 export type SolutionType = "PullRequest";
@@ -128,7 +129,10 @@ export interface CodeRepositoryListResponse {
 }
 
 class TemboAPI {
-  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  private async request<T>(
+    endpoint: string,
+    options: RequestInit = {},
+  ): Promise<T> {
     return withAccessToken(async (token) => {
       const url = `${TEMBO_API_BASE}${endpoint}`;
       const response = await fetch(url, {
@@ -142,7 +146,9 @@ class TemboAPI {
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`API request to ${endpoint} failed: ${response.status} ${response.statusText}\n${errorText}`);
+        throw new Error(
+          `API request to ${endpoint} failed: ${response.status} ${response.statusText}\n${errorText}`,
+        );
       }
 
       return response.json() as Promise<T>;
@@ -159,27 +165,31 @@ class TemboAPI {
   }): Promise<Issue[]> {
     const searchParams = new URLSearchParams();
 
-    if (params?.pageSize) searchParams.append("limit", params.pageSize.toString());
+    if (params?.pageSize)
+      searchParams.append("limit", params.pageSize.toString());
     searchParams.append("page", "1");
 
     const queryString = searchParams.toString();
-    const endpoint = `/public-api/issue/list${queryString ? `?${queryString}` : ""}`;
+    const endpoint = `/public-api/task/list${queryString ? `?${queryString}` : ""}`;
 
     const response = await this.request<IssueListResponse>(endpoint);
     return response.issues || [];
   }
 
   async createIssue(data: CreateIssueRequest): Promise<Issue> {
-    return this.request<Issue>("/public-api/issue/create", {
+    return this.request<Issue>("/public-api/task/create", {
       method: "POST",
       body: JSON.stringify(data),
     });
   }
 
   async getCodeRepositories(): Promise<CodeRepository[]> {
-    const response = await this.request<CodeRepositoryListResponse>("/public-api/code-repository/list");
+    const response = await this.request<CodeRepositoryListResponse>(
+      "/public-api/repository/list",
+    );
     return response.codeRepositories;
   }
 }
 
 export const temboAPI = new TemboAPI();
+export { TEMBO_UI_BASE };

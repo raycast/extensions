@@ -1,7 +1,12 @@
 import { Icon, MenuBarExtra, open } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { temboAPI, type Issue } from "./api";
-import { getIssueStatus, getIssueIntegrationType, getIssueRepo, getIntegrationIcon } from "./issue-utils";
+import { temboAPI, TEMBO_UI_BASE, type Issue } from "./api";
+import {
+  getIssueStatus,
+  getIssueIntegrationType,
+  getIssueRepo,
+  getIntegrationIcon,
+} from "./issue-utils";
 
 async function fetchIssues(): Promise<Issue[]> {
   try {
@@ -10,7 +15,10 @@ async function fetchIssues(): Promise<Issue[]> {
       pageSize: 20,
     });
 
-    issues.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    issues.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
     return issues;
   } catch (error) {
     console.error("Failed to fetch issues for menubar:", error);
@@ -36,7 +44,9 @@ export default function MenubarTasks() {
     return status === "open" || status === "queued";
   });
 
-  const failedIssues = issues.filter((issue) => getIssueStatus(issue) === "failed");
+  const failedIssues = issues.filter(
+    (issue) => getIssueStatus(issue) === "failed",
+  );
 
   const recentlyCompleted = issues.filter((issue) => {
     const status = getIssueStatus(issue);
@@ -88,7 +98,7 @@ export default function MenubarTasks() {
               subtitle={`${getIssueRepo(issue)} • ${formatTimeAgo(issue.createdAt)}`}
               icon={getIntegrationIcon(getIssueIntegrationType(issue))}
               onAction={() => {
-                const url = `http://localhost:3000/tasks/${issue.id}`;
+                const url = `${TEMBO_UI_BASE}/tasks/${issue.id}`;
                 open(url);
               }}
             />
@@ -105,7 +115,7 @@ export default function MenubarTasks() {
               subtitle={`${getIssueRepo(issue)} • ${formatTimeAgo(issue.createdAt)}`}
               icon={getIntegrationIcon(getIssueIntegrationType(issue))}
               onAction={() => {
-                const url = `http://localhost:3000/tasks/${issue.id}`;
+                const url = `${TEMBO_UI_BASE}/tasks/${issue.id}`;
                 open(url);
               }}
             />
@@ -122,7 +132,7 @@ export default function MenubarTasks() {
               subtitle={`${getIssueRepo(issue)} • ${formatTimeAgo(issue.createdAt)}`}
               icon={getIntegrationIcon(getIssueIntegrationType(issue))}
               onAction={() => {
-                const url = `http://localhost:3000/tasks/${issue.id}`;
+                const url = `${TEMBO_UI_BASE}/tasks/${issue.id}`;
                 open(url);
               }}
             />
@@ -136,7 +146,7 @@ export default function MenubarTasks() {
           icon={Icon.List}
           shortcut={{ modifiers: ["cmd"], key: "o" }}
           onAction={() => {
-            open("http://localhost:3000");
+            open(TEMBO_UI_BASE);
           }}
         />
         <MenuBarExtra.Item

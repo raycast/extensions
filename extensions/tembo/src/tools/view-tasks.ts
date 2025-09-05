@@ -41,7 +41,9 @@ async function tool(input: Input) {
       filteredIssues = issues.filter((issue) => {
         return (
           issue.solutions.some((solution) =>
-            solution.pullRequest.some((pr) => pr.url.toLowerCase().includes(repositoryLower)),
+            solution.pullRequest.some((pr) =>
+              pr.url.toLowerCase().includes(repositoryLower),
+            ),
           ) || issue.title.toLowerCase().includes(repositoryLower)
         );
       });
@@ -65,7 +67,8 @@ async function tool(input: Input) {
       kind: issue.kind,
       level: issue.level,
       levelReasoning: issue.levelReasoning,
-      status: issue.solutions.length > 0 ? issue.solutions[0].status : "Pending",
+      status:
+        issue.solutions.length > 0 ? issue.solutions[0].status : "Pending",
       externalUrl: issue.externalUrl,
       repository: issue.issueSource?.name || "Unknown",
       createdAt: issue.createdAt,
@@ -90,7 +93,9 @@ async function tool(input: Input) {
     };
   } catch (error) {
     if (error instanceof Error && error.message.includes("401")) {
-      throw new Error("Authentication failed. Please check your Tembo API key in Raycast preferences.");
+      throw new Error(
+        "Authentication failed. Please check your Tembo API key in Raycast preferences.",
+      );
     }
     throw new Error(`Failed to retrieve tasks: ${error}`);
   }

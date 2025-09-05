@@ -2,7 +2,14 @@ import { environment, Icon } from "@raycast/api";
 import type { Issue } from "./api";
 
 export type IssueStatus = "queued" | "open" | "closed" | "merged" | "failed";
-export type IntegrationType = "github" | "postgres" | "sentry" | "linear" | "jira" | "supabase" | "other";
+export type IntegrationType =
+  | "github"
+  | "postgres"
+  | "sentry"
+  | "linear"
+  | "jira"
+  | "supabase"
+  | "other";
 
 export function getIssueStatus(issue: Issue): IssueStatus {
   if (issue.solutions.length > 0) {
@@ -10,7 +17,11 @@ export function getIssueStatus(issue: Issue): IssueStatus {
     if (latestSolution.status === "Success") {
       if (latestSolution.pullRequest.length > 0) {
         const prStatus = latestSolution.pullRequest[0].status;
-        return prStatus === "merged" ? "merged" : prStatus === "closed" ? "closed" : "open";
+        return prStatus === "merged"
+          ? "merged"
+          : prStatus === "closed"
+            ? "closed"
+            : "open";
       } else {
         return "open";
       }
@@ -25,7 +36,9 @@ export function getIssueStatus(issue: Issue): IssueStatus {
 
 export function getIssueIntegrationType(issue: Issue): IntegrationType {
   const integrationType =
-    (issue.issueSource.integration?.type as IntegrationType) || (issue.issueSource.type as IntegrationType) || "other";
+    (issue.issueSource.integration?.type as IntegrationType) ||
+    (issue.issueSource.type as IntegrationType) ||
+    "other";
   return integrationType;
 }
 

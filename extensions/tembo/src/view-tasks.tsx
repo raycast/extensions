@@ -1,6 +1,13 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  List,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
-import { temboAPI, type Issue } from "./api";
+import { temboAPI, TEMBO_UI_BASE, type Issue } from "./api";
 import {
   getIssueStatus,
   getIssueIntegrationType,
@@ -10,7 +17,15 @@ import {
   getIntegrationIcon,
 } from "./issue-utils";
 
-type FilterType = "all" | "active" | "recently-done" | "queued" | "open" | "closed" | "merged" | "failed";
+type FilterType =
+  | "all"
+  | "active"
+  | "recently-done"
+  | "queued"
+  | "open"
+  | "closed"
+  | "merged"
+  | "failed";
 
 async function fetchIssues(): Promise<Issue[]> {
   try {
@@ -19,7 +34,10 @@ async function fetchIssues(): Promise<Issue[]> {
       taskView: "all",
     });
 
-    issues.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    issues.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
 
     return issues;
   } catch (error) {
@@ -70,7 +88,10 @@ export default function ViewTasks() {
       case "recently-done":
         return issues.filter((issue) => {
           const status = getIssueStatus(issue);
-          return (status === "closed" || status === "merged") && new Date(issue.createdAt) > oneWeekAgo;
+          return (
+            (status === "closed" || status === "merged") &&
+            new Date(issue.createdAt) > oneWeekAgo
+          );
         });
       case "queued":
         return issues.filter((issue) => getIssueStatus(issue) === "queued");
@@ -94,7 +115,9 @@ export default function ViewTasks() {
 
     const q = searchText.trim().toLowerCase();
     return filteredByStatus.filter((issue) => {
-      const hay = [issue.title, getIssueRepo(issue), getIssueStatus(issue)].join(" ").toLowerCase();
+      const hay = [issue.title, getIssueRepo(issue), getIssueStatus(issue)]
+        .join(" ")
+        .toLowerCase();
       return hay.includes(q);
     });
   };
@@ -135,8 +158,16 @@ export default function ViewTasks() {
           onChange={(value) => setActiveFilter(value as FilterType)}
         >
           <List.Dropdown.Item key="all" title="All Tasks" value="all" />
-          <List.Dropdown.Item key="active" title="Active (Open + Queued)" value="active" />
-          <List.Dropdown.Item key="recently-done" title="Recently Completed" value="recently-done" />
+          <List.Dropdown.Item
+            key="active"
+            title="Active (Open + Queued)"
+            value="active"
+          />
+          <List.Dropdown.Item
+            key="recently-done"
+            title="Recently Completed"
+            value="recently-done"
+          />
           <List.Dropdown.Item key="queued" title="Queued" value="queued" />
           <List.Dropdown.Item key="open" title="Open" value="open" />
           <List.Dropdown.Item key="closed" title="Closed" value="closed" />
@@ -145,7 +176,10 @@ export default function ViewTasks() {
         </List.Dropdown>
       }
     >
-      <List.Section title={getFilterTitle(activeFilter)} subtitle={`${filtered.length} issues`}>
+      <List.Section
+        title={getFilterTitle(activeFilter)}
+        subtitle={`${filtered.length} issues`}
+      >
         {filtered.map((issue) => {
           const status = getIssueStatus(issue);
           const integrationType = getIssueIntegrationType(issue);
@@ -181,7 +215,7 @@ export default function ViewTasks() {
                   <Action.OpenInBrowser
                     title="Open in Tembo"
                     icon={Icon.Eye}
-                    url={`http://localhost:3000/tasks/${issue.id}`}
+                    url={`${TEMBO_UI_BASE}/tasks/${issue.id}`}
                   />
                 </ActionPanel>
               }
