@@ -1,6 +1,6 @@
 # Proxmox Changelog
 
-## [Maintenance Release] - {PR_MERGE_DATE}
+## [Maintenance Release] - 2025-09-05
 
 - show status in `tooltip`
 - token is now password
