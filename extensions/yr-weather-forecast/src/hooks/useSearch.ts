@@ -38,7 +38,8 @@ export function useSearch(): UseSearchReturn {
   const [searchError, setSearchError] = useState<string | null>(null);
 
   // Search function with query intent parsing (no debouncing here)
-  const performSearch = useCallback(async (query: string): Promise<void> => {
+  const performSearch = useCallback(async (...args: unknown[]): Promise<void> => {
+    const query = args[0] as string;
     const trimmed = query.trim();
     if (!trimmed) {
       setLocations([]);
