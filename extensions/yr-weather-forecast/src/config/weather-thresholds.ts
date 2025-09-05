@@ -29,16 +29,18 @@ export const PRECIPITATION_THRESHOLDS = {
   /**
    * Moderate precipitation threshold
    * WMO: 2.6-7.5 mm per hour
-   * Used for: Moderate rain, moderate snow
+   * Used for: Values greater than this are moderate or higher
+   * Note: This is the lower bound for moderate precipitation
    */
-  MODERATE: 7.5,
+  MODERATE: 2.5,
 
   /**
    * Heavy precipitation threshold
    * WMO: More than 7.5 mm per hour
-   * Used for: Heavy rain, heavy snow, downpours
+   * Used for: Values greater than this are heavy or higher
+   * Note: This is the lower bound for heavy precipitation
    */
-  HEAVY: 7.6,
+  HEAVY: 7.5,
 
   /**
    * Very heavy precipitation threshold

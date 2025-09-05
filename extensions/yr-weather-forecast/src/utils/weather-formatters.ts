@@ -77,7 +77,7 @@ export class WeatherFormatters {
       const ss = sun.sunset ? new Date(sun.sunset) : undefined;
 
       // Only show sunrise if it's a valid date and not in the past relative to now
-      if (sr && !isNaN(sr.getTime())) {
+      if (sr && !isNaN(sr.getTime()) && sr.getTime() > Date.now()) {
         acc.push({
           tag: `🌅 ${formatTime(sr, "MILITARY")}`,
           tooltip: "Sunrise",
@@ -85,7 +85,7 @@ export class WeatherFormatters {
       }
 
       // Only show sunset if it's a valid date and not in the past relative to now
-      if (ss && !isNaN(ss.getTime())) {
+      if (ss && !isNaN(ss.getTime()) && ss.getTime() > Date.now()) {
         acc.push({
           tag: `🌇 ${formatTime(ss, "MILITARY")}`,
           tooltip: "Sunset",
