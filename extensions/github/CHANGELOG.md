@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Fix clone with options action] - {PR_MERGE_DATE}
+
+- Fix the clone action by adding the quote to the command to prevent issues with spaces in the path
+
 ## [Add My Starred Repositories command] - 2025-08-25
 
 - Add new "My Starred Repositories" command to view starred repositories

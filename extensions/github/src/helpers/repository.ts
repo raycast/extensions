@@ -156,7 +156,7 @@ export const buildCloneCommand = (
   const targetDir = options?.targetDir ?? "";
 
   const cloneUrl = formatRepositoryUrl(repoNameWithOwner, cloneProtocol);
-  return `git clone ${gitFlag} ${cloneUrl} ${targetDir}`;
+  return `git clone ${gitFlag} ${cloneUrl} "${targetDir}"`;
 };
 
 type AdditionalCloneFormatOptions = {
