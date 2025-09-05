@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-frc",
+  "title": "Raycast FRC",
+  "description": "Robotics Stats for FIRST Robotics Competition",
+  "icon": "icon.png",
+  "author": "vibsthebot",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "frc-team",
+      "title": "FRC Team",
+      "description": "Get information about a specific FRC team",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "team",
+          "placeholder": "Team Number",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "year",
+          "placeholder": "Year",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "frc-event",
+      "title": "FRC Event",
+      "description": "Get information about a specific FRC event",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "event",
+          "placeholder": "Event ID",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "ftc-team",
+      "title": "FTC Team",
+      "description": "Get information about a specific FTC team",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "team",
+          "placeholder": "Team Number",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "ftc-search",
+      "title": "FTC Search",
+      "description": "Search for FTC teams",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.3",
+    "@raycast/utils": "^1.17.0",
+    "date-fns": "^4.1.0"
+  },
+  "preferences": [
+    {
+      "name": "tbaApiKey",
+      "title": "TBA API Key",
+      "type": "textfield",
+      "required": true,
+      "description": "Your The Blue Alliance API Key. Get one at https://www.thebluealliance.com/account"
+    }
+  ],
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
