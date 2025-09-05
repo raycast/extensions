@@ -10,11 +10,11 @@ export const API_HEADERS = {
 
 export const DNS_RECORD_TYPE_TO_PLACEHOLDER: Record<string, string> = {
   A: "192.168.178.101",
-AAAA: "2001:db8::1324:5876",
-CNAME: "blog.example.com",
-MX: "mail.example.com",
-NS: "ns.example.com",
-SOA: "",
-SRV: "",
-TXT: ""
-}
+  AAAA: "2001:db8::1324:5876",
+  CNAME: "blog.example.com",
+  MX: "mail.example.com",
+  NS: "ns.example.com",
+  SOA: "",
+  SRV: "",
+  TXT: "",
+};

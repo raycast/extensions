@@ -1,10 +1,11 @@
 # Manotori Changelog
 
-## [View DNS Zones, DNS Records] - {PR_MERGE_DATE}
+## [View DNS Zones, DNS Records + Support Windows] - {PR_MERGE_DATE}
 
+- Support Windows!
 - View DNS Zones
-- View DNS Records
-    - Create DNS Record
+    1. View DNS Records
+        - Create DNS Record
 
 ## [View NS Sets] - 2025-01-03
 
