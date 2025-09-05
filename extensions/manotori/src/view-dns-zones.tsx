@@ -1,18 +1,13 @@
 import { FormValidation, getFavicon, useFetch, useForm } from "@raycast/utils";
 import { API_HEADERS, API_URL, DNS_RECORD_TYPE_TO_PLACEHOLDER } from "./config";
-import { DNSRecord, DNSZone, SuccessResult } from "./types";
+import { DNSRecord, DNSZone } from "./types";
 import { Action, ActionPanel, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { parseResponse } from "./utils";
 
 export default function ViewDNSZones() {
-  const { isLoading, data } = useFetch(API_URL + "dns/zone", {
+  const { isLoading, data } = useFetch<DNSZone[], DNSZone[]>(API_URL + "dns/zone", {
     headers: API_HEADERS,
     parseResponse,
-    mapResult(result: SuccessResult<DNSZone[]>) {
-      return {
-        data: result.data,
-      };
-    },
     initialData: [],
   });
 
@@ -41,16 +36,14 @@ export default function ViewDNSZones() {
 }
 
 function ViewDNSRecords({ zoneId, domainName }: { zoneId: number; domainName: string }) {
-  const { isLoading, data, revalidate } = useFetch(API_URL + "dns/zone/" + zoneId + "/records", {
-    headers: API_HEADERS,
-    parseResponse,
-    mapResult(result: SuccessResult<DNSRecord[]>) {
-      return {
-        data: result.data,
-      };
+  const { isLoading, data, revalidate } = useFetch<DNSRecord[], DNSRecord[]>(
+    API_URL + "dns/zone/" + zoneId + "/records",
+    {
+      headers: API_HEADERS,
+      parseResponse,
+      initialData: [],
     },
-    initialData: [],
-  });
+  );
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search dns record" isShowingDetail>
