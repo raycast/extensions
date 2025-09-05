@@ -1,5 +1,10 @@
 # MailerSend Changelog
 
+## [Windows Support + View DNS Records] - {PR_MERGE_DATE}
+
+- Add Windows Support
+- View Domain DNS Records
+
 ## [View Webhooks] - 2025-08-28
 
 - View Domain Webhooks
