@@ -110,7 +110,7 @@ export default function Command() {
           ))
         : filteredColors.map((color) => (
             <ColorListItem
-              key={`${color.categories[0]}-${color.name}-${color.hex}-${color.rgb}-${color.format}`}
+              key={`${color.name}-${color.hex}`}
               color={color}
               onSelect={handleColorSelect}
               showHex={showHex}

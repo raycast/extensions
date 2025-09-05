@@ -27,7 +27,7 @@ export function ColorSection({
     <List.Section title={shade.charAt(0).toUpperCase() + shade.slice(1)}>
       {colors.map((color) => (
         <ColorListItem
-          key={`${color.categories[0]}-${color.name}-${color.hex}-${color.rgb}-${color.format}`}
+          key={`${color.name}-${color.hex}`}
           color={color}
           onSelect={onColorSelect}
           showHex={showHex}
