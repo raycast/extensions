@@ -78,11 +78,11 @@ export default function Command() {
     search.safeLocations.length === 0 &&
     !search.isLoading;
 
-  // Only show favorites when not actively searching or when search is empty, AND when weather data is ready
+  // Show favorites immediately when loaded, regardless of weather data status (lazy loading)
   const shouldShowFavorites =
     favorites.favorites.length > 0 &&
-    (!search.searchText.trim() || search.safeLocations.length === 0) &&
-    favorites.weatherDataInitialized;
+    favorites.favoritesLoaded &&
+    (!search.searchText.trim() || search.safeLocations.length === 0);
 
   // Determine if we should show loading state - only true during initial load
   const shouldShowLoading = favorites.isInitialLoad || search.isLoading;
@@ -357,10 +357,11 @@ export default function Command() {
                         }
 
                         if (loading) {
-                          return "Loading...";
+                          return "Loading weather...";
                         }
 
-                        return "No data";
+                        // Show coordinates when no weather data yet (lazy loading)
+                        return `${fav.lat.toFixed(2)}, ${fav.lon.toFixed(2)}`;
                       })()}
                       icon={(() => {
                         if (!fav.id) return "❌";
@@ -377,13 +378,25 @@ export default function Command() {
                         if (loading) {
                           return "⏳";
                         }
-                        return "❓";
+                        // Show neutral location icon when no weather data yet (lazy loading)
+                        return "📍";
                       })()}
                       accessories={(() => {
                         if (!fav.id) return undefined;
                         const weather = favorites.getFavoriteWeather(fav.id, fav.lat, fav.lon);
                         const sunTimes = favorites.getFavoriteSunTimes(fav.id, fav.lat, fav.lon);
-                        return weather ? formatAccessories(weather, sunTimes) : undefined;
+                        const loading = favorites.isFavoriteLoading(fav.id, fav.lat, fav.lon);
+
+                        if (weather) {
+                          return formatAccessories(weather, sunTimes);
+                        }
+
+                        if (loading) {
+                          return [{ text: "Loading...", icon: Icon.ArrowClockwise }];
+                        }
+
+                        // No accessories when no weather data yet (lazy loading)
+                        return undefined;
                       })()}
                       actions={
                         <ActionPanel>
@@ -418,7 +431,6 @@ export default function Command() {
                           <Action.Push
                             title="Open Graph"
                             icon={Icon.BarChart}
-                            shortcut={{ modifiers: ["cmd"], key: "g" }}
                             target={
                               <LazyGraphView
                                 name={fav.name}

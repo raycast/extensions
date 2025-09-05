@@ -11,6 +11,7 @@ import {
 } from "../storage";
 import { LocationUtils } from "../utils/location-utils";
 import { DebugLogger } from "../utils/debug-utils";
+import { buildGraphMarkdown } from "../graph";
 
 export interface UseFavoritesReturn {
   // Favorites state
@@ -22,6 +23,7 @@ export interface UseFavoritesReturn {
   favoritesLoading: Record<string, boolean>;
   weatherDataInitialized: boolean;
   isInitialLoad: boolean;
+  preWarmedGraphs: Record<string, string>;
 
   // Favorites actions
   addFavoriteLocation: (location: FavoriteLocation) => Promise<void>;
@@ -52,6 +54,7 @@ export function useFavorites(): UseFavoritesReturn {
   const [favoritesLoading, setFavoritesLoading] = useState<Record<string, boolean>>({});
   const [weatherDataInitialized, setWeatherDataInitialized] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [preWarmedGraphs, setPreWarmedGraphs] = useState<Record<string, string>>({});
 
   // Load favorites on mount
   useEffect(() => {
@@ -115,6 +118,20 @@ export function useFavorites(): UseFavoritesReturn {
           for (const [key, ts, sun] of entries) {
             if (ts) {
               setFavoriteWeather((prev) => ({ ...prev, [key]: ts }));
+
+              // Pre-warm graph for this favorite
+              try {
+                const graphMarkdown = buildGraphMarkdown(
+                  favorites.find((f) => LocationUtils.getLocationKey(f.id, f.lat, f.lon) === key)?.name || "Location",
+                  [ts], // Single entry for favorites
+                  48,
+                  { title: "48h forecast", smooth: true },
+                ).markdown;
+
+                setPreWarmedGraphs((prev) => ({ ...prev, [key]: graphMarkdown }));
+              } catch (err) {
+                DebugLogger.error("Error pre-warming graph for favorite:", err);
+              }
             }
             setSunTimes((prev) => ({ ...prev, [key]: sun }));
             // Mark as no longer loading
@@ -231,6 +248,7 @@ export function useFavorites(): UseFavoritesReturn {
     favoritesLoading,
     weatherDataInitialized,
     isInitialLoad,
+    preWarmedGraphs,
 
     // Favorites actions
     addFavoriteLocation,

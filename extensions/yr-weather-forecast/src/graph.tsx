@@ -8,7 +8,7 @@ import { scaleLinear } from "d3-scale";
 import { line, curveMonotoneX } from "d3-shape";
 import { formatPrecip, formatTemperatureCelsius, getUnits } from "./units";
 import { symbolToEmoji } from "./utils/weather-symbols";
-import { directionFromDegrees } from "./weather-utils";
+import { directionFromDegrees, buildWeatherTable } from "./weather-utils";
 import { minFinite, maxFinite, svgToDataUri } from "./graph-utils";
 import { useWeatherData } from "./hooks/useWeatherData";
 import { generateNoForecastDataMessage } from "./utils/error-messages";
@@ -25,9 +25,19 @@ function GraphView(props: {
   hours?: number;
   onShowWelcome?: () => void;
   preCachedGraph?: string;
+  preWarmedGraph?: string;
 }) {
-  const { name, lat, lon, hours = getUIThresholds().DEFAULT_FORECAST_HOURS, onShowWelcome, preCachedGraph } = props;
+  const {
+    name,
+    lat,
+    lon,
+    hours = getUIThresholds().DEFAULT_FORECAST_HOURS,
+    onShowWelcome,
+    preCachedGraph,
+    preWarmedGraph,
+  } = props;
   const [sunByDate, setSunByDate] = useState<Record<string, SunTimes>>({});
+  const [view, setView] = useState<"graph" | "data">("graph");
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const { series, loading, showNoData, preRenderedGraph } = useWeatherData(lat, lon, true);
 
@@ -84,7 +94,10 @@ function GraphView(props: {
       };
     }
 
-    // Use pre-cached graph if available, otherwise use pre-rendered graph, otherwise generate new
+    // Use pre-warmed graph if available, otherwise pre-cached graph, otherwise pre-rendered graph, otherwise generate new
+    if (preWarmedGraph) {
+      return { markdown: preWarmedGraph };
+    }
     if (preCachedGraph) {
       return { markdown: preCachedGraph };
     }
@@ -96,27 +109,26 @@ function GraphView(props: {
     const graphMarkdown = buildGraphMarkdown(name, series, hours, { sunByDate });
 
     return graphMarkdown;
-  }, [name, series, hours, sunByDate, showNoData, loading, preCachedGraph, preRenderedGraph]);
+  }, [name, series, hours, sunByDate, showNoData, loading, preWarmedGraph, preCachedGraph, preRenderedGraph]);
 
-  // Add a small delay to ensure SVG is fully rendered before showing content
-  // This prevents the title and summary text from appearing before the graph
-  const [svgReady, setSvgReady] = useState(false);
+  // Generate data table for tab view
+  const dataTable = useMemo(() => {
+    if (loading || series.length === 0) return "";
+    const subset = series.slice(0, hours);
+    return buildWeatherTable(subset, { showDirection: true });
+  }, [series, hours, loading]);
 
-  useEffect(() => {
-    if (!loading && series.length > 0 && markdown) {
-      // Use configurable delay to ensure SVG is fully rendered
-      const timer = setTimeout(() => {
-        setSvgReady(true);
-      }, getUIThresholds().GRAPH_RENDER_DELAY);
-
-      return () => clearTimeout(timer);
-    } else {
-      setSvgReady(false);
+  // Generate content based on current view
+  const finalMarkdown = useMemo(() => {
+    if (loading) return "";
+    if (series.length === 0 && showNoData) {
+      return generateNoForecastDataMessage({ locationName: name });
     }
-  }, [loading, series.length, markdown]);
 
-  // Only show content when SVG is ready
-  const finalMarkdown = svgReady ? markdown : "";
+    const title = `# ${name} – ${hours}h forecast${view === "data" ? " (Data)" : ""}`;
+    const content = view === "graph" ? markdown : dataTable;
+    return [title, content].join("\n");
+  }, [loading, series.length, showNoData, name, hours, view, markdown, dataTable]);
 
   const handleFavoriteToggle = async () => {
     const favLocation: FavoriteLocation = { name, lat, lon };
@@ -154,6 +166,23 @@ function GraphView(props: {
       markdown={finalMarkdown}
       actions={
         <ActionPanel>
+          {/* View switching actions */}
+          {view === "graph" ? (
+            <Action
+              title="Show Data Table"
+              icon={Icon.List}
+              shortcut={{ modifiers: [], key: "d" }}
+              onAction={() => setView("data")}
+            />
+          ) : (
+            <Action
+              title="Show Graph"
+              icon={Icon.BarChart}
+              shortcut={{ modifiers: [], key: "g" }}
+              onAction={() => setView("graph")}
+            />
+          )}
+
           {isFavorite ? (
             <Action
               title="Remove from Favorites"
@@ -366,8 +395,7 @@ export function buildGraphMarkdown(
     )}</text>`;
   });
 
-  // Add precipitation axis line on the right
-  const precipAxisLine = `<line x1="${width - margin.RIGHT}" x2="${width - margin.RIGHT}" y1="${margin.TOP}" y2="${height - margin.BOTTOM}" stroke="#1e90ff" stroke-width="${graphConfig.LINE_STYLES.AXIS_WIDTH}" opacity="${graphConfig.OPACITY.AXIS_LINE}" />`;
+  // Precipitation axis line removed - white background grid is sufficient
 
   // Add precipitation title on the right
   const precipTitle = `<text x="${width - margin.RIGHT + 12}" y="${margin.TOP - 8}" font-size="${graphConfig.FONT_SIZES.TITLE}" text-anchor="start" fill="#1e90ff" font-weight="600">P (${units === "imperial" ? "in" : "mm"})</text>`;
@@ -406,7 +434,6 @@ export function buildGraphMarkdown(
     ${yLabels.join("\n")}
     ${pLabels.join("\n")}
     ${precipGridLines.join("\n")}
-    ${precipAxisLine}
     ${precipTitle}
     ${tempTitle}
     ${precipAreaFill}
@@ -426,7 +453,9 @@ export function buildGraphMarkdown(
   const tMinText = formatTemperatureCelsius(tMinC);
   const tMaxText = formatTemperatureCelsius(tMaxC);
   const pMaxText = formatPrecip(pMaxMm);
-  const titleLabel = opts?.title ?? `${hours}h forecast`;
-  const md = `# ${name} – ${titleLabel}\n\n![forecast](data:image/svg+xml;utf8,${svgToDataUri(svg)})\n\nMin ${tMinText ?? "N/A"} • Max ${tMaxText ?? "N/A"} • Max precip ${pMaxText ?? "N/A"}`;
+  // Use HTML img with explicit dimensions to prevent layout shift
+  const svgDataUri = `data:image/svg+xml;utf8,${svgToDataUri(svg)}`;
+  const graphHtml = `<img src="${svgDataUri}" width="${width}" height="${height}" alt="Forecast graph" style="display:block;" />`;
+  const md = `${graphHtml}\n\nMin ${tMinText ?? "N/A"} • Max ${tMaxText ?? "N/A"} • Max precip ${pMaxText ?? "N/A"}`;
   return { markdown: md };
 }

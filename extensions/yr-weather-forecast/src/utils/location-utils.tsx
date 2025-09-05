@@ -1,7 +1,6 @@
 import { Action, ActionPanel, Icon, showToast, Toast } from "@raycast/api";
 import ForecastView from "../forecast";
 import LazyGraphView from "../components/lazy-graph";
-import DayView from "../day-view";
 import { getWeather } from "../weather-client";
 import { TimeseriesEntry } from "../weather-client";
 import { FavoriteLocation } from "../storage";
@@ -26,25 +25,18 @@ export class LocationUtils {
   ) {
     return (
       <ActionPanel>
-        {targetDate ? (
-          <Action.Push
-            title="Open Day View"
-            target={
-              <DayView
-                name={name}
-                lat={lat}
-                lon={lon}
-                date={targetDate.toISOString().split("T")[0]}
-                onShowWelcome={onShowWelcome}
-              />
-            }
-          />
-        ) : (
-          <Action.Push
-            title="Open Forecast"
-            target={<ForecastView name={name} lat={lat} lon={lon} onShowWelcome={onShowWelcome} />}
-          />
-        )}
+        <Action.Push
+          title="Open Forecast"
+          target={
+            <ForecastView
+              name={name}
+              lat={lat}
+              lon={lon}
+              onShowWelcome={onShowWelcome}
+              targetDate={targetDate?.toISOString().split("T")[0]}
+            />
+          }
+        />
         <Action
           title="Show Current Weather"
           onAction={async () => {
@@ -63,7 +55,6 @@ export class LocationUtils {
         <Action.Push
           title="Open Graph"
           icon={Icon.BarChart}
-          shortcut={{ modifiers: ["cmd"], key: "g" }}
           target={<LazyGraphView name={name} lat={lat} lon={lon} onShowWelcome={onShowWelcome} />}
         />
         {isFavorite ? (

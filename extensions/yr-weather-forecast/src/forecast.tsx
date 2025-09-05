@@ -1,14 +1,14 @@
 import { Action, ActionPanel, Detail, showToast, Toast, Icon } from "@raycast/api";
 import { useMemo, useState, useEffect } from "react";
-import { type TimeseriesEntry } from "./weather-client";
 import { buildGraphMarkdown } from "./graph";
-import { groupByDay, reduceToDayPeriods, buildWeatherTable } from "./weather-utils";
+import { reduceToDayPeriods, buildWeatherTable, filterToDate } from "./weather-utils";
 import { useWeatherData } from "./hooks/useWeatherData";
 import { generateNoForecastDataMessage } from "./utils/error-messages";
 import { addFavorite, removeFavorite, isFavorite as checkIsFavorite, type FavoriteLocation } from "./storage";
 import { withErrorBoundary } from "./components/error-boundary";
 import { WeatherErrorFallback } from "./components/error-fallbacks";
 import { getUIThresholds } from "./config/weather-config";
+import { formatDate } from "./utils/date-utils";
 
 function ForecastView(props: {
   name: string;
@@ -16,9 +16,11 @@ function ForecastView(props: {
   lon: number;
   preCachedGraph?: string;
   onShowWelcome?: () => void;
+  targetDate?: string; // ISO date string for specific day view
 }) {
-  const { name, lat, lon, preCachedGraph, onShowWelcome } = props;
+  const { name, lat, lon, preCachedGraph, onShowWelcome, targetDate } = props;
   const [mode, setMode] = useState<"detailed" | "summary">("detailed");
+  const [view, setView] = useState<"graph" | "data">("graph");
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const { series: items, loading, showNoData, preRenderedGraph } = useWeatherData(lat, lon, true);
 
@@ -32,9 +34,21 @@ function ForecastView(props: {
     checkFavoriteStatus();
   }, [name, lat, lon]);
 
-  const byDay = useMemo(() => groupByDay(items), [items]);
+  // Filter data based on targetDate if provided, otherwise use mode-based filtering
+  const filteredItems = useMemo(() => {
+    if (targetDate) {
+      return filterToDate(items, new Date(targetDate));
+    }
+    return items;
+  }, [items, targetDate]);
+
   const reduced = useMemo(() => reduceToDayPeriods(items, getUIThresholds().SUMMARY_FORECAST_DAYS), [items]);
-  const displaySeries = mode === "detailed" ? items.slice(0, getUIThresholds().DETAILED_FORECAST_HOURS) : reduced;
+  const displaySeries = useMemo(() => {
+    if (targetDate) {
+      return filteredItems; // Use filtered data for specific date
+    }
+    return mode === "detailed" ? items.slice(0, getUIThresholds().DETAILED_FORECAST_HOURS) : reduced;
+  }, [targetDate, filteredItems, mode, items, reduced]);
 
   // Cache both graph types for instant switching
   const [graphCache, setGraphCache] = useState<{
@@ -84,35 +98,31 @@ function ForecastView(props: {
   }, [mode, graphCache, displaySeries.length, showNoData]);
 
   const listMarkdown = useMemo(() => {
-    if (displaySeries.length === 0 && showNoData) {
+    if (items.length === 0 && showNoData) {
       return generateNoForecastDataMessage({ locationName: name });
     }
 
-    return mode === "detailed" ? buildListMarkdown(byDay) : buildSummaryListMarkdown(reduced);
-  }, [mode, byDay, reduced, displaySeries.length, showNoData, name]);
+    // For data view, always show comprehensive table with all data points
+    return buildWeatherTable(items, { showDirection: true, showPeriod: false });
+  }, [items, showNoData, name]);
 
   // Only show content when not loading and we have data or know there's no data
   const shouldShowContent = !loading && (displaySeries.length > 0 || showNoData);
 
-  // Add a small delay to ensure SVG is fully rendered before showing content
-  // This prevents the text from appearing before the graph
-  const [svgReady, setSvgReady] = useState(false);
-
-  useEffect(() => {
-    if (shouldShowContent && graph) {
-      // Use configurable delay to ensure SVG is fully rendered
-      const timer = setTimeout(() => {
-        setSvgReady(true);
-      }, getUIThresholds().GRAPH_RENDER_DELAY);
-
-      return () => clearTimeout(timer);
-    } else {
-      setSvgReady(false);
-    }
-  }, [shouldShowContent, graph]);
-
-  // Only show content when SVG is ready
-  const finalMarkdown = shouldShowContent && svgReady ? [graph, "\n---\n", listMarkdown].join("\n") : "";
+  // Generate content based on current view and mode
+  const finalMarkdown = shouldShowContent
+    ? (() => {
+        let titleText;
+        if (targetDate) {
+          const dateLabel = formatDate(targetDate, "LONG_DAY");
+          titleText = `# ${name} – ${dateLabel} (1-day)${view === "data" ? " (Data)" : ""}`;
+        } else {
+          titleText = `# ${name} – ${mode === "detailed" ? "48-Hour Forecast" : "9-Day Summary"}${view === "data" ? " (Data)" : ""}`;
+        }
+        const content = view === "graph" ? graph : listMarkdown;
+        return [titleText, content].join("\n");
+      })()
+    : "";
 
   const handleFavoriteToggle = async () => {
     const favLocation: FavoriteLocation = { name, lat, lon };
@@ -150,11 +160,45 @@ function ForecastView(props: {
       markdown={finalMarkdown}
       actions={
         <ActionPanel>
-          {mode === "detailed" ? (
-            <Action title="Show 9-Day Summary" onAction={() => setMode("summary")} />
-          ) : (
-            <Action title="Show 2-Day Detailed" onAction={() => setMode("detailed")} />
+          {/* Primary flow: Mode switching with Space key (only when not in targetDate mode) */}
+          {!targetDate && (
+            <>
+              {mode === "detailed" ? (
+                <Action
+                  title="Show 9-Day Summary"
+                  icon={Icon.Calendar}
+                  shortcut={{ modifiers: [], key: "space" }}
+                  onAction={() => setMode("summary")}
+                />
+              ) : (
+                <Action
+                  title="Show 48-Hour Detailed"
+                  icon={Icon.Clock}
+                  shortcut={{ modifiers: [], key: "space" }}
+                  onAction={() => setMode("detailed")}
+                />
+              )}
+            </>
           )}
+
+          {/* View switching actions */}
+          {view === "graph" ? (
+            <Action
+              title="Show Data Table"
+              icon={Icon.List}
+              shortcut={{ modifiers: [], key: "d" }}
+              onAction={() => setView("data")}
+            />
+          ) : (
+            <Action
+              title="Show Graph"
+              icon={Icon.BarChart}
+              shortcut={{ modifiers: [], key: "g" }}
+              onAction={() => setView("graph")}
+            />
+          )}
+
+          {/* Favorites management */}
           {isFavorite ? (
             <Action
               title="Remove from Favorites"
@@ -190,27 +234,3 @@ export default withErrorBoundary(ForecastView, {
   componentName: "Forecast View",
   fallback: <WeatherErrorFallback componentName="Forecast View" />,
 });
-
-function buildListMarkdown(byDay: Record<string, TimeseriesEntry[]>): string {
-  const sections: string[] = [];
-  for (const [day, entries] of Object.entries(byDay)) {
-    sections.push(`### ${day}`);
-    sections.push("");
-    sections.push(buildWeatherTable(entries, { showDirection: true }));
-  }
-  return sections.join("\n");
-}
-
-function buildSummaryListMarkdown(series: TimeseriesEntry[]): string {
-  // Group reduced series again by day for table rendering
-  const byDay = groupByDay(series);
-  const sections: string[] = [];
-  for (const [day, entries] of Object.entries(byDay)) {
-    // Sort by time
-    entries.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
-    sections.push(`### ${day}`);
-    sections.push("");
-    sections.push(buildWeatherTable(entries, { showDirection: true, showPeriod: true }));
-  }
-  return sections.join("\n");
-}
