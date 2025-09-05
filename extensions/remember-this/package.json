@@ -5,6 +5,9 @@
   "description": "Remember This is an app designed to help you stay motivated and focused on completing your work by its due date. Simply enter any information, such as tasks, notes, or reminders, and set a due date. After the due date passes, the app automatically forgets the information, creating a sense of urgency to complete the task before it's lost forever. This unique feature inspires you to work efficiently and stay on top of your deadlines. With Remember This, you can say goodbye to forgotten tasks and missed deadlines, and hello to increased productivity.",
   "icon": "command_icon.png",
   "author": "Ek217",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "categories": [
     "Data"
   ],
@@ -134,37 +137,46 @@
           "value": "normal"
         },
         {
-                  "title": "Large",
-                  "value": "large"
-                }
+          "title": "Large",
+          "value": "large"
+        }
       ]
     },
     {
-          "name": "webhookurl",
-          "description": "WebhookURL",
-          "type": "password",
-          "required": false,
-          "title": "WebhookURL",
-          "placeholder": "WebhookURL"
-        }
+      "name": "hideNothingTodoTitle",
+      "description": "Hide the menu bar title when displaying 'Woohoo! You got nothing todo!'",
+      "type": "checkbox",
+      "required": false,
+      "title": "Menubar Command Nothing Todo Title",
+      "label": "Hide Nothing Todo Title",
+      "default": false
+    },
+    {
+      "name": "webhookurl",
+      "description": "WebhookURL",
+      "type": "password",
+      "required": false,
+      "title": "WebhookURL",
+      "placeholder": "WebhookURL"
+    }
   ],
   "dependencies": {
-    "@raycast/api": "^1.54.0",
-    "axios": "^1.8.4",
+    "@raycast/api": "^1.102.6",
+    "axios": "^1.11.0",
     "node-notifier": "^10.0.1",
-    "node-telegram-bot-api": "^0.61.0",
-    "open": "^9.1.0",
-    "run-applescript": "^6.1.0",
-    "ts-node": "^10.9.1"
+    "node-telegram-bot-api": "^0.66.0",
+    "open": "^10.2.0",
+    "run-applescript": "^7.0.0",
+    "ts-node": "^10.9.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "24.3.0",
     "@types/node-fetch": "^2.6.4",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@types/react": "19.1.12",
+    "eslint": "^9.34.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
   },
   "scripts": {
     "build": "ray build -e dist",

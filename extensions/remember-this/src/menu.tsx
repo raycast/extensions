@@ -11,6 +11,8 @@ if (!fs.existsSync(REMEMBERING_FILE)) {
 
 const preferences = getPreferenceValues<Preferences>();
 const sizeValue = preferences.size;
+const hideNothingTodoTitle = preferences.hideNothingTodoTitle;
+const nothingTodoTitle = hideNothingTodoTitle ? `` : `Woohoo! You got nothing todo!`;
 
 const second = 1000;
 const minute = 60 * second;
@@ -93,7 +95,7 @@ export default function Command() {
     }
     if (sizeValue === "normal") {
       return (
-        <MenuBarExtra icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} tooltip="Enjoy the rest of the day off">
+        <MenuBarExtra icon={Icon.Stars} title={nothingTodoTitle} tooltip="Enjoy the rest of the day off">
           <MenuBarExtra.Item icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} />
           <MenuBarExtra.Item
             icon={Icon.CircleProgress100}
@@ -107,7 +109,7 @@ export default function Command() {
     }
     if (sizeValue === "large") {
       return (
-        <MenuBarExtra icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} tooltip="Enjoy the rest of the day off">
+        <MenuBarExtra icon={Icon.Stars} title={nothingTodoTitle} tooltip="Enjoy the rest of the day off">
           <MenuBarExtra.Item icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} />
           <MenuBarExtra.Item
             icon={Icon.CircleProgress100}
@@ -142,7 +144,7 @@ export default function Command() {
     }
     if (sizeValue === "normal") {
       return (
-        <MenuBarExtra icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} tooltip="Enjoy the rest of the day off">
+        <MenuBarExtra icon={Icon.Stars} title={nothingTodoTitle} tooltip="Enjoy the rest of the day off">
           <MenuBarExtra.Item icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} />
           <MenuBarExtra.Item
             icon={Icon.CircleProgress100}
@@ -156,7 +158,7 @@ export default function Command() {
     }
     if (sizeValue === "large") {
       return (
-        <MenuBarExtra icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} tooltip="Enjoy the rest of the day off">
+        <MenuBarExtra icon={Icon.Stars} title={nothingTodoTitle} tooltip="Enjoy the rest of the day off">
           <MenuBarExtra.Item icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} />
           <MenuBarExtra.Item
             icon={Icon.CircleProgress100}
@@ -187,7 +189,7 @@ export default function Command() {
     }
     if (sizeValue === "normal") {
       return (
-        <MenuBarExtra icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} tooltip="Enjoy the rest of the day off">
+        <MenuBarExtra icon={Icon.Stars} title={nothingTodoTitle} tooltip="Enjoy the rest of the day off">
           <MenuBarExtra.Item icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} />
           <MenuBarExtra.Item
             icon={Icon.CircleProgress100}
@@ -201,7 +203,7 @@ export default function Command() {
     }
     if (sizeValue === "large") {
       return (
-        <MenuBarExtra icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} tooltip="Enjoy the rest of the day off">
+        <MenuBarExtra icon={Icon.Stars} title={nothingTodoTitle} tooltip="Enjoy the rest of the day off">
           <MenuBarExtra.Item icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} />
           <MenuBarExtra.Item
             icon={Icon.CircleProgress100}
