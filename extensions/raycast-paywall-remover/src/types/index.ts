@@ -1,13 +1,7 @@
 // Type definitions for the Raycast Paywall Remover extension
 
-/**
- * User preferences for the extension
- * Requirement 3.2: User can configure custom paywall removal service URL
- */
-export interface Preferences {
-  paywallServiceUrl: string;
-  defaultBrowser?: string;
-}
+// User preferences for the extension are auto-generated in raycast-env.d.ts
+// Remove this interface to avoid conflicts
 
 /**
  * Result of URL processing operation
@@ -110,7 +104,7 @@ export type ServiceUrlValidation = {
  * Requirement 4.3: Context for command state management
  */
 export type CommandContext = {
-  preferences: Preferences;
+  preferences: { paywallServiceUrl: string; defaultBrowser?: string };
   source: "clipboard" | "current-tab";
   startTime: number;
 };

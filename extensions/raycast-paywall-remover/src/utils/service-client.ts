@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { Preferences, ServiceUrlValidation } from "../types";
+import { ServiceUrlValidation } from "../types";
 
 /**
  * Default paywall removal service URL
@@ -13,10 +13,10 @@ const DEFAULT_SERVICE_URL = "https://open.bolha.tools";
  */
 export class PaywallServiceClient {
   private serviceUrl: string;
-  private preferences: Preferences;
+  private preferences: { paywallServiceUrl: string };
 
   constructor() {
-    this.preferences = getPreferenceValues<Preferences>();
+    this.preferences = getPreferenceValues<{ paywallServiceUrl: string }>();
     this.serviceUrl = this.getValidatedServiceUrl();
   }
 
@@ -186,7 +186,7 @@ export class PaywallServiceClient {
    * Requirement 3.1: Re-read preferences when needed
    */
   public refreshConfiguration(): void {
-    this.preferences = getPreferenceValues<Preferences>();
+    this.preferences = getPreferenceValues<{ paywallServiceUrl: string }>();
     this.serviceUrl = this.getValidatedServiceUrl();
   }
 

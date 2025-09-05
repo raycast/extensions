@@ -2,7 +2,6 @@
 
 A powerful Raycast extension that instantly removes paywalls from web articles. **What makes this extension unique?** You can configure your own paywall removal service, giving you complete control over how articles are processed.
 
-> [📸 Screenshot Placeholder: Raycast command palette showing "Remove Paywall from Clipboard URL" and "Remove Paywall from Current Tab" commands with the extension icon]
 
 ## ✨ Key Features
 
@@ -12,14 +11,10 @@ A powerful Raycast extension that instantly removes paywalls from web articles. 
 - **Popular alternatives**: `12ft.io`, `13ft.io`, or your own self-hosted solution
 - **Complete flexibility**: Use any service that accepts URL parameters
 
-> [📸 Screenshot Placeholder: Raycast extension preferences showing the "Paywall Service URL" configuration field with example services listed]
-
 ### 🚀 **Two Convenient Methods**
 
 **1. Clipboard URL Processing**
 Copy any paywalled article URL and instantly process it through your configured service.
-
-> [📸 Screenshot Placeholder: Success toast showing "Clipboard URL processed successfully! Opening: https://open.bolha.tools/https://example-news-site.com/article"]
 
 **2. Current Browser Tab**  
 Process the article you're currently reading with a single command. Works with:
@@ -29,15 +24,11 @@ Process the article you're currently reading with a single command. Works with:
 - ✅ **Edge** - Full support
 - ✅ **Zen Browser** - Clipboard method recommended
 
-> [📸 Screenshot Placeholder: Browser with a paywalled article open, showing Raycast command being executed and the resulting success message]
-
 ## 🛠 How It Works
 
 1. **Choose your method**: Use clipboard or current tab command
 2. **Automatic processing**: Your URL is sent to your configured paywall service
 3. **Instant access**: The processed article opens automatically in your browser
-
-> [📸 Screenshot Placeholder: Before/after comparison showing a paywalled article (left) and the same article accessible through the paywall removal service (right)]
 
 ## ⚙️ Configuration
 
@@ -50,8 +41,6 @@ Process the article you're currently reading with a single command. Works with:
    - `https://12ft.io`  
    - `https://13ft.io`
    - `https://your-custom-service.com`
-
-> [📸 Screenshot Placeholder: Step-by-step configuration screenshots showing: 1) Opening Raycast extensions, 2) Finding Paywall Remover, 3) Clicking configure, 4) Setting custom URL]
 
 ### Browser Compatibility
 
@@ -78,8 +67,6 @@ Process the article you're currently reading with a single command. Works with:
 - **`Remove Paywall from Clipboard URL`** - Process URL from clipboard
 - **`Remove Paywall from Current Tab`** - Process current browser tab URL
 
-> [📸 Screenshot Placeholder: Raycast command search showing both commands with keyboard shortcuts and descriptions]
-
 ## 🔒 Privacy & Control
 
 - **No data collection**: Your URLs are processed directly by your chosen service
@@ -104,6 +91,24 @@ Process the article you're currently reading with a single command. Works with:
 - **Raycast** (latest version recommended)
 - **macOS** 10.15 or later
 - **Internet connection** for paywall service access
+
+## 📸 Screenshots
+
+### Extension Interface
+![Raycast Paywall Remover Interface](metadata/raycast-paywall-remover-interface.jpeg)
+
+### Extension Settings
+![Extension Settings](metadata/raycast-paywall-remover-extension-settings.jpeg)
+
+### Before & After Example
+**Before:** Paywall blocking article access
+![Before - Paywall Block](metadata/example-paywall-before.png)
+
+**During:** Processing with extension
+![During - Processing](metadata/example-paywall-during.png)
+
+**After:** Full article access
+![After - Success](metadata/example-paywall-after.jpeg)
 
 ## 🤝 Contributing
 
