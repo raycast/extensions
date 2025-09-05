@@ -1,6 +1,9 @@
 ---
 title: zsh
 category: CLI
+tech: zsh
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Expressions

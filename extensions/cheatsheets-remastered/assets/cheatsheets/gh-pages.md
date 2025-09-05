@@ -1,6 +1,9 @@
 ---
 title: GitHub pages
 category: Jekyll
+tech: gh-pages
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Custom domains

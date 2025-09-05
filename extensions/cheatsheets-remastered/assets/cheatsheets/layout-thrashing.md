@@ -1,11 +1,15 @@
 ---
 title: Layout thrashing
 category: HTML
-description: ""
-updated: 2017-10-19
+description: ''
+updated: 2017-10-19T00:00:00.000Z
 weight: -1
-intro: |
-  These are CSS properties that will cause "layout thrashing". Avoid changing them to prevent bottlenecks in your UI performance.
+intro: >
+  These are CSS properties that will cause "layout thrashing". Avoid changing
+  them to prevent bottlenecks in your UI performance.
+tech: layout-thrashing
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Layout thrashing

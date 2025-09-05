@@ -1,6 +1,9 @@
 ---
 title: Vows
 category: JavaScript libraries
+tech: vows
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### About vows

@@ -1,10 +1,15 @@
 ---
 title: Stylus
 category: CSS
-prism_languages: [stylus]
+prism_languages:
+  - stylus
 weight: -3
-updated: 2017-10-30
-tags: [Featurable]
+updated: 2017-10-30T00:00:00.000Z
+tags:
+  - Featurable
+tech: stylus
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 Getting started

@@ -1,6 +1,9 @@
 ---
 title: Q.js
 category: JavaScript libraries
+tech: qjs
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### About

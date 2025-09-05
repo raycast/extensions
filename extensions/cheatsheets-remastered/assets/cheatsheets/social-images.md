@@ -1,5 +1,8 @@
 ---
 title: Social media images
+tech: social-images
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Facebook

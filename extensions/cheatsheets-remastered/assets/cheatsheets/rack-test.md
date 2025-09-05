@@ -1,6 +1,9 @@
 ---
 title: rack-test
 category: Ruby libraries
+tech: rack-test
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Methods

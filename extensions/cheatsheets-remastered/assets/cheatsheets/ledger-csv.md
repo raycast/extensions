@@ -1,6 +1,9 @@
 ---
 title: Ledger CSV format
 category: Ledger
+tech: ledger-csv
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Ledger CSV format

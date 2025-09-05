@@ -1,6 +1,10 @@
 ---
 title: Freenode
-tags: [WIP]
+tags:
+  - WIP
+tech: freenode
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### IRC server

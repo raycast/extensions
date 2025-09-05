@@ -1,17 +1,21 @@
 ---
 title: Sass
 category: CSS
-tags: [Featured]
-updated: 2020-07-03
+tags:
+  - Featured
+updated: 2020-07-03T00:00:00.000Z
 weight: -5
 keywords:
   - Variables
   - mixins
   - darken()
   - adjust-color()
-  - "@for @each @while @if @else"
-  - "$list: (a b c)"
-  - "$map: (a: b, c: d)"
+  - '@for @each @while @if @else'
+  - '$list: (a b c)'
+  - '$map: (a: b, c: d)'
+tech: sass
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Basics
