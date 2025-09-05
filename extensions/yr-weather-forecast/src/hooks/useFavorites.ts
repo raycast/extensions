@@ -12,6 +12,7 @@ import {
 import { LocationUtils } from "../utils/location-utils";
 import { DebugLogger } from "../utils/debug-utils";
 import { buildGraphMarkdown } from "../graph";
+import { getUIThresholds, getTimingThresholds } from "../config/weather-config";
 
 export interface UseFavoritesReturn {
   // Favorites state
@@ -124,7 +125,7 @@ export function useFavorites(): UseFavoritesReturn {
                 const graphMarkdown = buildGraphMarkdown(
                   favorites.find((f) => LocationUtils.getLocationKey(f.id, f.lat, f.lon) === key)?.name || "Location",
                   [ts], // Single entry for favorites
-                  48,
+                  getUIThresholds().DEFAULT_FORECAST_HOURS,
                   { title: "48h forecast", smooth: true },
                 ).markdown;
 
@@ -142,7 +143,7 @@ export function useFavorites(): UseFavoritesReturn {
           setTimeout(() => {
             setWeatherDataInitialized(true);
             setIsInitialLoad(false); // Mark initial load as complete
-          }, 100);
+          }, getTimingThresholds().COMPONENT_INIT_DELAY);
         }
       } catch (err) {
         DebugLogger.error("Error fetching favorites:", err);
@@ -153,7 +154,7 @@ export function useFavorites(): UseFavoritesReturn {
           setTimeout(() => {
             setWeatherDataInitialized(true);
             setIsInitialLoad(false); // Mark initial load as complete
-          }, 100);
+          }, getTimingThresholds().COMPONENT_INIT_DELAY);
         }
       }
     }

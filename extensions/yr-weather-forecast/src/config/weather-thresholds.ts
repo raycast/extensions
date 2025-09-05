@@ -38,7 +38,7 @@ export const PRECIPITATION_THRESHOLDS = {
    * WMO: More than 7.5 mm per hour
    * Used for: Heavy rain, heavy snow, downpours
    */
-  HEAVY: 7.5,
+  HEAVY: 7.6,
 
   /**
    * Very heavy precipitation threshold
@@ -46,6 +46,18 @@ export const PRECIPITATION_THRESHOLDS = {
    * Used for: Very heavy rain, torrential downpours
    */
   VERY_HEAVY: 10.0,
+
+  /**
+   * Minimum precipitation for display
+   * Used for: Graph scaling and visibility thresholds
+   */
+  DISPLAY_MIN: 1,
+
+  /**
+   * Zero precipitation threshold
+   * Used for: Graph area fill calculations
+   */
+  ZERO: 0,
 } as const;
 
 /**
@@ -172,6 +184,13 @@ export const UI_THRESHOLDS = {
    * Used for: 2-day detailed view
    */
   DETAILED_FORECAST_HOURS: 48,
+
+  /**
+   * Representative day period hours
+   * Used for: Reducing forecast to key times of day
+   * Based on meteorological conventions for morning, midday, afternoon, evening
+   */
+  REPRESENTATIVE_HOURS: [3, 9, 15, 21],
 } as const;
 
 /**
@@ -235,6 +254,154 @@ export const GRAPH_THRESHOLDS = {
     PRECIPITATION_POINTS: 0.8,
     GRID_LINES: 0.6,
     AXIS_LINE: 0.8,
+  },
+
+  /**
+   * Graph positioning and layout constants
+   */
+  POSITIONING: {
+    /**
+     * Emoji label vertical offset from temperature points
+     * Used for: Weather emoji positioning above temperature line
+     */
+    EMOJI_OFFSET: -12,
+
+    /**
+     * Day boundary label vertical offset from top margin
+     * Used for: Date labels above day boundary lines
+     */
+    DAY_LABEL_OFFSET: -8,
+
+    /**
+     * Sunrise/sunset label vertical offset from top margin
+     * Used for: Sun emoji positioning below day boundary lines
+     */
+    SUN_LABEL_OFFSET: 12,
+
+    /**
+     * Wind direction label vertical offset from bottom margin
+     * Used for: Wind arrow positioning below graph
+     */
+    WIND_LABEL_OFFSET: 20,
+
+    /**
+     * X-axis tick label vertical offset from bottom margin
+     * Used for: Hour labels below x-axis
+     */
+    X_AXIS_LABEL_OFFSET: 36,
+
+    /**
+     * Y-axis label horizontal offset from left margin
+     * Used for: Temperature labels to the left of y-axis
+     */
+    Y_AXIS_LABEL_OFFSET: -12,
+
+    /**
+     * Right-side label horizontal offset from right margin
+     * Used for: Precipitation labels to the right of graph
+     */
+    RIGHT_LABEL_OFFSET: 12,
+  },
+
+  /**
+   * Graph styling constants
+   */
+  STYLING: {
+    /**
+     * Day boundary line dash pattern
+     * Used for: Vertical lines marking midnight boundaries
+     */
+    DAY_BOUNDARY_DASH: "3 3",
+
+    /**
+     * Sunrise/sunset line dash pattern
+     * Used for: Vertical lines marking sun events
+     */
+    SUN_EVENT_DASH: "2 4",
+
+    /**
+     * Precipitation line dash pattern
+     * Used for: Precipitation line styling
+     */
+    PRECIPITATION_DASH: "4 4",
+
+    /**
+     * Number of x-axis ticks for time labels
+     * Used for: Hour markers on x-axis
+     */
+    X_AXIS_TICKS: 8,
+
+    /**
+     * Midnight hour for day boundary calculations
+     * Used for: Aligning day boundaries to local midnight
+     */
+    MIDNIGHT_HOUR: 24,
+
+    /**
+     * Milliseconds in a day for date calculations
+     * Used for: Incrementing day boundaries
+     */
+    MILLISECONDS_PER_DAY: 24 * 60 * 60 * 1000,
+  },
+
+  /**
+   * Graph color constants
+   */
+  COLORS: {
+    /**
+     * Temperature line color
+     */
+    TEMPERATURE: "#ff6b6b",
+
+    /**
+     * Precipitation line and area color
+     */
+    PRECIPITATION: "#1e90ff",
+
+    /**
+     * Precipitation area fill color
+     */
+    PRECIPITATION_AREA: "#1e90ff",
+
+    /**
+     * Day boundary line color
+     */
+    DAY_BOUNDARY: "#ddd",
+
+    /**
+     * Sunrise line color
+     */
+    SUNRISE: "#f0b429",
+
+    /**
+     * Sunset line color
+     */
+    SUNSET: "#a06cd5",
+
+    /**
+     * Grid line color
+     */
+    GRID: "#eee",
+
+    /**
+     * Precipitation grid color
+     */
+    PRECIPITATION_GRID: "#e6f3ff",
+
+    /**
+     * Label text color
+     */
+    LABEL: "#666",
+
+    /**
+     * Axis text color
+     */
+    AXIS: "#888",
+
+    /**
+     * Background color
+     */
+    BACKGROUND: "white",
   },
 } as const;
 

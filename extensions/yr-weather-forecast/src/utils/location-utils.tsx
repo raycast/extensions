@@ -5,7 +5,6 @@ import { getWeather } from "../weather-client";
 import { TimeseriesEntry } from "../weather-client";
 import { FavoriteLocation } from "../storage";
 import { WeatherFormatters } from "./weather-formatters";
-import { ToastMessages } from "./toast-utils";
 
 /**
  * Location utility functions to eliminate duplication
@@ -48,7 +47,11 @@ export class LocationUtils {
                 message: WeatherFormatters.formatWeatherToast(ts),
               });
             } catch (error) {
-              await ToastMessages.weatherLoadFailed(error);
+              await showToast({
+                style: Toast.Style.Failure,
+                title: "Failed to load weather",
+                message: String((error as Error)?.message ?? error),
+              });
             }
           }}
         />

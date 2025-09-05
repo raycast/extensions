@@ -3,7 +3,7 @@ import { showToast, Toast } from "@raycast/api";
 import { searchLocations, type LocationResult } from "../location-search";
 import { parseQueryIntent, type QueryIntent } from "../query-intent";
 import { useDebouncedCallback } from "./useDebounce";
-import { getUIThresholds, getTimingThresholds } from "../config/weather-config";
+import { getUIThresholds, getTimingThresholds, getGraphThresholds } from "../config/weather-config";
 import { DebugLogger } from "../utils/debug-utils";
 
 export interface UseSearchReturn {
@@ -56,7 +56,9 @@ export function useSearch(): UseSearchReturn {
     if (intent.targetDate) {
       const dateStr = intent.targetDate.toLocaleDateString();
       const isToday = intent.targetDate.toDateString() === new Date().toDateString();
-      const isTomorrow = intent.targetDate.toDateString() === new Date(Date.now() + 24 * 60 * 60 * 1000).toDateString();
+      const isTomorrow =
+        intent.targetDate.toDateString() ===
+        new Date(Date.now() + getGraphThresholds().STYLING.MILLISECONDS_PER_DAY).toDateString();
 
       let dateLabel = dateStr;
       if (isToday) dateLabel = "today";

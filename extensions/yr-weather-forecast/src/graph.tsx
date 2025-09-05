@@ -16,7 +16,13 @@ import { formatDate, formatTime } from "./utils/date-utils";
 import { addFavorite, removeFavorite, isFavorite as checkIsFavorite, type FavoriteLocation } from "./storage";
 import { withErrorBoundary } from "./components/error-boundary";
 import { GraphErrorFallback } from "./components/error-fallbacks";
-import { getGraphThresholds, getUIThresholds, convertTemperature, convertPrecipitation } from "./config/weather-config";
+import {
+  getGraphThresholds,
+  getUIThresholds,
+  convertTemperature,
+  convertPrecipitation,
+  getWeatherConfig,
+} from "./config/weather-config";
 
 function GraphView(props: {
   name: string;
@@ -227,6 +233,7 @@ export function buildGraphMarkdown(
 ): { markdown: string } {
   const subset = series.slice(0, hours);
   const graphConfig = getGraphThresholds();
+  const weatherConfig = getWeatherConfig();
   const { WIDTH: width, HEIGHT: height, MARGIN: margin } = graphConfig;
   const innerWidth = width - margin.LEFT - margin.RIGHT;
   const innerHeight = height - margin.TOP - margin.BOTTOM;
@@ -256,9 +263,12 @@ export function buildGraphMarkdown(
     .range([margin.TOP + innerHeight, margin.TOP]);
   const ty = (v: number) => yT(v);
 
-  const pMaxDisp = Math.max(1, maxFinite(precsDisplay) ?? 1);
+  const pMaxDisp = Math.max(
+    weatherConfig.precipitation.DISPLAY_MIN,
+    maxFinite(precsDisplay) ?? weatherConfig.precipitation.DISPLAY_MIN,
+  );
   const yP = scaleLinear()
-    .domain([0, pMaxDisp])
+    .domain([weatherConfig.precipitation.ZERO, pMaxDisp])
     .range([margin.TOP + innerHeight, margin.TOP]);
   const py = (v: number) => yP(v);
 
@@ -285,13 +295,13 @@ export function buildGraphMarkdown(
   // Always apply smooth curves for better visual appearance
   precAreaLine.curve(curveMonotoneX);
   const precAreaPath = precAreaLine([...precsDisplay, 0, 0] as number[]) || "";
-  const precipAreaFill = `<path d="${precAreaPath} L ${xScale(times[times.length - 1])} ${py(0)} L ${xScale(times[0])} ${py(0)} Z" fill="#1e90ff" opacity="0.1" stroke-linejoin="round" />`;
+  const precipAreaFill = `<path d="${precAreaPath} L ${xScale(times[times.length - 1])} ${py(weatherConfig.precipitation.ZERO)} L ${xScale(times[0])} ${py(weatherConfig.precipitation.ZERO)} Z" fill="${graphConfig.COLORS.PRECIPITATION_AREA}" opacity="${graphConfig.OPACITY.PRECIPITATION_AREA}" stroke-linejoin="round" />`;
 
   // Emoji labels for weather above temperature points
   const emojiLabels = times
     .map((t, i) => {
       const x = xScale(t);
-      const y = ty(tempsDisplay[i] ?? 0) - 12;
+      const y = ty(tempsDisplay[i] ?? 0) + graphConfig.POSITIONING.EMOJI_OFFSET;
       const e = symbolToEmoji(symbols[i]);
       return e
         ? `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" font-size="${graphConfig.FONT_SIZES.EMOJI}" text-anchor="middle">${e}</text>`
@@ -306,15 +316,19 @@ export function buildGraphMarkdown(
     const end = new Date(times[times.length - 1]);
     // Align to local midnight after start
     const firstMidnight = new Date(start);
-    firstMidnight.setHours(24, 0, 0, 0);
+    firstMidnight.setHours(graphConfig.STYLING.MIDNIGHT_HOUR, 0, 0, 0);
     const parts: string[] = [];
-    for (let d = firstMidnight; d.getTime() < end.getTime(); d = new Date(d.getTime() + 24 * 3600 * 1000)) {
+    for (
+      let d = firstMidnight;
+      d.getTime() < end.getTime();
+      d = new Date(d.getTime() + graphConfig.STYLING.MILLISECONDS_PER_DAY)
+    ) {
       const x = xScale(d.getTime());
       const label = formatDate(d, "SHORT_DAY");
       parts.push(
         `<g>
-          <line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${margin.TOP}" y2="${height - margin.BOTTOM}" stroke="#ddd" stroke-dasharray="3 3" />
-          <text x="${x.toFixed(1)}" y="${margin.TOP - 8}" font-size="${graphConfig.FONT_SIZES.LABEL}" text-anchor="middle" fill="#666">${label}</text>
+          <line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${margin.TOP}" y2="${height - margin.BOTTOM}" stroke="${graphConfig.COLORS.DAY_BOUNDARY}" stroke-dasharray="${graphConfig.STYLING.DAY_BOUNDARY_DASH}" />
+          <text x="${x.toFixed(1)}" y="${margin.TOP + graphConfig.POSITIONING.DAY_LABEL_OFFSET}" font-size="${graphConfig.FONT_SIZES.LABEL}" text-anchor="middle" fill="${graphConfig.COLORS.LABEL}">${label}</text>
         </g>`,
       );
     }
@@ -332,8 +346,8 @@ export function buildGraphMarkdown(
         const x = xScale(sr);
         parts.push(
           `<g>
-            <line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${margin.TOP}" y2="${height - margin.BOTTOM}" stroke="#f0b429" stroke-dasharray="2 4" />
-            <text x="${x.toFixed(1)}" y="${margin.TOP + 12}" font-size="${graphConfig.FONT_SIZES.LABEL}" text-anchor="middle">🌅</text>
+            <line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${margin.TOP}" y2="${height - margin.BOTTOM}" stroke="${graphConfig.COLORS.SUNRISE}" stroke-dasharray="${graphConfig.STYLING.SUN_EVENT_DASH}" />
+            <text x="${x.toFixed(1)}" y="${margin.TOP + graphConfig.POSITIONING.SUN_LABEL_OFFSET}" font-size="${graphConfig.FONT_SIZES.LABEL}" text-anchor="middle">🌅</text>
           </g>`,
         );
       }
@@ -341,8 +355,8 @@ export function buildGraphMarkdown(
         const x = xScale(ss);
         parts.push(
           `<g>
-            <line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${margin.TOP}" y2="${height - margin.BOTTOM}" stroke="#a06cd5" stroke-dasharray="2 4" />
-            <text x="${x.toFixed(1)}" y="${margin.TOP + 12}" font-size="${graphConfig.FONT_SIZES.LABEL}" text-anchor="middle">🌇</text>
+            <line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${margin.TOP}" y2="${height - margin.BOTTOM}" stroke="${graphConfig.COLORS.SUNSET}" stroke-dasharray="${graphConfig.STYLING.SUN_EVENT_DASH}" />
+            <text x="${x.toFixed(1)}" y="${margin.TOP + graphConfig.POSITIONING.SUN_LABEL_OFFSET}" font-size="${graphConfig.FONT_SIZES.LABEL}" text-anchor="middle">🌇</text>
           </g>`,
         );
       }
@@ -356,14 +370,14 @@ export function buildGraphMarkdown(
       const d = dirs[i];
       if (typeof d !== "number") return "";
       const x = xScale(t);
-      const y = height - margin.BOTTOM + 20;
+      const y = height - margin.BOTTOM + graphConfig.POSITIONING.WIND_LABEL_OFFSET;
       const { arrow } = directionFromDegrees(d);
-      return `<text x="${x.toFixed(1)}" y="${y}" font-size="${graphConfig.FONT_SIZES.LABEL}" text-anchor="middle" fill="#666">${arrow}</text>`;
+      return `<text x="${x.toFixed(1)}" y="${y}" font-size="${graphConfig.FONT_SIZES.LABEL}" text-anchor="middle" fill="${graphConfig.COLORS.LABEL}">${arrow}</text>`;
     })
     .join("");
 
   // X-axis ticks (hours)
-  const xTicks = 8;
+  const xTicks = graphConfig.STYLING.X_AXIS_TICKS;
   const xTickElems = new Array(xTicks + 1)
     .fill(0)
     .map((_, i) => {
@@ -371,8 +385,8 @@ export function buildGraphMarkdown(
       const x = xScale(t);
       const label = formatTime(new Date(t), "HOUR_ONLY");
       return `\n  <g>
-    <line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${margin.TOP}" y2="${height - margin.BOTTOM}" stroke="#eee" />
-    <text x="${x.toFixed(1)}" y="${height - margin.BOTTOM + 36}" font-size="${graphConfig.FONT_SIZES.AXIS}" text-anchor="middle" fill="#888">${label}</text>
+    <line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${margin.TOP}" y2="${height - margin.BOTTOM}" stroke="${graphConfig.COLORS.GRID}" />
+    <text x="${x.toFixed(1)}" y="${height - margin.BOTTOM + graphConfig.POSITIONING.X_AXIS_LABEL_OFFSET}" font-size="${graphConfig.FONT_SIZES.AXIS}" text-anchor="middle" fill="${graphConfig.COLORS.AXIS}">${label}</text>
   </g>`;
     })
     .join("");
@@ -381,16 +395,16 @@ export function buildGraphMarkdown(
   const tempLabel = (v: number) => (units === "imperial" ? `${Math.round(v)} °F` : `${Math.round(v)} °C`);
   const yLabels = [tMinDisp, (tMinDisp + tMaxDisp) / 2, tMaxDisp].map((v) => {
     const y = ty(v);
-    return `<text x="${margin.LEFT - 12}" y="${y.toFixed(1)}" font-size="${graphConfig.FONT_SIZES.AXIS}" text-anchor="end" alignment-baseline="middle" fill="#888">${tempLabel(
+    return `<text x="${margin.LEFT + graphConfig.POSITIONING.Y_AXIS_LABEL_OFFSET}" y="${y.toFixed(1)}" font-size="${graphConfig.FONT_SIZES.AXIS}" text-anchor="end" alignment-baseline="middle" fill="${graphConfig.COLORS.AXIS}">${tempLabel(
       v,
     )}</text>`;
   });
 
   // Right-side precipitation labels (0, mid, max) in selected units
   const pLabel = (v: number) => (units === "imperial" ? `${Number(v.toFixed(2))} in` : `${v} mm`);
-  const pLabels = [0, pMaxDisp / 2, pMaxDisp].map((v) => {
+  const pLabels = [weatherConfig.precipitation.ZERO, pMaxDisp / 2, pMaxDisp].map((v) => {
     const y = py(v);
-    return `<text x="${width - margin.RIGHT + 12}" y="${y.toFixed(1)}" font-size="${graphConfig.FONT_SIZES.AXIS}" text-anchor="start" alignment-baseline="middle" fill="#888" font-weight="500">${pLabel(
+    return `<text x="${width - margin.RIGHT + graphConfig.POSITIONING.RIGHT_LABEL_OFFSET}" y="${y.toFixed(1)}" font-size="${graphConfig.FONT_SIZES.AXIS}" text-anchor="start" alignment-baseline="middle" fill="${graphConfig.COLORS.AXIS}" font-weight="500">${pLabel(
       v,
     )}</text>`;
   });
@@ -398,24 +412,24 @@ export function buildGraphMarkdown(
   // Precipitation axis line removed - white background grid is sufficient
 
   // Add precipitation title on the right
-  const precipTitle = `<text x="${width - margin.RIGHT + 12}" y="${margin.TOP - 8}" font-size="${graphConfig.FONT_SIZES.TITLE}" text-anchor="start" fill="#1e90ff" font-weight="600">P (${units === "imperial" ? "in" : "mm"})</text>`;
+  const precipTitle = `<text x="${width - margin.RIGHT + graphConfig.POSITIONING.RIGHT_LABEL_OFFSET}" y="${margin.TOP + graphConfig.POSITIONING.DAY_LABEL_OFFSET}" font-size="${graphConfig.FONT_SIZES.TITLE}" text-anchor="start" fill="${graphConfig.COLORS.PRECIPITATION}" font-weight="600">P (${units === "imperial" ? "in" : "mm"})</text>`;
 
   // Add temperature title on the left
-  const tempTitle = `<text x="${margin.LEFT - 12}" y="${margin.TOP - 8}" font-size="${graphConfig.FONT_SIZES.TITLE}" text-anchor="end" fill="#ff6b6b" font-weight="600">T (${units === "imperial" ? "°F" : "°C"})</text>`;
+  const tempTitle = `<text x="${margin.LEFT + graphConfig.POSITIONING.Y_AXIS_LABEL_OFFSET}" y="${margin.TOP + graphConfig.POSITIONING.DAY_LABEL_OFFSET}" font-size="${graphConfig.FONT_SIZES.TITLE}" text-anchor="end" fill="${graphConfig.COLORS.TEMPERATURE}" font-weight="600">T (${units === "imperial" ? "°F" : "°C"})</text>`;
 
   // Add precipitation grid lines for better readability
-  const precipGridLines = [0, pMaxDisp / 2, pMaxDisp].map((v) => {
+  const precipGridLines = [weatherConfig.precipitation.ZERO, pMaxDisp / 2, pMaxDisp].map((v) => {
     const y = py(v);
-    return `<line x1="${margin.LEFT}" x2="${width - margin.RIGHT}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#e6f3ff" stroke-width="${graphConfig.LINE_STYLES.GRID_WIDTH}" opacity="${graphConfig.OPACITY.GRID_LINES}" />`;
+    return `<line x1="${margin.LEFT}" x2="${width - margin.RIGHT}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="${graphConfig.COLORS.PRECIPITATION_GRID}" stroke-width="${graphConfig.LINE_STYLES.GRID_WIDTH}" opacity="${graphConfig.OPACITY.GRID_LINES}" />`;
   });
 
   // Add precipitation data points for better visibility
   const precipPoints = precsDisplay
     .map((p, i) => {
-      if (p > 0) {
+      if (p > weatherConfig.precipitation.ZERO) {
         const x = xScale(times[i]);
         const y = py(p);
-        return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${graphConfig.PRECIPITATION_POINT_RADIUS}" fill="#1e90ff" opacity="${graphConfig.OPACITY.PRECIPITATION_POINTS}" />`;
+        return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${graphConfig.PRECIPITATION_POINT_RADIUS}" fill="${graphConfig.COLORS.PRECIPITATION}" opacity="${graphConfig.OPACITY.PRECIPITATION_POINTS}" />`;
       }
       return "";
     })
@@ -427,7 +441,7 @@ export function buildGraphMarkdown(
   <style>
     text { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
   </style>
-  <rect width="100%" height="100%" fill="white"/>
+  <rect width="100%" height="100%" fill="${graphConfig.COLORS.BACKGROUND}"/>
   <g>
     ${xTickElems}
     ${dayLinesAndLabels}
@@ -437,8 +451,8 @@ export function buildGraphMarkdown(
     ${precipTitle}
     ${tempTitle}
     ${precipAreaFill}
-    <path d="${precPath}" fill="none" stroke="#1e90ff" stroke-width="${graphConfig.LINE_STYLES.PRECIPITATION_WIDTH}" stroke-dasharray="4 4" opacity="${graphConfig.OPACITY.PRECIPITATION_LINE}" stroke-linecap="round" stroke-linejoin="round" />
-    <path d="${tempPath}" fill="none" stroke="#ff6b6b" stroke-width="${graphConfig.LINE_STYLES.TEMPERATURE_WIDTH}" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="${precPath}" fill="none" stroke="${graphConfig.COLORS.PRECIPITATION}" stroke-width="${graphConfig.LINE_STYLES.PRECIPITATION_WIDTH}" stroke-dasharray="${graphConfig.STYLING.PRECIPITATION_DASH}" opacity="${graphConfig.OPACITY.PRECIPITATION_LINE}" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="${tempPath}" fill="none" stroke="${graphConfig.COLORS.TEMPERATURE}" stroke-width="${graphConfig.LINE_STYLES.TEMPERATURE_WIDTH}" stroke-linecap="round" stroke-linejoin="round" />
     ${emojiLabels}
     ${sunLines}
     ${windLabels}

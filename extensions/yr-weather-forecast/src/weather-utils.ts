@@ -3,6 +3,7 @@ import { precipitationAmount, symbolCode } from "./utils-forecast";
 import { formatPrecip, formatTemperatureCelsius, formatWindSpeed } from "./units";
 import { symbolToEmoji } from "./utils/weather-symbols";
 import { formatDate, formatTime as formatTimeUtil, getPeriodName } from "./utils/date-utils";
+import { getUIThresholds } from "./config/weather-config";
 
 /**
  * Convert wind direction degrees to compass direction with arrow
@@ -78,7 +79,7 @@ export function reduceToDayPeriods(series: TimeseriesEntry[], maxDays: number): 
     const byHour: Record<number, TimeseriesEntry> = {};
     for (const ts of entries) byHour[new Date(ts.time).getHours()] = ts;
     // Target representative hours: 03, 09, 15, 21
-    const targets = [3, 9, 15, 21];
+    const targets = getUIThresholds().REPRESENTATIVE_HOURS;
     for (const target of targets) {
       let chosen: TimeseriesEntry | undefined = undefined;
       for (let delta = 0; delta <= 2 && !chosen; delta++) {
