@@ -276,6 +276,7 @@ function getMockData(): PveVm[] {
 const USE_MOCK_DATA = process.env.NODE_ENV === "development";
 
 export default function Command() {
+  // hook is not used directly to account for URL being invalid
   let vmListData;
   try {
     vmListData = useVmList();
@@ -286,14 +287,14 @@ export default function Command() {
         markdown="Something went wrong, check your preferences."
         actions={
           <ActionPanel>
-            <Action title="Open Preferences" onAction={openExtensionPreferences} />
+            <Action icon={Icon.Gear} title="Open Extension Preferences" onAction={openExtensionPreferences} />
           </ActionPanel>
         }
       />
     );
   }
-
   const { isLoading, data, revalidate, mutate } = vmListData;
+
   const [type, setType] = useState<string>("all");
 
   // it's not safe to use hooks inside a condition, but it's fine for dev
@@ -326,7 +327,7 @@ export default function Command() {
       {filteredData.map((vm) => (
         <List.Item
           key={vm.id}
-          icon={getStatusIcon(vm.status)}
+          icon={{ ...getStatusIcon(vm.status), tooltip: vm.status }}
           title={vm.name}
           actions={<VmActionPannel vm={vm} mutate={mutate} revalidate={revalidate} />}
           keywords={[vm.vmid.toString()]}
