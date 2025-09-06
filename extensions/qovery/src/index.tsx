@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { List, ActionPanel, Action, showToast, Toast, Form, LocalStorage, Icon } from "@raycast/api";
+import { List, ActionPanel, Action, showToast, Toast, LocalStorage, Icon, getPreferenceValues } from "@raycast/api";
 
 interface Service {
   id: string;
@@ -23,12 +23,16 @@ interface ServiceLink {
   url: string;
 }
 
+interface Preferences {
+  apiToken: string;
+}
+
 export default function Command() {
+  const preferences = getPreferenceValues<Preferences>();
   const [services, setServices] = useState<Service[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showConfig, setShowConfig] = useState(false);
-  const [apiToken, setApiToken] = useState("");
   const [organizationId, setOrganizationId] = useState("");
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [showOrganizations, setShowOrganizations] = useState(false);
@@ -44,13 +48,14 @@ export default function Command() {
 
   const loadStoredCredentials = async () => {
     try {
-      const storedApiToken = await LocalStorage.getItem("qovery_api_token");
       const storedOrgId = await LocalStorage.getItem("qovery_organization_id");
 
-      if (storedApiToken && storedOrgId) {
-        setApiToken(storedApiToken as string);
+      if (preferences.apiToken && storedOrgId) {
         setOrganizationId(storedOrgId as string);
-        fetchServices(storedApiToken as string, storedOrgId as string);
+        fetchServices(preferences.apiToken, storedOrgId as string);
+      } else if (preferences.apiToken) {
+        // API token is available but no organization selected
+        fetchOrganizations(preferences.apiToken);
       } else {
         setShowConfig(true);
         setIsLoading(false);
@@ -110,11 +115,9 @@ export default function Command() {
     }
   };
 
-  const saveCredentials = async (token: string, orgId: string) => {
+  const saveCredentials = async (orgId: string) => {
     try {
-      await LocalStorage.setItem("qovery_api_token", token);
       await LocalStorage.setItem("qovery_organization_id", orgId);
-      setApiToken(token);
       setOrganizationId(orgId);
       setShowConfig(false);
       setShowOrganizations(false);
@@ -123,13 +126,13 @@ export default function Command() {
       showToast({
         style: Toast.Style.Failure,
         title: "Error",
-        message: "Failed to save credentials",
+        message: "Failed to save organization ID",
       });
       return false;
     }
   };
 
-  const fetchServices = async (token = apiToken, orgId = organizationId) => {
+  const fetchServices = async (token = preferences.apiToken, orgId = organizationId) => {
     if (!token || !orgId) {
       setError("API Token and Organization ID are required.");
       setIsLoading(false);
@@ -227,7 +230,7 @@ export default function Command() {
 
       const response = await fetch(endpoint, {
         headers: {
-          Authorization: `Token ${apiToken}`,
+          Authorization: `Token ${preferences.apiToken}`,
           "Content-Type": "application/json",
         },
       });
@@ -273,9 +276,7 @@ export default function Command() {
 
   const clearCredentials = async () => {
     try {
-      await LocalStorage.removeItem("qovery_api_token");
       await LocalStorage.removeItem("qovery_organization_id");
-      setApiToken("");
       setOrganizationId("");
       setShowConfig(true);
       setShowOrganizations(false);
@@ -287,14 +288,14 @@ export default function Command() {
       setServiceLinks([]);
       showToast({
         style: Toast.Style.Success,
-        title: "Credentials cleared",
-        message: "Please enter new credentials",
+        title: "Organization cleared",
+        message: "Please select a new organization",
       });
     } catch (err) {
       showToast({
         style: Toast.Style.Failure,
         title: "Error",
-        message: "Failed to clear credentials",
+        message: "Failed to clear organization",
       });
     }
   };
@@ -360,14 +361,14 @@ export default function Command() {
                 <Action
                   title="Select Organization"
                   onAction={async () => {
-                    const success = await saveCredentials(apiToken, org.id);
+                    const success = await saveCredentials(org.id);
                     if (success) {
-                      fetchServices(apiToken, org.id);
+                      fetchServices(preferences.apiToken, org.id);
                     }
                   }}
                 />
                 <Action
-                  title="Back to Token Input"
+                  title="Back"
                   onAction={() => {
                     setShowOrganizations(false);
                     setOrganizations([]);
@@ -383,28 +384,25 @@ export default function Command() {
 
   if (showConfig) {
     return (
-      <Form
-        actions={
-          <ActionPanel>
-            <Action.SubmitForm
-              title="Fetch Organizations"
-              onSubmit={async (values: { apiToken: string }) => {
-                setApiToken(values.apiToken);
-                fetchOrganizations(values.apiToken);
-              }}
-            />
-            <Action title="Clear Stored Credentials" onAction={clearCredentials} style={Action.Style.Destructive} />
-          </ActionPanel>
-        }
-      >
-        <Form.TextField
-          id="apiToken"
-          title="Qovery API Token"
-          placeholder="Enter your Qovery API token"
-          value={apiToken}
-          onChange={setApiToken}
+      <List>
+        <List.EmptyView
+          icon="🔑"
+          title="API Token Required"
+          description="Please configure your Qovery API token in the extension preferences"
+          actions={
+            <ActionPanel>
+              <Action
+                title="Open Extension Preferences"
+                onAction={() => {
+                  // This will be handled by Raycast's built-in preferences system
+                  setShowConfig(false);
+                }}
+              />
+              <Action title="Clear Organization" onAction={clearCredentials} style={Action.Style.Destructive} />
+            </ActionPanel>
+          }
         />
-      </Form>
+      </List>
     );
   }
 
@@ -419,7 +417,7 @@ export default function Command() {
             <ActionPanel>
               <Action title="Retry" onAction={() => fetchServices()} shortcut={{ modifiers: ["cmd"], key: "r" }} />
               <Action
-                title="Change Credentials"
+                title="Change Organization"
                 onAction={() => {
                   setShowConfig(true);
                   setShowOrganizations(false);
@@ -427,7 +425,7 @@ export default function Command() {
                 }}
                 shortcut={{ modifiers: ["cmd"], key: "c" }}
               />
-              <Action title="Clear Credentials" onAction={clearCredentials} style={Action.Style.Destructive} />
+              <Action title="Clear Organization" onAction={clearCredentials} style={Action.Style.Destructive} />
             </ActionPanel>
           }
         />
@@ -464,7 +462,7 @@ export default function Command() {
                 shortcut={{ modifiers: ["cmd"], key: "r" }}
               />
               <Action
-                title="Change Credentials"
+                title="Change Organization"
                 onAction={() => {
                   setShowConfig(true);
                   setShowOrganizations(false);
@@ -472,7 +470,7 @@ export default function Command() {
                 }}
                 shortcut={{ modifiers: ["cmd"], key: "c" }}
               />
-              <Action title="Clear Credentials" onAction={clearCredentials} style={Action.Style.Destructive} />
+              <Action title="Clear Organization" onAction={clearCredentials} style={Action.Style.Destructive} />
             </ActionPanel>
           }
         />

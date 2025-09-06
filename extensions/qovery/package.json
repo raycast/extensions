@@ -31,16 +31,21 @@
       "name": "index",
       "title": "Find Services",
       "description": "Interact with your Qovery organization",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "apiToken",
+          "title": "API Token",
+          "description": "Your Qovery API token",
+          "type": "password",
+          "required": true
+        }
+      ]
     }
   ],
-  "main": "src/index.tsx",
   "dependencies": {
     "@raycast/api": "1.83.2",
     "@raycast/utils": "^1.17.0"
-  },
-  "engines": {
-    "node": ">=20.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
