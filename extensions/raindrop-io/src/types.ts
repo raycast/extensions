@@ -37,6 +37,7 @@ type CollectionParent = {
 export type Collection = {
   _id: number;
   title: string;
+  cover: [string];
   parent: CollectionParent;
   children?: Collection[];
 };
@@ -97,6 +98,7 @@ export interface CollectionItem {
   value?: number;
   label: string;
   name?: string;
+  cover?: string;
 }
 
 export type BookmarksParams = {

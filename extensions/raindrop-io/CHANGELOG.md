@@ -1,5 +1,9 @@
 # Raindrop.io Extension Changelog
 
+## [Enhancements] - 2025-09-06
+
+- Show collection cover icons in dropdowns (search filter and add/edit forms); fall back to folder icon when no cover is available.
+
 ## [Enhancements] - 2025-08-30
 
 - Prefill Add form from launch context (URL/title) for smoother adding from external sources; increases universality and works well with minimal/keyboard-centric browsers like QuteBrowser.
