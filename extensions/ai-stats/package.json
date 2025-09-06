@@ -8,6 +8,9 @@
   "author": "JonathanRReed",
   "license": "MIT",
   "categories": ["Developer Tools", "Data"],
+  "engines": {
+    "node": ">=22.14.0"
+  },
   "commands": [
     {
       "name": "view",
