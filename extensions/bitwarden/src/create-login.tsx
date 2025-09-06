@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, Icon, PopToRootType, showHUD, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DebuggingBugReportingActionSection } from "~/components/actions";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
@@ -68,7 +68,7 @@ function CreateLoginComponent() {
       toast.title = "Login created";
       toast.message = name;
       resetForm();
-      await popToRoot();
+      await showHUD(`Login created: ${name}`, { clearRootSearch: true, popToRootType: PopToRootType.Immediate });
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to create login";
