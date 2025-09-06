@@ -18,7 +18,7 @@ A modern, feature-rich [Raycast](https://www.raycast.com) extension for displayi
 - **Location Search**: Find any city or place worldwide using OpenStreetMap
 - **Quick Day Queries**: "Oslo fredag", "London next monday", "Bergen 25"
 - **Favorites System**: Save your most-used locations for instant access
-- **Recent Searches**: Intelligent caching and search history
+- **Smart Search**: Intelligent caching and query parsing
 
 ### 🎨 UX stuff
 - **Welcome System**: Helpful onboarding for new users
@@ -29,7 +29,6 @@ A modern, feature-rich [Raycast](https://www.raycast.com) extension for displayi
 - **Fast Performance**: Intelligent caching reduces API calls
 - **Error Handling**: Graceful fallbacks and user-friendly error messages
 - **Network Testing**: Built-in connectivity diagnostics
-- **TypeScript**: Full type safety and modern development practices
 - **Debug Mode**: Optional console output for troubleshooting
 
 ## 🚀 Getting Started
@@ -45,6 +44,7 @@ A modern, feature-rich [Raycast](https://www.raycast.com) extension for displayi
 2. **Quick day search**: Try "Oslo fredag" or "London tomorrow"
 3. **Add to favorites**: Use `Cmd+F` to save frequently used locations
 4. **Explore views**: Press Enter on favorites to see detailed forecasts
+5. **Switch to data view**: Press `D` in any forecast or graph view to see tabular data
 
 ## 📱 How to Use
 
@@ -80,16 +80,29 @@ A modern, feature-rich [Raycast](https://www.raycast.com) extension for displayi
 - **Cmd+G**: Open graph view directly
 - **Cmd+K**: Configure command preferences
 
-### Navigation
-- **↑/↓**: Navigate through search results and favorites
-- **Tab**: Move between search bar and results
-- **Escape**: Clear search or return to main view
-- **Cmd+W**: Close current view (when applicable)
+### View Navigation
+- **D**: Switch to data table view (from Forecast or Graph view)
+- **G**: Switch to graph view (from data table view)
+- **Space**: Toggle between detailed (48-hour) and summary (9-day) modes in Forecast view
 
 ### Detailed Views
-- **Forecast View**: Combined hourly data with graphs and tables
+- **Forecast View**: Combined hourly data with graphs and data tables
 - **One-Day View**: Focused view for specific dates
 - **Graph View**: Visual representation of weather trends
+- **Data View**: Markdown table of the current location's data
+
+### Data View
+The **Data View** provides a comprehensive markdown table showing detailed weather information for the current location. This view is available in both the Forecast View and Graph View.
+
+**Accessing Data View:**
+- **From Forecast View**: Press `D` to switch from graph to data table
+- **From Graph View**: Press `D` to switch from graph to data table
+- **Switch back to Graph**: Press `G` from data view
+
+**Data View Features:**
+- Complete weather data in tabular format
+- Temperature, wind, precipitation, and weather conditions
+- Time-stamped entries for easy reference
 
 ## ⚙️ Preferences
 
@@ -124,32 +137,21 @@ All APIs are used in compliance with their respective terms of service.
 - **Sunrise/Sunset**: 6 hours per location/day
 - **Search Results**: Intelligent caching for better performance
 
-## 🛠️ Development
+## 🔐 Requirements & Privacy
 
-### Prerequisites
-- Node.js 18+ 
-- npm or yarn
-- Raycast extension development environment
+This extension uses publicly available APIs that don't require authentication:
+- **MET APIs**: Free weather data from the Norwegian Meteorological Institute
+- **OpenStreetMap Nominatim**: Free geocoding service for location search
+- **No registration or API keys needed** - just install and use!
 
-### Setup
-```bash
-git clone https://github.com/kyndig/yr-weather-raycast.git
-cd yr-weather-raycast
-npm install
-```
+### Privacy & Data Usage
+- **No Personal Data Collection**: The extension doesn't collect, store, or transmit any personal information
+- **Local Storage Only**: All data (favorites, cache) is stored locally on your device
+- **No Tracking**: No analytics, tracking, or user behavior monitoring
+- **Open Source**: Full source code is available for transparency and security review
+- **Data Retention**: Cached weather data is automatically cleared after expiration (30 minutes to 6 hours)
+- **Location Privacy**: Search queries are sent to OpenStreetMap for geocoding, but no personal identifiers are included
 
-### Development
-```bash
-npm run dev      # Start development mode
-npm run build    # Build for production
-npm run lint     # Run linting
-npm run fix-lint # Fix linting issues
-```
-
-### Building
-```bash
-npm run build
-```
 
 ## 📄 License
 
@@ -158,12 +160,6 @@ MIT License - see package.json for details.
 ## 🤝 Contributing
 
 We welcome contributions! Please open an issue or submit a pull request on GitHub.
-
-### Development Guidelines
-- Follow TypeScript best practices
-- Maintain consistent code style
-- Add tests for new features
-- Update documentation as needed
 
 ## 📞 Support
 
