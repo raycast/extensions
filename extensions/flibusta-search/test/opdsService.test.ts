@@ -1,8 +1,7 @@
-import { searchBooks } from "../opdsService";
+import { searchBooks } from "../src/services/opdsService";
 import axios from "axios";
 import * as xml2js from "xml2js";
 
-// Mock axios and xml2js
 jest.mock("axios");
 jest.mock("xml2js");
 
