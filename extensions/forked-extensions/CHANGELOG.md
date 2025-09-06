@@ -15,6 +15,7 @@
 - Add a new "Pull Changes" action to allow users to sync commits from remote forked repository
 - Add support for inspecting commits difference in "Run Diagnostics" action
 - Polish readme with more details about the extension's features and usage
+- Change "repo" permission scope to "public_repo"
 
 ## [Bugfixes] - 2025-09-01
 
