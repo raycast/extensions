@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { AddDomainRequest, AddDomainRequestForm, AddDomainResponse, Domain } from "./utils/types";
-import { addDomain, deleteDomain, verifyDomain } from "./utils/api";
+import { AddDomainRequestForm, AddDomainResponse, Domain } from "./utils/types";
 import {
   Action,
   ActionPanel,
@@ -17,13 +16,15 @@ import {
 import { FormValidation, getFavicon, useForm } from "@raycast/utils";
 import { ADD_DOMAIN_REGIONS, RESEND_URL } from "./utils/constants";
 import ErrorComponent from "./components/ErrorComponent";
-import { useGetDomains } from "./lib/hooks";
+import { onError, useGetDomains } from "./lib/hooks";
+import { CreateDomainOptions } from "resend";
+import { resend } from "./lib/resend";
 
 export default function Domains() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const { isLoading: isLoadingDomains, domains, error: errorDomains, revalidate } = useGetDomains();
+  const { isLoading: isLoadingDomains, domains, error: errorDomains, revalidate, mutate } = useGetDomains();
 
   useEffect(() => {
     if (!errorDomains) return;
@@ -34,16 +35,26 @@ export default function Domains() {
 
   async function verifyDomainFromApi(domain: Domain) {
     setIsLoading(true);
-    const response = await verifyDomain(domain.id);
-    if (!("statusCode" in response)) {
-      await showToast({
-        title: "In Progress",
-        message: "You will receive an email notification once this operation is completed.",
-        style: Toast.Style.Success,
-      });
+    const toast = await showToast(Toast.Style.Animated, "Verifying Domain", domain.name);
+    
+    try {
+      await mutate(
+        resend.domains.verify(domain.id).then(({error}) => {
+          if (error) throw new Error(error.message, {cause: error.name});
+        }), {
+          optimisticUpdate(data) {
+            return data.map(d => d.id!==domain.id ? d : ({...d, status: "pending"}));
+          }
+        }
+      )
+      toast.style = Toast.Style.Success;
+      toast.title = "In Progress";
+      toast.message = "You will receive an email notification once this operation is completed.";
+    } catch (error) {
+      onError(error as Error);
+    } finally {
+      setIsLoading(false);
     }
-    revalidate();
-    setIsLoading(false);
   }
 
   async function confirmAndDelete(item: Domain) {
@@ -54,12 +65,26 @@ export default function Domains() {
         primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
       })
     ) {
-      const response = await deleteDomain(item.id);
-      if (!("statusCode" in response)) {
-        await showToast(Toast.Style.Success, "Deleted Domain");
-        revalidate();
+      setIsLoading(true);
+      const toast = await showToast(Toast.Style.Animated, "Deleting Domain", item.name);
+      try {
+        await mutate(
+          resend.domains.remove(item.id).then(({error}) => {
+            if (error) throw new Error(error.message, {cause: error.name});
+          }), {
+            optimisticUpdate(data) {
+              return data.filter(d => d.id!==item.id)
+            },
+            shouldRevalidateAfter: false
+          }
+        )
+        toast.style = Toast.Style.Success;
+        toast.title = "Deleted Domain";
+      } catch (error) {
+        onError(error as Error);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     }
   }
 
@@ -170,19 +195,20 @@ function DomainsAdd({ onDomainAdded }: { onDomainAdded: () => void }) {
   const { handleSubmit, itemProps } = useForm<AddDomainRequestForm>({
     async onSubmit(values) {
       setIsLoading(true);
-
-      const newDomainRequest: AddDomainRequest = {
-        name: values.name,
-        region: values.region as AddDomainRequest["region"],
-      };
-
-      const response = await addDomain(newDomainRequest);
-      if (!("statusCode" in response)) {
+      const toast = await showToast(Toast.Style.Animated, "Processing...", "Adding Domain");
+      try {
+        const {error,data} = await resend.domains.create({name: values.name, region: values.region as CreateDomainOptions["region"]});
+        if (error) throw new Error(error.message, {cause: error.name});
         onDomainAdded();
-        setNewDomain(response);
-        showToast(Toast.Style.Success, "Added Domain", response.name);
+        setNewDomain(data);
+        toast.style = Toast.Style.Success
+        toast.title = "Added Domain"
+        toast.message = data.name;
+      } catch (error) {
+        onError(error as Error);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     },
     validation: {
       name: FormValidation.Required,

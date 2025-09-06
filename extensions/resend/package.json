@@ -196,8 +196,8 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.100.3",
-    "@raycast/utils": "^2.2.0",
+    "@raycast/api": "^1.102.6",
+    "@raycast/utils": "^2.2.1",
     "resend": "^4.6.0"
   },
   "devDependencies": {

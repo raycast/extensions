@@ -20,6 +20,8 @@ import {
   VerifyDomainResponse,
 } from "./types";
 import { API_HEADERS, API_URL } from "./constants";
+import { resend } from "../lib/resend";
+import { CreateDomainOptions } from "resend";
 
 const headers = API_HEADERS;
 const callApi = async (endpoint: string, method: APIMethod, body?: BodyRequest, animatedToastMessage = "") => {
@@ -75,19 +77,10 @@ export async function deleteApiKey(id: string) {
 // DOMAINS
 // export async function getDomains() { -> MOVED TO HOOK
 
-export async function addDomain(newDomain: AddDomainRequest) {
-  return (await callApi(`domains`, "POST", { ...newDomain }, "Adding Domain")) as ErrorResponse | AddDomainResponse;
-}
-export async function verifyDomain(id: string) {
-  return (await callApi(`domains/${id}/verify`, "POST", undefined, "Verifying Domain")) as
-    | ErrorResponse
-    | VerifyDomainResponse;
-}
-export async function deleteDomain(id: string) {
-  return (await callApi(`domains/${id}`, "DELETE", undefined, "Deleting Domain")) as
-    | ErrorResponse
-    | Record<string, never>;
-}
+// sdk
+// export async function addDomain(newDomain: CreateDomainOptions) {
+// export async function verifyDomain(id: string) {
+// export async function deleteDomain(id: string) {
 
 // EMAILS
 export async function getEmail(id: string) {

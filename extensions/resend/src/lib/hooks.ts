@@ -35,7 +35,7 @@ const showSuccessToast = async (items: unknown[], singular: string, plural=`${si
   const numOfItems = items.length;
   await showToast(Toast.Style.Success, "Success", `Fetched ${numOfItems} ${numOfItems===1 ? singular : plural}`);
 }
-const onError = async (error: Error) => {
+export const onError = async (error: Error) => {
   await showFailureToast(error, {title: String(error.cause ?? "Something went wrong")});
 }
 export const useGetDomains = () => {
