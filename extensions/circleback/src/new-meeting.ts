@@ -1,8 +1,7 @@
-import { showHUD, open } from '@raycast/api'
-import { getRecordPanelDeepLink } from './utils/deepLink'
+import { showHUD } from '@raycast/api'
+import { openNewMeeting } from './utils/deepLink'
 
 export default async function main() {
-  const url = getRecordPanelDeepLink()
-  await open(url)
-  await showHUD('Opening Circleback recorder')
+  await openNewMeeting()
+  await showHUD('Opening Circleback')
 }

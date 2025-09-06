@@ -1,6 +1,6 @@
-import { showHUD, open } from '@raycast/api'
+import { showHUD } from '@raycast/api'
 import { fetchJson } from './utils/api'
-import { getMeetingDeepLink } from './utils/deepLink'
+import { openMeeting } from './utils/deepLink'
 import { oauthService } from './utils/oauth'
 import { withAccessToken } from '@raycast/utils'
 
@@ -11,14 +11,15 @@ type Meeting = {
 }
 
 const openLastMeeting = async () => {
-  const meetings = await fetchJson<Meeting[]>('/api/user/meetings')
+  const meetings = await fetchJson<Meeting[]>(
+    '/api/user/meetings?statuses=READY'
+  )
   const latest = meetings[0]
   if (!latest) {
     await showHUD('No meetings found')
     return
   }
-  const url = getMeetingDeepLink(latest.id)
-  await open(url)
+  await openMeeting(latest.id)
   await showHUD('Opening last meeting')
 }
 

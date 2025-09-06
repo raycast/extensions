@@ -52,7 +52,7 @@ const SearchMeetings = () => {
     <List
       isLoading={isLoading}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search your meetings"
+      searchBarPlaceholder="Search meetings…"
     >
       {searchedMeetings.map((meeting) => (
         <List.Item

@@ -1,6 +1,6 @@
 # Circleback
 
-Circleback helps you get the most out of every meeting with AI-powered meeting notes and automations. Works with Zoom, Google Meet, Microsoft Teams, Slack huddles, and in-person conversations. This Raycast extension brings Circleback’s capabilities to your Mac desktop, enabling you to record meetings, access notes, and search conversations seamlessly.
+Circleback helps teams get the most out of every conversation with best-in-class AI-powered meeting notes, action items, automations, and search. It works with all meeting platforms, including Zoom, Google Meet, Microsoft Teams, and Slack huddles, as well as in-person conversations. This Raycast extension brings Circleback's capabilities directly to your Mac desktop, enabling you to record meetings, access notes, and search conversations seamlessly.
 
 ## Getting Started
 To use this extension, ensure the following:
@@ -8,15 +8,15 @@ To use this extension, ensure the following:
 - You are logged into the Circleback app.
 
 ## Setup Instructions
-1. **Install Circleback**: Download and install the Circleback app from [circleback.ai](https://circleback.ai/desktop).
+1. **Install Circleback**: Download and install the Circleback app from [circleback.ai/desktop](https://circleback.ai/desktop).
 2. **Install the Extension**: Add this extension from the Raycast Store.
 3. **Authenticate**: Try opening the "Search meetings" command in Raycast, and follow the prompts to authenticate with your Circleback account.
 
 ## Circleback Commands
-- **New Meeting**: Start recording a new meeting directly in Circleback. Works for Zoom, Google Meet, Microsoft Teams, or in-person conversations. Notes and action items are automatically generated and organized.
-- **Open Last Meeting**: Quickly access your most recent meeting’s notes, transcript, and action items in the Circleback app.
-- **Search Meetings**: Browse and search all your Circleback meetings with AI-powered search to find specific moments, action items, or topics across your conversations.
+- **New Meeting**: Record a new meeting in Circleback.
+- **Open Last Meeting**: Open your most recent meeting in Circleback.
+- **Search Meetings**: Search your meetings in Circleback.
 
 
 ## Support
-For issues or feedback, contact Circleback support via [support.circleback.ai](https://support.circleback.ai/).
+For issues or feedback, go to [support.circleback.ai](https://support.circleback.ai)
