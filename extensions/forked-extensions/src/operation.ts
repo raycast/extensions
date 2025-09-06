@@ -131,8 +131,8 @@ class Operation {
    * @param options Optional toast options to customize the failure toast.
    */
   showFailureToast = async (error: unknown, options?: Toast.Options) => {
-    const title = error instanceof Error ? error.name : "Error";
-    const message = error instanceof Error ? error.message : String(error);
+    const title = error instanceof Error ? error.name : (options?.title ?? "Error");
+    const message = error instanceof Error ? error.message : (options?.message ?? String(error));
     const copyLogsAction = {
       title: "Copy Logs",
       onAction: () => Clipboard.copy([title, message].join("\n")),

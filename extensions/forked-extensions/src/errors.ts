@@ -1,5 +1,5 @@
 import { Toast, open } from "@raycast/api";
-import { HTTPError } from "got";
+import { HTTPError } from "ky";
 import { SubprocessError } from "nano-spawn";
 import * as api from "./api.js";
 import operation from "./operation.js";
@@ -20,7 +20,7 @@ type HandlerOptions = {
  * @param handlerOptions Options for error handling.
  */
 export const handleError = async (error: unknown, handlerOptions?: HandlerOptions) => {
-  if (error instanceof HTTPError) return handleGotHttpError(error, handlerOptions);
+  if (error instanceof HTTPError) return handleHttpError(error, handlerOptions);
   if (error instanceof SubprocessError) return handleSubprocessError(error);
   return operation.showFailureToast(error);
 };
@@ -43,14 +43,15 @@ export const catchError = (task: () => Promise<void>, handlerOptions?: HandlerOp
  * @param error The HTTPError to handle.
  * @param handlerOptions Options for error handling.
  */
-export const handleGotHttpError = (error: HTTPError, handlerOptions?: HandlerOptions) =>
-  operation.showFailureToast([error.message, error.response.body].join("\n"), {
+export const handleHttpError = async (error: HTTPError, handlerOptions?: HandlerOptions) => {
+  const responseBody = await error.response.text();
+  return operation.showFailureToast([error.message, responseBody].join("\n"), {
     title: error.message,
-    message: error.response.body,
+    message: responseBody,
     primaryAction:
       // [TODO] Needs a better way to detect if the permission scope is insufficient.
       // For now, we just check if the status code is 422 Unprocessable Entity.
-      error.response.statusCode === 422
+      error.response.status === 422
         ? {
             title: "Re-authorize GitHub",
             onAction: async () => {
@@ -62,6 +63,7 @@ export const handleGotHttpError = (error: HTTPError, handlerOptions?: HandlerOpt
           }
         : handlerOptions?.primaryAction,
   });
+};
 
 /**
  * Handle nano-spawn SubprocessError and show a failure toast.
