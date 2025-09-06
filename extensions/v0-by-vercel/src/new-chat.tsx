@@ -1,14 +1,13 @@
 import { ActionPanel, Action, showToast, Toast, Form, useNavigation, Icon } from "@raycast/api";
 import { useForm, showFailureToast } from "@raycast/utils";
 import type { CreateChatRequest, ScopeSummary } from "./types";
-import ChatDetail from "./components/ChatDetail";
+import ChatMessages from "./components/ChatMessages";
 import { useProjects } from "./hooks/useProjects";
 import { useActiveProfile } from "./hooks/useActiveProfile";
 import { useScopes } from "./hooks/useScopes";
-import { v0ApiFetcher, V0ApiError } from "./lib/v0-api-utils";
+import { V0ApiError } from "./lib/v0-api-utils";
 import InitializeChat from "./initialize-chat";
 import { useEffect } from "react";
-import type { CreateChatResponse } from "./types";
 import fs from "fs/promises";
 
 interface FormValues {
@@ -60,45 +59,29 @@ export default function Command() {
             ...(typeof values.imageGenerations === "boolean" && { imageGenerations: values.imageGenerations }),
             ...(typeof values.thinking === "boolean" && { thinking: values.thinking }),
           },
-          responseMode: "async",
+          responseMode: "experimental_stream",
         };
 
         if (values.attachments && values.attachments.length > 0) {
           const attachments = await Promise.all(
             values.attachments.map(async (filePath) => {
               const fileContent = await fs.readFile(filePath, { encoding: "base64" });
-              const mimeType = "application/octet-stream"; // Default MIME type
-              // You might want to infer the MIME type based on the file extension
-              // For simplicity, we'll use a generic one here.
+              const mimeType = "application/octet-stream";
               return { url: `data:${mimeType};base64,${fileContent}` };
             }),
           );
           requestBody.attachments = attachments;
         }
 
-        // Remove modelConfiguration if it's empty
         if (requestBody.modelConfiguration && Object.keys(requestBody.modelConfiguration).length === 0) {
           delete requestBody.modelConfiguration;
         }
 
-        const chatResponse = await v0ApiFetcher<CreateChatResponse>("https://api.v0.dev/v1/chats", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${activeProfileApiKey}`,
-            "Content-Type": "application/json",
-            "x-scope": values.scopeId || activeProfileDefaultScope || "",
-          },
-          body: JSON.stringify(requestBody),
-        });
-
-        toast.style = Toast.Style.Success;
-        toast.title = "Chat Created";
-        toast.message = "Your new chat has been created successfully!";
-
-        // Navigate to the newly created chat's detail page
+        toast.hide();
         push(
-          <ChatDetail
-            chatId={chatResponse.id}
+          <ChatMessages
+            request={{ ...requestBody, responseMode: "experimental_stream" }}
+            apiKey={activeProfileApiKey}
             scopeId={(values.scopeId as string | undefined) || (activeProfileDefaultScope ?? undefined)}
           />,
         );
@@ -127,7 +110,6 @@ export default function Command() {
     },
   });
 
-  // Set the default scope once profile details are loaded
   useEffect(() => {
     if (!isLoadingProfileDetails && activeProfileDefaultScope) {
       setValue("scopeId", activeProfileDefaultScope);

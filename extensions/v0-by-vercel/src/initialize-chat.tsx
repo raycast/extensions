@@ -7,7 +7,7 @@ import { useScopes } from "./hooks/useScopes";
 import { v0ApiFetcher, V0ApiError } from "./lib/v0-api-utils";
 import { readFilesFromPaths, type FileContent } from "./lib/file-utils";
 
-import ChatDetail from "./components/ChatDetail";
+import ChatMessages from "./components/ChatMessages";
 import type { InitializeChatResponse } from "./types";
 
 interface BaseInitializationRequestBody {
@@ -36,22 +36,29 @@ interface ZipInitializationRequestBody extends BaseInitializationRequestBody {
   zip: { url: string };
 }
 
+interface TemplateInitializationRequestBody extends BaseInitializationRequestBody {
+  type: "template";
+  templateId: string;
+}
+
 type InitializationRequestBody =
   | FilesInitializationRequestBody
   | RepoInitializationRequestBody
   | RegistryInitializationRequestBody
-  | ZipInitializationRequestBody;
+  | ZipInitializationRequestBody
+  | TemplateInitializationRequestBody;
 
 interface FormValues {
   name: string;
   chatPrivacy: "public" | "private" | "team-edit" | "team" | "unlisted";
   projectId?: string;
-  initializationType: "files" | "repo" | "registry" | "zip";
+  initializationType: "files" | "repo" | "registry" | "zip" | "template";
   files?: string[];
   repoUrl?: string;
   branch?: string;
   registryUrl?: string;
   zipUrl?: string;
+  templateId?: string;
 }
 
 export default function Command() {
@@ -70,6 +77,7 @@ export default function Command() {
       branch: "",
       registryUrl: "",
       zipUrl: "",
+      templateId: "",
     },
     onSubmit: async (formValues) => {
       if (!activeProfileApiKey) {
@@ -139,6 +147,17 @@ export default function Command() {
               url: formValues.zipUrl,
             },
           };
+        } else if (formValues.initializationType === "template") {
+          if (!formValues.templateId) {
+            throw new Error("Template ID is required for template initialization.");
+          }
+          requestBody = {
+            name: formValues.name,
+            chatPrivacy: formValues.chatPrivacy,
+            ...(formValues.projectId && { projectId: formValues.projectId }),
+            type: "template",
+            templateId: formValues.templateId,
+          };
         } else {
           throw new Error("Invalid initialization type selected.");
         }
@@ -157,8 +176,14 @@ export default function Command() {
         toast.title = "Chat Initialized";
         toast.message = "Your new chat has been initialized successfully!";
 
-        // Navigate to the newly created chat's detail page
-        push(<ChatDetail chatId={chatResponse.id} />);
+        // Navigate to the new chat messages view
+        push(
+          <ChatMessages
+            chatId={chatResponse.id}
+            apiKey={activeProfileApiKey}
+            scopeId={activeProfileDefaultScope || ""}
+          />,
+        );
       } catch (error) {
         if (error instanceof V0ApiError) {
           showFailureToast(error.message, { title: "Initialization Failed" });
@@ -202,6 +227,7 @@ export default function Command() {
         <Form.Dropdown.Item value="repo" title="Github Repository" />
         <Form.Dropdown.Item value="registry" title="Registry" />
         <Form.Dropdown.Item value="zip" title="Zip File" />
+        <Form.Dropdown.Item value="template" title="Community Template" />
       </Form.Dropdown>
 
       {values.initializationType === "files" && (
@@ -247,6 +273,15 @@ export default function Command() {
           title="Zip File URL"
           placeholder="https://example.com/archive.zip"
           info="The URL to a zip file."
+        />
+      )}
+
+      {values.initializationType === "template" && (
+        <Form.TextField
+          {...itemProps.templateId}
+          title="Template ID"
+          placeholder="e.g. fMitqLVrOfR"
+          info="Enter the v0 community Template ID to initialize from a template."
         />
       )}
 
