@@ -7,6 +7,8 @@
 - Add a cheatsheet for users to learn about the extension's Git commands
 - Polish Diagnostics action UI
 - Drop unused "assets/extension-icons" folder
+- Change "repo" permission scope to "public_repo"
+- Replace "got" dependency with "ky"
 - Cleanup unused dependencies
 
 ## [Improvements] - 2025-09-02
@@ -15,7 +17,6 @@
 - Add a new "Pull Changes" action to allow users to sync commits from remote forked repository
 - Add support for inspecting commits difference in "Run Diagnostics" action
 - Polish readme with more details about the extension's features and usage
-- Change "repo" permission scope to "public_repo"
 
 ## [Bugfixes] - 2025-09-01
 

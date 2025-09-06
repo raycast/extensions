@@ -79,7 +79,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.102.6",
-    "got": "^14.4.7",
+    "ky": "^1.10.0",
     "nano-spawn": "^1.0.2"
   },
   "devDependencies": {
