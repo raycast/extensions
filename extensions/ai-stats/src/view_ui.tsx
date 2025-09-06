@@ -134,6 +134,19 @@ export default function View() {
   );
 }
 
+type SearchSectionProps = {
+  setMode: (m: Mode) => void;
+  searchText: string;
+  setSearchText: (v: string) => void | Promise<void>;
+  creatorFilter: string;
+  setCreatorFilter: (v: string) => void | Promise<void>;
+  pinnedIds: string[];
+  addPin: (id: string) => void | Promise<void>;
+  removePin: (id: string) => void | Promise<void>;
+  movePin: (id: string, delta: number) => void | Promise<void>;
+  showPinnedSection: boolean;
+};
+
 function SearchSection({
   setMode,
   searchText,
@@ -145,18 +158,7 @@ function SearchSection({
   removePin,
   movePin,
   showPinnedSection,
-}: {
-  setMode: (m: Mode) => void;
-  searchText: string;
-  setSearchText: (v: string) => void | Promise<void>;
-  creatorFilter: string;
-  setCreatorFilter: (v: string) => void | Promise<void>;
-  pinnedIds: string[];
-  addPin: (id: string) => void | Promise<void>;
-  removePin: (id: string) => void | Promise<void>;
-  movePin: (id: string, delta: number) => void | Promise<void>;
-  showPinnedSection: boolean;
-}) {
+}: SearchSectionProps) {
   const [q, setQ] = useState("");
   const [isLoading, setLoading] = useState(false);
   const [rows, setRows] = useState<Model[]>([]);
@@ -391,15 +393,13 @@ function SearchSection({
   );
 }
 
-function LeaderboardSection({
-  metric,
-  setMode,
-  setMetric,
-}: {
+type LeaderboardSectionProps = {
   metric: MetricKey;
   setMode: (m: Mode) => void;
   setMetric: (m: MetricKey) => void;
-}) {
+};
+
+function LeaderboardSection({ metric, setMode, setMetric }: LeaderboardSectionProps) {
   const [rows, setRows] = useState<Model[]>([]);
   const [isLoading, setLoading] = useState(false);
 
@@ -484,7 +484,9 @@ function LeaderboardSection({
   );
 }
 
-function CreatorFilterDropdown({ value, onChange }: { value: string; onChange: (v: string) => void | Promise<void> }) {
+type CreatorFilterDropdownProps = { value: string; onChange: (v: string) => void | Promise<void> };
+
+function CreatorFilterDropdown({ value, onChange }: CreatorFilterDropdownProps) {
   const [creators, setCreators] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -615,17 +617,14 @@ function fencedJson(val: unknown) {
   return `\n\`\`\`json\n${JSON.stringify(val, null, 2)}\n\`\`\`\n`;
 }
 
-function ModelDetail({
-  model,
-  pinnedIds,
-  addPin,
-  removePin,
-}: {
+type ModelDetailProps = {
   model: Model;
   pinnedIds?: string[];
   addPin?: (id: string) => void | Promise<void>;
   removePin?: (id: string) => void | Promise<void>;
-}) {
+};
+
+function ModelDetail({ model, pinnedIds, addPin, removePin }: ModelDetailProps) {
   const md = modelMarkdown(model);
   const isPinned = pinnedIds?.includes(model.id) ?? false;
   return (
