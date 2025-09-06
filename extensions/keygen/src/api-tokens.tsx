@@ -20,7 +20,7 @@ export default function APITokens() {
       },
     };
     if (await confirmAlert(options)) {
-      const toast = await showToast(Toast.Style.Animated, "Revoking License", token.attributes.name);
+      const toast = await showToast(Toast.Style.Animated, "Revoking Token", token.attributes.name);
       try {
         await mutate(
           fetch(API_URL + `tokens/${token.id}`, {
@@ -35,7 +35,7 @@ export default function APITokens() {
           },
         );
         toast.style = Toast.Style.Success;
-        toast.title = "Revoked License";
+        toast.title = "Revoked Token";
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = "Could not revoke";
