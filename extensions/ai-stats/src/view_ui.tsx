@@ -80,7 +80,11 @@ export default function View() {
 
   return (
     <List
-      searchBarPlaceholder={mode === "search" ? "Search models by name, slug, or creator…" : ""}
+      searchBarPlaceholder={
+        mode === "search"
+          ? "Search models by name, slug, or creator…"
+          : "Search is disabled in Leaderboards. Use the Metric menu to change leaderboard."
+      }
       onSearchTextChange={(t) => setSearchText(t)}
       searchText={searchText}
       searchBarAccessory={
@@ -160,7 +164,7 @@ function SearchSection({
   showPinnedSection,
 }: SearchSectionProps) {
   const [q, setQ] = useState("");
-  const [isLoading, setLoading] = useState(false);
+  const [isLoading, setLoading] = useState(true);
   const [rows, setRows] = useState<Model[]>([]);
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -289,6 +293,12 @@ function SearchSection({
                     <Action title="Move Pin up" icon={Icon.ArrowUp} onAction={() => movePin(m.id, -1)} />
                     <Action title="Move Pin Down" icon={Icon.ArrowDown} onAction={() => movePin(m.id, 1)} />
                     <Action title="Switch to Leaderboards" icon={Icon.List} onAction={() => setMode("leaderboards")} />
+                    <ActionPanel.Submenu title="Filter by Creator" shortcut={{ modifiers: ["cmd"], key: "p" }}>
+                      <Action title="All Creators" onAction={() => setCreatorFilter("")} />
+                      {[...new Set(rows.map((r) => r.creator_name).filter(Boolean) as string[])].map((name) => (
+                        <Action key={name} title={name} onAction={() => setCreatorFilter(name)} />
+                      ))}
+                    </ActionPanel.Submenu>
                     <Action
                       title="Reset Filters"
                       icon={Icon.XMarkCircle}
@@ -300,12 +310,6 @@ function SearchSection({
                         void load("");
                       }}
                     />
-                    <ActionPanel.Submenu title="Filter by Creator" shortcut={{ modifiers: ["cmd"], key: "p" }}>
-                      <Action title="All Creators" onAction={() => setCreatorFilter("")} />
-                      {[...new Set(rows.map((r) => r.creator_name).filter(Boolean) as string[])].map((name) => (
-                        <Action key={name} title={name} onAction={() => setCreatorFilter(name)} />
-                      ))}
-                    </ActionPanel.Submenu>
                     <Action.CopyToClipboard title="Copy Name" content={m.name ?? ""} />
                     <Action.CopyToClipboard title="Copy Slug" content={m.slug ?? ""} />
                   </ActionPanel>
@@ -349,6 +353,16 @@ function SearchSection({
                     target={<ModelDetail model={m} pinnedIds={pinnedIds} addPin={addPin} removePin={removePin} />}
                   />
                   <Action title="Switch to Leaderboards" icon={Icon.List} onAction={() => setMode("leaderboards")} />
+                  <ActionPanel.Submenu
+                    title="Filter by Creator"
+                    icon={Icon.Person}
+                    shortcut={{ modifiers: ["cmd"], key: "p" }}
+                  >
+                    <Action title="All Creators" icon={Icon.Person} onAction={() => setCreatorFilter("")} />
+                    {[...new Set(rows.map((r) => r.creator_name).filter(Boolean) as string[])].map((name) => (
+                      <Action key={name} title={name} icon={Icon.Person} onAction={() => setCreatorFilter(name)} />
+                    ))}
+                  </ActionPanel.Submenu>
                   <Action
                     title="Reset Filters"
                     icon={Icon.XMarkCircle}
@@ -360,16 +374,6 @@ function SearchSection({
                       void load("");
                     }}
                   />
-                  <ActionPanel.Submenu
-                    title="Filter by Creator"
-                    icon={Icon.Person}
-                    shortcut={{ modifiers: ["cmd"], key: "p" }}
-                  >
-                    <Action title="All Creators" icon={Icon.Person} onAction={() => setCreatorFilter("")} />
-                    {[...new Set(rows.map((r) => r.creator_name).filter(Boolean) as string[])].map((name) => (
-                      <Action key={name} title={name} icon={Icon.Person} onAction={() => setCreatorFilter(name)} />
-                    ))}
-                  </ActionPanel.Submenu>
                   {isPinned ? (
                     <Action title="Unpin Model" icon={Icon.PinDisabled} onAction={() => removePin(m.id)} />
                   ) : (
@@ -401,7 +405,7 @@ type LeaderboardSectionProps = {
 
 function LeaderboardSection({ metric, setMode, setMetric }: LeaderboardSectionProps) {
   const [rows, setRows] = useState<Model[]>([]);
-  const [isLoading, setLoading] = useState(false);
+  const [isLoading, setLoading] = useState(true);
 
   const isAsc = useMemo(() => metric === "median_time_to_first_token_seconds" || metric.startsWith("price_"), [metric]);
 
@@ -458,7 +462,7 @@ function LeaderboardSection({ metric, setMode, setMetric }: LeaderboardSectionPr
                   />
                   <Action title="Switch to Search" icon={Icon.MagnifyingGlass} onAction={() => setMode("search")} />
                   <ActionPanel.Submenu
-                    title="Change Leaderboard"
+                    title="Change Leaderboard…"
                     icon={Icon.List}
                     shortcut={{ modifiers: ["cmd"], key: "k" }}
                   >

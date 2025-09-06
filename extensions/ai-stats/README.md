@@ -1,10 +1,8 @@
 # AI-Stats (Raycast Extension)
 
-A Raycast extension that provides quick access to AI model statistics and leaderboards.
-It connects to a Supabase database (hosted by Jonathan Reed) that syncs with [ArtificialAnalysis.ai](https://artificialanalysis.ai/).
-Search models, view benchmark results, compare prices, and check leaderboards — all without leaving Raycast.
-
-🌐 Web version: [https://aistats.jonathanreed.com](https://aistats.jonathanreed.com)
+A Raycast extension that provides quick access to AI model statistics & leaderboards.
+It syncs with [ArtificialAnalysis.ai's](https://artificialanalysis.ai/) API for model data.
+Search models, view benchmark results, compare prices, and check leaderboards all without leaving Raycast.
 
 ## Screenshots
 
@@ -17,11 +15,11 @@ Search models, view benchmark results, compare prices, and check leaderboards �
 - Command: `View AI Stats`
 - Creator Filter: Cmd+P
 - Reset Filters: Cmd+Backspace
-- Pinned Models: Pin/Unpin from list or detail; Move Up/Down; optional Pinned section in preferences.
+- Pinned Models: Pin/Unpin from list or detail; Move Up/Down; optional Pinned section (enabled by default) in preferences.
 
 ## Commands
 
-- View AI Stats — single unified command for Search and Leaderboards.
+- View AI Stats (single unified command for Search and Leaderboards).
 
 ## Action Menu (Quick Reference)
 
@@ -41,12 +39,12 @@ Search models, view benchmark results, compare prices, and check leaderboards �
 
 ## Features
 
-- 🔍 **Search Models** – Find models by name, slug, or creator. Most recent models shown first.
-- 🏷️ **Price Badges** – input & output prices per 1M tokens at a glance.
-- 🚀 **Throughput** – Median tokens/sec and TTFT, with clear color cues.
-- 🏆 **Leaderboards** – Rank by MMLU, GPQA, TPS, TTFT, prices, and more.
-- 📄 **Model Detail Pages** – “About” pages with overview, pricing, throughput, benchmarks, and raw JSON.
-- 📌 **Pin a Model** – Pin up to 10 models and have them at the top of the list when the extension launches.
+- 🔍 **Search Models** Find models by name, slug, or creator. Most recent models shown first.
+- 🏷️ **Price Badges** Input & output prices per 1M tokens at a glance.
+- 🚀 **Throughput** Median tokens/sec and TTFT, with clear color cues.
+- 🏆 **Leaderboards** Rank by MMLU, GPQA, TPS, TTFT, prices, and more.
+- 📄 **Model Detail Pages** “About” pages with overview, pricing, throughput, benchmarks, and raw JSON.
+- 📌 **Pin a Model** Pin up to 10 models and have them at the top of the list when the extension launches.
 
 ## Setup
 
@@ -71,7 +69,7 @@ If left empty, the extension uses a hosted, read-only Supabase instance to fetch
 
 ## Privacy
 
-- No account is required and no personal data is collected by this extension.
+- No account is required & no personal data is collected by this extension.
 - The extension stores only local preferences (e.g., pinned models, filters) using Raycast's local storage.
 - Network requests are made to a read-only Supabase endpoint to fetch public AI model data.
 
