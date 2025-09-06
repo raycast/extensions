@@ -33,7 +33,7 @@ interface EventData {
 }
 
 export default function Command() {
-  const [data, setData] = useState<TeamData[] | EventData[] | null>(null);
+  const [data, setData] = useState<Array<TeamData | EventData> | null>(null);
   const [searchText, setSearchText] = useState<string>("");
   async function fetchData(currentSearch: string) {
     if (currentSearch.length < 3) {
@@ -97,13 +97,16 @@ query ExampleQuery($searchText: String, $limit: Int, $season: Int!) {
 }`;
 
       const variables = { searchText: currentSearch, limit: 10, season: 2024 };
-      const response = await fetch("https://api.ftcscout.j5155.page/graphql", {
+      const response = await fetch("https://api.ftcscout.org/graphql", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query, variables }),
       });
-      const json = await response.json();
-      console.log("GraphQL Response:", json.data.eventsSearch);
+      const json = (await response.json()) as {
+        data?: { teamsSearch?: TeamData[]; eventsSearch?: EventData[] };
+        errors?: unknown;
+      };
+      console.log("GraphQL Response:", json.data?.eventsSearch);
       if (json.errors) {
         console.error("GraphQL Error:", json.errors);
         setData([]);
@@ -250,7 +253,7 @@ function getFTCMatchesTable(
 
         const matchNumLabel =
           match.tournamentLevel === "DoubleElim"
-            ? `Elims ${match.matchNum}`
+            ? `Elims ${match.series} - ${match.matchNum}`
             : `${match.tournamentLevel} ${match.matchNum}`;
 
         const matchLink = eventCode

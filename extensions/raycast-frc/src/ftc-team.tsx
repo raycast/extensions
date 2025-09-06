@@ -175,7 +175,7 @@ query ExampleQuery($number: Int!, $season: Int!) {
         const variables = { number: parseInt(team), season: 2024 };
 
         const response = await fetch(
-          "https://api.ftcscout.j5155.page/graphql",
+          "https://api.ftcscout.org/graphql",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -183,7 +183,10 @@ query ExampleQuery($number: Int!, $season: Int!) {
           },
         );
 
-        const json = await response.json();
+        const json = (await response.json()) as {
+          data?: { teamByNumber?: TeamData };
+          errors?: unknown;
+        };
         if (!json.data || !json.data.teamByNumber) {
           setTeamExists(false);
           console.log("GraphQL Response:", json);
@@ -325,7 +328,7 @@ function getFTCMatchesTable(
         }
         const matchNumLabel =
           match.match.tournamentLevel == "DoubleElim"
-            ? `Elims ${match.match.matchNum}`
+            ? `Elims ${match.match.series}-${match.match.matchNum}`
             : `${match.match.tournamentLevel} ${match.match.matchNum}`;
         const matchLink = team
           ? `[${matchNumLabel}](https://ftcscout.org/teams/${team}?scores=${eventCode}-${match.match.matchNum}#${eventCode})`
