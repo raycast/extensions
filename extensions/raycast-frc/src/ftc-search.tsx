@@ -107,11 +107,18 @@ query ExampleQuery($searchText: String, $limit: Int, $season: Int!) {
       if (json.errors) {
         console.error("GraphQL Error:", json.errors);
         setData([]);
-      } else if (!json.data || (!json.data.teamsSearch && !json.data.eventsSearch)) {
+      } else if (
+        !json.data ||
+        (!json.data.teamsSearch && !json.data.eventsSearch)
+      ) {
         setData([]);
       } else {
-        let teams = Array.isArray(json.data.teamsSearch) ? json.data.teamsSearch : [];
-        let events = Array.isArray(json.data.eventsSearch) ? json.data.eventsSearch : [];
+        let teams = Array.isArray(json.data.teamsSearch)
+          ? json.data.teamsSearch
+          : [];
+        let events = Array.isArray(json.data.eventsSearch)
+          ? json.data.eventsSearch
+          : [];
         teams = teams.slice(0, 10);
         events = events.slice(0, 10);
         setData([...teams, ...events].filter(Boolean));
@@ -143,7 +150,9 @@ query ExampleQuery($searchText: String, $limit: Int, $season: Int!) {
                 key={"team-" + item.number}
                 title={`${item.number} - ${item.name}`}
                 subtitle={
-                  item.location ? `${item.location.city}, ${item.location.state}, ${item.location.country}` : undefined
+                  item.location
+                    ? `${item.location.city}, ${item.location.state}, ${item.location.country}`
+                    : undefined
                 }
                 detail={
                   <List.Item.Detail
@@ -200,14 +209,26 @@ ${getFTCMatchesTable(item.matches, item.code)}
   );
 }
 
-function getFTCMatchesTable(matches: EventData["matches"], eventCode?: string): string {
+function getFTCMatchesTable(
+  matches: EventData["matches"],
+  eventCode?: string,
+): string {
   if (!matches || matches.length === 0) return "No matches found.";
 
-  const doubleElim = matches.filter((m) => m.tournamentLevel === "DoubleElim").sort((a, b) => a.matchNum - b.matchNum);
-  const qual = matches.filter((m) => m.tournamentLevel === "Quals").sort((a, b) => a.matchNum - b.matchNum);
-  const finals = matches.filter((m) => m.tournamentLevel === "Finals").sort((a, b) => a.matchNum - b.matchNum);
+  const doubleElim = matches
+    .filter((m) => m.tournamentLevel === "DoubleElim")
+    .sort((a, b) => a.matchNum - b.matchNum);
+  const qual = matches
+    .filter((m) => m.tournamentLevel === "Quals")
+    .sort((a, b) => a.matchNum - b.matchNum);
+  const finals = matches
+    .filter((m) => m.tournamentLevel === "Finals")
+    .sort((a, b) => a.matchNum - b.matchNum);
 
-  function tableSection(sectionMatches: EventData["matches"], sectionTitle: string) {
+  function tableSection(
+    sectionMatches: EventData["matches"],
+    sectionTitle: string,
+  ) {
     if (sectionMatches.length === 0) return "";
     let md = `\n### ${sectionTitle}\n`;
     md += "|  Match Num  | Red Teams | Blue Teams | Red Score | Blue Score |\n";
@@ -262,7 +283,8 @@ function getFTCMatchesTable(matches: EventData["matches"], eventCode?: string): 
 
   let result = "";
   if (qual.length > 0) result += tableSection(qual, "Qualifications");
-  if (doubleElim.length > 0) result += tableSection(doubleElim, "Double Eliminations");
+  if (doubleElim.length > 0)
+    result += tableSection(doubleElim, "Double Eliminations");
   if (finals.length > 0) result += tableSection(finals, "Finals");
   return result.trim() || "No matches found.";
 }

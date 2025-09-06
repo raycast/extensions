@@ -6,7 +6,11 @@ import type { Award, Event, Match, Rankings } from "./frc-team";
 import { getMatchesTable } from "./frc-team";
 
 const preferences = getPreferenceValues<Preferences.FrcEvent>();
-export default function Command({ arguments: { event } }: { arguments: Arguments.FrcEvent }) {
+export default function Command({
+  arguments: { event },
+}: {
+  arguments: Arguments.FrcEvent;
+}) {
   const [eventData, setEventData] = useState<Event | null>(null);
   const [markdown, setMarkdown] = useState<string | null>(null);
   const [eventExists, setEventExists] = useState<boolean>(true);
@@ -16,11 +20,14 @@ export default function Command({ arguments: { event } }: { arguments: Arguments
     setMarkdown("# Loading...");
     async function fetchData() {
       try {
-        const response = await fetch(`https://www.thebluealliance.com/api/v3/event/${event}`, {
-          headers: {
-            "X-TBA-Auth-Key": preferences.tbaApiKey,
+        const response = await fetch(
+          `https://www.thebluealliance.com/api/v3/event/${event}`,
+          {
+            headers: {
+              "X-TBA-Auth-Key": preferences.tbaApiKey,
+            },
           },
-        });
+        );
         const data = (await response.json()) as Partial<Event>;
         if (!data || typeof data !== "object" || !data.key) {
           setMarkdown("# Invalid Event ID");
@@ -46,11 +53,14 @@ export default function Command({ arguments: { event } }: { arguments: Arguments
           teams: [],
         };
         setEventData(eventData);
-        const awardsResponse = await fetch(`https://www.thebluealliance.com/api/v3/event/${event}/awards`, {
-          headers: {
-            "X-TBA-Auth-Key": preferences.tbaApiKey,
+        const awardsResponse = await fetch(
+          `https://www.thebluealliance.com/api/v3/event/${event}/awards`,
+          {
+            headers: {
+              "X-TBA-Auth-Key": preferences.tbaApiKey,
+            },
           },
-        });
+        );
         const awardsData = (await awardsResponse.json()) as Array<{
           name: string;
           recipient_list: Array<{ team_key: string }>;
@@ -72,26 +82,34 @@ export default function Command({ arguments: { event } }: { arguments: Arguments
         setEventData(eventData);
 
         try {
-          const rankingsResponse = await fetch(`https://www.thebluealliance.com/api/v3/event/${event}/teams/statuses`, {
-            headers: {
-              "X-TBA-Auth-Key": preferences.tbaApiKey,
+          const rankingsResponse = await fetch(
+            `https://www.thebluealliance.com/api/v3/event/${event}/teams/statuses`,
+            {
+              headers: {
+                "X-TBA-Auth-Key": preferences.tbaApiKey,
+              },
             },
-          });
+          );
           const rankingsData = (await rankingsResponse.json()) as Rankings;
           setRankings(rankingsData);
         } catch (error) {
           console.error("Error fetching rankings:", error);
         }
-        const matchList = await fetch(`https://www.thebluealliance.com/api/v3/event/${event}/matches/keys`, {
-          headers: {
-            "X-TBA-Auth-Key": preferences.tbaApiKey,
+        const matchList = await fetch(
+          `https://www.thebluealliance.com/api/v3/event/${event}/matches/keys`,
+          {
+            headers: {
+              "X-TBA-Auth-Key": preferences.tbaApiKey,
+            },
           },
-        });
+        );
         const matchListData = (await matchList.json()) as string[];
         const matches: Match[] = [];
         if (Array.isArray(matchListData) && matchListData.length > 0) {
           for (const matchKey of matchListData) {
-            const curMatch = await fetch(`https://api.statbotics.io/v3/match/${matchKey}`);
+            const curMatch = await fetch(
+              `https://api.statbotics.io/v3/match/${matchKey}`,
+            );
             const curMatchData = (await curMatch.json()) as {
               key: string;
               alliances: {
@@ -161,12 +179,21 @@ export default function Command({ arguments: { event } }: { arguments: Arguments
             }
           />
         }
-        subtitle={eventData ? `${eventData.city}, ${eventData.state_prov}, ${eventData.country}` : ""}
+        subtitle={
+          eventData
+            ? `${eventData.city}, ${eventData.state_prov}, ${eventData.country}`
+            : ""
+        }
       />
       {eventExists && (
         <>
           {eventData ? (
-            <List.Item title="Matches" detail={<List.Item.Detail markdown={getMatchesTable(eventData)} />} />
+            <List.Item
+              title="Matches"
+              detail={
+                <List.Item.Detail markdown={getMatchesTable(eventData)} />
+              }
+            />
           ) : (
             <List.Item title="Loading Matches..." />
           )}
@@ -174,13 +201,22 @@ export default function Command({ arguments: { event } }: { arguments: Arguments
           {eventData ? (
             <List.Item
               title="Awards"
-              detail={<List.Item.Detail markdown={awardsToMarkdown(eventData.awards, eventData)} />}
+              detail={
+                <List.Item.Detail
+                  markdown={awardsToMarkdown(eventData.awards, eventData)}
+                />
+              }
             />
           ) : (
             <List.Item title="Loading Awards..." />
           )}
           {rankings ? (
-            <List.Item title="Rankings" detail={<List.Item.Detail markdown={rankingsToMarkdown(rankings)} />} />
+            <List.Item
+              title="Rankings"
+              detail={
+                <List.Item.Detail markdown={rankingsToMarkdown(rankings)} />
+              }
+            />
           ) : (
             <List.Item title="Loading Rankings..." />
           )}
@@ -191,8 +227,10 @@ export default function Command({ arguments: { event } }: { arguments: Arguments
 }
 
 function rankingsToMarkdown(rankings: Rankings): string {
-  if (!rankings || Object.keys(rankings).length === 0) return "No rankings found.";
-  let md = "| Team | Rank | Record | Alliance | Playoff |\n|------|------|--------|----------|---------|\n";
+  if (!rankings || Object.keys(rankings).length === 0)
+    return "No rankings found.";
+  let md =
+    "| Team | Rank | Record | Alliance | Playoff |\n|------|------|--------|----------|---------|\n";
   const rankingArr = Object.entries(rankings)
     .map(([teamKey, team]) => {
       if (!team || !team.qual || !team.qual.ranking) {
@@ -217,7 +255,8 @@ function rankingsToMarkdown(rankings: Rankings): string {
             ? `${qual.record.wins}-${qual.record.losses}-${qual.record.ties}`
             : "",
         allianceStatus:
-          team.alliance_status_str && typeof team.alliance_status_str === "string"
+          team.alliance_status_str &&
+          typeof team.alliance_status_str === "string"
             ? team.alliance_status_str.replace(/<[^>]+>/g, "")
             : "",
         playoff:

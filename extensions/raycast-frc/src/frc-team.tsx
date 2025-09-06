@@ -87,14 +87,21 @@ function getDistrictName(code: string): string | null {
 
 const preferences = getPreferenceValues<Preferences.FrcEvent>();
 
-export default function Command({ arguments: { team, year: yearArg } }: { arguments: Arguments.FrcTeam }) {
+export default function Command({
+  arguments: { team, year: yearArg },
+}: {
+  arguments: Arguments.FrcTeam;
+}) {
   if (!team || isNaN(Number(team))) {
     console.log(Number(team));
     return <Detail markdown="# Invalid Team Number" />;
   }
   const [teamData, setTeamData] = useState<TeamData | null>(null);
   const [teamExists, setTeamExists] = useState<boolean>(true);
-  const year = yearArg && !isNaN(Number(yearArg)) ? Number(yearArg) : new Date().getFullYear();
+  const year =
+    yearArg && !isNaN(Number(yearArg))
+      ? Number(yearArg)
+      : new Date().getFullYear();
 
   const markdown = `
 # Team ${team}${teamData ? ` - ${teamData.nickname}` : ""}  
@@ -116,11 +123,14 @@ ${teamData?.district ? `As a member of the ${getDistrictName(teamData.district)}
   useEffect(() => {
     async function fetchData() {
       try {
-        const tbaResponse = await fetch(`https://www.thebluealliance.com/api/v3/team/frc${team}`, {
-          headers: {
-            "X-TBA-Auth-Key": preferences.tbaApiKey,
+        const tbaResponse = await fetch(
+          `https://www.thebluealliance.com/api/v3/team/frc${team}`,
+          {
+            headers: {
+              "X-TBA-Auth-Key": preferences.tbaApiKey,
+            },
           },
-        });
+        );
         const tbaData = (await tbaResponse.json()) as Partial<TeamData>;
         if (!tbaData || !tbaData.nickname) {
           setTeamExists(false);
@@ -141,7 +151,9 @@ ${teamData?.district ? `As a member of the ${getDistrictName(teamData.district)}
           district_rank: 0,
           events: [],
         });
-        const statboticsResponse = await fetch(`https://api.statbotics.io/v3/team_year/${team}/${year}`);
+        const statboticsResponse = await fetch(
+          `https://api.statbotics.io/v3/team_year/${team}/${year}`,
+        );
         type StatboticsData = {
           district?: string;
           epa?: { total_points?: { mean?: number } };
@@ -149,13 +161,17 @@ ${teamData?.district ? `As a member of the ${getDistrictName(teamData.district)}
           district_points?: number;
           district_rank?: number;
         };
-        const statboticsData = (await statboticsResponse.json()) as StatboticsData;
+        const statboticsData =
+          (await statboticsResponse.json()) as StatboticsData;
 
-        const eventListResponse = await fetch(`https://www.thebluealliance.com/api/v3/team/frc${team}/events/${year}`, {
-          headers: {
-            "X-TBA-Auth-Key": preferences.tbaApiKey,
+        const eventListResponse = await fetch(
+          `https://www.thebluealliance.com/api/v3/team/frc${team}/events/${year}`,
+          {
+            headers: {
+              "X-TBA-Auth-Key": preferences.tbaApiKey,
+            },
           },
-        });
+        );
         const eventListRaw = (await eventListResponse.json()) as Event[];
         let processedTeamData: TeamData = {
           nickname: tbaData.nickname ?? "",
@@ -216,7 +232,9 @@ ${teamData?.district ? `As a member of the ${getDistrictName(teamData.district)}
           const eventAwardsData = (await eventAwards.json()) as Award[];
 
           if (Array.isArray(eventAwardsData)) {
-            event.team_awards = eventAwardsData.map((award: { name: string }) => award.name) || [];
+            event.team_awards =
+              eventAwardsData.map((award: { name: string }) => award.name) ||
+              [];
           }
           if (eventStatusData && typeof eventStatusData === "object") {
             event.status = eventStatusData.overall_status_str || "";
@@ -234,7 +252,9 @@ ${teamData?.district ? `As a member of the ${getDistrictName(teamData.district)}
           const matches: Match[] = [];
           if (Array.isArray(matchListData) && matchListData.length > 0) {
             for (const matchKey of matchListData) {
-              const curMatch = await fetch(`https://api.statbotics.io/v3/match/${matchKey}`);
+              const curMatch = await fetch(
+                `https://api.statbotics.io/v3/match/${matchKey}`,
+              );
               type Alliance = { team_keys: string[] };
               type MatchResult = { blue_score: number; red_score: number };
               type MatchPred = { blue_score: number; red_score: number };
@@ -329,7 +349,10 @@ ${teamData?.district ? `As a member of the ${getDistrictName(teamData.district)}
                 subtitle={teamData?.epa ? `EPA: ${teamData.epa}` : ""}
                 actions={
                   <ActionPanel>
-                    <Action.OpenInBrowser url={`https://statbotics.io/team/${team}`} title="Open Statbotics" />
+                    <Action.OpenInBrowser
+                      url={`https://statbotics.io/team/${team}`}
+                      title="Open Statbotics"
+                    />
                   </ActionPanel>
                 }
               />
@@ -406,7 +429,9 @@ export function getMatchesTable(event: Event): string {
   let table = "";
   let semifinals_header = "";
   let finals_header = "";
-  const qms = matches.filter((m) => m.key.replace(/^[^_]+_/, "").startsWith("qm"));
+  const qms = matches.filter((m) =>
+    m.key.replace(/^[^_]+_/, "").startsWith("qm"),
+  );
   qms.sort((a, b) => {
     const aNum = parseInt(a.key.replace(/^[^_]+_qm/, ""));
     const bNum = parseInt(b.key.replace(/^[^_]+_qm/, ""));
@@ -422,7 +447,9 @@ export function getMatchesTable(event: Event): string {
       table += `| [${matchName}](https://statbotics.io/match/${match.key}) | [${match.red1}](https://statbotics.io/team/${match.red1}), [${match.red2}](https://statbotics.io/team/${match.red2}), [${match.red3}](https://statbotics.io/team/${match.red3}) | [${match.blue1}](https://statbotics.io/team/${match.blue1}), [${match.blue2}](https://statbotics.io/team/${match.blue2}), [${match.blue3}](https://statbotics.io/team/${match.blue3}) | ${match.predRed > match.predBlue ? `**${match.predRed}**` : match.predRed} | ${match.predBlue > match.predRed ? `**${match.predBlue}**` : match.predBlue} | ${match.scoreRed > match.scoreBlue ? `**${match.scoreRed}**` : match.scoreRed} | ${match.scoreBlue > match.scoreRed ? `**${match.scoreBlue}**` : match.scoreBlue} |\n`;
     }
   }
-  const sfs = matches.filter((m) => m.key.replace(/^[^_]+_/, "").startsWith("sf"));
+  const sfs = matches.filter((m) =>
+    m.key.replace(/^[^_]+_/, "").startsWith("sf"),
+  );
   sfs.sort((a, b) => {
     const aTrim = a.key.replace(/^[^_]+_/, "");
     const bTrim = b.key.replace(/^[^_]+_/, "");
@@ -443,7 +470,9 @@ export function getMatchesTable(event: Event): string {
       table += `| [${matchName}](https://statbotics.io/match/${match.key}) | [${match.red1}](https://statbotics.io/team/${match.red1}), [${match.red2}](https://statbotics.io/team/${match.red2}), [${match.red3}](https://statbotics.io/team/${match.red3}) | [${match.blue1}](https://statbotics.io/team/${match.blue1}), [${match.blue2}](https://statbotics.io/team/${match.blue2}), [${match.blue3}](https://statbotics.io/team/${match.blue3}) | ${match.predRed > match.predBlue ? `**${match.predRed}**` : match.predRed} | ${match.predBlue > match.predRed ? `**${match.predBlue}**` : match.predBlue} | ${match.scoreRed > match.scoreBlue ? `**${match.scoreRed}**` : match.scoreRed} | ${match.scoreBlue > match.scoreRed ? `**${match.scoreBlue}**` : match.scoreBlue} |\n`;
     }
   }
-  const finals = matches.filter((m) => m.key.replace(/^[^_]+_/, "").startsWith("f"));
+  const finals = matches.filter((m) =>
+    m.key.replace(/^[^_]+_/, "").startsWith("f"),
+  );
   finals.sort((a, b) => {
     const aTrim = a.key.replace(/^[^_]+_/, "");
     const bTrim = b.key.replace(/^[^_]+_/, "");
