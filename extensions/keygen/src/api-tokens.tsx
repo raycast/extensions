@@ -12,26 +12,28 @@ export default function APITokens() {
   async function confirmAndDelete(token: APIToken) {
     const options: Alert.Options = {
       title: "Are you absolutely sure?",
-      message: "This action cannot be undone. This will permanently revoke the API token. All subsequent API requests utilizing the token will no longer work.",
+      message:
+        "This action cannot be undone. This will permanently revoke the API token. All subsequent API requests utilizing the token will no longer work.",
       primaryAction: {
         style: Alert.ActionStyle.Destructive,
-        title: "Revoke"
-      }
-    }
+        title: "Revoke",
+      },
+    };
     if (await confirmAlert(options)) {
       const toast = await showToast(Toast.Style.Animated, "Revoking License", token.attributes.name);
       try {
         await mutate(
           fetch(API_URL + `tokens/${token.id}`, {
             method: "DELETE",
-            headers
-          }).then(parseResponse), {
+            headers,
+          }).then(parseResponse),
+          {
             optimisticUpdate(data) {
-              return data.filter(t => t.id!==token.id)
+              return data.filter((t) => t.id !== token.id);
             },
-            shouldRevalidateAfter: false
-          }
-        )
+            shouldRevalidateAfter: false,
+          },
+        );
         toast.style = Toast.Style.Success;
         toast.title = "Revoked License";
       } catch (error) {
@@ -45,9 +47,7 @@ export default function APITokens() {
   return (
     <List isLoading={isLoading} isShowingDetail pagination={pagination}>
       {!isLoading && !tokens.length && !error ? (
-        <List.EmptyView
-          description="No results"
-        />
+        <List.EmptyView description="No results" />
       ) : (
         tokens.map((token) => (
           <List.Item
@@ -61,10 +61,7 @@ export default function APITokens() {
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Resource" />
                     <List.Item.Detail.Metadata.Label title="ID" text={token.id} />
-                    <List.Item.Detail.Metadata.Label
-                      title="Created"
-                      text={dayjs(token.attributes.created).fromNow()}
-                    />
+                    <List.Item.Detail.Metadata.Label title="Created" text={dayjs(token.attributes.created).fromNow()} />
                     <List.Item.Detail.Metadata.Separator />
 
                     <List.Item.Detail.Metadata.Label title="Attributes" />
@@ -73,9 +70,11 @@ export default function APITokens() {
                     </List.Item.Detail.Metadata.TagList>
                     <List.Item.Detail.Metadata.Label title="Name" text={token.attributes.name || "--"} />
                     <List.Item.Detail.Metadata.Label title="Expiry" text={token.attributes.expiry || "--"} />
-                    
+
                     <List.Item.Detail.Metadata.TagList title="Permissions">
-                      {token.attributes.permissions.map(permission => <List.Item.Detail.Metadata.TagList.Item key={permission} text={permission} />)}
+                      {token.attributes.permissions.map((permission) => (
+                        <List.Item.Detail.Metadata.TagList.Item key={permission} text={permission} />
+                      ))}
                     </List.Item.Detail.Metadata.TagList>
                     <List.Item.Detail.Metadata.Separator />
 
@@ -87,7 +86,12 @@ export default function APITokens() {
             actions={
               <ActionPanel>
                 <OpenInKeygen route={`tokens/${token.id}`} />
-                              <Action icon={Icon.Trash} title="Delete" onAction={() => confirmAndDelete(token)} style={Action.Style.Destructive} />
+                <Action
+                  icon={Icon.Trash}
+                  title="Delete"
+                  onAction={() => confirmAndDelete(token)}
+                  style={Action.Style.Destructive}
+                />
               </ActionPanel>
             }
           />

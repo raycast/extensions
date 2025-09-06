@@ -11,11 +11,11 @@ export interface APIToken {
   id: string;
   attributes: {
     kind: TokenKind;
-    expiry: string | null
-    permissions: string[]
+    expiry: string | null;
+    permissions: string[];
     name: string;
     created: string;
-  }
+  };
 }
 
 export enum LicenseStatus {
