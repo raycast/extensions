@@ -6,9 +6,9 @@ Search models, view benchmark results, compare prices, and check leaderboards al
 
 ## Screenshots
 
-![AI Stats – Search](assets/ai-stats-1.png)
+![AI Stats – Search](metadata/ai-stats-1.png)
 
-![AI Stats – Details & Actions](assets/ai-stats-2.png)
+![AI Stats – Details & Actions](metadata/ai-stats-2.png)
 
 ## Usage
 
