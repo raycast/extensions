@@ -4,23 +4,6 @@
   "title": "Qovery",
   "description": "Interact with your Qovery organization",
   "icon": "extension-icon.png",
-  "screenshots": [
-    {
-      "title": "Qovery Services List",
-      "description": "View all services in your Qovery organization",
-      "path": "metadata/service-list.png"
-    },
-    {
-      "title": "Service Actions",
-      "description": "Quick actions for each service including opening in console and viewing links",
-      "path": "metadata/service-actions.png"
-    },
-    {
-      "title": "Service Links",
-      "description": "View and manage service links",
-      "path": "metadata/service-links.png"
-    }
-  ],
   "author": "RemiBonnet",
   "categories": [
     "Developer Tools"
