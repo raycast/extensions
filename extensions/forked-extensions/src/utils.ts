@@ -1,6 +1,7 @@
 import path from "node:path";
 import { Cache, getPreferenceValues } from "@raycast/api";
-import { ForkedExtension } from "./types.js";
+import { upstreamRepository } from "./constants.js";
+import { CommitDiff, ForkedExtension } from "./types.js";
 
 export const { gitExecutableFilePath, gitRemoteType, githubPersonalAccessToken, repositoryConfigurationPath } =
   getPreferenceValues<ExtensionPreferences>();
@@ -32,10 +33,10 @@ export const extensionLink = (username: string, extension: string) => `https://r
 
 /**
  * Returns the remote URL for the repository based on the configured remote type in extension preferences.
- * @param repository Optional. The full repository name. Defaults to `"raycast/extensions"`.
+ * @param repository Optional. The full repository name. Defaults to the upstream repository - `"raycast/extensions"`.
  * @returns The remote URL for the repository.
  */
-export const getRemoteUrl = (repository: string = "raycast/extensions") => {
+export const getRemoteUrl = (repository: string = upstreamRepository) => {
   if (gitRemoteType === "https") return `https://github.com/${repository}.git`;
   if (gitRemoteType === "ssh") return `git@github.com:${repository}.git`;
   throw new Error("Invalid URL type. Use 'https' or 'ssh'.");
@@ -46,5 +47,33 @@ export const getRemoteUrl = (repository: string = "raycast/extensions") => {
  * @param commitsCount The number of commits.
  * @returns The human-readable text for the number of commits.
  */
-export const getCommitsText = (commitsCount: number, prependSpace?: boolean) =>
-  (prependSpace ? " " : "") + (commitsCount === 1 ? "1 commit" : `${commitsCount} commits`);
+export const getCommitsText = (commitsCount: number) => (commitsCount === 1 ? "1 commit" : `${commitsCount} commits`);
+
+/**
+ * Returns a message indicating how many commits the forked repository is ahead and behind.
+ * @param commitDiff The commit difference object.
+ * @param options Optional. Additional options for the message.
+ * @returns The message indicating the commit difference.
+ */
+export const getCommitDiffMessage = (
+  commitDiff: CommitDiff | undefined,
+  options?: {
+    prependSpace?: boolean;
+    includeAhead?: boolean;
+    includeParentheses?: boolean;
+    includeZeroAhead?: boolean;
+    alwaysShow?: boolean;
+  },
+) => {
+  if (!commitDiff) return "";
+  const prefix = options?.prependSpace ? " " : "";
+  const aheadMessage =
+    options?.includeAhead && (options.includeZeroAhead || commitDiff.ahead > 0)
+      ? `${getCommitsText(commitDiff.ahead)} ahead, `
+      : "";
+  const behindMessage = `${getCommitsText(commitDiff.behind)} behind`;
+  const hasDiff = options?.alwaysShow || commitDiff.behind > 0;
+  const leftParenthese = options?.includeParentheses ? "(" : "";
+  const rightParenthese = options?.includeParentheses ? ")" : "";
+  return hasDiff ? `${prefix}${leftParenthese}${aheadMessage}${behindMessage}${rightParenthese}` : "";
+};

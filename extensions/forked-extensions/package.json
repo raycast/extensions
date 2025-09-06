@@ -39,7 +39,7 @@
     {
       "name": "githubPersonalAccessToken",
       "title": "GitHub Personal Access Token",
-      "description": "Optional. Your GitHub's personal access token. Required scope is: 'repo'.",
+      "description": "Optional. Your GitHub's personal access token. This only needs to be configured when you want to use another account for operations. Required scope is: 'repo'.",
       "type": "textfield",
       "required": false,
       "placeholder": "Your personal access token"
@@ -78,18 +78,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.5",
+    "@raycast/api": "^1.102.6",
     "got": "^14.4.7",
     "nano-spawn": "^1.0.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
-    "@eslint/js": "^9.33.0",
+    "@eslint/js": "^9.34.0",
     "@raycast/eslint-config": "^2.0.4",
     "@raycast/utils": "^2.2.1",
     "@types/node": "^24.3.0",
-    "@types/react": "^19.1.10",
-    "eslint": "^9.33.0",
+    "@types/react": "^19.1.12",
+    "eslint": "^9.34.0",
     "prettier": "^3.6.2",
     "typescript": "^5.9.2"
   }
