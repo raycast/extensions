@@ -1,6 +1,11 @@
 # Docker Changelog
 
+## [Feature] - {{PR_MERGE_DATE}}
+
+- Show loading toasts while container actions are running.
+
 ## [Improvement] - 2025-06-15
+
 - Group containers by state in the container list view
 
 ## [Feature] - 2025-06-10
