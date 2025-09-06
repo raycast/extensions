@@ -174,14 +174,11 @@ query ExampleQuery($number: Int!, $season: Int!) {
 }`;
         const variables = { number: parseInt(team), season: 2024 };
 
-        const response = await fetch(
-          "https://api.ftcscout.org/graphql",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ query, variables }),
-          },
-        );
+        const response = await fetch("https://api.ftcscout.org/graphql", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query, variables }),
+        });
 
         const json = (await response.json()) as {
           data?: { teamByNumber?: TeamData };
