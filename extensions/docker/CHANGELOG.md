@@ -1,6 +1,6 @@
 # Docker Changelog
 
-## [Feature] - {{PR_MERGE_DATE}}
+## [Feature] - {{PR_MERGE_DATE}
 
 - Show loading toasts while container actions are running.
 
