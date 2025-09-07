@@ -18,16 +18,12 @@ export default function ImageView({
   width,
   height,
 }: ImageViewProps) {
-  const params: string[] = [];
+  const params = new URLSearchParams({
+    "raycast-width": width?.toString() ?? "",
+    "raycast-height": height?.toString() ?? "",
+  });
 
-  if (width) {
-    params.push(`raycast-width=${width}`);
-  }
-  if (height) {
-    params.push(`raycast-height=${height}`);
-  }
-
-  const query = params.join("&");
+  const query = params.toString();
   const markdown = `![](${image}${query ? `?${query}` : ""})`;
 
   return <Detail markdown={markdown} navigationTitle={navigationTitle} metadata={metadata} actions={actions} />;
