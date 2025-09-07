@@ -1,5 +1,12 @@
 # Video Downloader Changelog
 
+## [Feat: Windows Support] - {PR_MERGE_DATE}
+
+- Added support for Windows OS, enabling video downloads and transcript extraction on Windows devices.
+- Ensured compatibility with Windows-specific file paths and dependencies.
+- Improved installation and setup instructions for Windows users.
+- Fixed platform-specific bugs to provide a seamless experience across Windows and macOS.
+
 ## [Chore: Fixed a typo in the installation view] - 2025-08-22
 
 ## [Chore] - 2025-03-10
