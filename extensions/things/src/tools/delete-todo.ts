@@ -1,3 +1,4 @@
+import { Tool } from '@raycast/api';
 import { deleteTodo, getTodoName } from '../api';
 
 type Input = {
@@ -9,7 +10,7 @@ export default async function ({ todoId }: Input) {
   return await deleteTodo(todoId);
 }
 
-export const confirmation = async ({ todoId }: Input) => {
+export const confirmation: Tool.Confirmation<Input> = async ({ todoId }: Input) => {
   const name = await getTodoName(todoId);
 
   return {

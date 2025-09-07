@@ -1,3 +1,4 @@
+import { Tool } from '@raycast/api';
 import { deleteProject, getProjectName } from '../api';
 
 type Input = {
@@ -9,7 +10,7 @@ export default async function ({ projectId }: Input) {
   return await deleteProject(projectId);
 }
 
-export const confirmation = async ({ projectId }: Input) => {
+export const confirmation: Tool.Confirmation<Input> = async ({ projectId }: Input) => {
   const name = await getProjectName(projectId);
 
   return {
