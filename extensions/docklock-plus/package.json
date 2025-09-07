@@ -1,0 +1,123 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "docklock-plus",
+    "title": "DockLock Plus",
+    "description": "Control macOS Dock position and automation (requires DockLock Plus app)",
+    "icon": "icon.png",
+    "author": "IGHOR",
+    "license": "MIT",
+    "version": "0.1.0",
+    "commands": [
+        {
+            "name": "move-dock-left",
+            "title": "Move Dock Left",
+            "subtitle": "DockLock Plus",
+            "description": "Moves the Dock to the left edge of the current or specified display using DockLock Plus automation",
+            "mode": "no-view"
+        },
+        {
+            "name": "move-dock-right",
+            "title": "Move Dock Right",
+            "subtitle": "DockLock Plus",
+            "description": "Moves the Dock to the right edge of the current or specified display using DockLock Plus automation",
+            "mode": "no-view"
+        },
+        {
+            "name": "move-dock-up",
+            "title": "Move Dock Up",
+            "subtitle": "DockLock Plus",
+            "description": "Moves the Dock to the up edge of the current or specified display using DockLock Plus automation",
+            "mode": "no-view"
+        },
+        {
+            "name": "move-dock-down",
+            "title": "Move Dock Down",
+            "subtitle": "DockLock Plus",
+            "description": "Moves the Dock to the down edge of the current or specified display using DockLock Plus automation",
+            "mode": "no-view"
+        },
+        {
+            "name": "enable-dock-lock",
+            "title": "Turn on DockLock engine",
+            "subtitle": "DockLock Plus",
+            "description": "Starts the DockLock engine to lock the Dock or enable automation modes",
+            "mode": "no-view"
+        },
+        {
+            "name": "disable-dock-lock",
+            "title": "Turn off DockLock engine",
+            "subtitle": "DockLock Plus",
+            "description": "Stops the DockLock engine and halts all automation",
+            "mode": "no-view"
+        },
+        {
+            "name": "enable-dock-follows-mouse",
+            "title": "Enable Dock Follows Mouse",
+            "subtitle": "DockLock Plus",
+            "description": "Activates DockLock Plus automation to move the Dock to the screen where your mouse is located",
+            "mode": "no-view"
+        },
+        {
+            "name": "disable-dock-follows-mouse",
+            "title": "Disable Dock Follows Mouse",
+            "subtitle": "DockLock Plus",
+            "description": "Disables the DockLock Plus feature that follows the mouse to relocate the Dock",
+            "mode": "no-view"
+        },
+        {
+            "name": "enable-dock-follows-active-window",
+            "title": "Enable Dock Follows Active Window",
+            "subtitle": "DockLock Plus",
+            "description": "Activates DockLock Plus automation to move the Dock to the screen where your active window is located",
+            "mode": "no-view"
+        },
+        {
+            "name": "disable-dock-follows-active-window",
+            "title": "Disable Dock Follows Active Window",
+            "subtitle": "DockLock Plus",
+            "description": "Disables the DockLock Plus feature that follows the active window to relocate the Dock",
+            "mode": "no-view"
+        },
+        {
+            "name": "move-to-display-by-name",
+            "title": "Move Dock to Display by Name",
+            "subtitle": "DockLock Plus",
+            "description": "Relocates the Dock to a specific display by its nam",
+            "mode": "view"
+        },
+        {
+            "name": "enable-dock-lock-on-display",
+            "title": "Enable Dock Lock on Display",
+            "subtitle": "DockLock Plus",
+            "description": "Enables DockLock only for a display by coordinates (x, y)",
+            "mode": "view"
+        },
+        {
+            "name": "disable-dock-lock-on-display",
+            "title": "Disable Dock Lock on Display",
+            "subtitle": "DockLock Plus",
+            "description": "Disables DockLock only for a display by name or by coordinates (x, y)",
+            "mode": "view"
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.100.3",
+        "@raycast/utils": "^1.19.1"
+    },
+    "devDependencies": {
+        "@raycast/eslint-config": "^2.0.4",
+        "@types/node": "22.13.10",
+        "@types/react": "19.0.10",
+        "eslint": "^9.22.0",
+        "prettier": "^3.5.3",
+        "typescript": "^5.8.2"
+    },
+    "scripts": {
+        "build": "ray build",
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint",
+        "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+        "publish": "npx @raycast/api@latest publish"
+    }
+}

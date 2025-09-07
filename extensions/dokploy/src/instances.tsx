@@ -3,6 +3,7 @@ import { FormValidation, useCachedState, useForm, useLocalStorage } from "@rayca
 import Projects from "./projects";
 import Docker from "./docker";
 import Users from "./users";
+import Destinations from "./destinations";
 
 interface Instance {
   key: string;
@@ -59,6 +60,7 @@ export default function Instances() {
                 <Action.Push icon={Icon.Folder} title="Projects" target={<Projects />} />
                 <Action.Push icon="blocks.svg" title="Docker" target={<Docker />} />
                 <ActionPanel.Section title="Settings">
+                  <Action.Push icon={Icon.Coin} title="S3 Destinations" target={<Destinations />} />
                   <Action.Push icon={Icon.TwoPeople} title="Users" target={<Users />} />
                 </ActionPanel.Section>
                 <ActionPanel.Section>

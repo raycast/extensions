@@ -49,9 +49,9 @@
       "mode": "no-view"
     },
     {
-      "name": "open-selected-finder-item",
+      "name": "open-selected-file-browser-item",
       "title": "Open in Warp",
-      "description": "Open selected Finder items in Warp.",
+      "description": "Open selected file browser items in Warp.",
       "mode": "no-view"
     }
   ],

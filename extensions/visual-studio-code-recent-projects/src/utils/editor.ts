@@ -8,6 +8,7 @@ const bundleIdMap: Record<string, string> = {
   Code: "com.microsoft.VSCode",
   "Code - Insiders": "com.microsoft.VSCodeInsiders",
   Cursor: "com.todesktop.230313mzl4w4u92",
+  Kiro: "dev.kiro.desktop",
   Positron: "com.rstudio.positron",
   Trae: "com.trae.app",
   "Trae CN": "cn.trae.app",

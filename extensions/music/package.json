@@ -13,7 +13,8 @@
     "urwrstkn8mare",
     "michalzuch",
     "validate",
-    "hrishabhn"
+    "hrishabhn",
+    "bogdan_bucur"
   ],
   "license": "MIT",
   "keywords": [
@@ -135,6 +136,14 @@
       "title": "Remove Current Track from Current Playlist",
       "subtitle": "Apple Music",
       "description": "Remove the currently playing track from the current playlist and skip to the next track.",
+      "disabledByDefault": true,
+      "mode": "no-view"
+    },
+    {
+      "name": "remove-current-playing-from-library",
+      "title": "Remove Current Track from Library",
+      "subtitle": "Apple Music",
+      "description": "Remove the currently playing track from the Library and skip to the next track.",
       "disabledByDefault": true,
       "mode": "no-view"
     },
@@ -1286,5 +1295,8 @@
     "prettier": "^3.3.3",
     "typescript": "^5.5.4",
     "react-devtools": "^5.2.0"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -1,10 +1,20 @@
 # awork Changelog
 
-## [Bug Fix] - 2025-06-04
+## [Bugfix] - 2025-08-26
+
+- Fix login
+
+## [Improve User Interface] - 2025-08-26
+
+- Added option to show tasks with status done
+- Added option to show projects with status closed
+- Added indicators for status of tasks and projects
+
+## [Bugfix] - 2025-06-04
 
 - Added error response when authenticating fails
 
-## [Bug Fix] - 2025-04-15
+## [Bugfix] - 2025-04-15
 
 - Fix error when searching in projects and tasks
 

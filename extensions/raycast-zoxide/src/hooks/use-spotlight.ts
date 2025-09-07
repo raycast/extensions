@@ -6,7 +6,7 @@ export const useSpotlight = (query: string, options?: object) => {
   options = {
     shell: true,
     env: {
-      PATH: "/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin:/opt/homebrew/sbin",
+      PATH: "/usr/bin",
     },
     ...options,
   };

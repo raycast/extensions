@@ -7,11 +7,12 @@
   "author": "garrett",
   "contributors": [
     "RSO",
-    "vette",
+    "dgrzedzielski",
     "emlez",
     "samuelkraft",
     "benoit.grelard",
-    "sdorra"
+    "sdorra",
+    "sebdanielsson"
   ],
   "license": "MIT",
   "commands": [
@@ -159,24 +160,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.72.0",
-    "@raycast/utils": "^1.15.0",
-    "js-base64": "^3.7.2",
-    "node-fetch": "^3.2.0",
-    "open": "^8.4.0",
-    "prettier": "^3.2.4",
-    "run-applescript": "^6.0.0",
-    "tempy": "^2.0.0",
-    "url-safe-base64": "^1.1.1"
+    "@raycast/api": "~1.102.3",
+    "@raycast/utils": "^2.2.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.2.27",
-    "eslint": "^7.32.0",
-    "react": "^18.2.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.17.0",
+    "@types/react": "^19.1.1",
+    "eslint": "^9.32.0",
+    "prettier": "^3.6.2",
+    "react": "^19.1.1",
+    "typescript": "~5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -184,5 +178,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

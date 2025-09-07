@@ -1,5 +1,9 @@
 # Dust.tt Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Replace all `\r\n` with `\n` in the codebase to ensure consistent line endings across all files.
+
 ## [Update] - 2025-06-18
 
 - Move Oauth connexion flow from Auth0 to WorkOS.

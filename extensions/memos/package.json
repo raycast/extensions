@@ -5,6 +5,9 @@
   "description": "Manage Your Memos",
   "icon": "logo.png",
   "author": "JakeYu",
+  "contributors": [
+    "littlequartz"
+  ],
   "license": "MIT",
   "commands": [
     {

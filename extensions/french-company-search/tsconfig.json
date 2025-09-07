@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "lib": ["ES2023"],
+    "module": "commonjs",
+    "target": "ES2023",
+    "strict": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "typeRoots": ["./node_modules/@types", "./types"],
+    "jsx": "react-jsx",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "dist",
+    "resolveJsonModule": true,
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "types/**/*.d.ts", "raycast-env.d.ts"],
+  "exclude": ["node_modules"]
+}

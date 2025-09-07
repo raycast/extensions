@@ -25,13 +25,15 @@ export function AlbumActionPanel({ album }: AlbumActionPanelProps) {
       />
       <Action
         icon={isAlbumSaved ? Icon.Minus : Icon.Plus}
-        title={isAlbumSaved ? "Remove From Library" : "Add To Library"}
+        title={isAlbumSaved ? "Remove from Library" : "Add to Library"}
         shortcut={{ modifiers: ["cmd", "shift"], key: isAlbumSaved ? "d" : "s" }}
         onAction={async () => {
           try {
-            isAlbumSaved
-              ? await removeFromMySavedAlbums({ albumIds: [album.id] })
-              : await addToMySavedAlbums({ albumIds: [album.id] });
+            if (isAlbumSaved) {
+              await removeFromMySavedAlbums({ albumIds: [album.id] });
+            } else {
+              await addToMySavedAlbums({ albumIds: [album.id] });
+            }
             await mutate();
             await showHUD(isAlbumSaved ? "Album removed from the library" : "Album added to the library");
             await popToRoot();

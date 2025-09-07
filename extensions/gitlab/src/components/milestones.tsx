@@ -6,7 +6,7 @@ import { Group, Project } from "../gitlabapi";
 import { getErrorMessage, getIdFromGqlId, showErrorToast } from "../utils";
 import { GitLabOpenInBrowserAction } from "./actions";
 
-/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 const GET_MILESTONES = gql`
   query GetProjectMilestones($fullPath: ID!) {
@@ -50,7 +50,7 @@ const GET_GROUP_MILESTONES = gql`
   }
 `;
 
-export function MilestoneListItem(props: { milestone: any }): JSX.Element {
+export function MilestoneListItem(props: { milestone: any }) {
   const milestone = props.milestone;
   const issueCounter = `${milestone.closedIssuesCount}/${milestone.totalIssuesCount}`;
   let subtitle = "";
@@ -72,7 +72,7 @@ export function MilestoneListItem(props: { milestone: any }): JSX.Element {
   );
 }
 
-export function MilestoneList(props: { project?: Project; group?: Group; navigationTitle?: string }): JSX.Element {
+export function MilestoneList(props: { project?: Project; group?: Group; navigationTitle?: string }) {
   const isGroup = !!props.group;
   let fullPath = props.project ? props.project.fullPath : "";
   if (fullPath.length <= 0) {
@@ -96,7 +96,7 @@ export function MilestoneList(props: { project?: Project; group?: Group; navigat
 export function useSearch(
   query: string | undefined,
   projectFullPath: string,
-  isGroup: boolean
+  isGroup: boolean,
 ): {
   milestones: any[];
   error?: string;
