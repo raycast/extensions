@@ -56,9 +56,7 @@ export default function TodoListItem({
     todo.project?.name ?? '',
     todo.project?.tags ?? '',
     todo.area?.name ?? '',
-    todo.area?.tags ?? '',
     todo.project?.area?.name ?? '',
-    todo.project?.area?.tags ?? '',
   ];
 
   const accessories: List.Item.Accessory[] = [];

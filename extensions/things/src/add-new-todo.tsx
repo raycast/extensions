@@ -24,7 +24,7 @@ type FormValues = {
   notes: string;
   tags: string[];
   listId: string;
-  // Possible values for when: 'today' | 'evening' | 'upcoming' | 'tomorrow' | 'anytime' | 'someday';
+  // Possible values for when: 'today' | 'evening' | 'upcoming' | 'tomorrow' | 'anytime' | 'someday' | 'logbook' | 'trash';
   when: string;
   date: Date | null;
   'checklist-items': string;
@@ -72,6 +72,10 @@ export function AddNewTodo({ title, commandListName, draftValues }: AddNewTodoPr
               name = 'anytime';
             } else if (values.when === 'someday') {
               name = 'someday';
+            } else if (values.when === 'logbook') {
+              name = 'logbook';
+            } else if (values.when === 'trash') {
+              name = 'trash';
             } else {
               name = 'inbox';
             }
@@ -118,7 +122,8 @@ export function AddNewTodo({ title, commandListName, draftValues }: AddNewTodoPr
       focus('checklist-items');
       await toast.hide();
     } catch (error) {
-      await showToast({ style: Toast.Style.Failure, title: 'Failed to generate check-list' });
+      const errorMessage = typeof error === 'string' ? error : error instanceof Error ? error.message : String(error);
+      await showToast({ style: Toast.Style.Failure, title: 'Failed to generate check-list', message: errorMessage });
     }
   }
 

@@ -1,5 +1,10 @@
 # Things Changelog
 
+## [Improved Project Handling] - {PR_MERGE_DATE}
+
+- Added Update and Delete project tools
+- Improved project data handling in AI chat
+
 ## [Fix Error on Task Update] - 2025-07-09
 
 - Fix JXA errors when updating todos via actions

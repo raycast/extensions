@@ -1,4 +1,4 @@
-import { deleteTodo, getTodo } from '../api';
+import { deleteTodo, getTodoName } from '../api';
 
 type Input = {
   /** The todo id to delete */
@@ -10,10 +10,10 @@ export default async function ({ todoId }: Input) {
 }
 
 export const confirmation = async ({ todoId }: Input) => {
-  const todo = await getTodo(todoId);
+  const name = await getTodoName(todoId);
 
   return {
     message: `Are you sure you want to delete the todo?`,
-    info: [{ name: 'Todo', value: todo?.name || 'hej' }],
+    info: [{ name: 'Todo', value: name }],
   };
 };

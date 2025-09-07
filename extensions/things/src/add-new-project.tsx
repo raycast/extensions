@@ -11,7 +11,7 @@ type FormValues = {
   notes: string;
   tags: string[];
   areaId: string;
-  // Possible values for when: 'today' | 'evening' | 'upcoming' | 'tomorrow' | 'anytime' | 'someday';
+  // Possible values for when: 'today' | 'evening' | 'upcoming' | 'tomorrow' | 'anytime' | 'someday' | 'logbook' | 'trash';
   when: string;
   date: Date | null;
   toDos: string;
@@ -81,7 +81,8 @@ Tasks:`);
       setValue('toDos', items.trim());
       focus('toDos');
     } catch (error) {
-      await showToast({ style: Toast.Style.Failure, title: 'Failed to generate to-dos' });
+      const errorMessage = typeof error === 'string' ? error : error instanceof Error ? error.message : String(error);
+      await showToast({ style: Toast.Style.Failure, title: 'Failed to generate to-dos', message: errorMessage });
     }
   }
 
