@@ -7,7 +7,7 @@
 
 ## [Fix Error on Task Update] - 2025-07-09
 
-- Fix JXA errors when updating todos via actions
+- Fix JXA errors when updating to-dos via actions
 
 ## [Improved Project Detection] - 2025-07-09
 
@@ -23,7 +23,7 @@
 
 ## [Fix Project Updates] - 2025-07-02
 
-- Fixed update actions failing when used on projects in lists. Projects now use the correct `things:///update-project` URL scheme instead of the regular `things:///update` scheme used for todos.
+- Fixed update actions failing when used on projects in lists. Projects now use the correct `things:///update-project` URL scheme instead of the regular `things:///update` scheme used for to-dos.
 
 ## [✨ Reminders] - 2025-05-06
 
@@ -36,7 +36,7 @@
 
 ## [✨ Menu Bar Todo] - 2025-04-25
 
-- Update the menu bar to display only incomplete todos from today’s list
+- Update the menu bar to display only incomplete to-dos from today’s list
 
 ## [Detect URL in Notes] - 2025-04-11
 

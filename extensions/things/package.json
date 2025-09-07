@@ -146,8 +146,8 @@
   "tools": [
     {
       "name": "get-list-todos",
-      "title": "Get List Todos",
-      "description": "Get all the todos from a list in Things"
+      "title": "Get List To-Dos",
+      "description": "Get all the to-dos from a list in Things"
     },
     {
       "name": "get-projects",
@@ -209,7 +209,7 @@
     "instructions": "Moving a todo means changing its list. For example, moving \"buy milk\" from inbox to today means changing its list to today. Only update the when property of the todo when referring to a date.",
     "evals": [
       {
-        "input": "@things what are my todos for today?",
+        "input": "@things what are my to-dos for today?",
         "mocks": {
           "get-list-todos": [
             {
@@ -325,7 +325,7 @@
         ]
       },
       {
-        "input": "@things move all todos from my inbox to today",
+        "input": "@things move all to-dos from my inbox to today",
         "mocks": {
           "update-todo": "Successfully called \"update-todo\"",
           "get-list-todos": [

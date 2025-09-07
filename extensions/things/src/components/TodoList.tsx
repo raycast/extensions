@@ -28,7 +28,7 @@ export default function TodoList({ commandListName, displayActivationDates }: To
 
   if (!todos && !isLoading) {
     return (
-      <Detail markdown="## No Data\n\nNo todos found and no error occurred. This might indicate an issue with the Things connection." />
+      <Detail markdown="## No Data\n\nNo to-dos found and no error occurred. This might indicate an issue with the Things connection." />
     );
   }
 

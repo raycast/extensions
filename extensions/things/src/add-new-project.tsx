@@ -190,7 +190,7 @@ Tasks:`);
           ))}
         </Form.TagPicker>
       ) : null}
-      <Form.TextArea {...itemProps.toDos} title="To-Dos" placeholder="To-dos separated by new lines" />
+      <Form.TextArea {...itemProps.toDos} title="To-Dos" placeholder="To-Dos separated by new lines" />
       <Form.DatePicker {...itemProps.deadline} title="Deadline" type={Form.DatePicker.Type.Date} min={now} />
     </Form>
   );
