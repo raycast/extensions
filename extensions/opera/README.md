@@ -2,7 +2,9 @@
     <img src="./assets/opera-logo.png" width="150" height="150" />
 </p>
 
-# Opera Extension
+# Opera
+
+A Raycast extension for [Opera](https://www.opera.com/) - _Your personal browser_.
 
 ## 🚀 Features
 

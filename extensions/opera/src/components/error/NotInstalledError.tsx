@@ -36,12 +36,12 @@ export function NotInstalledError() {
   const [isLoading, setIsLoading] = useState(false);
   return (
     <Detail
-    isLoading={isLoading}
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           {!isLoading && (
             <Action
-            icon={Icon.MugSteam}
+              icon={Icon.MugSteam}
               title="Install with Homebrew"
               onAction={async () => {
                 if (isLoading) return;
@@ -53,9 +53,9 @@ export function NotInstalledError() {
                   toast.title = "Installed! Please go back and try again.";
                   await popToRoot();
                 } catch {
-                    toast.style = Toast.Style.Failure;
-                    toast.title = DEFAULT_ERROR_TITLE;
-                    toast.message = "An unknown error occurred while trying to install";
+                  toast.style = Toast.Style.Failure;
+                  toast.title = DEFAULT_ERROR_TITLE;
+                  toast.message = "An unknown error occurred while trying to install";
                 } finally {
                   setIsLoading(false);
                 }

@@ -1,5 +1,5 @@
 import { runAppleScript, showFailureToast } from "@raycast/utils";
-import { closeMainWindow, popToRoot } from "@raycast/api";
+import { popToRoot } from "@raycast/api";
 import { Tab } from "../interfaces";
 import { NOT_INSTALLED_MESSAGE } from "../constants";
 
@@ -51,29 +51,32 @@ export async function openNewTab(queryText: string | null | undefined) {
       end tell
       return true
     `;
+
     await checkAppInstalled();
     await runAppleScript(script);
-    await popToRoot({clearSearchBar: true});
+    await popToRoot({ clearSearchBar: true });
   } catch (error) {
     await showFailureToast(error);
   }
 }
 
-export async function openNewHistoryTab(url: string): Promise<boolean | string> {
-  popToRoot();
-  closeMainWindow({ clearRootSearch: true });
-
-  const script = `
-    tell application "Opera"
-      activate
-      tell window 1
-          set newTab to make new tab with properties {URL:"${url}"}
+export async function openNewHistoryTab(url: string) {
+  try {
+    const script = `
+      tell application "Opera"
+        activate
+        tell window 1
+            set newTab to make new tab with properties {URL:"${url}"}
+        end tell
       end tell
-    end tell
-    return true
-  `;
+      return true
+    `;
 
-  return await runAppleScript(script);
+    await runAppleScript(script);
+    await popToRoot({ clearSearchBar: true });
+  } catch (error) {
+    await showFailureToast(error);
+  }
 }
 
 export async function setActiveTab(tab: Tab): Promise<void> {
