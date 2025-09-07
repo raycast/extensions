@@ -1,4 +1,4 @@
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 import { closeMainWindow, popToRoot } from "@raycast/api";
 import { Tab } from "../interfaces";
 import { NOT_INSTALLED_MESSAGE } from "../constants";

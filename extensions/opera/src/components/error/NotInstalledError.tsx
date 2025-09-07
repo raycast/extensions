@@ -53,7 +53,7 @@ export function NotInstalledError() {
                   await showToast(
                     Toast.Style.Failure,
                     DEFAULT_ERROR_TITLE,
-                    "An unknown error occurred while trying to install"
+                    "An unknown error occurred while trying to install",
                   );
                 }
                 toast.title = "Installed! Please go back and try again.";
