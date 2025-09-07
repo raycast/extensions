@@ -11,18 +11,19 @@ export const useSearch = <T extends "collections" | "photos">(query: string, typ
           hasMore: false,
         };
 
+      const page = options.page + 1;
       const { results, total_pages } = await performSearch({
         searchText,
         options: {
-          page: options.page + 1,
+          page,
           orientation,
           type: type || "photos",
         },
       });
-      
+
       return {
         data: results,
-        hasMore: options.page < total_pages,
+        hasMore: page < total_pages,
       };
     },
     [query, orientation],
@@ -72,7 +73,7 @@ export const performSearch = async <T extends PerformSearchProps>({
 
   return {
     results,
-    total_pages
+    total_pages,
   };
 };
 

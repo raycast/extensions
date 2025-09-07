@@ -28,15 +28,15 @@ export const useRandom = async (nowTime: number) => {
       ? [...defaultCollections, ...customCollections]
       : customCollections || defaultCollections;
 
-      let response: SearchResult;
-      try {
-        response = await apiRequest<SearchResult>(
-          `/photos/random?orientation=landscape&collections=${encodeURIComponent(whichCollections.join(","))}`,
-        );
-      } catch (error) {
-        if (environment.launchType===LaunchType.UserInitiated) showHUD(`${error}`);
-        return;
-      }
+  let response: SearchResult;
+  try {
+    response = await apiRequest<SearchResult>(
+      `/photos/random?orientation=landscape&collections=${encodeURIComponent(whichCollections.join(","))}`,
+    );
+  } catch (error) {
+    if (environment.launchType === LaunchType.UserInitiated) showHUD(`${error}`);
+    return;
+  }
   const { urls, id } = response;
 
   const image = urls?.raw || urls?.full || urls?.regular;

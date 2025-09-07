@@ -19,19 +19,13 @@ export const apiRequest = async <T>(path: string, options?: RequestInit) => {
 
   const url = path.startsWith("https://api.unsplash.com/") ? path : `https://api.unsplash.com${path}`;
 
-  // const response = await fetch(url, {
-  //   ...options,
-  //   headers: {
-  //     Authorization: `Bearer ${accessToken}`,
-  //     ...options?.headers,
-  //   },
-  // })
-  const response = new Response("Rate Limit Exceeded", {
+  const response = await fetch(url, {
+    ...options,
     headers: {
-        'Content-Type': 'text/plain'
-    }
-});
-
+      Authorization: `Bearer ${accessToken}`,
+      ...options?.headers,
+    },
+  });
   if (!response.headers.get("Content-Type")?.includes("json")) throw new Error(await response.text());
   const result = await response.json();
   if (!response.ok) throw new Error((result as Errors).errors[0]);
