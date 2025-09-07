@@ -92,6 +92,7 @@ export interface Meaning {
 export interface WordEntry {
   word: string;
   meanings: Meaning[];
+  suggestions: string[];
 }
 
 export interface Word {
@@ -102,16 +103,36 @@ export interface ApiResponse<T = unknown> {
   ok: boolean;
   data: T;
   error?: string;
+  suggestions: string[];
 }
 
 export type WordOnlyResponse = ApiResponse<Word>;
 export type WordEntryResponse = ApiResponse<WordEntry>;
+
+export class ApiError extends Error {
+  suggestions: string[];
+  constructor(message: string, suggestions: string[]) {
+    super(message);
+    this.suggestions = suggestions;
+    Object.setPrototypeOf(this, ApiError.prototype);
+  }
+}
 
 // Helper function to make API requests and handle errors
 async function makeApiRequest<T>(url: string): Promise<T> {
   const response = await fetch(url);
 
   if (!response.ok) {
+    try {
+      const errorData = (await response.json()) as ApiResponse<T>;
+      if (errorData.error === "NOT_FOUND") {
+        throw new ApiError("Word not found", errorData.suggestions);
+      }
+    } catch (parseError) {
+      if (parseError instanceof ApiError) {
+        throw parseError;
+      }
+    }
     throw new Error(`Request error: ${response.statusText}`);
   }
 
@@ -119,7 +140,7 @@ async function makeApiRequest<T>(url: string): Promise<T> {
 
   if (!res.ok) {
     const errorMsg = res.error === "NOT_FOUND" ? "Word not found" : res.error;
-    throw new Error(`API response error: ${errorMsg}`);
+    throw new ApiError(`API response error: ${errorMsg}`, res.suggestions);
   }
 
   return res.data;

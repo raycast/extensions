@@ -11,7 +11,8 @@
     "azlekov",
     "sebboer",
     "shkm",
-    "constantins2001"
+    "constantins2001",
+    "xmok"
   ],
   "license": "MIT",
   "preferences": [
@@ -21,6 +22,7 @@
       "required": true,
       "title": "API Key",
       "description": "Clockify API Key",
+      "placeholder": "XXX...xxxx",
       "link": "https://app.clockify.me/user/preferences#advanced"
     },
     {
@@ -64,20 +66,21 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.76.0",
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.1",
     "lodash.isempty": "^4.4.0",
-    "lodash.uniqwith": "^4.5.0",
-    "node-fetch": "^3.3.2"
+    "lodash.uniqwith": "^4.5.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^2.0.4",
     "@types/lodash.isempty": "^4.4.9",
     "@types/lodash.uniqwith": "^4.5.9",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "react-devtools": "^6.1.1",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",

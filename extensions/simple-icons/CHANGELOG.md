@@ -1,5 +1,16 @@
 # Brand Icons Changelog
 
+## [Improvements] - 2025-08-12
+
+- Add support for creating social badges through cross-extension
+- Bump all dependencies to the latest
+
+## [Bugfix] - 2025-08-04
+
+- Handle error when reading a non-existent file in `makeCopyToDownload`
+- Fix `titleToSlug` logics for legacy Simple Icons versions
+- Bump all dependencies to the latest
+
 ## [Bugfix & Enhancement] - 2025-07-29
 
 - Fix a bug which cannot update icon packs

@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gandi",
+  "title": "Gandi",
+  "description": "Manage your Gandi domains, DNS records, and check domain availability",
+  "icon": "extension-icon.png",
+  "author": "kud",
+  "categories": [
+    "Developer Tools",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-domains",
+      "title": "List Domains",
+      "subtitle": "Gandi",
+      "description": "List all domains in your Gandi account with their status and expiration dates",
+      "mode": "view"
+    },
+    {
+      "name": "check-availability",
+      "title": "Check Domain Availability",
+      "subtitle": "Gandi",
+      "description": "Check if a domain name is available for registration",
+      "mode": "view"
+    },
+    {
+      "name": "manage-dns",
+      "title": "Manage DNS Records",
+      "subtitle": "Gandi",
+      "description": "Manage DNS records for your domains",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.102.5",
+    "@raycast/utils": "2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.0.4",
+    "@types/node": "24.3.0",
+    "@types/react": "19.1.11",
+    "eslint": "9.34.0",
+    "prettier": "3.6.2",
+    "typescript": "5.9.2"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": true,
+      "title": "Gandi API Token",
+      "description": "Your Gandi Personal Access Token",
+      "placeholder": "Enter your Gandi PAT"
+    }
+  ]
+}

@@ -1,11 +1,14 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "deepwiki",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "title": "Deepwiki",
   "description": "Search, open, and crawl DeepWiki pages for GitHub repositories.",
   "icon": "deep-wiki.png",
   "author": "vivek",
+  "contributors": [
+    "tofrankie"
+  ],
   "license": "MIT",
   "categories": [
     "Documentation",

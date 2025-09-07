@@ -42,7 +42,13 @@ function HACSUpdateItems(props: { state: State | undefined }): React.ReactElemen
     return null;
   }
   const repos: HACSRepo[] | undefined = s.attributes.repositories;
-  return <>{repos?.map((r, i) => <HACSUpdateItem key={i} repo={r} state={s} />)}</>;
+  return (
+    <>
+      {repos?.map((r, i) => (
+        <HACSUpdateItem key={i} repo={r} state={s} />
+      ))}
+    </>
+  );
 }
 
 export function UpdatesList(): React.ReactElement {
@@ -70,11 +76,15 @@ export function UpdatesList(): React.ReactElement {
   return (
     <List searchBarPlaceholder="Filter by name or ID..." isLoading={isLoading} onSearchTextChange={setSearchText}>
       <List.Section title="Update Available" subtitle={`${updateRequiredStates?.length}`}>
-        {updateRequiredStates?.map((state) => <StateListItem key={state.entity_id} state={state} />)}
+        {updateRequiredStates?.map((state) => (
+          <StateListItem key={state.entity_id} state={state} />
+        ))}
         <HACSUpdateItems state={hacsState} />
       </List.Section>
       <List.Section title="Up-to-Date" subtitle={`${otherStates?.length}`}>
-        {otherStates?.map((state) => <StateListItem key={state.entity_id} state={state} />)}
+        {otherStates?.map((state) => (
+          <StateListItem key={state.entity_id} state={state} />
+        ))}
       </List.Section>
     </List>
   );

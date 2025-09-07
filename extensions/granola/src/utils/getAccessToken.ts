@@ -8,25 +8,43 @@ async function getAccessToken() {
   const fileContent = await fs.readFile(filePath, "utf8");
   const jsonData = JSON.parse(fileContent);
 
-  // Handle cognito_tokens which could be either a JSON string or an object
-  let cognitoTokens;
-  try {
-    // If cognito_tokens is a string, parse it as JSON
-    if (typeof jsonData.cognito_tokens === "string") {
-      cognitoTokens = JSON.parse(jsonData.cognito_tokens);
-    } else if (typeof jsonData.cognito_tokens === "object" && jsonData.cognito_tokens !== null) {
-      // If it's already an object, use it directly
-      cognitoTokens = jsonData.cognito_tokens;
-    } else {
-      throw new Error("cognito_tokens is neither a valid JSON string nor an object");
+  let accessToken;
+
+  // Try WorkOS tokens first (updated auth method)
+  if (jsonData.workos_tokens) {
+    try {
+      let workosTokens;
+      if (typeof jsonData.workos_tokens === "string") {
+        workosTokens = JSON.parse(jsonData.workos_tokens);
+      } else if (typeof jsonData.workos_tokens === "object" && jsonData.workos_tokens !== null) {
+        workosTokens = jsonData.workos_tokens;
+      }
+
+      if (workosTokens?.access_token) {
+        accessToken = workosTokens.access_token;
+      }
+    } catch {
+      // Silently continue to Cognito fallback if WorkOS parsing fails
     }
-  } catch (error) {
-    // Ensure error is treated as an Error object with a message property
-    const parseError = error instanceof Error ? error : new Error(String(error));
-    throw new Error(`Failed to parse local access token: ${parseError.message}`);
   }
-  // Extract the access token
-  const accessToken = cognitoTokens.access_token;
+
+  // Fallback to Cognito tokens for backward compatibility
+  if (!accessToken && jsonData.cognito_tokens) {
+    try {
+      let cognitoTokens;
+      if (typeof jsonData.cognito_tokens === "string") {
+        cognitoTokens = JSON.parse(jsonData.cognito_tokens);
+      } else if (typeof jsonData.cognito_tokens === "object" && jsonData.cognito_tokens !== null) {
+        cognitoTokens = jsonData.cognito_tokens;
+      }
+
+      if (cognitoTokens?.access_token) {
+        accessToken = cognitoTokens.access_token;
+      }
+    } catch {
+      // Silently continue if Cognito parsing fails
+    }
+  }
 
   if (!accessToken) {
     throw new Error(

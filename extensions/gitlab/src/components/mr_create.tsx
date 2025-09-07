@@ -29,7 +29,7 @@ async function submit(values: MRFormValues) {
     if (values.source_branch === "") {
       throw Error("Please select a source branch");
     }
-    const val = toFormValues(values);
+    const val = toFormValues(values as unknown as Record<string, unknown>);
     console.log(val);
     await gitlab.createMR(values.project_id, val);
     await showToast(Toast.Style.Success, "Merge Request created", "Merge Request creation successful");
@@ -45,21 +45,13 @@ async function getProjectBranches(projectID: number) {
   return { branches, project };
 }
 
-export function IssueMRCreateForm({
-  issue,
-  projectID,
-  title,
-}: {
-  issue: Issue;
-  projectID: number;
-  title: string;
-}): JSX.Element {
+export function IssueMRCreateForm({ issue, projectID, title }: { issue: Issue; projectID: number; title: string }) {
   const branchName = `${issue.iid}-${stringToSlug(issue.title)}`;
   const [branches, setBranches] = useState<Branch[]>();
   const [project, setProject] = useState<Project>();
 
   useEffect(() => {
-    projectID && getProjectBranches(projectID).then((data) => (setProject(data?.project), setBranches(data?.branches)));
+    projectID && getProjectBranches(projectID).then((data) => (setProject(data?.project), setBranches(data?.branches))); // eslint-disable-line @typescript-eslint/no-unused-expressions
   }, [projectID]);
 
   async function submit(values: { source_branch: string; target_branch: string }) {
@@ -101,9 +93,9 @@ export function IssueMRCreateForm({
   );
 }
 
-export function MRCreateForm(props: { project?: Project | undefined; branch?: string | undefined }): JSX.Element {
+export function MRCreateForm(props: { project?: Project | undefined; branch?: string | undefined }) {
   const [selectedProject, setSelectedProject] = useState<string | undefined>(
-    props.project ? props.project.id.toString() : undefined
+    props.project ? props.project.id.toString() : undefined,
   );
   const {
     data: projects,
@@ -117,7 +109,7 @@ export function MRCreateForm(props: { project?: Project | undefined; branch?: st
     },
     {
       deps: [],
-    }
+    },
   );
   const { projectinfo, errorProjectInfo, isLoadingProjectInfo } = useProjectMR(selectedProject);
   const members = projectinfo?.members || [];
@@ -153,7 +145,7 @@ export function MRCreateForm(props: { project?: Project | undefined; branch?: st
       if (selectedTemplateName === NO_TEMPLATE) return undefined;
       return await gitlab.getProjectMergeRequestTemplate(project?.id || 0, selectedTemplateName);
     },
-    { deps: [selectedTemplateName] }
+    { deps: [selectedTemplateName] },
   );
 
   useEffect(() => {

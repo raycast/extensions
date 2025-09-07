@@ -1,5 +1,5 @@
 import { ProjectList } from "./components/project";
 
-export default function MyProjectsRoot(): JSX.Element {
+export default function MyProjectsRoot() {
   return <ProjectList membership={true} />;
 }

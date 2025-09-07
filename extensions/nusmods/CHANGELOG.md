@@ -1,5 +1,9 @@
 # NUSMods Changelog
 
+## [Better Prereq Rendering] - 2025-08-04
+
+- Improved rendering logic for module prerequisites
+
 ## [Windows Support] - 2025-07-24
 
 - Added support for Raycast Windows

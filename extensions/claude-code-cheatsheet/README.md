@@ -7,6 +7,12 @@
 
 A comprehensive, interactive cheatsheet for the Claude Code CLI. Instantly access the latest commands, options, and unique thinking keywords to supercharge your development workflow.
 
+## Compatibility
+
+**Targeted Claude Code Versions:** v1.0.55 - v1.0.81+
+
+This extension aims to provide comprehensive coverage of commands, flags, slash commands, settings, and environment variables from recent Claude Code releases. However, Claude Code is actively developed with frequent updates that may introduce changes, deprecations, or new features. While we strive to maintain accuracy and completeness, some features may be missing, outdated, or subject to change. Please refer to the official Claude Code documentation for the most current and authoritative information.
+
 ## Features
 
 - **Instant Search:** Quickly find any Claude Code command, option, or keyword.

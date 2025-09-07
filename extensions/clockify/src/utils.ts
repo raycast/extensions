@@ -1,9 +1,8 @@
 import { LocalStorage, Toast, getPreferenceValues, showToast } from "@raycast/api";
-import fetch from "node-fetch";
-import { ClockifyRegion, FetcherArgs, FetcherResponse, PreferenceValues, TimeEntry } from "./types";
+import { FetcherArgs, FetcherResponse, TimeEntry } from "./types";
 
 // https://clockify.me/help/getting-started/data-regions
-const getApiUrl = (region: ClockifyRegion): string => {
+const getApiUrl = (region: Preferences["region"]): string => {
   switch (region) {
     case "AU":
       return `https://apse2.clockify.me/api/v1`;
@@ -26,9 +25,9 @@ export async function fetcher(
   url: string,
   { method, body, headers, ...args }: FetcherArgs = {},
 ): Promise<FetcherResponse> {
-  const preferences: PreferenceValues = getPreferenceValues();
-  const token = String(preferences?.token);
-  const apiURL = getApiUrl(preferences?.region);
+  const preferences = getPreferenceValues<Preferences>();
+  const token = preferences.token;
+  const apiURL = getApiUrl(preferences.region);
 
   try {
     const response = await fetch(`${apiURL}${url}`, {
@@ -55,8 +54,8 @@ export async function fetcher(
 }
 
 export function validateToken(): boolean {
-  const preferences: PreferenceValues = getPreferenceValues();
-  const token = String(preferences?.token);
+  const preferences = getPreferenceValues<Preferences>();
+  const token = preferences.token;
 
   if (token.length !== 48) {
     showToast(Toast.Style.Failure, "Invalid API Key detected");

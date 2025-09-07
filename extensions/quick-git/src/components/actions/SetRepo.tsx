@@ -1,15 +1,9 @@
 import { useMemo } from "react";
-import { Action, Icon, launchCommand, LaunchType } from "@raycast/api";
+import { Action, Icon } from "@raycast/api";
+import { launchSetRepo } from "../../utils/launchCommands.js";
 
 interface Props {
   title?: string;
-}
-
-function launchSetRepo() {
-  launchCommand({
-    name: "set-repo",
-    type: LaunchType.UserInitiated,
-  });
 }
 
 export function SetRepo({ title }: Props) {

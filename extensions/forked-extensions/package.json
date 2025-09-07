@@ -1,0 +1,96 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "forked-extensions",
+  "title": "Forked Extensions",
+  "type": "module",
+  "description": "Efficiently manage your forked Raycast extensions using Git sparse-checkout. Explore the full extension catalog, selectively checkout specific extensions, and remove extensions from your forked collection with ease.",
+  "icon": "forked-extensions-icon.png",
+  "author": "litomore",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Communication",
+    "Productivity",
+    "System",
+    "Fun"
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-forked-extensions",
+      "title": "Manage Forked Extensions",
+      "description": "Manage all forked extensions.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "githubPersonalAccessToken",
+      "title": "GitHub Personal Access Token",
+      "description": "Optional. Your GitHub's personal access token. This only needs to be configured when you want to use another account for operations. Required scope is: 'repo'.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Your personal access token"
+    },
+    {
+      "name": "repositoryConfigurationPath",
+      "title": "Repository Path",
+      "description": "Path to the repository where the extension is located.",
+      "type": "directory",
+      "required": true,
+      "default": "~/.config/raycast/forked-extensions"
+    },
+    {
+      "name": "gitRemoteType",
+      "title": "Git Remote Type",
+      "description": "Choose the type of Git remote to use for the repository.",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "value": "https",
+          "title": "HTTPS"
+        },
+        {
+          "value": "ssh",
+          "title": "SSH"
+        }
+      ]
+    },
+    {
+      "name": "gitExecutableFilePath",
+      "title": "Git Executable File Path",
+      "description": "Path to the Git executable file. If not set, it will use `git` as default. You may need to set this if `git` is not in your PATH environment variable. On Windows, if the path contains spaces, it will be wrapped with double quotes, e.g., `\"C:\\Program Files\\Git\\cmd\\git.exe\"`.",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.6",
+    "got": "^14.4.7",
+    "nano-spawn": "^1.0.2"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.34.0",
+    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/utils": "^2.2.1",
+    "@types/node": "^24.3.0",
+    "@types/react": "^19.1.12",
+    "eslint": "^9.34.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  }
+}

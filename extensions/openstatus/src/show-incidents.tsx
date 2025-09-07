@@ -1,7 +1,6 @@
 import { Action, ActionPanel, Color, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { Incident, incidentSchema, WhoamiSchema } from "./api/schema";
-import fetch from "node-fetch";
 
 export default function ShowIncidents() {
   const preferences = getPreferenceValues<Preferences>();
@@ -58,7 +57,7 @@ export default function ShowIncidents() {
       );
       toast.style = Toast.Style.Success;
       toast.title = action === "acknowledge" ? "Acknowledged" : "Resolved";
-    } catch (error) {
+    } catch {
       toast.style = Toast.Style.Failure;
       toast.title = action === "acknowledge" ? "Could not acknowledge" : "Could not resolve";
     }
