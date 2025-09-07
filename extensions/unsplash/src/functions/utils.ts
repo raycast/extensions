@@ -31,7 +31,7 @@ export const resolveHome = (filepath: string) => {
 };
 
 export const likeOrDislike = async (id: number, liked?: boolean) => {
-  const toast = await showToast(Toast.Style.Animated, "Liking photo...");
+  const toast = await showToast(Toast.Style.Animated, `${liked ? "Unliking" : "Liking"} photo...`);
 
   try {
     await apiRequest(`/photos/${id}/like`, {
