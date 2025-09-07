@@ -1,11 +1,12 @@
 import { ActionPanel, Action, List, LaunchProps, Color } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { deleteSavedItem, getSavedItems } from "./utilities/storage";
+import { deleteSavedItem, getSavedItems, moveItem } from "./utilities/storage";
 import { Entry, EntryCutPaste } from "./types";
 import FormCutPaste from "./components/FormCutPaste";
 import { performReplacement } from "./utilities/replacements";
 import EntryForm from "./components/EntryForm";
 import FormDirectReplace from "./components/FormDirectReplace";
+import { nanoid } from "nanoid";
 
 const tagOptions: Record<Entry["type"], { value: string; color?: Color.ColorLike }> = {
   directReplace: {
@@ -75,6 +76,31 @@ export default function ManageOptions(props: Readonly<LaunchProps<{ draftValues:
                   }
                   shortcut={{ modifiers: ["cmd"], key: "e" }}
                   onPop={revalidate}
+                />
+                <Action.Push
+                  title="Duplicate"
+                  target={
+                    <EntryForm
+                      initialValues={{ ...option, id: nanoid(), title: option.title + " (duplicated)" }}
+                      isNew
+                    />
+                  }
+                  shortcut={{ modifiers: ["cmd"], key: "d" }}
+                  onPop={revalidate}
+                />
+                <Action
+                  title="Move up"
+                  shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
+                  onAction={async () => {
+                    if (index > 0) await moveItem(index, index - 1, revalidate);
+                  }}
+                />
+                <Action
+                  title="Move Down"
+                  shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
+                  onAction={async () => {
+                    if (index < replacementEntries.length - 1) await moveItem(index, index + 1, revalidate);
+                  }}
                 />
                 <Action
                   title="Delete"

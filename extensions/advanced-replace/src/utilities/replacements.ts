@@ -14,6 +14,33 @@ export const performReplacement = (entry: Entry, resultType: ResultType) => {
   }
 };
 
+const processReplacementString = (replacement: string, match: string, ...groups: string[]) => {
+  let result = replacement;
+
+  // Backreferences
+  result = result.replace(/\$(\d+)/g, (_, num) => {
+    const index = parseInt(num, 10) - 1;
+    return groups[index] || "";
+  });
+  result = result.replace(/\$&/g, match);
+
+  // Character escapes (process before case transformations)
+  result = result.replace(/\\n/g, "\n");
+  result = result.replace(/\\t/g, "\t");
+  result = result.replace(/\\r/g, "\r");
+  result = result.replace(/\\\\/g, "\\");
+
+  // Standard case transformations only
+  result = result.replace(/\\U(.*?)\\E/g, (_, content) => content.toUpperCase());
+  result = result.replace(/\\U(.*)$/g, (_, content) => content.toUpperCase());
+  result = result.replace(/\\L(.*?)\\E/g, (_, content) => content.toLowerCase());
+  result = result.replace(/\\L(.*)$/g, (_, content) => content.toLowerCase());
+  result = result.replace(/\\u(.)/g, (_, char) => char.toUpperCase());
+  result = result.replace(/\\l(.)/g, (_, char) => char.toLowerCase());
+
+  return result;
+};
+
 export const performDirectReplacement = async (entry: EntryDirectReplace, resultType: ResultType = "copy") => {
   try {
     const selectedText = await getSelectedText().catch(() => null);
@@ -38,13 +65,14 @@ export const performDirectReplacement = async (entry: EntryDirectReplace, result
         return;
       }
 
-      output = output.replace(
-        new RegExp(
-          e.regex,
-          "" + (e.matchGlobally ? "g" : "") + (e.matchCaseInsensitive ? "i" : "") + (e.matchMultiline ? "m" : ""),
-        ),
-        e.replacement,
+      const regex = new RegExp(
+        e.regex,
+        "" + (e.matchGlobally ? "g" : "") + (e.matchCaseInsensitive ? "i" : "") + (e.matchMultiline ? "m" : ""),
       );
+
+      output = output.replace(regex, (match, ...groups) => {
+        return processReplacementString(e.replacement, match, ...groups);
+      });
     });
 
     if (output === content) {
