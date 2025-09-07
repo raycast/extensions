@@ -47,6 +47,7 @@ export const getytdlPath = () => {
 
     return defaultPath;
   } catch (error) {
+    console.error(error);
     return "";
   }
 };
@@ -63,6 +64,7 @@ export const getffmpegPath = () => {
 
     return defaultPath;
   } catch (error) {
+    console.error(error);
     return "";
   }
 };
@@ -78,6 +80,8 @@ export const getffprobePath = () => {
         : "/usr/bin/ffprobe";
     return defaultPath;
   } catch (error) {
+    console.error(error);
+
     return "";
   }
 };
