@@ -1,5 +1,6 @@
 import { Clipboard, showHUD, getSelectedText, popToRoot, showToast, Toast } from "@raycast/api";
 import { Match, Entry, EntryCutPaste, EntryDirectReplace } from "../types";
+import { updateSavedItemDate } from "./storage";
 
 export const applyReplacements = (str: string, replacements: Match[]) =>
   replacements.reduce((acc, { key, match }) => acc.split(`{${key}}`).join(match), str);
@@ -42,6 +43,8 @@ const processReplacementString = (replacement: string, match: string, ...groups:
 };
 
 export const performDirectReplacement = async (entry: EntryDirectReplace, resultType: ResultType = "copy") => {
+  await updateSavedItemDate(entry);
+
   try {
     const selectedText = await getSelectedText().catch(() => null);
     const clipboardText = await Clipboard.readText();
@@ -88,6 +91,7 @@ export const performDirectReplacement = async (entry: EntryDirectReplace, result
 };
 
 export const performCutPasteReplacement = async (entry: EntryCutPaste, resultType: ResultType = "copy") => {
+  await updateSavedItemDate(entry);
   try {
     const selectedText = await getSelectedText().catch(() => null);
     const clipboardText = await Clipboard.readText();

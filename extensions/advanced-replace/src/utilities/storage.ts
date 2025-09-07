@@ -45,3 +45,11 @@ export async function deleteSavedItem(item: Entry) {
     console.log("canceled");
   }
 }
+
+export async function updateSavedItemDate(item: Entry) {
+  const savedItems = await getSavedItems();
+
+  const updatedItems = savedItems.map((e) => (e.id === item.id ? { ...e, lastUsed: new Date() } : e));
+
+  setSavedItems(updatedItems);
+}
