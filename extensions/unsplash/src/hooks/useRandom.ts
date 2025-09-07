@@ -19,7 +19,7 @@ const defaultCollections = [
 ];
 
 export const useRandom = async (nowTime: number) => {
-  const { collections, includeDefaults } = getPreferenceValues();
+  const { collections, includeDefaults } = getPreferenceValues<Preferences>();
 
   const customCollections = collections?.split(", ");
 
@@ -28,15 +28,15 @@ export const useRandom = async (nowTime: number) => {
       ? [...defaultCollections, ...customCollections]
       : customCollections || defaultCollections;
 
-  const response = await apiRequest<SearchResult>(
-    `/photos/random?orientation=landscape&collections=${encodeURIComponent(whichCollections.join(","))}`,
-  );
-
-  if (response.errors) {
-    showHUD(response.errors[0]);
-    return;
-  }
-
+      let response: SearchResult;
+      try {
+        response = await apiRequest<SearchResult>(
+          `/photos/random?orientation=landscape&collections=${encodeURIComponent(whichCollections.join(","))}`,
+        );
+      } catch (error) {
+        if (environment.launchType===LaunchType.UserInitiated) showHUD(`${error}`);
+        return;
+      }
   const { urls, id } = response;
 
   const image = urls?.raw || urls?.full || urls?.regular;

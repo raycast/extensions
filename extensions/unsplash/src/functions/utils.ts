@@ -40,8 +40,7 @@ export const likeOrDislike = async (id: number, liked?: boolean) => {
 
     toast.style = Toast.Style.Success;
     toast.title = `Photo ${liked ? "unliked" : "liked"}!`;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (err) {
+  } catch {
     toast.style = Toast.Style.Failure;
     toast.title = "An error occured";
   }

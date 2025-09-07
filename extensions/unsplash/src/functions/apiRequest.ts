@@ -1,6 +1,6 @@
 import { LocalStorage, OAuth, getPreferenceValues } from "@raycast/api";
-import fetch, { type RequestInit } from "node-fetch";
 import { client, doAuth } from "@/oauth";
+import { Errors } from "@/types";
 
 const { accessKey } = getPreferenceValues<Preferences>();
 
@@ -19,14 +19,23 @@ export const apiRequest = async <T>(path: string, options?: RequestInit) => {
 
   const url = path.startsWith("https://api.unsplash.com/") ? path : `https://api.unsplash.com${path}`;
 
-  const response = await fetch(url, {
-    ...options,
+  // const response = await fetch(url, {
+  //   ...options,
+  //   headers: {
+  //     Authorization: `Bearer ${accessToken}`,
+  //     ...options?.headers,
+  //   },
+  // })
+  const response = new Response("Rate Limit Exceeded", {
     headers: {
-      Authorization: `Bearer ${accessToken}`,
-      ...options?.headers,
-    },
-  }).then(async (res) => res.json() as Promise<T>);
-  return response;
+        'Content-Type': 'text/plain'
+    }
+});
+
+  if (!response.headers.get("Content-Type")?.includes("json")) throw new Error(await response.text());
+  const result = await response.json();
+  if (!response.ok) throw new Error((result as Errors).errors[0]);
+  return result as T;
 };
 
 async function refreshTokens(refreshToken: string) {
