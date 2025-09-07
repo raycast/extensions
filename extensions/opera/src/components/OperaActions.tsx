@@ -39,6 +39,7 @@ function HistoryItemActions({ title, url }: { title: string; url: string }): Rea
           openNewHistoryTab(url);
         }}
         title={"Open in Tab"}
+        icon="opera-logo.png"
       />
       <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
     </ActionPanel>
