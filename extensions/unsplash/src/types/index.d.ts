@@ -50,7 +50,7 @@ interface SearchResult {
 // Collection Search
 interface CollectionResult {
   id: number;
-  title: title;
+  title: string;
   description: string;
   published_at: string;
   last_collected_at: string;
