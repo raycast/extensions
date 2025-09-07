@@ -34,7 +34,7 @@ export function AddNewProject({ draftValues }: AddNewProjectProps) {
         when: values.when === 'upcoming' && values.date ? getDateString(values.date) : values.when,
         'area-id': values.areaId,
         deadline: values.deadline ? getDateString(values.deadline) : '',
-        tags: values.tags,
+        ...(values.tags.length > 0 && { tags: values.tags.join(',') }),
         'to-dos': values.toDos,
       };
 
