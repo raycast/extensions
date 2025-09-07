@@ -9,7 +9,7 @@ import { RepositoryType } from "../types";
 const execAsync = promisify(exec);
 
 export async function openProject(cliPath: string, projectPath: string) {
-  const command = `${cliPath} open --project "${projectPath}"`;
+  const command = `${cliPath} open --project ${JSON.stringify(projectPath)}`;
 
   const { stderr, stdout } = await execAsync(command);
 
@@ -39,7 +39,7 @@ export async function previewProject(cliPath: string, projectPath: string, proje
 
   const qrcodePath = path.resolve(PREVIEW_QRCODE_DIR, `${projectId}.png`);
 
-  const command = `${cliPath} preview --project "${projectPath}" --qr-size small --qr-format image --qr-output ${qrcodePath}`;
+  const command = `${cliPath} preview --project ${JSON.stringify(projectPath)} --qr-size small --qr-format image --qr-output ${qrcodePath}`;
   const { stderr, stdout } = await execAsync(command);
 
   console.log("🚀 ~ previewProject ~ stdout:", stdout);
