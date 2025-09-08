@@ -17,5 +17,4 @@
 - **View Request History**: Browse and re-run your previous requests.
 - **Copy cURL Command**: Instantly copy the cURL equivalent of any request.
 - **Extract JSON Data**: Use JSONPath to extract and copy data from JSON responses.
-- **Manage Environments**: Switch between different request environments (e.g., dev, staging, prod).
 - **Import/Export Requests**: Save and share your requests with others.
