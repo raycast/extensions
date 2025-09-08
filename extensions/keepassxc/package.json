@@ -30,14 +30,6 @@
       "description": "KeePass database to access"
     },
     {
-      "name": "keepassxcRootPath",
-      "type": "appPicker",
-      "required": true,
-      "title": "KeePassXC App",
-      "description": "KeePassXC app to use",
-      "default": "/Applications/KeePassXC.app"
-    },
-    {
       "name": "lockAfterInactivity",
       "type": "dropdown",
       "required": false,
@@ -98,7 +90,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.6",
+    "@raycast/api": "^1.102.7",
     "@raycast/utils": "^1.19.1",
     "@types/crypto-js": "^4.2.2",
     "crypto-js": "^4.2.0",
