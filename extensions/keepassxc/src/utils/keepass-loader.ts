@@ -1,15 +1,9 @@
 import { getPreferenceValues, LocalStorage, Toast, showToast } from "@raycast/api";
 import { parse } from "csv-parse/sync";
 import child_process from "child_process";
-import path from "path";
 import process from "process";
 
 interface Preference {
-  keepassxcRootPath: {
-    name: string;
-    path: string;
-    bundleId: string;
-  };
   database: string;
 }
 
@@ -27,7 +21,7 @@ const showToastCliErrors = (e: { message: string }) => {
   if (e.message.includes("Invalid credentials") || e.message.includes("Failed to load key file")) {
     toastMessage = "Invalid Credentials";
   } else if (e.message.includes("keepassxc-cli: No such file or directory") || e.message.includes("ENOENT")) {
-    invalidPreference = "KeePassXC App";
+    toastMessage = "KeePassXC not found";
   } else if (
     e.message.includes("Failed to open database file") ||
     e.message.includes("Error while reading the database: Not a KeePass database")
@@ -49,14 +43,10 @@ class KeePassLoader {
   static {
     const preferences: Preference = getPreferenceValues();
     this.database = preferences.database;
-    this.keepassxcCli = preferences.keepassxcRootPath?.path
-      ? path.join(
-          preferences.keepassxcRootPath.path,
-          process.platform === "win32"
-            ? "C:\\Program Files\\KeePassXC\\keepassxc-cli.exe"
-            : "Contents/MacOS/keepassxc-cli",
-        )
-      : undefined;
+    this.keepassxcCli =
+      process.platform === "win32"
+        ? "C:\\Program Files\\KeePassXC\\keepassxc-cli.exe"
+        : "/Applications/KeePassXC.app/Contents/MacOS/keepassxc-cli";
   }
 
   /**
