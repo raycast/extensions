@@ -1,5 +1,7 @@
 # Raindrop.io Extension Changelog
 
+## [Moved contributor] - {PR_MERGE_DATE}
+
 ## [Enhancements] - 2025-08-30
 
 - Prefill Add form from launch context (URL/title) for smoother adding from external sources; increases universality and works well with minimal/keyboard-centric browsers like QuteBrowser.
