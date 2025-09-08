@@ -1,7 +1,4 @@
-export type Preferences = {
-  thingsAppIdentifier: string;
-  authToken?: string;
-};
+export type CommandListName = 'inbox' | 'today' | 'anytime' | 'upcoming' | 'someday' | 'logbook' | 'trash';
 
 export type CommandListName = 'inbox' | 'today' | 'anytime' | 'upcoming' | 'someday' | 'logbook' | 'trash';
 
