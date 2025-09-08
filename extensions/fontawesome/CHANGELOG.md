@@ -1,5 +1,10 @@
 # Font Awesome Changelog
 
+## [Feat: Add Support for Windows] - {PR_MERGE_DATE}
+
+- Add support for Raycast Windows
+- Bump dependencies to latest versions
+
 ## [Added AI icon search, Sharp Duotone and Duotone families] - 2025-06-22
 
 - The extension now supports v6.7.2.
