@@ -90,8 +90,7 @@
       "default": false
     }
   ],
-  "platforms": ["macos", "windows"],
-  "dependencies": {
+  "platforms": ["macOS", "Windows"],
   "dependencies": {
     "@raycast/api": "^1.102.7",
     "@raycast/utils": "^1.19.1",
