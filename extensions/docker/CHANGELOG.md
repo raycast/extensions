@@ -1,6 +1,6 @@
 # Docker Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2025-09-08
 
 - Show loading toasts while container actions are running.
 
