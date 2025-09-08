@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Action, ActionPanel, Form, Icon } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { showFailureToast, useForm } from "@raycast/utils";
 import createEvent from "./tools/create-whentomeet-event";
 
 type TimeSlot = {
@@ -11,7 +11,6 @@ type FormValues = {
   title: string;
   description: string;
   slotLength: string;
-  timeSlots: TimeSlot[];
 };
 
 export default function Command() {
@@ -56,65 +55,154 @@ export default function Command() {
       });
   };
 
-  const handleSubmit = async (values: FormValues) => {
-    setIsLoading(true);
+  const { handleSubmit, itemProps } = useForm<FormValues>({
+    async onSubmit(values) {
+      setIsLoading(true);
 
-    try {
-      // Validate required fields
-      if (!values.title.trim()) {
-        await showFailureToast({
-          title: "Title Required",
-          message: "Please enter an event title",
+      try {
+        // Parse slot length with enhanced validation
+        const slotLength = values.slotLength ? parseInt(values.slotLength, 10) : 60;
+
+        if (isNaN(slotLength) || slotLength <= 0) {
+          await showFailureToast(new Error("Please enter a positive number for the slot length (e.g., 30, 60, 90)"), {
+            title: "Invalid Slot Length",
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        if (slotLength > 480) {
+          await showFailureToast(
+            new Error("Slot length cannot exceed 480 minutes (8 hours). Please enter a shorter duration."),
+            {
+              title: "Slot Length Too Long",
+            },
+          );
+          setIsLoading(false);
+          return;
+        }
+
+        // Convert time slots to ISO format (empty slots will be filtered out)
+        const isoSlots = convertToISOSlots(timeSlots, slotLength);
+
+        // Validate title length
+        const trimmedTitle = values.title.trim();
+        if (trimmedTitle.length > 100) {
+          await showFailureToast(new Error("Event title must be 100 characters or less. Please shorten your title."), {
+            title: "Title Too Long",
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        // Validate description length
+        const trimmedDescription = values.description.trim();
+        if (trimmedDescription.length > 500) {
+          await showFailureToast(
+            new Error("Event description must be 500 characters or less. Please shorten your description."),
+            {
+              title: "Description Too Long",
+            },
+          );
+          setIsLoading(false);
+          return;
+        }
+
+        // Check for duplicate time slots
+        const uniqueSlots = new Set(isoSlots);
+        if (uniqueSlots.size !== isoSlots.length) {
+          await showFailureToast(
+            new Error("You have duplicate time slots. Please remove duplicates or adjust the times."),
+            {
+              title: "Duplicate Time Slots",
+            },
+          );
+          setIsLoading(false);
+          return;
+        }
+
+        // Import and call the create event tool
+        await createEvent({
+          title: trimmedTitle,
+          description: trimmedDescription || undefined,
+          slotLength,
+          slots: isoSlots,
         });
-        return;
-      }
+      } catch (error) {
+        let errorTitle = "Error Creating Event";
+        let errorMessage = "An unexpected error occurred. Please try again.";
 
-      // Parse slot length
-      const slotLength = values.slotLength ? parseInt(values.slotLength, 10) : 60;
-      if (isNaN(slotLength) || slotLength <= 0) {
-        await showFailureToast({
-          title: "Invalid Slot Length",
-          message: "Slot length must be a positive number",
+        if (error instanceof Error) {
+          const errorMsg = error.message.toLowerCase();
+
+          if (errorMsg.includes("url too long")) {
+            errorTitle = "Too Many Time Slots";
+            errorMessage =
+              "You have too many time slots. Please reduce the number of slots or shorten the title/description.";
+          } else if (errorMsg.includes("title is required")) {
+            errorTitle = "Missing Event Title";
+            errorMessage = "Please enter a title for your event.";
+          } else if (errorMsg.includes("time slot")) {
+            errorTitle = "Time Slot Error";
+            errorMessage = "There's an issue with your time slots. Please check that all times are valid.";
+          } else if (errorMsg.includes("network") || errorMsg.includes("connection")) {
+            errorTitle = "Connection Error";
+            errorMessage = "Unable to create event due to connection issues. Please check your internet and try again.";
+          } else if (error.message && error.message.trim()) {
+            errorMessage = error.message;
+          }
+        }
+
+        await showFailureToast(new Error(errorMessage), {
+          title: errorTitle,
         });
-        return;
+      } finally {
+        setIsLoading(false);
       }
-
-      // Convert time slots to ISO format (empty slots will be filtered out)
-      const isoSlots = convertToISOSlots(timeSlots, slotLength);
-
-      // Validate that at least one time slot is provided
-      if (isoSlots.length === 0) {
-        await showFailureToast({
-          title: "No Time Slots",
-          message: "Please add at least one time slot for your event",
-        });
-        return;
-      }
-
-      // Import and call the create event tool
-      await createEvent({
-        title: values.title.trim(),
-        description: values.description.trim() || undefined,
-        slotLength,
-        slots: isoSlots,
-      });
-    } catch (error) {
-      console.error("Error creating event:", error);
-      await showFailureToast({
-        title: "Error Creating Event",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    initialValues: {
+      title: "",
+      description: "",
+      slotLength: "60",
+    },
+    validation: {
+      title: (value) => {
+        if (!value || !value.trim()) {
+          return "Event title is required";
+        }
+        if (value.trim().length > 100) {
+          return "Title must be 100 characters or less";
+        }
+      },
+      description: (value) => {
+        if (value && value.trim().length > 500) {
+          return "Description must be 500 characters or less";
+        }
+      },
+      slotLength: (value) => {
+        if (!value) {
+          return "Slot length is required";
+        }
+        const slotLength = parseInt(value, 10);
+        if (isNaN(slotLength)) {
+          return "Slot length must be a number";
+        }
+        if (slotLength <= 0) {
+          return "Slot length must be greater than 0";
+        }
+        if (slotLength > 480) {
+          return "Slot length cannot exceed 480 minutes (8 hours)";
+        }
+      },
+    },
+  });
 
   return (
     <Form
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={isLoading ? "Creating Event…" : "Create WhenToMeet Event"}
+            title={isLoading ? "Creating Event…" : "Create Whentomeet Event"}
             icon={isLoading ? Icon.Clock : Icon.Calendar}
             onSubmit={handleSubmit}
           />
@@ -141,25 +229,24 @@ export default function Command() {
       }
     >
       <Form.TextField
-        id="title"
         title="Event Title"
         placeholder="e.g., Team Standup, Client Meeting"
         info="The title of your WhenToMeet event"
+        {...itemProps.title}
       />
 
       <Form.TextArea
-        id="description"
         title="Description (Optional)"
         placeholder="e.g., Weekly team sync to discuss progress and blockers"
         info="Optional description for the event"
+        {...itemProps.description}
       />
 
       <Form.TextField
-        id="slotLength"
         title="Slot Length (minutes)"
         placeholder="60"
-        defaultValue="60"
         info="Duration of each time slot in minutes (default: 60)"
+        {...itemProps.slotLength}
       />
 
       <Form.Description

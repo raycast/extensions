@@ -34,10 +34,6 @@ export default async (input: Input) => {
       throw new Error("Event title is required");
     }
 
-    if (!input.slots || input.slots.length === 0) {
-      throw new Error("At least one time slot is required");
-    }
-
     const slotLength = input.slotLength || 60;
 
     // Build URL
