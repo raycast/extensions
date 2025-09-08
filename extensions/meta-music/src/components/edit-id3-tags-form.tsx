@@ -1,11 +1,13 @@
 import { Action, ActionPanel, Form, Icon, Toast, showToast, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 
+import { parseError } from "@/utils/error";
+import { getFileNameFromPath, normalizeFileName } from "@/utils/files";
 import { readID3Tags } from "@/utils/id3";
-import NodeID3, { Tags } from "node-id3";
+import NodeID3 from "node-id3";
 import { useState } from "react";
 
-interface TagsForm extends Omit<Tags, "trackNumber" | "partOfSet" | "comment"> {
+interface TagsForm extends Omit<NodeID3.Tags, "trackNumber" | "partOfSet" | "comment"> {
   trackNumber: string;
   allTracks: string;
   partNumber: string;
@@ -31,7 +33,7 @@ export const EditID3Tags = ({ file }: EditID3TagsProps) => {
       try {
         const { trackNumber, allTracks, partNumber, allParts, comments, ...restValues } = values;
 
-        const payload: Tags = {
+        const payload: NodeID3.Tags = {
           ...restValues,
           trackNumber: allTracks ? `${trackNumber}/${allTracks}` : trackNumber,
           partOfSet: allParts ? `${partNumber}/${allParts}` : partNumber,
@@ -64,7 +66,7 @@ export const EditID3Tags = ({ file }: EditID3TagsProps) => {
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = "Failed to update tags 😥";
-        toast.message = error instanceof Error ? error.message : undefined;
+        toast.message = parseError(error);
       } finally {
         setIsLoading(false);
       }
@@ -103,6 +105,7 @@ export const EditID3Tags = ({ file }: EditID3TagsProps) => {
   return (
     <Form
       isLoading={isLoading}
+      navigationTitle={normalizeFileName(getFileNameFromPath(file))}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Update Tags" onSubmit={handleSubmit} icon={Icon.Upload} />
