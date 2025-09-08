@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Fix clone with options action] - {PR_MERGE_DATE}
+## [Fix clone with options action] - 2025-09-08
 
 - Fix the clone action by adding the quote to the command to prevent issues with spaces in the path
 
