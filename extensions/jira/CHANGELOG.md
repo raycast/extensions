@@ -1,5 +1,9 @@
 # Jira Changelog
 
+## [Fix unbounded JQL error when no project filter] - 2025-09-08
+
+- Added a fallback `created >= -30d` clause in the *Search Issues* command when no project is selected to prevent Jira’s “Unbounded JQL queries are not allowed” error.
+
 ## [Fix deprecated Jira search API] - 2025-08-20
 
 - Replaced removed `/search` endpoint with the new enhanced search-based API (`POST /search/jql`).
