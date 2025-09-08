@@ -1,5 +1,5 @@
 import { Fragment, useState } from "react";
-import { Form, ActionPanel, Action, LocalStorage, Icon } from "@raycast/api";
+import { Form, ActionPanel, Action, LocalStorage, Icon, Navigation } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import {
   headerKeys,
@@ -24,7 +24,7 @@ interface Header extends Identifiable {
   value: string;
 }
 
-export default function FormView({ push }: { push: (component: React.ReactNode) => void }) {
+export default function FormView({ push }: { push: Navigation["push"] }) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [method, setMethod] = useState<string>("GET");
   const [url, setUrl] = useState<string>("https://jsonplaceholder.typicode.com/todos/1");
