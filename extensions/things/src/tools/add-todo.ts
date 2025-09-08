@@ -1,6 +1,6 @@
 import { addTodo } from '../api';
-import { TodoParams } from '../types';
+import { AddTodoParams } from '../types';
 
-export default async function (props: TodoParams) {
+export default async function (props: AddTodoParams) {
   return await addTodo(props);
 }

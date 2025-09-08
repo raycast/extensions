@@ -17,7 +17,7 @@ import { getChecklistItemsWithAI, listItems, statusIcons } from '../helpers';
 import { capitalize } from '../utils';
 
 import EditTodo from './EditTodo';
-import { Todo, List as TList, CommandListName, TodoParams } from '../types';
+import { Todo, List as TList, CommandListName, UpdateTodoParams } from '../types';
 
 // Match URLs with protocols, with optional //
 const URL_REGEX = /([a-zA-Z][a-zA-Z0-9.+-]+):(?:\/\/\S+|%\S+)/;
@@ -46,7 +46,7 @@ export default function TodoListItemActions({
 
   const notesURL = todo.notes.match(URL_REGEX)?.[0];
 
-  async function updateAction(args: TodoParams, successToastOptions: Toast.Options) {
+  async function updateAction(args: UpdateTodoParams, successToastOptions: Toast.Options) {
     try {
       if (todo.isProject) {
         await updateProject(todo.id, args);

@@ -36,9 +36,29 @@ export type Area = {
 
 export type List = { id: string; name: string; type: 'area' | 'project' };
 
-export type TodoParams = {
+export type AddTodoParams = {
   title?: string;
   titles?: string;
+  notes?: string;
+  when?: string;
+  deadline?: string;
+  tags?: string;
+  'checklist-items'?: string;
+  'use-clipboard'?: string;
+  'list-id'?: string;
+  list?: string;
+  'heading-id'?: string;
+  heading?: string;
+  completed?: boolean;
+  canceled?: boolean;
+  'show-quick-entry'?: boolean;
+  reveal?: boolean;
+  'creation-date'?: string;
+  'completion-date'?: string;
+};
+
+export type UpdateTodoParams = {
+  title?: string;
   notes?: string;
   'prepend-notes'?: string;
   'append-notes'?: string;
