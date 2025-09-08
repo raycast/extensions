@@ -1,6 +1,6 @@
 # cURL – Keyboard-first HTTP Client for Raycast
 
-**cURL** is a keyboard-first HTTP client for [Raycast](https://www.raycast.com/), designed for developers and power users who want to quickly make, inspect, and manage HTTP requests directly from Raycast. Now with **Windows support**!
+**cURL** is a keyboard-first HTTP client for [Raycast](https://www.raycast.com/), designed for developers and power users who want to quickly make, inspect, and manage HTTP requests directly from Raycast!
 
 ## Features
 
