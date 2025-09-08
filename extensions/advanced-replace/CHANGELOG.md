@@ -5,7 +5,7 @@
 - Added possibility to use regex transformations (upper/lowercase, escapes)
 - New entry actions to duplicate and move entries
 
-## [Additional Replacement Method] - {PR_MERGE_DATE}
+## [Additional Replacement Method] - 2025-03-10
 
 - New type prop: directReplace | cutPaste
 - Direct Replace: Search & Replace directly in input string
