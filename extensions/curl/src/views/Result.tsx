@@ -56,9 +56,11 @@ export default function ResultView({
       }
       actions={
         <ActionPanel>
+          // eslint-disable-next-line @raycast/prefer-title-case
           <Action.CopyToClipboard title="Copy Curl" content={curl} />
           <Action.CopyToClipboard
-            title="Copy Jsonpath Result"
+            // eslint-disable-next-line @raycast/prefer-title-case
+            title="Copy JSONPath Result"
             content={jsonPathResultToClipboard}
             shortcut={{ modifiers: ["cmd"], key: "c" }}
           />
