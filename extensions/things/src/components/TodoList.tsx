@@ -69,7 +69,7 @@ export default function TodoList({ commandListName, displayActivationDates }: To
         }
 
         return (
-          <List.Section key={key} title={section.title} subtitle={plural(section.todos.length, 'todo')}>
+          <List.Section key={key} title={section.title} subtitle={plural(section.todos.length, 'to-do')}>
             {section.todos.map((todo) => (
               <TodoListItem
                 key={todo.id}

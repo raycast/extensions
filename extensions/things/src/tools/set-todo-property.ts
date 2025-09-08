@@ -1,7 +1,7 @@
 import { setTodoProperty } from '../api';
 
 type Input = {
-  /** The todo id to update */
+  /** The to-do id to update */
   todoId: string;
   /** The key to update */
   key: string;

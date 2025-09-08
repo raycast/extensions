@@ -116,7 +116,7 @@
           "name": "dontUseAI",
           "type": "checkbox",
           "label": "Don't use AI",
-          "description": "When enabled, the todo is simply added to your inbox with the input as the title.",
+          "description": "When enabled, the to-do is simply added to your inbox with the input as the title.",
           "default": false,
           "required": false
         }
@@ -171,23 +171,23 @@
     },
     {
       "name": "delete-todo",
-      "title": "Delete Todo",
-      "description": "Delete a todo in Things"
+      "title": "Delete To-Do",
+      "description": "Delete a to-do in Things"
     },
     {
       "name": "update-todo",
-      "title": "Update Todo",
-      "description": "Update a todo in Things"
+      "title": "Update To-Do",
+      "description": "Update a to-do in Things"
     },
     {
       "name": "set-todo-property",
-      "title": "Set Todo Property",
-      "description": "Set a property of a todo in Things"
+      "title": "Set To-Do Property",
+      "description": "Set a property of a to-do in Things"
     },
     {
       "name": "add-todo",
-      "title": "Add Todo",
-      "description": "Add a todo in Things"
+      "title": "Add To-Do",
+      "description": "Add a to-do in Things"
     },
     {
       "name": "add-project",
@@ -206,7 +206,7 @@
     }
   ],
   "ai": {
-    "instructions": "Moving a todo means changing its list. For example, moving \"buy milk\" from inbox to today means changing its list to today. Only update the when property of the todo when referring to a date.",
+    "instructions": "Moving a to-do means changing its list. For example, moving \"buy milk\" from inbox to today means changing its list to today. Only update the when property of the to-do when referring to a date.",
     "evals": [
       {
         "input": "@things what are my to-dos for today?",

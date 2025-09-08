@@ -29,24 +29,24 @@
 
 ## [✨ Reminders] - 2025-05-06
 
-- Update the "Today" and "Upcoming" lists to allow updating todo's reminders.
-- Fixed issue with the Deadline action to correctly remove a deadline from a todo.
+- Update the "Today" and "Upcoming" lists to allow updating to-do's reminders.
+- Fixed issue with the Deadline action to correctly remove a deadline from a to-do.
 
 ## [✨ Fix Complete Menu Bar Action] - 2025-04-25
 
-- Fix `Complete` menu bar action to mark the first incomplete todo as complete, rather than completing the first item in the list, even if it is already marked as completed.
+- Fix `Complete` menu bar action to mark the first incomplete to-do as complete, rather than completing the first item in the list, even if it is already marked as completed.
 
-## [✨ Menu Bar Todo] - 2025-04-25
+## [✨ Menu Bar To-Do] - 2025-04-25
 
 - Update the menu bar to display only incomplete to-dos from today’s list
 
 ## [Detect URL in Notes] - 2025-04-11
 
-- Detect a URL in todo notes and offer `Open URL From Notes` and `Copy URL From Notes` actions.
+- Detect a URL in to-do notes and offer `Open URL From Notes` and `Copy URL From Notes` actions.
 
 ## [✨ Improved Error Handling] - 2025-04-07
 
-- Fixed an issue that caused the application to crash when users attempted to update a todo item from the menu bar without a valid authentication token.
+- Fixed an issue that caused the application to crash when users attempted to update a to-do item from the menu bar without a valid authentication token.
 
 ## [✨ AI Enhancements] - 2025-02-21
 
@@ -54,13 +54,13 @@
 
 - Add shortcuts to focus the input fields in both the `Add New To-Do` and `Add New Project` commands.
 
-## [Quick ToDo Fixes] - 2024-08-19
+## [Quick To-Do Fixes] - 2024-08-19
 
-- Quick ToDo Command: Disable Automatic Date (when & deadline), List parsing when AI is not enabled in preferences/is not available via environment.
+- Quick To-Do Command: Disable Automatic Date (when & deadline), List parsing when AI is not enabled in preferences/is not available via environment.
 
 ## [Quick To-do Improvements] - 2024-08-05
 
-- Preference to disable date parsing for todo classification, sending all todo(s) to inbox.
+- Preference to disable date parsing for to-do classification, sending all to-do(s) to inbox.
 - The title input will still be parsed for assigning deadlines and list name followed with '#' (case-insensitive).
 
 ## [Fix Generate Checklist with AI] - 2024-07-30
@@ -71,7 +71,7 @@
 
 ## [Fix tags for new issues] - 2024-07-24
 
-- [#13560](https://github.com/raycast/extensions/issues/13560): Tags are correctly appended to the deeplink while creating new todo(s).
+- [#13560](https://github.com/raycast/extensions/issues/13560): Tags are correctly appended to the deeplink while creating new to-do(s).
 - Updated dependencies and resolved security vulnerabilities.
 
 ## [Add Status Icons in Menu Bar] - 2024-04-16
@@ -177,7 +177,7 @@ Added support for Things beta.
 ## [Fixes and Updates] - 2022-03-02
 
 - Updated the API
-- Fixed a todo creation bug
+- Fixed a to-do creation bug
 
 ## [Improvements] - 2021-12-03
 
@@ -187,8 +187,8 @@ Added support for Things beta.
 - Add complete action
 - Add "Mark as Completed"/"Mark as Canceled"/"Delete" actions
 - Add "Add New To-Do" command
-- Add fallback commands in show-list (search + create todo)
-- AddNewTodo: separate form handling in 2 actions
+- Add fallback commands in show-list (search + create to-do)
+- AddNewToDo: separate form handling in 2 actions
 - Better error handling: catch and display markdown error if things is not running
 - Fix TypeScript error
 
