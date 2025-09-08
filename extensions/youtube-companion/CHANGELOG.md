@@ -1,5 +1,7 @@
 # YouTube Companion Changelog
 
+## [Feat: Add Windows Support] - {PR_MERGE_DATE}
+
 ## [Initial Version] - 2022-04-24
 
 - Added following scripts
