@@ -1,6 +1,6 @@
 #  Zed Recent Projects Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2025-09-08
 
 - Use latest Zed sqlite schema
 
