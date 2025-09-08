@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Detail, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail } from "@raycast/api";
 import { AxiosRequestConfig } from "axios";
 import { methodColors } from "../../utils";
 
@@ -56,9 +56,9 @@ export default function ResultView({
       }
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy cURL" content={curl} />
+          <Action.CopyToClipboard title="Copy Curl" content={curl} />
           <Action.CopyToClipboard
-            title="Copy JSONPath Result"
+            title="Copy Jsonpath Result"
             content={jsonPathResultToClipboard}
             shortcut={{ modifiers: ["cmd"], key: "c" }}
           />
