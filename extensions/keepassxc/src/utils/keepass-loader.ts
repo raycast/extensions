@@ -1,7 +1,8 @@
 import { getPreferenceValues, LocalStorage, Toast, showToast } from "@raycast/api";
 import { parse } from "csv-parse/sync";
-import path from "path";
 import child_process from "child_process";
+import path from "path";
+import process from "process";
 
 interface Preference {
   keepassxcRootPath: {
@@ -49,7 +50,12 @@ class KeePassLoader {
     const preferences: Preference = getPreferenceValues();
     this.database = preferences.database;
     this.keepassxcCli = preferences.keepassxcRootPath?.path
-      ? path.join(preferences.keepassxcRootPath.path, "Contents/MacOS/keepassxc-cli")
+      ? path.join(
+          preferences.keepassxcRootPath.path,
+          process.platform === "win32"
+            ? "C:\\Program Files\\KeePassXC\\keepassxc-cli.exe"
+            : "Contents/MacOS/keepassxc-cli",
+        )
       : undefined;
   }
 
@@ -117,7 +123,14 @@ class KeePassLoader {
    * information of an entry.
    */
   private static parseCsvEntries = (entries: string) => {
-    let entriesArray = parse(entries, { delimiter: ",", from_line: 2 })
+    let entriesArray = parse(entries, {
+      delimiter: ",",
+      from_line: 2,
+      relax_column_count: true,
+      relax_quotes: true,
+      skip_empty_lines: true,
+      trim: true,
+    })
       .sort((a: string[], b: string[]) => {
         // sort first by the title
         const titleComparison = a[1].localeCompare(b[1]);

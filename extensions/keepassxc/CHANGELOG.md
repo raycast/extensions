@@ -1,5 +1,11 @@
 # KeePassXC Extension Changelog
 
+## [1.7.0] - {PR_MERGE_DATE}
+
+### Added
+
+- Support for Windows (#21352).
+
 ## [1.6.0] - 2025-04-07
 
 ### Added
