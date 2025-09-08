@@ -1,6 +1,6 @@
 # DeepWiki Changelog
 
-## [0.2.2] - {PR_MERGE_DATE}
+## [0.2.2] - 2025-09-08
 
 - Rename `Deepwiki` to `DeepWiki`.
 
