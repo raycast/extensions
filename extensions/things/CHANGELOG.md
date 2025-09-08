@@ -3,7 +3,7 @@
 ## [Improved Project Handling] - {PR_MERGE_DATE}
 
 - Added Update and Delete project tools with proper Things URL scheme support
-- Areas now return their tags, and projects include their to-dos
+- Areas now return their tags and to-dos, and projects include their to-dos
 - Improved project data handling and type safety with separate parameter types for add/update operations
 - Restricted `Move To` command for projects to list only Areas (prevents invalid moves)
 - Enhanced code organization by extracting types to dedicated types.ts file

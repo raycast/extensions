@@ -34,6 +34,7 @@ export type Area = {
   id: string;
   name: string;
   tags: string;
+  todos?: Todo[];
 };
 
 export type List = { id: string; name: string; type: 'area' | 'project' };

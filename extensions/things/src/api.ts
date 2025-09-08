@@ -204,6 +204,16 @@ export const getAreas = async (): Promise<Area[]> => {
       id: area.id(),
       name: area.name(),
       tags: area.tagNames(),
+      todos: area.toDos().map(todo => ({
+        id: todo.id(),
+        name: todo.name(),
+        status: todo.status(),
+        notes: todo.notes(),
+        tags: todo.tagNames(),
+        dueDate: todo.dueDate() && todo.dueDate().toISOString(),
+        activationDate: todo.activationDate() && todo.activationDate().toISOString(),
+        isProject: todo.properties().pcls === "project",
+      }))
     }));
   `);
 };
