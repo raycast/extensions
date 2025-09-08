@@ -1,7 +1,5 @@
 export type CommandListName = 'inbox' | 'today' | 'anytime' | 'upcoming' | 'someday' | 'logbook' | 'trash';
 
-export type CommandListName = 'inbox' | 'today' | 'anytime' | 'upcoming' | 'someday' | 'logbook' | 'trash';
-
 export type Todo = {
   id: string;
   name: string;
