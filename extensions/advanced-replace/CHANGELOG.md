@@ -1,6 +1,6 @@
 # Regex Replace Changelog
 
-## [Regex Transformations and Additional Entry Actions] - {PR_MERGE_DATE}
+## [Regex Transformations and Additional Entry Actions] - 2025-09-08
 
 - Added possibility to use regex transformations (upper/lowercase, escapes)
 - New entry actions to duplicate and move entries
