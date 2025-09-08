@@ -1,6 +1,6 @@
 import { Alert, confirmAlert, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
 import { showFailureToast, useSQL } from "@raycast/utils";
-import { execFile } from "child_process";
+import { execFile, execFileSync } from "child_process";
 import fs from "fs";
 import { homedir } from "os";
 import util from "util";
@@ -21,7 +21,7 @@ export interface ZedEntry {
 
 export type ZedEntries = Record<string, ZedEntry>;
 
-function getPath() {
+export function getPath() {
   return `${homedir()}/Library/Application Support/Zed/db/${getZedDbName(zedBuild)}/db.sqlite`;
 }
 
@@ -38,10 +38,10 @@ interface LocalWorkspace extends BaseWorkspace {
 
 interface RemoteWorkspace extends BaseWorkspace {
   type: "remote";
-  remote_paths: string;
+  paths: string; // In new schema (26+) or old schema for remote
   host: string;
-  user: string;
-  port: string;
+  user: string | null;
+  port: number | null;
 }
 
 type Workspace = LocalWorkspace | RemoteWorkspace;
@@ -103,7 +103,23 @@ function parseLocalPaths(str: string): string[] | null {
 }
 
 function processLocalWorkspace(workspace: LocalWorkspace): ZedEntry | undefined {
-  const paths = parseLocalPaths(workspace.local_paths);
+  // For dev build, paths are JSON, not binary
+  if (!workspace.local_paths) {
+    return undefined;
+  }
+
+  let paths: string[] | null = null;
+
+  // Try parsing as JSON first (dev build format)
+  try {
+    const parsed = JSON.parse(workspace.local_paths);
+    if (Array.isArray(parsed)) {
+      paths = parsed;
+    }
+  } catch {
+    // If JSON parsing fails, try binary format (stable build)
+    paths = parseLocalPaths(workspace.local_paths);
+  }
   // TODO: Only support single path workspaces for now
   if (!paths || paths.length !== 1) {
     return undefined;
@@ -126,9 +142,12 @@ function processLocalWorkspace(workspace: LocalWorkspace): ZedEntry | undefined 
 
 function processRemoteWorkspace(workspace: RemoteWorkspace): ZedEntry | undefined {
   try {
-    const paths = JSON.parse(workspace.remote_paths);
+    if (!workspace.paths) {
+      return undefined;
+    }
+    const paths = JSON.parse(workspace.paths);
     if (!Array.isArray(paths) || paths.length === 0) {
-      throw new Error("Invalid remote paths format");
+      return undefined;
     }
     const path = paths[0].replace(/^\/+/, "");
     const uri = `ssh://${workspace.user ? workspace.user + "@" : ""}${workspace.host}${
@@ -143,23 +162,55 @@ function processRemoteWorkspace(workspace: RemoteWorkspace): ZedEntry | undefine
       host: workspace.host,
     };
   } catch (error) {
-    showFailureToast(error, { title: "Error processing workspace" });
+    showFailureToast(error, {
+      title: "Error processing remote workspace",
+      message: "Failed to parse remote workspace data",
+    });
     return undefined;
   }
 }
 
-export function useZedRecentWorkspaces(): ZedRecentWorkspaces {
-  const path = getPath();
+export function getSchemaVersionSync(dbPath: string): number {
+  try {
+    const result = execFileSync("sqlite3", [dbPath, "SELECT MAX(step) FROM migrations WHERE domain = 'WorkspaceDb';"], {
+      encoding: "utf8",
+    });
+    const version = parseInt(result.trim(), 10);
+    return isNaN(version) ? 0 : version;
+  } catch (error) {
+    showFailureToast(error, {
+      title: "Failed to get schema version",
+      message: "Unable to determine Zed database schema version",
+    });
+    return 0;
+  }
+}
 
-  if (!fs.existsSync(path)) {
-    return {
-      entries: {},
-      removeEntry: () => Promise.resolve(),
-      removeAllEntries: () => Promise.resolve(),
-    };
+export function getQueryForSchema(schemaVersion: number): string {
+  // Schema version 26+ uses ssh_connections table and unified paths field
+  if (schemaVersion >= 26) {
+    return `
+      SELECT
+        CASE
+          WHEN ssh_connection_id IS NULL THEN 'local'
+          ELSE 'remote'
+        END as type,
+        workspace_id as id,
+        paths as local_paths,
+        paths,
+        timestamp,
+        host,
+        user,
+        port
+      FROM workspaces
+      LEFT JOIN ssh_connections ON ssh_connection_id = ssh_connections.id
+      WHERE paths IS NOT NULL AND paths != ''
+      ORDER BY timestamp DESC
+    `;
   }
 
-  const query = `
+  // Schema version 24 and below uses ssh_projects table and separate local_paths field
+  return `
     SELECT
       CASE
         WHEN local_paths IS NOT NULL THEN 'local'
@@ -167,23 +218,37 @@ export function useZedRecentWorkspaces(): ZedRecentWorkspaces {
       END as type,
       workspace_id as id,
       local_paths,
-      paths AS remote_paths,
+      paths,
       timestamp,
       host,
       user,
       port
     FROM workspaces
-    LEFT JOIN ssh_projects ON ssh_project_id = workspaces.ssh_project_id
+    LEFT JOIN ssh_projects ON ssh_project_id = ssh_projects.id
     WHERE (local_paths IS NOT NULL AND paths IS NULL)
        OR (local_paths IS NULL AND paths IS NOT NULL)
     ORDER BY timestamp DESC
   `;
+}
 
-  const { data, isLoading, error, mutate } = useSQL<Workspace>(path, query);
+export function useZedRecentWorkspaces(schemaVersion?: number, query?: string | null): ZedRecentWorkspaces {
+  const path = getPath();
+
+  // Always call the hook, but use a dummy query if not ready
+  const { data, isLoading, error, mutate } = useSQL<Workspace>(path, query || "SELECT * FROM workspaces LIMIT 0");
+
+  if (!fs.existsSync(path) || !query) {
+    return {
+      entries: {},
+      removeEntry: () => Promise.resolve(),
+      removeAllEntries: () => Promise.resolve(),
+      isLoading: true,
+    };
+  }
 
   async function removeEntry(id: number) {
     try {
-      await mutate(deleteEntryById(id), { shouldRevalidateAfter: true });
+      await mutate(deleteEntryById(id, schemaVersion ?? 0), { shouldRevalidateAfter: true });
 
       showToast(Toast.Style.Success, "Entry removed");
     } catch (error) {
@@ -208,7 +273,7 @@ export function useZedRecentWorkspaces(): ZedRecentWorkspaces {
           },
         })
       ) {
-        await mutate(deleteAllWorkspaces(), { shouldRevalidateAfter: true });
+        await mutate(deleteAllWorkspaces(schemaVersion ?? 0), { shouldRevalidateAfter: true });
         showToast(Toast.Style.Success, "All entries removed");
       }
     } catch (error) {
@@ -246,8 +311,16 @@ export function useZedRecentWorkspaces(): ZedRecentWorkspaces {
 
 export const execFilePromise = util.promisify(execFile);
 
-async function deleteEntryById(id: number) {
-  const deleteQuery = `
+async function deleteEntryById(id: number, schemaVersion: number) {
+  const deleteQuery =
+    schemaVersion >= 26
+      ? `
+DELETE FROM ssh_connections WHERE id = (
+  SELECT ssh_connection_id FROM workspaces WHERE workspace_id = ${id}
+);
+DELETE FROM workspaces WHERE workspace_id = ${id}
+`
+      : `
 DELETE FROM ssh_projects WHERE id = (
   SELECT ssh_project_id FROM workspaces WHERE workspace_id = ${id}
 );
@@ -256,6 +329,10 @@ DELETE FROM workspaces WHERE workspace_id = ${id}
   await execFilePromise("sqlite3", [getPath(), deleteQuery]);
 }
 
-async function deleteAllWorkspaces() {
-  await execFilePromise("sqlite3", [getPath(), "DELETE FROM ssh_projects;DELETE FROM workspaces;"]);
+async function deleteAllWorkspaces(schemaVersion: number) {
+  const deleteQuery =
+    schemaVersion >= 26
+      ? "DELETE FROM ssh_connections;DELETE FROM workspaces;"
+      : "DELETE FROM ssh_projects;DELETE FROM workspaces;";
+  await execFilePromise("sqlite3", [getPath(), deleteQuery]);
 }
