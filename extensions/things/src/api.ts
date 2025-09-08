@@ -182,6 +182,15 @@ export const getProjects = async (): Promise<Project[]> => {
         name: project.area().name(),
         tags: project.area().tagNames(),
       },
+      todos: project.toDos().map(todo => ({
+        id: todo.id(),
+        name: todo.name(),
+        status: todo.status(),
+        notes: todo.notes(),
+        tags: todo.tagNames(),
+        dueDate: todo.dueDate() && todo.dueDate().toISOString(),
+        activationDate: todo.activationDate() && todo.activationDate().toISOString(),
+      }))
     }));
   `);
 };

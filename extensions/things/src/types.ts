@@ -27,6 +27,7 @@ export type Project = {
   activationDate: string;
   notes: string;
   area?: Area;
+  todos?: Todo[];
 };
 
 export type Area = {
