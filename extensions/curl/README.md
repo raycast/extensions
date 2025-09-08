@@ -1,5 +1,10 @@
 # cURL Changelog
 
+## [Feat: Add Windows Support] - {PR_MERGE_DATE}
+
+- Added support for Windows
+- Bumped dependencies
+
 ## [Allow custom headers] - 2023-08-15
 
 - Allows custom values for a header key. Just type a value into the dropdown search box, and it will show up as an option.
