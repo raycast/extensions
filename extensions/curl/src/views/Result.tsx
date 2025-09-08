@@ -1,3 +1,4 @@
+/* eslint-disable @raycast/prefer-title-case */
 import { Action, ActionPanel, Color, Detail } from "@raycast/api";
 import { AxiosRequestConfig } from "axios";
 import { methodColors } from "../../utils";
@@ -56,10 +57,8 @@ export default function ResultView({
       }
       actions={
         <ActionPanel>
-          // eslint-disable-next-line @raycast/prefer-title-case
-          <Action.CopyToClipboard title="Copy Curl" content={curl} />
+          <Action.CopyToClipboard title="Copy cuRL" content={curl} />
           <Action.CopyToClipboard
-            // eslint-disable-next-line @raycast/prefer-title-case
             title="Copy JSONPath Result"
             content={jsonPathResultToClipboard}
             shortcut={{ modifiers: ["cmd"], key: "c" }}
