@@ -1,5 +1,10 @@
 # Instagram Media Downloader Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Add support for Windows platform.
+- Bump all dependencies to the latest.
+
 ## [Update] - 2025-07-13
 
 - Update the URL for obtaining the Instagram story.
