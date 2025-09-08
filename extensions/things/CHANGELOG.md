@@ -2,8 +2,10 @@
 
 ## [Improved Project Handling] - {PR_MERGE_DATE}
 
-- Added Update and Delete project tools
-- Improved project data handling in AI chat
+- Added Update and Delete project tools with proper Things URL scheme support
+- Improved project data handling and type safety with separate parameter types for add/update operations
+- Restricted `Move To` command for projects to list only Areas (prevents invalid moves)
+- Enhanced code organization by extracting types to dedicated types.ts file
 
 ## [Fix Error on Task Update] - 2025-07-09
 
