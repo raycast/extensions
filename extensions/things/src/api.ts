@@ -112,11 +112,13 @@ export const getListTodos = (commandListName: CommandListName): Promise<Todo[]> 
       area: todo.project().area() && {
         id: todo.project().area().id(),
         name: todo.project().area().name(),
+        tags: todo.project().area().tagNames(),
       },
     },
     area: todo.area() && {
       id: todo.area().id(),
       name: todo.area().name(),
+      tags: todo.area().tagNames(),
     },
   }));
 `);
@@ -178,6 +180,7 @@ export const getProjects = async (): Promise<Project[]> => {
       area: project.area() && {
         id: project.area().id(),
         name: project.area().name(),
+        tags: project.area().tagNames(),
       },
     }));
   `);
@@ -191,6 +194,7 @@ export const getAreas = async (): Promise<Area[]> => {
     return areas.map(area => ({
       id: area.id(),
       name: area.name(),
+      tags: area.tagNames(),
     }));
   `);
 };

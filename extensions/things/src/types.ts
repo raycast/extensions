@@ -32,6 +32,7 @@ export type Project = {
 export type Area = {
   id: string;
   name: string;
+  tags: string;
 };
 
 export type List = { id: string; name: string; type: 'area' | 'project' };
