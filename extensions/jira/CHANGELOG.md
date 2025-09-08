@@ -1,6 +1,6 @@
 # Jira Changelog
 
-## [Fix deprecated Jira search API] - 2025-08-20
+## [Fix deprecated Jira search API] - {PR_MERGE_DATE}
 
 - Replaced removed `/search` endpoint with the new enhanced search-based API (`POST /search/jql`).
 - Added response-shape compatibility for `searchResults` / `values`.
