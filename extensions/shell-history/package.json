@@ -113,6 +113,24 @@
           "type": "checkbox",
           "default": true,
           "required": false
+        },
+        {
+          "name": "displayOrder",
+          "title": "Display Order",
+          "description": "The order in which to display the shell history.",
+          "type": "dropdown",
+          "default": "newest-first",
+          "required": false,
+          "data": [
+            {
+              "title": "Newest First",
+              "value": "newest-first"
+            },
+            {
+              "title": "Oldest First",
+              "value": "oldest-first"
+            }
+          ]
         }
       ]
     }

@@ -29,7 +29,7 @@ export default function ProjectServices({ projectID, environmentID }: ProjectSer
         services.sort((a, b) => a.groupIndex - b.groupIndex);
         setServices(services);
         setIsLoading(false);
-      } catch (error) {
+      } catch {
         showFailureToast("Failed to fetch services");
         setIsLoading(false);
       }
@@ -109,7 +109,7 @@ export default function ProjectServices({ projectID, environmentID }: ProjectSer
                             title: "Failed to suspend service",
                           });
                         }
-                      } catch (error) {
+                      } catch {
                         await showToast({
                           style: Toast.Style.Failure,
                           title: "Failed to suspend service",
@@ -143,7 +143,7 @@ export default function ProjectServices({ projectID, environmentID }: ProjectSer
                           title: res.message,
                         });
                       }
-                    } catch (error) {
+                    } catch {
                       await showToast({
                         style: Toast.Style.Failure,
                         title: "Failed to redeploy service",
@@ -178,7 +178,7 @@ export default function ProjectServices({ projectID, environmentID }: ProjectSer
                           title: "Failed to restart service",
                         });
                       }
-                    } catch (error) {
+                    } catch {
                       await showToast({
                         style: Toast.Style.Failure,
                         title: "Failed to restart service",
@@ -219,7 +219,7 @@ export default function ProjectServices({ projectID, environmentID }: ProjectSer
                             title: "Failed to delete service",
                           });
                         }
-                      } catch (error) {
+                      } catch {
                         await showToast({
                           style: Toast.Style.Failure,
                           title: "Failed to delete service",

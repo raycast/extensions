@@ -37,6 +37,7 @@ jest.mock(
         shouldCacheVaultItems: true,
         windowActionOnCopy: "close",
         primaryAction: "copy",
+        syncOnLaunch: true,
       })
     ),
     LocalStorage: {

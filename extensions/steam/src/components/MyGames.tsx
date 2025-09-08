@@ -26,7 +26,9 @@ export const MyGames = ({ sortBy = "name", order = "asc", extraFilter = () => tr
   if (!isLoggedIn) return <NoApiKey />;
   return (
     <List navigationTitle="My Steam Account" isLoading={isLoading} searchBarPlaceholder="Search your games...">
-      {gamesFiltered?.map((game) => <MyGamesListType key={game.appid} game={game} />)}
+      {gamesFiltered?.map((game) => (
+        <MyGamesListType key={game.appid} game={game} />
+      ))}
     </List>
   );
 };

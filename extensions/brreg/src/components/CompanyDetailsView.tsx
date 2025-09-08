@@ -1,14 +1,26 @@
 import { Detail, ActionPanel, Action, Icon } from "@raycast/api";
+import KeyboardShortcutsHelp from "./KeyboardShortcutsHelp";
 import { Company } from "../types";
+import { KEYBOARD_SHORTCUTS } from "../constants";
 import { useState, useEffect } from "react";
 
 interface CompanyDetailsViewProps {
   company: Company;
   isLoading: boolean;
   onBack: () => void;
+  isFavorite: boolean;
+  onAddFavorite: () => void;
+  onRemoveFavorite: () => void;
 }
 
-export default function CompanyDetailsView({ company, isLoading, onBack }: CompanyDetailsViewProps) {
+export default function CompanyDetailsView({
+  company,
+  isLoading,
+  onBack,
+  isFavorite,
+  onAddFavorite,
+  onRemoveFavorite,
+}: CompanyDetailsViewProps) {
   const [activeTab, setActiveTab] = useState<"overview" | "financials" | "map">("overview");
   const [mapImageUrl, setMapImageUrl] = useState<string | undefined>(undefined);
   const [mapImageDataUri, setMapImageDataUri] = useState<string | undefined>(undefined);
@@ -136,6 +148,9 @@ ${formattedAddress ? `**Address:** ${formattedAddress}\n\n` : ""}${mapImageDataU
     if (activeTab === "overview") {
       return (
         <Detail.Metadata>
+          <Detail.Metadata.TagList title="Favorite">
+            <Detail.Metadata.TagList.Item text={isFavorite ? "Yes" : "No"} color={isFavorite ? "green" : "gray"} />
+          </Detail.Metadata.TagList>
           {company.organizationNumber && (
             <Detail.Metadata.Label title="Organization Number" text={company.organizationNumber} />
           )}
@@ -179,6 +194,9 @@ ${formattedAddress ? `**Address:** ${formattedAddress}\n\n` : ""}${mapImageDataU
       );
       return (
         <Detail.Metadata>
+          <Detail.Metadata.TagList title="Favorite">
+            <Detail.Metadata.TagList.Item text={isFavorite ? "Yes" : "No"} color={isFavorite ? "green" : "gray"} />
+          </Detail.Metadata.TagList>
           {hasFinancials && (
             <>
               {company.accountingYear && (
@@ -209,6 +227,9 @@ ${formattedAddress ? `**Address:** ${formattedAddress}\n\n` : ""}${mapImageDataU
       )}`;
       return (
         <Detail.Metadata>
+          <Detail.Metadata.TagList title="Favorite">
+            <Detail.Metadata.TagList.Item text={isFavorite ? "Yes" : "No"} color={isFavorite ? "green" : "gray"} />
+          </Detail.Metadata.TagList>
           {formattedAddress && <Detail.Metadata.Label title="Address" text={formattedAddress} />}
           <Detail.Metadata.Link title="Directions" target={directionsUrl} text="Open in Google Maps" />
         </Detail.Metadata>
@@ -233,36 +254,71 @@ ${formattedAddress ? `**Address:** ${formattedAddress}\n\n` : ""}${mapImageDataU
             />
           )}
           {company.organizationNumber && (
-            <Action.CopyToClipboard title="Copy Organization Number" content={company.organizationNumber} />
+            <Action.CopyToClipboard
+              title="Copy Organization Number"
+              content={company.organizationNumber}
+              shortcut={KEYBOARD_SHORTCUTS.COPY_ORG_NUMBER}
+            />
+          )}
+          {formattedAddress && (
+            <Action.CopyToClipboard
+              title="Copy Business Address"
+              content={formattedAddress}
+              shortcut={KEYBOARD_SHORTCUTS.COPY_ADDRESS}
+            />
+          )}
+          {company.revenue && (
+            <Action.CopyToClipboard
+              title="Copy Revenue"
+              content={company.revenue}
+              shortcut={KEYBOARD_SHORTCUTS.COPY_REVENUE}
+            />
+          )}
+          {company.result && (
+            <Action.CopyToClipboard
+              title="Copy Net Result"
+              content={company.result}
+              shortcut={KEYBOARD_SHORTCUTS.COPY_NET_RESULT}
+            />
+          )}
+          {isFavorite ? (
+            <Action
+              title="Remove from Favorites"
+              onAction={onRemoveFavorite}
+              shortcut={KEYBOARD_SHORTCUTS.REMOVE_FROM_FAVORITES}
+            />
+          ) : (
+            <Action title="Add to Favorites" onAction={onAddFavorite} shortcut={KEYBOARD_SHORTCUTS.ADD_TO_FAVORITES} />
           )}
           <ActionPanel.Section title="Tabs">
             <Action
               title="Show Overview"
               onAction={() => setActiveTab("overview")}
               icon={Icon.AlignLeft}
-              shortcut={{ modifiers: ["cmd"], key: "1" }}
+              shortcut={KEYBOARD_SHORTCUTS.SHOW_OVERVIEW}
             />
             <Action
               title="Show Financials"
               onAction={() => setActiveTab("financials")}
               icon={Icon.Coins}
-              shortcut={{ modifiers: ["cmd"], key: "2" }}
+              shortcut={KEYBOARD_SHORTCUTS.SHOW_FINANCIALS}
             />
             <Action
               title="Show Map"
               onAction={() => setActiveTab("map")}
               icon={Icon.Map}
-              shortcut={{ modifiers: ["cmd"], key: "3" }}
+              shortcut={KEYBOARD_SHORTCUTS.SHOW_MAP}
             />
             <Action
               title="Previous Tab"
               onAction={goToPreviousTab}
               icon={Icon.ChevronLeft}
-              shortcut={{ modifiers: [], key: "backspace" }}
+              shortcut={KEYBOARD_SHORTCUTS.PREVIOUS_TAB}
             />
           </ActionPanel.Section>
           {mapImageUrl && <Action.OpenInBrowser title="Open Static Map Image" url={mapImageUrl} />}
-          <Action title="Go Back" onAction={onBack} shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }} />
+          <Action.Push title="Keyboard Shortcuts" target={<KeyboardShortcutsHelp />} />
+          <Action title="Go Back" onAction={onBack} shortcut={KEYBOARD_SHORTCUTS.GO_BACK} />
         </ActionPanel>
       }
     />

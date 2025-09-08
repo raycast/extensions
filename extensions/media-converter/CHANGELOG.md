@@ -1,5 +1,11 @@
 # Media Converter Changelog
 
+## [1.5.1] - 2025-08-25
+
+### Fixed
+
+- Simple quality not being properly applied
+
 ## [1.5.0] - 2025-08-12
 
 ### Added

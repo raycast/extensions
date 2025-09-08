@@ -66,8 +66,12 @@ export default function SearchResults({
                   entity={entity}
                   addressString={addressString}
                   onViewDetails={onViewDetails}
-                  onCopyOrgNumber={() => {}}
-                  onCopyAddress={() => {}}
+                  onCopyOrgNumber={() => {
+                    // Show success toast - clipboard is handled by Action.CopyToClipboard
+                  }}
+                  onCopyAddress={() => {
+                    // Show success toast - clipboard is handled by Action.CopyToClipboard
+                  }}
                   onOpenInBrowser={() => {}}
                 />
                 <SearchResultActions
