@@ -30,6 +30,14 @@
       "subtitle": "GitHub Copilot",
       "description": "Delegate a task to Copilot coding agent to work on in the background",
       "mode": "view"
+    },
+    {
+      "name": "github-copilot-tasks",
+      "title": "Tasks",
+      "subtitle": "GitHub Copilot",
+      "description": "Track Copilot coding agent tasks from the menu bar",
+      "mode": "menu-bar",
+      "interval": "30m"
     }
   ],
   "tools": [

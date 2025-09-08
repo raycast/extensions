@@ -5,7 +5,7 @@ Start and track [GitHub Copilot coding agent](https://docs.github.com/en/enterpr
 ### How it works
 
 - **Create Task**: Kick off a Copilot coding agent job for a chosen repository and base branch using your prompt. The agent works in the background, opens a pull request and tags you for review.
-- **View Tasks**: Track the progress of tasks you've given to Copilot, and jump to the PR or session logs in GitHub.
+- **View Tasks**: Track the progress of tasks you've given to Copilot, and jump to the PR or session logs in GitHub. Available as a Raycast command, and from the menu bar.
 - **AI Assistant**: Use the AI tools to help create tasks, search repositories, and get repository information through natural language.
 
 ### Requirements
