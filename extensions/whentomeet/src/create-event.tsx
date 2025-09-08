@@ -82,6 +82,15 @@ export default function Command() {
       // Convert time slots to ISO format (empty slots will be filtered out)
       const isoSlots = convertToISOSlots(timeSlots, slotLength);
 
+      // Validate that at least one time slot is provided
+      if (isoSlots.length === 0) {
+        await showFailureToast({
+          title: "No Time Slots",
+          message: "Please add at least one time slot for your event",
+        });
+        return;
+      }
+
       // Import and call the create event tool
       await createEvent({
         title: values.title.trim(),
@@ -165,7 +174,7 @@ export default function Command() {
           <Form.DatePicker
             id={`dateTime-${index}`}
             title="Date & Time"
-            value={slot.dateTime}
+            value={slot.dateTime || null}
             onChange={(dateTime) => updateTimeSlot(index, dateTime || undefined)}
             info="Select the date and time for this slot. End time will be calculated automatically based on slot length."
           />
