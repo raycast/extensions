@@ -11,8 +11,9 @@ import {
 } from '@raycast/api';
 import { useCachedPromise } from '@raycast/utils';
 
-import { Todo, getListTodos, getLists, setTodoProperty, updateTodo, handleError } from './api';
+import { getListTodos, getLists, setTodoProperty, updateTodo, handleError } from './api';
 import { listItems, menuBarStatusIcons } from './helpers';
+import { Todo } from './types';
 
 const TASK_NAME_LENGTH_LIMIT = 30;
 

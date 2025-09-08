@@ -2,12 +2,13 @@ import { List, Detail } from '@raycast/api';
 import { useCachedPromise } from '@raycast/utils';
 import { useState } from 'react';
 
-import { CommandListName, Todo, getListTodos, getLists, getTags } from '../api';
+import { getListTodos, getLists, getTags } from '../api';
 import { plural } from '../utils';
 
 import TodoListEmptyView from './TodoListEmptyView';
 import TodoListItem from './TodoListItem';
 import ErrorView from './ErrorView';
+import { CommandListName, Todo } from '../types';
 
 type TodoListProps = {
   commandListName: CommandListName;

@@ -1,7 +1,8 @@
 import { ActionPanel, Action, Form, useNavigation } from '@raycast/api';
 import { FormValidation, useForm } from '@raycast/utils';
 
-import { Todo, handleError, updateTodo } from '../api';
+import { handleError, updateTodo } from '../api';
+import { Todo } from '../types';
 
 type EditTodoProps = {
   todo: Todo;

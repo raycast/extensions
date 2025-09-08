@@ -1,4 +1,5 @@
-import { updateTodo, TodoParams } from '../api';
+import { updateTodo } from '../api';
+import { TodoParams } from '../types';
 
 type Input = {
   /** The todo id to update */

@@ -4,23 +4,9 @@ import { promisify } from 'util';
 import { showToast, Toast, getPreferenceValues, openExtensionPreferences } from '@raycast/api';
 import { runAppleScript } from '@raycast/utils';
 import qs from 'qs';
+import { Area, CommandListName, List, Project, ProjectParams, Todo, TodoParams } from './types';
 
 export const preferences: Preferences = getPreferenceValues<Preferences>();
-
-export type Todo = {
-  id: string;
-  name: string;
-  status: 'open' | 'completed' | 'canceled';
-  tags: string;
-  project?: Project;
-  area?: Area;
-  dueDate: string;
-  activationDate: string;
-  notes: string;
-  isProject?: boolean;
-};
-
-export type CommandListName = 'inbox' | 'today' | 'anytime' | 'upcoming' | 'someday' | 'logbook' | 'trash';
 
 export class ThingsError extends Error {
   constructor(
@@ -166,17 +152,6 @@ export const getTags = (): Promise<string[]> =>
   return things.tags().map(tag => tag.name());
 `);
 
-export type Project = {
-  id: string;
-  name: string;
-  status: 'open' | 'completed' | 'canceled';
-  tags: string;
-  dueDate: string;
-  activationDate: string;
-  notes: string;
-  area?: Area;
-};
-
 export const getProjects = async (): Promise<Project[]> => {
   return executeJxa(`
     const things = Application('${preferences.thingsAppIdentifier}');
@@ -198,11 +173,6 @@ export const getProjects = async (): Promise<Project[]> => {
   `);
 };
 
-export type Area = {
-  id: string;
-  name: string;
-};
-
 export const getAreas = async (): Promise<Area[]> => {
   return executeJxa(`
     const things = Application('${preferences.thingsAppIdentifier}');
@@ -214,8 +184,6 @@ export const getAreas = async (): Promise<Area[]> => {
     }));
   `);
 };
-
-export type List = { id: string; name: string; type: 'area' | 'project' };
 
 export const getLists = async (): Promise<List[]> => {
   const projects = (await getProjects()) || [];
@@ -242,57 +210,6 @@ export const getLists = async (): Promise<List[]> => {
   });
 
   return [...projectsWithoutAreas, ...organizedAreasAndProjects];
-};
-
-export type TodoParams = {
-  /** The title of the to-do to add. Ignored if titles is also specified. */
-  title?: string;
-  /** String separated by new lines (encoded to %0a). Use instead of title to create multiple to-dos. Takes priority over title and show-quick-entry. The other parameters are applied to all the created to-dos. */
-  titles?: string;
-  /** The text to use for the notes field of the to-do. Maximum unencoded length: 10,000 characters. */
-  notes?: string;
-  /** Text to add before the existing notes of a to-do. Maximum unencoded length: 10,000 characters. */
-  'prepend-notes'?: string;
-  /** Text to add after the existing notes of a to-do. Maximum unencoded length: 10,000 characters. */
-  'append-notes'?: string;
-  /** Possible values: today, tomorrow, evening, anytime, someday, a date string, or a date time string. Using a date time string adds a reminder for that time. The time component is ignored if anytime or someday is specified. */
-  when?: string;
-  /** The deadline to apply to the to-do. */
-  deadline?: string;
-  /** Comma separated strings corresponding to the titles of tags. Does not apply a tag if the specified tag doesn't exist. */
-  tags?: string;
-  /** Comma separated strings corresponding to the titles of tags. Adds the specified tags to a to-do. Does not apply a tag if the specified tag doesn't exist. */
-  'add-tags'?: string;
-  /** String separated by new lines (encoded to %0a). Checklist items to add to the to-do (maximum of 100). */
-  'checklist-items'?: string;
-  /** String separated by new lines (encoded to %0a). Add checklist items to the front of the list of checklist items in the to-do (maximum of 100). */
-  'prepend-checklist-items'?: string;
-  /** String separated by new lines (encoded to %0a). Add checklist items to the end of the list of checklist items in the to-do (maximum of 100). */
-  'append-checklist-items'?: string;
-  /** Possible values can be replace-title (newlines overflow into notes, replacing them), replace-notes, or replace-checklist-items (newlines create multiple checklist rows). Takes priority over title, notes, or checklist-items. */
-  'use-clipboard'?: string;
-  /** The ID of a project or area to add to. Takes precedence over list. */
-  'list-id'?: string;
-  /** The title of a project or area to add to. Ignored if list-id is present. */
-  list?: string;
-  /** Takes precedence over heading. The ID of a heading within a project to add to. Ignored if a project is not specified, or if the heading doesn't exist. */
-  'heading-id'?: string;
-  /** The title of a heading within a project to add to. Ignored if heading-id is present, if a project is not specified, or if the heading doesn't exist. */
-  heading?: string;
-  /** Whether or not the to-do should be set to complete. Default: false. Ignored if canceled is also set to true. */
-  completed?: boolean;
-  /** Whether or not the to-do should be set to canceled. Default: false. Takes priority over completed. */
-  canceled?: boolean;
-  /** Whether or not to show the quick entry dialog (populated with the provided data) instead of adding a new to-do. Ignored if titles is specified. Default: false. */
-  'show-quick-entry'?: boolean;
-  /** Whether or not to navigate to and show the newly created to-do. If multiple to-dos have been created, the first one will be shown. Ignored if show-quick-entry is also set to true. Default: false. */
-  reveal?: boolean;
-  /** Set to true to duplicate the to-do before updating it, leaving the original to-do untouched. Repeating to-dos cannot be duplicated. Default: false. */
-  duplicate?: boolean;
-  /** ISO8601 date time string. The date to set as the creation date for the to-do in the database. Ignored if the date is in the future. */
-  'creation-date'?: string;
-  /** ISO8601 date time string. The date to set as the completion date for the to-do in the database. Ignored if the to-do is not completed or canceled, or if the date is in the future. */
-  'completion-date'?: string;
 };
 
 export async function silentlyOpenThingsURL(url: string) {
@@ -331,43 +248,6 @@ export async function updateProject(id: string, projectParams: ProjectParams) {
 export async function addTodo(todoParams: TodoParams) {
   await silentlyOpenThingsURL(`things:///add?${qs.stringify(todoParams)}`);
 }
-
-export type ProjectParams = {
-  /** The title of the project. */
-  title?: string;
-  /** The text to use for the notes field of the project. Maximum unencoded length: 10,000 characters. */
-  notes?: string;
-  /** Text to add before the existing notes of a project. Maximum unencoded length: 10,000 characters. */
-  'prepend-notes'?: string;
-  /** Text to add after the existing notes of a project. Maximum unencoded length: 10,000 characters. */
-  'append-notes'?: string;
-  /** Possible values: today, tomorrow, evening, anytime, someday, a date string, or a date time string. Using a date time string adds a reminder for that time. The time component is ignored if anytime or someday is specified. */
-  when?: string;
-  /** The deadline to apply to the project. */
-  deadline?: string;
-  /** Comma separated strings corresponding to the titles of tags. Does not apply a tag if the specified tag doesn't exist. */
-  tags?: string;
-  /** Comma separated strings corresponding to the titles of tags. Adds the specified tags to a project. Does not apply a tag if the specified tag doesn't exist. */
-  'add-tags'?: string;
-  /** The ID of an area to add to. Takes precedence over area. */
-  'area-id'?: string;
-  /** The title of an area to add to. Ignored if area-id is present. */
-  area?: string;
-  /** String separated by new lines (encoded to %0a). Titles of to-dos to create inside the project. */
-  'to-dos'?: string;
-  /** Whether or not the project should be set to complete. Default: false. Ignored if canceled is also set to true. Will set all child to-dos to be completed. */
-  completed?: boolean;
-  /** Whether or not the project should be set to canceled. Default: false. Takes priority over completed. Will set all child to-dos to be canceled. */
-  canceled?: boolean;
-  /** Whether or not to navigate into the newly created project. Default: false. */
-  reveal?: boolean;
-  /** Set to true to duplicate the project before updating it, leaving the original project untouched. Repeating projects cannot be duplicated. Default: false. */
-  duplicate?: boolean;
-  /** ISO8601 date time string. The date to set as the creation date for the project in the database. If the to-dos parameter is also specified, this date is applied to them, too. Ignored if the date is in the future. */
-  'creation-date'?: string;
-  /** ISO8601 date time string. The date to set as the completion date for the project in the database. If the to-dos parameter is also specified, this date is applied to them, too. Ignored if the to-do is not completed or canceled, or if the date is in the future. */
-  'completion-date'?: string;
-};
 
 export async function addProject(projectParams: ProjectParams) {
   await silentlyOpenThingsURL(`things:///add-project?${qs.stringify(projectParams)}`);

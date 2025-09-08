@@ -1,4 +1,5 @@
-import { updateProject, ProjectParams } from '../api';
+import { updateProject } from '../api';
+import { ProjectParams } from '../types';
 
 type Input = {
   /** The project id to update */

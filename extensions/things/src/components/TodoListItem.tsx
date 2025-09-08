@@ -1,10 +1,10 @@
 import { List, Icon, Color } from '@raycast/api';
 import dayjs from 'dayjs';
 
-import { CommandListName, Todo, List as TList } from '../api';
 import { statusIcons } from '../helpers';
 
 import TodoListItemActions from './TodoListItemActions';
+import { CommandListName, Todo, List as TList } from '../types';
 
 const getDueDateAccessory = (dueDate: string): List.Item.Accessory => {
   const today = dayjs(dayjs().format('YYYY-MM-DD')).toISOString();

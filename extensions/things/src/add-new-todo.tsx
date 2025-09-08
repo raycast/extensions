@@ -13,11 +13,12 @@ import {
 } from '@raycast/api';
 import { FormValidation, useCachedPromise, useForm } from '@raycast/utils';
 
-import { addTodo, CommandListName, getLists, getTags } from './api';
+import { addTodo, getLists, getTags } from './api';
 import TodoList from './components/TodoList';
 import ErrorView from './components/ErrorView';
 import { getChecklistItemsWithAI, listItems } from './helpers';
 import { getDateString } from './utils';
+import { CommandListName } from './types';
 
 type FormValues = {
   title: string;

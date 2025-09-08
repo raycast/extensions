@@ -12,22 +12,12 @@ import {
 } from '@raycast/api';
 
 import { AddNewTodo } from '../add-new-todo';
-import {
-  CommandListName,
-  Todo,
-  setTodoProperty,
-  deleteProject,
-  deleteTodo,
-  updateTodo,
-  updateProject,
-  handleError,
-  List as TList,
-  TodoParams,
-} from '../api';
+import { setTodoProperty, deleteProject, deleteTodo, updateTodo, updateProject, handleError } from '../api';
 import { getChecklistItemsWithAI, listItems, statusIcons } from '../helpers';
 import { capitalize } from '../utils';
 
 import EditTodo from './EditTodo';
+import { Todo, List as TList, CommandListName, TodoParams } from '../types';
 
 // Match URLs with protocols, with optional //
 const URL_REGEX = /([a-zA-Z][a-zA-Z0-9.+-]+):(?:\/\/\S+|%\S+)/;
