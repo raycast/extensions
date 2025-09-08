@@ -29,8 +29,9 @@ const getErrorMessage = (error: unknown): string => {
   if (!(error instanceof Error)) return "Failed to read EXIF data";
 
   if (error.message.includes("command not found")) {
-    return "ifex CLI tool not found. Please install ifex first.";
+    return "ifex CLI tool not found. Please install ifex first. See https://github.com/danielfilho/ifex for installation instructions.";
   }
+
   if (error.message.includes("No such file")) {
     return "File not found";
   }
