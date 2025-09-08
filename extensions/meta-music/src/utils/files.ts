@@ -24,11 +24,6 @@ export interface FileGeneralMetadata {
   updatedAt: string;
 }
 
-export interface Preferences {
-  musicDir: string;
-  useFinderSelection: boolean;
-}
-
 export const DEFAULT_MUSIC_DIR = `${homedir()}/Music`;
 
 /**
