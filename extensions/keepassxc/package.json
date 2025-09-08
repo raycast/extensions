@@ -6,7 +6,8 @@
   "icon": "keepassxc.png",
   "author": "pabroux",
   "contributors": [
-    "zkytech"
+    "zkytech",
+    "CT-7567"
   ],
   "categories": [
     "Security"
