@@ -57,7 +57,7 @@ export default function ResultView({
       }
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy cuRL" content={curl} />
+          <Action.CopyToClipboard title="Copy cURL" content={curl} />
           <Action.CopyToClipboard
             title="Copy JSONPath Result"
             content={jsonPathResultToClipboard}
