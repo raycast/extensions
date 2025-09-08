@@ -1,6 +1,6 @@
 import { addProject } from '../api';
-import { ProjectParams } from '../types';
+import { AddProjectParams } from '../types';
 
-export default async function (props: ProjectParams) {
+export default async function (props: AddProjectParams) {
   return await addProject(props);
 }

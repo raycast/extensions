@@ -4,7 +4,17 @@ import { promisify } from 'util';
 import { showToast, Toast, getPreferenceValues, openExtensionPreferences } from '@raycast/api';
 import { runAppleScript } from '@raycast/utils';
 import qs from 'qs';
-import { Area, CommandListName, List, Project, ProjectParams, Todo, AddTodoParams, UpdateTodoParams } from './types';
+import {
+  Area,
+  CommandListName,
+  List,
+  Project,
+  Todo,
+  AddTodoParams,
+  UpdateTodoParams,
+  AddProjectParams,
+  UpdateProjectParams,
+} from './types';
 
 export const preferences: Preferences = getPreferenceValues<Preferences>();
 
@@ -231,7 +241,7 @@ export async function updateTodo(id: string, todoParams: UpdateTodoParams) {
   );
 }
 
-export async function updateProject(id: string, projectParams: ProjectParams) {
+export async function updateProject(id: string, projectParams: UpdateProjectParams) {
   const { authToken } = getPreferenceValues<Preferences>();
 
   if (!authToken) throw new Error('unauthorized');
@@ -249,7 +259,7 @@ export async function addTodo(todoParams: AddTodoParams) {
   await silentlyOpenThingsURL(`things:///add?${qs.stringify(todoParams)}`);
 }
 
-export async function addProject(projectParams: ProjectParams) {
+export async function addProject(projectParams: AddProjectParams) {
   await silentlyOpenThingsURL(`things:///add-project?${qs.stringify(projectParams)}`);
 }
 

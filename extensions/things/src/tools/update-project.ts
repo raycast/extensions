@@ -1,11 +1,11 @@
 import { updateProject } from '../api';
-import { ProjectParams } from '../types';
+import { UpdateProjectParams } from '../types';
 
 type Input = {
   /** The project id to update */
   projectId: string;
   /** The parameters to update */
-  projectParams: ProjectParams;
+  projectParams: UpdateProjectParams;
 };
 
 export default async function ({ projectId, projectParams }: Input) {

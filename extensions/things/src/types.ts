@@ -83,7 +83,23 @@ export type UpdateTodoParams = {
   'completion-date'?: string;
 };
 
-export type ProjectParams = {
+export type AddProjectParams = {
+  title?: string;
+  notes?: string;
+  when?: string;
+  deadline?: string;
+  tags?: string;
+  'area-id'?: string;
+  area?: string;
+  'to-dos'?: string;
+  completed?: boolean;
+  canceled?: boolean;
+  reveal?: boolean;
+  'creation-date'?: string;
+  'completion-date'?: string;
+};
+
+export type UpdateProjectParams = {
   title?: string;
   notes?: string;
   'prepend-notes'?: string;
@@ -94,7 +110,6 @@ export type ProjectParams = {
   'add-tags'?: string;
   'area-id'?: string;
   area?: string;
-  'to-dos'?: string;
   completed?: boolean;
   canceled?: boolean;
   reveal?: boolean;
