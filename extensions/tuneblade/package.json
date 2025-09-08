@@ -13,7 +13,7 @@
     {
       "name": "control-device",
       "title": "Control Device",
-      "subtitle": "Manage a Tuneblade device",
+      "subtitle": "Tuneblade",
       "description": "Start searching for devices on your local networks",
       "mode": "view"
     }
