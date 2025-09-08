@@ -1,6 +1,6 @@
 # Manotori Changelog
 
-## [View DNS Zones, DNS Records + Support Windows] - {PR_MERGE_DATE}
+## [View DNS Zones, DNS Records + Support Windows] - 2025-09-08
 
 - Support Windows!
 - View DNS Zones
