@@ -1,6 +1,6 @@
 # Keygen Changelog
 
-## [List & Revoke API Tokens + Windows Support] - {PR_MERGE_DATE}
+## [List & Revoke API Tokens + Windows Support] - 2025-09-09
 
 - List API Tokens and Revoke old ones
 - Add Windows Support
