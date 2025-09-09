@@ -573,7 +573,7 @@ export default function Command() {
                         defaultIcon={preferences.defaultFavoriteIcon}
                       />
                     }
-                    shortcut={{ modifiers: ["cmd"], key: "e" }}
+                    shortcut={Keyboard.Shortcut.Common.Edit}
                   />
                   <Action
                     title="Remove Favorite"
