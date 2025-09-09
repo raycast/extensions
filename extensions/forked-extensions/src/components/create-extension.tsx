@@ -1,6 +1,14 @@
 import os from "node:os";
 import path from "node:path";
-import { Action, Clipboard, Icon, LaunchType, confirmAlert, launchCommand } from "@raycast/api";
+import {
+  Action,
+  Clipboard,
+  Icon,
+  LaunchType,
+  confirmAlert,
+  launchCommand,
+  openExtensionPreferences,
+} from "@raycast/api";
 import { catchError } from "../errors.js";
 import { repositoryConfigurationPath } from "../utils.js";
 
@@ -12,6 +20,21 @@ export default function CreateExtension() {
       title="Create Extension"
       onAction={catchError(async () => {
         const extensionsPath = path.join(repositoryConfigurationPath, "extensions");
+        const homedirRelativePath = path.relative(os.homedir(), extensionsPath);
+
+        if (homedirRelativePath.startsWith(".config")) {
+          await confirmAlert({
+            title: "Invalid Repository Location",
+            message:
+              'Raycast does not support creating extensions inside the "~/.config" directory. Please consider change another location to store your repository.',
+            primaryAction: {
+              title: "Open Extension Preferences",
+              onAction: catchError(async () => openExtensionPreferences()),
+            },
+          });
+          return;
+        }
+
         await confirmAlert({
           title: "Create Extension",
           message:
