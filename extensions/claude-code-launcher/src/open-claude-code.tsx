@@ -596,7 +596,7 @@ export default function Command() {
                       };
                       await confirmAlert(options);
                     }}
-                    shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                   />
                   <ActionPanel.Section>
                     <Action.Push
