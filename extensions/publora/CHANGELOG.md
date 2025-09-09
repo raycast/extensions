@@ -1,3 +1,3 @@
 # Publora Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-09-09
