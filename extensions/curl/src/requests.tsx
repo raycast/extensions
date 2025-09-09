@@ -18,7 +18,7 @@ import RequestDetails from "./views/RequestDetails";
 import { methodColors } from "../utils";
 import { JSONPath } from "jsonpath-plus";
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const curlString = require("curl-string");
 
 export interface Values {
@@ -154,7 +154,7 @@ export default function Requests() {
               <ActionPanel>
                 <ActionPanel.Section title="Actions">
                   <Action.CopyToClipboard
-                    title="Copy cURL"
+                    title="Copy Curl"
                     content={generateCurl({ url: req.key, payload: req.value })}
                   />
                   <Action
@@ -171,7 +171,7 @@ export default function Requests() {
                 </ActionPanel.Section>
                 <ActionPanel.Section title="Delete">
                   <Action
-                    title="Delete From History"
+                    title="Delete from History"
                     icon={Icon.Trash}
                     onAction={() => handleDeleteItem(req.key)}
                     shortcut={{ modifiers: ["cmd"], key: "delete" }}
