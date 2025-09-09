@@ -26,7 +26,7 @@ export function UserListItem({
   return (
     <List.Item
       key={user.id}
-      title={user.name}
+      title={user.name || "Unknown User"}
       icon={
         user.photo?.content_url
           ? { source: user.photo.content_url, mask: Image.Mask.Circle }

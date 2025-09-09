@@ -21,7 +21,7 @@ export function GroupListItem({
   onShowDetailsChange,
 }: GroupListItemProps) {
   const nameParts = (group.name ?? "").split(".");
-  const title = nameParts.length > 1 ? nameParts.slice(1).join(".") : group.name;
+  const title = nameParts.length > 1 ? nameParts.slice(1).join(".") : group.name || "Unknown Group";
   const accessory = nameParts.length > 1 ? nameParts[0] : "";
 
   return (

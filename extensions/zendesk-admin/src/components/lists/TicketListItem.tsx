@@ -28,7 +28,7 @@ export function TicketListItem({
   return (
     <List.Item
       key={ticket.id}
-      title={ticket.subject}
+      title={ticket.subject || "Untitled Ticket"}
       accessories={[{ tag: { value: `#${ticket.id}`, color: statusColor } }]}
       detail={
         <List.Item.Detail

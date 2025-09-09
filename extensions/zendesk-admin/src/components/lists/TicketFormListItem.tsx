@@ -23,7 +23,7 @@ export function TicketFormListItem({
   return (
     <List.Item
       key={ticketForm.id}
-      title={ticketForm.name}
+      title={ticketForm.name || "Untitled Form"}
       accessories={
         !ticketForm.active
           ? [

@@ -110,7 +110,7 @@ export function OrganizationListItem({
   return (
     <List.Item
       key={organization.id}
-      title={organization.name}
+      title={organization.name || "Unknown Organization"}
       icon={undefined}
       detail={
         <List.Item.Detail

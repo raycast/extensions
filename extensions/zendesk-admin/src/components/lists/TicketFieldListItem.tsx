@@ -29,7 +29,7 @@ export function TicketFieldListItem({
   return (
     <List.Item
       key={ticketField.id}
-      title={ticketField.title}
+      title={ticketField.title || "Untitled Field"}
       accessories={[
         {
           tag: {

@@ -51,7 +51,7 @@ export function SupportAddressListItem({
   return (
     <List.Item
       key={supportAddress.id}
-      title={supportAddress.email || ""}
+      title={supportAddress.email || "Unknown Email"}
       accessories={accessories}
       detail={
         <List.Item.Detail

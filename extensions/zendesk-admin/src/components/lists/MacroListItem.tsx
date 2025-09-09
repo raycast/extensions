@@ -21,7 +21,7 @@ export function MacroListItem({
   onShowDetailsChange,
 }: MacroListItemProps) {
   const nameParts = macro.title?.split("::");
-  const title = nameParts?.length > 1 ? nameParts[nameParts.length - 1] : macro.title;
+  const title = nameParts?.length > 1 ? nameParts[nameParts.length - 1] : macro.title || "Untitled Macro";
   const tags = nameParts?.length > 1 ? nameParts.slice(0, nameParts.length - 1) : [];
 
   return (

@@ -26,7 +26,7 @@ export function TriggerListItem({
   return (
     <List.Item
       key={trigger.id}
-      title={trigger.title}
+      title={trigger.title || "Untitled Trigger"}
       icon={undefined}
       accessories={
         !trigger.active

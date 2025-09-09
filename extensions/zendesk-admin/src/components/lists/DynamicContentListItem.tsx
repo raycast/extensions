@@ -21,7 +21,8 @@ export function DynamicContentListItem({
   onShowDetailsChange,
 }: DynamicContentListItemProps) {
   const nameParts = (dynamicContent.name ?? "").split("::");
-  const title = nameParts?.length > 1 ? nameParts[nameParts.length - 1] : dynamicContent.name;
+  const title =
+    nameParts?.length > 1 ? nameParts[nameParts.length - 1] : dynamicContent.name || "Unknown Dynamic Content";
   const tags = nameParts?.length > 1 ? nameParts.slice(0, nameParts.length - 1) : [];
   const defaultVariant = dynamicContent.variants?.find((v) => v.default === true);
 

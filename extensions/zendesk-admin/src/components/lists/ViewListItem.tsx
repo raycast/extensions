@@ -23,7 +23,7 @@ export function ViewListItem({
   return (
     <List.Item
       key={view.id}
-      title={view.title}
+      title={view.title || "Untitled View"}
       icon={undefined}
       accessories={
         !view.active

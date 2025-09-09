@@ -61,7 +61,7 @@ export default function OpenZendeskInstance() {
       {instances.map((instance) => (
         <List.Item
           key={instance.subdomain}
-          title={instance.name}
+          title={instance.name || "Unknown Instance"}
           subtitle={instance.subdomain}
           icon={{ source: Icon.House, tintColor: instance.color || Color.PrimaryText }}
           actions={

@@ -61,7 +61,7 @@ export default function UserGroupMembershipsList({ userId, userName, instance }:
         });
 
         setMemberships(enrichedMemberships);
-      } catch {
+      } catch (groupError) {
         // If group data fetch fails, still show memberships with just IDs
         setMemberships(membershipData);
       }
@@ -91,7 +91,7 @@ export default function UserGroupMembershipsList({ userId, userName, instance }:
         const title =
           nameParts.length > 1
             ? nameParts.slice(1).join(".")
-            : membership.group?.name || `Group ID: ${membership.group_id}`;
+            : membership.group?.name || `Group ID: ${membership.group_id}` || "Unknown Group";
         const accessory = nameParts.length > 1 ? nameParts[0] : "";
 
         return (

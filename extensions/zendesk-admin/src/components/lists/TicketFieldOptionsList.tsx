@@ -36,7 +36,7 @@ export default function TicketFieldOptionsList({ ticketField, instance }: Ticket
       {filteredOptions.map((option) => (
         <List.Item
           key={option.id}
-          title={option.name}
+          title={option.name || "Unnamed Option"}
           accessories={[{ tag: option.value || "" }]}
           icon={option.default ? { source: Icon.Star, tintColor: Color.Yellow } : undefined}
           actions={
