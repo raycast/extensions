@@ -1,6 +1,6 @@
 # Unsplash Changelog
 
-## [Error Handling Enhancements] - {PR_MERGE_DATE}
+## [Error Handling Enhancements] - 2025-09-09
 
 - Fixed extension would crash when "Rate Limit" exceeded (ref: [Issue #21405](https://github.com/raycast/extensions/issues/21405))
 - Fixed `Toast` would say "Liking" when _unliking_
