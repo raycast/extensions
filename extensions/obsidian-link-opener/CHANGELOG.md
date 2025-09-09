@@ -1,6 +1,6 @@
 # Changelog
 
-## [Caching, Ignore filters, Alias recognition, Memory optimization] - {PR_MERGE_DATE}
+## [Caching, Ignore filters, Alias recognition, Memory optimization] - 2025-09-09
 
 ### Added
 
