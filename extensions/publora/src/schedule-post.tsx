@@ -85,8 +85,6 @@ export default function Command(props: LaunchProps<{ draftValues: Post }>) {
     getPlatforms();
   }, []);
 
-  // console.log(allPlatforms);
-  // console.log(isLoading);
 
   return (
     <Form
