@@ -16,7 +16,6 @@ async function fetchIssues(): Promise<Issue[]> {
   try {
     const issues = await temboAPI.getIssues({
       pageSize: 50,
-      taskView: "all",
     });
 
     issues.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());

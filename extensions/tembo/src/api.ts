@@ -156,7 +156,6 @@ class TemboAPI {
     severity?: string[];
     integrationType?: string[];
     showHiddenIssues?: boolean;
-    taskView?: "all" | "backlog" | "waiting";
   }): Promise<Issue[]> {
     const searchParams = new URLSearchParams();
 

@@ -6,10 +6,6 @@ type Input = {
    */
   repository?: string;
   /**
-   * Task view filter: "all", "backlog", or "waiting" (defaults to "all")
-   */
-  view?: "all" | "backlog" | "waiting";
-  /**
    * Maximum number of tasks to return (defaults to 10, max 50)
    */
   limit?: number;
@@ -20,17 +16,16 @@ type Input = {
 };
 
 /**
- * Retrieves and displays tasks from Tembo, with optional filtering by repository, view type, and other criteria.
+ * Retrieves and displays tasks from Tembo, with optional filtering by repository and other criteria.
  */
 async function tool(input: Input) {
-  const { repository, view = "all", limit = 10, severity } = input;
+  const { repository, limit = 10, severity } = input;
 
   const taskLimit = Math.min(Math.max(limit || 10, 1), 50);
 
   try {
     const issues = await temboAPI.getIssues({
       pageSize: taskLimit,
-      taskView: view,
       severity,
       showHiddenIssues: false,
     });
@@ -52,9 +47,7 @@ async function tool(input: Input) {
         success: true,
         tasks: [],
         totalCount: 0,
-        message: repository
-          ? `No tasks found for repository "${repository}" in ${view} view.`
-          : `No tasks found in ${view} view.`,
+        message: repository ? `No tasks found for repository "${repository}".` : `No tasks found.`,
       };
     }
 
@@ -84,9 +77,8 @@ async function tool(input: Input) {
       success: true,
       tasks: formattedTasks,
       totalCount: filteredIssues.length,
-      view,
       repository: repository || null,
-      message: `Found ${filteredIssues.length} task${filteredIssues.length !== 1 ? "s" : ""} in ${view} view${repository ? ` for repository "${repository}"` : ""}.`,
+      message: `Found ${filteredIssues.length} task${filteredIssues.length !== 1 ? "s" : ""}${repository ? ` for repository "${repository}"` : ""}.`,
     };
   } catch (error) {
     if (error instanceof Error && error.message.includes("401")) {
