@@ -3,7 +3,7 @@ import { Action, ActionPanel, Detail, useNavigation } from "@raycast/api";
 import * as api from "../api.js";
 import { catchError } from "../errors.js";
 import * as git from "../git.js";
-import { getCommitDiffMessage, repositoryConfigurationPath } from "../utils.js";
+import { getCommitDiffMessage } from "../utils.js";
 
 export default function Diagnostics() {
   const [status, setStatus] = useState<string>("Running diagnostics...");
@@ -50,7 +50,7 @@ export default function Diagnostics() {
         "### Local forked repository",
         localForkedRepository
           ? [
-              `- ✅ [${localForkedRepository} 📁](file://$${repositoryConfigurationPath})`,
+              `- ✅ [${localForkedRepository} 📁](file://${git.repositoryPath})`,
               `- ${localCommitDiffPass ? "✅" : "⚠️"} ${localCommitDiffMessage}${localCommitDiffGuide}`,
             ]
               .filter(Boolean)

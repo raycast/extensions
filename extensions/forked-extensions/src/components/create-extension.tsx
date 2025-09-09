@@ -10,7 +10,8 @@ import {
   openExtensionPreferences,
 } from "@raycast/api";
 import { catchError } from "../errors.js";
-import { repositoryConfigurationPath } from "../utils.js";
+import * as git from "../git.js";
+import { simplifyPath } from "../utils.js";
 
 export default function CreateExtension() {
   if (os.platform() !== "darwin") return null;
@@ -19,7 +20,7 @@ export default function CreateExtension() {
       icon={Icon.NewFolder}
       title="Create Extension"
       onAction={catchError(async () => {
-        const extensionsPath = path.join(repositoryConfigurationPath, "extensions");
+        const extensionsPath = path.join(git.repositoryPath, "extensions");
         const homedirRelativePath = path.relative(os.homedir(), extensionsPath);
 
         if (homedirRelativePath.startsWith(".config")) {
@@ -42,7 +43,7 @@ export default function CreateExtension() {
           primaryAction: {
             title: "OK",
             onAction: catchError(async () => {
-              await Clipboard.copy(extensionsPath);
+              await Clipboard.copy(simplifyPath(extensionsPath));
               await launchCommand({
                 type: LaunchType.UserInitiated,
                 name: "create-extension",

@@ -47,7 +47,7 @@ export const getAllExtensions = async () => {
 
 /**
  * Checks if a repository exists on GitHub.
- * @permissions `repo`
+ * @permissions `public_repo`
  * @param repository The full name of the repository. The format is `username/repository`.
  * @returns A promise that resolves to true if the repository exists, false otherwise.
  * @see {@link https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#get-a-repository|Get a repository}
@@ -64,7 +64,7 @@ export const repositoryExists = async (repository: string) => {
 
 /**
  * Retrieves the full name of the user's forked repository.
- * @permissions `repo`
+ * @permissions `public_repo`
  * @remarks If the repository does not exist, it will create a new forked repository. Otherwise, it will return the existing repository full name.
  * @returns The full name of the user's forked repository. The format is `username/repository`.
  * @see {@link https://docs.github.com/en/rest/repos/forks?apiVersion=2022-11-28#create-a-fork|Create a fork}
@@ -79,6 +79,20 @@ export const getForkedRepository = async () => {
     })
     .json<{ full_name: string }>();
   return response.full_name;
+};
+
+/**
+ * Compares two commits in the user's forked repository on GitHub.
+ * @permissions `public_repo`
+ * @returns An object containing ahead count and behind count.
+ * @see {@link https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28#compare-two-commits|Compare two commits}
+ */
+export const compareTwoCommits = async (forkedRepository: string) => {
+  const [forkUser] = forkedRepository.split("/");
+  const { ahead_by: ahead, behind_by: behind } = await githubApi
+    .get(`repos/${upstreamRepository}/compare/raycast:main...${forkUser}:main`)
+    .json<{ ahead_by: number; behind_by: number }>();
+  return { ahead, behind };
 };
 
 /**
@@ -97,18 +111,4 @@ export const syncFork = async () => {
     })
     .json<{ message: string }>();
   return response.message;
-};
-
-/**
- * Compares two commits in the user's forked repository on GitHub.
- * @permissions `repo`
- * @returns An object containing ahead count and behind count.
- * @see {@link https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28#compare-two-commits|Compare two commits}
- */
-export const compareTwoCommits = async (forkedRepository: string) => {
-  const [forkUser] = forkedRepository.split("/");
-  const { ahead_by: ahead, behind_by: behind } = await githubApi
-    .get(`repos/${upstreamRepository}/compare/raycast:main...${forkUser}:main`)
-    .json<{ ahead_by: number; behind_by: number }>();
-  return { ahead, behind };
 };
