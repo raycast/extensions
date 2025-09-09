@@ -1,6 +1,6 @@
 #  Zed Recent Projects Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2025-09-09
 
 - Handle Zed sqlite schema version 28+
 
