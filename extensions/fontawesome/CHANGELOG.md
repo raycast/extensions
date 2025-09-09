@@ -1,6 +1,6 @@
 # Font Awesome Changelog
 
-## [Feat: Add Support for Windows] - {PR_MERGE_DATE}
+## [Feat: Add Support for Windows] - 2025-09-09
 
 - Add support for Raycast Windows
 - Bump dependencies to latest versions
