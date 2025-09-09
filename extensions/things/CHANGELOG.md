@@ -1,6 +1,6 @@
 # Things Changelog
 
-## [Improved Project Handling] - {PR_MERGE_DATE}
+## [Improved Project Handling] - 2025-09-09
 
 - Added Update and Delete project tools with proper Things URL scheme support
 - Areas now return their tags and to-dos, and projects include their to-dos
