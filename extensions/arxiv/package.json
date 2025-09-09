@@ -28,6 +28,7 @@
     {
       "name": "select-citation-style",
       "title": "Select Citation Style",
+      "subtitle": "ArXiv",
       "description": "Choose the citation format for arXiv papers",
       "mode": "view"
     }
