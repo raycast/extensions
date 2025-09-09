@@ -2,7 +2,7 @@
 
 ## [Fixes] - {PR_MERGE_DATE}
 
-- Handle Zed sqlite schema version 27
+- Handle Zed sqlite schema version 28+
 
 ## [Fixes] - 2025-09-08
 

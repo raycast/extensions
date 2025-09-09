@@ -198,7 +198,11 @@ export function getSchemaVersionSync(dbPath: string): number {
   try {
     // Check if database file exists first
     if (!fs.existsSync(dbPath)) {
-      console.log(`Database not found at: ${dbPath}`);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Database not found",
+        message: `Database not found at: ${dbPath}`,
+      });
       return 0;
     }
 
