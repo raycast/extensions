@@ -14,7 +14,7 @@ import {
   Alert,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { FAVORITE_ICON_NAMES, getIcon } from "./favorite-icons";
+import { PROJECT_ICON_NAMES, getIcon } from "./project-icons";
 import { getTerminalAdapter } from "./terminal-adapters";
 import { useState, useEffect, useMemo } from "react";
 import { randomUUID } from "crypto";
@@ -22,15 +22,15 @@ import { homedir } from "os";
 import path from "path";
 import { access, constants } from "fs/promises";
 
-const STORAGE_KEY = "claude-code-favorites";
+const STORAGE_KEY = "claude-code-projects";
 const CURRENT_VERSION = 1;
 
 interface Preferences {
   terminalApp: "Terminal" | "Alacritty";
-  defaultFavoriteIcon: string;
+  defaultProjectIcon: string;
 }
 
-interface Favorite {
+interface Project {
   id: string;
   path: string;
   name?: string;
@@ -40,8 +40,8 @@ interface Favorite {
   openCount: number;
 }
 
-interface FavoritesState {
-  favorites: Favorite[];
+interface ProjectsState {
+  projects: Project[];
   version: number;
 }
 
@@ -98,8 +98,8 @@ function getDirectoryName(dirPath: string): string {
   return path.basename(dirPath) || path.dirname(dirPath);
 }
 
-async function openInTerminal(favorite: Favorite, preferences: Preferences, onSuccess: () => void): Promise<void> {
-  const expandedPath = expandTilde(favorite.path);
+async function openInTerminal(project: Project, preferences: Preferences, onSuccess: () => void): Promise<void> {
+  const expandedPath = expandTilde(project.path);
 
   try {
     try {
@@ -116,7 +116,7 @@ async function openInTerminal(favorite: Favorite, preferences: Preferences, onSu
 
     await adapter.open(expandedPath);
     onSuccess();
-    showSuccessToast("Opened in Terminal", favorite.name || getDirectoryName(favorite.path));
+    showSuccessToast("Opened in Terminal", project.name || getDirectoryName(project.path));
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
     await showFailureToast(errorMessage, {
@@ -136,43 +136,46 @@ function IconDropdown({
 }) {
   return (
     <Form.Dropdown id="icon" title="Icon" value={value} onChange={onChange} defaultValue={defaultValue}>
-      {FAVORITE_ICON_NAMES.map((iconName) => (
+      {PROJECT_ICON_NAMES.map((iconName) => (
         <Form.Dropdown.Item key={iconName} value={iconName} title={iconName} icon={getIcon(iconName)} />
       ))}
     </Form.Dropdown>
   );
 }
 
-function AddFavoriteForm({
+function AddProjectForm({
   onAdd,
   existingPaths,
   defaultIcon,
 }: {
-  onAdd: (favorite: Favorite) => void;
+  onAdd: (project: Project) => void;
   existingPaths: string[];
   defaultIcon: string;
 }) {
   const { pop } = useNavigation();
-  const [path, setPath] = useState("");
+  const [paths, setPaths] = useState<string[]>([]);
   const [name, setName] = useState("");
   const [pathError, setPathError] = useState<string | undefined>();
   const [nameError, setNameError] = useState<string | undefined>();
   const [, setIsValidating] = useState(false);
 
-  const validatePath = async (pathValue: string): Promise<string | undefined> => {
-    if (!pathValue.trim()) {
-      return "Path is required";
+  const validatePaths = async (pathValues: string[]): Promise<string | undefined> => {
+    if (!pathValues || pathValues.length === 0) {
+      return "Please select a directory";
     }
 
-    const expandedPath = expandTilde(pathValue);
+    const pathValue = pathValues[0];
+    if (!pathValue) {
+      return "Please select a directory";
+    }
 
-    if (existingPaths.includes(expandedPath)) {
-      return "This directory is already in your favorites";
+    if (existingPaths.includes(pathValue)) {
+      return "This directory is already in your projects";
     }
 
     try {
-      await access(expandedPath, constants.R_OK);
-      const stats = await import("fs/promises").then((fs) => fs.stat(expandedPath));
+      await access(pathValue, constants.R_OK);
+      const stats = await import("fs/promises").then((fs) => fs.stat(pathValue));
       if (!stats.isDirectory()) {
         return "Path must be a directory";
       }
@@ -190,10 +193,10 @@ function AddFavoriteForm({
     return undefined;
   };
 
-  const handleSubmit = async (values: { path: string; name: string; icon: string }) => {
+  const handleSubmit = async (values: { path: string[]; name: string; icon: string }) => {
     setIsValidating(true);
 
-    const pathValidationError = await validatePath(values.path);
+    const pathValidationError = await validatePaths(values.path);
     const nameValidationError = validateName(values.name);
 
     if (pathValidationError || nameValidationError) {
@@ -203,42 +206,45 @@ function AddFavoriteForm({
       return;
     }
 
-    const expandedPath = expandTilde(values.path);
-    const newFavorite: Favorite = {
+    const selectedPath = values.path[0];
+    const newProject: Project = {
       id: randomUUID(),
-      path: expandedPath,
+      path: selectedPath,
       name: values.name || undefined,
       icon: values.icon || defaultIcon,
       addedAt: new Date(),
       openCount: 0,
     };
 
-    onAdd(newFavorite);
+    onAdd(newProject);
     pop();
-    showSuccessToast("Added Favorite", newFavorite.name || getDirectoryName(newFavorite.path));
+    showSuccessToast("Added Project", newProject.name || getDirectoryName(newProject.path));
   };
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Add Favorite" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Add Project" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField
+      <Form.FilePicker
         id="path"
-        title="Directory Path"
-        placeholder="~/Documents/Projects"
-        value={path}
+        title="Project Directory"
+        allowMultipleSelection={false}
+        canChooseDirectories={true}
+        canChooseFiles={false}
+        value={paths}
         error={pathError}
-        onChange={(value) => {
-          setPath(value);
-          setPathError(undefined);
-        }}
-        onBlur={async (event) => {
-          const error = await validatePath(event.target.value || "");
-          setPathError(error);
+        onChange={async (newPaths) => {
+          setPaths(newPaths);
+          if (newPaths && newPaths.length > 0) {
+            const error = await validatePaths(newPaths);
+            setPathError(error);
+          } else {
+            setPathError(undefined);
+          }
         }}
       />
       <Form.TextField
@@ -261,18 +267,18 @@ function AddFavoriteForm({
   );
 }
 
-function EditFavoriteForm({
-  favorite,
+function EditProjectForm({
+  project,
   onEdit,
   defaultIcon,
 }: {
-  favorite: Favorite;
-  onEdit: (favorite: Favorite) => void;
+  project: Project;
+  onEdit: (project: Project) => void;
   defaultIcon: string;
 }) {
   const { pop } = useNavigation();
-  const [name, setName] = useState(favorite.name || "");
-  const [icon, setIcon] = useState(favorite.icon || defaultIcon);
+  const [name, setName] = useState(project.name || "");
+  const [icon, setIcon] = useState(project.icon || defaultIcon);
   const [nameError, setNameError] = useState<string | undefined>();
 
   const validateName = (nameValue: string): string | undefined => {
@@ -290,26 +296,26 @@ function EditFavoriteForm({
       return;
     }
 
-    const updatedFavorite = {
-      ...favorite,
+    const updatedProject = {
+      ...project,
       name: values.name || undefined,
       icon: values.icon || defaultIcon,
     };
 
-    onEdit(updatedFavorite);
+    onEdit(updatedProject);
     pop();
-    showSuccessToast("Updated Favorite", updatedFavorite.name || getDirectoryName(updatedFavorite.path));
+    showSuccessToast("Updated Project", updatedProject.name || getDirectoryName(updatedProject.path));
   };
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Update Favorite" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Update Project" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.Description text={`Path: ${favorite.path}`} />
+      <Form.Description text={`Path: ${project.path}`} />
       <Form.TextField
         id="name"
         title="Name"
@@ -344,7 +350,7 @@ async function checkDependencies(preferences: Preferences): Promise<void> {
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState("");
-  const [favorites, setFavorites] = useState<Favorite[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [, setDependenciesValid] = useState(true);
 
@@ -352,115 +358,115 @@ export default function Command() {
     checkDependencies(preferences)
       .then(() => setDependenciesValid(true))
       .catch(() => setDependenciesValid(false))
-      .finally(() => loadFavorites());
+      .finally(() => loadProjects());
   }, []);
 
-  const loadFavorites = async () => {
+  const loadProjects = async () => {
     try {
       const stored = await LocalStorage.getItem<string>(STORAGE_KEY);
       if (stored) {
-        let state: FavoritesState;
+        let state: ProjectsState;
         try {
           state = JSON.parse(stored);
         } catch (parseError) {
-          console.error("Failed to parse favorites data:", parseError);
-          await showFailureToast("Favorites data is corrupted. Resetting to empty list.", {
+          console.error("Failed to parse projects data:", parseError);
+          await showFailureToast("Projects data is corrupted. Resetting to empty list.", {
             title: "Corrupted Data",
-            message: "Your favorites data was corrupted and has been reset.",
+            message: "Your projects data was corrupted and has been reset.",
           });
           await LocalStorage.removeItem(STORAGE_KEY);
-          setFavorites([]);
+          setProjects([]);
           return;
         }
 
-        if (!state.favorites || !Array.isArray(state.favorites)) {
-          console.error("Invalid favorites structure");
-          await showFailureToast("Invalid favorites data structure. Resetting to empty list.", {
+        if (!state.projects || !Array.isArray(state.projects)) {
+          console.error("Invalid projects structure");
+          await showFailureToast("Invalid projects data structure. Resetting to empty list.", {
             title: "Invalid Data",
-            message: "Your favorites data structure was invalid and has been reset.",
+            message: "Your projects data structure was invalid and has been reset.",
           });
           await LocalStorage.removeItem(STORAGE_KEY);
-          setFavorites([]);
+          setProjects([]);
           return;
         }
 
-        const favorites = state.favorites
-          .filter((fav) => fav && fav.id && fav.path)
-          .map((fav) => ({
-            ...fav,
-            addedAt: new Date(fav.addedAt),
-            lastOpened: fav.lastOpened ? new Date(fav.lastOpened) : undefined,
-            openCount: fav.openCount || 0,
-            icon: fav.icon || "Folder",
+        const projects = state.projects
+          .filter((proj) => proj && proj.id && proj.path)
+          .map((proj) => ({
+            ...proj,
+            addedAt: new Date(proj.addedAt),
+            lastOpened: proj.lastOpened ? new Date(proj.lastOpened) : undefined,
+            openCount: proj.openCount || 0,
+            icon: proj.icon || "Folder",
           }));
-        setFavorites(favorites);
+        setProjects(projects);
       }
     } catch (error) {
-      console.error("Failed to load favorites:", error);
+      console.error("Failed to load projects:", error);
       await showFailureToast(error, {
-        title: "Failed to load favorites",
-        message: "An unexpected error occurred while loading favorites.",
+        title: "Failed to load projects",
+        message: "An unexpected error occurred while loading projects.",
       });
-      setFavorites([]);
+      setProjects([]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const saveFavorites = async (newFavorites: Favorite[]) => {
+  const saveProjects = async (newProjects: Project[]) => {
     try {
-      const state: FavoritesState = {
-        favorites: newFavorites,
+      const state: ProjectsState = {
+        projects: newProjects,
         version: CURRENT_VERSION,
       };
       await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      setFavorites(newFavorites);
+      setProjects(newProjects);
     } catch (error) {
-      console.error("Failed to save favorites:", error);
+      console.error("Failed to save projects:", error);
       await showFailureToast(error, {
-        title: "Failed to save favorites",
+        title: "Failed to save projects",
       });
     }
   };
 
-  const addFavorite = async (favorite: Favorite) => {
-    const newFavorites = [...favorites, favorite];
-    await saveFavorites(newFavorites);
+  const addProject = async (project: Project) => {
+    const newProjects = [...projects, project];
+    await saveProjects(newProjects);
   };
 
-  const updateFavorite = async (updatedFavorite: Favorite) => {
-    const newFavorites = favorites.map((fav) => (fav.id === updatedFavorite.id ? updatedFavorite : fav));
-    await saveFavorites(newFavorites);
+  const updateProject = async (updatedProject: Project) => {
+    const newProjects = projects.map((proj) => (proj.id === updatedProject.id ? updatedProject : proj));
+    await saveProjects(newProjects);
   };
 
-  const removeFavorite = async (favoriteId: string) => {
-    const newFavorites = favorites.filter((fav) => fav.id !== favoriteId);
-    await saveFavorites(newFavorites);
+  const removeProject = async (projectId: string) => {
+    const newProjects = projects.filter((proj) => proj.id !== projectId);
+    await saveProjects(newProjects);
   };
 
-  const markAsOpened = async (favoriteId: string) => {
-    const newFavorites = favorites.map((fav) =>
-      fav.id === favoriteId
+  const markAsOpened = async (projectId: string) => {
+    const newProjects = projects.map((proj) =>
+      proj.id === projectId
         ? {
-            ...fav,
+            ...proj,
             lastOpened: new Date(),
-            openCount: fav.openCount + 1,
+            openCount: proj.openCount + 1,
           }
-        : fav,
+        : proj,
     );
-    await saveFavorites(newFavorites);
+    await saveProjects(newProjects);
   };
 
-  const filteredAndSortedFavorites = useMemo(() => {
+  const filteredAndSortedProjects = useMemo(() => {
     const searchLower = searchText.toLowerCase();
 
-    const matchesSearch = (favorite: Favorite) => {
+    const matchesSearch = (project: Project) => {
       if (!searchText) return true;
 
       const searchableText = [
-        favorite.name?.toLowerCase(),
-        favorite.path.toLowerCase(),
-        getDirectoryName(favorite.path).toLowerCase(),
+        project.name?.toLowerCase(),
+        project.path.toLowerCase(),
+        getDirectoryName(project.path).toLowerCase(),
       ]
         .filter(Boolean)
         .join(" ");
@@ -468,7 +474,7 @@ export default function Command() {
       return searchableText.includes(searchLower);
     };
 
-    const compareByRecency = (a: Favorite, b: Favorite) => {
+    const compareByRecency = (a: Project, b: Project) => {
       if (a.lastOpened && b.lastOpened) {
         return b.lastOpened.getTime() - a.lastOpened.getTime();
       }
@@ -477,41 +483,41 @@ export default function Command() {
       return 0;
     };
 
-    const compareByUsage = (a: Favorite, b: Favorite) => b.openCount - a.openCount;
+    const compareByUsage = (a: Project, b: Project) => b.openCount - a.openCount;
 
-    const compareByName = (a: Favorite, b: Favorite) => {
+    const compareByName = (a: Project, b: Project) => {
       const nameA = a.name || getDirectoryName(a.path);
       const nameB = b.name || getDirectoryName(b.path);
       return nameA.localeCompare(nameB);
     };
 
-    return favorites
+    return projects
       .filter(matchesSearch)
       .sort((a, b) => compareByRecency(a, b) || compareByUsage(a, b) || compareByName(a, b));
-  }, [favorites, searchText]);
+  }, [projects, searchText]);
 
   return (
     <List
       isLoading={isLoading}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search favorites..."
+      searchBarPlaceholder="Search projects..."
       searchText={searchText}
     >
-      {filteredAndSortedFavorites.length === 0 && !searchText ? (
+      {filteredAndSortedProjects.length === 0 && !searchText ? (
         <List.EmptyView
           icon={Icon.Star}
-          title="No Favorites Yet"
-          description="Press ⌘N to add your first favorite directory"
+          title="No Projects Yet"
+          description="Press ⌘N to add your first project directory"
           actions={
             <ActionPanel>
               <Action.Push
-                title="Add Favorite"
+                title="Add Project"
                 icon={Icon.Plus}
                 target={
-                  <AddFavoriteForm
-                    onAdd={addFavorite}
-                    existingPaths={favorites.map((f) => f.path)}
-                    defaultIcon={preferences.defaultFavoriteIcon}
+                  <AddProjectForm
+                    onAdd={addProject}
+                    existingPaths={projects.map((p) => p.path)}
+                    defaultIcon={preferences.defaultProjectIcon}
                   />
                 }
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
@@ -519,21 +525,21 @@ export default function Command() {
             </ActionPanel>
           }
         />
-      ) : filteredAndSortedFavorites.length === 0 ? (
+      ) : filteredAndSortedProjects.length === 0 ? (
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
-          title="No Favorites Found"
-          description={`No favorites matching "${searchText}"`}
+          title="No Projects Found"
+          description={`No projects matching "${searchText}"`}
           actions={
             <ActionPanel>
               <Action.Push
-                title="Add Favorite"
+                title="Add Project"
                 icon={Icon.Plus}
                 target={
-                  <AddFavoriteForm
-                    onAdd={addFavorite}
-                    existingPaths={favorites.map((f) => f.path)}
-                    defaultIcon={preferences.defaultFavoriteIcon}
+                  <AddProjectForm
+                    onAdd={addProject}
+                    existingPaths={projects.map((p) => p.path)}
+                    defaultIcon={preferences.defaultProjectIcon}
                   />
                 }
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
@@ -542,19 +548,17 @@ export default function Command() {
           }
         />
       ) : (
-        <List.Section title="Favorites" subtitle={`${filteredAndSortedFavorites.length} items`}>
-          {filteredAndSortedFavorites.map((favorite) => (
+        <List.Section title="Projects" subtitle={`${filteredAndSortedProjects.length} items`}>
+          {filteredAndSortedProjects.map((project) => (
             <List.Item
-              key={favorite.id}
-              icon={getIcon(favorite.icon || preferences.defaultFavoriteIcon, preferences.defaultFavoriteIcon)}
-              title={favorite.name || getDirectoryName(favorite.path)}
-              subtitle={favorite.name ? favorite.path : undefined}
+              key={project.id}
+              icon={getIcon(project.icon || preferences.defaultProjectIcon, preferences.defaultProjectIcon)}
+              title={project.name || getDirectoryName(project.path)}
+              subtitle={project.name ? project.path : undefined}
               accessories={[
                 {
-                  text: getRelativeTime(favorite.lastOpened),
-                  tooltip: favorite.lastOpened
-                    ? `Last opened: ${favorite.lastOpened.toLocaleString()}`
-                    : "Never opened",
+                  text: getRelativeTime(project.lastOpened),
+                  tooltip: project.lastOpened ? `Last opened: ${project.lastOpened.toLocaleString()}` : "Never opened",
                 },
               ]}
               actions={
@@ -562,36 +566,34 @@ export default function Command() {
                   <Action
                     title={`Open in ${preferences.terminalApp}`}
                     icon={Icon.Terminal}
-                    onAction={() => openInTerminal(favorite, preferences, () => markAsOpened(favorite.id))}
+                    onAction={() => openInTerminal(project, preferences, () => markAsOpened(project.id))}
                   />
                   <Action.Push
-                    title="Edit Favorite"
+                    title="Edit Project"
                     icon={Icon.Pencil}
                     target={
-                      <EditFavoriteForm
-                        favorite={favorite}
-                        onEdit={updateFavorite}
-                        defaultIcon={preferences.defaultFavoriteIcon}
+                      <EditProjectForm
+                        project={project}
+                        onEdit={updateProject}
+                        defaultIcon={preferences.defaultProjectIcon}
                       />
                     }
                     shortcut={Keyboard.Shortcut.Common.Edit}
                   />
                   <Action
-                    title="Remove Favorite"
+                    title="Remove Project"
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
                     onAction={async () => {
                       const options: Alert.Options = {
-                        title: "Remove Favorite",
-                        message: `Are you sure you want to remove "${
-                          favorite.name || getDirectoryName(favorite.path)
-                        }"?`,
+                        title: "Remove Project",
+                        message: `Are you sure you want to remove "${project.name || getDirectoryName(project.path)}"?`,
                         primaryAction: {
                           title: "Remove",
                           style: Alert.ActionStyle.Destructive,
                           onAction: () => {
-                            removeFavorite(favorite.id);
-                            showSuccessToast("Removed Favorite");
+                            removeProject(project.id);
+                            showSuccessToast("Removed Project");
                           },
                         },
                       };
@@ -601,13 +603,13 @@ export default function Command() {
                   />
                   <ActionPanel.Section>
                     <Action.Push
-                      title="Add Favorite"
+                      title="Add Project"
                       icon={Icon.Plus}
                       target={
-                        <AddFavoriteForm
-                          onAdd={addFavorite}
-                          existingPaths={favorites.map((f) => f.path)}
-                          defaultIcon={preferences.defaultFavoriteIcon}
+                        <AddProjectForm
+                          onAdd={addProject}
+                          existingPaths={projects.map((p) => p.path)}
+                          defaultIcon={preferences.defaultProjectIcon}
                         />
                       }
                       shortcut={{ modifiers: ["cmd"], key: "n" }}
@@ -616,12 +618,12 @@ export default function Command() {
                   <ActionPanel.Section>
                     <Action.CopyToClipboard
                       title="Copy Path"
-                      content={favorite.path}
+                      content={project.path}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                     />
                     <Action.ShowInFinder
                       title="Show in Finder"
-                      path={expandTilde(favorite.path)}
+                      path={expandTilde(project.path)}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
                     />
                   </ActionPanel.Section>

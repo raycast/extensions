@@ -1,9 +1,6 @@
 import { Icon, Image } from "@raycast/api";
 
-// Claude's official brand color for consistent UI theming
-const CLAUDE_COLOR = "#C15F3C";
-
-export const FAVORITE_ICON_NAMES = [
+export const PROJECT_ICON_NAMES = [
   "Folder",
   "Star",
   "Code",
@@ -45,7 +42,7 @@ export const FAVORITE_ICON_NAMES = [
   "WrenchScrewdriver",
 ] as const;
 
-export type IconName = (typeof FAVORITE_ICON_NAMES)[number];
+export type IconName = (typeof PROJECT_ICON_NAMES)[number];
 
 export function getIcon(name: string, fallback: string = "Folder"): Image {
   const iconName = name in Icon ? name : fallback in Icon ? fallback : "Folder";
@@ -53,6 +50,5 @@ export function getIcon(name: string, fallback: string = "Folder"): Image {
 
   return {
     source: iconValue,
-    tintColor: CLAUDE_COLOR,
   };
 }

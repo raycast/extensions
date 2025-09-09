@@ -13,7 +13,7 @@
       "name": "open-claude-code",
       "title": "Open Project",
       "subtitle": "Claude Code Launcher",
-      "description": "Launch Claude Code in favorite directories.",
+      "description": "Launch Claude Code in project directories.",
       "mode": "view"
     }
   ],
@@ -37,9 +37,9 @@
       ]
     },
     {
-      "name": "defaultFavoriteIcon",
-      "title": "Default Favorite Icon",
-      "description": "Default icon for new favorites",
+      "name": "defaultProjectIcon",
+      "title": "Default Project Icon",
+      "description": "Default icon for new projects",
       "type": "dropdown",
       "required": false,
       "default": "Terminal",
