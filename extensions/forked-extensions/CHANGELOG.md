@@ -1,6 +1,6 @@
 # Raycast Fork Extensions Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-09-09
 
 - Add support for creating extensions (macOS only due to Windows dose not support it yet)
 - Change the default repository path to "~/Documents/forked-extensions" for better compatibility
