@@ -1,6 +1,6 @@
 # cURL Changelog
 
-## [Feat: Add Windows Support] - {PR_MERGE_DATE}
+## [Feat: Add Windows Support] - 2025-09-09
 
 - Added support for Windows
 - Bumped dependencies
