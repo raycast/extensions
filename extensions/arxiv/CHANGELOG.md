@@ -1,7 +1,7 @@
 # arXiv Changelog
 
 
-## [Added viewing formats, publication year, and citation export] - {PR_MERGE_DATE}
+## [Added viewing formats, publication year, and citation export] - 2025-09-09
 
 - Added multiple viewing formats: Abstract, PDF, TeX Source, and HTML
 - Added citation export in multiple formats: BibTeX, APA, MLA, and Chicago
