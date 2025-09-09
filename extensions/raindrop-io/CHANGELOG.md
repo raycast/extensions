@@ -1,6 +1,6 @@
 # Raindrop.io Extension Changelog
 
-## [Moved contributor] - {PR_MERGE_DATE}
+## [Moved contributor] - 2025-09-09
 
 ## [Enhancements] - 2025-08-30
 
