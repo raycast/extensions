@@ -1,6 +1,9 @@
 ---
 title: Appcache
 category: HTML
+tech: appcache
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Format

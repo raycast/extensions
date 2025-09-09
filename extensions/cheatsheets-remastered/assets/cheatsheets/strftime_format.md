@@ -1,3 +1,9 @@
+---
+title: Strftime_format
+tech: strftime_format
+status: active
+lastReviewed: '2025-09-05'
+---
 ## {{ include.title }}
 {: .-three-column}
 

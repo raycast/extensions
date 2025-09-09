@@ -1,6 +1,9 @@
 ---
 title: Node.js API
 category: Node.js
+tech: nodejs
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Globals

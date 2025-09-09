@@ -1,8 +1,10 @@
 # Raindrop.io Extension Changelog
 
-## [Enhancements] - 2025-09-06
+## [Enhancements] - {PR_MERGE_DATE}
 
 - Show collection cover icons in dropdowns (search filter and add/edit forms); fall back to folder icon when no cover is available.
+- 
+## [Moved contributor] - 2025-09-09
 
 ## [Enhancements] - 2025-08-30
 

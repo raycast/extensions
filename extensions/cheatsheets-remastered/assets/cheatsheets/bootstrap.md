@@ -1,10 +1,17 @@
 ---
 title: Bootstrap
-prism_languages: [scss, haml, html]
+prism_languages:
+  - scss
+  - haml
+  - html
 weight: -1
 category: CSS
-description: |
-  .container .row .col-md-6, @screen-sm-min, .form-control, grids, .modal-content, tooltips, and other Bootstrap CSS examples.
+description: >
+  .container .row .col-md-6, @screen-sm-min, .form-control, grids,
+  .modal-content, tooltips, and other Bootstrap CSS examples.
+tech: bootstrap
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Screen sizes

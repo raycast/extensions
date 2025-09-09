@@ -1,9 +1,13 @@
 ---
 title: editorconfig
-prism_languages: [ini]
+prism_languages:
+  - ini
 weight: -1
-updated: 2019-09-25
+updated: 2019-09-25T00:00:00.000Z
 category: Apps
+tech: editorconfig
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Short example

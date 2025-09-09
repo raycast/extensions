@@ -1,6 +1,9 @@
 ---
 title: ReStructuredText
 category: Markup
+tech: rst
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### About

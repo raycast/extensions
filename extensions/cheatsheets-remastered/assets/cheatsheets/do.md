@@ -1,6 +1,9 @@
 ---
 title: Do gem
 category: Ruby libraries
+tech: do
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### About

@@ -69,6 +69,7 @@ const ContainerItem = ({ containerInfo, dockerState }: ContainerItemProps) => {
               icon={{ source: 'icon-stop.png', tintColor: Color.PrimaryText }}
               onAction={withToast({
                 action: () => stopContainer(containerInfo),
+                onStart: () => `Stopping container ${cName}`,
                 onSuccess: () => `Container ${cName} stopped`,
                 onFailure: (error) => formatContainerError(error, containerInfo),
               })}
@@ -81,6 +82,7 @@ const ContainerItem = ({ containerInfo, dockerState }: ContainerItemProps) => {
               shortcut={{ modifiers: ['opt'], key: 'r' }}
               onAction={withToast({
                 action: () => restartContainer(containerInfo),
+                onStart: () => `Restarting container ${cName}`,
                 onSuccess: () => `Container ${cName} restarted`,
                 onFailure: (error) => formatContainerError(error, containerInfo),
               })}
@@ -100,6 +102,7 @@ const ContainerItem = ({ containerInfo, dockerState }: ContainerItemProps) => {
               icon={{ source: 'icon-start.png', tintColor: Color.PrimaryText }}
               onAction={withToast({
                 action: () => startContainer(containerInfo),
+                onStart: () => `Starting container ${cName}`,
                 onSuccess: () => `Container ${cName} started`,
                 onFailure: (error) => formatContainerError(error, containerInfo),
               })}
@@ -119,6 +122,7 @@ const ContainerItem = ({ containerInfo, dockerState }: ContainerItemProps) => {
               shortcut={Keyboard.Shortcut.Common.Remove}
               onAction={withToast({
                 action: () => removeContainer(containerInfo),
+                onStart: () => `Removing container ${cName}`,
                 onSuccess: () => `Container ${cName} removed`,
                 onFailure: (error) => formatContainerError(error, containerInfo),
               })}
@@ -132,6 +136,7 @@ const ContainerItem = ({ containerInfo, dockerState }: ContainerItemProps) => {
               shortcut={Keyboard.Shortcut.Common.Remove}
               onAction={withToast({
                 action: () => stopAndRemoveContainer(containerInfo),
+                onStart: () => `Stopping and removing container ${cName}`,
                 onSuccess: () => `Container ${cName} stopped and removed`,
                 onFailure: (error) => formatContainerError(error, containerInfo),
               })}

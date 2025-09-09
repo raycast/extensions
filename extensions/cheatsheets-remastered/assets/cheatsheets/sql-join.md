@@ -1,8 +1,11 @@
 ---
 title: SQL joins
 category: Databases
-updated: 2018-12-06
+updated: 2018-12-06T00:00:00.000Z
 weight: -1
+tech: sql-join
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Example

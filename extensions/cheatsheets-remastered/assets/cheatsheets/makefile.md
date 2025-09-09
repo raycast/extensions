@@ -1,7 +1,11 @@
 ---
 title: Makefile
-prism_languages: [makefile]
+prism_languages:
+  - makefile
 category: CLI
+tech: makefile
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Var assignment

@@ -1,6 +1,9 @@
 ---
 title: OS X
 category: macOS
+tech: osx
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Locations of startup items

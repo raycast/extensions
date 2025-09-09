@@ -1,6 +1,9 @@
 ---
 title: Commander.js
 category: JavaScript libraries
+tech: commander.js
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### About

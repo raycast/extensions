@@ -1,6 +1,9 @@
 ---
-title: "Shell: named pipes"
+title: 'Shell: named pipes'
 category: CLI
+tech: sh-pipes
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Named pipes
