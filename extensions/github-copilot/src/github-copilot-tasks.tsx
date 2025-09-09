@@ -3,14 +3,7 @@ import { usePullRequestsWithAgentSessions } from "./hooks/usePullRequestsWithAge
 import { useMemo } from "react";
 import { withAccessToken } from "@raycast/utils";
 import { provider } from "./lib/oauth";
-import { getIcon } from "./utils";
-
-const truncate = (text: string, maxLength: number): string => {
-  if (text.length > maxLength) {
-    return text.slice(0, maxLength) + "...";
-  }
-  return text;
-};
+import { getIcon, getMenuBarShortcut, truncate } from "./utils";
 
 function Command() {
   const { isLoading, pullRequestsWithAgentSessions } = usePullRequestsWithAgentSessions();
@@ -29,7 +22,7 @@ function Command() {
       tooltip="GitHub Copilot Tasks"
       isLoading={isLoading}
     >
-      {openPullRequests.map((pullRequestWithAgentSessions) => (
+      {openPullRequests.map((pullRequestWithAgentSessions, index) => (
         <MenuBarExtra.Item
           key={pullRequestWithAgentSessions.key}
           title={truncate(pullRequestWithAgentSessions.pullRequest.title, 35)}
@@ -38,6 +31,7 @@ function Command() {
             open(pullRequestWithAgentSessions.pullRequest.url);
           }}
           icon={getIcon(pullRequestWithAgentSessions)}
+          shortcut={getMenuBarShortcut(index)}
         />
       ))}
     </MenuBarExtra>
