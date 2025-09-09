@@ -1,7 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 
 export async function getApiKey(): Promise<string> {
-  const preferences = getPreferenceValues<{ apiKey: string }>();
+  const preferences = getPreferenceValues<Preferences>();
   return preferences.apiKey.trim();
 }
 
