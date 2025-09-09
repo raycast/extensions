@@ -1,52 +1,52 @@
-import { ActionPanel, Action, List } from '@raycast/api'
-import { useEffect, useState } from 'react'
-import { fetchJson } from './utils/api'
-import { showFailureToast, withAccessToken } from '@raycast/utils'
-import { oauthService } from './utils/oauth'
-import { APP_URL, DEFAULT_MEETING_NAME } from './constants/raycast'
+import { ActionPanel, Action, List } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { fetchJson } from "./utils/api";
+import { showFailureToast, withAccessToken } from "@raycast/utils";
+import { oauthService } from "./utils/oauth";
+import { APP_URL, DEFAULT_MEETING_NAME } from "./constants/raycast";
 
 type MeetingSearchResult = {
-  id: number
-  name: string
-  createdAt: string | Date
-}
+  id: number;
+  name: string;
+  createdAt: string | Date;
+};
 
 type SearchResponse = {
-  meetings?: { result: MeetingSearchResult[] }
-}
+  meetings?: { result: MeetingSearchResult[] };
+};
 
 const SearchMeetings = () => {
-  const [searchText, setSearchText] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+  const [searchText, setSearchText] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [searchedMeetings, setSearchedMeetings] = useState<
     MeetingSearchResult[]
-  >([])
+  >([]);
 
   useEffect(() => {
-    let canceled = false
+    let canceled = false;
     const run = async () => {
-      setIsLoading(true)
+      setIsLoading(true);
       try {
-        const params = new URLSearchParams()
-        if (searchText) params.set('searchTerm', searchText)
+        const params = new URLSearchParams();
+        if (searchText) params.set("searchTerm", searchText);
         const data = await fetchJson<SearchResponse>(
-          `/api/search?${params.toString()}`
-        )
-        if (!canceled) setSearchedMeetings(data.meetings?.result ?? [])
+          `/api/search?${params.toString()}`,
+        );
+        if (!canceled) setSearchedMeetings(data.meetings?.result ?? []);
       } catch (error) {
         showFailureToast(error, {
-          title: 'Something went wrong.',
-        })
-        if (!canceled) setSearchedMeetings([])
+          title: "Something went wrong.",
+        });
+        if (!canceled) setSearchedMeetings([]);
       } finally {
-        if (!canceled) setIsLoading(false)
+        if (!canceled) setIsLoading(false);
       }
-    }
-    run()
+    };
+    run();
     return () => {
-      canceled = true
-    }
-  }, [searchText])
+      canceled = true;
+    };
+  }, [searchText]);
 
   return (
     <List
@@ -76,7 +76,7 @@ const SearchMeetings = () => {
         />
       ))}
     </List>
-  )
-}
+  );
+};
 
-export default withAccessToken(oauthService)(SearchMeetings)
+export default withAccessToken(oauthService)(SearchMeetings);
