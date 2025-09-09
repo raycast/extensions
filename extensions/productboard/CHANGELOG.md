@@ -1,9 +1,11 @@
 # Productboard Changelog
 
-## [View `Objectives`] - {PR_MERGE_DATE}
+## [View `Objectives` + Modernize] - {PR_MERGE_DATE}
 
 - `Objectives` command allows you to view objectives
-- improved API to handle another error case
+- Improved API to handle another error case
+- Modernized to use latest Raycast config
+- Removed `got`, `isemail`
 
 ## [Add `Notes` Command] - 2024-07-02
 

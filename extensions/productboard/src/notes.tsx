@@ -10,7 +10,12 @@ export default function Notes() {
   const { isLoading, data: notes, pagination, revalidate } = useProductboardPaginated<Note>("notes");
 
   return (
-    <List isLoading={isLoading} pagination={pagination} isShowingDetail={isShowingDetail} searchBarPlaceholder="Search notes">
+    <List
+      isLoading={isLoading}
+      pagination={pagination}
+      isShowingDetail={isShowingDetail}
+      searchBarPlaceholder="Search notes"
+    >
       {notes.map((note) => {
         const color = note.state === "processed" ? Color.Green : Color.Red;
         return (

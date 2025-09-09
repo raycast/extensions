@@ -57,31 +57,33 @@ export type Objective = {
   // parent
   owner: {
     email: string;
-  }
+  };
   // timeframe
   // state
   status: {
     id: string;
     name: string;
-  }
+  };
   archived: boolean;
   createdAt: string;
   updatedAt: string;
   links: {
     self: string;
     html: string;
-  }
-}
+  };
+};
 
 // OTHER
-export type PageMeta = {
-  pageCursor: string | null;
-  totalResults: number;
-} | {
-  links : {
-    next: string | null;
-  }
-};
+export type PageMeta =
+  | {
+      pageCursor: string | null;
+      totalResults: number;
+    }
+  | {
+      links: {
+        next: string | null;
+      };
+    };
 export type POSTResponse = {
   links: {
     html: string;
@@ -98,7 +100,8 @@ export type ErrorResponse =
   | { message: string }
   | {
       error: string;
-    } | {
+    }
+  | {
       errors: Array<{
         code: string;
         title: string;
