@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "frc-team",
-      "title": "FRC Team",
+      "title": "Show FRC Team",
       "description": "Get information about a specific FRC team",
       "mode": "view",
       "arguments": [
@@ -29,7 +29,7 @@
     },
     {
       "name": "frc-event",
-      "title": "FRC Event",
+      "title": "Show FRC Event",
       "description": "Get information about a specific FRC event",
       "mode": "view",
       "arguments": [
@@ -43,7 +43,7 @@
     },
     {
       "name": "ftc-team",
-      "title": "FTC Team",
+      "title": "Show FTC Team",
       "description": "Get information about a specific FTC team",
       "mode": "view",
       "arguments": [
@@ -57,7 +57,7 @@
     },
     {
       "name": "ftc-search",
-      "title": "FTC Search",
+      "title": "Search FTC Search",
       "description": "Search for FTC teams",
       "mode": "view"
     }
