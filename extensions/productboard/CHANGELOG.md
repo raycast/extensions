@@ -1,6 +1,6 @@
 # Productboard Changelog
 
-## [View `Objectives` + Modernize] - {PR_MERGE_DATE}
+## [View `Objectives` + Modernize] - 2025-09-09
 
 - `Objectives` command allows you to view objectives
 - Improved API to handle another error case
