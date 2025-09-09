@@ -173,7 +173,7 @@ query ExampleQuery($searchText: String, $limit: Int, $season: Int!) {
                   <ActionPanel>
                     <Action.OpenInBrowser
                       url={`https://ftcstats.org/team/${item.number}`}
-                      title="View Team on FTC Stats"
+                      title="View Team on Ftc Stats"
                     />
                   </ActionPanel>
                 }

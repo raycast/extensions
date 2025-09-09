@@ -214,7 +214,7 @@ query ExampleQuery($number: Int!, $season: Int!) {
                   <ActionPanel>
                     <Action.OpenInBrowser
                       url={`https://ftcstats.org/team/${team}`}
-                      title="View Team on FTC Stats"
+                      title="View Team on Ftc Stats"
                     />
                   </ActionPanel>
                 }
@@ -244,7 +244,7 @@ From ${data.location.city}, ${data.location.state}, ${data.location.country}
                       <ActionPanel>
                         <Action.OpenInBrowser
                           url={`https://ftcscout.org/events/2024/${event.eventCode}`}
-                          title="View Event on FTC Stats"
+                          title="View Event on Ftc Stats"
                         />
                       </ActionPanel>
                     }
