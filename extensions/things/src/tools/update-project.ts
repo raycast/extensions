@@ -1,17 +1,17 @@
-import { updateTodo } from '../api';
-import { UpdateTodoParams } from '../types';
+import { updateProject } from '../api';
+import { UpdateProjectParams } from '../types';
 
 type Input = {
-  /** The to-do id to update */
-  todoId: string;
+  /** The project id to update */
+  projectId: string;
   /** The parameters to update */
-  todoParams: UpdateTodoParams;
+  projectParams: UpdateProjectParams;
 };
 
-export default async function ({ todoId, todoParams }: Input) {
+export default async function ({ projectId, projectParams }: Input) {
   try {
-    const todo = await updateTodo(todoId, todoParams);
-    return todo;
+    const project = await updateProject(projectId, projectParams);
+    return project;
   } catch (error) {
     if (error instanceof Error && error.message === 'unauthorized') {
       return {
