@@ -10,6 +10,7 @@ import {
   Form,
   useNavigation,
   confirmAlert,
+  Keyboard,
   Alert,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
