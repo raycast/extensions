@@ -1,5 +1,5 @@
 import { OAuthService, withAccessToken } from "@raycast/utils";
-import got, { Got, HTTPError } from "got";
+import ky, { KyInstance, HTTPError } from "ky";
 import { githubOauthScope, upstreamRepository } from "./constants.js";
 import { githubPersonalAccessToken } from "./utils.js";
 
@@ -7,7 +7,7 @@ import { githubPersonalAccessToken } from "./utils.js";
  * GitHub API client instance.
  * @remarks The githubApi will be extended with the personal access token when the user authorizes the app.
  */
-export let githubApi: Got;
+export let githubApi: KyInstance;
 
 /**
  * OAuth service for GitHub API.
@@ -16,7 +16,7 @@ export const githubOauthService = OAuthService.github({
   personalAccessToken: githubPersonalAccessToken,
   scope: githubOauthScope,
   onAuthorize: async ({ token, type }) => {
-    githubApi = got.extend({
+    githubApi = ky.extend({
       prefixUrl: "https://api.github.com",
       headers: {
         Accept: "application/vnd.github+json",
@@ -38,7 +38,7 @@ export const withGithubClient = withAccessToken(githubOauthService);
  */
 export const getAllExtensions = async () => {
   const url = `https://raw.githubusercontent.com/${upstreamRepository}/refs/heads/main/.github/extensionName2Folder.json`;
-  const json = await got(url).json<Record<string, string>>();
+  const json = await ky.get(url).json<Record<string, string>>();
   const extensions = Object.entries(json)
     .map(([name, folder]) => ({ name, folder }))
     .sort((a, b) => a.folder.localeCompare(b.folder));
@@ -57,7 +57,7 @@ export const repositoryExists = async (repository: string) => {
     .get(`repos/${repository}`)
     .then(() => true)
     .catch((error) => {
-      if (error instanceof HTTPError && error.response.statusCode === 404) return false;
+      if (error instanceof HTTPError && error.response.status === 404) return false;
       throw error;
     });
 };
