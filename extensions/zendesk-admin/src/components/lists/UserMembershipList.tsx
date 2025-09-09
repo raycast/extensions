@@ -53,7 +53,7 @@ export default function UserMembershipList({ entityId, entityName, entityType, i
           });
 
           onPage(enrichedMemberships);
-        } catch (userError) {
+        } catch (_userError) {
           // If user data fetch fails, still show memberships with just IDs
           onPage(membershipData);
         }
@@ -63,7 +63,7 @@ export default function UserMembershipList({ entityId, entityName, entityType, i
           const users = await searchZendeskUsers(`role:${entityId}`, instance);
           const usersWithMembership = users.map((user) => ({ ...user, membership: undefined }));
           onPage(usersWithMembership);
-        } catch (error) {
+        } catch (_error) {
           onPage([]);
         }
       }
@@ -77,7 +77,9 @@ export default function UserMembershipList({ entityId, entityName, entityType, i
       const membership = item as MembershipWithUser;
       return membership.user
         ? membership.user.name || "Unknown User"
-        : `User ID: ${membership.user_id}` || "Unknown User";
+        : membership.user_id
+          ? `User ID: ${membership.user_id}`
+          : "Unknown User";
     } else {
       const user = item as UserWithMembership;
       return user.name || "Unknown User";
