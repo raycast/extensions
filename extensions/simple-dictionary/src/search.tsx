@@ -143,7 +143,7 @@ export default function Command(props: LaunchProps<{ arguments: { word: string; 
                                 },
                               };
                               if (await confirmAlert(options)) {
-                                Favorite.removeEntry(language, word, j, partOfSpeech);
+                                Favorite.removeEntry(languageFull, word, j, partOfSpeech);
                                 setFavorites((prev) => ({ ...prev, [favKey]: false }));
                               }
                             }
