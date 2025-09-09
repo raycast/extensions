@@ -8,9 +8,15 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "customers",
-      "title": "Customers",
-      "description": "",
+      "name": "manage-customers",
+      "title": "Manage Customers",
+      "description": "List and Create Customers",
+      "mode": "view"
+    },
+    {
+      "name": "manage-products",
+      "title": "Manage Products",
+      "description": "List and Create Products",
       "mode": "view"
     }
   ],
@@ -20,7 +26,7 @@
       "title": "Production API Key",
       "placeholder": "am_sk_live_XX...xx",
       "type": "password",
-      "description": "",
+      "description": "Production API Key from Autumn Dashboard",
       "required": true
     },
     {
@@ -28,15 +34,15 @@
       "title": "Sandbox API Key",
       "placeholder": "am_sk_test_XX...xx",
       "type": "password",
-      "description": "",
-      "required": true
+            "description": "Sandbox API Key from Autumn Dashboard",
+"required": true
     },
     {
       "name": "use_sandbox",
       "label": "Use Sandbox",
       "type": "checkbox",
       "default": true,
-      "description": "",
+      "description": "Use Sandbox",
       "required": false
     }
   ],
