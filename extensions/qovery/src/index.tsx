@@ -23,9 +23,6 @@ interface ServiceLink {
   url: string;
 }
 
-interface Preferences {
-  apiToken: string;
-}
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
