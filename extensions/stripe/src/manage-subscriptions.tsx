@@ -12,9 +12,11 @@ import {
   Detail,
   useNavigation,
 } from "@raycast/api";
+import React from "react";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { withEnvContext, ListContainer } from "./components";
 import { useStripeDashboard, useEnvContext } from "./hooks";
+import { STRIPE_API_VERSION } from "./enums";
 import { convertAmount, convertTimestampToDate } from "./utils";
 import Stripe from "stripe";
 
@@ -24,8 +26,8 @@ const { stripeTestApiKey, stripeLiveApiKey } = getPreferenceValues();
 const RESULTS_LIMIT = 10;
 
 // Create Stripe clients for both environments
-const stripeTest = stripeTestApiKey ? new Stripe(stripeTestApiKey, { apiVersion: "2025-02-24.acacia" }) : null;
-const stripeLive = stripeLiveApiKey ? new Stripe(stripeLiveApiKey, { apiVersion: "2025-02-24.acacia" }) : null;
+const stripeTest = stripeTestApiKey ? new Stripe(stripeTestApiKey, { apiVersion: STRIPE_API_VERSION }) : null;
+const stripeLive = stripeLiveApiKey ? new Stripe(stripeLiveApiKey, { apiVersion: STRIPE_API_VERSION }) : null;
 
 // Subscription Detail Component
 const SubscriptionDetailBase = ({ subscription }: { subscription: Stripe.Subscription }) => {
@@ -343,4 +345,4 @@ function SubscriptionList({ customerId }: SubscriptionListProps = {}) {
   );
 }
 
-export default withEnvContext(SubscriptionList);
+export default withEnvContext(SubscriptionList) as React.FC<SubscriptionListProps>;

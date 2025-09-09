@@ -2,14 +2,15 @@ import { Action, ActionPanel, Icon, List, Color, showToast, Toast, confirmAlert,
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { withEnvContext } from "./components";
 import { useStripeDashboard, useEnvContext } from "./hooks";
+import { STRIPE_API_VERSION } from "./enums";
 import Stripe from "stripe";
 import { getPreferenceValues } from "@raycast/api";
 
 const { stripeTestApiKey, stripeLiveApiKey } = getPreferenceValues();
 
 // Create Stripe clients for both environments
-const stripeTest = stripeTestApiKey ? new Stripe(stripeTestApiKey, { apiVersion: "2025-02-24.acacia" }) : null;
-const stripeLive = stripeLiveApiKey ? new Stripe(stripeLiveApiKey, { apiVersion: "2025-02-24.acacia" }) : null;
+const stripeTest = stripeTestApiKey ? new Stripe(stripeTestApiKey, { apiVersion: STRIPE_API_VERSION }) : null;
+const stripeLive = stripeLiveApiKey ? new Stripe(stripeLiveApiKey, { apiVersion: STRIPE_API_VERSION }) : null;
 
 interface CustomerPaymentsListProps {
   customerId: string;

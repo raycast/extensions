@@ -3,6 +3,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { withEnvContext, ListContainer } from "./components";
 import { useStripeDashboard, useEnvContext } from "./hooks";
+import { STRIPE_API_VERSION } from "./enums";
 import SubscriptionList from "./manage-subscriptions";
 import CustomerPaymentsList from "./customer-payments";
 import Stripe from "stripe";
@@ -10,8 +11,8 @@ import Stripe from "stripe";
 const { stripeTestApiKey, stripeLiveApiKey } = getPreferenceValues();
 
 // Create Stripe clients for both environments
-const stripeTest = stripeTestApiKey ? new Stripe(stripeTestApiKey, { apiVersion: "2024-10-28.acacia" }) : null;
-const stripeLive = stripeLiveApiKey ? new Stripe(stripeLiveApiKey, { apiVersion: "2024-10-28.acacia" }) : null;
+const stripeTest = stripeTestApiKey ? new Stripe(stripeTestApiKey, { apiVersion: STRIPE_API_VERSION }) : null;
+const stripeLive = stripeLiveApiKey ? new Stripe(stripeLiveApiKey, { apiVersion: STRIPE_API_VERSION }) : null;
 
 function CustomerList() {
   const { environment } = useEnvContext();
