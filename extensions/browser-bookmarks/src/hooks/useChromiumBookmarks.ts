@@ -112,7 +112,8 @@ async function getChromiumProfiles(path: string) {
       };
     });
 
-  const defaultProfile = localState.profile?.last_used?.length > 0 ? localState.profile.last_used : profiles[0].path;
+  const defaultProfile =
+    localState.profile?.last_used?.length > 0 ? localState.profile.last_used : profiles[0]?.path || "";
 
   profiles.sort((a, b) => a.name?.localeCompare(b.name));
   return { profiles, defaultProfile };

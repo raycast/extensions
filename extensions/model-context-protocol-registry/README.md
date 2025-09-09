@@ -42,6 +42,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [JetBrains](https://github.com/JetBrains/mcp-jetbrains) | The server proxies requests from client to JetBrains IDE. |
 | [Heroku](https://github.com/heroku/heroku-mcp-server) | The Heroku Platform MCP Server is a specialized Model Context Protocol (MCP) implementation designed to facilitate seamless interaction between large language models (LLMs) and the Heroku Platform. This server provides a robust set of tools and capabilities that enable LLMs to read, manage, and operate Heroku Platform resources. |
 | [Kagi Search](https://github.com/kagisearch/kagimcp) | The Official Model Context Protocol (MCP) server for Kagi search & other tools. |
+| [Keboola](https://github.com/keboola/mcp-server) | Keboola MCP Server is an open-source bridge between your Keboola project and modern AI tools. It turns Keboola features—like storage access, SQL transformations, and job triggers—into callable tools for Claude, Cursor, CrewAI, LangChain, Amazon Q, and more. |
 | [Filesystem](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem) | Node.js server implementing Model Context Protocol (MCP) for filesystem operations. The server will only allow operations within directories specified via args. |
 | [Paddle](https://github.com/PaddleHQ/paddle-mcp-server) | Paddle Billing is the developer-first merchant of record. We take care of payments, tax, subscriptions, and metrics with one unified API that does it all. This is a Model Context Protocol (MCP) server that provides tools for interacting with the Paddle API. |
 | [Perplexity](https://github.com/ppl-ai/modelcontextprotocol) | An MCP server implementation that integrates the Sonar API to provide Claude with unparalleled real-time, web-wide research. |
@@ -67,6 +68,9 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [Zeabur](https://zeabur.com/docs/en-US/mcp) | Zeabur provides an official Model Context Protocol (MCP) server that allows you to manage and deploy your Zeabur projects. |
 | [Grafana](https://github.com/grafana/mcp-grafana) | Official Grafana MCP server that provides seamless integration with Grafana APIs, enabling monitoring, visualization, and observability capabilities for developers and tools. |
 | [Anytype](https://github.com/anyproto/anytype-mcp) | A Model Context Protocol (MCP) server for Anytype that enables AI assistants to seamlessly interact with Anytype's API through natural language. Manage spaces, objects, properties, types and more in your knowledge base. |
+| [Gen-PDF](https://gen-pdf.com) | MCP server to generate professional looking PDF. Perfect for creating reports, invoices, contracts, and more. |
+| [Linear](https://linear.app/docs/mcp) | The Model Context Protocol (MCP) server provides a standardized interface that allows any compatible AI model or agent to access your Linear data in a simple and secure way. The Linear MCP server has tools available for finding, creating, and updating objects in Linear like issues, projects, and comments. |
+| [Rube](https://rube.composio.dev) |  Rube is a Model‑Context‑Protocol (MCP) server built on the Composio integration platform. It connects AI chat tools to more than 500 business and productivity applications – things like Gmail, Slack, Notion, GitHub, Linear, Airtable, and many others. |
 
 ### Community MCP Servers
 
@@ -86,5 +90,6 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [Lightdash](https://github.com/syucream/lightdash-mcp-server) | This server provides MCP-compatible access to Lightdash's API, allowing AI assistants to interact with your Lightdash data through a standardized interface. |
 | [Monday](https://github.com/sakce/mcp-server-monday) | MCP Server for monday.com, enabling MCP clients to interact with Monday.com boards, items, updates, and documents. |
 | [Paperless-NGX](https://github.com/baruchiro/paperless-mcp) | An MCP server for interacting with a Paperless-NGX API server. Manage documents, tags, correspondents, and document types in your Paperless-NGX instance. |
+
 
 <!-- MCP_SERVERS_END -->

@@ -9,16 +9,9 @@ import {
   List,
   showHUD,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { runAppleScript } from "run-applescript";
+import { runAppleScript, usePromise } from "@raycast/utils";
 import { getConnections, saveConnections } from "./storage.api";
 import { ISSHConnection } from "./types";
-
-interface Preferences {
-  terminal: string;
-  openin: string;
-  onlyname: boolean;
-}
 
 const preferences = getPreferenceValues<Preferences>();
 export const terminal = preferences["terminal"];
@@ -505,19 +498,7 @@ function getConnectionString(item: ISSHConnection) {
 }
 
 export default function Command() {
-  const [connectionsList, setConnectionsList] = useState<ISSHConnection[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-
-      const items: ISSHConnection[] = await getConnections();
-
-      setConnectionsList(items);
-      setLoading(false);
-    })();
-  }, []);
+  const { isLoading: loading, data: connectionsList = [], revalidate } = usePromise(getConnections);
 
   async function removeItem(item: ISSHConnection) {
     const confirmed = await confirmAlert({
@@ -536,7 +517,7 @@ export default function Command() {
       items = items.filter((i) => i.id !== item.id);
 
       await saveConnections(items);
-      setConnectionsList(items);
+      revalidate();
       await showHUD(`🗑 Connection [${item.name}] removed!`);
     }
   }

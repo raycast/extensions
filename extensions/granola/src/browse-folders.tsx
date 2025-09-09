@@ -1,45 +1,14 @@
 import { ActionPanel, List, Action, Icon, Color } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import getCache from "./utils/getCache";
-import { getFolders } from "./utils/fetchData";
-import { Doc, Folder } from "./utils/types";
+import { useFolders } from "./utils/useFolders";
+import { Doc } from "./utils/types";
 import Unresponsive from "./templates/unresponsive";
 import { useState, useEffect } from "react";
 import { NoteListItem } from "./components/NoteComponents";
-import { mapIconToRaycast, mapColorToRaycast } from "./utils/iconMapper";
+import { mapIconToHeroicon, mapColorToHex, getDefaultIconUrl } from "./utils/iconMapper";
 
 const FolderList = () => {
-  const [folders, setFolders] = useState<Folder[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    async function loadFolders() {
-      try {
-        const response = await getFolders();
-
-        // Add guard to check if response.lists exists and is an object
-        if (!response || !response.lists || typeof response.lists !== "object") {
-          console.error("Unexpected response format from getFolders()", response);
-          showFailureToast({
-            title: "Failed to load folders",
-            message: "Received an unexpected response format from Granola API",
-          });
-          setFolders([]);
-          setIsLoading(false);
-          return;
-        }
-
-        const foldersList = Object.values(response.lists);
-        setFolders(foldersList);
-      } catch (error) {
-        showFailureToast({ title: "Failed to load folders", message: String(error) });
-        setFolders([]);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    loadFolders();
-  }, []);
+  const { folders, isLoading } = useFolders();
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search folders...">
@@ -67,8 +36,8 @@ const FolderList = () => {
                 : ""
             }
             icon={{
-              source: folder.icon ? mapIconToRaycast(folder.icon.value) : Icon.Folder,
-              tintColor: folder.icon ? mapColorToRaycast(folder.icon.color) : Color.Blue,
+              source: folder.icon ? mapIconToHeroicon(folder.icon.value) : getDefaultIconUrl(),
+              tintColor: folder.icon ? mapColorToHex(folder.icon.color) : Color.Blue,
             }}
             accessories={[{ text: `${folder.document_ids.length} notes` }]}
             actions={
@@ -140,7 +109,6 @@ function DocumentsList({ folderTitle, documentIds }: { folderTitle: string; docu
           setIsLoading(false);
         }
       } catch (err) {
-        console.error("Error fetching documents:", err);
         if (isMounted) {
           setError(err instanceof Error ? err : new Error(String(err)));
           setIsLoading(false);
@@ -195,7 +163,7 @@ function DocumentsList({ folderTitle, documentIds }: { folderTitle: string; docu
         />
       ) : (
         documents.map((doc) => (
-          <NoteListItem key={doc.id} doc={doc} panels={panels} untitledNoteTitle={untitledNoteTitle} />
+          <NoteListItem key={doc.id} doc={doc} panels={panels} untitledNoteTitle={untitledNoteTitle} folders={[]} />
         ))
       )}
     </List>

@@ -1,6 +1,6 @@
 # Caschys Blog Changelog
 
-## [Version 1.0] - {PR_MERGE_DATE}
+## [Version 1.0] - 2025-04-05
 
 ### Added
 - AI-powered assistant for natural language interaction

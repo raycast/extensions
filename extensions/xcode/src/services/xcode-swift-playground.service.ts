@@ -7,7 +7,8 @@ import { XcodeSwiftPlaygroundTemplate } from "../models/swift-playground/xcode-s
 import { existsAsync, makeDirectoryAsync, removeDirectoryAsync, writeFileAsync } from "../shared/fs-async";
 import untildify from "untildify";
 import * as Path from "path";
-import { getPreferences } from "../shared/get-preferences";
+import { createSwiftPlaygroundCommandPreferences } from "../shared/preferences";
+import { XcodeSwiftPlaygroundSwiftVersion } from "../models/swift-playground/xcode-swift-playground-swift-version.model";
 
 /**
  * XcodeSwiftPlaygroundService
@@ -18,24 +19,13 @@ export class XcodeSwiftPlaygroundService {
    */
   private static scaffoldTemplateFiles: TemplateFile[] = [
     {
-      name: "timeline",
-      extension: "xctimeline",
-      contents: `
-      <?xml version="1.0" encoding="UTF-8"?>
-      <Timeline version="3.0">
-         <TimelineItems>
-         </TimelineItems>
-      </Timeline>
-      `,
-    },
-    {
       path: "playground.xcworkspace",
       name: "contents",
       extension: "xcworkspacedata",
       contents: `
       <?xml version="1.0" encoding="UTF-8"?>
       <Workspace version="1.0">
-        <FileRef location="group:self:">
+        <FileRef location="group:">
         </FileRef>
       </Workspace>
       `,
@@ -46,7 +36,7 @@ export class XcodeSwiftPlaygroundService {
    * The default location where a Swift Playground should be created
    */
   static get defaultSwiftPlaygroundLocation(): string {
-    return getPreferences().playgroundDefaultLocation;
+    return createSwiftPlaygroundCommandPreferences.playgroundDefaultLocation;
   }
 
   /**
@@ -79,7 +69,7 @@ export class XcodeSwiftPlaygroundService {
     const templateFiles = [
       ...XcodeSwiftPlaygroundService.scaffoldTemplateFiles,
       XcodeSwiftPlaygroundService.swiftSourceContentsTemplateFile(parameters.template),
-      XcodeSwiftPlaygroundService.contentsTemplateFile(parameters.platform),
+      XcodeSwiftPlaygroundService.contentsTemplateFile(parameters.platform, parameters.swiftVersion),
     ];
     try {
       // Create TemplateFiles in parallel
@@ -154,20 +144,24 @@ export class XcodeSwiftPlaygroundService {
   /**
    * The XCPlayground contents TemplateFile
    * @param platform The XcodeSwiftPlaygroundPlatform
+   * @param swiftVersion The XcodeSwiftPlaygroundSwiftVersion
    * @private
    */
-  private static contentsTemplateFile(platform: XcodeSwiftPlaygroundPlatform): TemplateFile {
+  private static contentsTemplateFile(
+    platform: XcodeSwiftPlaygroundPlatform,
+    swiftVersion: XcodeSwiftPlaygroundSwiftVersion
+  ): TemplateFile {
     return {
       name: "contents",
       extension: "xcplayground",
       contents: `
       <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-      <playground version='5.0' 
-                  target-platform='${platform.toLocaleLowerCase()}' 
+      <playground version='7.0' 
+                  target-platform='${platform.toLowerCase()}' 
+                  swift-version='${swiftVersion}'
                   buildActiveScheme='true' 
                   executeOnSourceChanges='false' 
                   importAppTypes='true'>
-          <timeline fileName='timeline.xctimeline'/>
       </playground>
       `,
     };

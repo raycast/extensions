@@ -172,7 +172,7 @@ function getWordItemList(lemmas: HTMLElement[] | undefined): LingueeWordItem[] {
       const tag_area_text = tag_area ? `${tag_area?.textContent}` : "";
       const posText = `${tag_wordtype?.textContent ?? ""} ${tag_forms_text} ${tag_area_text}`;
       const tag_type = lemma?.querySelector(".tag_type"); // related word pos
-      const pos = tag_wordtype ? posText : tag_type?.textContent ?? "";
+      const pos = tag_wordtype ? posText : (tag_type?.textContent ?? "");
       const featured = lemma.getAttribute("class")?.includes("featured") ?? false;
       // * note: audio is not always exist.
       const audio = tag_lemma?.querySelector(".audio")?.getAttribute("id");
@@ -226,7 +226,7 @@ function getWordItemList(lemmas: HTMLElement[] | undefined): LingueeWordItem[] {
 function getWordExplanationList(
   translations: HTMLElement[] | undefined,
   isFeatured = false,
-  designatedFrequency?: LingueeListItemType
+  designatedFrequency?: LingueeListItemType,
 ) {
   // console.log(`---> getWordExplanationList, length: ${translations?.length} , isFeatured: ${isFeatured}`);
   const explanationItems: LingueeWordExplanation[] = [];
@@ -407,7 +407,7 @@ export function getLingueeWebDictionaryURL(queryWordInfo: QueryWordInfo): string
 
   const sourceLanguage = getLanguageEnglishName(fromLanguage).toLowerCase();
   const lingueeUrl = `https://www.linguee.com/${validLanguagePair}/search?source=${sourceLanguage}&query=${encodeURIComponent(
-    queryWordInfo.word
+    queryWordInfo.word,
   )}`;
   return lingueeUrl;
 }

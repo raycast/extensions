@@ -10,8 +10,8 @@ const BASE_URL = "https://api.stripe.com/v1/";
 
 type ToastResolveProps = {
   isLoading: boolean;
-  data: any;
-  error: any;
+  data: unknown;
+  error: unknown;
   endpoint: string;
   stripeLiveApiKey?: string;
   stripeTestApiKey?: string;
@@ -58,7 +58,7 @@ const resolveToastOptions = ({
     return {
       style: Failure,
       title: "Error",
-      message: error.message,
+      message: error instanceof Error ? error.message : "Unknown error",
     };
   }
 
@@ -76,7 +76,7 @@ const resolveToastOptions = ({
   };
 };
 
-const resolveData = (data: any, error: any, isList: boolean) => {
+const resolveData = (data: unknown, error: unknown, isList: boolean) => {
   // we don't want to show the data if it's a list and we have an error
   if (isList && error) {
     return [];

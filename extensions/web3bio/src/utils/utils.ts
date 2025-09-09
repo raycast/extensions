@@ -1,14 +1,5 @@
-import { PlatformType, PlatformData } from "./platform";
-import {
-  regexDotbit,
-  regexEns,
-  regexEth,
-  regexLens,
-  regexTwitter,
-  regexUnstoppableDomains,
-  regexSpaceid,
-  regexFarcaster,
-} from "./regexp";
+import { getPlatform } from "web3bio-profile-kit/utils";
+import { Platform } from "web3bio-profile-kit/types";
 
 export const formatText = (string: string, length?: number) => {
   if (!string) return "";
@@ -28,58 +19,23 @@ export const formatText = (string: string, length?: number) => {
   return string;
 };
 
-export const handleSearchPlatform = (term: string) => {
-  switch (true) {
-    case regexEns.test(term):
-      return PlatformType.ens;
-    case regexEth.test(term):
-      return PlatformType.ethereum;
-    case regexLens.test(term):
-      return PlatformType.lens;
-    case regexUnstoppableDomains.test(term):
-      return PlatformType.unstoppableDomains;
-    case regexSpaceid.test(term):
-      return PlatformType.space_id;
-    case regexDotbit.test(term):
-      return PlatformType.dotbit;
-    case regexTwitter.test(term):
-      return PlatformType.twitter;
-    case regexFarcaster.test(term):
-      return PlatformType.farcaster;
-    default:
-      return PlatformType.nextid;
-  }
-};
-
-export const isDomainSearch = (term: PlatformType) => {
-  return [PlatformType.ens, PlatformType.dotbit, PlatformType.unstoppableDomains, PlatformType.space_id].includes(term);
-};
-
-export const SocialPlatformMapping = (platform: PlatformType) => {
-  return (
-    PlatformData[platform] ?? {
-      key: platform,
-      color: "#000000",
-      icon: "",
-      label: platform,
-      ensText: [],
-    }
-  );
-};
-
-const resolveSocialMediaLink = (name: string, type: PlatformType) => {
-  if (!Object.keys(PlatformType).includes(type)) return `https://web3.bio/?s=${name}`;
+const resolveSocialMediaLink = (name: string, type: Platform) => {
+  if (!Object.keys(Platform).includes(type)) return `https://web3.bio/?s=${name}`;
   switch (type) {
-    case PlatformType.url:
+    case Platform.url:
       return `${name}`;
-    case PlatformType.website:
+    case Platform.dns:
+    case Platform.website:
       return `https://${name}`;
+    case Platform.discord:
+      if (name.includes("https://")) return getPlatform(type).urlPrefix + name;
+      return "";
     default:
-      return SocialPlatformMapping(type).urlPrefix ? SocialPlatformMapping(type).urlPrefix + name : "";
+      return getPlatform(type).urlPrefix ? getPlatform(type).urlPrefix + name : name;
   }
 };
 
-export const getSocialMediaLink = (url: string, type: PlatformType) => {
+export const getSocialMediaLink = (url: string, type: Platform) => {
   let resolvedURL = "";
   if (!url) return null;
   if (url.startsWith("https")) {

@@ -144,6 +144,7 @@ You can use [Raycast Wallpapers](https://www.raycast.com/wallpapers) to make you
 - ✅ Select the most informative commands to showcase what your extension does – focus on giving the user as much detail as possible
 - ❌ Do not use multiple backgrounds for different screenshots – be consistent and use the same across all screenshots
 - ❌ Do not share sensitive data in your screenshots – these will be visible in the Store, as well as the Extension repository on GitHub
+- ❌ Do not include screenshots of other applications - keep the focus entirely on your extension within Raycast
 - ❌ Avoid using screenshots in different themes (light and dark), unless it is to demonstrate what your extension does
 
 ## Version History

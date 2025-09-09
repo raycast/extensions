@@ -9,7 +9,7 @@ const useSearch = () => {
     {
       keepPreviousData: true,
       execute: !!searchText,
-    }
+    },
   );
 
   return {

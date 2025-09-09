@@ -36,15 +36,16 @@ export default function Assets() {
     pages: number;
     total: number;
   };
-  const { api_key, workspace_slug } = getPreferenceValues<Preferences>();
-  const url = `https://${workspace_slug}.daminik.com/`;
+  const { api_key, workspace_url } = getPreferenceValues<Preferences>();
   const {
     isLoading,
     data: assets,
     pagination,
   } = useFetch(
     (options) =>
-      url + `api/assets?` + new URLSearchParams({ page: String(options.page + 1), s: searchText }).toString(),
+      new URL("api/assets", workspace_url) +
+      "?" +
+      new URLSearchParams({ page: String(options.page + 1), s: searchText }).toString(),
     {
       headers: {
         Accept: "application/json",
@@ -81,7 +82,7 @@ export default function Assets() {
               <Action.OpenInBrowser
                 icon="daminik.png"
                 title="Edit in Workspace"
-                url={`${url}file/edit/${asset.filename}`}
+                url={new URL(`file/edit/${asset.filename}`, workspace_url).toString()}
               />
               <Action.CopyToClipboard
                 title="Copy Public URL"

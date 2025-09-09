@@ -104,7 +104,7 @@ export default function Command() {
             subtitle="IP Lookup"
             actions={
               <ActionPanel>
-                <Action.Push title="IP Lookup" target={<LookUp ip={data} />} icon={Icon.Eye} />
+                <Action.Push title="Ip Lookup" target={<LookUp ip={data} />} icon={Icon.Eye} />
               </ActionPanel>
             }
             accessories={[

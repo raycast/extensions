@@ -7,7 +7,7 @@ const useResend = <T>(
   endpoint: string,
   { animatedToastMessage, onData }: { animatedToastMessage: string; onData?: (data: T) => void } = {
     animatedToastMessage: "",
-  }
+  },
 ) =>
   useFetch(API_URL + endpoint, {
     method: "GET",

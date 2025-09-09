@@ -1,6 +1,6 @@
 import { Icon, List, useNavigation } from "@raycast/api";
 import { useSourceLanguage, useTargetLanguages } from "../hooks";
-import { LanguageCode, getLanguageFlag, getLanguageFlagByCode, languages } from "../languages";
+import { LanguageCode, languages, supportedLanguagesByCode } from "../languages";
 import { TargetLanguageList } from "./TargetLanguageList";
 
 export function LanguageDropdown() {
@@ -22,11 +22,11 @@ export function LanguageDropdown() {
       <List.Dropdown.Item
         key="manageTargetLanguages"
         icon={Icon.Pencil}
-        title={`Translate to  ->  ${targetLanguages.map(getLanguageFlagByCode).join(" ")}`}
+        title={`Translate to  ->  ${targetLanguages.map((l) => supportedLanguagesByCode[l].name).join(" ")}`}
         value="manageTargetLanguages"
       />
       {languages.map((lang) => (
-        <List.Dropdown.Item key={lang.code} title={`${getLanguageFlag(lang)}   ${lang.name}`} value={lang.code} />
+        <List.Dropdown.Item key={lang.code} title={lang.name} value={lang.code} />
       ))}
     </List.Dropdown>
   );

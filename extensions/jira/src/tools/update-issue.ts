@@ -1,5 +1,5 @@
 import { withAccessToken } from "@raycast/utils";
-import markdownToAdf from "md-to-adf";
+import { markdownToAdf } from "marklassian";
 
 import { updateIssue } from "../api/issues";
 import { jira } from "../api/jiraCredentials";

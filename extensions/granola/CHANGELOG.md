@@ -1,5 +1,33 @@
 # Granola Changelog
 
+## [1.5.1] - 2025-08-19
+
+### 🔧 Bug Fixes
+- Add support for WorkOS authentication tokens
+- Maintain backward compatibility with Cognito tokens  
+- Update API client version to 6.157.0
+
+## [1.5] - 2025-07-14
+
+### 🚀 Major New Features
+- **Work with multiple notes at once.** New Export Transcripts and Export Notes commands for selecting and processing multiple notes simultaneously.
+- **Turn any transcript into a note.** Create Note from Transcript command lets you paste text or YouTube links to generate AI-powered meeting summaries.
+- **Save directly to Notion.** Export your notes and transcripts to Notion with batch processing support.
+- **Get YouTube transcripts instantly.** Extract and work with transcripts from any YouTube video URL.
+
+### ✨ Enhancements  
+- **Improved Folder Icons** - Folders now display with proper icons that reflect how they appear in Granola
+- **Cross-platform support** - Added full support for Windows (alongside existing macOS support)
+- **Smart batch processing** - Optimized export performance with dynamic batching and progress tracking
+- **Enhanced error handling** - Better error messages and recovery for bulk operations
+- **ZIP export with organization** - Export multiple notes as organized ZIP files with folder structure
+- **Real-time progress tracking** - Live progress updates with ETA calculations for bulk operations
+
+### 🛠 Enhanced Core Tools
+- **Get Transcript Tool** - Retrieve full transcript content for any specific note
+- **Save to Notion Tool** - Export individual or multiple notes to Notion with batch processing
+- **Enhanced AI Notes** - Improved AI integration with better transcript and folder support
+
 ## [1.4] - 2025-05-18
 
 ### ✨ New Features

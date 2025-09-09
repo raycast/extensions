@@ -19,7 +19,7 @@ interface PasswordForm {
  *
  * @returns {JSX.Element} The form interface for unlocking the KeePass database.
  */
-export default function unlockDatabase({ setIsUnlocked }: { setIsUnlocked: (isUnlocked: boolean) => void }) {
+export default function UnlockDatabase({ setIsUnlocked }: { setIsUnlocked: (isUnlocked: boolean) => void }) {
   const { handleSubmit, itemProps } = useForm<PasswordForm>({
     onSubmit(value) {
       showToast({

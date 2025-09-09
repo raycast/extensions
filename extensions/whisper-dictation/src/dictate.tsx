@@ -64,12 +64,13 @@ interface Config {
   soxPath: string;
 }
 
-export default function Command() {
+export default function DictateWithAICommand() {
   const [state, setState] = useState<CommandState>("configuring");
   const [transcribedText, setTranscribedText] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [aiErrorMessage, setAiErrorMessage] = useState<string>("");
   const [selectedSessionPrompt, setSelectedSessionPrompt] = useState<AIPrompt | null>(null);
+  const [skipAIForSession, setSkipAIForSession] = useState<boolean>(false);
   const soxProcessRef = useRef<ChildProcessWithoutNullStreams | null>(null);
   const [waveformSeed, setWaveformSeed] = useState<number>(0);
   const [config, setConfig] = useState<Config | null>(null);
@@ -143,6 +144,13 @@ export default function Command() {
     // Close the Raycast window
     closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
   }, [cleanupAudioFile]);
+
+  // Handle skipping AI refinement entirely for current session
+  const handleSkipAIRefinement = useCallback(() => {
+    setSkipAIForSession(true);
+    setSelectedSessionPrompt(null);
+    setState("idle");
+  }, []);
 
   // Handle skipping prompt selection, will use currently active prompt or first prompt
   const handleSkipAndUseActivePrompt = useCallback(async () => {
@@ -275,11 +283,12 @@ export default function Command() {
   useEffect(() => {
     if (preferences.aiRefinementMethod === "disabled") {
       setSelectedSessionPrompt(null);
+      setSkipAIForSession(false);
     }
   }, [preferences.aiRefinementMethod]);
 
   // Use transcription hook
-  const { startTranscription } = useTranscription({
+  const { startTranscription, handlePasteAndCopy } = useTranscription({
     config,
     preferences,
     setState,
@@ -289,6 +298,7 @@ export default function Command() {
     saveTranscriptionToHistory,
     cleanupAudioFile,
     aiErrorMessage,
+    skipAIForSession,
   });
 
   // Function to stop recording and transcribe via hook
@@ -422,6 +432,12 @@ export default function Command() {
               onPaste={() => closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate })} // Close after paste
             />
             <Action
+              title={DEFAULT_ACTION === "copy_paste" ? "Copy & Paste Text (Default)" : "Copy & Paste Text"}
+              icon={Icon.Clipboard}
+              shortcut={{ modifiers: ["cmd", "opt"], key: "enter" }}
+              onAction={() => handlePasteAndCopy(transcribedText)}
+            />
+            <Action
               title="View History"
               icon={Icon.List}
               shortcut={{ modifiers: ["cmd"], key: "h" }}
@@ -502,6 +518,12 @@ export default function Command() {
                   onAction={handleSkipAndUseActivePrompt}
                   shortcut={{ modifiers: ["cmd"], key: "s" }}
                 />
+                <Action
+                  title="Skip AI Refinement"
+                  icon={Icon.XMarkCircle}
+                  onAction={handleSkipAIRefinement}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                />
                 <Action title="Skip & Continue" icon={Icon.ArrowRight} onAction={handlePromptSelectionCancel} />
               </ActionPanel>
             }
@@ -531,6 +553,12 @@ export default function Command() {
                       shortcut={{ modifiers: ["cmd"], key: "s" }}
                     />
                     <Action
+                      title="Skip AI Refinement"
+                      icon={Icon.XMarkCircle}
+                      onAction={handleSkipAIRefinement}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                    />
+                    <Action
                       title="Configure AI"
                       icon={Icon.Gear}
                       onAction={async () => {
@@ -557,7 +585,9 @@ export default function Command() {
   if (state === "recording") {
     let refinementSection = "";
 
-    if (selectedSessionPrompt) {
+    if (skipAIForSession) {
+      refinementSection = `**AI Refinement: Skipped for this session**\n\n`;
+    } else if (selectedSessionPrompt) {
       refinementSection = `**AI Refinement: ${selectedSessionPrompt.name}**\n\n`;
     } else if (isRefinementActive && currentRefinementPrompt) {
       const activePrompt = prompts.find((p) => p.prompt === currentRefinementPrompt);

@@ -36,11 +36,15 @@
     "tsibog",
     "viethung0823",
     "eyal_levy",
-    "jonasengelmann",
-    "vmrjnvc"
+    "vmrjnvc",
+    "karthik_manikandan",
+    "kartheesan05",
+    "joshkat",
+    "CaffeineCat"
   ],
   "pastContributors": [
-    "bkeys818"
+    "bkeys818",
+    "jonasengelmann"
   ],
   "debug": {
     "reloadShortcut": {
@@ -196,6 +200,14 @@
           "required": false
         },
         {
+          "name": "cleanupTitle",
+          "description": "If enabled cleans up extra info like remix titles or versions from the song name",
+          "type": "checkbox",
+          "label": "Cleanup song title",
+          "default": false,
+          "required": false
+        },
+        {
           "name": "maxTextLength",
           "title": "Now Playing Text Length",
           "description": "Maximum number of characters to show for the currently playing track in the menu bar. Leave empty to use default (30 characters)",
@@ -236,7 +248,39 @@
       "subtitle": "Spotify",
       "description": "Adds the current song to a playlist of your choice.",
       "mode": "view",
-      "disabledByDefault": true
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "duplicateSongCheck",
+          "description": "Prevents duplicate song addition. Significantly slows performance of non cached playlists.",
+          "type": "checkbox",
+          "label": "Check for duplicate songs",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "cacheRefreshTime",
+          "title": "Cache Refresh Rate",
+          "description": "How often to refresh cached playlists",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "7 Days",
+              "value": "7"
+            },
+            {
+              "title": "14 Days",
+              "value": "14"
+            },
+            {
+              "title": "1 Month",
+              "value": "30"
+            }
+          ],
+          "required": false,
+          "default": "30"
+        }
+      ]
     },
     {
       "name": "removeSongFromPlaylist",
@@ -481,6 +525,13 @@
       "description": "Back 15 seconds in an episode.",
       "mode": "no-view",
       "disabledByDefault": true
+    },
+    {
+      "name": "findLyrics",
+      "title": "Find Lyrics",
+      "subtitle": "Spotify",
+      "description": "Find and display lyrics for the currently playing song from Genius.",
+      "mode": "view"
     }
   ],
   "tools": [
@@ -521,20 +572,22 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.87.0",
-    "@raycast/utils": "^1.16.2",
+    "@raycast/api": "^1.102.5",
+    "@raycast/utils": "^2.2.1",
     "@types/async-retry": "^1.4.9",
+    "@types/node-fetch": "^2.6.13",
     "async-retry": "^1.3.3",
+    "genius-lyrics": "^4.4.7",
     "node-fetch": "^3.3.2",
     "oazapfts": "^4.10.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.14.10",
-    "@types/react": "^18.3.3",
-    "eslint": "^8.53.0",
-    "prettier": "^3.4.2",
-    "typescript": "^5.5.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.17.2",
+    "@types/react": "^19.1.10",
+    "eslint": "^9.33.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
   },
   "scripts": {
     "build": "ray build -e dist",

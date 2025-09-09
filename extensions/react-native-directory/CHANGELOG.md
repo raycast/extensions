@@ -1,5 +1,11 @@
 # React Native Directory Changelog
 
+## [Changed] - 2025-06-23
+
+- Upgraded Raycast dependencies to latest versions:
+  - `@raycast/api`: `^1.94.0` → `^1.100.3`
+  - `@raycast/utils`: `^1.18.1` → `^2.0.0`
+
 ## [Changed] - 2025-01-18
 
 - Upgraded Raycast dependencies to latest versions

@@ -8,7 +8,7 @@ import {
   openExtensionPreferences,
 } from "@raycast/api";
 import { getFormattedDescription } from "./utils";
-import { Preferences, PRIORITY_VALUES, Task } from "./types";
+import { PRIORITY_VALUES, Task } from "./types";
 import { useTasks } from "./hooks/useTasks";
 import { priorityToIcon } from "./utils/priority";
 

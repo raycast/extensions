@@ -37,6 +37,22 @@ export interface Expense {
 export interface Category {
   id: number;
   name: string;
+  icon: string;
+  icon_types: {
+    slim: {
+      small: string;
+      large: string;
+    };
+    square: {
+      large: string;
+      xlarge: string;
+    };
+  };
+  subcategories?: Category[];
+}
+
+export interface GetCategories {
+  categories: Category[];
 }
 
 export interface Comment {
@@ -94,3 +110,26 @@ export interface UserElement {
   owed_share: string;
   net_balance: string;
 }
+
+export type ExpenseParams = {
+  description: string;
+  date: Date | null;
+  cost: string;
+  currency_code: string;
+  category?: string;
+  category_id?: number;
+  group_id?: number;
+  split_equally?: boolean;
+  users__0__user_id?: number;
+  users__0__paid_share?: string;
+  users__0__owed_share?: string;
+  users__1__user_id?: number;
+  users__1__owed_share?: string;
+};
+
+export type ExpenseForm = {
+  description: string;
+  cost: number;
+  currency_code: string;
+  errors?: { [key: string]: string };
+};

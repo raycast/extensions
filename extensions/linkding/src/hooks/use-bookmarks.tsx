@@ -1,16 +1,10 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { GetLinkdingBookmarkResponse, LinkdingBookmark, PostLinkdingBookmarkPayload } from "../types/linkding-types";
 
 const useBookmarks = () => {
   const { serverUrl, apiKey } = useMemo(() => getPreferenceValues<Preferences>(), []);
-  const apiUrl = useMemo(() => {
-    const url = new URL("/api/bookmarks", serverUrl);
-    // ensure there's a trailing slash, which linkding is finicky about
-    if (!url.pathname.endsWith("/")) url.pathname += "/";
-    return url.toString();
-  }, [serverUrl]);
   const requestOpts: RequestInit = useMemo(
     () => ({
       headers: {
@@ -21,21 +15,30 @@ const useBookmarks = () => {
     [apiKey]
   );
 
+  const [filter, setFilter] = useState("");
   const {
     isLoading,
     data: bookmarks,
     mutate,
-  } = useFetch(apiUrl, {
-    ...requestOpts,
-    mapResult: (response: GetLinkdingBookmarkResponse) => ({ data: response.results }),
-    initialData: [] as LinkdingBookmark[],
-  });
+  } = useFetch(
+    `${serverUrl}/api/bookmarks/?${new URLSearchParams({
+      q: filter,
+      // ideally we could just increase the limit here, but raycast OOMs on 1k+
+      limit: "101",
+    }).toString()}`,
+    {
+      ...requestOpts,
+      mapResult: (response: GetLinkdingBookmarkResponse) => ({ data: response.results }),
+      initialData: [] as LinkdingBookmark[],
+      keepPreviousData: true,
+    }
+  );
 
   const createBookmark = async (payload: PostLinkdingBookmarkPayload) => {
     const toast = await showToast(Toast.Style.Animated, "Creating bookmark");
     try {
       await mutate(
-        fetch(apiUrl, {
+        fetch(`${serverUrl}/api/bookmarks/`, {
           ...requestOpts,
           method: "POST",
           body: JSON.stringify(payload),
@@ -53,7 +56,7 @@ const useBookmarks = () => {
   const deleteBookmark = async (id: number) => {
     const toast = await showToast(Toast.Style.Animated, "Deleting bookmark");
     try {
-      await mutate(fetch(new URL(id.toString(), apiUrl).toString(), { ...requestOpts, method: "DELETE" }), {
+      await mutate(fetch(`${serverUrl}/api/bookmarks/${id}`, { ...requestOpts, method: "DELETE" }), {
         optimisticUpdate: (bookmarks) => bookmarks.filter((bookmark) => bookmark.id !== id),
       });
       toast.style = Toast.Style.Success;
@@ -65,7 +68,7 @@ const useBookmarks = () => {
     }
   };
 
-  return { isLoading, bookmarks, createBookmark, deleteBookmark };
+  return { isLoading, bookmarks, setFilter, createBookmark, deleteBookmark };
 };
 
 export default useBookmarks;

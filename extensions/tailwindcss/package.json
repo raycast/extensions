@@ -13,7 +13,8 @@
     "ridemountainpig",
     "jor",
     "garrill",
-    "olafvanmidden"
+    "olafvanmidden",
+    "hyftar"
   ],
   "license": "MIT",
   "platforms": [
@@ -25,7 +26,9 @@
       "name": "search-documentation",
       "title": "Search Documentation",
       "subtitle": "Tailwind CSS",
-      "keywords": ["css"],
+      "keywords": [
+        "css"
+      ],
       "description": "Search documentation and open it in the browser",
       "mode": "view"
     },
@@ -33,7 +36,9 @@
       "name": "search-classes",
       "title": "Search Classes",
       "subtitle": "Tailwind CSS",
-      "keywords": ["css"],
+      "keywords": [
+        "css"
+      ],
       "description": "Search Tailwind CSS utility classes",
       "mode": "view",
       "preferences": [
@@ -83,20 +88,79 @@
       "name": "search-colors",
       "title": "Search Colors",
       "subtitle": "Tailwind CSS",
-      "keywords": ["css"],
+      "keywords": [
+        "css"
+      ],
       "description": "Search Tailwind CSS default color palette",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "defaultAction",
+          "title": "Default Action",
+          "description": "Action to perform when pressing enter",
+          "type": "dropdown",
+          "required": false,
+          "default": "color-name",
+          "data": [
+            {
+              "title": "Copy Color Name",
+              "value": "color-name"
+            },
+            {
+              "title": "Copy HEX",
+              "value": "value-hex"
+            },
+            {
+              "title": "Copy RGB",
+              "value": "value-rgb"
+            },
+            {
+              "title": "Copy HSL",
+              "value": "value-hsl"
+            },
+            {
+              "title": "Copy Background Class",
+              "value": "bg-class"
+            },
+            {
+              "title": "Copy Text Class",
+              "value": "text-class"
+            },
+            {
+              "title": "Copy Border Class",
+              "value": "border-class"
+            },
+            {
+              "title": "Copy Shadow Class",
+              "value": "shadow-class"
+            },
+            {
+              "title": "Copy Ring Class",
+              "value": "ring-class"
+            },
+            {
+              "title": "Copy Outline Class",
+              "value": "outline-class"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "search-components",
       "title": "Search Components",
       "subtitle": "Tailwind UI",
-      "keywords": ["css"],
+      "keywords": [
+        "css"
+      ],
       "description": "Search Tailwind UI components",
       "mode": "view"
     }
   ],
-  "categories": ["Documentation", "Developer Tools"],
+  "categories": [
+    "Documentation",
+    "Developer Tools"
+  ],
   "dependencies": {
     "@raycast/api": "^1.57.2",
     "color-convert": "^2.0.1",

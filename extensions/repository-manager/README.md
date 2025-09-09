@@ -1,47 +1,142 @@
-# Project Manager
+# Repository Manager
 
-This extension is aiming to be a manager for all your local projects
+A comprehensive Raycast extension for managing all your local Git repositories with detailed statistics, Git operations, and project management features.
 
-## Requisites
-For a project to show up in the list it must be a valid git repo (it checks if exists a `.git` folder)
+## Features
 
-## Config
-Every project can have a customized config which tweaks the behaviour of the commands
+### Repository Management
+- **Project Discovery**: Automatically finds and lists all Git repositories in your configured directories
+- **Project Details**: View comprehensive information about each repository
+- **Quick Actions**: Open projects in your preferred editor, terminal, or browser
+- **Favorites**: Mark frequently used repositories as favorites for quick access
 
-For example you can define custom url placeholders with `dynamicUrlElements` to replace inside the template
+### Git Statistics
+- **Repository Overview**: View total commits, branches, and tags
+- **Contributor Analysis**: See top contributors with commit counts
+- **Code Statistics**: Detailed code analysis with language breakdown (requires cloc)
+- **Git Status**: Check working directory status and pending changes
+- **Commit History**: Browse recent commits with details
 
-In the case below the `{project}` placeholder will be replaced with `custom-value`
+### Git Operations
+- **Status Monitoring**: Real-time working directory status
+- **Branch Management**: View and work with repository branches
+- **Remote Operations**: Quick access to GitHub, GitLab, Bitbucket, and other Git remotes
+- **Commit Navigation**: Browse commit history and details
 
-If `{project}` placeholder is not overwritten then the name key will be used as default
+## Requirements
+
+### Basic Requirements
+- A valid Git repository (checks for `.git` folder presence)
+- Git installed and accessible from command line
+
+### Optional Requirements
+- **cloc**: For detailed code statistics and language analysis
+  - **macOS**: `brew install cloc`
+  - **npm**: `npm install -g cloc`
+
+## Configuration
+
+Every project can have a customized configuration file (`.raycast/repository-manager.json`) in the project root to customize behavior:
 
 ```json
 {
-    "name": "project name",
-    "description": "custom description used in detail page",
+    "name": "Custom Project Name",
+    "description": "Custom description shown in detail page",
     "urls": {
         "local": "{project}.test",
+        "staging": "staging.{project}.com",
         "production": "{project}.com"
     },
-    "dynamicUrlElements": [{ "key": "project", "value": "custom-value" }],
-    "developmentCommand": { "apps": ["editor"], "urls": ["{urls.local}"] }
+    "dynamicUrlElements": [
+        { "key": "project", "value": "custom-value" }
+    ],
+    "developmentCommand": {
+        "apps": ["editor", "terminal"],
+        "urls": ["{urls.local}", "{urls.staging}"]
+    }
 }
 ```
-### Development command
-`developmentCommand` has two keys:
-- `apps`: valid options are `editor` and `terminal`
-- `urls`: as shown above, you can reference any url present in `urls` by key `{urls.local}`
 
-you can completely omit `urls` key if you don't want to open the project in a browser
-or you can provide `terminal` inside apps array to also open it inside your terminal app
+### Configuration Options
 
+#### URLs
+Define custom URLs for different environments. You can use placeholders like `{project}` which will be replaced with the project name or custom values.
+
+#### Dynamic URL Elements
+Override placeholder values with custom values:
+- `key`: The placeholder name (without braces)
+- `value`: The replacement value
+
+#### Development Command
+Configure what happens when you use the "Start Development" action:
+- `apps`: Array of applications to open
+  - `"editor"`: Opens in your default editor
+  - `"terminal"`: Opens in your default terminal
+- `urls`: Array of URLs to open in browser (optional)
+  - Can reference URLs defined in the `urls` object using `{urls.keyname}`
+
+### Examples
+
+**Editor and Terminal only:**
 ```json
-"developmentCommand": { "apps": ["editor", "terminal"] }
+{
+    "developmentCommand": {
+        "apps": ["editor", "terminal"]
+    }
+}
 ```
 
-## Projects caching
-Since this extension performs quite a lot of reads from the file system, it might be useful to enable projects caching in the extension preferences to avoid re-scanning every time the command is launched.
+**Editor with URLs:**
+```json
+{
+    "developmentCommand": {
+        "apps": ["editor"],
+        "urls": ["{urls.local}", "{urls.staging}"]
+    }
+}
+```
 
-The cache can be manually cleared with the `Clear Cache` command (`⌘` + `⇧` + `⌫`)
+## Performance Features
 
-## Window resizing
-In the extension preferences there is an option to enable window resizing/positioning which works only on the editor window
+### Projects Caching
+Since the extension performs extensive file system operations, enable project caching in extension preferences to improve performance. The cache can be manually cleared using the "Clear Cache" command (`⌘` + `⇧` + `⌫`).
+
+### Window Management
+Enable window resizing/positioning in extension preferences for automatic window management when opening projects (works with editor windows).
+
+## Git Statistics Features
+
+### Code Statistics (cloc integration)
+When cloc is installed, you get detailed analysis including:
+- Lines of code by programming language
+- Comment and blank line counts
+- File counts per language
+- Total project statistics
+
+### Repository Metrics
+- Total commit count across all branches
+- Number of remote branches
+- Tag count
+- Top contributors with commit statistics
+
+### Git Status Integration
+- Working directory changes
+- Staged files
+- Untracked files
+- Branch status and upstream information
+
+## Supported Git Hosting Services
+
+The extension provides quick access to:
+- GitHub
+- GitLab
+- Bitbucket
+- Gitness
+- Any custom Git remote
+
+## Installation Notes
+
+1. Ensure Git is installed and accessible from your terminal
+2. For code statistics, install cloc using your preferred method
+3. Configure your preferred editor and terminal in Raycast settings
+4. Enable caching for better performance with large numbers of repositories

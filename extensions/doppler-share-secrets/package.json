@@ -50,8 +50,8 @@
   ],
   "dependencies": {
     "@dopplerhq/node-sdk": "^1.3.0",
-    "@raycast/api": "^1.95.0",
-    "@raycast/utils": "^1.19.1",
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.0.1",
     "got": "^11.8.2"
   },
   "devDependencies": {
@@ -63,7 +63,7 @@
     "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

@@ -1,7 +1,8 @@
-import { ActionPanel, Form, showToast, Icon, Action, Toast, LaunchProps, Color, AI, Detail } from '@raycast/api';
+import { ActionPanel, Form, showToast, Icon, Action, Toast, LaunchProps, Color, AI } from '@raycast/api';
 import { FormValidation, useCachedPromise, useForm } from '@raycast/utils';
 
-import { addProject, getAreas, getTags, thingsNotRunningError } from './api';
+import { addProject, getAreas, getTags } from './api';
+import ErrorView from './components/ErrorView';
 import { listItems } from './helpers';
 import { getDateString } from './utils';
 
@@ -10,7 +11,7 @@ type FormValues = {
   notes: string;
   tags: string[];
   areaId: string;
-  // Possible values for when: 'today' | 'evening' | 'upcoming' | 'tomorrow' | 'anytime' | 'someday';
+  // Possible values for when: 'today' | 'evening' | 'upcoming' | 'tomorrow' | 'anytime' | 'someday' | 'logbook' | 'trash';
   when: string;
   date: Date | null;
   toDos: string;
@@ -22,8 +23,8 @@ type AddNewProjectProps = {
 };
 
 export function AddNewProject({ draftValues }: AddNewProjectProps) {
-  const { data: tags, isLoading: isLoadingTags } = useCachedPromise(() => getTags());
-  const { data: areas, isLoading: isLoadingAreas } = useCachedPromise(() => getAreas());
+  const { data: tags, isLoading: isLoadingTags, error: tagsError } = useCachedPromise(() => getTags());
+  const { data: areas, isLoading: isLoadingAreas, error: areasError } = useCachedPromise(() => getAreas());
 
   const { handleSubmit, itemProps, values, reset, focus, setValue } = useForm<FormValues>({
     async onSubmit(values) {
@@ -33,7 +34,7 @@ export function AddNewProject({ draftValues }: AddNewProjectProps) {
         when: values.when === 'upcoming' && values.date ? getDateString(values.date) : values.when,
         'area-id': values.areaId,
         deadline: values.deadline ? getDateString(values.deadline) : '',
-        tags: values.tags,
+        ...(values.tags.length > 0 && { tags: values.tags.join(',') }),
         'to-dos': values.toDos,
       };
 
@@ -80,13 +81,17 @@ Tasks:`);
       setValue('toDos', items.trim());
       focus('toDos');
     } catch (error) {
-      await showToast({ style: Toast.Style.Failure, title: 'Failed to generate to-dos' });
+      const errorMessage = typeof error === 'string' ? error : error instanceof Error ? error.message : String(error);
+      await showToast({ style: Toast.Style.Failure, title: 'Failed to generate to-dos', message: errorMessage });
     }
   }
 
   const isLoading = isLoadingTags || isLoadingAreas;
+  const error = tagsError || areasError;
 
-  if (!tags && !isLoading) return <Detail markdown={thingsNotRunningError} />;
+  if (error) {
+    return <ErrorView error={error} />;
+  }
 
   const now = new Date();
 
@@ -185,7 +190,7 @@ Tasks:`);
           ))}
         </Form.TagPicker>
       ) : null}
-      <Form.TextArea {...itemProps.toDos} title="To-Dos" placeholder="To-dos separated by new lines" />
+      <Form.TextArea {...itemProps.toDos} title="To-Dos" placeholder="To-Dos separated by new lines" />
       <Form.DatePicker {...itemProps.deadline} title="Deadline" type={Form.DatePicker.Type.Date} min={now} />
     </Form>
   );

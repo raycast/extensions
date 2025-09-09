@@ -36,7 +36,9 @@
     "sushichan044",
     "luarmr",
     "nicolas-marien",
-    "iontea"
+    "iontea",
+    "ridemountainpig",
+    "kud"
   ],
   "categories": [
     "Developer Tools",
@@ -215,6 +217,12 @@
       "name": "my-latest-repositories",
       "title": "My Latest Repositories",
       "description": "List your repositories by latest updated",
+      "mode": "view"
+    },
+    {
+      "name": "my-starred-repositories",
+      "title": "My Starred Repositories",
+      "description": "List repositories you have starred",
       "mode": "view"
     },
     {
@@ -889,5 +897,9 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
     "generate": "graphql-codegen --config codegen.ts"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

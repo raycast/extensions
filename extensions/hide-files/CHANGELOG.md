@@ -1,5 +1,9 @@
 # Hide Files Changelog
 
+## [New Icon Style] - 2025-07-07
+
+- Optimize extension icons for macOS Tahoe
+
 ## [Toggle Widgets Visibility] - 2024-06-07
 
 - Toggle Desktop Visibility command adds setting to allow hiding desktop widgets

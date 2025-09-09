@@ -22,6 +22,7 @@ export type Reminder = {
   recurrenceRule: string;
   list: { id: string; title: string; color: string } | null;
   location?: Location;
+  creationDate?: Date;
 };
 
 export type List = { id: string; title: string; color: string; isDefault: boolean };

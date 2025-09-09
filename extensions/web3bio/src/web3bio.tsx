@@ -1,18 +1,18 @@
-import { Action, ActionPanel, Image, Icon, List, Cache } from "@raycast/api";
+import { Action, ActionPanel, Cache, Icon, Image, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useCallback, useEffect, useState } from "react";
-import { Profile } from "./utils/types";
-import { handleSearchPlatform, SocialPlatformMapping } from "./utils/utils";
-import { PlatformType } from "./utils/platform";
+import { Platform, ProfileResponse } from "web3bio-profile-kit/types";
+import { detectPlatform, getPlatform } from "web3bio-profile-kit/utils";
 
-const API_END_POINT = "https://api.web3.bio";
+const PROD_API_ENDPOINT = "https://api.web3.bio";
+
 const cache = new Cache();
 
 export default function Command() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showingDetail, setShowingDetail] = useState(false);
-  const [url, setUrl] = useState(API_END_POINT);
-  const platform = handleSearchPlatform(searchTerm);
+  const [url, setUrl] = useState(PROD_API_ENDPOINT);
+  const platform = detectPlatform(searchTerm);
   const [filter, setFilter] = useState("All");
 
   const { isLoading, data } = useFetch(url, {
@@ -21,7 +21,7 @@ export default function Command() {
         const rr = await res.json();
         if (rr.error) return [];
         return rr;
-      } catch (e) {
+      } catch {
         return [];
       }
     },
@@ -29,7 +29,7 @@ export default function Command() {
 
   useEffect(() => {
     if (searchTerm && platform && !cache.get(searchTerm)) {
-      setUrl(API_END_POINT + `/profile/${searchTerm.toLowerCase()}`);
+      setUrl(PROD_API_ENDPOINT + `/profile/${searchTerm.toLowerCase()}`);
     }
     if (data?.length > 0 && !cache.get(searchTerm)) {
       cache.set(searchTerm, JSON.stringify(data));
@@ -56,7 +56,7 @@ export default function Command() {
           <List.Dropdown.Section title="Platform Filter">
             <List.Dropdown.Item key={"All"} title={"All"} value={"All"} />
             {[..._set].map((x: string) => {
-              return <List.Dropdown.Item key={x} title={SocialPlatformMapping(x as PlatformType).label} value={x} />;
+              return <List.Dropdown.Item key={x} title={getPlatform(x as Platform).label} value={x} />;
             })}
           </List.Dropdown.Section>
         </List.Dropdown>
@@ -74,11 +74,11 @@ export default function Command() {
           ? "No results found"
           : "";
     const emptyDescription = !searchTerm
-      ? "Search for Ethereum (ENS), Lens, Farcaster, UD..."
+      ? "Search Ethereum, ENS, Lens, Farcaster..."
       : isLoading
         ? "Please wait a second."
         : !profiles?.length
-          ? "Please try different identity keyword."
+          ? "Please try different identity."
           : "";
     return <List.EmptyView title={emptyTitle} icon={emptyIcon} description={emptyDescription} />;
   }
@@ -86,7 +86,7 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Search for Ethereum (ENS), Lens, Farcaster, UD..."
+      searchBarPlaceholder="Search Ethereum, ENS, Lens, Farcaster..."
       onSearchTextChange={(text) => {
         setSearchTerm(text);
         setShowingDetail(false);
@@ -95,7 +95,7 @@ export default function Command() {
       isShowingDetail={showingDetail}
       searchBarAccessory={
         <PlatformFilter
-          platforms={(!profiles?.length || profiles.error ? [] : profiles)?.map((x: Profile) => x.platform)}
+          platforms={(!profiles?.length || profiles.error ? [] : profiles)?.map((x: ProfileResponse) => x.platform)}
           onSelectChange={setFilter}
         />
       }
@@ -104,12 +104,12 @@ export default function Command() {
 
       <List.Section title="Profiles">
         {profiles
-          ?.filter((x: Profile) => {
+          ?.filter((x: ProfileResponse) => {
             if (filter === "All") return x;
             return x.platform === filter;
           })
-          ?.map((item: Profile) => {
-            const relatedPath = `${item.identity}${item.platform === PlatformType.farcaster ? ".farcaster" : ""}`;
+          ?.map((item: ProfileResponse) => {
+            const relatedPath = `${item.identity}${item.platform === Platform.farcaster ? ".farcaster" : ""}`;
             const props: Partial<List.Item.Props> = showingDetail
               ? {
                   detail: (
@@ -120,24 +120,32 @@ export default function Command() {
                             <List.Item.Detail.Metadata.Label
                               title="Profile"
                               text={item.displayName}
-                              icon={{ source: item.avatar || "", mask: Image.Mask.Circle }}
+                              icon={{
+                                source:
+                                  item.avatar || `${PROD_API_ENDPOINT}/avatar/svg/${item.platform},${item.identity}`,
+                                mask: Image.Mask.Circle,
+                              }}
                             />
                           ) : (
                             <>
                               <List.Item.Detail.Metadata.Label
                                 title="Profile"
                                 text={item.displayName || ""}
-                                icon={{ source: item.avatar || "", mask: Image.Mask.Circle }}
+                                icon={{
+                                  source:
+                                    item.avatar || `${PROD_API_ENDPOINT}/avatar/svg/${item.platform},${item.identity}`,
+                                  mask: Image.Mask.Circle,
+                                }}
                               />
                               <List.Item.Detail.Metadata.Label title="" text={item.identity} />
                             </>
                           )}
                           <List.Item.Detail.Metadata.Separator />
-                          <List.Item.Detail.Metadata.Label title="Address" text={item.address} />
+                          <List.Item.Detail.Metadata.Label title="Address" text={item.address || ""} />
                           <List.Item.Detail.Metadata.Label
                             title="Platform"
-                            text={SocialPlatformMapping(item.platform as PlatformType).label}
-                            icon={SocialPlatformMapping(item.platform as PlatformType).icon}
+                            text={getPlatform(item.platform as Platform).label}
+                            icon={getPlatform(item.platform as Platform).icon}
                           />
                           {item.description && <List.Item.Detail.Metadata.Label title="Bio" text={item.description} />}
                           {item.email && <List.Item.Detail.Metadata.Label title="Email" text={item.email} />}
@@ -148,14 +156,14 @@ export default function Command() {
                               <List.Item.Detail.Metadata.Separator />
                               <List.Item.Detail.Metadata.Label title="🌐 Social links" />
                               {Object.keys(item.links).map((key) => {
-                                const x = item.links[key as PlatformType];
+                                const x = item.links[key as Platform];
                                 return (
                                   x.handle && (
                                     <List.Item.Detail.Metadata.Link
                                       key={`${key}_${x.handle}`}
                                       text={x.handle}
-                                      title={SocialPlatformMapping(key as PlatformType).label}
-                                      target={x.link}
+                                      title={getPlatform(key as Platform).label}
+                                      target={x.link || ""}
                                     />
                                   )
                                 );
@@ -164,7 +172,7 @@ export default function Command() {
                           )}
                           <List.Item.Detail.Metadata.Separator />
                           <List.Item.Detail.Metadata.Link
-                            title="🖼 NFTs 🌈 Activity Feeds 🔮 POAPs"
+                            title=""
                             text="More on Web3.bio"
                             target={`https://web3.bio/${relatedPath}`}
                           />
@@ -178,11 +186,14 @@ export default function Command() {
               <List.Item
                 key={item.identity + item.platform}
                 title={item.displayName || item.identity}
-                subtitle={item.displayName && item.displayName === item.identity ? item.address : item.identity}
-                icon={{ source: item.avatar || "", mask: Image.Mask.Circle }}
+                subtitle={item.displayName && item.displayName === item.identity ? item.address || "" : item.identity}
+                icon={{
+                  source: item.avatar || `${PROD_API_ENDPOINT}/avatar/svg/${item.platform},${item.identity}`,
+                  mask: Image.Mask.Circle,
+                }}
                 accessories={[
                   {
-                    icon: SocialPlatformMapping(item.platform as PlatformType).icon,
+                    icon: getPlatform(item.platform as Platform).icon,
                   },
                 ]}
                 {...props}

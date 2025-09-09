@@ -1,5 +1,10 @@
 # Sanity Changelog
 
+## [Update Sanity Logo] - 2025-07-07
+
+- Update extension logo ([link](https://github.com/sanity-io/sanity/blob/main/packages/sanity/static/favicons/favicon-512.png))
+- Modernize to use latest Raycast config
+
 ## [Add "Search Datasets" subcommand] - 2025-02-10
 
 - Simplify "search-projects" by replacing `Cache` with `useCachedPromise`

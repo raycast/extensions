@@ -1,70 +1,69 @@
 import { useMemo } from "react";
 import { Color, List } from "@raycast/api";
-import type { GitStatus } from "../../utils/status.js";
+import type { StatusValue } from "../../utils/git-status/changes.js";
+import { ChangeStatus, parseStatusValueName } from "../../utils/git-status/changes.js";
 
 interface Props {
-  stagedStatus: GitStatus;
-  unstagedStatus: GitStatus;
+  changes: ChangeStatus;
 }
 
-function tagForStatus(stagedStatus: GitStatus) {
+function colorForStatus(stagedStatus: StatusValue) {
   if (stagedStatus === ".") {
-    return null;
+    return;
   }
 
   switch (stagedStatus) {
     case "A":
-      return ["Added", Color.Green];
+      return Color.Green;
     case "M":
-      return ["Modified", Color.Blue];
+      return Color.Blue;
     case "T":
-      return ["File type changed", Color.Blue];
+      return Color.Blue;
     case "D":
-      return ["Deleted", Color.Red];
+      return Color.Red;
     case "R":
-      return ["Renamed", Color.Magenta];
+      return Color.Magenta;
     case "C":
-      return ["Copied", Color.Magenta];
+      return Color.Magenta;
     case "U":
-      return ["Unmerged", Color.Orange];
+      return Color.Orange;
     case "?":
-      return ["Untracked", Color.Green];
+      return Color.Green;
     case "!":
-      return ["Ignored", Color.SecondaryText];
-    default:
-      return null;
+      return Color.SecondaryText;
   }
 }
 
-export function GitStatusTags({ stagedStatus, unstagedStatus }: Props) {
+export function GitStatusTags({ changes }: Props) {
   const tags = useMemo(() => {
     const tags = [];
-    let status;
-    const isNotStaged = stagedStatus === "." || stagedStatus === "?";
-    if (isNotStaged) {
-      status = tagForStatus(unstagedStatus);
+
+    if (changes.hasStagedChanges) {
+      tags.push(["Staged", Color.PrimaryText]);
+      const status = parseStatusValueName(changes.stagedChanges);
       if (status) {
-        tags.push(["Unstaged", Color.SecondaryText]);
-      }
-    } else {
-      status = tagForStatus(stagedStatus);
-      if (status) {
-        tags.push(["Staged", Color.PrimaryText]);
+        tags.push([status, colorForStatus(changes.stagedChanges)]);
       }
     }
 
-    if (status) {
-      tags.push(status);
+    if (changes.hasUnstagedChanges) {
+      tags.push(["Unstaged", Color.SecondaryText]);
+
+      if (changes.unstagedChanges !== changes.stagedChanges) {
+        const status = parseStatusValueName(changes.unstagedChanges);
+        if (status) {
+          tags.push([status, colorForStatus(changes.unstagedChanges)]);
+        }
+      }
     }
 
     return tags;
-  }, [stagedStatus, unstagedStatus]);
+  }, [changes.hasStagedChanges, changes.stagedChanges, changes.hasUnstagedChanges, changes.unstagedChanges]);
 
-  return (
-    <List.Item.Detail.Metadata.TagList title="Status">
-      {tags.map((tag, index) => (
-        <List.Item.Detail.Metadata.TagList.Item key={index} text={tag[0]} color={tag[1]} />
-      ))}
-    </List.Item.Detail.Metadata.TagList>
+  const tagList = useMemo(
+    () => tags.map((tag, index) => <List.Item.Detail.Metadata.TagList.Item key={index} text={tag[0]} color={tag[1]} />),
+    [tags],
   );
+
+  return <List.Item.Detail.Metadata.TagList title="Status">{tagList}</List.Item.Detail.Metadata.TagList>;
 }

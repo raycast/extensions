@@ -179,6 +179,10 @@ interface Race {
     date: string;
     time: string;
   };
+  SprintQualifying?: {
+    date: string;
+    time: string;
+  };
 }
 
 interface RaceResultItem {

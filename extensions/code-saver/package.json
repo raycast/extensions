@@ -70,9 +70,9 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.9",
-    "@raycast/utils": "^1.5.2",
-    "better-sqlite3-multiple-ciphers": "^9.0.0",
+    "@raycast/api": "^1.99.4",
+    "@raycast/utils": "^1.19.1",
+    "better-sqlite3-multiple-ciphers": "^11.9.1",
     "date-fns": "^2.29.3",
     "dayjs": "^1.11.10",
     "drizzle-orm": "^0.28.6",
@@ -85,7 +85,7 @@
     "@raycast/eslint-config": "1.0.5",
     "@types/better-sqlite3": "^7.6.5",
     "@types/node": "^18.18.6",
-    "@types/react": "18.0.9",
+    "@types/react": "^18.2.28",
     "@types/tar-stream": "^3.1.3",
     "@types/uuid": "^9.0.6",
     "drizzle-kit": "^0.19.13",

@@ -260,7 +260,7 @@
   "dependencies": {
     "@raycast/api": "^1.93.0",
     "@raycast/utils": "^1.19.1",
-    "better-sqlite3": "^9.6.0",
+    "better-sqlite3": "12.1.1",
     "bindings": "^1.5.0",
     "dayjs": "^1.11.13",
     "open": "^8.4.0",
@@ -275,6 +275,9 @@
     "prettier": "^2.6.2",
     "react": "^18.2.0",
     "typescript": "^4.9.5"
+  },
+  "overrides": {
+    "tar-fs": ">=3.0.9"
   },
   "scripts": {
     "build": "ray build -e dist",

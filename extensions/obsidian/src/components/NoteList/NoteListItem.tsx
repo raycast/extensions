@@ -15,7 +15,7 @@ export function NoteListItem(props: {
   vault: Vault;
   key: string;
   pref: SearchNotePreferences;
-  action?: (note: Note, vault: Vault) => React.ReactFragment;
+  action?: (note: Note, vault: Vault) => React.ReactNode;
 }) {
   const { note, vault, pref, action } = props;
 

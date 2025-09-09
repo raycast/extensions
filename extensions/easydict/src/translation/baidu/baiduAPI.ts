@@ -93,7 +93,7 @@ export function requestBaiduTextTranslate(queryWordInfo: QueryWordInfo): Promise
         if (baiduResult.trans_result) {
           const translations = baiduResult.trans_result.map((item) => item.dst);
           console.warn(
-            `Baidu translate: ${translations}, ${baiduResult.from}, cost: ${response.headers[requestCostTime]} ms`
+            `Baidu translate: ${translations}, ${baiduResult.from}, cost: ${response.headers[requestCostTime]} ms`,
           );
           const result: QueryTypeResult = {
             type: type,

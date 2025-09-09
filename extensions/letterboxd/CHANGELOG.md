@@ -1,5 +1,9 @@
 # letterboxd Changelog
 
+## [Fix show movie details not working] - 2025-08-04
+
+- Fix the issue with the movie details not working
+
 ## [Add movie runtime information] - 2025-04-10
 
 - Add runtime information to the movie details panel

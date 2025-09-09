@@ -1,0 +1,87 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "focus-flow",
+  "title": "Focusflow - a Study Clock",
+  "description": "A Raycast extension to help you Focus on your studies and Flow with your team. Engage with your friends in some friendly competition.",
+  "icon": "extension_icon.png",
+  "author": "Ek217",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-team",
+      "title": "Create a Flow",
+      "description": "Create a new team to Flow with.",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Focus Menubar",
+      "subtitle": "FocusFlow",
+      "interval": "10s",
+      "description": "Quick access to FocusFlow from your menubar.",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "join-team",
+      "title": "Join a Flow",
+      "description": "Join an existing team to Flow with.",
+      "mode": "view"
+    },
+    {
+      "name": "team-settings",
+      "title": "Manage Your Flow",
+      "description": "Manage your Flow's settings.",
+      "mode": "view"
+    },
+    {
+      "name": "start-session",
+      "title": "Start a Focus Session",
+      "description": "Start tracking your Focus time.",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop-session",
+      "title": "Stop a Focus Session",
+      "description": "Stop tracking and save your Focus time.",
+      "mode": "no-view"
+    },
+    {
+      "name": "leaderboard",
+      "title": "View Your Flow Leaderboard",
+      "description": "View your Flow's leaderboard.",
+      "mode": "view"
+    },
+    {
+      "name": "modify-session",
+      "title": "Modify Last Session",
+      "description": "Modify your last completed study session.",
+      "mode": "view"
+    },
+    {
+      "name": "my-stats",
+      "title": "My Stats",
+      "description": "View your personal study statistics and rank.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

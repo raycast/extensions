@@ -1,13 +1,15 @@
-import { List } from "@raycast/api";
-import { BranchInfo } from "../../utils/branch.js";
 import { useMemo } from "react";
+import { List } from "@raycast/api";
+import type { BranchInfo } from "../../utils/git-status/branch.js";
+import { useRepo } from "../../hooks/useRepo.js";
 
 interface Props {
-  repo?: string;
   branch?: BranchInfo;
 }
 
-export function GitStatusEmpty({ branch, repo }: Props) {
+export function GitStatusEmpty({ branch }: Props) {
+  const repo = useRepo();
+
   const title = useMemo(() => {
     if (repo && branch) {
       return `On branch ${branch.name}`;

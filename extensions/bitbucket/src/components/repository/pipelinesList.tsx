@@ -2,7 +2,7 @@ import { ActionPanel, List, showToast, Color, Action, Image, Toast } from "@rayc
 import { useState, useEffect } from "react";
 
 import { preferences } from "../../helpers/preferences";
-import { pipelinesGetQuery, getCommitNames } from "../../queries";
+import { pipelinesGetQuery } from "../../queries";
 import { Repository, Pipeline } from "./interface";
 import { GoesToPreviousPipelinePage, GoesToNextPipelinePage } from "./actions";
 import { icon } from "../../helpers/icon";
@@ -13,7 +13,7 @@ interface State {
   isLoading?: boolean;
 }
 
-export function PipelinesList(props: { repo: Repository; pageNumber: number }): JSX.Element {
+export function PipelinesList(props: { repo: Repository; pageNumber: number }) {
   const [state, setState] = useState<State>({ isLoading: true });
   const [pageNumber, setPageNumber] = useState<number>(1);
 
@@ -24,18 +24,24 @@ export function PipelinesList(props: { repo: Repository; pageNumber: number }): 
 
         const { data } = await pipelinesGetQuery(props.repo.slug, pageNumber);
 
-        const pipelines = data.values.map((pipeline: any) => ({
-          name: (pipeline.name as string) || "",
-          uuid: pipeline.uuid as string,
-          buildNumber: pipeline.build_number.toString() as string,
-          state: (pipeline.state?.name == "IN_PROGRESS"
-            ? "IN_PROGRESS"
-            : null || pipeline.state?.result?.name || pipeline.state?.stage?.name || "") as string,
-          avatarCreatorUrl: (pipeline.creator?.links?.avatar?.href as string) || "",
-          triggerName: (pipeline.trigger?.name as string) || "",
-          commitMessage: (pipeline.target?.commit?.message).split("\n")[0] || "",
-          createdOn: pipeline.created_on as string,
-        }));
+        const pipelines =
+          data.values?.map((pipeline) => ({
+            name: (pipeline.name as string) || "",
+            uuid: pipeline.uuid as string,
+            buildNumber: pipeline?.build_number?.toString() as string,
+            state: (pipeline.state?.name == "IN_PROGRESS"
+              ? "IN_PROGRESS"
+              : // @ts-expect-error: To keep the original code
+                // eslint-disable-next-line no-constant-binary-expression
+                null || pipeline.state?.result?.name || pipeline.state?.stage?.name || "") as string,
+            avatarCreatorUrl: (pipeline.creator?.links?.avatar?.href as string) || "",
+            triggerName: (pipeline.trigger?.name as string) || "",
+            // @ts-expect-error: To keep the original code
+            // eslint-disable-next-line no-unsafe-optional-chaining
+            commitMessage: (pipeline.target?.commit?.message).split("\n")[0] || "",
+            createdOn: pipeline.created_on as string,
+          })) ?? [];
+        // @ts-expect-error: To keep the original code
         setState({ pipelines: pipelines, isLoading: false });
       } catch (error) {
         setState({ error: error instanceof Error ? error : new Error("Something went wrong") });
@@ -82,9 +88,10 @@ function SearchListItem({
 }: {
   pipeline: Pipeline;
   repoSlug: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setPageNumber: any;
   pageNumber: number;
-}): JSX.Element {
+}) {
   const { pipeline: pipeIcon } = icon;
   const statusIconUrl =
     pipeline.state == "SUCCESSFUL"

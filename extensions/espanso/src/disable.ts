@@ -1,11 +1,26 @@
 import { showHUD } from "@raycast/api";
-import { $ } from "zx";
+import { exec } from "child_process";
+import { getEspansoCmd } from "./lib/utils";
 
 export default async function main() {
   try {
-    await $`espanso cmd disable`;
-    await showHUD("Espanso disable");
+    await new Promise<void>((resolve, reject) => {
+      exec(`${getEspansoCmd()} cmd disable`, (error, stdout, stderr) => {
+        if (error) {
+          reject(new Error(stderr || error.message));
+        } else {
+          resolve();
+        }
+      });
+    });
+    await showHUD("Espanso disabled");
   } catch (error) {
-    await showHUD(`Error: ${error}`);
+    let message = "";
+    if (error instanceof Error) {
+      message = error.message;
+    } else {
+      message = String(error);
+    }
+    await showHUD(`Error: ${message}`);
   }
 }

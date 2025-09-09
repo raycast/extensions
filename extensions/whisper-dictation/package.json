@@ -20,10 +20,17 @@
   ],
   "commands": [
     {
-      "name": "dictate",
-      "title": "Dictate Text",
+      "name": "dictate-simple",
+      "title": "Dictate",
       "subtitle": "Whisper Dictation",
-      "description": "Convert speech to text using Whisper",
+      "description": "Convert speech to text using Whisper (no AI refinement)",
+      "mode": "view"
+    },
+    {
+      "name": "dictate",
+      "title": "Dictate with AI",
+      "subtitle": "Whisper Dictation",
+      "description": "Convert speech to text with AI refinement options",
       "mode": "view"
     },
     {
@@ -84,16 +91,20 @@
       "default": "none",
       "data": [
         {
-          "title": "Paste Text",
-          "value": "paste"
+          "title": "None (Show Options)",
+          "value": "none"
         },
         {
           "title": "Copy to Clipboard",
           "value": "copy"
         },
         {
-          "title": "None (Show Options)",
-          "value": "none"
+          "title": "Paste Text",
+          "value": "paste"
+        },
+        {
+          "title": "Copy & Paste Text",
+          "value": "copy_paste"
         }
       ]
     },

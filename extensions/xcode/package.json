@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "xcode",
   "title": "Xcode",
-  "version": "2.5.0",
-  "description": "Search and open your recent Xcode Projects, manage your Simulators & Apps, view the latest Releases, search the Apple Developer Documentation and quickly clear Xcode cache files.",
+  "version": "3.0.0",
+  "description": "Search and open your recent Xcode Projects, manage your Simulators & Apps, view the latest Releases, create Swift Packages & Playgrounds and quickly clear Xcode cache files.",
   "icon": "icon.png",
   "author": "SvenTiigi",
   "contributors": [
@@ -130,6 +130,14 @@
           "title": "Excluded Xcode Project paths (comma separated)",
           "description": "A comma separated list of directory paths that should be excluded when searching for recent Xcode Projects.",
           "placeholder": "~/Backup,~/Archive/Xcode"
+        },
+        {
+          "name": "terminalApp",
+          "type": "appPicker",
+          "required": false,
+          "title": "Terminal App",
+          "description": "Select which Terminal App to use when opening with a terminal",
+          "default": "com.apple.Terminal"
         }
       ]
     },
@@ -180,13 +188,6 @@
       "title": "Search Xcode Releases",
       "subtitle": "Xcode",
       "description": "Search, download and view the latest Xcode Releases.",
-      "mode": "view"
-    },
-    {
-      "name": "search-developer-documentation.command",
-      "title": "Search Developer Documentation",
-      "subtitle": "Xcode",
-      "description": "Search Apple Developer Documentation.",
       "mode": "view"
     },
     {
@@ -293,9 +294,389 @@
       "mode": "no-view"
     }
   ],
+  "tools": [
+    {
+      "name": "xcode-projects",
+      "title": "Xcode Projects",
+      "description": "The recently opened Xcode Projects, Swift Packages, Xcode Workspaces or Swift Playgrounds."
+    },
+    {
+      "name": "xcode-swift-package-resolved",
+      "title": "Swift Package Dependencies",
+      "description": "The Swift Package dependencies of a Xcode Project, Xcode Workspace or Swift Package."
+    },
+    {
+      "name": "xcode-simulators",
+      "title": "Xcode Simulators",
+      "description": "The installed Xcode Simulators."
+    },
+    {
+      "name": "boot-xcode-simulator",
+      "title": "Boot a Xcode Simulator",
+      "description": "Boots the Xcode Simulator by its udid."
+    },
+    {
+      "name": "shutdown-xcode-simulator",
+      "title": "Shutdown a Xcode Simulator",
+      "description": "Shutdowns the Xcode Simulator by its udid."
+    },
+    {
+      "name": "restart-xcode-simulator",
+      "title": "Restart a Xcode Simulator",
+      "description": "Restarts the Xcode Simulator by its udid."
+    },
+    {
+      "name": "open-url-in-xcode-simulator",
+      "title": "Open a URL in a Xcode Simulator",
+      "description": "Opens a URL in a Xcode Simulator either a specific one identified by its udid or the currently booted one, if any."
+    },
+    {
+      "name": "xcode-simulator-applications",
+      "title": "Xcode Simulator Builds",
+      "description": "The builds / apps installed on a Xcode simulator."
+    },
+    {
+      "name": "xcode-releases",
+      "title": "Xcode Releases",
+      "description": "The releases of Xcode."
+    },
+    {
+      "name": "xcode-add-swift-package",
+      "title": "Add Swift Package",
+      "description": "Adds a Swift Package to an Xcode project (*.xcodeproj) or Xcode workspace (*.xcworkspace) using its HTTPS or SSH URL."
+    },
+    {
+      "name": "clear-derived-data",
+      "title": "Clear Derived Data",
+      "description": "Clears the derived data directory."
+    },
+    {
+      "name": "clear-swift-package-manager-cache",
+      "title": "Clear Swift Package Manager Cache",
+      "description": "Clears the Swift Package Manager cache directory."
+    },
+    {
+      "name": "clear-swift-ui-previews-cache",
+      "title": "Clear SwiftUI Previews Cache",
+      "description": "Clears the SwiftUI previews cache directory."
+    },
+    {
+      "name": "open-path",
+      "title": "Open Path",
+      "description": "Opens a file path which either points to a file for example a Xcode Project (*.xcodeproj), Swift Package (Package.swift), Xcode Workspace (*.xcworkspace), Swift Playground (*.playground) or a directory."
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@xcode show my recent projects",
+        "mocks": {
+          "xcode-projects": [
+            {
+              "name": "TaskManager",
+              "path": "~/Developer/TaskManager/TaskManager.xcodeproj",
+              "type": "project",
+              "lastModified": "2025-06-14T14:30:00Z"
+            },
+            {
+              "name": "WeatherKit-Demo",
+              "path": "~/Developer/WeatherKit-Demo/WeatherKit-Demo.xcworkspace",
+              "type": "workspace",
+              "lastModified": "2025-06-13T16:45:00Z"
+            },
+            {
+              "name": "SwiftUI-Animations",
+              "path": "~/Developer/SwiftUI-Animations/Package.swift",
+              "type": "package",
+              "lastModified": "2025-06-12T09:15:00Z"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "xcode-projects"
+            }
+          },
+          {
+            "includes": "TaskManager"
+          },
+          {
+            "includes": "WeatherKit-Demo"
+          }
+        ]
+      },
+      {
+        "input": "@xcode what dependencies does my current project use?",
+        "mocks": {
+          "xcode-projects": [
+            {
+              "name": "TaskManager",
+              "path": "~/Developer/TaskManager/TaskManager.xcodeproj",
+              "type": "project"
+            }
+          ],
+          "xcode-swift-package-resolved": {
+            "project": "TaskManager",
+            "packages": [
+              {
+                "name": "Alamofire",
+                "url": "https://github.com/Alamofire/Alamofire.git",
+                "version": "5.8.1",
+                "revision": "bc268c28fb170f494de9e9927c371b8342979ece"
+              },
+              {
+                "name": "SwiftUI-Introspect",
+                "url": "https://github.com/siteline/SwiftUI-Introspect.git",
+                "version": "1.1.3",
+                "revision": "f2616860a41f9d9932da412a8978fec79c06fe24"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "xcode-swift-package-resolved"
+            }
+          },
+          {
+            "includes": "Alamofire"
+          },
+          {
+            "includes": "5.8.1"
+          }
+        ]
+      },
+      {
+        "input": "@xcode show all available iOS simulators",
+        "mocks": {
+          "xcode-simulators": [
+            {
+              "udid": "A1B2C3D4-E5F6-7890-ABCD-EF1234567890",
+              "name": "iPhone 15 Pro Max",
+              "deviceType": "com.apple.CoreSimulator.SimDeviceType.iPhone-15-Pro-Max",
+              "runtime": "iOS 17.2",
+              "state": "Booted",
+              "isAvailable": true
+            },
+            {
+              "udid": "B2C3D4E5-F678-90AB-CDEF-123456789012",
+              "name": "iPhone 14",
+              "deviceType": "com.apple.CoreSimulator.SimDeviceType.iPhone-14",
+              "runtime": "iOS 17.2",
+              "state": "Shutdown",
+              "isAvailable": true
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "xcode-simulators"
+            }
+          },
+          {
+            "includes": "iPhone 15 Pro Max"
+          },
+          {
+            "includes": "Booted"
+          }
+        ]
+      },
+      {
+        "input": "@xcode start the iPhone 16 simulator",
+        "mocks": {
+          "xcode-simulators": [
+            {
+              "udid": "B2C3D4E5-F678-90AB-CDEF-123456789012",
+              "name": "iPhone 16",
+              "deviceType": "com.apple.CoreSimulator.SimDeviceType.iPhone-14",
+              "runtime": "iOS 18.0",
+              "state": "Shutdown",
+              "isAvailable": true
+            }
+          ],
+          "boot-xcode-simulator": {
+            "success": true,
+            "udid": "B2C3D4E5-F678-90AB-CDEF-123456789012",
+            "previousState": "Shutdown",
+            "newState": "Booted"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "xcode-simulators"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "boot-xcode-simulator",
+              "arguments": {
+                "xcodeSimulatorUDID": "B2C3D4E5-F678-90AB-CDEF-123456789012"
+              }
+            }
+          },
+          {
+            "includes": "iPhone 16"
+          }
+        ]
+      },
+      {
+        "input": "@xcode restart all simulators that are currently running",
+        "mocks": {
+          "xcode-simulators": [
+            {
+              "udid": "A1B2C3D4-E5F6-7890-ABCD-EF1234567890",
+              "name": "iPhone 15 Pro Max",
+              "state": "Booted"
+            },
+            {
+              "udid": "B2C3D4E5-F678-90AB-CDEF-123456789012",
+              "name": "iPhone 14",
+              "state": "Shutdown"
+            }
+          ],
+          "restart-xcode-simulator": {
+            "success": true,
+            "udid": "A1B2C3D4-E5F6-7890-ABCD-EF1234567890"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "xcode-simulators"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "restart-xcode-simulator",
+              "arguments": {
+                "xcodeSimulatorUDID": "A1B2C3D4-E5F6-7890-ABCD-EF1234567890"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@xcode open maps:// in my current simulator",
+        "mocks": {
+          "open-url-in-xcode-simulator": {
+            "success": true,
+            "url": "maps://",
+            "simulatorName": "iPhone 15 Pro Max"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "open-url-in-xcode-simulator",
+              "arguments": {
+                "url": "maps://"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@xcode what apps are installed on my simulators?",
+        "mocks": {
+          "xcode-simulator-applications": [
+            {
+              "simulatorName": "iPhone 15 Pro Max",
+              "simulatorUdid": "A1B2C3D4-E5F6-7890-ABCD-EF1234567890",
+              "apps": [
+                {
+                  "name": "TaskManager",
+                  "bundleId": "com.company.taskmanager",
+                  "version": "1.2.0",
+                  "buildNumber": "42",
+                  "installDate": "2025-06-14T14:30:00Z"
+                },
+                {
+                  "name": "WeatherKit Demo",
+                  "bundleId": "com.company.weatherkit-demo",
+                  "version": "2.1.0",
+                  "buildNumber": "156",
+                  "installDate": "2025-06-13T16:45:00Z"
+                }
+              ]
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "xcode-simulator-applications"
+            }
+          },
+          {
+            "includes": "TaskManager"
+          },
+          {
+            "includes": "1.2.0"
+          }
+        ]
+      },
+      {
+        "input": "@xcode what's the latest version of Xcode available?",
+        "mocks": {
+          "xcode-releases": [
+            {
+              "name": "Xcode 16.4",
+              "versionNumber": "16.4",
+              "buildNumber": "16F6"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "xcode-releases"
+            }
+          },
+          {
+            "includes": "16.4"
+          }
+        ]
+      },
+      {
+        "input": "@xcode clean up all my Xcode caches and derived data",
+        "mocks": {
+          "clear-derived-data": {
+            "success": true
+          },
+          "clear-swift-package-manager-cache": {
+            "success": true
+          },
+          "clear-swift-ui-previews-cache": {
+            "success": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "clear-derived-data"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "clear-swift-package-manager-cache"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "clear-swift-ui-previews-cache"
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.65.0",
-    "@raycast/utils": "^1.10.1",
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.19.1",
     "dedent": "^0.7.0",
     "node-fetch": "^3.2.10",
     "plist": "^3.0.6",
@@ -321,5 +702,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

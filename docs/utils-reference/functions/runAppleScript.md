@@ -2,6 +2,10 @@
 
 Function that executes an AppleScript script.
 
+{% hint style="info" %}
+Only available on macOS
+{% endhint %}
+
 ## Signature
 
 There are two ways to use the function.

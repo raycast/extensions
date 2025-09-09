@@ -1,5 +1,11 @@
 # Get SSH Key Changelog
 
+## [Open In Finder] - 2025-06-29
+
+- Show number of keys in Section subtitle
+- Action to OpenInFinder
+- Use Key as List Icon
+
 ## [Updates] - 2024-06-07
 
 - Update dependencies

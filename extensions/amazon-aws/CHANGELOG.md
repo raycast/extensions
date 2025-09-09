@@ -1,9 +1,87 @@
 # Amazon AWS Changelog
 
-## [Console command] 2025-05-23
+## [API Gateway, AppSync & Amplify Enhancements] - 2025-08-25
+
+- Add API Gateway command to manage REST and HTTP APIs
+  - Browse and search API resources, methods, and integrations
+  - View and manage deployment stages and API keys
+  - Monitor usage plans and quotas
+- Add AppSync command for GraphQL API management
+  - View and manage GraphQL schemas, data sources, and resolvers
+  - Generate and manage API keys with expiration tracking
+  - Quick access to GraphQL endpoint and console
+- Add AI-powered tools for AWS Amplify automation
+  - Automate project discovery and branch management
+  - Streamline webhook operations and build triggers
+  - Enhanced job monitoring with intelligent insights
+- Add Amplify build log download with improved error handling
+
+## [Amplify command] - 2025-08-11
+
+- Add notification management for AWS Amplify branches
+  - Manage build notifications settings
+  - Direct link to AWS Console notifications page
+  - Visual notification status in branch list with bell icons
+- Add custom rules management for redirects and rewrites
+  - View and manage redirect and rewrite rules
+  - Create custom rules with source patterns and targets
+  - Configure HTTP status codes (200, 301, 302, 404)
+  - Edit existing rules
+  - Delete unwanted rules
+  - Direct link to AWS Console rewrites and redirects settings
+- Add comprehensive build management and history functionality
+  - View full build history for each branch with status indicators
+  - Start new builds directly from Raycast
+  - Cancel running builds
+  - Retry failed builds with original commit details
+  - View detailed build information including commit, timestamps, and duration
+  - Access build artifacts for completed jobs
+  - Color-coded status indicators for quick visual feedback
+  - Direct links to AWS Console build logs
+- Add monitoring links for AWS Amplify apps and branches
+  - App-level monitoring: Access logs, Alarms, Hosting compute logs, Metrics
+  - Branch-level monitoring: Build & Deploy logs, Access logs
+  - Quick access through dedicated Monitoring submenu
+- Add full environment variables management for AWS Amplify apps
+  - View all configured environment variables in a searchable list
+  - Add new environment variables with validation
+  - Edit existing variable values
+  - Delete environment variables
+  - Copy individual variables or all variables in JSON/.env format
+  - Visual indicator shows which apps have environment variables configured
+  - Direct link to AWS Console environment variables page
+- Add webhook support for AWS Amplify branches
+  - Display webhook URLs in branch actions submenu
+  - Enable direct webhook triggering to initiate builds
+  - Show webhook count indicator in branch accessories
+- Fix console link generation for AWS Amplify branches
+
+## [Fix] - 2025-08-08
+
+- Fix missing console link generation for AWS Amplify apps in resourceToConsoleLink utility
+
+## [Amplify command] - 2025-08-07
+
+- Add AWS Amplify command to manage Amplify apps and branches
+- View app details including platform, repository, and update times
+- Navigate to app branches with auto-build status and deployment information
+- Quick actions to open apps/branches in browser and AWS Console
+
+## [Fixes] - 2025-06-18
+
+- Fix local development crashing without AWS Vault.
+
+## [Console command] - 2025-06-13
+
+- Add AWS Audit Manager service to console command
+- Fix Amazon Bedrock service details (previously had incorrect AWS Audit Manager information)
+
+## [Console command] - 2025-05-23
+
 - Fix full URLs (e.g. `https://quicksight.aws.amazon.com`) routing correctly to the console
 
-## [Console command] 2025-04-25
+## [Console command] - 2025-04-25
+
 - Update WAF & Shield path to '/wafv2/homev2/home' for WAFv2 migration
 - Update AWS Firewall Manager path to '/wafv2/fmsv2/home' for Firewall Manager v2
 - Add common abbreviations 'cfn' for CloudFormation and 'sfn' for Step Functions

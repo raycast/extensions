@@ -1,5 +1,37 @@
 # Google Translate Changelog
 
+## [Feature] - 2025-07-01
+
+- Added instant translate commands for selected text translation
+- Added "Instant Translate View" command to display translation in HUD
+- Added "Instant Translate Copy" command to copy translation to clipboard
+- Added "Instant Translate Paste" command to paste translation directly
+- Implemented smart HUD duration that adjusts based on text length for better readability
+- Added reusable base instant translate function for consistent translation logic
+
+## [Feature] - 2025-06-25
+
+- Show Auto-Detected language in Quick Translate
+
+## [Feature] - 2025-06-24
+
+- Auto-focus on Text input after changing source or target language
+- Add shortcuts for quick focus on Source(`CMD + SHIFT + F`) and Target(`CMD + SHIFT + T`) language fields
+- Use auto-detected language when switching languages
+- Fix quick translate with Chinese auto detected language
+- Fix translate compatibility with old Country Codes format for people who had Chinese saved for example and some more languages
+- Fixed proxy for doubleWayTranslate
+- Add proxy for TTS
+
+## [Fix] - 2025-06-23
+
+- Fix uppercase ISO language codes (fix Chinese and some other languages)
+
+## [Maintenance] - 2025-06-19
+
+- Remove country flags from languages
+- Add all the languages from Google Translate website
+
 ## [Feature] - 2025-03-31
 
 - Add ability to set proxy

@@ -35,7 +35,7 @@ export default function Torrent({ ip }: { ip: string }) {
       return temp;
     },
     [ip],
-    { keepPreviousData: true, initialData: [] }
+    { keepPreviousData: true, initialData: [] },
   );
 
   return (

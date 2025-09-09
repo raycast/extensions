@@ -1,5 +1,11 @@
 # Remove Paywall Changelog
 
+## [Browser integration and advanced features] - 2025-07-15
+
+- Added "Remove Paywall from Current Tab" command with automatic browser detection
+- Added "Remove Paywall from Clipboard" command 
+- Browser support: Safari, Chrome, Firefox, Edge, Arc, Brave, Vivaldi, Orion, Zen
+
 ## [Added freedium] - 2024-02-28
 
 - Added support for Freedium

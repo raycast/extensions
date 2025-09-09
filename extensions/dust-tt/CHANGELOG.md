@@ -1,19 +1,27 @@
 # Dust.tt Changelog
 
-## [fixes] - 2025-05-05
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Replace all `\r\n` with `\n` in the codebase to ensure consistent line endings across all files.
+
+## [Update] - 2025-06-18
+
+- Move Oauth connexion flow from Auth0 to WorkOS.
+
+## [Fixes] - 2025-05-05
 
 - Fix again the listing of agents.
 
-## [fixes] - 2025-04-14
+## [Fixes] - 2025-04-14
 
 - Upgrade dust-tt/client to fix the listing of agents.
 - Add new logo for salesforce, gong and bigquery connectors.
 
-## [fixes] - 2024-12-11
+## [Fixes] - 2024-12-11
 
 - Upgrade dust-tt/client to allow more flexibility in the api response.
 
-## [fixes] - 2024-11-21
+## [Fixes] - 2024-11-21
 
 - Use the proper oauth audience and add scopes to limit api access.
 
@@ -38,16 +46,16 @@
 - ask user to provide email address during the setup
 - specify email address and username in API calls to provide accurate usage statistics
 
-## [chore] - 2024-09-23
+## [Chore] - 2024-09-23
 
 - transfer extension ownership to the Dust team
 
-## [bug fixes] - 2024-07-22
+## [Bug fixes] - 2024-07-22
 
 - use `agent_message_success` event as stop condition
 - don't stream Chain Of Thought tokens
 
-## [bug fixes] - 2024-03-27
+## [Bug fixes] - 2024-03-27
 
 - fixed a bug when the favorite agent was no longer available
 - fixed API related crashes (show an error)

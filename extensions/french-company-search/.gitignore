@@ -1,0 +1,49 @@
+# Fichiers de dépendances et de build
+node_modules
+dist
+build
+.next
+.nuxt
+.cache
+
+# Fichiers de logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Fichiers de cache et temporaires
+.eslintcache
+*.tsbuildinfo
+.nyc_output
+coverage
+
+# Fichiers du système d'exploitation (macOS)
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+
+# Fichiers de l'éditeur (VSCode)
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+.history
+
+# Fichiers d'environnement
+.env
+.env.*
+!/.env.example
+
+# Fichiers spécifiques au projet
+.claude/
+CLAUDE.md
+
+# Fichiers a conserver en local
+local
+GEMINI.md
+.aider*
+.aicodeprep-gui
+fullcode.txt

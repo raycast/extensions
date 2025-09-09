@@ -135,6 +135,8 @@ export const CharacterDetail = ({
       const characterData = await lookupCharacter(character.Region, character.Name);
       setCharacter(characterData);
       saveCharacterToFavorites(characterData);
+    } catch {
+      // Handle error gracefully
     } finally {
       toast.hide();
     }

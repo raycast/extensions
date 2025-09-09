@@ -351,7 +351,7 @@ export const AskDustQuestion = withPickedWorkspace(
         actions={
           <ActionPanel>
             <Action.OpenInBrowser
-              title="Continue On Dust"
+              title="Continue on Dust"
               url={`${dustAssistantUrl}/${conversationId ?? "new"}`}
               icon={Icon.Globe}
             />

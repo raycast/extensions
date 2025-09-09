@@ -15,12 +15,13 @@ import {
   VmConsoleTicketsCreateSpec,
   VmConsoleTicketsSummary,
 } from "./types";
-import fetch from "node-fetch";
+import fetch from "cross-fetch";
 
 export class vCenter {
   private readonly _credential: string;
   private _token: string | undefined;
   private readonly _fqdn: string;
+  private readonly _timeout: number = 3000;
 
   constructor(fqdn: string, username: string, password: string) {
     this._fqdn = fqdn;
@@ -39,6 +40,7 @@ export class vCenter {
       headers: {
         Authorization: `Basic ${this._credential}`,
       },
+      signal: AbortSignal.timeout(this._timeout),
     })
       .then((response) => {
         if (response.ok) {
@@ -65,8 +67,8 @@ export class vCenter {
     if (token) this._token = token as string;
   }
 
-  async ListVM(): Promise<VMSummary[] | undefined> {
-    const url = `https://${this._fqdn}/api/vcenter/vm`;
+  async ListVM(searchParamString?: string): Promise<VMSummary[] | undefined> {
+    const url = new URL(`/api/vcenter/vm${searchParamString ? `/?${searchParamString}` : ""}`, `https://${this._fqdn}`);
 
     while (!this._token) {
       await this.getToken();
@@ -77,6 +79,7 @@ export class vCenter {
       headers: {
         "vmware-api-session-id": this._token,
       },
+      signal: AbortSignal.timeout(this._timeout),
     })
       .then((response) => {
         if (response.ok) {
@@ -124,6 +127,7 @@ export class vCenter {
       headers: {
         "vmware-api-session-id": this._token,
       },
+      signal: AbortSignal.timeout(this._timeout),
     })
       .then((response) => {
         if (response.ok) {
@@ -167,6 +171,7 @@ export class vCenter {
       headers: {
         "vmware-api-session-id": this._token,
       },
+      signal: AbortSignal.timeout(this._timeout),
     })
       .then((response) => {
         if (response.ok) {
@@ -208,6 +213,7 @@ export class vCenter {
       headers: {
         "vmware-api-session-id": this._token,
       },
+      signal: AbortSignal.timeout(this._timeout),
     })
       .then((response) => {
         if (response.ok) {
@@ -259,6 +265,7 @@ export class vCenter {
       headers: {
         "vmware-api-session-id": this._token,
       },
+      signal: AbortSignal.timeout(this._timeout),
     })
       .then((response) => {
         if (response.ok) {
@@ -310,6 +317,7 @@ export class vCenter {
       headers: {
         "vmware-api-session-id": this._token,
       },
+      signal: AbortSignal.timeout(this._timeout),
     })
       .then((response) => {
         if (response.ok) {
@@ -355,6 +363,7 @@ export class vCenter {
       headers: {
         "vmware-api-session-id": this._token,
       },
+      signal: AbortSignal.timeout(this._timeout),
     })
       .then((response) => {
         if (response.ok) {
@@ -393,6 +402,7 @@ export class vCenter {
       headers: {
         "vmware-api-session-id": this._token,
       },
+      signal: AbortSignal.timeout(this._timeout),
     })
       .then((response) => {
         switch (response.status) {
@@ -466,6 +476,7 @@ export class vCenter {
       headers: {
         "vmware-api-session-id": this._token,
       },
+      signal: AbortSignal.timeout(this._timeout),
     })
       .then((response) => {
         if (response.ok) {
@@ -513,6 +524,7 @@ export class vCenter {
       headers: {
         "vmware-api-session-id": this._token,
       },
+      signal: AbortSignal.timeout(this._timeout),
     })
       .then((response) => {
         if (response.ok) {
@@ -560,6 +572,7 @@ export class vCenter {
       headers: {
         "vmware-api-session-id": this._token,
       },
+      signal: AbortSignal.timeout(this._timeout),
     })
       .then((response) => {
         if (response.ok) {
@@ -615,6 +628,7 @@ export class vCenter {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(body),
+      signal: AbortSignal.timeout(this._timeout),
     })
       .then((response) => {
         if (response.ok) {

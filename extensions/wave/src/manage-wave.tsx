@@ -1,18 +1,14 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import {
-  useGetBusinessCustomers,
-  useGetBusinesses,
-  useGetBusinessInvoices,
-  useGetBusinessProductsAndServices,
-} from "./lib/wave";
+import { useGetBusinesses, useGetBusinessInvoices } from "./lib/wave";
 import { Business, InvoiceStatus } from "./lib/types";
-import { getCustomerJoinedName, getInvoiceStatusColor } from "./lib/utils";
+import { getInvoiceStatusColor } from "./lib/utils";
 import { useCachedState, withAccessToken } from "@raycast/utils";
 import { HELP_LINKS, INVOICE_STATUSES } from "./lib/config";
-import CustomerStatement from "./lib/components/customer-statement";
 import { provider } from "./lib/oauth";
 import OpenInWave from "./lib/components/open-in-wave";
 import { useState } from "react";
+import BusinessCustomers from "./lib/components/business-customers";
+import BusinessProductsAndServices from "./lib/components/business-products-and-services";
 
 export default withAccessToken(provider)(ManageWave);
 
@@ -102,7 +98,14 @@ function BusinessInvoices({ business }: { business: Business }) {
               const markdown = `# ${title}
 | ${invoice.itemTitle} | ${invoice.unitTitle} | ${invoice.priceTitle} | ${invoice.amountTitle} |
 |----------------------|----------------------|-----------------------|------------------------|
-${invoice.items.map((item) => `| ${item.product.name} | ${item.quantity} | ${item.price} | ${item.subtotal.currency.symbol}${item.subtotal.value}`).join(`\n`)}`;
+${invoice.items.map((item) => `| ${item.product.name} | ${item.quantity} | ${item.price} | ${item.subtotal.currency.symbol}${item.subtotal.value}`).join(`\n`)}
+
+|  |  | Total | ${invoice.total.currency.symbol}${invoice.total.value} |
+|--|--|-------|--------------------------------------------------------|
+| | | Paid | ${invoice.amountPaid.currency.symbol}${invoice.amountPaid.value} |
+
+|  |  | Amount Due (${invoice.amountDue.currency.code}) | ${invoice.amountDue.currency.symbol}${invoice.amountDue.value} |
+|--|--|-------|--------------------------------------------------------|`;
 
               return (
                 <List.Item
@@ -163,157 +166,6 @@ ${invoice.items.map((item) => `| ${item.product.name} | ${item.quantity} | ${ite
                 />
               );
             })}
-        </List.Section>
-      )}
-    </List>
-  );
-}
-
-function BusinessCustomers({ business }: { business: Business }) {
-  const [isShowingDetail, setIsShowingDetail] = useCachedState("show-customer-details", false);
-
-  const { isLoading, data: customers } = useGetBusinessCustomers(business.id);
-  const isEmpty = !isLoading && !customers.length;
-
-  return (
-    <List isLoading={isLoading} isShowingDetail={!isEmpty && isShowingDetail} searchBarPlaceholder="Search customer">
-      {isEmpty ? (
-        <List.EmptyView
-          icon={{ source: "user.png", tintColor: { light: "", dark: "#000" } }}
-          title="All your customers in one place"
-          description="Save time creating invoices by adding customer details now, then track their payments with the Income by Customer report"
-          actions={
-            <ActionPanel>
-              <OpenInWave title="Add a customer" url={HELP_LINKS.AddCustomer} />
-            </ActionPanel>
-          }
-        />
-      ) : (
-        <List.Section title={`Businesses / ${business.name} / Customers`}>
-          {customers.map((customer) => {
-            return (
-              <List.Item
-                key={customer.id}
-                icon="no-user.png"
-                title={customer.name}
-                subtitle={isShowingDetail ? undefined : getCustomerJoinedName(customer)}
-                accessories={
-                  isShowingDetail ? undefined : [{ text: customer.email }, { date: new Date(customer.modifiedAt) }]
-                }
-                detail={
-                  <List.Item.Detail
-                    metadata={
-                      <List.Item.Detail.Metadata>
-                        <List.Item.Detail.Metadata.Label
-                          title="Created At"
-                          text={new Date(customer.createdAt).toISOString()}
-                        />
-                        <List.Item.Detail.Metadata.Label
-                          title="Modified At"
-                          text={new Date(customer.modifiedAt).toISOString()}
-                        />
-                        <List.Item.Detail.Metadata.Label title="Customer" text={customer.name} />
-                        <List.Item.Detail.Metadata.Label
-                          title="Name"
-                          text={getCustomerJoinedName(customer)}
-                          icon={!getCustomerJoinedName(customer) ? Icon.Minus : undefined}
-                        />
-                        {customer.website ? (
-                          <List.Item.Detail.Metadata.Link
-                            title="Website"
-                            text={customer.website}
-                            target={customer.website}
-                          />
-                        ) : (
-                          <List.Item.Detail.Metadata.Label title="Website" icon={Icon.Minus} />
-                        )}
-                        {customer.email ? (
-                          <List.Item.Detail.Metadata.Link
-                            title="Email"
-                            text={customer.email}
-                            target={`mailto:${customer.email}`}
-                          />
-                        ) : (
-                          <List.Item.Detail.Metadata.Label title="Email" icon={Icon.Minus} />
-                        )}
-                        {customer.phone ? (
-                          <List.Item.Detail.Metadata.Link
-                            title="Phone"
-                            text={customer.phone}
-                            target={`tel:${customer.phone}`}
-                          />
-                        ) : (
-                          <List.Item.Detail.Metadata.Label title="Phone" icon={Icon.Minus} />
-                        )}
-                      </List.Item.Detail.Metadata>
-                    }
-                  />
-                }
-                actions={
-                  <ActionPanel>
-                    <Action
-                      icon={Icon.AppWindowSidebarLeft}
-                      title="Toggle Details"
-                      onAction={() => setIsShowingDetail((prev) => !prev)}
-                    />
-                    <Action.Push
-                      icon={Icon.Paragraph}
-                      title="View Customer Statement"
-                      target={
-                        <CustomerStatement
-                          businessId={business.id}
-                          customers={customers}
-                          initialCustomerId={customer.id}
-                        />
-                      }
-                    />
-                  </ActionPanel>
-                }
-              />
-            );
-          })}
-        </List.Section>
-      )}
-    </List>
-  );
-}
-
-function BusinessProductsAndServices({ business }: { business: Business }) {
-  const [isShowingSubtitle, setIsShowingSubtitle] = useCachedState("show-products-subtitle", false);
-  const { isLoading, data: products } = useGetBusinessProductsAndServices(business.id);
-  const isEmpty = !isLoading && !products.length;
-
-  return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search product">
-      {isEmpty ? (
-        <List.EmptyView
-          title="You haven't added any products yet."
-          actions={
-            <ActionPanel>
-              <OpenInWave title="Add a product or service" url={HELP_LINKS.AddProductOrService} />
-            </ActionPanel>
-          }
-        />
-      ) : (
-        <List.Section title={`Businesses / ${business.name} / Products & Services`}>
-          {products.map((product) => (
-            <List.Item
-              key={product.id}
-              icon={Icon.Box}
-              title={product.name}
-              subtitle={!isShowingSubtitle ? undefined : product.description}
-              accessories={[{ text: product.price }]}
-              actions={
-                <ActionPanel>
-                  <Action
-                    icon={Icon.Text}
-                    title="Toggle Subtitle"
-                    onAction={() => setIsShowingSubtitle((prev) => !prev)}
-                  />
-                </ActionPanel>
-              }
-            />
-          ))}
         </List.Section>
       )}
     </List>

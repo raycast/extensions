@@ -1,5 +1,4 @@
-import { OAuth } from "@raycast/api";
-import fetch from "node-fetch";
+import { getPreferenceValues, OAuth } from "@raycast/api";
 
 const CLIENT_ID = "polar_ci_emNfLiLOhk0njeLomDs14g";
 
@@ -48,6 +47,9 @@ async function refreshTokens(
 }
 
 export const authenticate = async (): Promise<string> => {
+  const { access_token } = getPreferenceValues<Preferences>();
+  if (access_token) return access_token;
+
   const client = new OAuth.PKCEClient({
     redirectMethod: OAuth.RedirectMethod.Web,
     providerName: "Polar",

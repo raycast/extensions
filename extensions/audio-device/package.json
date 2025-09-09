@@ -12,7 +12,9 @@
     "thomas",
     "arthur_fontaine",
     "pernielsentikaer",
-    "taschaub"
+    "taschaub",
+    "cballenar",
+    "joshmedeski"
   ],
   "keywords": [
     "sound",
@@ -50,6 +52,108 @@
       "description": "Toggle the active audio output device between the favourites specified in the preferences",
       "mode": "no-view",
       "disabledByDefault": true
+    },
+    {
+      "name": "use-combo1",
+      "title": "Use Combo 1",
+      "subtitle": "Audio Device",
+      "description": "Switch to the first input/output device combination",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "comboName",
+          "required": true,
+          "title": "Combo Name",
+          "description": "A friendly name for this device combination",
+          "type": "textfield",
+          "default": "Combo 1"
+        },
+        {
+          "name": "input",
+          "required": true,
+          "title": "Input Device",
+          "description": "The name of the input device for this combo",
+          "type": "textfield",
+          "default": ""
+        },
+        {
+          "name": "output",
+          "required": true,
+          "title": "Output Device",
+          "description": "The name of the output device for this combo",
+          "type": "textfield",
+          "default": ""
+        }
+      ]
+    },
+    {
+      "name": "use-combo2",
+      "title": "Use Combo 2",
+      "subtitle": "Audio Device",
+      "description": "Switch to the second input/output device combination",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "comboName",
+          "required": true,
+          "title": "Combo Name",
+          "description": "A friendly name for this device combination",
+          "type": "textfield",
+          "default": "Combo 2"
+        },
+        {
+          "name": "input",
+          "required": true,
+          "title": "Input Device",
+          "description": "The name of the input device for this combo",
+          "type": "textfield",
+          "default": ""
+        },
+        {
+          "name": "output",
+          "required": true,
+          "title": "Output Device",
+          "description": "The name of the output device for this combo",
+          "type": "textfield",
+          "default": ""
+        }
+      ]
+    },
+    {
+      "name": "use-combo3",
+      "title": "Use Combo 3",
+      "subtitle": "Audio Device",
+      "description": "Switch to the third input/output device combination",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "comboName",
+          "required": true,
+          "title": "Combo Name",
+          "description": "A friendly name for this device combination",
+          "type": "textfield",
+          "default": "Combo 3"
+        },
+        {
+          "name": "input",
+          "required": true,
+          "title": "Input Device",
+          "description": "The name of the input device for this combo",
+          "type": "textfield",
+          "default": ""
+        },
+        {
+          "name": "output",
+          "required": true,
+          "title": "Output Device",
+          "description": "The name of the output device for this combo",
+          "type": "textfield",
+          "default": ""
+        }
+      ]
     }
   ],
   "preferences": [

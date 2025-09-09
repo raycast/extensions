@@ -1,5 +1,19 @@
 # Image Modification Changelog
 
+## [Bug Fixes] - 2025-07-07
+
+- Added support for detecting file selection in ForkLift's List and Icon views
+- Improve performance of "Apply Filter" AI Tool by supplying filter definitions
+- Fix vignette filter never getting applied
+- Fixed AVIF installation appearing to fail on the first try
+- Fixed AVIF encoder/decoder failing to run due to not following symlinks
+- Fixed selection detection scripts not raising Automation permission dialogs (and thus failing without reason)
+- Fixed ForkLift script not raising Accessibility permission dialog (and thus failing without reason)
+
+## [Bug Fix] - 2025-06-29
+
+- Remove `-lossless` flag from `dwebp` command.
+
 ## [Improved Selection Detection] - 2025-05-12
 
 - Added full support for QSpace Pro

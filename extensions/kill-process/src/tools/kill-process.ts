@@ -1,5 +1,6 @@
 import { exec } from "child_process";
 import { Tool } from "@raycast/api";
+import { getKillCommand, getPlatformSpecificErrorHelp } from "../utils/platform";
 
 /**
  * Input type for killing a process
@@ -19,6 +20,11 @@ type Input = {
    * Path to the process to kill
    */
   path?: string;
+
+  /**
+   * Whether to force kill the process (requires elevated privileges)
+   */
+  force?: boolean;
 };
 
 /**
@@ -28,12 +34,21 @@ type Input = {
  */
 export default async function killProcess(input: Input) {
   return new Promise((resolve, reject) => {
-    exec(`kill -9 ${input.id}`, (killErr) => {
+    const command = getKillCommand(input.id, input.force);
+
+    exec(command, (killErr) => {
       if (killErr) {
-        reject(killErr);
+        const errorHelp = getPlatformSpecificErrorHelp(input.force || false);
+        const error = new Error(`${errorHelp.title}: ${killErr.message}`);
+        reject(error);
         return;
       }
-      resolve(`Killed process: ${input.processName ? input.processName + " " : ""}(PID: ${input.id})`);
+
+      const processInfo = input.processName ? `${input.processName} ` : "";
+      resolve({
+        success: true,
+        message: `Killed process: ${processInfo}(PID: ${input.id})`,
+      });
     });
   });
 }

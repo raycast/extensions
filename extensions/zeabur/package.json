@@ -5,6 +5,10 @@
   "description": "The Raycast extension for Zeabur.",
   "icon": "extension-icon.png",
   "author": "ridemountainpig",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Documentation",
     "Data",
@@ -27,6 +31,22 @@
       "mode": "view"
     },
     {
+      "name": "manage-projects",
+      "title": "Manage Projects",
+      "subtitle": "Zeabur",
+      "description": "Manage Zeabur Projects",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "zeaburToken",
+          "title": "Zeabur Token",
+          "description": "Zeabur Token",
+          "type": "password",
+          "required": true
+        }
+      ]
+    },
+    {
       "name": "deploy-project",
       "title": "Deploy Project",
       "subtitle": "Zeabur",
@@ -35,20 +55,21 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.81.2",
-    "@raycast/utils": "^1.16.3",
+    "@raycast/api": "^1.102.6",
+    "@raycast/utils": "^2.2.1",
     "archiver": "^7.0.1",
-    "ignore": "^7.0.4",
+    "date-fns": "^4.1.0",
+    "ignore": "^7.0.5",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
+    "@raycast/eslint-config": "^2.0.4",
     "@types/archiver": "^6.0.3",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@types/node": "24.3.0",
+    "@types/react": "19.1.12",
+    "eslint": "^9.34.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
   },
   "scripts": {
     "build": "ray build -e dist",

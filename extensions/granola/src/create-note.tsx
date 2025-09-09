@@ -19,7 +19,6 @@ export default async function Command() {
       title: "Opened new note in Granola",
     });
   } catch (error) {
-    console.error("Error opening Granola:", error);
     await showFailureToast({ title: "Failed to open Granola", message: String(error) });
   }
 }

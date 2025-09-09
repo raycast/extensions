@@ -188,7 +188,7 @@ function APIKeysCreate({ onKeyCreated }: APIKeysCreateProps) {
       </Form.Dropdown>
       <Form.Description
         text={CREATE_API_KEY_PERMISSIONS.map((permission) => permission.title + ": " + permission.description).join(
-          `\n`
+          `\n`,
         )}
       />
 

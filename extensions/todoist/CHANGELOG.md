@@ -1,7 +1,67 @@
 # Todoist Changelog
 
+## [Improved Due Time Handling] - 2025-09-04
+
+- **Preserved Due Time on Date Conversion**: Ensured that the time component of a due date is preserved by using `toISOString()` during date-to-string conversions
+- **Fixed Due Time Getting Overriden By Current Time**: Set the time from parsedData whenever there's updates from nlp
+- **Enhanced NLP Robustness**: Resolved `TypeError: Cannot read properties of undefined (reading 'matchAll'` that occurred if users interacted with other form fields before entering a task title
+
+## [Fixed Create Task TypeError] - 2025-09-01
+
+- **Fixed TypeError on Task Creation**: Resolved `TypeError: Cannot read properties of undefined (reading 'length')` error when submitting the Create Task form by adding defensive checks for undefined arrays
+
+## [Fixed Create Task Form Initialization Error] - 2025-08-25
+
+- **Fixed TypeError on Task Creation**: Resolved intermittent `TypeError: Cannot read properties of undefined (reading 'length')` error when submitting the Create Task form
+
+## [Fixed Create Task Project and Assignee Assignment] - 2025-08-22
+
+- **Fixed Create Task API Issue**: Switched from `quickAddTask` to `addTask` API to use structured parameters instead of relying on server-side NLP parsing
+- **Direct Parameter Passing**: Form selections (project, assignee, labels, priority, dates) are now passed directly to the API instead of being embedded in text content
+- **Content Cleaning**: Automatically removes embedded project references (like "#ProjectName") from task content when projects are selected via dropdown, preventing duplication and keeping task titles clean
+- **Fixed Date Handling**: Resolved timezone issue where selected dates were shifting to the wrong day by using local date format instead of UTC conversion
+- **Maintained NLP Fallback**: Natural language parsing still works when users type project names and assignees in the content field
+- **Resolved Issue #21076**: Tasks created through Raycast now properly assign to selected projects and assignees instead of ending up in Inbox with "#ProjectName" appended to titles
+
+## [Fix Today view showing tomorrow's tasks] - 2025-08-19
+
+- **Fixed Today view filtering**: Resolved an issue where recurring tasks due tomorrow were incorrectly appearing in the Today view
+- **Improved date comparison logic**: Enhanced the date filtering algorithm to properly handle timezone differences and recurring task dates
+- **Fixed task grouping**: Ensured that filtered tasks are properly grouped without including unfiltered future tasks
+- **Better timezone handling**: Tasks are now compared at midnight in local timezone to avoid time-of-day confusion
+
+## [Enhanced Natural Language Task Creation] - 2025-08-13
+
+- **Smart NLP Parsing**: Added comprehensive natural language parsing for task creation with real-time form updates
+- **Bidirectional Sync**: Type parameters in the title OR use dropdowns - both update each other seamlessly
+- **Priority Support**: Use p1-p4 notation (p1=urgent, p2=high, p3=medium, p4=low) that maps to Todoist priority values
+- **Project Recognition**: Support for #ProjectName or #"Project Name" (with quotes for spaces) with smart shortest-first matching
+- **Label Detection**: Support for @label or @"Label Name" (with quotes for spaces) with intelligent case-insensitive matching
+- **Natural Date Parsing**: Advanced date recognition using chrono-node library supporting patterns like:
+  - Simple dates: "tomorrow", "next monday", "march 15"
+  - Times: "tomorrow at 3pm", "monday at 12:30"
+  - Relative: "in 3 days", "in 2 weeks"
+  - Complex: "next friday at 2pm", "monday morning"
+- **Deadline Support**: Use {date} notation for deadline parsing (e.g., {march 30}, {next month})
+- **Tiered Matching System**: Advanced matching algorithm with 4-tier priority:
+  1. Exact match (case-sensitive, with emojis)
+  2. Case-insensitive match (with emojis)
+  3. Emoji-insensitive match (case-sensitive)
+  4. Fully normalized match (case-insensitive, no emojis)
+- **Conflict Resolution**: "Last action wins" timestamp-based resolution for competing updates
+- **Smart Text Preservation**: Precise parameter replacement that maintains original text structure
+- **Todoist-Style API**: Always uses quickAddTask API for consistent behavior with native Todoist
+- **Enhanced User Experience**: Updated info message with clear examples and emoji-enhanced formatting
+
+## [Windows support] - 2025-07-24
+
+- Added Windows support
+
+## [Add task priority mapping for Todoist API] - 2025-06-12
+ - Add a priority mapping function to ensure the user-selected priority aligns with the priority value used in the backend.
+
 ## [Use confetti when completing tasks] - 2025-05-28
-- Add option to use the Raycast confetti command when completing tasks. 
+- Add option to use the Raycast confetti command when completing tasks.
 
 ## [Automatically create labels on quick add command] - 2025-05-09
 

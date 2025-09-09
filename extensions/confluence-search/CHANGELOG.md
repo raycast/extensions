@@ -1,5 +1,11 @@
 # Confluence Changelog
 
+## [Maintenance] - 2025-06-19
+
+- Get rid of `use-async-effect` dependency
+- Use the npm official registry
+- Bump all dependencies to the latest
+
 ## [Modernize Extension + Fix People Panel] - 2025-03-12
 
 - fix: "Popular" would error out if no popular items in feed
@@ -25,18 +31,19 @@
 - Add `Create Page`, `Create Blog`
 - Add `Switch Site` command to allow to change connected Confluence site
 
- ## [Update] - 2023-02-09
- - feat: add confluence filter by type, support page, blog, attachment.
- - feat: default only search page, [#4340](https://github.com/raycast/extensions/issues/4340)
- - fix: [#4523](https://github.com/raycast/extensions/issues/4523)
- - feat: upgrade raycast/api to 1.47.3
+## [Update] - 2023-02-09
 
- ## [Update] - 2023-02-07
+- feat: add confluence filter by type, support page, blog, attachment.
+- feat: default only search page, [#4340](https://github.com/raycast/extensions/issues/4340)
+- fix: [#4523](https://github.com/raycast/extensions/issues/4523)
+- feat: upgrade raycast/api to 1.47.3
 
- - fix: fix user icon not working
- - feat: add page type icon show
- - feat: show page's space name
+## [Update] - 2023-02-07
 
- ## [Update] - 2022-05-15
+- fix: fix user icon not working
+- feat: add page type icon show
+- feat: show page's space name
 
- - Added "unsafe https" option
+## [Update] - 2022-05-15
+
+- Added "unsafe https" option

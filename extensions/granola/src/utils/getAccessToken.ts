@@ -1,53 +1,58 @@
 import { promises as fs } from "fs";
-import * as path from "path";
-import * as os from "os";
+import { getSupabaseConfigPath } from "./granolaConfig";
 
 async function getAccessToken() {
-  // Get the user's home directory dynamically
-  const homeDirectory = os.homedir();
+  const filePath = getSupabaseConfigPath();
 
-  // Construct the path to the supabase.json file
-  const filePath = path.join(homeDirectory, "Library", "Application Support", "Granola", "supabase.json");
+  // Read and parse the JSON file
+  const fileContent = await fs.readFile(filePath, "utf8");
+  const jsonData = JSON.parse(fileContent);
 
-  try {
-    // Read and parse the JSON file
-    const fileContent = await fs.readFile(filePath, "utf8");
-    const jsonData = JSON.parse(fileContent);
+  let accessToken;
 
-    // Handle cognito_tokens which could be either a JSON string or an object
-    let cognitoTokens;
+  // Try WorkOS tokens first (updated auth method)
+  if (jsonData.workos_tokens) {
     try {
-      // If cognito_tokens is a string, parse it as JSON
+      let workosTokens;
+      if (typeof jsonData.workos_tokens === "string") {
+        workosTokens = JSON.parse(jsonData.workos_tokens);
+      } else if (typeof jsonData.workos_tokens === "object" && jsonData.workos_tokens !== null) {
+        workosTokens = jsonData.workos_tokens;
+      }
+
+      if (workosTokens?.access_token) {
+        accessToken = workosTokens.access_token;
+      }
+    } catch {
+      // Silently continue to Cognito fallback if WorkOS parsing fails
+    }
+  }
+
+  // Fallback to Cognito tokens for backward compatibility
+  if (!accessToken && jsonData.cognito_tokens) {
+    try {
+      let cognitoTokens;
       if (typeof jsonData.cognito_tokens === "string") {
         cognitoTokens = JSON.parse(jsonData.cognito_tokens);
       } else if (typeof jsonData.cognito_tokens === "object" && jsonData.cognito_tokens !== null) {
-        // If it's already an object, use it directly
         cognitoTokens = jsonData.cognito_tokens;
-      } else {
-        throw new Error("cognito_tokens is neither a valid JSON string nor an object");
       }
-    } catch (error) {
-      // Ensure error is treated as an Error object with a message property
-      const parseError = error instanceof Error ? error : new Error(String(error));
-      throw new Error(`Failed to parse local access token: ${parseError.message}`);
-    }
-    // Extract the access token
-    const accessToken = cognitoTokens.access_token;
 
-    if (!accessToken) {
-      throw new Error(
-        "Access token not found in your local Granola data. Make sure Granola is installed, running, and that you are logged in to the application.",
-      );
+      if (cognitoTokens?.access_token) {
+        accessToken = cognitoTokens.access_token;
+      }
+    } catch {
+      // Silently continue if Cognito parsing fails
     }
+  }
 
-    return accessToken;
-  } catch (error) {
-    console.error("Error retrieving access token:", error);
+  if (!accessToken) {
     throw new Error(
-      `Failed to get Granola access token: ${error}. Please make sure Granola is installed, running, and that you are logged in to the application.`,
-      { cause: error },
+      "Access token not found in your local Granola data. Make sure Granola is installed, running, and that you are logged in to the application.",
     );
   }
+
+  return accessToken;
 }
 
 export default getAccessToken;

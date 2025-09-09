@@ -6,6 +6,14 @@ export const QR_OPTIONS = {
   },
 } as const;
 
+export const QR_OPTIONS_PREVIEW = {
+  width: 512,
+  color: {
+    dark: "#000000",
+    light: "#FFFFFF", // white background for visibility
+  },
+} as const;
+
 export const SVG_OPTIONS = {
   width: 1536,
   color: {

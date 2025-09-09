@@ -43,6 +43,7 @@ export default function ImageList() {
                 shortcut={Keyboard.Shortcut.Common.Remove}
                 onAction={withToast({
                   action: () => removeImage(image),
+                  onStart: () => `Removing image ${imageTitle(image)}`,
                   onSuccess: () => `Image ${imageTitle(image)} removed`,
                   onFailure: ({ message }) => message,
                 })}

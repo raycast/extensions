@@ -7,7 +7,8 @@
   "author": "alanzchen",
   "contributors": [
     "kolacek.m",
-    "JonathanAquino"
+    "JonathanAquino",
+    "drewbabel"
   ],
   "categories": [
     "Productivity"
@@ -36,30 +37,54 @@
           "title": "Model Override",
           "placeholder": "Follow global model",
           "data": [
-            {
-              "title": "Follow global model",
-              "value": "global"
-            },
-            {
-              "title": "GPT-4o",
-              "value": "gpt-4o"
-            },
-            {
-              "title": "GPT-4o mini",
-              "value": "gpt-4o-mini"
-            },
-            {
-              "title": "GPT-4",
-              "value": "gpt-4"
-            },
-            {
-              "title": "GPT-4 Turbo",
-              "value": "gpt-4-turbo"
-            },
-            {
-              "title": "GPT-3.5 Turbo",
-              "value": "gpt-3.5-turbo"
-            }
+                    {
+                              "title": "Follow global model",
+                              "value": "global"
+                    },
+                    {
+                              "title": "GPT-4o",
+                              "value": "gpt-4o"
+                    },
+                    {
+                              "title": "GPT-4o mini",
+                              "value": "gpt-4o-mini"
+                    },
+                    {
+                              "title": "GPT-4.1",
+                              "value": "gpt-4.1"
+                    },
+                    {
+                              "title": "GPT-4.1 mini",
+                              "value": "gpt-4.1-mini"
+                    },
+                    {
+                              "title": "GPT-4.1 nano",
+                              "value": "gpt-4.1-nano"
+                    },
+                    {
+                              "title": "o1",
+                              "value": "o1"
+                    },
+                    {
+                              "title": "o1-mini",
+                              "value": "o1-mini"
+                    },
+                    {
+                              "title": "o1-pro",
+                              "value": "o1-pro"
+                    },
+                    {
+                              "title": "o3",
+                              "value": "o3"
+                    },
+                    {
+                              "title": "o3-mini",
+                              "value": "o3-mini"
+                    },
+                    {
+                              "title": "o4-mini",
+                              "value": "o4-mini"
+                    }
           ]
         }
       ]
@@ -86,30 +111,54 @@
           "title": "Model Override",
           "placeholder": "Follow global model",
           "data": [
-            {
-              "title": "Follow global model",
-              "value": "global"
-            },
-            {
-              "title": "GPT-4o",
-              "value": "gpt-4o"
-            },
-            {
-              "title": "GPT-4o mini",
-              "value": "gpt-4o-mini"
-            },
-            {
-              "title": "GPT-4",
-              "value": "gpt-4"
-            },
-            {
-              "title": "GPT-4 Turbo",
-              "value": "gpt-4-turbo"
-            },
-            {
-              "title": "GPT-3.5 Turbo",
-              "value": "gpt-3.5-turbo"
-            }
+                    {
+                              "title": "Follow global model",
+                              "value": "global"
+                    },
+                    {
+                              "title": "GPT-4o",
+                              "value": "gpt-4o"
+                    },
+                    {
+                              "title": "GPT-4o mini",
+                              "value": "gpt-4o-mini"
+                    },
+                    {
+                              "title": "GPT-4.1",
+                              "value": "gpt-4.1"
+                    },
+                    {
+                              "title": "GPT-4.1 mini",
+                              "value": "gpt-4.1-mini"
+                    },
+                    {
+                              "title": "GPT-4.1 nano",
+                              "value": "gpt-4.1-nano"
+                    },
+                    {
+                              "title": "o1",
+                              "value": "o1"
+                    },
+                    {
+                              "title": "o1-mini",
+                              "value": "o1-mini"
+                    },
+                    {
+                              "title": "o1-pro",
+                              "value": "o1-pro"
+                    },
+                    {
+                              "title": "o3",
+                              "value": "o3"
+                    },
+                    {
+                              "title": "o3-mini",
+                              "value": "o3-mini"
+                    },
+                    {
+                              "title": "o4-mini",
+                              "value": "o4-mini"
+                    }
           ]
         }
       ]
@@ -136,30 +185,54 @@
           "title": "Model Override",
           "placeholder": "Follow global model",
           "data": [
-            {
-              "title": "Follow global model",
-              "value": "global"
-            },
-            {
-              "title": "GPT-4o",
-              "value": "gpt-4o"
-            },
-            {
-              "title": "GPT-4o mini",
-              "value": "gpt-4o-mini"
-            },
-            {
-              "title": "GPT-4",
-              "value": "gpt-4"
-            },
-            {
-              "title": "GPT-4 Turbo",
-              "value": "gpt-4-turbo"
-            },
-            {
-              "title": "GPT-3.5 Turbo",
-              "value": "gpt-3.5-turbo"
-            }
+                    {
+                              "title": "Follow global model",
+                              "value": "global"
+                    },
+                    {
+                              "title": "GPT-4o",
+                              "value": "gpt-4o"
+                    },
+                    {
+                              "title": "GPT-4o mini",
+                              "value": "gpt-4o-mini"
+                    },
+                    {
+                              "title": "GPT-4.1",
+                              "value": "gpt-4.1"
+                    },
+                    {
+                              "title": "GPT-4.1 mini",
+                              "value": "gpt-4.1-mini"
+                    },
+                    {
+                              "title": "GPT-4.1 nano",
+                              "value": "gpt-4.1-nano"
+                    },
+                    {
+                              "title": "o1",
+                              "value": "o1"
+                    },
+                    {
+                              "title": "o1-mini",
+                              "value": "o1-mini"
+                    },
+                    {
+                              "title": "o1-pro",
+                              "value": "o1-pro"
+                    },
+                    {
+                              "title": "o3",
+                              "value": "o3"
+                    },
+                    {
+                              "title": "o3-mini",
+                              "value": "o3-mini"
+                    },
+                    {
+                              "title": "o4-mini",
+                              "value": "o4-mini"
+                    }
           ]
         }
       ]
@@ -186,30 +259,54 @@
           "title": "Model Override",
           "placeholder": "Follow global model",
           "data": [
-            {
-              "title": "Follow global model",
-              "value": "global"
-            },
-            {
-              "title": "GPT-4o",
-              "value": "gpt-4o"
-            },
-            {
-              "title": "GPT-4o mini",
-              "value": "gpt-4o-mini"
-            },
-            {
-              "title": "GPT-4",
-              "value": "gpt-4"
-            },
-            {
-              "title": "GPT-4 Turbo",
-              "value": "gpt-4-turbo"
-            },
-            {
-              "title": "GPT-3.5 Turbo",
-              "value": "gpt-3.5-turbo"
-            }
+                    {
+                              "title": "Follow global model",
+                              "value": "global"
+                    },
+                    {
+                              "title": "GPT-4o",
+                              "value": "gpt-4o"
+                    },
+                    {
+                              "title": "GPT-4o mini",
+                              "value": "gpt-4o-mini"
+                    },
+                    {
+                              "title": "GPT-4.1",
+                              "value": "gpt-4.1"
+                    },
+                    {
+                              "title": "GPT-4.1 mini",
+                              "value": "gpt-4.1-mini"
+                    },
+                    {
+                              "title": "GPT-4.1 nano",
+                              "value": "gpt-4.1-nano"
+                    },
+                    {
+                              "title": "o1",
+                              "value": "o1"
+                    },
+                    {
+                              "title": "o1-mini",
+                              "value": "o1-mini"
+                    },
+                    {
+                              "title": "o1-pro",
+                              "value": "o1-pro"
+                    },
+                    {
+                              "title": "o3",
+                              "value": "o3"
+                    },
+                    {
+                              "title": "o3-mini",
+                              "value": "o3-mini"
+                    },
+                    {
+                              "title": "o4-mini",
+                              "value": "o4-mini"
+                    }
           ]
         }
       ]
@@ -228,30 +325,54 @@
           "title": "Model Override",
           "placeholder": "Follow global model",
           "data": [
-            {
-              "title": "Follow global model",
-              "value": "global"
-            },
-            {
-              "title": "GPT-4o",
-              "value": "gpt-4o"
-            },
-            {
-              "title": "GPT-4o mini",
-              "value": "gpt-4o-mini"
-            },
-            {
-              "title": "GPT-4",
-              "value": "gpt-4"
-            },
-            {
-              "title": "GPT-4 Turbo",
-              "value": "gpt-4-turbo"
-            },
-            {
-              "title": "GPT-3.5 Turbo",
-              "value": "gpt-3.5-turbo"
-            }
+                    {
+                              "title": "Follow global model",
+                              "value": "global"
+                    },
+                    {
+                              "title": "GPT-4o",
+                              "value": "gpt-4o"
+                    },
+                    {
+                              "title": "GPT-4o mini",
+                              "value": "gpt-4o-mini"
+                    },
+                    {
+                              "title": "GPT-4.1",
+                              "value": "gpt-4.1"
+                    },
+                    {
+                              "title": "GPT-4.1 mini",
+                              "value": "gpt-4.1-mini"
+                    },
+                    {
+                              "title": "GPT-4.1 nano",
+                              "value": "gpt-4.1-nano"
+                    },
+                    {
+                              "title": "o1",
+                              "value": "o1"
+                    },
+                    {
+                              "title": "o1-mini",
+                              "value": "o1-mini"
+                    },
+                    {
+                              "title": "o1-pro",
+                              "value": "o1-pro"
+                    },
+                    {
+                              "title": "o3",
+                              "value": "o3"
+                    },
+                    {
+                              "title": "o3-mini",
+                              "value": "o3-mini"
+                    },
+                    {
+                              "title": "o4-mini",
+                              "value": "o4-mini"
+                    }
           ]
         }
       ]
@@ -270,30 +391,54 @@
           "title": "Model Override",
           "placeholder": "Follow global model",
           "data": [
-            {
-              "title": "Follow global model",
-              "value": "global"
-            },
-            {
-              "title": "GPT-4o",
-              "value": "gpt-4o"
-            },
-            {
-              "title": "GPT-4o mini",
-              "value": "gpt-4o-mini"
-            },
-            {
-              "title": "GPT-4",
-              "value": "gpt-4"
-            },
-            {
-              "title": "GPT-4 Turbo",
-              "value": "gpt-4-turbo"
-            },
-            {
-              "title": "GPT-3.5 Turbo",
-              "value": "gpt-3.5-turbo"
-            }
+                    {
+                              "title": "Follow global model",
+                              "value": "global"
+                    },
+                    {
+                              "title": "GPT-4o",
+                              "value": "gpt-4o"
+                    },
+                    {
+                              "title": "GPT-4o mini",
+                              "value": "gpt-4o-mini"
+                    },
+                    {
+                              "title": "GPT-4.1",
+                              "value": "gpt-4.1"
+                    },
+                    {
+                              "title": "GPT-4.1 mini",
+                              "value": "gpt-4.1-mini"
+                    },
+                    {
+                              "title": "GPT-4.1 nano",
+                              "value": "gpt-4.1-nano"
+                    },
+                    {
+                              "title": "o1",
+                              "value": "o1"
+                    },
+                    {
+                              "title": "o1-mini",
+                              "value": "o1-mini"
+                    },
+                    {
+                              "title": "o1-pro",
+                              "value": "o1-pro"
+                    },
+                    {
+                              "title": "o3",
+                              "value": "o3"
+                    },
+                    {
+                              "title": "o3-mini",
+                              "value": "o3-mini"
+                    },
+                    {
+                              "title": "o4-mini",
+                              "value": "o4-mini"
+                    }
           ]
         }
       ]
@@ -320,30 +465,54 @@
           "title": "Model Override",
           "placeholder": "Follow global model",
           "data": [
-            {
-              "title": "Follow global model",
-              "value": "global"
-            },
-            {
-              "title": "GPT-4o",
-              "value": "gpt-4o"
-            },
-            {
-              "title": "GPT-4o mini",
-              "value": "gpt-4o-mini"
-            },
-            {
-              "title": "GPT-4",
-              "value": "gpt-4"
-            },
-            {
-              "title": "GPT-4 Turbo",
-              "value": "gpt-4-turbo"
-            },
-            {
-              "title": "GPT-3.5 Turbo",
-              "value": "gpt-3.5-turbo"
-            }
+                    {
+                              "title": "Follow global model",
+                              "value": "global"
+                    },
+                    {
+                              "title": "GPT-4o",
+                              "value": "gpt-4o"
+                    },
+                    {
+                              "title": "GPT-4o mini",
+                              "value": "gpt-4o-mini"
+                    },
+                    {
+                              "title": "GPT-4.1",
+                              "value": "gpt-4.1"
+                    },
+                    {
+                              "title": "GPT-4.1 mini",
+                              "value": "gpt-4.1-mini"
+                    },
+                    {
+                              "title": "GPT-4.1 nano",
+                              "value": "gpt-4.1-nano"
+                    },
+                    {
+                              "title": "o1",
+                              "value": "o1"
+                    },
+                    {
+                              "title": "o1-mini",
+                              "value": "o1-mini"
+                    },
+                    {
+                              "title": "o1-pro",
+                              "value": "o1-pro"
+                    },
+                    {
+                              "title": "o3",
+                              "value": "o3"
+                    },
+                    {
+                              "title": "o3-mini",
+                              "value": "o3-mini"
+                    },
+                    {
+                              "title": "o4-mini",
+                              "value": "o4-mini"
+                    }
           ]
         }
       ]
@@ -370,30 +539,54 @@
           "title": "Model Override",
           "placeholder": "Follow global model",
           "data": [
-            {
-              "title": "Follow global model",
-              "value": "global"
-            },
-            {
-              "title": "GPT-4o",
-              "value": "gpt-4o"
-            },
-            {
-              "title": "GPT-4o mini",
-              "value": "gpt-4o-mini"
-            },
-            {
-              "title": "GPT-4",
-              "value": "gpt-4"
-            },
-            {
-              "title": "GPT-4 Turbo",
-              "value": "gpt-4-turbo"
-            },
-            {
-              "title": "GPT-3.5 Turbo",
-              "value": "gpt-3.5-turbo"
-            }
+                    {
+                              "title": "Follow global model",
+                              "value": "global"
+                    },
+                    {
+                              "title": "GPT-4o",
+                              "value": "gpt-4o"
+                    },
+                    {
+                              "title": "GPT-4o mini",
+                              "value": "gpt-4o-mini"
+                    },
+                    {
+                              "title": "GPT-4.1",
+                              "value": "gpt-4.1"
+                    },
+                    {
+                              "title": "GPT-4.1 mini",
+                              "value": "gpt-4.1-mini"
+                    },
+                    {
+                              "title": "GPT-4.1 nano",
+                              "value": "gpt-4.1-nano"
+                    },
+                    {
+                              "title": "o1",
+                              "value": "o1"
+                    },
+                    {
+                              "title": "o1-mini",
+                              "value": "o1-mini"
+                    },
+                    {
+                              "title": "o1-pro",
+                              "value": "o1-pro"
+                    },
+                    {
+                              "title": "o3",
+                              "value": "o3"
+                    },
+                    {
+                              "title": "o3-mini",
+                              "value": "o3-mini"
+                    },
+                    {
+                              "title": "o4-mini",
+                              "value": "o4-mini"
+                    }
           ]
         }
       ]
@@ -418,27 +611,51 @@
       "description": "OpenAI LLM to use for your commands",
       "type": "dropdown",
       "data": [
-        {
-          "title": "GPT-4o",
-          "value": "gpt-4o"
-        },
-        {
-          "title": "GPT-4o mini",
-          "value": "gpt-4o-mini"
-        },
-        {
-          "title": "GPT-4",
-          "value": "gpt-4"
-        },
-        {
-          "title": "GPT-4 Turbo",
-          "value": "gpt-4-turbo"
-        },
-        {
-          "title": "GPT-3.5 Turbo",
-          "value": "gpt-3.5-turbo"
-        }
-      ],
+                {
+                        "title": "GPT-4o",
+                        "value": "gpt-4o"
+                },
+                {
+                        "title": "GPT-4o mini",
+                        "value": "gpt-4o-mini"
+                },
+                {
+                        "title": "GPT-4.1",
+                        "value": "gpt-4.1"
+                },
+                {
+                        "title": "GPT-4.1 mini",
+                        "value": "gpt-4.1-mini"
+                },
+                {
+                        "title": "GPT-4.1 nano",
+                        "value": "gpt-4.1-nano"
+                },
+                {
+                        "title": "o1",
+                        "value": "o1"
+                },
+                {
+                        "title": "o1-mini",
+                        "value": "o1-mini"
+                },
+                {
+                        "title": "o1-pro",
+                        "value": "o1-pro"
+                },
+                {
+                        "title": "o3",
+                        "value": "o3"
+                },
+                {
+                        "title": "o3-mini",
+                        "value": "o3-mini"
+                },
+                {
+                        "title": "o4-mini",
+                        "value": "o4-mini"
+                }
+        ],
       "required": true,
       "title": "OpenAI Model"
     },
@@ -462,6 +679,7 @@
   },
   "scripts": {
     "build": "ray build -e dist",
+    "build-package": "node scripts/build-package.js",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

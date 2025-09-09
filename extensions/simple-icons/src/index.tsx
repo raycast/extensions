@@ -14,6 +14,7 @@ import {
   showHUD,
   showToast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import debounce from "lodash/debounce.js";
 import { getIconSlug } from "./vender/simple-icons-sdk.js";
 import { CopyFontEntities, LaunchCommand, Supports, actions, defaultActionsOrder } from "./actions.js";
@@ -23,6 +24,7 @@ import {
   displaySimpleIconsFontFeatures,
   enableAiSearch,
   getAliases,
+  getRelativeFileLink,
   loadCachedJson,
   useSearch,
   useVersion,
@@ -51,11 +53,8 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
       title: "Loading Icons",
     });
 
-    await cacheAssetPack(version).catch(async () => {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to download icons asset",
-      });
+    await cacheAssetPack(version).catch(async (error) => {
+      await showFailureToast(error, { title: "Failed to cache asset pack" });
       await setTimeout(1200);
     });
     const json = await loadCachedJson(version).catch(() => {
@@ -84,7 +83,9 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
 
   useEffect(() => {
     if (version) {
-      fetchIcons(version);
+      fetchIcons(version).catch((error) => {
+        showFailureToast(error, { title: "Failed to fetch icons" });
+      });
     }
   }, [version]);
 
@@ -149,7 +150,7 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
         // Limit to 500 icons to avoid performance issues
         searchResult.slice(0, 500).map((icon) => {
           const slug = getIconSlug(icon);
-          const fileLink = `pack/simple-icons-${version}/icons/${slug}.svg`;
+          const fileLink = getRelativeFileLink(slug, version);
           const aliases = getAliases(icon);
 
           return (

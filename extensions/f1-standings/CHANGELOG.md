@@ -1,6 +1,11 @@
 # F1 Standings Changelog
 
-## [🐞 Fixed default values for AI tools] - {PR_MERGE_DATE}
+## [🏃‍♂️‍➡️ Added Sprint Qualifying Times] - 2025-07-05
+
+- Added Sprint Qualifying Times
+- Choose Time Format in Race Schedule Command (16:00 or 4:00 PM)
+
+## [🐞 Fixed default values for AI tools] - 2025-05-02
 
 - Fixed default values for AI tools
 

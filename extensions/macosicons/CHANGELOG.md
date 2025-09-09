@@ -1,5 +1,11 @@
 # macOSIcons.com Changelog
 
+## [Fix API Error Handling] - 2025-07-17
+
+- Fix error handling to check HTTP status before parsing JSON response
+- Properly handle non-JSON error responses (e.g., Cloudflare HTML 403 pages)
+- Improve error messages to include HTTP status codes and response body
+
 ## [User Applications] - 2025-06-04
 
 - Adds support for applying icons to user applications (`~/Applications`).

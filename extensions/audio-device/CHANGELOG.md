@@ -1,5 +1,17 @@
 # Audio Device Changelog
 
+## [Update] - 2025-08-04
+
+- Added frecency sorting to the devices list
+
+## [Update] - 2025-06-26
+
+- Added support for device name for quick links
+
+## [Update] - 2025-06-11
+
+- Added combo commands to simultaneously change input and output device
+
 ## [Update] - 2025-02-25
 
 - Added icons for AirPods, AirPlay, and Bluetooth devices

@@ -12,9 +12,3 @@ For future releases:
 - Write comments on patches or issues.
 - See the sync status for a project.
 - And much more.
-
-For this extension to browse your Radicle storage you need to:
-
-- have the Radicle binaries installed, [more details here](https://radicle.xyz)
-- create your Radicle identity with `$ rad auth`
-- start your `radicle-httpd` with `$ radicle-httpd`

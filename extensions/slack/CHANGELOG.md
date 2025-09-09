@@ -1,5 +1,19 @@
 # Slack Changelog
 
+## [Fix Send Message Missing Scope Error] - 2025-08-25
+- Add missing `chat:write` scope to fix “missing_scope” error when using the **Send Message** command.
+
+## [Channel, Channel History bug fixes and "Search Message" to Tools] - 2025-07-10
+- Added the `search.message` slack api to enable AI to use the tool (search for full messages)
+- Fixed failure to find channelId when using get-channel-history with AI
+- Fixed issue that prevented importing all slack channels
+
+## [Fix YAML manifest errors in README] - 2025-06-25
+
+## [Fix search messages from specific user] - 2025-06-23
+
+- Fix search messages from specific user (using `from:<@${user.id}>` instead of `from:${user.name}`)
+
 ## [Fix Emoji Search Missing Scope Error] - 2025-05-28
 
 - Add missing `emoji:read` scope to fix "missing_scope" error when using Search Emojis command

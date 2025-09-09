@@ -5,6 +5,9 @@
   "description": "Show friends in other timezones",
   "icon": "icon.png",
   "author": "andrebreia",
+  "contributors": [
+    "jelias"
+  ],
   "categories": [
     "Fun"
   ],

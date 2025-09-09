@@ -1,5 +1,22 @@
 # Bitwarden Changelog
 
+## [Improvements] - 2025-09-02
+
+- Sync vault on command launch
+- Reorganize preferences
+
+## [Fix] - 2025-06-26
+
+- Catch any errors caused by `OTPAuth.TOTP` constructor
+
+## [Fix] - 2025-06-25
+
+- Check if user can access `BrowserExtension` before getting tabs
+
+## [Fix] - 2025-06-24
+
+- More authenticator error handling to prevent "TypeError: t is not a function" error
+
 ## [Fix] - 2025-06-05
 
 - Fix attempt for authenticator "TypeError: t is not a function" error

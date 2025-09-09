@@ -124,5 +124,9 @@
       "label": "Automatically parse dates and tags"
     }
   ],
-  "title": "Todo List"
+  "title": "Todo List",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

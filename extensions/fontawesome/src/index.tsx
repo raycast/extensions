@@ -6,11 +6,15 @@ import { familyStylesByPrefix, iconForStyle, iconActions } from './utils';
 
 //GraphQL Query to fetch icons for a specific style
 const iconQuery = (squery: string, stype: string) => `query Search {
-  search(query:"${squery}", version: "6.5.2", first: 48) {
+  search(query:"${squery}", version: "6.7.2", first: 48) {
       id
       unicode
       svgs(filter: { familyStyles: [
-        { family: ${stype.split(', ')[0].toUpperCase()}, style: ${stype.split(', ')[1].toUpperCase()} }
+        { family: ${
+          stype.split(' ').length === 3
+            ? stype.split(', ')[0].replace(' ', '_').toUpperCase()
+            : stype.split(', ')[0].toUpperCase()
+        }, style: ${stype.split(', ')[1].toUpperCase()} }
         { family: CLASSIC, style: BRANDS }
       ] }) {
           html
@@ -95,7 +99,7 @@ export default function Command() {
             <>
               <Grid.Dropdown.Section title="Classic Icons">
                 {Object.entries(familyStylesByPrefix)
-                  .slice(5, 10)
+                  .slice(8, 13)
                   .map(([key, value]) => (
                     <Grid.Dropdown.Item
                       key={key}
@@ -119,7 +123,19 @@ export default function Command() {
               </Grid.Dropdown.Section>
               <Grid.Dropdown.Section title="Duotone Icons">
                 {Object.entries(familyStylesByPrefix)
-                  .slice(4, 5)
+                  .slice(4, 8)
+                  .map(([key, value]) => (
+                    <Grid.Dropdown.Item
+                      key={key}
+                      title={value}
+                      value={key}
+                      icon={{ source: iconForStyle(key), tintColor: Color.SecondaryText }}
+                    />
+                  ))}
+              </Grid.Dropdown.Section>
+              <Grid.Dropdown.Section title="Sharp Duotone Icons">
+                {Object.entries(familyStylesByPrefix)
+                  .slice(13, 17)
                   .map(([key, value]) => (
                     <Grid.Dropdown.Item
                       key={key}

@@ -1,5 +1,9 @@
 # Jira Search Changelog
 
+## [Fixes] - 2025-09-09
+
+- Fixed issue search to work again
+
 ## [Update] - 2023-05-16
 
 - Show board type in board search

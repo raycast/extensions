@@ -6,7 +6,7 @@ import {
   updateTask,
   getAllUncompletedTasks,
 } from "../utils/taskOperations";
-import { Preferences, Priority, Task } from "../types";
+import { Priority, Task } from "../types";
 import { priorityToValue } from "../utils/priority";
 
 export const useTasks = (preferences: Preferences) => {

@@ -1,6 +1,7 @@
 import { ActionPanel, Icon, List, Action } from "@raycast/api";
 import { useTeams } from "./hooks/useTeams";
 import { ListDocs } from "./views/DocList/ListDocs";
+import { OpenInClickUpAction } from "./components/OpenInClickUpAction";
 
 export default function Teams() {
   const { isLoading, teams } = useTeams();
@@ -19,6 +20,7 @@ export default function Teams() {
                   title="Docs Page"
                   target={<ListDocs workspaceId={team.id} workspaceName={team.name} />}
                 />
+                <OpenInClickUpAction route={team.id} />
               </ActionPanel>
             }
           />

@@ -19,23 +19,24 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.71.4",
+    "@raycast/api": "^1.99.4",
+    "@raycast/utils": "^2.0.0",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.2.2"
+    "@eslint/js": "^9.27.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.1",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish",
     "prettier:check": "prettier --check '**/*.{js,jsx,ts,tsx,json,css,md}'",
     "prettier:format": "prettier --write '**/*.{js,jsx,ts,tsx,json,css,md}'"
   }

@@ -32,18 +32,28 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "repo-locations",
+      "title": "Location of git projects",
+      "description": "A directory to search for git projects",
+      "default": "~/",
+      "type": "directory",
+      "required": true
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.99.0",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.102.4",
+    "@raycast/utils": "^2.2.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
+    "@types/react": "19.1.10",
+    "eslint": "^9.33.0",
     "eslint-plugin-react-hooks": "^5.2.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
   },
   "scripts": {
     "build": "ray build",
@@ -51,6 +61,7 @@
     "lint": "ray lint",
     "lint:fix": "ray lint --fix",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "pull-contributions": "ray pull-contributions"
   }
 }

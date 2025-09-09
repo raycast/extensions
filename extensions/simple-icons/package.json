@@ -3,7 +3,7 @@
   "name": "simple-icons",
   "title": "Brand Icons - simpleicons.org",
   "type": "module",
-  "description": "Browse, Search, and Copy 3200+ popular brand icons from Simple Icons.",
+  "description": "Browse, Search, and Copy 3300+ popular brand icons from Simple Icons.",
   "icon": "simpleicons-icon.png",
   "author": "litomore",
   "categories": [
@@ -22,7 +22,7 @@
     {
       "name": "index",
       "title": "Search Brand Icons",
-      "description": "Browse, search, and copy 3200+ free SVG icons for popular brands from Simple Icons",
+      "description": "Browse, search, and copy 3300+ SVG icons for popular brands from Simple Icons",
       "mode": "view"
     }
   ],
@@ -37,6 +37,15 @@
       "default": ""
     },
     {
+      "name": "releaseVersion",
+      "title": "Release Version",
+      "placeholder": "e.g. simple-icons@latest",
+      "description": "This field is used to specify the release version of the npm package. It is used to download the asset pack from npm. You can use a versioned release (e.g. `simple-icons@14`) or a tag (e.g. `latest`). If you leave it empty, the extension will use the latest version of the package.",
+      "required": false,
+      "type": "textfield",
+      "default": "simple-icons"
+    },
+    {
       "name": "defaultDetailAction",
       "title": "Default detail action",
       "description": "The default action when viewing detail of an item",
@@ -46,6 +55,10 @@
         {
           "value": "OpenWith",
           "title": "Open With"
+        },
+        {
+          "value": "MakeBadge",
+          "title": "Make Badge"
         },
         {
           "value": "CopySvg",
@@ -110,21 +123,24 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.99.3",
-    "@raycast/utils": "^1.19.1",
+    "@raycast/api": "^1.102.3",
+    "@raycast/utils": "^2.2.0",
     "date-fns": "^4.1.0",
     "fast-fuzzy": "^1.12.0",
     "got": "^14.4.7",
     "lodash": "^4.17.21",
-    "nano-spawn": "^1.0.2",
-    "raycast-cross-extension": "^0.2.3"
+    "pacote": "^21.0.0",
+    "raycast-cross-extension": "^0.2.3",
+    "semver": "^7.7.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
-    "@types/lodash": "^4.17.17",
-    "@types/react": "^19.1.6",
-    "eslint": "^9.27.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.3"
+    "@types/lodash": "^4.17.20",
+    "@types/pacote": "^11.1.8",
+    "@types/react": "^19.1.9",
+    "@types/semver": "^7.7.0",
+    "eslint": "^9.32.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
   }
 }

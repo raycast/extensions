@@ -14,7 +14,7 @@ function readCACertFileSync(filename: string): Buffer | undefined {
     const data = fs.readFileSync(filename);
     return data;
   } catch (e) {
-    throw Error(`Could not read CA cert file ${filename}`);
+    throw Error(`Could not read CA cert file ${filename} ${e}`);
   }
 }
 
@@ -23,7 +23,7 @@ function readCertFileSync(filename: string): Buffer | undefined {
     const data = fs.readFileSync(filename);
     return data;
   } catch (e) {
-    throw Error(`Could not read cert file ${filename}`);
+    throw Error(`Could not read cert file ${filename} ${e}`);
   }
 }
 
@@ -42,7 +42,7 @@ export function getHttpAgent(): https.Agent | undefined {
   return agent;
 }
 
-/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 const activateAPILogging = false;
 
@@ -70,6 +70,7 @@ function userFromJson(data: any): User {
 export function dataToProject(project: any): Project {
   return {
     id: project.id,
+    group_id: project.namespace.kind == "group" ? project.namespace.id : 0,
     name: project.name,
     name_with_namespace: project.name_with_namespace,
     fullPath: project.path_with_namespace,
@@ -142,11 +143,22 @@ export function jsonDataToIssue(issue: any): Issue {
   };
 }
 
-function paramString(params: { [key: string]: string }): string {
+/**
+ * Converts a params object to a query string, supporting arrays and nested keys (e.g., labels[], not[labels][]).
+ * - Arrays are output as multiple key[]=value pairs.
+ * - Nested keys (e.g., not[labels][]) are supported if the key is in the form 'not[labels][]'.
+ */
+function paramString(params: { [key: string]: any }): string {
   const p: string[] = [];
   for (const k in params) {
-    const v = encodeURI(params[k]);
-    p.push(`${k}=${v}`);
+    const v = params[k];
+    if (Array.isArray(v)) {
+      for (const item of v) {
+        p.push(`${encodeURIComponent(k)}=${encodeURIComponent(item)}`);
+      }
+    } else {
+      p.push(`${encodeURIComponent(k)}=${encodeURIComponent(v)}`);
+    }
   }
   let prefix = "";
   if (p.length > 0) {
@@ -301,6 +313,7 @@ export class Todo {
 
 export class Project {
   public id = 0;
+  public group_id = 0;
   public name_with_namespace = "";
   public name = "";
   public fullPath = "";
@@ -525,8 +538,38 @@ export class GitLab {
     }
   }
 
+  /**
+   * Fetches issues for a project, supporting label inclusion and exclusion.
+   * If params.includeLabels or params.excludeLabels are provided (comma-separated strings),
+   * they are mapped to the correct GitLab API query parameters:
+   *   - labels[] for inclusion
+   *   - not[labels][] for exclusion
+   */
   async getIssues(params: Record<string, any>, project?: Project, all?: boolean): Promise<Issue[]> {
     const projectPrefix = project ? `projects/${project.id}/` : "";
+
+    // Build correct label filter params for GitLab API
+    if (params.includeLabels) {
+      const includeArr = params.includeLabels
+        .split(",")
+        .map((l: string) => l.trim())
+        .filter((l: string) => l.length > 0);
+      if (includeArr.length > 0) {
+        params["labels[]"] = includeArr;
+      }
+      delete params.includeLabels;
+    }
+    if (params.excludeLabels) {
+      const excludeArr = params.excludeLabels
+        .split(",")
+        .map((l: string) => l.trim())
+        .filter((l: string) => l.length > 0);
+      if (excludeArr.length > 0) {
+        params["not[labels][]"] = excludeArr;
+      }
+      delete params.excludeLabels;
+    }
+
     if (!params.with_labels_details) {
       params.with_labels_details = "true";
     }
@@ -611,14 +654,14 @@ export class GitLab {
           id: template.key,
           name: template.name,
         }));
-      }
+      },
     );
     return items;
   }
 
   async getProjectMergeRequestTemplate(projectId: number, templateName: string): Promise<TemplateDetail> {
     const item: TemplateDetail = await this.fetch(
-      `projects/${projectId}/templates/merge_requests/${templateName}`
+      `projects/${projectId}/templates/merge_requests/${templateName}`,
     ).then((template) => {
       return {
         name: template.name,
@@ -679,7 +722,7 @@ export class GitLab {
     const projects: Project[] = await this.fetch(`users/${user.id}/starred_projects`, params, all).then(
       (projects: any[]) => {
         return projects.map((p: any) => dataToProject(p));
-      }
+      },
     );
     return projects;
   }
@@ -790,7 +833,7 @@ export class GitLab {
   }
 
   async getUserGroups(
-    params: { min_access_level?: string; search?: string; top_level_only?: boolean } = {}
+    params: { min_access_level?: string; search?: string; top_level_only?: boolean } = {},
   ): Promise<any> {
     if (!params.min_access_level) {
       params.min_access_level = "30";
@@ -813,7 +856,7 @@ export class GitLab {
       groupid?: string;
       include_ancestor_groups?: boolean;
       include_descendant_groups?: boolean;
-    } = {}
+    } = {},
   ): Promise<Epic[]> {
     if (!params.min_access_level) {
       params.min_access_level = "30";
@@ -844,7 +887,7 @@ export class GitLab {
         const data = (await this.fetch(`groups/${groupid}/epics`, params as Record<string, any>, true)) || [];
         return data;
       } catch (e: any) {
-        logAPI("skip during error");
+        logAPI(`skip during error ${e}`);
         return [];
       }
     }
@@ -858,7 +901,7 @@ export class GitLab {
           epics.push(e);
         }
       } catch (e: any) {
-        logAPI("skip during error");
+        logAPI(`skip during error ${e}`);
       }
     }
     if (params.include_ancestor_groups === true && !groupid) {
@@ -904,7 +947,7 @@ export class GitLab {
 
 export function searchData<Type>(
   data: any,
-  params: { search: string; keys: string[]; limit: number; threshold?: number; ignoreLocation?: boolean }
+  params: { search: string; keys: string[]; limit: number; threshold?: number; ignoreLocation?: boolean },
 ): any {
   const options = {
     includeScore: true,

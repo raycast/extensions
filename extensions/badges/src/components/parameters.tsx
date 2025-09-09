@@ -1,9 +1,10 @@
-import { Color as Colour, Detail, Icon, LaunchType, open, useNavigation } from "@raycast/api";
-import { crossLaunchCommand } from "raycast-cross-extension";
+import { useEffect } from "react";
+import { Buffer } from "node:buffer";
+import { Color as Colour, Detail, Icon, useNavigation } from "@raycast/api";
 import { badgeSizes, badgeStyles, dynamicBadgeTypes } from "../constants.js";
 import { Input } from "./input.js";
 import { Badge, FieldName, OnBadgeChange, ParameterProps } from "../types.js";
-import { ellipsis, getTagColor, pickColor } from "../utils.js";
+import { ellipsis, getSvgFromFile, getTagColor, pickColor, pickLogo } from "../utils.js";
 
 export const EditButton = ({
   fieldName,
@@ -163,38 +164,50 @@ export const LabelColor = ({ badge, onChange }: ParameterProps) => {
 };
 
 export const Logo = ({ badge, onChange }: ParameterProps) => {
-  const { $icon, logoColor, logoSize } = badge;
+  const { $icon, logo, logoColor, logoSize } = badge;
+  const isBase64Logo = logo?.startsWith("data:image/svg+xml;base64,");
+
+  useEffect(() => {
+    if (logo && isBase64Logo) {
+      const [dataUriPrefix, logoBase64] = logo.split(",");
+      let svg = Buffer.from(logoBase64, "base64").toString("utf8");
+      svg = svg.replace(/fill="#[A-Za-z0-9]{3,6}" /, "");
+      if (logoColor) svg = svg.replace("<svg ", `<svg fill="#${logoColor}" `);
+      onChange({ ...badge, logo: [dataUriPrefix, Buffer.from(svg).toString("base64")].join(",") });
+    }
+  }, [logoColor]);
+
   return (
     <>
       <Detail.Metadata.TagList title="logo">
-        <Detail.Metadata.TagList.Item text={$icon?.slug ?? "none"} color={$icon?.hex ?? Colour.Green} />
-        <Detail.Metadata.TagList.Item
-          icon={Icon.Pencil}
-          text="edit"
-          color={Colour.SecondaryText}
-          onAction={async () => {
-            try {
-              await crossLaunchCommand(
-                {
-                  name: "index",
-                  type: LaunchType.UserInitiated,
-                  extensionName: "simple-icons",
-                  ownerOrAuthorName: "litomore",
-                  context: {
-                    launchFromExtensionTitle: "Badges - shields.io",
-                  },
-                },
-                {
-                  context: {
-                    launchFromExtensionName: "simple-icons",
-                  },
-                },
-              );
-            } catch {
-              open("raycast://extensions/litomore/simple-icons");
+        {$icon && (
+          <Detail.Metadata.TagList.Item
+            text="none"
+            color={Colour.SecondaryText}
+            onAction={() =>
+              onChange({ ...badge, $icon: undefined, logo: undefined, logoColor: undefined, logoSize: undefined })
             }
-          }}
-        />
+          />
+        )}
+        <Detail.Metadata.TagList.Item text={$icon?.slug ?? "none"} color={$icon?.hex ?? Colour.Green} />
+        {$icon && (
+          <Detail.Metadata.TagList.Item
+            text="base64"
+            color={isBase64Logo ? Colour.Green : Colour.SecondaryText}
+            onAction={async () => {
+              if (isBase64Logo) {
+                onChange({ ...badge, logo: $icon.slug });
+              } else {
+                const svg = await getSvgFromFile($icon.file, badge.logoColor);
+                onChange({
+                  ...badge,
+                  logo: `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`,
+                });
+              }
+            }}
+          />
+        )}
+        <Detail.Metadata.TagList.Item icon={Icon.Pencil} text="edit" color={Colour.SecondaryText} onAction={pickLogo} />
       </Detail.Metadata.TagList>
       {$icon && (
         <>

@@ -7,11 +7,6 @@ export enum IssueIdFormat {
 
 export type IssueIdStyle = keyof typeof IssueIdFormat;
 
-interface Preferences {
-  url: string;
-  format: IssueIdStyle;
-}
-
 export const getPreferences = (): Preferences => {
   return getPreferenceValues<Preferences>();
 };

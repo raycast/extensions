@@ -1,5 +1,11 @@
 # Parcel Changelog
 
+## [Expected Delivery Date Formatting Overhaul] - 2025-06-12
+
+- Delivery windows now show the full time range when available (e.g., "12 Jun 10:45 – 12:45"), so you know exactly when to expect your package.
+- Times are shown when provided by the carrier, making delivery info more precise.
+- Dates are now easier to read: you'll see "Today", "Tomorrow", weekday names, or a simple date, depending on when your package is due.
+
 ## [Enhanced Date Format Support] - 2025-06-03
 
 - Added support for more date formats in delivery tracking, including dates with day names

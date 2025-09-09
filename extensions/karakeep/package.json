@@ -1,0 +1,233 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "karakeep",
+  "title": "Karakeep",
+  "description": "A self-hostable bookmark-everything app (links, notes and images) with AI-based automatic tagging and full text search",
+  "icon": "logo-icon.png",
+  "author": "luolei",
+  "contributors": [
+    "kdurek",
+    "edequalsawesome"
+  ],
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "bookmarks",
+      "title": "Bookmarks",
+      "subtitle": "Karakeep",
+      "description": "List all your bookmarks",
+      "mode": "view"
+    },
+    {
+      "name": "lists",
+      "title": "Lists",
+      "subtitle": "Karakeep",
+      "description": "List all your lists",
+      "mode": "view"
+    },
+    {
+      "name": "tags",
+      "title": "Tags",
+      "subtitle": "Karakeep",
+      "description": "List all your tags",
+      "mode": "view"
+    },
+    {
+      "name": "createBookmark",
+      "title": "Create Bookmark",
+      "subtitle": "Karakeep",
+      "description": "Create a new bookmark",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.86.0",
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "language",
+      "title": "Language",
+      "description": "Select your preferred language",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "中文",
+          "value": "zh"
+        }
+      ],
+      "default": "en"
+    },
+    {
+      "name": "apiUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "API Host",
+      "description": "Enter the API host URL",
+      "placeholder": "https://your-karakeep.host.com",
+      "default": ""
+    },
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Enter your API key",
+      "placeholder": "Enter your Karakeep API key",
+      "default": ""
+    },
+    {
+      "name": "linkMainAction",
+      "type": "dropdown",
+      "label": "default link action",
+      "title": "Default Link Action",
+      "required": false,
+      "description": "Select the default action when you click on a link",
+      "data": [
+        {
+          "title": "Open in Browser",
+          "value": "openInBrowser"
+        },
+        {
+          "title": "View Details",
+          "value": "viewDetail"
+        },
+        {
+          "title": "Edit",
+          "value": "edit"
+        }
+      ]
+    },
+    {
+      "name": "textMainAction",
+      "type": "dropdown",
+      "label": "default text action",
+      "title": "Default Text Action",
+      "required": false,
+      "description": "Select the default action when you click on a text",
+      "data": [
+        {
+          "title": "View Details",
+          "value": "viewDetail"
+        },
+        {
+          "title": "Copy Content",
+          "value": "copy"
+        },
+        {
+          "title": "Edit",
+          "value": "edit"
+        }
+      ]
+    },
+    {
+      "name": "createBookmarkType",
+      "type": "dropdown",
+      "label": "default create bookmark type",
+      "title": "Default Create Bookmark Type",
+      "required": false,
+      "description": "Select the default type when you create a new bookmark",
+      "data": [
+        {
+          "title": "Plain Text",
+          "value": "text"
+        },
+        {
+          "title": "URL Link",
+          "value": "link"
+        }
+      ]
+    },
+    {
+      "label": "Show Website Icon",
+      "name": "showWebsitePreview",
+      "title": "Show Website Icon",
+      "description": "Display website icon in the list",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "displayBookmarkPreview",
+      "type": "checkbox",
+      "label": "Preview Image",
+      "title": "Custom display elements in list view",
+      "description": "Display bookmark preview in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "displayTags",
+      "type": "checkbox",
+      "label": "Tags",
+      "description": "Display tags in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "displayCreatedAt",
+      "type": "checkbox",
+      "label": "Created At",
+      "description": "Display created at in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "displayDescription",
+      "type": "checkbox",
+      "label": "Description",
+      "description": "Display description in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "displayNote",
+      "type": "checkbox",
+      "label": "Note",
+      "description": "Display note in the list",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "displayBookmarkStatus",
+      "type": "checkbox",
+      "label": "Status",
+      "description": "Display bookmark status in the list",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "displaySummary",
+      "type": "checkbox",
+      "label": "Summary",
+      "description": "Display summary in the list",
+      "default": false,
+      "required": false
+    }
+  ]
+}

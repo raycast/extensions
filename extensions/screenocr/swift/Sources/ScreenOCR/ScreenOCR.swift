@@ -58,6 +58,60 @@ func recognizeText(
   return recognizedText
 }
 
+@raycast
+func detectBarcode(
+  keepImage: Bool
+) -> String {
+  let imgRef = captureSelectedArea(keepImage: keepImage)
+
+  guard let capturedImage = imgRef else {
+    return "Error: failed to capture image"
+  }
+
+  var detectedText = ""
+  let semaphore = DispatchSemaphore(value: 0)
+  
+  let request = VNDetectBarcodesRequest { request, error in
+    defer { semaphore.signal() }
+    
+    if let error = error {
+      detectedText = "Error: \(error.localizedDescription)"
+      return
+    }
+    
+    guard let observations = request.results as? [VNBarcodeObservation] else {
+      detectedText = "No barcodes or QR codes detected"
+      return
+    }
+    
+    for observation in observations {
+      let barcodeValue = observation.payloadStringValue ?? "Unknown value"
+      if !detectedText.isEmpty {
+        detectedText += "\n"
+      }
+      detectedText += barcodeValue
+    }
+    
+    if detectedText.isEmpty {
+      detectedText = "No barcodes or QR codes detected"
+    } else {
+      detectedText = detectedText.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+  }
+
+  DispatchQueue.global(qos: .userInitiated).async {
+    do {
+      try VNImageRequestHandler(cgImage: capturedImage, options: [:]).perform([request])
+    } catch {
+      detectedText = "Error: \(error.localizedDescription)"
+      semaphore.signal()
+    }
+  }
+  
+  semaphore.wait()
+  return detectedText
+}
+
 func captureScreen(keepImage: Bool) -> CGImage? {
   let screenRect = NSScreen.main?.frame ?? .zero
   let imageRef = CGWindowListCreateImage(

@@ -1,5 +1,62 @@
 # Media Converter Changelog
 
+## [1.5.1] - 2025-08-25
+
+### Fixed
+
+- Simple quality not being properly applied
+
+## [1.5.0] - 2025-08-12
+
+### Added
+
+- Video conversion quality settings
+- "More Conversion Settings (Advanced)": by default, video and audio will only show "lowest", "low", "medium", "high" and "highest" quality settings. By enabling "More Conversion Settings (Advanced)" in the extension preferences, the user will be shown a more fully-featured quality settings page, including CRF/VBR/VBR-2-PASS encoding mode, bitrate and more for video; bitrate, sample rate, bit depth, and more for audio
+- Added lots more of supported formats as inputs
+
+### API Changes
+
+- New type system for centralized values
+
+## [1.4.2] - 2025-06-27
+
+### Added
+
+- Specify custom FFmpeg path from the Raycast app's extension preferences (optional)
+
+### Removed
+
+- FFmpegInstallPage.tsx: a page for specifying a custom FFmpeg path. Replaced by the proper handling of user preferences.
+
+### API Changes
+
+- Re-flowed the lost FFmpeg handling to HelloPage.tsx, previously at FFmpegInstallPage.tsx
+
+## [1.4.1] - 2025-06-26
+
+Publish on windows
+
+## [1.4.0] - 2025-06-25
+
+Major rework of the installation of FFmpeg (way more streamline for non-brew users), future-proof (for when Raycast will support more platforms than MacOS)
+
+### Added
+
+- New auto-installation of FFmpeg (extension dependency)
+- Auto-detect and auto-use of system FFmpeg if found on system and version 6.0+
+- Possibility to give the extension a custom path to a FFmpeg 6.0+ binary executable (on the Welcome page, under actions, &#9881; Specify Local FFmpeg Path (Advanced))
+- Icons for all actions
+
+### Removed
+
+- The previous 'NotInstalled.tsx' page, where the user would be guided to install FFmpeg via Homebrew. This has been replaced by the auto-detection or auto-installation
+- Converting to .HEIC is now only possible on MacOS (not an issue since at the time of writing, Raycast is MacOS only). This is because HEIC is patent-encumbered and MacOS is the only OS (that we know of) that has a built-in utility containing libvips compiled with support for libheif, libde265 and x265
+
+### API Changes
+
+- Custom FFmpeg installation to environment.supportPath using a customised version of the [ffmpeg-static npm package](https://www.npmjs.com/package/ffmpeg-static)
+- Added more categories to the extension
+
 ## [1.3.0] - 2025-05-27
 
 ### Added

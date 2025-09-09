@@ -41,14 +41,14 @@ export async function getRepositoriesLazy(path: string) {
         "next",
       ].join(","),
     })
-    .catch((e) => {
+    .catch(() => {
       return { data: { values: [] as Schema.Repository[] }, status: 500 };
     });
 
   return data.values as Schema.Repository[];
 }
 
-export async function pipelinesGetQuery(repoSlug: string, pageNumber: number): Promise<any> {
+export async function pipelinesGetQuery(repoSlug: string, pageNumber: number) {
   return await bitbucket.pipelines.list({
     ...defaults,
     repo_slug: repoSlug,
@@ -69,7 +69,7 @@ export async function pipelinesGetQuery(repoSlug: string, pageNumber: number): P
   });
 }
 
-export async function pullRequestsGetQuery(repoSlug: string, pageNumber: number): Promise<any> {
+export async function pullRequestsGetQuery(repoSlug: string) {
   return await bitbucket.pullrequests.list({
     ...defaults,
     repo_slug: repoSlug,
@@ -78,7 +78,7 @@ export async function pullRequestsGetQuery(repoSlug: string, pageNumber: number)
   });
 }
 
-export async function getCommitNames(repoSlug: string): Promise<any> {
+export async function getCommitNames(repoSlug: string) {
   return await bitbucket.pipelines.list({
     ...defaults,
     pagelen: 20,
@@ -87,7 +87,7 @@ export async function getCommitNames(repoSlug: string): Promise<any> {
   });
 }
 
-export async function getMyOpenPullRequests(): Promise<any> {
+export async function getMyOpenPullRequests() {
   return await bitbucket.pullrequests.listPullrequestsForUser({
     ...defaults,
     pagelen: 20,

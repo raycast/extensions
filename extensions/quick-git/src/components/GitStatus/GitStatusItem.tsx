@@ -1,25 +1,17 @@
+import { useMemo, useState } from "react";
 import { Icon, List } from "@raycast/api";
-import { useMemo } from "react";
-import { GitStatusItemActions } from "./GitStatusItemActions.js";
-import type { StatusInfo } from "../../utils/status.js";
-import { BranchInfo } from "../../utils/branch.js";
+import type { StatusInfo } from "../../utils/git-status/porcelain.js";
+import type { BranchInfo } from "../../utils/git-status/branch.js";
 import { GitStatusItemDetail } from "./GitStatusItemDetail.js";
+import { GitStatusItemActions } from "./GitStatusItemActions.js";
 
 interface Props {
-  repo: string;
   branch: BranchInfo;
   status: StatusInfo;
-  checkStatus: () => void;
 }
 
-export function GitStatusItem({ repo, status, branch, checkStatus }: Props) {
-  const isNotStaged = useMemo(() => {
-    return status.staged === "." || status.staged === "?";
-  }, [status.staged]);
-
-  const isCommittedFile = useMemo(() => {
-    return status.format !== "untracked" && status.format !== "ignored";
-  }, [status.format]);
+export function GitStatusItem({ status, branch }: Props) {
+  const [diff, setDiff] = useState("");
 
   const title = useMemo(() => {
     if (status.origPath) {
@@ -28,20 +20,32 @@ export function GitStatusItem({ repo, status, branch, checkStatus }: Props) {
     return status.fileName;
   }, [status.fileName, status.origPath]);
 
+  const icon = useMemo(() => {
+    if (status.changes.hasStagedChanges && status.changes.hasUnstagedChanges) {
+      return Icon.CircleProgress50;
+    }
+
+    if (status.changes.hasStagedChanges && !status.changes.hasUnstagedChanges) {
+      return Icon.CheckCircle;
+    }
+
+    return Icon.Circle;
+  }, [status.changes.hasStagedChanges, status.changes.hasUnstagedChanges]);
+
   return (
     <List.Item
-      icon={isNotStaged ? Icon.Circle : Icon.CheckCircle}
+      icon={icon}
       title={title}
       actions={
         <GitStatusItemActions
-          isNotStaged={isNotStaged}
-          isCommittedFile={isCommittedFile}
-          repo={repo}
+          isNotStaged={status.changes.hasUnstagedChanges}
+          isCommittedFile={status.changes.isTracked}
+          isShowingDiff={!!diff}
           fileName={status.fileName}
-          checkStatus={checkStatus}
+          updateDiff={setDiff}
         />
       }
-      detail={<GitStatusItemDetail branch={branch} status={status} />}
+      detail={<GitStatusItemDetail branch={branch} status={status} diff={diff} />}
     />
   );
 }

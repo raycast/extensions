@@ -30,6 +30,7 @@ export function FolderListSection({
           subtitle={!isShowingDetail ? enclosingFolderName(result) : ""}
           icon={{ fileIcon: result.path }}
           accessories={resultIsPinned(result) ? [{ icon: { source: Icon.Star, tintColor: Color.Yellow } }] : []}
+          quickLook={{ path: result.path, name: folderName(result) }}
           detail={
             <List.Item.Detail
               metadata={

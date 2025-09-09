@@ -5,6 +5,9 @@
   "description": "Are.na is a platform for connecting ideas and building knowledge through visual blocks and channels. This Raycast extension allows users to search for channels, blocks, and users on Are.na, as well as create new channels directly from Raycast. Easily discover, explore, and organize content from your Are.na account without leaving your workflow.",
   "icon": "extension-icon.png",
   "author": "alvinkobe",
+  "contributors": [
+    "xmok"
+  ],
   "categories": [
     "Web",
     "Other"
@@ -71,6 +74,7 @@
       "description": "Enter your personal Are.na API Key",
       "type": "password",
       "title": "API Key",
+      "placeholder": "XxX...xxx",
       "required": true
     }
   ],

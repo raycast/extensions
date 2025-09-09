@@ -63,6 +63,12 @@
           "placeholder": "Author",
           "type": "text",
           "required": false
+        },
+        {
+          "name": "tags",
+          "placeholder": "Tags",
+          "type": "text",
+          "required": false
         }
       ]
     },
@@ -126,6 +132,10 @@
             {
               "title": "Later",
               "value": "later"
+            },
+            {
+              "title": "Archive",
+              "value": "archive"
             }
           ],
           "required": false,
@@ -165,6 +175,15 @@
       "required": true,
       "title": "Access Token",
       "placeholder": "Access Token"
+    },
+    {
+      "name": "openInDesktopApp",
+      "description": "Open links in desktop app instead of browser",
+      "type": "checkbox",
+      "required": false,
+      "title": "Desktop App",
+      "label": "Open links in desktop app",
+      "default": false
     }
   ]
 }

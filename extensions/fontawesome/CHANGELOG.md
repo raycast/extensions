@@ -1,5 +1,15 @@
 # Font Awesome Changelog
 
+## [Feat: Add Support for Windows] - 2025-09-09
+
+- Add support for Raycast Windows
+- Bump dependencies to latest versions
+
+## [Added AI icon search, Sharp Duotone and Duotone families] - 2025-06-22
+
+- The extension now supports v6.7.2.
+- Added support for the Solid, Regular, Light and Thin styles for both Sharp Duotone and Duotone families.
+
 ## [Added primary action preference] - 2024-10-23
 
 - Added a primary action preference to configure the main action for the icon.

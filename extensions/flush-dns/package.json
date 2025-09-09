@@ -41,6 +41,7 @@
   },
   "version": "1.0.0",
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

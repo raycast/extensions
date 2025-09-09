@@ -14,7 +14,8 @@
     "pernielsentikaer",
     "nagauta",
     "PWrzesinski",
-    "yug2005"
+    "yug2005",
+    "ridemountainpig"
   ],
   "keywords": [
     "text",
@@ -56,12 +57,28 @@
       "required": true
     },
     {
+      "name": "preservePunctuation",
+      "type": "checkbox",
+      "default": false,
+      "description": "Check this option to preserve punctuation marks in their original positions when changing case. This option is only available for Lower Case and Upper Case.",
+      "label": "Preserve Punctuation",
+      "required": false
+    },
+    {
       "name": "popToRoot",
       "type": "checkbox",
       "default": false,
       "description": "Usually, you only need to change the case for one text at a time - check this to pop back to root transforming the text.",
       "label": "Pop to Root After Action",
       "required": true
+    },
+    {
+      "name": "hideHUD",
+      "type": "checkbox",
+      "default": false,
+      "description": "Check this to hide the HUD after the action.",
+      "label": "Hide HUD After Action",
+      "required": false
     },
     {
       "name": "exceptions",
@@ -308,5 +325,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

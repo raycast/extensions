@@ -1,11 +1,18 @@
 import { Fragment, useState } from "react";
-import { Form, ActionPanel, Action, LocalStorage, Icon } from "@raycast/api";
+import { Form, ActionPanel, Action, LocalStorage, Icon, Navigation } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { headerKeys, methods, makeObject } from "../../utils";
+import {
+  headerKeys,
+  methods,
+  makeObject,
+  Parameter,
+  extractParametersFromUrl,
+  buildUrlFromParameters,
+} from "../../utils";
 import ResultView from "./Result";
 import axios from "axios";
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const curlString = require("curl-string");
 
 interface Identifiable {
@@ -17,10 +24,11 @@ interface Header extends Identifiable {
   value: string;
 }
 
-export default function FormView({ push }: { push: (component: React.ReactNode) => void }) {
+export default function FormView({ push }: { push: Navigation["push"] }) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [method, setMethod] = useState<string>("GET");
   const [url, setUrl] = useState<string>("https://jsonplaceholder.typicode.com/todos/1");
+  const [parameters, setParameters] = useState<Parameter[]>([]);
   const [headers, setHeaders] = useState<Header[]>([{ key: "Content-Type", value: "application/json" }]);
   const [headerSearchTexts, setHeaderSearchTexts] = useState<(string | undefined)[]>([]);
   const [body, setBody] = useState<string>("");
@@ -29,8 +37,10 @@ export default function FormView({ push }: { push: (component: React.ReactNode) 
     setIsLoading(true);
     let response;
 
+    const finalUrl = buildUrlFromParameters(url.split("?")[0], parameters);
+
     const payload = {
-      url,
+      url: finalUrl,
       method,
       headers: makeObject(headers),
       ...(method !== "GET" &&
@@ -57,12 +67,12 @@ export default function FormView({ push }: { push: (component: React.ReactNode) 
             }),
         };
 
-        const curl = curlString(url, curlOptions);
+        const curl = curlString(finalUrl, curlOptions);
 
         await LocalStorage.setItem(
           method != "GET" && method != "DELETE"
-            ? `${method}-${url}-${body.replace("```\n\b\b", "")}`
-            : `${method}-${url}`,
+            ? `${method}-${finalUrl}-${body.replace("```\n\b\b", "")}`
+            : `${method}-${finalUrl}`,
           JSON.stringify({ ...payload, meta: { title: "", description: "", jsonPathQuery: "" } }),
         );
         push(<ResultView result={result as never} curl={curl} jsonPathResult={""} />);
@@ -75,6 +85,42 @@ export default function FormView({ push }: { push: (component: React.ReactNode) 
         });
       })
       .finally(() => setIsLoading(false));
+  }
+
+  function handleUrlChange(value: string) {
+    const params = extractParametersFromUrl(value);
+    setParameters(params);
+    setUrl(value);
+  }
+
+  function handleParameterChange(type: "key" | "value", index: number, value: string) {
+    const newParameters = [...parameters];
+    newParameters[index][type] = value;
+    setParameters(newParameters);
+
+    const newUrl = buildUrlFromParameters(url.split("?")[0], newParameters);
+    setUrl(newUrl);
+  }
+
+  function handleToggleParameter(index: number) {
+    const newParameters = parameters.map((param, i) => (i === index ? { ...param, enabled: !param.enabled } : param));
+    setParameters(newParameters);
+
+    const newUrl = buildUrlFromParameters(url.split("?")[0], newParameters);
+    setUrl(newUrl);
+  }
+
+  function handleAddParameter() {
+    setParameters([...parameters, { key: "", value: "", enabled: true }]);
+  }
+
+  function handleRemoveParameter() {
+    const newParameters = [...parameters];
+    newParameters.pop();
+    setParameters(newParameters);
+
+    const newUrl = buildUrlFromParameters(url.split("?")[0], newParameters);
+    setUrl(newUrl);
   }
 
   function handleAddHeader() {
@@ -113,20 +159,28 @@ export default function FormView({ push }: { push: (component: React.ReactNode) 
         <ActionPanel>
           <Action.SubmitForm title="Make Request" icon={Icon.Rocket} onSubmit={handleSubmit} />
           <Action
+            title="Add Parameter"
+            icon={Icon.Plus}
+            shortcut={{ modifiers: ["opt"], key: "p" }}
+            onAction={handleAddParameter}
+          />
+          <Action
+            title="Remove Last Parameter"
+            icon={Icon.Minus}
+            shortcut={{ modifiers: ["opt", "shift"], key: "p" }}
+            onAction={handleRemoveParameter}
+          />
+          <Action
             title="Add Headers"
             icon={Icon.Plus}
             shortcut={{ modifiers: ["cmd"], key: "h" }}
-            onAction={() => {
-              handleAddHeader();
-            }}
+            onAction={handleAddHeader}
           />
           <Action
             title="Remove Last Header"
             icon={Icon.Minus}
             shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
-            onAction={() => {
-              handleRemoveHeader();
-            }}
+            onAction={handleRemoveHeader}
           />
         </ActionPanel>
       }
@@ -144,8 +198,39 @@ export default function FormView({ push }: { push: (component: React.ReactNode) 
         title="URL"
         placeholder="http://localhost"
         value={url}
-        onChange={(value) => setUrl(value)}
+        onChange={(value) => handleUrlChange(value)}
       />
+
+      {/* URL Parameters */}
+      <Form.Separator />
+      <Form.Description title="Parameters" text="⌥P Add" />
+      {parameters.map((param, index) => (
+        <Fragment key={`parameter-${index}`}>
+          <Form.Checkbox
+            id={`param-enabled-${index}`}
+            title="Enable"
+            label="Enable Parameter"
+            value={param.enabled}
+            onChange={() => handleToggleParameter(index)}
+          />
+          <Form.TextField
+            id={`param-key-${index}`}
+            title="Key"
+            placeholder="Parameter key"
+            value={param.key}
+            onChange={(value) => handleParameterChange("key", index, value)}
+          />
+          <Form.TextField
+            id={`param-value-${index}`}
+            title="Value"
+            placeholder="Parameter value"
+            value={param.value}
+            onChange={(value) => handleParameterChange("value", index, value)}
+          />
+        </Fragment>
+      ))}
+
+      {parameters.length > 0 && <Form.Description title="" text="⌥⇧P Remove Last" />}
 
       <Form.Separator />
 

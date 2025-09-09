@@ -1,8 +1,22 @@
 # Jira Changelog
 
-## [AI Extension Fix] - {PR_MERGE_DATE}
+## [Fix unbounded JQL error when no project filter] - 2025-09-08
 
-Reduced the numbers of issues being passed to the AI during search to avoid bloating it.
+- Added a fallback `created >= -30d` clause in the *Search Issues* command when no project is selected to prevent Jira’s “Unbounded JQL queries are not allowed” error.
+
+## [Fix deprecated Jira search API] - 2025-08-20
+
+- Replaced removed `/search` endpoint with the new enhanced search-based API (`POST /search/jql`).
+- Added response-shape compatibility for `searchResults` / `values`.
+- Updated `src/api/issues.ts` and related hooks to prevent runtime errors after Atlassian CHANGE-2046.
+
+## [Update Markdown library] - 2025-06-25
+
+- Migrated to a new Markdown to ADF library as the old one was no longer being maintained.
+
+## [AI Extension Fix] - 2025-02-27
+
+- Reduced the numbers of issues being passed to the AI during search to avoid bloating it.
 
 ## [✨ AI Enhancements] - 2025-02-21
 

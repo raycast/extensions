@@ -1,5 +1,11 @@
 # Change Case Changelog
 
+## [Add `hide HUD` preference] - 2025-08-18
+- Added a preference to hide the HUD after the action
+
+## [Add `preserve punctuation` preference] - 2025-07-15
+- Added a preference to preserve punctuation when transforming text to Lower Case or Upper Case
+
 ## [Focus last used case] - 2024-11-24
 - Focus the last used case when opening the extension
 

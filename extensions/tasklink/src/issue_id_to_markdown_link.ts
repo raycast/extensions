@@ -1,5 +1,6 @@
-import { showToast, Clipboard, Toast } from "@raycast/api";
+import { Clipboard } from "@raycast/api";
 import { getPreferences } from "./preferences";
+import { handleErrors } from "./error_handler";
 import { getSelectedTextOfFrontmostApplication, MarkdownText, SelectedText } from "./selected_text";
 
 export default async function Command() {
@@ -11,17 +12,9 @@ export default async function Command() {
 
 const convertIssueIdsIntoMarkdownLinks = (text: SelectedText): MarkdownText => {
   const { format, url } = getPreferences();
-
   return text.convertIssueIdsIntoMarkdownLinks(format, url);
 };
 
 const replaceSelectedText = (text: MarkdownText): Promise<void> => {
   return Clipboard.paste(text.toClipboardContent());
-};
-
-const handleErrors = () => {
-  return showToast({
-    style: Toast.Style.Failure,
-    title: "No text selected",
-  });
 };

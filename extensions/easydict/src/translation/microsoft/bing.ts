@@ -115,7 +115,7 @@ export async function requestWebBingTranslate(queryWordInfo: QueryWordInfo): Pro
         if (!responseData) {
           if (bingHost !== newBingHost && retryCount < 3) {
             console.warn(
-              `bing translate response is empty, change to use new host: ${bingHost}, then request again, retryCount: ${retryCount}`
+              `bing translate response is empty, change to use new host: ${bingHost}, then request again, retryCount: ${retryCount}`,
             );
             retryCount++;
             requestBingConfig().then((bingConfig) => {

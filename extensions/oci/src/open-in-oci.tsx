@@ -9,7 +9,7 @@ export default function OpenInOCI({ title = "Open in OCI", route }: OpenInOCIPro
     <Action.OpenInBrowser
       icon="red-cloud-white-bg-blue-b.png"
       title={title}
-      url={`https://cloud.oracle.com/compute/${route}`}
+      url={`https://cloud.oracle.com/${route}`}
       shortcut={Keyboard.Shortcut.Common.Open}
     />
   );

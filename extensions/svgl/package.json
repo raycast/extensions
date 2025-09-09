@@ -96,7 +96,7 @@
     }
   ],
   "ai": {
-    "evals":[
+    "evals": [
       {
         "input": "@svgl Get Raycast SVG Logo",
         "mocks": {
@@ -328,5 +328,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

@@ -44,6 +44,7 @@ const queryWebItemTypes = [
   DictionaryType.Linguee,
   DictionaryType.Eudic,
   TranslationType.DeepL,
+  TranslationType.DeepLX,
   TranslationType.Google,
   TranslationType.Baidu,
   TranslationType.Volcano,
@@ -442,6 +443,11 @@ function getWebQueryItem(queryType: QueryType, wordInfo: QueryWordInfo): WebQuer
       break;
     }
     case TranslationType.DeepL: {
+      webUrl = getDeepLWebTranslateURL(wordInfo);
+      break;
+    }
+    case TranslationType.DeepLX: {
+      // DeepLX uses the same web interface as DeepL
       webUrl = getDeepLWebTranslateURL(wordInfo);
       break;
     }

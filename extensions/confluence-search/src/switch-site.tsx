@@ -19,7 +19,7 @@ export default function Command() {
       failureToastOptions: {
         title: "Could not load sites",
       },
-    }
+    },
   );
 
   if (isLoading) {

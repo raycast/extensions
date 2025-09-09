@@ -16,6 +16,36 @@ npm install --save @raycast/utils
 
 ## Changelog
 
+### v2.2.1
+
+- Fix compiled file to actually make `useSQL` and `executeSQL` work on Windows.
+
+### v2.2.0
+
+- Make `useSQL` and `executeSQL` work on Windows.
+
+### v2.1.1
+
+- Fix the default size of `getFavicon`.
+
+### v2.1.0
+
+- `getFavicon` will now respect the user's setting for the favicon provider. Note that the `Apple` provider isn't supported since it relies on a native API.
+
+### v2.0.1
+
+- Fix types for ESM extensions
+
+### v2.0.0
+
+- The library can now be tree-shaken, reducing its size considerably.
+- When using `usePromise` and mutating the data with an optimistic update before it is fetched, the current fetch will be aborted to avoid a race condition.
+- Add a new [`runPowerShellScript`](./functions/runPowerShellScript.md) function.
+
+### v1.19.1
+
+- Fixed an issue where arguments weren't passed to `withCache`.
+
 ### v1.19.0
 
 - Add a new [`withCache`](./functions/withCache.md) function.
