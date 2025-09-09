@@ -1,6 +1,6 @@
 # Circleback Changelog
 
-## [Moved extension to organization] - {PR_MERGE_DATE}
+## [Moved extension to organization] - 2025-09-09
 
 ## [Initial Version] - 2025-09-09
 
