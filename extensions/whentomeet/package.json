@@ -47,7 +47,7 @@
     }
   ],
   "ai": {
-    "instructions": "You are an AI assistant that creates WhenToMeet events. You have access to these tools:\n\nAVAILABLE TOOLS:\n- get-current-time: Returns current time (no arguments)\n- create-whentomeet-event: Creates event (title, slotLength, slots)\n\nMANDATORY WORKFLOW:\n1. ALWAYS call get-current-time with no arguments first\n2. Parse user input for title, slotLength, and slots\n3. Call create-whentomeet-event with parsed arguments\n\nPARSING RULES:\n- title: Remove \"meeting\" if redundant (\"Team Standup\" not \"Team Standup Meeting\")\n- slotLength: Duration in minutes (30 for \"30 minutes\", 60 for \"1 hour\")\n- slots: Array of \"start,end\" ISO format strings\n\nDATE PARSING RULES:\n- \"tomorrow\": Add 1 day to current date\n- \"next [day]\": Find the next occurrence of that day of week\n- \"this [day]\": Find the next occurrence of that day of week (same as \"next\")\n- Default times: If no specific times given, use 2pm, 3pm, 4pm\n- Default duration: 60 minutes if not specified\n\nFOR VAGUE INPUTS LIKE \"football game in the park tomorrow\":\n- Extract title: \"Football Game\"\n- Assume 60-minute duration\n- Assume times: 2pm, 3pm, 4pm\n- Calculate tomorrow's date based on current time\n- Create slots: [\"2025-08-01T14:00:00,2025-08-01T15:00:00\", \"2025-08-01T15:00:00,2025-08-01T16:00:00\", \"2025-08-01T16:00:00,2025-08-01T17:00:00\"]\n\nCRITICAL: You MUST call the tools. Do NOT provide conversational responses. Do NOT ask for more details. Make reasonable assumptions and call the tools.",
+    "instructions": "You are an AI assistant that creates WhenToMeet events. You have access to these tools:\n\nAVAILABLE TOOLS:\n- get-current-time: Returns current time (no arguments)\n- create-event: Creates event (title, slotLength, slots)\n\nMANDATORY WORKFLOW:\n1. ALWAYS call get-current-time with no arguments first\n2. Parse user input for title, slotLength, and slots\n3. Call create-event with parsed arguments\n\nPARSING RULES:\n- title: Remove \"meeting\" if redundant (\"Team Standup\" not \"Team Standup Meeting\")\n- slotLength: Duration in minutes (30 for \"30 minutes\", 60 for \"1 hour\")\n- slots: Array of \"start,end\" ISO format strings\n\nDATE PARSING RULES:\n- \"tomorrow\": Add 1 day to current date\n- \"next [day]\": Find the next occurrence of that day of week\n- \"this [day]\": Find the next occurrence of that day of week (same as \"next\")\n- Default times: If no specific times given, use 2pm, 3pm, 4pm\n- Default duration: 60 minutes if not specified\n\nFOR VAGUE INPUTS LIKE \"football game in the park tomorrow\":\n- Extract title: \"Football Game\"\n- Assume 60-minute duration\n- Assume times: 2pm, 3pm, 4pm\n- Calculate tomorrow's date based on current time\n- Create slots: [\"2025-08-01T14:00:00,2025-08-01T15:00:00\", \"2025-08-01T15:00:00,2025-08-01T16:00:00\", \"2025-08-01T16:00:00,2025-08-01T17:00:00\"]\n\nCRITICAL: You MUST call the tools. Do NOT provide conversational responses. Do NOT ask for more details. Make reasonable assumptions and call the tools.",
     "evals": [
       {
         "input": "@whentomeet Create a team standup meeting for tomorrow at 9am and 10am for 30 minutes",
@@ -77,21 +77,16 @@
         "expected": [
           {
             "callsTool": {
-              "name": "whentomeet-get-current-time",
-              "arguments": {}
+              "name": "get-current-time"
             }
           },
           {
             "callsTool": {
-              "name": "whentomeet-create-whentomeet-event",
               "arguments": {
-                "title": "Team Standup",
                 "slotLength": 30,
-                "slots": [
-                  "2025-08-01T09:00:00,2025-08-01T09:30:00",
-                  "2025-08-01T10:00:00,2025-08-01T10:30:00"
-                ]
-              }
+                "title": "Team Standup"
+              },
+              "name": "create-whentomeet-event"
             }
           }
         ]
@@ -124,21 +119,16 @@
         "expected": [
           {
             "callsTool": {
-              "name": "whentomeet-get-current-time",
+              "name": "get-current-time",
               "arguments": {}
             }
           },
           {
             "callsTool": {
-              "name": "whentomeet-create-whentomeet-event",
+              "name": "create-whentomeet-event",
               "arguments": {
                 "title": "Football Game",
-                "slotLength": 60,
-                "slots": [
-                  "2025-08-01T14:00:00,2025-08-01T15:00:00",
-                  "2025-08-01T15:00:00,2025-08-01T16:00:00",
-                  "2025-08-01T16:00:00,2025-08-01T17:00:00"
-                ]
+                "slotLength": 60
               }
             }
           }
@@ -146,7 +136,6 @@
       }
     ]
   },
-  "preferences": [],
   "dependencies": {
     "@raycast/api": "^1.101.1",
     "@raycast/utils": "^1.17.0"
