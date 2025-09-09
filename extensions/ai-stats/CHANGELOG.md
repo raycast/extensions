@@ -17,3 +17,20 @@
   - Reorder pins (Move Up/Down), max 10, persistent across sessions
 - Preferences
   - `SHOW_PINNED_SECTION` to show/hide the Pinned section
+
+### Fixed
+
+- Show `isLoading` on the top-level `List` for better loading UX
+- Switched data fetching to `useCachedPromise` for faster, cancel/race-safe loads
+- Prevented initial empty-state flicker by starting section loading states and forwarding to `List`
+- Adjusted tag colors for clarity:
+  - Input price = Orange, Output price = Red, TPS = Green,
+  - Leaderboard scores = Gold (less “all red” look)
+- Action panel polish:
+  - Added ellipsis to “Change Leaderboard…” submenu
+  - Moved “Reset Filters” below “Filter by Creator”
+- Code quality:
+  - DRY’d list accessories into a shared helper
+  - Stabilized callbacks for pin/unpin/move (useCallback)
+  - Introduced typed metric registry for leaderboard sort order
+  - Removed duplicate/unused state and imports; switched refresh to `revalidate()`

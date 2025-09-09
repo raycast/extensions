@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Color, Detail, Icon, List, showToast, Toast, getPreferenceValues } from "@raycast/api";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useLocalStorage } from "@raycast/utils";
+import { Action, ActionPanel, Color, Detail, Icon, List, getPreferenceValues } from "@raycast/api";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCachedPromise, useLocalStorage } from "@raycast/utils";
 import { sb } from "./lib/supabase";
 import type { Model } from "./lib/types";
 
@@ -18,6 +18,20 @@ const METRICS = [
   { key: "price_1m_output_tokens", label: "Price per 1M Output Tokens (asc)" },
   { key: "price_1m_blended_3_to_1", label: "Blended Price (3:1) (asc)" },
 ] as const;
+
+type MetricKey = (typeof METRICS)[number]["key"];
+
+// Typed registry for leaderboard sort order
+const METRIC_ASC: Record<MetricKey, boolean> = {
+  mmlu_pro: false,
+  gpqa: false,
+  livecodebench: false,
+  median_output_tokens_per_second: false,
+  median_time_to_first_token_seconds: true,
+  price_1m_input_tokens: true,
+  price_1m_output_tokens: true,
+  price_1m_blended_3_to_1: true,
+};
 
 function timeAgo(iso: string | null | undefined) {
   if (!iso) return "N/A";
@@ -41,8 +55,6 @@ function timeAgo(iso: string | null | undefined) {
   }
 }
 
-type MetricKey = (typeof METRICS)[number]["key"];
-
 function isMissing(v: number | null | undefined): boolean {
   return v == null || v === 0;
 }
@@ -59,27 +71,38 @@ export default function View() {
   const [searchText, setSearchText] = useState<string>("");
   const { value: creatorFilter = "", setValue: setCreatorFilter } = useLocalStorage<string>("ai-stats-creator", "");
   const { value: pinnedIds = [], setValue: setPinnedIds } = useLocalStorage<string[]>("ai-stats-pinned-ids", []);
+  const [listLoading, setListLoading] = useState(false);
 
-  function addPin(id: string) {
-    const next = [id, ...pinnedIds.filter((x) => x !== id)].slice(0, 10);
-    return setPinnedIds(next);
-  }
-  function removePin(id: string) {
-    const next = pinnedIds.filter((x) => x !== id);
-    return setPinnedIds(next);
-  }
-  function movePin(id: string, delta: number) {
-    const idx = pinnedIds.indexOf(id);
-    if (idx === -1) return;
-    const next = pinnedIds.slice();
-    const newIdx = Math.max(0, Math.min(next.length - 1, idx + delta));
-    next.splice(idx, 1);
-    next.splice(newIdx, 0, id);
-    setPinnedIds(next);
-  }
+  const addPin = useCallback(
+    (id: string) => {
+      const next = [id, ...pinnedIds.filter((x) => x !== id)].slice(0, 10);
+      return setPinnedIds(next);
+    },
+    [pinnedIds, setPinnedIds],
+  );
+  const removePin = useCallback(
+    (id: string) => {
+      const next = pinnedIds.filter((x) => x !== id);
+      return setPinnedIds(next);
+    },
+    [pinnedIds, setPinnedIds],
+  );
+  const movePin = useCallback(
+    (id: string, delta: number) => {
+      const idx = pinnedIds.indexOf(id);
+      if (idx === -1) return;
+      const next = pinnedIds.slice();
+      const newIdx = Math.max(0, Math.min(next.length - 1, idx + delta));
+      next.splice(idx, 1);
+      next.splice(newIdx, 0, id);
+      setPinnedIds(next);
+    },
+    [pinnedIds, setPinnedIds],
+  );
 
   return (
     <List
+      isLoading={listLoading}
       searchBarPlaceholder={
         mode === "search"
           ? "Search models by name, slug, or creator…"
@@ -130,9 +153,10 @@ export default function View() {
           removePin={removePin}
           movePin={movePin}
           showPinnedSection={Boolean(SHOW_PINNED_SECTION)}
+          onLoadingChange={setListLoading}
         />
       ) : (
-        <LeaderboardSection metric={metric} setMode={setMode} setMetric={setMetric} />
+        <LeaderboardSection metric={metric} setMode={setMode} setMetric={setMetric} onLoadingChange={setListLoading} />
       )}
     </List>
   );
@@ -149,6 +173,7 @@ type SearchSectionProps = {
   removePin: (id: string) => void | Promise<void>;
   movePin: (id: string, delta: number) => void | Promise<void>;
   showPinnedSection: boolean;
+  onLoadingChange: (loading: boolean) => void;
 };
 
 function SearchSection({
@@ -162,64 +187,53 @@ function SearchSection({
   removePin,
   movePin,
   showPinnedSection,
+  onLoadingChange,
 }: SearchSectionProps) {
   const [q, setQ] = useState("");
-  const [isLoading, setLoading] = useState(true);
-  const [rows, setRows] = useState<Model[]>([]);
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const selectColumns = useMemo(
-    () =>
-      `
-      id,name,slug,creator_name,creator_slug,
-      aa_intelligence_index,aa_coding_index,aa_math_index,
-      mmlu_pro,gpqa,livecodebench,scicode,math_500,aime,hle,
-      median_output_tokens_per_second,median_time_to_first_token_seconds,
-      price_1m_input_tokens,price_1m_output_tokens,price_1m_blended_3_to_1,
-      pricing,evaluations,first_seen,last_seen
-    `.replace(/\s+/g, " "),
-    [],
-  );
-
-  async function load(query: string) {
-    try {
-      setLoading(true);
+  // forward loading state to parent List
+  const {
+    data: rows = [],
+    isLoading,
+    revalidate,
+  } = useCachedPromise(
+    async (query: string, creator: string) => {
       const client = sb();
+      const selectColumns = `id,name,slug,creator_name,creator_slug,aa_intelligence_index,aa_coding_index,aa_math_index,mmlu_pro,gpqa,livecodebench,scicode,math_500,aime,hle,median_output_tokens_per_second,median_time_to_first_token_seconds,price_1m_input_tokens,price_1m_output_tokens,price_1m_blended_3_to_1,pricing,evaluations,first_seen,last_seen`;
       let base = client.from("aa_models").select(selectColumns).limit(100);
       if (query) {
         base = base.or(`name.ilike.*${query}*,slug.ilike.*${query}*,creator_name.ilike.*${query}*`);
       }
-      if (creatorFilter) {
-        base = base.eq("creator_name", creatorFilter);
+      if (creator) {
+        base = base.eq("creator_name", creator);
       }
       base = base.order("last_seen", { ascending: false });
       const { data, error } = await base;
       if (error) throw error;
-      setRows((data ?? []) as unknown as Model[]);
-    } catch (e: unknown) {
-      console.error(e);
-      let message = "Unknown error";
-      if (e && typeof e === "object" && "message" in e) {
-        const m = (e as { message?: unknown }).message;
-        message = typeof m === "string" ? m : JSON.stringify(m);
-      }
-      void showToast({ style: Toast.Style.Failure, title: "Failed to load models", message });
-      setRows([]);
-    } finally {
-      setLoading(false);
-    }
-  }
+      return (data ?? []) as unknown as Model[];
+    },
+    [q, creatorFilter],
+    { keepPreviousData: true },
+  );
 
   useEffect(() => {
-    void load("");
+    onLoadingChange(isLoading);
+  }, [isLoading, onLoadingChange]);
+
+  // (removed unused selectColumns; columns are defined in useCachedPromise)
+
+  // initialize debounced search
+  useEffect(() => {
+    setQ(searchText);
   }, []);
 
   // React to parent search text or creator filter changes
   useEffect(() => {
     if (debounce.current) clearTimeout(debounce.current);
     setQ(searchText);
-    debounce.current = setTimeout(() => void load(searchText), 250);
-  }, [searchText, creatorFilter]);
+    debounce.current = setTimeout(() => setQ(searchText), 250);
+  }, [searchText]);
 
   const pinnedRows = rows
     .filter((r) => pinnedIds.includes(r.id))
@@ -245,7 +259,7 @@ function SearchSection({
                     await setCreatorFilter("");
                     await setSearchText("");
                     setQ("");
-                    void load("");
+                    await revalidate();
                   }}
                 />
               </ActionPanel>
@@ -259,23 +273,7 @@ function SearchSection({
       {showPinnedSection && pinnedRows.length > 0 && (
         <List.Section title="Pinned">
           {pinnedRows.map((m) => {
-            const accessories: List.Item.Accessory[] = [];
-            accessories.push({ tag: { value: "Pinned", color: Color.Yellow } });
-            if (m.price_1m_input_tokens != null && m.price_1m_input_tokens !== 0) {
-              accessories.push({ tag: { value: `${formatPrice(m.price_1m_input_tokens)}/1M in`, color: Color.Red } });
-            } else {
-              accessories.push({ tag: { value: `N/A in`, color: Color.SecondaryText } });
-            }
-            if (m.price_1m_output_tokens != null && m.price_1m_output_tokens !== 0) {
-              accessories.push({ tag: { value: `${formatPrice(m.price_1m_output_tokens)}/1M out`, color: Color.Red } });
-            } else {
-              accessories.push({ tag: { value: `N/A out`, color: Color.SecondaryText } });
-            }
-            if (m.median_output_tokens_per_second != null && m.median_output_tokens_per_second !== 0) {
-              accessories.push({ tag: { value: `${m.median_output_tokens_per_second} tps`, color: Color.Orange } });
-            } else {
-              accessories.push({ tag: { value: `N/A tps`, color: Color.SecondaryText } });
-            }
+            const accessories = accessoriesForModel(m, true);
             return (
               <List.Item
                 key={`pinned-${m.id}`}
@@ -307,7 +305,7 @@ function SearchSection({
                         await setCreatorFilter("");
                         await setSearchText("");
                         setQ("");
-                        void load("");
+                        await revalidate();
                       }}
                     />
                     <Action.CopyToClipboard title="Copy Name" content={m.name ?? ""} />
@@ -321,24 +319,8 @@ function SearchSection({
       )}
       <List.Section title="Models" subtitle={updatedLabel ?? q}>
         {listRows.map((m) => {
-          const accessories: List.Item.Accessory[] = [];
           const isPinned = pinnedIds.includes(m.id);
-          if (isPinned) accessories.push({ tag: { value: "Pinned", color: Color.Yellow } });
-          if (m.price_1m_input_tokens != null && m.price_1m_input_tokens !== 0) {
-            accessories.push({ tag: { value: `${formatPrice(m.price_1m_input_tokens)}/1M in`, color: Color.Red } });
-          } else {
-            accessories.push({ tag: { value: `N/A in`, color: Color.SecondaryText } });
-          }
-          if (m.price_1m_output_tokens != null && m.price_1m_output_tokens !== 0) {
-            accessories.push({ tag: { value: `${formatPrice(m.price_1m_output_tokens)}/1M out`, color: Color.Red } });
-          } else {
-            accessories.push({ tag: { value: `N/A out`, color: Color.SecondaryText } });
-          }
-          if (m.median_output_tokens_per_second != null && m.median_output_tokens_per_second !== 0) {
-            accessories.push({ tag: { value: `${m.median_output_tokens_per_second} tps`, color: Color.Orange } });
-          } else {
-            accessories.push({ tag: { value: `N/A tps`, color: Color.SecondaryText } });
-          }
+          const accessories = accessoriesForModel(m, isPinned);
           return (
             <List.Item
               key={m.id}
@@ -371,7 +353,7 @@ function SearchSection({
                       await setCreatorFilter("");
                       await setSearchText("");
                       setQ("");
-                      void load("");
+                      await revalidate();
                     }}
                   />
                   {isPinned ? (
@@ -386,7 +368,7 @@ function SearchSection({
                     </>
                   )}
                   <Action.CopyToClipboard title="Copy Name" icon={Icon.Clipboard} content={m.name ?? ""} />
-                  <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => void load(q)} />
+                  <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => void revalidate()} />
                 </ActionPanel>
               }
             />
@@ -401,38 +383,36 @@ type LeaderboardSectionProps = {
   metric: MetricKey;
   setMode: (m: Mode) => void;
   setMetric: (m: MetricKey) => void;
+  onLoadingChange: (loading: boolean) => void;
 };
 
-function LeaderboardSection({ metric, setMode, setMetric }: LeaderboardSectionProps) {
-  const [rows, setRows] = useState<Model[]>([]);
-  const [isLoading, setLoading] = useState(true);
+function LeaderboardSection({ metric, setMode, setMetric, onLoadingChange }: LeaderboardSectionProps) {
+  const isAsc = useMemo(() => METRIC_ASC[metric], [metric]);
 
-  const isAsc = useMemo(() => metric === "median_time_to_first_token_seconds" || metric.startsWith("price_"), [metric]);
-
-  async function load() {
-    setLoading(true);
-    const client = sb();
-    const columns = `id,name,slug,creator_name,${metric}`;
-    const { data, error } = await client
-      .from("aa_models")
-      .select(columns)
-      .not(metric, "is", null)
-      .order(metric, { ascending: isAsc })
-      .limit(50);
-    if (error) {
-      console.error(error);
-      setRows([]);
-      const message = typeof error.message === "string" ? error.message : JSON.stringify(error);
-      void showToast({ style: Toast.Style.Failure, title: "Failed to load leaderboard", message });
-    } else {
-      setRows((data ?? []) as unknown as Model[]);
-    }
-    setLoading(false);
-  }
+  const {
+    data: rows = [],
+    isLoading,
+    revalidate,
+  } = useCachedPromise(
+    async (m: MetricKey) => {
+      const client = sb();
+      const columns = `id,name,slug,creator_name,${m}`;
+      const { data, error } = await client
+        .from("aa_models")
+        .select(columns)
+        .not(m, "is", null)
+        .order(m, { ascending: METRIC_ASC[m] })
+        .limit(50);
+      if (error) throw error;
+      return (data ?? []) as unknown as Model[];
+    },
+    [metric],
+    { keepPreviousData: true },
+  );
 
   useEffect(() => {
-    void load();
-  }, [metric]);
+    onLoadingChange(isLoading);
+  }, [isLoading, onLoadingChange]);
 
   return (
     <>
@@ -440,10 +420,9 @@ function LeaderboardSection({ metric, setMode, setMetric }: LeaderboardSectionPr
       <List.Section title={`Top by ${metric}`} subtitle={isAsc ? "ascending" : "descending"}>
         {rows.map((r) => {
           const accessories: List.Item.Accessory[] = [];
-          // Removed slug accessory to avoid redundancy with title
           const value = (r as unknown as Record<string, number | null>)[metric];
           if (value != null && value !== 0) {
-            accessories.push({ tag: { value: String(value), color: isAsc ? Color.Orange : Color.Red } });
+            accessories.push({ tag: { value: formatMetricValue(metric, value), color: colorForMetric(metric) } });
           } else {
             accessories.push({ tag: { value: "N/A", color: Color.SecondaryText } });
           }
@@ -477,7 +456,7 @@ function LeaderboardSection({ metric, setMode, setMetric }: LeaderboardSectionPr
                       ))}
                     </ActionPanel.Section>
                   </ActionPanel.Submenu>
-                  <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => void load()} />
+                  <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => void revalidate()} />
                 </ActionPanel>
               }
             />
@@ -675,4 +654,44 @@ function formatPrice(n: number) {
   } catch {
     return `$${n}`;
   }
+}
+
+function accessoriesForModel(m: Model, isPinned: boolean): List.Item.Accessory[] {
+  const acc: List.Item.Accessory[] = [];
+  if (isPinned) acc.push({ tag: { value: "Pinned", color: Color.Yellow } });
+
+  if (m.price_1m_input_tokens != null && m.price_1m_input_tokens !== 0) {
+    acc.push({ tag: { value: `${formatPrice(m.price_1m_input_tokens)}/1M in`, color: Color.Orange } });
+  } else {
+    acc.push({ tag: { value: `N/A in`, color: Color.SecondaryText } });
+  }
+
+  if (m.price_1m_output_tokens != null && m.price_1m_output_tokens !== 0) {
+    acc.push({ tag: { value: `${formatPrice(m.price_1m_output_tokens)}/1M out`, color: Color.Red } });
+  } else {
+    acc.push({ tag: { value: `N/A out`, color: Color.SecondaryText } });
+  }
+
+  if (m.median_output_tokens_per_second != null && m.median_output_tokens_per_second !== 0) {
+    acc.push({ tag: { value: `${m.median_output_tokens_per_second} tps`, color: Color.Green } });
+  } else {
+    acc.push({ tag: { value: `N/A tps`, color: Color.SecondaryText } });
+  }
+
+  return acc;
+}
+
+function colorForMetric(metric: MetricKey): Color {
+  if (metric === "median_output_tokens_per_second") return Color.Green;
+  if (metric === "price_1m_output_tokens") return Color.Red;
+  if (metric === "price_1m_input_tokens" || metric === "price_1m_blended_3_to_1") return Color.Orange;
+  if (metric === "median_time_to_first_token_seconds") return Color.Orange;
+  return Color.Yellow; // default for score metrics (gold)
+}
+
+function formatMetricValue(metric: MetricKey, value: number): string {
+  if (metric.startsWith("price_1m_")) return `${formatPrice(value)}`;
+  if (metric === "median_output_tokens_per_second") return `${value} tps`;
+  if (metric === "median_time_to_first_token_seconds") return `${value} s`;
+  return String(value);
 }
