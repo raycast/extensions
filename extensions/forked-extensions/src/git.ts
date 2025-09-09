@@ -85,7 +85,7 @@ export const getExtensionList = async () => {
 /**
  * Executes a git command in the repository root directory.
  * @param args The arguments to pass to the git command.
- * @return The subprocess result of the git command execution.
+ * @returns The subprocess result of the git command execution.
  */
 export const git = async (args: string[]) => spawn(gitFilePath, args, { cwd: repositoryPath, shell: true });
 

@@ -1,5 +1,13 @@
 # Raycast Fork Extensions Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Run local Git commands before requesting GitHub API to improve performance
+- Use the resolved repository path in all Git commands for better accuracy
+- Simplify the file path before copying for Create Extension action
+- Fix a redundant "$" sign in Diagnostics' file URL
+- Update some outdated comments
+
 ## [Improvements] - 2025-09-09
 
 - Add support for creating extensions (macOS only due to Windows dose not support it yet)
