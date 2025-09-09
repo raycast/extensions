@@ -1,8 +1,11 @@
 ---
 title: Input tag
 category: HTML
-updated: 2017-10-30
+updated: 2017-10-30T00:00:00.000Z
 weight: -3
+tech: html-input
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Input

@@ -1,7 +1,10 @@
 ---
 title: Vim helpfiles
 category: Vim
-updated: 2017-09-09
+updated: 2017-09-09T00:00:00.000Z
+tech: vim-help
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Writing help files

@@ -1,7 +1,10 @@
 ---
 title: GNU grep
 category: CLI
-updated: 2021-08-23
+updated: 2021-08-23T00:00:00.000Z
+tech: grep
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Usage

@@ -1,6 +1,10 @@
 ---
 title: Yargs
 category: JavaScript libraries
+tech: yargs
+status: active
+lastReviewed: '2025-09-05'
+version: .
 ---
 
 ### Basic usage

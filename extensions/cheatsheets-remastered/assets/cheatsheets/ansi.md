@@ -3,6 +3,9 @@ title: Ansi codes
 category: CLI
 intro: |
   Quick reference to ANSI color codes.
+tech: ansi
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Format

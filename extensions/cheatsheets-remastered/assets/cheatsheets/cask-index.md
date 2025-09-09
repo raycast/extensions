@@ -1,7 +1,11 @@
 ---
 title: Caskroom index
-tags: [Archived]
+tags:
+  - Archived
 archived: This sheet may have outdated information.
+tech: cask-index
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 

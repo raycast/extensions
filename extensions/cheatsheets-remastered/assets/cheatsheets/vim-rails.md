@@ -2,6 +2,9 @@
 title: Vim-rails
 category: Vim
 html_class: key-codes
+tech: vim-rails
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 Alternate files

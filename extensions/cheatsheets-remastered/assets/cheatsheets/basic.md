@@ -1,6 +1,9 @@
 ---
-title: "Basic test"
+title: Basic test
 category: Hidden
+tech: basic
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Introduction
