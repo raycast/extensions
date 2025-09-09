@@ -1,6 +1,6 @@
 # Comet Browser Changelog
 
-## [1.0.1] - {PR_MERGE_DATE}
+## [1.0.1] - 2025-09-09
 
 ### Fixed
 - Fixed "Command failed with exit code 1: osascript -e" error when no Comet windows are open
