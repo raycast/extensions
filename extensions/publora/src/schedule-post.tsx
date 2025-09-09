@@ -1,14 +1,15 @@
 import { Form, ActionPanel, Action, LaunchProps, Toast, showToast, getPreferenceValues } from "@raycast/api";
-import { useCachedState, useForm, FormValidation } from "@raycast/utils";
+import { useCachedState, useForm, FormValidation, showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
 import { Post, Platform } from "./types";
 import { fetchPlatforms, schedulePost } from "./api";
+import { validateContent } from "./utils";
 
 export default function Command(props: LaunchProps<{ draftValues: Post }>) {
   const { draftValues: draftPost } = props;
 
-  const api_key = getPreferenceValues<ExtensionPreferences>().api_key;
+  const { api_key } = getPreferenceValues<ExtensionPreferences>();
 
   const [isLoading, setIsLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
@@ -32,37 +33,22 @@ export default function Command(props: LaunchProps<{ draftValues: Post }>) {
       try {
         await schedulePost(api_key, post);
         reset({ content: "", platforms: [], scheduledTime: undefined });
-        showToast({ title: "Submitted form", message: "Your post scheduled successfully" });
+        showToast({
+          title: "Success",
+          message: "Your post scheduled successfully",
+          style: Toast.Style.Success,
+        });
         return true;
       } catch (error) {
         console.error("Error scheduling post:", error);
-        showToast({ title: "Error", message: "Failed to schedule post" });
+        await showFailureToast(error, {
+          title: "Failed to schedule post",
+        });
       }
     },
     validation: {
       platforms: FormValidation.Required,
-      content: (value) => {
-        if (value?.length === 0) {
-          return "Content cannot be empty";
-        }
-        if (value?.length && value?.length > 280 && values?.platforms.findIndex((v) => v.startsWith("twitter")) != -1) {
-          showToast({ title: "Too long for X", message: "280 characters limit", style: Toast.Style.Failure });
-        }
-        if (value?.length && value?.length > 300 && values.platforms.findIndex((v) => v.startsWith("bluesky")) != -1) {
-          showToast({ title: "Too long for Bluesky", message: "300 characters limit", style: Toast.Style.Failure });
-          return "Too long for Bluesky";
-        }
-        if (
-          value?.length &&
-          value?.length > 500 &&
-          values.platforms &&
-          values.platforms.findIndex((v) => v.startsWith("threads")) != -1
-        ) {
-          showToast({ title: "Too long for Threads", message: "500 characters limit", style: Toast.Style.Failure });
-          return "Too long for Threads";
-        }
-        return undefined;
-      },
+      content: (value: string | undefined): string | undefined => validateContent(value, values?.platforms),
     },
   });
 
@@ -73,18 +59,23 @@ export default function Command(props: LaunchProps<{ draftValues: Post }>) {
         const platforms = await fetchPlatforms(api_key);
         setAllPlatforms(platforms);
         setCanSubmit(true);
-        setIsLoading(false);
       } catch (error) {
         console.error("Error fetching platforms:", error);
-        showToast({ title: "Error", message: "Error fetching platforms, check API key", style: Toast.Style.Failure });
+        showToast({
+          title: "Error",
+          message: "Error fetching platforms, check API key",
+          style: Toast.Style.Failure,
+        });
         setCanSubmit(false);
+      } finally {
         setIsLoading(false);
       }
     };
 
-    getPlatforms();
-  }, []);
-
+    if (api_key) {
+      getPlatforms();
+    }
+  }, [api_key]);
 
   return (
     <Form
