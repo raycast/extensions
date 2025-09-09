@@ -2,11 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "arxiv",
   "title": "ArXiv Search",
-  "description": "Search the arXiv for papers and find citations. For Researchers, Students and Scholars in Computer Science, Mathematics, Physics, Quantitative Biology, Quantitative Finance, Statistics, Electrical Engineering and Systems Science, and Economics.",
+  "description": "Search arXiv papers, access multiple formats (PDF, TeX, HTML), and export citations in various academic styles.",
   "icon": "arxiv-icon.png",
   "author": "koayon",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "osteele"
   ],
   "categories": [
     "Productivity",
@@ -14,17 +15,47 @@
     "Media"
   ],
   "license": "MIT",
+  "engines": {
+    "node": ">=22.14.0"
+  },
   "commands": [
     {
       "name": "index",
       "title": "Search ArXiv",
       "description": "Search arXiv",
       "mode": "view"
+    },
+    {
+      "name": "select-citation-style",
+      "title": "Select Citation Style",
+      "subtitle": "ArXiv",
+      "description": "Choose the citation format for arXiv papers",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "accessoryDisplay",
+      "title": "Search Result Info Display",
+      "description": "Choose what information to show on the right side of search results",
+      "type": "dropdown",
+      "required": false,
+      "default": "timeAgo",
+      "data": [
+        {
+          "title": "Time Since Published",
+          "value": "timeAgo"
+        },
+        {
+          "title": "Publication Details",
+          "value": "publicationInfo"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.52.1",
-    "@raycast/utils": "^1.4.8",
+    "@raycast/api": "^1.72.0",
+    "@raycast/utils": "^1.16.0",
     "date-fns": "^2.23.0",
     "natural": "^6.3.0",
     "npm": "^9.6.7",
@@ -32,11 +63,17 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
+    "@testing-library/react": "^13.4.0",
+    "@types/jest": "^29.5.0",
     "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
+    "@types/react": "18.3.3",
     "@types/xml2js": "^0.4.11",
     "eslint": "^7.32.0",
+    "jest": "^29.5.0",
+    "jest-environment-jsdom": "^29.5.0",
+    "jest-fetch-mock": "^3.0.3",
     "prettier": "^2.5.1",
+    "ts-jest": "^29.1.0",
     "typescript": "^4.4.3"
   },
   "scripts": {
@@ -44,6 +81,9 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   }
 }
