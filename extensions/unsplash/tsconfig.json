@@ -12,7 +12,6 @@
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
     "resolveJsonModule": true,
-    "typeRoots": ["./src/types"],
     "paths": {
       "@/*": ["./src/*"]
     }
