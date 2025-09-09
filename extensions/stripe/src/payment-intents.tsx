@@ -2,7 +2,7 @@ import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import snakeCase from "lodash/snakeCase";
 import type Stripe from "stripe";
 import { useStripeApi, useStripeDashboard } from "./hooks";
-import { convertAmount, convertTimestampToDate, titleCase } from "./utils";
+import { convertAmount, convertTimestampToDate, titleCase, resolveMetadataValue } from "./utils";
 import { STRIPE_ENDPOINTS } from "./enums";
 import { ListContainer, withEnvContext } from "./components";
 
@@ -39,22 +39,10 @@ const resolvePaymentIntent = (paymentIntent: Stripe.PaymentIntent): PaymentInten
   return resolvedPaymentIntent;
 };
 
-const resolveMetadataValue = (value: any) => {
-  if (typeof value === "string") {
-    return value;
-  }
-
-  if (typeof value === "number") {
-    return `${value}`;
-  }
-
-  return "";
-};
-
 const PaymentIntents = () => {
   const { isLoading, data } = useStripeApi(STRIPE_ENDPOINTS.PAYMENT_INTENTS, true);
   const { dashboardUrl } = useStripeDashboard();
-  const formattedPaymentIntents = data.map(resolvePaymentIntent);
+  const formattedPaymentIntents = (data as Stripe.PaymentIntent[]).map(resolvePaymentIntent);
 
   const renderPaymentIntents = (paymentIntent: PaymentIntent) => {
     const { amount, currency, id } = paymentIntent;
@@ -77,7 +65,8 @@ const PaymentIntents = () => {
                 <List.Item.Detail.Metadata.Label title="Metadata" />
                 <List.Item.Detail.Metadata.Separator />
                 {Object.entries(paymentIntent).map(([type, value]) => {
-                  const resolvedValue = resolveMetadataValue(value);
+                  if (type === "metadata") return null;
+                  const resolvedValue = resolveMetadataValue(value as string | number | boolean | null | undefined);
                   if (!resolvedValue) return null;
 
                   return <List.Item.Detail.Metadata.Label key={type} title={titleCase(type)} text={resolvedValue} />;
