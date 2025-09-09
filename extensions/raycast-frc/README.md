@@ -6,11 +6,7 @@ Statistics for FIRST Robotics Competition and FIRST Tech Challenge right at your
 
 ## Demo
 
-
-
 https://github.com/user-attachments/assets/1bcfa56b-6018-4a30-8346-fc532a395282
-
-
 
 ## Features
 
@@ -19,16 +15,9 @@ https://github.com/user-attachments/assets/1bcfa56b-6018-4a30-8346-fc532a395282
 - Specify a year for team history (optional, and only for FRC)
 - Uses The Blue Alliance, Statbotics, and FTCScout APIs
 
-## Installation
-> This extension is not yet available on the Raycast Store, so you will have to manually install it using the command line. 
-```bash
-git clone https://github.com/vibsthebot/raycast-frc.git
-cd raycast-frc
+## How to get your key?
 
-npm install
-npm run build
-```
-Run the extension in raycast and enter your The Blue Alliance API Key (get one from https://www.thebluealliance.com/account).
+Get The Blue Alliance API Key (get one from https://www.thebluealliance.com/account).
 
 ## Commands
 
