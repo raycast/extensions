@@ -102,7 +102,7 @@ function parseLocalPaths(str: string): string[] | null {
   }
 }
 
-function processLocalWorkspace(workspace: LocalWorkspace): ZedEntry | undefined {
+function processLocalWorkspace(workspace: LocalWorkspace, schemaVersion: number): ZedEntry | undefined {
   // For dev build, paths are JSON, not binary
   if (!workspace.local_paths) {
     return undefined;
@@ -110,16 +110,40 @@ function processLocalWorkspace(workspace: LocalWorkspace): ZedEntry | undefined 
 
   let paths: string[] | null = null;
 
-  // Try parsing as JSON first (dev build format)
-  try {
-    const parsed = JSON.parse(workspace.local_paths);
-    if (Array.isArray(parsed)) {
-      paths = parsed;
+  // Schema 27+ uses plain string paths
+  if (schemaVersion >= 27) {
+    // Single path stored as plain string
+    const path = workspace.local_paths.trim();
+    if (path) {
+      paths = [path];
     }
-  } catch {
-    // If JSON parsing fails, try binary format (stable build)
-    paths = parseLocalPaths(workspace.local_paths);
+  } else if (schemaVersion === 26) {
+    // Schema 26 (dev) uses JSON arrays
+    try {
+      const parsed = JSON.parse(workspace.local_paths);
+      if (Array.isArray(parsed)) {
+        paths = parsed;
+      }
+    } catch {
+      // If JSON parsing fails, fall back to plain string
+      const path = workspace.local_paths.trim();
+      if (path) {
+        paths = [path];
+      }
+    }
+  } else {
+    // Schema 25 and below might use binary format
+    try {
+      const parsed = JSON.parse(workspace.local_paths);
+      if (Array.isArray(parsed)) {
+        paths = parsed;
+      }
+    } catch {
+      // If JSON parsing fails, try binary format (old stable build)
+      paths = parseLocalPaths(workspace.local_paths);
+    }
   }
+
   // TODO: Only support single path workspaces for now
   if (!paths || paths.length !== 1) {
     return undefined;
@@ -172,6 +196,12 @@ function processRemoteWorkspace(workspace: RemoteWorkspace): ZedEntry | undefine
 
 export function getSchemaVersionSync(dbPath: string): number {
   try {
+    // Check if database file exists first
+    if (!fs.existsSync(dbPath)) {
+      console.log(`Database not found at: ${dbPath}`);
+      return 0;
+    }
+
     const result = execFileSync("sqlite3", [dbPath, "SELECT MAX(step) FROM migrations WHERE domain = 'WorkspaceDb';"], {
       encoding: "utf8",
     });
@@ -187,7 +217,29 @@ export function getSchemaVersionSync(dbPath: string): number {
 }
 
 export function getQueryForSchema(schemaVersion: number): string {
-  // Schema version 26+ uses ssh_connections table and unified paths field
+  // Schema version 28+ uses remote_connections table instead of ssh_connections
+  if (schemaVersion >= 28) {
+    return `
+      SELECT
+        CASE
+          WHEN remote_connection_id IS NULL THEN 'local'
+          ELSE 'remote'
+        END as type,
+        workspace_id as id,
+        paths as local_paths,
+        paths,
+        timestamp,
+        host,
+        user,
+        port
+      FROM workspaces
+      LEFT JOIN remote_connections ON remote_connection_id = remote_connections.id
+      WHERE paths IS NOT NULL AND paths != ''
+      ORDER BY timestamp DESC
+    `;
+  }
+
+  // Schema version 26-27 uses ssh_connections table and unified paths field
   if (schemaVersion >= 26) {
     return `
       SELECT
@@ -289,7 +341,7 @@ export function useZedRecentWorkspaces(schemaVersion?: number, query?: string | 
           let entry: ZedEntry | undefined;
 
           if (workspace.type === "local") {
-            entry = processLocalWorkspace(workspace);
+            entry = processLocalWorkspace(workspace, schemaVersion ?? 0);
           } else if (workspace.type === "remote") {
             entry = processRemoteWorkspace(workspace);
           }
@@ -312,27 +364,44 @@ export function useZedRecentWorkspaces(schemaVersion?: number, query?: string | 
 export const execFilePromise = util.promisify(execFile);
 
 async function deleteEntryById(id: number, schemaVersion: number) {
-  const deleteQuery =
-    schemaVersion >= 26
-      ? `
+  let deleteQuery: string;
+
+  if (schemaVersion >= 28) {
+    deleteQuery = `
+DELETE FROM remote_connections WHERE id = (
+  SELECT remote_connection_id FROM workspaces WHERE workspace_id = ${id}
+);
+DELETE FROM workspaces WHERE workspace_id = ${id}
+`;
+  } else if (schemaVersion >= 26) {
+    deleteQuery = `
 DELETE FROM ssh_connections WHERE id = (
   SELECT ssh_connection_id FROM workspaces WHERE workspace_id = ${id}
 );
 DELETE FROM workspaces WHERE workspace_id = ${id}
-`
-      : `
+`;
+  } else {
+    deleteQuery = `
 DELETE FROM ssh_projects WHERE id = (
   SELECT ssh_project_id FROM workspaces WHERE workspace_id = ${id}
 );
 DELETE FROM workspaces WHERE workspace_id = ${id}
 `;
+  }
+
   await execFilePromise("sqlite3", [getPath(), deleteQuery]);
 }
 
 async function deleteAllWorkspaces(schemaVersion: number) {
-  const deleteQuery =
-    schemaVersion >= 26
-      ? "DELETE FROM ssh_connections;DELETE FROM workspaces;"
-      : "DELETE FROM ssh_projects;DELETE FROM workspaces;";
+  let deleteQuery: string;
+
+  if (schemaVersion >= 28) {
+    deleteQuery = "DELETE FROM remote_connections;DELETE FROM workspaces;";
+  } else if (schemaVersion >= 26) {
+    deleteQuery = "DELETE FROM ssh_connections;DELETE FROM workspaces;";
+  } else {
+    deleteQuery = "DELETE FROM ssh_projects;DELETE FROM workspaces;";
+  }
+
   await execFilePromise("sqlite3", [getPath(), deleteQuery]);
 }
