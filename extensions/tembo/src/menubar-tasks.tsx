@@ -1,12 +1,7 @@
 import { Icon, MenuBarExtra, open } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { temboAPI, TEMBO_UI_BASE, type Issue } from "./api";
-import {
-  getIssueStatus,
-  getIssueIntegrationType,
-  getIssueRepo,
-  getIntegrationIcon,
-} from "./issue-utils";
+import { getIssueStatus, getIssueIntegrationType, getIssueRepo, getIntegrationIcon } from "./issue-utils";
 
 async function fetchIssues(): Promise<Issue[]> {
   try {
@@ -15,10 +10,7 @@ async function fetchIssues(): Promise<Issue[]> {
       pageSize: 20,
     });
 
-    issues.sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    );
+    issues.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     return issues;
   } catch (error) {
     console.error("Failed to fetch issues for menubar:", error);
@@ -44,9 +36,7 @@ export default function MenubarTasks() {
     return status === "open" || status === "queued";
   });
 
-  const failedIssues = issues.filter(
-    (issue) => getIssueStatus(issue) === "failed",
-  );
+  const failedIssues = issues.filter((issue) => getIssueStatus(issue) === "failed");
 
   const recentlyCompleted = issues.filter((issue) => {
     const status = getIssueStatus(issue);

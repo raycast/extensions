@@ -5,9 +5,7 @@ export async function getApiKey(): Promise<string> {
   return preferences.apiKey.trim();
 }
 
-export async function withAccessToken<T>(
-  fn: (token: string) => Promise<T>,
-): Promise<T> {
+export async function withAccessToken<T>(fn: (token: string) => Promise<T>): Promise<T> {
   const apiKey = await getApiKey();
   return fn(apiKey);
 }

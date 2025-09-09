@@ -45,9 +45,7 @@ async function tool(input: Input) {
 
       if (!matchedRepo) {
         const repoNames = repositories.map((r) => r.name).join(", ");
-        throw new Error(
-          `Repository "${repository}" not found. Available repositories: ${repoNames || "None"}`,
-        );
+        throw new Error(`Repository "${repository}" not found. Available repositories: ${repoNames || "None"}`);
       }
 
       codeRepoIds = [matchedRepo.id];
@@ -87,9 +85,7 @@ async function tool(input: Input) {
     };
   } catch (error) {
     if (error instanceof Error && error.message.includes("401")) {
-      throw new Error(
-        "Authentication failed. Please check your Tembo API key in Raycast preferences.",
-      );
+      throw new Error("Authentication failed. Please check your Tembo API key in Raycast preferences.");
     }
     throw new Error(`Failed to create task: ${error}`);
   }
