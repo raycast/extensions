@@ -5,6 +5,8 @@
   "description": "Record, view, and search meetings in Circleback",
   "icon": "extension-icon.png",
   "author": "arguiot",
+  "owner": "circleback",
+  "access": "public",
   "categories": [
     "Productivity"
   ],
