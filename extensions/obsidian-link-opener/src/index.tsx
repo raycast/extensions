@@ -74,6 +74,7 @@ export default function Command() {
             url: urlInfo.url,
             noteId: note.id,
             noteUrls: note.urls, // Include all URLs from the note
+            aliases: note.aliases, // Include aliases for searching
             frecencyScore: note.frecencyScore || 0,
             frecencyBucket: note.frecencyBucket || 0,
             isFirstUrlForNote: urlIndex === 0,
@@ -98,6 +99,7 @@ export default function Command() {
         const titleLower = item.noteTitle.toLowerCase();
         const sourceLower = item.urlSource.toLowerCase();
         const urlLower = item.url.toLowerCase();
+        const aliasesLower = item.aliases?.map((a) => a.toLowerCase()) || [];
 
         let score = 0;
         let matches = false;
@@ -109,6 +111,19 @@ export default function Command() {
         } else if (titleLower.includes(searchTerm)) {
           score += 50; // Lower priority for contains match
           matches = true;
+        }
+
+        // Check aliases matches
+        for (const alias of aliasesLower) {
+          if (alias.startsWith(searchTerm)) {
+            score += 90; // High priority for alias prefix match
+            matches = true;
+            break;
+          } else if (alias.includes(searchTerm)) {
+            score += 45; // Lower priority for alias contains match
+            matches = true;
+            break;
+          }
         }
 
         // Check source matches
@@ -206,6 +221,7 @@ export default function Command() {
                 key={item.id}
                 title={title}
                 subtitle={item.url}
+                keywords={item.aliases}
                 accessories={[
                   ...(item.totalUrlsForNote > 1 && item.isFirstUrlForNote
                     ? [{ text: `${item.totalUrlsForNote} URLs` }]
@@ -225,11 +241,13 @@ export default function Command() {
                       <Action.CopyToClipboard
                         content={item.url}
                         title="Copy URL"
+                        shortcut={{ modifiers: ["cmd"], key: "c" }}
                       />
                       <Action
                         title="Open URL in Default App"
                         icon={Icon.Globe}
                         onAction={() => handleUrlOpen(item.url, item.noteId)}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
                       />
                     </ActionPanel.Section>
                     {item.noteUrls && item.noteUrls.length > 1 && (
