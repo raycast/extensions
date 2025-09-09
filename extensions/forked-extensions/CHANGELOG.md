@@ -1,6 +1,6 @@
 # Raycast Fork Extensions Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-09-09
 
 - Run local Git commands before requesting GitHub API to improve performance
 - Use the resolved repository path in all Git commands for better accuracy
