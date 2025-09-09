@@ -79,7 +79,7 @@ function CustomerList() {
     [searchQuery],
     {
       keepPreviousData: true,
-    }
+    },
   );
 
   return (

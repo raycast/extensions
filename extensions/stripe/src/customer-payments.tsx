@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, List, Color, showToast, Toast, confirmAlert, Alert } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { withEnvContext } from "./components";
 import { useStripeDashboard, useEnvContext } from "./hooks";
 import Stripe from "stripe";
@@ -8,8 +8,8 @@ import { getPreferenceValues } from "@raycast/api";
 const { stripeTestApiKey, stripeLiveApiKey } = getPreferenceValues();
 
 // Create Stripe clients for both environments
-const stripeTest = stripeTestApiKey ? new Stripe(stripeTestApiKey, { apiVersion: "2024-10-28.acacia" }) : null;
-const stripeLive = stripeLiveApiKey ? new Stripe(stripeLiveApiKey, { apiVersion: "2024-10-28.acacia" }) : null;
+const stripeTest = stripeTestApiKey ? new Stripe(stripeTestApiKey, { apiVersion: "2025-02-24.acacia" }) : null;
+const stripeLive = stripeLiveApiKey ? new Stripe(stripeLiveApiKey, { apiVersion: "2025-02-24.acacia" }) : null;
 
 interface CustomerPaymentsListProps {
   customerId: string;
@@ -37,7 +37,7 @@ function CustomerPaymentsList({ customerId }: CustomerPaymentsListProps) {
     [],
     {
       keepPreviousData: true,
-    }
+    },
   );
 
   const handleRefund = async (charge: Stripe.Charge) => {
@@ -55,7 +55,7 @@ function CustomerPaymentsList({ customerId }: CustomerPaymentsListProps) {
     const confirmed = await confirmAlert({
       title: "Refund Payment",
       message: `Are you sure you want to refund ${(remainingAmount / 100).toFixed(
-        2
+        2,
       )} ${charge.currency.toUpperCase()}?`,
       primaryAction: {
         title: "Refund",
@@ -86,10 +86,8 @@ function CustomerPaymentsList({ customerId }: CustomerPaymentsListProps) {
       // Revalidate the list to show updated status
       revalidate();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(error, {
         title: "Refund Failed",
-        message: error instanceof Error ? error.message : "An error occurred",
       });
     }
   };
