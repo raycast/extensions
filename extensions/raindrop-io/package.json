@@ -9,7 +9,6 @@
   "contributors": [
     "shubham",
     "pernielsentikaer",
-    "sh-cho",
     "tdkn",
     "j3lte",
     "rien7",
@@ -17,6 +16,9 @@
     "pewpeo",
     "joaopesce",
     "ridemountainpig"
+  ],
+  "pastContributors": [
+    "sh-cho"
   ],
   "license": "MIT",
   "commands": [
