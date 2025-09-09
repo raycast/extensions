@@ -57,15 +57,19 @@ Search models, view benchmark results, compare prices, and check leaderboards al
 You can optionally override the default read-only Supabase project via Raycast Preferences for this extension:
 
 - `SUPABASE_URL` (textfield) – e.g., `https://YOUR-PROJECT.supabase.co`
-- `SUPABASE Publish API Key` (password) – your project's publish API key
+- `SUPABASE_ANON_KEY` (password) – your project's publishable anon key
 - `SHOW_PINNED_SECTION` (checkbox) – show a Pinned section at the top of Search (default: enabled)
 
 If left empty, the extension uses a hosted, read-only Supabase instance to fetch public AI stats.
 
-## Data Source
+## Data Source & Configuration
 
-- 📡 Stats come from [ArtificialAnalysis.ai](https://artificialanalysis.ai/) (via their free API).
-- Data and benchmarks are owned by ArtificialAnalysis.ai. A read-only Supabase database mirrors this data to reduce API calls.
+- 📡 Stats come from [ArtificialAnalysis.ai](https://artificialanalysis.ai/) (via their free API) and are mirrored into a read-only Supabase database for fast, reliable queries from Raycast.
+- 🔧 You can point the extension at your own Supabase project if you prefer. Configure via Raycast Preferences (`SUPABASE_URL`, `SUPABASE_ANON_KEY`).
+- ⚙️ Resolution order for configuration:
+  1. Raycast Preferences: `SUPABASE_URL`, `SUPABASE_ANON_KEY`
+  2. Environment variables: `DEFAULT_SUPABASE_URL`, `DEFAULT_SUPABASE_ANON_KEY`
+  3. Built-in publishable read-only defaults (fastest & most reliable out-of-the-box)
 
 ## Privacy
 

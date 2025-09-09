@@ -233,6 +233,9 @@ function SearchSection({
     if (debounce.current) clearTimeout(debounce.current);
     setQ(searchText);
     debounce.current = setTimeout(() => setQ(searchText), 250);
+    return () => {
+      if (debounce.current) clearTimeout(debounce.current);
+    };
   }, [searchText]);
 
   const pinnedRows = rows

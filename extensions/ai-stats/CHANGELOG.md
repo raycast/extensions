@@ -34,3 +34,13 @@
   - Stabilized callbacks for pin/unpin/move (useCallback)
   - Introduced typed metric registry for leaderboard sort order
   - Removed duplicate/unused state and imports; switched refresh to `revalidate()`
+  - Debounced search now cleans up pending timeouts to avoid potential memory leaks
+  - Security: removed hardcoded Supabase credentials from source; configuration now resolves in this order:
+    - Raycast Preferences (`SUPABASE_URL`, `SUPABASE_ANON_KEY`)
+    - Environment variables (`DEFAULT_SUPABASE_URL`, `DEFAULT_SUPABASE_ANON_KEY`)
+    - Built-in publishable read-only defaults for out-of-the-box use
+
+### Data Source
+
+- Data is collected from [ArtificialAnalysis.ai](https://artificialanalysis.ai/) and mirrored into a read-only Supabase database for fast, reliable queries from Raycast.
+- You can point the extension to your own Supabase by setting preferences (`SUPABASE_URL`, `SUPABASE_ANON_KEY`) or environment variables. The hosted defaults remain the fastest and most reliable setup.

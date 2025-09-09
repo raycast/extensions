@@ -38,7 +38,7 @@
       "title": "Supabase URL (optional)",
       "placeholder": "https://YOUR-PROJECT.supabase.co",
       "required": false,
-      "default": "",
+      "default": "https://bgbqdzmgxkwstjihgeef.supabase.co",
       "description": "Optional override for the read-only Supabase instance. Leave empty to use the default."
     },
     {
@@ -46,7 +46,7 @@
       "type": "password",
       "title": "Supabase Anon Key (optional)",
       "required": false,
-      "default": "",
+      "default": "sb_publishable_i_viL-n7Gd7C9ijmmHtj5g_BgLbFmuf",
       "description": "Optional override for the read-only anon key. Leave empty to use the default."
     }
   ],
