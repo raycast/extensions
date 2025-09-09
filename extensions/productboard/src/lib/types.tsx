@@ -54,12 +54,9 @@ export type Objective = {
   name: string;
   description: string;
   level: number | null;
-  // parent
   owner: {
     email: string;
   };
-  // timeframe
-  // state
   status: {
     id: string;
     name: string;
