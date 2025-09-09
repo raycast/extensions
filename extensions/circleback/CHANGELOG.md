@@ -1,5 +1,7 @@
 # Circleback Changelog
 
+## [Moved extension to organization] - {PR_MERGE_DATE}
+
 ## [Initial Version] - 2025-09-09
 
 - Added Circleback extension
