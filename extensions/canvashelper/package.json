@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "canvashelper",
+  "title": "Canvas Helper",
+  "description": "Complete Canvas LMS integration for Raycast - manage courses, check grades, track assignments, and navigate Canvas efficiently.",
+  "icon": "extension-icon.png",
+  "author": "athitheya_gobinathan",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "dashboard",
+      "title": "Go to Dashboard",
+      "description": "Quick access to your Canvas dashboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "courses",
+      "title": "Courses",
+      "description": "View and manage your Canvas courses with quick navigation actions",
+      "mode": "view"
+    },
+    {
+      "name": "grades",
+      "title": "Grades",
+      "description": "Check your Canvas course grades with real-time data",
+      "mode": "view"
+    },
+    {
+      "name": "assignments",
+      "title": "Assignments",
+      "description": "Track next due assignments and view assignment statistics by course",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "canvasUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "Canvas Instance URL",
+      "description": "Your Canvas instance URL (e.g., https://canvas.instructure.com)",
+      "placeholder": "https://canvas.instructure.com"
+    },
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": true,
+      "title": "Canvas API Token",
+      "description": "Your Canvas API token (generate from Canvas Settings > API Keys)",
+      "placeholder": "Enter your Canvas API token"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.4",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
