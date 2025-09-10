@@ -34,8 +34,8 @@
       "title": "Sandbox API Key",
       "placeholder": "am_sk_test_XX...xx",
       "type": "password",
-            "description": "Sandbox API Key from Autumn Dashboard",
-"required": true
+      "description": "Sandbox API Key from Autumn Dashboard",
+      "required": true
     },
     {
       "name": "use_sandbox",
