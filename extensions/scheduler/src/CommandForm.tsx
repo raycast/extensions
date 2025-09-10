@@ -1,9 +1,10 @@
 import { ActionPanel, Action, Form, showToast, Toast, popToRoot, Icon } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { useMemo, useState } from "react";
-import { ScheduledCommand, RaycastCommand, FormValues, ScheduleType } from "../types";
-import { toLocalYMD } from "../utils/dateTime";
-import { useCommandPermissions } from "../hooks/useCommandPermissions";
+import { ScheduledCommand, RaycastCommand, FormValues, ScheduleType } from "./types";
+import { toLocalYMD } from "./utils/dateTime";
+import { useCommandPermissions } from "./hooks/useCommandPermissions";
+import CronExpressionParser from "cron-parser";
 import {
   getScheduleDescription,
   parseRaycastDeeplink,
@@ -11,8 +12,9 @@ import {
   processFormValues,
   createRaycastCommand,
   createSavedSchedule,
-} from "../utils";
-import { ERROR_MESSAGES } from "../utils/constants";
+  buildScheduleFromValues,
+} from "./utils";
+import { ERROR_MESSAGES } from "./utils/constants";
 
 interface CommandFormProps {
   command?: ScheduledCommand;
@@ -29,7 +31,7 @@ const PERMISSION_MESSAGES = {
   },
   VERIFIED: {
     title: "✅ Command Verified",
-    getText: (date: string) => `This command was last tested successfully on ${new Date(date).toLocaleDateString()}.`,
+    getText: (date: string) => `Last tested successfully on ${new Date(date).toLocaleDateString()}.`,
   },
 } as const;
 
@@ -63,6 +65,7 @@ export function CommandForm({ command, onSave, title, submitButtonTitle, draftVa
       date: (draftValues?.date as string) ?? (command?.schedule.date || ""),
       dayOfWeek: (draftValues?.dayOfWeek as string) ?? command?.schedule.dayOfWeek?.toString(),
       dayOfMonth: (draftValues?.dayOfMonth as string) ?? command?.schedule.dayOfMonth?.toString(),
+      cronExpression: (draftValues?.cronExpression as string) ?? (command?.schedule.cronExpression || ""),
     },
     async onSubmit(values) {
       setIsSubmitting(true);
@@ -104,6 +107,16 @@ export function CommandForm({ command, onSave, title, submitButtonTitle, draftVa
         }
       },
       time: (value) => {
+        const scheduleType = itemProps.scheduleType.value;
+        // Time is not required for interval-based schedules
+        if (scheduleType === "15mins" || scheduleType === "30mins" || scheduleType === "hourly") {
+          return undefined;
+        }
+        // Time is not required for cron schedules
+        if (scheduleType === "cron") {
+          return undefined;
+        }
+
         if (!value) return "Time is required";
         const str = String(value).trim();
         const isValid = /^([01]\d|2[0-3]):[0-5]\d$/.test(str);
@@ -117,6 +130,20 @@ export function CommandForm({ command, onSave, title, submitButtonTitle, draftVa
       dayOfMonth: (value) => {
         if (itemProps.scheduleType.value === "monthly" && !value) {
           return "Day of month is required for 'monthly' schedule";
+        }
+      },
+      cronExpression: (value) => {
+        if (itemProps.scheduleType.value === "cron" && !value) {
+          return "Cron expression is required for 'cron' schedule";
+        }
+        if (itemProps.scheduleType.value === "cron" && value) {
+          try {
+            // Validate cron expression (cron-parser without seconds field by default)
+            CronExpressionParser.parse(String(value));
+            return undefined;
+          } catch (error) {
+            return "Invalid cron expression. Use format: * * * * * (minute hour day month weekday) " + error;
+          }
         }
       },
     },
@@ -136,6 +163,34 @@ export function CommandForm({ command, onSave, title, submitButtonTitle, draftVa
     () => (parsedCommand ? getCommandPermission(parsedCommand) : null),
     [parsedCommand, getCommandPermission],
   );
+
+  // Live schedule preview based on current form state
+  const schedulePreview = useMemo(() => {
+    try {
+      const formValues = {
+        name: String(itemProps.name?.value || ""),
+        command: String(itemProps.command?.value || ""),
+        scheduleType: (itemProps.scheduleType?.value as ScheduleType) || "daily",
+        time: String(itemProps.time?.value || ""),
+        date: String(itemProps.date?.value || ""),
+        dayOfWeek: itemProps.dayOfWeek?.value ? String(itemProps.dayOfWeek.value) : undefined,
+        dayOfMonth: itemProps.dayOfMonth?.value ? String(itemProps.dayOfMonth.value) : undefined,
+        cronExpression: itemProps.cronExpression?.value ? String(itemProps.cronExpression.value) : undefined,
+        runInBackground: Boolean(itemProps.runInBackground?.value),
+      } as FormValues;
+      const schedule = buildScheduleFromValues(formValues);
+      return getScheduleDescription(schedule);
+    } catch {
+      return undefined;
+    }
+  }, [
+    itemProps.scheduleType?.value,
+    itemProps.time?.value,
+    itemProps.date?.value,
+    itemProps.dayOfWeek?.value,
+    itemProps.dayOfMonth?.value,
+    itemProps.cronExpression?.value,
+  ]);
 
   async function handleTest() {
     if (!parsedCommand) {
@@ -216,9 +271,13 @@ export function CommandForm({ command, onSave, title, submitButtonTitle, draftVa
         onChange={(v) => itemProps.scheduleType?.onChange?.(v as unknown as ScheduleType)}
       >
         <Form.Dropdown.Item value="once" title="Once" />
+        <Form.Dropdown.Item value="15mins" title="Every 15 minutes" />
+        <Form.Dropdown.Item value="30mins" title="Every 30 minutes" />
+        <Form.Dropdown.Item value="hourly" title="Hourly" />
         <Form.Dropdown.Item value="daily" title="Daily" />
         <Form.Dropdown.Item value="weekly" title="Weekly" />
         <Form.Dropdown.Item value="monthly" title="Monthly" />
+        <Form.Dropdown.Item value="cron" title="Custom" />
       </Form.Dropdown>
 
       {/* Once: Date */}
@@ -241,13 +300,18 @@ export function CommandForm({ command, onSave, title, submitButtonTitle, draftVa
         />
       )}
 
-      {/* Time */}
-      <Form.TextField
-        title="Time"
-        placeholder="09:00"
-        info="Enter time in 24-hour format (HH:MM)"
-        {...itemProps.time}
-      />
+      {/* Time - only show for schedules that need it */}
+      {currentScheduleType !== "15mins" &&
+        currentScheduleType !== "30mins" &&
+        currentScheduleType !== "hourly" &&
+        currentScheduleType !== "cron" && (
+          <Form.TextField
+            title="Time"
+            placeholder="09:00"
+            info="Enter time in 24-hour format (HH:MM)"
+            {...itemProps.time}
+          />
+        )}
 
       {/* Weekly: Day of Week */}
       {currentScheduleType === "weekly" && (
@@ -270,6 +334,20 @@ export function CommandForm({ command, onSave, title, submitButtonTitle, draftVa
           ))}
         </Form.Dropdown>
       )}
+
+      {/* Cron: Cron Expression */}
+      {currentScheduleType === "cron" && (
+        <Form.TextField
+          title="Cron Expression"
+          placeholder="0 9 * * *"
+          info="Enter a cron expression (e.g., '0 9 * * *' for daily at 9:00 AM). Format: minute hour day month weekday"
+          {...itemProps.cronExpression}
+        />
+      )}
+      <Form.Description
+        title="Schedule Summary"
+        text={schedulePreview ? schedulePreview : "Adjust the fields above to preview the schedule"}
+      />
     </Form>
   );
 }
