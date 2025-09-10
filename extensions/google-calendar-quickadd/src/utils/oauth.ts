@@ -3,8 +3,7 @@ import { OAuthService, withAccessToken } from "@raycast/utils";
 import type { Tool } from "@raycast/api";
 
 // Only request the minimal scopes needed
-const GOOGLE_SCOPES =
-  "https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.readonly";
+const GOOGLE_SCOPES = "https://www.googleapis.com/auth/calendar";
 const CLIENT_ID = "690234628480-bhl8vft6dp81bkv4bq0lf9l6vv7nerq4.apps.googleusercontent.com";
 
 let calendar: calendar_v3.Calendar | null = null;

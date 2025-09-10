@@ -249,18 +249,10 @@
       ]
     }
   ],
-  "oauth": {
-    "clientId": "1020774972971-ah78vboj2tucn69aj74rtkog8cm9hsep.apps.googleusercontent.com",
-    "scope": "https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.readonly",
-    "authorizeUrl": "https://accounts.google.com/o/oauth2/v2/auth",
-    "tokenUrl": "https://oauth2.googleapis.com/token"
-  },
   "dependencies": {
     "@googleapis/calendar": "^11.0.1",
     "@raycast/api": "^1.102.5",
-    "@raycast/utils": "^1.19.1",
-    "axios": "^1.11.0",
-    "dotenv": "^17.2.1"
+    "@raycast/utils": "^1.19.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
