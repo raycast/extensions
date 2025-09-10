@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Color, Detail, Icon, List, getPreferenceValues } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Detail,
+  Icon,
+  Keyboard,
+  List,
+  Toast,
+  getPreferenceValues,
+  showToast,
+} from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCachedPromise, useLocalStorage } from "@raycast/utils";
 import { sb } from "./lib/supabase";
@@ -290,9 +301,24 @@ function SearchSection({
                       icon={Icon.Sidebar}
                       target={<ModelDetail model={m} pinnedIds={pinnedIds} addPin={addPin} removePin={removePin} />}
                     />
-                    <Action title="Unpin Model" icon={Icon.PinDisabled} onAction={() => removePin(m.id)} />
-                    <Action title="Move Pin up" icon={Icon.ArrowUp} onAction={() => movePin(m.id, -1)} />
-                    <Action title="Move Pin Down" icon={Icon.ArrowDown} onAction={() => movePin(m.id, 1)} />
+                    <Action
+                      title="Unpin Model"
+                      icon={Icon.PinDisabled}
+                      shortcut={Keyboard.Shortcut.Common.Pin}
+                      onAction={() => removePin(m.id)}
+                    />
+                    <Action
+                      title="Move Pin up"
+                      icon={Icon.ArrowUp}
+                      shortcut={Keyboard.Shortcut.Common.MoveUp}
+                      onAction={() => movePin(m.id, -1)}
+                    />
+                    <Action
+                      title="Move Pin Down"
+                      icon={Icon.ArrowDown}
+                      shortcut={Keyboard.Shortcut.Common.MoveDown}
+                      onAction={() => movePin(m.id, 1)}
+                    />
                     <Action title="Switch to Leaderboards" icon={Icon.List} onAction={() => setMode("leaderboards")} />
                     <ActionPanel.Submenu title="Filter by Creator" shortcut={{ modifiers: ["cmd"], key: "p" }}>
                       <Action title="All Creators" onAction={() => setCreatorFilter("")} />
@@ -360,14 +386,34 @@ function SearchSection({
                     }}
                   />
                   {isPinned ? (
-                    <Action title="Unpin Model" icon={Icon.PinDisabled} onAction={() => removePin(m.id)} />
+                    <Action
+                      title="Unpin Model"
+                      icon={Icon.PinDisabled}
+                      shortcut={Keyboard.Shortcut.Common.Pin}
+                      onAction={() => removePin(m.id)}
+                    />
                   ) : (
-                    <Action title="Pin Model" icon={Icon.Pin} onAction={() => addPin(m.id)} />
+                    <Action
+                      title="Pin Model"
+                      icon={Icon.Pin}
+                      shortcut={Keyboard.Shortcut.Common.Pin}
+                      onAction={() => addPin(m.id)}
+                    />
                   )}
                   {isPinned && (
                     <>
-                      <Action title="Move Pin up" icon={Icon.ArrowUp} onAction={() => movePin(m.id, -1)} />
-                      <Action title="Move Pin Down" icon={Icon.ArrowDown} onAction={() => movePin(m.id, 1)} />
+                      <Action
+                        title="Move Pin up"
+                        icon={Icon.ArrowUp}
+                        shortcut={Keyboard.Shortcut.Common.MoveUp}
+                        onAction={() => movePin(m.id, -1)}
+                      />
+                      <Action
+                        title="Move Pin Down"
+                        icon={Icon.ArrowDown}
+                        shortcut={Keyboard.Shortcut.Common.MoveDown}
+                        onAction={() => movePin(m.id, 1)}
+                      />
                     </>
                   )}
                   <Action.CopyToClipboard title="Copy Name" icon={Icon.Clipboard} content={m.name ?? ""} />
@@ -621,9 +667,31 @@ function ModelDetail({ model, pinnedIds, addPin, removePin }: ModelDetailProps) 
           {addPin &&
             removePin &&
             (isPinned ? (
-              <Action title="Unpin Model" icon={Icon.PinDisabled} onAction={() => removePin(model.id)} />
+              <Action
+                title="Unpin Model"
+                icon={Icon.PinDisabled}
+                shortcut={Keyboard.Shortcut.Common.Pin}
+                onAction={() => {
+                  removePin(model.id);
+                  showToast({
+                    title: "Model unpinned",
+                    message: model.name ?? model.slug ?? "Model",
+                  });
+                }}
+              />
             ) : (
-              <Action title="Pin Model" icon={Icon.Pin} onAction={() => addPin(model.id)} />
+              <Action
+                title="Pin Model"
+                icon={Icon.Pin}
+                shortcut={Keyboard.Shortcut.Common.Pin}
+                onAction={() => {
+                  addPin(model.id);
+                  showToast({
+                    title: "Model pinned",
+                    message: model.name ?? model.slug ?? "Model",
+                  });
+                }}
+              />
             ))}
           <ActionPanel.Submenu title="Copy Info" icon={Icon.Clipboard}>
             {(() => {
