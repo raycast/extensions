@@ -1,9 +1,8 @@
-import { ActionPanel, Action, showToast, Toast, Form, useNavigation } from "@raycast/api";
+import { ActionPanel, Action, Form, useNavigation } from "@raycast/api";
 import { useForm, showFailureToast } from "@raycast/utils";
 import type { CreateMessageRequest } from "../types";
-import ChatDetail from "./ChatDetail";
+import ChatMessages from "./ChatMessages";
 import { useActiveProfile } from "../hooks/useActiveProfile";
-import { v0ApiFetcher, V0ApiError } from "../lib/v0-api-utils";
 import fs from "fs/promises";
 
 interface FormValues {
@@ -41,68 +40,49 @@ export default function AddMessage({ chatId, chatTitle, revalidateChats, scopeId
         return;
       }
 
-      const toast = await showToast({
-        style: Toast.Style.Animated,
-        title: "Sending message...",
-      });
-
       try {
-        const requestBody: CreateMessageRequest = {
+        const followUpRequest: CreateMessageRequest = {
           message: values.message,
           modelConfiguration: {
             ...(values.modelId && { modelId: values.modelId }),
             ...(typeof values.imageGenerations === "boolean" && { imageGenerations: values.imageGenerations }),
             ...(typeof values.thinking === "boolean" && { thinking: values.thinking }),
           },
-          responseMode: "async",
         };
 
         if (values.attachments && values.attachments.length > 0) {
           const attachments = await Promise.all(
             values.attachments.map(async (filePath) => {
               const fileContent = await fs.readFile(filePath, { encoding: "base64" });
-              const mimeType = "application/octet-stream"; // Default MIME type
-              // You might want to infer the MIME type based on the file extension
-              // For simplicity, we'll use a generic one here.
+              const mimeType = "application/octet-stream";
               return { url: `data:${mimeType};base64,${fileContent}` };
             }),
           );
-          requestBody.attachments = attachments;
+          followUpRequest.attachments = attachments;
         }
 
-        // Remove modelConfiguration if it's empty
-        if (requestBody.modelConfiguration && Object.keys(requestBody.modelConfiguration).length === 0) {
-          delete requestBody.modelConfiguration;
+        // Trim empty modelConfiguration
+        if (followUpRequest.modelConfiguration && Object.keys(followUpRequest.modelConfiguration).length === 0) {
+          delete followUpRequest.modelConfiguration;
         }
 
-        await v0ApiFetcher<CreateMessageRequest>(`https://api.v0.dev/v1/chats/${chatId}/messages`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${activeProfileApiKey}`,
-            "Content-Type": "application/json",
-            "x-scope": scopeId || activeProfileDefaultScope || "", // Use scopeId if available, otherwise default
-          },
-          body: JSON.stringify(requestBody),
-        });
-
-        toast.style = Toast.Style.Success;
-        toast.title = "Message Sent";
-        toast.message = "Your message has been sent successfully!";
-
-        // Push back to the chat detail to show the new message
-        push(<ChatDetail chatId={chatId} scopeId={scopeId} />);
+        // Navigate to chat messages view and start streaming the follow-up there
+        push(
+          <ChatMessages
+            chatId={chatId}
+            apiKey={activeProfileApiKey}
+            followUpRequest={followUpRequest}
+            scopeId={scopeId || activeProfileDefaultScope || ""}
+          />,
+        );
 
         revalidateChats();
 
         return;
       } catch (error) {
-        if (error instanceof V0ApiError) {
-          showFailureToast(error.message, { title: "Send Failed" });
-        } else {
-          showFailureToast(`Failed to send message: ${error instanceof Error ? error.message : String(error)}`, {
-            title: "Send Failed",
-          });
-        }
+        showFailureToast(`Failed to send message: ${error instanceof Error ? error.message : String(error)}`, {
+          title: "Send Failed",
+        });
         throw error;
       }
     },

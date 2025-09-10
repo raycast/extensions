@@ -6,6 +6,8 @@ import { useActiveProfile } from "./hooks/useActiveProfile";
 import { useScopes } from "./hooks/useScopes";
 import ProjectChats from "./view-projects-chats";
 import CreateProjectForm from "./components/CreateProjectForm";
+import CreateProjectEnvVarForm from "./components/CreateProjectEnvVarForm";
+import ViewProjectEnvVars from "./components/ViewProjectEnvVars";
 
 export default function ViewProjectsCommand() {
   const { activeProfileApiKey, activeProfileDefaultScope, isLoadingProfileDetails } = useActiveProfile();
@@ -60,6 +62,18 @@ export default function ViewProjectsCommand() {
                 title="View in Browser"
                 shortcut={Keyboard.Shortcut.Common.Open}
                 url={`https://v0.dev/chat/projects/${project.id}`}
+              />
+              <Action.Push
+                title="Add Environment Variable"
+                icon={Icon.PlusCircle}
+                target={<CreateProjectEnvVarForm projectId={project.id} />}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+              />
+              <Action.Push
+                title="View Environment Variables"
+                icon={Icon.Eye}
+                target={<ViewProjectEnvVars projectId={project.id} />}
+                shortcut={{ modifiers: ["cmd"], key: "e" }}
               />
               <Action.CopyToClipboard
                 title="Copy Project ID"

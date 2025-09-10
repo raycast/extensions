@@ -37,6 +37,7 @@ export interface MessageSummary {
   object: "message";
   content: string;
   createdAt: string;
+  updatedAt?: string;
   type:
     | "message"
     | "forked-block"
@@ -55,6 +56,7 @@ export interface MessageSummary {
     | "auto-fix-with-v0"
     | "sync-git";
   role: "user" | "assistant";
+  finishReason?: "stop" | "length" | "content-filter" | "tool-calls" | "error" | "other" | "unknown";
 }
 
 export interface ChatDetailResponse {
@@ -131,7 +133,7 @@ export interface CreateChatRequest {
     imageGenerations?: boolean;
     thinking?: boolean;
   };
-  responseMode?: "sync" | "async";
+  responseMode?: "sync" | "async" | "experimental_stream";
 }
 
 export interface CreateChatResponse {
@@ -166,7 +168,7 @@ export interface CreateMessageRequest {
     imageGenerations?: boolean;
     thinking?: boolean;
   };
-  responseMode?: "sync" | "async";
+  responseMode?: "sync" | "async" | "experimental_stream";
 }
 
 export interface CreateMessageResponse {

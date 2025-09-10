@@ -1,7 +1,8 @@
 import { ActionPanel, Detail, List, Action, Icon, showToast, Toast, confirmAlert, Keyboard } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import type { ChatSummary, FindChatsResponse, ForkChatResponse, ProjectChatsResponse } from "./types";
-import ChatDetail from "./components/ChatDetail";
+// import ChatDetail from "./components/ChatDetail";
+import ChatMessages from "./components/ChatMessages";
 import AddMessage from "./components/AddMessage";
 import { useNavigation } from "@raycast/api";
 import AssignProjectForm from "./components/AssignProjectForm";
@@ -167,8 +168,14 @@ export default function Command(props: { scopeId?: string; projectId?: string })
         body: requestBody,
       });
 
-      // Navigate to the new chat detail
-      push(<ChatDetail chatId={newChatResponse.id} />);
+      // Navigate to the new chat detail (streaming UI)
+      push(
+        <ChatMessages
+          chatId={newChatResponse.id}
+          apiKey={activeProfileApiKey || ""}
+          scopeId={activeProfileDefaultScope || undefined}
+        />,
+      );
 
       toast.style = Toast.Style.Success;
       toast.title = "Chat Forked";
@@ -236,7 +243,17 @@ export default function Command(props: { scopeId?: string; projectId?: string })
             ]}
             actions={
               <ActionPanel>
-                <Action.Push title="View Messages" target={<ChatDetail chatId={chat.id} />} icon={Icon.Message} />
+                <Action.Push
+                  title="View Messages"
+                  target={
+                    <ChatMessages
+                      chatId={chat.id}
+                      apiKey={activeProfileApiKey || ""}
+                      scopeId={selectedScopeFilter || undefined}
+                    />
+                  }
+                  icon={Icon.Message}
+                />
                 <Action.Push
                   title="Add Message"
                   target={<AddMessage chatId={chat.id} chatTitle={chat.name} revalidateChats={mutate} />}
