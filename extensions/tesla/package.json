@@ -138,6 +138,65 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "view-car",
+      "title": "View Car",
+      "description": "View details about the car"
+    },
+    {
+      "name": "drive-history",
+      "title": "Drive History",
+      "description": "Get driving history"
+    },
+    {
+      "name": "charge-history",
+      "title": "Charge History",
+      "description": "View historical charging data"
+    },
+    {
+      "name": "enable-sentry-mode",
+      "title": "Enable Sentry Mode",
+      "description": "Turn on sentry mode"
+    },
+    {
+      "name": "disable-sentry-mode",
+      "title": "Disable Sentry Mode",
+      "description": "Turn Sentry Mode Off"
+    },
+    {
+      "name": "start-defrosting",
+      "title": "Start Defrosting",
+      "description": "Turn defrosting on"
+    },
+    {
+      "name": "stop-defrosting",
+      "title": "Stop Defrosting",
+      "description": "Turn defrosting off"
+    },
+    {
+      "name": "enable-climate-control",
+      "title": "Enable Claimet Control",
+      "description": "Turns on climate control/AC"
+    },
+    {
+      "name": "disable-climate-control",
+      "title": "Disable Climate Control",
+      "description": "Turn Climate Control Off/AC"
+    }
+  ,
+    {
+      "name": "start-charging",
+      "title": "Start Charging",
+      "description": "Start charging"
+    }
+      ,
+    {
+      "name": "stop-charging",
+      "title": "Stop Charging",
+      "description": "Stop charging"
+    }
+      ],
   "preferences": [
     {
       "name": "tessieApiKey",
@@ -191,13 +250,13 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.57.1",
-    "@raycast/utils": "^1.9.1",
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.19.0",
     "moment": "^2.29.4",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
+    "@raycast/eslint-config": "1.0.11",
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
     "eslint": "^7.32.0",
