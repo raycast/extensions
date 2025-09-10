@@ -13,6 +13,7 @@ import { useRef, useEffect, useState } from "react";
 import { LinkItem } from "../types";
 import Service from "./../Service";
 import MultiLinks from "../multi-links";
+
 function CreateForm(props: { data?: LinkItem; onCreate?: () => void }) {
   const [browsers, setBrowsers] = useState<Application[]>([
     { name: "Google Chrome", bundleId: "com.google.Chrome", path: "" },
@@ -24,6 +25,7 @@ function CreateForm(props: { data?: LinkItem; onCreate?: () => void }) {
   const mode = props.data ? "edit" : "create";
   const { pop, push } = useNavigation();
   let updateBrowserList = true;
+
   async function handleSubmit(values: LinkItem) {
     if (values.name.trim() === "") {
       await showToast({ style: Toast.Style.Failure, title: "Name is required" });
@@ -34,6 +36,7 @@ function CreateForm(props: { data?: LinkItem; onCreate?: () => void }) {
       linksFieldRef.current?.focus();
       return;
     }
+
     if (mode === "create") {
       values.id = Math.random().toString(36).replace("0.", "");
       await Service.setLink(values);
@@ -41,6 +44,7 @@ function CreateForm(props: { data?: LinkItem; onCreate?: () => void }) {
       nameFieldRef.current?.reset();
       linksFieldRef.current?.reset();
       props.onCreate?.();
+
       if (props.onCreate) {
         pop();
       } else {
@@ -57,9 +61,11 @@ function CreateForm(props: { data?: LinkItem; onCreate?: () => void }) {
       }
     }
   }
+
   useEffect(() => {
     (async () => {
       const installedApplications = await getApplications();
+
       const browserIds = [
         "com.google.Chrome",
         "com.apple.Safari",
@@ -74,16 +80,20 @@ function CreateForm(props: { data?: LinkItem; onCreate?: () => void }) {
         "company.thebrowser.dia",
         "ai.perplexity.comet",
       ];
+
       const browsers = installedApplications.filter((app) => browserIds.includes(String(app.bundleId)));
+
       if (updateBrowserList) {
         setBrowsers(browsers);
         setSelectedBrowser(initialValues.browser);
       }
     })();
+
     return () => {
       updateBrowserList = false;
     };
   }, []);
+
   return (
     <Form
       actions={
@@ -104,6 +114,7 @@ function CreateForm(props: { data?: LinkItem; onCreate?: () => void }) {
         ref={nameFieldRef}
         autoFocus={true}
       />
+
       <Form.TextArea
         title="Links"
         id="links"
@@ -111,12 +122,14 @@ function CreateForm(props: { data?: LinkItem; onCreate?: () => void }) {
         defaultValue={initialValues.links}
         ref={linksFieldRef}
       />
-      <Form.Dropdown id="browser" onChange={setSelectedBrowser} title="Open with" value={selectedBrowser}>
+
+      <Form.Dropdown id="browser" title="Open with" value={selectedBrowser} onChange={setSelectedBrowser}>
         {browsers.map((app) => (
-          <Form.Dropdown.Item key={app.bundleId} title={app.name} value={String(app.bundleId)} />
+          <Form.Dropdown.Item key={app.bundleId} value={String(app.bundleId)} title={app.name} />
         ))}
       </Form.Dropdown>
     </Form>
   );
 }
+
 export default CreateForm;
