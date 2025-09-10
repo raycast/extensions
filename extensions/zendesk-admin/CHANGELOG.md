@@ -1,6 +1,6 @@
 # Zendesk Admin Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2025-09-10
 
 ### Added
 - Search across 14 Zendesk entity types (tickets, users, organizations, groups, views, brands, triggers, automations, macros, ticket fields, forms, dynamic content, support addresses, custom roles)
