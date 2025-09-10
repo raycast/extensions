@@ -8,10 +8,17 @@ import {
   Clipboard,
   Icon,
   Color,
+  getPreferenceValues,
+  showHUD,
 } from "@raycast/api";
-import { listAudioFiles, cleanupTempFiles } from "./utils/audio";
+import {
+  listAudioFiles,
+  cleanupTempFiles,
+  saveTranscription,
+  deleteRecordingFile,
+} from "./utils/audio";
 import { transcribeAudio } from "./utils/openai";
-import { TranscriptionFile } from "./types";
+import { TranscriptionFile, TranscriptionData, Preferences } from "./types";
 import { TEMP_DIRECTORY } from "./constants";
 import { formatDuration, formatFileSize } from "./utils/time";
 
@@ -25,7 +32,13 @@ export default function RecordingHistory() {
   useEffect(() => {
     loadAudioFiles();
     // Clean up old files when component mounts
-    cleanupTempFiles().catch(console.error);
+    const preferences = getPreferenceValues<Preferences>();
+    const retentionPeriod = preferences.retentionPeriod || "24";
+
+    if (retentionPeriod !== "never") {
+      const hours = parseInt(retentionPeriod, 10);
+      cleanupTempFiles(hours).catch(console.error);
+    }
   }, []);
 
   const loadAudioFiles = async () => {
@@ -43,11 +56,17 @@ export default function RecordingHistory() {
     }
   };
 
+  const handleCopyTranscription = async (transcription: string) => {
+    await Clipboard.copy(transcription);
+    await showHUD("Transcription copied to clipboard");
+  };
+
   const handleTranscribe = async (file: TranscriptionFile) => {
     if (transcribingFiles.has(file.id)) {
       return;
     }
 
+    const preferences = getPreferenceValues<Preferences>();
     setTranscribingFiles((prev) => new Set(prev).add(file.id));
 
     try {
@@ -58,6 +77,19 @@ export default function RecordingHistory() {
       });
 
       const transcription = await transcribeAudio(file.filePath);
+      const wordCount = transcription.split(/\s+/).length;
+
+      // Save transcription to JSON file
+      const transcriptionData: TranscriptionData = {
+        transcription,
+        wordCount,
+        transcribedAt: new Date().toISOString(),
+        model: preferences.model,
+        language: preferences.language,
+        formatMode: "original",
+      };
+
+      await saveTranscription(file.filePath, transcriptionData);
 
       // Update the file with transcription
       setAudioFiles((prev) =>
@@ -66,7 +98,7 @@ export default function RecordingHistory() {
             ? {
                 ...f,
                 transcription,
-                wordCount: transcription.split(/\s+/).length,
+                wordCount,
               }
             : f,
         ),
@@ -75,7 +107,7 @@ export default function RecordingHistory() {
       await showToast({
         style: Toast.Style.Success,
         title: "Transcription complete",
-        message: "Text copied to clipboard",
+        message: "Text copied to clipboard and saved",
       });
 
       await Clipboard.copy(transcription);
@@ -90,6 +122,26 @@ export default function RecordingHistory() {
         const newSet = new Set(prev);
         newSet.delete(file.id);
         return newSet;
+      });
+    }
+  };
+
+  const handleDeleteRecording = async (file: TranscriptionFile) => {
+    try {
+      // Optimistically remove from list
+      setAudioFiles((prev) => prev.filter((f) => f.id !== file.id));
+
+      await deleteRecordingFile(file.filePath);
+
+      await showHUD("Recording deleted");
+    } catch (error) {
+      // Revert the optimistic update if deletion fails
+      await loadAudioFiles();
+
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to delete recording",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   };
@@ -157,7 +209,9 @@ export default function RecordingHistory() {
                 {file.transcription && (
                   <Action
                     title="Copy Transcription"
-                    onAction={() => Clipboard.copy(file.transcription!)}
+                    onAction={() =>
+                      handleCopyTranscription(file.transcription!)
+                    }
                     icon={Icon.Clipboard}
                     shortcut={{ modifiers: ["cmd"], key: "c" }}
                   />
@@ -178,12 +232,22 @@ export default function RecordingHistory() {
                   icon={Icon.ArrowClockwise}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
                 />
+
+                <ActionPanel.Section>
+                  <Action
+                    title="Delete Recording"
+                    onAction={() => handleDeleteRecording(file)}
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                  />
+                </ActionPanel.Section>
               </ActionPanel>
             }
             detail={
               file.transcription ? (
                 <List.Item.Detail
-                  markdown={`## Recording Transcription\n\n${file.transcription}`}
+                  markdown={`${file.transcription}`}
                   metadata={
                     <List.Item.Detail.Metadata>
                       <List.Item.Detail.Metadata.Label
