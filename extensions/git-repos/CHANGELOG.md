@@ -1,6 +1,6 @@
 # Git Repos Changelog
 
-## [Bug Fix] - {PR_MERGE_DATE}
+## [Bug Fix] - 2025-09-10
 
 - Fixes determination of remote URLs for worktrees.
 
