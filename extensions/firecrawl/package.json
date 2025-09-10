@@ -3,7 +3,7 @@
   "name": "firecrawl",
   "title": "Firecrawl",
   "description": "Scrape, search, and conduct in-depth research with Firecrawl",
-  "icon": "extension-icon.png",
+  "icon": "firecrawl-extension-icon.png",
   "author": "nickscamara",
   "owner": "firecrawl",
   "access": "public",
