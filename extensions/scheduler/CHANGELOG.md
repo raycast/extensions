@@ -1,6 +1,6 @@
 # Scheduler Changelog
 
-## [Added new schedule types] - {PR_MERGE_DATE}
+## [Added new schedule types] - 2025-09-10
 
 - You can now schedule commands to run every 15 or 30 minutes (works well for scheduling AI commands)
 - Added hourly schedule
