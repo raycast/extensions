@@ -14,6 +14,7 @@ export default async function (input: Input) {
     // (BUG): Bigger max depth, takes more time, and tool stall - pinged @thomas about it
     maxDepth: parseInt(getPreferenceValues().maxDepth ?? "3"),
     timeLimit: parseInt(getPreferenceValues().timeLimit ?? "500"),
+    // @ts-expect-error integration property is not defined in DeepResearchParams type
     integration: "raycast",
   });
 
