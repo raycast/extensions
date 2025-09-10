@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Nuxt UI MCP Server] - {PR_MERGE_DATE}
+## [Add Nuxt UI MCP Server] - 2025-09-10
 
 Add official Nuxt UI MCP Server to registry
 
