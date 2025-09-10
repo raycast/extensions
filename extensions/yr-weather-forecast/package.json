@@ -6,6 +6,9 @@
   "description": "Weather forecast using the Norwegian Meteorological Institute's API",
   "icon": "extension-icon.png",
   "author": "kakaoduft",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/kyndig/raycast-yr"
