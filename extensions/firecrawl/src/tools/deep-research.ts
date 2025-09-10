@@ -10,7 +10,7 @@ export default async function (input: Input) {
   const { query } = input;
 
   // // Start deep research
-  const research = await firecrawl.__deepResearch(
+  const research = await firecrawl.v1.__deepResearch(
     query,
     {
       // (BUG): Bigger max depth, takes more time, and tool stall - pinged @thomas about it
@@ -18,9 +18,6 @@ export default async function (input: Input) {
       timeLimit: parseInt(getPreferenceValues().timeLimit ?? "500"),
       // @ts-expect-error integration property is not defined in DeepResearchParams type
       integration: "raycast",
-    },
-    (activity) => {
-      console.log(activity);
     },
   );
 

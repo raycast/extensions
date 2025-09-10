@@ -79,7 +79,7 @@
     }
   ],
   "dependencies": {
-    "@mendable/firecrawl-js": "^1.25.5",
+    "@mendable/firecrawl-js": "^4.3.4",
     "@raycast/api": "^1.99.4",
     "@raycast/utils": "^1.17.0"
   },
