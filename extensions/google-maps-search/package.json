@@ -9,10 +9,10 @@
     "Web"
   ],
   "contributors": [
-    "lin",
     "chrismessina",
     "klaussner",
-    "krsntn"
+    "krsntn",
+    "lin"
   ],
   "keywords": [
     "directions",
@@ -25,6 +25,20 @@
     "Windows"
   ],
   "commands": [
+    {
+      "name": "searchPlaces",
+      "title": "Search Places",
+      "subtitle": "Google Maps",
+      "description": "Search for places and see detailed information and a map view. Enable autofill to use selected text or clipboard.",
+      "mode": "view"
+    },
+    {
+      "name": "findNearbyPlaces",
+      "title": "Find Nearby Places",
+      "subtitle": "Google Maps",
+      "description": "Find places near your home or current location.",
+      "mode": "view"
+    },
     {
       "name": "travelHome",
       "title": "Get Me Home",
@@ -56,16 +70,18 @@
       "keywords": [
         "find place"
       ]
-    },
-    {
-      "name": "find",
-      "title": "Search Google Maps",
-      "subtitle": "Google Maps",
-      "description": "Use text selection or clipboard to find a place or category on Google Maps.",
-      "mode": "view"
     }
   ],
   "preferences": [
+    {
+      "name": "googlePlacesApiKey",
+      "title": "Google Places API Key",
+      "description": "Enter your Google Places API key. Required for place details and map features.",
+      "type": "password",
+      "required": true,
+      "placeholder": "Your Google Places API Key",
+      "information": "Get your API key from the Google Cloud Console: https://console.cloud.google.com/"
+    },
     {
       "name": "homeAddress",
       "title": "Home Address",
@@ -73,6 +89,24 @@
       "type": "textfield",
       "required": true,
       "placeholder": "Street Address, City, State, ZIP Code"
+    },
+    {
+      "name": "preferredOrigin",
+      "title": "Preferred Starting Location",
+      "description": "Select your preferred starting location.",
+      "type": "dropdown",
+      "required": true,
+      "default": "home",
+      "data": [
+        {
+          "title": "Home Address",
+          "value": "home"
+        },
+        {
+          "title": "Custom Address",
+          "value": "custom"
+        }
+      ]
     },
     {
       "name": "preferredMode",
@@ -101,24 +135,20 @@
       ]
     },
     {
-      "name": "preferredOrigin",
-      "title": "Preferred Starting Location",
-      "description": "Select your preferred starting location.",
+      "name": "unitSystem",
       "type": "dropdown",
-      "required": true,
-      "default": "curloc",
+      "title": "Unit System",
+      "required": false,
+      "default": "metric",
+      "description": "Choose between metric or imperial units for distances.",
       "data": [
         {
-          "title": "Current Location",
-          "value": "curloc"
+          "title": "Metric System (Kilometers)",
+          "value": "metric"
         },
         {
-          "title": "Home",
-          "value": "home"
-        },
-        {
-          "title": "Custom",
-          "value": "custom"
+          "title": "Imperial Units (Miles)",
+          "value": "imperial"
         }
       ]
     },
@@ -139,20 +169,81 @@
       "type": "checkbox",
       "required": false,
       "default": true
+    },
+    {
+      "name": "showMapInSidebar",
+      "title": "Show Map in Place Details",
+      "label": "Show Maps",
+      "description": "Check this box to show a map when viewing place details.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "defaultSortOrder",
+      "title": "Default Sort Order",
+      "description": "Choose how search results should be sorted by default.",
+      "type": "dropdown",
+      "required": false,
+      "default": "none",
+      "data": [
+        {
+          "title": "Default",
+          "value": "none"
+        },
+        {
+          "title": "Proximity",
+          "value": "proximity"
+        },
+        {
+          "title": "Rating",
+          "value": "rating"
+        },
+        {
+          "title": "Price Level",
+          "value": "price"
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "searchPlaces",
+      "title": "Search Places",
+      "description": "Search for places by name, address, or category"
+    },
+    {
+      "name": "getPlaceDetails",
+      "title": "Get Place Details",
+      "description": "Get detailed information about a specific place"
+    },
+    {
+      "name": "getDirections",
+      "title": "Get Directions",
+      "description": "Get directions between locations"
+    },
+    {
+      "name": "showPlacesOnMap",
+      "title": "Show Places on Map",
+      "description": "Display multiple places on a Google Maps interface"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.80.0"
+    "@googlemaps/google-maps-services-js": "^3.4.0",
+    "@raycast/api": "^1.97.1",
+    "@raycast/utils": "^1.19.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.5",
-    "@types/node": "^18.8.3",
-    "@types/react": "^18.0.9",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
     "eslint": "^8.22.0",
     "typescript": "^4.7.4"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "publish": "npx @raycast/api@latest publish",
+    "evals": "npx ray evals"
   }
 }
