@@ -3,12 +3,11 @@ import { showFailureToast } from "@raycast/utils";
 import { LaunchProps } from "@raycast/api";
 import { parseEventDetails } from "./services/llm";
 import { createGoogleCalendarEvent } from "./services/calendar";
-import { authorize } from "./utils/oauth";
+import { withGoogleAPIs } from "./utils/oauth";
 import { CreateEventArguments, CreateEventPreferences } from "./types";
 
-export default async function CreateEvent(props: LaunchProps<{ arguments: CreateEventArguments }>): Promise<void> {
+async function CreateEventImpl(props: LaunchProps<{ arguments: CreateEventArguments }>): Promise<void> {
   const preferences = getPreferenceValues<CreateEventPreferences>();
-  const token: string = await authorize();
   const eventDetails: string = props.arguments.eventDetails;
   const color: string = props.arguments.color ?? preferences.defaultColor ?? "11";
 
@@ -25,7 +24,7 @@ export default async function CreateEvent(props: LaunchProps<{ arguments: Create
       defaultDuration: preferences.defaultDuration,
     });
 
-    const event = await createGoogleCalendarEvent(token, parsed, color, finalPreferences);
+    const event = await createGoogleCalendarEvent(parsed, color, finalPreferences);
 
     await showToast({
       style: Toast.Style.Success,
@@ -33,7 +32,9 @@ export default async function CreateEvent(props: LaunchProps<{ arguments: Create
       primaryAction: {
         title: "View Event",
         onAction: () => {
-          open(event.htmlLink);
+          if (event.htmlLink) {
+            open(event.htmlLink);
+          }
         },
       },
     });
@@ -41,3 +42,5 @@ export default async function CreateEvent(props: LaunchProps<{ arguments: Create
     showFailureToast(error, { title: "Failed to create event" });
   }
 }
+
+export default withGoogleAPIs(CreateEventImpl);

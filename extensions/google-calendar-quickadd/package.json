@@ -256,17 +256,19 @@
     "tokenUrl": "https://oauth2.googleapis.com/token"
   },
   "dependencies": {
+    "@googleapis/calendar": "^11.0.1",
     "@raycast/api": "^1.102.5",
     "@raycast/utils": "^1.19.1",
     "axios": "^1.11.0",
-    "dotenv": "^17.2.1",
-    "googleapis": "^157.0.0"
+    "dotenv": "^17.2.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
+    "eslint": "^9.35.0",
+    "i": "^0.3.7",
+    "npm": "^11.6.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
   },

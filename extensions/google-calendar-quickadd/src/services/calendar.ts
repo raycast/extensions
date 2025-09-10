@@ -1,18 +1,12 @@
-import axios from "axios";
-import {
-  CalendarEvent,
-  GoogleCalendarEventResponse,
-  CalendarServicePreferences,
-  GoogleCalendarEventData,
-  CalendarListItem,
-} from "../types";
+import { calendar_v3 } from "@googleapis/calendar";
+import { CalendarEvent, CalendarServicePreferences, GoogleCalendarEventData } from "../types";
+import { getCalendarClient } from "../utils/oauth";
 
 export async function createGoogleCalendarEvent(
-  token: string,
   event: CalendarEvent,
   color: string,
   preferences: CalendarServicePreferences,
-): Promise<GoogleCalendarEventResponse> {
+): Promise<calendar_v3.Schema$Event> {
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const calendarId = preferences.defaultCalendar || "primary";
 
@@ -42,27 +36,16 @@ export async function createGoogleCalendarEvent(
       ],
     };
   }
-  const response = await axios.post(
-    `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events`,
-    eventData,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    },
-  );
-
-  return response.data;
+  const client = getCalendarClient();
+  const response = await client.events.insert({
+    calendarId,
+    requestBody: eventData,
+  });
+  return response.data as calendar_v3.Schema$Event;
 }
 
-export async function getCalendarList(token: string): Promise<CalendarListItem[]> {
-  const response = await axios.get("https://www.googleapis.com/calendar/v3/users/me/calendarList", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-  });
-
-  return response.data.items || [];
+export async function getCalendarList(): Promise<calendar_v3.Schema$CalendarListEntry[]> {
+  const client = getCalendarClient();
+  const response = await client.calendarList.list();
+  return response.data.items ?? [];
 }

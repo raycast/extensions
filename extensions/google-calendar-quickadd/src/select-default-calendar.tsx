@@ -1,12 +1,12 @@
 import { List, ActionPanel, Action, Toast, showToast, LocalStorage, popToRoot, Icon, Keyboard } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
-import { authorize } from "./utils/oauth";
+import { withGoogleAPIs } from "./utils/oauth";
 import { getCalendarList } from "./services/calendar";
-import { Calendar } from "./types";
+import { calendar_v3 } from "@googleapis/calendar";
 
-export default function SelectDefaultCalendar() {
-  const [calendars, setCalendars] = useState<Calendar[]>([]);
+function SelectDefaultCalendarImpl() {
+  const [calendars, setCalendars] = useState<calendar_v3.Schema$CalendarListEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentDefault, setCurrentDefault] = useState<string>("");
   const [hiddenCalendars, setHiddenCalendars] = useState<Set<string>>(new Set());
@@ -29,8 +29,7 @@ export default function SelectDefaultCalendar() {
         }
 
         // Fetch calendars
-        const token = await authorize();
-        const calendarList = await getCalendarList(token);
+        const calendarList = await getCalendarList();
         setCalendars(calendarList);
       } catch (error) {
         showFailureToast(error, { title: "Failed to fetch calendars" });
@@ -96,11 +95,11 @@ export default function SelectDefaultCalendar() {
     <List isLoading={isLoading} searchBarPlaceholder="Search calendars...">
       <List.Section title="Select Default Calendar">
         {calendars
-          .filter((calendar) => !hiddenCalendars.has(calendar.id))
+          .filter((calendar) => calendar.id && !hiddenCalendars.has(calendar.id))
           .map((calendar) => (
             <List.Item
-              key={calendar.id}
-              title={calendar.summary}
+              key={calendar.id as string}
+              title={calendar.summary || "(no title)"}
               subtitle={calendar.description || ""}
               icon={currentDefault === calendar.id ? "✅" : "📅"}
               accessories={[
@@ -112,11 +111,11 @@ export default function SelectDefaultCalendar() {
                   <Action
                     title="Set as Default Calendar"
                     icon={Icon.Checkmark}
-                    onAction={() => selectCalendar(calendar.id, calendar.summary)}
+                    onAction={() => selectCalendar(calendar.id as string, calendar.summary || "(no title)")}
                   />
                   <Action.CopyToClipboard
                     title="Copy Calendar ID"
-                    content={calendar.id}
+                    content={calendar.id as string}
                     shortcut={Keyboard.Shortcut.Common.Copy}
                   />
                   <ActionPanel.Section>
@@ -125,7 +124,7 @@ export default function SelectDefaultCalendar() {
                       icon={Icon.EyeDisabled}
                       style={Action.Style.Destructive}
                       shortcut={{ modifiers: ["cmd"], key: "h" }}
-                      onAction={() => removeCalendar(calendar.id, calendar.summary)}
+                      onAction={() => removeCalendar(calendar.id as string, calendar.summary || "(no title)")}
                     />
                     <Action
                       title={`Reset Calendars (${hiddenCalendars.size})`}
@@ -143,3 +142,5 @@ export default function SelectDefaultCalendar() {
     </List>
   );
 }
+
+export default withGoogleAPIs(SelectDefaultCalendarImpl);
