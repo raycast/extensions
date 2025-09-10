@@ -1,0 +1,45 @@
+{
+	"$schema": "https://www.raycast.com/schemas/extension.json",
+	"name": "chem",
+	"title": "Chemistry",
+	"description": "Helpers for Chemistry",
+	"icon": "extension_icon.png",
+	"author": "andylovescode",
+	"categories": [
+		"Communication"
+	],
+	"platforms": [
+		"Windows",
+		"macOS"
+	],
+	"license": "MIT",
+	"commands": [
+		{
+			"name": "elements",
+			"title": "Search Elements",
+			"description": "Search the elements",
+			"mode": "view"
+		}
+	],
+	"preferences": [],
+	"dependencies": {
+		"@raycast/api": "^1.102.7",
+		"@raycast/utils": "^2.2.1"
+	},
+	"devDependencies": {
+		"@raycast/eslint-config": "^1.0.6",
+		"@types/node": "18.18.4",
+		"@types/react": "19.0.10",
+		"eslint": "^8.51.0",
+		"prettier": "^3.0.3",
+		"react": "^19.0.0",
+		"typescript": "^5.9.2"
+	},
+	"scripts": {
+		"build": "ray build -e dist",
+		"dev": "ray develop",
+		"fix-lint": "ray lint --fix",
+		"lint": "ray lint",
+		"publish": "ray publish"
+	}
+}
