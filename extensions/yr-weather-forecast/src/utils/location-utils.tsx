@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, showToast, Toast } from "@raycast/api";
 import ForecastView from "../forecast";
 import { getWeather } from "../weather-client";
 import { TimeseriesEntry } from "../weather-client";

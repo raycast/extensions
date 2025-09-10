@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Action, ActionPanel, List, Icon, showToast, Toast } from "@raycast/api";
 import ForecastView from "./forecast";
-import LazyGraphView from "./components/lazy-graph";
 import WelcomeMessage from "./components/welcome-message";
 import { ErrorBoundary } from "./components/error-boundary";
 import { SearchErrorFallback, FavoritesErrorFallback } from "./components/error-fallbacks";
