@@ -144,7 +144,10 @@ class Favorite {
     const favorites: FavoriteEntry[] = await this.getEntries();
     return favorites.some(
       (fav: FavoriteEntry) =>
-        fav.language.toLowerCase() === language.toLowerCase() && fav.word.toLowerCase() === word.toLowerCase() && fav.entry === entry && fav.partOfSpeech === partOfSpeech,
+        fav.language.toLowerCase() === language.toLowerCase() &&
+        fav.word.toLowerCase() === word.toLowerCase() &&
+        fav.entry === entry &&
+        fav.partOfSpeech === partOfSpeech,
     );
   }
 }

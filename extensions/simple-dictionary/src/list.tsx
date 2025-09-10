@@ -105,7 +105,12 @@ export default function Command(): JSX.Element {
                                     title: "Delete",
                                     style: Alert.ActionStyle.Destructive,
                                     onAction: async (): Promise<void> => {
-                                      const success: boolean = await Favorite.removeEntry(lang, entry.word, entry.entry, entry.partOfSpeech);
+                                      const success: boolean = await Favorite.removeEntry(
+                                        lang,
+                                        entry.word,
+                                        entry.entry,
+                                        entry.partOfSpeech,
+                                      );
 
                                       if (success) {
                                         const favs: FavoriteEntry[] = await Favorite.getEntries();
