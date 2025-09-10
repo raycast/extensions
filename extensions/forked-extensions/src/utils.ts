@@ -1,3 +1,4 @@
+import os from "node:os";
 import path from "node:path";
 import { Cache, getPreferenceValues } from "@raycast/api";
 import { upstreamRepository } from "./constants.js";
@@ -7,6 +8,17 @@ export const { gitExecutableFilePath, gitRemoteType, githubPersonalAccessToken, 
   getPreferenceValues<ExtensionPreferences>();
 
 export const cache = new Cache();
+
+/**
+ * Simplifies a file path by replacing the home directory with a tilde.
+ * @param filePath The file path to simplify.
+ * @returns The simplified file path.
+ */
+export const simplifyPath = (filePath: string) => {
+  const home = os.homedir();
+  if (filePath.startsWith(home)) return filePath.replace(home, "~");
+  return filePath;
+};
 
 /**
  * Returns the actual path to the icon of a forked extension.

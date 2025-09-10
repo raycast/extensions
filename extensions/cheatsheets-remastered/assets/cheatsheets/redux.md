@@ -1,8 +1,11 @@
 ---
 title: Redux
 category: React
-updated: 2018-01-17
+updated: 2018-01-17T00:00:00.000Z
 weight: -3
+tech: redux
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Creating a store

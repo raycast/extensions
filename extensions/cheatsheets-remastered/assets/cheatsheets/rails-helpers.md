@@ -1,6 +1,9 @@
 ---
 title: Rails helpers
 category: Rails
+tech: rails-helpers
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Date

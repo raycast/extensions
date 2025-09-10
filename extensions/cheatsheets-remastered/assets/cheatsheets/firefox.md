@@ -1,7 +1,11 @@
 ---
 title: Firefox
-tags: [Archived]
+tags:
+  - Archived
 archived: This sheet has not been updated with newer Firefox releases.
+tech: firefox
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### [Firefox 31](https://www.mozilla.org/en-US/firefox/31.0/releasenotes/) (July 2014)

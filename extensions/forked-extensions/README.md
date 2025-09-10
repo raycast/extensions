@@ -21,7 +21,7 @@ This extension leverages the [Git sparse-checkout](https://git-scm.com/docs/git-
 
 This extension requires the following GitHub API permission scopes:
 
-- `repo`
+- `public_repo`
   - `api.repositoryExists()` - Checks if the user's forked repository exists
   - `api.getForkedRepository()` - Retrieves the full name of the user's forked repository
   - `api.compareTwoCommits()` - Compares two commits in the user's forked repository
@@ -30,7 +30,7 @@ This extension requires the following GitHub API permission scopes:
 
 ## Hint
 
-You can always open your forked extension folder in the terminal to work with CLI commands directly.
+You can always open your forked extension folder in the terminal to work with CLI commands directly. We also prepared a [CHEATSHEET.md](https://github.com/raycast/extensions/tree/main/extensions/forked-extensions/CHEATSHEET.md) if you want to learn more about the Git commands used in this extension.
 
 ## License
 

@@ -1,6 +1,9 @@
 ---
 title: Vim-Unite
 category: Vim
+tech: vim-unite
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Usage

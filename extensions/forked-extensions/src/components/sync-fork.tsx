@@ -32,8 +32,10 @@ export default function SyncFork({
   useEffect(() => {
     catchError(async () => {
       if (!forkedRepository) return;
-      const githubCommitDiff = await api.compareTwoCommits(forkedRepository);
+      // Run local Git command before requesting GitHub in case the network request is too slow to block the execution of other Git operations.
+      // But this still has a chance to be conflicted if the user execute another Git operation at the same time.
       const localCommitDiff = await git.getAheadBehindCommits();
+      const githubCommitDiff = await api.compareTwoCommits(forkedRepository);
       setCommitDiff({ github: githubCommitDiff, local: localCommitDiff });
     }, diagnosticsAction)();
   }, [forkedRepository, lastCommitHash]);
@@ -61,7 +63,7 @@ export default function SyncFork({
               title: "Sync",
               onAction: catchError(async () => {
                 await operation.sync();
-                onSyncFinished?.();
+                onSyncFinished();
               }, diagnosticsAction),
             },
           })
@@ -79,7 +81,7 @@ export default function SyncFork({
               title: "Pull",
               onAction: catchError(async () => {
                 await operation.pull();
-                onSyncFinished?.();
+                onSyncFinished();
               }, diagnosticsAction),
             },
           });

@@ -2,6 +2,9 @@
 title: JavaScript Date
 category: JavaScript
 weight: -3
+tech: js-date
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Date

@@ -1,10 +1,15 @@
 ---
 title: Vim scripting
 category: Vim
-prism_languages: [vim]
-updated: 2020-07-05
+prism_languages:
+  - vim
+updated: 2020-07-05T00:00:00.000Z
 weight: -10
-tags: [Featurable]
+tags:
+  - Featurable
+tech: vimscript
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Start hacking

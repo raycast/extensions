@@ -18,6 +18,12 @@
       "title": "Select Vault",
       "description": "Choose which Obsidian vault to use",
       "mode": "view"
+    },
+    {
+      "name": "refresh-index",
+      "title": "Refresh Index",
+      "description": "Clear cache and rebuild the index of Obsidian URLs",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -28,6 +34,14 @@
       "description": "Sort notes by frequency and recency of use. When disabled, sorts alphabetically.",
       "type": "checkbox",
       "default": true,
+      "required": false
+    },
+    {
+      "name": "cacheTTL",
+      "title": "Cache TTL (minutes)",
+      "description": "How long to cache vault data before refreshing (in minutes). Lower values mean more frequent updates but slower performance.",
+      "type": "textfield",
+      "default": "5",
       "required": false
     }
   ],
@@ -62,6 +76,7 @@
     "publish": "ray publish",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
   }
 }

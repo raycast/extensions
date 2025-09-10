@@ -1,6 +1,9 @@
 ---
 title: Mocha HTML
 category: JavaScript libraries
+tech: mocha-html
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### About

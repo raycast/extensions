@@ -1,10 +1,14 @@
 ---
 title: Spacemacs
 category: Apps
-updated: 2020-05-22
-tags: [WIP]
+updated: 2020-05-22T00:00:00.000Z
+tags:
+  - WIP
 intro: |
   [Spacemacs](http://spacemacs.org) is a distribution for Emacs.
+tech: spacemacs
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 Shortcuts

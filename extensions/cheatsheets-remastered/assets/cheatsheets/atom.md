@@ -1,7 +1,10 @@
 ---
 title: Atom
 category: Apps
-updated: 2021-09-10
+updated: 2021-09-10T00:00:00.000Z
+tech: atom
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Shortcuts

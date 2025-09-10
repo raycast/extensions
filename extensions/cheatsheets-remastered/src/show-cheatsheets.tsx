@@ -13,13 +13,16 @@ import {
   Alert,
   LocalStorage,
   Clipboard,
+  getPreferenceValues,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { showFailureToast, useFrecencySorting } from "@raycast/utils";
 
-import Service, { CustomCheatsheet, OfflineCheatsheet, FavoriteCheatsheet } from "./service";
+import Service, { CustomCheatsheet, FavoriteCheatsheet, RepositoryCheatsheet } from "./service";
 import type { File as ServiceFile } from "./service";
-import { stripFrontmatter, stripTemplateTags, formatTables } from "./utils";
+import { stripFrontmatter, stripTemplateTags, formatTables, formatHtmlElements } from "./utils";
+// GitHub icon for repository cheatsheets - using built-in icon
+const githubIcon = Icon.Globe;
 
 // (removed unused getCheatsheetIcon)
 
@@ -50,35 +53,46 @@ function useDraftPersistence(key: string, defaultValue: string) {
   return { value, updateValue, clearDraft };
 }
 
-type FilterType = "all" | "custom" | "default";
+type FilterType = "all" | "custom" | "default" | "repository" | "favorites" | "hidden";
 
 interface UnifiedCheatsheet {
   id: string;
-  type: "custom" | "default";
+  type: "custom" | "default" | "repository";
   slug: string;
   title: string;
-  isOffline: boolean;
   isFavorited: boolean;
+  repositoryId?: string; // For repository cheatsheets
+  repositoryName?: string; // For display purposes
+  isHidden?: boolean; // For hidden cheatsheets
 }
 
 function Command() {
   const [sheets, setSheets] = useState<string[]>([]);
   const [customSheets, setCustomSheets] = useState<CustomCheatsheet[]>([]);
-  const [offlineSheets, setOfflineSheets] = useState<OfflineCheatsheet[]>([]);
+  const [repositorySheets, setRepositorySheets] = useState<RepositoryCheatsheet[]>([]);
   const [favorites, setFavorites] = useState<FavoriteCheatsheet[]>([]);
   const [filter, setFilter] = useState<FilterType>("all");
-  const [sort, setSort] = useState<"frecency" | "lastViewed" | "mostViewed" | "alpha">("frecency");
+  const preferences = getPreferenceValues<{ defaultSort: "frecency" | "lastViewed" | "mostViewed" | "alpha" }>();
+  const sort = preferences.defaultSort;
   const [viewStats, setViewStats] = useState<Record<string, { count: number; lastViewedAt: number }>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [contentResults, setContentResults] = useState<string[]>([]);
+  const [unifiedList, setUnifiedList] = useState<UnifiedCheatsheet[]>([]);
 
   useEffect(() => {
     loadData();
-    // Trigger background offline update if preferences allow
-    Service.updateOfflineIfNeeded();
   }, []);
+
+  // Update unified list when data changes
+  useEffect(() => {
+    const updateUnifiedList = async () => {
+      const unified = await createUnifiedList();
+      setUnifiedList(unified);
+    };
+    updateUnifiedList();
+  }, [sheets, customSheets, repositorySheets, favorites]);
 
   // Add content search effect
   useEffect(() => {
@@ -104,24 +118,20 @@ function Command() {
       setError(null);
 
       // Always try to fetch fresh data from online sources by default
-      const [files, custom, offline, favs] = await Promise.all([
+      const [files, custom, repository, favs] = await Promise.all([
         Service.listFiles(),
         Service.getCustomCheatsheets(),
-        Service.getOfflineCheatsheets(),
+        Service.getRepositoryCheatsheets(),
         Service.getFavorites(),
       ]);
 
       if (files.length > 0) {
         const sheets = getSheets(files);
         setSheets(sheets);
-      } else if (offline.length > 0 && Service.getPreferences().enableOfflineStorage) {
-        // Only use offline data if no fresh data available AND offline storage is enabled
-        const offlineSlugs = offline.map((sheet) => sheet.slug);
-        setSheets(offlineSlugs);
       }
 
       setCustomSheets(custom);
-      setOfflineSheets(offline);
+      setRepositorySheets(repository);
       setFavorites(favs);
       setViewStats(await Service.getViewStatsMap());
     } catch (err) {
@@ -133,49 +143,77 @@ function Command() {
   }
 
   // Create unified cheatsheet list
-  const createUnifiedList = (): UnifiedCheatsheet[] => {
+  const createUnifiedList = async (): Promise<UnifiedCheatsheet[]> => {
     const unified: UnifiedCheatsheet[] = [];
+
+    // Get hidden cheatsheets to mark them
+    const hiddenCheatsheets = await Service.getHiddenCheatsheets();
+    const hiddenKeys = new Set(hiddenCheatsheets.map((h) => h.key));
 
     // Add custom cheatsheets
     customSheets.forEach((sheet) => {
+      const key = `custom:${sheet.id}`;
+      const isHidden = hiddenKeys.has(key);
+
       unified.push({
         id: sheet.id,
         type: "custom",
         slug: sheet.id,
         title: sheet.title,
-        isOffline: true, // Custom sheets are always "offline"
         isFavorited: favorites.some((fav) => fav.slug === sheet.id && fav.type === "custom"),
+        isHidden: isHidden,
       });
     });
 
     // Add online cheatsheets
     sheets.forEach((sheet) => {
-      const isOffline = offlineSheets.some((offline) => offline.slug === sheet);
+      const key = `default:${sheet}`;
+      const isHidden = hiddenKeys.has(key);
+
       unified.push({
         id: sheet,
         type: "default",
         slug: sheet,
         title: sheet,
-        isOffline,
         isFavorited: favorites.some((fav) => fav.slug === sheet && fav.type === "default"),
+        isHidden: isHidden,
+      });
+    });
+
+    // Add repository cheatsheets with proper repository names
+    const userRepos = await Service.getUserRepositories();
+    const repoMap = new Map(userRepos.map((repo) => [repo.id, repo]));
+
+    repositorySheets.forEach((sheet) => {
+      const key = `repository:${sheet.slug}`;
+      const isHidden = hiddenKeys.has(key);
+      const repo = repoMap.get(sheet.repositoryId);
+      const repositoryName = repo ? `${repo.owner}/${repo.name}` : sheet.filePath.split("/")[0];
+      const isFavorited = favorites.some((fav) => fav.slug === sheet.slug && fav.type === "repository");
+
+      unified.push({
+        id: sheet.id,
+        type: "repository",
+        slug: sheet.slug,
+        title: sheet.title,
+        isFavorited,
+        repositoryId: sheet.repositoryId,
+        repositoryName: repositoryName,
+        isHidden: isHidden,
       });
     });
 
     return unified;
   };
 
-  const unifiedList = createUnifiedList();
-
   // Apply frequency sorting
   const { data: frecencyData } = useFrecencySorting(unifiedList, {
     namespace: "cheatsheets",
     key: (item) => `${item.type}-${item.slug}`,
     sortUnvisited: (a, b) => {
-      // Sort unvisited items: favorites first, then by type (custom first), then alphabetically
+      // Sort unvisited items: favorites first, then alphabetically
       if (a.isFavorited && !b.isFavorited) return -1;
       if (!a.isFavorited && b.isFavorited) return 1;
-      if (a.type === "custom" && b.type === "default") return -1;
-      if (a.type === "default" && b.type === "custom") return 1;
       return a.title.localeCompare(b.title);
     },
   });
@@ -198,13 +236,22 @@ function Command() {
     let typeMatch = false;
     switch (filter) {
       case "custom":
-        typeMatch = item.type === "custom";
+        typeMatch = item.type === "custom" && !item.isHidden;
         break;
       case "default":
-        typeMatch = item.type === "default";
+        typeMatch = item.type === "default" && !item.isHidden;
+        break;
+      case "repository":
+        typeMatch = item.type === "repository" && !item.isHidden;
+        break;
+      case "favorites":
+        typeMatch = item.isFavorited && !item.isHidden;
+        break;
+      case "hidden":
+        typeMatch = item.isHidden === true;
         break;
       default:
-        typeMatch = true;
+        typeMatch = !item.isHidden; // "all" shows only visible items
     }
 
     if (!typeMatch) return false;
@@ -229,6 +276,19 @@ function Command() {
       // For default sheets, search in title and content results
       if (item.type === "default") {
         return Service.defaultMatchesQuery(item.slug, searchQuery) || contentResults.includes(item.slug);
+      }
+
+      // For repository sheets, search in title and content
+      if (item.type === "repository") {
+        const repoSheet = repositorySheets.find((s) => s.id === item.id);
+        if (repoSheet) {
+          return (
+            repoSheet.title.toLowerCase().includes(query) ||
+            repoSheet.content.toLowerCase().includes(query) ||
+            repoSheet.filePath.toLowerCase().includes(query) ||
+            (item.repositoryName && item.repositoryName.toLowerCase().includes(query))
+          );
+        }
       }
     }
 
@@ -323,6 +383,7 @@ function Command() {
 
   async function handleToggleFavorite(item: UnifiedCheatsheet) {
     try {
+      // Toggle favorite status for any cheatsheet type
       const newFavorited = await Service.toggleFavorite(item.type, item.slug, item.title);
 
       // Update local state
@@ -342,22 +403,22 @@ function Command() {
     }
   }
 
-  async function handleDownloadForOffline(slug: string) {
+  async function handleToggleHidden(item: UnifiedCheatsheet) {
     try {
-      const content = await Service.getSheet(slug);
-      await Service.saveOfflineCheatsheet(slug, content);
+      // Toggle hidden status for any cheatsheet type
+      const newHidden = await Service.toggleHidden(item.type, item.slug, item.title);
+
+      // Refresh the unified list to reflect the change
+      const unified = await createUnifiedList();
+      setUnifiedList(unified);
+
       showToast({
         style: Toast.Style.Success,
-        title: "Downloaded",
-        message: `${slug} is now available offline`,
+        title: newHidden ? "Hidden" : "Shown",
+        message: `"${item.title}" is now ${newHidden ? "hidden" : "visible"}`,
       });
-      // Reload offline data
-      const updated = await Service.getOfflineCheatsheets();
-      setOfflineSheets(updated);
-      // Reload unified list
-      await loadData();
     } catch (error) {
-      showFailureToast(error, { title: "Download Failed" });
+      showFailureToast(error, { title: "Failed to toggle visibility" });
     }
   }
 
@@ -382,23 +443,14 @@ function Command() {
       searchText={searchQuery}
       onSearchTextChange={setSearchQuery}
       searchBarAccessory={
-        <>
-          <List.Dropdown tooltip="Filter" value={filter} onChange={(value) => setFilter(value as FilterType)}>
-            <List.Dropdown.Item title="All" value="all" />
-            <List.Dropdown.Item title="Custom" value="custom" />
-            <List.Dropdown.Item title="Default" value="default" />
-          </List.Dropdown>
-          <List.Dropdown
-            tooltip="Sort"
-            value={sort}
-            onChange={(value) => setSort(value as "frecency" | "lastViewed" | "mostViewed" | "alpha")}
-          >
-            <List.Dropdown.Item title="Frecency" value="frecency" />
-            <List.Dropdown.Item title="Last Viewed" value="lastViewed" />
-            <List.Dropdown.Item title="Most Viewed" value="mostViewed" />
-            <List.Dropdown.Item title="Alphabetical" value="alpha" />
-          </List.Dropdown>
-        </>
+        <List.Dropdown tooltip="Filter" value={filter} onChange={(value) => setFilter(value as FilterType)}>
+          <List.Dropdown.Item title="All" value="all" icon={Icon.AppWindowList} />
+          <List.Dropdown.Item title="Favorites" value="favorites" icon={Icon.Star} />
+          <List.Dropdown.Item title="Custom" value="custom" icon={Icon.Brush} />
+          <List.Dropdown.Item title="Default" value="default" icon={Icon.Box} />
+          <List.Dropdown.Item title="GitHub" value="repository" icon={githubIcon} />
+          <List.Dropdown.Item title="Hidden" value="hidden" icon={Icon.EyeDisabled} />
+        </List.Dropdown>
       }
       actions={
         <ActionPanel>
@@ -416,22 +468,6 @@ function Command() {
               />
             }
           />
-          {Service.getPreferences().enableOfflineStorage && (
-            <>
-              <Action
-                title="Download All for Offline"
-                icon={Icon.Download}
-                onAction={async () => {
-                  try {
-                    await Service.downloadAllForOffline();
-                    await loadData();
-                  } catch {
-                    // Error already shown by service
-                  }
-                }}
-              />
-            </>
-          )}
         </ActionPanel>
       }
     >
@@ -497,15 +533,29 @@ function Command() {
             <List.Item
               key={`recent-${item.id}`}
               title={item.title}
-              subtitle={`${item.type === "custom" ? "Custom" : "Default"}`}
+              subtitle=""
               icon={
                 item.type === "custom"
-                  ? customSheets.find((s) => s.id === item.id)?.iconKey
-                    ? Service.iconForKey(customSheets.find((s) => s.id === item.id)!.iconKey!)
-                    : Icon.Document
-                  : Service.resolveIconForSlug(item.slug)
+                  ? Icon.Box
+                  : item.type === "repository"
+                    ? Icon.Globe
+                    : item.type === "default"
+                      ? Icon.Box
+                      : Icon.Document
               }
-              accessories={[{ text: "Recent", icon: Icon.Clock }]}
+              accessories={[
+                { text: "Recent", icon: Icon.Clock },
+                ...(item.isHidden ? [{ icon: Icon.EyeDisabled, tooltip: "Hidden" }] : []),
+                ...(item.type === "custom"
+                  ? (customSheets.find((s) => s.id === item.id)?.tags || [])
+                      .slice(0, 3)
+                      .map((tag) => ({ text: tag, icon: Icon.Tag }))
+                  : item.type === "default"
+                    ? (Service.getDefaultMetadata(item.slug)?.tags || [])
+                        .slice(0, 3)
+                        .map((tag) => ({ text: tag, icon: Icon.Tag }))
+                    : []),
+              ]}
               actions={
                 <ActionPanel>
                   <Action.Push
@@ -518,6 +568,12 @@ function Command() {
                         <SheetView slug={item.slug} />
                       )
                     }
+                  />
+                  <Action
+                    title={item.isHidden ? "Show Cheatsheet" : "Hide Cheatsheet"}
+                    icon={item.isHidden ? Icon.Eye : Icon.EyeDisabled}
+                    onAction={() => handleToggleHidden(item)}
+                    shortcut={{ modifiers: ["cmd"], key: "h" }}
                   />
                 </ActionPanel>
               }
@@ -532,33 +588,39 @@ function Command() {
           title={item.title}
           subtitle={
             item.type === "custom"
-              ? customSheets.find((s) => s.id === item.id)?.description || "Custom"
-              : Service.getDefaultMetadata(item.slug)?.description ||
-                (Service.isLocalCheatsheet(item.slug) ? "Local" : "Default")
+              ? customSheets.find((s) => s.id === item.id)?.description || ""
+              : item.type === "repository"
+                ? item.repositoryName || ""
+                : ""
           }
           icon={
             item.type === "custom"
-              ? customSheets.find((s) => s.id === item.id)?.iconKey
-                ? Service.iconForKey(customSheets.find((s) => s.id === item.id)!.iconKey!)
-                : Icon.Document
-              : Service.resolveIconForSlug(item.slug)
+              ? Icon.Brush
+              : item.type === "repository"
+                ? Icon.Globe
+                : item.type === "default"
+                  ? Icon.Box
+                  : Icon.Document
           }
           keywords={
             item.type === "custom"
               ? customSheets.find((s) => s.id === item.id)?.tags || []
-              : Service.getDefaultMetadata(item.slug)?.tags || []
+              : item.type === "repository"
+                ? ["repository", "github", item.repositoryName || ""].filter(Boolean)
+                : Service.getDefaultMetadata(item.slug)?.tags || []
           }
           accessories={[
-            {
-              text: item.type === "custom" ? "Custom" : Service.isLocalCheatsheet(item.slug) ? "Local" : "Default",
-              icon:
-                item.type === "custom" ? Icon.Tag : Service.isLocalCheatsheet(item.slug) ? Icon.Document : Icon.Globe,
-            },
-            ...(item.type === "custom"
-              ? (customSheets.find((s) => s.id === item.id)?.tags || []).slice(0, 3).map((t) => ({ text: t }))
-              : (Service.getDefaultMetadata(item.slug)?.tags || []).slice(0, 3).map((t) => ({ text: t }))),
-            ...(item.isOffline ? [{ icon: Icon.Checkmark, tooltip: "Available Offline" }] : []),
             ...(item.isFavorited ? [{ icon: Icon.Star, tooltip: "Favorited" }] : []),
+            ...(item.isHidden ? [{ icon: Icon.EyeDisabled, tooltip: "Hidden" }] : []),
+            ...(item.type === "custom"
+              ? (customSheets.find((s) => s.id === item.id)?.tags || [])
+                  .slice(0, 3)
+                  .map((tag) => ({ text: tag, icon: Icon.Tag }))
+              : item.type === "default"
+                ? (Service.getDefaultMetadata(item.slug)?.tags || [])
+                    .slice(0, 3)
+                    .map((tag) => ({ text: tag, icon: Icon.Tag }))
+                : []),
           ]}
           actions={
             <ActionPanel>
@@ -569,12 +631,17 @@ function Command() {
                   target={
                     item.type === "custom" ? (
                       <CustomSheetView sheet={customSheets.find((s) => s.id === item.id)!} />
+                    ) : item.type === "repository" ? (
+                      <RepositorySheetView sheet={repositorySheets.find((s) => s.id === item.id)!} />
                     ) : (
                       <SheetView slug={item.slug} />
                     )
                   }
                   onPush={async () => {
                     await Service.recordView(item.type, item.slug, item.title);
+                    if (item.type === "repository") {
+                      await Service.recordRepositoryCheatsheetAccess(item.id);
+                    }
                     const stats = await Service.getViewStatsMap();
                     setViewStats(stats);
                   }}
@@ -589,6 +656,12 @@ function Command() {
                   icon={item.isFavorited ? Icon.StarDisabled : Icon.Star}
                   onAction={() => handleToggleFavorite(item)}
                   shortcut={{ modifiers: ["cmd"], key: "f" }}
+                />
+                <Action
+                  title={item.isHidden ? "Show Cheatsheet" : "Hide Cheatsheet"}
+                  icon={item.isHidden ? Icon.Eye : Icon.EyeDisabled}
+                  onAction={() => handleToggleHidden(item)}
+                  shortcut={{ modifiers: ["cmd"], key: "h" }}
                 />
                 <Action.CopyToClipboard title="Copy Title" content={item.title} icon={Icon.CopyClipboard} />
                 {item.type === "default" && (
@@ -641,13 +714,6 @@ function Command() {
                     }
                   />
                 )}
-                {item.type === "default" && Service.getPreferences().enableOfflineStorage && (
-                  <Action
-                    title={item.isOffline ? "Update Offline Copy" : "Download for Offline"}
-                    icon={item.isOffline ? Icon.ArrowClockwise : Icon.Download}
-                    onAction={() => handleDownloadForOffline(item.slug)}
-                  />
-                )}
               </ActionPanel.Section>
               {item.type === "custom" && (
                 <ActionPanel.Section title="Danger Zone">
@@ -698,10 +764,64 @@ function getSheets(files: ServiceFile[]): string[] {
     .filter((file) => {
       const isDir = file.type === "tree";
       const isMarkdown = file.path.endsWith(".md");
-      const adminFiles = ["CONTRIBUTING", "README", "index", "index@2016"];
-      const isAdminFile = adminFiles.some((adminFile) => file.path.startsWith(adminFile));
-      const inUnderscoreDir = /(^|\/)_[^/]+/.test(file.path);
-      return !isDir && isMarkdown && !isAdminFile && !inUnderscoreDir;
+
+      // Skip if directory or not markdown
+      if (isDir || !isMarkdown) {
+        return false;
+      }
+
+      // Admin and documentation file exclusions - be more precise
+      const isNotAdminFile = !file.path.match(/^(README|CONTRIBUTING|index|index@2016)\.md$/i);
+      const isNotInGitHubDir = !file.path.startsWith(".github/");
+      const isNotCodeOfConduct = !file.path.match(/code[_-]of[_-]conduct\.md$/i);
+      const isNotLicense = !file.path.match(/^(LICENSE|LICENCE)\.md$/i);
+      const isNotChangelog = !file.path.match(/^(CHANGELOG|HISTORY)\.md$/i);
+      const isNotSecurity = !file.path.match(/^(SECURITY|SECURITY\.md)$/i);
+      const isNotContributing = !file.path.match(/^(CONTRIBUTING|CONTRIBUTING\.md)$/i);
+      const isNotPullRequestTemplate = !file.path.match(/pull_request_template\.md$/i);
+      const isNotIssueTemplate = !file.path.startsWith(".github/ISSUE_TEMPLATE/");
+      const isNotWorkflow = !file.path.startsWith(".github/workflows/");
+      const isNotReleaseNotes = !file.path.match(/^(RELEASES?|RELEASE[_-]NOTES?)\.md$/i);
+      const isNotAuthors = !file.path.match(/^(AUTHORS?|CONTRIBUTORS?)\.md$/i);
+      const isNotRoadmap = !file.path.match(/^(ROADMAP|ROAD[_-]MAP)\.md$/i);
+      const isNotTodo = !file.path.match(/^(TODO|TASKS?)\.md$/i);
+      const isNotInstallation = !file.path.match(/^(INSTALL|INSTALLATION)\.md$/i);
+      const isNotGettingStarted = !file.path.match(/^(GETTING[_-]STARTED|QUICK[_-]START)\.md$/i);
+
+      // Directory and file pattern exclusions
+      const isNotInUnderscoreDir = !file.path.match(/(^|\/)_[^/]+/); // Exclude dirs starting with _
+      const isNotAtSymbolFile = !file.path.includes("@"); // Exclude files with @ in name
+      const isNotInUnderscoreFile = !file.path.match(/_[^/]*\.md$/); // Exclude files starting with _
+
+      // Additional exclusions for common non-cheatsheet files
+      const isNotIndexFile = !file.path.match(/^(Index|IndexASVS|IndexMASVS|IndexProactiveControls|IndexTopTen)\.md$/i);
+      const isNotPrefaceFile = !file.path.match(/^(Preface|HelpGuide)\.md$/i);
+      const isNotProjectFile = !file.path.match(/^Project\.[^/]*\.md$/i);
+
+      return (
+        isNotAdminFile &&
+        isNotInGitHubDir &&
+        isNotCodeOfConduct &&
+        isNotLicense &&
+        isNotChangelog &&
+        isNotSecurity &&
+        isNotContributing &&
+        isNotPullRequestTemplate &&
+        isNotIssueTemplate &&
+        isNotWorkflow &&
+        isNotReleaseNotes &&
+        isNotAuthors &&
+        isNotRoadmap &&
+        isNotTodo &&
+        isNotInstallation &&
+        isNotGettingStarted &&
+        isNotInUnderscoreDir &&
+        isNotAtSymbolFile &&
+        isNotInUnderscoreFile &&
+        isNotIndexFile &&
+        isNotPrefaceFile &&
+        isNotProjectFile
+      );
     })
     .map((file) => file.path.replace(".md", ""));
 }
@@ -751,7 +871,7 @@ function SheetView({ slug }: SheetProps) {
     );
   }
 
-  const processedContent = formatTables(stripTemplateTags(stripFrontmatter(content)));
+  const processedContent = formatHtmlElements(formatTables(stripTemplateTags(stripFrontmatter(content))));
   const isLocal = Service.isLocalCheatsheet(slug);
 
   return (
@@ -1060,5 +1180,98 @@ function CreateCustomSheetForm({ onCreated }: CreateCustomSheetProps) {
   );
 }
 
-export { EditCustomSheetForm, CustomSheetView, SheetView };
+// Repository cheatsheet view component
+function RepositorySheetView({ sheet }: { sheet: RepositoryCheatsheet }) {
+  const [isLoading] = useState(false);
+  const [repository, setRepository] = useState<{ owner: string; name: string; defaultBranch: string } | null>(null);
+
+  useEffect(() => {
+    // Record view for repository sheet
+    Service.recordRepositoryCheatsheetAccess(sheet.repositoryId);
+
+    // Fetch repository information
+    const fetchRepository = async () => {
+      try {
+        const userRepos = await Service.getUserRepositories();
+        const repo = userRepos.find((r) => r.id === sheet.repositoryId);
+        if (repo) {
+          setRepository({
+            owner: repo.owner,
+            name: repo.name,
+            defaultBranch: repo.defaultBranch,
+          });
+        }
+      } catch (err) {
+        console.error("Failed to fetch repository info:", err);
+      }
+    };
+
+    fetchRepository();
+  }, [sheet.repositoryId]);
+
+  const processedContent = formatHtmlElements(formatTables(stripTemplateTags(stripFrontmatter(sheet.content))));
+
+  // Construct GitHub URLs
+  const githubUrl = repository
+    ? `https://github.com/${repository.owner}/${repository.name}/blob/${repository.defaultBranch}/${sheet.filePath}`
+    : null;
+  const repositoryUrl = repository ? `https://github.com/${repository.owner}/${repository.name}` : null;
+
+  return (
+    <Detail
+      isLoading={isLoading}
+      markdown={processedContent}
+      navigationTitle={sheet.title}
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.Label title="Title" text={sheet.title} />
+          {repositoryUrl ? (
+            <Detail.Metadata.Link
+              title="Repository"
+              target={repositoryUrl}
+              text={`${repository.owner}/${repository.name}`}
+            />
+          ) : (
+            <Detail.Metadata.Label title="Repository" text={sheet.repositoryId} />
+          )}
+          {githubUrl ? (
+            <Detail.Metadata.Link title="File Path" target={githubUrl} text={sheet.filePath} />
+          ) : (
+            <Detail.Metadata.Label title="File Path" text={sheet.filePath} />
+          )}
+          <Detail.Metadata.Label
+            title="Synced"
+            text={new Date(sheet.syncedAt).toLocaleDateString()}
+            icon={Icon.Clock}
+          />
+          {sheet.lastAccessedAt && (
+            <Detail.Metadata.Label
+              title="Last Accessed"
+              text={new Date(sheet.lastAccessedAt).toLocaleDateString()}
+              icon={Icon.Eye}
+            />
+          )}
+        </Detail.Metadata>
+      }
+      actions={
+        <ActionPanel>
+          {repositoryUrl && (
+            <ActionPanel.Section title="GitHub">
+              <Action.OpenInBrowser title="View Repository" url={repositoryUrl} icon={Icon.Globe} />
+              {githubUrl && <Action.OpenInBrowser title="View File on GitHub" url={githubUrl} icon={Icon.Document} />}
+              <Action.CopyToClipboard title="Copy Repository URL" content={repositoryUrl} icon={Icon.Clipboard} />
+              {githubUrl && <Action.CopyToClipboard title="Copy File URL" content={githubUrl} icon={Icon.Clipboard} />}
+            </ActionPanel.Section>
+          )}
+          <ActionPanel.Section title="Actions">
+            <Action.CopyToClipboard title="Copy Content" content={sheet.content} icon={Icon.CopyClipboard} />
+            <Action.CopyToClipboard title="Copy Title" content={sheet.title} icon={Icon.CopyClipboard} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+export { EditCustomSheetForm, CustomSheetView, SheetView, RepositorySheetView };
 export default Command;

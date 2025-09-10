@@ -1,6 +1,9 @@
 ---
 title: AWS CLI
 category: Devops
+tech: awscli
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### EC2

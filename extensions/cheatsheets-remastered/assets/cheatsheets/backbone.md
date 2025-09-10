@@ -1,7 +1,10 @@
 ---
 title: Backbone.js
-updated: 2018-12-06
+updated: 2018-12-06T00:00:00.000Z
 category: JavaScript libraries
+tech: backbone
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Binding events

@@ -3,6 +3,9 @@ title: HTTP Status
 category: API
 description: |
   List of HTTP Status codes and links to description.
+tech: http-status
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Informational Responses

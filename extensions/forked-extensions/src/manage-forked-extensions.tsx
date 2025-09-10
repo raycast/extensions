@@ -13,10 +13,7 @@ import {
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { withGithubClient } from "./api.js";
-import Diagnostics from "./components/diagnostics.js";
-import Tags from "./components/tags.js";
-import SyncFork from "./components/sync-fork.js";
-import ValidExtensions from "./components/valid-extensions.js";
+import { CreateExtension, Diagnostics, SyncFork, Tags, ValidExtensions } from "./components/index.js";
 import { catchError, handleError } from "./errors.js";
 import * as git from "./git.js";
 import operation from "./operation.js";
@@ -75,6 +72,7 @@ function ManageForkedExtensions() {
                 icon={Icon.NewDocument}
                 target={<ValidExtensions forkedExtensionFolders={forkedExtensionFolders} onPop={revalidate} />}
               />
+              <CreateExtension />
               <Action.ShowInFinder title="Show Repository in Finder" path={git.repositoryPath} />
               <SyncFork
                 forkedRepository={forkedRepository}
@@ -127,6 +125,7 @@ function ManageForkedExtensions() {
                   shortcut={Keyboard.Shortcut.Common.New}
                   target={<ValidExtensions forkedExtensionFolders={forkedExtensionFolders} onPop={revalidate} />}
                 />
+                <CreateExtension />
                 <SyncFork
                   forkedRepository={forkedRepository}
                   lastCommitHash={lastCommitHash}
