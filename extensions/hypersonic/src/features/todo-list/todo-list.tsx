@@ -18,6 +18,7 @@ import { OpenInNotionAction } from './components/open-in-notion-action'
 import { OpenOnNotionAction } from './components/open-on-notion'
 import { OpenAttachedLink } from './components/open-attached-link'
 import { SetStatusAction } from './components/set-todo-status-action'
+import { DEFAULT_STATUS_ICONS } from '@/utils/statuses'
 
 export function TodoList() {
   const {
@@ -149,7 +150,10 @@ export function TodoList() {
                 <List.Item
                   key={todo.id}
                   icon={{
-                    source: status && status.icon ? status.icon : 'pending.svg',
+                    source:
+                      status && status.icon
+                        ? status.icon
+                        : DEFAULT_STATUS_ICONS.pending,
                     tintColor: status?.color
                       ? status.color
                       : Color.SecondaryText,

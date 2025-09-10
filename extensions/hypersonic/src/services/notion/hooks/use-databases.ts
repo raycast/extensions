@@ -1,4 +1,4 @@
-import { useCachedPromise, usePromise } from '@raycast/utils'
+import { usePromise } from '@raycast/utils'
 import { getDatabases } from '../operations/get-databases'
 
 export function useDatabases() {

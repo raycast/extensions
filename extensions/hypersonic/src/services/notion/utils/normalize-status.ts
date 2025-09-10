@@ -1,37 +1,25 @@
 import { Status } from '@/types/status'
 import { notionColorToStatusColor } from './notion-color-to-status-color'
-
-const ICONS = {
-  'To-do': ['pending.svg'],
-  'In progress': ['progress1.svg', 'progress2.svg', 'progress3.svg'],
-  Complete: ['completed.svg'],
-}
+import { getStatusConfig } from '@/utils/statuses'
 
 export const normalizeStatus = (
   status: any,
   statusIdWithGroupName: Record<string, { name: string; index: number }>
 ): Status => {
-  const group = statusIdWithGroupName[status.id].name as keyof typeof ICONS
-  const groupIcons = ICONS[group]
-  let icon =
-    groupIcons[statusIdWithGroupName[status.id].index] ||
-    groupIcons[groupIcons.length - 1]
+  const statusName = status.name
+  const index = statusIdWithGroupName[status.id]?.index ?? 0
 
-  const isSpecial =
-    status.name.toLowerCase() === 'blocked' ||
-    status.name.toLowerCase() === 'canceled'
+  // Get status configuration using the status name (group mapping is handled automatically)
+  const statusConfig = getStatusConfig(statusName, index)
 
-  if (isSpecial) {
-    icon = 'blocked.svg'
-  }
-
+  // Use Notion color if available, otherwise use our default color
   const color = status.color
     ? notionColorToStatusColor(status.color)
-    : notionColorToStatusColor('default')
+    : statusConfig.color
 
   return {
     ...status,
-    icon,
+    icon: statusConfig.icon,
     color,
   }
 }

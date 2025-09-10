@@ -1,5 +1,13 @@
 # Hypersonic Changelog
 
+## [2.1.2] - {PR_MERGE_DATE}
+
+#### Updated
+
+- Improved task status management for better organization and ease of use across the extension.
+- Centralized task status definitions and icons for easier maintenance.
+- Refined the logic for status updates to enhance stability.
+
 ## [2.1.1] - 2025-08-04
 
 #### New

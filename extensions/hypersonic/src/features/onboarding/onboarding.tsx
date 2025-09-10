@@ -6,6 +6,7 @@ import { SetLabelAction } from '@/components/set-todo-label-action'
 import { useOnboarding } from './hooks/use-onboarding'
 import { Action, ActionPanel, Color, Icon, List, open } from '@raycast/api'
 import { createAccessoriesArray } from '@/utils/create-accessories-array'
+import { DEFAULT_STATUS_ICONS } from '@/utils/statuses'
 
 export function Onboarding() {
   const {
@@ -46,7 +47,9 @@ export function Onboarding() {
           <List.Item
             key={todo.id}
             icon={{
-              source: todo.completed ? 'completed.svg' : 'pending.svg',
+              source: todo.completed
+                ? DEFAULT_STATUS_ICONS.completed
+                : DEFAULT_STATUS_ICONS.pending,
               tintColor: todo.completed
                 ? {
                     light: '#0CA16C',

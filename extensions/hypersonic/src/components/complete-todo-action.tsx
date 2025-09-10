@@ -1,5 +1,6 @@
-import { Action, Color, Icon } from '@raycast/api'
+import { Action, Color } from '@raycast/api'
 import { Todo } from '@/types/todo'
+import { DEFAULT_STATUS_ICONS } from '@/utils/statuses'
 
 export function CompleteTodoAction({
   todo,
@@ -11,7 +12,7 @@ export function CompleteTodoAction({
   return (
     <Action
       icon={{
-        source: 'completed.svg',
+        source: DEFAULT_STATUS_ICONS.completed,
         tintColor: {
           light: Color.SecondaryText,
           dark: Color.PrimaryText,
