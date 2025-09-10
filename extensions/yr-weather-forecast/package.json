@@ -36,7 +36,8 @@
   "commands": [
     {
       "name": "yr",
-      "title": "Yr",
+      "title": "Show Weather Forecast",
+      "subtitle": "Yr",
       "description": "Search and show weather",
       "mode": "view",
       "preferences": [

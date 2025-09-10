@@ -9,6 +9,7 @@ import { withErrorBoundary } from "./components/error-boundary";
 import { WeatherErrorFallback } from "./components/error-fallbacks";
 import { getUIThresholds } from "./config/weather-config";
 import { formatDate } from "./utils/date-utils";
+import { FavoriteToggleAction } from "./components/FavoriteToggleAction";
 
 function ForecastView(props: {
   name: string;
@@ -198,22 +199,7 @@ function ForecastView(props: {
             />
           )}
 
-          {/* Favorites management */}
-          {isFavorite ? (
-            <Action
-              title="Remove from Favorites"
-              icon={Icon.StarDisabled}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-              onAction={handleFavoriteToggle}
-            />
-          ) : (
-            <Action
-              title="Add to Favorites"
-              icon={Icon.Star}
-              shortcut={{ modifiers: ["cmd"], key: "f" }}
-              onAction={handleFavoriteToggle}
-            />
-          )}
+          <FavoriteToggleAction isFavorite={isFavorite} onToggle={handleFavoriteToggle} />
 
           {onShowWelcome && (
             <Action
