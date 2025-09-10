@@ -15,3 +15,4 @@ Convert Franc Pacifique (XPF) to Euros (EUR) instantly.
 - Automatic clipboard copy
 - Clean HUD display
 - Supports decimal amounts
+                                    
