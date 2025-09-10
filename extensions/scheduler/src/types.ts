@@ -1,4 +1,4 @@
-export type ScheduleType = "once" | "daily" | "weekly" | "monthly";
+export type ScheduleType = "once" | "15mins" | "30mins" | "hourly" | "daily" | "weekly" | "monthly" | "cron";
 
 export type Schedule = {
   type: ScheduleType;
@@ -6,6 +6,7 @@ export type Schedule = {
   time?: string; // HH:mm format
   dayOfWeek?: number; // 0-7 for weekly (0 or 7 = Sunday, 1 = Monday, etc.)
   dayOfMonth?: number; // 1-31 for monthly
+  cronExpression?: string; // Cron expression for "cron" type
 };
 
 // Simplified to store only the deeplink
@@ -23,6 +24,7 @@ export type ScheduledCommand = {
   enabled: boolean;
   createdAt: string;
   updatedAt: string;
+  lastExecutedAt?: string; // ISO string for when the command was last successfully executed
 };
 
 export interface FormValues {
@@ -33,6 +35,7 @@ export interface FormValues {
   time: string;
   dayOfWeek?: string;
   dayOfMonth?: string;
+  cronExpression?: string;
   runInBackground?: boolean;
 }
 
