@@ -1,6 +1,9 @@
 ---
 title: Rails form helpers
 category: Rails
+tech: rails-forms
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Form builder

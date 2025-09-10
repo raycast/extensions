@@ -2,6 +2,9 @@
 title: Homebrew
 weight: -3
 category: CLI
+tech: homebrew
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Commands

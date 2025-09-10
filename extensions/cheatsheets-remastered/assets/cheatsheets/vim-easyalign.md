@@ -1,8 +1,12 @@
 ---
 title: Vim Easyalign
 html_class: key-codes
-hljs_languages: [vim]
+hljs_languages:
+  - vim
 category: Vim
+tech: vim-easyalign
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Command mode

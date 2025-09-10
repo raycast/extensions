@@ -11,7 +11,7 @@ type FormValues = {
   notes: string;
   tags: string[];
   areaId: string;
-  // Possible values for when: 'today' | 'evening' | 'upcoming' | 'tomorrow' | 'anytime' | 'someday';
+  // Possible values for when: 'today' | 'evening' | 'upcoming' | 'tomorrow' | 'anytime' | 'someday' | 'logbook' | 'trash';
   when: string;
   date: Date | null;
   toDos: string;
@@ -34,7 +34,7 @@ export function AddNewProject({ draftValues }: AddNewProjectProps) {
         when: values.when === 'upcoming' && values.date ? getDateString(values.date) : values.when,
         'area-id': values.areaId,
         deadline: values.deadline ? getDateString(values.deadline) : '',
-        tags: values.tags,
+        ...(values.tags.length > 0 && { tags: values.tags.join(',') }),
         'to-dos': values.toDos,
       };
 
@@ -81,7 +81,8 @@ Tasks:`);
       setValue('toDos', items.trim());
       focus('toDos');
     } catch (error) {
-      await showToast({ style: Toast.Style.Failure, title: 'Failed to generate to-dos' });
+      const errorMessage = typeof error === 'string' ? error : error instanceof Error ? error.message : String(error);
+      await showToast({ style: Toast.Style.Failure, title: 'Failed to generate to-dos', message: errorMessage });
     }
   }
 
@@ -189,7 +190,7 @@ Tasks:`);
           ))}
         </Form.TagPicker>
       ) : null}
-      <Form.TextArea {...itemProps.toDos} title="To-Dos" placeholder="To-dos separated by new lines" />
+      <Form.TextArea {...itemProps.toDos} title="To-Dos" placeholder="To-Dos separated by new lines" />
       <Form.DatePicker {...itemProps.deadline} title="Deadline" type={Form.DatePicker.Type.Date} min={now} />
     </Form>
   );

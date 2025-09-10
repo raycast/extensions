@@ -1,11 +1,18 @@
 ---
 title: Cheatsheet styles
-tags: [WIP]
-updated: 2017-10-26
-intro: |
+tags:
+  - WIP
+updated: 2017-10-26T00:00:00.000Z
+intro: >
   This is a reference of styles that you can use on Devhints cheatsheets. How
+
   meta!
-  You can refer to this when contributing your own cheatsheets to the [GitHub repo](https://github.com/rstacruz/cheatsheets/).
+
+  You can refer to this when contributing your own cheatsheets to the [GitHub
+  repo](https://github.com/rstacruz/cheatsheets/).
+tech: cheatsheet-styles
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 Intro

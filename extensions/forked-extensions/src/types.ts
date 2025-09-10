@@ -1,5 +1,7 @@
 export type ForkedExtension = {
+  /** The folder full path */
   folderPath: string;
+  /** The folder name */
   folderName: string;
   name: string;
   title: string;

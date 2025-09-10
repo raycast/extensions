@@ -54,7 +54,7 @@ const resolveConnectedAccount = (connectedAccount: Stripe.Account): ConnectedAcc
 const ConnectedAccounts = () => {
   const { isLoading, data } = useStripeApi(STRIPE_ENDPOINTS.CONNECTED_ACCOUNTS, true);
   const { dashboardUrl } = useStripeDashboard();
-  const formattedConnectedAccounts = data.map(resolveConnectedAccount);
+  const formattedConnectedAccounts = (data as Stripe.Account[]).map(resolveConnectedAccount);
 
   const renderConnectedAccounts = (connectedAccount: ConnectedAccount) => {
     const { email, id } = connectedAccount;

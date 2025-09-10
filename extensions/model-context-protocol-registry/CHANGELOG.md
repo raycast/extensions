@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Nuxt UI MCP Server] - 2025-09-10
+
+Add official Nuxt UI MCP Server to registry
+
 ## [Add Rube MCP Server] - 2025-08-26
 
 Add official Rube MCP Server to registry to connect AI tools to 500+ apps

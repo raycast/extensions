@@ -1,10 +1,15 @@
 ---
 title: Xpath
 category: HTML
-tags: [Featured]
+tags:
+  - Featured
 weight: -5
-description: |
-  $x('//div//p//*') == $('div p *'), $x('//[@id="item"]') == $('#item'), and many other Xpath examples.
+description: >
+  $x('//div//p//*') == $('div p *'), $x('//[@id="item"]') == $('#item'), and
+  many other Xpath examples.
+tech: xpath
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Testing

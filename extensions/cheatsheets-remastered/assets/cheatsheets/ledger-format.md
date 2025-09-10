@@ -1,6 +1,9 @@
 ---
 title: Ledger format
 category: Ledger
+tech: ledger-format
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Example

@@ -1,6 +1,9 @@
 ---
 title: Ledger examples
 category: Ledger
+tech: ledger-examples
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Inspecting transactions

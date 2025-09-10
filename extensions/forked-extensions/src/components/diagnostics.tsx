@@ -3,7 +3,7 @@ import { Action, ActionPanel, Detail, useNavigation } from "@raycast/api";
 import * as api from "../api.js";
 import { catchError } from "../errors.js";
 import * as git from "../git.js";
-import { getCommitDiffMessage, repositoryConfigurationPath } from "../utils.js";
+import { getCommitDiffMessage } from "../utils.js";
 
 export default function Diagnostics() {
   const [status, setStatus] = useState<string>("Running diagnostics...");
@@ -41,18 +41,16 @@ export default function Diagnostics() {
 
       const status = [
         "## Diagnostics",
-        "### Git installed",
+        "### Git status",
         isGitInstalled
-          ? "- ✅ Good"
+          ? isStatusClean
+            ? "- ✅ Good"
+            : "- ⚠️ You have uncommitted changes. Please commit or stash them before performing operations."
           : "- ⚠️ Git is not installed or not found. Please set up your Git executable file path manually in the extension preferences.",
-        "### Git status clean",
-        isStatusClean
-          ? "- ✅ Good"
-          : "- ⚠️ You have uncommitted changes. Please commit or stash them before performing operations.",
         "### Local forked repository",
         localForkedRepository
           ? [
-              `- ✅ [${localForkedRepository} 📁](file://$${repositoryConfigurationPath})`,
+              `- ✅ [${localForkedRepository} 📁](file://${git.repositoryPath})`,
               `- ${localCommitDiffPass ? "✅" : "⚠️"} ${localCommitDiffMessage}${localCommitDiffGuide}`,
             ]
               .filter(Boolean)

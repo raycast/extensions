@@ -1,7 +1,10 @@
 ---
 title: StimulusReflex
 category: Ruby
-updated: 2021-01-07
+updated: 2021-01-07T00:00:00.000Z
+tech: stimulus-reflex
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### via Data Attributes

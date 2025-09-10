@@ -7,9 +7,12 @@ authors:
   - github: izzergh
   - github: kolapsys
   - github: samtrion
-updated: 2020-03-10
+updated: 2020-03-10T00:00:00.000Z
 description: |
   Basic cheatsheets for regular expression
+tech: regexp
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## RegExp

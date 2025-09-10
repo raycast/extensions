@@ -1,7 +1,11 @@
 ---
 title: Make for assets
-tags: [Archived]
+tags:
+  - Archived
 archived: This sheet may be listing practices that are outdated.
+tech: make-assets
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Basic compiling

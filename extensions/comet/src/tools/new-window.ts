@@ -28,6 +28,9 @@ export default async function (input: Input) {
       await runAppleScript(`
         tell application "Comet"
           make new window
+          
+          -- Small delay to ensure window is fully initialized before loading URL
+          delay 0.2
           activate
           open location "${perplexityUrl}"
         end tell
@@ -42,6 +45,9 @@ export default async function (input: Input) {
       await runAppleScript(`
         tell application "Comet"
           make new window
+          
+          -- Small delay to ensure window is fully initialized before loading URL
+          delay 0.2
           activate
           open location "${normalizedUrl}"
         end tell

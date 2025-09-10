@@ -1,13 +1,16 @@
 ---
 title: Git log format string
 category: Git
-updated: 2017-10-18
+updated: 2017-10-18T00:00:00.000Z
 weight: -1
 keywords:
-  - "git log --pretty=format:%H"
-  - "%H - Commit hash"
-  - "%an - Author"
-  - "%aD - Author date"
+  - 'git log --pretty=format:%H'
+  - '%H - Commit hash'
+  - '%an - Author'
+  - '%aD - Author date'
+tech: git-log-format
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Log format

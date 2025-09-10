@@ -1,6 +1,9 @@
 ---
 title: Vim digraphs
 category: Vim
+tech: vim-digraphs
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Typing digraphs in insert mode

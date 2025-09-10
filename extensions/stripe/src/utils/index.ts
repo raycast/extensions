@@ -4,7 +4,7 @@ export const convertAmount = (amount: number) => amount / 100;
 
 export const titleCase = (str: string) => startCase(camelCase(str));
 
-const dateFormatOptions = {
+const dateFormatOptions: Intl.DateTimeFormatOptions = {
   year: "numeric",
   month: "numeric",
   day: "numeric",
@@ -19,14 +19,14 @@ export const convertTimestampToDate = (timestamp: number | null): string => {
     return "";
   }
 
-  const dateFormat = new Intl.DateTimeFormat("en-GB", dateFormatOptions as any);
+  const dateFormat = new Intl.DateTimeFormat("en-GB", dateFormatOptions as unknown as Intl.DateTimeFormatOptions);
 
   const milliseconds = timestamp * 1000;
   const dateObj = new Date(milliseconds);
   return dateFormat.format(dateObj);
 };
 
-export const resolveMetadataValue = (value: any) => {
+export const resolveMetadataValue = (value: string | boolean | number | null | undefined) => {
   if (typeof value === "string") {
     return value;
   }
