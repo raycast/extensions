@@ -5,6 +5,9 @@
   "description": "Extension to control Antinote app. Create new notes, search notes and pin/unpin Antinote with Raycast.",
   "icon": "antinote-icon.png",
   "author": "sc0",
+  "contributors": [
+    "subhash_jha"
+  ],
   "categories": [
     "Productivity"
   ],
