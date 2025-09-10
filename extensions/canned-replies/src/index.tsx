@@ -9,6 +9,7 @@ import {
   Toast,
   closeMainWindow,
   Clipboard,
+  Keyboard,
 } from "@raycast/api";
 import { useLocalStorage, runAppleScript } from "@raycast/utils";
 import TemplateForm from "./TemplateForm";
@@ -91,7 +92,7 @@ export default function Command() {
         replies.map((reply) => (
           <List.Item
             key={reply.id}
-            icon={Icon.TextDocument}
+            icon={Icon.Document}
             title={reply.title}
             subtitle={reply.body.slice(0, 50)}
             actions={
@@ -114,18 +115,19 @@ export default function Command() {
                     title="Edit Template"
                     icon={Icon.Pencil}
                     target={<TemplateForm existing={reply} />}
-                    shortcut={{ modifiers: ["cmd"], key: "e" }}
+                    shortcut={Keyboard.Shortcut.Common.Edit}
                   />
                   <Action.Push
                     title="Duplicate Template"
-                    icon={Icon.TextDocument}
+                    icon={Icon.Document}
                     target={<TemplateForm existing={reply} duplicate={true} />}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                    shortcut={Keyboard.Shortcut.Common.Duplicate}
                   />
                   <Action
                     title="Delete Template"
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                     onAction={() => deleteTemplate(reply.id)}
                   />
                 </ActionPanel.Section>
@@ -135,7 +137,7 @@ export default function Command() {
                     title="Create New Template"
                     icon={Icon.Plus}
                     target={<TemplateForm />}
-                    shortcut={{ modifiers: ["cmd"], key: "n" }}
+                    shortcut={Keyboard.Shortcut.Common.New}
                   />
                   <Action.Push
                     title="Import from JSON"
@@ -150,6 +152,7 @@ export default function Command() {
                   <Action.OpenInBrowser
                     title="Open Documentation"
                     icon={Icon.Globe}
+                    shortcut={Keyboard.Shortcut.Common.Open}
                     url="https://github.com/Enragedsaturday/raycast-canned-email-response#readme"
                   />
                 </ActionPanel.Section>
@@ -159,7 +162,7 @@ export default function Command() {
         ))
       ) : (
         <List.EmptyView
-          icon={Icon.TextDocument}
+          icon={Icon.Document}
           title="No Canned Replies"
           description="No templates found. Create a new reply template to get started."
           actions={
@@ -168,7 +171,7 @@ export default function Command() {
                 title="Create New Template"
                 icon={Icon.Plus}
                 target={<TemplateForm />}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={Keyboard.Shortcut.Common.New}
               />
               <Action.Push
                 title="Import from JSON"
@@ -178,6 +181,7 @@ export default function Command() {
               <Action.OpenInBrowser
                 title="Open Documentation"
                 icon={Icon.Globe}
+                shortcut={Keyboard.Shortcut.Common.Open}
                 url="https://github.com/Enragedsaturday/raycast-canned-email-response#readme"
               />
             </ActionPanel>
