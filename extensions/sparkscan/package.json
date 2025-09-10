@@ -1,0 +1,128 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sparkscan",
+  "title": "Sparkscan Search",
+  "description": "Search and explore the Spark network",
+  "icon": "extension-icon.png",
+  "author": "nejc",
+  "owner": "flashnet",
+  "access": "public",
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Web",
+    "Finance",
+    "Developer Tools",
+    "Data",
+    "Other"
+  ],
+  "keywords": [
+    "sparkscan",
+    "bitcoin",
+    "spark",
+    "lightning",
+    "blockchain",
+    "crypto"
+  ],
+  "preferences": [
+    {
+      "name": "defaultNetwork",
+      "title": "Default Network",
+      "description": "The default network to use",
+      "type": "dropdown",
+      "required": false,
+      "default": "MAINNET",
+      "data": [
+        {
+          "title": "Mainnet",
+          "value": "MAINNET"
+        },
+        {
+          "title": "Regtest",
+          "value": "REGTEST"
+        }
+      ]
+    },
+    {
+      "name": "transactionLimit",
+      "title": "Transaction Limit",
+      "description": "The number of transactions to show in the latest transactions list",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "25",
+      "default": "25"
+    },
+    {
+      "name": "defaultDetails",
+      "title": "Default Details",
+      "label": "Show Details",
+      "description": "Whether to show details by default in the latest transactions list",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "statistics",
+      "title": "View Statistics",
+      "description": "View statistics for the selected network",
+      "mode": "view"
+    },
+    {
+      "name": "open-in-sparkscan",
+      "title": "Open in Sparkscan",
+      "description": "Open the copied address in Sparkscan",
+      "mode": "no-view"
+    },
+    {
+      "name": "latest-transactions",
+      "title": "View Latest Transactions",
+      "description": "View the latest transactions on the selected network",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar-stats-and-status",
+      "title": "Stats & Status",
+      "description": "View statistics and status of the Spark network",
+      "mode": "menu-bar",
+      "interval": "10m"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-stats",
+      "title": "Get Spark Network Statistics",
+      "description": "Get the latest statistics for the Spark network"
+    },
+    {
+      "name": "get-status",
+      "title": "Get Sparkscan Status",
+      "description": "Get the status of the Sparkscan API"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.101.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@sparkscan/api-types": "^0.1.6",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
