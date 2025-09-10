@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "block-explorer",
+  "title": "Block Explorer",
+  "description": "Quickly search block explorers for transactions, addresses, and blocks.",
+  "icon": "extension-icon.png",
+  "author": "nathan_schwermann",
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Finance",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "block-explorer-cmd",
+      "title": "Block Explorer",
+      "subtitle": "Search EVM block explorers",
+      "description": "Quickly search block explorers for transactions, addresses, and blocks.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "Enter address, transaction hash, or block number",
+          "defaultValue": "",
+          "description": "The query to search for on block explorers (e.g., address, transaction hash, block number).",
+          "required": true
+        },
+        {
+          "name": "chain",
+          "type": "text",
+          "placeholder": "Chain ID (e.g., eth, bsc)",
+          "description": "The blockchain to search on (e.g., eth, bsc).",
+          "required": false,
+          "defaultValue": "eth"
+        }
+      ]
+    },{
+      "name" : "chains-cmd",
+      "title": "Blockchains",
+      "description": "List all supported blockchains.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
