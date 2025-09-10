@@ -16,7 +16,7 @@ export default async function (input: Input) {
     throw new Error("Failed to search the web");
   }
 
-  return {  
+  return {
     searchResults: research.web,
   };
 }
