@@ -2,6 +2,10 @@
 
 Manage your Google Calendar events with natural language
 
+## Note:
+
+This extension uses Raycast AI to intelligently parse your natural language input, making it easy to create events without worrying about exact formats. If you are on the free Raycast plan, creating an event will use one of your 50 monthly AI requests.
+
 ## Features
 
 - **Create Events**: Use natural language to create calendar events quickly
