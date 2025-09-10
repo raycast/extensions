@@ -1,0 +1,196 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "openai-voices",
+  "version": "1.0.0",
+  "title": "OpenAI Voices",
+  "description": "Text to speech powered by OpenAI",
+  "icon": "extension-icon.png",
+  "author": "andypai",
+  "license": "MIT",
+  "access": "public",
+  "categories": [
+    "Productivity",
+    "Media"
+  ],
+  "keywords": [
+    "openai",
+    "tts",
+    "text to speech",
+    "voice"
+  ],
+  "commands": [
+    {
+      "name": "read-selected-text",
+      "title": "Read Selected Text",
+      "description": "Immediately reads the selected text or clipboard content without confirmation.",
+      "mode": "no-view"
+    },
+    {
+      "name": "read-text-editor",
+      "title": "Read Text with Editor",
+      "description": "Opens an editor to review and modify text before reading aloud.",
+      "mode": "view"
+    },
+    {
+      "name": "onboarding",
+      "title": "Get Started",
+      "description": "Onboarding and configuration for OpenAI Voices.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "openaiApiKey",
+      "type": "password",
+      "title": "OpenAI API Key",
+      "description": "Your OpenAI API key.",
+      "placeholder": "sk-...",
+      "required": true
+    },
+    {
+      "name": "model",
+      "type": "dropdown",
+      "title": "Model",
+      "description": "The TTS model to use. gpt-4o-mini-tts is the newest and most advanced.",
+      "defaultValue": "gpt-4o-mini-tts",
+      "required": true,
+      "data": [
+        {
+          "value": "gpt-4o-mini-tts",
+          "title": "GPT-4o Mini TTS"
+        },
+        {
+          "value": "tts-1-hd",
+          "title": "TTS-1 HD"
+        },
+        {
+          "value": "tts-1",
+          "title": "TTS-1"
+        }
+      ]
+    },
+    {
+      "name": "voice",
+      "type": "dropdown",
+      "title": "Voice",
+      "description": "The voice to use for the text-to-speech.",
+      "defaultValue": "onyx",
+      "required": true,
+      "data": [
+        {
+          "value": "alloy",
+          "title": "Alloy"
+        },
+        {
+          "value": "ash",
+          "title": "Ash"
+        },
+        {
+          "value": "ballad",
+          "title": "Ballad"
+        },
+        {
+          "value": "coral",
+          "title": "Coral"
+        },
+        {
+          "value": "echo",
+          "title": "Echo"
+        },
+        {
+          "value": "fable",
+          "title": "Fable"
+        },
+        {
+          "value": "nova",
+          "title": "Nova"
+        },
+        {
+          "value": "onyx",
+          "title": "Onyx"
+        },
+        {
+          "value": "sage",
+          "title": "Sage"
+        },
+        {
+          "value": "shimmer",
+          "title": "Shimmer"
+        }
+      ]
+    },
+    {
+      "name": "speed",
+      "type": "textfield",
+      "title": "Speed",
+      "description": "Playback speed (from 0.25 to 4.0).",
+      "defaultValue": "1.5",
+      "required": false
+    },
+    {
+      "name": "instructions",
+      "type": "textfield",
+      "title": "Instructions",
+      "description": "Optional instructions to guide the model's speech, affecting accent, tone, and emotion.",
+      "defaultValue": "Read the text clearly",
+      "required": false
+    },
+    {
+      "name": "response_format",
+      "type": "dropdown",
+      "title": "Response Format",
+      "description": "The format for the audio output. WAV is recommended for low-latency streaming.",
+      "defaultValue": "wav",
+      "required": true,
+      "data": [
+        {
+          "value": "mp3",
+          "title": "MP3"
+        },
+        {
+          "value": "wav",
+          "title": "WAV (Low Latency)"
+        },
+        {
+          "value": "aac",
+          "title": "AAC"
+        },
+        {
+          "value": "flac",
+          "title": "FLAC"
+        }
+      ]
+    },
+    {
+      "name": "saveAudioFiles",
+      "type": "checkbox",
+      "title": "Save Audio Files",
+      "description": "Save generated audio files to ~/.cache/raycast-openai-voices/ for debugging and reuse.",
+      "defaultValue": false,
+      "required": false,
+      "label": "Save Audio Files"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.101.1",
+    "@raycast/utils": "^1.17.0",
+    "openai": "^4.39.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "packageManager": "pnpm@10.14.0-0+sha512.2cd47a0cbf5f1d1de7693a88307a0ede5be94e0d3b34853d800ee775efbea0650cb562b77605ec80bc8d925f5cd27c4dfe8bb04d3a0b76090784c664450d32d6"
+}
