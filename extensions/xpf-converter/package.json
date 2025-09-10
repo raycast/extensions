@@ -1,6 +1,6 @@
 {
   "name": "xpf-converter",
-  "title": "Xpf to Eur Converter",
+  "title": "XPF to EUR Converter",
   "description": "Convert Franc Pacifique (XPF) to Euros (EUR) with instant clipboard copy",
   "icon": "icon.png",
   "author": "vincent_perrot",
@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "convert",
-      "title": "Convert Xpf to Eur",
+      "title": "Convert XPF to EUR",
       "description": "Convert Franc Pacifique to Euros",
       "mode": "no-view",
       "arguments": [
