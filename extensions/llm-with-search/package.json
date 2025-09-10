@@ -1,0 +1,114 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "llm-with-search",
+  "title": "AI with Internet Search",
+  "description": "Local AI via Ollama with optional internet search context and citations.",
+  "icon": "assets/extension-icon.png",
+  "author": "hamza5645",
+  "license": "MIT",
+  "categories": ["ai", "developer-tools"],
+  "commands": [
+    {
+      "name": "llm-with-search",
+      "title": "AI with Internet Search",
+      "subtitle": "Local AI via Ollama + Web Search",
+      "description": "Chat with local AI and optionally add web results with citations.",
+      "mode": "view",
+      "path": "src/llm-with-search.tsx",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "Your question"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "serperApiKey",
+      "title": "Serper API Key",
+      "type": "password",
+      "required": false,
+      "placeholder": "sk-...",
+      "description": "Optional. For web search context via serper.dev."
+    },
+    {
+      "name": "ollamaBaseUrl",
+      "title": "Ollama Base URL",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "http://localhost:11434",
+      "description": "Base URL for your local Ollama server.",
+      "default": "http://localhost:11434"
+    },
+    {
+      "name": "ollamaModel",
+      "title": "Ollama Model",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "llama3.2:latest",
+      "description": "Model name to use with Ollama.",
+      "default": "llama3.2:latest"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search",
+      "title": "Web Search",
+      "description": "Performs a web search using Serper API and returns the results."
+    }
+  ],
+  "ai": {
+    "evals": {
+      "web_search": {
+        "tool": "search",
+        "description": "Use this tool to search the web when the user requests internet research or citations.",
+        "input": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "query": { "type": "string", "description": "Search query to send to Serper" }
+            },
+            "required": ["query"]
+          }
+        },
+        "output": {
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": { "type": "string" },
+                "link": { "type": "string" },
+                "snippet": { "type": "string" },
+                "source": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "dependencies": {
+    "@raycast/api": "^1.102.3",
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the prepublishOnly script and rerun npm publish again.\\nIf you wanted to publish it to the Raycast Store instead, use npm run publish instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
