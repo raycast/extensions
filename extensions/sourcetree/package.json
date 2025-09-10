@@ -1,10 +1,14 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sourcetree",
+  "version": "1.1.0",
   "title": "Sourcetree",
   "description": "Search and open Sourcetree repositories",
   "icon": "sourcetree_512x512x32.png",
   "author": "i906",
+  "contributors": [
+    "tofrankie"
+  ],
   "categories": [
     "Developer Tools"
   ],
@@ -39,24 +43,25 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.2",
-    "@raycast/utils": "^1.0.6",
+    "@raycast/api": "^1.101.1",
+    "@raycast/utils": "^1.19.1",
     "bplist-parser": "^0.3.2"
   },
   "keywords": [
     "Git",
+    "Hg",
+    "Mercurial",
     "Sourcetree",
     "Atlassian"
   ],
   "devDependencies": {
-    "@types/plist": "^3.0.2",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "ts-node": "^10.8.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^24.0.15",
+    "@types/plist": "^3.0.5",
+    "@types/react": "^19.1.8",
+    "eslint": "^9.31.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",

@@ -1,20 +1,14 @@
 import { Action, ActionPanel, Color, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { getAhead, getBehind, getBranch, Repository } from "./lib/repository";
+import { getRepositoryState, RepositoryState, Repository } from "./lib/repository";
 import { OpenInSourceTreeApp } from "./OpenInSourceTreeApp";
-
-interface GitState {
-  branch: string | null;
-  ahead: string | null;
-  behind: string | null;
-}
 
 interface RepositoryItemProps {
   repo: Repository;
 }
 
-export function RepositoryItem({ repo }: RepositoryItemProps): JSX.Element {
-  const { data } = useCachedPromise(getGitStatus, [repo.path], {
+export function RepositoryItem({ repo }: RepositoryItemProps) {
+  const { data } = useCachedPromise(getRepositoryState, [repo.path, repo.repositoryType], {
     keepPreviousData: true,
     execute: true,
   });
@@ -45,7 +39,7 @@ export function RepositoryItem({ repo }: RepositoryItemProps): JSX.Element {
   );
 }
 
-function prepareAccessory(state?: GitState): List.Item.Accessory[] {
+function prepareAccessory(state?: RepositoryState): List.Item.Accessory[] {
   const accessories: List.Item.Accessory[] = [];
 
   if (!state) {
@@ -89,16 +83,4 @@ function prepareAccessory(state?: GitState): List.Item.Accessory[] {
   }
 
   return accessories;
-}
-
-function getGitStatus(path: string): Promise<GitState> {
-  const branch = getBranch(path);
-  const ahead = getAhead(path);
-  const behind = getBehind(path);
-
-  return Promise.all([branch, ahead, behind]).then((values) => ({
-    branch: values[0],
-    ahead: values[1],
-    behind: values[2],
-  }));
 }
