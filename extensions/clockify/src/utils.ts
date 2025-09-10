@@ -38,8 +38,18 @@ export async function fetcher(
     });
 
     if (response.ok) {
-      const data = await response.json();
-      return { data };
+      // Check if response has content before trying to parse JSON
+      const contentType = response.headers.get("content-type");
+      const hasJsonContent = contentType && contentType.includes("application/json");
+
+      // Only parse JSON if the response has content and is JSON
+      if (hasJsonContent && response.status !== 204) {
+        const data = await response.json();
+        return { data };
+      } else {
+        // For 204 No Content or non-JSON responses, return empty data
+        return { data: null };
+      }
     } else {
       if (response.status === 401) {
         LocalStorage.clear();

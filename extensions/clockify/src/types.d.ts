@@ -32,7 +32,7 @@ export interface Tag {
 }
 
 export interface FetcherArgs {
-  method?: "PATCH" | "POST";
+  method?: "PATCH" | "POST" | "GET" | "DELETE";
   body?: any;
   headers?: {
     "X-Api-Key": string;
