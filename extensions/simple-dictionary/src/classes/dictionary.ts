@@ -74,28 +74,34 @@ class Dictionary {
    * If the fetch is successful, it processes and formats the entry, updating internal properties.
    * Returns the grouped entry data or an empty object if the fetch fails.
    *
-   * @returns {Promise<GroupedEntry>} A promise that resolves to the grouped entry data or an empty object.
+   * @returns {Promise<GroupedEntry>} A promise that resolves to the grouped entry data or an empty object. If there are no definitions or there is an error during the fetch operation, it returns an empty object.
    */
   public async fetchEntry(): Promise<GroupedEntry> {
-    const res: Response = await fetch(`${this.url}/${this.languageCode}/${this.wordQuery}`);
+    const ge: GroupedEntry = {};
 
-    if (res.ok) {
-      const entry: DictionaryResponse = (await res.json()) as DictionaryResponse;
+    try {
+      const res: Response = await fetch(`${this.url}/${this.languageCode}/${this.wordQuery}`);
 
-      if (!entry.entries.length) return {};
+      if (res.ok) {
+        const entry: DictionaryResponse = (await res.json()) as DictionaryResponse;
 
-      // Updating the word and language to ensure proper formatting
+        if (!entry.entries.length) return {};
 
-      this.language =
-        entry.entries[0].language.name.slice(0, 1).toUpperCase() +
-        entry.entries[0].language.name.slice(1).toLowerCase();
-      this.word = entry.word.slice(0, 1).toUpperCase() + entry.word.slice(1).toLowerCase();
-      this.urlWord = entry.source.url.replaceAll(" ", "%20");
+        // Updating the word and language to ensure proper formatting
 
-      return this.groupEntries(entry);
-    } else {
-      return {};
+        this.language =
+          entry.entries[0].language.name.slice(0, 1).toUpperCase() +
+          entry.entries[0].language.name.slice(1).toLowerCase();
+        this.word = entry.word.slice(0, 1).toUpperCase() + entry.word.slice(1).toLowerCase();
+        this.urlWord = entry.source.url.replaceAll(" ", "%20");
+
+        return this.groupEntries(entry);
+      }
+    } catch {
+      // There was an error fetching the entries
     }
+
+    return ge;
   }
 
   /**

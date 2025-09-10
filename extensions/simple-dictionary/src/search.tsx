@@ -35,31 +35,40 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
 
   useEffect(() => {
     d = new Dictionary(language, word);
-    d.fetchEntry().then((ge: GroupedEntry) => {
-      setGroupedEntries(ge);
-      setEntryURL(d.getURL);
-      setLanguageFull(d.getLanguage);
-      setLoading(false);
-    });
+    d.fetchEntry()
+      .then((ge: GroupedEntry) => {
+        setGroupedEntries(ge);
+        setEntryURL(d.getURL);
+        setLanguageFull(d.getLanguage);
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+        setGroupedEntries({});
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to fetch entry",
+          message: "Please try again later",
+        });
+      });
   }, [language, word]);
 
   useEffect(() => {
     const checkFavorites = async () => {
       const favs: Record<string, boolean> = {};
+      const promises: Promise<void>[] = [];
 
       for (const [partOfSpeech, entry] of Object.entries(groupedEntries)) {
-        entry.senses.forEach(async (_, j: number) => {
-          const exists = await Favorite.exist(languageFull.toLowerCase(), word, j, partOfSpeech);
-
-          favs[`${partOfSpeech}-${j}`] = exists;
-
-          if (
-            Object.keys(favs).length === Object.values(groupedEntries).reduce((a: number, e) => a + e.senses.length, 0)
-          ) {
-            setFavorites({ ...favs });
-          }
+        entry.senses.forEach((_, j: number) => {
+          const promise = Favorite.exist(languageFull.toLowerCase(), word, j, partOfSpeech).then((exists) => {
+            favs[`${partOfSpeech}-${j}`] = exists;
+          });
+          promises.push(promise);
         });
       }
+
+      await Promise.all(promises);
+      setFavorites({ ...favs });
     };
 
     if (Object.keys(groupedEntries).length) checkFavorites();
@@ -111,10 +120,11 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
                         <Action
                           title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
                           icon={isFavorite ? Icon.StarDisabled : Icon.Star}
-                          shortcut={Keyboard.Shortcut.Common.Pin}
+                          style={isFavorite ? Action.Style.Destructive : Action.Style.Regular}
+                          shortcut={isFavorite ? Keyboard.Shortcut.Common.Remove : Keyboard.Shortcut.Common.Pin}
                           onAction={async (): Promise<void> => {
                             if (!isFavorite) {
-                              Favorite.addEntry(
+                              const success: boolean = await Favorite.addEntry(
                                 languageFull,
                                 word,
                                 sense.markdown || "",
@@ -122,12 +132,20 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
                                 j,
                                 partOfSpeech,
                               );
-                              await showToast({
-                                style: Toast.Style.Success,
-                                title: "Added to Favorites",
-                                message: `"${word}" (${languageFull}) has been added to your favorites`,
-                              });
-                              setFavorites((prev) => ({ ...prev, [favKey]: true }));
+                              if (success) {
+                                await showToast({
+                                  style: Toast.Style.Success,
+                                  title: "Added to Favorites",
+                                  message: `"${word}" (${languageFull}) has been added to your favorites`,
+                                });
+                                setFavorites((prev) => ({ ...prev, [favKey]: true }));
+                              } else {
+                                await showToast({
+                                  style: Toast.Style.Failure,
+                                  title: "Failed to add to Favorites",
+                                  message: `"${word}" (${languageFull}) is already in your favorites`,
+                                });
+                              }
                             } else {
                               const options: Alert.Options = {
                                 title: "Remove from Favorites",
@@ -145,8 +163,21 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
                                 },
                               };
                               if (await confirmAlert(options)) {
-                                Favorite.removeEntry(languageFull, word, j, partOfSpeech);
-                                setFavorites((prev) => ({ ...prev, [favKey]: false }));
+                                const success: boolean = await Favorite.removeEntry(
+                                  languageFull,
+                                  word,
+                                  j,
+                                  partOfSpeech,
+                                );
+                                if (success) {
+                                  setFavorites((prev) => ({ ...prev, [favKey]: false }));
+                                } else {
+                                  await showToast({
+                                    style: Toast.Style.Failure,
+                                    title: "Failed to remove from Favorites",
+                                    message: `"${word.slice(0, 1).toUpperCase()}${word.slice(1)}" (${languageFull}) is not in your favorites`,
+                                  });
+                                }
                               }
                             }
                           }}

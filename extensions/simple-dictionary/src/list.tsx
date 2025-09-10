@@ -105,16 +105,24 @@ export default function Command(): JSX.Element {
                                     title: "Delete",
                                     style: Alert.ActionStyle.Destructive,
                                     onAction: async (): Promise<void> => {
-                                      await Favorite.removeEntry(lang, entry.word, entry.entry, entry.partOfSpeech);
+                                      const success: boolean = await Favorite.removeEntry(lang, entry.word, entry.entry, entry.partOfSpeech);
 
-                                      const favs: FavoriteEntry[] = await Favorite.getEntries();
-                                      setFavorites(favs);
+                                      if (success) {
+                                        const favs: FavoriteEntry[] = await Favorite.getEntries();
+                                        setFavorites(favs);
 
-                                      await showToast({
-                                        style: Toast.Style.Success,
-                                        title: "Removed from Favorites",
-                                        message: `"${entry.word.slice(0, 1).toUpperCase() + entry.word.slice(1).toLowerCase()}" (${lang.slice(0, 1).toUpperCase() + lang.slice(1).toLowerCase()}) has been removed from your favorites`,
-                                      });
+                                        await showToast({
+                                          style: Toast.Style.Success,
+                                          title: "Removed from Favorites",
+                                          message: `"${entry.word.slice(0, 1).toUpperCase() + entry.word.slice(1).toLowerCase()}" (${lang.slice(0, 1).toUpperCase() + lang.slice(1).toLowerCase()}) has been removed from your favorites`,
+                                        });
+                                      } else {
+                                        await showToast({
+                                          style: Toast.Style.Failure,
+                                          title: "Failed to remove from Favorites",
+                                          message: `"${entry.word.slice(0, 1).toUpperCase() + entry.word.slice(1).toLowerCase()}" (${lang.slice(0, 1).toUpperCase() + lang.slice(1).toLowerCase()}) could not be found in your favorites`,
+                                        });
+                                      }
                                     },
                                   },
                                 };
@@ -135,16 +143,24 @@ export default function Command(): JSX.Element {
                                     title: "Delete",
                                     style: Alert.ActionStyle.Destructive,
                                     onAction: async (): Promise<void> => {
-                                      await Favorite.removeAll();
+                                      const success: boolean = await Favorite.removeAll();
 
-                                      const favs: FavoriteEntry[] = await Favorite.getEntries();
-                                      setFavorites(favs);
+                                      if (success) {
+                                        const favs: FavoriteEntry[] = await Favorite.getEntries();
+                                        setFavorites(favs);
 
-                                      await showToast({
-                                        style: Toast.Style.Success,
-                                        title: "Removed from Favorites",
-                                        message: `All favorites have been removed`,
-                                      });
+                                        await showToast({
+                                          style: Toast.Style.Success,
+                                          title: "Removed from Favorites",
+                                          message: `All favorites have been removed`,
+                                        });
+                                      } else {
+                                        await showToast({
+                                          style: Toast.Style.Failure,
+                                          title: "Failed to remove from Favorites",
+                                          message: `Could not remove all favorites`,
+                                        });
+                                      }
                                     },
                                   },
                                 };

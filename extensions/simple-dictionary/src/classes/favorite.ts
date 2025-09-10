@@ -26,11 +26,15 @@ class Favorite {
   /**
    * Retrieves the list of favorite entries from local storage.
    *
-   * @returns {FavoriteEntry[]} An array of favorite entries. Returns an empty array if no entries are found.
+   * @returns {FavoriteEntry[]} An array of favorite entries. Returns an empty array if no entries are found or if the entry data is invalid.
    */
   public static async getEntries(): Promise<FavoriteEntry[]> {
-    const entries = await LocalStorage.getItem(Favorite.key);
-    return entries ? JSON.parse(entries.toString()) : [];
+    try {
+      const entries = await LocalStorage.getItem(Favorite.key);
+      return entries ? JSON.parse(entries.toString()) : [];
+    } catch {
+      return [];
+    }
   }
 
   /**
@@ -44,6 +48,8 @@ class Favorite {
    *
    * Checks if the combination of language and word already exists in the favorites.
    * If not, formats the language and word, adds them to the favorites, and updates LocalStorage.
+   *
+   * @returns {Promise<boolean>} A promise that resolves to `true` if the operation was successful, `false` otherwise.
    */
   public static async addEntry(
     language: string,
@@ -52,27 +58,29 @@ class Favorite {
     url: string,
     entry: number,
     partOfSpeech: string,
-  ): Promise<void> {
-    const favorites: FavoriteEntry[] = await this.getEntries();
-    const exists: boolean = favorites.find(
-      (fav: FavoriteEntry) =>
-        fav.language === language && fav.word === word && fav.entry === entry && fav.partOfSpeech === partOfSpeech,
-    )
-      ? true
-      : false;
-
-    if (!exists) {
-      favorites.push({
-        language: this.formatText(language),
-        word: this.formatText(word),
-        markdown,
-        url,
-        entry,
-        partOfSpeech,
-      });
-      favorites.sort((a, b) => a.word.localeCompare(b.word));
-      LocalStorage.setItem(Favorite.key, JSON.stringify(favorites));
+  ): Promise<boolean> {
+    let result: boolean = true;
+    try {
+      const favorites: FavoriteEntry[] = await this.getEntries();
+      const exists: boolean = await Favorite.exist(language.toLowerCase(), word, entry, partOfSpeech);
+      if (!exists) {
+        favorites.push({
+          language: this.formatText(language),
+          word: this.formatText(word),
+          markdown,
+          url,
+          entry,
+          partOfSpeech,
+        });
+        favorites.sort((a, b) => a.word.localeCompare(b.word));
+        LocalStorage.setItem(Favorite.key, JSON.stringify(favorites));
+      } else {
+        result = false;
+      }
+    } catch {
+      result = false;
     }
+    return result;
   }
 
   /**
@@ -82,26 +90,45 @@ class Favorite {
    * @param {string} word The word of the entry to remove.
    * @param {number} entry The entry number of the entry to remove.
    * @param {string} partOfSpeech The part of speech of the entry to remove.
+   *
+   * @returns {Promise<boolean>} A promise that resolves to `true` if the operation was successful, `false` otherwise.
    */
-  public static async removeEntry(language: string, word: string, entry: number, partOfSpeech: string): Promise<void> {
-    const favorites: FavoriteEntry[] = await this.getEntries();
-    const updatedFavorites = favorites.filter(
-      (fav: FavoriteEntry) =>
-        fav.language.toLowerCase() !== language.toLowerCase() ||
-        fav.word.toLowerCase() !== word.toLowerCase() ||
-        fav.entry !== entry ||
-        fav.partOfSpeech !== partOfSpeech,
-    );
-    LocalStorage.setItem(Favorite.key, JSON.stringify(updatedFavorites));
+  public static async removeEntry(
+    language: string,
+    word: string,
+    entry: number,
+    partOfSpeech: string,
+  ): Promise<boolean> {
+    let result: boolean = true;
+    try {
+      const favorites: FavoriteEntry[] = await this.getEntries();
+      const updatedFavorites = favorites.filter(
+        (fav: FavoriteEntry) =>
+          fav.language.toLowerCase() !== language.toLowerCase() ||
+          fav.word.toLowerCase() !== word.toLowerCase() ||
+          fav.entry !== entry ||
+          fav.partOfSpeech !== partOfSpeech,
+      );
+      LocalStorage.setItem(Favorite.key, JSON.stringify(updatedFavorites));
+    } catch {
+      result = false;
+    }
+    return result;
   }
 
   /**
    * Removes all favorite items from local storage.
    *
-   * @returns {Promise<void>} A promise that resolves when all favorites have been removed.
+   * @returns {Promise<boolean>} A promise that resolves to `true` if the operation was successful, `false` otherwise.
    */
-  public static async removeAll(): Promise<void> {
-    await LocalStorage.removeItem(Favorite.key);
+  public static async removeAll(): Promise<boolean> {
+    let result = true;
+    try {
+      await LocalStorage.removeItem(Favorite.key);
+    } catch {
+      result = false;
+    }
+    return result;
   }
 
   /**
@@ -117,7 +144,7 @@ class Favorite {
     const favorites: FavoriteEntry[] = await this.getEntries();
     return favorites.some(
       (fav: FavoriteEntry) =>
-        fav.language === language && fav.word === word && fav.entry === entry && fav.partOfSpeech === partOfSpeech,
+        fav.language.toLowerCase() === language.toLowerCase() && fav.word.toLowerCase() === word.toLowerCase() && fav.entry === entry && fav.partOfSpeech === partOfSpeech,
     );
   }
 }
