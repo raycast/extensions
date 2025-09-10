@@ -1,40 +1,85 @@
 # Mozilla VPN Connect
 
-_Interact with the Mozilla VPN client from Raycast without even opening the Mozilla client._
+_Interact with the Mozilla VPN client from Raycast using natural language commands without even opening the Mozilla client._
 
-### What does it do?
+## What does it do?
 
-- It checks that the application is installed and prompts you to download and install if it is not.
-- It checks if you are logged in and opens the app if you are not logged in.
-- It connects using the Mozilla VPN client to the Mozilla VPN service.
-- It displays the current server the Mozilla VPN client is configured for.
-- It fetches the current external IP and geolocates the IP's Country and city. It then refreshes when it connects to the VPN.
-- It allows you to change the server from the UI. You select a Country and city if available and if there are multiple VPN servers, it will randomly choose one to connect to.
+### Core VPN Functionality
+- **Installation Check**: Verifies the Mozilla VPN application is installed and prompts you to download if missing
+- **Authentication Check**: Confirms you're logged in and opens the app if authentication is needed
+- **Smart Connection**: Connects using the Mozilla VPN client with automatic retry logic for reliable connections
+- **Real-time Status**: Displays current server location, connection status, and external IP address
+- **IP Geolocation**: Fetches and displays your current external IP with country and city information
+- **Server Management**: Change servers by country/city with automatic random server selection when multiple options exist
 
+### AI-Powered Natural Language Commands
 
+The extension now includes AI capabilities that let you control your VPN using natural language! Simply type commands like:
 
-### Requirements
+#### 🔌 **Connection Control**
+- `"Connect to VPN"` - Connect using your last configuration
+- `"Connect to Germany"` - Connect to a random server in Germany  
+- `"Connect to Seattle, USA"` - Connect to a specific city
+- `"Disconnect VPN"` / `"Turn off VPN"` - Disconnect immediately
+- `"Change server to London, UK"` - Switch server without connecting
+
+#### 📊 **Status & Information**
+- `"VPN status"` / `"Is VPN connected?"` - Show connection status and IP
+- `"What's my IP address?"` - Display current IP and location
+
+#### 📍 **Server Discovery**
+- `"List countries"` - Show all available VPN countries
+- `"Show cities in USA"` - List all cities available in a specific country
+- `"Show servers in UK"` - Display all servers in a country (grouped by city)
+- `"Servers in London, UK"` - Show servers available in a specific city
+
+#### 🔄 **Smart Features**
+- **Auto-reconnection**: If you were connected and change servers, it automatically reconnects
+- **Retry Logic**: Automatically retries failed connections up to 3 times
+- **Country Aliases**: Understands "USA", "US", "United States", "UK", "United Kingdom", etc.
+- **Partial Matching**: Finds countries/cities even with partial names
+
+## Requirements
 
 - Must have a Mozilla VPN account
-- Must have the Mozilla VPN client downloaded and configured.
+- Must have the Mozilla VPN client downloaded and configured
+- Raycast with AI Extensions enabled (for natural language commands)
 
-### CLI commands used for Mozilla Client
+## Example AI Commands
 
-Client Connect `/Applications/Mozilla\ VPN.app/Contents/MacOS/Mozilla\ VPN activate`
+```
+"Connect to VPN"
+"Disconnect from VPN" 
+"What's my current IP?"
+"List all countries"
+"Show cities in Germany"
+"Connect to Berlin, Germany"
+"Show servers in London, UK"
+"Change server to Tokyo, Japan"
+"VPN status"
+```
 
-Client Disconnect `/Applications/Mozilla\ VPN.app/Contents/MacOS/Mozilla\ VPN deactivate`
+## CLI Commands Used for Mozilla Client
 
-Status `/Applications/Mozilla\ VPN.app/Contents/MacOS/Mozilla\ VPN status`
+The extension uses these Mozilla VPN CLI commands under the hood:
 
-List all the servers `/Applications/Mozilla\ VPN.app/Contents/MacOS/Mozilla\ VPN servers`
+- **Connect**: `/Applications/Mozilla\ VPN.app/Contents/MacOS/Mozilla\ VPN activate`
+- **Disconnect**: `/Applications/Mozilla\ VPN.app/Contents/MacOS/Mozilla\ VPN deactivate`  
+- **Status**: `/Applications/Mozilla\ VPN.app/Contents/MacOS/Mozilla\ VPN status`
+- **List Servers**: `/Applications/Mozilla\ VPN.app/Contents/MacOS/Mozilla\ VPN servers`
+- **Select Server**: `/Applications/Mozilla\ VPN.app/Contents/MacOS/Mozilla\ VPN select [server-name]`
 
-Select a server, must be the actual server name and not the city `/Applications/Mozilla\ VPN.app/Contents/MacOS/Mozilla\ VPN select`
+The status command shows connection state, server location, and all configured devices for your account.
 
+## APIs Used for IP Data
 
-Status shows if the client is connected or not, and the server city and country it is configured for. There are other details here like all devices configured for the service.
+- **IP Address**: `https://api.ipify.org` - For retrieving your current external IP
+- **Geolocation**: `http://ip-api.com` - For determining the geographic location of your IP address
 
-### APIs used for gathering IP data
+## Technical Features
 
-`https://api.ipify.org` For displaying the current IP address.
-
-`http://ip-api.com` For displaying the geolocation of the IP address.
+- **Robust Error Handling**: Graceful handling of connection failures with helpful error messages
+- **Type Safety**: Full TypeScript implementation with comprehensive type checking
+- **Smart Server Selection**: Intelligent random server selection when multiple servers are available
+- **Connection Validation**: Verifies you're connected to the requested location
+- **Fallback Support**: Multiple retry mechanisms for reliable VPN operations
