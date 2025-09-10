@@ -106,9 +106,36 @@ export class GitRepoService {
   }
 }
 
+function resolveGitPath(repoPath: string): string {
+  const gitPath = path.join(repoPath, ".git");
+
+  try {
+    const stats = fs.statSync(gitPath);
+
+    if (stats.isFile()) {
+      const content = fs.readFileSync(gitPath, "utf8").trim();
+      const match = content.match(/^gitdir:\s*(.+)$/);
+
+      if (match) {
+        const gitDirPath = match[1];
+        const basePath = path.dirname(gitPath);
+        return path.resolve(basePath, gitDirPath);
+      }
+    }
+
+    return gitPath;
+  } catch {
+    return gitPath;
+  }
+}
+
+function resolveGitConfig(repoPath: string): string {
+  return path.join(resolveGitPath(repoPath), "config");
+}
+
 function gitRemotes(path: string): RemoteRepo[] {
   let repos = [] as RemoteRepo[];
-  const gitConfig = parseGitConfig.sync({ cwd: path, path: ".git/config", expandKeys: true });
+  const gitConfig = parseGitConfig.sync({ cwd: path, path: resolveGitConfig(path), expandKeys: true });
   if (gitConfig.remote != null) {
     for (const remoteName in gitConfig.remote) {
       const config = gitConfig.remote[remoteName] as GitRemote;
