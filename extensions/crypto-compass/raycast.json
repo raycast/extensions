@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cryptocompass",
+  "title": "CryptoCompass",
+  "description": "Navigate the crypto landscape with precision. Convert SLIP-0044 IDs, convert amounts, and get real-time prices.",
+  "categories": ["Developer Tools", "Productivity", "Finance"],
+  "icon": "assets/icon.png",
+  "author": "Afshin Honari",
+  "license": "MIT",
+  "version": "1.0.0",
+  "commands": [
+    {
+      "name": "convert",
+      "title": "Convert SLIP-0044",
+      "subtitle": "ID ⇄ Network Name",
+      "mode": "view",
+      "path": "src/convert.tsx",
+      "description": "Convert SLIP-0044 coin type IDs to network names and vice versa",
+      "keywords": ["slip44", "coin type", "network", "convert", "crypto", "blockchain"],
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "label": "Query",
+          "placeholder": "Type network name or coin type (e.g., 0, bitcoin, eth)...",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "decimal-converter",
+      "title": "Decimal Converter",
+      "subtitle": "Convert Amount ↔ Decimal",
+      "mode": "view",
+      "path": "src/decimal-converter.tsx",
+      "description": "Convert between human-readable amounts and decimal representations",
+      "keywords": ["decimal", "convert", "amount", "wei", "satoshi", "lamports", "crypto"],
+      "arguments": [
+        {
+          "name": "amount",
+          "type": "text",
+          "label": "Amount to Convert",
+          "placeholder": "Type amount (e.g., 1.5, 1000000000000000000)...",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "permissions": ["clipboard"],
+  "preferences": [
+    {
+      "name": "showTestnets",
+      "type": "checkbox",
+      "title": "Show Testnets",
+      "description": "Include testnet networks in search results",
+      "default": true
+    }
+  ]
+}
+
+
+
+
