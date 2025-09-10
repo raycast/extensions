@@ -33,7 +33,7 @@
     },
     {
       "name": "github-copilot-tasks",
-      "title": "Tasks",
+      "title": "Menu Bar Tasks",
       "subtitle": "GitHub Copilot",
       "description": "Track Copilot coding agent tasks from the menu bar",
       "mode": "menu-bar",
