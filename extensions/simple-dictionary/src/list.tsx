@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Icon, Alert, showToast, confirmAlert, Toast, open } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Alert, showToast, confirmAlert, Toast, open, Keyboard } from "@raycast/api";
 import { JSX, useEffect, useState } from "react";
 import Favorite, { FavoriteEntry } from "./classes/favorite";
 
@@ -85,67 +85,74 @@ export default function Command(): JSX.Element {
                           <Action
                             title="Open in Browser"
                             icon={Icon.Globe}
+                            shortcut={Keyboard.Shortcut.Common.Open}
                             onAction={(): void => {
                               const url: string = entry.url;
                               if (url) open(url);
                             }}
                           />
-                          <Action
-                            title="Remove from Favorites"
-                            icon={Icon.StarDisabled}
-                            onAction={async (): Promise<void> => {
-                              const options: Alert.Options = {
-                                title: "Remove from Favorites",
-                                message: `"${entry.word.slice(0, 1).toUpperCase() + entry.word.slice(1).toLowerCase()}" (${lang.slice(0, 1).toUpperCase() + lang.slice(1).toLowerCase()}) will be removed from your favorites`,
-                                primaryAction: {
-                                  title: "Delete",
-                                  style: Alert.ActionStyle.Destructive,
-                                  onAction: async (): Promise<void> => {
-                                    await Favorite.removeEntry(lang, entry.word, entry.entry, entry.partOfSpeech);
+                          <ActionPanel.Section>
+                            <Action
+                              title="Remove from Favorites"
+                              icon={Icon.StarDisabled}
+                              style={Action.Style.Destructive}
+                              shortcut={Keyboard.Shortcut.Common.Remove}
+                              onAction={async (): Promise<void> => {
+                                const options: Alert.Options = {
+                                  title: "Remove from Favorites",
+                                  message: `"${entry.word.slice(0, 1).toUpperCase() + entry.word.slice(1).toLowerCase()}" (${lang.slice(0, 1).toUpperCase() + lang.slice(1).toLowerCase()}) will be removed from your favorites`,
+                                  primaryAction: {
+                                    title: "Delete",
+                                    style: Alert.ActionStyle.Destructive,
+                                    onAction: async (): Promise<void> => {
+                                      await Favorite.removeEntry(lang, entry.word, entry.entry, entry.partOfSpeech);
 
-                                    const favs: FavoriteEntry[] = await Favorite.getEntries();
-                                    setFavorites(favs);
+                                      const favs: FavoriteEntry[] = await Favorite.getEntries();
+                                      setFavorites(favs);
 
-                                    await showToast({
-                                      style: Toast.Style.Success,
-                                      title: "Removed from Favorites",
-                                      message: `"${entry.word.slice(0, 1).toUpperCase() + entry.word.slice(1).toLowerCase()}" (${lang.slice(0, 1).toUpperCase() + lang.slice(1).toLowerCase()}) has been removed from your favorites`,
-                                    });
+                                      await showToast({
+                                        style: Toast.Style.Success,
+                                        title: "Removed from Favorites",
+                                        message: `"${entry.word.slice(0, 1).toUpperCase() + entry.word.slice(1).toLowerCase()}" (${lang.slice(0, 1).toUpperCase() + lang.slice(1).toLowerCase()}) has been removed from your favorites`,
+                                      });
+                                    },
                                   },
-                                },
-                              };
+                                };
 
-                              await confirmAlert(options);
-                            }}
-                          />
-                          <Action
-                            title="Remove All Favorites"
-                            icon={Icon.Trash}
-                            onAction={async (): Promise<void> => {
-                              const options: Alert.Options = {
-                                title: "Remove All Favorites",
-                                message: `All favorites will be removed`,
-                                primaryAction: {
-                                  title: "Delete",
-                                  style: Alert.ActionStyle.Destructive,
-                                  onAction: async (): Promise<void> => {
-                                    await Favorite.removeAll();
+                                await confirmAlert(options);
+                              }}
+                            />
+                            <Action
+                              title="Remove All Favorites"
+                              icon={Icon.Trash}
+                              style={Action.Style.Destructive}
+                              shortcut={Keyboard.Shortcut.Common.RemoveAll}
+                              onAction={async (): Promise<void> => {
+                                const options: Alert.Options = {
+                                  title: "Remove All Favorites",
+                                  message: `All favorites will be removed`,
+                                  primaryAction: {
+                                    title: "Delete",
+                                    style: Alert.ActionStyle.Destructive,
+                                    onAction: async (): Promise<void> => {
+                                      await Favorite.removeAll();
 
-                                    const favs: FavoriteEntry[] = await Favorite.getEntries();
-                                    setFavorites(favs);
+                                      const favs: FavoriteEntry[] = await Favorite.getEntries();
+                                      setFavorites(favs);
 
-                                    await showToast({
-                                      style: Toast.Style.Success,
-                                      title: "Removed from Favorites",
-                                      message: `All favorites have been removed`,
-                                    });
+                                      await showToast({
+                                        style: Toast.Style.Success,
+                                        title: "Removed from Favorites",
+                                        message: `All favorites have been removed`,
+                                      });
+                                    },
                                   },
-                                },
-                              };
+                                };
 
-                              await confirmAlert(options);
-                            }}
-                          />
+                                await confirmAlert(options);
+                              }}
+                            />
+                          </ActionPanel.Section>
                         </ActionPanel>
                       }
                     />

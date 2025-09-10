@@ -12,12 +12,13 @@ import {
   showHUD,
   List,
   Color,
+  Keyboard,
 } from "@raycast/api";
-import { JSX, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Dictionary, { GroupedEntry, Sense } from "./classes/dictionary";
 import Favorite from "./classes/favorite";
 
-export default function Command(props: LaunchProps<{ arguments: { word: string; language: string } }>): JSX.Element {
+export default function Command(props: LaunchProps<{ arguments: Arguments.Search }>) {
   let d: Dictionary;
 
   const colors: Color[] = [Color.Blue, Color.Green, Color.Magenta, Color.Orange, Color.Purple, Color.Red, Color.Yellow];
@@ -110,6 +111,7 @@ export default function Command(props: LaunchProps<{ arguments: { word: string; 
                         <Action
                           title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
                           icon={isFavorite ? Icon.StarDisabled : Icon.Star}
+                          shortcut={Keyboard.Shortcut.Common.Pin}
                           onAction={async (): Promise<void> => {
                             if (!isFavorite) {
                               Favorite.addEntry(
@@ -152,6 +154,7 @@ export default function Command(props: LaunchProps<{ arguments: { word: string; 
                         <Action
                           title="Copy to Clipboard"
                           icon={Icon.Clipboard}
+                          shortcut={Keyboard.Shortcut.Common.Copy}
                           onAction={(): void => {
                             Clipboard.copy(sense.definition);
                             showHUD(
