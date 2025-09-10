@@ -1,0 +1,124 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-content-core",
+  "title": "Content Core",
+  "description": "Extract content from URLs, documents, videos, and audio files using Content Core's intelligent auto-engine",
+  "icon": "command-icon.png",
+  "author": "luis_novo",
+  "license": "MIT",
+  "keywords": [
+    "content",
+    "extract",
+    "pdf",
+    "video",
+    "audio",
+    "transcription",
+    "summary",
+    "ocr",
+    "documents"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "version": "1.0.0",
+  "preferences": [
+    {
+      "name": "openaiApiKey",
+      "type": "password",
+      "required": false,
+      "title": "OpenAI API Key",
+      "description": "Required for audio/video transcription and AI-powered content cleaning",
+      "placeholder": "sk-..."
+    },
+    {
+      "name": "firecrawlApiKey",
+      "type": "password",
+      "required": false,
+      "title": "Firecrawl API Key",
+      "description": "Optional: For enhanced web crawling and content extraction",
+      "placeholder": "fc-..."
+    },
+    {
+      "name": "jinaApiKey",
+      "type": "password",
+      "required": false,
+      "title": "Jina API Key",
+      "description": "Optional: Alternative web crawling service (fallback)",
+      "placeholder": "jina_..."
+    }
+  ],
+  "commands": [
+    {
+      "name": "extract-content",
+      "title": "Extract Content",
+      "description": "Extract content from URLs, files, documents, videos, and audio",
+      "mode": "view",
+      "keywords": [
+        "extract",
+        "content",
+        "url",
+        "file",
+        "pdf",
+        "document",
+        "video",
+        "audio"
+      ]
+    },
+    {
+      "name": "summarize-content",
+      "title": "Summarize Content",
+      "description": "Generate AI-powered summaries from URLs, files, and documents",
+      "mode": "view",
+      "keywords": [
+        "summarize",
+        "summary",
+        "ai",
+        "url",
+        "file",
+        "document"
+      ]
+    },
+    {
+      "name": "quick-extract",
+      "title": "Quick Extract",
+      "description": "Extract content from URL or file path directly to clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "source",
+          "placeholder": "URL or file path to extract",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "keywords": [
+        "quick",
+        "extract",
+        "clipboard",
+        "url",
+        "file"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.70.0",
+    "@raycast/utils": "^1.12.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "build-no-types": "ray build -e dist --skip-types",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
