@@ -20,6 +20,8 @@ export const API_ENDPOINTS = {
  * @param endpoint - The API endpoint (must be one of the defined API_ENDPOINTS values)
  * @returns Full URL for the API endpoint
  */
-export const buildApiUrl = (endpoint: typeof API_ENDPOINTS[keyof typeof API_ENDPOINTS]): string => {
+export const buildApiUrl = (
+  endpoint: (typeof API_ENDPOINTS)[keyof typeof API_ENDPOINTS],
+): string => {
   return `${BACKEND_API_URL}${endpoint}`;
 };
