@@ -1,0 +1,174 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "google-calendar",
+  "title": "Google Calendar",
+  "description": "Manage your Google calendar easily. Create events, search contacts, and check out your upcoming schedule.",
+  "icon": "icon.png",
+  "author": "thomas",
+  "contributors": [
+    "j3lte",
+    "markusjura",
+    "fabitosh"
+  ],
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-event",
+      "title": "Create Event",
+      "subtitle": "Google Calendar",
+      "description": "Creates an event in your Google Calendar",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "addSignature",
+          "type": "checkbox",
+          "title": "Advanced",
+          "label": "Add Signature",
+          "description": "Add a signature that the event was created using Raycast to the description of the event",
+          "default": true,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "search-contacts",
+      "title": "Search Contacts",
+      "description": "Search your Google Contacts",
+      "mode": "view",
+      "subtitle": "Google Calendar"
+    },
+    {
+      "name": "list-events",
+      "title": "List Events",
+      "description": "View your upcoming Google Calendar events",
+      "mode": "view",
+      "subtitle": "Google Calendar"
+    },
+    {
+      "name": "list-calendars",
+      "title": "List Calendars",
+      "description": "View your Google Calendars",
+      "mode": "view",
+      "subtitle": "Google Calendar"
+    }
+  ],
+  "tools": [
+    {
+      "name": "create-event",
+      "title": "Create Event",
+      "description": "Creates a new event in the user's Google Calendar"
+    },
+    {
+      "name": "search-contacts",
+      "title": "Search Contacts",
+      "description": "Searches the user's Google Contacts"
+    },
+    {
+      "name": "delete-event",
+      "title": "Delete Event",
+      "description": "Deletes an event from the user's Google Calendar"
+    },
+    {
+      "name": "edit-event",
+      "title": "Edit Event",
+      "description": "Edits an existing event in the user's Google Calendar"
+    },
+    {
+      "name": "search-events",
+      "title": "Search Events",
+      "description": "Searches events from the user's Google Calendar"
+    },
+    {
+      "name": "check-availability",
+      "title": "Check Availability",
+      "description": "Checks the availability of potential attendees for a given time period"
+    },
+    {
+      "name": "get-current-user",
+      "title": "Get Current User",
+      "description": "Returns information about the currently authenticated user"
+    },
+    {
+      "name": "get-current-time",
+      "title": "Get Current Time",
+      "description": "Returns the current time of the user in the user's timezone"
+    },
+    {
+      "name": "list-calendars",
+      "title": "List Calendars",
+      "description": "Lists the user's Google Calendars"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultEventDuration",
+      "title": "Default Event Duration",
+      "description": "The default duration for new events",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "15 minutes",
+          "value": "15"
+        },
+        {
+          "title": "30 minutes",
+          "value": "30"
+        },
+        {
+          "title": "45 minutes",
+          "value": "45"
+        },
+        {
+          "title": "1 hour",
+          "value": "60"
+        },
+        {
+          "title": "1.5 hours",
+          "value": "90"
+        },
+        {
+          "title": "2 hours",
+          "value": "120"
+        }
+      ],
+      "default": "30",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@googleapis/calendar": "^9.8.0",
+    "@googleapis/people": "^3.0.9",
+    "@raycast/api": "^1.94.2",
+    "@raycast/utils": "^1.19.1",
+    "date-fns": "^4.1.0",
+    "humanize-duration": "^3.32.1",
+    "nanoid": "^5.1.5",
+    "parse-duration": "^2.1.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/humanize-duration": "^3.27.4",
+    "@types/node": "22.13.14",
+    "@types/parse-duration": "^0.1.0",
+    "@types/react": "19.0.12",
+    "eslint": "^9.23.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}
