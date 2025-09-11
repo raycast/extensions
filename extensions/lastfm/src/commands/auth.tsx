@@ -1,0 +1,169 @@
+import {
+  ActionPanel,
+  List,
+  showToast,
+  Toast,
+  Icon,
+  getPreferenceValues,
+  Action,
+  openExtensionPreferences,
+} from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import React from "react";
+import { useEffect, useState } from "react";
+import { getAuthToken, getSession } from "../services/auth";
+import { storeSessionKey, hasSessionKey, removeSessionKey, validateStoredSessionKey } from "../utils/storage";
+
+const Command: React.FC = () => {
+  const { apikey: API_KEY, apisecret: API_SECRET } = getPreferenceValues();
+  const [isLoading, setIsLoading] = useState(true);
+  const [token, setToken] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    async function checkAuth() {
+      // Verify API Secret is configured (required for scrobbling)
+      if (!API_SECRET) {
+        setError("API Secret is missing. Scrobbling requires an API secret. Open preferences to set it up.");
+        setIsLoading(false);
+        return;
+      }
+      const hasAuth = await hasSessionKey();
+      if (hasAuth) {
+        const isValid = await validateStoredSessionKey();
+        if (isValid) {
+          setIsAuthenticated(true);
+          setIsLoading(false);
+          return;
+        } else {
+          await removeSessionKey();
+        }
+      }
+
+      const tokenResponse = await getAuthToken();
+
+      if (!tokenResponse.success) {
+        setError(tokenResponse.error || "Failed to get auth token");
+        setIsLoading(false);
+        return;
+      }
+
+      if (tokenResponse.data) {
+        setToken(tokenResponse.data);
+      }
+      setIsLoading(false);
+    }
+
+    checkAuth();
+  }, [API_SECRET]);
+
+  if (error) {
+    return (
+      <List>
+        <List.Item
+          title="Authentication Error"
+          subtitle={error}
+          actions={
+            <ActionPanel>
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
+
+  if (isAuthenticated) {
+    return (
+      <List>
+        <List.Item
+          title="Already Authenticated"
+          subtitle="You can now use scrobbling features!"
+          icon={Icon.Checkmark}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Reset Authentication"
+                icon={Icon.XMarkCircle}
+                onAction={async () => {
+                  await removeSessionKey();
+                  setIsAuthenticated(false);
+                  setToken(null);
+                  const tokenResponse = await getAuthToken();
+                  if (tokenResponse.success && tokenResponse.data) {
+                    setToken(tokenResponse.data);
+                  }
+                }}
+              />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
+
+  if (!token) {
+    return <List isLoading={isLoading} searchBarPlaceholder="Authenticating..." />;
+  }
+
+  const authUrl = `https://www.last.fm/api/auth/?api_key=${API_KEY}&token=${token}`;
+
+  return (
+    <List searchBarPlaceholder="Authenticate with Last.fm">
+      <List.Item
+        title="Step 1: Open Last.fm Auth Page"
+        subtitle="Authorize the app in your browser"
+        icon={Icon.Link}
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser title="Open Last.fm Auth Page" url={authUrl} icon={Icon.Link} />
+          </ActionPanel>
+        }
+      />
+      <List.Item
+        title="Step 2: Complete Authentication"
+        subtitle="Click after authorizing in the browser"
+        icon={Icon.Checkmark}
+        actions={
+          <ActionPanel>
+            <Action
+              title="Complete Authentication"
+              icon={Icon.Checkmark}
+              onAction={async () => {
+                setIsLoading(true);
+                const sessionResponse = await getSession(token);
+
+                if (!sessionResponse.success) {
+                  await showFailureToast({
+                    title: "Authentication Failed",
+                    message: sessionResponse.error,
+                  });
+                  setIsLoading(false);
+                  return;
+                }
+
+                try {
+                  if (sessionResponse.data) {
+                    await storeSessionKey(sessionResponse.data);
+                    setIsAuthenticated(true);
+                  }
+                  await showToast(
+                    Toast.Style.Success,
+                    "Authentication Successful",
+                    "You can now use scrobbling features!",
+                  );
+                } catch (error) {
+                  await showToast(Toast.Style.Failure, "Storage Error", "Failed to store authentication data");
+                }
+                setIsLoading(false);
+              }}
+            />
+          </ActionPanel>
+        }
+      />
+    </List>
+  );
+};
+
+export default Command;

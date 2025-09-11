@@ -2,8 +2,8 @@ import React from "react";
 import { ActionPanel, showToast, Icon, Toast, List, Action } from "@raycast/api";
 
 // Hooks
-import { useTopTracks } from "./hooks/useTopTracks";
-import { useRecentTracks } from "./hooks/useRecentTracks";
+import { useTopTracks } from "../hooks/useTopTracks";
+import { useRecentTracks } from "../hooks/useRecentTracks";
 
 // Types
 import type { Track, TopTrack } from "@/types";

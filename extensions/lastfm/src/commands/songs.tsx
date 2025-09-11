@@ -2,15 +2,15 @@ import React, { useState } from "react";
 import { showToast, Toast, getPreferenceValues, List, Grid } from "@raycast/api";
 
 // Hooks
-import { useTopSongs } from "./hooks/useTopSongs";
+import { useTopSongs } from "../hooks/useTopSongs";
 
 // Types
 import type { TopTrack } from "@/types/SongResponse";
-import { periodTypes } from "./types";
-import { useTopTracks } from "./hooks/useTopTracks";
-import { PeriodDropdown } from "./components/period";
-import { ListResults } from "./components/list";
-import { GridResults } from "./components/grid";
+import { periodTypes } from "../types";
+import { useTopTracks } from "../hooks/useTopTracks";
+import { PeriodDropdown } from "../components/period";
+import { ListResults } from "../components/list";
+import { GridResults } from "../components/grid";
 
 const TopSongs: React.FC = () => {
   const { period: defaultPeriod, view } = getPreferenceValues();
