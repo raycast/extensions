@@ -48,11 +48,11 @@ function useMenuBarEvents() {
       const calendar = getCalendarClient();
 
       // Get all selected calendars first
-      console.log("📅 Fetching calendar list...");
+      console.log("Fetching calendar list...");
       const calendarsResponse = await calendar.calendarList.list();
       const selectedCalendars = calendarsResponse.data.items?.filter((cal) => cal.selected && cal.id) || [];
       console.log(
-        `📅 Found ${selectedCalendars.length} selected calendars:`,
+        `Found ${selectedCalendars.length} selected calendars:`,
         selectedCalendars.map((cal) => cal.summary),
       );
 
@@ -60,9 +60,9 @@ function useMenuBarEvents() {
       const isBackground = environment.launchType === "background";
       const calendarsToFetch = selectedCalendars; // Always fetch all calendars
 
-      console.log(`📅 Launch type: ${environment.launchType}, fetching from ${calendarsToFetch.length} calendars`);
+      console.log(`Launch type: ${environment.launchType}, fetching from ${calendarsToFetch.length} calendars`);
       if (isBackground) {
-        console.log(`📅 Background refresh: optimizing for speed`);
+        console.log(`Background refresh: optimizing for speed`);
       }
 
       // Fetch events from selected calendars
@@ -71,7 +71,7 @@ function useMenuBarEvents() {
       // Use Promise.all for parallel fetching to speed up the process
       const fetchPromises = calendarsToFetch.map(async (cal) => {
         try {
-          console.log(`📅 Fetching events from calendar: ${cal.summary} (${cal.id})`);
+          console.log(`Fetching events from calendar: ${cal.summary} (${cal.id})`);
           const response = await calendar.events.list({
             calendarId: cal.id!,
             timeMin: new Date().toISOString(), // Only future events
@@ -83,7 +83,7 @@ function useMenuBarEvents() {
 
           const calendarEvents = response.data.items ?? [];
           console.log(
-            `📅 Found ${calendarEvents.length} events in ${cal.summary}:`,
+            `Found ${calendarEvents.length} events in ${cal.summary}:`,
             calendarEvents.map((event) => event.summary),
           );
 
@@ -97,7 +97,7 @@ function useMenuBarEvents() {
             }),
           );
         } catch (error) {
-          console.error(`❌ Failed to fetch events from calendar ${cal.summary}:`, error);
+          console.error(`Failed to fetch events from calendar ${cal.summary}:`, error);
           return []; // Return empty array if calendar fails
         }
       });
@@ -118,7 +118,7 @@ function useMenuBarEvents() {
       });
 
       console.log(
-        `📅 Total events found: ${sortedEvents.length}, returning first 10:`,
+        `Total events found: ${sortedEvents.length}, returning first 10:`,
         sortedEvents.slice(0, 10).map((event) => `${event.summary} (${event.calendarName})`),
       );
 
