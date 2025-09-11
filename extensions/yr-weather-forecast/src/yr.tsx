@@ -21,8 +21,6 @@ import { ToastMessages } from "./utils/toast-utils";
 import { WeatherFormatters } from "./utils/weather-formatters";
 import { LocationUtils } from "./utils/location-utils";
 import { DebugLogger } from "./utils/debug-utils";
-import { OpenGraphAction } from "./components/OpenGraphAction";
-import { FavoriteToggleAction } from "./components/FavoriteToggleAction";
 
 export default function Command() {
   // UI state
@@ -314,6 +312,7 @@ export default function Command() {
                       },
                       () => setShowWelcomeMessage(true),
                       search.queryIntent.targetDate,
+                      favorites.refreshFavorites,
                     )}
                   />
                 ))}
@@ -409,6 +408,7 @@ export default function Command() {
                                 name={fav.name}
                                 lat={fav.lat}
                                 lon={fav.lon}
+                                onFavoriteChange={favorites.refreshFavorites}
                                 onShowWelcome={() => setShowWelcomeMessage(true)}
                               />
                             }
@@ -429,15 +429,11 @@ export default function Command() {
                               }
                             }}
                           />
-                          <OpenGraphAction
-                            name={fav.name}
-                            lat={fav.lat}
-                            lon={fav.lon}
-                            onShowWelcome={() => setShowWelcomeMessage(true)}
-                          />
-                          <FavoriteToggleAction
-                            isFavorite={true}
-                            onToggle={async () => {
+                          <Action
+                            title="Remove from Favorites"
+                            icon={Icon.StarDisabled}
+                            shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+                            onAction={async () => {
                               await favorites.removeFavoriteLocation(fav);
                               await ToastMessages.favoriteRemoved(fav.name);
                             }}

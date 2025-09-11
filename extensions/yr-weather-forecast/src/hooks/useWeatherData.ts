@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { getForecast, type TimeseriesEntry } from "../weather-client";
 import { DebugLogger } from "../utils/debug-utils";
-import { buildGraphMarkdown } from "../graph";
+import { buildGraphMarkdown } from "../graph-utils";
 
 /**
  * Custom hook for managing weather data fetching

@@ -1,11 +1,9 @@
-import { Action, ActionPanel, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, showToast, Toast, Icon } from "@raycast/api";
 import ForecastView from "../forecast";
 import { getWeather } from "../weather-client";
 import { TimeseriesEntry } from "../weather-client";
 import { FavoriteLocation } from "../storage";
 import { WeatherFormatters } from "./weather-formatters";
-import { OpenGraphAction } from "../components/OpenGraphAction";
-import { FavoriteToggleAction } from "../components/FavoriteToggleAction";
 
 /**
  * Location utility functions to eliminate duplication
@@ -22,6 +20,7 @@ export class LocationUtils {
     onFavoriteToggle: () => void,
     onShowWelcome?: () => void,
     targetDate?: Date,
+    onFavoriteChange?: () => void,
   ) {
     return (
       <ActionPanel>
@@ -32,6 +31,7 @@ export class LocationUtils {
               name={name}
               lat={lat}
               lon={lon}
+              onFavoriteChange={onFavoriteChange}
               onShowWelcome={onShowWelcome}
               targetDate={targetDate?.toISOString().split("T")[0]}
             />
@@ -56,8 +56,21 @@ export class LocationUtils {
             }
           }}
         />
-        <OpenGraphAction name={name} lat={lat} lon={lon} onShowWelcome={onShowWelcome} />
-        <FavoriteToggleAction isFavorite={isFavorite} onToggle={onFavoriteToggle} />
+        {isFavorite ? (
+          <Action
+            title="Remove from Favorites"
+            icon={Icon.StarDisabled}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+            onAction={onFavoriteToggle}
+          />
+        ) : (
+          <Action
+            title="Add to Favorites"
+            icon={Icon.Star}
+            shortcut={{ modifiers: ["cmd"], key: "f" }}
+            onAction={onFavoriteToggle}
+          />
+        )}
       </ActionPanel>
     );
   }

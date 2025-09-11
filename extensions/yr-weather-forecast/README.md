@@ -1,6 +1,6 @@
 # Yr Weather Forecast
 
-A modern, feature-rich [Raycast](https://www.raycast.com) extension for displaying weather forecasts from The Norwegian Institute of Meteorology (MET). Get accurate weather information with an intuitive interface, smart search, and beautiful visualizations.
+A modern, feature-rich [Raycast](https://www.raycast.com) extension for displaying weather forecasts from [The Norwegian Institute of Meteorology (MET)](https://www.met.no). Get accurate weather information with an intuitive interface, smart search, and beautiful visualizations. 
 
 **Maintainer:** Kynd  
 **Contact:** weather@kynd.no  
@@ -24,6 +24,7 @@ A modern, feature-rich [Raycast](https://www.raycast.com) extension for displayi
 - **Welcome System**: Helpful onboarding for new users
 - **Keyboard Shortcuts**: Quick actions for power users
 - **Units Support**: Metric (default) or Imperial units
+- **Clock Format**: Choose between 12-hour and 24-hour time display (24h is default because I like it better)
 
 ### 🚀 Technicalities
 - **Fast Performance**: Intelligent caching reduces API calls
@@ -77,26 +78,23 @@ A modern, feature-rich [Raycast](https://www.raycast.com) extension for displayi
 - **Cmd+F**: Add location to favorites
 - **Cmd+Shift+F**: Remove location from favorites
 - **Enter**: Show current weather (search results) or open forecast (favorites)
-- **Cmd+G**: Open graph view directly
 - **Cmd+K**: Configure command preferences
 
 ### View Navigation
-- **D**: Switch to data table view (from Forecast or Graph view)
+- **D**: Switch to data table view (from Forecast view)
 - **G**: Switch to graph view (from data table view)
 - **Space**: Toggle between detailed (48-hour) and summary (9-day) modes in Forecast view
 
 ### Detailed Views
-- **Forecast View**: Combined hourly data with graphs and data tables
+- **Forecast View**: Combined hourly data with graphs and data tables (includes sunrise/sunset indicators)
 - **One-Day View**: Focused view for specific dates
-- **Graph View**: Visual representation of weather trends
 - **Data View**: Markdown table of the current location's data
 
 ### Data View
-The **Data View** provides a comprehensive markdown table showing detailed weather information for the current location. This view is available in both the Forecast View and Graph View.
+The **Data View** provides a comprehensive markdown table showing detailed weather information for the current location. This view is available in the Forecast View.
 
 **Accessing Data View:**
 - **From Forecast View**: Press `D` to switch from graph to data table
-- **From Graph View**: Press `D` to switch from graph to data table
 - **Switch back to Graph**: Press `G` from data view
 
 **Data View Features:**
@@ -108,10 +106,11 @@ The **Data View** provides a comprehensive markdown table showing detailed weath
 
 Access preferences via `Yr` command → `Cmd+K` → Configure Command:
 
-- **Units**: Metric (°C, m/s, mm) or Imperial (°F, mph, in)
+- **Units**: Metric (°C, m/s, mm) or Imperial (°F, mph, in) - pick your poison
+- **Clock Format**: 12-hour (2:30 PM) or 24-hour (14:30) time display - I default to 24h because it makes more sense
 - **Show Wind Direction**: Display wind arrows and cardinal directions
 - **Show Sunrise/Sunset**: Include sun times in location displays
-- **Debug Mode**: Enable console output for troubleshooting
+- **Debug Mode**: Enable console output for troubleshooting (useful when things break)
 
 ## 🔧 Debug Mode
 

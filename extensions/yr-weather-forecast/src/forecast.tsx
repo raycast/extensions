@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Detail, showToast, Toast, Icon } from "@raycast/api";
 import { useMemo, useState, useEffect } from "react";
-import { buildGraphMarkdown } from "./graph";
+import { buildGraphMarkdown } from "./graph-utils";
 import { reduceToDayPeriods, buildWeatherTable, filterToDate } from "./weather-utils";
 import { useWeatherData } from "./hooks/useWeatherData";
 import { generateNoForecastDataMessage } from "./utils/error-messages";
@@ -8,8 +8,10 @@ import { addFavorite, removeFavorite, isFavorite as checkIsFavorite, type Favori
 import { withErrorBoundary } from "./components/error-boundary";
 import { WeatherErrorFallback } from "./components/error-fallbacks";
 import { getUIThresholds } from "./config/weather-config";
-import { formatDate } from "./utils/date-utils";
-import { FavoriteToggleAction } from "./components/FavoriteToggleAction";
+import { formatDate, formatTime } from "./utils/date-utils";
+import { getSunTimes, type SunTimes } from "./sunrise-client";
+import { formatTemperatureCelsius, formatPrecip } from "./units";
+import { precipitationAmount } from "./utils-forecast";
 
 function ForecastView(props: {
   name: string;
@@ -18,22 +20,59 @@ function ForecastView(props: {
   preCachedGraph?: string;
   onShowWelcome?: () => void;
   targetDate?: string; // ISO date string for specific day view
+  onFavoriteChange?: () => void; // Callback when favorites are added/removed
 }) {
-  const { name, lat, lon, preCachedGraph, onShowWelcome, targetDate } = props;
+  const { name, lat, lon, preCachedGraph, onShowWelcome, targetDate, onFavoriteChange } = props;
   const [mode, setMode] = useState<"detailed" | "summary">("detailed");
   const [view, setView] = useState<"graph" | "data">("graph");
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
+  const [sunByDate, setSunByDate] = useState<Record<string, SunTimes>>({});
   const { series: items, loading, showNoData, preRenderedGraph } = useWeatherData(lat, lon, true);
 
   // Check if current location is in favorites
   useEffect(() => {
     const checkFavoriteStatus = async () => {
-      const favLocation: FavoriteLocation = { name, lat, lon };
+      // Generate a consistent ID for locations that don't have one from search results
+      const id = `${lat.toFixed(3)},${lon.toFixed(3)}`;
+      const favLocation: FavoriteLocation = { id, name, lat, lon };
       const favorite = await checkIsFavorite(favLocation);
       setIsFavorite(favorite);
     };
     checkFavoriteStatus();
   }, [name, lat, lon]);
+
+  // Fetch sunrise/sunset for visible dates once forecast is loaded
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchSun() {
+      if (items.length === 0) return;
+      const subset = items.slice(0, getUIThresholds().DETAILED_FORECAST_HOURS);
+      const dates = Array.from(new Set(subset.map((s) => new Date(s.time)).map((d) => d.toISOString().slice(0, 10))));
+      const entries = await Promise.all(
+        dates.map(async (date: string) => {
+          try {
+            const v = await getSunTimes(lat, lon, date);
+            return [date, v] as const;
+          } catch (error) {
+            console.warn(`Failed to fetch sunrise/sunset for ${date}:`, error);
+            return [date, {} as SunTimes];
+          }
+        }),
+      );
+      if (!cancelled) {
+        const map: Record<string, SunTimes> = {};
+        for (const entry of entries) {
+          const [date, sunTimes] = entry as [string, SunTimes];
+          map[date] = sunTimes;
+        }
+        setSunByDate(map);
+      }
+    }
+    fetchSun();
+    return () => {
+      cancelled = true;
+    };
+  }, [items, lat, lon]);
 
   // Filter data based on targetDate if provided, otherwise use mode-based filtering
   const filteredItems = useMemo(() => {
@@ -60,21 +99,19 @@ function ForecastView(props: {
   // Generate and cache graphs when data changes
   useEffect(() => {
     if (items.length > 0) {
-      // Use pre-cached graph if available, otherwise use pre-rendered graph, otherwise generate new one
-      const detailedGraph =
-        preCachedGraph ||
-        preRenderedGraph ||
-        buildGraphMarkdown(
-          name,
-          items.slice(0, getUIThresholds().DETAILED_FORECAST_HOURS),
-          getUIThresholds().DETAILED_FORECAST_HOURS,
-          {
-            title: "48h forecast",
-            smooth: true,
-          },
-        ).markdown;
+      // Always generate fresh graph to include sunrise/sunset data
+      const detailedGraph = buildGraphMarkdown(
+        name,
+        items.slice(0, getUIThresholds().DETAILED_FORECAST_HOURS),
+        getUIThresholds().DETAILED_FORECAST_HOURS,
+        {
+          title: "48h forecast",
+          smooth: true,
+          sunByDate,
+        },
+      ).markdown;
 
-      // Cache summary graph (9-day)
+      // Cache summary graph (9-day) - no sunrise/sunset data needed
       const summaryGraph = buildGraphMarkdown(name, reduced, reduced.length, {
         title: "9-day summary",
         smooth: true,
@@ -85,7 +122,7 @@ function ForecastView(props: {
         summary: summaryGraph,
       });
     }
-  }, [items, reduced, name, preCachedGraph, preRenderedGraph]);
+  }, [items, reduced, name, preCachedGraph, preRenderedGraph, sunByDate]);
 
   // Clear graph cache when component mounts to ensure fresh styling
   useEffect(() => {
@@ -121,17 +158,74 @@ function ForecastView(props: {
           titleText = `# ${name} – ${mode === "detailed" ? "48-Hour Forecast" : "9-Day Summary"}${view === "data" ? " (Data)" : ""}`;
         }
         const content = view === "graph" ? graph : listMarkdown;
-        return [titleText, content].join("\n");
+
+        // Add temperature, precipitation, and sunrise/sunset summary for detailed forecast
+        let summaryInfo = "";
+        if (mode === "detailed") {
+          const summaryParts: string[] = [];
+
+          // Temperature range
+          if (items.length > 0) {
+            const temps = items
+              .slice(0, getUIThresholds().DETAILED_FORECAST_HOURS)
+              .map((s) => s.data?.instant?.details?.air_temperature)
+              .filter((t): t is number => typeof t === "number" && Number.isFinite(t));
+
+            if (temps.length > 0) {
+              const minTemp = Math.min(...temps);
+              const maxTemp = Math.max(...temps);
+              const minText = formatTemperatureCelsius(minTemp);
+              const maxText = formatTemperatureCelsius(maxTemp);
+              summaryParts.push(`Min ${minText} • Max ${maxText}`);
+            }
+          }
+
+          // Precipitation
+          if (items.length > 0) {
+            const precips = items
+              .slice(0, getUIThresholds().DETAILED_FORECAST_HOURS)
+              .map((s) => precipitationAmount(s))
+              .filter((p): p is number => typeof p === "number" && Number.isFinite(p));
+
+            if (precips.length > 0) {
+              const maxPrecip = Math.max(...precips);
+              const precipText = formatPrecip(maxPrecip);
+              summaryParts.push(`Max precip ${precipText}`);
+            }
+          }
+
+          // Sunrise/sunset
+          if (Object.keys(sunByDate).length > 0) {
+            const firstDate = Object.keys(sunByDate)[0];
+            const sunTimes = sunByDate[firstDate];
+            if (sunTimes.sunrise || sunTimes.sunset) {
+              const sunriseTime = sunTimes.sunrise ? formatTime(sunTimes.sunrise, "MILITARY") : "N/A";
+              const sunsetTime = sunTimes.sunset ? formatTime(sunTimes.sunset, "MILITARY") : "N/A";
+              summaryParts.push(`Sunrise ${sunriseTime} • Sunset ${sunsetTime}`);
+            }
+          }
+
+          if (summaryParts.length > 0) {
+            summaryInfo = `\n\n${summaryParts.join(" • ")}`;
+          }
+        }
+
+        return [titleText, summaryInfo, content].join("\n");
       })()
     : "";
 
   const handleFavoriteToggle = async () => {
-    const favLocation: FavoriteLocation = { name, lat, lon };
+    // Generate a consistent ID for locations that don't have one from search results
+    const id = `${lat.toFixed(3)},${lon.toFixed(3)}`;
+    const favLocation: FavoriteLocation = { id, name, lat, lon };
+
+    console.log("Adding favorite:", favLocation);
 
     try {
       if (isFavorite) {
         await removeFavorite(favLocation);
         setIsFavorite(false);
+        onFavoriteChange?.(); // Notify parent component
         await showToast({
           style: Toast.Style.Success,
           title: "Removed from Favorites",
@@ -140,6 +234,8 @@ function ForecastView(props: {
       } else {
         await addFavorite(favLocation);
         setIsFavorite(true);
+        console.log("Favorite added successfully:", favLocation);
+        onFavoriteChange?.(); // Notify parent component
         await showToast({
           style: Toast.Style.Success,
           title: "Added to Favorites",
