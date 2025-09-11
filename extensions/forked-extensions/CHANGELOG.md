@@ -1,6 +1,6 @@
 # Raycast Fork Extensions Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-09-11
 
 - Add support for migrating existing full-checkout repositories to sparse-checkout
 - Simplify the description for avoid the content overflow on Windows
