@@ -409,6 +409,7 @@ export default function Command() {
                                 name={fav.name}
                                 lat={fav.lat}
                                 lon={fav.lon}
+                                onFavoriteChange={favorites.refreshFavorites}
                                 onShowWelcome={() => setShowWelcomeMessage(true)}
                               />
                             }
@@ -428,12 +429,6 @@ export default function Command() {
                                 await ToastMessages.weatherLoadFailed(error);
                               }
                             }}
-                          />
-                          <OpenGraphAction
-                            name={fav.name}
-                            lat={fav.lat}
-                            lon={fav.lon}
-                            onShowWelcome={() => setShowWelcomeMessage(true)}
                           />
                           <FavoriteToggleAction
                             isFavorite={true}

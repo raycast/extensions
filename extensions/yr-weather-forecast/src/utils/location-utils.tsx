@@ -4,7 +4,6 @@ import { getWeather } from "../weather-client";
 import { TimeseriesEntry } from "../weather-client";
 import { FavoriteLocation } from "../storage";
 import { WeatherFormatters } from "./weather-formatters";
-import { OpenGraphAction } from "../components/OpenGraphAction";
 import { FavoriteToggleAction } from "../components/FavoriteToggleAction";
 
 /**
@@ -22,6 +21,7 @@ export class LocationUtils {
     onFavoriteToggle: () => void,
     onShowWelcome?: () => void,
     targetDate?: Date,
+    onFavoriteChange?: () => void,
   ) {
     return (
       <ActionPanel>
@@ -34,6 +34,7 @@ export class LocationUtils {
               lon={lon}
               onShowWelcome={onShowWelcome}
               targetDate={targetDate?.toISOString().split("T")[0]}
+              onFavoriteChange={onFavoriteChange}
             />
           }
         />
@@ -56,7 +57,6 @@ export class LocationUtils {
             }
           }}
         />
-        <OpenGraphAction name={name} lat={lat} lon={lon} onShowWelcome={onShowWelcome} />
         <FavoriteToggleAction isFavorite={isFavorite} onToggle={onFavoriteToggle} />
       </ActionPanel>
     );

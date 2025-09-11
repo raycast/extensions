@@ -373,12 +373,12 @@ export const GRAPH_THRESHOLDS = {
     /**
      * Sunrise line color
      */
-    SUNRISE: "#f0b429",
+    SUNRISE: "#ff6b35",
 
     /**
      * Sunset line color
      */
-    SUNSET: "#a06cd5",
+    SUNSET: "#6b46c1",
 
     /**
      * Grid line color
