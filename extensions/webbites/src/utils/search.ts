@@ -21,7 +21,7 @@ export const search = async (
   try {
     // Extract and set default options
     const {
-      searchTerm = "",
+      searchTerm,
       orderBy = "relevance",
       page = 0,
       hitsPerPage = 20,
@@ -32,7 +32,7 @@ export const search = async (
 
     // Make the search request
     const response = await makeSearchRequest(
-      searchTerm,
+      searchTerm || "",
       userId,
       sessionToken,
       orderBy,
