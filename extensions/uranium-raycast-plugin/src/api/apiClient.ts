@@ -3,10 +3,6 @@ import { API_CONFIG } from "../config";
 import { getPreferenceValues } from "@raycast/api";
 import { SomeFunction } from "./types";
 
-interface Preferences {
-  apiKey: string;
-}
-
 // Create axios instance with base config
 export const apiClient = axios.create({
   baseURL: API_CONFIG.BASE_URL,
