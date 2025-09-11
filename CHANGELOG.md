@@ -1,4 +1,16 @@
 # Google Calendar Changelog
+## [1.4.0] - 2025-01-15
+
+### Added
+- **Menu Bar Extension**: New menu bar command that displays your next meeting in the macOS menu bar
+  - Shows next upcoming meeting title with countdown timer
+  - Click meeting title to open meeting details in browser
+  - Join meeting option for video conferences
+  - Dismiss meetings to hide them from menu bar
+  - Configurable settings for display preferences
+  - Automatic refresh with smart caching for performance
+  - Filter out all-day events and show ongoing meetings within configurable time window
+
 ## [1.3.0] - 2025-05-30
 - Feat(create-event): Enable creating events with natural language duration string input.
 - Chore(deps): Added `parse-duration`.

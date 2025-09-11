@@ -8,7 +8,8 @@
   "contributors": [
     "j3lte",
     "markusjura",
-    "fabitosh"
+    "fabitosh",
+    "alex_pomerenk"
   ],
   "categories": [
     "Productivity",
@@ -53,6 +54,13 @@
       "title": "List Calendars",
       "description": "View your Google Calendars",
       "mode": "view",
+      "subtitle": "Google Calendar"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Menu Bar",
+      "description": "Show next meeting in menu bar",
+      "mode": "menu-bar",
       "subtitle": "Google Calendar"
     }
   ],
@@ -136,6 +144,39 @@
         }
       ],
       "default": "30",
+      "required": false
+    },
+    {
+      "name": "showTimeUntilNext",
+      "title": "Show Time Until Next Meeting",
+      "description": "Display time remaining until the next meeting in the menu bar",
+      "type": "checkbox",
+      "label": "Show time until next meeting",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "maxCharacters",
+      "title": "Max Characters in Menu Bar",
+      "description": "Maximum number of characters to display for the meeting title in the menu bar",
+      "type": "textfield",
+      "default": "30",
+      "required": false
+    },
+    {
+      "name": "refreshInterval",
+      "title": "Refresh Interval (minutes)",
+      "description": "How often to refresh the menu bar data",
+      "type": "textfield",
+      "default": "5",
+      "required": false
+    },
+    {
+      "name": "showOngoingMinutes",
+      "title": "Show Ongoing Meetings (minutes)",
+      "description": "How many minutes after a meeting starts to still show it in the menu bar",
+      "type": "textfield",
+      "default": "15",
       "required": false
     }
   ],
