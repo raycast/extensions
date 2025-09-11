@@ -11,6 +11,13 @@ import { useCachedPromise } from "@raycast/utils";
 import { differenceInMinutes, format, isAfter, isToday, isTomorrow } from "date-fns";
 import { getCalendarClient, withGoogleAPIs } from "./lib/google";
 
+// Extended event interface with calendar information
+interface EventWithCalendar extends calendar_v3.Schema$Event {
+  calendarId?: string | null;
+  calendarName?: string | null;
+  calendarColor?: string | null;
+}
+
 // Simple debounce for logging to reduce noise
 let lastLogTime = 0;
 const LOG_DEBOUNCE_MS = 1000; // Only log once per second
@@ -28,36 +35,39 @@ interface MenuBarPreferences {
 
 /**
  * Custom hook optimized for menu bar performance
- * 
+ *
  * Fetches only the next 10 events (instead of 50) to reduce API calls and loading time.
  * Uses aggressive caching to prevent loading states on every menu bar click.
- * 
- * API calls are made based on the refreshInterval preference, but the countdown display 
+ *
+ * API calls are made based on the refreshInterval preference, but the countdown display
  * updates every minute using cached data, providing real-time feel without excessive API usage.
  */
 function useMenuBarEvents() {
   return useCachedPromise(
     async () => {
       const calendar = getCalendarClient();
-      
+
       // Get all selected calendars first
       console.log("📅 Fetching calendar list...");
       const calendarsResponse = await calendar.calendarList.list();
-      const selectedCalendars = calendarsResponse.data.items?.filter(cal => cal.selected && cal.id) || [];
-      console.log(`📅 Found ${selectedCalendars.length} selected calendars:`, selectedCalendars.map(cal => cal.summary));
-      
+      const selectedCalendars = calendarsResponse.data.items?.filter((cal) => cal.selected && cal.id) || [];
+      console.log(
+        `📅 Found ${selectedCalendars.length} selected calendars:`,
+        selectedCalendars.map((cal) => cal.summary),
+      );
+
       // For background refresh, optimize to avoid timeout
       const isBackground = environment.launchType === "background";
       const calendarsToFetch = selectedCalendars; // Always fetch all calendars
-      
+
       console.log(`📅 Launch type: ${environment.launchType}, fetching from ${calendarsToFetch.length} calendars`);
       if (isBackground) {
         console.log(`📅 Background refresh: optimizing for speed`);
       }
-      
+
       // Fetch events from selected calendars
-      const allEvents: calendar_v3.Schema$Event[] = [];
-      
+      const allEvents: EventWithCalendar[] = [];
+
       // Use Promise.all for parallel fetching to speed up the process
       const fetchPromises = calendarsToFetch.map(async (cal) => {
         try {
@@ -70,40 +80,48 @@ function useMenuBarEvents() {
             singleEvents: true, // Expand recurring events
             orderBy: "startTime", // Sort by start time
           });
-          
+
           const calendarEvents = response.data.items ?? [];
-          console.log(`📅 Found ${calendarEvents.length} events in ${cal.summary}:`, calendarEvents.map(event => event.summary));
-          
+          console.log(
+            `📅 Found ${calendarEvents.length} events in ${cal.summary}:`,
+            calendarEvents.map((event) => event.summary),
+          );
+
           // Add calendar info to each event for identification
-          return calendarEvents.map(event => ({
-            ...event,
-            calendarId: cal.id,
-            calendarName: cal.summaryOverride ?? cal.summary,
-            calendarColor: cal.backgroundColor,
-          }));
+          return calendarEvents.map(
+            (event): EventWithCalendar => ({
+              ...event,
+              calendarId: cal.id,
+              calendarName: cal.summaryOverride ?? cal.summary,
+              calendarColor: cal.backgroundColor,
+            }),
+          );
         } catch (error) {
           console.error(`❌ Failed to fetch events from calendar ${cal.summary}:`, error);
           return []; // Return empty array if calendar fails
         }
       });
-      
+
       // Wait for all calendar fetches to complete in parallel
       const results = await Promise.all(fetchPromises);
-      
+
       // Flatten the results
       for (const calendarEvents of results) {
         allEvents.push(...calendarEvents);
       }
-      
+
       // Sort all events by start time and return the first 10
       const sortedEvents = allEvents.sort((a, b) => {
         const dateA = new Date(a.start?.dateTime ?? a.start?.date ?? "");
         const dateB = new Date(b.start?.dateTime ?? b.start?.date ?? "");
         return dateA.getTime() - dateB.getTime();
       });
-      
-      console.log(`📅 Total events found: ${sortedEvents.length}, returning first 10:`, sortedEvents.slice(0, 10).map(event => `${event.summary} (${(event as any).calendarName})`));
-      
+
+      console.log(
+        `📅 Total events found: ${sortedEvents.length}, returning first 10:`,
+        sortedEvents.slice(0, 10).map((event) => `${event.summary} (${event.calendarName})`),
+      );
+
       return sortedEvents.slice(0, 10);
     },
     [],
@@ -216,14 +234,14 @@ function getTimeUntilEvent(event: calendar_v3.Schema$Event) {
     if (minutesAgo < 60) {
       return `${minutesAgo}m ago`;
     }
-    
+
     const hoursAgo = Math.floor(minutesAgo / 60);
     const remainingMinutes = minutesAgo % 60;
-    
+
     if (hoursAgo < 24) {
       return remainingMinutes > 0 ? `${hoursAgo}h ${remainingMinutes}m ago` : `${hoursAgo}h ago`;
     }
-    
+
     const daysAgo = Math.floor(hoursAgo / 24);
     return `${daysAgo} day${daysAgo > 1 ? "s" : ""} ago`;
   }
@@ -266,7 +284,7 @@ function truncateText(text: string, maxLength: number) {
 function Command() {
   // Get user preferences for menu bar configuration
   const preferences = getPreferenceValues<MenuBarPreferences>();
-  
+
   // Parse preferences with defaults
   const maxCharacters = parseInt(preferences.maxCharacters || "30");
   const showTimeUntil = preferences.showTimeUntilNext !== false;
@@ -274,26 +292,29 @@ function Command() {
   const { data: events, isLoading, revalidate } = useMenuBarEvents();
 
   const nextMeeting = getNextMeeting(events, showOngoingMinutes);
-  
+
   // Get all upcoming events for the dropdown
-  const allUpcomingEvents = events?.filter((event) => {
-    const startDate = new Date(event.start?.dateTime ?? event.start?.date ?? "");
-    const now = new Date();
-    const ongoingThreshold = new Date(now.getTime() - showOngoingMinutes * 60 * 1000);
-    const isUpcoming = isAfter(startDate, now);
-    const isOngoing = startDate >= ongoingThreshold && startDate <= now;
-    const isNotAllDay = !event.start?.date;
-    return (isUpcoming || isOngoing) && isNotAllDay;
-  }).sort((a, b) => {
-    const dateA = new Date(a.start?.dateTime ?? a.start?.date ?? "");
-    const dateB = new Date(b.start?.dateTime ?? b.start?.date ?? "");
-    return dateA.getTime() - dateB.getTime();
-  }) || [];
-  
+  const allUpcomingEvents =
+    events
+      ?.filter((event) => {
+        const startDate = new Date(event.start?.dateTime ?? event.start?.date ?? "");
+        const now = new Date();
+        const ongoingThreshold = new Date(now.getTime() - showOngoingMinutes * 60 * 1000);
+        const isUpcoming = isAfter(startDate, now);
+        const isOngoing = startDate >= ongoingThreshold && startDate <= now;
+        const isNotAllDay = !event.start?.date;
+        return (isUpcoming || isOngoing) && isNotAllDay;
+      })
+      .sort((a, b) => {
+        const dateA = new Date(a.start?.dateTime ?? a.start?.date ?? "");
+        const dateB = new Date(b.start?.dateTime ?? b.start?.date ?? "");
+        return dateA.getTime() - dateB.getTime();
+      }) || [];
+
   // Debug: Log only when data changes or on background refresh, with debounce
   const now = Date.now();
   if ((environment.launchType === "background" || !isLoading) && now - lastLogTime > LOG_DEBOUNCE_MS) {
-    console.log(`[${environment.launchType}] Events: ${events?.length || 0}, Next: ${nextMeeting?.summary || 'none'}`);
+    console.log(`[${environment.launchType}] Events: ${events?.length || 0}, Next: ${nextMeeting?.summary || "none"}`);
     lastLogTime = now;
   }
 
@@ -344,13 +365,13 @@ function Command() {
         const eventTime = formatEventTime(event);
         const timeUntil = getTimeUntilEvent(event);
         const isNextMeeting = event.id === nextMeeting?.id;
-        const calendarName = (event as any).calendarName;
-        
+        const calendarName = event.calendarName;
+
         return (
           <MenuBarExtra.Item
             key={event.id || index}
             title={eventTitle}
-            subtitle={`${eventTime} (${timeUntil})${calendarName ? ` • ${calendarName}` : ''}`}
+            subtitle={`${eventTime} (${timeUntil})${calendarName ? ` • ${calendarName}` : ""}`}
             icon={isNextMeeting ? Icon.Calendar : undefined}
             onAction={() => {
               if (event.htmlLink) {
@@ -360,7 +381,7 @@ function Command() {
           />
         );
       })}
-      
+
       {/* Show join meeting option only for video conferences of the next meeting */}
       {nextMeeting?.conferenceData?.entryPoints?.[0]?.uri && (
         <>
@@ -374,18 +395,18 @@ function Command() {
           />
         </>
       )}
-      
-        <MenuBarExtra.Separator />
-        
-        {/* Manual refresh option - needed since we disabled automatic refresh */}
-        <MenuBarExtra.Item
-          title="Refresh"
-          icon={Icon.ArrowClockwise}
-          onAction={() => {
-            revalidate();
-          }}
-        />
-      </MenuBarExtra>
+
+      <MenuBarExtra.Separator />
+
+      {/* Manual refresh option - needed since we disabled automatic refresh */}
+      <MenuBarExtra.Item
+        title="Refresh"
+        icon={Icon.ArrowClockwise}
+        onAction={() => {
+          revalidate();
+        }}
+      />
+    </MenuBarExtra>
   );
 }
 
