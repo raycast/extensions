@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "azure-devops-branch-helper",
-  "title": "Azure DevOps Helper",
+  "title": "Azure Devops Helper",
   "description": "Fetch Azure DevOps work items and generate standardized Git branch names",
   "icon": "devops-icon.png",
   "author": "tor_gjosaeter",
@@ -13,6 +13,20 @@
       "description": "Convert task description to branch name format",
       "mode": "view",
       "entrypoint": "src/branchname.tsx"
+    },
+    {
+      "name": "activate-and-branch",
+      "title": "Activate and Branch Work Item",
+      "description": "Set work item to active, assign to self, and create branch",
+      "mode": "view",
+      "entrypoint": "src/activate-and-branch.tsx"
+    },
+    {
+      "name": "check-workitem",
+      "title": "Check Work Item",
+      "description": "View work item details and get URLs without making changes",
+      "mode": "view",
+      "entrypoint": "src/check-workitem.tsx"
     }
   ],
   "preferences": [
@@ -35,9 +49,25 @@
     {
       "name": "azureProject",
       "title": "Azure DevOps Project (Optional)",
-      "description": "Default project name for Azure DevOps queries",
+      "description": "Default project name - will auto-detect from work item if not specified",
       "type": "textfield",
       "placeholder": "MyProject",
+      "required": false
+    },
+    {
+      "name": "azureRepository",
+      "title": "Azure DevOps Repository (Optional)",
+      "description": "Repository name for branch operations - defaults to project name if not specified",
+      "type": "textfield",
+      "placeholder": "MyRepository",
+      "required": false
+    },
+    {
+      "name": "sourceBranch",
+      "title": "Source Branch",
+      "description": "The branch to create new branches from",
+      "type": "textfield",
+      "default": "main",
       "required": false
     }
   ],
