@@ -312,7 +312,6 @@ export default function Command() {
                       },
                       () => setShowWelcomeMessage(true),
                       search.queryIntent.targetDate,
-                      favorites.refreshFavorites,
                     )}
                   />
                 ))}
