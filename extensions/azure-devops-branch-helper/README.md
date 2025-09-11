@@ -1,6 +1,6 @@
-# DevOps Branch Name Generator
+# Azure DevOps Helper
 
-A Raycast extension that converts work item descriptions to standardized branch names with Azure DevOps integration.
+A Raycast extension that fetches Azure DevOps work items and generates standardized Git branch names.
 
 ## Features
 
@@ -12,7 +12,7 @@ A Raycast extension that converts work item descriptions to standardized branch 
 ## Quick Start
 
 1. Install the extension in Raycast
-2. Search for "Branchname" in Raycast
+2. Search for "Generate Branch Name" in Raycast
 3. Enter a work item number (e.g., "12345")
 4. The extension will auto-fetch the work item title from Azure DevOps
 5. Press Enter to generate and copy the branch name
@@ -39,7 +39,7 @@ A Raycast extension that converts work item descriptions to standardized branch 
 
 #### Option 1: Extension Settings (Recommended)
 1. Open Raycast
-2. Search for "Branchname" 
+2. Search for "Generate Branch Name" 
 3. Press `⌘ + ,` to open extension settings
 4. Configure:
    - **Branch Prefix**: Your preferred prefix (default: `tor/`)
@@ -66,7 +66,7 @@ az boards work-item show --id YOUR_WORK_ITEM_ID --output json
 ## Usage
 
 ### Basic Usage
-1. Open Raycast and search for "Branchname"
+1. Open Raycast and search for "Generate Branch Name"
 2. Enter work item number: `12345`
 3. Extension automatically fetches: "Display environment (Prod / Dev / UAT) on profile page"
 4. Generated branch name: `tor/12345-display-environment-prod-dev-uat-on-profile-page`
