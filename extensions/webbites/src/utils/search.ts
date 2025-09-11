@@ -32,7 +32,7 @@ export const search = async (
 
     // Make the search request
     const response = await makeSearchRequest(
-      searchTerm || "",
+      searchTerm,
       userId,
       sessionToken,
       orderBy,
