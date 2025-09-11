@@ -132,6 +132,8 @@ const PullRequestsResponseSchema = z.object({
   ),
 });
 
+// We can't use the Bitbucket package for this, as it doesn't support this endpoint
+// We can't use listPullrequestsForUser, as this has been removed: https://community.atlassian.com/forums/Bitbucket-articles/Reminder-List-pull-requests-for-a-user-API-removal/ba-p/2935311
 export async function getMyOpenPullRequests() {
   const response = await fetch(
     `https://api.bitbucket.org/2.0/workspaces/${preferences.workspace}/pullrequests/${await getUsername()}?pagelen=20&sort=-created_on&state=OPEN`,
