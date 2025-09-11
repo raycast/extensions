@@ -1,6 +1,6 @@
 # QQ Music Controls Changelog
 
-## [New Logo] - {PR_MERGE_DATE}
+## [New Logo] - 2025-09-11
 
 - Update QQ Music logo
 - Update project dependencies
