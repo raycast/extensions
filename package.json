@@ -166,7 +166,7 @@
     {
       "name": "refreshInterval",
       "title": "Refresh Interval (minutes)",
-      "description": "How often to refresh the menu bar data",
+      "description": "How often to refresh the menu bar display (countdown updates automatically, this controls data refresh)",
       "type": "textfield",
       "default": "5",
       "required": false
@@ -176,7 +176,7 @@
       "title": "Show Ongoing Meetings (minutes)",
       "description": "How many minutes after a meeting starts to still show it in the menu bar",
       "type": "textfield",
-      "default": "15",
+      "default": "10",
       "required": false
     }
   ],
