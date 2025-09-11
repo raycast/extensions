@@ -21,6 +21,7 @@ export class LocationUtils {
     onFavoriteToggle: () => void,
     onShowWelcome?: () => void,
     targetDate?: Date,
+    onFavoriteChange?: () => void,
   ) {
     return (
       <ActionPanel>
@@ -33,6 +34,7 @@ export class LocationUtils {
               lon={lon}
               onShowWelcome={onShowWelcome}
               targetDate={targetDate?.toISOString().split("T")[0]}
+              onFavoriteChange={onFavoriteChange}
             />
           }
         />
