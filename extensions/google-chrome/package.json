@@ -299,6 +299,7 @@
   "dependencies": {
     "@raycast/api": "^1.94.0",
     "@raycast/utils": "^1.18.1",
+    "run-applescript": "^7.1.0",
     "sql.js": "^1.12.0"
   },
   "devDependencies": {
