@@ -1,5 +1,15 @@
 # Warp Changelog
 
+## [Windows Support] - {PR_MERGE_DATE}
+
+- Added support for Windows
+- Updated eslint configuration to the new format
+- Updated all dependencies to the latest versions
+- Added fixes for the following commands to run on Windows:
+  - "Open Directory"
+  - "Open in Warp"
+  - "Open Launch Configuration"
+
 ## [Improvements] - 2025-04-23
 
 - Added build preference to select between [Warp](https://www.warp.dev) and [Warp Preview](https://www.warp.dev/blog/warp-preview) Releases.
