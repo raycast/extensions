@@ -93,9 +93,7 @@ export default function View() {
     <List
       isLoading={listLoading}
       searchBarPlaceholder={
-        mode === "search"
-          ? "Search models by name, slug, or creator…"
-          : "Search is disabled in Leaderboards. Use the Metric menu to change leaderboard."
+        mode === "search" ? "Search models by name, slug, or creator…" : "Filter leaderboard by name, slug, or creator…"
       }
       onSearchTextChange={(t) => setSearchText(t)}
       searchText={searchText}
@@ -152,6 +150,7 @@ export default function View() {
           pinnedIds={pinnedIds}
           addPin={addPin}
           removePin={removePin}
+          searchText={searchText}
         />
       )}
     </List>
@@ -185,6 +184,7 @@ function SearchSection({
 }: SearchSectionProps) {
   const [q, setQ] = useState("");
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [showSkel, setShowSkel] = useState(false);
 
   // forward loading state to parent List
   const {
@@ -211,27 +211,54 @@ function SearchSection({
   );
 
   useEffect(() => {
-    onLoadingChange(isLoading && rows.length === 0);
+    const shouldShow = isLoading && rows.length === 0;
+    let t: ReturnType<typeof setTimeout> | null = null;
+    if (shouldShow) {
+      t = setTimeout(() => onLoadingChange(true), 120);
+    } else {
+      onLoadingChange(false);
+    }
+    return () => {
+      if (t) clearTimeout(t);
+    };
   }, [isLoading, rows, onLoadingChange]);
-  // forward loading state handled above; debounce keeps transitions smooth
-  // initialize debounced search
+  // Debounced skeleton reveal to avoid flashing on quick cache hits
   useEffect(() => {
-    setQ(searchText);
-  }, []);
+    const shouldShow = isLoading && rows.length === 0;
+    let t: ReturnType<typeof setTimeout> | null = null;
+    if (shouldShow) {
+      t = setTimeout(() => setShowSkel(true), 120);
+    } else {
+      setShowSkel(false);
+    }
+    return () => {
+      if (t) clearTimeout(t);
+    };
+  }, [isLoading, rows]);
 
   // React to parent search text or creator filter changes
   useEffect(() => {
+    // Avoid duplicate initial fetch when value hasn't changed
+    if (searchText === q) return;
     if (debounce.current) clearTimeout(debounce.current);
     debounce.current = setTimeout(() => setQ(searchText), 250);
     return () => {
       if (debounce.current) clearTimeout(debounce.current);
     };
-  }, [searchText]);
+  }, [searchText, q]);
 
-  const { pinned: pinnedRows, unpinned: listRows } = splitPinned(rows, pinnedIds);
+  // Always include pinned models even if they don't match the current query
+  const { pinnedModels: pinnedFull } = usePinnedModelsData(MODEL_FULL_COLUMNS, pinnedIds);
+  const mergedMap = new Map<string, Model>();
+  rows.forEach((r) => mergedMap.set(r.id, r));
+  pinnedFull.forEach((m) => {
+    if (pinnedIds.includes(m.id) && !mergedMap.has(m.id)) mergedMap.set(m.id, m as Model);
+  });
+  const mergedRows = Array.from(mergedMap.values());
+  const { pinned: pinnedRows, unpinned: listRows } = splitPinned(mergedRows, pinnedIds);
   const updatedLabel = rows.length > 0 && rows[0]?.last_seen ? `Updated ${timeAgo(rows[0].last_seen)}` : undefined;
 
-  const showSearchSkeleton = isLoading && rows.length === 0;
+  const showSearchSkeleton = showSkel;
 
   return (
     <>
@@ -426,6 +453,7 @@ type LeaderboardSectionProps = {
   pinnedIds: string[];
   addPin: (id: string) => void | Promise<void>;
   removePin: (id: string) => void | Promise<void>;
+  searchText: string;
 };
 
 function LeaderboardSection({
@@ -436,8 +464,11 @@ function LeaderboardSection({
   pinnedIds,
   addPin,
   removePin,
+  searchText,
 }: LeaderboardSectionProps) {
   const isAsc = useMemo(() => METRIC_ASC[metric], [metric]);
+  const [showSkel, setShowSkel] = useState(false);
+  const [showPinnedSkel, setShowPinnedSkel] = useState(false);
 
   const {
     data: rows = [],
@@ -461,12 +492,14 @@ function LeaderboardSection({
     { keepPreviousData: false },
   );
 
-  useEffect(() => {
-    onLoadingChange(isLoading && rows.length === 0);
-  }, [isLoading, rows, onLoadingChange]);
+  // Parent spinner and skeletons are shown with a short delay to avoid flashes
+  // of loading UI on quick cache hits
 
   // Universal pinned models: fetch by IDs via shared hook so pins appear regardless of leaderboard slice
-  const { pinnedModels, isLoading: pinnedLoading } = usePinnedModelsData(`id,name,slug,creator_name,${metric}`);
+  const { pinnedModels, isLoading: pinnedLoading } = usePinnedModelsData(
+    `id,name,slug,creator_name,${metric}`,
+    pinnedIds,
+  );
 
   // helper to render a leaderboard row with actions and tags
   const renderItem = (r: Model) => {
@@ -479,10 +512,12 @@ function LeaderboardSection({
     } else {
       accessories.push({ tag: { value: "N/A", color: Color.SecondaryText } });
     }
+    const rank = rankById.get(r.id);
+    const title = `${rank ? `${rank}. ` : ""}${r.name ?? r.slug ?? "Model"}`;
     return (
       <List.Item
         key={r.id}
-        title={r.name ?? r.slug ?? "Model"}
+        title={title}
         subtitle={r.creator_name ?? ""}
         accessories={accessories}
         actions={
@@ -543,22 +578,23 @@ function LeaderboardSection({
   };
 
   // Merge immediate pinned from current leaderboard slice (no fetch delay) with fetched pinned records
-  const pinnedFromSlice = rows.filter((r) => {
-    const v = (r as unknown as Record<string, number | null>)[metric];
-    return v != null && v !== 0 && pinnedIds.includes(r.id);
-  });
+  const pinnedFromSlice = rows.filter((r) => pinnedIds.includes(r.id));
   const mergedPinned = new Map<string, Model>();
   pinnedFromSlice.forEach((m) => mergedPinned.set(m.id, m as unknown as Model));
   pinnedModels.forEach((m) => {
-    const v = (m as unknown as Record<string, number | null>)[metric];
-    if (v != null && v !== 0 && pinnedIds.includes(m.id) && !mergedPinned.has(m.id)) {
+    if (pinnedIds.includes(m.id) && !mergedPinned.has(m.id)) {
       mergedPinned.set(m.id, m as unknown as Model);
     }
   });
   const pinnedRows = Array.from(mergedPinned.values()).sort((a, b) => {
-    const av = (a as unknown as Record<string, number | null>)[metric] ?? 0;
-    const bv = (b as unknown as Record<string, number | null>)[metric] ?? 0;
-    return METRIC_ASC[metric] ? av - bv : bv - av;
+    const av = (a as unknown as Record<string, number | null>)[metric];
+    const bv = (b as unknown as Record<string, number | null>)[metric];
+    const aMissing = av == null || av === 0;
+    const bMissing = bv == null || bv === 0;
+    if (aMissing && bMissing) return 0;
+    if (aMissing) return 1; // push a to bottom
+    if (bMissing) return -1; // push b to bottom
+    return METRIC_ASC[metric] ? (av as number) - (bv as number) : (bv as number) - (av as number);
   });
   // Filter main rows for current metric to avoid flashing in 'no data' entries while new metric loads
   const rowsForMetric = rows.filter((r) => {
@@ -566,8 +602,53 @@ function LeaderboardSection({
     return v != null && v !== 0;
   });
   const { unpinned: listRows } = splitPinned(rowsForMetric, pinnedIds);
-  const showSkeleton = isLoading && rowsForMetric.length === 0 && pinnedRows.length === 0;
-  const showPinnedSkeleton = pinnedLoading && pinnedRows.length === 0 && pinnedIds.length > 0;
+  // Build rank map from the full (unfiltered) metric-eligible rows returned by the query
+  const rankById = useMemo(() => new Map<string, number>(rowsForMetric.map((r, i) => [r.id, i + 1])), [rowsForMetric]);
+  // Lightweight text filter for leaderboard search
+  const q = searchText.trim().toLowerCase();
+  const matches = (r: Model) => {
+    if (!q) return true;
+    const name = (r.name ?? "").toLowerCase();
+    const slug = (r.slug ?? "").toLowerCase();
+    const creator = (r.creator_name ?? "").toLowerCase();
+    return name.includes(q) || slug.includes(q) || creator.includes(q);
+  };
+  const pinnedRowsFiltered = pinnedRows.filter(matches);
+  const listRowsFiltered = listRows.filter(matches);
+  const showSkeleton = showSkel;
+  const showPinnedSkeleton = showPinnedSkel;
+
+  // Delay show spinner/skeleton to avoid flicker when data is immediately available
+  useEffect(() => {
+    const shouldShow = isLoading && rowsForMetric.length === 0 && pinnedRows.length === 0;
+    let t: ReturnType<typeof setTimeout> | null = null;
+    if (shouldShow) {
+      t = setTimeout(() => {
+        onLoadingChange(true);
+        setShowSkel(true);
+      }, 120);
+    } else {
+      onLoadingChange(false);
+      setShowSkel(false);
+    }
+    return () => {
+      if (t) clearTimeout(t);
+    };
+  }, [isLoading, rowsForMetric.length, pinnedRows.length, onLoadingChange]);
+
+  // Delay pinned skeletons as well to avoid brief flashes on quick cache hits
+  useEffect(() => {
+    const shouldShowPinned = pinnedLoading && pinnedRows.length === 0 && pinnedIds.length > 0;
+    let t: ReturnType<typeof setTimeout> | null = null;
+    if (shouldShowPinned) {
+      t = setTimeout(() => setShowPinnedSkel(true), 120);
+    } else {
+      setShowPinnedSkel(false);
+    }
+    return () => {
+      if (t) clearTimeout(t);
+    };
+  }, [pinnedLoading, pinnedRows.length, pinnedIds.length]);
 
   return (
     <>
@@ -598,11 +679,11 @@ function LeaderboardSection({
           ))}
         </List.Section>
       )}
-      {pinnedRows.length > 0 && (
-        <List.Section title="Pinned">{pinnedRows.map((r) => renderItem(r as unknown as Model))}</List.Section>
+      {pinnedRowsFiltered.length > 0 && (
+        <List.Section title="Pinned">{pinnedRowsFiltered.map((r) => renderItem(r as unknown as Model))}</List.Section>
       )}
       <List.Section title={`Top by ${metric}`} subtitle={isAsc ? "ascending" : "descending"}>
-        {listRows.map((r) => renderItem(r as unknown as Model))}
+        {listRowsFiltered.map((r) => renderItem(r as unknown as Model))}
       </List.Section>
     </>
   );

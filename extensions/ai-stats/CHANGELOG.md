@@ -8,6 +8,8 @@
 - Leaderboards: Pinned section at the top with models sorted by the current metric order (asc/desc)
 - Skeleton loading: lightweight placeholders for Search, Leaderboards main list, and the Leaderboards Pinned section
 - Model Detail: preference `AFTER_PIN_BEHAVIOR` to return to list or stay on detail after pin/unpin
+- Leaderboards: Search filtering by name, slug, or creator (preserves true rank)
+- Leaderboards: Rank number shown to the left of each model name
 
 ### Changed
 
@@ -16,6 +18,7 @@
   - Switch between Search and Leaderboards: Cmd+L
   - Change Leaderboard…: Cmd+P
 - Start in Search always; Mode dropdown is controlled (no persistence)
+- Leaderboards search bar placeholder updated to reflect filtering capability
 
 ### Fixed
 
@@ -23,6 +26,7 @@
 - Debounced search cleanup avoids double-renders and memory leaks
 - Detail view now fetches full model data by ID when opened from Leaderboards (which has partial columns)
 - Pinned models no longer disappear during fetch; merge pinned from current slice with fetched pinned and keep previous data
+- Smoothed cache revalidation: add ~120ms delay before showing parent spinner/skeletons; avoid duplicate initial fetch; apply same gating to Leaderboards to prevent quick-flash loading states
 
 ---
 

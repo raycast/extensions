@@ -40,9 +40,10 @@ export function usePinnedModels(maxPins: number = 10) {
 
 // Universal pinned models data hook
 // Usage: const { pinnedModels } = usePinnedModelsData("id,name,slug,creator_name,metric")
-export function usePinnedModelsData(columns: string) {
-  const { value: pinnedIds = [] } = useLocalStorage<string[]>("ai-stats-pinned-ids", []);
-  const idsKey = pinnedIds.join(",");
+export function usePinnedModelsData(columns: string, overridePinnedIds?: string[]) {
+  const { value: lsPinnedIds = [] } = useLocalStorage<string[]>("ai-stats-pinned-ids", []);
+  const effectiveIds = (overridePinnedIds ?? lsPinnedIds ?? []).filter(Boolean);
+  const idsKey = effectiveIds.join(",");
   const {
     data = [],
     isLoading,
