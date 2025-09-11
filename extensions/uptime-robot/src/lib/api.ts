@@ -10,6 +10,7 @@ export async function deleteMonitor(monitorId: number) {
       id: monitorId.toString(),
     }).toString(),
   });
+  if (!res.headers.get("Content-Type")?.includes("json")) throw new Error(await res.text());
   const result = (await res.json()) as SuccessResponse<{ monitor: { id: number } }> | ErrorResponse;
   if (result.stat === "fail")
     throw new Error(result.error.message, {
@@ -24,9 +25,10 @@ export async function createMonitor(newMonitor: NewMonitor) {
     method: "POST",
     body: new URLSearchParams({
       ...API_BODY,
-      ...newMonitor
+      ...newMonitor,
     }).toString(),
   });
+  if (!res.headers.get("Content-Type")?.includes("json")) throw new Error(await res.text());
   const result = (await res.json()) as SuccessResponse<Monitor> | ErrorResponse;
   if (result.stat === "fail")
     throw new Error(result.error.message, {

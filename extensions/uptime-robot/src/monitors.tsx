@@ -76,7 +76,7 @@ export default function Monitors() {
           hasMore: page * result.pagination.limit > result.pagination.total,
         };
       },
-      keepPreviousData: true,
+      keepPreviousData: false,
       initialData: [],
       async onData(data) {
         await setMonitors({
@@ -92,7 +92,7 @@ export default function Monitors() {
     if (!value?.monitors.length) setExecute(true);
     else if (value && hasDayPassed(value.updated_at)) setExecute(true);
     else setExecute(false);
-  }, [isLoadingLocal]);
+  }, [isLoadingLocal, value]);
 
   async function confirmAndDeleteMonitor(monitor: Monitor) {
     const options: Alert.Options = {
@@ -134,7 +134,7 @@ export default function Monitors() {
           key={monitor.id}
           title={monitor.friendly_name}
           subtitle={MonitorType[monitor.type]}
-          icon={{value: MONITOR_ICONS[monitor.status], tooltip: MonitorStatus[monitor.status]}}
+          icon={{ value: MONITOR_ICONS[monitor.status], tooltip: MonitorStatus[monitor.status] }}
           accessories={[
             {
               icon: Icon.Redo,
@@ -149,7 +149,7 @@ export default function Monitors() {
               <Action.Push
                 icon={Icon.Plus}
                 title="Add New Monitor"
-                target={<AddNewMonitor onMonitorAdded={() => setExecute((prev) => !prev)} />}
+                target={<AddNewMonitor onMonitorAdded={() => setExecute(true)} />}
               />
               <Action.OpenInBrowser
                 icon="up.png"
@@ -183,8 +183,8 @@ function AddNewMonitor({ onMonitorAdded }: AddNewMonitorProps) {
       setIsLoading(true);
       const toast = await showToast(Toast.Style.Animated, "Creating monitor", values.friendly_name);
       try {
-        const body = {...values};
-        if (values.type==="PING") delete body.interval;
+        const body = { ...values };
+        if (values.type === "PING") delete body.interval;
         await createMonitor(body);
         toast.style = Toast.Style.Success;
         toast.title = "Created monitor";
@@ -206,7 +206,7 @@ function AddNewMonitor({ onMonitorAdded }: AddNewMonitorProps) {
       friendly_name: FormValidation.Required,
       url(value) {
         if (!value) return "The item is required";
-        if (values.type===MonitorType.HTTP.toString()) {
+        if (values.type === MonitorType.HTTP.toString()) {
           try {
             new URL(value);
           } catch {
@@ -240,15 +240,17 @@ function AddNewMonitor({ onMonitorAdded }: AddNewMonitorProps) {
         {...itemProps.url}
       />
       <Form.TextField title="Friendly name of monitor" placeholder="blog" {...itemProps.friendly_name} />
-      {values.type==="HTTP" && <Form.Dropdown
-        title="Monitor interval"
-        {...itemProps.interval}
-        info="We recommend to use at least 1-minute checks"
-      >
-        {Object.entries(MONITOR_INTERVALS).map(([interval, title]) => (
-          <Form.Dropdown.Item key={interval} title={title} value={interval} />
-        ))}
-      </Form.Dropdown>}
+      {values.type === "HTTP" && (
+        <Form.Dropdown
+          title="Monitor interval"
+          {...itemProps.interval}
+          info="We recommend to use at least 1-minute checks"
+        >
+          {Object.entries(MONITOR_INTERVALS).map(([interval, title]) => (
+            <Form.Dropdown.Item key={interval} title={title} value={interval} />
+          ))}
+        </Form.Dropdown>
+      )}
 
       <Form.Separator />
       <Form.Description text="Advanced Settings" />

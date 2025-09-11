@@ -28,15 +28,15 @@ type MonitorLog = {
   };
 };
 export enum MonitorType {
-  HTTP=1,
-  PING=3
+  HTTP = 1,
+  PING = 3,
 }
 export enum MonitorStatus {
-  "Paused"=0,
-  "Preparing"=1,
-  "Up"=2,
-  ""=8,
-  "Down"=9,
+  "Paused" = 0,
+  "Preparing" = 1,
+  "Up" = 2,
+  "" = 8,
+  "Down" = 9,
 }
 export type Monitor = {
   id: number;
