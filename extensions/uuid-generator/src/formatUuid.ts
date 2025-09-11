@@ -7,10 +7,6 @@ function formatUuidWithDashes(uuid: string): string {
     throw new Error("Invalid UUID format: must be 32 hexadecimal characters");
   }
 
-  if (!/^[0-9a-fA-F]{32}$/.test(cleanUuid)) {
-    throw new Error("Invalid UUID format: must contain only hexadecimal characters");
-  }
-
   return [
     cleanUuid.substring(0, 8),
     cleanUuid.substring(8, 12),
