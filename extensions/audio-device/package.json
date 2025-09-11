@@ -14,7 +14,8 @@
     "pernielsentikaer",
     "taschaub",
     "cballenar",
-    "joshmedeski"
+    "joshmedeski",
+    "joshhayes747"
   ],
   "keywords": [
     "sound",
@@ -157,15 +158,6 @@
     }
   ],
   "preferences": [
-    {
-      "name": "airplay",
-      "required": false,
-      "title": "Enable AirPlay Support",
-      "description": "Enable AirPlay speakers detection on the output devices list.",
-      "label": "Include AirPlay devices",
-      "type": "checkbox",
-      "default": false
-    },
     {
       "name": "systemOutput",
       "required": false,
