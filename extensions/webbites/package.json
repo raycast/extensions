@@ -2,7 +2,6 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "webbites",
   "title": "WebBites",
-  "subtitle": "WebBites, the AI based bookmark manager",
   "description": "Search your WebBites.io bookmarks",
   "icon": "webbites-extension-icon.png",
   "author": "elias_ruiz_monserrat",

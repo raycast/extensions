@@ -68,6 +68,7 @@ const getAuthInfo = async (): Promise<{
       title: "No user found",
       message: "Please login again",
     });
+    throw new Error("User authentication required");
   }
 
   // Get session token for authentication
