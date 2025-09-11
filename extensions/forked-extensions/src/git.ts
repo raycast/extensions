@@ -2,9 +2,12 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import process from "node:process";
+import { confirmAlert } from "@raycast/api";
 import spawn from "nano-spawn";
 import * as api from "./api.js";
 import { defaultGitExecutableFilePath } from "./constants.js";
+import { catchError } from "./errors.js";
+import operation from "./operation.js";
 import { ForkedExtension } from "./types.js";
 import { gitExecutableFilePath, getRemoteUrl, repositoryConfigurationPath } from "./utils.js";
 
@@ -75,6 +78,7 @@ export const getExtensionList = async () => {
 
   const validExtensions = allExtension.filter((extension) => Boolean(extension.name));
   const sparseCheckoutExtensions = await sparseCheckoutList();
+  if (!sparseCheckoutExtensions) return [];
   const untrackedExtensions = validExtensions.filter(
     (x) => !sparseCheckoutExtensions.includes(`extensions/${x.folderName}`),
   );
@@ -125,6 +129,16 @@ export const getForkedRepository = async () => {
 };
 
 /**
+ * Converts a full checkout to a sparse checkout with cone mode.
+ */
+export const convertFullCheckoutToSparseCheckout = async () => {
+  await git(["config", "remote.origin.promisor", "true"]);
+  await git(["config", "remote.origin.partialclonefilter", "blob:none"]);
+  await git(["sparse-checkout", "set", "--cone"]);
+  await git(["checkout", "main"]);
+};
+
+/**
  * Initializes the repository by cloning it if it doesn't exist.
  * @returns The full name of the forked repository.
  */
@@ -139,8 +153,7 @@ export const initRepository = async () => {
       shell: true,
     },
   );
-  await git(["sparse-checkout", "set", "--cone"]);
-  await git(["checkout", "main"]);
+  await convertFullCheckoutToSparseCheckout();
   return forkedRepository;
 };
 
@@ -159,10 +172,39 @@ export const setUpstream = async (forkedRepository: string) => {
 /**
  * Checks if the current working directory is in clean status.
  */
-export const isStatusClean = async () => {
+export const checkIfStatusClean = async () => {
   const { output } = await git(["status", "--porcelain"]);
   if (output.trim() === "") return;
   throw new Error("The repository is not clean. Please commit or stash your changes before proceeding.");
+};
+
+/**
+ * Checks if the repository enabled sparse-checkout.
+ */
+export const checkIfSparseCheckoutEnabled = async () => {
+  const isSparseCheckout = await git(["sparse-checkout", "list"])
+    .then(() => true)
+    .catch(() => false);
+  if (!isSparseCheckout) {
+    return new Promise<void>((resolve, reject) => {
+      confirmAlert({
+        title: "Sparse Checkout Not Enabled",
+        message: "This operation requires sparse checkout to be enabled. Would you like to enable it now?",
+        primaryAction: {
+          title: "Enable Sparse Checkout",
+          onAction: catchError(async () => {
+            await checkIfStatusClean();
+            await operation.convertFullCheckoutToSparseCheckout();
+            resolve();
+          }),
+        },
+        dismissAction: {
+          title: "Cancel",
+          onAction: resolve,
+        },
+      }).catch(reject);
+    });
+  }
 };
 
 /**
@@ -183,7 +225,7 @@ export const getAheadBehindCommits = async () => {
 export const syncFork = async () => {
   const { output } = await git(["branch", "--show-current"]);
   const currentBranch = output.trim();
-  await git(["fetch", "upstream"]);
+  await git(["fetch", "--prune", "--filter=blob:none", "upstream"]);
   if (currentBranch !== "main") await git(["checkout", "main"]);
   await git(["merge", "--ff-only", "upstream/main"]);
   if (currentBranch !== "main") await git(["checkout", currentBranch]);

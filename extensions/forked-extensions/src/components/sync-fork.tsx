@@ -13,9 +13,9 @@ export default function SyncFork({
   lastCommitHash,
   onSyncFinished,
 }: {
-  forkedRepository: string | undefined;
-  lastCommitHash: string | undefined;
-  onSyncFinished: () => void;
+  readonly forkedRepository: string | undefined;
+  readonly lastCommitHash: string | undefined;
+  readonly onSyncFinished: () => void;
 }) {
   const { push } = useNavigation();
   const [commitDiff, setCommitDiff] = useState<{ github: CommitDiff; local: CommitDiff }>();
