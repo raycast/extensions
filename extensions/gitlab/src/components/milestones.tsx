@@ -1,5 +1,5 @@
 import { gql } from "@apollo/client";
-import { ActionPanel, List } from "@raycast/api";
+import { ActionPanel, Color, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getGitLabGQL } from "../common";
 import { Group, Project } from "../gitlabapi";
@@ -11,7 +11,7 @@ import { GitLabOpenInBrowserAction } from "./actions";
 const GET_MILESTONES = gql`
   query GetProjectMilestones($fullPath: ID!) {
     project(fullPath: $fullPath) {
-      milestones {
+      milestones(sort: DUE_DATE_DESC) {
         nodes {
           id
           title
@@ -53,16 +53,26 @@ const GET_GROUP_MILESTONES = gql`
 export function MilestoneListItem(props: { milestone: any }) {
   const milestone = props.milestone;
   const issueCounter = `${milestone.closedIssuesCount}/${milestone.totalIssuesCount}`;
+  const issueRatio =
+    milestone.totalIssuesCount && milestone.totalIssuesCount > 0
+      ? milestone.closedIssuesCount / milestone.totalIssuesCount
+      : 0.0;
+  const issuePercent = `${(issueRatio * 100).toFixed(0)}%`;
   let subtitle = "";
-  if (milestone.dueDate) {
-    subtitle = milestone.dueDate + (milestone.expired ? " [expired]" : "");
+  if (milestone.dueDateTime) {
+    subtitle = milestone.dueDate;
+    if (milestone.expired && milestone.state !== "closed") {
+      subtitle += ` ⚠️ ${milestone.expired ? " [expired]" : ""}`;
+    }
   }
+  const colors = [Color.Red, Color.Orange, Color.Yellow, Color.Blue, Color.Green];
+  const colorIndex = Math.floor(issueRatio * (colors.length - 1));
   return (
     <List.Item
       id={milestone.id}
       title={milestone.title}
       subtitle={subtitle}
-      accessories={[{ text: issueCounter }]}
+      accessories={[{ tag: { value: issuePercent, color: colors[colorIndex] } }, { text: issueCounter }]}
       actions={
         <ActionPanel>
           <GitLabOpenInBrowserAction url={milestone.webUrl} />
@@ -82,11 +92,21 @@ export function MilestoneList(props: { project?: Project; group?: Group; navigat
   if (error) {
     showErrorToast(error, "Cannot search Milestones");
   }
+  const closeMilestones = milestones.filter((m) => m.state === "closed");
+  const openMilestones = milestones
+    .filter((m) => m.state !== "closed")
+    .sort((a, b) => (a.dueDateTime || 0) - (b.dueDateTime || 0));
+
   return (
     <List isLoading={isLoading} navigationTitle={props.navigationTitle || "Milestones"}>
-      <List.Section title="Milestones">
-        {milestones?.map((milestone) => (
-          <MilestoneListItem key={milestone.id} milestone={milestone} />
+      <List.Section title="Open">
+        {openMilestones?.map((milestone) => (
+          <MilestoneListItem key={openMilestones.id} milestone={milestone} />
+        ))}
+      </List.Section>
+      <List.Section title="Closed">
+        {closeMilestones?.map((milestone) => (
+          <MilestoneListItem key={openMilestones.id} milestone={milestone} />
         ))}
       </List.Section>
     </List>
@@ -132,6 +152,7 @@ export function useSearch(
           id: getIdFromGqlId(p.id),
           title: p.title,
           dueDate: p.dueDate,
+          dueDateTime: p.dueDate ? new Date(p.dueDate).getTime() : undefined,
           state: p.state,
           expired: p.expired,
           webUrl: `${getGitLabGQL().url}/${p.webPath}`,
