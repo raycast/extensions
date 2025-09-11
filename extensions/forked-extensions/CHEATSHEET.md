@@ -2,10 +2,15 @@
 
 ## Git Commands
 
-### Clone a repository with sparse-checkout
+### Clone a repository with `blob:none` filter
 
 ```shell
 git clone --filter=blob:none --no-checkout <fork-repository-url>
+```
+
+### Convert full checkout to sparse checkout with cone mode
+
+```shell
 git sparse-checkout set --cone
 git checkout main
 ```
@@ -19,7 +24,7 @@ git remote add upstream <upstream-repository-url>
 ### Sync the forked repository with the upstream on local
 
 ```shell
-git fetch upstream
+git fetch --prune --filter=blob:none upstream
 git checkout main
 git merge --ff-only upstream/main
 ```
@@ -44,3 +49,14 @@ git sparse-checkout list
    ```shell
    git sparse-checkout reapply
    ```
+
+### Disable sparse-checkout
+
+```shell
+git sparse-checkout disable
+```
+
+## References
+
+- [`git-clone` documentation](https://git-scm.com/docs/git-clone)
+- [`git-sparse-checkout` documentation](https://git-scm.com/docs/git-sparse-checkout)
