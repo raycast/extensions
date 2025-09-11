@@ -1,6 +1,6 @@
 # Rize.io Sessions Changelog
 
-## [1.0.2] - {PR_MERGE_DATE}
+## [1.0.2] - 2025-09-11
 - Added more session length options so they match what Rize.io provides in their Menu bar
 
 ## [1.0.1] - 2025-06-10
