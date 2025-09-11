@@ -13,7 +13,7 @@ export default function Diagnostics() {
     catchError(async () => {
       const isGitInstalled = await git.checkIfGitIsValid();
       const isStatusClean = await git
-        .isStatusClean()
+        .checkIfStatusClean()
         .then(() => true)
         .catch(() => false);
       const localForkedRepository = await git.getForkedRepository();

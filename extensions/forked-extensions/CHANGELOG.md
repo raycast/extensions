@@ -1,5 +1,15 @@
 # Raycast Fork Extensions Changelog
 
+## [Improvements] - 2025-09-11
+
+- Add support for migrating existing full-checkout repositories to sparse-checkout
+- Simplify the description for avoid the content overflow on Windows
+- Use a promise to handle the confirmAlert's async actions
+- Improve fetch speed with "blob:none" filter
+- Update the Hint section to FAQ and add some useful information
+- Mark all component props as readonly for better type safety
+- Update cheatsheet
+
 ## [Improvements] - 2025-09-09
 
 - Run local Git commands before requesting GitHub API to improve performance

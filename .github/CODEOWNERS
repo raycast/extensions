@@ -107,7 +107,7 @@
 /extensions/atomberg-raycast-extension                              @gupta-ji6
 /extensions/atomic                                                  @joepio
 /extensions/atproto-utilities                                       @futurGH
-/extensions/audio-device                                            @benvp @mathieudutour @mike182uk @FezVrasta @rcruzper @thomaspaulmann @arthur-fontaine @pernielsentikaer @taschaub @cballenar @joshmedeski
+/extensions/audio-device                                            @benvp @mathieudutour @mike182uk @FezVrasta @rcruzper @thomaspaulmann @arthur-fontaine @pernielsentikaer @taschaub @cballenar @joshmedeski @jdh747
 /extensions/audio-writer                                            @pradeepb28
 /extensions/authy                                                   @guga4ka @gdsmith @pernielsentikaer @LitoMore
 /extensions/auto-quit-app                                           @koinzhang @alejandrot96
@@ -1684,7 +1684,7 @@
 /extensions/rick-and-morty                                          @xmok
 /extensions/ring-intercom                                           @stefanbd
 /extensions/risk-reward-calculator                                  @demirtarik
-/extensions/rize-io-sessions                                        @sdquinn
+/extensions/rize-io-sessions                                        @sdquinn @devneill
 /extensions/roam-research                                           @dive2Pro @dive2Pro @baibhavbista
 /extensions/roblox                                                  @iamEvanYT
 /extensions/roblox-creator-docs                                     @choppedtuna

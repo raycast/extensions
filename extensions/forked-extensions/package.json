@@ -3,7 +3,7 @@
   "name": "forked-extensions",
   "title": "Forked Extensions",
   "type": "module",
-  "description": "Efficiently manage your forked Raycast extensions using Git sparse-checkout. Explore the full extension catalog, selectively checkout specific extensions, and remove extensions from your forked collection with ease.",
+  "description": "Efficiently manage your forked Raycast extensions using Git sparse-checkout.",
   "icon": "forked-extensions-icon.png",
   "author": "litomore",
   "contributors": [
