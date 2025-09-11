@@ -265,7 +265,7 @@ function SearchSection({
       {/* Loading state handled by parent List's isLoading spinner to avoid empty-state flicker */}
       {showSearchSkeleton && (
         <List.Section title="Loading…">
-          {Array.from({ length: 6 }).map((_, i) => (
+          {Array.from({ length: 9 }).map((_, i) => (
             <List.Item
               key={`search-skeleton-${i}`}
               title="Loading…"
@@ -655,7 +655,7 @@ function LeaderboardSection({
       {/* Loading state handled by parent List's isLoading spinner to avoid empty-state flicker */}
       {showSkeleton && (
         <List.Section title="Loading…">
-          {Array.from({ length: 6 }).map((_, i) => (
+          {Array.from({ length: 9 }).map((_, i) => (
             <List.Item
               key={`skeleton-${i}`}
               title="Loading…"
@@ -668,7 +668,7 @@ function LeaderboardSection({
       )}
       {showPinnedSkeleton && (
         <List.Section title="Pinned">
-          {Array.from({ length: Math.min(6, pinnedIds.length) }).map((_, i) => (
+          {Array.from({ length: Math.min(9, pinnedIds.length) }).map((_, i) => (
             <List.Item
               key={`pinned-skeleton-${i}`}
               title="Loading…"
