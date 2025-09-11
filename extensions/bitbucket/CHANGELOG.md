@@ -1,5 +1,10 @@
 # Bitbucket Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Swap to API tokens, as App Passwords are no longer supported by Bitbucket.
+- Change endpoint used for getting my open pull requests (as the previous one didn't support API tokens)
+
 ## [Maintenance] - 2025-06-18
 
 - Use the npm official registry
