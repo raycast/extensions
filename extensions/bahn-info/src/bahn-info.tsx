@@ -180,7 +180,7 @@ function ErrorItem({ error }: { error: string }) {
     <List.Item
       title={isNetworkError ? "Not connected to WIFIonICE" : "Unable to load train information"}
       subtitle={error}
-      icon={{ source: isNetworkError ? Icon.WifiDisconnected : Icon.ExclamationMark, tintColor: Color.Red }}
+      icon={{ source: isNetworkError ? Icon.Wifi : Icon.ExclamationMark, tintColor: Color.Red }}
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Error" content={error} />

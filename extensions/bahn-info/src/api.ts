@@ -51,7 +51,7 @@ export async function fetchTripInfo(): Promise<TripResponse | null> {
   const isConnected = await checkWiFiOnICEConnection();
   if (!isConnected) {
     throw new NetworkError(
-      "Not connected to WIFIonICE network. Please connect to the WIFIonICE SSID to view train information.",
+      "Please connect to the ICE WiFi network. Make sure you are connected to 'WIFIonICE' to view train information.",
     );
   }
 
@@ -65,8 +65,12 @@ export async function fetchTripInfo(): Promise<TripResponse | null> {
       throw new APIError(`Trip info API error: ${response.status}`, response.status);
     }
 
-    const data: TripResponse = await response.json();
-    return data;
+    try {
+      const data: TripResponse = await response.json();
+      return data;
+    } catch (jsonError) {
+      throw new NetworkError("Please connect to the ICE WiFi. Make sure you are connected to 'WIFIonICE' network.");
+    }
   } catch (error) {
     if (error instanceof APIError || error instanceof NetworkError) {
       throw error;
@@ -91,8 +95,12 @@ export async function fetchStatus(): Promise<StatusResponse | null> {
       throw new APIError(`Status API error: ${response.status}`, response.status);
     }
 
-    const data: StatusResponse = await response.json();
-    return data;
+    try {
+      const data: StatusResponse = await response.json();
+      return data;
+    } catch (jsonError) {
+      throw new NetworkError("Please connect to the ICE WiFi. Make sure you are connected to 'WIFIonICE' network.");
+    }
   } catch (error) {
     if (error instanceof APIError) {
       throw error;
@@ -100,7 +108,9 @@ export async function fetchStatus(): Promise<StatusResponse | null> {
     if (error instanceof Error && error.name === "AbortError") {
       throw new NetworkError("Connection timeout. Please check your WIFIonICE connection.");
     }
-    throw new NetworkError("Unable to connect to ICE Portal. Please ensure you are connected to the WIFIonICE SSID.");
+    throw new NetworkError(
+      "Unable to connect to ICE Portal. Please ensure you are connected to the 'WIFIonICE' network.",
+    );
   }
 }
 
