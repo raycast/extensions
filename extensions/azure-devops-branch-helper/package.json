@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "azure-devops-branch-helper",
+  "title": "Azure DevOps Helper",
+  "description": "Fetch Azure DevOps work items and generate standardized Git branch names",
+  "icon": "devops-icon.png",
+  "author": "tor_gjosaeter",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "branchname",
+      "title": "Generate Branch Name",
+      "description": "Convert task description to branch name format",
+      "mode": "view",
+      "entrypoint": "src/branchname.tsx"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "branchPrefix",
+      "title": "Branch Prefix",
+      "description": "The prefix to use for branch names (e.g., 'tor/', 'feature/')",
+      "type": "textfield",
+      "default": "tor/",
+      "required": false
+    },
+    {
+      "name": "azureOrganization",
+      "title": "Azure DevOps Organization URL",
+      "description": "Your Azure DevOps organization URL (e.g., https://dev.azure.com/myorg)",
+      "type": "textfield",
+      "placeholder": "https://dev.azure.com/myorganization",
+      "required": false
+    },
+    {
+      "name": "azureProject",
+      "title": "Azure DevOps Project (Optional)",
+      "description": "Default project name for Azure DevOps queries",
+      "type": "textfield",
+      "placeholder": "MyProject",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.7",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
