@@ -1,6 +1,6 @@
 # UptimeRobot Changelog
 
-## [Creeat Ping Monitor] - {PR_MERGE_DATE}
+## [Create Ping Monitor + Modernize] - {PR_MERGE_DATE}
 
 - Create Ping Monitors
 - Show monitor type in **Monitors**
