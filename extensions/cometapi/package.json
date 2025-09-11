@@ -161,6 +161,7 @@
     ],
     "dependencies": {
         "@raycast/api": "^1.102.4",
+        "@raycast/utils": "^2.2.1",
         "openai": "^5.12.2"
     },
     "preferences": [
@@ -192,7 +193,8 @@
         "build": "ray build",
         "dev": "ray develop",
         "fix-lint": "ray lint --fix",
-        "lint": "ray lint"
+        "lint": "ray lint",
+        "publish": "ray publish"
     },
     "platforms": [
         "macOS"

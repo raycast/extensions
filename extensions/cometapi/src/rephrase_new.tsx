@@ -16,22 +16,14 @@ import { openai, getGlobalModel } from "./api";
 
 interface FormValues {
   input: string;
-  language: string;
 }
 
 export default function Command() {
   const { push, pop } = useNavigation();
 
-  const prefValues = getPreferenceValues<Preferences.Translate>();
-  const primary = prefValues.primary_language_translate?.trim() || "English";
-  const secondary =
-    prefValues.secondary_language_translate?.trim() || "Chinese";
-
   const { handleSubmit, itemProps, setValue } = useForm<FormValues>({
     async onSubmit(values) {
       const input = values.input?.trim();
-      const manual = values.language?.trim() || "";
-
       if (!input) {
         await showToast({
           style: Toast.Style.Failure,
@@ -40,46 +32,41 @@ export default function Command() {
         return;
       }
 
-      const model = prefValues.model_translate?.trim() || getGlobalModel();
-      push(<Detail isLoading markdown={`Translating...`} />);
+      const prefs = getPreferenceValues<Preferences.Rephrase>();
+      const sys =
+        prefs.prompt_rephrase?.trim() ||
+        "Rephrase the following text to make it clearer and more natural, without changing its meaning:";
+      const model = prefs.model_rephrase?.trim() || getGlobalModel();
+      push(<Detail isLoading markdown="Rephrasing..." />);
 
       try {
-        const basePrompt = (
-          prefValues.prompt_translate?.trim() ||
-          "You are a translation assistant. Rules:\n1) If the user supplies 'Target: <LANG>', translate into <LANG>.\n2) If the source language is {PRIMARY} or {SECONDARY}, translate into the other one.\n3) Otherwise, translate into {PRIMARY}.\nPreserve formatting and meaning. Output only the translated text without extra explanations."
-        )
-          .replace("{PRIMARY}", primary)
-          .replace("{SECONDARY}", secondary);
-
-        const userContent = manual ? `Target: ${manual}\n\n${input}` : input;
-
         const res = await openai.chat.completions.create({
           model,
           messages: [
-            { role: "system", content: basePrompt },
-            { role: "user", content: userContent },
+            { role: "system", content: sys },
+            { role: "user", content: input },
           ],
         });
 
         const content = res.choices?.[0]?.message?.content ?? "(no content)";
         push(
           <Detail
-            markdown={`# Translation
+            markdown={`# Rephrase
 
-## Input
+## Original Text
 ${input}
 
-## Output
+## Rephrased
 ${content}`}
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard
-                  title="Copy Translation"
+                  title="Copy Rephrased"
                   content={content}
                   icon={Icon.Clipboard}
                 />
                 <Action.Paste
-                  title="Paste Translation"
+                  title="Paste Rephrased"
                   content={content}
                   icon={Icon.Text}
                 />
@@ -96,7 +83,7 @@ ${content}`}
         const msg = e instanceof Error ? e.message : String(e);
         await showToast({
           style: Toast.Style.Failure,
-          title: "Translate failed",
+          title: "Rephrase failed",
           message: msg,
         });
         pop();
@@ -104,7 +91,6 @@ ${content}`}
     },
     initialValues: {
       input: "",
-      language: "",
     },
     validation: {
       input: FormValidation.Required,
@@ -127,8 +113,8 @@ ${content}`}
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="Translate"
-            icon={Icon.Globe}
+            title="Rephrase"
+            icon={Icon.Pencil}
             onSubmit={handleSubmit}
           />
         </ActionPanel>
@@ -136,13 +122,8 @@ ${content}`}
     >
       <Form.TextArea
         title="Text"
-        placeholder="Example: Hello, my name is Sarah and I work as a software engineer at a technology company. I love programming and solving complex problems. In my free time, I enjoy reading books, hiking in the mountains, and learning new languages. Today is a beautiful day and I'm excited to start working on a new project that will help people communicate better across different cultures."
+        placeholder="Paste or type text to rephrase..."
         {...itemProps.input}
-      />
-      <Form.TextField
-        title="Target Language"
-        placeholder={`${primary} | ${secondary}`}
-        {...itemProps.language}
       />
     </Form>
   );

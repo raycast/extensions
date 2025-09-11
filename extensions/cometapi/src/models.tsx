@@ -137,7 +137,11 @@ export default function Command() {
         markdown={details}
         actions={
           <ActionPanel>
-            <Action.CopyToClipboard title="Copy Model ID" content={model.id} />
+            <Action.CopyToClipboard
+              title="Copy Model ID"
+              content={model.id}
+              icon={Icon.Clipboard}
+            />
             <Action.CopyToClipboard
               title="Copy Usage Example"
               content={JSON.stringify(
@@ -151,6 +155,7 @@ export default function Command() {
                 null,
                 2,
               )}
+              icon={Icon.Code}
             />
             <Action
               title="Refresh Models"
@@ -206,11 +211,13 @@ export default function Command() {
               <ActionPanel>
                 <Action
                   title="View Details"
+                  icon={Icon.Eye}
                   onAction={() => showModelDetails(model)}
                 />
                 <Action.CopyToClipboard
                   title="Copy Model ID"
                   content={model.id}
+                  icon={Icon.Clipboard}
                 />
                 <Action
                   title="Refresh Models"
@@ -250,11 +257,13 @@ export default function Command() {
                   <ActionPanel>
                     <Action
                       title="View Details"
+                      icon={Icon.Eye}
                       onAction={() => showModelDetails(model)}
                     />
                     <Action.CopyToClipboard
                       title="Copy Model ID"
                       content={model.id}
+                      icon={Icon.Clipboard}
                     />
                   </ActionPanel>
                 }

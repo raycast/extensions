@@ -1,12 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import OpenAI from "openai";
 
-type Prefs = {
-  apikey: string;
-  model: string;
-};
-
-const preferences = getPreferenceValues<Prefs>();
+const preferences = getPreferenceValues<Preferences>();
 
 function sanitizeApiKey(key: string) {
   return (
