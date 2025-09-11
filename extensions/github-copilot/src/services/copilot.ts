@@ -64,11 +64,32 @@ type ListAgentSessionsResponse = {
   sessions: AgentSession[];
 };
 
-type CreateTaskResponse = {
-  pull_request: {
-    html_url: string;
+type CreateJobResponse = {
+  job_id: string;
+  session_id: string;
+  actor: {
+    id: number;
+    login: string;
   };
+  created_at: string;
+  updated_at: string;
 };
+
+type GetJobResponse =
+  | {
+      status: "pending";
+      error?: {
+        message: string;
+        response_status_code: string;
+      };
+    }
+  | {
+      status: "queued";
+      pull_request: {
+        id: number;
+        number: number;
+      };
+    };
 
 // Generates a global ID for a pull request based on its ID and repository ID.
 // This implementation is NOT safe or guaranteed to work - but it does at the
@@ -79,7 +100,11 @@ const unsafelyGetGlobalIdForPullRequest = (pullRequestId: number, repoId: number
   return "PR_" + Buffer.from(encoded).toString("base64");
 };
 
-export async function createTask(repository: string, prompt: string, branch: string) {
+export async function createTask(
+  repository: string,
+  prompt: string,
+  branch: string,
+): Promise<{ pullRequestUrl: string }> {
   const { token } = getAccessToken();
 
   let generatedTitle: string | null = null;
@@ -100,7 +125,7 @@ export async function createTask(repository: string, prompt: string, branch: str
     }
   }
 
-  const response = await fetch(`https://api.githubcopilot.com/agents/swe/jobs/${repository}`, {
+  const createJobResponse = await fetch(`https://api.githubcopilot.com/agents/swe/v1/jobs/${repository}`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -117,18 +142,59 @@ export async function createTask(repository: string, prompt: string, branch: str
     }),
   });
 
-  if (!response.ok) {
-    if (response.status === 403) {
+  if (!createJobResponse.ok) {
+    if (createJobResponse.status === 403) {
       throw new Error(
         "Failed to create task. Please check if Copilot coding agent is enabled for your user at https://github.com/settings/copilot/features.",
       );
     } else {
-      throw new Error(`Failed to create task: ${response.statusText}`);
+      throw new Error(`Failed to create task: ${createJobResponse.statusText}`);
     }
   }
 
-  return (await response.json()) as CreateTaskResponse;
+  const createJobResult = (await createJobResponse.json()) as CreateJobResponse;
+  return { pullRequestUrl: await pollJobUntilPullRequestUrlReady({ repository, jobId: createJobResult.job_id }) };
 }
+
+const pollJobUntilPullRequestUrlReady = async ({
+  repository,
+  jobId,
+}: {
+  repository: string;
+  jobId: string;
+}): Promise<string> => {
+  const { token } = getAccessToken();
+
+  const getJobResponse = await fetch(`https://api.githubcopilot.com/agents/swe/v1/jobs/${repository}/${jobId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!getJobResponse.ok) {
+    throw new Error(`Failed to get job status: ${getJobResponse.statusText}`);
+  }
+
+  const getJobResult = (await getJobResponse.json()) as GetJobResponse;
+
+  if (getJobResult.status !== "pending") {
+    const pullRequestUrl = `https://github.com/${repository}/pull/${getJobResult.pull_request.number}`;
+    return pullRequestUrl;
+  } else if (getJobResult.error) {
+    if (getJobResult.error.response_status_code === "422") {
+      throw new Error(
+        "Failed to create task. Copilot is unable to work in your repository due to rules or branch protections. You can resolve this error by excluding branches starting with `copilot/` from policies configured.",
+      );
+    } else {
+      throw new Error(`Failed to create task: ${getJobResponse.statusText}`);
+    }
+  } else {
+    await sleep(1_000);
+    return pollJobUntilPullRequestUrlReady({ repository, jobId });
+  }
+};
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const fetchSessions = async (): Promise<
   {
@@ -259,5 +325,5 @@ export const fetchSessions = async (): Promise<
 };
 
 // Export types for use in other files
-export type { AgentSession, PullRequest, PullRequestWithAgentSessions, CreateTaskResponse };
+export type { AgentSession, PullRequest, PullRequestWithAgentSessions };
 export { AgentSessionState };
