@@ -11,7 +11,7 @@ import {
 } from "../storage";
 import { LocationUtils } from "../utils/location-utils";
 import { DebugLogger } from "../utils/debug-utils";
-import { buildGraphMarkdown } from "../graph";
+import { buildGraphMarkdown } from "../graph-utils";
 import { getUIThresholds, getTimingThresholds } from "../config/weather-config";
 
 export interface UseFavoritesReturn {

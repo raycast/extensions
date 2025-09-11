@@ -82,6 +82,25 @@
           "default": true
         },
         {
+          "name": "clockFormat",
+          "label": "Clock Format",
+          "title": "Clock Format",
+          "description": "Choose 12-hour or 24-hour time format",
+          "type": "dropdown",
+          "required": false,
+          "default": "24h",
+          "data": [
+            {
+              "title": "24-Hour (14:30)",
+              "value": "24h"
+            },
+            {
+              "title": "12-Hour (2:30 PM)",
+              "value": "12h"
+            }
+          ]
+        },
+        {
           "name": "debugMode",
           "label": "Debug Mode",
           "title": "Debug Mode",
