@@ -21,7 +21,6 @@ import { ToastMessages } from "./utils/toast-utils";
 import { WeatherFormatters } from "./utils/weather-formatters";
 import { LocationUtils } from "./utils/location-utils";
 import { DebugLogger } from "./utils/debug-utils";
-import { OpenGraphAction } from "./components/OpenGraphAction";
 import { FavoriteToggleAction } from "./components/FavoriteToggleAction";
 
 export default function Command() {
