@@ -50,3 +50,22 @@ export type ColorFormatType =
   | "oklch"
   | "lch"
   | "p3";
+
+export type UseColorsSelectionObject<T = HistoryItem | string> = {
+  actions: {
+    toggleSelection: (item: T) => void;
+    selectAll: () => void;
+    clearSelection: () => void;
+  };
+  selected: {
+    selectedItems: T[];
+    anySelected: boolean;
+    allSelected: boolean;
+    countSelected: number;
+  };
+  helpers: {
+    getIsItemSelected: (item: T) => boolean;
+  };
+};
+
+export type CopyColorsFormat = "json" | "css-classes" | "css-variables";

@@ -1,8 +1,9 @@
-import { AI, Action, ActionPanel, Grid, LaunchProps } from "@raycast/api";
+import { AI, Action, ActionPanel, Grid, Icon, LaunchProps } from "@raycast/api";
 import { showFailureToast, useAI } from "@raycast/utils";
 import CopyAsSubmenu from "./components/CopyAsSubmenu";
 import { addToHistory } from "./history";
-import { getFormattedColor, getPreviewColor } from "./utils";
+import { useColorsSelection } from "./hooks/useColorsSelection";
+import { COPY_FORMATS, copySelectedColors, getFormattedColor, getPreviewColor } from "./utils";
 
 export default function GenerateColors(props: LaunchProps<{ arguments: Arguments.GenerateColors }>) {
   const { data, isLoading } = useAI(
@@ -32,22 +33,80 @@ JSON colors:`,
     showFailureToast(error, { title: "Could not generate colors, please try again." });
   }
 
+  const { selection } = useColorsSelection(colors);
+
   return (
     <Grid columns={5} isLoading={isLoading}>
       {colors.map((c, index) => {
         const formattedColor = getFormattedColor(c);
         const previewColor = getPreviewColor(c);
-        const color = { light: previewColor, dark: previewColor, adjustContrast: false };
+
+        const isSelected = selection.helpers.getIsItemSelected(c);
+        const content = isSelected
+          ? { source: Icon.CircleFilled, tintColor: { light: previewColor, dark: previewColor, adjustContrast: false } }
+          : { color: { light: previewColor, dark: previewColor, adjustContrast: false } };
+
         return (
           <Grid.Item
             key={index}
-            content={{ color }}
-            title={formattedColor}
+            content={content}
+            title={`${isSelected ? "✓ " : ""}${formattedColor}`}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard content={formattedColor} onCopy={() => addToHistory(formattedColor)} />
-                <Action.Paste content={formattedColor} onPaste={() => addToHistory(formattedColor)} />
-                <CopyAsSubmenu color={formattedColor} onCopy={() => addToHistory(formattedColor)} />
+                <ActionPanel.Section title={`Color ${formattedColor}`}>
+                  <Action.CopyToClipboard
+                    title={`Copy Color ${formattedColor}`}
+                    content={formattedColor}
+                    onCopy={() => addToHistory(formattedColor)}
+                  />
+                  <Action.Paste content={formattedColor} onPaste={() => addToHistory(formattedColor)} />
+                  <CopyAsSubmenu color={formattedColor} onCopy={() => addToHistory(formattedColor)} />
+                </ActionPanel.Section>
+                <ActionPanel.Section title="Multiple Colors">
+                  {selection.selected.countSelected > 0 && (
+                    <ActionPanel.Submenu
+                      title="Copy Selected Colors"
+                      icon={Icon.CopyClipboard}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                    >
+                      <Action.CopyToClipboard
+                        title="Copy to Organize Colors"
+                        content={selection.selected.selectedItems.map((item) => getFormattedColor(item)).join(";")}
+                        onCopy={() => selection.selected.selectedItems.map((i) => addToHistory(i))}
+                      />
+                      {COPY_FORMATS.map(({ format, title, icon }) => (
+                        <Action.CopyToClipboard
+                          key={format}
+                          title={title}
+                          content={copySelectedColors(selection.selected.selectedItems, format)}
+                          icon={icon}
+                        />
+                      ))}
+                    </ActionPanel.Submenu>
+                  )}
+                  <Action
+                    icon={isSelected ? Icon.Checkmark : Icon.Circle}
+                    title={isSelected ? `Deselect Color ${formattedColor}` : `Select Color ${formattedColor}`}
+                    shortcut={{ modifiers: ["cmd"], key: "s" }}
+                    onAction={() => selection.actions.toggleSelection(c)}
+                  />
+                  {!selection.selected.allSelected && (
+                    <Action
+                      icon={Icon.Checkmark}
+                      title="Select All Colors"
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                      onAction={selection.actions.selectAll}
+                    />
+                  )}
+                  {selection.selected.anySelected && (
+                    <Action
+                      icon={Icon.XMarkCircle}
+                      title="Clear Selection"
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "z" }}
+                      onAction={selection.actions.clearSelection}
+                    />
+                  )}
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />
