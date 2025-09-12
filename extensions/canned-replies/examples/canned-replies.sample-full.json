@@ -1,0 +1,17 @@
+[
+  {
+    "id": "reply-001",
+    "title": "Out of Office",
+    "body": "I’m out until 2025-09-15.\nCheers,\nName",
+    "createdAt": "2025-09-09T12:34:56.789Z",
+    "updatedAt": "2025-09-09T12:34:56.789Z"
+  },
+  {
+    "id": "reply-002",
+    "title": "Thanks For Reaching Out",
+    "body": "Thanks! I’ll reply with details shortly.",
+    "createdAt": "2025-08-01T10:00:00.000Z",
+    "updatedAt": "2025-08-20T16:45:00.000Z"
+  }
+]
+

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "canned-replies",
+  "title": "Canned Replies",
+  "description": "Send email templates quickly in Apple Mail",
+  "version": "1.0.0",
+  "author": "enragedsaturday",
+  "license": "MIT",
+  "icon": "icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Enragedsaturday/raycast-canned-email-response"
+  },
+  "homepage": "https://github.com/Enragedsaturday/raycast-canned-email-response",
+  "bugs": {
+    "url": "https://github.com/Enragedsaturday/raycast-canned-email-response/issues"
+  },
+  "categories": [
+    "Productivity",
+    "Communication",
+    "Applications"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "keywords": [
+    "apple mail",
+    "email",
+    "templates",
+    "canned replies",
+    "canned responses"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Canned Replies",
+      "subtitle": "Canned Replies for Apple Mail",
+      "description": "Search and insert saved email replies",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.7",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "npx ray develop",
+    "build": "npx ray build",
+    "lint": "npx ray lint",
+    "type-check": "tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo '\nThis project is a Raycast extension, not an npm package. Use `npm run publish` to submit to the Raycast Store.\n' && exit 1"
+  }
+}
