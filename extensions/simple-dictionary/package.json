@@ -11,6 +11,13 @@
   ],
   "commands": [
     {
+      "name": "history",
+      "title": "View History",
+      "description": "View your search history",
+      "mode": "view",
+      "arguments": []
+    },
+    {
       "name": "list",
       "title": "View Favorites",
       "description": "View your favourite words",
