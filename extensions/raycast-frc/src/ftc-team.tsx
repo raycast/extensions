@@ -1,21 +1,14 @@
 import { ActionPanel, Action, List, Detail } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useCachedPromise } from "@raycast/utils";
 
 export interface MatchData {
   matchId: number;
   match: {
     scores: {
-      red?: {
-        totalPoints: number;
-      };
-      blue?: {
-        totalPoints: number;
-      };
+      red?: { totalPoints: number };
+      blue?: { totalPoints: number };
     };
-    teams: {
-      alliance: "Red" | "Blue";
-      teamNumber: number;
-    }[];
+    teams: { alliance: "Red" | "Blue"; teamNumber: number }[];
     matchNum: number;
     series: number;
     tournamentLevel?: string;
@@ -30,12 +23,7 @@ interface EventData {
   season: number;
   event: {
     name: string;
-    location: {
-      city: string;
-      state: string;
-      country: string;
-      venue: string;
-    };
+    location: { city: string; state: string; country: string; venue: string };
     teamMatches: MatchData[];
   };
   stats?: {
@@ -43,14 +31,8 @@ interface EventData {
     losses?: number;
     ties?: number;
     rank?: number;
-    opr?: {
-      totalPointsNp?: number;
-      dcPoints?: number;
-      autoPoints?: number;
-    };
-    avg?: {
-      totalPointsNp?: number;
-    };
+    opr?: { totalPointsNp?: number; dcPoints?: number; autoPoints?: number };
+    avg?: { totalPointsNp?: number };
     rp?: number;
   };
 }
@@ -58,11 +40,7 @@ interface EventData {
 export interface TeamData {
   name: string;
   number: number;
-  location: {
-    city: string;
-    country: string;
-    state: string;
-  };
+  location: { city: string; country: string; state: string };
   quickStats: {
     auto: { rank: number; value: number };
     eg: { rank: number; value: number };
@@ -70,76 +48,35 @@ export interface TeamData {
     dc: { rank: number; value: number };
   };
   events?: EventData[];
-  awards: {
-    eventCode: string;
-    type: string;
-  }[];
+  awards: { eventCode: string; type: string }[];
 }
 
-export default function Command({
-  arguments: { team },
-}: {
-  arguments: Arguments.FtcTeam;
-}) {
-  const [data, setData] = useState<TeamData | null>(null);
-  const [teamExists, setTeamExists] = useState<boolean>(true);
-
-  useEffect(() => {
-    async function fetchTeam() {
-      try {
-        const query = `
+async function fetchTeam(team: string): Promise<TeamData | null> {
+  const query = `
 query ExampleQuery($number: Int!, $season: Int!) {
   teamByNumber(number: $number) {
     name
-    location {
-      city
-      state
-      country
-    }
+    location { city state country }
     quickStats(season: $season) {
-      auto {
-        rank
-        value
-      }
-      eg {
-        rank
-        value
-      }
-      tot {
-        rank
-        value
-      }
-      dc {
-        rank
-        value
-      }
+      auto { rank value }
+      eg { rank value }
+      tot { rank value }
+      dc { rank value }
     }
     events(season: $season) {
       season
       eventCode
       event {
-        location {
-          city
-          state
-          country
-          venue
-        }
+        location { city state country venue }
         teamMatches(teamNumber: $number) {
           match {
             scores {
               ... on MatchScores2024 {
-                red {
-                  totalPoints                 
-                }
-                blue {
-                  totalPoints
-                }
+                red { totalPoints }
+                blue { totalPoints }
               }
             }
-            teams {
-              alliance
-              teamNumber
-            }
+            teams { alliance teamNumber }
             matchNum
             series
             tournamentLevel
@@ -150,110 +87,100 @@ query ExampleQuery($number: Int!, $season: Int!) {
       }
       stats {
         ... on TeamEventStats2024 {
-          wins
-          losses
-          ties
-          rank
-          opr {
-            totalPointsNp
-            dcPoints
-            autoPoints
-          }
-          avg {
-            totalPointsNp
-          }
+          wins losses ties rank
+          opr { totalPointsNp dcPoints autoPoints }
+          avg { totalPointsNp }
           rp
         }
       }
     }
-    awards(season: $season) {
-      eventCode
-      type
-    }
+    awards(season: $season) { eventCode type }
   }
 }`;
-        const variables = { number: parseInt(team), season: 2024 };
+  const variables = { number: parseInt(team), season: 2024 };
 
-        const response = await fetch("https://api.ftcscout.org/graphql", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query, variables }),
-        });
+  const response = await fetch("https://api.ftcscout.org/graphql", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query, variables }),
+  });
 
-        const json = (await response.json()) as {
-          data?: { teamByNumber?: TeamData };
-          errors?: unknown;
-        };
-        if (!json.data || !json.data.teamByNumber) {
-          setTeamExists(false);
-          console.log("GraphQL Response:", json);
-        } else if (json.errors) {
-          console.error("GraphQL Error:", json.errors);
-          setTeamExists(false);
-        } else {
-          setData(json.data.teamByNumber);
-        }
-      } catch (error) {
-        setTeamExists(false);
-        console.error("Fetch Error:", error);
-      }
-    }
+  const json = (await response.json()) as {
+    data?: { teamByNumber?: TeamData };
+    errors?: unknown;
+  };
 
-    fetchTeam();
-  }, [team]);
+  if (!json.data || !json.data.teamByNumber || json.errors) {
+    return null;
+  }
+
+  return json.data.teamByNumber;
+}
+
+export default function Command({
+  arguments: { team },
+}: {
+  arguments: Arguments.FtcTeam;
+}) {
+  const { data, isLoading, error } = useCachedPromise(
+    (team: string) => fetchTeam(team),
+    [team],
+  );
+
+  if (error || data === null) {
+    return <Detail markdown={`# Invalid Team Number\n`} />;
+  }
 
   return (
-    <>
-      {teamExists ? (
-        <List isShowingDetail={true} filtering={false}>
-          {data ? (
-            <>
-              <List.Item
-                title={`Team ${team}`}
-                actions={
-                  <ActionPanel>
-                    <Action.OpenInBrowser
-                      url={`https://ftcstats.org/team/${team}`}
-                      title="View Team on Ftc Stats"
-                    />
-                  </ActionPanel>
-                }
-                subtitle={`OPR: ${data.quickStats.tot.value.toFixed(2)}`}
-                detail={
-                  <List.Item.Detail
-                    markdown={`
+    <List isShowingDetail filtering={false} isLoading={isLoading}>
+      {data ? (
+        <>
+          <List.Item
+            title={`Team ${team}`}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser
+                  url={`https://ftcstats.org/team/${team}`}
+                  title="View Team on Ftc Stats"
+                />
+              </ActionPanel>
+            }
+            subtitle={`OPR: ${data.quickStats.tot.value.toFixed(2)}`}
+            detail={
+              <List.Item.Detail
+                markdown={`
 # Team ${team} - ${data.name}
 From ${data.location.city}, ${data.location.state}, ${data.location.country}
 
 ## Quick Stats
 |               | Total NP | Auto    | Teleop  | Endgame |
 |---------------|----------|---------|---------|---------|
-| **Best OPR**  | ${data.quickStats?.tot?.value !== undefined ? data.quickStats.tot.value.toFixed(2) : "-"} | ${data.quickStats?.auto?.value !== undefined ? data.quickStats.auto.value.toFixed(2) : "-"} | ${data.quickStats?.dc?.value !== undefined ? data.quickStats.dc.value.toFixed(2) : "-"} | ${data.quickStats?.eg?.value !== undefined ? data.quickStats.eg.value.toFixed(2) : "-"} |
-| **Rank**      | ${data.quickStats?.tot?.rank ?? "-"}  | ${data.quickStats?.auto?.rank ?? "-"}  | ${data.quickStats?.dc?.rank ?? "-"}  | ${data.quickStats?.eg?.rank ?? "-"}  |`}
-                  />
-                }
+| **Best OPR**  | ${data.quickStats?.tot?.value?.toFixed(2) ?? "-"} | ${data.quickStats?.auto?.value?.toFixed(2) ?? "-"} | ${data.quickStats?.dc?.value?.toFixed(2) ?? "-"} | ${data.quickStats?.eg?.value?.toFixed(2) ?? "-"} |
+| **Rank**      | ${data.quickStats?.tot?.rank ?? "-"} | ${data.quickStats?.auto?.rank ?? "-"} | ${data.quickStats?.dc?.rank ?? "-"} | ${data.quickStats?.eg?.rank ?? "-"} |`}
               />
+            }
+          />
 
-              <List.Section title="Events">
-                {data.events?.map((event) => (
-                  <List.Item
-                    key={event.eventCode}
-                    title={event.event.name}
-                    subtitle={`${event.event.location.city}, ${event.event.location.state}`}
-                    actions={
-                      <ActionPanel>
-                        <Action.OpenInBrowser
-                          url={`https://ftcscout.org/events/2024/${event.eventCode}`}
-                          title="View Event on Ftc Stats"
-                        />
-                      </ActionPanel>
-                    }
-                    detail={
-                      <List.Item.Detail
-                        markdown={`
+          <List.Section title="Events">
+            {data.events?.map((event) => (
+              <List.Item
+                key={event.eventCode}
+                title={event.event.name}
+                subtitle={`${event.event.location.city}, ${event.event.location.state}`}
+                actions={
+                  <ActionPanel>
+                    <Action.OpenInBrowser
+                      url={`https://ftcscout.org/events/2024/${event.eventCode}`}
+                      title="View Event on Ftc Stats"
+                    />
+                  </ActionPanel>
+                }
+                detail={
+                  <List.Item.Detail
+                    markdown={`
 # ${event.event.name}
 
-${event.event.location.venue === null ? "" : `${event.event.location.venue}, `}${event.event.location.city}, ${event.event.location.state}, ${event.event.location.country}
+${event.event.location.venue ? `${event.event.location.venue}, ` : ""}${event.event.location.city}, ${event.event.location.state}, ${event.event.location.country}
 
 (${event.eventCode})
 
@@ -272,21 +199,17 @@ WLT: **${event.stats.wins}-${event.stats.losses}-${event.stats.ties}**
 ${getAwardsFTC(data.awards, event.eventCode)}
 
 ${getFTCMatchesTable(event.event.teamMatches, team, event.eventCode)}
-        `}
-                      />
-                    }
+                    `}
                   />
-                ))}
-              </List.Section>
-            </>
-          ) : (
-            <List.Item title={`Team ${team}`} subtitle="Loading..." />
-          )}
-        </List>
+                }
+              />
+            ))}
+          </List.Section>
+        </>
       ) : (
-        <Detail markdown={`# Invalid Team Number\n    `} />
+        <List.Item title={`Team ${team}`} subtitle="Loading..." />
       )}
-    </>
+    </List>
   );
 }
 
@@ -305,6 +228,7 @@ function getFTCMatchesTable(
   const finals = matches
     .filter((m) => m.match.tournamentLevel === "Finals")
     .sort((a, b) => a.match.matchNum - b.match.matchNum);
+
   function tableSection(sectionMatches: MatchData[], sectionTitle: string) {
     if (sectionMatches.length === 0) return "";
     let md = `\n### ${sectionTitle}\n`;
@@ -317,11 +241,8 @@ function getFTCMatchesTable(
         let redDisplay = redScore ?? "-";
         let blueDisplay = blueScore ?? "-";
         if (typeof redScore === "number" && typeof blueScore === "number") {
-          if (redScore > blueScore) {
-            redDisplay = `**${redScore}**`;
-          } else if (blueScore > redScore) {
-            blueDisplay = `**${blueScore}**`;
-          }
+          if (redScore > blueScore) redDisplay = `**${redScore}**`;
+          else if (blueScore > redScore) blueDisplay = `**${blueScore}**`;
         }
         const matchNumLabel =
           match.match.tournamentLevel == "DoubleElim"
@@ -380,6 +301,5 @@ export function getAwardsFTC(
       types.push(formattedType);
     }
   }
-  if (!types || types.length === 0) return "";
-  return types.join(", ");
+  return types.join(", ") || "";
 }

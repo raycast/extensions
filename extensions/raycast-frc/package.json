@@ -57,7 +57,7 @@
     },
     {
       "name": "ftc-search",
-      "title": "Search FTC Search",
+      "title": "Search FTC",
       "description": "Search for FTC teams",
       "mode": "view"
     }
