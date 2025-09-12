@@ -1,5 +1,6 @@
 import React, { Component, ReactNode } from "react";
-import { List, Action, ActionPanel, Icon, showToast, Toast } from "@raycast/api";
+import { List, showToast, Toast } from "@raycast/api";
+import { ActionPanelBuilders } from "../utils/action-panel-builders";
 import { DebugLogger } from "../utils/debug-utils";
 
 interface ErrorBoundaryState {
@@ -126,36 +127,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                 tooltip: "Number of retry attempts",
               },
             ]}
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Retry"
-                  icon={Icon.ArrowClockwise}
-                  onAction={this.handleRetry}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
-                />
-                <Action
-                  title="Reset"
-                  icon={Icon.Trash}
-                  onAction={this.handleReset}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-                />
-                <Action
-                  title="Show Error Details"
-                  icon={Icon.Info}
-                  onAction={() => {
-                    const error = this.state.error;
-                    if (error) {
-                      showToast({
-                        style: Toast.Style.Failure,
-                        title: "Error Details",
-                        message: error.message,
-                      });
-                    }
-                  }}
-                />
-              </ActionPanel>
-            }
+            actions={ActionPanelBuilders.createErrorActions(this.handleRetry, this.handleReset, this.state.error)}
           />
         </List.Section>
       );

@@ -3,6 +3,8 @@
  * This consolidates all date/time formatting logic into a single source of truth
  */
 
+import { getClockFormat } from "../clock";
+
 /**
  * Common date formatting options used throughout the application
  */
@@ -80,10 +82,21 @@ export function formatDate(date: Date | string, format: keyof typeof DATE_FORMAT
 
 /**
  * Format a time using predefined format options
+ * Respects user's clock format preference (12h/24h)
  */
 export function formatTime(date: Date | string, format: keyof typeof TIME_FORMATS): string {
   const dateObj = typeof date === "string" ? new Date(date) : date;
-  return dateObj.toLocaleTimeString(undefined, TIME_FORMATS[format]);
+  const clockFormat = getClockFormat();
+
+  // Get the base format options
+  const formatOptions = { ...TIME_FORMATS[format] };
+
+  // Override hour12 based on user preference for STANDARD and MILITARY formats
+  if (format === "STANDARD" || format === "MILITARY") {
+    (formatOptions as Intl.DateTimeFormatOptions).hour12 = clockFormat === "12h";
+  }
+
+  return dateObj.toLocaleTimeString(undefined, formatOptions);
 }
 
 /**
@@ -151,6 +164,7 @@ export function getRelativeDateString(date: Date | string): string {
 
 /**
  * Format time range between two dates
+ * Respects user's clock format preference (12h/24h)
  */
 export function formatTimeRange(
   start: Date | string,

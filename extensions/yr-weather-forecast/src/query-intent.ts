@@ -99,9 +99,17 @@ function startOfLocalDay(date: Date): Date {
 function thisOrNextOccurrence(weekday: number, now = new Date()): Date {
   const base = startOfLocalDay(now);
   const current = base.getDay();
-  const delta = (weekday - current + 7) % 7; // allow today
+  let delta = (weekday - current + 7) % 7;
+  if (delta === 0) {
+    delta = 7; // If it's the same day, go to next week
+  }
   const target = new Date(base);
   target.setDate(base.getDate() + delta);
+
+  console.log(
+    `thisOrNextOccurrence: weekday=${weekday}, current=${current}, delta=${delta}, target=${target.toDateString()}`,
+  );
+
   return target;
 }
 
@@ -158,6 +166,9 @@ export function parseQueryIntent(input: string, now = new Date()): QueryIntent {
     const dw = dayTokenToWeekday[t];
     if (typeof dw === "number") {
       weekday = dw;
+      console.log(
+        `Found weekday token: "${t}" -> ${dw} (${["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dw]})`,
+      );
       continue;
     }
   }

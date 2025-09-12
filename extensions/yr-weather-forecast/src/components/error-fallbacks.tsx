@@ -1,5 +1,6 @@
 import React from "react";
-import { List, Action, ActionPanel, Icon, showToast, Toast } from "@raycast/api";
+import { List } from "@raycast/api";
+import { ActionPanelBuilders } from "../utils/action-panel-builders";
 
 interface ErrorFallbackProps {
   componentName: string;
@@ -32,33 +33,7 @@ export function WeatherErrorFallback({
             tooltip: "Number of retry attempts",
           },
         ]}
-        actions={
-          <ActionPanel>
-            <Action
-              title="Retry Weather Load"
-              icon={Icon.ArrowClockwise}
-              onAction={onRetry}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
-            />
-            <Action
-              title="Reset Component"
-              icon={Icon.Trash}
-              onAction={onReset}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-            />
-            <Action
-              title="Check Network"
-              icon={Icon.Globe}
-              onAction={() => {
-                showToast({
-                  style: Toast.Style.Animated,
-                  title: "Checking Network",
-                  message: "Testing connectivity to weather services...",
-                });
-              }}
-            />
-          </ActionPanel>
-        }
+        actions={ActionPanelBuilders.createErrorActions(onRetry || (() => {}), onReset || (() => {}), undefined)}
       />
     </List.Section>
   );
@@ -86,33 +61,7 @@ export function SearchErrorFallback({
             tooltip: "Number of retry attempts",
           },
         ]}
-        actions={
-          <ActionPanel>
-            <Action
-              title="Retry Search"
-              icon={Icon.ArrowClockwise}
-              onAction={onRetry}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
-            />
-            <Action
-              title="Reset Search"
-              icon={Icon.Trash}
-              onAction={onReset}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-            />
-            <Action
-              title="Try Different Search"
-              icon={Icon.MagnifyingGlass}
-              onAction={() => {
-                showToast({
-                  style: Toast.Style.Success,
-                  title: "Search Reset",
-                  message: "Try searching for a different location",
-                });
-              }}
-            />
-          </ActionPanel>
-        }
+        actions={ActionPanelBuilders.createErrorActions(onRetry || (() => {}), onReset || (() => {}), undefined)}
       />
     </List.Section>
   );
@@ -140,33 +89,7 @@ export function GraphErrorFallback({
             tooltip: "Number of retry attempts",
           },
         ]}
-        actions={
-          <ActionPanel>
-            <Action
-              title="Retry Graph"
-              icon={Icon.ArrowClockwise}
-              onAction={onRetry}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
-            />
-            <Action
-              title="Reset Graph"
-              icon={Icon.Trash}
-              onAction={onReset}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-            />
-            <Action
-              title="View Forecast Instead"
-              icon={Icon.List}
-              onAction={() => {
-                showToast({
-                  style: Toast.Style.Success,
-                  title: "Switch to Forecast",
-                  message: "Try viewing the detailed forecast instead",
-                });
-              }}
-            />
-          </ActionPanel>
-        }
+        actions={ActionPanelBuilders.createErrorActions(onRetry || (() => {}), onReset || (() => {}), undefined)}
       />
     </List.Section>
   );
@@ -194,33 +117,7 @@ export function FavoritesErrorFallback({
             tooltip: "Number of retry attempts",
           },
         ]}
-        actions={
-          <ActionPanel>
-            <Action
-              title="Retry Favorites"
-              icon={Icon.ArrowClockwise}
-              onAction={onRetry}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
-            />
-            <Action
-              title="Reset Favorites"
-              icon={Icon.Trash}
-              onAction={onReset}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-            />
-            <Action
-              title="Search for Locations"
-              icon={Icon.MagnifyingGlass}
-              onAction={() => {
-                showToast({
-                  style: Toast.Style.Success,
-                  title: "Search Mode",
-                  message: "You can still search for new locations",
-                });
-              }}
-            />
-          </ActionPanel>
-        }
+        actions={ActionPanelBuilders.createErrorActions(onRetry || (() => {}), onReset || (() => {}), undefined)}
       />
     </List.Section>
   );
@@ -249,35 +146,7 @@ export function GenericErrorFallback({
             tooltip: "Number of retry attempts",
           },
         ]}
-        actions={
-          <ActionPanel>
-            <Action
-              title="Retry"
-              icon={Icon.ArrowClockwise}
-              onAction={onRetry}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
-            />
-            <Action
-              title="Reset"
-              icon={Icon.Trash}
-              onAction={onReset}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-            />
-            <Action
-              title="Show Error Details"
-              icon={Icon.Info}
-              onAction={() => {
-                if (error) {
-                  showToast({
-                    style: Toast.Style.Failure,
-                    title: "Error Details",
-                    message: error.message,
-                  });
-                }
-              }}
-            />
-          </ActionPanel>
-        }
+        actions={ActionPanelBuilders.createErrorActions(onRetry || (() => {}), onReset || (() => {}), error)}
       />
     </List.Section>
   );

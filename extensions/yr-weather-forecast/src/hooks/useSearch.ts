@@ -5,6 +5,7 @@ import { parseQueryIntent, type QueryIntent } from "../query-intent";
 import { useDebouncedCallback } from "./useDebounce";
 import { getUIThresholds, getTimingThresholds, getGraphThresholds } from "../config/weather-config";
 import { DebugLogger } from "../utils/debug-utils";
+import { LocationUtils } from "../utils/location-utils";
 
 export interface UseSearchReturn {
   // Search state
@@ -87,7 +88,8 @@ export function useSearch(): UseSearchReturn {
 
     try {
       const results = await searchLocations(locationQuery);
-      setLocations(results);
+      const sortedResults = LocationUtils.sortLocationsByPrecision(results);
+      setLocations(sortedResults);
     } catch (error) {
       DebugLogger.error("Search failed:", error);
       setLocations([]);

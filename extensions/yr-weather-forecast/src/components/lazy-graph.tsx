@@ -1,42 +1,94 @@
-import { lazy, Suspense } from "react";
-import { Detail, ActionPanel, Action, Icon } from "@raycast/api";
+import { lazy, Suspense, useState, useEffect } from "react";
+import { Detail } from "@raycast/api";
+import { ActionPanelBuilders } from "../utils/action-panel-builders";
+import { ErrorBoundary } from "./error-boundary";
+import { GraphErrorFallback } from "./error-fallbacks";
+import { TimeseriesEntry } from "../weather-client";
+import { SunTimes } from "../sunrise-client";
 
-// Lazy load the graph component to reduce initial bundle size
-// This ensures D3 libraries are only loaded when the graph view is actually accessed
-const GraphView = lazy(() => import("../graph"));
+// Lazy load the graph generation function
+const LazyGraphGenerator = lazy(() =>
+  import("../graph-utils").then((module) => ({
+    default: function LazyGraphRenderer({
+      name,
+      series,
+      hours,
+      options,
+    }: {
+      name: string;
+      series: TimeseriesEntry[];
+      hours: number;
+      options?: {
+        sunByDate?: Record<string, SunTimes>;
+        title?: string;
+        smooth?: boolean;
+      };
+    }) {
+      const result = module.buildGraphMarkdown(name, series, hours, options);
+      return <Detail markdown={result.markdown} />;
+    },
+  })),
+);
 
 interface LazyGraphProps {
   name: string;
-  lat: number;
-  lon: number;
-  hours?: number;
-  onShowWelcome?: () => void;
+  series: TimeseriesEntry[];
+  hours: number;
+  options?: {
+    sunByDate?: Record<string, SunTimes>;
+    title?: string;
+    smooth?: boolean;
+  };
+  fallback?: string;
 }
 
 /**
- * Lazy-loaded graph component wrapper
- * This reduces the initial bundle size by only loading D3 when the graph is actually needed
- *
- * Bundle size benefits:
- * - D3 libraries (~50KB) are only loaded when graph is accessed
- * - Initial bundle size is significantly smaller
- * - Better performance for users who don't use the graph feature
+ * Lazy-loaded graph component that defers D3 library loading
+ * until the graph is actually needed
  */
-export default function LazyGraphView(props: LazyGraphProps) {
+export function LazyGraph({ name, series, hours, options, fallback }: LazyGraphProps) {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Small delay to show loading state
+    const timer = setTimeout(() => setIsLoading(false), 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <Detail
+        markdown={fallback || "Loading graph..."}
+        actions={ActionPanelBuilders.createRefreshActions(() => window.location.reload(), "Refresh Graph")}
+      />
+    );
+  }
+
   return (
-    <Suspense
-      fallback={
-        <Detail
-          markdown="# Loading Weather Graph\n\nPreparing interactive weather visualization..."
-          actions={
-            <ActionPanel>
-              <Action title="Loading Graph" icon={Icon.Clock} />
-            </ActionPanel>
-          }
-        />
-      }
-    >
-      <GraphView {...props} />
-    </Suspense>
+    <ErrorBoundary componentName="Lazy Graph" fallback={<GraphErrorFallback componentName="Lazy Graph" />}>
+      <Suspense
+        fallback={
+          <Detail
+            markdown={fallback || "Loading graph..."}
+            actions={ActionPanelBuilders.createRefreshActions(() => window.location.reload(), "Refresh Graph")}
+          />
+        }
+      >
+        <LazyGraphGenerator name={name} series={series} hours={hours} options={options} />
+      </Suspense>
+    </ErrorBoundary>
   );
+}
+
+/**
+ * Hook to preload the graph component
+ * Call this when user hovers over graph-related actions
+ */
+export function useGraphPreloader() {
+  const preloadGraph = () => {
+    // Preload the graph component
+    import("../graph-utils");
+  };
+
+  return { preloadGraph };
 }

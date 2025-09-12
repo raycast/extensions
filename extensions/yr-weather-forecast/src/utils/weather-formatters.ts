@@ -7,6 +7,22 @@ import { directionFromDegrees } from "../weather-utils";
 import { formatTime } from "./date-utils";
 
 /**
+ * Consolidated temperature formatting utility
+ * Single source of truth for temperature formatting from TimeseriesEntry
+ */
+export class TemperatureFormatter {
+  /**
+   * Format temperature from TimeseriesEntry
+   * Consolidates the duplicate formatTemp functions across the codebase
+   */
+  static format(ts: TimeseriesEntry | undefined): string | undefined {
+    if (!ts) return undefined;
+    const details = ts?.data?.instant?.details ?? {};
+    return formatTemperatureCelsius(details.air_temperature);
+  }
+}
+
+/**
  * Consolidated weather formatting utilities to eliminate duplication
  */
 export class WeatherFormatters {
@@ -98,10 +114,9 @@ export class WeatherFormatters {
 
   /**
    * Format temperature from TimeseriesEntry
+   * @deprecated Use TemperatureFormatter.format instead
    */
   static formatTemp(ts: TimeseriesEntry | undefined): string | undefined {
-    if (!ts) return undefined;
-    const details = ts?.data?.instant?.details ?? {};
-    return formatTemperatureCelsius(details.air_temperature);
+    return TemperatureFormatter.format(ts);
   }
 }
