@@ -1,0 +1,24 @@
+{
+  "name": "node-play",
+  "title": "Node Play",
+  "description": "Execute Node.js projects and scripts directly from Raycast",
+  "version": "1.0.0",
+  "author": "maxwesley",
+  "license": "MIT",
+  "keywords": ["node", "npm", "scripts", "development"],
+  "icon": "icon.svg",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Node Play",
+      "description": "Execute Node.js projects and scripts",
+      "mode": "view"
+    },
+    {
+      "name": "configure",
+      "title": "Configure Node Play",
+      "description": "Configure root directories for Node.js projects",
+      "mode": "view"
+    }
+  ]
+}

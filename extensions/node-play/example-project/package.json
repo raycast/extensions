@@ -1,0 +1,17 @@
+{
+  "name": "exemplo-projeto",
+  "version": "1.0.0",
+  "description": "Projeto de exemplo para demonstrar a extensão Node Play",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "jest",
+    "build": "webpack --mode production",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
+  "keywords": ["exemplo", "node", "raycast"],
+  "author": "Max Wesley",
+  "license": "MIT"
+}

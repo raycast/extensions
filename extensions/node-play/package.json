@@ -1,0 +1,48 @@
+{
+  "name": "node-play",
+  "title": "Node Play",
+  "description": "Execute Node.js projects and scripts directly from Raycast",
+  "version": "1.0.0",
+  "author": "maxwesley",
+  "license": "MIT",
+  "keywords": [
+    "node",
+    "npm",
+    "scripts",
+    "development"
+  ],
+  "icon": "icon.png",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Node Play",
+      "description": "Execute Node.js projects and scripts",
+      "mode": "view"
+    },
+    {
+      "name": "configure",
+      "title": "Configure Node Play",
+      "description": "Configure root directories for Node.js projects",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.60.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.35.0",
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "eslint": "^8.57.1",
+    "prettier": "^3.6.2",
+    "sharp": "^0.34.3",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "ray develop",
+    "lint": "eslint 'src/**'",
+    "lint:fix": "eslint 'src/**' --fix",
+    "format": "prettier 'src/**' '!**/.DS_Store' --write"
+  }
+}
