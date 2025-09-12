@@ -66,7 +66,7 @@ export async function ensureFdCLI() {
     // Don't create ignore file if one already exists
     if (!fs.existsSync(ignoreFile)) {
       console.log("creating default ~/.fdignore file");
-      await afs.writeFile(ignoreFile, "Library/\n");
+      await afs.writeFile(ignoreFile, "Library/\n**.photoslibrary\n");
     }
 
     const cliFileInfo = getCliFileInfo();
