@@ -2,9 +2,7 @@
 
 Toggle the "Use all F1, F2, etc. keys as standard function keys" option in macOS System Preferences.
 
-Thanks to MrSimonC, the initial version code was taken from this project:
-
-Project Path: https://github.com/MrSimonC/Toggle-Mac-Function-Keys
+The source code of the togglefn executable is located at: https://github.com/CaramelFur/fntoggle
 
 Tested with:
 
