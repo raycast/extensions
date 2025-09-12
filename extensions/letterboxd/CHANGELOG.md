@@ -1,5 +1,10 @@
 # letterboxd Changelog
 
+## [Fix search movies not working] - {PR_MERGE_DATE}
+
+- Fix the issue with the search movies not working
+- Fix the issue with the movie details not displaying data
+
 ## [Fix show movie details not working] - 2025-08-04
 
 - Fix the issue with the movie details not working
