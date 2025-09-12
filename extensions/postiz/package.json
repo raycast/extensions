@@ -16,11 +16,12 @@
       "required": true
     },
     {
-      "name": "url",
-      "title": "URL",
+      "name": "postiz_url",
+      "title": "Postiz URL",
+      "placeholder": "https://api.postiz.com/ OR https://postiz.example.com/",
+      "default": "https://api.postiz.com/",
       "description": "",
-      "required": false,
-      "placeholder": "",
+      "required": true,
       "type": "textfield"
     }
   ],
@@ -30,12 +31,18 @@
       "title": "Search Channels",
       "description": "",
       "mode": "view"
+    },
+    {
+      "name": "search-posts",
+      "title": "Search Posts",
+      "description": "",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@postiz/node": "^1.0.8",
     "@raycast/api": "^1.102.7",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^1.17.0",
+    "date-fns": "^4.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

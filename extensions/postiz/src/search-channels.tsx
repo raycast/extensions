@@ -1,10 +1,8 @@
-import Postiz from "@postiz/node";
-import { Detail, getPreferenceValues, Grid, List } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { Color, List } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
+import { buildPostizUrl, POSTIZ_HEADERS } from "./postiz";
 
-const {api_key, url} = getPreferenceValues<Preferences>();
-const postiz = new Postiz(api_key, url);
-type Integration = {
+type Channel = {
     id: string;
     name: string;
     identifier: string;
@@ -13,14 +11,15 @@ type Integration = {
     profile: string;
 }
 export default function SearchChannels() {
-    const {isLoading, data: integrations} = useCachedPromise(async () => {
-        const data = await postiz.integrations() as Integration[];
-        return data;
-    }, [], {
+    const {isLoading, data: channels} = useFetch<Channel[], Channel[]>(buildPostizUrl("integrations"), {
+        headers: POSTIZ_HEADERS,
         initialData: []
     });
 
     return <List isLoading={isLoading}>
-        {integrations.map(integration => <List.Item key={integration.id} icon={integration.picture} title={integration.name} subtitle={integration.identifier} />)}
+        {channels.map(channel => <List.Item key={channel.id} icon={channel.picture} title={channel.name} subtitle={channel.profile} accessories={[
+            {icon: `platforms/${channel.identifier}.png`, tooltip: channel.identifier},
+            {tag: channel.disabled ?  {value:"DISABLED", color: Color.Red} : {value: "ENABLED", color:Color.Green}}
+        ]} />)}
     </List>
 }
