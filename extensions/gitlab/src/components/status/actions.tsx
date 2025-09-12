@@ -214,7 +214,7 @@ export function StatusPresetMoveUpAction(props: {
   };
   return (
     <Action
-      title="Move Up"
+      title="Move up"
       onAction={handle}
       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
       icon={{ source: Icon.ChevronUp, tintColor: Color.PrimaryText }}

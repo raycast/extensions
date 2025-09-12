@@ -1,5 +1,9 @@
 # GitLab Changelog
 
+## [Optimize Windows Experience] - 2025-09-11
+
+- Better milestones view
+
 ## [Added support for Windows] - 2025-08-07
 
 ## [Group milestones in MRs and Issues] - 2025-06-27
