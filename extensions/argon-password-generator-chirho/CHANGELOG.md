@@ -1,3 +1,5 @@
-# hallelujah-1-chirho Changelog
+# Argon Password Generator Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - {2025-09-12}
+
+Initial release

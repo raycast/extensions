@@ -3,8 +3,9 @@
   "name": "argon-password-generator-chirho",
   "title": "Argon Password Generator",
   "description": "Generate Django-compatible Argon2 password hashes with customizable parameters",
-  "icon": "extension-icon.png",
+  "icon": "extension_icon_chirho.png",
   "author": "lovejesus",
+  "categories": ["Security", "Developer Tools"],
   "license": "MIT",
   "commands": [
     {
