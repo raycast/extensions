@@ -358,152 +358,192 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <List.Section title={getPaginationTitle()}>
-        {workItems.map((workItem, index) => {
-          const workItemUrl = getWorkItemUrl(workItem);
-          const preferences = getPreferenceValues<Preferences>();
-          const branchName = convertToBranchName(
-            workItem.id.toString(),
-            workItem.fields["System.Title"],
-            preferences.branchPrefix,
-          );
+      {!isLoading && workItems.length === 0 ? (
+        <List.EmptyView
+          icon="📋"
+          title={
+            viewMode === "recent" ? "No Recent Work Items" : "Empty Backlog"
+          }
+          description={
+            viewMode === "recent"
+              ? "No work items created in the last 30 days. Time to start creating some new items!"
+              : "The backlog is empty. Time to add some work items to get started!"
+          }
+          actions={
+            <ActionPanel>
+              <ActionPanel.Section title="View Actions">
+                <Action
+                  title="Show Recently Created"
+                  onAction={() => fetchRecentlyCreatedItems(0)}
+                  icon={Icon.Clock}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                />
+                <Action
+                  title="Show Backlog"
+                  onAction={() => fetchBacklogItems(0)}
+                  icon={Icon.List}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+                />
+              </ActionPanel.Section>
+              <ActionPanel.Section title="Refresh">
+                <Action
+                  title="Refresh"
+                  onAction={handleRefresh}
+                  icon={Icon.ArrowClockwise}
+                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                />
+              </ActionPanel.Section>
+            </ActionPanel>
+          }
+        />
+      ) : (
+        <List.Section title={getPaginationTitle()}>
+          {workItems.map((workItem, index) => {
+            const workItemUrl = getWorkItemUrl(workItem);
+            const preferences = getPreferenceValues<Preferences>();
+            const branchName = convertToBranchName(
+              workItem.id.toString(),
+              workItem.fields["System.Title"],
+              preferences.branchPrefix,
+            );
 
-          // Show position in current list
-          const listPosition = currentPage * ITEMS_PER_PAGE + index + 1;
-          const positionPrefix = viewMode === "recent" ? "#" : "#";
+            // Show position in current list
+            const listPosition = currentPage * ITEMS_PER_PAGE + index + 1;
+            const positionPrefix = viewMode === "recent" ? "#" : "#";
 
-          return (
-            <List.Item
-              key={workItem.id}
-              icon={{
-                source: getWorkItemTypeIcon(
-                  workItem.fields["System.WorkItemType"],
-                ),
-                tintColor: getStateColor(workItem.fields["System.State"]),
-              }}
-              title={`${positionPrefix}${listPosition}: ${workItem.fields["System.Title"]}`}
-              subtitle={`#${workItem.id} - ${workItem.fields["System.WorkItemType"]}`}
-              accessories={[
-                {
-                  text: workItem.fields["System.State"],
-                  tooltip: `State: ${workItem.fields["System.State"]}`,
-                },
-                {
-                  text:
-                    workItem.fields["System.AssignedTo"]?.displayName ||
-                    "Unassigned",
-                  tooltip: `Assigned to: ${workItem.fields["System.AssignedTo"]?.displayName || "Unassigned"}`,
-                },
-                {
-                  text: formatDate(
-                    viewMode === "recent"
-                      ? workItem.fields["System.CreatedDate"]
-                      : workItem.fields["System.ChangedDate"],
+            return (
+              <List.Item
+                key={workItem.id}
+                icon={{
+                  source: getWorkItemTypeIcon(
+                    workItem.fields["System.WorkItemType"],
                   ),
-                  tooltip:
-                    viewMode === "recent"
-                      ? `Created: ${new Date(workItem.fields["System.CreatedDate"]).toLocaleString()}`
-                      : `Last updated: ${new Date(workItem.fields["System.ChangedDate"]).toLocaleString()}`,
-                },
-              ]}
-              actions={
-                <ActionPanel>
-                  <ActionPanel.Section title="Work Item Actions">
-                    <Action.Push
-                      title="View Work Item Details"
-                      target={
-                        <WorkItemDetailsView
-                          workItemId={workItem.id.toString()}
-                          initialTitle={workItem.fields["System.Title"]}
+                  tintColor: getStateColor(workItem.fields["System.State"]),
+                }}
+                title={`${positionPrefix}${listPosition}: ${workItem.fields["System.Title"]}`}
+                subtitle={`#${workItem.id} - ${workItem.fields["System.WorkItemType"]}`}
+                accessories={[
+                  {
+                    text: workItem.fields["System.State"],
+                    tooltip: `State: ${workItem.fields["System.State"]}`,
+                  },
+                  {
+                    text:
+                      workItem.fields["System.AssignedTo"]?.displayName ||
+                      "Unassigned",
+                    tooltip: `Assigned to: ${workItem.fields["System.AssignedTo"]?.displayName || "Unassigned"}`,
+                  },
+                  {
+                    text: formatDate(
+                      viewMode === "recent"
+                        ? workItem.fields["System.CreatedDate"]
+                        : workItem.fields["System.ChangedDate"],
+                    ),
+                    tooltip:
+                      viewMode === "recent"
+                        ? `Created: ${new Date(workItem.fields["System.CreatedDate"]).toLocaleString()}`
+                        : `Last updated: ${new Date(workItem.fields["System.ChangedDate"]).toLocaleString()}`,
+                  },
+                ]}
+                actions={
+                  <ActionPanel>
+                    <ActionPanel.Section title="Work Item Actions">
+                      <Action.Push
+                        title="View Work Item Details"
+                        target={
+                          <WorkItemDetailsView
+                            workItemId={workItem.id.toString()}
+                            initialTitle={workItem.fields["System.Title"]}
+                          />
+                        }
+                        icon={Icon.Document}
+                        shortcut={{ modifiers: ["cmd"], key: "d" }}
+                      />
+                      <Action.Push
+                        title="Activate & Create Branch"
+                        target={
+                          <ActivateAndBranchForm
+                            initialWorkItemId={workItem.id.toString()}
+                          />
+                        }
+                        icon={Icon.Rocket}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                      />
+                      {workItemUrl && (
+                        <Action.OpenInBrowser
+                          title="Open in Azure Devops"
+                          url={workItemUrl}
+                          icon={Icon.Globe}
                         />
-                      }
-                      icon={Icon.Document}
-                      shortcut={{ modifiers: ["cmd"], key: "d" }}
-                    />
-                    <Action.Push
-                      title="Activate & Create Branch"
-                      target={
-                        <ActivateAndBranchForm
-                          initialWorkItemId={workItem.id.toString()}
+                      )}
+                      <Action.CopyToClipboard
+                        title="Copy Work Item ID"
+                        content={workItem.id.toString()}
+                        icon={Icon.Clipboard}
+                      />
+                      <Action.CopyToClipboard
+                        title="Copy Work Item Title"
+                        content={workItem.fields["System.Title"]}
+                        icon={Icon.Text}
+                      />
+                      <Action.CopyToClipboard
+                        title="Copy Branch Name"
+                        content={branchName}
+                        icon={Icon.Code}
+                        shortcut={{ modifiers: ["cmd"], key: "b" }}
+                      />
+                    </ActionPanel.Section>
+                    <ActionPanel.Section title="View Actions">
+                      <Action
+                        title="Show Recently Created"
+                        onAction={() => fetchRecentlyCreatedItems(0)}
+                        icon={Icon.Clock}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                      />
+                      <Action
+                        title="Show Backlog"
+                        onAction={() => fetchBacklogItems(0)}
+                        icon={Icon.List}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+                      />
+                    </ActionPanel.Section>
+                    <ActionPanel.Section title="Pagination">
+                      {currentPage > 0 && (
+                        <Action
+                          title="Previous Page"
+                          onAction={() => handlePageNavigation(currentPage - 1)}
+                          icon={Icon.ChevronLeft}
+                          shortcut={{
+                            modifiers: ["cmd", "shift"],
+                            key: "arrowLeft",
+                          }}
                         />
-                      }
-                      icon={Icon.Rocket}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-                    />
-                    {workItemUrl && (
-                      <Action.OpenInBrowser
-                        title="Open in Azure Devops"
-                        url={workItemUrl}
-                        icon={Icon.Globe}
-                      />
-                    )}
-                    <Action.CopyToClipboard
-                      title="Copy Work Item ID"
-                      content={workItem.id.toString()}
-                      icon={Icon.Clipboard}
-                    />
-                    <Action.CopyToClipboard
-                      title="Copy Work Item Title"
-                      content={workItem.fields["System.Title"]}
-                      icon={Icon.Text}
-                    />
-                    <Action.CopyToClipboard
-                      title="Copy Branch Name"
-                      content={branchName}
-                      icon={Icon.Code}
-                      shortcut={{ modifiers: ["cmd"], key: "b" }}
-                    />
-                  </ActionPanel.Section>
-                  <ActionPanel.Section title="View Actions">
-                    <Action
-                      title="Show Recently Created"
-                      onAction={() => fetchRecentlyCreatedItems(0)}
-                      icon={Icon.Clock}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-                    />
-                    <Action
-                      title="Show Backlog"
-                      onAction={() => fetchBacklogItems(0)}
-                      icon={Icon.List}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
-                    />
-                  </ActionPanel.Section>
-                  <ActionPanel.Section title="Pagination">
-                    {currentPage > 0 && (
+                      )}
+                      {hasNextPage && (
+                        <Action
+                          title="Next Page"
+                          onAction={() => handlePageNavigation(currentPage + 1)}
+                          icon={Icon.ChevronRight}
+                          shortcut={{
+                            modifiers: ["cmd", "shift"],
+                            key: "arrowRight",
+                          }}
+                        />
+                      )}
                       <Action
-                        title="Previous Page"
-                        onAction={() => handlePageNavigation(currentPage - 1)}
-                        icon={Icon.ChevronLeft}
-                        shortcut={{
-                          modifiers: ["cmd", "shift"],
-                          key: "arrowLeft",
-                        }}
+                        title="Refresh"
+                        onAction={handleRefresh}
+                        icon={Icon.ArrowClockwise}
+                        shortcut={{ modifiers: ["cmd"], key: "r" }}
                       />
-                    )}
-                    {hasNextPage && (
-                      <Action
-                        title="Next Page"
-                        onAction={() => handlePageNavigation(currentPage + 1)}
-                        icon={Icon.ChevronRight}
-                        shortcut={{
-                          modifiers: ["cmd", "shift"],
-                          key: "arrowRight",
-                        }}
-                      />
-                    )}
-                    <Action
-                      title="Refresh"
-                      onAction={handleRefresh}
-                      icon={Icon.ArrowClockwise}
-                      shortcut={{ modifiers: ["cmd"], key: "r" }}
-                    />
-                  </ActionPanel.Section>
-                </ActionPanel>
-              }
-            />
-          );
-        })}
-      </List.Section>
+                    </ActionPanel.Section>
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
+        </List.Section>
+      )}
     </List>
   );
 }

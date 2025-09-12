@@ -8,13 +8,6 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "branchname",
-      "title": "Generate Branch Name",
-      "description": "Convert task description to branch name format",
-      "mode": "view",
-      "entrypoint": "src/branchname.tsx"
-    },
-    {
       "name": "activate-and-branch",
       "title": "Activate and Branch Work Item",
       "description": "Set work item to active, assign to self, and create branch",
@@ -62,6 +55,13 @@
       "description": "Create a new user story with title, description, tag, feature, and assignee",
       "mode": "view",
       "entrypoint": "src/create-user-story.tsx"
+    },
+    {
+      "name": "create-work-item",
+      "title": "Create Work Item",
+      "description": "Create a new work item (Feature, User Story, or Bug) with customizable fields",
+      "mode": "view",
+      "entrypoint": "src/create-work-item.tsx"
     }
   ],
   "preferences": [

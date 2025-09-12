@@ -11,6 +11,7 @@ import {
 import { useState, useEffect } from "react";
 import { exec } from "child_process";
 import { promisify } from "util";
+import PullRequestDetailsView from "./PullRequestDetailsView";
 
 const execAsync = promisify(exec);
 
@@ -275,93 +276,123 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search pull requests...">
-      <List.Section title={`Pull Requests (${currentUser || "You"})`}>
-        {pullRequests.map((pr) => {
-          const prUrl = getPullRequestUrl(pr);
-          const userRole = getUserRole(pr, currentUser);
-          const reviewStatus = getReviewStatus(pr, currentUser);
-          const sourceBranch = formatBranchName(pr.sourceRefName);
-          const targetBranch = formatBranchName(pr.targetRefName);
+      {!isLoading && pullRequests.length === 0 ? (
+        <List.EmptyView
+          icon="🔀"
+          title="No Pull Requests Found"
+          description="You have no active pull requests. Either you haven't created any, or they've all been completed. Time to create some new PRs or check your filters!"
+          actions={
+            <ActionPanel>
+              <Action
+                title="Refresh List"
+                onAction={fetchPullRequests}
+                icon={Icon.ArrowClockwise}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+              />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        <List.Section title={`Pull Requests (${currentUser || "You"})`}>
+          {pullRequests.map((pr) => {
+            const prUrl = getPullRequestUrl(pr);
+            const userRole = getUserRole(pr, currentUser);
+            const reviewStatus = getReviewStatus(pr, currentUser);
+            const sourceBranch = formatBranchName(pr.sourceRefName);
+            const targetBranch = formatBranchName(pr.targetRefName);
 
-          return (
-            <List.Item
-              key={pr.pullRequestId}
-              icon={{
-                source: getPRStatusIcon(pr.status, pr.isDraft),
-                tintColor: getPRStatusColor(
-                  pr.status,
-                  pr.isDraft,
-                  pr.mergeStatus,
-                ),
-              }}
-              title={`#${pr.pullRequestId}: ${pr.title}`}
-              subtitle={`${sourceBranch} → ${targetBranch} • ${pr.repository.name}`}
-              accessories={[
-                {
-                  text: pr.isDraft ? "Draft" : pr.status,
-                  tooltip: `Status: ${pr.isDraft ? "Draft" : pr.status}`,
-                },
-                {
-                  text: userRole,
-                  tooltip: `Your role: ${userRole}`,
-                },
-                {
-                  text: reviewStatus,
-                  tooltip: `Review status: ${reviewStatus}`,
-                },
-                {
-                  text: formatDate(pr.creationDate),
-                  tooltip: `Created: ${new Date(pr.creationDate).toLocaleString()}`,
-                },
-              ]}
-              actions={
-                <ActionPanel>
-                  <ActionPanel.Section title="Pull Request Actions">
-                    {prUrl && (
-                      <Action.OpenInBrowser
-                        title="Open in Azure Devops"
-                        url={prUrl}
-                        icon={Icon.Globe}
-                        shortcut={{ modifiers: ["cmd"], key: "o" }}
+            return (
+              <List.Item
+                key={pr.pullRequestId}
+                icon={{
+                  source: getPRStatusIcon(pr.status, pr.isDraft),
+                  tintColor: getPRStatusColor(
+                    pr.status,
+                    pr.isDraft,
+                    pr.mergeStatus,
+                  ),
+                }}
+                title={`#${pr.pullRequestId}: ${pr.title}`}
+                subtitle={`${sourceBranch} → ${targetBranch} • ${pr.repository.name}`}
+                accessories={[
+                  {
+                    text: pr.isDraft ? "Draft" : pr.status,
+                    tooltip: `Status: ${pr.isDraft ? "Draft" : pr.status}`,
+                  },
+                  {
+                    text: userRole,
+                    tooltip: `Your role: ${userRole}`,
+                  },
+                  {
+                    text: reviewStatus,
+                    tooltip: `Review status: ${reviewStatus}`,
+                  },
+                  {
+                    text: formatDate(pr.creationDate),
+                    tooltip: `Created: ${new Date(pr.creationDate).toLocaleString()}`,
+                  },
+                ]}
+                actions={
+                  <ActionPanel>
+                    <ActionPanel.Section title="Pull Request Actions">
+                      <Action.Push
+                        title="View Pr Details"
+                        target={
+                          <PullRequestDetailsView
+                            pullRequestId={pr.pullRequestId.toString()}
+                            initialTitle={pr.title}
+                            project={pr.repository.project.name}
+                          />
+                        }
+                        icon={Icon.Document}
+                        shortcut={{ modifiers: ["cmd"], key: "d" }}
                       />
-                    )}
-                    <Action.CopyToClipboard
-                      title="Copy Pr ID"
-                      content={pr.pullRequestId.toString()}
-                      icon={Icon.Clipboard}
-                    />
-                    <Action.CopyToClipboard
-                      title="Copy Pr Title"
-                      content={pr.title}
-                      icon={Icon.Text}
-                    />
-                    <Action.CopyToClipboard
-                      title="Copy Source Branch"
-                      content={sourceBranch}
-                      icon={Icon.Tree}
-                      shortcut={{ modifiers: ["cmd"], key: "b" }}
-                    />
-                    <Action.CopyToClipboard
-                      title="Copy Pr URL"
-                      content={prUrl}
-                      icon={Icon.Link}
-                      shortcut={{ modifiers: ["cmd"], key: "u" }}
-                    />
-                  </ActionPanel.Section>
-                  <ActionPanel.Section title="List Actions">
-                    <Action
-                      title="Refresh List"
-                      onAction={fetchPullRequests}
-                      icon={Icon.ArrowClockwise}
-                      shortcut={{ modifiers: ["cmd"], key: "r" }}
-                    />
-                  </ActionPanel.Section>
-                </ActionPanel>
-              }
-            />
-          );
-        })}
-      </List.Section>
+                      {prUrl && (
+                        <Action.OpenInBrowser
+                          title="Open in Azure Devops"
+                          url={prUrl}
+                          icon={Icon.Globe}
+                          shortcut={{ modifiers: ["cmd"], key: "o" }}
+                        />
+                      )}
+                      <Action.CopyToClipboard
+                        title="Copy Pr ID"
+                        content={pr.pullRequestId.toString()}
+                        icon={Icon.Clipboard}
+                      />
+                      <Action.CopyToClipboard
+                        title="Copy Pr Title"
+                        content={pr.title}
+                        icon={Icon.Text}
+                      />
+                      <Action.CopyToClipboard
+                        title="Copy Source Branch"
+                        content={sourceBranch}
+                        icon={Icon.Tree}
+                        shortcut={{ modifiers: ["cmd"], key: "b" }}
+                      />
+                      <Action.CopyToClipboard
+                        title="Copy Pr URL"
+                        content={prUrl}
+                        icon={Icon.Link}
+                        shortcut={{ modifiers: ["cmd"], key: "u" }}
+                      />
+                    </ActionPanel.Section>
+                    <ActionPanel.Section title="List Actions">
+                      <Action
+                        title="Refresh List"
+                        onAction={fetchPullRequests}
+                        icon={Icon.ArrowClockwise}
+                        shortcut={{ modifiers: ["cmd"], key: "r" }}
+                      />
+                    </ActionPanel.Section>
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
+        </List.Section>
+      )}
     </List>
   );
 }

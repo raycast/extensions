@@ -484,16 +484,42 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      {activeBuilds.length > 0 && (
-        <List.Section title={getActiveSectionTitle()}>
-          {activeBuilds.map((build) => renderBuildItem(build, "active"))}
-        </List.Section>
-      )}
+      {!isLoading &&
+      activeBuilds.length === 0 &&
+      completedBuilds.length === 0 ? (
+        <List.EmptyView
+          icon="🏗️"
+          title="No Builds Found"
+          description="No builds are available. This could mean no builds have been run recently, or there might be a configuration issue."
+          actions={
+            <ActionPanel>
+              <ActionPanel.Section title="Navigation">
+                <Action
+                  title="Refresh"
+                  onAction={() => fetchBuilds(currentPage)}
+                  icon={Icon.ArrowClockwise}
+                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                />
+              </ActionPanel.Section>
+            </ActionPanel>
+          }
+        />
+      ) : (
+        <>
+          {activeBuilds.length > 0 && (
+            <List.Section title={getActiveSectionTitle()}>
+              {activeBuilds.map((build) => renderBuildItem(build, "active"))}
+            </List.Section>
+          )}
 
-      {completedBuilds.length > 0 && (
-        <List.Section title={getCompletedSectionTitle()}>
-          {completedBuilds.map((build) => renderBuildItem(build, "completed"))}
-        </List.Section>
+          {completedBuilds.length > 0 && (
+            <List.Section title={getCompletedSectionTitle()}>
+              {completedBuilds.map((build) =>
+                renderBuildItem(build, "completed"),
+              )}
+            </List.Section>
+          )}
+        </>
       )}
     </List>
   );

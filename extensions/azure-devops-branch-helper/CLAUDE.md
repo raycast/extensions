@@ -105,3 +105,70 @@ src/
 - No API keys or secrets stored in extension
 - Relies on Azure CLI's built-in authentication mechanisms
 - Commands are executed with user's current Azure context
+
+## Azure CLI Command Quirks & Limitations
+
+### Pull Request Commands
+Different Azure CLI pull request commands have inconsistent parameter support:
+
+- **`az repos pr list`**: Supports `--organization`, `--project`, and `--repository` parameters
+  ```bash
+  az repos pr list --status active --organization "https://dev.azure.com/myorg" --project "MyProject" --repository "MyRepo"
+  ```
+
+- **`az repos pr show`**: Only supports `--id`, `--organization`, `--detect`, and `--open`
+  ```bash
+  az repos pr show --id 123 --organization "https://dev.azure.com/myorg"
+  ```
+  ⚠️ **Important**: `az repos pr show` does NOT support `--project` or `--repository` parameters, despite other `repos` commands supporting them.
+
+### Build Commands
+- **`az pipelines build show`**: Supports both `--organization` and `--project` parameters
+- **`az pipelines build list`**: Supports both `--organization` and `--project` parameters
+
+### Work Item Commands
+- **`az boards work-item show`**: Supports both `--organization` and `--project` parameters
+- **`az boards query`**: Supports both `--organization` and `--project` parameters
+
+### General Pattern
+Most Azure DevOps CLI commands follow the pattern `--organization` + `--project`, but some commands (particularly `az repos pr show`) have reduced parameter support. Always check command help (`az [command] --help`) when encountering parameter errors.
+
+## UI/UX Guidelines
+
+### Empty State Views
+All list components MUST include `List.EmptyView` components to provide friendly user feedback when no items are available:
+
+```tsx
+{!isLoading && items.length === 0 ? (
+  <List.EmptyView
+    icon="🎉"  // Choose appropriate emoji
+    title="Friendly Empty State Title"
+    description="Helpful description explaining why the list is empty and what users can do"
+    actions={
+      <ActionPanel>
+        <Action
+          title="Refresh"
+          onAction={refreshFunction}
+          icon={Icon.ArrowClockwise}
+          shortcut={{ modifiers: ["cmd"], key: "r" }}
+        />
+      </ActionPanel>
+    }
+  />
+) : (
+  // Regular list content
+)}
+```
+
+**Required for all list views:**
+- `list-my-workitems.tsx` ✅ - "Congratulations! You have no assigned tasks!"
+- `list-backlog.tsx` ✅ - Context-aware for "Empty Backlog" vs "No Recent Work Items"
+- `list-builds.tsx` ✅ - "No Builds Found"  
+- `list-pull-requests.tsx` ✅ - "No Pull Requests Found"
+
+**Best Practices:**
+- Use appropriate emojis that match the content type
+- Provide encouraging/positive messaging when possible
+- Include refresh action for easy retry
+- Explain possible reasons for empty state
+- Only show when `!isLoading` to avoid flashing during data fetching

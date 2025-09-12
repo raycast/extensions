@@ -226,103 +226,121 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search work items...">
-      <List.Section title={`Work Items Assigned to ${currentUser || "You"}`}>
-        {workItems.map((workItem) => {
-          const workItemUrl = getWorkItemUrl(workItem);
-          const preferences = getPreferenceValues<Preferences>();
-          const branchName = convertToBranchName(
-            workItem.id.toString(),
-            workItem.fields["System.Title"],
-            preferences.branchPrefix,
-          );
+      {!isLoading && workItems.length === 0 ? (
+        <List.EmptyView
+          icon="🎉"
+          title="Congratulations! You have no assigned tasks!"
+          description="Time to celebrate - your work queue is empty! Either you're incredibly productive, or it's time to pick up some new work items."
+          actions={
+            <ActionPanel>
+              <Action
+                title="Refresh List"
+                onAction={fetchMyWorkItems}
+                icon={Icon.ArrowClockwise}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+              />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        <List.Section title={`Work Items Assigned to ${currentUser || "You"}`}>
+          {workItems.map((workItem) => {
+            const workItemUrl = getWorkItemUrl(workItem);
+            const preferences = getPreferenceValues<Preferences>();
+            const branchName = convertToBranchName(
+              workItem.id.toString(),
+              workItem.fields["System.Title"],
+              preferences.branchPrefix,
+            );
 
-          return (
-            <List.Item
-              key={workItem.id}
-              icon={{
-                source: getWorkItemTypeIcon(
-                  workItem.fields["System.WorkItemType"],
-                ),
-                tintColor: getStateColor(workItem.fields["System.State"]),
-              }}
-              title={`#${workItem.id}: ${workItem.fields["System.Title"]}`}
-              subtitle={workItem.fields["System.WorkItemType"]}
-              accessories={[
-                {
-                  text: workItem.fields["System.State"],
-                  tooltip: `State: ${workItem.fields["System.State"]}`,
-                },
-                {
-                  text: workItem.fields["System.TeamProject"],
-                  tooltip: `Project: ${workItem.fields["System.TeamProject"]}`,
-                },
-                {
-                  text: formatDate(workItem.fields["System.ChangedDate"]),
-                  tooltip: `Last updated: ${new Date(workItem.fields["System.ChangedDate"]).toLocaleString()}`,
-                },
-              ]}
-              actions={
-                <ActionPanel>
-                  <ActionPanel.Section title="Work Item Actions">
-                    <Action.Push
-                      title="View Work Item Details"
-                      target={
-                        <WorkItemDetailsView
-                          workItemId={workItem.id.toString()}
-                          initialTitle={workItem.fields["System.Title"]}
-                        />
-                      }
-                      icon={Icon.Document}
-                      shortcut={{ modifiers: ["cmd"], key: "d" }}
-                    />
-                    <Action.Push
-                      title="Activate & Create Branch"
-                      target={
-                        <ActivateAndBranchForm
-                          initialWorkItemId={workItem.id.toString()}
-                        />
-                      }
-                      icon={Icon.Rocket}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-                    />
-                    {workItemUrl && (
-                      <Action.OpenInBrowser
-                        title="Open in Azure Devops"
-                        url={workItemUrl}
-                        icon={Icon.Globe}
+            return (
+              <List.Item
+                key={workItem.id}
+                icon={{
+                  source: getWorkItemTypeIcon(
+                    workItem.fields["System.WorkItemType"],
+                  ),
+                  tintColor: getStateColor(workItem.fields["System.State"]),
+                }}
+                title={`#${workItem.id}: ${workItem.fields["System.Title"]}`}
+                subtitle={workItem.fields["System.WorkItemType"]}
+                accessories={[
+                  {
+                    text: workItem.fields["System.State"],
+                    tooltip: `State: ${workItem.fields["System.State"]}`,
+                  },
+                  {
+                    text: workItem.fields["System.TeamProject"],
+                    tooltip: `Project: ${workItem.fields["System.TeamProject"]}`,
+                  },
+                  {
+                    text: formatDate(workItem.fields["System.ChangedDate"]),
+                    tooltip: `Last updated: ${new Date(workItem.fields["System.ChangedDate"]).toLocaleString()}`,
+                  },
+                ]}
+                actions={
+                  <ActionPanel>
+                    <ActionPanel.Section title="Work Item Actions">
+                      <Action.Push
+                        title="View Work Item Details"
+                        target={
+                          <WorkItemDetailsView
+                            workItemId={workItem.id.toString()}
+                            initialTitle={workItem.fields["System.Title"]}
+                          />
+                        }
+                        icon={Icon.Document}
+                        shortcut={{ modifiers: ["cmd"], key: "d" }}
                       />
-                    )}
-                    <Action.CopyToClipboard
-                      title="Copy Work Item ID"
-                      content={workItem.id.toString()}
-                      icon={Icon.Clipboard}
-                    />
-                    <Action.CopyToClipboard
-                      title="Copy Work Item Title"
-                      content={workItem.fields["System.Title"]}
-                      icon={Icon.Text}
-                    />
-                    <Action.CopyToClipboard
-                      title="Copy Branch Name"
-                      content={branchName}
-                      icon={Icon.Code}
-                      shortcut={{ modifiers: ["cmd"], key: "b" }}
-                    />
-                  </ActionPanel.Section>
-                  <ActionPanel.Section title="List Actions">
-                    <Action
-                      title="Refresh List"
-                      onAction={fetchMyWorkItems}
-                      icon={Icon.ArrowClockwise}
-                      shortcut={{ modifiers: ["cmd"], key: "r" }}
-                    />
-                  </ActionPanel.Section>
-                </ActionPanel>
-              }
-            />
-          );
-        })}
-      </List.Section>
+                      <Action.Push
+                        title="Activate & Create Branch"
+                        target={
+                          <ActivateAndBranchForm
+                            initialWorkItemId={workItem.id.toString()}
+                          />
+                        }
+                        icon={Icon.Rocket}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                      />
+                      {workItemUrl && (
+                        <Action.OpenInBrowser
+                          title="Open in Azure Devops"
+                          url={workItemUrl}
+                          icon={Icon.Globe}
+                        />
+                      )}
+                      <Action.CopyToClipboard
+                        title="Copy Work Item ID"
+                        content={workItem.id.toString()}
+                        icon={Icon.Clipboard}
+                      />
+                      <Action.CopyToClipboard
+                        title="Copy Work Item Title"
+                        content={workItem.fields["System.Title"]}
+                        icon={Icon.Text}
+                      />
+                      <Action.CopyToClipboard
+                        title="Copy Branch Name"
+                        content={branchName}
+                        icon={Icon.Code}
+                        shortcut={{ modifiers: ["cmd"], key: "b" }}
+                      />
+                    </ActionPanel.Section>
+                    <ActionPanel.Section title="List Actions">
+                      <Action
+                        title="Refresh List"
+                        onAction={fetchMyWorkItems}
+                        icon={Icon.ArrowClockwise}
+                        shortcut={{ modifiers: ["cmd"], key: "r" }}
+                      />
+                    </ActionPanel.Section>
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
+        </List.Section>
+      )}
     </List>
   );
 }
