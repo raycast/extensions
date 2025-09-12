@@ -1,6 +1,6 @@
 # Product Hunt Changelog
 
-## [2.2] - {PR_MERGE_DATE}
+## [2.2] - 2025-09-12
 
 ### Added
 - Raycast-only structured logger with optional toasts (controlled by new "Verbose Logging" preference)
