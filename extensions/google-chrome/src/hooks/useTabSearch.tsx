@@ -30,7 +30,7 @@ export function useTabSearch(query = ""): SearchResult<Tab> & { data: NonNullabl
         tabs
           .map((tab): [Tab, string] => [tab, `${tab.title.toLowerCase()} ${tab.urlWithoutScheme().toLowerCase()}`])
           .filter(([, searchable]) => queryParts.reduce((isMatch, part) => isMatch && searchable.includes(part), true))
-          .map(([tab]) => tab)
+          .map(([tab]) => tab),
       )
       .then(setData)
       .then(() => setIsLoading(false))
