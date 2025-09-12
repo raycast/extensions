@@ -50,16 +50,6 @@ export default function Command() {
     }
   };
 
-  const handleVolumeChange = async (playerId: string, volume: number) => {
-    try {
-      await client.setVolume(playerId, volume);
-      // Revalidate player data to get updated volume
-      revalidatePlayerDetails();
-    } catch (error) {
-      console.error("Failed to set volume:", error);
-    }
-  };
-
   const getPlayerById = (playerId: string): Player | undefined => {
     return players.find((p) => p.player_id === playerId);
   };
@@ -96,7 +86,10 @@ export default function Command() {
                         key={option.level}
                         title={option.display}
                         icon={player?.volume_level === option.level ? Icon.CheckCircle : undefined}
-                        onAction={() => handleVolumeChange(queue.queue_id, option.level)}
+                        onAction={async () => {
+                          await client.setVolume(queue.queue_id, option.level);
+                          revalidatePlayerDetails();
+                        }}
                       />
                     ))}
                   </MenuBarExtra.Submenu>
