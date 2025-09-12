@@ -4,6 +4,7 @@
   "title": "Scoop",
   "description": "Manage Scoop, the command-line installer for Windows.",
   "icon": "scoop.png",
+  "platforms": ["Windows"],
   "author": "zsombor_biro",
   "license": "MIT",
   "categories": [
