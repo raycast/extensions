@@ -9,6 +9,7 @@ import { Note } from "../../api/vault/notes/notes.types";
 import { Vault } from "../../api/vault/vault.types";
 import { filterContent } from "../../api/vault/vault.service";
 import { renewCache } from "../../api/cache/cache.service";
+import { renderMarkdown } from "../../utils/renderMarkdown";
 
 export function NoteListItem(props: {
   note: Note;
@@ -62,7 +63,7 @@ export function NoteListItem(props: {
       ]}
       detail={
         <List.Item.Detail
-          markdown={filterContent(note.content)}
+          markdown={renderMarkdown(filterContent(note.content))}
           metadata={
             pref.showMetadata ? (
               <List.Item.Detail.Metadata>

@@ -1,5 +1,14 @@
 # Obsidian Changelog
 
+## [Obsidian Callout Support] - {PR_MERGE_DATE}
+
+- Adds support for Obsidian-style callouts with emoji icons
+- Displays 24 different callout types (note, warning, success, tip, etc.) with distinctive emojis
+- Callouts render with proper formatting in both list view and detail view
+- Supports custom titles and multi-line content within callouts
+- Added sample callout examples file for testing and reference
+- Compatible with standard Obsidian callout syntax: `> [!type] title`
+
 ## [Bug fixes] - 2025-06-10
 
 - Fixes a bug, which create a tagged note a wrong way. Changes an order of properties block and note text
