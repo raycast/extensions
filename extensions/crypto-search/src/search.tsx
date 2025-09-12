@@ -33,14 +33,14 @@ export default function SearchCommand() {
 
     try {
       if (isTransactionHash(input)) {
-        const chain = detectTransactionChain(input);
+        const chain = await detectTransactionChain(input);
         if (chain === "unknown") {
           showToast({ style: Toast.Style.Failure, title: "Unable to detect transaction chain" });
           return;
         }
         const url = getTransactionExplorerUrl(chain, input);
         await open(url);
-        showToast({ style: Toast.Style.Success, title: "Opening transaction explorer" });
+        showToast({ style: Toast.Style.Success, title: `Opening ${chain} transaction explorer` });
       } else if (isSolanaAddress(input)) {
         const isToken = await checkSolanaToken(input);
         let url: string;
