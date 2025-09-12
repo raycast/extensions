@@ -50,6 +50,7 @@ export default function Command() {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
   const [hasNextPage, setHasNextPage] = useState(false);
+  const [viewMode, setViewMode] = useState<"backlog" | "recent">("backlog");
 
   async function fetchBacklogItems(page = 0) {
     setIsLoading(true);
@@ -86,6 +87,7 @@ export default function Command() {
       setTotalItems(allWorkItems.length);
       setHasNextPage(endIndex < allWorkItems.length);
       setCurrentPage(page);
+      setViewMode("backlog");
 
       const pageInfo = `Page ${page + 1} (${startIndex + 1}-${Math.min(endIndex, allWorkItems.length)} of ${allWorkItems.length})`;
 
@@ -107,6 +109,71 @@ export default function Command() {
         Toast.Style.Failure,
         "Error",
         "Failed to fetch backlog items",
+      );
+      console.error(error);
+      setWorkItems([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function fetchRecentlyCreatedItems(page = 0) {
+    setIsLoading(true);
+    try {
+      const preferences = getPreferenceValues<Preferences>();
+      const azCommand = "/opt/homebrew/bin/az";
+
+      // Calculate SKIP value for pagination
+      const skipCount = page * ITEMS_PER_PAGE;
+
+      // WIQL query to get recently created work items (last 30 days)
+      // Order by creation date (newest first)
+      let queryCommand = `${azCommand} boards query --wiql "SELECT [System.Id], [System.Title], [System.WorkItemType], [System.State], [System.AssignedTo], [System.TeamProject], [System.CreatedDate], [System.ChangedDate], [Microsoft.VSTS.Common.Priority], [Microsoft.VSTS.Common.StackRank] FROM WorkItems WHERE [System.WorkItemType] IN ('Product Backlog Item', 'User Story', 'Feature', 'Epic', 'Bug', 'Task') AND [System.CreatedDate] > @Today - 30 ORDER BY [System.CreatedDate] DESC" --output json`;
+
+      if (preferences.azureOrganization) {
+        queryCommand += ` --organization "${preferences.azureOrganization}"`;
+      }
+
+      if (preferences.azureProject) {
+        queryCommand += ` --project "${preferences.azureProject}"`;
+      }
+
+      const { stdout: queryResult } = await execAsync(queryCommand);
+
+      // The Azure CLI boards query returns work items directly as an array
+      const allWorkItems: WorkItem[] = JSON.parse(queryResult);
+
+      // Client-side pagination
+      const startIndex = skipCount;
+      const endIndex = startIndex + ITEMS_PER_PAGE;
+      const pageItems = allWorkItems.slice(startIndex, endIndex);
+
+      setWorkItems(pageItems);
+      setTotalItems(allWorkItems.length);
+      setHasNextPage(endIndex < allWorkItems.length);
+      setCurrentPage(page);
+      setViewMode("recent");
+
+      const pageInfo = `Page ${page + 1} (${startIndex + 1}-${Math.min(endIndex, allWorkItems.length)} of ${allWorkItems.length})`;
+
+      if (pageItems.length > 0) {
+        await showToast(
+          Toast.Style.Success,
+          "Loaded!",
+          `${pageInfo} recently created items`,
+        );
+      } else {
+        await showToast(
+          Toast.Style.Success,
+          "No recent items",
+          "No work items created in the last 30 days",
+        );
+      }
+    } catch (error) {
+      await showToast(
+        Toast.Style.Failure,
+        "Error",
+        "Failed to fetch recently created items",
       );
       console.error(error);
       setWorkItems([]);
@@ -215,11 +282,29 @@ export default function Command() {
   }
 
   function getPaginationTitle(): string {
-    if (totalItems === 0) return "Backlog";
+    const baseTitle = viewMode === "recent" ? "Recently Created" : "Backlog";
+
+    if (totalItems === 0) return baseTitle;
 
     const startIndex = currentPage * ITEMS_PER_PAGE + 1;
     const endIndex = Math.min((currentPage + 1) * ITEMS_PER_PAGE, totalItems);
-    return `Backlog (${startIndex}-${endIndex} of ${totalItems})`;
+    return `${baseTitle} (${startIndex}-${endIndex} of ${totalItems})`;
+  }
+
+  function handlePageNavigation(page: number) {
+    if (viewMode === "recent") {
+      fetchRecentlyCreatedItems(page);
+    } else {
+      fetchBacklogItems(page);
+    }
+  }
+
+  function handleRefresh() {
+    if (viewMode === "recent") {
+      fetchRecentlyCreatedItems(currentPage);
+    } else {
+      fetchBacklogItems(currentPage);
+    }
   }
 
   useEffect(() => {
@@ -232,11 +317,25 @@ export default function Command() {
       searchBarPlaceholder="Search backlog items..."
       actions={
         <ActionPanel>
+          <ActionPanel.Section title="View Actions">
+            <Action
+              title="Show Recently Created"
+              onAction={() => fetchRecentlyCreatedItems(0)}
+              icon={Icon.Clock}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+            />
+            <Action
+              title="Show Backlog"
+              onAction={() => fetchBacklogItems(0)}
+              icon={Icon.List}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+            />
+          </ActionPanel.Section>
           <ActionPanel.Section title="Pagination">
             {currentPage > 0 && (
               <Action
                 title="Previous Page"
-                onAction={() => fetchBacklogItems(currentPage - 1)}
+                onAction={() => handlePageNavigation(currentPage - 1)}
                 icon={Icon.ChevronLeft}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "arrowLeft" }}
               />
@@ -244,14 +343,14 @@ export default function Command() {
             {hasNextPage && (
               <Action
                 title="Next Page"
-                onAction={() => fetchBacklogItems(currentPage + 1)}
+                onAction={() => handlePageNavigation(currentPage + 1)}
                 icon={Icon.ChevronRight}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "arrowRight" }}
               />
             )}
             <Action
               title="Refresh"
-              onAction={() => fetchBacklogItems(currentPage)}
+              onAction={handleRefresh}
               icon={Icon.ArrowClockwise}
               shortcut={{ modifiers: ["cmd"], key: "r" }}
             />
@@ -269,8 +368,9 @@ export default function Command() {
             preferences.branchPrefix,
           );
 
-          // Show position in overall backlog
-          const overallPosition = currentPage * ITEMS_PER_PAGE + index + 1;
+          // Show position in current list
+          const listPosition = currentPage * ITEMS_PER_PAGE + index + 1;
+          const positionPrefix = viewMode === "recent" ? "#" : "#";
 
           return (
             <List.Item
@@ -281,7 +381,7 @@ export default function Command() {
                 ),
                 tintColor: getStateColor(workItem.fields["System.State"]),
               }}
-              title={`#${overallPosition}: ${workItem.fields["System.Title"]}`}
+              title={`${positionPrefix}${listPosition}: ${workItem.fields["System.Title"]}`}
               subtitle={`#${workItem.id} - ${workItem.fields["System.WorkItemType"]}`}
               accessories={[
                 {
@@ -295,8 +395,15 @@ export default function Command() {
                   tooltip: `Assigned to: ${workItem.fields["System.AssignedTo"]?.displayName || "Unassigned"}`,
                 },
                 {
-                  text: formatDate(workItem.fields["System.ChangedDate"]),
-                  tooltip: `Last updated: ${new Date(workItem.fields["System.ChangedDate"]).toLocaleString()}`,
+                  text: formatDate(
+                    viewMode === "recent"
+                      ? workItem.fields["System.CreatedDate"]
+                      : workItem.fields["System.ChangedDate"],
+                  ),
+                  tooltip:
+                    viewMode === "recent"
+                      ? `Created: ${new Date(workItem.fields["System.CreatedDate"]).toLocaleString()}`
+                      : `Last updated: ${new Date(workItem.fields["System.ChangedDate"]).toLocaleString()}`,
                 },
               ]}
               actions={
@@ -347,11 +454,25 @@ export default function Command() {
                       shortcut={{ modifiers: ["cmd"], key: "b" }}
                     />
                   </ActionPanel.Section>
+                  <ActionPanel.Section title="View Actions">
+                    <Action
+                      title="Show Recently Created"
+                      onAction={() => fetchRecentlyCreatedItems(0)}
+                      icon={Icon.Clock}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                    />
+                    <Action
+                      title="Show Backlog"
+                      onAction={() => fetchBacklogItems(0)}
+                      icon={Icon.List}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+                    />
+                  </ActionPanel.Section>
                   <ActionPanel.Section title="Pagination">
                     {currentPage > 0 && (
                       <Action
                         title="Previous Page"
-                        onAction={() => fetchBacklogItems(currentPage - 1)}
+                        onAction={() => handlePageNavigation(currentPage - 1)}
                         icon={Icon.ChevronLeft}
                         shortcut={{
                           modifiers: ["cmd", "shift"],
@@ -362,7 +483,7 @@ export default function Command() {
                     {hasNextPage && (
                       <Action
                         title="Next Page"
-                        onAction={() => fetchBacklogItems(currentPage + 1)}
+                        onAction={() => handlePageNavigation(currentPage + 1)}
                         icon={Icon.ChevronRight}
                         shortcut={{
                           modifiers: ["cmd", "shift"],
@@ -372,7 +493,7 @@ export default function Command() {
                     )}
                     <Action
                       title="Refresh"
-                      onAction={() => fetchBacklogItems(currentPage)}
+                      onAction={handleRefresh}
                       icon={Icon.ArrowClockwise}
                       shortcut={{ modifiers: ["cmd"], key: "r" }}
                     />
