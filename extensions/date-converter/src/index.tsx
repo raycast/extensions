@@ -12,7 +12,7 @@ import timezone from "dayjs/plugin/timezone";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-const DEFAULT_DATE_FORMAT = "dddd, MMMM D, YYYY hh:mm:ss";
+const DEFAULT_DATE_FORMAT = "dddd, MMMM D, YYYY HH:mm:ss";
 const TIMEZONES = listTimeZones();
 const LOCAL_TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
