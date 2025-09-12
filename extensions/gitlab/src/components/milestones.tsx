@@ -50,6 +50,12 @@ const GET_GROUP_MILESTONES = gql`
   }
 `;
 
+function getColorByRatio(ratio: number): Color {
+  const colors = [Color.Red, Color.Orange, Color.Yellow, Color.Blue, Color.Green];
+  const colorIndex = Math.floor(ratio * (colors.length - 1));
+  return colors[colorIndex];
+}
+
 export function MilestoneListItem(props: { milestone: any }) {
   const milestone = props.milestone;
   const issueCounter = `${milestone.closedIssuesCount}/${milestone.totalIssuesCount}`;
@@ -65,14 +71,13 @@ export function MilestoneListItem(props: { milestone: any }) {
       subtitle += ` ⚠️ ${milestone.expired ? " [expired]" : ""}`;
     }
   }
-  const colors = [Color.Red, Color.Orange, Color.Yellow, Color.Blue, Color.Green];
-  const colorIndex = Math.floor(issueRatio * (colors.length - 1));
+  const ratioColor = getColorByRatio(issueRatio);
   return (
     <List.Item
       id={milestone.id}
       title={milestone.title}
       subtitle={subtitle}
-      accessories={[{ tag: { value: issuePercent, color: colors[colorIndex] } }, { text: issueCounter }]}
+      accessories={[{ text: issueCounter }, { tag: { value: issuePercent, color: ratioColor } }]}
       actions={
         <ActionPanel>
           <GitLabOpenInBrowserAction url={milestone.webUrl} />
@@ -101,12 +106,12 @@ export function MilestoneList(props: { project?: Project; group?: Group; navigat
     <List isLoading={isLoading} navigationTitle={props.navigationTitle || "Milestones"}>
       <List.Section title="Open">
         {openMilestones?.map((milestone) => (
-          <MilestoneListItem key={openMilestones.id} milestone={milestone} />
+          <MilestoneListItem key={milestone.id} milestone={milestone} />
         ))}
       </List.Section>
       <List.Section title="Closed">
         {closeMilestones?.map((milestone) => (
-          <MilestoneListItem key={openMilestones.id} milestone={milestone} />
+          <MilestoneListItem key={milestone.id} milestone={milestone} />
         ))}
       </List.Section>
     </List>
