@@ -1,0 +1,97 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "leetcode-zerotrac",
+  "title": "Leetcode Zerotrac",
+  "description": "Search and filter LeetCode problems with accurate Zerotrac difficulty ratings. Find problems by rating range, sort by difficulty, and practice more effectively.",
+  "icon": "icon.png",
+  "author": "icycoldveins",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "leetcode",
+    "zerotrac",
+    "competitive programming",
+    "algorithms",
+    "coding interview",
+    "difficulty rating",
+    "contest",
+    "programming problems"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-problems",
+      "title": "Zerotrac",
+      "description": "Search and filter LeetCode problems with Zerotrac ratings, sort by difficulty, and filter by rating range",
+      "mode": "view",
+      "icon": "icon.png",
+      "keywords": [
+        "leetcode",
+        "problems",
+        "zerotrac",
+        "rating",
+        "difficulty",
+        "search",
+        "filter"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultSort",
+      "title": "Default Sort Order",
+      "description": "Choose the default sorting method for problems",
+      "type": "dropdown",
+      "required": false,
+      "default": "rating-asc",
+      "data": [
+        {
+          "title": "Rating (Low to High)",
+          "value": "rating-asc"
+        },
+        {
+          "title": "Rating (High to Low)",
+          "value": "rating-desc"
+        },
+        {
+          "title": "Problem ID (Low to High)",
+          "value": "id-asc"
+        },
+        {
+          "title": "Problem ID (High to Low)",
+          "value": "id-desc"
+        },
+        {
+          "title": "Title (A to Z)",
+          "value": "title-asc"
+        },
+        {
+          "title": "Title (Z to A)",
+          "value": "title-desc"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.4",
+    "@raycast/utils": "^2.2.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
