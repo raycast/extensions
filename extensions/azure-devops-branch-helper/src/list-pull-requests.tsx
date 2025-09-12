@@ -338,7 +338,7 @@ export default function Command() {
                     <Action.CopyToClipboard
                       title="Copy Source Branch"
                       content={sourceBranch}
-                      icon={Icon.Branch}
+                      icon={Icon.Tree}
                       shortcut={{ modifiers: ["cmd"], key: "b" }}
                     />
                     <Action.CopyToClipboard

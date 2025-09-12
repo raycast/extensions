@@ -321,7 +321,7 @@ export default function BuildLogsView({
             <Action.CopyToClipboard
               title="Copy Build ID"
               content={buildId.toString()}
-              icon={Icon.HashSign}
+              icon={Icon.Hashtag}
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="View Actions">

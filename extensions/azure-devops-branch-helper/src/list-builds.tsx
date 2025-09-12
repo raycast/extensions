@@ -390,12 +390,12 @@ export default function Command() {
               <Action.CopyToClipboard
                 title="Copy Build ID"
                 content={build.id.toString()}
-                icon={Icon.HashSign}
+                icon={Icon.Hashtag}
               />
               <Action.CopyToClipboard
                 title="Copy Branch Name"
                 content={build.sourceBranch.replace("refs/heads/", "")}
-                icon={Icon.Branch}
+                icon={Icon.Tree}
               />
             </ActionPanel.Section>
             <ActionPanel.Section title="Navigation">
