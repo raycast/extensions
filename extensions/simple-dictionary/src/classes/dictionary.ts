@@ -1,3 +1,5 @@
+import { Cache } from "@raycast/api";
+
 interface Sense {
   definition: string;
   tags: string[];
@@ -48,6 +50,9 @@ interface GroupedEntry {
 }
 
 class Dictionary {
+
+  private static cache: Cache = new Cache();
+
   private url: string = "https://freedictionaryapi.com/api/v1/entries";
   private urlWord: string = "";
 
@@ -70,38 +75,108 @@ class Dictionary {
   }
 
   /**
-   * Fetches a dictionary entry for the specified word and language from the configured URL.
-   * If the fetch is successful, it processes and formats the entry, updating internal properties.
-   * Returns the grouped entry data or an empty object if the fetch fails.
-   *
-   * @returns {Promise<GroupedEntry>} A promise that resolves to the grouped entry data or an empty object. If there are no definitions or there is an error during the fetch operation, it returns an empty object.
+   * Capitalizes the first letter of the input string and lowercases the rest.
+   * 
+   * @param {string} text The input string to capitalize.
+   * @returns {string} The capitalized string.
    */
-  public async fetchEntry(): Promise<GroupedEntry> {
-    const ge: GroupedEntry = {};
+  public static capitalize(text: string): string {
+    return text.slice(0, 1).toUpperCase() + text.slice(1).toLowerCase();
+  }
+
+  public async getEntry(): Promise<GroupedEntry | undefined> {
+
+    let result: GroupedEntry | undefined = {};
 
     try {
+      const ge: GroupedEntry | undefined = this.checkCache();
+
+      if (!ge || !Object.keys(ge).length) {
+        result = await this.fetchEntry();
+      } else {
+        result = ge;
+      }
+    } catch (err) {
+      console.error(err);
+      result = await this.fetchEntry();
+    }
+
+    return result;
+  }
+
+  /**
+   * Checks the cache for a previously fetched dictionary entry.
+   * 
+   * @returns {GroupedEntry | undefined} The cached grouped entry if it exists. If there is no cached entry, it returns an empty object. If there is an error accessing the cache, it returns `undefined`.
+   */
+  private checkCache(): GroupedEntry | undefined {
+
+    let result: GroupedEntry | undefined = {};
+
+    try {
+      const cachedResult: string | undefined = Dictionary.cache.get(`${this.languageCode}-${this.wordQuery}`);
+
+      if (cachedResult) {
+
+        const ge: GroupedEntry = JSON.parse(cachedResult);
+
+        this.language = Dictionary.capitalize(ge[Object.keys(ge)?.[0]]?.language?.name || this.languageCode);
+        this.word = ge[Object.keys(ge)?.[0]]?.forms[0]?.word || this.wordQuery;
+
+        result = ge;
+      } else {
+        result = {};
+      }
+    } catch {
+      result = undefined;
+    }
+
+    return result;
+  }
+
+  /**
+   * Fetches a dictionary entry for the specified word and language from the configured URL.
+   * If the fetch is successful, it processes and formats the entry, updating internal properties.
+   *
+   * @returns {Promise<GroupedEntry | undefined>} A promise that resolves to the grouped entry data or an empty object. If there are no definitions, it returns an empty object. If the fetch fails, it returns `undefined`.
+   */
+  private async fetchEntry(): Promise<GroupedEntry | undefined> {
+
+    let result: GroupedEntry | undefined = {};
+
+    try {
+
       const res: Response = await fetch(`${this.url}/${this.languageCode}/${this.wordQuery}`);
 
       if (res.ok) {
         const entry: DictionaryResponse = (await res.json()) as DictionaryResponse;
 
-        if (!entry.entries.length) return {};
+        if (entry.entries.length) {
 
-        // Updating the word and language to ensure proper formatting
+          // Updating the word and language to ensure proper formatting
 
-        this.language =
-          entry.entries[0].language.name.slice(0, 1).toUpperCase() +
-          entry.entries[0].language.name.slice(1).toLowerCase();
-        this.word = entry.word.slice(0, 1).toUpperCase() + entry.word.slice(1).toLowerCase();
-        this.urlWord = entry.source.url.replaceAll(" ", "%20");
+          this.language = Dictionary.capitalize(entry.entries[0]?.language?.name);
+          this.word = entry.word;
+          this.urlWord = entry.source.url.replaceAll(" ", "%20");
 
-        return this.groupEntries(entry);
+          const ge: GroupedEntry = this.groupEntries(entry);
+
+          try {
+            Dictionary.cache.set(`${this.languageCode}-${this.wordQuery}`, JSON.stringify(ge));
+          } catch (error) {
+            console.error("Failed to cache dictionary entry:", error);
+          }
+
+          result = ge;
+        }
+      } else {
+        result = undefined;
       }
     } catch {
-      // There was an error fetching the entries
+      result = undefined;
     }
 
-    return ge;
+    return result;
   }
 
   /**

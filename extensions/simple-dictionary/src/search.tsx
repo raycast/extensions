@@ -17,6 +17,7 @@ import {
 import { useEffect, useState } from "react";
 import Dictionary, { GroupedEntry, Sense } from "./classes/dictionary";
 import Favorite from "./classes/favorite";
+import History from "./classes/history";
 
 export default function Command(props: LaunchProps<{ arguments: Arguments.Search }>) {
   let d: Dictionary;
@@ -35,19 +36,44 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
 
   useEffect(() => {
     d = new Dictionary(language, word);
-    d.fetchEntry()
-      .then((ge: GroupedEntry) => {
-        setGroupedEntries(ge);
-        setEntryURL(d.getURL);
-        setLanguageFull(d.getLanguage);
-        setLoading(false);
+    d.getEntry()
+      .then(async (ge: GroupedEntry | undefined) => {
+        if (ge) {
+          setGroupedEntries(ge);
+          setEntryURL(d.getURL);
+          setLanguageFull(d.getLanguage);
+          setLoading(false);
+
+          if (Object.entries(ge).length && d.getLanguage) {
+
+            console.log(d.getLanguage, language, word);
+
+            const success: boolean = await History.addEntry(d.getLanguage, language, word);
+
+            if (!success) {
+              showToast({
+                style: Toast.Style.Failure,
+                title: "There was an error saving the entry to your history",
+                message: 'Please try again later',
+              });
+            }
+          }
+        } else {
+          setLoading(false);
+          setGroupedEntries({});
+          showToast({
+            style: Toast.Style.Failure,
+            title: "There was an error searching the word",
+            message: 'Please try again later',
+          });
+        }
       })
       .catch(() => {
         setLoading(false);
         setGroupedEntries({});
         showToast({
           style: Toast.Style.Failure,
-          title: "Failed to fetch entry",
+          title: "There was an error searching the word",
           message: "Please try again later",
         });
       });
@@ -55,19 +81,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
 
   useEffect(() => {
     const checkFavorites = async () => {
-      const favs: Record<string, boolean> = {};
-      const promises: Promise<void>[] = [];
-
-      for (const [partOfSpeech, entry] of Object.entries(groupedEntries)) {
-        entry.senses.forEach((_, j: number) => {
-          const promise = Favorite.exist(languageFull.toLowerCase(), word, j, partOfSpeech).then((exists) => {
-            favs[`${partOfSpeech}-${j}`] = exists;
-          });
-          promises.push(promise);
-        });
-      }
-
-      await Promise.all(promises);
+      const favs: Record<string, boolean> = await Favorite.existMultiple(groupedEntries, word);
       setFavorites({ ...favs });
     };
 
@@ -79,7 +93,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
       isLoading={loading}
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Filter by definition..."
+      searchBarPlaceholder={loading ? "Loading. Please wait..." : "Filter by definition..."}
       filtering={true}
       isShowingDetail={true}
     >
@@ -92,7 +106,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
           return (
             <List.Section
               key={partOfSpeech}
-              title={`${partOfSpeech.charAt(0).toUpperCase() + partOfSpeech.slice(1)} (${entry.senses.length})`}
+              title={`${Dictionary.capitalize(partOfSpeech)} (${entry.senses.length})`}
             >
               {entry.senses.map((sense: Sense, j: number) => {
                 const favKey = `${partOfSpeech}-${j}`;
@@ -102,6 +116,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
                   <List.Item
                     key={`${word}-${partOfSpeech}-${j}`}
                     title={""}
+                    accessories={isFavorite ? [{ icon: Icon.Star } ] : []}
                     icon={{
                       source: Icon.Dot,
                       tintColor: color,
@@ -136,20 +151,20 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
                                 await showToast({
                                   style: Toast.Style.Success,
                                   title: "Added to Favorites",
-                                  message: `"${word}" (${languageFull}) has been added to your favorites`,
+                                  message: `"${word}" (${Dictionary.capitalize(languageFull)}) has been added to your favorites`,
                                 });
                                 setFavorites((prev) => ({ ...prev, [favKey]: true }));
                               } else {
                                 await showToast({
                                   style: Toast.Style.Failure,
                                   title: "Failed to add to Favorites",
-                                  message: `"${word}" (${languageFull}) is already in your favorites`,
+                                  message: `"${word}" (${Dictionary.capitalize(languageFull)}) is already in your favorites`,
                                 });
                               }
                             } else {
                               const options: Alert.Options = {
                                 title: "Remove from Favorites",
-                                message: `"${word.slice(0, 1).toUpperCase()}${word.slice(1)}" (${languageFull}) will be removed from your favorites`,
+                                message: `"${word}" (${Dictionary.capitalize(languageFull)}) will be removed from your favorites`,
                                 primaryAction: {
                                   title: "Delete",
                                   style: Alert.ActionStyle.Destructive,
@@ -157,7 +172,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
                                     await showToast({
                                       style: Toast.Style.Success,
                                       title: "Removed from Favorites",
-                                      message: `"${word.slice(0, 1).toUpperCase()}${word.slice(1)}" (${languageFull}) has been removed from your favorites`,
+                                      message: `"${word}" (${Dictionary.capitalize(languageFull)}) has been removed from your favorites`,
                                     });
                                   },
                                 },
@@ -175,7 +190,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
                                   await showToast({
                                     style: Toast.Style.Failure,
                                     title: "Failed to remove from Favorites",
-                                    message: `"${word.slice(0, 1).toUpperCase()}${word.slice(1)}" (${languageFull}) is not in your favorites`,
+                                    message: `"${word}" (${Dictionary.capitalize(languageFull)}) is not in your favorites`,
                                   });
                                 }
                               }
@@ -189,7 +204,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
                           onAction={(): void => {
                             Clipboard.copy(sense.definition);
                             showHUD(
-                              `The definitions for "${word}" (${language.toUpperCase()}) have been copied to clipboard`,
+                              `The definitions for "${word}" (${Dictionary.capitalize(languageFull)}) have been copied to clipboard`,
                             );
                           }}
                         />

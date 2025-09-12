@@ -1,4 +1,5 @@
 import { LocalStorage } from "@raycast/api";
+import { GroupedEntry } from "./dictionary";
 
 interface FavoriteEntry {
   language: string;
@@ -11,17 +12,6 @@ interface FavoriteEntry {
 
 class Favorite {
   private static key: string = "favorites";
-
-  /**
-   * Formats the input text by trimming whitespace, converting to lowercase,
-   * and replacing double spaces with single spaces.
-   *
-   * @param {string} t The input string to format.
-   * @returns {string} The formatted string.
-   */
-  private static formatText(t: string): string {
-    return t.trim().toLowerCase().replace("  ", " ");
-  }
 
   /**
    * Retrieves the list of favorite entries from local storage.
@@ -65,17 +55,17 @@ class Favorite {
       const exists: boolean = await Favorite.exist(language.toLowerCase(), word, entry, partOfSpeech);
       if (!exists) {
         favorites.push({
-          language: this.formatText(language),
-          word: this.formatText(word),
+          language: language.toLowerCase().replace("  ", " "),
+          word: word,
           markdown,
           url,
           entry,
           partOfSpeech,
         });
-        favorites.sort((a, b) => a.word.localeCompare(b.word));
+        favorites.sort((a: FavoriteEntry, b: FavoriteEntry) => a.word.localeCompare(b.word));
         LocalStorage.setItem(Favorite.key, JSON.stringify(favorites));
       } else {
-        result = false;
+        result = true;
       }
     } catch {
       result = false;
@@ -104,8 +94,8 @@ class Favorite {
       const favorites: FavoriteEntry[] = await this.getEntries();
       const updatedFavorites = favorites.filter(
         (fav: FavoriteEntry) =>
-          fav.language.toLowerCase() !== language.toLowerCase() ||
-          fav.word.toLowerCase() !== word.toLowerCase() ||
+          fav.language !== language ||
+          fav.word !== word ||
           fav.entry !== entry ||
           fav.partOfSpeech !== partOfSpeech,
       );
@@ -144,11 +134,43 @@ class Favorite {
     const favorites: FavoriteEntry[] = await this.getEntries();
     return favorites.some(
       (fav: FavoriteEntry) =>
-        fav.language.toLowerCase() === language.toLowerCase() &&
-        fav.word.toLowerCase() === word.toLowerCase() &&
+        fav.language === language &&
+        fav.word === word &&
         fav.entry === entry &&
         fav.partOfSpeech === partOfSpeech,
     );
+  }
+
+  /**
+   * Checks the existence of multiple grouped dictionary entries in the favorites list for a given word in a specific language.
+   *
+   * @param {GroupedEntry} groupedEntry The grouped dictionary entry to check.
+   * @param {string} word The word to check for favorite status.
+   * 
+   * @returns {Promise<Record<string, boolean>>} A promise that resolves to a record where each key is a unique identifier for an entry (partOfSpeech-senseIndex), and the value is `true` if the entry exists in favorites, or `false` otherwise.
+   */
+  public static async existMultiple(groupedEntry: GroupedEntry, word: string): Promise<Record<string, boolean>> {
+
+    const result: Record<string, boolean> = {};
+    const entries: FavoriteEntry[] = await this.getEntries();
+
+    for (const [partOfSpeech, entry] of Object.entries(groupedEntry)) {
+      if (entry.senses && entry.senses.length) {
+        entry.senses.forEach((_, i: number) => {
+          const key = `${partOfSpeech}-${i}`;
+          const exists = entries.some(
+            (fav) =>
+              fav.language.toLowerCase() === entry.language.name.toLowerCase() &&
+              fav.word.toLowerCase() === word.toLowerCase() &&
+              fav.entry === i &&
+              fav.partOfSpeech === partOfSpeech
+          );
+          result[key] = exists;
+        });
+      }
+    }
+
+    return result;
   }
 }
 
