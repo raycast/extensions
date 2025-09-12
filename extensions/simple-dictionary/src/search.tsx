@@ -45,16 +45,13 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
           setLoading(false);
 
           if (Object.entries(ge).length && d.getLanguage) {
-
-            console.log(d.getLanguage, language, word);
-
             const success: boolean = await History.addEntry(d.getLanguage, language, word);
 
             if (!success) {
               showToast({
                 style: Toast.Style.Failure,
                 title: "There was an error saving the entry to your history",
-                message: 'Please try again later',
+                message: "Please try again later",
               });
             }
           }
@@ -64,7 +61,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
           showToast({
             style: Toast.Style.Failure,
             title: "There was an error searching the word",
-            message: 'Please try again later',
+            message: "Please try again later",
           });
         }
       })
@@ -104,10 +101,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
           const color: Color = colors[i % colors.length];
 
           return (
-            <List.Section
-              key={partOfSpeech}
-              title={`${Dictionary.capitalize(partOfSpeech)} (${entry.senses.length})`}
-            >
+            <List.Section key={partOfSpeech} title={`${Dictionary.capitalize(partOfSpeech)} (${entry.senses.length})`}>
               {entry.senses.map((sense: Sense, j: number) => {
                 const favKey = `${partOfSpeech}-${j}`;
                 const isFavorite = favorites[favKey] || false;
@@ -116,7 +110,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
                   <List.Item
                     key={`${word}-${partOfSpeech}-${j}`}
                     title={""}
-                    accessories={isFavorite ? [{ icon: Icon.Star } ] : []}
+                    accessories={isFavorite ? [{ icon: Icon.Star }] : []}
                     icon={{
                       source: Icon.Dot,
                       tintColor: color,

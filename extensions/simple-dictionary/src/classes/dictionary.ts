@@ -50,7 +50,6 @@ interface GroupedEntry {
 }
 
 class Dictionary {
-
   private static cache: Cache = new Cache();
 
   private url: string = "https://freedictionaryapi.com/api/v1/entries";
@@ -76,7 +75,7 @@ class Dictionary {
 
   /**
    * Capitalizes the first letter of the input string and lowercases the rest.
-   * 
+   *
    * @param {string} text The input string to capitalize.
    * @returns {string} The capitalized string.
    */
@@ -85,7 +84,6 @@ class Dictionary {
   }
 
   public async getEntry(): Promise<GroupedEntry | undefined> {
-
     let result: GroupedEntry | undefined = {};
 
     try {
@@ -106,18 +104,16 @@ class Dictionary {
 
   /**
    * Checks the cache for a previously fetched dictionary entry.
-   * 
+   *
    * @returns {GroupedEntry | undefined} The cached grouped entry if it exists. If there is no cached entry, it returns an empty object. If there is an error accessing the cache, it returns `undefined`.
    */
   private checkCache(): GroupedEntry | undefined {
-
     let result: GroupedEntry | undefined = {};
 
     try {
       const cachedResult: string | undefined = Dictionary.cache.get(`${this.languageCode}-${this.wordQuery}`);
 
       if (cachedResult) {
-
         const ge: GroupedEntry = JSON.parse(cachedResult);
 
         this.language = Dictionary.capitalize(ge[Object.keys(ge)?.[0]]?.language?.name || this.languageCode);
@@ -141,18 +137,15 @@ class Dictionary {
    * @returns {Promise<GroupedEntry | undefined>} A promise that resolves to the grouped entry data or an empty object. If there are no definitions, it returns an empty object. If the fetch fails, it returns `undefined`.
    */
   private async fetchEntry(): Promise<GroupedEntry | undefined> {
-
     let result: GroupedEntry | undefined = {};
 
     try {
-
       const res: Response = await fetch(`${this.url}/${this.languageCode}/${this.wordQuery}`);
 
       if (res.ok) {
         const entry: DictionaryResponse = (await res.json()) as DictionaryResponse;
 
         if (entry.entries.length) {
-
           // Updating the word and language to ensure proper formatting
 
           this.language = Dictionary.capitalize(entry.entries[0]?.language?.name);

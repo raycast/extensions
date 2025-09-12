@@ -94,10 +94,7 @@ class Favorite {
       const favorites: FavoriteEntry[] = await this.getEntries();
       const updatedFavorites = favorites.filter(
         (fav: FavoriteEntry) =>
-          fav.language !== language ||
-          fav.word !== word ||
-          fav.entry !== entry ||
-          fav.partOfSpeech !== partOfSpeech,
+          fav.language !== language || fav.word !== word || fav.entry !== entry || fav.partOfSpeech !== partOfSpeech,
       );
       LocalStorage.setItem(Favorite.key, JSON.stringify(updatedFavorites));
     } catch {
@@ -134,10 +131,7 @@ class Favorite {
     const favorites: FavoriteEntry[] = await this.getEntries();
     return favorites.some(
       (fav: FavoriteEntry) =>
-        fav.language === language &&
-        fav.word === word &&
-        fav.entry === entry &&
-        fav.partOfSpeech === partOfSpeech,
+        fav.language === language && fav.word === word && fav.entry === entry && fav.partOfSpeech === partOfSpeech,
     );
   }
 
@@ -146,11 +140,10 @@ class Favorite {
    *
    * @param {GroupedEntry} groupedEntry The grouped dictionary entry to check.
    * @param {string} word The word to check for favorite status.
-   * 
+   *
    * @returns {Promise<Record<string, boolean>>} A promise that resolves to a record where each key is a unique identifier for an entry (partOfSpeech-senseIndex), and the value is `true` if the entry exists in favorites, or `false` otherwise.
    */
   public static async existMultiple(groupedEntry: GroupedEntry, word: string): Promise<Record<string, boolean>> {
-
     const result: Record<string, boolean> = {};
     const entries: FavoriteEntry[] = await this.getEntries();
 
@@ -163,7 +156,7 @@ class Favorite {
               fav.language.toLowerCase() === entry.language.name.toLowerCase() &&
               fav.word.toLowerCase() === word.toLowerCase() &&
               fav.entry === i &&
-              fav.partOfSpeech === partOfSpeech
+              fav.partOfSpeech === partOfSpeech,
           );
           result[key] = exists;
         });

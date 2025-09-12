@@ -33,11 +33,7 @@ export default function Command(): JSX.Element {
         <List.Dropdown tooltip="Filter by language" storeValue={true} onChange={setSelectedLanguage} defaultValue="All">
           <List.Dropdown.Item title="All" value="All" />
           {langs.map((lang: string) => (
-            <List.Dropdown.Item
-              key={lang}
-              title={Dictionary.capitalize(lang)}
-              value={lang}
-            />
+            <List.Dropdown.Item key={lang} title={Dictionary.capitalize(lang)} value={lang} />
           ))}
         </List.Dropdown>
       }
