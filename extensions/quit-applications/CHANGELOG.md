@@ -1,5 +1,9 @@
 # Quit Applications Changelog
 
+## [Bug fix] - {PR_MERGE_DATE}
+
+- Fixed Apple Events authorization error (-1743) by adding fallback to `ps` command when System Events permission is not granted
+
 ## [Bug fix] - 2025-05-27
 
 - Fixed issue where excluded applications still appeared in the list when multiple windows were open
