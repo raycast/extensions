@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, LocalStorage, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, List, LocalStorage, showToast, Toast, Cache } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { MeiliSearch } from "meilisearch";
 import fetch from "node-fetch";
@@ -58,12 +58,32 @@ export default function main() {
   const [selectedVersion, setSelectedVersion] = useState<string | undefined>();
   const [availableVersions, setAvailableVersions] = useState<AvailableVersion[]>([]);
   const [searchQuery, setSearchQuery] = useState<string | undefined>();
+  const cache = new Cache();
 
   useEffect(() => {
     const initializeVersions = async () => {
-      const availableVersions = await fetchAvailableVersions();
+      let availableVersions;
+      const cachedAvailableVersions = cache.get('availableVersions');
 
-      if (availableVersions) setAvailableVersions(availableVersions);
+      if (cachedAvailableVersions) {
+        const parsed = JSON.parse(cachedAvailableVersions);
+
+        // Ensure the cache isn't older than 24 hours
+        if (parsed.timestamp + 1000 * 60 * 60 * 24 > Date.now()) {
+          availableVersions = parsed.availableVersions;
+        } else {
+          availableVersions = await fetchAvailableVersions();
+        }
+      } else {
+        availableVersions = await fetchAvailableVersions();
+      }
+
+      setAvailableVersions(availableVersions);
+
+      cache.set('availableVersions', JSON.stringify({
+        availableVersions,
+        timestamp: Date.now(),
+      }));
 
       const rememberedVersion = await LocalStorage.getItem('version');
 
