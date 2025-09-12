@@ -1,0 +1,44 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ani-cli-raycast-extension",
+  "title": "Ani-cli",
+  "description": "search and watch anime using ani-cli",
+  "icon": "command-icon.png",
+  "author": "7862szhcjt",
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-anime",
+      "title": "Search Anime",
+      "description": "Search for anime and select episodes to watch",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.70.0",
+    "@raycast/utils": "^1.14.0",
+    "ansi-regex": "^6.2.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.34.0",
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.27",
+    "eslint": "^8.57.1",
+    "eslint-plugin-react": "^7.37.5",
+    "globals": "^16.3.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2",
+    "typescript-eslint": "^8.41.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
