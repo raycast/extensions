@@ -1,0 +1,69 @@
+{
+  "triggers": [
+    {
+      "id": "test_trigger_1",
+      "owner_id": "test_owner_1",
+      "component_id": "test_component_1",
+      "configurable_props": [
+        {
+          "name": "test_app",
+          "type": "app",
+          "app": "test_app"
+        },
+        {
+          "name": "testSiteId",
+          "label": "Test Site",
+          "description": "Test site configuration",
+          "type": "string",
+          "remoteOptions": true
+        }
+      ],
+      "configured_props": {
+        "test_app": {
+          "authProvisionId": "test_auth_1"
+        },
+        "testSiteId": {
+          "__lv": {
+            "label": "Test Site",
+            "value": "test_site_id_456"
+          }
+        }
+      },
+      "active": true,
+      "created_at": 1704187900,
+      "updated_at": 1704187900,
+      "name": "Test Form Submission",
+      "name_slug": "test-form-submission"
+    }
+  ],
+  "steps": [
+    {
+      "id": "test_step_1",
+      "type": "CodeCell",
+      "namespace": "test_namespace",
+      "disabled": false,
+      "code_raw": null,
+      "codeRaw": null,
+      "codeConfigJson": null,
+      "lang": "nodejs18.x",
+      "text_raw": null,
+      "appConnections": [],
+      "flat_params_visibility_json": null,
+      "params_json": "{}",
+      "component": true,
+      "savedComponent": {
+        "id": "test_saved_component_1",
+        "code": null,
+        "codeHash": "test_hash_456",
+        "configurableProps": [
+          {
+            "app": "test_filter",
+            "name": "filter",
+            "type": "app"
+          }
+        ]
+      }
+    }
+  ],
+  "test_data": true
+}
