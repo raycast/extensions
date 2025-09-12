@@ -11,7 +11,8 @@
     "LunaticMuch",
     "hmarr",
     "harsh_khandelwal",
-    "lukas-runge"
+    "lukas-runge",
+    "ridemountainpig"
   ],
   "keywords": [
     "guid",
@@ -133,6 +134,20 @@
           "name": "typeID",
           "type": "text",
           "placeholder": "prefix_1234567890",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "formatUuid",
+      "title": "Format UUID",
+      "description": "Format UUID without dashes into standard UUID format and copy to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "uuid",
+          "type": "text",
+          "placeholder": "550e8400e29b41d4a716446655440000",
           "required": true
         }
       ]
