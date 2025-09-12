@@ -5,6 +5,8 @@ A [Raycast](https://www.raycast.com) extension for WeChat to quickly search your
 ![WeChat](./assets/cover.png)
 ![WeChat Showcase1](./metadata/wechat-1.png)
 ![WeChat Showcase2](./metadata/wechat-2.png)
+![WeChat Showcase3](./metadata/wechat-3.png)
+![WeChat Showcase4](./metadata/wechat-4.png)
 
 ## Requirements
 
@@ -21,6 +23,8 @@ A [Raycast](https://www.raycast.com) extension for WeChat to quickly search your
 - [x] Recent Contacts / 最近联系人
 - [x] Support fuzzy Query / 微信通讯录模糊查询
 - [x] Manage WeChatTweak / 管理WeChatTweak
+- [x] Generate AI Message / 生成AI消息
+- [x] Add Raycast AI @wechat / 添加Raycast AI @wechat
 
 ## Shortcuts
 `Enter` Open WeChat Contact / 打开微信好友
@@ -30,6 +34,8 @@ A [Raycast](https://www.raycast.com) extension for WeChat to quickly search your
 `Command + Shift + p` Pin WeChat Contact / 置顶好友
 
 `Command + Shift + x` Clear Search History / 清除好友搜索记录
+
+`Command + Shift + a` Generate AI Message / 生成AI消息
 
 ## How to Use
 
@@ -42,6 +48,20 @@ A [Raycast](https://www.raycast.com) extension for WeChat to quickly search your
 - Manual Install
 
 `npm install && npm run dev`
+
+## Note
+### Multi-Language Support
+
+**English**:
+While it's technically possible to add Simplified Chinese support to this extension, since the Raycast platform currently only supports English, we've decided to maintain English-only to avoid a disjointed user experience. When Raycast adds multi-language support in the future, we will promptly add corresponding language support to our extension.
+
+**中文**：
+虽然技术上可以为此扩展添加简体中文支持，但由于 Raycast 平台目前仅支持英文界面，为避免用户体验割裂，我们暂时保持扩展与平台一致使用英文。当 Raycast 未来支持多语言时，我们将及时跟进添加相应语言支持。
+
+### WeChat Version
+该插件当前支持微信4.0以下版本，微信4.0以上版本[参考这里](https://github.com/sunnyyoung/WeChatTweak-macOS/issues/832)
+
+This extension currently supports WeChat versions below 4.0, WeChat versions above 4.0 [refer here](https://github.com/sunnyyoung/WeChatTweak-macOS/issues/832)
 
 ## License
 

@@ -136,6 +136,15 @@ export function useSearch() {
     [cancelRef, setState],
   );
 
+  const setSearchResults = useCallback((searchText: string, results: SearchResult[]): void => {
+    setState((prevState) => ({
+      ...prevState,
+      items: results,
+      searchText: searchText,
+      isLoading: false,
+    }));
+  }, []);
+
   useEffect(() => {
     search("");
     return () => {
@@ -152,5 +161,6 @@ export function useSearch() {
     state,
     search,
     clearRecentContacts,
+    setSearchResults,
   };
 }
