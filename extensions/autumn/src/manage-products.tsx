@@ -89,7 +89,7 @@ function CreateProduct() {
       <Form.Checkbox
         label="Add-on"
         info="This product is an add-on that can be bought together with your base products (eg, for top ups)"
-        {...itemProps.is_default}
+        {...itemProps.is_add_on}
       />
     </Form>
   );
