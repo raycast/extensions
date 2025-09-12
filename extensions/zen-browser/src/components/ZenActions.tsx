@@ -1,17 +1,20 @@
-import { Action, ActionPanel, closeMainWindow, Icon } from "@raycast/api";
-import { openHistoryTab, openNewTab, setActiveTab } from "../actions";
-import { HistoryEntry, Tab } from "../interfaces";
+import { Action, ActionPanel, getPreferenceValues } from "@raycast/api";
+import { SEARCH_ENGINE } from "../constants";
+import { HistoryEntry } from "../interfaces";
 
 export class ZenActions {
   public static NewTab = NewTabAction;
   public static HistoryItem = HistoryItemAction;
-  public static TabListItem = TabListItemAction;
 }
 
 function NewTabAction({ query }: { query?: string }) {
   return (
     <ActionPanel title="New Tab">
-      <Action onAction={() => openNewTab(query)} title={query ? `Search "${query}"` : "Open Empty Tab"} />
+      <Action.Open
+        title="Open with Zen"
+        target={`${SEARCH_ENGINE[getPreferenceValues<Preferences>().searchEngine.toLowerCase()]}${query || ""}`}
+        application={"Zen"}
+      />
     </ActionPanel>
   );
 }
@@ -19,34 +22,9 @@ function NewTabAction({ query }: { query?: string }) {
 function HistoryItemAction({ entry: { title, url } }: { entry: HistoryEntry }) {
   return (
     <ActionPanel title={title}>
-      <ZenHistoryTab url={url} />
+      <Action.Open title="Open with Zen" target={url} application={"Zen"} />
       <Action.OpenInBrowser title="Open in Default Browser" url={url} shortcut={{ modifiers: ["opt"], key: "enter" }} />
       <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
     </ActionPanel>
   );
-}
-
-function TabListItemAction(props: { tab: Tab }) {
-  return (
-    <ActionPanel title={props.tab.title}>
-      <ZenGoToTab tab={props.tab} />
-      <Action.CopyToClipboard title="Copy URL" content={props.tab.url} />
-    </ActionPanel>
-  );
-}
-
-function ZenGoToTab(props: { tab: Tab }) {
-  async function handleAction() {
-    await setActiveTab(props.tab);
-    await closeMainWindow();
-  }
-  return <Action title="Open Tab" icon={{ source: Icon.Eye }} onAction={handleAction} />;
-}
-
-function ZenHistoryTab({ url }: { url: string }) {
-  async function handleAction() {
-    await openHistoryTab(url);
-    await closeMainWindow();
-  }
-  return <Action title="Open in Zen" icon={{ source: Icon.Eye }} onAction={handleAction} />;
 }
