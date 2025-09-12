@@ -41,6 +41,27 @@
       "description": "Browse backlog items with pagination (8 items per page)",
       "mode": "view",
       "entrypoint": "src/list-backlog.tsx"
+    },
+    {
+      "name": "list-builds",
+      "title": "List Builds",
+      "description": "View active and recent builds with live log streaming",
+      "mode": "view",
+      "entrypoint": "src/list-builds.tsx"
+    },
+    {
+      "name": "list-pull-requests",
+      "title": "List Pull Requests",
+      "description": "View pull requests where you are the author or reviewer",
+      "mode": "view",
+      "entrypoint": "src/list-pull-requests.tsx"
+    },
+    {
+      "name": "create-user-story",
+      "title": "Create User Story",
+      "description": "Create a new user story with title, description, tag, feature, and assignee",
+      "mode": "view",
+      "entrypoint": "src/create-user-story.tsx"
     }
   ],
   "preferences": [

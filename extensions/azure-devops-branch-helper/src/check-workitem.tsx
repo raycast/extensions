@@ -56,9 +56,8 @@ export default function Command() {
         fetchCommand += ` --organization "${preferences.azureOrganization}"`;
       }
 
-      if (preferences.azureProject) {
-        fetchCommand += ` --project "${preferences.azureProject}"`;
-      }
+      // Note: az boards work-item show doesn't support --project parameter
+      // The project is determined from the work item ID itself
 
       const { stdout: workItemJson } = await execAsync(fetchCommand);
       const workItem: WorkItem = JSON.parse(workItemJson);

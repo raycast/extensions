@@ -50,10 +50,8 @@ export default function Command() {
         command += ` --organization "${preferences.azureOrganization}"`;
       }
 
-      // Add project parameter if specified in preferences
-      if (preferences.azureProject) {
-        command += ` --project "${preferences.azureProject}"`;
-      }
+      // Note: az boards work-item show doesn't support --project parameter
+      // The project is determined from the work item ID itself
 
       const { stdout } = await execAsync(command);
       const workItem: WorkItem = JSON.parse(stdout);

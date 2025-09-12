@@ -92,9 +92,8 @@ export default function ActivateAndBranchForm({
         fetchCommand += ` --organization "${preferences.azureOrganization}"`;
       }
 
-      if (preferences.azureProject) {
-        fetchCommand += ` --project "${preferences.azureProject}"`;
-      }
+      // Note: az boards work-item show doesn't support --project parameter
+      // The project is determined from the work item ID itself
 
       const { stdout: workItemJson } = await execAsync(fetchCommand);
       const workItem: WorkItem = JSON.parse(workItemJson);
@@ -161,7 +160,35 @@ export default function ActivateAndBranchForm({
         );
       }
 
-      // Step 5: Create branch in Azure DevOps
+      // Step 5: Check if branch already exists
+      let checkBranchCommand = `${azCommand} repos ref list --filter "heads/${branchName}" --query "[0].name" -o tsv`;
+      checkBranchCommand += ` --repository "${repositoryToUse}"`;
+
+      if (preferences.azureOrganization) {
+        checkBranchCommand += ` --organization "${preferences.azureOrganization}"`;
+      }
+
+      checkBranchCommand += ` --project "${projectToUse}"`;
+
+      try {
+        const { stdout: existingBranch } = await execAsync(checkBranchCommand);
+        if (existingBranch.trim()) {
+          throw new Error(
+            `Branch '${branchName}' already exists in Azure DevOps`,
+          );
+        }
+      } catch (checkError) {
+        // If the check command fails, it might be because the branch doesn't exist, which is what we want
+        // Only throw if it's a different kind of error
+        if (
+          checkError instanceof Error &&
+          checkError.message.includes("already exists")
+        ) {
+          throw checkError;
+        }
+      }
+
+      // Step 6: Create branch in Azure DevOps
       let createBranchCommand = `${azCommand} repos ref create --name "refs/heads/${branchName}" --object-id "${trimmedObjectId}"`;
       createBranchCommand += ` --repository "${repositoryToUse}"`;
 
@@ -201,6 +228,11 @@ export default function ActivateAndBranchForm({
           errorMessage = "Azure CLI not found or not configured properly";
         } else if (error.message.includes("already exists")) {
           errorMessage = "Branch already exists in Azure DevOps";
+        } else if (
+          error.message.includes("ERROR: None") ||
+          error.message.includes("repos ref create")
+        ) {
+          errorMessage = "Branch already exists or repository access denied";
         } else if (error.message.includes("repos")) {
           errorMessage =
             "Failed to create branch in Azure DevOps - check repository access";

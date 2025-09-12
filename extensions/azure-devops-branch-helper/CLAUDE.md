@@ -48,9 +48,17 @@ Configure the extension preferences in Raycast settings:
 - Browse backlog items with pagination (8 items per page)
 - Shows backlog items ordered by StackRank (backlog priority) then creation date
 - Includes Product Backlog Items, User Stories, Features, Epics, Bugs, and Tasks
-- Client-side pagination with Previous/Next controls (⌘P/⌘N)
+- Client-side pagination with Previous/Next controls (⌘⇧←/⌘⇧→)
 - Shows position in overall backlog and current page information
 - Entry point: `src/list-backlog.tsx`
+
+### 6. List Active Builds (`list-active-builds`)
+- View all active/running builds with real-time status updates
+- Shows build status, duration, branch, and requested by information
+- Auto-refresh every 30 seconds for live build monitoring  
+- Pagination support for large build lists (15 items per page)
+- Access to live log streaming for each build
+- Entry point: `src/list-active-builds.tsx`
 
 ## Technical Architecture
 
