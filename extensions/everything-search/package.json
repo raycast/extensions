@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "everything-search",
+  "title": "Everything",
+  "description": "Search multiple Everything ETP/FTP servers from Raycast",
+  "icon": "extension-icon.png",
+  "platforms": ["Windows"],
+  "author": "anastasiy_safari",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "evy",
+      "title": "Search Files by Mask",
+      "subtitle": "Everything",
+      "description": "Find Files from Everything by Mask",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "mask",
+          "placeholder": "File mask (e.g. *.jpg)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^1.17.0",
+    "basic-ftp": "^5.0.5"
+  },
+  "preferences": [
+    {
+      "name": "serversJSON",
+      "title": "Everything Servers Configuration",
+      "description": "JSON array of ETP/FTP server configurations",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "[{\"name\":\"...\",\"host\":\"...\",\"port\":21,\"user\":\"...\",\"pass\":\"...\"}]"
+    }
+  ],
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^24.0.4",
+    "@types/react": "^19.1.8",
+    "eslint": "^9.29.0",
+    "prettier": "^3.6.1",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
