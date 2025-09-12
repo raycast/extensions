@@ -56,6 +56,19 @@ export async function ensureFdCLI() {
   });
 
   try {
+    // Create ignore file (including ~/Library/ directory takes too much resources)
+    const homePath = process.env.HOME;
+    if (homePath === undefined) {
+      await release();
+      throw new Error("$HOME environmental variable undefined");
+    }
+    const ignoreFile = path.join(homePath, ".fdignore");
+    // Don't create ignore file if one already exists
+    if (!fs.existsSync(ignoreFile)) {
+      console.log("creating default ~/.fdignore file");
+      await afs.writeFile(ignoreFile, "Library/\n");
+    }
+
     const cliFileInfo = getCliFileInfo();
     if (fs.existsSync(fdCliFilepath())) {
       return fdCliFilepath();

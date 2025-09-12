@@ -71,7 +71,7 @@ export default function Command() {
       }
 
       const filteredPaths = fzf.find(searchTerm).map((v) => v.item);
-      console.log(`Fzf filtered results for '${searchTerm}' in: ${Date.now() - start}`);
+      console.log(`Fzf filtered results for '${searchTerm}' in: ${Date.now() - start}ms`);
       return filteredPaths;
     },
     [searchText, fzf],
