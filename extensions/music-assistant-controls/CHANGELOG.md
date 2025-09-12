@@ -1,6 +1,6 @@
 # Music Assistant Controls Changelog
 
-## [Volume Control Features] - {PR_MERGE_DATE}
+## [Volume Control Features] - 2025-09-12
 
 ### ✨ New Features
 
