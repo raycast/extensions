@@ -1,9 +1,10 @@
-import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
-import { useState } from "react";
+import { Action, ActionPanel, List, LocalStorage, showToast, Toast } from "@raycast/api";
+import { useEffect, useState } from "react";
 import { MeiliSearch } from "meilisearch";
 import fetch from "node-fetch";
 import { decode } from "html-entities";
 import fallbackResults from "./../fallback-results.json";
+import { VersionDropdown } from "./version_dropdown";
 
 type SearchResult = {
   id: string;
@@ -16,6 +17,14 @@ type SearchResult = {
 type SearchResultList = {
   [key: string]: SearchResult[];
 };
+
+type AvailableVersion = {
+  version: string;
+  branch: string;
+  url: string;
+};
+
+export type { AvailableVersion };
 
 const client = new MeiliSearch({
   host: "https://search.statamic.dev",
@@ -31,11 +40,46 @@ const client = new MeiliSearch({
   },
 });
 
-const index = client.index("docs-5");
+process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0; // todo: remove once the API is in production
+
+const fetchAvailableVersions = async (): Promise<AvailableVersion[] | null> => {
+  try {
+    const response = await fetch("http://statamic.dev.test/versions.json");
+    return await response.json() as AvailableVersion[];
+  } catch (error) {
+    await showToast(Toast.Style.Failure, "Failed to fetch available versions", error);
+    return null;
+  }
+};
 
 export default function main() {
   const [isLoading, setIsLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<SearchResultList>({});
+  const [selectedVersion, setSelectedVersion] = useState<string | undefined>();
+  const [availableVersions, setAvailableVersions] = useState<AvailableVersion[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string | undefined>();
+
+  useEffect(() => {
+    const initializeVersions = async () => {
+      const availableVersions = await fetchAvailableVersions();
+
+      if (availableVersions) setAvailableVersions(availableVersions);
+
+      const rememberedVersion = await LocalStorage.getItem('version');
+
+      if (!rememberedVersion && availableVersions) {
+        setSelectedVersion(availableVersions[0].version);
+      }
+    };
+
+    initializeVersions();
+  }, []);
+
+  useEffect(() => {
+    if (selectedVersion && searchQuery !== undefined) {
+      updateSearchResults();
+    }
+  }, [selectedVersion]);
 
   const getTitle = (hit: SearchResult): string => {
     return hit.hierarchy_lvl1 || hit.hierarchy_lvl0 || "";
@@ -50,7 +94,7 @@ export default function main() {
       return;
     }
 
-    return await index
+    return await client.index(`docs-${selectedVersion}`)
       .search(query, {
         hitsPerPage: 20,
       })
@@ -65,36 +109,44 @@ export default function main() {
       });
   };
 
+  const updateSearchResults = async () => {
+    if (!searchQuery) {
+      setSearchResults(fallbackResults);
+      return;
+    }
+
+    const results = (await search(searchQuery)) as SearchResult[];
+
+    if (!results) {
+      return;
+    }
+
+    setSearchResults(
+      results.reduce((acc: SearchResultList, hit: SearchResult) => {
+        const key = hit.hierarchy_lvl0 || "Other";
+
+        if (!acc[key]) {
+          acc[key] = [];
+        }
+
+        acc[key].push(hit);
+
+        return acc;
+      }, {})
+    );
+  };
+
+  const versionChanged = async (version: string) => {
+    setSelectedVersion(version);
+    await LocalStorage.setItem('version', version);
+  };
+
   return (
     <List
       throttle={true}
       isLoading={isLoading}
-      onSearchTextChange={async (query) => {
-        if (!query) {
-          setSearchResults(fallbackResults);
-          return;
-        }
-
-        const results = (await search(query)) as SearchResult[];
-
-        if (!results) {
-          return;
-        }
-
-        setSearchResults(
-          results.reduce((acc: SearchResultList, hit: SearchResult) => {
-            const key = hit.hierarchy_lvl0 || "Other";
-
-            if (!acc[key]) {
-              acc[key] = [];
-            }
-
-            acc[key].push(hit);
-
-            return acc;
-          }, {})
-        );
-      }}
+      onSearchTextChange={async (value) => (setSearchQuery(value), updateSearchResults())}
+      searchBarAccessory={<VersionDropdown id="version" versions={availableVersions} onChange={versionChanged} />}
     >
       {Object.entries(searchResults as SearchResultList).map(
         ([section, items]: [string, SearchResult[]], index: number) => {
