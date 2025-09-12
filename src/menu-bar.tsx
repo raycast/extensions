@@ -9,6 +9,7 @@ import { calendar_v3 } from "@googleapis/calendar";
 import { environment, getPreferenceValues, Icon, MenuBarExtra, open } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { differenceInMinutes, format, isAfter, isToday, isTomorrow } from "date-fns";
+import { useEffect, useState } from "react";
 import { getCalendarClient, withGoogleAPIs } from "./lib/google";
 
 // Extended event interface with calendar information
@@ -209,8 +210,8 @@ function formatEventTime(event: calendar_v3.Schema$Event) {
  * @param event - The calendar event
  * @returns Human-readable countdown string (e.g., "In 15m", "In 2h 30m", "Tomorrow")
  */
-function getTimeUntilEvent(event: calendar_v3.Schema$Event) {
-  const now = new Date();
+function getTimeUntilEvent(event: calendar_v3.Schema$Event, currentTime?: Date) {
+  const now = currentTime || new Date();
   const startDate = new Date(event.start?.dateTime ?? event.start?.date ?? "");
 
   // Handle all-day events
@@ -291,6 +292,17 @@ function Command() {
   const showOngoingMinutes = parseInt(preferences.showOngoingMinutes || "15");
   const { data: events, isLoading, revalidate } = useMenuBarEvents();
 
+  // Force re-render every minute to update time display
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, []);
+
   const nextMeeting = getNextMeeting(events, showOngoingMinutes);
 
   // Get all upcoming events for the dropdown
@@ -348,7 +360,7 @@ function Command() {
   const eventTitle = nextMeeting.summary || "Untitled Event";
   const truncatedTitle = truncateText(eventTitle, maxCharacters);
   const eventTime = formatEventTime(nextMeeting);
-  const timeUntil = getTimeUntilEvent(nextMeeting);
+  const timeUntil = getTimeUntilEvent(nextMeeting, currentTime);
 
   // Build menu bar title based on user preferences
   let menuBarTitle = truncatedTitle;
@@ -363,7 +375,7 @@ function Command() {
       {allUpcomingEvents.map((event, index) => {
         const eventTitle = event.summary || "Untitled Event";
         const eventTime = formatEventTime(event);
-        const timeUntil = getTimeUntilEvent(event);
+        const timeUntil = getTimeUntilEvent(event, currentTime);
         const isNextMeeting = event.id === nextMeeting?.id;
         const calendarName = event.calendarName;
 

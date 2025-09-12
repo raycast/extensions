@@ -61,7 +61,8 @@
       "title": "Menu Bar",
       "description": "Show next meeting in menu bar",
       "mode": "menu-bar",
-      "subtitle": "Google Calendar"
+      "subtitle": "Google Calendar",
+      "interval": "30s"
     }
   ],
   "tools": [
