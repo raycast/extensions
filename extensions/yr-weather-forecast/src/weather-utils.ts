@@ -1,9 +1,10 @@
 import type { TimeseriesEntry } from "./weather-client";
 import { precipitationAmount, symbolCode } from "./utils-forecast";
-import { formatPrecip, formatTemperatureCelsius, formatWindSpeed } from "./units";
+import { formatPrecip, formatWindSpeed } from "./units";
 import { symbolToEmoji } from "./utils/weather-symbols";
 import { formatDate, formatTime as formatTimeUtil, getPeriodName } from "./utils/date-utils";
 import { getUIThresholds } from "./config/weather-config";
+import { TemperatureFormatter } from "./utils/weather-formatters";
 
 /**
  * Convert wind direction degrees to compass direction with arrow
@@ -18,25 +19,65 @@ export function directionFromDegrees(degrees: number): { arrow: string; name: st
 
 /**
  * Format temperature from TimeseriesEntry
+ * @deprecated Use TemperatureFormatter.format instead
  */
 export function formatTemp(ts: TimeseriesEntry | undefined): string | undefined {
-  if (!ts) return undefined;
-  const details = ts?.data?.instant?.details ?? {};
-  return formatTemperatureCelsius(details.air_temperature);
+  return TemperatureFormatter.format(ts);
 }
 
 /**
- * Filter forecast series to a specific date
+ * Filter forecast series to a specific date with extended context
+ * Handles timezone conversion between local date and UTC API data
+ * Includes the last data point of the previous day and first data point of the next day
+ * for a more complete visualization
  */
 export function filterToDate(series: TimeseriesEntry[], targetDate: Date): TimeseriesEntry[] {
+  // Create date range in local timezone
   const target = new Date(targetDate);
   target.setHours(0, 0, 0, 0);
-  return series.filter((s) => {
+  const nextDay = new Date(target);
+  nextDay.setDate(nextDay.getDate() + 1);
+
+  // Convert to UTC for comparison with API data
+  const targetUTC = new Date(target.getTime() - target.getTimezoneOffset() * 60000);
+  const nextDayUTC = new Date(nextDay.getTime() - nextDay.getTimezoneOffset() * 60000);
+
+  // Find the last data point of the previous day and first data point of the next day
+  const previousDay = new Date(target);
+  previousDay.setDate(previousDay.getDate() - 1);
+  const previousDayUTC = new Date(previousDay.getTime() - previousDay.getTimezoneOffset() * 60000);
+
+  const dayAfter = new Date(nextDay);
+  dayAfter.setDate(dayAfter.getDate() + 1);
+  const dayAfterUTC = new Date(dayAfter.getTime() - dayAfter.getTimezoneOffset() * 60000);
+
+  // Filter data for the target day plus context points
+  const targetDayData = series.filter((s) => {
     const d = new Date(s.time);
-    const local = new Date(d);
-    local.setHours(0, 0, 0, 0);
-    return local.getTime() === target.getTime();
+    return d >= targetUTC && d < nextDayUTC;
   });
+
+  // Find the last data point of the previous day
+  const previousDayData = series.filter((s) => {
+    const d = new Date(s.time);
+    return d >= previousDayUTC && d < targetUTC;
+  });
+  const lastPreviousDay = previousDayData.length > 0 ? previousDayData[previousDayData.length - 1] : null;
+
+  // Find the first data point of the next day
+  const nextDayData = series.filter((s) => {
+    const d = new Date(s.time);
+    return d >= nextDayUTC && d < dayAfterUTC;
+  });
+  const firstNextDay = nextDayData.length > 0 ? nextDayData[0] : null;
+
+  // Combine all data points for a more complete visualization
+  const result = [];
+  if (lastPreviousDay) result.push(lastPreviousDay);
+  result.push(...targetDayData);
+  if (firstNextDay) result.push(firstNextDay);
+
+  return result;
 }
 
 /**
@@ -134,7 +175,7 @@ export function buildWeatherTable(
     parts.push(emoji);
 
     // Temperature column
-    parts.push(formatTemp(ts) ?? "");
+    parts.push(TemperatureFormatter.format(ts) ?? "");
 
     // Wind column
     const details = ts?.data?.instant?.details ?? {};

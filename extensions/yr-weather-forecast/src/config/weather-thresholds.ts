@@ -508,6 +508,18 @@ export const CACHE_THRESHOLDS = {
    * 1 hour - locations don't change frequently
    */
   LOCATION_SEARCH: 60 * 60 * 1000,
+
+  /**
+   * Graph cache TTL
+   * 2 hours - graphs can be cached longer since they're expensive to generate
+   */
+  GRAPH: 2 * 60 * 60 * 1000,
+
+  /**
+   * Graph cache version
+   * Increment this to invalidate all cached graphs when graph format changes
+   */
+  GRAPH_VERSION: "1.0.0",
 } as const;
 
 /**

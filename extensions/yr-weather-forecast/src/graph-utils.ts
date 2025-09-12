@@ -88,13 +88,8 @@ export function buildGraphMarkdown(
   const precPath = precLine(precsDisplay as number[]) || "";
 
   // Build precipitation area fill for better visibility
-  const precAreaLine = line<number>()
-    .x((_: number, i: number) => xScale(times[i]))
-    .y((_: number, i: number) => yP(precsDisplay[i] ?? 0));
-  // Always apply smooth curves for better visual appearance
-  precAreaLine.curve(curveMonotoneX);
-  const precAreaPath = precAreaLine([...precsDisplay, 0, 0] as number[]) || "";
-  const precipAreaFill = `<path d="${precAreaPath} L ${xScale(times[times.length - 1])} ${py(weatherConfig.precipitation.ZERO)} L ${xScale(times[0])} ${py(weatherConfig.precipitation.ZERO)} Z" fill="${graphConfig.COLORS.PRECIPITATION_AREA}" opacity="${graphConfig.OPACITY.PRECIPITATION_AREA}" stroke-linejoin="round" />`;
+  // Create area fill by closing the path to the zero line
+  const precipAreaFill = `<path d="${precPath} L ${xScale(times[times.length - 1])} ${py(weatherConfig.precipitation.ZERO)} L ${xScale(times[0])} ${py(weatherConfig.precipitation.ZERO)} Z" fill="${graphConfig.COLORS.PRECIPITATION_AREA}" opacity="${graphConfig.OPACITY.PRECIPITATION_AREA}" stroke-linejoin="round" />`;
 
   // Emoji labels for weather above temperature points
   const emojiLabels = times

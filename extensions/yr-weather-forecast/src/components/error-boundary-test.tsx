@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { List, Action, ActionPanel, Icon } from "@raycast/api";
+import { List } from "@raycast/api";
+import { ActionPanelBuilders } from "../utils/action-panel-builders";
 import { ErrorBoundary } from "./error-boundary";
 import { GenericErrorFallback } from "./error-fallbacks";
 
@@ -20,12 +21,12 @@ function ErrorTestComponent() {
         title="Test Error Boundary"
         subtitle="Click to trigger an error and see the error boundary in action"
         icon="🧪"
-        actions={
-          <ActionPanel>
-            <Action title="Throw Test Error" icon={Icon.ExclamationMark} onAction={() => setShouldThrow(true)} />
-            <Action title="Reset Component" icon={Icon.ArrowClockwise} onAction={() => setShouldThrow(false)} />
-          </ActionPanel>
-        }
+        actions={ActionPanelBuilders.createTestActions(
+          () => setShouldThrow(true),
+          () => setShouldThrow(false),
+          "Throw Test Error",
+          "Reset Component",
+        )}
       />
     </List.Section>
   );

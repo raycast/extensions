@@ -11,8 +11,8 @@ import {
 } from "../storage";
 import { LocationUtils } from "../utils/location-utils";
 import { DebugLogger } from "../utils/debug-utils";
-import { buildGraphMarkdown } from "../graph-utils";
 import { getUIThresholds, getTimingThresholds } from "../config/weather-config";
+import { generateAndCacheGraph } from "../graph-cache";
 
 export interface UseFavoritesReturn {
   // Favorites state
@@ -25,9 +25,10 @@ export interface UseFavoritesReturn {
   weatherDataInitialized: boolean;
   isInitialLoad: boolean;
   preWarmedGraphs: Record<string, string>;
+  isBackgroundLoading: boolean; // New: indicates if background loading is in progress
 
   // Favorites actions
-  addFavoriteLocation: (location: FavoriteLocation) => Promise<void>;
+  addFavoriteLocation: (location: FavoriteLocation) => Promise<boolean>;
   removeFavoriteLocation: (location: FavoriteLocation) => Promise<void>;
   moveFavoriteUp: (location: FavoriteLocation) => Promise<void>;
   moveFavoriteDown: (location: FavoriteLocation) => Promise<void>;
@@ -56,6 +57,7 @@ export function useFavorites(): UseFavoritesReturn {
   const [weatherDataInitialized, setWeatherDataInitialized] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [preWarmedGraphs, setPreWarmedGraphs] = useState<Record<string, string>>({});
+  const [isBackgroundLoading, setIsBackgroundLoading] = useState(false);
 
   // Load favorites on mount
   useEffect(() => {
@@ -77,11 +79,13 @@ export function useFavorites(): UseFavoritesReturn {
       setFavoriteErrors({});
       setFavoritesLoading({});
       setWeatherDataInitialized(true); // No favorites to load, so we're "done"
+      setIsBackgroundLoading(false);
       return;
     }
 
     let cancelled = false;
     setWeatherDataInitialized(false); // Starting fresh data load
+    setIsBackgroundLoading(true); // Start background loading
 
     async function fetchAll() {
       // Reset states
@@ -120,14 +124,17 @@ export function useFavorites(): UseFavoritesReturn {
             if (ts) {
               setFavoriteWeather((prev) => ({ ...prev, [key]: ts }));
 
-              // Pre-warm graph for this favorite
+              // Pre-warm graph for this favorite using persistent cache
               try {
-                const graphMarkdown = buildGraphMarkdown(
-                  favorites.find((f) => LocationUtils.getLocationKey(f.id, f.lat, f.lon) === key)?.name || "Location",
+                const favoriteName =
+                  favorites.find((f) => LocationUtils.getLocationKey(f.id, f.lat, f.lon) === key)?.name || "Location";
+                const graphMarkdown = await generateAndCacheGraph(
+                  key,
+                  "detailed",
                   [ts], // Single entry for favorites
+                  favoriteName,
                   getUIThresholds().DEFAULT_FORECAST_HOURS,
-                  { title: "48h forecast", smooth: true },
-                ).markdown;
+                );
 
                 setPreWarmedGraphs((prev) => ({ ...prev, [key]: graphMarkdown }));
               } catch (err) {
@@ -143,6 +150,7 @@ export function useFavorites(): UseFavoritesReturn {
           setTimeout(() => {
             setWeatherDataInitialized(true);
             setIsInitialLoad(false); // Mark initial load as complete
+            setIsBackgroundLoading(false); // Background loading complete
           }, getTimingThresholds().COMPONENT_INIT_DELAY);
         }
       } catch (err) {
@@ -154,6 +162,7 @@ export function useFavorites(): UseFavoritesReturn {
           setTimeout(() => {
             setWeatherDataInitialized(true);
             setIsInitialLoad(false); // Mark initial load as complete
+            setIsBackgroundLoading(false); // Background loading complete
           }, getTimingThresholds().COMPONENT_INIT_DELAY);
         }
       }
@@ -165,35 +174,50 @@ export function useFavorites(): UseFavoritesReturn {
     };
   }, [favorites]);
 
-  // Add favorite location
-  const addFavoriteLocation = useCallback(async (location: FavoriteLocation) => {
-    await addFavorite(location);
-    await refreshFavorites();
-  }, []);
-
-  // Remove favorite location
-  const removeFavoriteLocation = useCallback(async (location: FavoriteLocation) => {
-    await removeFavorite(location);
-    await refreshFavorites();
-  }, []);
-
-  // Move favorite up
-  const moveFavoriteUpAction = useCallback(async (location: FavoriteLocation) => {
-    await moveFavoriteUp(location);
-    await refreshFavorites();
-  }, []);
-
-  // Move favorite down
-  const moveFavoriteDownAction = useCallback(async (location: FavoriteLocation) => {
-    await moveFavoriteDown(location);
-    await refreshFavorites();
-  }, []);
-
   // Refresh favorites from storage
   const refreshFavorites = useCallback(async () => {
     const favs = await getFavorites();
     setFavorites(favs);
   }, []);
+
+  // Add favorite location
+  const addFavoriteLocation = useCallback(
+    async (location: FavoriteLocation) => {
+      const wasAdded = await addFavorite(location);
+      if (wasAdded) {
+        await refreshFavorites();
+      }
+      return wasAdded;
+    },
+    [refreshFavorites],
+  );
+
+  // Remove favorite location
+  const removeFavoriteLocation = useCallback(
+    async (location: FavoriteLocation) => {
+      await removeFavorite(location);
+      await refreshFavorites();
+    },
+    [refreshFavorites],
+  );
+
+  // Move favorite up
+  const moveFavoriteUpAction = useCallback(
+    async (location: FavoriteLocation) => {
+      await moveFavoriteUp(location);
+      await refreshFavorites();
+    },
+    [refreshFavorites],
+  );
+
+  // Move favorite down
+  const moveFavoriteDownAction = useCallback(
+    async (location: FavoriteLocation) => {
+      await moveFavoriteDown(location);
+      await refreshFavorites();
+    },
+    [refreshFavorites],
+  );
 
   // Check if location is favorite
   const isLocationFavorite = useCallback(
@@ -250,6 +274,7 @@ export function useFavorites(): UseFavoritesReturn {
     weatherDataInitialized,
     isInitialLoad,
     preWarmedGraphs,
+    isBackgroundLoading,
 
     // Favorites actions
     addFavoriteLocation,

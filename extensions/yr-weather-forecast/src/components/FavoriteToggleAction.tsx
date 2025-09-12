@@ -1,4 +1,4 @@
-import { Action, Icon, Keyboard } from "@raycast/api";
+import { Action, Icon } from "@raycast/api";
 
 interface FavoriteToggleActionProps {
   isFavorite: boolean;
@@ -10,7 +10,7 @@ export function FavoriteToggleAction({ isFavorite, onToggle }: FavoriteToggleAct
     <Action
       title={`${isFavorite ? "Remove from" : "Add to"} Favorites`}
       icon={isFavorite ? Icon.StarDisabled : Icon.Star}
-      shortcut={Keyboard.Shortcut.Common.Pin}
+      shortcut={isFavorite ? { modifiers: ["cmd", "shift"], key: "f" } : { modifiers: ["cmd"], key: "f" }}
       onAction={onToggle}
     />
   );

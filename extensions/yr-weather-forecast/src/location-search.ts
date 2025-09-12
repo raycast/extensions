@@ -5,6 +5,20 @@ export type LocationResult = {
   displayName: string;
   lat: number;
   lon: number;
+  address?: {
+    city?: string;
+    town?: string;
+    municipality?: string;
+    county?: string;
+    state?: string;
+    country?: string;
+    country_code?: string;
+    postcode?: string;
+  };
+  osm_type?: string;
+  type?: string;
+  class?: string;
+  addresstype?: string;
 };
 
 // Simple Nominatim search (OpenStreetMap). Comply with usage policy by sending a UA.
@@ -27,11 +41,30 @@ export async function searchLocations(query: string): Promise<LocationResult[]> 
     display_name: string;
     lat: string;
     lon: string;
+    address?: {
+      city?: string;
+      town?: string;
+      municipality?: string;
+      county?: string;
+      state?: string;
+      country?: string;
+      country_code?: string;
+      postcode?: string;
+    };
+    osm_type?: string;
+    type?: string;
+    class?: string;
+    addresstype?: string;
   }>;
   return data.map((p) => ({
     id: String(p.place_id),
     displayName: p.display_name,
     lat: Number(p.lat),
     lon: Number(p.lon),
+    address: p.address,
+    osm_type: p.osm_type,
+    type: p.type,
+    class: p.class,
+    addresstype: p.addresstype,
   }));
 }

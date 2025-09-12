@@ -4,7 +4,7 @@ import { buildGraphMarkdown } from "./graph-utils";
 import { reduceToDayPeriods, buildWeatherTable, filterToDate } from "./weather-utils";
 import { useWeatherData } from "./hooks/useWeatherData";
 import { generateNoForecastDataMessage } from "./utils/error-messages";
-import { addFavorite, removeFavorite, isFavorite as checkIsFavorite, type FavoriteLocation } from "./storage";
+import { addFavorite, removeFavorite, getFavorites, isSameLocation, type FavoriteLocation } from "./storage";
 import { withErrorBoundary } from "./components/error-boundary";
 import { WeatherErrorFallback } from "./components/error-fallbacks";
 import { FavoriteToggleAction } from "./components/FavoriteToggleAction";
@@ -13,6 +13,8 @@ import { formatDate, formatTime } from "./utils/date-utils";
 import { getSunTimes, type SunTimes } from "./sunrise-client";
 import { formatTemperatureCelsius, formatPrecip } from "./units";
 import { precipitationAmount } from "./utils-forecast";
+import { generateAndCacheGraph } from "./graph-cache";
+import { LocationUtils } from "./utils/location-utils";
 
 function ForecastView(props: {
   name: string;
@@ -22,25 +24,26 @@ function ForecastView(props: {
   onShowWelcome?: () => void;
   targetDate?: string; // ISO date string for specific day view
   onFavoriteChange?: () => void; // Callback when favorites are added/removed
+  initialMode?: "detailed" | "summary"; // Initial mode to start in
 }) {
-  const { name, lat, lon, preCachedGraph, onShowWelcome, targetDate, onFavoriteChange } = props;
-  const [mode, setMode] = useState<"detailed" | "summary">("detailed");
+  const { name, lat, lon, preCachedGraph, onShowWelcome, targetDate, onFavoriteChange, initialMode } = props;
+  const [mode, setMode] = useState<"detailed" | "summary">(initialMode || "detailed");
   const [view, setView] = useState<"graph" | "data">("graph");
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const [sunByDate, setSunByDate] = useState<Record<string, SunTimes>>({});
   const { series: items, loading, showNoData, preRenderedGraph } = useWeatherData(lat, lon, true);
 
-  // Check if current location is in favorites
+  // Check if current location is in favorites (using coordinate + name matching)
   useEffect(() => {
     const checkFavoriteStatus = async () => {
-      // Generate a consistent ID for locations that don't have one from search results
-      const id = `${lat.toFixed(3)},${lon.toFixed(3)}`;
-      const favLocation: FavoriteLocation = { id, name, lat, lon };
-      const favorite = await checkIsFavorite(favLocation);
-      setIsFavorite(favorite);
+      const existingFavorites = await getFavorites();
+      const existingFavorite = existingFavorites.find((fav) =>
+        isSameLocation(fav, { name, lat, lon, id: `${lat.toFixed(3)},${lon.toFixed(3)}` }),
+      );
+      setIsFavorite(!!existingFavorite);
     };
     checkFavoriteStatus();
-  }, [name, lat, lon]);
+  }, [lat, lon, name]);
 
   // Fetch sunrise/sunset for visible dates once forecast is loaded
   useEffect(() => {
@@ -100,50 +103,98 @@ function ForecastView(props: {
   // Generate and cache graphs when data changes
   useEffect(() => {
     if (items.length > 0) {
-      // Always generate fresh graph to include sunrise/sunset data
-      const detailedGraph = buildGraphMarkdown(
-        name,
-        items.slice(0, getUIThresholds().DETAILED_FORECAST_HOURS),
-        getUIThresholds().DETAILED_FORECAST_HOURS,
-        {
-          title: "48h forecast",
-          smooth: true,
-          sunByDate,
-        },
-      ).markdown;
+      const locationKey = LocationUtils.getLocationKey(`${lat},${lon}`, lat, lon);
 
-      // Cache summary graph (9-day) - no sunrise/sunset data needed
-      const summaryGraph = buildGraphMarkdown(name, reduced, reduced.length, {
-        title: "9-day summary",
-        smooth: true,
-      }).markdown;
+      // Use displaySeries for graph generation to respect target date filtering
+      const dataForDetailedGraph = targetDate
+        ? displaySeries
+        : items.slice(0, getUIThresholds().DETAILED_FORECAST_HOURS);
+      const dataForSummaryGraph = targetDate ? displaySeries : reduced;
 
-      setGraphCache({
-        detailed: detailedGraph,
-        summary: summaryGraph,
-      });
+      // Generate graphs using persistent cache
+      const generateGraphs = async () => {
+        try {
+          const [detailedGraph, summaryGraph] = await Promise.all([
+            generateAndCacheGraph(
+              locationKey,
+              "detailed",
+              dataForDetailedGraph,
+              name,
+              targetDate ? displaySeries.length : getUIThresholds().DETAILED_FORECAST_HOURS,
+              sunByDate,
+              targetDate,
+            ),
+            generateAndCacheGraph(
+              locationKey,
+              "summary",
+              dataForSummaryGraph,
+              name,
+              dataForSummaryGraph.length,
+              undefined, // No sunrise/sunset data for summary
+              targetDate,
+            ),
+          ]);
+
+          setGraphCache({
+            detailed: detailedGraph,
+            summary: summaryGraph,
+          });
+        } catch (error) {
+          console.warn("Failed to generate cached graphs, falling back to direct generation:", error);
+
+          // Fallback to direct generation if caching fails
+          const detailedGraph = buildGraphMarkdown(
+            name,
+            dataForDetailedGraph,
+            targetDate ? displaySeries.length : getUIThresholds().DETAILED_FORECAST_HOURS,
+            {
+              title: targetDate ? "1-day forecast" : "48h forecast",
+              smooth: true,
+              sunByDate,
+            },
+          ).markdown;
+
+          const summaryGraph = buildGraphMarkdown(name, dataForSummaryGraph, dataForSummaryGraph.length, {
+            title: targetDate ? "1-day forecast" : "9-day summary",
+            smooth: true,
+          }).markdown;
+
+          setGraphCache({
+            detailed: detailedGraph,
+            summary: summaryGraph,
+          });
+        }
+      };
+
+      generateGraphs();
     }
-  }, [items, reduced, name, preCachedGraph, preRenderedGraph, sunByDate]);
+  }, [items, reduced, name, preCachedGraph, preRenderedGraph, sunByDate, displaySeries, targetDate, lat, lon]);
 
   // Clear graph cache when component mounts to ensure fresh styling
   useEffect(() => {
     setGraphCache({ detailed: "", summary: "" });
   }, []);
 
-  // Get cached graph based on current mode
+  // Get cached graph based on current mode, with preCachedGraph as fallback
   const graph = useMemo(() => {
     if (displaySeries.length === 0 && showNoData) return "";
+
+    // Use preCachedGraph if available and we don't have a cached version yet
+    if (preCachedGraph && !graphCache[mode]) {
+      return preCachedGraph;
+    }
+
     return mode === "detailed" ? graphCache.detailed : graphCache.summary;
-  }, [mode, graphCache, displaySeries.length, showNoData]);
+  }, [mode, graphCache, displaySeries.length, showNoData, preCachedGraph]);
 
   const listMarkdown = useMemo(() => {
-    if (items.length === 0 && showNoData) {
+    if (displaySeries.length === 0 && showNoData) {
       return generateNoForecastDataMessage({ locationName: name });
     }
 
-    // For data view, always show comprehensive table with all data points
-    return buildWeatherTable(items, { showDirection: true, showPeriod: false });
-  }, [items, showNoData, name]);
+    // For data view, show table with filtered data (respects target date)
+    return buildWeatherTable(displaySeries, { showDirection: true, showPeriod: false });
+  }, [displaySeries, showNoData, name]);
 
   // Only show content when not loading and we have data or know there's no data
   const shouldShowContent = !loading && (displaySeries.length > 0 || showNoData);
@@ -154,6 +205,7 @@ function ForecastView(props: {
         let titleText;
         if (targetDate) {
           const dateLabel = formatDate(targetDate, "LONG_DAY");
+          console.log(`Date display: targetDate="${targetDate}", dateLabel="${dateLabel}"`);
           titleText = `# ${name} – ${dateLabel} (1-day)${view === "data" ? " (Data)" : ""}`;
         } else {
           titleText = `# ${name} – ${mode === "detailed" ? "48-Hour Forecast" : "9-Day Summary"}${view === "data" ? " (Data)" : ""}`;
@@ -164,13 +216,27 @@ function ForecastView(props: {
         let summaryInfo = "";
         if (mode === "detailed" || mode === "summary") {
           const summaryParts: string[] = [];
+          let dataCoverageInfo = "";
+
+          // Add data coverage information for target dates (on its own line)
+          if (targetDate && displaySeries.length > 0) {
+            const firstTime = new Date(displaySeries[0].time);
+            const lastTime = new Date(displaySeries[displaySeries.length - 1].time);
+            const firstLocal = new Date(firstTime.getTime() + new Date().getTimezoneOffset() * 60000);
+            const lastLocal = new Date(lastTime.getTime() + new Date().getTimezoneOffset() * 60000);
+
+            const startHour = firstLocal.getHours();
+            const endHour = lastLocal.getHours();
+            const hoursCovered = displaySeries.length;
+
+            if (hoursCovered < 24) {
+              dataCoverageInfo = `\n\n📊 Data coverage: ${startHour.toString().padStart(2, "0")}:00-${endHour.toString().padStart(2, "0")}:00 (${hoursCovered}h) - Future forecasts have limited hourly data`;
+            }
+          }
 
           // Temperature range
-          if (items.length > 0) {
-            const dataToAnalyze =
-              mode === "detailed" ? items.slice(0, getUIThresholds().DETAILED_FORECAST_HOURS) : reduced;
-
-            const temps = dataToAnalyze
+          if (displaySeries.length > 0) {
+            const temps = displaySeries
               .map((s) => s.data?.instant?.details?.air_temperature)
               .filter((t): t is number => typeof t === "number" && Number.isFinite(t));
 
@@ -184,11 +250,8 @@ function ForecastView(props: {
           }
 
           // Precipitation
-          if (items.length > 0) {
-            const dataToAnalyze =
-              mode === "detailed" ? items.slice(0, getUIThresholds().DETAILED_FORECAST_HOURS) : reduced;
-
-            const precips = dataToAnalyze
+          if (displaySeries.length > 0) {
+            const precips = displaySeries
               .map((s) => precipitationAmount(s))
               .filter((p): p is number => typeof p === "number" && Number.isFinite(p));
 
@@ -213,6 +276,9 @@ function ForecastView(props: {
           if (summaryParts.length > 0) {
             summaryInfo = `\n\n${summaryParts.join(" • ")}`;
           }
+
+          // Add data coverage info on its own line
+          summaryInfo += dataCoverageInfo;
         }
 
         return [titleText, summaryInfo, content].join("\n");
@@ -223,8 +289,6 @@ function ForecastView(props: {
     // Generate a consistent ID for locations that don't have one from search results
     const id = `${lat.toFixed(3)},${lon.toFixed(3)}`;
     const favLocation: FavoriteLocation = { id, name, lat, lon };
-
-    console.log("Adding favorite:", favLocation);
 
     try {
       if (isFavorite) {
@@ -237,15 +301,45 @@ function ForecastView(props: {
           message: `${name} has been removed from your favorites`,
         });
       } else {
-        await addFavorite(favLocation);
+        // Check if there's already a favorite with the same location
+        const existingFavorites = await getFavorites();
+        const existingFavorite = existingFavorites.find((fav) => isSameLocation(fav, favLocation));
+
+        if (existingFavorite) {
+          // Update the existing favorite's name to the current name
+          await removeFavorite(existingFavorite);
+          const updatedFavorite: FavoriteLocation = {
+            ...existingFavorite,
+            name: name,
+            id: id, // Use the new ID format
+          };
+          await addFavorite(updatedFavorite);
+          await showToast({
+            style: Toast.Style.Success,
+            title: "Updated Favorite",
+            message: `Updated existing favorite to "${name}"`,
+          });
+        } else {
+          // Add new favorite (storage layer will prevent duplicates)
+          const wasAdded = await addFavorite(favLocation);
+          if (wasAdded) {
+            await showToast({
+              style: Toast.Style.Success,
+              title: "Added to Favorites",
+              message: `${name} has been added to your favorites`,
+            });
+          } else {
+            await showToast({
+              style: Toast.Style.Animated,
+              title: "⭐ Already a Favorite Location!",
+              message: `${name} is already in your favorites`,
+            });
+            return; // Don't update isFavorite state or call onFavoriteChange
+          }
+        }
+
         setIsFavorite(true);
-        console.log("Favorite added successfully:", favLocation);
         onFavoriteChange?.(); // Notify parent component
-        await showToast({
-          style: Toast.Style.Success,
-          title: "Added to Favorites",
-          message: `${name} has been added to your favorites`,
-        });
       }
     } catch (error) {
       await showToast({
@@ -262,24 +356,53 @@ function ForecastView(props: {
       markdown={finalMarkdown}
       actions={
         <ActionPanel>
-          {/* Primary flow: Mode switching with Space key (only when not in targetDate mode) */}
-          {!targetDate && (
+          {/* Mode switching actions with dedicated shortcuts */}
+          {targetDate ? (
+            <>
+              <Action.Push
+                title="Show 48-Hour Detailed"
+                icon={Icon.Clock}
+                shortcut={{ modifiers: ["cmd"], key: "4" }}
+                target={
+                  <ForecastView
+                    name={name}
+                    lat={lat}
+                    lon={lon}
+                    onShowWelcome={onShowWelcome}
+                    onFavoriteChange={onFavoriteChange}
+                    initialMode="detailed"
+                  />
+                }
+              />
+              <Action.Push
+                title="Show 9-Day Summary"
+                icon={Icon.Calendar}
+                shortcut={{ modifiers: ["cmd"], key: "9" }}
+                target={
+                  <ForecastView
+                    name={name}
+                    lat={lat}
+                    lon={lon}
+                    onShowWelcome={onShowWelcome}
+                    onFavoriteChange={onFavoriteChange}
+                    initialMode="summary"
+                  />
+                }
+              />
+            </>
+          ) : (
             <>
               {mode === "detailed" ? (
-                <Action
-                  title="Show 9-Day Summary"
-                  icon={Icon.Calendar}
-                  shortcut={{ modifiers: [], key: "space" }}
-                  onAction={() => setMode("summary")}
-                />
+                <Action title="Show 9-Day Summary" icon={Icon.Calendar} onAction={() => setMode("summary")} />
               ) : (
-                <Action
-                  title="Show 48-Hour Detailed"
-                  icon={Icon.Clock}
-                  shortcut={{ modifiers: [], key: "space" }}
-                  onAction={() => setMode("detailed")}
-                />
+                <Action title="Show 48-Hour Detailed" icon={Icon.Clock} onAction={() => setMode("detailed")} />
               )}
+              <Action
+                title={mode === "detailed" ? "Show 9-Day Summary" : "Show 48-Hour Detailed"}
+                icon={mode === "detailed" ? Icon.Calendar : Icon.Clock}
+                shortcut={{ modifiers: ["cmd"], key: mode === "detailed" ? "9" : "4" }}
+                onAction={() => setMode(mode === "detailed" ? "summary" : "detailed")}
+              />
             </>
           )}
 

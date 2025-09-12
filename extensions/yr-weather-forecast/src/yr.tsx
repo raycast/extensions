@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Action, ActionPanel, List, Icon, showToast, Toast } from "@raycast/api";
-import ForecastView from "./forecast";
+import { LazyForecastView, useForecastPreloader } from "./components/lazy-forecast";
 import WelcomeMessage from "./components/welcome-message";
 import { ErrorBoundary } from "./components/error-boundary";
 import { SearchErrorFallback, FavoritesErrorFallback } from "./components/error-fallbacks";
@@ -15,13 +15,14 @@ import { useNetworkTest } from "./hooks/useNetworkTest";
 import { useSearch } from "./hooks/useSearch";
 import { useFavorites } from "./hooks/useFavorites";
 import { useFavoriteIds } from "./hooks/useFavoriteIds";
+import { useGraphCache } from "./hooks/useGraphCache";
 import { getUIThresholds } from "./config/weather-config";
 
 import { ToastMessages } from "./utils/toast-utils";
-import { WeatherFormatters } from "./utils/weather-formatters";
 import { LocationUtils } from "./utils/location-utils";
+import { WeatherFormatters } from "./utils/weather-formatters";
 import { DebugLogger } from "./utils/debug-utils";
-import { FavoriteToggleAction } from "./components/FavoriteToggleAction";
+import { ActionPanelBuilders } from "./utils/action-panel-builders";
 
 export default function Command() {
   // UI state
@@ -32,11 +33,18 @@ export default function Command() {
   const favorites = useFavorites();
   const favoriteIds = useFavoriteIds();
   const networkTest = useNetworkTest();
+  const graphCache = useGraphCache();
+  const { preloadForecast } = useForecastPreloader();
 
   // Update favorite IDs when search results change
   useEffect(() => {
     favoriteIds.refreshFavoriteIds(search.safeLocations);
   }, [search.safeLocations, favoriteIds.refreshFavoriteIds]);
+
+  // Update favorite IDs when favorites change
+  useEffect(() => {
+    favoriteIds.refreshFavoriteIds(search.safeLocations);
+  }, [favorites.favorites, favoriteIds.refreshFavoriteIds, search.safeLocations]);
 
   // Debug: Log network test results and show user-friendly notifications
   useEffect(() => {
@@ -72,6 +80,19 @@ export default function Command() {
     checkFirstTime();
   }, []);
 
+  // Periodic cache cleanup to prevent memory bloat
+  useEffect(() => {
+    const cleanupInterval = setInterval(
+      () => {
+        // Clean up graphs older than 24 hours
+        graphCache.cleanupCache(24 * 60 * 60 * 1000);
+      },
+      60 * 60 * 1000,
+    ); // Run every hour
+
+    return () => clearInterval(cleanupInterval);
+  }, [graphCache]);
+
   const showEmpty =
     favorites.favoritesLoaded &&
     favorites.favorites.length === 0 &&
@@ -86,6 +107,9 @@ export default function Command() {
 
   // Determine if we should show loading state - only true during initial load
   const shouldShowLoading = favorites.isInitialLoad || search.isLoading;
+
+  // Show background loading indicator for favorites
+  const showBackgroundLoading = favorites.isBackgroundLoading && !favorites.isInitialLoad;
 
   // Special loading state for date queries
   const isDateQueryLoading = search.isLoading && search.queryIntent.targetDate;
@@ -103,22 +127,10 @@ export default function Command() {
           : "Search for a location or try 'Oslo fredag', 'London tomorrow'..."
       }
       throttle
-      actions={
-        <ActionPanel>
-          <Action
-            title="Show Welcome Message"
-            icon={Icon.Info}
-            onAction={() => setShowWelcomeMessage(true)}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
-          />
-          <Action
-            title="Hide Welcome Message"
-            icon={Icon.Info}
-            onAction={() => setShowWelcomeMessage(false)}
-            shortcut={{ modifiers: ["cmd", "shift", "alt"], key: "w" }}
-          />
-        </ActionPanel>
-      }
+      actions={ActionPanelBuilders.createWelcomeToggleActions(
+        () => setShowWelcomeMessage(true),
+        () => setShowWelcomeMessage(false),
+      )}
     >
       {/* Welcome message - shown when manually triggered, regardless of favorites/search state */}
       {showWelcomeMessage && !search.searchText.trim() && <WelcomeMessage showActions={false} />}
@@ -163,16 +175,7 @@ export default function Command() {
                     tooltip: "Characters needed",
                   },
                 ]}
-                actions={
-                  <ActionPanel>
-                    <Action
-                      title="Show Welcome Message"
-                      icon={Icon.Info}
-                      onAction={() => setShowWelcomeMessage(true)}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
-                    />
-                  </ActionPanel>
-                }
+                actions={ActionPanelBuilders.createWelcomeActions(() => setShowWelcomeMessage(true))}
               />
             )}
 
@@ -193,35 +196,11 @@ export default function Command() {
                     tooltip: networkTest.nominatim ? "Location API: Connected" : "Location API: Failed",
                   },
                 ]}
-                actions={
-                  <ActionPanel>
-                    <Action
-                      title="Retry Network Tests"
-                      icon={Icon.ArrowClockwise}
-                      onAction={() => {
-                        // Network tests will re-run when the component re-mounts
-                        // Show a toast message to indicate retry action
-                        ToastMessages.networkTestsRetry();
-                      }}
-                    />
-                    <Action
-                      title="Show Error Details"
-                      icon={Icon.Info}
-                      onAction={async () => {
-                        await ToastMessages.networkTestErrors(
-                          networkTest.error || "Unknown network connectivity issues",
-                        );
-                      }}
-                    />
-
-                    <Action
-                      title="Show Welcome Message"
-                      icon={Icon.Info}
-                      onAction={() => setShowWelcomeMessage(true)}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
-                    />
-                  </ActionPanel>
-                }
+                actions={ActionPanelBuilders.createNetworkRetryActions(() => {
+                  // Network tests will re-run when the component re-mounts
+                  // Show a toast message to indicate retry action
+                  ToastMessages.networkTestsRetry();
+                })}
               />
             </List.Section>
           )}
@@ -240,16 +219,7 @@ export default function Command() {
                     icon: Icon.ArrowClockwise,
                   },
                 ]}
-                actions={
-                  <ActionPanel>
-                    <Action
-                      title="Show Welcome Message"
-                      icon={Icon.Info}
-                      onAction={() => setShowWelcomeMessage(true)}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
-                    />
-                  </ActionPanel>
-                }
+                actions={ActionPanelBuilders.createWelcomeActions(() => setShowWelcomeMessage(true))}
               />
             </List.Section>
           )}
@@ -270,13 +240,13 @@ export default function Command() {
                 {search.safeLocations.map((loc) => (
                   <List.Item
                     key={loc.id}
-                    title={loc.displayName}
+                    title={LocationUtils.formatLocationName(loc)}
                     subtitle={
                       search.queryIntent.targetDate
                         ? `Tap to view weather for ${search.queryIntent.targetDate.toLocaleDateString()}`
                         : undefined
                     }
-                    icon={search.queryIntent.targetDate ? "📅" : "📍"}
+                    icon={search.queryIntent.targetDate ? "📅" : LocationUtils.getLocationEmoji(loc)}
                     accessories={[
                       {
                         text: search.queryIntent.targetDate
@@ -313,6 +283,8 @@ export default function Command() {
                       },
                       () => setShowWelcomeMessage(true),
                       search.queryIntent.targetDate,
+                      undefined, // onFavoriteChange - not needed for search results
+                      undefined, // preCachedGraph - not available for search results
                     )}
                   />
                 ))}
@@ -333,7 +305,7 @@ export default function Command() {
           {/* Show favorites only when not actively searching or when no search results */}
           {shouldShowFavorites && (
             <ErrorBoundary componentName="Favorites" fallback={<FavoritesErrorFallback componentName="Favorites" />}>
-              <List.Section title="Favorites">
+              <List.Section title={showBackgroundLoading ? "Favorites (Loading weather data...)" : "Favorites"}>
                 {favorites.favorites.map((fav) => {
                   const key = LocationUtils.getLocationKey(fav.id, fav.lat, fav.lon);
 
@@ -404,10 +376,11 @@ export default function Command() {
                             title="Open Forecast"
                             icon={Icon.Clock}
                             target={
-                              <ForecastView
+                              <LazyForecastView
                                 name={fav.name}
                                 lat={fav.lat}
                                 lon={fav.lon}
+                                preCachedGraph={favorites.preWarmedGraphs[key]}
                                 onFavoriteChange={favorites.refreshFavorites}
                                 onShowWelcome={() => setShowWelcomeMessage(true)}
                               />
@@ -429,9 +402,11 @@ export default function Command() {
                               }
                             }}
                           />
-                          <FavoriteToggleAction
-                            isFavorite={true}
-                            onToggle={async () => {
+                          <Action
+                            title="Remove from Favorites"
+                            icon={Icon.StarDisabled}
+                            shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+                            onAction={async () => {
                               await favorites.removeFavoriteLocation(fav);
                               await ToastMessages.favoriteRemoved(fav.name);
                             }}
