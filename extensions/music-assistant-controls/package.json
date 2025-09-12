@@ -39,6 +39,13 @@
       "mode": "view",
       "subtitle": "Configure the player to run commands on",
       "icon": "logo.png"
+    },
+    {
+      "name": "set-volume",
+      "title": "Set Volume",
+      "subtitle": "Set the volume for the active player.",
+      "description": "Set the volume (0-100) on the currently selected player.",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -79,6 +86,7 @@
     "test:coverage": "jest --coverage",
     "test:coverage:enforce": "jest --coverage --coverageThreshold='{\"global\":{\"branches\":100,\"functions\":100,\"lines\":100,\"statements\":100}}'",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "prepublish": "npm run lint && npm run build",
     "publish": "npx @raycast/api@latest publish"
   }
 }
