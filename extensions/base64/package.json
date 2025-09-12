@@ -7,7 +7,12 @@
   "author": "DanielSinclair",
   "contributors": [
     "stelo",
-    "sammarks"
+    "sammarks",
+    "ridemountainpig"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "license": "MIT",
   "commands": [
@@ -55,19 +60,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.80.0",
-    "@raycast/utils": "^1.16.3",
-    "js-base64": "^3.7.7"
+    "@raycast/api": "^1.102.7",
+    "@raycast/utils": "^2.2.1",
+    "js-base64": "^3.7.8"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^22.1.0",
-    "@types/react": "^18.3.3",
-    "@typescript-eslint/eslint-plugin": "^8.0.0",
-    "@typescript-eslint/parser": "^8.0.0",
-    "eslint": "^8.57.0",
-    "eslint-config-prettier": "^9.1.0",
-    "typescript": "^5.5.4"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^24.3.1",
+    "@types/react": "^19.1.12",
+    "@typescript-eslint/eslint-plugin": "^8.43.0",
+    "@typescript-eslint/parser": "^8.43.0",
+    "eslint": "^9.35.0",
+    "eslint-config-prettier": "^10.1.8",
+    "typescript": "^5.9.2"
   },
   "scripts": {
     "build": "ray build -e dist",
