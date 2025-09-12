@@ -1,4 +1,3 @@
-import { encode } from "@msgpack/msgpack";
 import { getAccessToken } from "@raycast/utils";
 import { getOctokit } from "../lib/oauth";
 import { handleGitHubError } from "../lib/github-client";
@@ -26,6 +25,7 @@ type AgentSession = {
   owner_id: number;
   repo_id: number;
   resource_type: "pull";
+  resource_global_id: string;
   resource_id: number;
   last_updated_at: string;
   created_at: string;
@@ -41,6 +41,7 @@ type AgentSession = {
 
 // A pull request returned from the GitHub GraphQL API
 type PullRequest = {
+  globalId: string;
   title: string;
   state: "OPEN" | "CLOSED" | "MERGED";
   url: string;
@@ -90,15 +91,6 @@ type GetJobResponse =
         number: number;
       };
     };
-
-// Generates a global ID for a pull request based on its ID and repository ID.
-// This implementation is NOT safe or guaranteed to work - but it does at the
-// moment and allows us to overcome the fact that Copilot API only returns
-// integer pull request IDs.
-const unsafelyGetGlobalIdForPullRequest = (pullRequestId: number, repoId: number): string => {
-  const encoded: Uint8Array = encode([0, repoId, pullRequestId]);
-  return "PR_" + Buffer.from(encoded).toString("base64");
-};
 
 export async function createTask(
   repository: string,
@@ -196,24 +188,7 @@ const pollJobUntilPullRequestUrlReady = async ({
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export const fetchSessions = async (): Promise<
-  {
-    sessions: AgentSession[];
-    key: string;
-    pullRequest: {
-      id: number;
-      title: string;
-      state: "OPEN" | "CLOSED" | "MERGED";
-      url: string;
-      repository: {
-        name: string;
-        owner: {
-          login: string;
-        };
-      };
-    };
-  }[]
-> => {
+export const fetchSessions = async (): Promise<PullRequestWithAgentSessions[]> => {
   const { token } = getAccessToken();
 
   const listSessionsResponse = await fetch("https://api.githubcopilot.com/agents/sessions", {
@@ -232,23 +207,18 @@ export const fetchSessions = async (): Promise<
 
   const { sessions: retrievedSessions } = (await listSessionsResponse.json()) as ListAgentSessionsResponse;
 
-  const pullRequestIdAndRepoIdPairs = retrievedSessions
-    .filter((session) => session.resource_type === "pull")
-    .map((session) => ({
-      pullRequestId: session.resource_id,
-      repoId: session.repo_id,
-    }));
-
-  const uniquePullRequestIdAndRepoIdPairs = Array.from(
-    new Map(pullRequestIdAndRepoIdPairs.map((pair) => [`${pair.pullRequestId}-${pair.repoId}`, pair])).values(),
+  const pullRequestGlobalIds = Array.from(
+    new Set(
+      retrievedSessions
+        .filter((session) => session.resource_type === "pull")
+        .map((session) => session.resource_global_id),
+    ),
   );
 
   const octokit = getOctokit();
 
   const pullRequestResults = await Promise.allSettled(
-    uniquePullRequestIdAndRepoIdPairs.map(async ({ pullRequestId, repoId }) => {
-      const globalId = unsafelyGetGlobalIdForPullRequest(pullRequestId, repoId);
-
+    pullRequestGlobalIds.map(async (globalId) => {
       try {
         const data = await octokit.graphql<{ node: PullRequest }>(`
           query {
@@ -268,7 +238,7 @@ export const fetchSessions = async (): Promise<
           }
         `);
         return {
-          id: pullRequestId,
+          globalId,
           title: data.node.title,
           state: data.node.state,
           url: data.node.url,
@@ -285,10 +255,10 @@ export const fetchSessions = async (): Promise<
     .filter((result) => result.status === "fulfilled")
     .map((result) => result.value);
 
-  const sessionsByResourceId = retrievedSessions.reduce((acc: Record<number, AgentSession[]>, session) => {
+  const sessionsByGlobalId = retrievedSessions.reduce((acc: Record<string, AgentSession[]>, session) => {
     if (session.resource_type !== "pull") return acc;
 
-    const key = session.resource_id;
+    const key = session.resource_global_id;
 
     if (acc[key]) {
       acc[key] = acc[key].concat(session);
@@ -299,13 +269,13 @@ export const fetchSessions = async (): Promise<
     return acc;
   }, {});
 
-  const transformedPullRequestsWithAgentSessions = Object.entries(sessionsByResourceId)
-    .map(([resourceId, retrievedSessions]) => {
+  const transformedPullRequestsWithAgentSessions = Object.entries(sessionsByGlobalId)
+    .map(([globalId, retrievedSessions]) => {
       const sortedSessions = retrievedSessions.sort(
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
       );
       const lastUpdatedSession = sortedSessions[0];
-      const pullRequest = pullRequests.find((pullRequest) => pullRequest.id.toString() === resourceId);
+      const pullRequest = pullRequests.find((pullRequest) => pullRequest.globalId.toString() === globalId);
 
       // If pull request couldn't be resolved, skip this session group silently
       if (!pullRequest) {

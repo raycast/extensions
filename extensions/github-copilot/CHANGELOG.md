@@ -1,5 +1,9 @@
 # GitHub Copilot Changelog
 
+## [Refactor data loading] - 2025-09-12
+
+- Load pull request data using the pull request ID returned from the GitHub API
+
 ## [Menu bar command, new icons and more] - 2025-09-08
 
 - Add menu bar command for tracking agent tasks
