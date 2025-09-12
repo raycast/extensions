@@ -37,6 +37,12 @@
   ],
   "commands": [
     {
+      "name": "focus-from-url",
+      "title": "Focus Task from URL",
+      "description": "Paste a Todoist URL to focus the task",
+      "mode": "view"
+    },
+    {
       "name": "home",
       "title": "My Tasks",
       "subtitle": "Todoist",
