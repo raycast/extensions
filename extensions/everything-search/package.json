@@ -4,6 +4,7 @@
   "title": "Everything",
   "description": "Search multiple Everything ETP/FTP servers from Raycast",
   "icon": "extension-icon.png",
+  "platforms": ["Windows"],
   "author": "anastasiy_safari",
   "license": "MIT",
   "commands": [
