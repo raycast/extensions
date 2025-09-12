@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ez-timezone-converter",
+  "title": "Ez Timezone Converter",
+  "description": "Easily convert times between different timezones",
+  "icon": "timezone-icon-512x512.png",
+  "author": "jack",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "convert-timezone",
+      "title": "Convert Timezone",
+      "description": "Convert time between different timezones",
+      "mode": "view"
+    },
+    {
+      "name": "world-clock",
+      "title": "View World Clock",
+      "description": "View current time in multiple timezones",
+      "mode": "view"
+    },
+    {
+      "name": "quick-convert",
+      "title": "Quick Convert",
+      "description": "Quick timezone conversion with arguments",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "time",
+          "placeholder": "Time (e.g., 2:30 PM, 14:30)",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "fromTimezone",
+          "placeholder": "From timezone (e.g., EST, UTC, America/New_York)",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "toTimezone",
+          "placeholder": "To timezone (e.g., PST, UTC, Europe/London)",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.3",
+    "date-fns": "^2.30.0",
+    "date-fns-tz": "^2.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.6",
+    "@types/node": "18.8.3",
+    "@types/react": "18.2.0",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
