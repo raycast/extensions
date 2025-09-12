@@ -31,7 +31,7 @@ export async function createGoogleCalendarEvent(
       overrides: [
         {
           method: "popup",
-          minutes: parseInt(preferences.defaultReminderMinutes),
+          minutes: parseInt(preferences.defaultReminderMinutes, 10) || 15,
         },
       ],
     };
