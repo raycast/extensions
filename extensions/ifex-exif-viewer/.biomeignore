@@ -1,0 +1,7 @@
+node_modules/
+dist/
+build/
+.next/
+.raycast/
+*.min.js
+*.d.ts
