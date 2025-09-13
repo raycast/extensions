@@ -35,12 +35,16 @@ function useGitBranch(path: string) {
 }
 
 export const EntryItem = ({ entry, ...props }: EntryItemProps) => {
-  const branch = useGitBranch(entry.path);
+  const branch = entry.type === "local" && entry.path ? useGitBranch(entry.path) : undefined;
 
   return (
     <List.Item
       title={entry.title}
-      subtitle={entry.subtitle}
+      subtitle={{
+        value: entry.subtitle,
+        tooltip: entry.subtitle,
+      }}
+      // detail
       accessories={
         branch
           ? [
@@ -52,7 +56,7 @@ export const EntryItem = ({ entry, ...props }: EntryItemProps) => {
             ]
           : []
       }
-      icon={entry.is_remote ? "remote.svg" : entry.path && { fileIcon: entry.path }}
+      icon={entry.type === "remote" ? "remote.svg" : entry.path && { fileIcon: entry.path }}
       {...props}
     />
   );
