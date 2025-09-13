@@ -28,28 +28,6 @@ https://alexi.build/
 
 - [Raycast Browser Extension: Summarize and Automate Your Tabs](https://www.raycast.com/browser-extension) for URL detection
 
-## Installation
-
-Install this extension from the Raycast Store or clone this repository and run:
-
-```bash
-npm install
-npm run dev
-```
-
-## How It Works
-
-1. **Text Selection**: Uses Raycast's `getSelectedText()` API to capture highlighted text
-2. **URL Detection**: Gets the current browser tab URL via Browser Extension
-3. **Formatting**: Combines text and URL into a clean quote format
-4. **Copy**: Places the formatted result in your clipboard
-
-## Error Handling
-
-- Shows helpful error messages if no text is selected
-- Shows error message if no browser URL is available
-- Requires active browser tab for URL detection
-
 ## Privacy
 
 This extension only accesses:
