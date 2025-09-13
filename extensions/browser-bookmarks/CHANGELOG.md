@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Add preference to disable frecency] - {PR_MERGE_DATE}
+
+- Add preference to disable frecency when returning results
+
 ## [Fix Zen Support] - 2025-08-19
 
 - Fix Bundle ID for Zen Browser.
