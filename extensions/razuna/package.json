@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "razuna",
+  "title": "Razuna - Add and Browse Files in Razuna",
+  "description": "Upload, search, and browse files in your Razuna workspace directly from Raycast.",
+  "icon": "command-icon.png",
+  "author": "TheNitai",
+  "categories": [
+    "Media",
+    "Design Tools",
+    "Data",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-workspaces",
+      "title": "Select Workspace",
+      "description": "Select and manage your Razuna workspaces",
+      "mode": "view"
+    },
+    {
+      "name": "browse-files",
+      "title": "Browse Files",
+      "description": "Browse and search files in your Razuna workspace",
+      "mode": "view"
+    },
+    {
+      "name": "upload-file",
+      "title": "Upload File",
+      "description": "Upload files to your Razuna workspace",
+      "mode": "view"
+    },
+    {
+      "name": "search-files",
+      "title": "Search Files",
+      "description": "Search for files across your Razuna workspace",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "server_url",
+      "type": "textfield",
+      "required": true,
+      "title": "Server URL",
+      "description": "Your Razuna server URL (e.g., https://app.razuna.com, https://app.razuna.eu, or https://yourserver.com)",
+      "placeholder": "https://app.razuna.com"
+    },
+    {
+      "name": "access_token",
+      "type": "password",
+      "required": true,
+      "title": "Access Token",
+      "description": "Your Razuna access token from your profile settings",
+      "placeholder": "Enter your access token"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.86.1",
+    "@raycast/utils": "^1.4.7",
+    "@rushstack/eslint-patch": "^1.12.0",
+    "eslint": "^8.57.1",
+    "form-data": "^4.0.0",
+    "node-fetch": "^3.2.10",
+    "prettier": "^3.6.2"
+  },
+  "devDependencies": {
+    "@types/form-data": "^2.5.0",
+    "@types/node": "18.18.4",
+    "@types/node-fetch": "^2.6.11",
+    "@typescript-eslint/eslint-plugin": "^8.43.0",
+    "@typescript-eslint/parser": "^8.43.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
