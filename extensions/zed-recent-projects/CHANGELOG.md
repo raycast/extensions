@@ -1,5 +1,9 @@
 #  Zed Recent Projects Changelog
 
+## [Refactor] - 2025-09-13
+
+- Internal refactoring and cleanup. Added tests.
+
 ## [Fixes] - 2025-09-09
 
 - Handle Zed sqlite schema version 28+

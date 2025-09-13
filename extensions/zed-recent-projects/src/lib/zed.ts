@@ -1,3 +1,6 @@
+import { getPreferenceValues } from "@raycast/api";
+import { homedir } from "os";
+
 export type ZedBuild = Preferences["build"];
 export type ZedBundleId = "dev.zed.Zed" | "dev.zed.Zed-Preview" | "dev.zed.Zed-Dev";
 
@@ -19,4 +22,10 @@ export function getZedBundleId(build: ZedBuild): ZedBundleId {
 
 export function getZedDbName(build: ZedBuild): string {
   return ZedDbNameMapping[build];
+}
+
+export function getZedDbPath() {
+  const preferences = getPreferenceValues<Preferences>();
+  const zedBuild = preferences.build;
+  return `${homedir()}/Library/Application Support/Zed/db/${getZedDbName(zedBuild)}/db.sqlite`;
 }

@@ -74,8 +74,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.93.2",
-    "@raycast/utils": "^1.19.1",
+    "@raycast/api": "^1.102.7",
+    "@raycast/utils": "^2.2.1",
     "tildify": "^3.0.0"
   },
   "devDependencies": {
@@ -84,14 +84,17 @@
     "@types/react": "^19.0.10",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "vitest": "^3.2.4"
   },
   "scripts": {
     "build": "ray build -e dist",
+    "create-fixtures": "./scripts/create-fixtures.sh",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "ray publish",
+    "test": "vitest"
   },
   "platforms": [
     "macOS"
