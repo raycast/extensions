@@ -60,7 +60,9 @@ type Folder = {
 export default function Command() {
   const { data: availableBrowsers } = useAvailableBrowsers();
 
-  const { showDomain, openBookmarkBrowser } = getPreferenceValues<Preferences>();
+  const { showDomain, openBookmarkBrowser, disableFrecency } = getPreferenceValues<
+    Preferences & { disableFrecency?: boolean }
+  >();
 
   const {
     data: storedBrowsers,
@@ -186,19 +188,21 @@ export default function Command() {
         return { ...item, domain, bookmarkFrecency: frecencies[item.id] };
       })
       .sort((a, b) => {
-        // If a has a frecency, but b doesn't, a should come first
-        if (a.bookmarkFrecency && !b.bookmarkFrecency) {
-          return -1;
-        }
+        if (!disableFrecency) {
+          // If a has a frecency, but b doesn't, a should come first
+          if (a.bookmarkFrecency && !b.bookmarkFrecency) {
+            return -1;
+          }
 
-        // If b has a frecency, but a doesn't, b should come first
-        if (!a.bookmarkFrecency && b.bookmarkFrecency) {
-          return 1;
-        }
+          // If b has a frecency, but a doesn't, b should come first
+          if (!a.bookmarkFrecency && b.bookmarkFrecency) {
+            return 1;
+          }
 
-        // If both frecencies are defined,put the one with the higher frecency first
-        if (a.bookmarkFrecency && b.bookmarkFrecency) {
-          return b.bookmarkFrecency.frecency - a.bookmarkFrecency.frecency;
+          // If both frecencies are defined,put the one with the higher frecency first
+          if (a.bookmarkFrecency && b.bookmarkFrecency) {
+            return b.bookmarkFrecency.frecency - a.bookmarkFrecency.frecency;
+          }
         }
 
         // If both frecencies are undefined, sort by title
@@ -228,6 +232,7 @@ export default function Command() {
     whale.bookmarks,
     zen.bookmarks,
     frecencies,
+    disableFrecency,
     setBookmarks,
   ]);
 
@@ -320,26 +325,17 @@ export default function Command() {
 
     return searchResults
       .sort((a, b) => {
-        // If a has a frecency, but b doesn't, a should come first
-        if (a.item.bookmarkFrecency && !b.item.bookmarkFrecency) {
-          return -1;
+        if (!disableFrecency) {
+          if (a.item.bookmarkFrecency && !b.item.bookmarkFrecency) return -1;
+          if (!a.item.bookmarkFrecency && b.item.bookmarkFrecency) return 1;
+          if (a.item.bookmarkFrecency && b.item.bookmarkFrecency) {
+            return b.item.bookmarkFrecency.frecency - a.item.bookmarkFrecency.frecency;
+          }
         }
-
-        // If b has a frecency, but a doesn't, b should come first
-        if (!a.item.bookmarkFrecency && b.item.bookmarkFrecency) {
-          return 1;
-        }
-
-        // If both frecencies are defined,put the one with the higher frecency first
-        if (a.item.bookmarkFrecency && b.item.bookmarkFrecency) {
-          return b.item.bookmarkFrecency.frecency - a.item.bookmarkFrecency.frecency;
-        }
-
-        // If both frecencies are undefined, sort by their score
         return (a.score || 1) - (b.score || 1);
       })
       .map((result) => result.item);
-  }, [folderBookmarks, fuse, query]);
+  }, [folderBookmarks, fuse, query, disableFrecency]);
 
   const filteredFolders = useMemo(() => {
     return folders.filter((item) => {
