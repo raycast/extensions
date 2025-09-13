@@ -1,0 +1,37 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wow-guides",
+  "version": "1.0.0",
+  "title": "Search World of Warcraft Guides",
+  "description": "Quickly find World of Warcraft class and spec guides from Wowhead.",
+  "icon": "Wowheadlogo.png",
+  "author": "dakota_walker",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "wow",
+      "title": "Search World of Warcraft Guides",
+      "description": "Find guides for WoW classes and specs.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.77.0",
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.35.0",
+    "@types/node": "~20.10.0",
+    "@types/react": "^18.2.38",
+    "eslint": "^8.57.1",
+    "eslint-plugin-react": "^7.37.5",
+    "globals": "^16.3.0",
+    "prettier": "^3.1.0",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}
