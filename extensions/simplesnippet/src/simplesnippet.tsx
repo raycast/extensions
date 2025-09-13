@@ -256,30 +256,6 @@ export default function Command() {
                   />
                 )
               )}
-
-              {/* {
-                                    Array.from({ length: promptsCount }, (_, index) => {
-                                        // Skip the currently selected prompt
-                                        if (index === promptSelected) {
-                                            return null;
-                                        }
-
-                                        // Only show actions up to index 8 (prompt 9)
-                                        if (index > 8) {
-                                            return null;
-                                        }
-
-                                        return <Action
-                                            key={`prompt-action-${index}`}
-                                            title={`${(index + 1).toString()}${prompt === "" ? ` (discard ${promptSelected})` : " (switch)"}`}
-                                            icon={Icon.Switch}
-                                            shortcut={{ modifiers: ["cmd"], key: (index + 1).toString() as KeyEquivalent }}
-                                            onAction={async () => {
-                                                await switchPrompt(index);
-                                            }}
-                                        />
-                                    }).filter(Boolean)
-                                } */}
             </ActionPanel.Section>
           )}
 
