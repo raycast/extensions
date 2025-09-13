@@ -1,0 +1,44 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "memes-gifs",
+  "title": "Memes/gifs",
+  "description": "Effortlessly discover and share the funniest memes and trending GIFs directly from Tenor, right within Raycast! Instantly fetch a wide variety of Indian and global memes, search by keyword, and preview or copy GIFs to use in your work or chats. Perfect for anyone who loves bringing humor and viral content into their workflow with zero friction.",
+  "icon": "tenor-logo.png",
+  "author": "shubhra_agarwal",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "meme",
+      "title": "Meme",
+      "description": "Effortlessly discover and share the funniest memes and trending GIFs directly from Tenor, right within Raycast! Instantly fetch a wide variety of Indian and global memes, search by keyword, and preview or copy GIFs to use in your work or chats. Perfect for anyone who loves bringing humor and viral content into their workflow with zero friction.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.7",
+    "@raycast/utils": "^1.17.0",
+    "@tanstack/react-query": "^5.87.4",
+    "dotenv": "^17.2.2",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/node-fetch": "^2.6.13",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "eslint": "./node_modules/.bin/eslint 'src/**'",
+    "prettier": "./node_modules/.bin/prettier 'src/**' '!**/.DS_Store' --list-different",
+    "prettier:fix": "./node_modules/.bin/prettier 'src/**' '!**/.DS_Store' --write",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
