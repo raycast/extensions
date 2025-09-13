@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [New Command] - {PR_MERGE_DATE}
+
+- Add Create Login command to create new login items with name, username, password, and folder-id
+
 ## [Improvements] - 2025-09-02
 
 - Sync vault on command launch
