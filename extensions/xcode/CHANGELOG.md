@@ -1,5 +1,9 @@
 # Xcode Changelog
 
+## [Xcode 26 Assets] - {PR_MERGE_DATE}
+
+- Updated assets to match Xcode 26 
+
 ## [AI Tools & Improved Search Recent Projects] - 2025-06-16
 
 - Added AI tools to search for your recent Xcode projects, Swift packages, boot and shutdown simulators, and more.
@@ -11,7 +15,7 @@
 - Added "Delete" action to the "Manage Simulators" command.
 - Updated Raycast Store screenshots.
 
-## [Fix open URL] -  2025-04-25
+## [Fix open URL] - 2025-04-25
 
 - Fix the open URL in Simulator command to support URLs with query parameters.
 
