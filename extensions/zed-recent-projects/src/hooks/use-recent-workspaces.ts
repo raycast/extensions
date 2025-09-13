@@ -1,7 +1,6 @@
 import { Alert, confirmAlert, Icon, showToast, Toast } from "@raycast/api";
 import { showFailureToast, useSQL } from "@raycast/utils";
-import { execFilePromise } from "../lib/utils";
-import { DEFAULT_WORKSPACE_DB_VERSION, getZedWorkspacesQuery } from "../lib/db";
+import { DEFAULT_WORKSPACE_DB_VERSION, getZedWorkspacesQuery, queryDb } from "../lib/db";
 import { ZedWorkspace, Workspace, parseZedWorkspace } from "../lib/workspaces";
 
 export type Workspaces = Record<string, Workspace>;
@@ -80,11 +79,9 @@ export function useRecentWorkspaces(
 }
 
 async function deleteEntryById(dbPath: string, id: number) {
-  const deleteQuery = `DELETE FROM workspaces WHERE workspace_id = ${id}`;
-  await execFilePromise("sqlite3", [dbPath, deleteQuery]);
+  await queryDb(dbPath, `DELETE FROM workspaces WHERE workspace_id = ${id};`);
 }
 
 async function deleteAllWorkspaces(dbPath: string) {
-  const deleteQuery = "DELETE FROM workspaces;";
-  await execFilePromise("sqlite3", [dbPath, deleteQuery]);
+  await queryDb(dbPath, "DELETE FROM workspaces;");
 }

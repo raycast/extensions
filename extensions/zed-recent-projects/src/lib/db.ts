@@ -42,7 +42,10 @@ export async function queryDb(dbPath: string, query: string) {
   }
 }
 
-export async function getZedWorkspaceDbVersion(dbPath: string): Promise<{ version: number; supported: boolean }> {
+export async function getZedWorkspaceDbVersion(
+  dbPath: string,
+  defaultDbVersion: number = DEFAULT_WORKSPACE_DB_VERSION,
+): Promise<{ version: number; supported: boolean }> {
   try {
     const result = await queryDb(dbPath, "SELECT MAX(step) FROM migrations WHERE domain = 'WorkspaceDb';");
     const version = parseInt(result.trim(), 10);
@@ -57,6 +60,12 @@ export async function getZedWorkspaceDbVersion(dbPath: string): Promise<{ versio
 
     return { version, supported: true };
   } catch (error) {
+    // Zed DB might be temporarily locked during write operation
+    if (String(error).includes("Error: in prepare, database is locked")) {
+      console.warn("DB is locked, fallback to default version");
+      return { version: defaultDbVersion, supported: true };
+    }
+
     console.error(`Error getting Zed workspace DB version: ${error}`);
     return { version: 0, supported: false };
   }

@@ -1,6 +1,6 @@
 import fs from "fs";
 import { ComponentType, createContext, useContext } from "react";
-import { Application, Detail, getApplications } from "@raycast/api";
+import { Application, Detail, getApplications, LocalStorage } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { zedBuild } from "../lib/preferences";
 import { getZedBundleId, getZedDbPath } from "../lib/zed";
@@ -15,13 +15,24 @@ interface ZedContextType {
 
 const ZedContext = createContext<ZedContextType | undefined>(undefined);
 
+const defaultDbVersionKey = "defaultDbVersion";
+
 function useZed() {
   const dbPath = getZedDbPath();
 
   const { data, isLoading } = usePromise(async () => {
-    const [applications, workspaceDbVersion] = await Promise.all([getApplications(), getZedWorkspaceDbVersion(dbPath)]);
+    const defaultDbVersion = await LocalStorage.getItem<number>(defaultDbVersionKey);
+    const [applications, workspaceDbVersion] = await Promise.all([
+      getApplications(),
+      getZedWorkspaceDbVersion(dbPath, defaultDbVersion),
+    ]);
     const zedBundleId = getZedBundleId(zedBuild);
     const app = applications.find((a) => a.bundleId === zedBundleId);
+
+    if (workspaceDbVersion.supported) {
+      await LocalStorage.setItem(defaultDbVersionKey, workspaceDbVersion.version);
+    }
+
     return {
       app,
       isDbSupported: workspaceDbVersion.supported,
@@ -30,7 +41,7 @@ function useZed() {
   });
 
   return {
-    isLoading,
+    isLoading: isLoading,
     app: data?.app,
     isDbSupported: !!data?.isDbSupported,
     workspaceDbVersion: data?.workspaceDbVersion || 0,
