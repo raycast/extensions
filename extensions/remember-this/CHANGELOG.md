@@ -2,7 +2,7 @@
 
 ## [Enhancements] - {PR_MERGE_DATE}
 
-- Add preferences to hide the nothing todo title in the menubar command
+- Hide `Woohoo! You got nothing todo!` title in the menubar command normal format
 - Bump all dependencies to the latest
 
 ## [Dependency Update] - 2025-04-04

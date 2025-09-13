@@ -143,15 +143,6 @@
       ]
     },
     {
-      "name": "hideNothingTodoTitle",
-      "description": "Hide the menu bar title when displaying 'Woohoo! You got nothing todo!'",
-      "type": "checkbox",
-      "required": false,
-      "title": "Menubar Command Nothing Todo Title",
-      "label": "Hide Nothing Todo Title",
-      "default": false
-    },
-    {
       "name": "webhookurl",
       "description": "WebhookURL",
       "type": "password",
