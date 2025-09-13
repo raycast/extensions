@@ -60,9 +60,7 @@ type Folder = {
 export default function Command() {
   const { data: availableBrowsers } = useAvailableBrowsers();
 
-  const { showDomain, openBookmarkBrowser, disableFrecency } = getPreferenceValues<
-    Preferences & { disableFrecency?: boolean }
-  >();
+  const { showDomain, openBookmarkBrowser, disableFrecency } = getPreferenceValues<Preferences>();
 
   const {
     data: storedBrowsers,
