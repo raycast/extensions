@@ -57,7 +57,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "latest",
+    "@raycast/api": "1.86.1",
     "@raycast/utils": "^1.4.7",
     "@rushstack/eslint-patch": "^1.12.0",
     "eslint": "^8.57.1",
@@ -69,16 +69,12 @@
     "@types/form-data": "^2.5.0",
     "@types/node": "18.18.4",
     "@types/node-fetch": "^2.6.11",
-    "@types/react": "18.2.79",
-    "typescript": "^5.4.5",
     "@typescript-eslint/eslint-plugin": "^8.43.0",
     "@typescript-eslint/parser": "^8.43.0",
     "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-react-hooks": "^5.2.0"
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "typescript": "^5.4.5"
   },
-    "peerDependencies": {
-      "@raycast/api": "*"
-    },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
