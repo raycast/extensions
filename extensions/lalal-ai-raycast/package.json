@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lalal-ai-raycast",
+  "title": "Lalal.ai",
+  "description": "Separate audio stems from selected files using Lalal.ai's AI-powered technology",
+  "version": "1.0.0",
+  "author": "matt.beck",
+  "license": "MIT",
+  "icon": "icon.png",
+  "categories": ["Media"],
+  "commands": [
+    {
+      "name": "create-stems",
+      "title": "Create Stems",
+      "subtitle": "Lalal.ai",
+      "description": "Create audio stems from selected file using Lalal.ai's AI-powered technology",
+      "icon": "icon.png",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "stemType",
+          "type": "dropdown",
+          "placeholder": "Select Stem Type",
+          "required": true,
+          "width": "small",
+          "data": [
+            { "title": "Vocal and Instrumental", "value": "vocals" },
+            { "title": "Drums", "value": "drum" },
+            { "title": "Piano", "value": "piano" },
+            { "title": "Bass", "value": "bass" },
+            { "title": "Voice/Noise", "value": "voice" },
+            { "title": "Electric Guitar", "value": "electric_guitar" },
+            { "title": "Acoustic Guitar", "value": "acoustic_guitar" },
+            { "title": "Synthesizer", "value": "synthesizer" },
+            { "title": "Strings", "value": "strings" },
+            { "title": "Wind", "value": "wind" }
+          ]
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "license",
+      "type": "password",
+      "required": true,
+      "title": "License Key",
+      "description": "Your Lalal.ai license key",
+      "placeholder": "Enter your Lalal.ai license key"
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "type-check": "ray tsc",
+    "lint": "eslint src --ext .ts,.tsx",
+    "format": "prettier --write src/**/*.{ts,tsx}",
+    "audit": "npm audit --production"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.70.0",
+    "@raycast/utils": "^1.0.0",
+    "form-data": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "eslint-config-prettier": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0"
+  }
+}
