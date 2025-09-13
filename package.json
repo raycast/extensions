@@ -7,7 +7,35 @@
   "author": "boris_adaev",
   "license": "MIT",
   "commands": [],
-  "preferences": [],
+  "preferences": [
+    {
+      "name": "farragoDataDir",
+      "type": "textfield",
+      "title": "Farrago Data Directory",
+      "default": "~/Library/Application Support/Farrago 2",
+      "placeholder": "~/Library/Application Support/Farrago 2",
+      "description": "Path to Farrago's data directory",
+      "required": false
+    },
+    {
+      "name": "oscHost",
+      "type": "textfield",
+      "title": "OSC Host",
+      "default": "localhost",
+      "placeholder": "localhost",
+      "description": "OSC host set up in Farrago",
+      "required": true
+    },
+    {
+      "name": "oscPort",
+      "type": "textfield",
+      "title": "Farrago Port",
+      "default": "8090",
+      "placeholder": "53000",
+      "description": "Farrago's OSC port",
+      "required": true
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.102.7",
     "@raycast/utils": "^1.17.0",
