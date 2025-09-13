@@ -4,7 +4,7 @@
   "title": "Farrago",
   "description": "An extension for interacting with the soundboard app Farrago.",
   "icon": "extension-icon.png",
-  "author": "boris_adaev",
+  "author": "boradatti",
   "license": "MIT",
   "commands": [],
   "preferences": [
@@ -15,7 +15,7 @@
       "default": "~/Library/Application Support/Farrago 2",
       "placeholder": "~/Library/Application Support/Farrago 2",
       "description": "Path to Farrago's data directory",
-      "required": false
+      "required": true
     },
     {
       "name": "oscHost",
@@ -29,10 +29,10 @@
     {
       "name": "oscPort",
       "type": "textfield",
-      "title": "Farrago Port",
+      "title": "OSC Port",
       "default": "8090",
       "placeholder": "53000",
-      "description": "Farrago's OSC port",
+      "description": "OSC port set up in Farrago",
       "required": true
     }
   ],
