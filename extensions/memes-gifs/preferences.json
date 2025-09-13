@@ -1,0 +1,9 @@
+{
+  "tenorApiKey": {
+    "type": "password",
+    "required": true,
+    "title": "Tenor API Key",
+    "description": "Your Tenor API key from Google Cloud Console",
+    "placeholder": "Enter your Tenor API key here"
+  }
+}

@@ -4,14 +4,12 @@ Effortlessly discover and share the funniest memes and trending GIFs directly fr
 
 ## Setup
 
-1. Get your Tenor API key from [Google Tenor API](https://developers.google.com/tenor/guides/quickstart)
-2. Copy `.env.example` to `.env` and add your API key:
-   ```bash
-   cp .env.example .env
-   ```
-3. Edit `.env` and replace `your_tenor_api_key_here` with your actual API key
-4. Run the extension in Raycast
+1. Install the extension from the Raycast Store
+2. Open Raycast and run the "Memes/GIFs" command
+3. Start searching for memes and GIFs immediately!
 
-## Environment Variables
+## Features
 
-- `TENOR_API_KEY`: Your Tenor API key (required)
+- **No Configuration Required**: The extension works out of the box
+- **Instant Access**: Search and discover memes and GIFs immediately
+- **Powered by Tenor**: High-quality GIF database with millions of memes
