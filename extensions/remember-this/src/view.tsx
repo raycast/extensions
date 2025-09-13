@@ -157,7 +157,7 @@ export default function Command() {
     const lines = fileContents.trim().split("\n");
 
     // Remove the line at the specified index
-    // const deletedLine = lines.splice(index, 1)[0];
+    lines.splice(index, 1);
 
     // Join the remaining lines back into a single string
     const newFileContents = lines.join("\n");
