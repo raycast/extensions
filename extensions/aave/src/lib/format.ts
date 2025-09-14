@@ -10,6 +10,7 @@ export function formatCompactNumber(value: number) {
   return value.toLocaleString("en-US", {
     notation: "compact",
     compactDisplay: "short",
+    maximumFractionDigits: 2,
   });
 }
 
