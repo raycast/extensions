@@ -1,5 +1,10 @@
 # Rename Changelog
 
+## [Enhancement] - {PR_MERGE_DATE}
+
+- Fix the bug that cause rename incorrect issue.
+- Improve the rename script with better file/directory detection and special character handling.
+
 ## [New feature] - 2024-12-02
 
 - Add a new `Replace File(s) Characters` command to change characters in file names.
