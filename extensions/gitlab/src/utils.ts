@@ -308,3 +308,5 @@ export function showErrorToast(message: string, title?: string): Promise<Toast> 
     },
   });
 }
+
+export const isWindows = process.platform === "win32";
