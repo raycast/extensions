@@ -62,7 +62,7 @@ export async function getMarkets(chainIds: ChainId[]) {
           totalBorrow: "$" + formatCompactNumber(parseFloat(reserve.borrowInfo?.total.usd ?? "0")),
           supplyApy: formatApy(supplyApy),
           borrowApy: formatApy(borrowApy),
-          url: `https://app.aave.com/reserve-overview/?underlyingAsset=${reserve.underlyingToken.address.toLowerCase()}&marketName=${reserve.market.name}`,
+          url: `https://app.aave.com/reserve-overview/?underlyingAsset=${reserve.underlyingToken.address.toLowerCase()}`,
           chain: {
             id: market.chain.chainId,
             name: market.chain.name,

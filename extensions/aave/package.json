@@ -22,6 +22,11 @@
   ],
   "tools": [
     {
+      "name": "get-chains",
+      "title": "Get Chains",
+      "description": "Get Aave chains information"
+    },
+    {
       "name": "get-markets",
       "title": "Get Markets",
       "description": "Get Aave markets information"
