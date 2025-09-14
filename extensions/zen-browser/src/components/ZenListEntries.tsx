@@ -1,12 +1,13 @@
 import { Icon, List } from "@raycast/api";
 import { ZenActions } from "./index";
-import { HistoryEntry, WorkspaceEntry } from "../interfaces";
+import { HistoryEntry, Tab, WorkspaceEntry } from "../interfaces";
 import { getFavicon } from "@raycast/utils";
 
 export class ZenListEntries {
   public static NewTabEntry = NewTabEntry;
   public static HistoryEntry = HistoryListEntry;
   public static WorkspaceEntry = WorkspaceListEntry;
+  public static TabEntry = TabListEntry;
 }
 
 function NewTabEntry({ searchText }: { searchText?: string }) {
@@ -15,6 +16,17 @@ function NewTabEntry({ searchText }: { searchText?: string }) {
       title={!searchText ? "Open Empty Tab" : `Search "${searchText}"`}
       icon={{ source: !searchText ? Icon.Plus : Icon.MagnifyingGlass }}
       actions={<ZenActions.NewTab query={searchText} />}
+    />
+  );
+}
+
+function TabListEntry({ tab }: { tab: Tab }) {
+  return (
+    <List.Item
+      title={tab.title}
+      subtitle={tab.url}
+      actions={<ZenActions.TabListItem tab={tab} />}
+      icon={getFavicon(tab.url)}
     />
   );
 }

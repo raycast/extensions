@@ -4,6 +4,7 @@
 
 - Added a command to open a specific workspace in Zen Browser.
 - Added a hook to fetch user shortcuts.
+- Improved retry mechanism for SQL queries.
 
 ## [Fix New Tab and History Tab] - 2025-06-11
 

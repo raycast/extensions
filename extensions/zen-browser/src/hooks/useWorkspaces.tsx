@@ -1,9 +1,10 @@
 import { useSQL } from "@raycast/utils";
 import { existsSync } from "fs";
-import { ReactElement, useState } from "react";
+import { ReactElement } from "react";
 import { NotInstalledError } from "../components";
 import { WorkspaceModel } from "../interfaces";
 import { getPlacesDbPath } from "../util";
+import { useRetrySQLError } from "./useRetrySQLError";
 import { useShortcuts } from "./useShortcuts";
 
 export const useWorkspaces = () => {
@@ -32,26 +33,13 @@ export const useWorkspaces = () => {
 export const useListWorkspaces = () => {
   const dbPath = getPlacesDbPath();
   const inQuery = getAllWorkspacesQuery();
-  const [retryCount, setRetryCount] = useState(0);
 
   if (!existsSync(dbPath)) {
     return { data: [], isLoading: false, permissionView: <NotInstalledError /> };
   }
 
-  const { isLoading, data, permissionView } = useSQL<WorkspaceModel>(dbPath, inQuery, {
-    execute: retryCount < 3,
-    onError: (error) => {
-      const isRetryableError =
-        error.message?.includes("database is locked") || error.message?.includes("disk image is malformed");
-
-      if (isRetryableError && retryCount < 3) {
-        console.log(`Retrying to access the database. Attempt #${retryCount + 1}`);
-        setTimeout(() => {
-          setRetryCount(retryCount + 1);
-        }, 100 * (retryCount + 1));
-      }
-    },
-  });
+  const { data, isLoading, error, permissionView, revalidate } = useSQL<WorkspaceModel>(dbPath, inQuery);
+  useRetrySQLError({ error, onRetry: revalidate });
 
   return { data, isLoading, permissionView: permissionView as ReactElement };
 };
