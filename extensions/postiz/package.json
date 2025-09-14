@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "postiz",
   "title": "Postiz",
-  "description": "",
+  "description": "The All-in-One Social Media Management Tool",
   "icon": "postiz.png",
   "author": "xmok",
   "license": "MIT",
@@ -10,7 +10,7 @@
     {
       "name": "api_key",
       "title": "API Key",
-      "description": "",
+      "description": "Postiz Public API Key",
       "placeholder": "xx...xxx",
       "type": "password",
       "required": true
@@ -20,7 +20,7 @@
       "title": "Postiz URL",
       "placeholder": "https://api.postiz.com/ OR https://postiz.example.com/",
       "default": "https://api.postiz.com/",
-      "description": "",
+      "description": "API URL of Postiz Instance",
       "required": true,
       "type": "textfield"
     }
@@ -29,13 +29,13 @@
     {
       "name": "search-channels",
       "title": "Search Channels",
-      "description": "",
+      "description": "Search Channels",
       "mode": "view"
     },
     {
       "name": "search-posts",
       "title": "Search Posts",
-      "description": "",
+      "description": "Search Posts",
       "mode": "view"
     }
   ],
