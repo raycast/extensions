@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "aave",
+  "title": "Aave",
+  "description": "Get Aave markets information",
+  "icon": "extension.png",
+  "author": "vimtor",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-markets",
+      "title": "Search Markets",
+      "subtitle": "Aave",
+      "description": "Search Aave markets",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-markets",
+      "title": "Search Markets",
+      "description": "Search Aave markets"
+    }
+  ],
+  "dependencies": {
+    "@aave/client": "^0.6.1",
+    "@raycast/api": "^1.102.7",
+    "@raycast/utils": "^1.17.0",
+    "dedent": "^1.7.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
