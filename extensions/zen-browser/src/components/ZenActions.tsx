@@ -20,7 +20,7 @@ function NewTabAction({ query }: { query?: string }) {
 function HistoryItemAction({ entry: { title, url } }: { entry: HistoryEntry }) {
   return (
     <ActionPanel title={title}>
-      <ZenOpenTab url={url} />
+      <ZenOpenTab title={"Open in Zen"} url={url} />
       <Action.OpenInBrowser title="Open in Default Browser" url={url} shortcut={{ modifiers: ["opt"], key: "enter" }} />
       <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
     </ActionPanel>
@@ -40,7 +40,7 @@ function WorkspaceItemAction(props: { workspace: WorkspaceEntry }) {
   return (
     <ActionPanel title={props.workspace.name}>
       {props.workspace.shortcut && <ZenGoToWorkspace workspace={props.workspace} />}
-      <ZenOpenTab url={"about:preferences#zenCKS"} />
+      <ZenOpenTab title={"Set Workspace Shortcut"} url={"about:preferences#zenCKS"} />
     </ActionPanel>
   );
 }
@@ -49,6 +49,7 @@ function ZenGoToWorkspace(props: { workspace: WorkspaceEntry }) {
   return (
     <Action
       title="Open Workspace"
+      icon={Icon.AppWindowSidebarLeft}
       onAction={async () => {
         await runShortcut(props.workspace.shortcut as Shortcut);
         popToRoot();
@@ -67,11 +68,11 @@ function ZenGoToTab(props: { tab: Tab }) {
   return <Action title="Open Tab" icon={{ source: Icon.Eye }} onAction={handleAction} />;
 }
 
-function ZenOpenTab({ url }: { url: string }) {
+function ZenOpenTab({ title, url }: { title: string; url: string }) {
   async function handleAction() {
     await openTabFromUrl(url);
     popToRoot();
     closeMainWindow();
   }
-  return <Action title="Open in Zen" icon={{ source: Icon.Eye }} onAction={handleAction} />;
+  return <Action title={title} icon={Icon.ArrowNe} onAction={handleAction} />;
 }

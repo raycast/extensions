@@ -53,8 +53,8 @@ export interface ShortcutModel {
     control: boolean;
     alt: boolean;
     shift: boolean;
-    meta: boolean; // Option
-    accel: boolean; // Cmd
+    meta: boolean;
+    accel: boolean;
   };
 }
 

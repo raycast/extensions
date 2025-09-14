@@ -9,7 +9,7 @@ const zenToAppleScriptKeyMod = {
   alt: "option",
   shift: "shift",
   meta: "command",
-  accel: "command",
+  accel: "fn",
 };
 
 type ZenModifierKey = keyof typeof zenToAppleScriptKeyMod;
