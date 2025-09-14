@@ -2,7 +2,7 @@ import { Action, ActionPanel, Detail, getPreferenceValues, Icon, openExtensionPr
 import { useGlucoseData, useTreatmentData, useStatusData, useServerUnits } from "./hooks";
 import { ErrorDetail, EventList, GlucoseStatsMetadata } from "./components";
 import { createGraph } from "./utils/createGraph";
-import { useCachedState } from "@raycast/utils";
+import { useLocalStorage } from "@raycast/utils";
 
 export default function GlucoseView() {
   const preferences = getPreferenceValues<Preferences.GlucoseView>();
@@ -10,9 +10,13 @@ export default function GlucoseView() {
   const { status, isLoading: statusLoading, appError: statusError, refresh: refreshStatus } = useStatusData();
   const { readings, isLoading: glucoseLoading, appError: glucoseError, refresh: refreshGlucose } = useGlucoseData();
   const { treatments, isLoading: treatLoading, appError: treatError, refresh: refreshTreatments } = useTreatmentData();
-  const [hoursToShow, setHoursToShow] = useCachedState<number>("hoursToShow", 2);
+  const {
+    value: hoursToShow,
+    setValue: setHoursToShow,
+    isLoading: hoursLoading,
+  } = useLocalStorage<number>("hoursToShow", 2);
 
-  const isLoading = glucoseLoading || treatLoading || statusLoading;
+  const isLoading = glucoseLoading || treatLoading || statusLoading || hoursLoading;
   const appError = glucoseError || treatError || statusError;
 
   const refresh = () => {
