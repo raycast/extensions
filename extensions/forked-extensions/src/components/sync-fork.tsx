@@ -1,11 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Action, Icon, confirmAlert, useNavigation } from "@raycast/api";
 import * as api from "../api.js";
 import Diagnostics from "./diagnostics.js";
 import { catchError } from "../errors.js";
 import * as git from "../git.js";
 import operation from "../operation.js";
-import { CommitDiff } from "../types.js";
 import { getCommitDiffMessage } from "../utils.js";
 
 export default function SyncFork({
@@ -18,7 +17,8 @@ export default function SyncFork({
   readonly onSyncFinished: () => void;
 }) {
   const { push } = useNavigation();
-  const [commitDiff, setCommitDiff] = useState<{ github: CommitDiff; local: CommitDiff }>();
+  const [remoteDiff, setRemoteDiff] = useState<string>();
+  const [localDiff, setLocalDiff] = useState<string>();
 
   const diagnosticsAction = {
     primaryAction: {
@@ -29,6 +29,12 @@ export default function SyncFork({
     },
   };
 
+  const diffMessageOptions = {
+    prependSpace: true,
+    includeAhead: true,
+    includeParentheses: true,
+  };
+
   useEffect(() => {
     catchError(async () => {
       if (!forkedRepository) return;
@@ -36,18 +42,10 @@ export default function SyncFork({
       // But this still has a chance to be conflicted if the user execute another Git operation at the same time.
       const localCommitDiff = await git.getAheadBehindCommits();
       const githubCommitDiff = await api.compareTwoCommits(forkedRepository);
-      setCommitDiff({ github: githubCommitDiff, local: localCommitDiff });
+      setLocalDiff(getCommitDiffMessage(localCommitDiff, diffMessageOptions));
+      setRemoteDiff(getCommitDiffMessage(githubCommitDiff, diffMessageOptions));
     }, diagnosticsAction)();
   }, [forkedRepository, lastCommitHash]);
-
-  const diffMessageOptions = {
-    prependSpace: true,
-    includeAhead: true,
-    includeParentheses: true,
-  };
-
-  const remoteDiff = useMemo(() => getCommitDiffMessage(commitDiff?.github, diffMessageOptions), [commitDiff]);
-  const localDiff = useMemo(() => getCommitDiffMessage(commitDiff?.local, diffMessageOptions), [commitDiff]);
 
   return (
     <>

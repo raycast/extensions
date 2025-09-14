@@ -2,7 +2,8 @@
 
 ## [Improvements] - {PR_MERGE_DATE}
 
-- Optimize event handling in Sync Fork by using `useMemo`
+- Optimize event handling in Sync Fork component;
+- Add `isMac` and `isWindows` helpers to utils
 
 ## [Improvements] - 2025-09-11
 
