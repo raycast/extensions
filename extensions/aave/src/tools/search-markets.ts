@@ -1,11 +1,11 @@
-import { ChainId, chainId } from "@aave/client";
+import { chainId } from "@aave/client";
 import { getChains, getMarkets } from "../lib/api";
 import { AI } from "@raycast/api";
 import dedent from "dedent";
 
 type Input = {
   /**
-   * List of chain names to search for markets. Leave empty to search for all chains.
+   * List of chain names to search for markets. Leave empty to search all chains.
    */
   chains?: string[];
 };
