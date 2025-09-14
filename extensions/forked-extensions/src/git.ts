@@ -1,5 +1,4 @@
 import fs from "node:fs/promises";
-import os from "node:os";
 import path from "node:path";
 import process from "node:process";
 import { confirmAlert } from "@raycast/api";
@@ -9,7 +8,7 @@ import { defaultGitExecutableFilePath } from "./constants.js";
 import { catchError } from "./errors.js";
 import operation from "./operation.js";
 import { ForkedExtension } from "./types.js";
-import { gitExecutableFilePath, getRemoteUrl, repositoryConfigurationPath } from "./utils.js";
+import { gitExecutableFilePath, getRemoteUrl, repositoryConfigurationPath, isWindows } from "./utils.js";
 
 /**
  * The path to the Git executable file.
@@ -18,7 +17,7 @@ import { gitExecutableFilePath, getRemoteUrl, repositoryConfigurationPath } from
  * So we need to add quotes around the path if it contains spaces and is not already quoted.
  */
 const gitFilePath =
-  os.platform() === "win32" &&
+  isWindows &&
   gitExecutableFilePath?.includes(" ") &&
   !(gitExecutableFilePath?.startsWith('"') && gitExecutableFilePath?.endsWith('"'))
     ? `"${gitExecutableFilePath}"`

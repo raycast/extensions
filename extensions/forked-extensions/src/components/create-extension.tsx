@@ -11,10 +11,10 @@ import {
 } from "@raycast/api";
 import { catchError } from "../errors.js";
 import * as git from "../git.js";
-import { simplifyPath } from "../utils.js";
+import { isWindows, simplifyPath } from "../utils.js";
 
 export default function CreateExtension() {
-  if (os.platform() !== "darwin") return null;
+  if (isWindows) return null;
   return (
     <Action
       icon={Icon.NewFolder}

@@ -4,6 +4,9 @@ import { Cache, getPreferenceValues } from "@raycast/api";
 import { upstreamRepository } from "./constants.js";
 import { CommitDiff, ForkedExtension } from "./types.js";
 
+export const isMac = process.platform === "darwin";
+export const isWindows = process.platform === "win32";
+
 export const { gitExecutableFilePath, gitRemoteType, githubPersonalAccessToken, repositoryConfigurationPath } =
   getPreferenceValues<ExtensionPreferences>();
 
