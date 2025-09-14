@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { getFavicon, Response, useFetch } from "@raycast/utils";
+import { getFavicon, useFetch } from "@raycast/utils";
 import { Action, ActionPanel, Clipboard, getPreferenceValues, Icon, List } from "@raycast/api";
 import { URL, URLSearchParams } from "node:url";
 import {
@@ -14,12 +14,6 @@ import { ManageSavedSites } from "./manage-saved-sites";
 import { v4 as uuidv4 } from "uuid";
 import { strEq, toFullUrlIfLikely } from "./utils";
 import { parseSuggestionsFromDuckDuckGo, parseSuggestionsFromGoogle } from "./search-suggestions";
-
-interface Preferences {
-  prefillFromClipboard: boolean;
-  interpretDdgBangs: boolean;
-  searchSuggestionsProvider: "__NONE__" | "ddg" | "google";
-}
 
 function fillTemplateUrl(templateUrl: string, query: string) {
   if (templateUrl !== "" && !templateUrl.includes(SEARCH_TEMPLATE)) {
@@ -68,7 +62,7 @@ function DefaultActions(props: SavedSitesState) {
     <ActionPanel.Section title="Manage search engines and websites">
       <Action.Push
         target={<ManageSavedSites savedSites={savedSites} setSavedSites={setSavedSites} />}
-        title="Manage sites"
+        title="Manage Sites"
         icon={Icon.Gear}
         shortcut={{ key: "return", modifiers: ["cmd"] }}
       ></Action.Push>
@@ -191,7 +185,7 @@ export default function () {
 
   return (
     <List
-      enableFiltering={false}
+      filtering={false}
       isLoading={isLoading}
       throttle={false}
       searchText={searchText}
