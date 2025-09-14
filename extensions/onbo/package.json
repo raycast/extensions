@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "onbo",
+  "title": "Onbo - Job Tracker",
+  "description": "Discover and track New Grad and Internship opportunities from top companies.",
+  "icon": "extension-icon.png",
+  "author": "soradotwav",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "keywords": [
+    "job",
+    "tracker",
+    "new grad",
+    "internship",
+    "career",
+    "opportunities",
+    "recruitment",
+    "applications"
+  ],
+  "commands": [
+    {
+      "name": "search-jobs",
+      "title": "Find New Grad Roles",
+      "description": "Browse and track entry-level opportunities by company and role type.",
+      "mode": "view"
+    },
+    {
+      "name": "search-internships",
+      "title": "Find Internships",
+      "description": "Browse and track internship opportunities by company and role type.",
+      "mode": "view"
+    },
+    {
+      "name": "applied-roles",
+      "title": "My Applications",
+      "description": "View and manage roles you've applied to.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "autoSaveOnOpen",
+      "type": "checkbox",
+      "default": true,
+      "title": "Auto-Save on Open/Copy",
+      "description": "Automatically save roles to My Applications when you open or copy a listing.",
+      "label": "Enable Auto-Save",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.7",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
