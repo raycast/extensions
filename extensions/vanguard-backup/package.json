@@ -33,6 +33,12 @@
       "mode": "view"
     },
     {
+      "name": "search-backup-tasks",
+      "title": "Search Backup Tasks",
+      "description": "",
+      "mode": "view"
+    },
+    {
       "name": "search-remote-servers",
       "title": "Search Remote Servers",
       "description": "",

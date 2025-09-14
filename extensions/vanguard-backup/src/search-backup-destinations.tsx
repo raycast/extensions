@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Detail, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
-import { FormValidation, useFetch, useForm } from "@raycast/utils";
-import { buildApiUrl, callVanguard, headers, parseResponse, useVanguardPaginated } from "./vanguard";
-import { BackupDestination, BackupDestinationType, CreateBackupDestination, CreateServer, Server } from "./types";
+import { Action, ActionPanel, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { FormValidation, useForm } from "@raycast/utils";
+import { callVanguard, useVanguardPaginated } from "./vanguard";
+import { BackupDestination, BackupDestinationType, CreateBackupDestination } from "./types";
 
 export default function SearchBackupDestinations() {
   const {isLoading, data:destinations, pagination, error, revalidate} = useVanguardPaginated<BackupDestination>("backup-destinations");

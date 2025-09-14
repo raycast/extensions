@@ -30,7 +30,7 @@ export const callVanguard = async (endpoint: string, {method, body}: {method: st
     const result = await parseResponse(response);
     return result;
 }
-export const useVanguard = <T>(endpoint: string) => useFetch<SuccessResult<T>,T,T>(buildApiUrl(endpoint), {
+export const useVanguard = <T>(endpoint: string) => useFetch<SuccessResult<T>,T,T|undefined>(buildApiUrl(endpoint), {
     headers,
     parseResponse,
     mapResult(result) {

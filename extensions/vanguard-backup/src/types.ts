@@ -55,6 +55,46 @@ export type CreateBackupDestination = {
   path_style_endpoint: boolean;
 }
 
+export enum BackupTaskType {
+    Files="files",
+    Database="Database"
+}
+export enum BackupTaskFrequency {
+    Daily="daily",
+    Weekly="weekly"
+}
+export type CreateBackupTask = {
+  remote_server_id: number;
+  backup_destination_id: number;
+  label: string;
+  description: string;
+  source_path: string;
+  frequency: BackupTaskFrequency;
+  maximum_backups_to_keep: number
+  type: BackupTaskType;
+  time_to_run_at: string;
+  store_path: string;
+}
+export type BackupTask = {
+      id: number;
+      user_id: number;
+      remote_server_id: number;
+      backup_destination_id: number;
+      label: string;
+      description: string;
+    status: string;
+      has_encryption_password: boolean;
+      created_at: string;
+      updated_at: string;
+}
+
+export type User = {
+    id: number;
+ account_settings: {
+    timezone: string;
+ }   
+}
+
 export type SuccessResult<T> = {
     data: T;
 }
