@@ -6,6 +6,11 @@
   "icon": "extension.png",
   "author": "vimtor",
   "license": "MIT",
+  "categories": [
+    "Data",
+    "Developer Tools",
+    "Finance"
+  ],
   "commands": [
     {
       "name": "search-markets",
@@ -20,6 +25,15 @@
       "name": "search-markets",
       "title": "Search Markets",
       "description": "Search Aave markets"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "showFrozenOrPausedAssets",
+      "type": "checkbox",
+      "label": "Show frozen or paused assets",
+      "description": "Show frozen or paused assets in the search results",
+      "default": false
     }
   ],
   "dependencies": {

@@ -1,6 +1,7 @@
 import { AaveClient, ChainId, ChainsFilter } from "@aave/client";
 import { chains, markets } from "@aave/client/actions";
 import { formatApy, formatCompactNumber, titleCase } from "./format";
+import { showFrozenOrPausedAssets } from "./preferences";
 
 export const client = AaveClient.create();
 
@@ -22,7 +23,13 @@ export async function getMarkets(chainIds: ChainId[]) {
     address: market.address,
     name: titleCase(market.name),
     reserves: market.supplyReserves
-      .filter((reserve) => !reserve.isFrozen && !reserve.isPaused)
+      .filter((reserve) => {
+        if (showFrozenOrPausedAssets) {
+          return true;
+        }
+
+        return !reserve.isFrozen && !reserve.isPaused;
+      })
       .map((reserve) => {
         let supplyApy = parseFloat(reserve.supplyInfo?.apy.value ?? "0");
         let borrowApy = parseFloat(reserve.borrowInfo?.apy.value ?? "0");
@@ -47,9 +54,15 @@ export async function getMarkets(chainIds: ChainId[]) {
             symbol: reserve.underlyingToken.symbol,
             icon: reserve.underlyingToken.imageUrl,
           },
-          size: "$" + formatCompactNumber(parseFloat(reserve.size.usd ?? "0")),
+          totalSupply:
+            "$" +
+            formatCompactNumber(
+              parseFloat(reserve.supplyInfo.total.value ?? "0") * parseFloat(reserve.usdExchangeRate ?? "0"),
+            ),
+          totalBorrow: "$" + formatCompactNumber(parseFloat(reserve.borrowInfo?.total.usd ?? "0")),
           supplyApy: formatApy(supplyApy),
           borrowApy: formatApy(borrowApy),
+          url: `https://app.aave.com/reserve-overview/?underlyingAsset=${reserve.underlyingToken.address.toLowerCase()}&marketName=${reserve.market.name}`,
           chain: {
             id: market.chain.chainId,
             name: market.chain.name,
