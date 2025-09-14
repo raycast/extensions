@@ -27,6 +27,12 @@
   ],
   "commands": [
     {
+      "name": "search-backup-destinations",
+      "title": "Search Backup Destinations",
+      "description": "",
+      "mode": "view"
+    },
+    {
       "name": "search-remote-servers",
       "title": "Search Remote Servers",
       "description": "",

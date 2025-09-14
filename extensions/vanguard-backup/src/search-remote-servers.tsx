@@ -1,7 +1,13 @@
 import { Action, ActionPanel, Color, Detail, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
-import { FormValidation, useForm } from "@raycast/utils";
-import { callVanguard, useVanguard, useVanguardPaginated } from "./vanguard";
-import { CreateServer, Server } from "./types";
+import { FormValidation, useFetch, useForm } from "@raycast/utils";
+import { buildApiUrl, callVanguard, headers, parseResponse, useVanguardPaginated } from "./vanguard";
+import { CreateServer, Server, ServerStatusConnectivity } from "./types";
+
+const SERVER_ACCESSORY: Partial<Record<ServerStatusConnectivity, List.Item.Accessory>> = {
+  checking: {tag: {value:"Checking", color: Color.Purple}},
+  connected: {tag: {value:"Connected", color: Color.Green}},
+  offline: {tag: {value:"Offline", color: Color.Red}}
+}
 
 export default function SearchRemoteServers() {
   const {isLoading, data:servers, pagination, error, revalidate} = useVanguardPaginated<Server>("remote-servers");
@@ -9,7 +15,7 @@ export default function SearchRemoteServers() {
     {!isLoading && !servers.length && !error ? <List.EmptyView icon={Icon.HardDrive} title="You don't have any remote servers setup!" description="You can configure your first remote server by clicking the button below." actions={<ActionPanel>
       <Action.Push icon={Icon.Plus} title="Add Remote Server" target={<AddRemoteServer />} onPop={revalidate} />
     </ActionPanel>} /> : servers.map(server => <List.Item key={server.id} icon={Icon.HardDrive} title={server.label} subtitle={server.connection.ip_address} accessories={[
-      {tag: server.status.connectivity==="unknown" ? {value: "Checking", color: Color.Purple} : server.status.connectivity}
+      SERVER_ACCESSORY[server.status.connectivity] ?? {tag: server.status.connectivity}
     ]} actions={<ActionPanel>
       <Action.Push icon={Icon.Plus} title="Add Remote Server" target={<AddRemoteServer />} onPop={revalidate} />
       
@@ -18,12 +24,15 @@ export default function SearchRemoteServers() {
 }
 
 function AddRemoteServer() {
-  type FormValues = Omit<CreateServer, 'port'> & {
+  type FormValues = Omit<CreateServer, "port"> & {
     port: string;
   };
 
   const {pop} = useNavigation();
-  const {isLoading, data} = useVanguard<{public_key: string}>("ssh-key");
+  const {isLoading, data} = useFetch<{public_key: string}>(buildApiUrl( "ssh-key"),{
+    headers,
+    parseResponse
+  });
 
   const {handleSubmit, itemProps} = useForm<FormValues>({
     async onSubmit(values) {
