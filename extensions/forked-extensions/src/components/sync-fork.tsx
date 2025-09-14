@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Action, Icon, confirmAlert, useNavigation } from "@raycast/api";
 import * as api from "../api.js";
 import Diagnostics from "./diagnostics.js";
@@ -46,8 +46,8 @@ export default function SyncFork({
     includeParentheses: true,
   };
 
-  const remoteDiff = getCommitDiffMessage(commitDiff?.github, diffMessageOptions);
-  const localDiff = getCommitDiffMessage(commitDiff?.local, diffMessageOptions);
+  const remoteDiff = useMemo(() => getCommitDiffMessage(commitDiff?.github, diffMessageOptions), [commitDiff]);
+  const localDiff = useMemo(() => getCommitDiffMessage(commitDiff?.local, diffMessageOptions), [commitDiff]);
 
   return (
     <>
