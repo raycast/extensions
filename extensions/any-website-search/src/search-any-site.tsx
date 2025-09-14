@@ -12,7 +12,7 @@ import {
 } from "./saved-sites";
 import { ManageSavedSites } from "./manage-saved-sites";
 import { v4 as uuidv4 } from "uuid";
-import { strEq } from "./utils";
+import { strEq, toFullUrlIfLikely } from "./utils";
 import { parseSuggestionsFromDuckDuckGo, parseSuggestionsFromGoogle } from "./search-suggestions";
 
 interface Preferences {
@@ -110,6 +110,9 @@ export default function () {
     return `${bang} ${selectedSuggestion}`.trim();
   }, [selectedSuggestion, currentBang, selectedSite]);
 
+  // If the user typed a URL, prefer opening it directly
+  const directOpenUrl = useMemo(() => toFullUrlIfLikely(textToSearch), [textToSearch]);
+
   const urlsToSites = Object.fromEntries(savedSites.items.map(({ title, url }) => [url, title]));
 
   let suggestionsData: null | {
@@ -140,40 +143,49 @@ export default function () {
     }
   }
 
-  const { isLoading, data } =
-    suggestionsData === null
-      ? { isLoading: false, data: searchText.length === 0 ? [] : [searchText] }
-      : useFetch<string[] | string, void>(suggestionsData.urlCtor(encodeURIComponent(searchSuggestionQueryText)), {
-          headers: {
-            "User-Agent":
-              "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Safari/605.1.15",
-          },
-          execute: true,
-          // to make sure the screen isn't flickering when the searchText changes
-          keepPreviousData: true,
-          parseResponse: async (response) => {
-            const url = new URL(response.url);
-            const queryParams = new URLSearchParams(url.search);
-            const query = queryParams.get("q") ?? "";
-            if (query === "") {
-              return [];
-            }
+  const fetchArgs = useMemo(() => {
+    if (suggestionsData && !directOpenUrl) {
+      return {
+        url: suggestionsData.urlCtor(encodeURIComponent(searchSuggestionQueryText)),
+        parser: suggestionsData.responseParser,
+      };
+    }
+    return null;
+  }, [suggestionsData, directOpenUrl, searchSuggestionQueryText]);
 
-            if (!(200 <= response.status && response.status < 300)) {
-              return `${response.status}: ${response.statusText}`;
-            }
+  const { isLoading, data } = fetchArgs
+    ? useFetch<string[] | string, void>(fetchArgs.url, {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Safari/605.1.15",
+        },
+        execute: true,
+        // to make sure the screen isn't flickering when the searchText changes
+        keepPreviousData: true,
+        parseResponse: async (response) => {
+          const url = new URL(response.url);
+          const queryParams = new URLSearchParams(url.search);
+          const query = queryParams.get("q") ?? "";
+          if (query === "") {
+            return [];
+          }
 
-            const suggestions = (await suggestionsData?.responseParser(response, query)) ?? [];
+          if (!(200 <= response.status && response.status < 300)) {
+            return `${response.status}: ${response.statusText}`;
+          }
 
-            return suggestions;
-          },
-        });
+          const suggestions = (await fetchArgs.parser(response, query)) ?? [];
+
+          return suggestions;
+        },
+      })
+    : { isLoading: false, data: searchText.length === 0 ? [] : [searchText] };
 
   const searchActionPanel = (
     <ActionPanel>
       <Action.OpenInBrowser
-        title={`Search on ${selectedSite.title}`}
-        url={fillTemplateUrl(selectedSite.url, textToSearch)}
+        title={directOpenUrl ? "Open URL" : `Search on ${selectedSite.title}`}
+        url={directOpenUrl ?? fillTemplateUrl(selectedSite.url, textToSearch)}
       ></Action.OpenInBrowser>
       <DefaultActions savedSites={savedSites} setSavedSites={setSavedSites} />
     </ActionPanel>
@@ -200,6 +212,10 @@ export default function () {
       }
       actions={
         <ActionPanel>
+          <Action.OpenInBrowser
+            title={directOpenUrl ? "Open URL" : `Search on ${selectedSite.title}`}
+            url={directOpenUrl ?? fillTemplateUrl(selectedSite.url, textToSearch)}
+          />
           <DefaultActions savedSites={savedSites} setSavedSites={setSavedSites} />
         </ActionPanel>
       }
