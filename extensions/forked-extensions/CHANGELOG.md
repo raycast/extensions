@@ -1,5 +1,9 @@
 # Raycast Fork Extensions Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Optimize event handling in Sync Fork by using `useMemo`
+
 ## [Improvements] - 2025-09-11
 
 - Add support for migrating existing full-checkout repositories to sparse-checkout
