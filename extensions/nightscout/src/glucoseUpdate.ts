@@ -12,7 +12,7 @@ import { mgdlToMMOL } from "./utils/unitConversion";
 import { getDirectionArrow, getTimeAgo } from "./utils/glucoseStats";
 
 export default async function GlucoseUpdate(props: LaunchProps) {
-  const preferences = getPreferenceValues<Preferences.GlucoseUpdate>();
+  const preferences = getPreferenceValues<Preferences>();
 
   const preferencesError = createPreferencesError(preferences);
   if (preferencesError) {

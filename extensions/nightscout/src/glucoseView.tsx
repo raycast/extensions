@@ -5,7 +5,7 @@ import { createGraph } from "./utils/createGraph";
 import { useLocalStorage } from "@raycast/utils";
 
 export default function GlucoseView() {
-  const preferences = getPreferenceValues<Preferences.GlucoseView>();
+  const preferences = getPreferenceValues<Preferences>();
   const { units } = useServerUnits();
   const { status, isLoading: statusLoading, appError: statusError, refresh: refreshStatus } = useStatusData();
   const { readings, isLoading: glucoseLoading, appError: glucoseError, refresh: refreshGlucose } = useGlucoseData();
