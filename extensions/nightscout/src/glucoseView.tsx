@@ -60,12 +60,6 @@ export default function GlucoseView() {
               />
             ))}
           </ActionPanel.Submenu>
-          <Action
-            title="Refresh Now"
-            icon={Icon.ArrowClockwise}
-            onAction={refresh}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-          />
           <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           <Action.OpenInBrowser
             title="Open Nightscout Instance"
