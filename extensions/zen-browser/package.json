@@ -11,7 +11,8 @@
     "jimmy-b36",
     "sdaza",
     "ellioth",
-    "ridemountainpig"
+    "ridemountainpig",
+    "david_ferland"
   ],
   "categories": [
     "Applications",
@@ -20,6 +21,13 @@
   ],
   "license": "MIT",
   "commands": [
+    {
+      "name": "open-workspace",
+      "title": "Open Workspace",
+      "subtitle": "Zen Browser",
+      "description": "Open a Zen Workspace.",
+      "mode": "view"
+    },
     {
       "name": "new-tab",
       "title": "New Tab",

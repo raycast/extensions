@@ -1,5 +1,7 @@
 # Zen Changelog
 
+## [Added Open Workspace Command] - 2025-09-14
+
 ## [Fix New Tab and History Tab] - 2025-06-11
 
 - Fix new tab and history tab commands, by adding a delay to the script to ensure the URL bar is focused.

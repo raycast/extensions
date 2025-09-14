@@ -1,11 +1,12 @@
-import { Action, ActionPanel, closeMainWindow, Icon } from "@raycast/api";
-import { openHistoryTab, openNewTab, setActiveTab } from "../actions";
-import { HistoryEntry, Tab } from "../interfaces";
+import { Action, ActionPanel, closeMainWindow, Icon, popToRoot } from "@raycast/api";
+import { openTabFromUrl, openNewTab, runShortcut, setActiveTab } from "../actions";
+import { HistoryEntry, Shortcut, Tab, WorkspaceEntry } from "../interfaces";
 
 export class ZenActions {
   public static NewTab = NewTabAction;
   public static HistoryItem = HistoryItemAction;
-  public static TabListItem = TabListItemAction;
+  public static TabListItem = TabItemAction;
+  public static WorkspaceItem = WorkspaceItemAction;
 }
 
 function NewTabAction({ query }: { query?: string }) {
@@ -19,14 +20,14 @@ function NewTabAction({ query }: { query?: string }) {
 function HistoryItemAction({ entry: { title, url } }: { entry: HistoryEntry }) {
   return (
     <ActionPanel title={title}>
-      <ZenHistoryTab url={url} />
+      <ZenOpenTab url={url} />
       <Action.OpenInBrowser title="Open in Default Browser" url={url} shortcut={{ modifiers: ["opt"], key: "enter" }} />
       <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
     </ActionPanel>
   );
 }
 
-function TabListItemAction(props: { tab: Tab }) {
+function TabItemAction(props: { tab: Tab }) {
   return (
     <ActionPanel title={props.tab.title}>
       <ZenGoToTab tab={props.tab} />
@@ -35,18 +36,42 @@ function TabListItemAction(props: { tab: Tab }) {
   );
 }
 
+function WorkspaceItemAction(props: { workspace: WorkspaceEntry }) {
+  return (
+    <ActionPanel title={props.workspace.name}>
+      {props.workspace.shortcut && <ZenGoToWorkspace workspace={props.workspace} />}
+      <ZenOpenTab url={"about:preferences#zenCKS"} />
+    </ActionPanel>
+  );
+}
+
+function ZenGoToWorkspace(props: { workspace: WorkspaceEntry }) {
+  return (
+    <Action
+      title="Open Workspace"
+      onAction={async () => {
+        await runShortcut(props.workspace.shortcut as Shortcut);
+        popToRoot();
+        closeMainWindow();
+      }}
+    />
+  );
+}
+
 function ZenGoToTab(props: { tab: Tab }) {
   async function handleAction() {
     await setActiveTab(props.tab);
-    await closeMainWindow();
+    popToRoot();
+    closeMainWindow();
   }
   return <Action title="Open Tab" icon={{ source: Icon.Eye }} onAction={handleAction} />;
 }
 
-function ZenHistoryTab({ url }: { url: string }) {
+function ZenOpenTab({ url }: { url: string }) {
   async function handleAction() {
-    await openHistoryTab(url);
-    await closeMainWindow();
+    await openTabFromUrl(url);
+    popToRoot();
+    closeMainWindow();
   }
   return <Action title="Open in Zen" icon={{ source: Icon.Eye }} onAction={handleAction} />;
 }

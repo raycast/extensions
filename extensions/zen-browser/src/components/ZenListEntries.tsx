@@ -1,12 +1,12 @@
 import { Icon, List } from "@raycast/api";
 import { ZenActions } from "./index";
-import { HistoryEntry, Tab } from "../interfaces";
+import { HistoryEntry, WorkspaceEntry } from "../interfaces";
 import { getFavicon } from "@raycast/utils";
 
 export class ZenListEntries {
   public static NewTabEntry = NewTabEntry;
   public static HistoryEntry = HistoryListEntry;
-  public static TabListEntry = TabListEntry;
+  public static WorkspaceEntry = WorkspaceListEntry;
 }
 
 function NewTabEntry({ searchText }: { searchText?: string }) {
@@ -19,14 +19,21 @@ function NewTabEntry({ searchText }: { searchText?: string }) {
   );
 }
 
-function TabListEntry({ tab }: { tab: Tab }) {
+function WorkspaceListEntry({ workspace }: { workspace: WorkspaceEntry }) {
+  const shortcutAccessory = workspace.shortcut
+    ? {
+        text: `${workspace.shortcut.modifiers
+          .map((m) => m[0].toUpperCase() + m.slice(1))
+          .join("+")}+${workspace.shortcut.key.toUpperCase()}`,
+      }
+    : { text: { value: "Assign a Shortcut" }, tooltip: "Shorcuts are necessary to make this feature work" };
+
   return (
     <List.Item
-      title={tab.title}
-      subtitle={tab.urlWithoutScheme()}
-      keywords={[tab.urlWithoutScheme()]}
-      actions={<ZenActions.TabListItem tab={tab} />}
-      icon={tab.googleFavicon()}
+      title={workspace.name}
+      accessories={[{ text: workspace.is_default ? "Default" : "" }, shortcutAccessory]}
+      actions={<ZenActions.WorkspaceItem workspace={workspace} />}
+      icon={{ source: workspace.icon }}
     />
   );
 }
