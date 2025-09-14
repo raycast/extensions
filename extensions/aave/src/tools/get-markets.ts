@@ -1,7 +1,5 @@
 import { ChainId, chainId } from "@aave/client";
 import { getChains, getMarkets } from "../lib/api";
-import { AI } from "@raycast/api";
-import dedent from "dedent";
 
 type Input = {
   /**

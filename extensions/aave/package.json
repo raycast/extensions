@@ -38,14 +38,14 @@
       "type": "checkbox",
       "label": "Show frozen or paused assets",
       "description": "Show frozen or paused assets in the search results",
-      "default": false
+      "default": false,
+      "required": true
     }
   ],
   "dependencies": {
     "@aave/client": "^0.6.1",
     "@raycast/api": "^1.102.7",
-    "@raycast/utils": "^1.17.0",
-    "dedent": "^1.7.0"
+    "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
