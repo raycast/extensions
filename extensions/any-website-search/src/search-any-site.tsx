@@ -143,43 +143,41 @@ export default function () {
     }
   }
 
-  const fetchArgs = useMemo(() => {
-    if (suggestionsData && !directOpenUrl) {
-      return {
-        url: suggestionsData.urlCtor(encodeURIComponent(searchSuggestionQueryText)),
-        parser: suggestionsData.responseParser,
-      };
-    }
-    return null;
-  }, [suggestionsData, directOpenUrl, searchSuggestionQueryText]);
+  const fetchUrl = useMemo(() => {
+    const urlCtor = suggestionsData?.urlCtor;
+    const q = encodeURIComponent(searchSuggestionQueryText);
+    return urlCtor ? urlCtor(q) : "https://duckduckgo.com/ac/?q=";
+  }, [suggestionsData, searchSuggestionQueryText]);
 
-  const { isLoading, data } = fetchArgs
-    ? useFetch<string[] | string, void>(fetchArgs.url, {
-        headers: {
-          "User-Agent":
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Safari/605.1.15",
-        },
-        execute: true,
-        // to make sure the screen isn't flickering when the searchText changes
-        keepPreviousData: true,
-        parseResponse: async (response) => {
-          const url = new URL(response.url);
-          const queryParams = new URLSearchParams(url.search);
-          const query = queryParams.get("q") ?? "";
-          if (query === "") {
-            return [];
-          }
+  const responseParser = useMemo(() => {
+    return suggestionsData?.responseParser ?? (async () => [] as string[]);
+  }, [suggestionsData]);
 
-          if (!(200 <= response.status && response.status < 300)) {
-            return `${response.status}: ${response.statusText}`;
-          }
+  const { isLoading, data } = useFetch<string[] | string, void>(fetchUrl, {
+    headers: {
+      "User-Agent":
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Safari/605.1.15",
+    },
+    execute: !!suggestionsData && !directOpenUrl,
+    // to make sure the screen isn't flickering when the searchText changes
+    keepPreviousData: true,
+    parseResponse: async (response) => {
+      const url = new URL(response.url);
+      const queryParams = new URLSearchParams(url.search);
+      const query = queryParams.get("q") ?? "";
+      if (query === "") {
+        return [];
+      }
 
-          const suggestions = (await fetchArgs.parser(response, query)) ?? [];
+      if (!(200 <= response.status && response.status < 300)) {
+        return `${response.status}: ${response.statusText}`;
+      }
 
-          return suggestions;
-        },
-      })
-    : { isLoading: false, data: searchText.length === 0 ? [] : [searchText] };
+      const suggestions = (await responseParser(response, query)) ?? [];
+
+      return suggestions;
+    },
+  });
 
   const searchActionPanel = (
     <ActionPanel>
@@ -206,7 +204,7 @@ export default function () {
           onChange={(newUrl) => setSelectedSite({ title: urlsToSites[newUrl], url: newUrl })}
         >
           {savedSites.items.map(({ title, url }, i) => (
-            <List.Dropdown.Item {...{ title, key: i, value: url, icon: getFavicon(url) }} />
+            <List.Dropdown.Item key={i} title={title} value={url} icon={getFavicon(url)} />
           ))}
         </List.Dropdown>
       }
