@@ -10,7 +10,7 @@ type Input = {
   chains?: string[];
 };
 
-export default async function searchMarkets(input: Input) {
+export default async function (input: Input) {
   const allChains = await getChains();
 
   let chainIds = allChains.map((chain) => chain.chainId);

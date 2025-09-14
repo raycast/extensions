@@ -3,7 +3,7 @@ import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { getChains, getMarkets } from "./lib/api";
 import { chainId, ChainId } from "@aave/client";
 
-export default function SearchMarkets() {
+export default function () {
   const [selectedChainId, setSelectedChainId] = useCachedState<ChainId>("chainId", chainId(1));
   const { data: chains, isLoading: isLoadingChains } = useCachedPromise(getChains);
   const { data: markets, isLoading: isLoadingMarkets } = useCachedPromise(getMarkets, [[selectedChainId]]);
@@ -17,6 +17,7 @@ export default function SearchMarkets() {
           isLoading={isLoadingChains}
           value={selectedChainId.toString()}
           tooltip="Select Chain"
+          placeholder="Search chains by name"
           onChange={(value) => setSelectedChainId(chainId(Number(value)))}
         >
           {chains?.map((chain) => (
@@ -28,6 +29,7 @@ export default function SearchMarkets() {
               }}
               title={chain.name}
               value={chain.chainId.toString()}
+              keywords={[chain.chainId.toString()]}
             />
           ))}
         </List.Dropdown>
