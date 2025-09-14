@@ -17,6 +17,9 @@
     "Productivity",
     "System"
   ],
+  "platforms": [
+    "macOS"
+  ],
   "license": "MIT",
   "assets": [
     "assets"

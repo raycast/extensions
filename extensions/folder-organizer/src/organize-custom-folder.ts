@@ -167,7 +167,9 @@ function runCleanupScript(
 ): Promise<ScriptResult> {
   return new Promise((resolve, reject) => {
     const categoriesJson = JSON.stringify(fileTypes);
-    const args = command ? ` "${folderPath}" '${categoriesJson}' ${command}` : ` "${folderPath}" '${categoriesJson}'`;
+    // Properly escape single quotes in JSON to prevent shell injection
+    const escapedJson = categoriesJson.replace(/'/g, "'\"'\"'");
+    const args = command ? ` "${folderPath}" '${escapedJson}' ${command}` : ` "${folderPath}" '${escapedJson}'`;
     exec(`python3 "${scriptPath}"${args}`, (error, stdout, stderr) => {
       if (error) {
         reject(new Error(stderr || error.message));

@@ -1,108 +1,11 @@
 import React, { useState, useEffect } from "react";
-import {
-  ActionPanel,
-  Action,
-  List,
-  Form,
-  showToast,
-  Toast,
-  Alert,
-  confirmAlert,
-  useNavigation,
-  LocalStorage,
-} from "@raycast/api";
-
-interface FileCategory {
-  name: string;
-  extensions: string[];
-}
+import { ActionPanel, Action, List, Form, showToast, Toast, Alert, confirmAlert, useNavigation } from "@raycast/api";
+import { FileCategory, DEFAULT_CATEGORIES, loadCategories, saveCategories } from "./utils/categories";
 
 interface CategoryFormProps {
   category?: FileCategory;
   onSave: (category: FileCategory) => void;
 }
-
-const DEFAULT_CATEGORIES: FileCategory[] = [
-  {
-    name: "★ Pictures",
-    extensions: [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".webp", ".heic", ".svg", ".ico"],
-  },
-  {
-    name: "★ Videos",
-    extensions: [".mp4", ".mkv", ".avi", ".mov", ".wmv", ".flv", ".webm", ".mpeg", ".3gp", ".ts"],
-  },
-  {
-    name: "★ Audio",
-    extensions: [".mp3", ".wav", ".aac", ".ogg", ".flac", ".m4a", ".wma", ".aiff"],
-  },
-  {
-    name: "★ Documents",
-    extensions: [
-      ".pdf",
-      ".doc",
-      ".docx",
-      ".xls",
-      ".xlsx",
-      ".ppt",
-      ".pptx",
-      ".odt",
-      ".ods",
-      ".odp",
-      ".rtf",
-      ".txt",
-      ".md",
-      ".csv",
-      ".tsv",
-      ".numbers",
-      ".psd",
-      ".ai",
-      ".xd",
-      ".fig",
-      ".sketch",
-      ".indd",
-    ],
-  },
-  {
-    name: "★ Archives",
-    extensions: [".zip", ".rar", ".7z", ".tar", ".gz", ".bz2", ".xz", ".iso", ".dmg"],
-  },
-  {
-    name: "★ Code",
-    extensions: [
-      ".py",
-      ".js",
-      ".ts",
-      ".tsx",
-      ".jsx",
-      ".java",
-      ".c",
-      ".cpp",
-      ".h",
-      ".hpp",
-      ".cs",
-      ".go",
-      ".rb",
-      ".php",
-      ".swift",
-      ".rs",
-      ".sh",
-      ".bat",
-      ".sql",
-      ".json",
-      ".xml",
-      ".yaml",
-      ".yml",
-    ],
-  },
-  {
-    name: "★ Executables",
-    extensions: [".exe", ".msi", ".apk", ".app", ".bin", ".run", ".pkg", ".deb", ".rpm"],
-  },
-  {
-    name: "★ Fonts",
-    extensions: [".ttf", ".otf", ".woff", ".woff2", ".eot"],
-  },
-];
 
 function CategoryForm({ category, onSave }: CategoryFormProps) {
   const { pop } = useNavigation();
@@ -182,19 +85,13 @@ export default function ManageCategories() {
   const { push } = useNavigation();
 
   useEffect(() => {
-    loadCategories();
+    loadCategoriesFromStorage();
   }, []);
 
-  async function loadCategories() {
+  async function loadCategoriesFromStorage() {
     try {
-      const storedCategories = await LocalStorage.getItem<string>("file-categories");
-      if (storedCategories) {
-        setCategories(JSON.parse(storedCategories));
-      } else {
-        // First time setup - use default categories
-        await saveCategories(DEFAULT_CATEGORIES);
-        setCategories(DEFAULT_CATEGORIES);
-      }
+      const categories = await loadCategories();
+      setCategories(categories);
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
@@ -206,9 +103,9 @@ export default function ManageCategories() {
     }
   }
 
-  async function saveCategories(newCategories: FileCategory[]) {
+  async function saveCategoriesAndUpdate(newCategories: FileCategory[]) {
     try {
-      await LocalStorage.setItem("file-categories", JSON.stringify(newCategories));
+      await saveCategories(newCategories);
       setCategories(newCategories);
       await showToast({
         style: Toast.Style.Success,
@@ -225,13 +122,13 @@ export default function ManageCategories() {
 
   async function handleAddCategory(category: FileCategory) {
     const updatedCategories = [...categories, category];
-    await saveCategories(updatedCategories);
+    await saveCategoriesAndUpdate(updatedCategories);
   }
 
   async function handleEditCategory(index: number, category: FileCategory) {
     const updatedCategories = [...categories];
     updatedCategories[index] = category;
-    await saveCategories(updatedCategories);
+    await saveCategoriesAndUpdate(updatedCategories);
   }
 
   async function handleDeleteCategory(index: number) {
@@ -247,7 +144,7 @@ export default function ManageCategories() {
 
     if (confirmed) {
       const updatedCategories = categories.filter((_, i) => i !== index);
-      await saveCategories(updatedCategories);
+      await saveCategoriesAndUpdate(updatedCategories);
     }
   }
 
@@ -262,7 +159,7 @@ export default function ManageCategories() {
     });
 
     if (confirmed) {
-      await saveCategories(DEFAULT_CATEGORIES);
+      await saveCategoriesAndUpdate(DEFAULT_CATEGORIES);
     }
   }
 
