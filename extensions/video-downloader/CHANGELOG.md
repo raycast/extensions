@@ -1,5 +1,9 @@
 # Video Downloader Changelog
 
+## [Fix: Add install flags] - 2025-09-12
+
+- Added acceptance flags when installing packages with winget.
+
 ## [Feat: Windows Support] - 2025-09-12
 
 - Added support for Windows OS, enabling video downloads and transcript extraction on Windows devices.
