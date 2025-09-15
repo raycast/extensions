@@ -1,6 +1,6 @@
 # Google Calendar Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-09-15
 
 - Add natural language event creation with Raycast AI parsing
 - Add support for all 11 Google Calendar event colors
