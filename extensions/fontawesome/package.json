@@ -119,13 +119,11 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "^20.19.13",
+    "@types/node": "^22.18.3",
     "@types/react": "^19.1.12",
-    "change-case": "^4.1.2",
     "eslint": "^9.35.0",
     "prettier": "^3.6.2",
     "react": "^19.1.1",
-    "svg-to-png": "^4.0.0",
     "typescript": "^5.8.2"
   },
   "scripts": {
