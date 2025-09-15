@@ -1,4 +1,4 @@
-# AI-Stats (Raycast Extension)
+# AI-Stats
 
 A Raycast extension that provides quick access to AI model statistics & leaderboards.
 It syncs with [ArtificialAnalysis.ai's](https://artificialanalysis.ai/) API for model data.
