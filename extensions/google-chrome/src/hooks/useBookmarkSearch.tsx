@@ -5,7 +5,7 @@ import { NoBookmarksError, NotInstalledError, UnknownError } from "../components
 import { getBookmarks } from "../util";
 
 export function useBookmarkSearch(
-  query?: string
+  query?: string,
 ): Required<SearchResult<HistoryEntry> & { readonly errorView: ReactNode }> {
   const [data, setData] = useState<HistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -16,7 +16,7 @@ export function useBookmarkSearch(
     (profileId: string) => {
       setProfile(profileId);
     },
-    [profile]
+    [profile],
   );
 
   useEffect(() => {
@@ -26,8 +26,8 @@ export function useBookmarkSearch(
           bookmarks.filter(
             (bookmark) =>
               bookmark.title.toLowerCase().includes(query?.toLowerCase() || "") ||
-              bookmark.url.toLowerCase().includes(query?.toLowerCase() || "")
-          )
+              bookmark.url.toLowerCase().includes(query?.toLowerCase() || ""),
+          ),
         );
         setIsLoading(false);
       })
