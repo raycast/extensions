@@ -52,10 +52,10 @@ class Favorite {
     let result: boolean = true;
     try {
       const favorites: FavoriteEntry[] = await this.getEntries();
-      const exists: boolean = await Favorite.exist(language.toLowerCase(), word, entry, partOfSpeech);
+      const exists: boolean = await Favorite.exist(language, word, entry, partOfSpeech);
       if (!exists) {
         favorites.push({
-          language: language.toLowerCase().replace("  ", " "),
+          language: language.toLowerCase(),
           word: word,
           markdown,
           url,
@@ -94,7 +94,7 @@ class Favorite {
       const favorites: FavoriteEntry[] = await this.getEntries();
       const updatedFavorites = favorites.filter(
         (fav: FavoriteEntry) =>
-          fav.language !== language || fav.word !== word || fav.entry !== entry || fav.partOfSpeech !== partOfSpeech,
+          fav.language !== language.toLowerCase() || fav.word !== word || fav.entry !== entry || fav.partOfSpeech !== partOfSpeech,
       );
       LocalStorage.setItem(Favorite.key, JSON.stringify(updatedFavorites));
     } catch {
@@ -131,7 +131,7 @@ class Favorite {
     const favorites: FavoriteEntry[] = await this.getEntries();
     return favorites.some(
       (fav: FavoriteEntry) =>
-        fav.language === language && fav.word === word && fav.entry === entry && fav.partOfSpeech === partOfSpeech,
+        fav.language === language.toLowerCase() && fav.word === word && fav.entry === entry && fav.partOfSpeech === partOfSpeech,
     );
   }
 
