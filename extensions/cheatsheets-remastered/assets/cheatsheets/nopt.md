@@ -1,6 +1,9 @@
 ---
 title: Nopt
 category: JavaScript libraries
+tech: nopt
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### About

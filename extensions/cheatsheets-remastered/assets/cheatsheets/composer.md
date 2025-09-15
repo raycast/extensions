@@ -4,9 +4,12 @@ category: CLI
 weight: -1
 authors:
   - github: benolot
-updated: 2020-02-23
+updated: 2020-02-23T00:00:00.000Z
 description: |
   Basic guide on how to use Composer, the PHP Package manager.
+tech: composer
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 All composer commands, depending on your install, may need to use `php composer.phar` in the install folder for composer, instead of global/plain `composer`.

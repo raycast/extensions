@@ -1,5 +1,9 @@
 ---
 title: Saucelabs
+tech: saucelabs
+status: active
+lastReviewed: '2025-09-05'
+version: 6..
 ---
 
 ### Getting started

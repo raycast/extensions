@@ -1,9 +1,13 @@
 ---
 title: cssnext
 category: CSS
-updated: 2017-10-30
-tags: [Featurable]
+updated: 2017-10-30T00:00:00.000Z
+tags:
+  - Featurable
 weight: -3
+tech: cssnext
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Variables

@@ -1,7 +1,10 @@
 ---
 title: HTML emails
 category: HTML
-updated: 2017-08-30
+updated: 2017-08-30T00:00:00.000Z
+tech: html-email
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Properties to avoid

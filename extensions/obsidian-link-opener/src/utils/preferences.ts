@@ -12,12 +12,8 @@ export function getPreferences(): Preferences {
   return {
     urlProperties: preferences.urlProperties || ["url", "link", "website"],
     scanInterval: preferences.scanInterval || 60,
-    excludeFolders: preferences.excludeFolders || [
-      "_templates",
-      ".obsidian",
-      ".trash",
-    ],
     useFrecency: preferences.useFrecency !== false, // Default to true
+    cacheTTL: preferences.cacheTTL ? parseInt(String(preferences.cacheTTL)) : 5, // Default to 5 minutes
   };
 }
 

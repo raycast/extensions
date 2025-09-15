@@ -1,9 +1,16 @@
 ---
-title: "Phoenix: Ecto models"
+title: 'Phoenix: Ecto models'
 category: Elixir
 deprecated: true
-tags: [Archived]
-archived: This is for Phoenix 1.2 and below. [Phoenix 1.3 has a new API.](./phoenix-ecto@1.3).
+tags:
+  - Archived
+archived: >-
+  This is for Phoenix 1.2 and below. [Phoenix 1.3 has a new
+  API.](./phoenix-ecto@1.3).
+tech: phoenix-ecto
+status: active
+lastReviewed: '2025-09-05'
+version: 1.2.
 ---
 
 ### About

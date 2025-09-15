@@ -1,5 +1,9 @@
 #  Zed Recent Projects Changelog
 
+## [Fixes] - 2025-09-09
+
+- Handle Zed sqlite schema version 28+
+
 ## [Fixes] - 2025-09-08
 
 - Use latest Zed sqlite schema

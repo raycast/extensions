@@ -28,7 +28,9 @@ const UnsplashLikes = () => {
     <Grid isLoading={loading} itemSize={itemSize} searchBarPlaceholder="Search your likes...">
       <Grid.EmptyView icon="empty-states-photos.png" />
       <Grid.Section title="Results" subtitle={String(filteredLikes?.length)}>
-        {filteredLikes?.map((like) => <SearchListItem key={like.id} item={like} unlike={setUnliked} />)}
+        {filteredLikes?.map((like) => (
+          <SearchListItem key={like.id} item={like} unlike={setUnliked} />
+        ))}
       </Grid.Section>
     </Grid>
   );

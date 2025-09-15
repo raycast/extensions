@@ -10,8 +10,8 @@ export default function ValidExtensions({
   forkedExtensionFolders,
   onPop,
 }: {
-  forkedExtensionFolders: string[];
-  onPop: () => void;
+  readonly forkedExtensionFolders: string[];
+  readonly onPop: () => void;
 }) {
   const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState(false);

@@ -1,6 +1,9 @@
 ---
 title: Animated GIFs
 category: CLI
+tech: animated_gif
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Animated GIFs

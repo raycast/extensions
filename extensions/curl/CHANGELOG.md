@@ -1,5 +1,10 @@
 # cURL Changelog
 
+## [Feat: Add Windows Support] - 2025-09-09
+
+- Added support for Windows
+- Bumped dependencies
+
 ## [Enhancement] - 2025-07-07
 
 - Enhanced the request form to allow users to select and modify parameters for their requests

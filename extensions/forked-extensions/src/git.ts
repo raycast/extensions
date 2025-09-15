@@ -2,9 +2,12 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import process from "node:process";
+import { confirmAlert } from "@raycast/api";
 import spawn from "nano-spawn";
 import * as api from "./api.js";
 import { defaultGitExecutableFilePath } from "./constants.js";
+import { catchError } from "./errors.js";
+import operation from "./operation.js";
 import { ForkedExtension } from "./types.js";
 import { gitExecutableFilePath, getRemoteUrl, repositoryConfigurationPath } from "./utils.js";
 
@@ -59,6 +62,7 @@ export const getExtensionList = async () => {
   if (!extensionsFolderExists) return [];
 
   const files = await fs.readdir(extensionsFolder, { withFileTypes: true });
+
   const extensionFolders = files
     .filter((file) => file.isDirectory())
     .map((file) => ({ path: path.join(repositoryPath, "extensions", file.name), name: file.name }));
@@ -72,13 +76,20 @@ export const getExtensionList = async () => {
     }),
   );
 
-  return allExtension.filter((extension) => Boolean(extension.name));
+  const validExtensions = allExtension.filter((extension) => Boolean(extension.name));
+  const sparseCheckoutExtensions = await sparseCheckoutList();
+  if (!sparseCheckoutExtensions) return [];
+  const untrackedExtensions = validExtensions.filter(
+    (x) => !sparseCheckoutExtensions.includes(`extensions/${x.folderName}`),
+  );
+  if (untrackedExtensions.length > 0) await sparseCheckoutAdd(untrackedExtensions.map((x) => x.folderName));
+  return validExtensions;
 };
 
 /**
  * Executes a git command in the repository root directory.
  * @param args The arguments to pass to the git command.
- * @return The subprocess result of the git command execution.
+ * @returns The subprocess result of the git command execution.
  */
 export const git = async (args: string[]) => spawn(gitFilePath, args, { cwd: repositoryPath, shell: true });
 
@@ -118,6 +129,16 @@ export const getForkedRepository = async () => {
 };
 
 /**
+ * Converts a full checkout to a sparse checkout with cone mode.
+ */
+export const convertFullCheckoutToSparseCheckout = async () => {
+  await git(["config", "remote.origin.promisor", "true"]);
+  await git(["config", "remote.origin.partialclonefilter", "blob:none"]);
+  await git(["sparse-checkout", "set", "--cone"]);
+  await git(["checkout", "main"]);
+};
+
+/**
  * Initializes the repository by cloning it if it doesn't exist.
  * @returns The full name of the forked repository.
  */
@@ -132,8 +153,7 @@ export const initRepository = async () => {
       shell: true,
     },
   );
-  await git(["sparse-checkout", "set", "--cone"]);
-  await git(["checkout", "main"]);
+  await convertFullCheckoutToSparseCheckout();
   return forkedRepository;
 };
 
@@ -152,10 +172,39 @@ export const setUpstream = async (forkedRepository: string) => {
 /**
  * Checks if the current working directory is in clean status.
  */
-export const isStatusClean = async () => {
+export const checkIfStatusClean = async () => {
   const { output } = await git(["status", "--porcelain"]);
   if (output.trim() === "") return;
   throw new Error("The repository is not clean. Please commit or stash your changes before proceeding.");
+};
+
+/**
+ * Checks if the repository enabled sparse-checkout.
+ */
+export const checkIfSparseCheckoutEnabled = async () => {
+  const isSparseCheckout = await git(["sparse-checkout", "list"])
+    .then(() => true)
+    .catch(() => false);
+  if (!isSparseCheckout) {
+    return new Promise<void>((resolve, reject) => {
+      confirmAlert({
+        title: "Sparse Checkout Not Enabled",
+        message: "This operation requires sparse checkout to be enabled. Would you like to enable it now?",
+        primaryAction: {
+          title: "Enable Sparse Checkout",
+          onAction: catchError(async () => {
+            await checkIfStatusClean();
+            await operation.convertFullCheckoutToSparseCheckout();
+            resolve();
+          }),
+        },
+        dismissAction: {
+          title: "Cancel",
+          onAction: resolve,
+        },
+      }).catch(reject);
+    });
+  }
 };
 
 /**
@@ -176,29 +225,43 @@ export const getAheadBehindCommits = async () => {
 export const syncFork = async () => {
   const { output } = await git(["branch", "--show-current"]);
   const currentBranch = output.trim();
-  await git(["fetch", "upstream"]);
+  await git(["fetch", "--prune", "--filter=blob:none", "upstream"]);
   if (currentBranch !== "main") await git(["checkout", "main"]);
   await git(["merge", "--ff-only", "upstream/main"]);
   if (currentBranch !== "main") await git(["checkout", currentBranch]);
 };
 
 /**
- * Adds an extension folder to the sparse-checkout list.
- * @param extensionFolder The target extension folder name. The value should be folder name only, without the `extensions/` prefix and slashes.
+ * Lists the folders in the sparse-checkout list.
+ * @returns An array of folder names in the sparse-checkout list.
  */
-export const sparseCheckoutAdd = async (extensionFolder: string) => {
-  await git(["sparse-checkout", "add", path.join("extensions", extensionFolder)]);
+export const sparseCheckoutList = async () => {
+  const { output } = await git(["sparse-checkout", "list"]);
+  return output
+    .split("\n")
+    .map((x) => x.trim())
+    .filter(Boolean);
 };
 
 /**
- * Removes an extension folder from the sparse-checkout list.
- * @param extensionFolder The target extension folder name. The value should be folder name only, without the `extensions/` prefix and slashes.
+ * Adds extension folders to the sparse-checkout list.
+ * @param extensionFolders The target extension folder names. The values should be folder names only, without the `extensions/` prefix and slashes.
  */
-export const sparseCheckoutRemove = async (extensionFolder: string) => {
+export const sparseCheckoutAdd = async (extensionFolders: string[]) => {
+  const extensionPaths = extensionFolders.map((x) => path.join("extensions", x));
+  await git(["sparse-checkout", "add", ...extensionPaths]);
+};
+
+/**
+ * Removes extension folders from the sparse-checkout list.
+ * @param extensionFolders The target extension folder names. The values should be folder names only, without the `extensions/` prefix and slashes.
+ */
+export const sparseCheckoutRemove = async (extensionFolders: string[]) => {
   const sparseCheckoutInfoPath = path.join(repositoryPath, ".git", "info", "sparse-checkout");
   const sparseCheckoutInfo = await fs.readFile(sparseCheckoutInfoPath, "utf-8");
   const lines = sparseCheckoutInfo.split("\n");
-  const updatedInfo = lines.filter((x) => x !== `/extensions/${extensionFolder}/`).join("\n");
+  const toBeRemovedFolders = new Set(extensionFolders.map((x) => `/extensions/${x}/`));
+  const updatedInfo = lines.filter((x) => !toBeRemovedFolders.has(x)).join("\n");
   await fs.writeFile(sparseCheckoutInfoPath, updatedInfo, "utf-8");
   await git(["sparse-checkout", "reapply"]);
 };

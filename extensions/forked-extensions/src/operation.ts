@@ -1,5 +1,6 @@
 import { Clipboard, Toast, confirmAlert, openExtensionPreferences } from "@raycast/api";
 import * as api from "./api.js";
+import { catchError } from "./errors.js";
 import * as git from "./git.js";
 import { getCommitsText } from "./utils.js";
 
@@ -46,6 +47,7 @@ class Operation {
 
       this.showToast({ title: "Initializing repository" });
       const forkedRepository = await git.initRepository();
+      await git.checkIfSparseCheckoutEnabled();
       await git.setUpstream(forkedRepository);
       return forkedRepository;
     } finally {
@@ -53,6 +55,16 @@ class Operation {
       this.hideToast();
     }
   };
+
+  /**
+   * Converts the current repository from full checkout to sparse checkout.
+   */
+  convertFullCheckoutToSparseCheckout = () =>
+    this.spawn(
+      git.convertFullCheckoutToSparseCheckout,
+      "Enabling sparse checkout",
+      "Enable sparse checkout successfully",
+    );
 
   /**
    * Synchronizes the forked repository with the upstream repository both on GitHub and local.
@@ -88,30 +100,34 @@ class Operation {
           );
         const { behind } = await api.compareTwoCommits(forkedRepository);
         if (behind > 0) {
-          await confirmAlert({
-            title: "Repository Outdated",
-            message: `Your forked repository on GitHub is ${getCommitsText(behind)} behind the upstream repository. Do you want to sync it now?`,
-            primaryAction: {
-              title: "Sync Now",
-              onAction: async () => {
-                // Set `isOperating` to false to allow `sync` to run.
-                this.isOperating = false;
-                await this.sync();
-                // Manually show the toast again because the previous sync operation completed the toast.
-                await this.showToast({ title: "Forking extension" });
-                await git.sparseCheckoutAdd(extensionFolder);
-                this.completeToast("Forked successfully");
+          return new Promise<void>((resolve, reject) => {
+            confirmAlert({
+              title: "Repository Outdated",
+              message: `Your forked repository on GitHub is ${getCommitsText(behind)} behind the upstream repository. Do you want to sync it now?`,
+              primaryAction: {
+                title: "Sync Now",
+                onAction: catchError(async () => {
+                  // Set `isOperating` to false to allow `sync` to run.
+                  this.isOperating = false;
+                  await this.sync();
+                  // Manually show the toast again because the previous sync operation completed the toast.
+                  await this.showToast({ title: "Forking extension" });
+                  await git.sparseCheckoutAdd([extensionFolder]);
+                  this.completeToast("Forked successfully");
+                  resolve();
+                }),
               },
-            },
-            dismissAction: {
-              title: "Fork Anyway",
-              onAction: async () => {
-                await git.sparseCheckoutAdd(extensionFolder);
+              dismissAction: {
+                title: "Fork Anyway",
+                onAction: catchError(async () => {
+                  await git.sparseCheckoutAdd([extensionFolder]);
+                  resolve();
+                }),
               },
-            },
+            }).catch(reject);
           });
         } else {
-          await git.sparseCheckoutAdd(extensionFolder);
+          await git.sparseCheckoutAdd([extensionFolder]);
         }
       },
       "Forking extension",
@@ -123,7 +139,7 @@ class Operation {
    * @param extensionFolder The folder of the extension to remove.
    */
   remove = async (extensionFolder: string) =>
-    this.spawn(async () => git.sparseCheckoutRemove(extensionFolder), "Removing extension", "Removed successfully");
+    this.spawn(async () => git.sparseCheckoutRemove([extensionFolder]), "Removing extension", "Removed successfully");
 
   /**
    * The singleton instance version of the the `showFailureToast` method.
@@ -131,8 +147,8 @@ class Operation {
    * @param options Optional toast options to customize the failure toast.
    */
   showFailureToast = async (error: unknown, options?: Toast.Options) => {
-    const title = error instanceof Error ? error.name : "Error";
-    const message = error instanceof Error ? error.message : String(error);
+    const title = error instanceof Error ? error.name : (options?.title ?? "Error");
+    const message = error instanceof Error ? error.message : (options?.message ?? String(error));
     const copyLogsAction = {
       title: "Copy Logs",
       onAction: () => Clipboard.copy([title, message].join("\n")),
@@ -163,7 +179,7 @@ class Operation {
     if (this.isOperating) return;
     try {
       this.isOperating = true;
-      await git.isStatusClean();
+      await git.checkIfStatusClean();
       this.showToast({ title: loadingMessage });
       const result = await task();
       if (completedMessage) {

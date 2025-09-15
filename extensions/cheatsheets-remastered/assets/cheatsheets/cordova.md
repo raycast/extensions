@@ -1,7 +1,11 @@
 ---
 title: Apache Cordova
-intro: |
-  A quick reference to common [Apache Cordova](https://cordova.apache.org/) commands.
+intro: >
+  A quick reference to common [Apache Cordova](https://cordova.apache.org/)
+  commands.
+tech: cordova
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Common commands
