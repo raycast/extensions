@@ -1,6 +1,6 @@
 # Raycast Fork Extensions Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-09-15
 
 - Add `isMac` and `isWindows` helpers to utils
 
