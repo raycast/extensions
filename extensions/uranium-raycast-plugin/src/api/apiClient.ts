@@ -47,10 +47,7 @@ export const createRouter = <T extends { [key: string]: SomeFunction }>(data: T)
   return data;
 };
 
-export const combineRouters = <
-  T extends { [key: string]: SomeFunction },
-  R extends { [key: string]: T },
->(
+export const combineRouters = <T extends { [key: string]: SomeFunction }, R extends { [key: string]: T }>(
   routes: R,
 ): R => {
   return routes;
