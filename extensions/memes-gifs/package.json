@@ -21,6 +21,7 @@
     "node-fetch": "^3.3.2",
     "dotenv": "^17.2.2"
   },
+  "platforms": ["macos"],
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "22.13.10",
