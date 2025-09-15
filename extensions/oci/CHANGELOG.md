@@ -1,6 +1,6 @@
 # Oracle Cloud Changelog
 
-## [Manage Bucket Objects + View NoSQL Database] - {PR_MERGE_DATE}
+## [Manage Bucket Objects + View NoSQL Database] - 2025-09-15
 
 - view NoSQL Databases
 - view objects in buckets w/ filesize
