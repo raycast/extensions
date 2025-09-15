@@ -104,27 +104,13 @@ jobs:
           else
             echo "No changes."
             echo "changes_pushed=false" >> $GITHUB_OUTPUT
+          fi
       - name: Sleep for 30 seconds
         if: steps.commit_changes.outputs.changes_pushed == 'true'
         run: sleep 30 # sleep 30s for ubuntu
         shell: bash
       - name: Merge
-        id: merge_pr
-        run: gh pr merge ${{ github.event.inputs.pr_number }} --squash
-      - name: Delete PR branch
-        if: success()
-        run: |
-          pr_info=$(gh pr view ${{ github.event.inputs.pr_number }} --json headRefName,headRepository,headRepositoryOwner,merged)
-          pr_branch=$(echo $pr_info | jq -r .headRefName)
-          pr_repo_owner=$(echo $pr_info | jq -r .headRepositoryOwner.login)
-          pr_repo_name=$(echo $pr_info | jq -r .headRepository.name)
-          merged=$(echo $pr_info | jq -r .merged)
-          if [[ "$merged" == "true" ]]; then
-            # Delete the branch using GitHub API
-            gh api -X DELETE /repos/$pr_repo_owner/$pr_repo_name/git/refs/heads/$pr_branch
-            echo "Branch $pr_branch deleted."
-          else
-            echo "PR not merged, branch not deleted."
+        run: gh pr merge ${{ github.event.inputs.pr_number }} --squash --delete-branch
       - name: Notify Failure to Slack
         if: failure()
         uses: raycast/github-actions/slack-send@master
