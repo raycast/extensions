@@ -1,4 +1,5 @@
 import { LocalStorage } from "@raycast/api";
+import { API_BASE_URL } from "./constants";
 
 interface Session {
   access_token: string;
@@ -89,7 +90,7 @@ export async function refreshSession(): Promise<Session | null> {
   if (!session) return null;
 
   try {
-    const response = await fetch(`${process.env.API_URL}/api/v1/auth/refresh`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/auth/refresh`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refresh_token: session.refresh_token }),
