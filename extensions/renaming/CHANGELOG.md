@@ -1,6 +1,6 @@
 # Rename Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2025-09-15
 
 - Fix the bug that cause rename incorrect issue.
 - Improve the rename script with better file/directory detection and special character handling.
