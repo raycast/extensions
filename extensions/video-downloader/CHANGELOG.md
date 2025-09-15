@@ -1,6 +1,6 @@
 # Video Downloader Changelog
 
-## [Fix: Add install flags] - {PR_MERGE_DATE}
+## [Fix: Add install flags] - 2025-09-15
 
 - Added acceptance flags when installing packages with winget.
 
