@@ -4,8 +4,8 @@ export type BodyType<Data> = Data;
 
 export type ErrorType<Error> = AxiosError<Error>;
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export type SomeFunction<TResult, TParameters, _TError = ErrorType<unknown>> = (
+// eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/no-explicit-any
+export type SomeFunction<TResult = any, TParameters = any, _TError = ErrorType<unknown>> = (
   params?: TParameters,
   options?: AxiosRequestConfig,
   signal?: AbortController | AbortSignal,
