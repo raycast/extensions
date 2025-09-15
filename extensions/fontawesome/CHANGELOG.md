@@ -1,5 +1,10 @@
 # Font Awesome Changelog
 
+## [Fix: Unused Dependencies deleted] - {PR_MERGE_DATE}
+
+- Remove `svg-to-png` and `change-case` dependencies
+- Bump `@types/node`
+
 ## [Feat: Add Support for Windows] - 2025-09-09
 
 - Add support for Raycast Windows
