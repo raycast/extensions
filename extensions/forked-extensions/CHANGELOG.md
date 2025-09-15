@@ -1,5 +1,9 @@
 # Raycast Fork Extensions Changelog
 
+## [Improvements] - 2025-09-15
+
+- Add `isMac` and `isWindows` helpers to utils
+
 ## [Bugfix] - 2025-09-15
 
 - Fix the rerender logic of "Sync Fork" actions
