@@ -1,5 +1,11 @@
 # Raycast Fork Extensions Changelog
 
+## [Bugfix] - {PR_MERGE_DATE}
+
+- Fix the rerender logic of "Sync Fork" actions
+- Polish some code delightfully
+- Update link style in readme for better visual
+
 ## [Improvements] - 2025-09-11
 
 - Add support for migrating existing full-checkout repositories to sparse-checkout
