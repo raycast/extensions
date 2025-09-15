@@ -1,6 +1,6 @@
 # YouTube Companion Changelog
 
-## [Fix: Update debug dependency] - {PR_MERGE_DATE}
+## [Fix: Update debug dependency] - 2025-09-15
 
 - Upgraded `debug` from 4.4.2 (contained obfuscated code) to 4.4.3.
 
