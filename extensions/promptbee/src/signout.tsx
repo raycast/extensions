@@ -1,6 +1,6 @@
 import { ActionPanel, Action, Detail, showHUD } from "@raycast/api";
 import { useState } from "react";
-import { clearSession, getSession } from "./session";
+import { clearSession, getValidAccessToken } from "./session";
 import { API_BASE_URL } from "./constants";
 
 export default function Logout() {
@@ -12,7 +12,7 @@ export default function Logout() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${await getSession()}`,
+          Authorization: `Bearer ${await getValidAccessToken()}`,
         },
       });
       console.log(res);
