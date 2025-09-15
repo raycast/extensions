@@ -1,6 +1,9 @@
 import type { RoleListing } from "../models/RolesAPI";
 import { formatLocationsString } from "./format";
 
+/**
+ * Minimal job shape used by enhanceJobTitles for formatting titles with location.
+ */
 interface JobWithLocation {
   id: number;
   company: string;
@@ -8,6 +11,13 @@ interface JobWithLocation {
   locations?: string[];
 }
 
+/**
+ * Derives a human-readable identifier from a job URL (e.g., Workday R-number),
+ * falling back to a shortened numeric token or the internal id suffix.
+ *
+ * @param job - Object containing application_url and id.
+ * @returns A compact job identifier string for display.
+ */
 const getJobIdentifier = (job: { application_url: string; id: number }) => {
   const url = job.application_url;
 
@@ -42,6 +52,11 @@ const getJobIdentifier = (job: { application_url: string; id: number }) => {
   return `#${job.id.toString().slice(-4)}`;
 };
 
+/**
+ * Shortens a long numeric identifier, preserving only the last 4 digits with a leading ellipsis.
+ *
+ * @param num - Stringified number to shorten.
+ */
 const shortenNumber = (num: string) => {
   if (num.length <= 6) return num;
   return `...${num.slice(-4)}`;
@@ -55,6 +70,13 @@ export function enhanceJobTitles<T extends JobWithLocation & { application_url: 
   jobs: T[],
 ): Array<T & { displayTitle: string }>;
 
+/**
+ * Adds a displayTitle to each job to disambiguate duplicate titles by including
+ * a compact identifier and/or location as needed.
+ *
+ * @param jobs - Array of jobs to enhance.
+ * @returns New array with displayTitle set for each entry.
+ */
 export function enhanceJobTitles<T extends JobWithLocation & { application_url: string }>(
   jobs: T[],
 ): Array<T & { displayTitle: string }> {

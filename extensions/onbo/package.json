@@ -1,13 +1,14 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "onbo",
-  "title": "Onbo - Job Tracker",
-  "description": "Discover and track New Grad and Internship opportunities from top companies.",
+  "title": "Onbo: New Grad & Internship Tracker",
+  "description": "Browse and save student and entry-level roles from leading tech companies.",
   "icon": "extension-icon.png",
   "author": "soradotwav",
   "license": "MIT",
   "categories": [
     "Productivity",
+    "Developer Tools",
     "Web"
   ],
   "keywords": [
@@ -23,13 +24,13 @@
   "commands": [
     {
       "name": "search-jobs",
-      "title": "Find New Grad Roles",
+      "title": "Browse New Grad Roles",
       "description": "Browse and track entry-level opportunities by company and role type.",
       "mode": "view"
     },
     {
       "name": "search-internships",
-      "title": "Find Internships",
+      "title": "Browse Internships",
       "description": "Browse and track internship opportunities by company and role type.",
       "mode": "view"
     },
@@ -45,10 +46,18 @@
       "name": "autoSaveOnOpen",
       "type": "checkbox",
       "default": true,
-      "title": "Auto-Save on Open/Copy",
+      "title": "Auto-Save Listings",
       "description": "Automatically save roles to My Applications when you open or copy a listing.",
       "label": "Enable Auto-Save",
       "required": false
+    },
+    {
+      "name": "jobLinksBrowser",
+      "title": "Open Job Links In",
+      "type": "appPicker",
+      "description": "Choose the browser to open job listings. This can be different from your Mac’s default browser.",
+      "default": "Safari",
+      "required": true
     }
   ],
   "dependencies": {

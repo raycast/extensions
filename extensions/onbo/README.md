@@ -1,4 +1,4 @@
-# Onbo - Job Tracker
+# Onbo: New Grad & Internship Job Tracker for Raycast
 
 > Streamline your tech job search with integrated opportunity discovery and application tracking in Raycast.
 
@@ -8,83 +8,81 @@
 
 ## Overview
 
-Onbo Job Tracker transforms the chaotic job search experience into a streamlined, keyboard-driven workflow within Raycast. Built specifically for college students and new graduates entering the tech industry, it eliminates the need to juggle multiple job boards, spreadsheets, and browser bookmarks.
+Onbo transforms the chaotic job search experience into a streamlined, keyboard-driven workflow within Raycast. Built specifically for college students and new grads entering tech, it lets you find roles and track applications without juggling tabs, spreadsheets, and bookmarks.
 
 ## Features
 
-### 🔍 **Smart Job Discovery**
-- **Dual Search Modes**: Separate optimized experiences for New Grad roles and Internships
-- **Real-time Search**: Instant results with keyword matching across job titles and companies
-- **Category Filtering**: Focus on Software Engineering, Hardware, Data Science, Product Management, or Quantitative Finance
-- **Intelligent Enhancement**: Automatically disambiguates similar roles with location and job ID context
+### 🔍 Smart Job Discovery
+-  **Dual Search Modes:** Separate optimized experiences for New Grad roles and Internships
+-  **Real-time Search:** Instant results with keyword matching across titles and companies
+-  **Category Filtering:** Software Engineering, Hardware, Data Science, Product, Quant Finance
+-  **Intelligent Enhancement:** Disambiguates similar roles with location and compact job IDs
 
-### 📊 **Application Management**
-- **5-Stage Tracking**: Saved → Applied → Interviewing → Offer → Rejected
-- **Lightning-Fast Updates**: Use ⌘1-5 keyboard shortcuts for instant status changes
-- **Smart Organization**: Chronological sorting with visual status indicators
-- **Role Type Filtering**: Switch between New Grad and Internship views when you have both
+### 📊 Application Management
+-  **5-Stage Tracking:** Saved → Applied → Interviewing → Offer → Rejected
+-  **Lightning-Fast Updates:** Use ⌘1–5 for instant status changes
+-  **Notes on Applications:** Add/edit per-job notes; a pencil icon indicates notes and hovering shows them
+-  **Smart Organization:** Chronological sorting with visual status indicators
+-  **Role Type Filtering:** Switch between New Grad and Internship views when both exist
 
-### ⚡ **Productivity Features**
-- **Auto-Save Option**: Automatically save interesting opportunities (configurable)
-- **Quick Actions**: Open applications, copy links, update statuses with minimal friction
-- **Keyboard-First Design**: Full navigation without touching the mouse
-- **Privacy-Focused**: All your data stays local on your device
+### ⚡ Productivity
+-  **Custom Browser Support:** Choose a specific browser to open job links (can differ from your macOS default)
+-  **Jump to "My Applications":** From search, open the Applications view focused on a saved job
+-  **Auto-Save Option:** Optionally save when opening or copying a listing
+-  **Keyboard-First Design:** Navigate and act quickly without touching the mouse
+-  **Privacy-Focused:** Your data stays local on your device
+
+### 🔄 Data Portability
+-  **CSV Export:** Save your applications to a spreadsheet with canonical columns
+-  **CSV Import:** Bring applications in with newer-wins conflict handling and advanced options
 
 ## Installation
 
 1. Open Raycast (⌘Space)
 2. Type "Store" and select "Extension Store"
-3. Search for "Onbo Job Tracker"
+3. Search for "Onbo: New Grad & Internship Job Tracker"
 4. Click "Install"
 
 ## Usage
 
 ### Finding Jobs
-
-**Discover New Grad Opportunities:**
-- ⌘Space → "Find New Grad Roles"
-
-**Explore Internships:**
-- ⌘Space → "Find Internships"
-
-**Search & Filter:**
-- Type keywords (company names, technologies, role types)
-- Use category dropdown to focus on specific areas
-- Browse paginated results with automatic loading
+-  ⌘Space → "Find New Grad Roles"
+-  ⌘Space → "Find Internships"
+-  Type to search; use the Category dropdown to focus results
 
 ### Managing Applications
+-  **Save or Remove:** ⌘S on any job listing
+-  **Track Progress:** ⌘Space → "My Applications"
+-  **Update Status:** ⌘1 Saved, ⌘2 Applied, ⌘3 Interviewing, ⌘4 Offer, ⌘5 Rejected
+-  **Add/Edit Notes:** ⌘N on a saved listing or within "My Applications"
+-  **View in My Applications:** From a saved listing in search, use "View in My Applications" to jump to the item
 
-**Save Interesting Opportunities:**
-- Press ⌘S on any job listing
-- Or enable auto-save in preferences for one-click saving
+### Opening Links in Your Preferred Browser
+-  Pick a dedicated browser for job links via Preferences → "Open Job Links In"
+-  Useful if you use a different browser for applications than your system default
+-  Opening a listing will use that browser; falls back to your default if unavailable
 
-**Track Your Progress:**
-- ⌘Space → "My Applications"
+## CSV Import & Export
 
-**Update Status Quickly:**
-- ⌘1: Mark as Saved
-- ⌘2: Mark as Applied
-- ⌘3: Mark as Interviewing
-- ⌘4: Mark as Offer
-- ⌘5: Mark as Rejected
-
-### Quick Actions Available
-- **Apply Now**: Open job application in browser
-- **Copy Link**: Get application URL for sharing/notes
-- **Save/Remove**: Toggle application tracking
-- **Status Updates**: Move through your application pipeline
-- **Delete**: Remove from tracking (with confirmation)
+-  **Export**
+    - "Export as Spreadsheet" creates a CSV compatible with Excel, Numbers, and Google Sheets
+    - Columns: id, company, role, role_type, status, appliedDate, application_url, locations (newline-separated), is_active, statusUpdatedAt, notes
+-  **Import**
+    - "Import from Spreadsheet" supports:
+        - Only update newer entries (recommended)
+        - Treat missing dates as newer (advanced)
+        - Overwrite existing data (ignore dates)
+    - Validates headers and URLs; assigns negative IDs for new local entries
 
 ## Configuration
 
 ### Preferences
+-  Open Job Links In
+    - Choose the browser used to open job listings (can be different from your macOS default)
+-  Auto-Save on Open/Copy
+    - Automatically saves a listing when you open or copy it
 
-**Auto-Save on Open/Copy**
-- **Default**: Enabled
-- **Purpose**: Automatically saves jobs when you open or copy listings
-- **Benefit**: Perfect for rapid discovery sessions where you want to save promising opportunities for later review
-
-Access preferences: ⌘Space → "Extensions" → "Onbo Job Tracker" → "Configure Extension"
+**Access:** ⌘Space → "Extensions" → "Onbo: New Grad & Internship Job Tracker" → "Configure Extension"
 
 ## Privacy & Security
 
@@ -103,18 +101,19 @@ Job listings are sourced from Onbo's curated database, which aggregates opportun
 
 Data is updated regularly to ensure freshness and accuracy.
 
-## Keyboard Shortcuts Reference
+## Keyboard Shortcuts
 
-| Action | Shortcut | Context |
-|--------|----------|---------|
-| Save/Toggle Application | ⌘S | Job listings |
-| Mark as Saved | ⌘1 | My Applications |
-| Mark as Applied | ⌘2 | My Applications |
-| Mark as Interviewing | ⌘3 | My Applications |
-| Mark as Offer | ⌘4 | My Applications |
-| Mark as Rejected | ⌘5 | My Applications |
-| Open Application | ⌘O | Any job listing |
-| Copy Link | ⌘C | Any job listing |
+| Action               | Shortcut | Context                            |
+|:---------------------|:---------|:-----------------------------------|
+| Save/Remove          | ⌘S       | Job listings                       |
+| Add/Edit Note        | ⌘N       | Saved listings and My Applications |
+| Mark as Saved        | ⌘1       | My Applications                    |
+| Mark as Applied      | ⌘2       | My Applications                    |
+| Mark as Interviewing | ⌘3       | My Applications                    |
+| Mark as Offer        | ⌘4       | My Applications                    |
+| Mark as Rejected     | ⌘5       | My Applications                    |
+| Open Application     | ⌘O       | Any job listing                    |
+| Copy Link            | ⌘C       | Any job listing                    |
 
 ## Contributing
 

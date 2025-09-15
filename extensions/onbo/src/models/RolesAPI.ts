@@ -1,3 +1,7 @@
+/**
+ * A single role listing as returned by the API.
+ * Includes metadata like locations, source URL, category, and flags.
+ */
 export type RoleListing = {
   id: number;
   company: string;
@@ -11,6 +15,11 @@ export type RoleListing = {
   days_ago: number;
 };
 
+/**
+ * Paginated roles response envelope from the API.
+ * - data: Array of RoleListing.
+ * - page/limit/total/total_pages: Pagination metadata.
+ */
 export interface RolesAPI {
   data: RoleListing[];
   page: number;
