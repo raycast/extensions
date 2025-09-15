@@ -47,20 +47,7 @@ interface NetworkInfo {
   lastScanTime?: Date;
 }
 
-interface Preferences {
-  defaultTimeout: string;
-  defaultMaxThreads: string;
-  defaultRecommendations: string;
-  autoScanOnOpen: boolean;
-  showProgressBar: boolean;
-  scanCommonRanges: boolean;
-  gatherDeviceInfo: boolean;
-  scanPorts: boolean;
-  themePreference: "auto" | "light" | "dark";
-  colorScheme: "blue" | "green" | "purple" | "orange" | "red";
-  showNetworkMap: boolean;
-  mapLayout: "hierarchical" | "radial" | "grid";
-}
+// Remove this interface - it's auto-generated in raycast-env.d.ts
 
 interface ScanForm {
   subnet: string;
