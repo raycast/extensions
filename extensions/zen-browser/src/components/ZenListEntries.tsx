@@ -38,7 +38,7 @@ function WorkspaceListEntry({ workspace }: { workspace: WorkspaceEntry }) {
           .map((m) => m[0].toUpperCase() + m.slice(1))
           .join("+")}+${workspace.shortcut.key.toUpperCase()}`,
       }
-    : { text: { value: "Assign a Shortcut" }, tooltip: "Shorcuts are necessary to make this feature work" };
+    : { text: { value: "Assign a Shortcut" }, tooltip: "Shortcuts are necessary to make this feature work" };
 
   return (
     <List.Item
