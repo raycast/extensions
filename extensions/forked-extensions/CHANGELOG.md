@@ -1,6 +1,6 @@
 # Raycast Fork Extensions Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2025-09-15
 
 - Fix the rerender logic of "Sync Fork" actions
 - Polish some code delightfully
