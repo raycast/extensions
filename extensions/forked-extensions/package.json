@@ -79,16 +79,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.6",
+    "@raycast/api": "^1.102.7",
     "ky": "^1.10.0",
-    "nano-spawn": "^1.0.2"
+    "nano-spawn": "^1.0.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@raycast/utils": "^2.2.1",
-    "@types/node": "^24.3.0",
-    "@types/react": "^19.1.12",
-    "eslint": "^9.34.0",
+    "@types/node": "^24.4.0",
+    "@types/react": "^19.1.13",
+    "eslint": "^9.35.0",
     "prettier": "^3.6.2",
     "typescript": "^5.9.2"
   }

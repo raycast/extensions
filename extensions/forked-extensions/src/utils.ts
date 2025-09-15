@@ -4,13 +4,23 @@ import { Cache, getPreferenceValues } from "@raycast/api";
 import { upstreamRepository } from "./constants.js";
 import { CommitDiff, ForkedExtension } from "./types.js";
 
-export const isMac = process.platform === "darwin";
-export const isWindows = process.platform === "win32";
-
 export const { gitExecutableFilePath, gitRemoteType, githubPersonalAccessToken, repositoryConfigurationPath } =
   getPreferenceValues<ExtensionPreferences>();
 
+/**
+ * A cache instance to store data temporarily.
+ */
 export const cache = new Cache();
+
+/**
+ * Returns true if the current platform is macOS.
+ */
+export const isMac = process.platform === "darwin";
+
+/**
+ * Returns true if the current platform is Windows.
+ */
+export const isWindows = process.platform === "win32";
 
 /**
  * Simplifies a file path by replacing the home directory with a tilde.

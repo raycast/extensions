@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Action, Icon, confirmAlert, useNavigation } from "@raycast/api";
 import * as api from "../api.js";
 import Diagnostics from "./diagnostics.js";
@@ -18,14 +18,17 @@ export default function SyncFork({
   const { push } = useNavigation();
   const [commitDiff, setCommitDiff] = useState<{ github: CommitDiff; local: CommitDiff }>();
 
-  const diagnosticsAction = {
-    primaryAction: {
-      title: "Run Diagnostics",
-      onAction: () => {
-        push(<Diagnostics />);
+  const diagnosticsAction = useMemo(
+    () => ({
+      primaryAction: {
+        title: "Run Diagnostics",
+        onAction: () => {
+          push(<Diagnostics />);
+        },
       },
-    },
-  };
+    }),
+    [push],
+  );
 
   const loadDiff = useCallback(async () => {
     if (!forkedRepository) return;
