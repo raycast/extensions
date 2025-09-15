@@ -1,6 +1,6 @@
 # Raycast Fork Extensions Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-09-15
 
 - Fix the infinite rerender of the "Sync Remote" action
 - Add the missing JSDoc to some new utilities
