@@ -1,14 +1,14 @@
 import { useCachedState } from "@raycast/utils";
-import { ZedEntry } from "../lib/zedEntries";
+import { Entry } from "../lib/entry";
 
-interface PinnedZedEntry extends ZedEntry {
+interface PinnedEntry extends Entry {
   order: number;
 }
 
-type PinnedZedEntries = Record<string, PinnedZedEntry>;
+type PinnedEntries = Record<string, PinnedEntry>;
 
-function toDict(arr: ZedEntry[]) {
-  return arr.reduce<PinnedZedEntries>((acc, item, i) => {
+function toDict(arr: Entry[]) {
+  return arr.reduce<PinnedEntries>((acc, item, i) => {
     return {
       [item.uri]: {
         ...item,
@@ -19,26 +19,26 @@ function toDict(arr: ZedEntry[]) {
   }, {});
 }
 
-function toArray(dict: PinnedZedEntries) {
+function toArray(dict: PinnedEntries) {
   return Object.values(dict).sort((a, b) => a.order - b.order);
 }
 
 export function usePinnedEntries() {
-  const [entries, setEntries] = useCachedState<PinnedZedEntries>("pinnedEntries", {});
+  const [entries, setEntries] = useCachedState<PinnedEntries>("pinnedEntries", {});
 
   return {
     pinnedEntries: entries,
-    pinEntry: (entry: ZedEntry) => setEntries((s) => toDict([entry, ...toArray(s)])),
-    unpinEntry: (entry: Pick<PinnedZedEntry, "uri">) =>
+    pinEntry: (entry: Entry) => setEntries((s) => toDict([entry, ...toArray(s)])),
+    unpinEntry: (entry: Pick<PinnedEntry, "uri">) =>
       setEntries((s) => toDict(toArray(s).filter((e) => e.uri !== entry.uri))),
     unpinAllEntries: () => setEntries({}),
-    moveUp: (entry: PinnedZedEntry) =>
+    moveUp: (entry: PinnedEntry) =>
       setEntries((s) => {
         const arr = toArray(s);
         arr.splice(entry.order - 1, 2, arr[entry.order], arr[entry.order - 1]);
         return toDict(arr);
       }),
-    moveDown: (entry: PinnedZedEntry) =>
+    moveDown: (entry: PinnedEntry) =>
       setEntries((s) => {
         const arr = toArray(s);
         arr.splice(entry.order, 2, arr[entry.order + 1], arr[entry.order]);
