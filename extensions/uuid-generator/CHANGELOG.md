@@ -1,6 +1,6 @@
 # UUID Generator Changelog
 
-## [Added support for formatting UUID] - {PR_MERGE_DATE}
+## [Added support for formatting UUID] - 2025-09-15
 
 - You can now format UUID without dashes into standard UUID format
 
