@@ -3,7 +3,7 @@
   "name": "uranium-raycast-plugin",
   "version": "1.0.0",
   "author": "uranium",
-  "title": "Nft Primitive Tools",
+  "title": "NFT Primitive Tools",
   "description": "Mint, list, manage, Conversion of any media: images, videos, audio, or documents. Permaweb storage.",
   "icon": "extension-icon.png",
   "categories": [
@@ -24,35 +24,37 @@
     "audio",
     "collection"
   ],
-  "contributors": ["xkelxmc"],
+  "contributors": [
+    "xkelxmc"
+  ],
   "license": "MIT",
   "private": true,
   "commands": [
     {
       "name": "contracts-list",
       "title": "View Collections",
-      "subtitle": "View your collections",
+      "subtitle": "NFT Primitive Tools",
       "description": "Browse all of your existing NFT collections.",
       "mode": "view"
     },
     {
       "name": "contracts-create",
       "title": "Create Collection",
-      "subtitle": "Create a new collection",
+      "subtitle": "NFT Primitive Tools",
       "description": "Create and deploy a new NFT collection (ERC721 or ERC1155).",
       "mode": "view"
     },
     {
       "name": "nfts-list",
       "title": "View Assets",
-      "subtitle": "View your assets",
+      "subtitle": "NFT Primitive Tools",
       "description": "Browse, search, and manage all of your NFT assets.",
       "mode": "view"
     },
     {
       "name": "nfts-create",
       "title": "Mint New Asset",
-      "subtitle": "Mint a new asset",
+      "subtitle": "NFT Primitive Tools",
       "description": "Mint a new NFT from an image, video, audio, or other media file.",
       "mode": "view"
     }

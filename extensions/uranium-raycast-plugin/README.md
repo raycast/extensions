@@ -1,7 +1,5 @@
 # Uranium Tools for Raycast
 
-[![Raycast Store](https://www.raycast.com/uranium/uranium-raycast-plugin/install_button)](https://www.raycast.com/uranium/uranium-raycast-plugin)
-
 Manage your Uranium NFT collections and assets directly from Raycast. This extension allows you to mint, list, and manage your digital assets and collections on the permaweb without leaving your workspace.
 
 ## Features
