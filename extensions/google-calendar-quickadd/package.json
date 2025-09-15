@@ -10,7 +10,7 @@
     {
       "name": "create-event",
       "title": "Create Event",
-      "subtitle": "Quick event creation",
+      "subtitle": "Google Calendar Events Quick Add",
       "description": "Type your event in plain English and AI creates it instantly - 'meeting tomorrow 3pm' or 'dinner friday 7pm'",
       "mode": "no-view",
       "keywords": [
@@ -91,7 +91,7 @@
     {
       "name": "select-default-calendar",
       "title": "Select Default Calendar",
-      "subtitle": "Choose your default calendar",
+      "subtitle": "Google Calendar Events Quick Add",
       "description": "Choose which calendar to use as default for new events",
       "mode": "view",
       "keywords": [
