@@ -1,6 +1,6 @@
 # Remember This Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2025-09-15
 
 - Hide `Woohoo! You got nothing todo!` title in the menubar command normal format
 - Bump all dependencies to the latest
