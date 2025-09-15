@@ -94,7 +94,10 @@ class Favorite {
       const favorites: FavoriteEntry[] = await this.getEntries();
       const updatedFavorites = favorites.filter(
         (fav: FavoriteEntry) =>
-          fav.language !== language.toLowerCase() || fav.word !== word || fav.entry !== entry || fav.partOfSpeech !== partOfSpeech,
+          fav.language !== language.toLowerCase() ||
+          fav.word !== word ||
+          fav.entry !== entry ||
+          fav.partOfSpeech !== partOfSpeech,
       );
       LocalStorage.setItem(Favorite.key, JSON.stringify(updatedFavorites));
     } catch {
@@ -131,7 +134,10 @@ class Favorite {
     const favorites: FavoriteEntry[] = await this.getEntries();
     return favorites.some(
       (fav: FavoriteEntry) =>
-        fav.language === language.toLowerCase() && fav.word === word && fav.entry === entry && fav.partOfSpeech === partOfSpeech,
+        fav.language === language.toLowerCase() &&
+        fav.word === word &&
+        fav.entry === entry &&
+        fav.partOfSpeech === partOfSpeech,
     );
   }
 
