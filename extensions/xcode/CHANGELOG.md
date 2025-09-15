@@ -1,6 +1,6 @@
 # Xcode Changelog
 
-## [Xcode 26 Assets] - {PR_MERGE_DATE}
+## [Xcode 26 Assets] - 2025-09-15
 
 - Updated assets to match Xcode 26 
 
