@@ -21,22 +21,16 @@ export default function Diagnostics() {
         ? await api.repositoryExists(localForkedRepository)
         : "✅ Cannot determine (no local repository found)";
 
+      const commitDiffMessageOptions = { includeAhead: true, includeZeroAhead: true, alwaysShow: true };
+
       const githubCommitDiff = localForkedRepository ? await api.compareTwoCommits(localForkedRepository) : undefined;
       const githubCommitDiffPass = githubCommitDiff && !(githubCommitDiff.ahead > 0 || githubCommitDiff.behind > 0);
-      const githubCommitDiffMessage = getCommitDiffMessage(githubCommitDiff, {
-        includeAhead: true,
-        includeZeroAhead: true,
-        alwaysShow: true,
-      }).trim();
+      const githubCommitDiffMessage = getCommitDiffMessage(githubCommitDiff, commitDiffMessageOptions).trim();
       const githubCommitDiffGuide = githubCommitDiffPass ? "" : ' (You can use "Sync Remote" action to sync changes)';
 
       const localCommitDiff = await git.getAheadBehindCommits();
       const localCommitDiffPass = !(localCommitDiff.ahead > 0 || localCommitDiff.behind > 0);
-      const localCommitDiffMessage = getCommitDiffMessage(localCommitDiff, {
-        includeAhead: true,
-        includeZeroAhead: true,
-        alwaysShow: true,
-      }).trim();
+      const localCommitDiffMessage = getCommitDiffMessage(localCommitDiff, commitDiffMessageOptions).trim();
       const localCommitDiffGuide = localCommitDiffPass ? "" : ' (You can use "Pull Changes" action to sync changes)';
 
       const status = [
