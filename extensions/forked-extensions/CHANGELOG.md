@@ -1,5 +1,11 @@
 # Raycast Fork Extensions Changelog
 
+## [Maintenance] - 2025-09-15
+
+- Fix the infinite rerender of the "Sync Remote" action
+- Add the missing JSDoc to some new utilities
+- Bump all dependencies to the latest
+
 ## [Improvements] - 2025-09-15
 
 - Add `isMac` and `isWindows` helpers to utils
