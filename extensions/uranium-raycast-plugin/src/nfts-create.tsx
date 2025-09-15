@@ -28,7 +28,7 @@ function NftsCreateContent({ contractId }: NftsCreateProps) {
   const [uploadStatus] = useAtom(workflow.statusAtom);
   const [uploadProgress] = useAtom(workflow.progressAtom);
   const [uploadError] = useAtom(workflow.errorAtom);
-  const [_fileId] = useAtom(workflow.fileIdAtom);
+  // const [_fileId] = useAtom(workflow.fileIdAtom);
 
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -148,7 +148,7 @@ function NftsCreateContent({ contractId }: NftsCreateProps) {
       });
 
       // Create NFT
-      const _resultFileId = await finalizeMintAction({
+      await finalizeMintAction({
         title: data.title,
         description: data.description || undefined,
         location: data.location || undefined,

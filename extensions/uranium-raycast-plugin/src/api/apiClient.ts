@@ -43,11 +43,14 @@ const getConfigFromParams = (
   return { ...(options ?? {}), signal: options?.signal ?? extractSignal(controller) };
 };
 
-export const createRouter = <T extends { [key: string]: SomeFunction<any, any> }>(data: T): T => {
+export const createRouter = <T extends { [key: string]: SomeFunction<unknown, unknown> }>(data: T): T => {
   return data;
 };
 
-export const combineRouters = <T extends { [key: string]: SomeFunction<any, any> }, R extends { [key: string]: T }>(
+export const combineRouters = <
+  T extends { [key: string]: SomeFunction<unknown, unknown> },
+  R extends { [key: string]: T },
+>(
   routes: R,
 ): R => {
   return routes;

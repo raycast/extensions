@@ -12,7 +12,7 @@ type UploadOptions = {
 
 export type FileWithPreview = File & { preview?: string };
 
-const extractEtagFromHeaders = (headers: Record<string, any>) => {
+const extractEtagFromHeaders = (headers: Record<string, unknown>) => {
   const etag = headers.etag || headers.ETag || headers["etag"];
   if (!etag) return `""`;
   if (typeof etag === "string") return etag;
@@ -65,7 +65,7 @@ export const createUploadPrimitives = (id: string, data?: UploadOptions) => {
   const disableThumbnailAtom = atom<boolean>(disableThumbnail, `${id}.disableThumbnail`);
   const isPrivateAtom = atom<boolean>(isPrivate, `${id}.isPrivate`);
   const fileTypeAtom = atom<FileType | null>(null, `${id}.fileType`);
-  const metadataAtom = atom<Record<string, any> | null>(null, `${id}.metadata`);
+  const metadataAtom = atom<Record<string, unknown> | null>(null, `${id}.metadata`);
 
   // Upload state
   const statusAtom = atom<UploadStatus>("idle", `${id}.status`);

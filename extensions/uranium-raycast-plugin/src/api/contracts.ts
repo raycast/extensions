@@ -19,8 +19,4 @@ export const contractsApiRouter = createRouter({
       },
       ...params,
     ),
-  // TODO: Implement when API details are available
-  getById: (_contractId: string, ..._params) => {
-    throw new Error("TODO: Implement contracts.getById when API specification is available");
-  },
 });

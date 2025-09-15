@@ -9,9 +9,14 @@ import {
   StartMintingRequestDto,
   StartMintingResponseDto,
 } from "./types";
+import { AxiosRequestConfig } from "axios";
 
 export const assetsApiRouter = createRouter({
-  list: (params: FindUserAssetsRequestDto, options?: any, controller?: any) => {
+  list: (
+    params: FindUserAssetsRequestDto,
+    options?: Partial<AxiosRequestConfig>,
+    controller?: AbortController | AbortSignal,
+  ) => {
     const searchParams = new URLSearchParams();
 
     if (params.contractId) searchParams.append("contractId", params.contractId);
@@ -31,7 +36,11 @@ export const assetsApiRouter = createRouter({
     );
   },
 
-  prepareNewFile: (data: PrepareNewFileRequestDto, options?: any, controller?: any) => {
+  prepareNewFile: (
+    data: PrepareNewFileRequestDto,
+    options?: Partial<AxiosRequestConfig>,
+    controller?: AbortController | AbortSignal,
+  ) => {
     return createInstanceGateway<PrepareNewFileResponseDto>(
       {
         method: "POST",
@@ -43,7 +52,11 @@ export const assetsApiRouter = createRouter({
     );
   },
 
-  completeUpload: (data: CompleteUploadRequestDto, options?: any, controller?: any) => {
+  completeUpload: (
+    data: CompleteUploadRequestDto,
+    options?: Partial<AxiosRequestConfig>,
+    controller?: AbortController | AbortSignal,
+  ) => {
     return createInstanceGateway<CompleteUploadResponseDto>(
       {
         method: "POST",
@@ -55,7 +68,11 @@ export const assetsApiRouter = createRouter({
     );
   },
 
-  startMinting: (data: StartMintingRequestDto, options?: any, controller?: any) => {
+  startMinting: (
+    data: StartMintingRequestDto,
+    options?: Partial<AxiosRequestConfig>,
+    controller?: AbortController | AbortSignal,
+  ) => {
     return createInstanceGateway<StartMintingResponseDto>(
       {
         method: "POST",
@@ -65,10 +82,5 @@ export const assetsApiRouter = createRouter({
       options,
       controller,
     );
-  },
-
-  // TODO: Implement when API details are available
-  getById: (_assetId: string, ..._args) => {
-    throw new Error("TODO: Implement assets.getById when API specification is available");
   },
 });

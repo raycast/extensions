@@ -24,7 +24,7 @@ export const createSingleAssetWorkflow = (id: string) => {
     title: string;
     description?: string;
     location?: string;
-    metaAttributes?: Record<string, any>;
+    metaAttributes?: Record<string, unknown>;
   }) => {
     const attributes: Metadata_AttributeDto[] = [];
 
