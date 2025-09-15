@@ -1,6 +1,6 @@
 # Font Awesome Changelog
 
-## [Fix: Unused Dependencies deleted] - {PR_MERGE_DATE}
+## [Fix: Unused Dependencies deleted] - 2025-09-15
 
 - Remove `svg-to-png` and `change-case` dependencies
 - Bump `@types/node`
