@@ -19,62 +19,81 @@ export async function getMarkets(chainIds: ChainId[]) {
     throw new Error(result.error.message);
   }
 
-  return result.value.map((market) => ({
-    address: market.address,
-    name: titleCase(market.name),
-    reserves: market.supplyReserves
-      .filter((reserve) => {
-        if (showFrozenOrPausedAssets) {
-          return true;
-        }
+  return result.value.map((market) => {
+    const size = parseFloat(market.totalMarketSize);
+    const liquidity = parseFloat(market.totalAvailableLiquidity);
+    const borrows = size - liquidity;
 
-        return !reserve.isFrozen && !reserve.isPaused;
-      })
-      .map((reserve) => {
-        const baseSupplyApy = parseFloat(reserve.supplyInfo?.apy.value ?? "0");
-        const baseBorrowApy = parseFloat(reserve.borrowInfo?.apy.value ?? "0");
+    return {
+      address: market.address,
+      name: titleCase(market.name),
+      size: formatCompactNumber(size),
+      liquidity: formatCompactNumber(liquidity),
+      borrows: formatCompactNumber(borrows),
+      reserves: market.supplyReserves
+        .filter((reserve) => {
+          if (showFrozenOrPausedAssets) {
+            return true;
+          }
 
-        const meritBorrowApy = reserve.incentives
-          .filter((i) => i.__typename === "MeritBorrowIncentive" || i.__typename === "AaveBorrowIncentive")
-          .map((i) => parseFloat(i.borrowAprDiscount.value))
-          .reduce((acc, curr) => acc + curr, 0);
-        const meritSupplyApy = reserve.incentives
-          .filter((i) => i.__typename === "MeritSupplyIncentive" || i.__typename === "AaveSupplyIncentive")
-          .map((i) => parseFloat(i.extraSupplyApr.value))
-          .reduce((acc, curr) => acc + curr, 0);
+          return !reserve.isFrozen && !reserve.isPaused;
+        })
+        .map((reserve) => {
+          const protocolSupplyApy = parseFloat(reserve.supplyInfo?.apy.value ?? "0");
+          const protocolBorrowApy = parseFloat(reserve.borrowInfo?.apy.value ?? "0");
 
-        const finalSupplyApy = baseSupplyApy + meritSupplyApy;
-        const finalBorrowApy = baseBorrowApy - meritBorrowApy;
+          const meritBorrowApy = reserve.incentives
+            .filter((i) => i.__typename === "MeritBorrowIncentive" || i.__typename === "AaveBorrowIncentive")
+            .map((i) => parseFloat(i.borrowAprDiscount.value))
+            .reduce((acc, curr) => acc + curr, 0);
+          const meritSupplyApy = reserve.incentives
+            .filter((i) => i.__typename === "MeritSupplyIncentive" || i.__typename === "AaveSupplyIncentive")
+            .map((i) => parseFloat(i.extraSupplyApr.value))
+            .reduce((acc, curr) => acc + curr, 0);
 
-        const marketVersion = /\d+/.exec(market.name)?.[0];
-        const marketName = `proto_${titleCase(market.name).split(" ").at(-1)?.toLowerCase()}_v${marketVersion}`;
+          const finalSupplyApy = protocolSupplyApy + meritSupplyApy;
+          const totalBorrowApy = protocolBorrowApy - meritBorrowApy;
 
-        return {
-          underlyingToken: {
-            address: reserve.underlyingToken.address,
-            name: reserve.underlyingToken.name,
-            symbol: reserve.underlyingToken.symbol,
-            icon: reserve.underlyingToken.imageUrl,
-          },
-          totalSupply:
-            "$" +
-            formatCompactNumber(
-              parseFloat(reserve.supplyInfo.total.value ?? "0") * parseFloat(reserve.usdExchangeRate ?? "0"),
-            ),
-          totalBorrow: "$" + formatCompactNumber(parseFloat(reserve.borrowInfo?.total.usd ?? "0")),
-          baseSupplyApy: formatApy(baseSupplyApy),
-          meritSupplyApy: formatApy(meritSupplyApy),
-          finalSupplyApy: formatApy(finalSupplyApy),
-          baseBorrowApy: formatApy(baseBorrowApy),
-          meritBorrowApy: formatApy(meritBorrowApy),
-          finalBorrowApy: formatApy(finalBorrowApy),
-          url: `https://app.aave.com/reserve-overview/?underlyingAsset=${reserve.underlyingToken.address.toLowerCase()}&marketName=${marketName}`,
-          chain: {
-            id: market.chain.chainId,
-            name: market.chain.name,
-            icon: market.chain.icon,
-          },
-        };
-      }),
-  }));
+          const marketVersion = /\d+/.exec(market.name)?.[0];
+          const marketName = `proto_${titleCase(market.name).split(" ").at(-1)?.toLowerCase()}_v${marketVersion}`;
+
+          return {
+            underlyingToken: {
+              address: reserve.underlyingToken.address,
+              name: reserve.underlyingToken.name,
+              symbol: reserve.underlyingToken.symbol,
+              icon: reserve.underlyingToken.imageUrl,
+            },
+            interestBearingToken: {
+              address: reserve.aToken.address,
+              name: reserve.aToken.name,
+              symbol: reserve.aToken.symbol,
+            },
+            variableDebtToken: {
+              address: reserve.vToken.address,
+              name: reserve.vToken.name,
+              symbol: reserve.vToken.symbol,
+            },
+            totalSupply:
+              "$" +
+              formatCompactNumber(
+                parseFloat(reserve.supplyInfo.total.value ?? "0") * parseFloat(reserve.usdExchangeRate ?? "0"),
+              ),
+            totalBorrow: "$" + formatCompactNumber(parseFloat(reserve.borrowInfo?.total.usd ?? "0")),
+            protocolSupplyApy: formatApy(protocolSupplyApy),
+            meritSupplyApy: formatApy(meritSupplyApy),
+            totalSupplyApy: formatApy(finalSupplyApy),
+            protocolBorrowApy: formatApy(protocolBorrowApy),
+            meritBorrowApy: formatApy(meritBorrowApy),
+            totalBorrowApy: formatApy(totalBorrowApy),
+            url: `https://app.aave.com/reserve-overview/?underlyingAsset=${reserve.underlyingToken.address.toLowerCase()}&marketName=${marketName}`,
+            chain: {
+              id: market.chain.chainId,
+              name: market.chain.name,
+              icon: market.chain.icon,
+            },
+          };
+        }),
+    };
+  });
 }

@@ -72,6 +72,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "ai": {
+    "instructions": "The `interestBearingToken` and `variableDebtToken` are the internal tokens Aave uses to track supply and variable debt. They are merely informational, unless asked for, you should use the `underlyingToken`.",
     "evals": [
       {
         "input": "@aave What are the highest APY supply tokens?",
