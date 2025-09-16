@@ -85,7 +85,7 @@ export async function getSelectedTextContent(): Promise<string | undefined> {
 export enum ObsidianTargetType {
   OpenVault = "obsidian://open?vault=",
   OpenPath = "obsidian://open?path=",
-  DailyNote = "obsidian://advanced-uri?daily=true&vault=",
+  DailyNote = "obsidian://daily?vault=",
   DailyNoteAppend = "obsidian://advanced-uri?daily=true",
   NewNote = "obsidian://new?vault=",
   AppendTask = "obsidian://advanced-uri?mode=append&filepath=",
