@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Detail, Form, Icon, LaunchProps, List, LocalStorage, useNavigation } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { OllamaService, showErrorToast, showSuccessToast } from "./ollama-service";
 import { OllamaModel, ChatMessage, STORAGE_KEYS } from "./types";
 
@@ -10,6 +10,7 @@ function SettingsForm() {
   const [models, setModels] = useState<OllamaModel[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [modelsKey, setModelsKey] = useState(0); // Force re-render key
+  const [initialLoad, setInitialLoad] = useState(true); // Track if this is the initial load
 
   useEffect(() => {
     const loadExistingSettings = async () => {
@@ -20,26 +21,24 @@ function SettingsForm() {
       const targetUrl = savedUrl || "http://localhost:11434";
       setOllamaUrl(targetUrl);
 
-      // Set model if exists
-      if (savedModel) {
-        setSelectedModel(savedModel);
-      }
-
-      // Always try to load models
-      await loadModels(targetUrl);
+      // Load models first, then set the saved model if it exists in the loaded models
+      await loadModels(targetUrl, savedModel);
+      setInitialLoad(false);
     };
 
     loadExistingSettings();
   }, []);
 
-  // Auto-reload models when URL changes
+  // Auto-reload models when URL changes (but not on initial load)
   useEffect(() => {
-    if (ollamaUrl) {
+    if (ollamaUrl && !initialLoad) {
+      // Clear selected model when URL changes to avoid mismatches
+      setSelectedModel("");
       loadModels(ollamaUrl);
     }
-  }, [ollamaUrl]);
+  }, [ollamaUrl, initialLoad]);
 
-  const loadModels = async (url?: string) => {
+  const loadModels = async (url?: string, savedModel?: string) => {
     const targetUrl = url || ollamaUrl;
     if (!targetUrl) {
       return;
@@ -56,6 +55,15 @@ function SettingsForm() {
       setModels(fetchedModels);
       setModelsKey((prev) => prev + 1); // Force re-render
 
+      // Set the saved model only if it exists in the fetched models
+      if (savedModel && fetchedModels.some((model) => model.name === savedModel)) {
+        setSelectedModel(savedModel);
+      } else if (savedModel) {
+        // If saved model doesn't exist anymore, clear the selection
+        setSelectedModel("");
+        await showErrorToast("Model Not Found", `Previously selected model "${savedModel}" is no longer available.`);
+      }
+
       if (fetchedModels.length === 0) {
         await showErrorToast("No Models", "No models found. Install one with 'ollama pull <model>'");
       } else {
@@ -67,6 +75,7 @@ function SettingsForm() {
         `Could not connect to Ollama at ${targetUrl}. Make sure Ollama is running.`,
       );
       setModels([]);
+      setSelectedModel(""); // Clear selection on connection failure
       setModelsKey((prev) => prev + 1);
     } finally {
       setIsLoading(false);
@@ -76,6 +85,15 @@ function SettingsForm() {
   const saveSettings = async () => {
     if (!ollamaUrl || !selectedModel) {
       await showErrorToast("Missing Info", "Please provide both URL and select a model");
+      return;
+    }
+
+    // Verify the selected model exists in the current models list
+    if (!models.some((model) => model.name === selectedModel)) {
+      await showErrorToast(
+        "Invalid Model",
+        "Selected model is not available. Please refresh models or select a different one.",
+      );
       return;
     }
 
@@ -91,7 +109,9 @@ function SettingsForm() {
 
       await LocalStorage.setItem(STORAGE_KEYS.OLLAMA_URL, ollamaUrl);
       await LocalStorage.setItem(STORAGE_KEYS.DEFAULT_MODEL, selectedModel);
-      await showSuccessToast("Settings Saved", "Ready to chat!");
+      await LocalStorage.setItem(STORAGE_KEYS.SETTINGS_UPDATED, Date.now().toString());
+      await showSuccessToast("Settings Saved", `Ready to chat with ${selectedModel}!`);
+
       pop();
     } catch (error) {
       await showErrorToast("Save Failed", error instanceof Error ? error.message : "Unknown error");
@@ -106,6 +126,12 @@ function SettingsForm() {
       actions={
         <ActionPanel>
           <Action title="Save Settings" onAction={saveSettings} icon={Icon.Check} />
+          <Action
+            title="Refresh Models"
+            onAction={() => loadModels(ollamaUrl)}
+            icon={Icon.ArrowClockwise}
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+          />
         </ActionPanel>
       }
     >
@@ -149,26 +175,51 @@ function MainInterface({ initialQuery }: { initialQuery?: string }) {
   const [isConfigured, setIsConfigured] = useState(false);
   const [conversationHistory, setConversationHistory] = useState<ChatMessage[]>([]);
   const [hasResponse, setHasResponse] = useState(false);
+  const [lastSettingsUpdate, setLastSettingsUpdate] = useState<string | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
-    const loadSettings = async () => {
-      const url = await LocalStorage.getItem<string>(STORAGE_KEYS.OLLAMA_URL);
-      const defaultModel = await LocalStorage.getItem<string>(STORAGE_KEYS.DEFAULT_MODEL);
+  const loadSettings = async () => {
+    const url = await LocalStorage.getItem<string>(STORAGE_KEYS.OLLAMA_URL);
+    const defaultModel = await LocalStorage.getItem<string>(STORAGE_KEYS.DEFAULT_MODEL);
+    const settingsTimestamp = await LocalStorage.getItem<string>(STORAGE_KEYS.SETTINGS_UPDATED);
 
-      if (url && defaultModel) {
+    if (url && defaultModel) {
+      // Only update if the values are actually different to avoid unnecessary re-renders
+      if (url !== ollamaUrl || defaultModel !== model) {
         setOllamaUrl(url);
         setModel(defaultModel);
         setIsConfigured(true);
+      }
 
-        // If there's an initial query, send it automatically
-        if (initialQuery && initialQuery.trim()) {
-          await sendMessage(initialQuery);
-        }
+      // If there's an initial query, send it automatically
+      if (initialQuery && initialQuery.trim()) {
+        await sendMessage(initialQuery);
+      }
+    } else {
+      setIsConfigured(false);
+    }
+
+    // Update last settings timestamp
+    if (settingsTimestamp && settingsTimestamp !== lastSettingsUpdate) {
+      setLastSettingsUpdate(settingsTimestamp);
+    }
+  };
+
+  useEffect(() => {
+    loadSettings();
+
+    // Set up polling to check for settings changes every 2 seconds
+    intervalRef.current = setInterval(() => {
+      loadSettings();
+    }, 2000);
+
+    // Cleanup interval on unmount
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
       }
     };
-
-    loadSettings();
-  }, [initialQuery]);
+  }, [initialQuery]); // Remove settingsKey dependency
 
   const sendMessage = async (query: string) => {
     if (!query.trim() || !isConfigured) return;
@@ -214,17 +265,13 @@ function MainInterface({ initialQuery }: { initialQuery?: string }) {
     setSearchText("");
   };
 
+  const openSettings = () => {
+    push(<SettingsForm />);
+  };
+
   if (!isConfigured) {
-    return (
-      <Detail
-        markdown="# Setup Required\n\nConfigure your Ollama connection to get started."
-        actions={
-          <ActionPanel>
-            <Action title="Open Settings" onAction={() => push(<SettingsForm />)} icon={Icon.Gear} />
-          </ActionPanel>
-        }
-      />
-    );
+    // Redirect directly to settings instead of showing setup required message
+    return <SettingsForm />;
   }
 
   // Show full response view when we have a response
@@ -261,7 +308,7 @@ function MainInterface({ initialQuery }: { initialQuery?: string }) {
             />
             <Action
               title="Settings"
-              onAction={() => push(<SettingsForm />)}
+              onAction={openSettings}
               icon={Icon.Gear}
               shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
             />
@@ -285,7 +332,7 @@ function MainInterface({ initialQuery }: { initialQuery?: string }) {
           )}
           <Action
             title="Settings"
-            onAction={() => push(<SettingsForm />)}
+            onAction={openSettings}
             icon={Icon.Gear}
             shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
           />

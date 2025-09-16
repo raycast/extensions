@@ -27,4 +27,5 @@ export interface OllamaChatResponse {
 export const STORAGE_KEYS = {
   OLLAMA_URL: "ollama-url",
   DEFAULT_MODEL: "default-model",
+  SETTINGS_UPDATED: "settings-updated",
 } as const;
