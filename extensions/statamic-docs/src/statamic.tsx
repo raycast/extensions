@@ -47,8 +47,8 @@ const fetchAvailableVersions = async (): Promise<Version[] | null> => {
   try {
     const response = await fetch("http://statamic.dev.test/versions.json");
     return await response.json() as Version[];
-  } catch (err) {
-    await showToast(Toast.Style.Failure, "Failed to fetch available versions", err.message);
+  } catch (error) {
+    await showToast(Toast.Style.Failure, "Failed to fetch available versions");
     return null;
   }
 };
@@ -116,7 +116,7 @@ export default function main() {
   };
 
   const search = async (query = "") => {
-    if (query === '') return;
+    if (query === '' || !selectedVersion) return;
 
     return await client.index(`docs-${selectedVersion.version}`)
       .search(query, {
