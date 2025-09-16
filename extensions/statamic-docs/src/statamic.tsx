@@ -45,7 +45,7 @@ const client = new MeiliSearch({
 const fetchAvailableVersions = async (): Promise<Version[] | null> => {
   try {
     const response = await fetch("https://statamic.dev/versions.json");
-    return await response.json() as Version[];
+    return (await response.json()) as Version[];
   } catch (error) {
     await showToast(Toast.Style.Failure, "Failed to fetch available versions");
     return null;
@@ -63,7 +63,7 @@ export default function main() {
   useEffect(() => {
     const initializeVersions = async () => {
       let availableVersions;
-      const cachedAvailableVersions = cache.get('availableVersionsThree');
+      const cachedAvailableVersions = cache.get("availableVersionsThree");
 
       if (cachedAvailableVersions) {
         const parsed = JSON.parse(cachedAvailableVersions);
@@ -80,12 +80,15 @@ export default function main() {
 
       setAvailableVersions(availableVersions);
 
-      cache.set('availableVersionsThree', JSON.stringify({
-        availableVersions,
-        timestamp: Date.now(),
-      }));
+      cache.set(
+        "availableVersionsThree",
+        JSON.stringify({
+          availableVersions,
+          timestamp: Date.now(),
+        })
+      );
 
-      let rememberedVersion: string | undefined = await LocalStorage.getItem('versionThree');
+      let rememberedVersion: string | undefined = await LocalStorage.getItem("versionThree");
       if (rememberedVersion) rememberedVersion = JSON.parse(rememberedVersion);
 
       setSelectedVersion(rememberedVersion ?? availableVersions[0]);
@@ -103,7 +106,7 @@ export default function main() {
   const versionChanged = async (value: string) => {
     const version = availableVersions.find((v) => v.version === value);
     setSelectedVersion(version);
-    await LocalStorage.setItem('versionThree', JSON.stringify(version));
+    await LocalStorage.setItem("versionThree", JSON.stringify(version));
   };
 
   const getTitle = (hit: SearchResult): string => {
@@ -115,9 +118,10 @@ export default function main() {
   };
 
   const search = async (query = "") => {
-    if (query === '' || !selectedVersion) return;
+    if (query === "" || !selectedVersion) return;
 
-    return await client.index(`docs-${selectedVersion.version}`)
+    return await client
+      .index(`docs-${selectedVersion.version}`)
       .search(query, {
         hitsPerPage: 20,
       })
@@ -134,9 +138,12 @@ export default function main() {
 
   const getFallbackResults = (version: Version): SearchResultList => {
     switch (version.branch) {
-      case "6.x": return fallbackResults6x;
-      case "5.x": return fallbackResults5x;
-      default: return fallbackResults6x;
+      case "6.x":
+        return fallbackResults6x;
+      case "5.x":
+        return fallbackResults5x;
+      default:
+        return fallbackResults6x;
     }
   };
 
