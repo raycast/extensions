@@ -1,6 +1,6 @@
 # Share a Quote Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2025-09-16
 
 ### Features
 
