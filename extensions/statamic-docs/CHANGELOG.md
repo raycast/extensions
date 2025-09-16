@@ -1,6 +1,6 @@
 # Statamic Docs Changelog
 
-## [Update] - {PR_MERGE_DATE
+## [Update] - {PR_MERGE_DATE}
 
 - Added version switcher
 
