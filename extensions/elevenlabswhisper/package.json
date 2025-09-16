@@ -1,0 +1,102 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "elevenlabswhisper",
+  "title": "Elevenlabs Whisper",
+  "description": "Turn your voice into text instantly with the power of ElevenLabs.",
+  "icon": "extension-icon.png",
+  "author": "insv23",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "transcribe",
+      "title": "Transcribe Audio",
+      "subtitle": "ElevenLabs & 302.ai",
+      "description": "Record audio and get instant AI-powered transcription.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "soxExecutablePath",
+      "type": "textfield",
+      "title": "SoX Executable Path",
+      "placeholder": "/opt/homebrew/bin/sox",
+      "description": "Absolute path to the sox binary. Leave empty to use PATH or common Homebrew paths.",
+      "required": false
+    },
+    {
+      "name": "provider",
+      "type": "dropdown",
+      "title": "Provider",
+      "description": "Choose the transcription provider.",
+      "data": [
+        {
+          "title": "ElevenLabs",
+          "value": "elevenlabs"
+        },
+        {
+          "title": "302.ai",
+          "value": "ai302"
+        }
+      ],
+      "defaultValue": "elevenlabs",
+      "required": true
+    },
+    {
+      "name": "elevenlabsApiKey",
+      "type": "password",
+      "title": "ElevenLabs API Key",
+      "placeholder": "sk_...",
+      "description": "API key used for ElevenLabs requests (header: xi-api-key).",
+      "required": false
+    },
+    {
+      "name": "ai302ApiBaseUrl",
+      "type": "textfield",
+      "title": "302.ai Base URL",
+      "placeholder": "https://api.302.ai/elevenlabs/speech-to-text",
+      "defaultValue": "https://api.302.ai/elevenlabs/speech-to-text",
+      "description": "Full endpoint URL for 302.ai speech-to-text API.",
+      "required": false
+    },
+    {
+      "name": "ai302ApiKey",
+      "type": "password",
+      "title": "302.ai API Key",
+      "placeholder": "sk-...",
+      "description": "API key used for 302.ai requests (Authorization: Bearer <key>).",
+      "required": false
+    },
+    {
+      "name": "modelId",
+      "type": "textfield",
+      "title": "Model ID",
+      "placeholder": "scribe_v1",
+      "description": "Model identifier used by the provider.",
+      "defaultValue": "scribe_v1",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.7",
+    "@raycast/utils": "^1.17.0",
+    "use-sync-external-store": "^1.5.0",
+    "zustand": "^5.0.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
