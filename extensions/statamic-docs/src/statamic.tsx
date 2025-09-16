@@ -54,12 +54,12 @@ const fetchAvailableVersions = async (): Promise<Version[] | null> => {
 };
 
 export default function main() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [searchResults, setSearchResults] = useState<SearchResultList>({});
-  const [selectedVersion, setSelectedVersion] = useState<Version | undefined>();
-  const [availableVersions, setAvailableVersions] = useState<Version[]>([]);
-  const [searchQuery, setSearchQuery] = useState<string | undefined>();
   const cache = new Cache();
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState<string | undefined>();
+  const [searchResults, setSearchResults] = useState<SearchResultList>({});
+  const [availableVersions, setAvailableVersions] = useState<Version[]>([]);
+  const [selectedVersion, setSelectedVersion] = useState<Version | undefined>();
 
   useEffect(() => {
     const initializeVersions = async () => {
@@ -86,7 +86,7 @@ export default function main() {
         timestamp: Date.now(),
       }));
 
-      let rememberedVersion = await LocalStorage.getItem('version');
+      let rememberedVersion: string | undefined = await LocalStorage.getItem('version');
       if (rememberedVersion) rememberedVersion = JSON.parse(rememberedVersion);
 
       setSelectedVersion(rememberedVersion ?? availableVersions[0]);
