@@ -1,5 +1,6 @@
 import { InfisicalSDK } from "@infisical/sdk";
 import { getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
 
 const {siteUrl,clientId,clientSecret} = getPreferenceValues<Preferences>();
 const client = new InfisicalSDK({
@@ -37,3 +38,13 @@ export const callInfisical = async<T>(endpoint: string) => {
     if (!response.ok) throw new Error((result as Error).message);
     return result as T;
 }
+export const useInfisicalApi = <T>(endpoint: string) => useFetch(new URL(`api/${endpoint}`, siteUrl).toString(), {
+  headers: {
+    Authorization: `Bearer ${infisical.auth().getAccessToken()}`
+  },
+  async parseResponse(response) {
+    const result = await response.json();
+    if (!response.ok) throw new Error((result as Error).message);
+    return result as T;
+  },
+})
