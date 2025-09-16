@@ -113,6 +113,7 @@ export function jsonDataToMergeRequest(mr: any): MergeRequest {
     has_conflicts: mr.has_conflicts === true || false,
     force_remove_source_branch: mr.force_remove_source_branch,
     squash_on_merge: mr.squash_on_merge,
+    merge_when_pipeline_succeeds: mr.merge_when_pipeline_succeeds,
   };
 }
 
@@ -265,6 +266,7 @@ export class MergeRequest {
   public has_conflicts = false;
   public force_remove_source_branch: boolean | undefined = undefined;
   public squash_on_merge: boolean | undefined = undefined;
+  public merge_when_pipeline_succeeds: boolean | undefined = undefined;
 }
 
 export class Pipeline {
