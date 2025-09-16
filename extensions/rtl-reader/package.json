@@ -11,7 +11,6 @@
     {
       "name": "rtl-text",
       "title": "RTL Text Formatter",
-      "subtitle": "Format text for RTL reading",
       "description": "Format text containing RTL and LTR languages for proper display",
       "mode": "view"
     }
