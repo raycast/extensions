@@ -1,6 +1,6 @@
-import { AaveClient, chainId, ChainId, ChainsFilter } from "@aave/client";
+import { AaveClient, ChainId, ChainsFilter } from "@aave/client";
 import { chains, markets } from "@aave/client/actions";
-import { formatApy, formatCompactNumber, formatMarketName, titleCase } from "./format";
+import { formatApy, formatUSD, formatMarketName, titleCase } from "./format";
 import { showFrozenOrPausedAssets } from "./preferences";
 
 export const client = AaveClient.create();
@@ -32,9 +32,9 @@ export async function getMarkets(chainIds: ChainId[]) {
       icon: market.icon,
       address: market.address,
       name: formatMarketName(market.name),
-      size: formatCompactNumber(size),
-      liquidity: formatCompactNumber(liquidity),
-      borrows: formatCompactNumber(borrows),
+      size: formatUSD(size),
+      liquidity: formatUSD(liquidity),
+      borrows: formatUSD(borrows),
       chain: {
         id: market.chain.chainId,
         name: market.chain.name,
@@ -86,12 +86,10 @@ export async function getMarkets(chainIds: ChainId[]) {
               name: reserve.vToken.name,
               symbol: reserve.vToken.symbol,
             },
-            totalSupply:
-              "$" +
-              formatCompactNumber(
-                parseFloat(reserve.supplyInfo.total.value ?? "0") * parseFloat(reserve.usdExchangeRate ?? "0"),
-              ),
-            totalBorrow: "$" + formatCompactNumber(parseFloat(reserve.borrowInfo?.total.usd ?? "0")),
+            totalSupply: formatUSD(
+              parseFloat(reserve.supplyInfo.total.value ?? "0") * parseFloat(reserve.usdExchangeRate ?? "0"),
+            ),
+            totalBorrow: formatUSD(parseFloat(reserve.borrowInfo?.total.usd ?? "0")),
             protocolSupplyApy: formatApy(protocolSupplyApy),
             meritSupplyApy: formatApy(meritSupplyApy),
             totalSupplyApy: formatApy(totalSupplyApy),
@@ -101,6 +99,7 @@ export async function getMarkets(chainIds: ChainId[]) {
             url: `https://app.aave.com/reserve-overview/?underlyingAsset=${reserve.underlyingToken.address.toLowerCase()}&marketName=${marketName}`,
             isPaused: reserve.isPaused,
             isFrozen: reserve.isFrozen,
+            usdExchangeRate: parseFloat(reserve.usdExchangeRate ?? "0"),
           };
         }),
     };

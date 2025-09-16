@@ -6,12 +6,15 @@ export function formatApy(value: number) {
   return (value * 100).toFixed(2) + "%";
 }
 
-export function formatCompactNumber(value: number) {
-  return value.toLocaleString("en-US", {
-    notation: "compact",
-    compactDisplay: "short",
-    maximumFractionDigits: 2,
-  });
+export function formatUSD(value: number) {
+  return (
+    "$" +
+    value.toLocaleString("en-US", {
+      notation: "compact",
+      compactDisplay: "short",
+      maximumFractionDigits: 2,
+    })
+  );
 }
 
 export function titleCase(value: string) {

@@ -40,7 +40,7 @@ export default function () {
         ?.map((market) => (
           <List.Section
             key={`${market.address}-${market.chain.id}-${market.name}`}
-            title={`Market $${market.size}    Available $${market.liquidity}    Borrows $${market.borrows}`}
+            title={`Market ${market.size}    Available ${market.liquidity}    Borrows ${market.borrows}`}
           >
             {market.reserves.map((reserve) => (
               <List.Item
