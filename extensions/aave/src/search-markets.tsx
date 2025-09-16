@@ -1,5 +1,5 @@
 import { ActionPanel, Action, Image, List, Color } from "@raycast/api";
-import { useCachedPromise, useCachedState, usePromise } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { getMarkets } from "./lib/api";
 import { includeIncentivePrograms } from "./lib/preferences";
 

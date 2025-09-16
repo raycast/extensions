@@ -1,5 +1,5 @@
 import { ChainId, chainId } from "@aave/client";
-import { getChains, getMarkets } from "../lib/api";
+import { getMarkets } from "../lib/api";
 
 type Input = {
   /**
