@@ -23,7 +23,7 @@ You can open an item on Metacritic in your browser or copy the title (and score)
    - Copy Title and Score
 
 ## Limitations
-- Metacritic's autosuggest endpoint only returns up to 6 items per query. This extension reflects that limit and will not display more than 6 results for a given search. Please make your query as refined as possible to get more desired results.
+- This extension uses Metacritic's autosuggest API endpoint (https://backend.metacritic.com/finder/metacritic/search/{query}/web?apiKey=key&limit=30&offset=0). This is the same API that powers Metacritic's own search page. Please note that this API may change over time or might not be accessible in all regions.
 
 ## Data Ownership and Responsibility
 - This extension is an unofficial client. It is not affiliated with, endorsed, or sponsored by Metacritic.

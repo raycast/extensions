@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ActionPanel, Action, Grid, Detail } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
+import { Icon } from "@raycast/api";
 
 type MCImage = {
   bucketType?: string | null;
@@ -154,20 +155,20 @@ function DetailView({ item }: { item: MCItem }) {
       markdown={markdown}
       metadata={<Detail.Metadata>
         <Detail.Metadata.Label title="Title" text={item.title} />
-        {typeLabel && <Detail.Metadata.Label title="Type" text={typeLabel} />}
-        {scoreNum !== undefined && (
+        {typeLabel ? <Detail.Metadata.Label title="Type" text={typeLabel} /> : null}
+        {scoreNum !== undefined ? (
           <Detail.Metadata.TagList title="Score">
             <Detail.Metadata.TagList.Item text={`${scoreNum}`} color={scoreColor(scoreNum)} />
           </Detail.Metadata.TagList>
-        )}
-        {release && <Detail.Metadata.Label title="Release" text={release} />}
-        {genres && <Detail.Metadata.Label title="Genres" text={genres} />}
-        {platforms && <Detail.Metadata.Label title="Platforms" text={platforms} />}
-        {item.rating && <Detail.Metadata.Label title="Rating" text={item.rating} />}
-        {item.seasonCount && item.seasonCount > 0 && (
+        ) : null}
+        {release ? <Detail.Metadata.Label title="Release" text={release} /> : null}
+        {genres ? <Detail.Metadata.Label title="Genres" text={genres} /> : null}
+        {platforms ? <Detail.Metadata.Label title="Platforms" text={platforms} /> : null}
+        {item.rating ? <Detail.Metadata.Label title="Rating" text={item.rating} /> : null}
+        {item.seasonCount && item.seasonCount > 0 ? (
           <Detail.Metadata.Label title="Season Count" text={String(item.seasonCount)} />
-        )}
-        {duration && <Detail.Metadata.Label title="Duration" text={duration} />}
+        ) : null}
+        {duration ? <Detail.Metadata.Label title="Duration" text={duration} /> : null}
       </Detail.Metadata>}
       actions={<ActionPanel>
         {targetUrl && <Action.OpenInBrowser title="Open on Metacritic" url={targetUrl} />}
@@ -187,17 +188,18 @@ export default function Command() {
       )}/web?apiKey=1MOZgmNFxvmljaQR1X9KAij9Mo4xAY3u&limit=32&offset=0`
     : "";
 
-  const { isLoading, data } = useFetch<MCResponse>(url, {
+  const { isLoading, data: items } = useFetch(url, {
     execute: trimmed.length > 0,
     keepPreviousData: true,
-    parseResponse: async (response: Response) => {
-      const json = (await response.json()) as MCResponse;
-      return json;
+    mapResult: (result: MCResponse) => {
+      // Filter out people results; we only want media (games, movies, shows, etc.)
+      const items: MCItem[] = (result.data?.items ?? []).filter((i) => i.type !== "person");
+      return {
+        data: items,
+      };
     },
+    initialData: [],
   });
-
-  // Filter out people results; we only want media (games, movies, shows, etc.)
-  const items: MCItem[] = (data?.data?.items ?? []).filter((i) => i.type !== "person");
 
   return (
     <Grid
@@ -241,7 +243,7 @@ export default function Command() {
             title={displayTitle}
             actions={
               <ActionPanel>
-                <Action.Push title="Show Details" target={<DetailView item={item} />} />
+                <Action.Push icon={Icon.Info} title="Show Details" target={<DetailView item={item} />} />
                 {targetUrl && <Action.OpenInBrowser title="Open on Metacritic" url={targetUrl} />}
                 <Action.CopyToClipboard
                   title="Copy Title and Score"
