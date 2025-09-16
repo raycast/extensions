@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ActionPanel, Action, Grid } from "@raycast/api";
+import { ActionPanel, Action, Grid, Detail } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
 type MCImage = {
@@ -15,6 +15,17 @@ type MCItem = {
   slug?: string;
   images?: MCImage[];
   criticScoreSummary?: { url?: string; score?: number | string | null };
+  rating?: string | null; // e.g., E, PG-13
+  releaseDate?: string | null; // ISO or YYYY-MM-DD
+  premiereYear?: number | null;
+  genres?: { id?: number | null; name?: string | null }[];
+  platforms?: { id?: number | null; name?: string | null }[];
+  seasonCount?: number | null;
+  description?: string | null;
+  duration?: string | number | null; // e.g., minutes for movies/episodes
+  mustSee?: boolean | null;
+  mustWatch?: boolean | null;
+  mustPlay?: boolean | null;
 };
 
 type MCResponse = {
@@ -58,6 +69,19 @@ function mediaEmojiForType(type: string | undefined): string {
   }
 }
 
+function mediaTypeLabel(type: string | undefined): string {
+  switch (type) {
+    case "game-title":
+      return "Video Game";
+    case "show":
+      return "TV Show";
+    case "movie":
+      return "Movie";
+    default:
+      return type ? type : "";
+  }
+}
+
 function displayTitleForItem(item: MCItem): string {
   const mediaEmoji = mediaEmojiForType(item.type);
   const scoreNum = normalizeScore(item.criticScoreSummary?.score);
@@ -66,6 +90,91 @@ function displayTitleForItem(item: MCItem): string {
   }
   const scoreEmoji = scoreNum >= 75 ? "🟢" : scoreNum >= 50 ? "🟡" : "🔴";
   return `${mediaEmoji}${scoreEmoji}${String(scoreNum)}: ${item.title}`;
+}
+
+function joinNames(items?: { name?: string | null }[], fallback = "—"): string {
+  if (!items || items.length === 0) return fallback;
+  const names = items
+    .map((g) => (g?.name || "").trim())
+    .filter((n) => n.length > 0);
+  return names.length ? names.join(", ") : fallback;
+}
+
+function formatReleaseDate(item: MCItem): string | undefined {
+  if (item.releaseDate) return item.releaseDate;
+  if (item.premiereYear) return String(item.premiereYear);
+  return undefined;
+}
+
+function formatDuration(d?: string | number | null): string | undefined {
+  if (d == null) return undefined;
+  if (typeof d === "number") {
+    // Assume minutes if a number
+    return `${d} min`;
+  }
+  const trimmed = d.trim();
+  return trimmed.length ? trimmed : undefined;
+}
+
+function badgesMarkdown(item: MCItem): string {
+  const badges: string[] = [];
+  if (item.mustPlay) badges.push("`MUST PLAY`");
+  if (item.mustWatch) badges.push("`MUST WATCH`");
+  if (item.mustSee) badges.push("`MUST SEE`");
+  return badges.join(" ");
+}
+
+function scoreColor(score?: number): string {
+  if (score == null) return "gray";
+  if (score >= 75) return "green";
+  if (score >= 50) return "yellow";
+  return "red";
+}
+
+function DetailView({ item }: { item: MCItem }) {
+  const image = buildImageUrl(item.images);
+  const scoreNum = normalizeScore(item.criticScoreSummary?.score);
+  const typeLabel = mediaTypeLabel(item.type);
+  const release = formatReleaseDate(item);
+  const genres = joinNames(item.genres);
+  const platforms = joinNames(item.platforms);
+  const duration = formatDuration(item.duration);
+  const badgeLine = badgesMarkdown(item);
+  const reviewsPath = item.criticScoreSummary?.url;
+  const targetUrl = reviewsPath ? `https://www.metacritic.com${reviewsPath}` : undefined;
+
+  const mdParts: string[] = [];
+  if (image) mdParts.push(`![](${image})`);
+  if (item.description) mdParts.push("\n" + item.description + "\n");
+  if (badgeLine) mdParts.push(badgeLine);
+  const markdown = mdParts.join("\n\n");
+
+  return (
+    <Detail
+      markdown={markdown}
+      metadata={<Detail.Metadata>
+        <Detail.Metadata.Label title="Title" text={item.title} />
+        {typeLabel && <Detail.Metadata.Label title="Type" text={typeLabel} />}
+        {scoreNum !== undefined && (
+          <Detail.Metadata.TagList title="Score">
+            <Detail.Metadata.TagList.Item text={`${scoreNum}`} color={scoreColor(scoreNum)} />
+          </Detail.Metadata.TagList>
+        )}
+        {release && <Detail.Metadata.Label title="Release" text={release} />}
+        {genres && <Detail.Metadata.Label title="Genres" text={genres} />}
+        {platforms && <Detail.Metadata.Label title="Platforms" text={platforms} />}
+        {item.rating && <Detail.Metadata.Label title="Rating" text={item.rating} />}
+        {item.seasonCount && item.seasonCount > 0 && (
+          <Detail.Metadata.Label title="Season Count" text={String(item.seasonCount)} />
+        )}
+        {duration && <Detail.Metadata.Label title="Duration" text={duration} />}
+      </Detail.Metadata>}
+      actions={<ActionPanel>
+        {targetUrl && <Action.OpenInBrowser title="Open on Metacritic" url={targetUrl} />}
+        <Action.CopyToClipboard title="Copy Title and Score" content={`${item.title} (${item.criticScoreSummary?.score ?? "N/A"})`} />
+      </ActionPanel>}
+    />
+  );
 }
 
 export default function Command() {
@@ -87,7 +196,8 @@ export default function Command() {
     },
   });
 
-  const items: MCItem[] = data?.data?.items ?? [];
+  // Filter out people results; we only want media (games, movies, shows, etc.)
+  const items: MCItem[] = (data?.data?.items ?? []).filter((i) => i.type !== "person");
 
   return (
     <Grid
@@ -131,8 +241,12 @@ export default function Command() {
             title={displayTitle}
             actions={
               <ActionPanel>
+                <Action.Push title="Show Details" target={<DetailView item={item} />} />
                 {targetUrl && <Action.OpenInBrowser title="Open on Metacritic" url={targetUrl} />}
-                <Action.CopyToClipboard title="Copy Title and Score" content={`${item.title} (${item.criticScoreSummary?.score})`} />
+                <Action.CopyToClipboard
+                  title="Copy Title and Score"
+                  content={`${item.title} (${item.criticScoreSummary?.score ?? "N/A"})`}
+                />
               </ActionPanel>
             }
           />
@@ -141,3 +255,4 @@ export default function Command() {
     </Grid>
   );
 }
+
