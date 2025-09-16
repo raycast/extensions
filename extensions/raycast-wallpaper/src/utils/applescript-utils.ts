@@ -1,7 +1,7 @@
 import { RaycastWallpaper, RaycastWallpaperWithInfo } from "../types/types";
 import { showToast, Toast } from "@raycast/api";
 import { existsSync } from "fs-extra";
-import { runAppleScript } from "@raycast/utils";
+import { runAppleScript, runPowerShellScript } from "@raycast/utils";
 import { buildCachePath, cachePicture } from "./common-utils";
 import { applyTo } from "../types/preferences";
 
@@ -25,6 +25,15 @@ const scriptSetWallpaper = (path: string, applyTo: string) => {
     `;
 };
 
+const setWallpaperWin = (path: string, applyTo: string) => {
+  const escapedPath = path.replace(/\//g, '\\');
+
+  console.log("Setting wallpaper with path:", escapedPath);
+
+  const exePath="wallpaper_setter.exe";
+
+}
+
 export const setWallpaper = async (wallpaper: RaycastWallpaperWithInfo) => {
   const toast = await showToast(Toast.Style.Animated, "Setting wallpaper...");
 
@@ -37,7 +46,11 @@ export const setWallpaper = async (wallpaper: RaycastWallpaperWithInfo) => {
       await cachePicture(wallpaper);
     }
 
-    const result = await runAppleScript(scriptSetWallpaper(actualPath, applyTo));
+    const result = process.platform === "win32"
+      ? await setWallpaperWin(actualPath, applyTo)
+      : await runAppleScript(scriptSetWallpaper(actualPath, applyTo));
+
+      console.log("Wallpaper set result:", result);
 
     if (result !== "ok") throw new Error("Error setting wallpaper.");
     else if (toast) {
@@ -65,7 +78,9 @@ export const autoSetWallpaper = async (wallpaper: RaycastWallpaper) => {
       await cachePicture(wallpaper);
     }
 
-    const result = await runAppleScript(scriptSetWallpaper(actualPath, applyTo));
+    const result = process.platform === "win32"
+      ? await setWallpaperWin(actualPath, applyTo)
+      : await runAppleScript(scriptSetWallpaper(actualPath, applyTo));
 
     if (result !== "ok") throw new Error("Error setting wallpaper.");
   } catch (err) {
@@ -74,9 +89,31 @@ export const autoSetWallpaper = async (wallpaper: RaycastWallpaper) => {
 };
 
 const scriptSystemAppearance = `tell application "System Events" to tell appearance preferences to get dark mode`;
+const scriptSystemAppearanceWin = `
+$RegistryKeyPath = "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize"
+$RegistryValueName = "AppsUseLightTheme"
+
+if (-not (Test-Path $RegistryKeyPath)) {
+    throw "Registry key not found: $RegistryKeyPath"
+}
+
+$value = Get-ItemPropertyValue -Path $RegistryKeyPath -Name $RegistryValueName
+
+if ($value -isnot [int]) {
+    throw "Unexpected value type for $RegistryValueName"
+}
+
+return ($value -eq 0)
+`;
+
+
 export const getSystemAppearance = async () => {
   try {
-    const result = await runAppleScript(scriptSystemAppearance);
+
+    const result = process.platform === "win32" 
+      ? await runPowerShellScript(scriptSystemAppearanceWin) 
+      : await runAppleScript(scriptSystemAppearance);
+
     if (result === "true") {
       return "dark";
     }
