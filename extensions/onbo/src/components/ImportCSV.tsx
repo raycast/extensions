@@ -110,7 +110,7 @@ export default function ImportCSVCommand({ onComplete }: Props) {
             <Action.Open
               title="Open Selected File"
               icon={Icon.Document}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
+              shortcut={{ modifiers: ["cmd"], key: "o" }}
               target={itemProps.file.value?.[0] ?? ""}
             />
           </ActionPanel.Section>

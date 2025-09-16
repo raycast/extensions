@@ -30,15 +30,6 @@ type SearchCommandProps = {
   normalizeCategoryTitle?: (title: string) => string;
 };
 
-type PreferenceValues = {
-  autoSaveOnOpen: boolean;
-  jobLinksBrowser: {
-    name: string;
-    path: string;
-    bundleId: string;
-  };
-};
-
 const API_BASE = "https://onbo.dev/api/v1" as const;
 
 /**
@@ -87,7 +78,7 @@ export default function SearchList({ resource, normalizeCategoryTitle = defaultN
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [savedJobs, setSavedJobs] = useState<Set<number>>(new Set());
   const [savedById, setSavedById] = useState<Map<number, AppliedRole>>(new Map());
-  const { autoSaveOnOpen, jobLinksBrowser } = getPreferenceValues<PreferenceValues>();
+  const { autoSaveOnOpen, jobLinksBrowser } = getPreferenceValues();
   const { push } = useNavigation();
 
   const {
