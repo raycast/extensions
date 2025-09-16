@@ -12,7 +12,7 @@ This extension leverages the [Git sparse-checkout](https://git-scm.com/docs/git-
 
 ## Features
 
-- [x] Explorer full extension list
+- [x] Explore full extension list
 - [x] Sparse-checkout an extension
 - [x] Remove an extension from forked list
 - [x] Synchronizes the forked repository with the upstream repository on local
@@ -38,10 +38,10 @@ You can always open your forked extension folder in the terminal to work with CL
 
 You might need some manual cleanup to reduce the size of your `.git` folder. Here are a few methods you can take:
 
-- Use [`git gc`](https://git-scm.com/docs/git-gc) to clean up unnecessary files and optimize the local repository
-- Use [`git fsck`](https://git-scm.com/docs/git-fsck) to check the integrity of the repository
-- Use [`git prune`](https://git-scm.com/docs/git-prune) to remove any objects that are no longer referenced by your branches
-- Use [`git maintenance`](https://git-scm.com/docs/git-maintenance) to perform various maintenance tasks on your repository
+- Use [git-gc](https://git-scm.com/docs/git-gc) to clean up unnecessary files and optimize the local repository
+- Use [git-fsck](https://git-scm.com/docs/git-fsck) to check the integrity of the repository
+- Use [git-prune](https://git-scm.com/docs/git-prune) to remove any objects that are no longer referenced by your branches
+- Use [git-maintenance](https://git-scm.com/docs/git-maintenance) to perform various maintenance tasks on your repository
 
 But we recommend using a new clone of the repository to start fresh with a smaller `.git` folder.
 

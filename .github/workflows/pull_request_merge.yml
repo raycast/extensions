@@ -110,7 +110,7 @@ jobs:
         run: sleep 30 # sleep 30s for ubuntu
         shell: bash
       - name: Merge
-        run: gh pr merge ${{ github.event.inputs.pr_number }} --squash
+        run: gh pr merge ${{ github.event.inputs.pr_number }} --squash --delete-branch
       - name: Notify Failure to Slack
         if: failure()
         uses: raycast/github-actions/slack-send@master
