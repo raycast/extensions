@@ -18,13 +18,13 @@ type SearchResultList = {
   [key: string]: SearchResult[];
 };
 
-type AvailableVersion = {
+type Version = {
   version: string;
   branch: string;
   url: string;
 };
 
-export type { AvailableVersion };
+export type { Version };
 
 const client = new MeiliSearch({
   host: "https://search.statamic.dev",
@@ -42,12 +42,12 @@ const client = new MeiliSearch({
 
 process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0; // todo: remove once the API is in production
 
-const fetchAvailableVersions = async (): Promise<AvailableVersion[] | null> => {
+const fetchAvailableVersions = async (): Promise<Version[] | null> => {
   try {
     const response = await fetch("http://statamic.dev.test/versions.json");
-    return await response.json() as AvailableVersion[];
-  } catch (error) {
-    await showToast(Toast.Style.Failure, "Failed to fetch available versions", error);
+    return await response.json() as Version[];
+  } catch (err) {
+    await showToast(Toast.Style.Failure, "Failed to fetch available versions", err.message);
     return null;
   }
 };
@@ -55,8 +55,8 @@ const fetchAvailableVersions = async (): Promise<AvailableVersion[] | null> => {
 export default function main() {
   const [isLoading, setIsLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<SearchResultList>({});
-  const [selectedVersion, setSelectedVersion] = useState<string | undefined>();
-  const [availableVersions, setAvailableVersions] = useState<AvailableVersion[]>([]);
+  const [selectedVersion, setSelectedVersion] = useState<Version | undefined>();
+  const [availableVersions, setAvailableVersions] = useState<Version[]>([]);
   const [searchQuery, setSearchQuery] = useState<string | undefined>();
   const cache = new Cache();
 
@@ -85,11 +85,10 @@ export default function main() {
         timestamp: Date.now(),
       }));
 
-      const rememberedVersion = await LocalStorage.getItem('version');
+      let rememberedVersion = await LocalStorage.getItem('currentVersion2');
+      if (rememberedVersion) rememberedVersion = JSON.parse(rememberedVersion);
 
-      if (!rememberedVersion && availableVersions) {
-        setSelectedVersion(availableVersions[0].version);
-      }
+      setSelectedVersion(rememberedVersion ?? availableVersions[0]);
     };
 
     initializeVersions();
@@ -97,9 +96,15 @@ export default function main() {
 
   useEffect(() => {
     if (selectedVersion && searchQuery !== undefined) {
-      updateSearchResults();
+      updateSearchResults(searchQuery);
     }
   }, [selectedVersion]);
+
+  const versionChanged = async (value: string) => {
+    const version = availableVersions.find((v) => v.version === value);
+    setSelectedVersion(version);
+    await LocalStorage.setItem('currentVersion2', JSON.stringify(version));
+  };
 
   const getTitle = (hit: SearchResult): string => {
     return hit.hierarchy_lvl1 || hit.hierarchy_lvl0 || "";
@@ -110,11 +115,9 @@ export default function main() {
   };
 
   const search = async (query = "") => {
-    if (query === "") {
-      return;
-    }
+    if (query === '') return;
 
-    return await client.index(`docs-${selectedVersion}`)
+    return await client.index(`docs-${selectedVersion.version}`)
       .search(query, {
         hitsPerPage: 20,
       })
@@ -129,17 +132,15 @@ export default function main() {
       });
   };
 
-  const updateSearchResults = async () => {
-    if (!searchQuery) {
+  const updateSearchResults = async (query: string) => {
+    if (!query) {
       setSearchResults(fallbackResults);
       return;
     }
 
-    const results = (await search(searchQuery)) as SearchResult[];
+    const results = (await search(query)) as SearchResult[];
 
-    if (!results) {
-      return;
-    }
+    if (!results) return;
 
     setSearchResults(
       results.reduce((acc: SearchResultList, hit: SearchResult) => {
@@ -156,16 +157,11 @@ export default function main() {
     );
   };
 
-  const versionChanged = async (version: string) => {
-    setSelectedVersion(version);
-    await LocalStorage.setItem('version', version);
-  };
-
   return (
     <List
       throttle={true}
       isLoading={isLoading}
-      onSearchTextChange={async (value) => (setSearchQuery(value), updateSearchResults())}
+      onSearchTextChange={async (value) => (setSearchQuery(value), updateSearchResults(value))}
       searchBarAccessory={<VersionDropdown id="version" versions={availableVersions} onChange={versionChanged} />}
     >
       {Object.entries(searchResults as SearchResultList).map(
@@ -173,7 +169,7 @@ export default function main() {
           return (
             <List.Section title={section} key={index}>
               {items.map((hit: SearchResult) => {
-                const url = `https://statamic.dev${hit.url}`;
+                const url = `${selectedVersion.url}${hit.url}`;
                 return (
                   <List.Item
                     key={hit.id}
