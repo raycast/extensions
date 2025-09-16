@@ -88,10 +88,11 @@ export default function main() {
         })
       );
 
-      let rememberedVersion: string | undefined = await LocalStorage.getItem("version");
-      if (rememberedVersion) rememberedVersion = JSON.parse(rememberedVersion);
+      const rememberedVersion: string | undefined = await LocalStorage.getItem("version");
+      let parsedVersion: Version | undefined;
+      if (rememberedVersion) parsedVersion = JSON.parse(rememberedVersion);
 
-      setSelectedVersion(rememberedVersion ?? availableVersions[0]);
+      setSelectedVersion(parsedVersion ?? availableVersions[0]);
     };
 
     initializeVersions();
