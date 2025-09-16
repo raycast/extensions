@@ -15,7 +15,7 @@ import path from "path";
 import { useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { GetInstalledBrowsers } from "get-installed-browsers";
-import { GitRepo, Preferences, tildifyPath, GitRepoService, GitRepoType, OpenWith } from "./utils";
+import { GitRepo, Preferences, tildifyPath, GitRepoService, GitRepoType } from "./utils";
 import { useUsageBasedSort } from "./hooks/useUsageBasedSort";
 
 const installedBrowsers = GetInstalledBrowsers().map(
@@ -111,30 +111,24 @@ function GitRepoListItem(props: {
           <ActionPanel.Section>
             <GitRepoOpenAction openWith={preferences.openWith1} repo={repo} recordUsageHook={props.recordUsageHook} />
             <GitRepoOpenAction openWith={preferences.openWith2} repo={repo} recordUsageHook={props.recordUsageHook} />
-            {preferences.openWith3 && (
-              <GitRepoOpenAction
-                openWith={preferences.openWith3}
-                repo={repo}
-                recordUsageHook={props.recordUsageHook}
-                shortcut={{ modifiers: ["opt"], key: "return" }}
-              />
-            )}
-            {preferences.openWith4 && (
-              <GitRepoOpenAction
-                openWith={preferences.openWith4}
-                repo={repo}
-                recordUsageHook={props.recordUsageHook}
-                shortcut={{ modifiers: ["ctrl"], key: "return" }}
-              />
-            )}
-            {preferences.openWith5 && (
-              <GitRepoOpenAction
-                openWith={preferences.openWith5}
-                repo={repo}
-                recordUsageHook={props.recordUsageHook}
-                shortcut={{ modifiers: ["shift"], key: "return" }}
-              />
-            )}
+            <GitRepoOpenAction
+              openWith={preferences.openWith3}
+              repo={repo}
+              recordUsageHook={props.recordUsageHook}
+              shortcut={{ modifiers: ["opt"], key: "return" }}
+            />
+            <GitRepoOpenAction
+              openWith={preferences.openWith4}
+              repo={repo}
+              recordUsageHook={props.recordUsageHook}
+              shortcut={{ modifiers: ["ctrl"], key: "return" }}
+            />
+            <GitRepoOpenAction
+              openWith={preferences.openWith5}
+              repo={repo}
+              recordUsageHook={props.recordUsageHook}
+              shortcut={{ modifiers: ["shift"], key: "return" }}
+            />
             <Action
               title="Open in All Applications"
               icon={Icon.ChevronUp}
@@ -285,10 +279,12 @@ function GitRepoPropertyDropdown(props: {
 
 function GitRepoOpenAction(props: {
   repo: GitRepo;
-  openWith: OpenWith;
+  openWith?: Application;
   shortcut?: Keyboard.Shortcut;
   recordUsageHook?: (id: string | number) => void;
-}): JSX.Element {
+}) {
+  if (!props.openWith) return null;
+
   return (
     <Action.Open
       title={`Open in ${props.openWith.name}`}

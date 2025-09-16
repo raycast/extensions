@@ -1,4 +1,4 @@
-import { getPreferenceValues, showToast, LocalStorage, Toast } from "@raycast/api";
+import { getPreferenceValues, showToast, LocalStorage, Toast, Application } from "@raycast/api";
 
 import { homedir } from "os";
 import path from "path";
@@ -10,22 +10,16 @@ import parseGitConfig = require("parse-git-config");
 import parseGithubURL = require("parse-github-url");
 import getDefaultBrowser from "default-browser";
 
-export interface OpenWith {
-  name: string;
-  path: string;
-  bundleId: string;
-}
-
 export interface Preferences {
   repoScanPath: string;
   repoScanDepth?: number;
   includeSubmodules?: boolean;
   searchKeys?: string;
-  openWith1: OpenWith;
-  openWith2: OpenWith;
-  openWith3?: OpenWith;
-  openWith4?: OpenWith;
-  openWith5?: OpenWith;
+  openWith1: Application;
+  openWith2: Application;
+  openWith3?: Application;
+  openWith4?: Application;
+  openWith5?: Application;
 }
 
 export enum GitRepoType {
