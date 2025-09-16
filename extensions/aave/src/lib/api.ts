@@ -38,7 +38,6 @@ export async function getMarkets(chainIds: ChainId[]) {
           .filter((i) => i.__typename === "MeritBorrowIncentive" || i.__typename === "AaveBorrowIncentive")
           .map((i) => parseFloat(i.borrowAprDiscount.value))
           .reduce((acc, curr) => acc + curr, 0);
-
         const meritSupplyApy = reserve.incentives
           .filter((i) => i.__typename === "MeritSupplyIncentive" || i.__typename === "AaveSupplyIncentive")
           .map((i) => parseFloat(i.extraSupplyApr.value))
