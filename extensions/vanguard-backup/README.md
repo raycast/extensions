@@ -1,1 +1,28 @@
+<p align="center">
+    <img src="./assets/extension_icon.png" width="200" height="200" />
+</p>
+
 # Vanguard Backup
+
+This is a Raycast extension for [Vanguard Backup](https://vanguardbackup.com/). With this extension you can:
+- Manage **Backup Destinations**
+- Manage **Backup Tasks**
+- Manage **Remote Servers**
+
+## 🚀 Getting Started
+
+1. **Install extension**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/xmok/vanguard-backup) OR `install` via Raycast Store
+
+2. **Enter your Vanguard Details**: The first time you use the extension, you'll need to enter the following in Preferences OR at first prompt:
+
+    a. The URL of your Vanguard instance
+
+    b. API Token from Vanguard Dashboard
+
+---
+
+Looking for more OSS? Try these:
+
+<a title="Install appwrite Raycast Extension" href="https://www.raycast.com/xmok/appwrite"><img src="https://www.raycast.com/xmok/appwrite/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install coolify Raycast Extension" href="https://www.raycast.com/xmok/coolify"><img src="https://www.raycast.com/xmok/coolify/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install dokploy Raycast Extension" href="https://www.raycast.com/xmok/dokploy"><img src="https://www.raycast.com/xmok/dokploy/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
