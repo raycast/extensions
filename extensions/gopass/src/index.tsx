@@ -13,7 +13,7 @@ import {
 import { useEffect, useState } from "react";
 import gopass from "./gopass";
 import Details from "./details";
-import { isDirectory } from "./utils";
+import { isDirectory, generateOTPFromUrl, extractOtpauthUrls } from "./utils";
 import Fuse from "fuse.js";
 import CreateEditPassword from "./create-edit";
 
@@ -77,6 +77,26 @@ export async function pastePassword(entry: string): Promise<void> {
 export async function copyOTP(entry: string): Promise<void> {
   try {
     const toast = await showToast({ title: "Copying OTP", style: Toast.Style.Animated });
+    
+    // First try to get OTP from otpauth:// URLs in the entry details
+    try {
+      const value = await gopass.show(entry);
+      const allLines = [value.password, ...value.attributes];
+      const otpauthUrls = extractOtpauthUrls(allLines);
+      
+      if (otpauthUrls.length > 0) {
+        const otp = generateOTPFromUrl(otpauthUrls[0]);
+        await Clipboard.copy(otp);
+        await toast.hide();
+        await closeMainWindow();
+        await showHUD("OTP copied");
+        return;
+      }
+    } catch (otpauthError) {
+      console.warn("Failed to generate OTP from otpauth:// URL, falling back to gopass otp command:", otpauthError);
+    }
+    
+    // Fallback to gopass otp command
     const otp = await gopass.otp(entry);
     await Clipboard.copy(otp);
     await toast.hide();
@@ -91,6 +111,26 @@ export async function copyOTP(entry: string): Promise<void> {
 export async function pasteOTP(entry: string): Promise<void> {
   try {
     const toast = await showToast({ title: "Pasting OTP", style: Toast.Style.Animated });
+    
+    // First try to get OTP from otpauth:// URLs in the entry details
+    try {
+      const value = await gopass.show(entry);
+      const allLines = [value.password, ...value.attributes];
+      const otpauthUrls = extractOtpauthUrls(allLines);
+      
+      if (otpauthUrls.length > 0) {
+        const otp = generateOTPFromUrl(otpauthUrls[0]);
+        await Clipboard.paste(otp);
+        await toast.hide();
+        await closeMainWindow();
+        await showHUD("OTP pasted");
+        return;
+      }
+    } catch (otpauthError) {
+      console.warn("Failed to generate OTP from otpauth:// URL, falling back to gopass otp command:", otpauthError);
+    }
+    
+    // Fallback to gopass otp command
     const otp = await gopass.otp(entry);
     await Clipboard.paste(otp);
     await toast.hide();

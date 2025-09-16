@@ -26,7 +26,8 @@
   "dependencies": {
     "@raycast/api": "^1.36.0",
     "@raycast/utils": "^1.18.1",
-    "fuse.js": "^7.0.0"
+    "fuse.js": "^7.0.0",
+    "otpauth": "^9.0.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
