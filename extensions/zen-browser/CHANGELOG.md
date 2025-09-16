@@ -1,5 +1,14 @@
 # Zen Changelog
 
+## [Simplify Actions and Remove Browser Default Search] - 2025-09-16
+
+- Simplified new tab and history actions to use native Raycast Action.Open instead of AppleScript
+- Removed Browser Default search engine option and set Google as the new default
+- Removed openHistoryTab and setActiveTab functions in favor of simpler browser opening
+- Removed code for searching tabs as it was unused
+
+## []
+
 ## [Fix New Tab and History Tab] - 2025-06-11
 
 - Fix new tab and history tab commands, by adding a delay to the script to ensure the URL bar is focused.
