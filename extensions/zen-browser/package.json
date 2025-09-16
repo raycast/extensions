@@ -11,12 +11,17 @@
     "jimmy-b36",
     "sdaza",
     "ellioth",
-    "ridemountainpig"
+    "ridemountainpig",
+    "sjasct"
   ],
   "categories": [
     "Applications",
     "Developer Tools",
     "Productivity"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "license": "MIT",
   "commands": [
@@ -82,6 +87,13 @@
       "title": "Profile Directory Suffix",
       "default": "Default (alpha)",
       "description": "The Zen profile directory suffix, check it with `ls ~/Library/Application Support/zen/Profiles`",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "profilesDirectory",
+      "title": "Profiles Directory",
+      "description": "The directory where your Zen profiles live",
       "type": "textfield",
       "required": false
     },
@@ -215,7 +227,7 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.94.0",
+    "@raycast/api": "^1.103.0",
     "@raycast/utils": "^1.19.1"
   },
   "devDependencies": {
