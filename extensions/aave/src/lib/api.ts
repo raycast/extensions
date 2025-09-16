@@ -31,21 +31,24 @@ export async function getMarkets(chainIds: ChainId[]) {
         return !reserve.isFrozen && !reserve.isPaused;
       })
       .map((reserve) => {
-        let supplyApy = parseFloat(reserve.supplyInfo?.apy.value ?? "0");
-        let borrowApy = parseFloat(reserve.borrowInfo?.apy.value ?? "0");
+        const baseSupplyApy = parseFloat(reserve.supplyInfo?.apy.value ?? "0");
+        const baseBorrowApy = parseFloat(reserve.borrowInfo?.apy.value ?? "0");
 
-        const borrowMerit = reserve.incentives
+        const meritBorrowApy = reserve.incentives
           .filter((i) => i.__typename === "MeritBorrowIncentive" || i.__typename === "AaveBorrowIncentive")
           .map((i) => parseFloat(i.borrowAprDiscount.value))
           .reduce((acc, curr) => acc + curr, 0);
 
-        const supplyMerit = reserve.incentives
+        const meritSupplyApy = reserve.incentives
           .filter((i) => i.__typename === "MeritSupplyIncentive" || i.__typename === "AaveSupplyIncentive")
           .map((i) => parseFloat(i.extraSupplyApr.value))
           .reduce((acc, curr) => acc + curr, 0);
 
-        supplyApy += supplyMerit;
-        borrowApy -= borrowMerit;
+        const finalSupplyApy = baseSupplyApy + meritSupplyApy;
+        const finalBorrowApy = baseBorrowApy - meritBorrowApy;
+
+        const marketVersion = /\d+/.exec(market.name)?.[0];
+        const marketName = `proto_${titleCase(market.name).split(" ").at(-1)?.toLowerCase()}_v${marketVersion}`;
 
         return {
           underlyingToken: {
@@ -60,9 +63,13 @@ export async function getMarkets(chainIds: ChainId[]) {
               parseFloat(reserve.supplyInfo.total.value ?? "0") * parseFloat(reserve.usdExchangeRate ?? "0"),
             ),
           totalBorrow: "$" + formatCompactNumber(parseFloat(reserve.borrowInfo?.total.usd ?? "0")),
-          supplyApy: formatApy(supplyApy),
-          borrowApy: formatApy(borrowApy),
-          url: `https://app.aave.com/reserve-overview/?underlyingAsset=${reserve.underlyingToken.address.toLowerCase()}`,
+          baseSupplyApy: formatApy(baseSupplyApy),
+          meritSupplyApy: formatApy(meritSupplyApy),
+          finalSupplyApy: formatApy(finalSupplyApy),
+          baseBorrowApy: formatApy(baseBorrowApy),
+          meritBorrowApy: formatApy(meritBorrowApy),
+          finalBorrowApy: formatApy(finalBorrowApy),
+          url: `https://app.aave.com/reserve-overview/?underlyingAsset=${reserve.underlyingToken.address.toLowerCase()}&marketName=${marketName}`,
           chain: {
             id: market.chain.chainId,
             name: market.chain.name,

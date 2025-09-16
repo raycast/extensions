@@ -2,6 +2,7 @@ import { ActionPanel, Action, Image, List, Color } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { getChains, getMarkets } from "./lib/api";
 import { chainId, ChainId } from "@aave/client";
+import { includeMeritPrograms } from "./lib/preferences";
 
 export default function () {
   const [selectedChainId, setSelectedChainId] = useCachedState<ChainId>("chainId", chainId(1));
@@ -49,9 +50,21 @@ export default function () {
               keywords={[reserve.underlyingToken.address]}
               accessories={[
                 { text: reserve.totalSupply, tooltip: "Total Supplied" },
-                { tag: { value: reserve.supplyApy, color: Color.Green }, tooltip: "Supply APY" },
+                {
+                  tag: {
+                    value: includeMeritPrograms ? reserve.finalSupplyApy : reserve.baseSupplyApy,
+                    color: Color.Green,
+                  },
+                  tooltip: "Supply APY",
+                },
                 { text: reserve.totalBorrow, tooltip: "Total Borrowed" },
-                { tag: { value: reserve.borrowApy, color: Color.Red }, tooltip: "Borrow APY" },
+                {
+                  tag: {
+                    value: includeMeritPrograms ? reserve.finalBorrowApy : reserve.baseBorrowApy,
+                    color: Color.Red,
+                  },
+                  tooltip: "Borrow APY",
+                },
               ]}
               actions={
                 <ActionPanel>

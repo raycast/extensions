@@ -40,6 +40,14 @@
       "description": "Show frozen or paused assets in the search results",
       "default": false,
       "required": true
+    },
+    {
+      "name": "includeMeritPrograms",
+      "type": "checkbox",
+      "label": "Use merit programs in APY calculations",
+      "description": "Include merit programs when displaying APY",
+      "default": true,
+      "required": true
     }
   ],
   "dependencies": {
