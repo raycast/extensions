@@ -1,23 +1,12 @@
 import { exec } from "child_process";
-import { showToast, Toast, Alert, confirmAlert, environment } from "@raycast/api";
+import { showToast, Toast, Alert, confirmAlert } from "@raycast/api";
 import { showInFinder } from "@raycast/api";
 import path from "path";
 import { loadCategories, categoriesToFileTypes } from "./utils/categories";
-import { checkPython3Available } from "./utils/python-check";
+import { analyzeFolder, organizeFolder } from "./utils/file-organizer";
 
 export default async function main() {
   try {
-    // Check if Python 3 is available
-    const pythonAvailable = await checkPython3Available();
-    if (!pythonAvailable) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Python 3 not found",
-        message: "Please install Python 3 to use this extension",
-      });
-      return;
-    }
-
     // Load categories from storage
     const categories = await loadCategories();
     const fileTypes = categoriesToFileTypes(categories);
@@ -33,8 +22,6 @@ export default async function main() {
       return;
     }
 
-    const scriptPath = path.join(environment.assetsPath, "scripts/file_organizer.py");
-
     // First, analyze files to get count
     const analysisToast = await showToast({
       style: Toast.Style.Animated,
@@ -42,8 +29,17 @@ export default async function main() {
       message: `Analyzing files in ${path.basename(folderPath)}`,
     });
 
-    const analysisResult = await runCleanupScript(scriptPath, folderPath, fileTypes, "analyze");
+    const analysisResult = analyzeFolder(folderPath, fileTypes);
     analysisToast.hide();
+
+    if (!analysisResult.success) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "❌ Analysis failed",
+        message: analysisResult.error || "Unknown error occurred",
+      });
+      return;
+    }
 
     if (analysisResult.total_files === 0) {
       await showToast({
@@ -91,7 +87,14 @@ export default async function main() {
       message: `Organizing files in ${path.basename(folderPath)}`,
     });
 
-    const sortResult = await runCleanupScript(scriptPath, folderPath, fileTypes);
+    const sortResult = organizeFolder(folderPath, fileTypes);
+
+    if (!sortResult.success) {
+      sortingToast.style = Toast.Style.Failure;
+      sortingToast.title = "❌ Organization failed";
+      sortingToast.message = sortResult.error || "Unknown error occurred";
+      return;
+    }
 
     sortingToast.style = Toast.Style.Success;
     sortingToast.title = "✅ Folder organized!";
@@ -146,42 +149,6 @@ function pickFolder(): Promise<string | null> {
 
       const folderPath = stdout.trim();
       resolve(folderPath);
-    });
-  });
-}
-
-interface ScriptResult {
-  total_files: number;
-  organized_files: number;
-  categories?: Record<string, number>;
-  total_moved?: number;
-  categories_created?: string[];
-  [key: string]: unknown;
-}
-
-function runCleanupScript(
-  scriptPath: string,
-  folderPath: string,
-  fileTypes: Record<string, string[]>,
-  command?: string,
-): Promise<ScriptResult> {
-  return new Promise((resolve, reject) => {
-    const categoriesJson = JSON.stringify(fileTypes);
-    // Properly escape single quotes in JSON to prevent shell injection
-    const escapedJson = categoriesJson.replace(/'/g, "'\"'\"'");
-    const args = command ? ` "${folderPath}" '${escapedJson}' ${command}` : ` "${folderPath}" '${escapedJson}'`;
-    exec(`python3 "${scriptPath}"${args}`, (error, stdout, stderr) => {
-      if (error) {
-        reject(new Error(stderr || error.message));
-        return;
-      }
-
-      try {
-        const result = JSON.parse(stdout);
-        resolve(result);
-      } catch {
-        reject(new Error(`Failed to parse script output: ${stdout}`));
-      }
     });
   });
 }

@@ -35,7 +35,7 @@ The extension uses file extensions to categorize files into appropriate folders:
 
 ## Requirements
 
-- macOS with Python 3 installed (usually pre-installed)
+- macOS
 - Raycast app
 
 ## Safety

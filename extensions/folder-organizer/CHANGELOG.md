@@ -8,4 +8,3 @@
 - **Smart File Detection**: Automatically categorize files based on extensions
 - **Safety Features**: Confirmation dialogs and preview of organization before execution
 - **Keyboard Shortcuts**: Quick access with customizable shortcuts
-- **Python Integration**: Uses efficient Python script for file operations
