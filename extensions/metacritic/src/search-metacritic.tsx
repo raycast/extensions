@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { ActionPanel, Action, Grid, Detail } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { Icon } from "@raycast/api";
@@ -95,9 +95,7 @@ function displayTitleForItem(item: MCItem): string {
 
 function joinNames(items?: { name?: string | null }[], fallback = "—"): string {
   if (!items || items.length === 0) return fallback;
-  const names = items
-    .map((g) => (g?.name || "").trim())
-    .filter((n) => n.length > 0);
+  const names = items.map((g) => (g?.name || "").trim()).filter((n) => n.length > 0);
   return names.length ? names.join(", ") : fallback;
 }
 
@@ -153,27 +151,34 @@ function DetailView({ item }: { item: MCItem }) {
   return (
     <Detail
       markdown={markdown}
-      metadata={<Detail.Metadata>
-        <Detail.Metadata.Label title="Title" text={item.title} />
-        {typeLabel ? <Detail.Metadata.Label title="Type" text={typeLabel} /> : null}
-        {scoreNum !== undefined ? (
-          <Detail.Metadata.TagList title="Score">
-            <Detail.Metadata.TagList.Item text={`${scoreNum}`} color={scoreColor(scoreNum)} />
-          </Detail.Metadata.TagList>
-        ) : null}
-        {release ? <Detail.Metadata.Label title="Release" text={release} /> : null}
-        {genres ? <Detail.Metadata.Label title="Genres" text={genres} /> : null}
-        {platforms ? <Detail.Metadata.Label title="Platforms" text={platforms} /> : null}
-        {item.rating ? <Detail.Metadata.Label title="Rating" text={item.rating} /> : null}
-        {item.seasonCount && item.seasonCount > 0 ? (
-          <Detail.Metadata.Label title="Season Count" text={String(item.seasonCount)} />
-        ) : null}
-        {duration ? <Detail.Metadata.Label title="Duration" text={duration} /> : null}
-      </Detail.Metadata>}
-      actions={<ActionPanel>
-        {targetUrl && <Action.OpenInBrowser title="Open on Metacritic" url={targetUrl} />}
-        <Action.CopyToClipboard title="Copy Title and Score" content={`${item.title} (${item.criticScoreSummary?.score ?? "N/A"})`} />
-      </ActionPanel>}
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.Label title="Title" text={item.title} />
+          {typeLabel ? <Detail.Metadata.Label title="Type" text={typeLabel} /> : null}
+          {scoreNum !== undefined ? (
+            <Detail.Metadata.TagList title="Score">
+              <Detail.Metadata.TagList.Item text={`${scoreNum}`} color={scoreColor(scoreNum)} />
+            </Detail.Metadata.TagList>
+          ) : null}
+          {release ? <Detail.Metadata.Label title="Release" text={release} /> : null}
+          {genres ? <Detail.Metadata.Label title="Genres" text={genres} /> : null}
+          {platforms ? <Detail.Metadata.Label title="Platforms" text={platforms} /> : null}
+          {item.rating ? <Detail.Metadata.Label title="Rating" text={item.rating} /> : null}
+          {item.seasonCount && item.seasonCount > 0 ? (
+            <Detail.Metadata.Label title="Season Count" text={String(item.seasonCount)} />
+          ) : null}
+          {duration ? <Detail.Metadata.Label title="Duration" text={duration} /> : null}
+        </Detail.Metadata>
+      }
+      actions={
+        <ActionPanel>
+          {targetUrl && <Action.OpenInBrowser title="Open on Metacritic" url={targetUrl} />}
+          <Action.CopyToClipboard
+            title="Copy Title and Score"
+            content={`${item.title} (${item.criticScoreSummary?.score ?? "N/A"})`}
+          />
+        </ActionPanel>
+      }
     />
   );
 }
@@ -184,7 +189,7 @@ export default function Command() {
   const trimmed = searchText.trim();
   const url = trimmed
     ? `https://backend.metacritic.com/finder/metacritic/search/${encodeURIComponent(
-        trimmed
+        trimmed,
       )}/web?apiKey=1MOZgmNFxvmljaQR1X9KAij9Mo4xAY3u&limit=32&offset=0`
     : "";
 
@@ -225,10 +230,7 @@ export default function Command() {
       }
     >
       {items.length === 0 && !searchText && (
-        <Grid.EmptyView
-          title="Search Metacritic"
-          description="Start typing to search games, movies, TV, and more"
-        />
+        <Grid.EmptyView title="Search Metacritic" description="Start typing to search games, movies, TV, and more" />
       )}
       {items.map((item) => {
         const image = buildImageUrl(item.images);
@@ -257,4 +259,3 @@ export default function Command() {
     </Grid>
   );
 }
-
