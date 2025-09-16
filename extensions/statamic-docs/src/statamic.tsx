@@ -54,7 +54,7 @@ const fetchAvailableVersions = async (): Promise<Version[] | null> => {
 export default function main() {
   const cache = new Cache();
   const [isLoading, setIsLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState<string | undefined>();
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [searchResults, setSearchResults] = useState<SearchResultList>({});
   const [availableVersions, setAvailableVersions] = useState<Version[]>([]);
   const [selectedVersion, setSelectedVersion] = useState<Version | undefined>();
@@ -62,7 +62,7 @@ export default function main() {
   useEffect(() => {
     const initializeVersions = async () => {
       let availableVersions;
-      const cachedAvailableVersions = cache.get('availableVersions');
+      const cachedAvailableVersions = cache.get('availableVersionsThree');
 
       if (cachedAvailableVersions) {
         const parsed = JSON.parse(cachedAvailableVersions);
@@ -79,12 +79,12 @@ export default function main() {
 
       setAvailableVersions(availableVersions);
 
-      cache.set('availableVersions', JSON.stringify({
+      cache.set('availableVersionsThree', JSON.stringify({
         availableVersions,
         timestamp: Date.now(),
       }));
 
-      let rememberedVersion: string | undefined = await LocalStorage.getItem('version');
+      let rememberedVersion: string | undefined = await LocalStorage.getItem('versionThree');
       if (rememberedVersion) rememberedVersion = JSON.parse(rememberedVersion);
 
       setSelectedVersion(rememberedVersion ?? availableVersions[0]);
@@ -102,7 +102,7 @@ export default function main() {
   const versionChanged = async (value: string) => {
     const version = availableVersions.find((v) => v.version === value);
     setSelectedVersion(version);
-    await LocalStorage.setItem('version', JSON.stringify(version));
+    await LocalStorage.setItem('versionThree', JSON.stringify(version));
   };
 
   const getTitle = (hit: SearchResult): string => {

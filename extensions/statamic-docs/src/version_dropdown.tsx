@@ -13,7 +13,7 @@ export function VersionDropdown(props: { versions: Version[]; id: string; onChan
     return (
         <List.Dropdown tooltip="Select version" onChange={props.onChange} id={props.id} storeValue={true}>
             <List.Dropdown.Section title="Select version">
-                {props.versions.map((version: Version) => (
+                {props.versions?.map((version: Version) => (
                     <List.Dropdown.Item title={getVersionLabel(version)} value={version.version} key={version.version} />
                 ))}
             </List.Dropdown.Section>
