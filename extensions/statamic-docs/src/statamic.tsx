@@ -63,7 +63,7 @@ export default function main() {
   useEffect(() => {
     const initializeVersions = async () => {
       let availableVersions;
-      const cachedAvailableVersions = cache.get("availableVersionsThree");
+      const cachedAvailableVersions = cache.get("availableVersions");
 
       if (cachedAvailableVersions) {
         const parsed = JSON.parse(cachedAvailableVersions);
@@ -81,14 +81,14 @@ export default function main() {
       setAvailableVersions(availableVersions);
 
       cache.set(
-        "availableVersionsThree",
+        "availableVersions",
         JSON.stringify({
           availableVersions,
           timestamp: Date.now(),
         })
       );
 
-      let rememberedVersion: string | undefined = await LocalStorage.getItem("versionThree");
+      let rememberedVersion: string | undefined = await LocalStorage.getItem("version");
       if (rememberedVersion) rememberedVersion = JSON.parse(rememberedVersion);
 
       setSelectedVersion(rememberedVersion ?? availableVersions[0]);
@@ -106,7 +106,7 @@ export default function main() {
   const versionChanged = async (value: string) => {
     const version = availableVersions.find((v) => v.version === value);
     setSelectedVersion(version);
-    await LocalStorage.setItem("versionThree", JSON.stringify(version));
+    await LocalStorage.setItem("version", JSON.stringify(version));
   };
 
   const getTitle = (hit: SearchResult): string => {
