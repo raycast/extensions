@@ -166,6 +166,8 @@ export default function main() {
     >
       {Object.entries(searchResults as SearchResultList).map(
         ([section, items]: [string, SearchResult[]], index: number) => {
+          if (!selectedVersion) return;
+
           return (
             <List.Section title={section} key={index}>
               {items.map((hit: SearchResult) => {
