@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { MeiliSearch } from "meilisearch";
 import fetch from "node-fetch";
 import { decode } from "html-entities";
-import fallbackResults from "./../fallback-results.json";
+import fallbackResults5x from "./../assets/docs/5.x.json";
+import fallbackResults6x from "./../assets/docs/6.x.json";
 import { VersionDropdown } from "./version_dropdown";
 
 type SearchResult = {
@@ -131,9 +132,19 @@ export default function main() {
       });
   };
 
+  const getFallbackResults = (version: Version): SearchResultList => {
+    switch (version.branch) {
+      case "6.x": return fallbackResults6x;
+      case "5.x": return fallbackResults5x;
+      default: return fallbackResults6x;
+    }
+  };
+
   const updateSearchResults = async (query: string) => {
+    if (!selectedVersion) return;
+
     if (!query) {
-      setSearchResults(fallbackResults);
+      setSearchResults(getFallbackResults(selectedVersion));
       return;
     }
 
