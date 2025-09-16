@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "belgian-rrn-generator",
+  "title": "Belgian Rrn Generator",
+  "description": "Generate a random, valid Belgian National Number (Rijksregisternummer)",
+  "icon": "command-icon.png",
+  "author": "oenie",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "generate-rrn-number",
+      "title": "Generate Rrn Number",
+      "description": "Generate a random, valid Belgian National Number (Rijksregisternummer)",
+      "mode": "no-view"
+    },
+    {
+      "name": "generate-iban-number",
+      "title": "Generate Belgian Iban Number",
+      "description": "Generate a random, valid Belgian IBAN number",
+      "mode": "no-view"
+    },
+    {
+      "name": "generate-helpper-ipsum",
+      "title": "Generate Generic Helpper Content",
+      "description": "Generate random care request and careseeker descriptions",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "customDataPath",
+      "title": "Custom Helpper Ipsum Data File (Optional)",
+      "description": "Select a custom JSON file to add more Helpper Ipsum examples to the lists.",
+      "type": "file",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.62.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
