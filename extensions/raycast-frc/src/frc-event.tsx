@@ -81,7 +81,7 @@ export default function Command({
             headers: {
               "X-TBA-Auth-Key": preferences.tbaApiKey,
             },
-          }
+          },
         );
         const eventData = (await eventResponse.json()) as Partial<Event>;
         if (!eventData || typeof eventData !== "object" || !eventData.key) {
@@ -115,19 +115,19 @@ export default function Command({
               `https://www.thebluealliance.com/api/v3/event/${event}/awards`,
               {
                 headers: { "X-TBA-Auth-Key": preferences.tbaApiKey },
-              }
+              },
             ),
             fetch(
               `https://www.thebluealliance.com/api/v3/event/${event}/teams/statuses`,
               {
                 headers: { "X-TBA-Auth-Key": preferences.tbaApiKey },
-              }
+              },
             ),
             fetch(
               `https://www.thebluealliance.com/api/v3/event/${event}/matches/keys`,
               {
                 headers: { "X-TBA-Auth-Key": preferences.tbaApiKey },
-              }
+              },
             ),
           ]);
 
@@ -141,13 +141,13 @@ export default function Command({
           awardsData
             .filter(
               (award) =>
-                award.recipient_list && Array.isArray(award.recipient_list)
+                award.recipient_list && Array.isArray(award.recipient_list),
             )
             .flatMap((award) =>
               award.recipient_list.map((recipient) => ({
                 name: award.name,
                 team: recipient.team_key,
-              }))
+              })),
             )
             .forEach((award) => awards.push(award));
         }
@@ -176,7 +176,7 @@ export default function Command({
             const matchPromises = batch.map(async (matchKey) => {
               try {
                 const response = await fetch(
-                  `https://api.statbotics.io/v3/match/${matchKey}`
+                  `https://api.statbotics.io/v3/match/${matchKey}`,
                 );
                 return await response.json();
               } catch (error) {
@@ -195,7 +195,7 @@ export default function Command({
                   curMatchData.alliances?.red?.team_keys?.length >= 3 &&
                   curMatchData.alliances?.blue?.team_keys?.length >= 3 &&
                   curMatchData.result &&
-                  curMatchData.pred
+                  curMatchData.pred,
               )
               .map((curMatchData) => {
                 const { alliances, result, pred } = curMatchData;
@@ -364,7 +364,7 @@ function awardsToMarkdown(awards: Award[], event: Event): string {
     awards
       .map(
         (award) =>
-          `| **${award.name}** | ${award.team && typeof award.team === "string" ? award.team.replace(/^frc/, "") : award.team} |`
+          `| **${award.name}** | ${award.team && typeof award.team === "string" ? award.team.replace(/^frc/, "") : award.team} |`,
       )
       .join("\n")
   );
