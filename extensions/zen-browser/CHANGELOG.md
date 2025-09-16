@@ -1,6 +1,6 @@
 # Zen Changelog
 
-## [Simplify Actions and Remove Browser Default Search] - {PR_MERGE_DATE}
+## [Simplify Actions and Remove Browser Default Search] - 2025-09-16
 
 - Simplified new tab and history actions to use native Raycast Action.Open instead of AppleScript
 - Removed Browser Default search engine option and set Google as the new default
