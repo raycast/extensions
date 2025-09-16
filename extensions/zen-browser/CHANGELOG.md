@@ -1,6 +1,6 @@
 # Zen Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2025-09-16
 
 - Added Windows Support
 - Added a preference to change the location of Zen profiles
