@@ -85,7 +85,7 @@ export default function main() {
         timestamp: Date.now(),
       }));
 
-      let rememberedVersion = await LocalStorage.getItem('currentVersion2');
+      let rememberedVersion = await LocalStorage.getItem('version');
       if (rememberedVersion) rememberedVersion = JSON.parse(rememberedVersion);
 
       setSelectedVersion(rememberedVersion ?? availableVersions[0]);
@@ -103,7 +103,7 @@ export default function main() {
   const versionChanged = async (value: string) => {
     const version = availableVersions.find((v) => v.version === value);
     setSelectedVersion(version);
-    await LocalStorage.setItem('currentVersion2', JSON.stringify(version));
+    await LocalStorage.setItem('version', JSON.stringify(version));
   };
 
   const getTitle = (hit: SearchResult): string => {
