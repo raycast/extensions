@@ -22,55 +22,54 @@
   "commands": [
     {
       "name": "dashboard",
-      "title": "Dashboard",
-      "subtitle": "Overview of your tasks, projects, and timers",
+      "title": "View Dashboard",
+      "subtitle": "Braintick",
       "description": "See your productivity at a glance",
       "mode": "view"
     },
     {
       "name": "list-tasks",
       "title": "List Tasks",
-      "subtitle": "View and manage your tasks",
+      "subtitle": "Braintick",
       "description": "List all your tasks with filtering options",
       "mode": "view"
     },
     {
       "name": "create-task",
       "title": "Create Task",
-      "subtitle": "Create a new task",
+      "subtitle": "Braintick",
       "description": "Add a new task with priority, due date, and project",
       "mode": "view"
     },
     {
       "name": "projects",
       "title": "List Projects",
-      "subtitle": "View and manage your projects",
+      "subtitle": "Braintick",
       "description": "List all your projects",
       "mode": "view"
     },
     {
       "name": "create-project",
       "title": "Create Project",
-      "subtitle": "Create a new project",
+      "subtitle": "Braintick",
       "description": "Add a new project with name and color",
       "mode": "view"
     },
     {
       "name": "timers",
       "title": "List Timers",
-      "subtitle": "View and manage time tracking",
+      "subtitle": "Braintick",
       "description": "List all your time tracking entries",
       "mode": "view"
     },
     {
       "name": "start-timer",
       "title": "Start Timer",
-      "subtitle": "Start tracking time",
+      "subtitle": "Braintick",
       "description": "Start a new timer for a project or task",
       "mode": "view"
     }
   ],
-
   "preferences": [
     {
       "name": "email",
@@ -88,7 +87,6 @@
       "required": true
     }
   ],
-
   "dependencies": {
     "@raycast/api": "^1.102.3",
     "@raycast/utils": "^1.17.0"
