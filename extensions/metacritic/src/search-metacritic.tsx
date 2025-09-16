@@ -62,32 +62,20 @@ function displayTitleForItem(item: MCItem): string {
   const mediaEmoji = mediaEmojiForType(item.type);
   const scoreNum = normalizeScore(item.criticScoreSummary?.score);
   if (scoreNum === undefined) {
-    return `${mediaEmoji}${mediaEmoji ? "" : ""}${item.title}`;
+    return `${mediaEmoji}${item.title}`;
   }
   const scoreEmoji = scoreNum >= 75 ? "🟢" : scoreNum >= 50 ? "🟡" : "🔴";
-  return `${mediaEmoji}${mediaEmoji ? "" : ""}${scoreEmoji}${String(scoreNum)}: ${item.title}`;
+  return `${mediaEmoji}${scoreEmoji}${String(scoreNum)}: ${item.title}`;
 }
 
 export default function Command() {
   const [columns, setColumns] = useState(4);
   const [searchText, setSearchText] = useState("");
-
-  // Local debounced value to avoid frequent API calls while typing
-  function useDebounced(value: string, delay: number) {
-    const [debounced, setDebounced] = useState(value);
-    useEffect(() => {
-      const t = setTimeout(() => setDebounced(value), delay);
-      return () => clearTimeout(t);
-    }, [value, delay]);
-    return debounced;
-  }
-
-  const debounced = useDebounced(searchText, 300);
-  const trimmed = debounced.trim();
+  const trimmed = searchText.trim();
   const url = trimmed
-    ? `https://backend.metacritic.com/finder/metacritic/autosuggest/${encodeURIComponent(
+    ? `https://backend.metacritic.com/finder/metacritic/search/${encodeURIComponent(
         trimmed
-      )}?apiKey=1MOZgmNFxvmljaQR1X9KAij9Mo4xAY3u`
+      )}/web?apiKey=1MOZgmNFxvmljaQR1X9KAij9Mo4xAY3u&limit=32&offset=0`
     : "";
 
   const { isLoading, data } = useFetch<MCResponse>(url, {
@@ -104,6 +92,7 @@ export default function Command() {
   return (
     <Grid
       columns={columns}
+      throttle
       isLoading={isLoading}
       searchText={searchText}
       onSearchTextChange={setSearchText}
