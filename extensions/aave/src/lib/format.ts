@@ -20,3 +20,18 @@ export function titleCase(value: string) {
     .replace(/^./, (str) => str.toUpperCase())
     .trim();
 }
+
+export function formatMarketName(value: string) {
+  const str = titleCase(value).replace("Aave ", "");
+
+  const regex = /^(V\d+)\s+(.+)$/;
+  const match = str.match(regex);
+
+  if (match) {
+    // match[1] is the version (V3), match[2] is the rest
+    return `${match[2]} ${match[1]}`;
+  }
+
+  // Return original string if no match
+  return str;
+}

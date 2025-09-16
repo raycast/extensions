@@ -1,6 +1,6 @@
 import { AaveClient, ChainId, ChainsFilter } from "@aave/client";
 import { chains, markets } from "@aave/client/actions";
-import { formatApy, formatCompactNumber, titleCase } from "./format";
+import { formatApy, formatCompactNumber, formatMarketName, titleCase } from "./format";
 import { showFrozenOrPausedAssets } from "./preferences";
 
 export const client = AaveClient.create();
@@ -26,7 +26,7 @@ export async function getMarkets(chainIds: ChainId[]) {
 
     return {
       address: market.address,
-      name: titleCase(market.name),
+      name: formatMarketName(market.name),
       size: formatCompactNumber(size),
       liquidity: formatCompactNumber(liquidity),
       borrows: formatCompactNumber(borrows),
@@ -42,17 +42,19 @@ export async function getMarkets(chainIds: ChainId[]) {
           const protocolSupplyApy = parseFloat(reserve.supplyInfo?.apy.value ?? "0");
           const protocolBorrowApy = parseFloat(reserve.borrowInfo?.apy.value ?? "0");
 
-          const meritBorrowApy = reserve.incentives
-            .filter((i) => i.__typename === "MeritBorrowIncentive" || i.__typename === "AaveBorrowIncentive")
-            .map((i) => parseFloat(i.borrowAprDiscount.value))
-            .reduce((acc, curr) => acc + curr, 0);
+          const meritBorrowApy =
+            -1 *
+            reserve.incentives
+              .filter((i) => i.__typename === "MeritBorrowIncentive" || i.__typename === "AaveBorrowIncentive")
+              .map((i) => parseFloat(i.borrowAprDiscount.value))
+              .reduce((acc, curr) => acc + curr, 0);
           const meritSupplyApy = reserve.incentives
             .filter((i) => i.__typename === "MeritSupplyIncentive" || i.__typename === "AaveSupplyIncentive")
             .map((i) => parseFloat(i.extraSupplyApr.value))
             .reduce((acc, curr) => acc + curr, 0);
 
-          const finalSupplyApy = protocolSupplyApy + meritSupplyApy;
-          const totalBorrowApy = protocolBorrowApy - meritBorrowApy;
+          const totalSupplyApy = protocolSupplyApy + meritSupplyApy;
+          const totalBorrowApy = protocolBorrowApy + meritBorrowApy;
 
           const marketVersion = /\d+/.exec(market.name)?.[0];
           const marketName = `proto_${titleCase(market.name).split(" ").at(-1)?.toLowerCase()}_v${marketVersion}`;
@@ -82,11 +84,13 @@ export async function getMarkets(chainIds: ChainId[]) {
             totalBorrow: "$" + formatCompactNumber(parseFloat(reserve.borrowInfo?.total.usd ?? "0")),
             protocolSupplyApy: formatApy(protocolSupplyApy),
             meritSupplyApy: formatApy(meritSupplyApy),
-            totalSupplyApy: formatApy(finalSupplyApy),
+            totalSupplyApy: formatApy(totalSupplyApy),
             protocolBorrowApy: formatApy(protocolBorrowApy),
             meritBorrowApy: formatApy(meritBorrowApy),
             totalBorrowApy: formatApy(totalBorrowApy),
             url: `https://app.aave.com/reserve-overview/?underlyingAsset=${reserve.underlyingToken.address.toLowerCase()}&marketName=${marketName}`,
+            isPaused: reserve.isPaused,
+            isFrozen: reserve.isFrozen,
             chain: {
               id: market.chain.chainId,
               name: market.chain.name,
