@@ -41,11 +41,9 @@ const client = new MeiliSearch({
   },
 });
 
-process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0; // todo: remove once the API is in production
-
 const fetchAvailableVersions = async (): Promise<Version[] | null> => {
   try {
-    const response = await fetch("http://statamic.dev.test/versions.json");
+    const response = await fetch("https://statamic.dev/versions.json");
     return await response.json() as Version[];
   } catch (error) {
     await showToast(Toast.Style.Failure, "Failed to fetch available versions");
