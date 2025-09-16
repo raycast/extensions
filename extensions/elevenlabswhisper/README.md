@@ -2,11 +2,6 @@
 
 A Raycast extension that provides speech-to-text transcription using ElevenLabs' Scribe model.
 
-<div align="center">
-  <img src="metadata/elevenlabswhisper-1.png" alt="Recording Interface" width="48%">
-  <img src="metadata/elevenlabswhisper-3.png" alt="Transcript Editor" width="48%">
-</div>
-
 ## Features
 
 ### 🎙️ Audio Recording
