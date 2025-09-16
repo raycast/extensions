@@ -1,5 +1,11 @@
 # pass Changelog
 
+## [Enhanced OTP support] - 2025-09-16
+
+- Add support for otpauth:// URLs with real-time countdown timers
+- Add color-coded progress rings for OTP codes
+- Support multiple otpauth URL storage formats
+
 ## [New Additions] - 2024-12-28
 
 - Add Sync, Create, Update and Delete support.
