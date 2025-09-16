@@ -1,4 +1,4 @@
-import { AaveClient, ChainId, ChainsFilter } from "@aave/client";
+import { AaveClient, chainId, ChainId, ChainsFilter } from "@aave/client";
 import { chains, markets } from "@aave/client/actions";
 import { formatApy, formatCompactNumber, formatMarketName, titleCase } from "./format";
 import { showFrozenOrPausedAssets } from "./preferences";
@@ -14,7 +14,10 @@ export async function getChains() {
 }
 
 export async function getMarkets(chainIds: ChainId[]) {
-  const result = await markets(client, { chainIds });
+  const result = await markets(client, {
+    chainIds: chainIds.length > 0 ? chainIds : (await getChains()).map((chain) => chain.chainId),
+  });
+
   if (result.isErr()) {
     throw new Error(result.error.message);
   }
@@ -25,11 +28,18 @@ export async function getMarkets(chainIds: ChainId[]) {
     const borrows = size - liquidity;
 
     return {
+      id: market.name,
+      icon: market.icon,
       address: market.address,
       name: formatMarketName(market.name),
       size: formatCompactNumber(size),
       liquidity: formatCompactNumber(liquidity),
       borrows: formatCompactNumber(borrows),
+      chain: {
+        id: market.chain.chainId,
+        name: market.chain.name,
+        icon: market.chain.icon,
+      },
       reserves: market.supplyReserves
         .filter((reserve) => {
           if (showFrozenOrPausedAssets) {
@@ -91,11 +101,6 @@ export async function getMarkets(chainIds: ChainId[]) {
             url: `https://app.aave.com/reserve-overview/?underlyingAsset=${reserve.underlyingToken.address.toLowerCase()}&marketName=${marketName}`,
             isPaused: reserve.isPaused,
             isFrozen: reserve.isFrozen,
-            chain: {
-              id: market.chain.chainId,
-              name: market.chain.name,
-              icon: market.chain.icon,
-            },
           };
         }),
     };

@@ -13,8 +13,6 @@ export default async function (input: Input) {
 
   if (input.chainIds && input.chainIds.length > 0) {
     chainIds = input.chainIds.map((id) => chainId(id));
-  } else {
-    chainIds = (await getChains()).map((chain) => chain.chainId);
   }
 
   return getMarkets(chainIds);
