@@ -1,5 +1,10 @@
 # Zen Changelog
 
+## [Windows Support] - {PR_MERGE_DATE}
+
+- Added Windows Support
+- Added a preference to change the location of Zen profiles
+
 ## [Simplify Actions and Remove Browser Default Search] - 2025-09-16
 
 - Simplified new tab and history actions to use native Raycast Action.Open instead of AppleScript
