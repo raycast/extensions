@@ -312,45 +312,22 @@ export class ShodanAPI {
 
   async getAlertInfo(): Promise<ShodanAlertInfo[]> {
     try {
-      console.log("🔍 Fetching alert info from Shodan API...");
-      console.log("🔑 API Key present:", !!this.apiKey);
-      console.log("🌐 API URL:", `${this.baseUrl}/shodan/alert/info?key=${this.apiKey ? "[REDACTED]" : "MISSING"}`);
-      const startTime = Date.now();
-
+  async getAlertInfo(): Promise<ShodanAlertInfo[]> {
+    try {
       const response = await fetch(`${this.baseUrl}/shodan/alert/info?key=${this.apiKey}`);
-
-      console.log("📡 Response received:", {
-        status: response.status,
-        statusText: response.statusText,
-        ok: response.ok,
-        headers: Object.fromEntries(response.headers.entries()),
-      });
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("❌ Shodan API error:", {
-          status: response.status,
-          statusText: response.statusText,
-          response: errorText,
-          url: `${this.baseUrl}/shodan/alert/info?key=${this.apiKey ? "[REDACTED]" : "MISSING"}`,
-        });
         throw new Error(`Shodan API error: ${response.status} ${response.statusText}`);
       }
 
       const data = await response.json();
-      const fetchTime = Date.now() - startTime;
-
-      console.log("📊 Raw response data:", data);
-      console.log("📊 Data type:", typeof data);
-      console.log("📊 Is array:", Array.isArray(data));
-      console.log("📊 Data keys:", data ? Object.keys(data) : "null/undefined");
-
-      console.log("✅ Alert info fetched successfully:", {
-        alertCount: Array.isArray(data) ? data.length : 0,
-        fetchTime: `${fetchTime}ms`,
-        responseSize: JSON.stringify(data).length,
-        dataStructure: data,
-      });
+      return data as ShodanAlertInfo[];
+    } catch (error) {
+      console.error("Error getting alert info:", error);
+      throw new Error(`Failed to get alert info: ${error instanceof Error ? error.message : "Unknown error"}`);
+    }
+  }
 
       return data as ShodanAlertInfo[];
     } catch (error) {
