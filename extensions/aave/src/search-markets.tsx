@@ -2,7 +2,7 @@ import { ActionPanel, Action, Image, List, Color } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { getChains, getMarkets } from "./lib/api";
 import { chainId, ChainId } from "@aave/client";
-import { includeMeritPrograms } from "./lib/preferences";
+import { includeIncentivePrograms } from "./lib/preferences";
 
 export default function () {
   const [selectedChainId, setSelectedChainId] = useCachedState<ChainId>("chainId", chainId(1));
@@ -40,7 +40,7 @@ export default function () {
         <List.Section
           key={market.address}
           title={market.name}
-          subtitle={`Market: $${market.size}   Liquidity: $${market.liquidity}   Borrows: $${market.borrows}`}
+          subtitle={`Market $${market.size}    Liquidity $${market.liquidity}    Borrows $${market.borrows}`}
         >
           {market.reserves.map((reserve) => (
             <List.Item
@@ -56,7 +56,7 @@ export default function () {
                 { text: reserve.totalSupply, tooltip: "Total Supplied" },
                 {
                   tag: {
-                    value: includeMeritPrograms ? reserve.totalSupplyApy : reserve.protocolSupplyApy,
+                    value: includeIncentivePrograms ? reserve.totalSupplyApy : reserve.protocolSupplyApy,
                     color: Color.Green,
                   },
                   tooltip: "Supply APY",
@@ -64,7 +64,7 @@ export default function () {
                 { text: reserve.totalBorrow, tooltip: "Total Borrowed" },
                 {
                   tag: {
-                    value: includeMeritPrograms ? reserve.totalBorrowApy : reserve.protocolBorrowApy,
+                    value: includeIncentivePrograms ? reserve.totalBorrowApy : reserve.protocolBorrowApy,
                     color: Color.Red,
                   },
                   tooltip: "Borrow APY",

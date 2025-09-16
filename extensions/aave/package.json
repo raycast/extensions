@@ -42,10 +42,10 @@
       "required": true
     },
     {
-      "name": "includeMeritPrograms",
+      "name": "includeIncentivePrograms",
       "type": "checkbox",
-      "label": "Use merit programs in APY calculations",
-      "description": "Include merit programs when displaying APY",
+      "label": "Use incentive programs in APY calculations",
+      "description": "Include incentive and merit programs when displaying APY",
       "default": true,
       "required": true
     }

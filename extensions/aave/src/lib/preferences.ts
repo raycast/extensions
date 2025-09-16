@@ -4,4 +4,4 @@ const preferences = getPreferenceValues<Preferences>();
 
 export const showFrozenOrPausedAssets = preferences.showFrozenOrPausedAssets;
 
-export const includeMeritPrograms = preferences.includeMeritPrograms;
+export const includeIncentivePrograms = preferences.includeIncentivePrograms;
