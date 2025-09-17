@@ -7,10 +7,9 @@ import {
   getSelectedText,
   showToast,
   Toast,
-  useNavigation,
   getPreferenceValues,
 } from "@raycast/api";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm, FormValidation } from "@raycast/utils";
 import { openai, getGlobalModel } from "./api";
 
@@ -19,8 +18,12 @@ interface FormValues {
   language: string;
 }
 
+type ViewState = "form" | "loading" | "result";
+
 export default function Command() {
-  const { push, pop } = useNavigation();
+  const [viewState, setViewState] = useState<ViewState>("form");
+  const [result, setResult] = useState<string>("");
+  const [originalInput, setOriginalInput] = useState<string>("");
 
   const prefValues = getPreferenceValues<Preferences.Translate>();
   const primary = prefValues.primary_language_translate?.trim() || "English";
@@ -41,7 +44,10 @@ export default function Command() {
       }
 
       const model = prefValues.model_translate?.trim() || getGlobalModel();
-      push(<Detail isLoading markdown={`Translating...`} />);
+
+      // Set loading state
+      setViewState("loading");
+      setOriginalInput(input);
 
       try {
         const basePrompt = (
@@ -62,49 +68,20 @@ export default function Command() {
         });
 
         const content = res.choices?.[0]?.message?.content ?? "(no content)";
-        push(
-          <Detail
-            markdown={`# Translation
 
-## Input
-${input}
-
-## Output
-${content}`}
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard
-                  title="Copy Translation"
-                  content={content}
-                  icon={Icon.Clipboard}
-                />
-                <Action.Paste
-                  title="Paste Translation"
-                  content={content}
-                  icon={Icon.Text}
-                />
-                <Action
-                  title="Back"
-                  icon={Icon.ArrowLeft}
-                  onAction={() => pop()}
-                />
-              </ActionPanel>
-            }
-          />,
-        );
+        // Set result state
+        setResult(content);
+        setViewState("result");
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
         await showToast({
           style: Toast.Style.Failure,
-          title: "Translate failed",
+          title: "Translation failed",
           message: msg,
         });
-        pop();
+        // Go back to form on error
+        setViewState("form");
       }
-    },
-    initialValues: {
-      input: "",
-      language: "",
     },
     validation: {
       input: FormValidation.Required,
@@ -114,34 +91,73 @@ ${content}`}
   useEffect(() => {
     (async () => {
       try {
-        const sel = await getSelectedText();
-        setValue("input", sel);
+        const selectedText = await getSelectedText();
+        if (selectedText) {
+          setValue("input", selectedText);
+        }
       } catch {
-        // ignore when no selection
+        // No selected text, that's fine
       }
     })();
   }, [setValue]);
 
+  // Loading view
+  if (viewState === "loading") {
+    return <Detail isLoading markdown="Translating..." />;
+  }
+
+  // Result view
+  if (viewState === "result") {
+    return (
+      <Detail
+        markdown={`# Translation
+
+## Input
+${originalInput}
+
+## Output
+${result}`}
+        actions={
+          <ActionPanel>
+            <Action.CopyToClipboard
+              title="Copy Translation"
+              content={result}
+              icon={Icon.Clipboard}
+            />
+            <Action.Paste
+              title="Paste Translation"
+              content={result}
+              icon={Icon.Text}
+            />
+            <Action
+              title="Back to Form"
+              icon={Icon.ArrowLeft}
+              onAction={() => setViewState("form")}
+              shortcut={{ modifiers: ["cmd"], key: "b" }}
+            />
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
+  // Form view (default)
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Translate"
-            icon={Icon.Globe}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Translate" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.TextArea
         title="Text"
-        placeholder="Example: Hello, my name is Sarah and I work as a software engineer at a technology company. I love programming and solving complex problems. In my free time, I enjoy reading books, hiking in the mountains, and learning new languages. Today is a beautiful day and I'm excited to start working on a new project that will help people communicate better across different cultures."
+        placeholder="Enter the text you want to translate..."
         {...itemProps.input}
       />
       <Form.TextField
         title="Target Language"
-        placeholder={`${primary} | ${secondary}`}
+        placeholder={`Optional (defaults to ${primary}/${secondary} auto-detection)`}
         {...itemProps.language}
       />
     </Form>

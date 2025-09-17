@@ -7,10 +7,9 @@ import {
   getSelectedText,
   showToast,
   Toast,
-  useNavigation,
   getPreferenceValues,
 } from "@raycast/api";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm, FormValidation } from "@raycast/utils";
 import { openai, getGlobalModel } from "./api";
 
@@ -18,8 +17,17 @@ interface FormValues {
   input: string;
 }
 
+type ViewState = "form" | "loading" | "result";
+
 export default function Command() {
-  const { push, pop } = useNavigation();
+  const [viewState, setViewState] = useState<ViewState>("form");
+  const [result, setResult] = useState<string>("");
+  const [originalInput, setOriginalInput] = useState<string>("");
+
+  const prefs = getPreferenceValues<Preferences.Rephrase>();
+  const sys =
+    prefs.prompt_rephrase?.trim() ||
+    "Rephrase the following text to improve clarity and flow while maintaining the original meaning:";
 
   const { handleSubmit, itemProps, setValue } = useForm<FormValues>({
     async onSubmit(values) {
@@ -32,12 +40,11 @@ export default function Command() {
         return;
       }
 
-      const prefs = getPreferenceValues<Preferences.Rephrase>();
-      const sys =
-        prefs.prompt_rephrase?.trim() ||
-        "Rephrase the following text to make it clearer and more natural, without changing its meaning:";
       const model = prefs.model_rephrase?.trim() || getGlobalModel();
-      push(<Detail isLoading markdown="Rephrasing..." />);
+
+      // Set loading state
+      setViewState("loading");
+      setOriginalInput(input);
 
       try {
         const res = await openai.chat.completions.create({
@@ -49,36 +56,10 @@ export default function Command() {
         });
 
         const content = res.choices?.[0]?.message?.content ?? "(no content)";
-        push(
-          <Detail
-            markdown={`# Rephrase
 
-## Original Text
-${input}
-
-## Rephrased
-${content}`}
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard
-                  title="Copy Rephrased"
-                  content={content}
-                  icon={Icon.Clipboard}
-                />
-                <Action.Paste
-                  title="Paste Rephrased"
-                  content={content}
-                  icon={Icon.Text}
-                />
-                <Action
-                  title="Back"
-                  icon={Icon.ArrowLeft}
-                  onAction={() => pop()}
-                />
-              </ActionPanel>
-            }
-          />,
-        );
+        // Set result state
+        setResult(content);
+        setViewState("result");
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
         await showToast({
@@ -86,11 +67,9 @@ ${content}`}
           title: "Rephrase failed",
           message: msg,
         });
-        pop();
+        // Go back to form on error
+        setViewState("form");
       }
-    },
-    initialValues: {
-      input: "",
     },
     validation: {
       input: FormValidation.Required,
@@ -100,29 +79,68 @@ ${content}`}
   useEffect(() => {
     (async () => {
       try {
-        const sel = await getSelectedText();
-        setValue("input", sel);
+        const selectedText = await getSelectedText();
+        if (selectedText) {
+          setValue("input", selectedText);
+        }
       } catch {
-        // ignore when no selection
+        // No selected text, that's fine
       }
     })();
   }, [setValue]);
 
+  // Loading view
+  if (viewState === "loading") {
+    return <Detail isLoading markdown="Rephrasing..." />;
+  }
+
+  // Result view
+  if (viewState === "result") {
+    return (
+      <Detail
+        markdown={`# Rephrase
+
+## Original Text
+${originalInput}
+
+## Rephrased
+${result}`}
+        actions={
+          <ActionPanel>
+            <Action.CopyToClipboard
+              title="Copy Rephrase"
+              content={result}
+              icon={Icon.Clipboard}
+            />
+            <Action.Paste
+              title="Paste Rephrase"
+              content={result}
+              icon={Icon.Text}
+            />
+            <Action
+              title="Back to Form"
+              icon={Icon.ArrowLeft}
+              onAction={() => setViewState("form")}
+              shortcut={{ modifiers: ["cmd"], key: "b" }}
+            />
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
+  // Form view (default)
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Rephrase"
-            icon={Icon.Pencil}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Rephrase" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.TextArea
         title="Text"
-        placeholder="Example: The meeting was really good and we talked about a lot of stuff. Everyone was there and we discussed the project. We need to do more work on it and make it better. The deadline is coming up soon so we have to hurry."
+        placeholder="Enter the text you want to rephrase..."
         {...itemProps.input}
       />
     </Form>

@@ -7,10 +7,9 @@ import {
   getSelectedText,
   showToast,
   Toast,
-  useNavigation,
   getPreferenceValues,
 } from "@raycast/api";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm, FormValidation } from "@raycast/utils";
 import { openai, getGlobalModel } from "./api";
 
@@ -18,8 +17,12 @@ interface FormValues {
   input: string;
 }
 
+type ViewState = "form" | "loading" | "result";
+
 export default function Command() {
-  const { push, pop } = useNavigation();
+  const [viewState, setViewState] = useState<ViewState>("form");
+  const [result, setResult] = useState<string>("");
+  const [originalInput, setOriginalInput] = useState<string>("");
 
   const prefs = getPreferenceValues<Preferences.Proofread>();
   const sys =
@@ -38,7 +41,10 @@ export default function Command() {
       }
 
       const model = prefs.model_proofread?.trim() || getGlobalModel();
-      push(<Detail isLoading markdown="Proofreading..." />);
+
+      // Set loading state
+      setViewState("loading");
+      setOriginalInput(input);
 
       try {
         const res = await openai.chat.completions.create({
@@ -50,36 +56,10 @@ export default function Command() {
         });
 
         const content = res.choices?.[0]?.message?.content ?? "(no content)";
-        push(
-          <Detail
-            markdown={`# Proofread
 
-## Original Text
-${input}
-
-## Corrected
-${content}`}
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard
-                  title="Copy Proofread"
-                  content={content}
-                  icon={Icon.Clipboard}
-                />
-                <Action.Paste
-                  title="Paste Proofread"
-                  content={content}
-                  icon={Icon.Text}
-                />
-                <Action
-                  title="Back"
-                  icon={Icon.ArrowLeft}
-                  onAction={() => pop()}
-                />
-              </ActionPanel>
-            }
-          />,
-        );
+        // Set result state
+        setResult(content);
+        setViewState("result");
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
         await showToast({
@@ -87,7 +67,8 @@ ${content}`}
           title: "Proofread failed",
           message: msg,
         });
-        pop();
+        // Go back to form on error
+        setViewState("form");
       }
     },
     initialValues: {
@@ -101,29 +82,68 @@ ${content}`}
   useEffect(() => {
     (async () => {
       try {
-        const sel = await getSelectedText();
-        setValue("input", sel);
+        const selectedText = await getSelectedText();
+        if (selectedText) {
+          setValue("input", selectedText);
+        }
       } catch {
-        // ignore when no selection
+        // No selected text, that's fine
       }
     })();
   }, [setValue]);
 
+  // Loading view
+  if (viewState === "loading") {
+    return <Detail isLoading markdown="Proofreading..." />;
+  }
+
+  // Result view
+  if (viewState === "result") {
+    return (
+      <Detail
+        markdown={`# Proofread
+
+## Original Text
+${originalInput}
+
+## Corrected
+${result}`}
+        actions={
+          <ActionPanel>
+            <Action.CopyToClipboard
+              title="Copy Proofread"
+              content={result}
+              icon={Icon.Clipboard}
+            />
+            <Action.Paste
+              title="Paste Proofread"
+              content={result}
+              icon={Icon.Text}
+            />
+            <Action
+              title="Back to Form"
+              icon={Icon.ArrowLeft}
+              onAction={() => setViewState("form")}
+              shortcut={{ modifiers: ["cmd"], key: "b" }}
+            />
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
+  // Form view (default)
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Proofread"
-            icon={Icon.CheckCircle}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Proofread" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.TextArea
         title="Text"
-        placeholder="Example: I has three book's on my desk. Their very intresting to read, but I dont have time to finished them all. The book's cover's are beutiful and the storys inside is amazing. I will definately reccomend this to my freinds who enjoys reading literture."
+        placeholder="Enter the text you want to proofread..."
         {...itemProps.input}
       />
     </Form>

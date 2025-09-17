@@ -6,8 +6,8 @@ import {
   Icon,
   showToast,
   Toast,
-  useNavigation,
 } from "@raycast/api";
+import { useState } from "react";
 import { useForm, FormValidation } from "@raycast/utils";
 import { getApiKey } from "./api";
 
@@ -17,8 +17,12 @@ interface FormValues {
   requestBody: string;
 }
 
+type ViewState = "form" | "loading" | "result";
+
 export default function Command() {
-  const { push, pop } = useNavigation();
+  const [viewState, setViewState] = useState<ViewState>("form");
+  const [result, setResult] = useState<string>("");
+  const [fullUrl, setFullUrl] = useState<string>("");
 
   const { handleSubmit, itemProps } = useForm<FormValues>({
     async onSubmit(values) {
@@ -51,13 +55,11 @@ export default function Command() {
         }
       }
 
-      const fullUrl = `https://api.cometapi.com/v1/${trimmedEndpoint}`;
-      push(
-        <Detail
-          isLoading
-          markdown={`Making ${trimmedMethod} request to ${fullUrl}...`}
-        />,
-      );
+      const url = `https://api.cometapi.com/v1/${trimmedEndpoint}`;
+      setFullUrl(url);
+
+      // Set loading state
+      setViewState("loading");
 
       try {
         const apiKey = getApiKey();
@@ -75,7 +77,7 @@ export default function Command() {
           options.body = trimmedBody;
         }
 
-        const response = await fetch(fullUrl, options);
+        const response = await fetch(url, options);
         const responseText = await response.text();
 
         let responseData;
@@ -91,30 +93,11 @@ export default function Command() {
             ? responseData
             : JSON.stringify(responseData, null, 2);
 
-        push(
-          <Detail
-            markdown={`# API Response\n\n${statusInfo}\n\n## Response Body\n\n\`\`\`json\n${responseContent}\n\`\`\``}
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard
-                  title="Copy Response"
-                  content={responseContent}
-                  icon={Icon.Clipboard}
-                />
-                <Action.CopyToClipboard
-                  title="Copy URL"
-                  content={fullUrl}
-                  icon={Icon.Link}
-                />
-                <Action
-                  title="Back"
-                  icon={Icon.ArrowLeft}
-                  onAction={() => pop()}
-                />
-              </ActionPanel>
-            }
-          />,
-        );
+        const formattedResult = `# API Response\n\n${statusInfo}\n\n## Response Body\n\n\`\`\`json\n${responseContent}\n\`\`\``;
+
+        // Set result state
+        setResult(formattedResult);
+        setViewState("result");
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
         await showToast({
@@ -122,7 +105,8 @@ export default function Command() {
           title: "Request failed",
           message: msg,
         });
-        pop();
+        // Go back to form on error
+        setViewState("form");
       }
     },
     initialValues: {
@@ -156,6 +140,41 @@ export default function Command() {
     },
   });
 
+  // Loading view
+  if (viewState === "loading") {
+    return <Detail isLoading markdown="Sending request..." />;
+  }
+
+  // Result view
+  if (viewState === "result") {
+    return (
+      <Detail
+        markdown={result}
+        actions={
+          <ActionPanel>
+            <Action.CopyToClipboard
+              title="Copy Response"
+              content={result}
+              icon={Icon.Clipboard}
+            />
+            <Action.CopyToClipboard
+              title="Copy URL"
+              content={fullUrl}
+              icon={Icon.Link}
+            />
+            <Action
+              title="Back to Form"
+              icon={Icon.ArrowLeft}
+              onAction={() => setViewState("form")}
+              shortcut={{ modifiers: ["cmd"], key: "b" }}
+            />
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
+  // Form view (default)
   return (
     <Form
       actions={

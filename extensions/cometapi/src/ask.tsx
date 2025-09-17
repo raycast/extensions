@@ -6,9 +6,9 @@ import {
   Icon,
   showToast,
   Toast,
-  useNavigation,
   getPreferenceValues,
 } from "@raycast/api";
+import { useState } from "react";
 import { useForm, FormValidation } from "@raycast/utils";
 import { openai, getGlobalModel } from "./api";
 
@@ -16,8 +16,12 @@ interface FormValues {
   question: string;
 }
 
+type ViewState = "form" | "loading" | "result";
+
 export default function Command() {
-  const { push, pop } = useNavigation();
+  const [viewState, setViewState] = useState<ViewState>("form");
+  const [result, setResult] = useState<string>("");
+  const [originalQuestion, setOriginalQuestion] = useState<string>("");
 
   const prefs = getPreferenceValues<Preferences.Ask>();
   const sys =
@@ -36,7 +40,10 @@ export default function Command() {
       }
 
       const model = prefs.model_ask?.trim() || getGlobalModel();
-      push(<Detail isLoading markdown="Thinking..." />);
+
+      // Set loading state
+      setViewState("loading");
+      setOriginalQuestion(q);
 
       try {
         const res = await openai.chat.completions.create({
@@ -48,67 +55,76 @@ export default function Command() {
         });
 
         const content = res.choices?.[0]?.message?.content ?? "(no content)";
-        push(
-          <Detail
-            markdown={`# Answer
 
-## Question
-${q}
-
-## Answer
-${content}`}
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard
-                  title="Copy Answer"
-                  content={content}
-                  icon={Icon.Clipboard}
-                />
-                <Action.Paste
-                  title="Paste Answer"
-                  content={content}
-                  icon={Icon.Text}
-                />
-                <Action
-                  title="Back"
-                  icon={Icon.ArrowLeft}
-                  onAction={() => pop()}
-                />
-              </ActionPanel>
-            }
-          />,
-        );
+        // Set result state
+        setResult(content);
+        setViewState("result");
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
         await showToast({
           style: Toast.Style.Failure,
-          title: "Ask AI failed",
+          title: "Question failed",
           message: msg,
         });
-        pop();
+        // Go back to form on error
+        setViewState("form");
       }
-    },
-    initialValues: {
-      question: "",
     },
     validation: {
       question: FormValidation.Required,
     },
   });
 
+  // Loading view
+  if (viewState === "loading") {
+    return <Detail isLoading markdown="Thinking..." />;
+  }
+
+  // Result view
+  if (viewState === "result") {
+    return (
+      <Detail
+        markdown={`# Answer
+
+## Question
+${originalQuestion}
+
+## Answer
+${result}`}
+        actions={
+          <ActionPanel>
+            <Action.CopyToClipboard
+              title="Copy Answer"
+              content={result}
+              icon={Icon.Clipboard}
+            />
+            <Action.Paste
+              title="Paste Answer"
+              content={result}
+              icon={Icon.Text}
+            />
+            <Action
+              title="Back to Form"
+              icon={Icon.ArrowLeft}
+              onAction={() => setViewState("form")}
+              shortcut={{ modifiers: ["cmd"], key: "b" }}
+            />
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
+  // Form view (default)
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Ask"
-            icon={Icon.QuestionMarkCircle}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Ask AI" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField
+      <Form.TextArea
         title="Question"
         placeholder="Enter your question..."
         {...itemProps.question}
