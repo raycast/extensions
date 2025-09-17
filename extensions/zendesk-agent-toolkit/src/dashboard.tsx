@@ -1,26 +1,34 @@
-import { Action, ActionPanel, Detail, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import React, { useEffect, useState } from "react";
 import { zdFetch, getCurrentUserId } from "./zendesk";
+import { ticketMonitor } from "./ticket-monitor";
+import AISuggestions from "./ai-suggestions";
 
-interface TicketStats {
+interface DailyTicketData {
+  date: string;
   solved: number;
-  pending: number;
-  open: number;
-  total: number;
-  thisWeek: number;
-  thisMonth: number;
-  avgResolutionTime?: string;
+  submitted: number;
 }
 
-interface TimeSeriesData {
-  date: string;
+interface SystemData {
+  system: string;
   count: number;
+  percentage: number;
+}
+
+interface OpenTicket {
+  id: number;
+  subject: string;
+  updated_at: string;
+  priority?: string;
 }
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<TicketStats | null>(null);
-  const [weeklyData, setWeeklyData] = useState<TimeSeriesData[]>([]);
+  const [dailyData, setDailyData] = useState<DailyTicketData[]>([]);
+  const [systemsData, setSystemsData] = useState<SystemData[]>([]);
+  const [openTickets, setOpenTickets] = useState<OpenTicket[]>([]);
+  const [aiSuggestionsCount, setAISuggestionsCount] = useState<number>(0);
 
   useEffect(() => {
     loadDashboardData();
@@ -31,193 +39,240 @@ export default function Dashboard() {
     try {
       await getCurrentUserId(); // Verify auth
 
-      // Get current stats
-      const [solvedResponse, pendingResponse, openResponse] = await Promise.all([
-        zdFetch<{ results: Array<{ id: number; subject: string; updated_at: string }> }>(
-          `/api/v2/search.json?query=type:ticket assignee:me status:solved`,
-        ),
-        zdFetch<{ results: Array<{ id: number; subject: string; updated_at: string }> }>(
-          `/api/v2/search.json?query=type:ticket assignee:me status:pending`,
-        ),
-        zdFetch<{ results: Array<{ id: number; subject: string; updated_at: string }> }>(
-          `/api/v2/search.json?query=type:ticket assignee:me status:open`,
-        ),
-      ]);
+      // Get open tickets assigned to you
+      const openResponse = await zdFetch<{
+        results: Array<{ id: number; subject: string; updated_at: string; priority?: string }>;
+      }>(`/api/v2/search.json?query=type:ticket assignee:me status:open`);
 
-      // Get this week's solved tickets
-      const oneWeekAgo = new Date();
-      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-      const thisWeekResponse = await zdFetch<{ results: Array<{ id: number; subject: string; updated_at: string }> }>(
-        `/api/v2/search.json?query=type:ticket assignee:me status:solved solved>${oneWeekAgo.toISOString().split("T")[0]}`,
-      );
+      // Generate daily stats for the last 5 days
+      const dailyStats = await generateDailyStats();
 
-      // Get this month's solved tickets
-      const oneMonthAgo = new Date();
-      oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-      const thisMonthResponse = await zdFetch<{ results: Array<{ id: number; subject: string; updated_at: string }> }>(
-        `/api/v2/search.json?query=type:ticket assignee:me status:solved solved>${oneMonthAgo.toISOString().split("T")[0]}`,
-      );
+      // Generate systems breakdown
+      const systemsStats = await generateSystemsBreakdown();
 
-      // Generate weekly data for the last 8 weeks
-      const weeklyStats = await generateWeeklyStats();
+      // Check for AI macro suggestions
+      const suggestions = await ticketMonitor.checkForResolvedTickets();
 
-      setStats({
-        solved: solvedResponse.results.length,
-        pending: pendingResponse.results.length,
-        open: openResponse.results.length,
-        total: solvedResponse.results.length + pendingResponse.results.length + openResponse.results.length,
-        thisWeek: thisWeekResponse.results.length,
-        thisMonth: thisMonthResponse.results.length,
-      });
-
-      setWeeklyData(weeklyStats);
-    } catch (e) {
+      setDailyData(dailyStats);
+      setSystemsData(systemsStats);
+      setOpenTickets(openResponse.results);
+      setAISuggestionsCount(suggestions.length);
+    } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to load dashboard",
-        message: String(e),
+        message: String(error),
       });
     } finally {
       setLoading(false);
     }
   }
 
-  async function generateWeeklyStats(): Promise<TimeSeriesData[]> {
-    const weeks: TimeSeriesData[] = [];
+  async function generateDailyStats(): Promise<DailyTicketData[]> {
+    const days: DailyTicketData[] = [];
 
-    for (let i = 7; i >= 0; i--) {
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() - (i * 7 + 7));
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() - i * 7);
+    for (let i = 4; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split("T")[0];
 
       try {
-        const response = await zdFetch<{ results: Array<{ id: number; subject: string; updated_at: string }> }>(
-          `/api/v2/search.json?query=type:ticket assignee:me status:solved solved>${startDate.toISOString().split("T")[0]} solved<${endDate.toISOString().split("T")[0]}`,
+        // Get solved tickets for this day
+        const solvedResponse = await zdFetch<{ results: Array<{ id: number }> }>(
+          `/api/v2/search.json?query=type:ticket assignee:me status:solved solved:${dateStr}`,
         );
 
-        weeks.push({
-          date: startDate.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-          count: response.results.length,
+        // Get submitted tickets for this day
+        const submittedResponse = await zdFetch<{ results: Array<{ id: number }> }>(
+          `/api/v2/search.json?query=type:ticket assignee:me created:${dateStr}`,
+        );
+
+        days.push({
+          date: dateStr,
+          solved: solvedResponse.results.length,
+          submitted: submittedResponse.results.length,
         });
-      } catch (e) {
-        console.error(`Failed to get stats for week ${i}:`, e);
-        weeks.push({
-          date: startDate.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-          count: 0,
+      } catch {
+        days.push({
+          date: dateStr,
+          solved: 0,
+          submitted: 0,
         });
       }
     }
 
-    return weeks;
+    return days;
   }
 
-  function generateSparkline(data: TimeSeriesData[]): string {
-    if (data.length === 0) return "";
+  async function generateSystemsBreakdown(): Promise<SystemData[]> {
+    try {
+      const preferences = getPreferenceValues<{
+        systemFieldId?: string;
+      }>();
+      const systemFieldId = preferences.systemFieldId ? parseInt(preferences.systemFieldId) : null;
 
-    const max = Math.max(...data.map((d) => d.count));
-    if (max === 0) return "▁".repeat(data.length);
+      if (!systemFieldId) {
+        return [
+          {
+            system: "System Field ID not configured",
+            count: 1,
+            percentage: 100,
+          },
+        ];
+      }
 
-    const bars = "▁▂▃▄▅▆▇█";
+      // Get tickets solved this week with custom fields
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+      const response = await zdFetch<{
+        results: Array<{
+          id: number;
+          custom_fields: Array<{ id: number; value: string | null }>;
+        }>;
+      }>(
+        `/api/v2/search.json?query=type:ticket assignee:me status:solved solved>${oneWeekAgo.toISOString().split("T")[0]}&include=custom_fields`,
+      );
+
+      const systemCounts: Record<string, number> = {};
+      let totalTickets = 0;
+
+      response.results.forEach((ticket) => {
+        if (ticket.custom_fields) {
+          const systemField = ticket.custom_fields.find((field) => field.id === systemFieldId);
+          if (systemField && systemField.value) {
+            const system = String(systemField.value);
+            systemCounts[system] = (systemCounts[system] || 0) + 1;
+            totalTickets++;
+          }
+        }
+      });
+
+      return Object.entries(systemCounts)
+        .map(([system, count]) => ({
+          system,
+          count,
+          percentage: Math.round((count / totalTickets) * 100),
+        }))
+        .sort((a, b) => b.count - a.count);
+    } catch (e) {
+      console.error("Failed to generate systems breakdown:", e);
+      return [];
+    }
+  }
+
+  function generateVerticalBarChart(data: DailyTicketData[]): string {
+    if (data.length === 0) return "No data available";
+
+    const maxValue = Math.max(...data.map((d) => Math.max(d.solved, d.submitted)));
+    if (maxValue === 0) return "No activity in the last 5 days";
+
+    const height = 6;
+    let chart = "";
+
+    // Build chart from top to bottom
+    for (let row = height; row >= 1; row--) {
+      let line = "";
+      for (const day of data) {
+        const solvedHeight = Math.ceil((day.solved / maxValue) * height);
+        const submittedHeight = Math.ceil((day.submitted / maxValue) * height);
+
+        if (row <= solvedHeight && row <= submittedHeight) {
+          line += "██  "; // Both solved and submitted
+        } else if (row <= solvedHeight) {
+          line += "▓▓  "; // Only solved
+        } else if (row <= submittedHeight) {
+          line += "░░  "; // Only submitted
+        } else {
+          line += "    "; // Empty
+        }
+      }
+      chart += line + "\n";
+    }
+
+    // Add date labels with better spacing
+    chart +=
+      data
+        .map((d) => {
+          const date = new Date(d.date);
+          return date.toLocaleDateString("en-US", { weekday: "short" }).substring(0, 3);
+        })
+        .join("  ") + "\n";
+
+    // Add numbers for each day
+    chart += data.map((d) => `${d.solved.toString().padStart(2, " ")}s`).join(" ") + "\n";
+    chart += data.map((d) => `${d.submitted.toString().padStart(2, " ")}n`).join(" ") + "\n";
+
+    // Add legend
+    chart += "\n▓▓ Solved  ░░ Submitted  ██ Both\ns = Solved count, n = New/Submitted count";
+
+    return chart;
+  }
+
+  function generateSystemsChart(data: SystemData[]): string {
+    if (data.length === 0) return "No systems data available";
+
+    const maxCount = Math.max(...data.map((d) => d.count));
+
     return data
-      .map((d) => {
-        const normalized = Math.floor((d.count / max) * (bars.length - 1));
-        return bars[normalized];
+      .map((item) => {
+        const barLength = Math.ceil((item.count / maxCount) * 20);
+        const bar = "█".repeat(barLength);
+        return `${item.system.padEnd(15)} ${bar} ${item.count} (${item.percentage}%)`;
       })
-      .join("");
+      .join("\n");
   }
 
-  if (loading || !stats) {
-    return <Detail isLoading={true} />;
+  if (loading) {
+    return <Detail isLoading={true} markdown="Loading dashboard..." />;
   }
 
   const markdown = `
-# 📊 Your Zendesk Performance Dashboard
+# Zendesk Dashboard
 
-## 🎯 Current Status
-- **Solved Tickets**: ${stats.solved}
-- **Open Tickets**: ${stats.open}
-- **Pending Tickets**: ${stats.pending}
-- **Total Assigned**: ${stats.total}
+${aiSuggestionsCount > 0 ? `🤖 **${aiSuggestionsCount} AI Macro Suggestions Available!** - [View Suggestions](raycast://extensions/zendesk-agent-toolkit/ai-suggestions)\n\n` : ""}
 
-## 📈 Recent Performance
-- **This Week**: ${stats.thisWeek} tickets solved
-- **This Month**: ${stats.thisMonth} tickets solved
-- **Weekly Average**: ${Math.round(stats.thisMonth / 4)} tickets
+## 📋 Open Tickets Assigned to You (${openTickets.length})
 
-## 📊 8-Week Trend
+${
+  openTickets.length === 0
+    ? "*No open tickets assigned to you*"
+    : openTickets
+        .map(
+          (ticket) =>
+            `**#${ticket.id}** - ${ticket.subject}\n*Updated: ${new Date(ticket.updated_at).toLocaleDateString()}*`,
+        )
+        .join("\n\n")
+}
+
+## 📊 5-Day Activity
+
 \`\`\`
-${generateSparkline(weeklyData)}
-${weeklyData.map((d) => d.date.slice(0, 3)).join(" ")}
-${weeklyData.map((d) => d.count.toString().padStart(3)).join(" ")}
+${generateVerticalBarChart(dailyData)}
 \`\`\`
 
-## 🏆 Performance Metrics
-- **Resolution Rate**: ${stats.total > 0 ? Math.round((stats.solved / stats.total) * 100) : 0}%
-- **Productivity Score**: ${stats.thisWeek >= 10 ? "🔥 High" : stats.thisWeek >= 5 ? "📈 Good" : "📊 Normal"}
+## 🔧 Systems Breakdown (This Week)
 
----
-
-💡 **Tip**: Keep your open tickets low and maintain a steady resolution pace for optimal performance!
-`;
+\`\`\`
+${generateSystemsChart(systemsData)}
+\`\`\`
+  `;
 
   return (
     <Detail
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action title="Refresh Data" onAction={loadDashboardData} />
-          <Action.Push title="View Tickets" target={<DashboardTicketList />} />
+          <Action title="Refresh" onAction={loadDashboardData} />
+          {aiSuggestionsCount > 0 && (
+            <Action.Push
+              title={`View ${aiSuggestionsCount} AI Macro Suggestions`}
+              icon="🤖"
+              target={<AISuggestions />}
+            />
+          )}
         </ActionPanel>
       }
     />
-  );
-}
-
-interface Ticket {
-  id: number;
-  subject: string;
-  updated_at: string;
-}
-
-function DashboardTicketList() {
-  const [loading, setLoading] = useState(true);
-  const [recentTickets, setRecentTickets] = useState<Ticket[]>([]);
-
-  useEffect(() => {
-    loadRecentTickets();
-  }, []);
-
-  async function loadRecentTickets() {
-    setLoading(true);
-    try {
-      // Get last 10 solved tickets
-      const response = await zdFetch<{ results: Ticket[] }>(
-        `/api/v2/search.json?query=type:ticket assignee:me status:solved sort:updated_at`,
-      );
-
-      setRecentTickets(response.results.slice(0, 10));
-    } catch (e) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load recent tickets",
-        message: String(e),
-      });
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  return (
-    <List isLoading={loading} navigationTitle="Recently Solved Tickets">
-      {recentTickets.map((ticket) => (
-        <List.Item
-          key={ticket.id}
-          title={ticket.subject || `Ticket #${ticket.id}`}
-          subtitle={`Solved • Updated ${new Date(ticket.updated_at).toLocaleDateString()}`}
-          accessories={[{ tag: { value: "Solved", color: "#00C853" } }, { date: new Date(ticket.updated_at) }]}
-        />
-      ))}
-    </List>
   );
 }

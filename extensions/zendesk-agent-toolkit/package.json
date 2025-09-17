@@ -11,7 +11,10 @@
     "type": "git",
     "url": "https://github.com/Unicornninja80/raycast-zendesk.git"
   },
-  "categories": ["Productivity"],
+  "private": true,
+  "categories": [
+    "Productivity"
+  ],
   "preferences": [
     {
       "name": "subdomain",
@@ -70,6 +73,39 @@
       "description": "Your Zendesk Issue custom field ID (find in admin settings)",
       "required": false,
       "placeholder": "123457"
+    },
+    {
+      "name": "openaiApiKey",
+      "type": "password",
+      "title": "OpenAI API Key",
+      "description": "Your OpenAI API key for AI-powered macro generation",
+      "required": false,
+      "placeholder": "sk-..."
+    },
+    {
+      "name": "enableAIMacros",
+      "type": "checkbox",
+      "title": "Enable AI Macro Generation",
+      "label": "Automatically suggest macros based on ticket patterns",
+      "description": "Use AI to analyze resolved tickets and suggest new macros",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "permissionGroupId",
+      "type": "textfield",
+      "title": "Help Center Permission Group ID",
+      "description": "Default permission group ID for new Help Center articles",
+      "required": false,
+      "placeholder": "e.g., 1882214"
+    },
+    {
+      "name": "userSegmentId",
+      "type": "textfield",
+      "title": "Help Center User Segment ID",
+      "description": "Private segment ID for restricted articles (leave empty for everyone)",
+      "required": false,
+      "placeholder": "e.g., 933727"
     }
   ],
   "commands": [
@@ -88,10 +124,45 @@
       "mode": "view"
     },
     {
+      "name": "macros-entry",
+      "title": "Macros",
+      "subtitle": "Zendesk",
+      "description": "Manage and create macros for quick ticket actions",
+      "mode": "view"
+    },
+    {
+      "name": "ai-suggestions",
+      "title": "AI Macro Suggestions",
+      "subtitle": "Zendesk",
+      "description": "AI-powered macro suggestions based on your ticket patterns",
+      "mode": "view"
+    },
+    {
+      "name": "test-ai",
+      "title": "Test AI System",
+      "subtitle": "Zendesk",
+      "description": "Test and debug the AI macro generation system",
+      "mode": "view"
+    },
+    {
       "name": "search-zendesk-support-center",
       "title": "Help Center",
       "subtitle": "Zendesk",
       "description": "Search Help Center articles and create new articles from Markdown",
+      "mode": "view"
+    },
+    {
+      "name": "ticket-to-article",
+      "title": "Convert to Article",
+      "subtitle": "Zendesk",
+      "description": "Convert a resolved ticket to a Help Center article using AI",
+      "mode": "view"
+    },
+    {
+      "name": "zendesk-placeholders",
+      "title": "Zendesk Placeholders",
+      "subtitle": "Zendesk",
+      "description": "Reference guide for Zendesk template variables and placeholders",
       "mode": "view"
     }
   ],
@@ -104,13 +175,13 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
-    "@raycast/api": "1.102.4"
+    "@raycast/api": "1.102.4",
+    "@raycast/utils": "^2.2.0"
   },
   "devDependencies": {
-"@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.0.4",
     "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
+    "eslint": "^8.57.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
   }

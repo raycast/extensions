@@ -1,29 +1,31 @@
 # Changelog
 
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
 ## [Unreleased]
 
+## [0.1.0] - 2025-01-27
+
 ### Added
-- Complete Zendesk agent toolkit for Raycast
-- **Personal Dashboard**: View ticket statistics and performance metrics with visual graphs
-- Ticket management: view, assign, and update ticket status
-- Smart ticket replies with public/private comments
-- Image attachment support for ticket replies
-- Advanced ticket editing: change assignees, groups, and custom fields
-- Help Center article search functionality
-- Help Center article creation from Markdown files
-- Group-based ticket filtering and assignment
-- Configurable custom fields (System and Issue fields)
-- Rate limiting handling for Zendesk API
-- Comprehensive error handling and user feedback
+- **AI Article Creation**: Convert resolved tickets to help articles using GPT-4
+- **AI Macro Suggestions**: Intelligent macro recommendations based on ticket patterns
+- **Enhanced Ticket Management**: Better search, filtering, and bulk operations
+- **Help Center Integration**: Full CRUD operations for articles and categories
+- **Custom Field Support**: System and Issue field management
+- **Advanced Search**: Search across all tickets, not just assigned ones
 
-### Features
-- **Dashboard Command**: Personal performance analytics with 8-week trend visualization
-- **My Tickets Command**: View and manage assigned tickets with filtering options
-- **Help Center Command**: Search articles and create new ones from Markdown
-- **Smart Assignment**: Support for both user and group assignment
-- **File Uploads**: Direct image attachment to ticket replies
-- **Custom Fields**: Configurable System and Issue custom field support
-- **Multi-format Support**: Markdown to HTML conversion for article creation
-- **Performance Metrics**: Track solved tickets, resolution rates, and productivity scores
+### Changed
+- **Architecture**: Moved from web scraping to full API integration
+- **UI**: Enhanced interface following Raycast design patterns
+- **Commands**: Added "My Tickets" command alongside "Search Articles"
 
-Initial release providing complete Zendesk workflow management within Raycast.
+### Removed
+- **Legacy search implementation**: Replaced with modern API-based approach
+- **Basic URL authentication**: Replaced with secure API token system
+
+## [0.0.1] - 2025-01-27
+
+Initial version code.

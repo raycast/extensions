@@ -9,8 +9,21 @@ import {
   getPreferenceValues,
   popToRoot,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import React, { useEffect, useState } from "react";
 import { zdFetch, getAgentTicketUrl, getCurrentUserId, getAuthHeader } from "./zendesk";
+import { MacroList } from "./macros";
+import { TicketToArticleAction } from "./ticket-to-article";
+import {
+  StatusDropdown,
+  TicketManagementActions,
+  TicketListItem,
+  FormSeparator,
+  FieldGroup,
+  StatusIndicator,
+  withErrorHandling,
+} from "./components/common";
+import { open } from "@raycast/api";
 
 interface Ticket {
   id: number;
@@ -81,20 +94,30 @@ interface SearchResponse {
 export default function Tickets() {
   const [loading, setLoading] = useState(true);
   const [tickets, setTickets] = useState<Ticket[]>([]);
-  const [query, setQuery] = useState("type:ticket assignee:me status<solved");
+  const [query, setQuery] = useState("type:ticket assignee:me status:open");
+  const [searchText, setSearchText] = useState("");
   const [groups, setGroups] = useState<Group[]>([]);
   const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null);
-  const [onlyOpenTickets, setOnlyOpenTickets] = useState<boolean>(false);
+  const [onlyOpenTickets, setOnlyOpenTickets] = useState<boolean>(true);
 
   async function load(q: string) {
+    if (!q || q.trim() === "") {
+      console.log("Empty query, skipping load");
+      return;
+    }
+
+    console.log("🔍 Loading tickets with query:", q);
     setLoading(true);
     try {
       const data = await zdFetch<SearchResponse>(
         `/api/v2/search.json?query=${encodeURIComponent(q)}&sort_by=updated_at&sort_order=desc`,
       );
+      console.log(
+        `📊 Found ${data.results.length} total results, ${data.results.filter((r) => r.result_type === "ticket").length} tickets`,
+      );
       setTickets(data.results.filter((r) => r.result_type === "ticket"));
     } catch (e) {
-      await showToast({ style: Toast.Style.Failure, title: "Failed to load tickets", message: String(e) });
+      await showFailureToast(e, { title: "Failed to load tickets" });
     } finally {
       setLoading(false);
     }
@@ -109,9 +132,16 @@ export default function Tickets() {
     }
   }
 
-  function buildQuery(assignmentType: "me" | "group", groupId?: number, openOnly?: boolean) {
-    const statusPart = openOnly ? "status:open" : "status<solved";
+  function buildQuery(assignmentType: "me" | "group", groupId?: number, openOnly?: boolean, searchTerms?: string) {
+    const statusPart = openOnly ? "status:open" : "status:open status:pending status:new";
 
+    // If there's search text, search across ALL tickets regardless of assignment
+    if (searchTerms && searchTerms.trim()) {
+      const searchText = searchTerms.trim();
+      return `type:ticket ${statusPart} ${searchText}`;
+    }
+
+    // If no search text, filter by assignment as before
     if (assignmentType === "me") {
       return `type:ticket assignee:me ${statusPart}`;
     } else if (assignmentType === "group" && groupId) {
@@ -123,20 +153,38 @@ export default function Tickets() {
   function handleAssignmentTypeChange(type: "me" | "group", groupId?: number) {
     if (type === "me") {
       setSelectedGroupId(null);
-      setQuery(buildQuery("me", undefined, onlyOpenTickets));
+      setQuery(buildQuery("me", undefined, onlyOpenTickets, searchText));
     } else if (type === "group" && groupId) {
       setSelectedGroupId(groupId);
-      setQuery(buildQuery("group", groupId, onlyOpenTickets));
+      setQuery(buildQuery("group", groupId, onlyOpenTickets, searchText));
     }
   }
 
   function handleOpenTicketsToggle(checked: boolean) {
     setOnlyOpenTickets(checked);
     if (selectedGroupId) {
-      setQuery(buildQuery("group", selectedGroupId, checked));
+      setQuery(buildQuery("group", selectedGroupId, checked, searchText));
     } else {
-      setQuery(buildQuery("me", undefined, checked));
+      setQuery(buildQuery("me", undefined, checked, searchText));
     }
+  }
+
+  function handleSearchTextChange(text: string) {
+    console.log("🔍 Search text changed to:", text);
+    setSearchText(text);
+
+    // Build the new query
+    let newQuery: string;
+    if (selectedGroupId) {
+      newQuery = buildQuery("group", selectedGroupId, onlyOpenTickets, text);
+      console.log("🔍 New query (group):", newQuery);
+    } else {
+      newQuery = buildQuery("me", undefined, onlyOpenTickets, text);
+      console.log("🔍 New query (me):", newQuery);
+    }
+
+    console.log("🔍 Setting query to:", newQuery);
+    setQuery(newQuery);
   }
 
   useEffect(() => {
@@ -150,9 +198,10 @@ export default function Tickets() {
   return (
     <List
       isLoading={loading}
-      searchBarPlaceholder="Search Zendesk…"
-      onSearchTextChange={setQuery}
-      throttle
+      searchBarPlaceholder={
+        searchText ? "Searching all tickets..." : "Search tickets by title, description, or requester..."
+      }
+      onSearchTextChange={handleSearchTextChange}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Select Assignment"
@@ -168,7 +217,7 @@ export default function Tickets() {
         >
           <List.Dropdown.Item value="me" title="My Tickets" />
           {groups.map((group) => (
-            <List.Dropdown.Item key={group.id} value={`group-${group.id}`} title={`Group: ${group.name}`} />
+            <List.Dropdown.Item value={`group-${group.id}`} title={`Group: ${group.name}`} />
           ))}
         </List.Dropdown>
       }
@@ -184,19 +233,28 @@ export default function Tickets() {
       }
     >
       {tickets.map((t: Ticket) => (
-        <List.Item
-          key={t.id}
+        <TicketListItem
+          id={t.id}
           title={t.subject || `Ticket #${t.id}`}
-          accessories={[{ tag: t.status }, { date: new Date(t.updated_at) }]}
+          status={t.status}
+          updatedAt={t.updated_at}
           actions={
             <ActionPanel>
-              <Action.Push title="View Details" target={<TicketDetails ticketId={t.id} />} />
-              <Action.OpenInBrowser url={getAgentTicketUrl(t.id)} />
-              <Action.Push title="Reply…" target={<ReplyForm ticketId={t.id} />} />
-              <Action.Push title="Edit Ticket" target={<EditTicketForm ticketId={t.id} />} />
-              <Action title="Assign to Me" onAction={() => assignToMe(t.id)} />
-              <Action title="Mark as Solved" onAction={() => updateStatus(t.id, "solved")} />
-              <Action title="Mark as Pending" onAction={() => updateStatus(t.id, "pending")} />
+              <TicketManagementActions
+                onAssignToMe={() => assignToMe(t.id)}
+                onMarkAsSolved={() => updateStatus(t.id, "solved")}
+                onMarkAsPending={() => updateStatus(t.id, "pending")}
+                onOpenInBrowser={() => open(getAgentTicketUrl(t.id))}
+                onManageTicket={<TicketDetails ticketId={t.id} />}
+                onApplyMacro={<MacroList ticketId={t.id} onMacroApplied={() => load(query)} />}
+                onConvertToArticle={<TicketToArticleAction ticketId={t.id} ticketSubject={t.subject} />}
+              />
+              <Action
+                title={onlyOpenTickets ? "Show All Tickets" : "Only Open Tickets"}
+                icon={onlyOpenTickets ? "❌" : "✅"}
+                onAction={() => handleOpenTicketsToggle(!onlyOpenTickets)}
+                shortcut={{ modifiers: ["cmd"], key: "o" }}
+              />
             </ActionPanel>
           }
         />
@@ -205,11 +263,40 @@ export default function Tickets() {
   );
 }
 
-function ReplyForm({ ticketId }: { ticketId: number }) {
+function ManageTicketForm({ ticketId }: { ticketId: number }) {
+  // Reply-related state
   const [text, setText] = useState("");
   const [isPublic, setIsPublic] = useState(true);
   const [attachments, setAttachments] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
+
+  // Ticket editing state
+  const [loading, setLoading] = useState(true);
+  const [ticket, setTicket] = useState<FullTicket | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const [selectedStatus, setSelectedStatus] = useState<string>("");
+  const [selectedAssigneeId, setSelectedAssigneeId] = useState<string>("");
+
+  const [systemFieldValue, setSystemFieldValue] = useState<string>("");
+  const [issueFieldValue, setIssueFieldValue] = useState<string>("");
+
+  // Custom field dropdown options
+  const [systemOptions, setSystemOptions] = useState<{ value: string; label: string }[]>([
+    { value: "", label: "Select System..." },
+  ]);
+  const [issueOptions, setIssueOptions] = useState<{ value: string; label: string }[]>([
+    { value: "", label: "Select Issue..." },
+  ]);
+
+  const preferences = getPreferenceValues<{
+    subdomain: string;
+    email: string;
+    apiToken: string;
+    enableSystemField?: boolean;
+    systemFieldId?: string;
+    enableIssueField?: boolean;
+    issueFieldId?: string;
+  }>();
 
   async function uploadImage(file: File): Promise<string> {
     const formData = new FormData();
@@ -291,94 +378,280 @@ function ReplyForm({ ticketId }: { ticketId: number }) {
     }
   }
 
-  async function submit() {
-    if (!text.trim() && attachments.length === 0) return;
-    await showToast({ style: Toast.Style.Animated, title: "Sending reply…" });
+  // Load ticket data and users on mount
+  React.useEffect(() => {
+    loadTicketAndUsers();
+    loadCustomFieldOptions();
+  }, [ticketId]);
+
+  async function loadTicketAndUsers() {
+    setLoading(true);
     try {
-      const comment: { body: string; public: boolean; uploads?: string[] } = {
-        body: text,
-        public: isPublic,
-      };
+      const [ticketResponse, usersResponse] = await Promise.all([
+        zdFetch<TicketResponse>(`/api/v2/tickets/${ticketId}.json`),
+        loadAllAgents(),
+      ]);
 
-      if (attachments.length > 0) {
-        comment.uploads = attachments;
+      const loadedTicket = ticketResponse.ticket;
+      setTicket(loadedTicket);
+      setUsers(usersResponse.users);
+
+      // Set current values
+      setSelectedStatus(loadedTicket.status || "");
+      setSelectedAssigneeId(loadedTicket.assignee_id?.toString() || "");
+
+      // Load custom field values with better null handling
+      if (loadedTicket.custom_fields) {
+        if (preferences.enableSystemField && preferences.systemFieldId) {
+          const systemField = loadedTicket.custom_fields.find(
+            (field) => field.id === parseInt(preferences.systemFieldId!),
+          );
+          const value = systemField?.value;
+          setSystemFieldValue(value !== null && value !== undefined ? value.toString() : "");
+          console.log("Loaded system field value:", value, "->", systemField?.value?.toString() || "");
+        }
+
+        if (preferences.enableIssueField && preferences.issueFieldId) {
+          const issueField = loadedTicket.custom_fields.find(
+            (field) => field.id === parseInt(preferences.issueFieldId!),
+          );
+          const value = issueField?.value;
+          setIssueFieldValue(value !== null && value !== undefined ? value.toString() : "");
+          console.log("Loaded issue field value:", value, "->", issueField?.value?.toString() || "");
+        }
       }
-
-      await zdFetch(`/api/v2/tickets/${ticketId}.json`, {
-        method: "PUT",
-        body: JSON.stringify({ ticket: { comment } }),
-      });
-      await showToast({ style: Toast.Style.Success, title: "Reply sent" });
-      // Clear the form
-      setText("");
-      setAttachments([]);
-      // Navigate back to the ticket list
-      popToRoot();
     } catch (e) {
-      await showToast({ style: Toast.Style.Failure, title: "Failed to send reply", message: String(e) });
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to load ticket details",
+        message: String(e),
+      });
+    } finally {
+      setLoading(false);
     }
   }
 
+  async function loadAllAgents(): Promise<{ users: User[] }> {
+    return await zdFetch<{ users: User[] }>("/api/v2/users.json?role[]=agent&role[]=admin");
+  }
+
+  async function loadCustomFieldOptions() {
+    try {
+      // Load system field options if enabled
+      if (preferences.enableSystemField && preferences.systemFieldId) {
+        const fieldResponse = await zdFetch<{
+          ticket_field: { custom_field_options: Array<{ name: string; value: string }> };
+        }>(`/api/v2/ticket_fields/${preferences.systemFieldId}.json`);
+        const options = fieldResponse.ticket_field.custom_field_options.map((option) => ({
+          value: option.value,
+          label: option.name,
+        }));
+        setSystemOptions([{ value: "", label: "Select System..." }, ...options]);
+      }
+
+      // Load issue field options if enabled
+      if (preferences.enableIssueField && preferences.issueFieldId) {
+        const fieldResponse = await zdFetch<{
+          ticket_field: { custom_field_options: Array<{ name: string; value: string }> };
+        }>(`/api/v2/ticket_fields/${preferences.issueFieldId}.json`);
+        const options = fieldResponse.ticket_field.custom_field_options.map((option) => ({
+          value: option.value,
+          label: option.name,
+        }));
+        setIssueOptions([{ value: "", label: "Select Issue..." }, ...options]);
+      }
+    } catch (e) {
+      console.error("Failed to load custom field options:", e);
+    }
+  }
+
+  async function submit() {
+    await showToast({ style: Toast.Style.Animated, title: "Updating ticket…" });
+
+    try {
+      const updateData: {
+        status?: string;
+        assignee_id?: number | null;
+        custom_fields?: Array<{ id: number; value: string | null }>;
+        comment?: { body: string; public: boolean; uploads?: string[] };
+      } = {};
+
+      // Add ticket updates if changed
+      if (selectedStatus && selectedStatus !== ticket?.status) {
+        updateData.status = selectedStatus;
+      }
+
+      if (selectedAssigneeId !== ticket?.assignee_id?.toString()) {
+        updateData.assignee_id = selectedAssigneeId ? parseInt(selectedAssigneeId) : null;
+      }
+
+      // Always send custom fields to ensure persistence
+      const customFields: Array<{ id: number; value: string | null }> = [];
+
+      if (preferences.enableSystemField && preferences.systemFieldId) {
+        // Always include system field, even if empty
+        customFields.push({
+          id: parseInt(preferences.systemFieldId),
+          value: systemFieldValue || null,
+        });
+      }
+
+      if (preferences.enableIssueField && preferences.issueFieldId) {
+        // Always include issue field, even if empty
+        customFields.push({
+          id: parseInt(preferences.issueFieldId),
+          value: issueFieldValue || null,
+        });
+      }
+
+      if (customFields.length > 0) {
+        updateData.custom_fields = customFields;
+        console.log("Sending custom fields:", customFields);
+      }
+
+      // Add comment if provided
+      if (text.trim() || attachments.length > 0) {
+        const comment: { body: string; public: boolean; uploads?: string[] } = {
+          body: text,
+          public: isPublic,
+        };
+
+        if (attachments.length > 0) {
+          comment.uploads = attachments;
+        }
+
+        updateData.comment = comment;
+      }
+
+      console.log("Update data being sent:", JSON.stringify({ ticket: updateData }, null, 2));
+
+      const response = await zdFetch(`/api/v2/tickets/${ticketId}.json`, {
+        method: "PUT",
+        body: JSON.stringify({ ticket: updateData }),
+      });
+
+      console.log("Update response:", response);
+
+      await showToast({ style: Toast.Style.Success, title: "Ticket updated successfully" });
+      popToRoot();
+    } catch (e) {
+      await showFailureToast(e, { title: "Failed to update ticket" });
+    }
+  }
+
+  if (loading || !ticket) {
+    return <Form isLoading={true} />;
+  }
+
+  const agents = users.filter((user) => user.role === "agent" || user.role === "admin");
+
   return (
     <Form
+      isLoading={loading || uploading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Send Reply" onSubmit={submit} />
+          <Action.SubmitForm title="Update Ticket" onSubmit={submit} />
         </ActionPanel>
       }
     >
-      <Form.Description title={`Reply to #${ticketId}`} text="" />
-      <Form.Checkbox id="public" label="Public Reply" value={isPublic} onChange={setIsPublic} />
-      <Form.TextArea
-        id="body"
-        title="Message"
-        value={text}
-        onChange={setText}
-        enableMarkdown
-        placeholder="Type your reply…"
-      />
-      <Form.FilePicker
-        id="images"
-        title="📎 Image Attachments"
-        allowMultipleSelection={true}
-        value={[]}
-        onChange={handleFileSelection}
-        canChooseDirectories={false}
-        canChooseFiles={true}
-        showHiddenFiles={false}
-        info="Click to select images or drag files onto Raycast"
-      />
-      {attachments.length > 0 && (
-        <Form.Description title="Uploaded Images" text={`${attachments.length} image(s) ready to attach`} />
+      <Form.Description title={`Manage Ticket #${ticketId}`} text={ticket.subject || ""} />
+
+      {/* Ticket Status and Assignment */}
+      <StatusDropdown value={selectedStatus} onChange={setSelectedStatus} />
+
+      <Form.Dropdown id="assignee" title="Assignee" value={selectedAssigneeId} onChange={setSelectedAssigneeId}>
+        <Form.Dropdown.Item value="" title="Unassigned" />
+        {agents.map((agent) => (
+          <Form.Dropdown.Item value={agent.id.toString()} title={agent.name} />
+        ))}
+      </Form.Dropdown>
+
+      {/* Custom Fields */}
+      {preferences.enableSystemField && preferences.systemFieldId && (
+        <Form.Dropdown id="systemField" title="System" value={systemFieldValue} onChange={setSystemFieldValue}>
+          {systemOptions.map((option) => (
+            <Form.Dropdown.Item value={option.value} title={option.label} />
+          ))}
+        </Form.Dropdown>
       )}
-      {uploading && <Form.Description title="Status" text="Uploading images..." />}
+
+      {preferences.enableIssueField && preferences.issueFieldId && (
+        <Form.Dropdown id="issueField" title="Issue" value={issueFieldValue} onChange={setIssueFieldValue}>
+          {issueOptions.map((option) => (
+            <Form.Dropdown.Item value={option.value} title={option.label} />
+          ))}
+        </Form.Dropdown>
+      )}
+
+      <FormSeparator />
+
+      {/* Reply Section */}
+      <FieldGroup title="Add Reply (Optional)" description="Leave blank to only update ticket properties">
+        <Form.Checkbox id="public" label="Public Reply" value={isPublic} onChange={setIsPublic} />
+
+        <Form.TextArea
+          id="body"
+          title="Message"
+          value={text}
+          onChange={setText}
+          enableMarkdown
+          placeholder="Type your reply…"
+        />
+
+        <Form.FilePicker
+          id="images"
+          title="📎 Image Attachments"
+          allowMultipleSelection={true}
+          value={[]}
+          onChange={handleFileSelection}
+          canChooseDirectories={false}
+          canChooseFiles={true}
+          showHiddenFiles={false}
+          info="Click to select images or drag files onto Raycast"
+        />
+
+        {attachments.length > 0 && (
+          <StatusIndicator title="Uploaded Images" text={`${attachments.length} image(s) ready to attach`} />
+        )}
+        {uploading && <StatusIndicator title="Status" text="Uploading images" isLoading={true} />}
+      </FieldGroup>
     </Form>
   );
 }
 
 async function assignToMe(ticketId: number) {
-  try {
-    const me = await getCurrentUserId();
-    await zdFetch(`/api/v2/tickets/${ticketId}.json`, {
-      method: "PUT",
-      body: JSON.stringify({ ticket: { assignee_id: me } }),
-    });
-    await showToast({ style: Toast.Style.Success, title: "Assigned to you" });
-  } catch (e) {
-    await showToast({ style: Toast.Style.Failure, title: "Failed to assign", message: String(e) });
-  }
+  await withErrorHandling(
+    async () => {
+      const me = await getCurrentUserId();
+      await zdFetch(`/api/v2/tickets/${ticketId}.json`, {
+        method: "PUT",
+        body: JSON.stringify({ ticket: { assignee_id: me } }),
+      });
+    },
+    "Assign ticket",
+    {
+      showSuccess: true,
+      successMessage: "Assigned to you",
+      useFailureToast: true,
+    },
+  );
 }
 
 async function updateStatus(ticketId: number, status: "pending" | "solved" | "open" | "hold") {
-  try {
-    await zdFetch(`/api/v2/tickets/${ticketId}.json`, {
-      method: "PUT",
-      body: JSON.stringify({ ticket: { status } }),
-    });
-    await showToast({ style: Toast.Style.Success, title: `Marked ${status}` });
-  } catch (e) {
-    await showToast({ style: Toast.Style.Failure, title: "Failed to update status", message: String(e) });
-  }
+  await withErrorHandling(
+    async () => {
+      await zdFetch(`/api/v2/tickets/${ticketId}.json`, {
+        method: "PUT",
+        body: JSON.stringify({ ticket: { status } }),
+      });
+    },
+    "Update status",
+    {
+      showSuccess: true,
+      successMessage: `Marked ${status}`,
+      useFailureToast: true,
+    },
+  );
 }
 
 function TicketDetails({ ticketId }: { ticketId: number }) {
@@ -422,7 +695,7 @@ function TicketDetails({ ticketId }: { ticketId: number }) {
         setUsers(usersMap);
       }
     } catch (e) {
-      await showToast({ style: Toast.Style.Failure, title: "Failed to load ticket details", message: String(e) });
+      await showFailureToast(e, { title: "Failed to load ticket details" });
     } finally {
       setLoading(false);
     }
@@ -484,380 +757,19 @@ ${comment.body}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={getAgentTicketUrl(ticketId)} />
-          <Action.Push title="Reply…" target={<ReplyForm ticketId={ticketId} />} />
-          <Action.Push title="Edit Ticket" target={<EditTicketForm ticketId={ticketId} />} />
+          <Action.Push title="Manage Ticket" target={<ManageTicketForm ticketId={ticketId} />} />
+          <Action.Push
+            title="Apply Macro"
+            icon="⚡"
+            target={<MacroList ticketId={ticketId} />}
+            shortcut={{ modifiers: ["cmd"], key: "m" }}
+          />
+          <TicketToArticleAction ticketId={ticketId} ticketSubject={ticket?.subject || `Ticket ${ticketId}`} />
           <Action title="Assign to Me" onAction={() => assignToMe(ticketId)} />
           <Action title="Mark as Solved" onAction={() => updateStatus(ticketId, "solved")} />
           <Action title="Mark as Pending" onAction={() => updateStatus(ticketId, "pending")} />
         </ActionPanel>
       }
     />
-  );
-}
-
-function EditTicketForm({ ticketId }: { ticketId: number }) {
-  const preferences = getPreferenceValues<{
-    subdomain: string;
-    email: string;
-    apiToken: string;
-    enableSystemField?: boolean;
-    systemFieldId?: string;
-    enableIssueField?: boolean;
-    issueFieldId?: string;
-  }>();
-
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [ticket, setTicket] = useState<FullTicket | null>(null);
-  const [users, setUsers] = useState<User[]>([]);
-  const [groups, setGroups] = useState<Group[]>([]);
-
-  // Form states
-  const [selectedAssigneeId, setSelectedAssigneeId] = useState<string>("");
-  const [selectedGroupId, setSelectedGroupId] = useState<string>("");
-  const [assignmentType, setAssignmentType] = useState<"user" | "group">("user");
-  const [ticketStatus, setTicketStatus] = useState<string>("");
-  const [systemFieldValue, setSystemFieldValue] = useState<string>("");
-  const [issueFieldValue, setIssueFieldValue] = useState<string>("");
-
-  const [systemOptions, setSystemOptions] = useState<{ value: string; label: string }[]>([
-    { value: "", label: "Select System..." },
-  ]);
-  const [issueOptions, setIssueOptions] = useState<{ value: string; label: string }[]>([
-    { value: "", label: "Select Issue..." },
-  ]);
-
-  const statusOptions = [
-    { value: "", label: "No Change" },
-    { value: "new", label: "New" },
-    { value: "open", label: "Open" },
-    { value: "pending", label: "Pending" },
-    { value: "hold", label: "On Hold" },
-    { value: "solved", label: "Solved" },
-    { value: "closed", label: "Closed" },
-  ];
-
-  useEffect(() => {
-    loadTicketAndUsers();
-    loadCustomFieldOptions();
-  }, [ticketId]);
-
-  async function loadAllAgents(): Promise<{ users: User[] }> {
-    try {
-      let allUsers: User[] = [];
-      let nextPage = "/api/v2/users.json?role[]=agent&role[]=admin&per_page=100";
-
-      // Handle pagination to get all agents and admins
-      while (nextPage) {
-        const response = await zdFetch<{
-          users: User[];
-          next_page?: string;
-        }>(nextPage);
-
-        allUsers = [...allUsers, ...response.users];
-        nextPage = response.next_page || "";
-
-        // Prevent infinite loops - safety check
-        if (allUsers.length > 1000) {
-          console.warn("Too many users found, limiting to first 1000");
-          break;
-        }
-      }
-
-      return { users: allUsers };
-    } catch (e) {
-      console.error("Failed to load agents:", e);
-      // Fallback to basic users endpoint if the filtered one fails
-      return await zdFetch<{ users: User[] }>("/api/v2/users.json");
-    }
-  }
-
-  async function loadCustomFieldOptions() {
-    try {
-      // Load ticket fields to get custom field options
-      const fieldsResponse = await zdFetch<{
-        ticket_fields: Array<{
-          id: number;
-          title: string;
-          custom_field_options?: Array<{ name: string; value: string }>;
-        }>;
-      }>("/api/v2/ticket_fields.json");
-
-      // Load system field options
-      if (preferences.enableSystemField && preferences.systemFieldId) {
-        const systemField = fieldsResponse.ticket_fields.find(
-          (field) => field.id === parseInt(preferences.systemFieldId!),
-        );
-        if (systemField?.custom_field_options) {
-          const options = [
-            { value: "", label: "Select System..." },
-            ...systemField.custom_field_options.map((option) => ({
-              value: option.value,
-              label: option.name,
-            })),
-          ];
-          setSystemOptions(options);
-        }
-      }
-
-      // Load issue field options
-      if (preferences.enableIssueField && preferences.issueFieldId) {
-        const issueField = fieldsResponse.ticket_fields.find(
-          (field) => field.id === parseInt(preferences.issueFieldId!),
-        );
-        if (issueField?.custom_field_options) {
-          const options = [
-            { value: "", label: "Select Issue..." },
-            ...issueField.custom_field_options.map((option) => ({
-              value: option.value,
-              label: option.name,
-            })),
-          ];
-          setIssueOptions(options);
-        }
-      }
-    } catch (e) {
-      console.error("Failed to load custom field options:", e);
-      // Keep default options if loading fails
-    }
-  }
-
-  async function loadTicketAndUsers() {
-    setLoading(true);
-    try {
-      // Load ticket details, users, and groups in parallel
-      const [ticketResponse, usersResponse, groupsResponse] = await Promise.all([
-        zdFetch<TicketResponse>(`/api/v2/tickets/${ticketId}.json`),
-        loadAllAgents(),
-        zdFetch<GroupsResponse>("/api/v2/groups.json"),
-      ]);
-
-      setTicket(ticketResponse.ticket);
-      setUsers(usersResponse.users);
-      setGroups(groupsResponse.groups);
-
-      // Set current values
-      if (ticketResponse.ticket.assignee_id) {
-        setSelectedAssigneeId(ticketResponse.ticket.assignee_id.toString());
-        setAssignmentType("user");
-      }
-
-      // Set current status (but leave dropdown empty for "no change" by default)
-      // setTicketStatus(ticketResponse.ticket.status || "");
-
-      // Set custom field values
-      if (ticketResponse.ticket.custom_fields) {
-        if (preferences.enableSystemField && preferences.systemFieldId) {
-          const systemField = ticketResponse.ticket.custom_fields.find(
-            (cf) => cf.id === parseInt(preferences.systemFieldId!),
-          );
-          if (systemField?.value) {
-            setSystemFieldValue(systemField.value.toString());
-          }
-        }
-
-        if (preferences.enableIssueField && preferences.issueFieldId) {
-          const issueField = ticketResponse.ticket.custom_fields.find(
-            (cf) => cf.id === parseInt(preferences.issueFieldId!),
-          );
-          if (issueField?.value) {
-            setIssueFieldValue(issueField.value.toString());
-          }
-        }
-      }
-    } catch (e) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load ticket details",
-        message: String(e),
-      });
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function updateTicket() {
-    setSaving(true);
-    await showToast({ style: Toast.Style.Animated, title: "Updating ticket..." });
-
-    try {
-      const updateData: {
-        status?: string;
-        assignee_id?: number | null;
-        group_id?: number | null;
-        custom_fields?: Array<{ id: number; value: string }>;
-      } = {};
-
-      // Handle status change
-      if (ticketStatus) {
-        updateData.status = ticketStatus;
-      }
-
-      // Handle assignment
-      if (assignmentType === "user" && selectedAssigneeId) {
-        updateData.assignee_id = parseInt(selectedAssigneeId);
-        updateData.group_id = null; // Clear group assignment when assigning to user
-      } else if (assignmentType === "group" && selectedGroupId) {
-        updateData.group_id = parseInt(selectedGroupId);
-        updateData.assignee_id = null; // Clear user assignment when assigning to group
-      }
-
-      // Handle custom fields
-      const customFields = [];
-      if (preferences.enableSystemField && preferences.systemFieldId && systemFieldValue) {
-        customFields.push({
-          id: parseInt(preferences.systemFieldId),
-          value: systemFieldValue,
-        });
-      }
-      if (preferences.enableIssueField && preferences.issueFieldId && issueFieldValue) {
-        customFields.push({
-          id: parseInt(preferences.issueFieldId),
-          value: issueFieldValue,
-        });
-      }
-
-      if (customFields.length > 0) {
-        updateData.custom_fields = customFields;
-      }
-
-      await zdFetch(`/api/v2/tickets/${ticketId}.json`, {
-        method: "PUT",
-        body: JSON.stringify({ ticket: updateData }),
-      });
-
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Ticket updated successfully",
-      });
-
-      // Navigate back
-      popToRoot();
-    } catch (e) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to update ticket",
-        message: String(e),
-      });
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  if (loading || !ticket) {
-    return <Form isLoading={true} />;
-  }
-
-  const agents = users.filter((user) => user.role === "agent" || user.role === "admin");
-
-  return (
-    <Form
-      isLoading={saving}
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Update Ticket" onSubmit={updateTicket} />
-        </ActionPanel>
-      }
-    >
-      <Form.Description title={`Edit Ticket #${ticketId}`} text={ticket.subject || "No subject"} />
-
-      <Form.Separator />
-
-      <Form.Dropdown
-        id="status"
-        title="Ticket Status"
-        value={ticketStatus}
-        onChange={setTicketStatus}
-        info={`Current status: ${ticket.status || "Unknown"}`}
-      >
-        {statusOptions.map((option) => (
-          <Form.Dropdown.Item key={option.value} value={option.value} title={option.label} />
-        ))}
-      </Form.Dropdown>
-
-      <Form.Separator />
-
-      <Form.Dropdown
-        id="assignmentType"
-        title="Assignment Type"
-        value={assignmentType}
-        onChange={(value) => setAssignmentType(value as "user" | "group")}
-      >
-        <Form.Dropdown.Item value="user" title="Assign to User" />
-        <Form.Dropdown.Item value="group" title="Assign to Group" />
-      </Form.Dropdown>
-
-      {assignmentType === "user" && (
-        <Form.Dropdown id="assignee" title="Assignee" value={selectedAssigneeId} onChange={setSelectedAssigneeId}>
-          <Form.Dropdown.Item value="" title="Unassigned" />
-          {agents.map((user) => (
-            <Form.Dropdown.Item key={user.id} value={user.id.toString()} title={`${user.name} (${user.email})`} />
-          ))}
-        </Form.Dropdown>
-      )}
-
-      {assignmentType === "group" && (
-        <Form.Dropdown id="group" title="Group" value={selectedGroupId} onChange={setSelectedGroupId}>
-          <Form.Dropdown.Item value="" title="Select Group..." />
-          {groups.map((group) => (
-            <Form.Dropdown.Item key={group.id} value={group.id.toString()} title={group.name} />
-          ))}
-        </Form.Dropdown>
-      )}
-
-      {(preferences.enableSystemField || preferences.enableIssueField) && <Form.Separator />}
-
-      {preferences.enableSystemField && (
-        <Form.Dropdown
-          id="system"
-          title="System"
-          value={systemFieldValue}
-          onChange={setSystemFieldValue}
-          info={
-            preferences.systemFieldId ? `Field ID: ${preferences.systemFieldId}` : "Configure field ID in preferences"
-          }
-        >
-          {systemOptions.map((option) => (
-            <Form.Dropdown.Item key={option.value} value={option.value} title={option.label} />
-          ))}
-        </Form.Dropdown>
-      )}
-
-      {preferences.enableIssueField && (
-        <Form.Dropdown
-          id="issue"
-          title="Issue"
-          value={issueFieldValue}
-          onChange={setIssueFieldValue}
-          info={
-            preferences.issueFieldId ? `Field ID: ${preferences.issueFieldId}` : "Configure field ID in preferences"
-          }
-        >
-          {issueOptions.map((option) => (
-            <Form.Dropdown.Item key={option.value} value={option.value} title={option.label} />
-          ))}
-        </Form.Dropdown>
-      )}
-
-      {(ticketStatus ||
-        selectedAssigneeId ||
-        selectedGroupId ||
-        (preferences.enableSystemField && systemFieldValue) ||
-        (preferences.enableIssueField && issueFieldValue)) && (
-        <>
-          <Form.Separator />
-          <Form.Description
-            title="Changes Summary"
-            text={`${ticketStatus ? `Status: ${statusOptions.find((s) => s.value === ticketStatus)?.label}` : "Status: No change"}\n${
-              assignmentType === "user" && selectedAssigneeId
-                ? `Assign to: ${agents.find((u) => u.id.toString() === selectedAssigneeId)?.name}`
-                : assignmentType === "group" && selectedGroupId
-                  ? `Assign to group: ${groups.find((g) => g.id.toString() === selectedGroupId)?.name}`
-                  : "Assignment: No change"
-            }${preferences.enableSystemField && systemFieldValue ? `\nSystem: ${systemFieldValue}` : ""}${preferences.enableIssueField && issueFieldValue ? `\nIssue: ${issueFieldValue}` : ""}`}
-          />
-        </>
-      )}
-    </Form>
   );
 }
