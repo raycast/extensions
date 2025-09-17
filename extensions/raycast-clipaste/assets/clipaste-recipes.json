@@ -1,0 +1,118 @@
+{
+  "version": 1,
+  "recipes": [
+    {
+      "id": "img-to-png",
+      "label": "Paste image → PNG to ~/Pictures/Clip",
+      "args": [
+        "paste",
+        "--format",
+        "png",
+        "--output",
+        "~/Pictures/Clip",
+        "--auto-extension"
+      ]
+    },
+    {
+      "id": "text-to-md",
+      "label": "Paste text → Markdown in ~/Documents/Notes",
+      "args": [
+        "paste",
+        "--type",
+        "text",
+        "--auto-extension",
+        "--output",
+        "~/Documents/Notes",
+        "--filename",
+        "note"
+      ]
+    },
+    {
+      "id": "status",
+      "label": "Status",
+      "args": [
+        "status"
+      ]
+    },
+    {
+      "id": "ai-summarize-copyback",
+      "label": "AI: summarize clipboard → copy back",
+      "args": [
+        "ai",
+        "summarize",
+        "--copy"
+      ]
+    },
+    {
+      "id": "random-password-strong",
+      "label": "Random: Strong password (24 chars)",
+      "args": [
+        "random",
+        "password",
+        "--length",
+        "24",
+        "--show-meta"
+      ]
+    },
+    {
+      "id": "random-password-words",
+      "label": "Random: Diceware password (6 words)",
+      "args": [
+        "random",
+        "password",
+        "--words",
+        "--length",
+        "6",
+        "--show-meta"
+      ]
+    },
+    {
+      "id": "random-uuid",
+      "label": "Random: UUID-like string",
+      "args": [
+        "random",
+        "string",
+        "--template",
+        "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+      ]
+    },
+    {
+      "id": "random-license-plate",
+      "label": "Random: License plate format",
+      "args": [
+        "random",
+        "string",
+        "--template",
+        "XXX-999"
+      ]
+    },
+    {
+      "id": "random-finnish-personal-id",
+      "label": "Random: Finnish Personal ID",
+      "args": [
+        "random",
+        "personal-id",
+        "--show-meta"
+      ]
+    },
+    {
+      "id": "random-finnish-iban",
+      "label": "Random: Finnish IBAN (spaced)",
+      "args": [
+        "random",
+        "iban",
+        "--format",
+        "spaced"
+      ]
+    },
+    {
+      "id": "random-finnish-business-id",
+      "label": "Random: Finnish Business ID",
+      "args": [
+        "random",
+        "business-id",
+        "--show-meta"
+      ]
+    }
+  ]
+}

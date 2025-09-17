@@ -1,0 +1,86 @@
+{
+  "name": "raycast-clipaste",
+  "version": "1.0.5",
+  "title": "Raycast Clipaste Launcher",
+  "description": "Keyboard-first Raycast extension to run clipaste with a form, recipes, and clipboard preview/history.",
+  "icon": "icon.png",
+  "author": "markomanninen",
+  "categories": [
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "launcher",
+      "title": "Clipaste Launcher",
+      "description": "Run clipaste with arguments from a single form.",
+      "mode": "view",
+      "keywords": [
+        "clipboard",
+        "paste",
+        "copy",
+        "clipaste"
+      ],
+      "icon": "icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clipastePath",
+      "label": "clipaste binary",
+      "title": "clipaste binary",
+      "description": "Path to the clipaste executable (or just 'clipaste' if it's on PATH).",
+      "type": "textfield",
+      "required": true,
+      "default": "clipaste"
+    },
+    {
+      "name": "defaultOutputDir",
+      "label": "Default Output Directory",
+      "title": "Default Output Directory",
+      "description": "Used when 'Paste' has empty Output dir.",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "enablePngpaste",
+      "label": "Enable pngpaste fallback (macOS)",
+      "title": "Enable pngpaste fallback (macOS)",
+      "description": "If clipboard contains an image (not a file), try to dump it via pngpaste for preview.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "pngpastePath",
+      "label": "pngpaste binary",
+      "title": "pngpaste binary",
+      "description": "Path to pngpaste (e.g., 'pngpaste'). Install with: brew install pngpaste",
+      "type": "textfield",
+      "required": false,
+      "default": "pngpaste"
+    }
+  ],
+  "scripts": {
+    "dev": "ray dev",
+    "build": "ray build",
+    "lint": "eslint . --ext .ts,.tsx || true",
+    "install-deps": "./install.sh",
+    "setup": "npm install && npm run build",
+    "publish": "ray publish",
+    "package": "./package.sh"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.77.0",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.57.1",
+    "eslint-plugin-react": "^7.35.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "prettier": "^3.3.3",
+    "typescript": "~5.3.3"
+  }
+}
