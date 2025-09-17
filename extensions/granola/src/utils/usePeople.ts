@@ -138,6 +138,8 @@ export function usePeople() {
         const allPeople = Array.from(peopleMap.values());
         setPeople(allPeople);
 
+        const companyMeetingIds = new Map<string, Set<string>>();
+
         // Extract unique companies from people
         // Use company name if available, otherwise use email domain
         allPeople.forEach((person) => {
@@ -158,10 +160,24 @@ export function usePeople() {
           }
 
           if (companyKey) {
+            const meetingIds = Array.isArray(person.meetingIds) ? person.meetingIds : [];
+            let meetingSet = companyMeetingIds.get(companyKey);
+            if (!meetingSet) {
+              meetingSet = new Set<string>();
+              companyMeetingIds.set(companyKey, meetingSet);
+            }
+
+            meetingIds.forEach((id) => {
+              if (typeof id === "string" && id.length > 0) {
+                meetingSet.add(id);
+              }
+            });
+
+            const totalMeetings = meetingSet.size;
             const existing = companyMap.get(companyKey);
             if (existing) {
               existing.people.push(person);
-              existing.totalMeetings = (existing.totalMeetings || 0) + (person.meetingCount || 0);
+              existing.totalMeetings = totalMeetings;
               if (compareDates(person.lastMeetingDate, existing.lastMeetingDate) > 0) {
                 existing.lastMeetingDate = person.lastMeetingDate;
               }
@@ -170,7 +186,7 @@ export function usePeople() {
                 name: person.company_name || companyKey,
                 description: person.company_description || "",
                 people: [person],
-                totalMeetings: person.meetingCount || 0,
+                totalMeetings,
                 lastMeetingDate: person.lastMeetingDate,
               });
             }

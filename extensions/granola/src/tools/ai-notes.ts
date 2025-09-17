@@ -317,36 +317,57 @@ export default async function tool(input: Input): Promise<Note[] | FolderInfo[]>
 
     // Apply date filter if provided and not empty
     if (input.date && input.date.trim() !== "") {
+      const inputLower = input.date.toLowerCase();
+      const isLatestQuery =
+        inputLower.includes("latest") ||
+        inputLower.includes("most recent") ||
+        inputLower === "recent" ||
+        inputLower === "newest";
+
+      if (isLatestQuery) {
+        // Treat "latest" style date filters as chronological lookups without additional filtering
+        return true;
+      }
+
       try {
         const noteDate = new Date(note.date);
         const noteDateStr = noteDate.toISOString().split("T")[0];
 
-        let targetDate: Date | null = null;
-        const inputLower = input.date.toLowerCase();
+        if (Number.isNaN(noteDate.getTime())) {
+          return true;
+        }
 
         if (inputLower === "today") {
-          targetDate = new Date();
-          return noteDateStr === targetDate.toISOString().split("T")[0];
-        } else if (inputLower === "yesterday") {
-          targetDate = new Date();
-          targetDate.setDate(targetDate.getDate() - 1);
-          return noteDateStr === targetDate.toISOString().split("T")[0];
-        } else if (inputLower === "last week") {
+          const today = new Date();
+          return noteDateStr === today.toISOString().split("T")[0];
+        }
+
+        if (inputLower === "yesterday") {
+          const yesterday = new Date();
+          yesterday.setDate(yesterday.getDate() - 1);
+          return noteDateStr === yesterday.toISOString().split("T")[0];
+        }
+
+        if (inputLower === "last week" || inputLower.includes("week")) {
           const weekAgo = new Date();
           weekAgo.setDate(weekAgo.getDate() - 7);
           return noteDate >= weekAgo;
-        } else if (inputLower === "last month") {
+        }
+
+        if (inputLower === "last month" || inputLower.includes("month")) {
           const monthAgo = new Date();
           monthAgo.setMonth(monthAgo.getMonth() - 1);
           return noteDate >= monthAgo;
-        } else {
-          // Try parsing as ISO date
-          targetDate = new Date(input.date);
-          return noteDateStr === targetDate.toISOString().split("T")[0];
         }
-      } catch (e) {
-        showFailureToast(`Invalid date format or query: note.date=${note.date} or input.date=${input.date}`);
-        return false;
+
+        const targetDate = new Date(input.date);
+        if (Number.isNaN(targetDate.getTime())) {
+          return true;
+        }
+
+        return noteDateStr === targetDate.toISOString().split("T")[0];
+      } catch (error) {
+        return true;
       }
     }
 
