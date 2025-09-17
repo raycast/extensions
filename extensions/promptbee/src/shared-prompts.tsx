@@ -43,8 +43,8 @@ export default function SharedPromptsCommand() {
       const data: Prompt[] = (await res.json()) as Prompt[];
       setPrompts(data);
     } catch (err) {
+      console.error(err);
       showToast({ style: Toast.Style.Failure, title: "Failed to load prompts" });
-      console.log(err);
     } finally {
       setLoading(false);
     }
