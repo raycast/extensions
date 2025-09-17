@@ -2,7 +2,7 @@ import { ActionPanel, List, Action, getPreferenceValues, environment } from "@ra
 import { useCachedPromise, usePromise } from "@raycast/utils";
 import { spawn } from "child_process";
 import path, { basename } from "path";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { ensureFdCLI } from "./lib/fd-downloader";
 import os from "os";
 import fs from "fs";
@@ -59,16 +59,8 @@ export default function Command() {
       const outFD = fs.openSync(fdOutput, "w");
       const fd = spawn(fdPath, [...optionalArgs, "--print0", "--follow", ".", ...searchDirs], {
         stdio: ["ignore", outFD, "pipe"],
+        signal: abortable.current?.signal,
       });
-
-      let fdKilled = false;
-      const onAbort = () => {
-        console.log("aborting fd", basename(fdOutput));
-        fdKilled = true;
-        fd.kill();
-        fs.rmSync(fdOutput, { force: true });
-      };
-      abortable.current?.signal.addEventListener("abort", onAbort);
 
       await new Promise<void>((resolve, reject) => {
         let stderr = "";
@@ -76,17 +68,22 @@ export default function Command() {
           stderr += chunk;
         });
 
+        fd.on("error", () => {
+          console.log("aborting fd");
+        });
+
+        // this is executed both on finish and after on error
         fd.on("close", (code) => {
           fs.closeSync(outFD);
-          if (code === 0 || fdKilled) {
+          if (code === 0 || code === null) {
             resolve();
           } else {
+            console.log("closing with code", code);
             fs.rmSync(fdOutput, { force: true });
             reject(`Exit code of 'fd' = ${code}:\n${stderr}`);
           }
         });
       });
-      abortable.current?.signal.removeEventListener("abort", onAbort);
 
       return fdOutput;
     },
@@ -96,14 +93,6 @@ export default function Command() {
       abortable,
     },
   );
-
-  useEffect(() => {
-    return () => {
-      if (!fdOutput) return;
-      console.log("removing", basename(fdOutput));
-      fs.rmSync(fdOutput, { force: true });
-    };
-  }, [fdOutput]);
 
   // Get filteredPaths from fzf output
   const { data: filteredPaths, isLoading: isFilteredPathsLoading } = usePromise(
