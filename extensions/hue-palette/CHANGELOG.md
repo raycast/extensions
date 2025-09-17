@@ -1,5 +1,10 @@
 # Hue Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Add support for Windows platform.
+- Bump all dependencies to the latest.
+
 ## [Feature] - 2025-02-02
 
 - Added the action to copy the new Tailwind CSS version 4.0 configuration code.
