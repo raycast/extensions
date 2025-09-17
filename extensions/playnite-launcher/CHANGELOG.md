@@ -1,6 +1,6 @@
 # Playnite Launcher Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2025-09-17
 
 * Feat: added support for portable versions of Playnite
 * Fix: updated shortcuts to prevent conflict with Raycast
