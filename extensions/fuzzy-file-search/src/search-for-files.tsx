@@ -1,5 +1,5 @@
-import { ActionPanel, List, Action, getPreferenceValues, environment } from "@raycast/api";
-import { useCachedPromise, usePromise } from "@raycast/utils";
+import { ActionPanel, List, Action, getPreferenceValues, environment, showToast, Toast } from "@raycast/api";
+import { useCachedPromise, useCachedState, usePromise } from "@raycast/utils";
 import { spawn } from "child_process";
 import path, { basename } from "path";
 import { useRef, useState } from "react";
@@ -24,7 +24,7 @@ export default function Command() {
   const prefs = getPreferenceValues<Prefs>();
 
   const [searchText, setSearchText] = useState("");
-  const [searchRoot, setSearchRoot] = useState<string>(os.homedir());
+  const [searchRoot, setSearchRoot] = useCachedState<string>("searchRootKey");
 
   // Get FD CLI path
   const { data: fdPath, isLoading: isFdLoading } = useCachedPromise(async () => {
@@ -46,7 +46,8 @@ export default function Command() {
 
   // Get fdOutput filepath
   const { data: fdOutput, isLoading: isFdOutputLoading } = usePromise(
-    async (searchRoot: string, fdPath: string | undefined) => {
+    async (searchRoot?: string, fdPath?: string) => {
+      assert(searchRoot !== undefined);
       assert(fdPath !== undefined);
 
       let optionalArgs = ["--type", "file"];
@@ -56,6 +57,11 @@ export default function Command() {
 
       const searchDirs = searchRoot.split(" ");
 
+      const toast = await showToast({
+        title: "Indexing",
+        message: "indexing files using fd",
+        style: Toast.Style.Animated,
+      });
       const fdOutput = path.join(environment.supportPath, `fd-out-${sanitizeFilename(searchRoot)}.txt`);
       const outFD = fs.openSync(fdOutput, "w");
       const fd = spawn(fdPath, [...optionalArgs, "--print0", "--follow", ".", ...searchDirs], {
@@ -86,18 +92,19 @@ export default function Command() {
         });
       });
 
+      await toast.hide();
       return fdOutput;
     },
     [searchRoot, fdPath],
     {
-      execute: fdPath !== undefined,
+      execute: searchRoot !== undefined && fdPath !== undefined,
       abortable: abortableFd,
     },
   );
 
   // Get filteredPaths from fzf output
   const { data: filteredPaths, isLoading: isFilteredPathsLoading } = usePromise(
-    async (searchText: string, fzfPath: string | undefined, fdOutput: string | undefined) => {
+    async (searchText: string, fzfPath?: string, fdOutput?: string) => {
       assert(fzfPath !== undefined);
       assert(fdOutput !== undefined);
 
