@@ -19,7 +19,8 @@ type Prefs = {
 };
 
 export default function Command() {
-  const abortable = useRef<AbortController>(null);
+  const abortableFd = useRef<AbortController>(null);
+  const abortableFzf = useRef<AbortController>(null);
   const prefs = getPreferenceValues<Prefs>();
 
   const [searchText, setSearchText] = useState("");
@@ -59,7 +60,7 @@ export default function Command() {
       const outFD = fs.openSync(fdOutput, "w");
       const fd = spawn(fdPath, [...optionalArgs, "--print0", "--follow", ".", ...searchDirs], {
         stdio: ["ignore", outFD, "pipe"],
-        signal: abortable.current?.signal,
+        signal: abortableFd.current?.signal,
       });
 
       await new Promise<void>((resolve, reject) => {
@@ -90,7 +91,7 @@ export default function Command() {
     [searchRoot, fdPath],
     {
       execute: fdPath !== undefined,
-      abortable,
+      abortable: abortableFd,
     },
   );
 
@@ -110,6 +111,7 @@ export default function Command() {
       const fdOutputFD = fs.openSync(fdOutput, "r");
       const fd = spawn(fzfPath, ["--read0", "--filter", searchTerm], {
         stdio: [fdOutputFD, "pipe", "pipe"],
+        signal: abortableFzf.current?.signal,
       });
       await new Promise<void>((resolve, reject) => {
         const rl = readline.createInterface({ input: fd.stdout as Stream.Readable });
@@ -123,7 +125,11 @@ export default function Command() {
         fd.stderr?.on("data", (chunk) => {
           stderr += chunk;
         });
+        fd.on("error", () => {
+          console.log("aborting fzf");
+        });
         fd.on("close", (code) => {
+          rl.close();
           fs.closeSync(fdOutputFD);
           // Fzf returns error code 1 if output is empty
           if (code === 0 || code === null || (code === 1 && stderr.length === 0)) {
@@ -138,6 +144,7 @@ export default function Command() {
     [searchText, fzfPath, fdOutput],
     {
       execute: fzfPath !== undefined && fdOutput !== undefined,
+      abortable: abortableFzf,
     },
   );
 
@@ -161,7 +168,7 @@ export default function Command() {
         const filename = basename(filepath);
         return (
           <List.Item
-            key={`${searchRoot}-${searchText}-${filepath}`}
+            key={filepath}
             title={filepath.startsWith(os.homedir()) ? filepath.replace(os.homedir(), "~") : filepath}
             subtitle={filename}
             quickLook={{ path: filepath, name: filename }}
