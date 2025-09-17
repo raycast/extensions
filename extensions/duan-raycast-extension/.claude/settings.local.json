@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "WebFetch(domain:developers.raycast.com)"
-    ],
-    "deny": []
-  }
-}

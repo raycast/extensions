@@ -1,6 +1,6 @@
 # duan Changelog
 
-## [Added Sorting, Filtering & Pin Features] - 2025-08-05
+## [Added Sorting, Filtering & Pin Features] - 2025-09-17
 
 ### Added
 - Pin important links to keep them at the top
@@ -26,4 +26,4 @@
 ### Fixed
 - Edit link now uses Raycast's default shortcut (⌘E)
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-06-26
