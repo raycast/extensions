@@ -80,7 +80,7 @@ export default function Command() {
   const getMarkdown = () => {
     switch (state.status) {
       case "recording":
-        return waveformMarkdown || "## Recording...  \n\nPress Enter to stop and transcibe.";
+        return waveformMarkdown || "## Recording...  \n\nPress Enter to stop and transcribe.";
       case "transcribing":
         return spinnerMarkdown || "## Transcribing...\n\nPlease wait while we process your audio.";
       case "transcribing_error":

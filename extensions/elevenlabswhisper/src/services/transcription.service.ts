@@ -1,7 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { getPreferenceValues } from "@raycast/api";
-import type { Preferences, Provider } from "../types/preferences";
+
+type Provider = Preferences["provider"];
 
 export type TranscriptionResponse = {
   text?: string;

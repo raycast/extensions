@@ -3,6 +3,7 @@
   "name": "elevenlabswhisper",
   "title": "Elevenlabs Whisper",
   "description": "Turn your voice into text instantly with the power of ElevenLabs.",
+  "platforms": ["macOS"],
   "icon": "extension-icon.png",
   "author": "insv23",
   "license": "MIT",

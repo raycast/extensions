@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { getPreferenceValues, openExtensionPreferences } from "@raycast/api";
 import { audioService, SoxError } from "../../services/audio.service";
-import type { Preferences } from "../../types/preferences";
 import type { SystemCheckResult, SystemCheckState } from "./types";
 
 const normalizeError = (error: unknown): SoxError => {

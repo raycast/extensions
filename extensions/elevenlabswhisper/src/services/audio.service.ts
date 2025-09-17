@@ -1,7 +1,6 @@
 import { spawn, type ChildProcessWithoutNullStreams, exec } from "node:child_process";
 import { getPreferenceValues } from "@raycast/api";
 import path from "node:path";
-import type { Preferences } from "../types/preferences";
 
 export class SoxError extends Error {
   constructor(
