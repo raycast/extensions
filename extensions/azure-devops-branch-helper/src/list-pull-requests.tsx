@@ -6,14 +6,16 @@ import {
   Toast,
   getPreferenceValues,
   Icon,
-  Color,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { exec } from "child_process";
-import { promisify } from "util";
+import { runAz } from "./az-cli";
 import PullRequestDetailsView from "./PullRequestDetailsView";
-
-const execAsync = promisify(exec);
+import { formatRelativeDate } from "./utils/DateUtils";
+import {
+  getPullRequestStatusIcon,
+  getPullRequestStatusColor,
+} from "./utils/IconUtils";
+import { getCurrentUser } from "./azure-devops";
 
 interface Preferences {
   branchPrefix: string;
@@ -62,24 +64,10 @@ export default function Command() {
   const [pullRequests, setPullRequests] = useState<PullRequest[]>([]);
   const [currentUser, setCurrentUser] = useState<string>("");
 
-  async function getCurrentUser() {
-    try {
-      const azCommand = "/opt/homebrew/bin/az";
-      const { stdout: userEmail } = await execAsync(
-        `${azCommand} account show --query user.name -o tsv`,
-      );
-      return userEmail.trim();
-    } catch (error) {
-      console.error("Failed to get current user:", error);
-      return null;
-    }
-  }
-
   async function fetchPullRequests() {
     setIsLoading(true);
     try {
       const preferences = getPreferenceValues<Preferences>();
-      const azCommand = "/opt/homebrew/bin/az";
 
       const user = await getCurrentUser();
       if (!user) {
@@ -100,35 +88,26 @@ export default function Command() {
         );
       }
 
-      // Fetch PRs where user is the creator
-      let createdPRsCommand = `${azCommand} repos pr list --creator "${user}" --status active --output json --organization "${preferences.azureOrganization}" --project "${preferences.azureProject}"`;
+      // Fetch ALL active PRs (not just user-related ones)
+      const allActiveArgs = [
+        "repos",
+        "pr",
+        "list",
+        "--status",
+        "active",
+        "--output",
+        "json",
+        "--organization",
+        preferences.azureOrganization!,
+        "--project",
+        preferences.azureProject!,
+        ...(preferences.azureRepository
+          ? ["--repository", preferences.azureRepository]
+          : []),
+      ];
 
-      if (preferences.azureRepository) {
-        createdPRsCommand += ` --repository "${preferences.azureRepository}"`;
-      }
-
-      // Fetch PRs where user is a reviewer
-      let reviewPRsCommand = `${azCommand} repos pr list --reviewer "${user}" --status active --output json --organization "${preferences.azureOrganization}" --project "${preferences.azureProject}"`;
-
-      if (preferences.azureRepository) {
-        reviewPRsCommand += ` --repository "${preferences.azureRepository}"`;
-      }
-
-      const [createdResult, reviewResult] = await Promise.all([
-        execAsync(createdPRsCommand),
-        execAsync(reviewPRsCommand),
-      ]);
-
-      const createdPRs: PullRequest[] = JSON.parse(createdResult.stdout);
-      const reviewPRs: PullRequest[] = JSON.parse(reviewResult.stdout);
-
-      // Combine and deduplicate PRs (in case user is both author and reviewer)
-      const allPRs = [...createdPRs];
-      reviewPRs.forEach((reviewPR) => {
-        if (!allPRs.some((pr) => pr.pullRequestId === reviewPR.pullRequestId)) {
-          allPRs.push(reviewPR);
-        }
-      });
+      const result = await runAz(allActiveArgs);
+      const allPRs: PullRequest[] = JSON.parse(result.stdout);
 
       // Sort by creation date (newest first)
       const sortedPRs = allPRs.sort(
@@ -140,10 +119,14 @@ export default function Command() {
       setPullRequests(sortedPRs);
 
       if (sortedPRs.length > 0) {
+        const myCount = sortedPRs.filter(
+          (pr) => pr.createdBy.uniqueName === user,
+        ).length;
+        const otherCount = sortedPRs.length - myCount;
         await showToast(
           Toast.Style.Success,
           "Loaded!",
-          `Found ${sortedPRs.length} pull requests (${createdPRs.length} created, ${reviewPRs.length} to review)`,
+          `Found ${sortedPRs.length} pull requests (${myCount} mine, ${otherCount} active)`,
         );
       } else {
         await showToast(
@@ -173,62 +156,6 @@ export default function Command() {
     const repoName = pr.repository.name;
 
     return `${preferences.azureOrganization}/${encodeURIComponent(projectName)}/_git/${encodeURIComponent(repoName)}/pullrequest/${pr.pullRequestId}`;
-  }
-
-  function getPRStatusIcon(status: string, isDraft: boolean): Icon {
-    if (isDraft) return Icon.Document;
-
-    const lowerStatus = status.toLowerCase();
-    switch (lowerStatus) {
-      case "active":
-        return Icon.Circle;
-      case "completed":
-        return Icon.CheckCircle;
-      case "abandoned":
-        return Icon.XMarkCircle;
-      default:
-        return Icon.Circle;
-    }
-  }
-
-  function getPRStatusColor(
-    status: string,
-    isDraft: boolean,
-    mergeStatus: string,
-  ): Color {
-    if (isDraft) return Color.SecondaryText;
-
-    const lowerStatus = status.toLowerCase();
-    const lowerMergeStatus = mergeStatus.toLowerCase();
-
-    if (lowerStatus === "active") {
-      if (lowerMergeStatus === "conflicts") {
-        return Color.Red;
-      }
-      return Color.Orange;
-    }
-
-    switch (lowerStatus) {
-      case "completed":
-        return Color.Green;
-      case "abandoned":
-        return Color.Red;
-      default:
-        return Color.PrimaryText;
-    }
-  }
-
-  function formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - date.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 1) return "1 day ago";
-    if (diffDays < 7) return `${diffDays} days ago`;
-    if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
-
-    return date.toLocaleDateString();
   }
 
   function getReviewStatus(pr: PullRequest, currentUserEmail: string): string {
@@ -293,105 +220,126 @@ export default function Command() {
           }
         />
       ) : (
-        <List.Section title={`Pull Requests (${currentUser || "You"})`}>
-          {pullRequests.map((pr) => {
-            const prUrl = getPullRequestUrl(pr);
-            const userRole = getUserRole(pr, currentUser);
-            const reviewStatus = getReviewStatus(pr, currentUser);
-            const sourceBranch = formatBranchName(pr.sourceRefName);
-            const targetBranch = formatBranchName(pr.targetRefName);
+        <>
+          {(() => {
+            // Separate user's PRs from others
+            const myPRs = pullRequests.filter(
+              (pr) => pr.createdBy.uniqueName === currentUser,
+            );
+            const otherPRs = pullRequests.filter(
+              (pr) => pr.createdBy.uniqueName !== currentUser,
+            );
+
+            const renderPRItem = (pr: PullRequest) => {
+              const prUrl = getPullRequestUrl(pr);
+              const userRole = getUserRole(pr, currentUser);
+              const reviewStatus = getReviewStatus(pr, currentUser);
+              const sourceBranch = formatBranchName(pr.sourceRefName);
+              const targetBranch = formatBranchName(pr.targetRefName);
+
+              return (
+                <List.Item
+                  key={pr.pullRequestId}
+                  icon={{
+                    source: getPullRequestStatusIcon(pr.status, pr.isDraft),
+                    tintColor: getPullRequestStatusColor(pr.status),
+                  }}
+                  title={`#${pr.pullRequestId}: ${pr.title}`}
+                  subtitle={`${sourceBranch} → ${targetBranch} • ${pr.repository.name}`}
+                  accessories={[
+                    {
+                      text: pr.isDraft ? "Draft" : pr.status,
+                      tooltip: `Status: ${pr.isDraft ? "Draft" : pr.status}`,
+                    },
+                    {
+                      text: userRole,
+                      tooltip: `Your role: ${userRole}`,
+                    },
+                    {
+                      text: reviewStatus,
+                      tooltip: `Review status: ${reviewStatus}`,
+                    },
+                    {
+                      text: formatRelativeDate(pr.creationDate),
+                      tooltip: `Created: ${new Date(pr.creationDate).toLocaleString()}`,
+                    },
+                  ]}
+                  actions={
+                    <ActionPanel>
+                      <ActionPanel.Section title="Pull Request Actions">
+                        <Action.Push
+                          title="View Pr Details"
+                          target={
+                            <PullRequestDetailsView
+                              pullRequestId={pr.pullRequestId.toString()}
+                              initialTitle={pr.title}
+                              project={pr.repository.project.name}
+                            />
+                          }
+                          icon={Icon.Document}
+                          shortcut={{ modifiers: ["cmd"], key: "d" }}
+                        />
+                        {prUrl && (
+                          <Action.OpenInBrowser
+                            title="Open in Azure Devops"
+                            url={prUrl}
+                            icon={Icon.Globe}
+                            shortcut={{ modifiers: ["cmd"], key: "o" }}
+                          />
+                        )}
+                        <Action.CopyToClipboard
+                          title="Copy Pr ID"
+                          content={pr.pullRequestId.toString()}
+                          icon={Icon.Clipboard}
+                        />
+                        <Action.CopyToClipboard
+                          title="Copy Pr Title"
+                          content={pr.title}
+                          icon={Icon.Text}
+                        />
+                        <Action.CopyToClipboard
+                          title="Copy Source Branch"
+                          content={sourceBranch}
+                          icon={Icon.Tree}
+                          shortcut={{ modifiers: ["cmd"], key: "b" }}
+                        />
+                        <Action.CopyToClipboard
+                          title="Copy Pr URL"
+                          content={prUrl}
+                          icon={Icon.Link}
+                          shortcut={{ modifiers: ["cmd"], key: "u" }}
+                        />
+                      </ActionPanel.Section>
+                      <ActionPanel.Section title="List Actions">
+                        <Action
+                          title="Refresh List"
+                          onAction={fetchPullRequests}
+                          icon={Icon.ArrowClockwise}
+                          shortcut={{ modifiers: ["cmd"], key: "r" }}
+                        />
+                      </ActionPanel.Section>
+                    </ActionPanel>
+                  }
+                />
+              );
+            };
 
             return (
-              <List.Item
-                key={pr.pullRequestId}
-                icon={{
-                  source: getPRStatusIcon(pr.status, pr.isDraft),
-                  tintColor: getPRStatusColor(
-                    pr.status,
-                    pr.isDraft,
-                    pr.mergeStatus,
-                  ),
-                }}
-                title={`#${pr.pullRequestId}: ${pr.title}`}
-                subtitle={`${sourceBranch} → ${targetBranch} • ${pr.repository.name}`}
-                accessories={[
-                  {
-                    text: pr.isDraft ? "Draft" : pr.status,
-                    tooltip: `Status: ${pr.isDraft ? "Draft" : pr.status}`,
-                  },
-                  {
-                    text: userRole,
-                    tooltip: `Your role: ${userRole}`,
-                  },
-                  {
-                    text: reviewStatus,
-                    tooltip: `Review status: ${reviewStatus}`,
-                  },
-                  {
-                    text: formatDate(pr.creationDate),
-                    tooltip: `Created: ${new Date(pr.creationDate).toLocaleString()}`,
-                  },
-                ]}
-                actions={
-                  <ActionPanel>
-                    <ActionPanel.Section title="Pull Request Actions">
-                      <Action.Push
-                        title="View Pr Details"
-                        target={
-                          <PullRequestDetailsView
-                            pullRequestId={pr.pullRequestId.toString()}
-                            initialTitle={pr.title}
-                            project={pr.repository.project.name}
-                          />
-                        }
-                        icon={Icon.Document}
-                        shortcut={{ modifiers: ["cmd"], key: "d" }}
-                      />
-                      {prUrl && (
-                        <Action.OpenInBrowser
-                          title="Open in Azure Devops"
-                          url={prUrl}
-                          icon={Icon.Globe}
-                          shortcut={{ modifiers: ["cmd"], key: "o" }}
-                        />
-                      )}
-                      <Action.CopyToClipboard
-                        title="Copy Pr ID"
-                        content={pr.pullRequestId.toString()}
-                        icon={Icon.Clipboard}
-                      />
-                      <Action.CopyToClipboard
-                        title="Copy Pr Title"
-                        content={pr.title}
-                        icon={Icon.Text}
-                      />
-                      <Action.CopyToClipboard
-                        title="Copy Source Branch"
-                        content={sourceBranch}
-                        icon={Icon.Tree}
-                        shortcut={{ modifiers: ["cmd"], key: "b" }}
-                      />
-                      <Action.CopyToClipboard
-                        title="Copy Pr URL"
-                        content={prUrl}
-                        icon={Icon.Link}
-                        shortcut={{ modifiers: ["cmd"], key: "u" }}
-                      />
-                    </ActionPanel.Section>
-                    <ActionPanel.Section title="List Actions">
-                      <Action
-                        title="Refresh List"
-                        onAction={fetchPullRequests}
-                        icon={Icon.ArrowClockwise}
-                        shortcut={{ modifiers: ["cmd"], key: "r" }}
-                      />
-                    </ActionPanel.Section>
-                  </ActionPanel>
-                }
-              />
+              <>
+                {myPRs.length > 0 && (
+                  <List.Section title={`Mine (${myPRs.length})`}>
+                    {myPRs.map(renderPRItem)}
+                  </List.Section>
+                )}
+                {otherPRs.length > 0 && (
+                  <List.Section title={`Active (${otherPRs.length})`}>
+                    {otherPRs.map(renderPRItem)}
+                  </List.Section>
+                )}
+              </>
             );
-          })}
-        </List.Section>
+          })()}
+        </>
       )}
     </List>
   );

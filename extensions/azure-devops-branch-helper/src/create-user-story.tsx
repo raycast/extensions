@@ -8,10 +8,7 @@ import {
   Icon,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { exec } from "child_process";
-import { promisify } from "util";
-
-const execAsync = promisify(exec);
+import { runAz } from "./az-cli";
 
 interface Preferences {
   branchPrefix: string;
@@ -63,7 +60,6 @@ export default function Command() {
     setIsLoadingData(true);
     try {
       const preferences = getPreferenceValues<Preferences>();
-      const azCommand = "/opt/homebrew/bin/az";
 
       if (!preferences.azureOrganization) {
         throw new Error(
@@ -79,14 +75,50 @@ export default function Command() {
 
       // Load team members by querying existing work items to get assignees
       // This is a workaround since there's no direct team member list command
-      const teamMembersCommand = `${azCommand} boards query --wiql "SELECT [System.AssignedTo] FROM WorkItems WHERE [System.TeamProject] = '${preferences.azureProject}' AND [System.AssignedTo] <> ''" --output json --organization "${preferences.azureOrganization}" --project "${preferences.azureProject}"`;
-
-      // Load Feature work items
-      const featuresCommand = `${azCommand} boards query --wiql "SELECT [System.Id], [System.Title], [System.State] FROM WorkItems WHERE [System.WorkItemType] = 'Feature' AND [System.TeamProject] = '${preferences.azureProject}' AND [System.State] <> 'Closed' AND [System.State] <> 'Removed' ORDER BY [System.Title] ASC" --output json --organization "${preferences.azureOrganization}" --project "${preferences.azureProject}"`;
+      const teamWIQL = `SELECT [System.AssignedTo] FROM WorkItems WHERE [System.TeamProject] = '${
+        preferences.azureProject || ""
+      }' AND [System.AssignedTo] <> ''`;
+      const featuresWIQL = `SELECT [System.Id], [System.Title], [System.State] FROM WorkItems WHERE [System.WorkItemType] = 'Feature' AND [System.TeamProject] = '${
+        preferences.azureProject || ""
+      }' AND [System.State] <> 'Closed' AND [System.State] <> 'Removed' ORDER BY [System.Title] ASC`;
 
       const [teamResult, featuresResult] = await Promise.all([
-        execAsync(teamMembersCommand).catch(() => ({ stdout: "[]" })), // Fallback to empty array if query fails
-        execAsync(featuresCommand).catch(() => ({ stdout: "[]" })), // Fallback to empty array if features fail
+        runAz([
+          "boards",
+          "query",
+          "--wiql",
+          teamWIQL,
+          "--output",
+          "json",
+          "--organization",
+          preferences.azureOrganization!,
+          "--project",
+          preferences.azureProject!,
+        ]).catch(
+          () =>
+            ({ stdout: "[]", stderr: "" }) as {
+              stdout: string;
+              stderr: string;
+            },
+        ),
+        runAz([
+          "boards",
+          "query",
+          "--wiql",
+          featuresWIQL,
+          "--output",
+          "json",
+          "--organization",
+          preferences.azureOrganization!,
+          "--project",
+          preferences.azureProject!,
+        ]).catch(
+          () =>
+            ({ stdout: "[]", stderr: "" }) as {
+              stdout: string;
+              stderr: string;
+            },
+        ),
       ]);
 
       // Process team members - extract unique assignees
@@ -155,7 +187,6 @@ export default function Command() {
     setIsLoading(true);
     try {
       const preferences = getPreferenceValues<Preferences>();
-      const azCommand = "/opt/homebrew/bin/az";
 
       if (!preferences.azureOrganization) {
         throw new Error(
@@ -170,35 +201,50 @@ export default function Command() {
       }
 
       // Build the create command
-      let createCommand = `${azCommand} boards work-item create --title "${title.trim()}" --type "User Story" --output json --organization "${preferences.azureOrganization}" --project "${preferences.azureProject}"`;
-
-      // Add optional fields
-      if (description.trim()) {
-        createCommand += ` --description "${description.trim()}"`;
-      }
-
-      if (selectedAssignee) {
-        createCommand += ` --assigned-to "${selectedAssignee}"`;
-      }
-
-      // Add tags as custom field if selected
       const fieldsArray: string[] = [];
       if (selectedTag) {
-        fieldsArray.push(`"System.Tags=${selectedTag}"`);
+        // Pass field pairs without wrapping quotes since args are passed as an array
+        fieldsArray.push(`System.Tags=${selectedTag}`);
       }
-
-      if (fieldsArray.length > 0) {
-        createCommand += ` --fields ${fieldsArray.join(" ")}`;
-      }
-
-      const { stdout } = await execAsync(createCommand);
+      const { stdout } = await runAz([
+        "boards",
+        "work-item",
+        "create",
+        "--title",
+        title.trim(),
+        "--type",
+        "User Story",
+        "--output",
+        "json",
+        "--organization",
+        preferences.azureOrganization!,
+        "--project",
+        preferences.azureProject!,
+        ...(description.trim() ? ["--description", description.trim()] : []),
+        ...(selectedAssignee ? ["--assigned-to", selectedAssignee] : []),
+        ...(fieldsArray.length > 0 ? ["--fields", ...fieldsArray] : []),
+      ]);
       const createdWorkItem = JSON.parse(stdout);
 
       // If a feature is selected, create parent-child relationship
       if (selectedFeature) {
         try {
-          const relationCommand = `${azCommand} boards work-item relation add --id ${createdWorkItem.id} --relation-type parent --target-id ${selectedFeature} --output json --organization "${preferences.azureOrganization}"`;
-          await execAsync(relationCommand);
+          await runAz([
+            "boards",
+            "work-item",
+            "relation",
+            "add",
+            "--id",
+            String(createdWorkItem.id),
+            "--relation-type",
+            "parent",
+            "--target-id",
+            selectedFeature,
+            "--output",
+            "json",
+            "--organization",
+            preferences.azureOrganization!,
+          ]);
         } catch (relationError) {
           console.error("Failed to set parent feature:", relationError);
           // Don't fail the entire operation if relation fails

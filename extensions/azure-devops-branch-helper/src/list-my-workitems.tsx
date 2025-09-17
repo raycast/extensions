@@ -6,15 +6,14 @@ import {
   Toast,
   getPreferenceValues,
   Icon,
-  Color,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { exec } from "child_process";
-import { promisify } from "util";
+import { runAz } from "./az-cli";
 import ActivateAndBranchForm from "./ActivateAndBranchForm";
 import WorkItemDetailsView from "./WorkItemDetailsView";
-
-const execAsync = promisify(exec);
+import { getCurrentUser, convertToBranchName } from "./azure-devops";
+import { formatRelativeDate } from "./utils/DateUtils";
+import { getWorkItemTypeIcon, getStateColor } from "./utils/IconUtils";
 
 interface Preferences {
   branchPrefix: string;
@@ -48,27 +47,10 @@ export default function Command() {
   const [workItems, setWorkItems] = useState<WorkItem[]>([]);
   const [currentUser, setCurrentUser] = useState<string>("");
 
-  async function getCurrentUser() {
-    try {
-      const azCommand = "/opt/homebrew/bin/az";
-
-      // Try to get the user in different formats to see which one works
-      const { stdout: userEmail } = await execAsync(
-        `${azCommand} account show --query user.name -o tsv`,
-      );
-
-      return userEmail.trim();
-    } catch (error) {
-      console.error("Failed to get current user:", error);
-      return null;
-    }
-  }
-
   async function fetchMyWorkItems() {
     setIsLoading(true);
     try {
       const preferences = getPreferenceValues<Preferences>();
-      const azCommand = "/opt/homebrew/bin/az";
 
       const user = await getCurrentUser();
       if (!user) {
@@ -77,17 +59,22 @@ export default function Command() {
       setCurrentUser(user);
 
       // Use @Me macro to find work items assigned to current user
-      let queryCommand = `${azCommand} boards query --wiql "SELECT [System.Id], [System.Title], [System.WorkItemType], [System.State], [System.AssignedTo], [System.TeamProject], [System.CreatedDate], [System.ChangedDate], [Microsoft.VSTS.Common.Priority] FROM WorkItems WHERE [System.AssignedTo] = @Me AND [System.State] <> 'Closed' AND [System.State] <> 'Removed' AND [System.State] <> 'Done' ORDER BY [Microsoft.VSTS.Common.Priority] ASC, [System.ChangedDate] DESC" --output json`;
-
-      if (preferences.azureOrganization) {
-        queryCommand += ` --organization "${preferences.azureOrganization}"`;
-      }
-
-      if (preferences.azureProject) {
-        queryCommand += ` --project "${preferences.azureProject}"`;
-      }
-
-      const { stdout: queryResult } = await execAsync(queryCommand);
+      const wiql =
+        "SELECT [System.Id], [System.Title], [System.WorkItemType], [System.State], [System.AssignedTo], [System.TeamProject], [System.CreatedDate], [System.ChangedDate], [Microsoft.VSTS.Common.Priority] FROM WorkItems WHERE [System.AssignedTo] = @Me AND [System.State] <> 'Closed' AND [System.State] <> 'Removed' AND [System.State] <> 'Done' AND [System.State] <> 'Resolved' ORDER BY [Microsoft.VSTS.Common.Priority] ASC, [System.ChangedDate] DESC";
+      const { stdout: queryResult } = await runAz([
+        "boards",
+        "query",
+        "--wiql",
+        wiql,
+        "--output",
+        "json",
+        ...(preferences.azureOrganization
+          ? ["--organization", preferences.azureOrganization]
+          : []),
+        ...(preferences.azureProject
+          ? ["--project", preferences.azureProject]
+          : []),
+      ]);
 
       // The Azure CLI boards query returns work items directly as an array
       const workItemsData: WorkItem[] = JSON.parse(queryResult);
@@ -130,94 +117,6 @@ export default function Command() {
       projectFromWorkItem || preferences.azureProject || "Unknown";
 
     return `${preferences.azureOrganization}/${encodeURIComponent(projectToUse)}/_workitems/edit/${workItem.id}`;
-  }
-
-  function getWorkItemTypeIcon(type: string): Icon {
-    const lowerType = type.toLowerCase();
-    switch (lowerType) {
-      case "bug":
-        return Icon.Bug;
-      case "task":
-        return Icon.CheckCircle;
-      case "user story":
-      case "story":
-        return Icon.Person;
-      case "product backlog item":
-      case "pbi":
-        return Icon.List;
-      case "feature":
-        return Icon.Star;
-      case "epic":
-        return Icon.Crown;
-      case "issue":
-        return Icon.ExclamationMark;
-      case "test case":
-        return Icon.Play;
-      case "test suite":
-        return Icon.Folder;
-      case "test plan":
-        return Icon.Document;
-      case "requirement":
-        return Icon.Text;
-      case "code review request":
-        return Icon.Eye;
-      default:
-        return Icon.Circle;
-    }
-  }
-
-  function getStateColor(state: string): Color {
-    const lowerState = state.toLowerCase();
-    switch (lowerState) {
-      case "new":
-      case "to do":
-      case "proposed":
-        return Color.Blue;
-      case "active":
-      case "in progress":
-      case "committed":
-      case "approved":
-        return Color.Orange;
-      case "resolved":
-      case "done":
-      case "completed":
-        return Color.Green;
-      case "closed":
-      case "removed":
-        return Color.SecondaryText;
-      case "blocked":
-      case "on hold":
-        return Color.Red;
-      default:
-        return Color.PrimaryText;
-    }
-  }
-
-  function formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - date.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 1) return "1 day ago";
-    if (diffDays < 7) return `${diffDays} days ago`;
-    if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
-
-    return date.toLocaleDateString();
-  }
-
-  function convertToBranchName(
-    number: string,
-    description: string,
-    prefix: string,
-  ): string {
-    const combined = `${number} ${description}`;
-    const slug = combined
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-
-    return `${prefix}${slug}`;
   }
 
   useEffect(() => {
@@ -274,7 +173,9 @@ export default function Command() {
                     tooltip: `Project: ${workItem.fields["System.TeamProject"]}`,
                   },
                   {
-                    text: formatDate(workItem.fields["System.ChangedDate"]),
+                    text: formatRelativeDate(
+                      workItem.fields["System.ChangedDate"],
+                    ),
                     tooltip: `Last updated: ${new Date(workItem.fields["System.ChangedDate"]).toLocaleString()}`,
                   },
                 ]}

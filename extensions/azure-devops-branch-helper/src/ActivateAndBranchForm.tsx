@@ -7,10 +7,8 @@ import {
   getPreferenceValues,
 } from "@raycast/api";
 import { useState } from "react";
-import { exec } from "child_process";
-import { promisify } from "util";
-
-const execAsync = promisify(exec);
+import { getCurrentUser, convertToBranchName } from "./azure-devops";
+import { runAz } from "./az-cli";
 
 interface Preferences {
   branchPrefix: string;
@@ -50,19 +48,6 @@ export default function ActivateAndBranchForm({
   const [branchUrl, setBranchUrl] = useState<string>("");
   const [workItemUrl, setWorkItemUrl] = useState<string>("");
 
-  async function getCurrentUser() {
-    try {
-      const azCommand = "/opt/homebrew/bin/az";
-      const { stdout } = await execAsync(
-        `${azCommand} account show --query user.name -o tsv`,
-      );
-      return stdout.trim();
-    } catch (error) {
-      console.error("Failed to get current user:", error);
-      return null;
-    }
-  }
-
   async function activateAndBranch(workItemId: string) {
     if (!workItemId) {
       await showToast(
@@ -76,7 +61,6 @@ export default function ActivateAndBranchForm({
     setIsLoading(true);
     try {
       const preferences = getPreferenceValues<Preferences>();
-      const azCommand = "/opt/homebrew/bin/az";
 
       // Get current user
       const user = await getCurrentUser();
@@ -86,16 +70,18 @@ export default function ActivateAndBranchForm({
       setCurrentUser(user);
 
       // Step 1: Fetch work item details
-      let fetchCommand = `${azCommand} boards work-item show --id ${workItemId} --output json`;
-
-      if (preferences.azureOrganization) {
-        fetchCommand += ` --organization "${preferences.azureOrganization}"`;
-      }
-
-      // Note: az boards work-item show doesn't support --project parameter
-      // The project is determined from the work item ID itself
-
-      const { stdout: workItemJson } = await execAsync(fetchCommand);
+      const { stdout: workItemJson } = await runAz([
+        "boards",
+        "work-item",
+        "show",
+        "--id",
+        workItemId,
+        "--output",
+        "json",
+        ...(preferences.azureOrganization
+          ? ["--organization", preferences.azureOrganization]
+          : []),
+      ]);
       const workItem: WorkItem = JSON.parse(workItemJson);
       setWorkItemDetails(workItem);
 
@@ -123,15 +109,20 @@ export default function ActivateAndBranchForm({
       }
 
       // Step 2: Update work item to Active and assign to self
-      let updateCommand = `${azCommand} boards work-item update --id ${workItemId}`;
-      updateCommand += ` --state "Active"`;
-      updateCommand += ` --assigned-to "${user}"`;
-
-      if (preferences.azureOrganization) {
-        updateCommand += ` --organization "${preferences.azureOrganization}"`;
-      }
-
-      await execAsync(updateCommand);
+      await runAz([
+        "boards",
+        "work-item",
+        "update",
+        "--id",
+        workItemId,
+        "--state",
+        "Active",
+        "--assigned-to",
+        user,
+        ...(preferences.azureOrganization
+          ? ["--organization", preferences.azureOrganization]
+          : []),
+      ]);
 
       // Step 3: Generate branch name
       const title = workItem.fields["System.Title"];
@@ -142,16 +133,24 @@ export default function ActivateAndBranchForm({
       );
 
       // Step 4: Get the object ID of the source branch
-      let getObjectIdCommand = `${azCommand} repos ref list --filter "heads/${preferences.sourceBranch}" --query "[0].objectId" -o tsv`;
-      getObjectIdCommand += ` --repository "${repositoryToUse}"`;
-
-      if (preferences.azureOrganization) {
-        getObjectIdCommand += ` --organization "${preferences.azureOrganization}"`;
-      }
-
-      getObjectIdCommand += ` --project "${projectToUse}"`;
-
-      const { stdout: objectId } = await execAsync(getObjectIdCommand);
+      const { stdout: objectId } = await runAz([
+        "repos",
+        "ref",
+        "list",
+        "--filter",
+        `heads/${preferences.sourceBranch}`,
+        "--query",
+        "[0].objectId",
+        "-o",
+        "tsv",
+        "--repository",
+        repositoryToUse,
+        ...(preferences.azureOrganization
+          ? ["--organization", preferences.azureOrganization]
+          : []),
+        "--project",
+        projectToUse,
+      ]);
       const trimmedObjectId = objectId.trim();
 
       if (!trimmedObjectId) {
@@ -161,17 +160,25 @@ export default function ActivateAndBranchForm({
       }
 
       // Step 5: Check if branch already exists
-      let checkBranchCommand = `${azCommand} repos ref list --filter "heads/${branchName}" --query "[0].name" -o tsv`;
-      checkBranchCommand += ` --repository "${repositoryToUse}"`;
-
-      if (preferences.azureOrganization) {
-        checkBranchCommand += ` --organization "${preferences.azureOrganization}"`;
-      }
-
-      checkBranchCommand += ` --project "${projectToUse}"`;
-
       try {
-        const { stdout: existingBranch } = await execAsync(checkBranchCommand);
+        const { stdout: existingBranch } = await runAz([
+          "repos",
+          "ref",
+          "list",
+          "--filter",
+          `heads/${branchName}`,
+          "--query",
+          "[0].name",
+          "-o",
+          "tsv",
+          "--repository",
+          repositoryToUse,
+          ...(preferences.azureOrganization
+            ? ["--organization", preferences.azureOrganization]
+            : []),
+          "--project",
+          projectToUse,
+        ]);
         if (existingBranch.trim()) {
           throw new Error(
             `Branch '${branchName}' already exists in Azure DevOps`,
@@ -189,16 +196,22 @@ export default function ActivateAndBranchForm({
       }
 
       // Step 6: Create branch in Azure DevOps
-      let createBranchCommand = `${azCommand} repos ref create --name "refs/heads/${branchName}" --object-id "${trimmedObjectId}"`;
-      createBranchCommand += ` --repository "${repositoryToUse}"`;
-
-      if (preferences.azureOrganization) {
-        createBranchCommand += ` --organization "${preferences.azureOrganization}"`;
-      }
-
-      createBranchCommand += ` --project "${projectToUse}"`;
-
-      await execAsync(createBranchCommand);
+      await runAz([
+        "repos",
+        "ref",
+        "create",
+        "--name",
+        `refs/heads/${branchName}`,
+        "--object-id",
+        trimmedObjectId,
+        "--repository",
+        repositoryToUse,
+        ...(preferences.azureOrganization
+          ? ["--organization", preferences.azureOrganization]
+          : []),
+        "--project",
+        projectToUse,
+      ]);
 
       // Generate URLs for easy access
       const organizationUrl = preferences.azureOrganization;
@@ -244,20 +257,6 @@ export default function ActivateAndBranchForm({
     } finally {
       setIsLoading(false);
     }
-  }
-
-  function convertToBranchName(
-    number: string,
-    description: string,
-    prefix: string,
-  ): string {
-    const combined = `${number} ${description}`;
-    const slug = combined
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-
-    return `${prefix}${slug}`;
   }
 
   return (

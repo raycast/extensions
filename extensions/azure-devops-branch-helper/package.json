@@ -8,13 +8,6 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "activate-and-branch",
-      "title": "Activate and Branch Work Item",
-      "description": "Set work item to active, assign to self, and create branch",
-      "mode": "view",
-      "entrypoint": "src/activate-and-branch.tsx"
-    },
-    {
       "name": "check-workitem",
       "title": "Check Work Item",
       "description": "View work item details and get URLs without making changes",

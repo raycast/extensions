@@ -7,57 +7,36 @@ import {
   getPreferenceValues,
   Icon,
   useNavigation,
+  Clipboard,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { exec } from "child_process";
-import { promisify } from "util";
+import { runAz } from "./az-cli";
 import ActivateAndBranchForm from "./ActivateAndBranchForm";
 import PullRequestDetailsView from "./PullRequestDetailsView";
-import { activateAndCreatePR } from "./azure-devops-utils";
-
-const execAsync = promisify(exec);
-
-interface Preferences {
-  branchPrefix: string;
-  azureOrganization?: string;
-  azureProject?: string;
-  azureRepository?: string;
-  sourceBranch: string;
-}
-
-interface WorkItemDetails {
-  id: number;
-  fields: {
-    "System.Title": string;
-    "System.Description"?: string;
-    "System.WorkItemType": string;
-    "System.State": string;
-    "System.Reason"?: string;
-    "System.AssignedTo"?: {
-      displayName: string;
-      uniqueName: string;
-    };
-    "System.CreatedBy"?: {
-      displayName: string;
-      uniqueName: string;
-    };
-    "System.TeamProject": string;
-    "System.AreaPath"?: string;
-    "System.IterationPath"?: string;
-    "System.CreatedDate": string;
-    "System.ChangedDate": string;
-    "System.Tags"?: string;
-    "Microsoft.VSTS.Common.Priority"?: number;
-    "Microsoft.VSTS.Common.Severity"?: string;
-    "Microsoft.VSTS.Common.StackRank"?: number;
-    "Microsoft.VSTS.Scheduling.Effort"?: number;
-    "Microsoft.VSTS.Scheduling.OriginalEstimate"?: number;
-    "Microsoft.VSTS.Scheduling.RemainingWork"?: number;
-    "Microsoft.VSTS.Scheduling.CompletedWork"?: number;
-    "System.BoardColumn"?: string;
-    "System.BoardColumnDone"?: boolean;
-  };
-}
+import {
+  activateAndCreatePR,
+  convertToBranchName,
+  findExistingBranchesForWorkItem,
+} from "./azure-devops";
+import {
+  getRelatedWorkItems,
+  getWorkItemComments,
+  WorkItemComment,
+} from "./azure-devops";
+import LinkUserStoryToFeature from "./LinkUserStoryToFeature";
+import {
+  WorkItemDetails,
+  WorkItemRelationsData,
+  Preferences,
+} from "./types/work-item";
+import {
+  generateWorkItemMarkdown,
+  cleanDescription,
+} from "./components/WorkItemMetadata";
+import { generateRelationsMarkdown } from "./components/WorkItemRelations";
+import WorkItemActions from "./components/WorkItemActions";
+import AddCommentForm from "./components/AddCommentForm";
+import RelatedItemsList from "./components/RelatedItemsList";
 
 interface Props {
   workItemId: string;
@@ -68,6 +47,7 @@ export default function WorkItemDetailsView({
   workItemId,
   initialTitle,
 }: Props) {
+  console.log("[WIDetails] render start", { workItemId });
   const [isLoading, setIsLoading] = useState(true);
   const [workItem, setWorkItem] = useState<WorkItemDetails | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -79,30 +59,48 @@ export default function WorkItemDetailsView({
     project: string;
   } | null>(null);
   const [isCheckingPR, setIsCheckingPR] = useState(false);
+  const [relatedBranches, setRelatedBranches] = useState<string[]>([]);
+  const [isLoadingRelations, setIsLoadingRelations] = useState(false);
+  const [relations, setRelations] = useState<WorkItemRelationsData>({
+    parentItem: null,
+    siblingItems: [],
+    relatedItems: [],
+    childItems: [],
+  });
+  const [commentsCount, setCommentsCount] = useState<number | null>(null);
+  const [comments, setComments] = useState<WorkItemComment[]>([]);
+  const [isLoadingComments, setIsLoadingComments] = useState(false);
 
   const { push } = useNavigation();
 
+  // WorkItemLite imported from utils
+
   async function fetchWorkItemDetails() {
+    console.log("[WIDetails] fetchWorkItemDetails start", { workItemId });
     setIsLoading(true);
     setError(null);
 
     try {
       const preferences = getPreferenceValues<Preferences>();
-      const azCommand = "/opt/homebrew/bin/az";
 
       // Fetch detailed work item information
-      let fetchCommand = `${azCommand} boards work-item show --id ${workItemId} --output json`;
-
-      if (preferences.azureOrganization) {
-        fetchCommand += ` --organization "${preferences.azureOrganization}"`;
-      }
-
-      // Note: az boards work-item show doesn't support --project parameter
-      // The project is determined from the work item ID itself
-
-      const { stdout: workItemJson } = await execAsync(fetchCommand);
+      const { stdout: workItemJson } = await runAz([
+        "boards",
+        "work-item",
+        "show",
+        "--id",
+        workItemId,
+        "--output",
+        "json",
+        ...(preferences.azureOrganization
+          ? ["--organization", preferences.azureOrganization]
+          : []),
+      ]);
       const workItemData: WorkItemDetails = JSON.parse(workItemJson);
-
+      console.log("[WIDetails] fetched", {
+        id: workItemData?.id,
+        title: workItemData?.fields?.["System.Title"],
+      });
       setWorkItem(workItemData);
     } catch (error) {
       const errorMessage = "Failed to fetch work item details";
@@ -110,58 +108,187 @@ export default function WorkItemDetailsView({
       await showToast(Toast.Style.Failure, "Error", errorMessage);
       console.error(error);
     } finally {
+      console.log("[WIDetails] fetchWorkItemDetails end");
       setIsLoading(false);
     }
   }
 
+  async function fetchRelatedItems() {
+    if (!workItem) return;
+    console.log("[WIDetails] fetchRelatedItems start");
+    setIsLoadingRelations(true);
+    try {
+      const { parent, siblings, related, children } = await getRelatedWorkItems(
+        workItem.id,
+      );
+      setRelations({
+        parentItem: parent,
+        siblingItems: siblings,
+        relatedItems: related,
+        childItems: children,
+      });
+      console.log("[WIDetails] relations", {
+        parent: parent?.id,
+        siblings: siblings.length,
+        related: related.length,
+        children: children.length,
+      });
+    } catch {
+      console.log("Failed to fetch related items:");
+      setRelations({
+        parentItem: null,
+        siblingItems: [],
+        relatedItems: [],
+        childItems: [],
+      });
+    } finally {
+      console.log("[WIDetails] fetchRelatedItems end");
+      setIsLoadingRelations(false);
+    }
+  }
+
+  async function handleCopyContextForAI() {
+    if (!workItem) return;
+
+    try {
+      const { parent, siblings, related, children } = await getRelatedWorkItems(
+        workItem.id,
+      );
+
+      const selfTitle = workItem.fields["System.Title"];
+      const selfDesc = cleanDescription(workItem.fields["System.Description"]);
+
+      let context = `#${workItem.id}: ${selfTitle}`;
+      if (selfDesc) {
+        context += `\n\nDescription:\n${selfDesc}`;
+      }
+
+      const lines: string[] = [];
+      if (parent) {
+        const pDesc = cleanDescription(parent.description);
+        lines.push(
+          `Parent #${parent.id}: ${parent.title}${pDesc ? `\n${pDesc}` : ""}`,
+        );
+      }
+      if (siblings.length) {
+        lines.push("Siblings:");
+        siblings.forEach((s) => {
+          const sDesc = cleanDescription(s.description);
+          lines.push(`- #${s.id}: ${s.title}${sDesc ? `\n  ${sDesc}` : ""}`);
+        });
+      }
+      if (related.length) {
+        lines.push("Related:");
+        related.forEach((r) => {
+          const rDesc = cleanDescription(r.description);
+          lines.push(`- #${r.id}: ${r.title}${rDesc ? `\n  ${rDesc}` : ""}`);
+        });
+      }
+
+      if (children.length) {
+        lines.push("Children:");
+        children.forEach((c) => {
+          const cDesc = cleanDescription(c.description);
+          lines.push(`- #${c.id}: ${c.title}${cDesc ? `\n  ${cDesc}` : ""}`);
+        });
+      }
+
+      if (lines.length) {
+        context += `\n\nThis is related information:\n${lines.join("\n\n")}`;
+      }
+
+      await Clipboard.copy(context);
+      await showToast(Toast.Style.Success, "Copied AI context");
+    } catch (e) {
+      console.error("Failed to build AI context", e);
+      await showToast(
+        Toast.Style.Failure,
+        "Error",
+        "Could not copy AI context",
+      );
+    }
+  }
+
   async function checkForExistingPR() {
+    console.log("[WIDetails] checkForExistingPR start");
     if (!workItem) return;
 
     setIsCheckingPR(true);
 
     try {
       const preferences = getPreferenceValues<Preferences>();
-      const azCommand = "/opt/homebrew/bin/az";
 
       if (!preferences.azureOrganization || !preferences.azureProject) {
         return;
       }
 
-      // Generate expected branch name
-      const branchName = convertToBranchName(
+      // Expected branch based on current user's prefix
+      const expectedBranch = convertToBranchName(
         workItem.id.toString(),
         workItem.fields["System.Title"],
         preferences.branchPrefix,
       );
 
+      // Also look for any other branches for this WI
+      const found = await findExistingBranchesForWorkItem(
+        workItem.id.toString(),
+        workItem.fields["System.Title"],
+      );
+      setRelatedBranches(found);
+
+      const branchesToCheck = Array.from(new Set([expectedBranch, ...found]));
+
       const repositoryName =
         preferences.azureRepository || preferences.azureProject;
 
-      // Search for active PRs from this branch
-      const prListCommand = `${azCommand} repos pr list --source-branch "${branchName}" --status active --output json --organization "${preferences.azureOrganization}" --project "${preferences.azureProject}" --repository "${repositoryName}"`;
-
-      const { stdout: prResult } = await execAsync(prListCommand);
-      const prs = JSON.parse(prResult);
-
-      if (prs && prs.length > 0) {
-        // Found existing PR(s), use the first one
-        const pr = prs[0];
-        setExistingPR({
-          pullRequestId: pr.pullRequestId,
-          title: pr.title,
-          project:
-            pr.repository?.project?.name ||
-            preferences.azureProject ||
-            "Unknown",
-        });
-      } else {
-        setExistingPR(null);
+      // Search for active PRs from any of the candidate branches
+      for (const sourceBranch of branchesToCheck) {
+        try {
+          const { stdout: prResult } = await runAz([
+            "repos",
+            "pr",
+            "list",
+            "--source-branch",
+            sourceBranch,
+            "--status",
+            "active",
+            "--output",
+            "json",
+            "--organization",
+            preferences.azureOrganization!,
+            "--project",
+            preferences.azureProject!,
+            "--repository",
+            repositoryName,
+          ]);
+          const prs = JSON.parse(prResult);
+          if (prs && prs.length > 0) {
+            const pr = prs[0];
+            setExistingPR({
+              pullRequestId: pr.pullRequestId,
+              title: pr.title,
+              project:
+                pr.repository?.project?.name ||
+                preferences.azureProject ||
+                "Unknown",
+            });
+            console.log("[WIDetails] found PR", pr.pullRequestId);
+            return; // Found a PR; we can stop checking further
+          }
+        } catch (e) {
+          // Ignore per-branch failures and continue
+          console.log("PR check failed for branch", sourceBranch, e);
+        }
       }
+
+      // No PRs found across any branches
+      setExistingPR(null);
     } catch (error) {
       // Silently fail - PR checking is optional
       console.log("Could not check for existing PRs:", error);
       setExistingPR(null);
     } finally {
+      console.log("[WIDetails] checkForExistingPR end");
       setIsCheckingPR(false);
     }
   }
@@ -179,243 +306,24 @@ export default function WorkItemDetailsView({
     return `${preferences.azureOrganization}/${encodeURIComponent(projectToUse)}/_workitems/edit/${workItem.id}`;
   }
 
-  function getWorkItemTypeIcon(type: string): string {
-    const lowerType = type.toLowerCase();
-    switch (lowerType) {
-      case "bug":
-        return "🐛";
-      case "task":
-        return "✅";
-      case "user story":
-      case "story":
-        return "👤";
-      case "product backlog item":
-      case "pbi":
-        return "📋";
-      case "feature":
-        return "⭐";
-      case "epic":
-        return "👑";
-      case "issue":
-        return "❗";
-      case "test case":
-        return "🧪";
-      case "test suite":
-        return "📁";
-      case "test plan":
-        return "📄";
-      case "requirement":
-        return "📝";
-      case "code review request":
-        return "👁";
-      default:
-        return "⚪";
-    }
-  }
-
-  function getStateColor(state: string): string {
-    const lowerState = state.toLowerCase();
-    switch (lowerState) {
-      case "new":
-      case "to do":
-      case "proposed":
-        return "🔵";
-      case "active":
-      case "in progress":
-      case "committed":
-      case "approved":
-        return "🟠";
-      case "resolved":
-      case "done":
-      case "completed":
-        return "🟢";
-      case "closed":
-      case "removed":
-        return "⚪";
-      case "blocked":
-      case "on hold":
-        return "🔴";
-      default:
-        return "⚫";
-    }
-  }
-
-  function formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return date.toLocaleString();
-  }
-
-  function convertToBranchName(
-    number: string,
-    description: string,
-    prefix: string,
-  ): string {
-    const combined = `${number} ${description}`;
-    const slug = combined
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-
-    return `${prefix}${slug}`;
-  }
-
   function generateMarkdown(): string {
     if (!workItem) return "Loading work item details...";
 
-    const preferences = getPreferenceValues<Preferences>();
-    const branchName = convertToBranchName(
-      workItem.id.toString(),
-      workItem.fields["System.Title"],
-      preferences.branchPrefix,
-    );
+    const metadataMarkdown = generateWorkItemMarkdown({
+      workItem,
+      commentsCount,
+      relatedBranches,
+    });
 
-    const typeIcon = getWorkItemTypeIcon(
-      workItem.fields["System.WorkItemType"],
-    );
-    const stateColor = getStateColor(workItem.fields["System.State"]);
+    const relationsMarkdown = generateRelationsMarkdown({
+      workItem,
+      relations,
+      isLoadingRelations,
+      comments,
+      isLoadingComments,
+    });
 
-    let markdown = `# ${typeIcon} ${workItem.fields["System.Title"]}\n\n`;
-
-    // Compact metadata in a horizontal layout
-    markdown += `${stateColor} **${workItem.fields["System.State"]}** • `;
-    markdown += `#${workItem.id} • `;
-    markdown += `${workItem.fields["System.WorkItemType"]} • `;
-
-    if (workItem.fields["System.AssignedTo"]) {
-      markdown += `👤 ${workItem.fields["System.AssignedTo"].displayName} • `;
-    } else {
-      markdown += `👤 Unassigned • `;
-    }
-
-    markdown += `📁 ${workItem.fields["System.TeamProject"]}`;
-
-    // Add priority and effort if available
-    const importantMetadata = [];
-    if (workItem.fields["Microsoft.VSTS.Common.Priority"]) {
-      importantMetadata.push(
-        `⚡ P${workItem.fields["Microsoft.VSTS.Common.Priority"]}`,
-      );
-    }
-    if (workItem.fields["Microsoft.VSTS.Scheduling.Effort"]) {
-      importantMetadata.push(
-        `🎯 ${workItem.fields["Microsoft.VSTS.Scheduling.Effort"]}pts`,
-      );
-    }
-    if (workItem.fields["Microsoft.VSTS.Scheduling.RemainingWork"]) {
-      importantMetadata.push(
-        `⏱️ ${workItem.fields["Microsoft.VSTS.Scheduling.RemainingWork"]}h`,
-      );
-    }
-
-    if (importantMetadata.length > 0) {
-      markdown += ` • ${importantMetadata.join(" • ")}`;
-    }
-
-    markdown += `\n\n`;
-
-    // Tags prominently displayed
-    if (workItem.fields["System.Tags"]) {
-      const tags = workItem.fields["System.Tags"]
-        .split(";")
-        .map((tag) => tag.trim())
-        .filter((tag) => tag);
-      markdown += `🏷️ ${tags.map((tag) => `\`${tag}\``).join(" ")} \n\n`;
-    }
-
-    // Description (main content)
-    if (workItem.fields["System.Description"]) {
-      const description = workItem.fields["System.Description"]
-        .replace(/<[^>]*>/g, "") // Remove HTML tags
-        .replace(/&nbsp;/g, " ") // Replace non-breaking spaces
-        .replace(/&amp;/g, "&") // Decode ampersands
-        .replace(/&lt;/g, "<") // Decode less-than
-        .replace(/&gt;/g, ">") // Decode greater-than
-        .replace(/&quot;/g, '"') // Decode quotes
-        .trim();
-
-      if (description) {
-        markdown += `${description}\n\n`;
-      }
-    }
-
-    // Compact details section at the bottom
-    markdown += `---\n\n`;
-
-    // Create a compact 3-column layout for detailed metadata
-    const leftColumn = [];
-    const middleColumn = [];
-    const rightColumn = [];
-
-    // Left column - Core info
-    if (workItem.fields["System.AreaPath"]) {
-      leftColumn.push(`**Area:** ${workItem.fields["System.AreaPath"]}`);
-    }
-    if (workItem.fields["System.IterationPath"]) {
-      leftColumn.push(
-        `**Iteration:** ${workItem.fields["System.IterationPath"]}`,
-      );
-    }
-    if (workItem.fields["System.BoardColumn"]) {
-      leftColumn.push(`**Column:** ${workItem.fields["System.BoardColumn"]}`);
-    }
-    if (workItem.fields["System.Reason"]) {
-      leftColumn.push(`**Reason:** ${workItem.fields["System.Reason"]}`);
-    }
-
-    // Middle column - Planning
-    if (workItem.fields["Microsoft.VSTS.Common.Severity"]) {
-      middleColumn.push(
-        `**Severity:** ${workItem.fields["Microsoft.VSTS.Common.Severity"]}`,
-      );
-    }
-    if (workItem.fields["Microsoft.VSTS.Common.StackRank"]) {
-      middleColumn.push(
-        `**Rank:** ${workItem.fields["Microsoft.VSTS.Common.StackRank"]}`,
-      );
-    }
-    if (workItem.fields["Microsoft.VSTS.Scheduling.OriginalEstimate"]) {
-      middleColumn.push(
-        `**Original:** ${workItem.fields["Microsoft.VSTS.Scheduling.OriginalEstimate"]}h`,
-      );
-    }
-    if (workItem.fields["Microsoft.VSTS.Scheduling.CompletedWork"]) {
-      middleColumn.push(
-        `**Completed:** ${workItem.fields["Microsoft.VSTS.Scheduling.CompletedWork"]}h`,
-      );
-    }
-
-    // Right column - Dates and people
-    if (workItem.fields["System.CreatedBy"]) {
-      rightColumn.push(
-        `**Created by:** ${workItem.fields["System.CreatedBy"].displayName}`,
-      );
-    }
-    rightColumn.push(
-      `**Created:** ${formatDate(workItem.fields["System.CreatedDate"])}`,
-    );
-    rightColumn.push(
-      `**Modified:** ${formatDate(workItem.fields["System.ChangedDate"])}`,
-    );
-
-    // Only show detailed metadata if we have any
-    if (
-      leftColumn.length > 0 ||
-      middleColumn.length > 0 ||
-      rightColumn.length > 0
-    ) {
-      // Simple vertical list instead of complex table layout
-      const allDetails = [...leftColumn, ...middleColumn, ...rightColumn];
-      if (allDetails.length > 0) {
-        markdown += `**Details:**  \n`;
-        markdown += allDetails.join(" • ");
-        markdown += `\n\n`;
-      }
-    }
-
-    // Suggested Branch Name (compact)
-    markdown += `**Branch:** \`${branchName}\`\n\n`;
-
-    return markdown;
+    return metadataMarkdown + relationsMarkdown;
   }
 
   async function handleActivateAndCreatePR() {
@@ -465,6 +373,31 @@ export default function WorkItemDetailsView({
     }
   }, [workItem]);
 
+  async function fetchComments() {
+    if (!workItem) return;
+    console.log("[WIDetails] fetchComments start");
+    setIsLoadingComments(true);
+    try {
+      const fetchedComments = await getWorkItemComments(workItem.id);
+      setComments(fetchedComments);
+      setCommentsCount(fetchedComments.length);
+      console.log("[WIDetails] fetched", fetchedComments.length, "comments");
+    } catch (e) {
+      console.log("Failed to fetch comments:", e);
+      setComments([]);
+    } finally {
+      console.log("[WIDetails] fetchComments end");
+      setIsLoadingComments(false);
+    }
+  }
+
+  useEffect(() => {
+    if (workItem) {
+      fetchRelatedItems();
+      fetchComments();
+    }
+  }, [workItem]);
+
   const workItemUrl = getWorkItemUrl();
   const preferences = getPreferenceValues<Preferences>();
   const branchName = workItem
@@ -498,77 +431,68 @@ export default function WorkItemDetailsView({
       markdown={generateMarkdown()}
       navigationTitle={initialTitle || `Work Item #${workItemId}`}
       actions={
-        <ActionPanel>
-          <ActionPanel.Section title="Work Item Actions">
-            {workItem && (
-              <>
-                {existingPR ? (
-                  <Action
-                    title="Open Pull Request"
-                    onAction={handleOpenExistingPR}
-                    icon={Icon.Eye}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-                  />
-                ) : (
-                  <Action
-                    title="Activate & Create Pull Request"
-                    onAction={handleActivateAndCreatePR}
-                    icon={Icon.PlusCircle}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-                  />
-                )}
-                <Action.Push
-                  title="Activate & Create Branch"
-                  target={
-                    <ActivateAndBranchForm
-                      initialWorkItemId={workItem.id.toString()}
-                    />
+        <WorkItemActions
+          workItem={workItem}
+          existingPR={existingPR}
+          workItemUrl={workItemUrl}
+          branchName={branchName}
+          relations={relations}
+          onRefresh={fetchWorkItemDetails}
+          onActivateAndCreatePR={handleActivateAndCreatePR}
+          onActivateAndBranch={() =>
+            push(
+              <ActivateAndBranchForm
+                initialWorkItemId={workItem?.id.toString() || workItemId}
+              />,
+            )
+          }
+          onCopyContextForAI={handleCopyContextForAI}
+          onAddComment={() =>
+            push(
+              <AddCommentForm
+                workItemId={workItem?.id || parseInt(workItemId)}
+                onPosted={async () => {
+                  if (workItem) {
+                    await fetchComments();
                   }
-                  icon={Icon.Rocket}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-                />
-              </>
-            )}
-            {workItemUrl && (
-              <Action.OpenInBrowser
-                title="Open in Azure Devops"
-                url={workItemUrl}
-                icon={Icon.Globe}
-                shortcut={{ modifiers: ["cmd"], key: "o" }}
-              />
-            )}
-            {workItem && (
-              <>
-                <Action.CopyToClipboard
-                  title="Copy Work Item ID"
-                  content={workItem.id.toString()}
-                  icon={Icon.Clipboard}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Work Item Title"
-                  content={workItem.fields["System.Title"]}
-                  icon={Icon.Text}
-                  shortcut={{ modifiers: ["cmd"], key: "t" }}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Branch Name"
-                  content={branchName}
-                  icon={Icon.Code}
-                  shortcut={{ modifiers: ["cmd"], key: "b" }}
-                />
-              </>
-            )}
-          </ActionPanel.Section>
-          <ActionPanel.Section title="View Actions">
-            <Action
-              title="Refresh"
-              onAction={fetchWorkItemDetails}
-              icon={Icon.ArrowClockwise}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
-            />
-          </ActionPanel.Section>
-        </ActionPanel>
+                }}
+              />,
+            )
+          }
+          onLinkToFeature={
+            workItem
+              ? () =>
+                  push(
+                    <LinkUserStoryToFeature
+                      workItemId={workItem.id}
+                      onLinked={() => {
+                        fetchRelatedItems();
+                        fetchWorkItemDetails();
+                      }}
+                    />,
+                  )
+              : undefined
+          }
+          onOpenExistingPR={handleOpenExistingPR}
+          onBrowseRelated={() =>
+            push(
+              <RelatedItemsList
+                parentItem={relations.parentItem}
+                siblingItems={relations.siblingItems}
+                relatedItems={relations.relatedItems}
+                childItems={relations.childItems}
+                onOpenWorkItem={(id, title) =>
+                  push(
+                    <WorkItemDetailsView
+                      workItemId={String(id)}
+                      initialTitle={title}
+                    />,
+                  )
+                }
+              />,
+            )
+          }
+        />
       }
     />
   );

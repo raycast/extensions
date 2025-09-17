@@ -1,21 +1,23 @@
 # Azure DevOps Helper
 
-A Raycast extension that fetches Azure DevOps work items and generates standardized Git branch names.
+Raycast extension for Azure DevOps that helps you browse work items and builds, create branches and PRs, and generate standardized branch names.
 
 ## Features
 
-- 🌿 **Branch Name Generation**: Converts task descriptions to clean, standardized branch names
-- 🔗 **Azure DevOps Integration**: Automatically fetches work item titles from Azure DevOps
-- ⚙️ **Customizable Prefix**: Configure your preferred branch prefix (e.g., `tor/`, `feature/`, `bugfix/`)
-- 📋 **Clipboard Integration**: Copies generated branch names directly to your clipboard
+- 🌿 **Branch Names**: Generate standardized branch names from work items
+- 🧩 **Work Items**: Check details, list your items, and browse backlog
+- 🏗️ **Builds**: View active and recent builds with quick links
+- 🔀 **Pull Requests**: List PRs where you’re author or reviewer; open details quickly
+- 🚀 **Activate & Branch**: Set a work item Active, assign to self, create a branch, and optionally a PR
+- ➕ **Create Items**: Create User Stories, Features, and Bugs with optional parent linking
+- ⚙️ **Customizable Prefix**: Configure your preferred branch prefix (e.g., `tor/`, `feature/`)
 
 ## Quick Start
 
 1. Install the extension in Raycast
-2. Search for "Generate Branch Name" in Raycast
-3. Enter a work item number (e.g., "12345")
-4. The extension will auto-fetch the work item title from Azure DevOps
-5. Press Enter to generate and copy the branch name
+2. Open any command, e.g. “List My Work Items”, “List Builds”, or “Activate and Branch Work Item”
+3. Configure preferences if prompted (Org URL, Project, optional Repository)
+4. Use actions to open in Azure DevOps, copy IDs/URLs, create branches/PRs
 
 ## Setup
 
@@ -39,7 +41,7 @@ A Raycast extension that fetches Azure DevOps work items and generates standardi
 
 #### Option 1: Extension Settings (Recommended)
 1. Open Raycast
-2. Search for "Generate Branch Name" 
+2. Search for any of the commands (e.g., “List My Work Items”, “List Builds”)
 3. Press `⌘ + ,` to open extension settings
 4. Configure:
    - **Branch Prefix**: Your preferred prefix (default: `tor/`)
@@ -65,17 +67,14 @@ az boards work-item show --id YOUR_WORK_ITEM_ID --output json
 
 ## Usage
 
-### Basic Usage
-1. Open Raycast and search for "Generate Branch Name"
-2. Enter work item number: `12345`
-3. Extension automatically fetches: "Display environment (Prod / Dev / UAT) on profile page"
-4. Generated branch name: `tor/12345-display-environment-prod-dev-uat-on-profile-page`
-
-### Manual Mode
-If Azure DevOps integration isn't available:
-1. Enter work item number: `99`
-2. Manually type description: "Display environment (Prod / Dev / UAT) on profile page"
-3. Generate branch name: `tor/99-display-environment-prod-dev-uat-on-profile-page`
+Key commands:
+- `Activate and Branch Work Item`: Activate + assign work item, create branch, optional PR
+- `Check Work Item`: View details and suggested branch name without changes
+- `List My Work Items`: All items assigned to you; open, copy, or branch
+- `List Backlog`: Browse backlog with pagination and quick actions
+- `List Builds`: Active and recent builds; quick open and PR creation for successful runs
+- `List Pull Requests`: Your authored/review PRs with quick open and copy
+- `Create User Story` / `Create Work Item`: Create items with tags, assignee, and optional parent
 
 ## Configuration Options
 
@@ -84,6 +83,8 @@ If Azure DevOps integration isn't available:
 | Branch Prefix | Prefix for all branch names | `tor/` | `feature/`, `bugfix/` |
 | Azure Organization URL | Your Azure DevOps org URL | - | `https://dev.azure.com/myorg` |
 | Azure Project | Default project name | - | `MyProject` |
+| Azure Repository (Optional) | Repository name for branch operations | - | `MyRepo` |
+| Source Branch | Default target branch for PRs and source for new branches | `main` | `main`, `develop` |
 
 ## Troubleshooting
 
@@ -139,3 +140,10 @@ npm run lint
 ## Support
 
 For issues and feature requests, please check the extension settings first, then verify your Azure CLI configuration.
+### Azure CLI Path
+The extension auto-resolves the Azure CLI binary:
+- Uses `AZ_CLI` env var if set
+- Falls back to `az` on your `PATH`
+- Tries common install paths (`/opt/homebrew/bin/az`, `/usr/local/bin/az`, `/usr/bin/az`)
+
+If detection fails, ensure Azure CLI is installed and accessible from your shell.
