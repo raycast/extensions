@@ -1,6 +1,6 @@
 # Granola Changelog
 
-## [1.6] - {PR_MERGE_DATE}
+## [1.6] - 2025-09-17
 
 ### 🚀 New Commands
 - **Search People** - Browse and search people from your Granola meetings
