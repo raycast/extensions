@@ -291,7 +291,7 @@ export default function Command() {
       enableDrafts
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Run clipaste" onSubmit={onSubmit} />
+          <Action.SubmitForm title="Run Clipaste" onSubmit={onSubmit} />
           <Action.CopyToClipboard title="Copy Command" content={previewCmd} />
           <Action
             title="Refresh Clipboard Preview"
@@ -314,7 +314,7 @@ export default function Command() {
           />
           {prefs.enablePngpaste ? (
             <Action.Push
-              title="Generate PNG Preview (pngpaste)"
+              title="Generate Png Preview"
               target={
                 <PngpastePreviewDetail
                   pngpastePath={prefs.pngpastePath || "pngpaste"}
@@ -323,7 +323,7 @@ export default function Command() {
             />
           ) : null}
           <Action.OpenInBrowser
-            title="Open Project (clipaste)"
+            title="Open Project (Clipaste)"
             url="https://github.com/markomanninen/clipaste"
           />
         </ActionPanel>
