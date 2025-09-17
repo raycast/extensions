@@ -107,13 +107,11 @@
     "@raycast/api": "1.102.4"
   },
   "devDependencies": {
-    "@types/node": "^20.19.10",
-    "@types/react": "^19.0.10",
-    "@types/react-dom": "^19.0.4",
-    "@typescript-eslint/eslint-plugin": "^8.39.1",
-    "@typescript-eslint/parser": "^8.39.1",
-    "eslint": "^8.57.1",
-    "prettier": "^3.6.2",
-    "typescript": "~5.4.5"
+"@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   }
 }
