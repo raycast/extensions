@@ -157,7 +157,7 @@ export interface UploadResponse {
 }
 
 export const getPreferences = () => {
-  return getPreferenceValues<Preferences>();
+  return getPreferenceValues();
 };
 
 export const getApiUrl = (path: string): string => {
