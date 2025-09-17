@@ -31,7 +31,7 @@ export default function SignInCommand() {
         body: JSON.stringify({ email: values.email, password: values.password }),
       });
 
-      console.log(res);
+      if (!res.ok) throw new Error("Login failed");
 
       if (!res.ok) throw new Error("Login failed");
 
