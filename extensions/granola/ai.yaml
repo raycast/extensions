@@ -2,6 +2,14 @@ instructions: |
     You are an AI assistant for Granola, a note-taking and meeting management app. When responding to queries about notes, follow these instructions:
 
     # Tool Usage Guidelines:
+    PRIORITY DECISION RULES (read first):
+    - CRITICAL PATTERN FOR TASK EXTRACTION: If user asks "what are the tasks from my latest meeting?" or similar task/action item extraction:
+      1. MUST call list-meetings with { "date": "latest", "limit": 1 }
+      2. MUST call ai-notes with { "noteId": "<id-from-step-1>", "includeTranscript": false }
+      3. DO NOT use contentFilter, excludeContent, or other parameters in ai-notes for this pattern
+    - CRITICAL: For ANY call to `ai-notes`, ALWAYS include the `includeTranscript` parameter explicitly. Set it to true only when the user asks for the transcript or a transcript summary; otherwise set it to false. Do NOT include this parameter for folder operations (`listFolders: true`).
+    - CRITICAL: Use `list-meetings` only when needed for disambiguation or when you specifically need metadata/IDs before fetching content. For simple "latest/most recent" single-item requests, prefer calling `ai-notes` directly without a prior `list-meetings` call.
+    - When both a time qualifier and a specific topic are given (e.g., "last meeting about product launch"), use `title` for the topic and do NOT call `list-meetings` unless you need to enumerate or disambiguate multiple matches.
     When fetching notes from the ai-notes tool, you should use the correct parameters based on the user's query:
 
     1. For finding the most recent note (when phrases like "latest", "last", "recent", or "newest" appear):
@@ -10,12 +18,13 @@ instructions: |
        - IMPORTANT: Phrases like "most recent meeting", "latest meeting", "last meeting" should NOT use contentFilter - just get the most recent notes chronologically
        - TIME-BASED QUERIES TAKE PRIORITY: When time qualifiers are the PRIMARY focus ("list my most recent meeting", "show latest notes"), do NOT use contentFilter
        - EXCEPTION: If a specific topic is mentioned AFTER the time qualifier ("last meeting ABOUT product launch"), use title parameter for the topic
+       - CRITICAL: For queries that might return multiple results or when users ask about "tasks from meetings", first use the list-meetings tool to get metadata, then use ai-notes with specific noteId
 
     2. For transcript requests:
        - ALWAYS set "includeTranscript" to true when words like "transcript", "conversation", "dialog", or "what was said" appear in the query
        - When asked to summarize a transcript, you MUST set includeTranscript to true
-       - NEVER set includeTranscript to true by default - only when explicitly requested
-       - CRITICAL: The `includeTranscript` parameter MUST ALWAYS be included in ALL tool calls when querying for notes (ai-notes)
+        - NEVER set includeTranscript to true by default - only when explicitly requested
+        - CRITICAL: The `includeTranscript` parameter MUST ALWAYS be included in ALL tool calls when querying for notes (ai-notes)
        - If transcript is NOT requested, you MUST explicitly set `includeTranscript` to `false`
        - IMPORTANT: Do NOT include `includeTranscript` parameter when performing folder operations (when `listFolders` is true)
 
@@ -25,6 +34,7 @@ instructions: |
        - When users ask for meetings/notes "about" specific topics, use title parameter with the topic
        - Use "contentFilter" when searching by note type, category, or general content keywords
        - IMPORTANT: When users ask for "meeting notes", "meetings", "calls", or similar note types (including variations like "project meeting", "team meeting", "client meeting"), use contentFilter with the relevant keyword (e.g., contentFilter: "meeting" or contentFilter: "project meeting")
+       - EXCEPTION: For task/action item extraction queries (e.g., "what are the tasks from my latest meeting"), do NOT use contentFilter - instead use list-meetings first, then ai-notes with noteId
        - CRITICAL RULE: If the query is ONLY about time-based retrieval without specific topics ("most recent meeting", "latest call"), do NOT use contentFilter. If there's a specific topic mentioned ("last meeting about X"), use title parameter for the topic
        - When in doubt between title and contentFilter for specific topics, prefer using the title parameter
        - When in doubt for note types or categories, use contentFilter
@@ -53,11 +63,45 @@ instructions: |
        - When summarizing a specific conversation in detail
        - Requires a specific noteId (get this from ai-notes first if needed)
 
-    8. **save-to-notion tool usage**:
+    8. **list-meetings tool usage (IMPORTANT - READ CAREFULLY)**:
+        - SPECIAL CASE FOR TASK/ACTION ITEM QUERIES: If the user asks "what are the tasks from my latest meeting?" or similar:
+          * MUST call list-meetings first with { "date": "latest", "limit": 1 }
+          * MUST then call ai-notes with { "noteId": "<id-from-list-meetings>", "includeTranscript": false }
+          * DO NOT use contentFilter, excludeContent, or any other parameters in ai-notes for this case
+        - Use when users ask to "list meetings" or to see meeting metadata (titles, dates, folders)
+        - Use when a query could return multiple meetings (e.g., "yesterday", "last week", "last month", "meetings in the Work folder")
+        - Use when you need to select a specific meeting before fetching content, to avoid loading full content for many meetings
+        - For requests like "tasks from my latest meeting" or similar extractions on the latest meeting, first call list-meetings with `date: "latest"` and `limit: 1`, then call ai-notes with the returned `noteId`
+        - For simple "show my latest/most recent meeting" where returning the top note is sufficient, call ai-notes directly (no need for list-meetings)
+        - Tip: `date` supports values like "latest", "most recent", "today", "yesterday", "last week", "last month", or an ISO date (YYYY-MM-DD). When `date` includes "latest/most recent" and no `limit` is provided, treat `limit` as 1 by default
+         - CRITICAL: After getting meeting metadata from list-meetings, you MUST call ai-notes with the specific `noteId` to get the full content when content is requested
+         - CRITICAL: For queries extracting tasks/action items from the "latest" or a specific meeting (e.g., "what are the tasks from my latest meeting?"), you MUST follow this exact two-step pattern:
+           Step 1: Call `list-meetings` with arguments: `{ "date": "latest", "limit": 1 }`
+                   This will return something like: `{ "id": "latest-meeting-123", "title": "Product Launch", ... }`
+           Step 2: Call `ai-notes` with arguments: `{ "noteId": "latest-meeting-123", "includeTranscript": false }`
+                   Where "latest-meeting-123" is the actual ID value from the list-meetings response
+           IMPORTANT: The `noteId` parameter is REQUIRED in step 2 - you cannot omit it or use other parameters instead.
+           DO NOT use `contentFilter`, `excludeContent`, `date`, or any other parameters in the ai-notes call - only use `noteId` and `includeTranscript`.
+         - IMPORTANT: For slash-recipe queries like "/tldr my latest meeting", call `recipes` (get by slug) and then call `ai-notes` directly for the latest item (with `includeTranscript: false`). Do NOT call `list-meetings` unless the prompt requires browsing multiple candidates.
+
+    9. **save-to-notion tool usage**:
        - Use when users ask to "save to Notion", "export to Notion", "share to Notion", or similar
        - Can handle single notes or multiple notes (provide array of noteIds)
        - Always inform users about the results (success/failure) and provide Notion page URLs when successful
        - If saving multiple notes, mention the batch processing approach
+        - IMPORTANT: For queries like "save my last N meeting notes", FIRST call `ai-notes` with `contentFilter: "meeting"` and `includeTranscript: false` to obtain the latest meeting notes (newest first). Then select the top N `id`s and pass them to `save-to-notion`. Do NOT use `list-meetings` for this flow.
+
+    10. **recipes tool usage**:
+        - Use this tool when the user has a query containing a slash command, e.g., "/tldr", "/how-did-i-do", "/retro-notes". This can be with or without the "@granola" prefix (e.g., "@granola /tldr ...").
+        - Actions and parameters:
+          - `action: "list"` to retrieve available recipes and feature flag
+          - `action: "get"` with `slug` to retrieve a specific recipe (e.g., "tldr")
+          - `action: "search"` with `query` to filter user recipes by slug or instructions
+        - The tool returns:
+          - For list: `{ featureEnabled, userRecipes, defaultRecipes, sharedRecipes }`
+          - For get: a single `Recipe` or empty array if not found
+          - For search: an array of matching `Recipe` items (defaults to all user recipes when query is empty)
+        - If the feature is disabled, handle gracefully by informing the user
 
     NOTE: The tool will always return results sorted by date (newest first). When a user asks for "latest" or "last", you don't need to add any filters - just use the first result returned.
 
@@ -84,6 +128,10 @@ evals:
     
     - input: "@granola Show me the transcript of my last meeting about the product launch"
       mocks:
+        list-meetings:
+          - id: "sample-id-456"
+            title: "Product Launch"
+            date: "2025-03-06T16:15:20.057Z"
         ai-notes:
           - content: "Product launch planning discussion"
             date: "2025-03-06T16:15:20.057Z"
@@ -133,6 +181,16 @@ evals:
     
     - input: "@granola save my last 3 meeting notes to Notion"
       mocks:
+        list-meetings:
+          - id: "note-1"
+            title: "Team Sync"
+            date: "2025-03-15T14:00:00.000Z"
+          - id: "note-2"
+            title: "Client Call"
+            date: "2025-03-14T16:30:00.000Z"
+          - id: "note-3"
+            title: "Planning Session"
+            date: "2025-03-13T11:00:00.000Z"
         ai-notes:
           - id: "note-1"
             title: "Team Sync"
@@ -205,4 +263,58 @@ evals:
             arguments:
               contentType: "enhanced"
               contentFilter: "project meeting"
+              includeTranscript: false
+
+    - input: "@granola what are the tasks from my latest meeting?"
+      mocks:
+        list-meetings:
+          - id: "latest-meeting-123"
+            title: "Product Launch Planning"
+            date: "2025-03-16T14:00:00.000Z"
+            folderIds: ["work-folder-456"]
+            folderNames: ["Work Projects"]
+        ai-notes:
+          - content: "### Product Launch Tasks\n\n- Finalize marketing materials by Friday\n- Schedule demo with engineering team\n- Prepare presentation for stakeholders\n- Review budget allocation for Q2"
+            date: "2025-03-16T14:00:00.000Z"
+            title: "Product Launch Planning"
+            id: "latest-meeting-123"
+      expected:
+        - callsTool:
+            name: "list-meetings"
+            arguments:
+              date: "latest"
+              limit: 1
+        - callsTool:
+            name: "ai-notes"
+            arguments:
+              noteId: "latest-meeting-123"
               includeTranscript: false 
+
+    
+
+    - input: "@granola /tldr my latest meeting"
+      mocks:
+        recipes:
+          - slug: "tldr"
+            id: "r-101"
+            config:
+              instructions: "Provide a concise TL;DR"
+        list-meetings:
+          - id: "latest-meeting-123"
+            title: "Engineering Sync"
+            date: "2025-03-16T10:00:00.000Z"
+        ai-notes:
+          - content: "Product roadmap discussion with engineering team"
+            date: "2025-03-16T10:00:00.000Z"
+            title: "Engineering Sync"
+            id: "latest-meeting-123"
+      expected:
+        - callsTool:
+            name: "recipes"
+            arguments:
+              action: "get"
+              slug: "tldr"
+        - callsTool:
+            name: "ai-notes"
+            arguments:
+              includeTranscript: false
