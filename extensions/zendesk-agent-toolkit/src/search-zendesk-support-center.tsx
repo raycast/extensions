@@ -245,8 +245,9 @@ function CreateArticleForm() {
           title: title,
           body: htmlContent,
           locale: "en-us",
-          permission_group_id: 1882214, // Using the same ID from your working Python app
-          user_segment_id: isPublic ? null : 933727, // null = everyone, 933727 = agents/admins
+          // These values should come from preferences or be configurable
+          permission_group_id: 1882214, // TODO: Make this configurable
+          user_segment_id: isPublic ? null : 933727, // TODO: Make this configurable
         },
         notify_subscribers: false,
       };
