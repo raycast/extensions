@@ -1,4 +1,4 @@
-import { environment, showToast } from "@raycast/api";
+import { environment, showToast, Toast } from "@raycast/api";
 import axios from "axios";
 import fs from "fs";
 import afs from "fs/promises";
@@ -64,9 +64,10 @@ export async function ensureFzfCLI() {
     }
 
     // Download the CLI
-    showToast({
+    const toast = await showToast({
+      style: Toast.Style.Animated,
       title: "Downloading",
-      message: "fzf cli",
+      message: "installing fzf cli",
     });
     const binaryURL = `https://github.com/junegunn/fzf/releases/download/v${cliVersion}/${cliFileInfo.pkg}`;
     console.log("downloading fzf archive:", binaryURL);
@@ -89,10 +90,9 @@ export async function ensureFzfCLI() {
     await afs.chmod(fzfCliFilepath(), "755");
     console.log("set permissions to fzf executable to 755");
 
-    showToast({
-      title: "Success",
-      message: "fzf cli installed successfully",
-    });
+    toast.style = Toast.Style.Success;
+    toast.message = "fzf cli installed successfully";
+
     return fzfCliFilepath();
   } catch (error) {
     showFailureToast(error, { title: "Could not install fzf cli" });

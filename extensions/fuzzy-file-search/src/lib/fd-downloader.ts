@@ -1,4 +1,4 @@
-import { environment, showToast } from "@raycast/api";
+import { environment, showToast, Toast } from "@raycast/api";
 import axios from "axios";
 import fs from "fs";
 import afs from "fs/promises";
@@ -75,9 +75,10 @@ export async function ensureFdCLI() {
       return fdCliFilepath();
     }
 
-    showToast({
+    const toast = await showToast({
+      style: Toast.Style.Animated,
       title: "Downloading",
-      message: "fd cli",
+      message: "installing fd cli",
     });
     // Download the cli
     const binaryURL = `https://github.com/sharkdp/fd/releases/download/v${cliVersion}/${cliFileInfo.pkg}`;
@@ -100,10 +101,9 @@ export async function ensureFdCLI() {
     await afs.chmod(fdCliFilepath(), "755");
     console.log("set permissions to fd executable to 755");
 
-    showToast({
-      title: "Success",
-      message: "fd cli installed successfully",
-    });
+    toast.style = Toast.Style.Success;
+    toast.message = "fd cli installed successfully";
+
     return fdCliFilepath();
   } catch (error) {
     showFailureToast(error, { title: "Could not install fd cli" });
