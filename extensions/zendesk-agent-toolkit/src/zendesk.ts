@@ -1,10 +1,5 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 
-interface Preferences {
-  subdomain: string;
-  email: string;
-  apiToken: string;
-}
 
 function getBaseUrl(): string {
   const { subdomain } = getPreferenceValues<Preferences>();
