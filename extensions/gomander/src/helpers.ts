@@ -1,3 +1,5 @@
+// Port range for scanning gomander instances
+// Default range is 9001-9100 as per gomander configuration
 const START_PORT = 9001;
 const END_PORT = 9100;
 
