@@ -77,7 +77,7 @@ export default function FavouritePromptsCommand() {
           actions={
             <ActionPanel>
               <Action.CopyToClipboard content={prompt.content} />
-              <Action.OpenInBrowser url={`https://promptbee.dev/prompts/${prompt.id}`} />
+              <Action.OpenInBrowser url={`https://www.promptbee.dev/prompts/${prompt.id}`} />
             </ActionPanel>
           }
         />
