@@ -53,7 +53,6 @@ export default function Command({
   arguments: Arguments.FrcEvent;
 }) {
   const [eventData, setEventData] = useState<Event | null>(null);
-  const [eventExists, setEventExists] = useState<boolean>(false);
   const [rankings, setRankings] = useState<Rankings | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -69,7 +68,6 @@ export default function Command({
         if (cachedEventData && cachedRankings) {
           setEventData(cachedEventData);
           setRankings(cachedRankings);
-          setEventExists(true);
           setIsLoading(false);
           return;
         }
@@ -84,8 +82,8 @@ export default function Command({
           },
         );
         const eventData = (await eventResponse.json()) as Partial<Event>;
+        console.log(eventData);
         if (!eventData || typeof eventData !== "object" || !eventData.key) {
-          setEventExists(false);
           setIsLoading(false);
           return;
         }
@@ -225,7 +223,6 @@ export default function Command({
 
         eventObj.matches = matches;
         setEventData(eventObj);
-        setEventExists(true);
 
         // Cache the results
         setCachedData(cacheKey, eventObj);
@@ -242,20 +239,9 @@ export default function Command({
     fetchData();
   }, [event]);
 
-  if (!eventExists) {
-    return (
-      <List isShowingDetail={true} filtering={false} isLoading={false}>
-        <List.EmptyView
-          title="Invalid Event ID"
-          description="The event ID you provided is not valid. Please check the event ID and try again."
-        />
-      </List>
-    );
-  }
-
   return (
     <List isShowingDetail={true} filtering={false} isLoading={isLoading}>
-      {!isLoading && eventData && (
+      {eventData && (
         <>
           <List.Item
             title={eventData.name}
