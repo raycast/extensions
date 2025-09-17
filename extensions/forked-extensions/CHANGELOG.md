@@ -1,6 +1,6 @@
 # Raycast Fork Extensions Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2025-09-17
 
 - Fix the incorrect clipboard content when copying the extension path
 - Fix the incorrect type of package.json structure
