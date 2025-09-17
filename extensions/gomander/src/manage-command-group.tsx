@@ -2,11 +2,20 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useGetCommandGroups } from "./queries/useGetCommandGroups";
 import { useRunCommandGroup } from "./mutations/useRunCommandGroup";
 import { useStopCommandGroup } from "./mutations/useStopCommandGroup";
+import { useEffect } from "react";
 
 export default function Command() {
   const { data: commandGroups, refetch } = useGetCommandGroups();
   const { mutate: runCommandGroup } = useRunCommandGroup({ onSuccess: refetch });
   const { mutate: stopCommandGroup } = useStopCommandGroup({ onSuccess: refetch });
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refetch();
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <List>
