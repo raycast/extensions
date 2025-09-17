@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 import { getPanelId } from "../utils/getPanelId";
 import { getTranscript } from "../utils/fetchData";
 import convertHtmlToMarkdown from "../utils/convertHtmltoMarkdown";
-import { convertDocumentToMarkdown } from "../utils/convertJsonNodes";
 import { saveToNotion } from "../utils/granolaApi";
 import { Doc, NoteActionsProps, PanelsByDocId, Folder } from "../utils/types";
 import { mapIconToHeroicon, mapColorToHex, getDefaultIconUrl } from "../utils/iconMapper";
@@ -194,28 +193,28 @@ export function NoteListItem({
             target={
               <Detail
                 markdown={(() => {
-                  // Get panel ID with safe fallback
+                  // First try to get content from the note's panel data
                   const panelId = getPanelId(panels, doc.id);
                   const panelData = panels && panels[doc.id] && panelId ? panels[doc.id][panelId] : null;
 
                   let content = "";
                   if (panelData) {
-                    content = panelData.content
-                      ? convertDocumentToMarkdown(panelData.content)
-                      : panelData.original_content || "";
+                    content = panelData.original_content || "No content available for this note.";
                   }
 
-                  if (!content && doc.notes_markdown) {
-                    content = doc.notes_markdown;
+                  // Convert HTML to markdown for proper display
+                  if (content) {
+                    content = convertHtmlToMarkdown(content);
                   }
 
-                  // Check for iOS unsynced note case
+                  // Special handling for iOS-created notes that haven't synced yet
                   if (!content.trim() && doc.creation_source === "iOS") {
                     return `# ${
                       doc.title ?? untitledNoteTitle
                     }\n\n---\n\nThis note was created on an iOS device and needs to be synced.\n\nPlease open this note in the Granola app to view its content. Then you need to reload the Raycast window to see the updated content.`;
                   }
 
+                  // For notes with no content
                   if (!content.trim()) {
                     return `# ${doc.title ?? untitledNoteTitle}\n\n Created at: ${new Date(
                       doc.created_at,
@@ -232,6 +231,38 @@ export function NoteListItem({
                       title="View Transcript"
                       icon={Icon.Waveform}
                       target={<FullTranscriptDetail docId={doc.id} title={doc.title ?? untitledNoteTitle} />}
+                    />
+                    <Action.Push
+                      title="My Notes "
+                      icon={Icon.Code}
+                      target={
+                        <Detail
+                          markdown={(() => {
+                            // Display the raw notes_markdown field
+                            const notesMarkdown = doc.notes_markdown;
+
+                            if (!notesMarkdown || !notesMarkdown.trim()) {
+                              return `# ${doc.title ?? untitledNoteTitle}\n\n Created at: ${new Date(
+                                doc.created_at,
+                              ).toLocaleString()}\n\n---\n\nNo My Notes available for this note.`;
+                            }
+
+                            return `# ${doc.title ?? untitledNoteTitle}\n\n Created at: ${new Date(
+                              doc.created_at,
+                            ).toLocaleString()}\n\n---\n\n${notesMarkdown}`;
+                          })()}
+                          actions={
+                            <ActionPanel>
+                              <Action.CopyToClipboard
+                                title="Copy My Notes"
+                                content={doc.notes_markdown || ""}
+                                shortcut={{ modifiers: ["cmd"], key: "c" }}
+                              />
+                              <NoteActions doc={doc} panels={panels} />
+                            </ActionPanel>
+                          }
+                        />
+                      }
                     />
                     <NoteActions doc={doc} panels={panels} />
                   </ActionPanel>

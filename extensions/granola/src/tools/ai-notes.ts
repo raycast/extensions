@@ -32,6 +32,9 @@ type Input = {
   /**
    * Optional specific note ID to fetch transcript for
    * Use when a user refers to a specific note they want to examine in detail
+   * CRITICAL: For task extraction queries like "what are the tasks from my latest meeting?",
+   * you MUST use this parameter with the ID obtained from list-meetings tool.
+   * Pattern: First call list-meetings with date:"latest" limit:1, then use the returned ID here.
    */
   noteId?: string;
   /**
@@ -156,6 +159,11 @@ function resolveEnhancedContent(panels: PanelsByDocId | undefined, documentId: s
  *
  * For note queries, it can filter by title, content, date, or folder.
  * For folder queries, it returns folder metadata including note counts.
+ *
+ * CRITICAL PATTERN for task extraction queries (e.g., "what are the tasks from my latest meeting?"):
+ * 1. First call list-meetings with { "date": "latest", "limit": 1 } to get the meeting ID
+ * 2. Then call THIS tool with { "noteId": "<id-from-step-1>", "includeTranscript": false }
+ * DO NOT use contentFilter or excludeContent for task extraction - use noteId instead.
  *
  * IMPORTANT: When dealing with queries that might return many notes (e.g., "all meetings",
  * "tasks from meetings"), consider using:

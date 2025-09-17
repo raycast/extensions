@@ -61,6 +61,11 @@ type Meeting = {
  * - User wants to see meetings from a specific time period
  * - You need to get meeting IDs before fetching full content
  *
+ * CRITICAL: For task extraction queries like "what are the tasks from my latest meeting?":
+ * 1. Call THIS tool with { "date": "latest", "limit": 1 } to get the meeting ID
+ * 2. Then call ai-notes with { "noteId": "<id-from-step-1>", "includeTranscript": false }
+ * DO NOT skip step 2 - you MUST call ai-notes with the specific noteId to get content.
+ *
  * After getting the meeting list, use the ai-notes tool with specific noteId
  * to retrieve full content for individual meetings.
  */
@@ -135,50 +140,57 @@ export default async function tool(input: Input): Promise<Meeting[]> {
     );
   }
 
-  // Date filter
+  // Date filter (excluding "latest" logic which is handled after all filters)
+  let isLatestQuery = false;
   if (input.date && input.date.trim() !== "") {
     const inputLower = input.date.toLowerCase();
 
-    // Handle "latest" or "most recent" - just return the first one after sorting
+    // Check if this is a "latest" query but don't process it yet
     if (inputLower.includes("latest") || inputLower.includes("most recent") || inputLower.includes("recent")) {
-      // For latest queries, default limit to 1 unless specified otherwise
-      const limit = input.limit || 1;
-      return filteredMeetings.slice(0, limit);
-    }
+      isLatestQuery = true;
+    } else {
+      // Apply other date filters
+      filteredMeetings = filteredMeetings.filter((meeting) => {
+        try {
+          const meetingDate = new Date(meeting.date);
+          const meetingDateStr = meetingDate.toISOString().split("T")[0];
 
-    // Apply other date filters
-    filteredMeetings = filteredMeetings.filter((meeting) => {
-      try {
-        const meetingDate = new Date(meeting.date);
-        const meetingDateStr = meetingDate.toISOString().split("T")[0];
-
-        if (inputLower === "today") {
-          const today = new Date();
-          return meetingDateStr === today.toISOString().split("T")[0];
-        } else if (inputLower === "yesterday") {
-          const yesterday = new Date();
-          yesterday.setDate(yesterday.getDate() - 1);
-          return meetingDateStr === yesterday.toISOString().split("T")[0];
-        } else if (inputLower === "last week" || inputLower.includes("week")) {
-          const weekAgo = new Date();
-          weekAgo.setDate(weekAgo.getDate() - 7);
-          return meetingDate >= weekAgo;
-        } else if (inputLower === "last month" || inputLower.includes("month")) {
-          const monthAgo = new Date();
-          monthAgo.setMonth(monthAgo.getMonth() - 1);
-          return meetingDate >= monthAgo;
-        } else {
-          // Try parsing as ISO date
-          const targetDate = new Date(input.date!);
-          return meetingDateStr === targetDate.toISOString().split("T")[0];
+          if (inputLower === "today") {
+            const today = new Date();
+            return meetingDateStr === today.toISOString().split("T")[0];
+          } else if (inputLower === "yesterday") {
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            return meetingDateStr === yesterday.toISOString().split("T")[0];
+          } else if (inputLower === "last week" || inputLower.includes("week")) {
+            const weekAgo = new Date();
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            return meetingDate >= weekAgo;
+          } else if (inputLower === "last month" || inputLower.includes("month")) {
+            const monthAgo = new Date();
+            monthAgo.setMonth(monthAgo.getMonth() - 1);
+            return meetingDate >= monthAgo;
+          } else {
+            // Try parsing as ISO date
+            const targetDate = new Date(input.date!);
+            return meetingDateStr === targetDate.toISOString().split("T")[0];
+          }
+        } catch (e) {
+          return false;
         }
-      } catch (e) {
-        return false;
-      }
-    });
+      });
+    }
   }
 
-  // Apply limit (default to 10 if not specified)
-  const limit = input.limit || 10;
+  // Ensure meetings are sorted by date (newest first) after all filtering
+  filteredMeetings.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  // Apply limit based on query type
+  let limit = input.limit;
+  if (!limit) {
+    // For "latest" queries, default to 1; otherwise default to 10
+    limit = isLatestQuery ? 1 : 10;
+  }
+
   return filteredMeetings.slice(0, limit);
 }

@@ -3,6 +3,10 @@ instructions: |
 
     # Tool Usage Guidelines:
     PRIORITY DECISION RULES (read first):
+    - CRITICAL PATTERN FOR TASK EXTRACTION: If user asks "what are the tasks from my latest meeting?" or similar task/action item extraction:
+      1. MUST call list-meetings with { "date": "latest", "limit": 1 }
+      2. MUST call ai-notes with { "noteId": "<id-from-step-1>", "includeTranscript": false }
+      3. DO NOT use contentFilter, excludeContent, or other parameters in ai-notes for this pattern
     - CRITICAL: For ANY call to `ai-notes`, ALWAYS include the `includeTranscript` parameter explicitly. Set it to true only when the user asks for the transcript or a transcript summary; otherwise set it to false. Do NOT include this parameter for folder operations (`listFolders: true`).
     - CRITICAL: Use `list-meetings` only when needed for disambiguation or when you specifically need metadata/IDs before fetching content. For simple "latest/most recent" single-item requests, prefer calling `ai-notes` directly without a prior `list-meetings` call.
     - When both a time qualifier and a specific topic are given (e.g., "last meeting about product launch"), use `title` for the topic and do NOT call `list-meetings` unless you need to enumerate or disambiguate multiple matches.
@@ -30,6 +34,7 @@ instructions: |
        - When users ask for meetings/notes "about" specific topics, use title parameter with the topic
        - Use "contentFilter" when searching by note type, category, or general content keywords
        - IMPORTANT: When users ask for "meeting notes", "meetings", "calls", or similar note types (including variations like "project meeting", "team meeting", "client meeting"), use contentFilter with the relevant keyword (e.g., contentFilter: "meeting" or contentFilter: "project meeting")
+       - EXCEPTION: For task/action item extraction queries (e.g., "what are the tasks from my latest meeting"), do NOT use contentFilter - instead use list-meetings first, then ai-notes with noteId
        - CRITICAL RULE: If the query is ONLY about time-based retrieval without specific topics ("most recent meeting", "latest call"), do NOT use contentFilter. If there's a specific topic mentioned ("last meeting about X"), use title parameter for the topic
        - When in doubt between title and contentFilter for specific topics, prefer using the title parameter
        - When in doubt for note types or categories, use contentFilter
@@ -58,7 +63,11 @@ instructions: |
        - When summarizing a specific conversation in detail
        - Requires a specific noteId (get this from ai-notes first if needed)
 
-    8. **list-meetings tool usage**:
+    8. **list-meetings tool usage (IMPORTANT - READ CAREFULLY)**:
+        - SPECIAL CASE FOR TASK/ACTION ITEM QUERIES: If the user asks "what are the tasks from my latest meeting?" or similar:
+          * MUST call list-meetings first with { "date": "latest", "limit": 1 }
+          * MUST then call ai-notes with { "noteId": "<id-from-list-meetings>", "includeTranscript": false }
+          * DO NOT use contentFilter, excludeContent, or any other parameters in ai-notes for this case
         - Use when users ask to "list meetings" or to see meeting metadata (titles, dates, folders)
         - Use when a query could return multiple meetings (e.g., "yesterday", "last week", "last month", "meetings in the Work folder")
         - Use when you need to select a specific meeting before fetching content, to avoid loading full content for many meetings
@@ -66,7 +75,13 @@ instructions: |
         - For simple "show my latest/most recent meeting" where returning the top note is sufficient, call ai-notes directly (no need for list-meetings)
         - Tip: `date` supports values like "latest", "most recent", "today", "yesterday", "last week", "last month", or an ISO date (YYYY-MM-DD). When `date` includes "latest/most recent" and no `limit` is provided, treat `limit` as 1 by default
          - CRITICAL: After getting meeting metadata from list-meetings, you MUST call ai-notes with the specific `noteId` to get the full content when content is requested
-         - CRITICAL: For queries extracting tasks/action items from the "latest" or a specific meeting (e.g., "what are the tasks from my latest meeting"), DO NOT use `contentFilter`. First call `list-meetings` with `date: "latest"`, `limit: 1`, then call `ai-notes` with `noteId` and `includeTranscript: false`.
+         - CRITICAL: For queries extracting tasks/action items from the "latest" or a specific meeting (e.g., "what are the tasks from my latest meeting?"), you MUST follow this exact two-step pattern:
+           Step 1: Call `list-meetings` with arguments: `{ "date": "latest", "limit": 1 }`
+                   This will return something like: `{ "id": "latest-meeting-123", "title": "Product Launch", ... }`
+           Step 2: Call `ai-notes` with arguments: `{ "noteId": "latest-meeting-123", "includeTranscript": false }`
+                   Where "latest-meeting-123" is the actual ID value from the list-meetings response
+           IMPORTANT: The `noteId` parameter is REQUIRED in step 2 - you cannot omit it or use other parameters instead.
+           DO NOT use `contentFilter`, `excludeContent`, `date`, or any other parameters in the ai-notes call - only use `noteId` and `includeTranscript`.
          - IMPORTANT: For slash-recipe queries like "/tldr my latest meeting", call `recipes` (get by slug) and then call `ai-notes` directly for the latest item (with `includeTranscript: false`). Do NOT call `list-meetings` unless the prompt requires browsing multiple candidates.
 
     9. **save-to-notion tool usage**:

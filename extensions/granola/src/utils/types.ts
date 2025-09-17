@@ -187,6 +187,24 @@ export interface Creator {
 export interface Attendee {
   name?: string;
   email?: string;
+  details?: {
+    person?: {
+      name?: {
+        fullName?: string;
+      };
+      avatar?: string;
+      linkedin?: {
+        handle?: string;
+      };
+      employment?: {
+        name?: string;
+        title?: string;
+      };
+    };
+    company?: {
+      name?: string;
+    };
+  };
 }
 
 export interface TranscriptSegment {
@@ -240,6 +258,42 @@ export interface FoldersResponse {
   lists: {
     [key: string]: Folder;
   };
+}
+
+// Person type from cache
+export interface Person {
+  id: string;
+  created_at: string;
+  user_id: string;
+  name: string;
+  job_title: string;
+  company_name: string;
+  company_description: string;
+  links: Array<{
+    url: string;
+    title: string;
+  }>;
+  email: string;
+  avatar: string;
+  favorite_panel_templates?: Array<{
+    template_id: string;
+  }>;
+  user_type?: string;
+  subscription_name?: string;
+  // Meeting metadata
+  meetingCount?: number;
+  lastMeetingDate?: string;
+  meetingIds?: string[];
+}
+
+// Company type (extracted from people)
+export interface Company {
+  name: string;
+  description: string;
+  people: Person[];
+  // Company metadata
+  totalMeetings?: number;
+  lastMeetingDate?: string;
 }
 
 // Recipes types

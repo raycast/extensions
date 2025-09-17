@@ -12,12 +12,10 @@ export default function Command() {
   const { folders, isLoading: foldersLoading } = useFolders();
   const { noteData, panels, isLoading, hasError } = useGranolaData();
 
-  // Memoized filtering for better performance with accurate folder data
   const { filteredNotes, notesNotInFolders, folderNoteCounts } = useMemo(() => {
     const allNotes = noteData?.data?.docs || [];
     const noteIds = new Set(allNotes.map((d) => d.id));
 
-    // Calculate which notes are in folders and which aren't using accurate folder data
     const notesInFolders = new Set<string>();
     const counts: Record<string, number> = {};
 
@@ -50,7 +48,6 @@ export default function Command() {
     };
   }, [noteData?.data?.docs, folders, selectedFolder]);
 
-  // Handle loading and error states
   if (isLoading) {
     return <List isLoading={true} />;
   }

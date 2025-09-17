@@ -39,10 +39,22 @@
       "description": "Select multiple notes and export them",
       "mode": "view"
     },
-    {
+        {
       "name": "create-note-from-transcript",
       "title": "Create Note from Transcript",
       "description": "Create a new note in Granola from a transcript",
+      "mode": "view"
+    },
+    {
+      "name": "search-people",
+      "title": "Search People",
+      "description": "Search people from your Granola meetings",
+      "mode": "view"
+    },
+    {
+      "name": "search-companies",
+      "title": "Search Companies",
+      "description": "Search companies from your Granola meetings",
       "mode": "view"
     }
   ],
@@ -66,12 +78,12 @@
       "name": "save-to-notion",
       "title": "Save to Notion",
       "description": "Save one or more notes to Notion"
-    },
-    {
-      "name": "recipes",
-      "title": "Recipes",
-      "description": "List and search Granola recipes"
-    }
+      },
+      {
+        "name": "recipes",
+        "title": "Recipes",
+        "description": "List and search Granola recipes"
+      }
   ],
   "dependencies": {
     "@danielxceron/youtube-transcript": "^1.2.3",
@@ -97,5 +109,9 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }
