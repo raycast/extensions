@@ -54,6 +54,7 @@
     "axios": "^1.11.0",
     "extract-zip": "^2.0.1",
     "proper-lockfile": "^4.1.2",
+    "sanitize-filename": "^1.6.3",
     "sha256-file": "^1.0.0",
     "tar": "^6.2.1"
   },

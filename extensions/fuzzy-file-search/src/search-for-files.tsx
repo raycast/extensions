@@ -2,14 +2,15 @@ import { ActionPanel, List, Action, getPreferenceValues, environment } from "@ra
 import { useCachedPromise, usePromise } from "@raycast/utils";
 import { spawn } from "child_process";
 import path, { basename } from "path";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ensureFdCLI } from "./lib/fd-downloader";
 import os from "os";
-import fs, { closeSync } from "fs";
+import fs from "fs";
 import { ensureFzfCLI } from "./lib/fzf-downloader";
 import readline from "readline";
 import Stream from "stream";
 import assert from "assert";
+import sanitizeFilename from "sanitize-filename";
 
 type Prefs = {
   includeDirectories: boolean;
@@ -18,10 +19,11 @@ type Prefs = {
 };
 
 export default function Command() {
+  const abortable = useRef<AbortController>(null);
   const prefs = getPreferenceValues<Prefs>();
 
   const [searchText, setSearchText] = useState("");
-  const [searchRoot, setSearchRoot] = useState<string>("~");
+  const [searchRoot, setSearchRoot] = useState<string>(os.homedir());
 
   // Get FD CLI path
   const { data: fdPath, isLoading: isFdLoading } = useCachedPromise(async () => {
@@ -51,40 +53,57 @@ export default function Command() {
         optionalArgs = [];
       }
 
-      let searchDirs: string[] = [];
-      if (searchRoot === "~") {
-        searchDirs = [os.homedir()];
-      } else {
-        searchDirs = searchRoot.split(" ");
-      }
+      const searchDirs = searchRoot.split(" ");
 
-      const fileListFile = path.join(environment.supportPath, "fd-out.txt");
-      const outFD = fs.openSync(fileListFile, "w");
+      const fdOutput = path.join(environment.supportPath, `fd-out-${sanitizeFilename(searchRoot)}.txt`);
+      const outFD = fs.openSync(fdOutput, "w");
       const fd = spawn(fdPath, [...optionalArgs, "--print0", "--follow", ".", ...searchDirs], {
         stdio: ["ignore", outFD, "pipe"],
       });
+
+      let fdKilled = false;
+      const onAbort = () => {
+        console.log("aborting fd", basename(fdOutput));
+        fdKilled = true;
+        fd.kill();
+        fs.rmSync(fdOutput, { force: true });
+      };
+      abortable.current?.signal.addEventListener("abort", onAbort);
+
       await new Promise<void>((resolve, reject) => {
         let stderr = "";
         fd.stderr?.on("data", (chunk) => {
           stderr += chunk;
         });
+
         fd.on("close", (code) => {
-          closeSync(outFD);
-          if (code === 0) {
+          fs.closeSync(outFD);
+          if (code === 0 || fdKilled) {
             resolve();
           } else {
+            fs.rmSync(fdOutput, { force: true });
             reject(`Exit code of 'fd' = ${code}:\n${stderr}`);
           }
         });
       });
+      abortable.current?.signal.removeEventListener("abort", onAbort);
 
-      return fileListFile;
+      return fdOutput;
     },
     [searchRoot, fdPath],
     {
       execute: fdPath !== undefined,
+      abortable,
     },
   );
+
+  useEffect(() => {
+    return () => {
+      if (!fdOutput) return;
+      console.log("removing", basename(fdOutput));
+      fs.rmSync(fdOutput, { force: true });
+    };
+  }, [fdOutput]);
 
   // Get filteredPaths from fzf output
   const { data: filteredPaths, isLoading: isFilteredPathsLoading } = usePromise(
@@ -116,7 +135,7 @@ export default function Command() {
           stderr += chunk;
         });
         fd.on("close", (code) => {
-          closeSync(fdOutputFD);
+          fs.closeSync(fdOutputFD);
           // Fzf returns error code 1 if output is empty
           if (code === 0 || code === null || (code === 1 && stderr.length === 0)) {
             resolve();
@@ -143,7 +162,7 @@ export default function Command() {
       // throttle // don't re-render on every key-press, adds delay
       searchBarAccessory={
         <List.Dropdown tooltip="Search in directory" value={searchRoot} onChange={setSearchRoot}>
-          <List.Dropdown.Item title="Home (~)" value={"~"} />
+          <List.Dropdown.Item title="Home (~)" value={os.homedir()} />
           <List.Dropdown.Item title="This Computer (/)" value={"/"} />
           <List.Dropdown.Item title={`Custom Directories`} value={prefs.customSearchDirs} />
         </List.Dropdown>
