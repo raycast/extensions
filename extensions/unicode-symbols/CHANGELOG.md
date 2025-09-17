@@ -1,6 +1,6 @@
 # Unicode Symbols
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-09-17
 
 - Update to `unidata16` to version `1.0.0`, which contains the latest Unicode data set (version 17.0.0)
 - Add additional Latin Extended blocks to the dataset
