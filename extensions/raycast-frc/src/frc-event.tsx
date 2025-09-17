@@ -1,9 +1,16 @@
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
-import { getPreferenceValues, Cache } from "@raycast/api";
+import {
+  getPreferenceValues,
+  Cache,
+  ActionPanel,
+  Action,
+  Keyboard,
+} from "@raycast/api";
 import { List } from "@raycast/api";
 import type { Award, Event, Match, Rankings } from "./frc-team";
 import { getMatchesTable } from "./frc-team";
+import { showFailureToast } from "@raycast/utils";
 
 const cache = new Cache();
 
@@ -79,8 +86,27 @@ export default function Command({
             headers: {
               "X-TBA-Auth-Key": preferences.tbaApiKey,
             },
-          },
+          }
         );
+
+        // Check for authentication errors
+        if (!eventResponse.ok) {
+          if (eventResponse.status === 401) {
+            await showFailureToast(new Error("Invalid TBA API Key"), {
+              title: "Please check your API key in preferences",
+            });
+          } else {
+            await showFailureToast(
+              new Error(`API Error ${eventResponse.status}`),
+              {
+                title: "Failed to fetch event data",
+              }
+            );
+          }
+          setIsLoading(false);
+          return;
+        }
+
         const eventData = (await eventResponse.json()) as Partial<Event>;
         console.log(eventData);
         if (!eventData || typeof eventData !== "object" || !eventData.key) {
@@ -113,21 +139,49 @@ export default function Command({
               `https://www.thebluealliance.com/api/v3/event/${event}/awards`,
               {
                 headers: { "X-TBA-Auth-Key": preferences.tbaApiKey },
-              },
+              }
             ),
             fetch(
               `https://www.thebluealliance.com/api/v3/event/${event}/teams/statuses`,
               {
                 headers: { "X-TBA-Auth-Key": preferences.tbaApiKey },
-              },
+              }
             ),
             fetch(
               `https://www.thebluealliance.com/api/v3/event/${event}/matches/keys`,
               {
                 headers: { "X-TBA-Auth-Key": preferences.tbaApiKey },
-              },
+              }
             ),
           ]);
+
+        // Check for authentication errors in parallel requests
+        if (
+          !awardsResponse.ok ||
+          !rankingsResponse.ok ||
+          !matchKeysResponse.ok
+        ) {
+          const failedResponse = !awardsResponse.ok
+            ? awardsResponse
+            : !rankingsResponse.ok
+              ? rankingsResponse
+              : matchKeysResponse;
+
+          if (failedResponse.status === 401) {
+            await showFailureToast(new Error("Invalid TBA API Key"), {
+              title: "Please check your API key in preferences",
+            });
+          } else {
+            await showFailureToast(
+              new Error(`API Error ${failedResponse.status}`),
+              {
+                title: "Failed to fetch event details",
+              }
+            );
+          }
+          setIsLoading(false);
+          return;
+        }
 
         // Process awards with more efficient array methods
         const awardsData = (await awardsResponse.json()) as Array<{
@@ -139,13 +193,13 @@ export default function Command({
           awardsData
             .filter(
               (award) =>
-                award.recipient_list && Array.isArray(award.recipient_list),
+                award.recipient_list && Array.isArray(award.recipient_list)
             )
             .flatMap((award) =>
               award.recipient_list.map((recipient) => ({
                 name: award.name,
                 team: recipient.team_key,
-              })),
+              }))
             )
             .forEach((award) => awards.push(award));
         }
@@ -159,12 +213,15 @@ export default function Command({
           // Update event data with awards and rankings first for progressive loading
           setEventData({ ...eventObj, awards: eventObj.awards });
         } catch (error) {
-          console.error("Error fetching rankings:", error);
+          await showFailureToast(error, {
+            title: "Failed to load event rankings",
+          });
         }
 
         // Process matches
         const matchKeysData = (await matchKeysResponse.json()) as string[];
         const matches: Match[] = [];
+        let matchErrorCount = 0;
 
         if (Array.isArray(matchKeysData) && matchKeysData.length > 0) {
           // Fetch all match data in parallel (batch of 10 to avoid overwhelming APIs)
@@ -174,11 +231,12 @@ export default function Command({
             const matchPromises = batch.map(async (matchKey) => {
               try {
                 const response = await fetch(
-                  `https://api.statbotics.io/v3/match/${matchKey}`,
+                  `https://api.statbotics.io/v3/match/${matchKey}`
                 );
                 return await response.json();
               } catch (error) {
                 console.error(`Error fetching match ${matchKey}:`, error);
+                matchErrorCount++;
                 return null;
               }
             });
@@ -193,7 +251,7 @@ export default function Command({
                   curMatchData.alliances?.red?.team_keys?.length >= 3 &&
                   curMatchData.alliances?.blue?.team_keys?.length >= 3 &&
                   curMatchData.result &&
-                  curMatchData.pred,
+                  curMatchData.pred
               )
               .map((curMatchData) => {
                 const { alliances, result, pred } = curMatchData;
@@ -224,6 +282,16 @@ export default function Command({
         eventObj.matches = matches;
         setEventData(eventObj);
 
+        // Show warning if some matches failed to load
+        if (matchErrorCount > 0) {
+          await showFailureToast(
+            new Error(`Failed to load ${matchErrorCount} matches`),
+            {
+              title: "Some match data may be incomplete",
+            }
+          );
+        }
+
         // Cache the results
         setCachedData(cacheKey, eventObj);
         if (rankings) {
@@ -233,6 +301,9 @@ export default function Command({
         setIsLoading(false);
       } catch (error) {
         console.error("Error fetching event data:", error);
+        await showFailureToast(error, {
+          title: "Failed to fetch event data. Please try again.",
+        });
         setIsLoading(false);
       }
     }
@@ -259,11 +330,46 @@ export default function Command({
               />
             }
             subtitle={`${eventData.city}, ${eventData.state_prov}, ${eventData.country}`}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser
+                  url={`https://www.thebluealliance.com/event/${eventData.key}`}
+                  title="Open in The Blue Alliance"
+                  shortcut={Keyboard.Shortcut.Common.Open}
+                />
+                <Action.OpenInBrowser
+                  url={`https://statbotics.io/event/${eventData.key}`}
+                  title="Open in Statbotics"
+                  shortcut={{ modifiers: ["cmd"], key: "s" }}
+                />
+                {eventData.gmaps_url && (
+                  <Action.OpenInBrowser
+                    url={eventData.gmaps_url}
+                    title="Open Location in Maps"
+                    shortcut={{ modifiers: ["cmd"], key: "m" }}
+                  />
+                )}
+              </ActionPanel>
+            }
           />
 
           <List.Item
             title="Matches"
             detail={<List.Item.Detail markdown={getMatchesTable(eventData)} />}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser
+                  url={`https://www.thebluealliance.com/event/${eventData.key}#results`}
+                  title="View Matches on TBA"
+                  shortcut={Keyboard.Shortcut.Common.Open}
+                />
+                <Action.OpenInBrowser
+                  url={`https://statbotics.io/event/${eventData.key}`}
+                  title="View Matches on Statbotics"
+                  shortcut={{ modifiers: ["cmd"], key: "s" }}
+                />
+              </ActionPanel>
+            }
           />
 
           <List.Item
@@ -273,12 +379,30 @@ export default function Command({
                 markdown={awardsToMarkdown(eventData.awards, eventData)}
               />
             }
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser
+                  url={`https://www.thebluealliance.com/event/${eventData.key}#awards`}
+                  title="View Awards on TBA"
+                  shortcut={Keyboard.Shortcut.Common.Open}
+                />
+              </ActionPanel>
+            }
           />
           {rankings && (
             <List.Item
               title="Rankings"
               detail={
                 <List.Item.Detail markdown={rankingsToMarkdown(rankings)} />
+              }
+              actions={
+                <ActionPanel>
+                  <Action.OpenInBrowser
+                    url={`https://www.thebluealliance.com/event/${eventData.key}#rankings`}
+                    title="View Rankings on TBA"
+                    shortcut={Keyboard.Shortcut.Common.Open}
+                  />
+                </ActionPanel>
               }
             />
           )}
@@ -350,7 +474,7 @@ function awardsToMarkdown(awards: Award[], event: Event): string {
     awards
       .map(
         (award) =>
-          `| **${award.name}** | ${award.team && typeof award.team === "string" ? award.team.replace(/^frc/, "") : award.team} |`,
+          `| **${award.name}** | ${award.team && typeof award.team === "string" ? award.team.replace(/^frc/, "") : award.team} |`
       )
       .join("\n")
   );
