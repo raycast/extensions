@@ -5,6 +5,9 @@
   "description": "Robotics Stats for FIRST Robotics Competition",
   "icon": "icon.png",
   "author": "vibsthebot",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "commands": [
     {
