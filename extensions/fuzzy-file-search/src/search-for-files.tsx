@@ -144,6 +144,7 @@ export default function Command() {
       searchBarAccessory={
         <List.Dropdown tooltip="Search in directory" value={searchRoot} onChange={setSearchRoot}>
           <List.Dropdown.Item title="Home (~)" value={"~"} />
+          <List.Dropdown.Item title="This Computer (/)" value={"/"} />
           <List.Dropdown.Item title={`Custom Directories`} value={prefs.customSearchDirs} />
         </List.Dropdown>
       }
