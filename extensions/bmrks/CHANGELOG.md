@@ -1,5 +1,9 @@
 # bmrks Changelog
 
+## [Improvement] - {PR_MERGE_DATE}
+
+- Added feature to manage groups: create and delete group.
+
 ## [Improvement] - 2024-03-08
 
 - Changed error display from markdown view to empty list view.

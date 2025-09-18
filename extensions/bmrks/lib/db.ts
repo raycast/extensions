@@ -8,6 +8,14 @@ export async function getGroups(userId: string) {
   return supabase.from("groups").select("id, name, slug").eq("user_id", userId).returns<Group[]>();
 }
 
+export async function createGroup(group: Omit<Group, "id">) {
+  return supabase.from('groups').insert(group).returns<Group>();
+}
+
+export async function deleteGroup(id: string) {
+  return supabase.from("groups").delete().match({ id });
+}
+
 export async function deleteBookmark(id: string) {
   return supabase.from("bookmarks").delete().match({ id });
 }
