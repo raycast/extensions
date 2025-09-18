@@ -205,5 +205,10 @@
   "categories": [
     "Developer Tools",
     "System"
+  ],
+  "platforms": [
+    "mac",
+    "windows",
+    "linux"
   ]
 }
