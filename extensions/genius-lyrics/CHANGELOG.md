@@ -1,5 +1,9 @@
 # Genius Lyrics Changelog
 
+## [Improve Lyric Formatting] - {PR_MERGE_DATE}
+
+- Use markdown headers to create separation between verses.
+
 ## [Lyric Page Bug Fix] - 2025-04-22
 
 - Fixed lyric page including more text than it should.
