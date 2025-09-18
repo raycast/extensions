@@ -6,6 +6,7 @@ import { Activity } from "./types";
 const ACTIVITY_TYPE_ICONS: Record<string, Image.Source> = {
     "domain": Icon.Globe,
     "organization": Icon.Building,
+    "secret": Icon.Key,
     "session": Icon.Person,
     "subscription": Icon.CreditCard,
 };
@@ -30,8 +31,8 @@ export default function ListActivities() {
 
     function getActivityIcon(activity: Activity): Image.ImageLike {
         const source = ACTIVITY_TYPE_ICONS[activity.object.type] || Icon.Heartbeat;
-        const tintColor = ACTIVITY_VERB_COLORS[activity.verb];
-
+        let tintColor = ACTIVITY_VERB_COLORS[activity.verb];
+        if (activity.verb==="created" && activity.object.type==="session") tintColor = Color.Blue;
         return { source, tintColor };
     }
 
@@ -101,6 +102,10 @@ export default function ListActivities() {
             }
         }
 
+        if (activity.object.type==="secret") {
+            if (activity.verb==="created") return "Created secret";
+        }
+
         if (activity.object.type==="session") {
             if (activity.verb==="created") return "Logged in";
         }
@@ -110,7 +115,7 @@ export default function ListActivities() {
 
     function getAccessories(activity: Activity) {
         const accessories: List.Item.Accessory[] = [];
-        if (activity.object.type==="domain") accessories.push({tag: activity.object.name});
+        if (activity.object.type==="domain" || activity.object.type==="secret") accessories.push({tag: activity.object.name});
         accessories.push({icon:Icon.Clock, date: new Date(activity.created_at)});
         return accessories;
     }

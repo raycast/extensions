@@ -34,6 +34,24 @@ export type CreateDomain = {
     app_id: string;
 }
 
+export enum SecretType {
+    SIMPLE="SIMPLE",
+    REGISTRY="REGISTRY",
+    MANAGED="MANAGED",
+}
+export type Secret = {
+    id: string;
+    name: string;
+    type: SecretType;
+    updated_at: string;
+    value: string;
+}
+export type CreateSecret = {
+    name: string;
+    value: string;
+    type: SecretType;
+}
+
 export type ErrorResult = {
     status: number;
     code: string;

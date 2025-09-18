@@ -24,6 +24,12 @@
       "mode": "view"
     },
     {
+      "name": "manage-secrets",
+      "title": "Manage Secrets",
+      "description": "",
+      "mode": "view"
+    },
+    {
       "name": "manage-domains",
       "title": "Manage Domains",
       "description": "",
