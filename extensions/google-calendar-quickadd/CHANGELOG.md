@@ -1,5 +1,10 @@
 # Google Calendar Changelog
 
+## [Update] - 2025-09-18
+
+- Fix default calendar color not being used
+- Add default calendar color in settings
+
 ## [Initial Version] - 2025-09-15
 
 - Add natural language event creation with Raycast AI parsing
