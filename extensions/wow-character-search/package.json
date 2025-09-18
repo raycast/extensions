@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wow-character-search",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "title": "World of Warcraft Character Search",
   "description": "Search for World of Warcraft characters on the official Armory.",
   "icon": "WoW_icon.png",
