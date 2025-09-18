@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Action, Icon, confirmAlert, useNavigation } from "@raycast/api";
 import * as api from "../api.js";
 import Diagnostics from "./diagnostics.js";
@@ -10,42 +10,40 @@ import { getCommitDiffMessage } from "../utils.js";
 
 export default function SyncFork({
   forkedRepository,
-  lastCommitHash,
   onSyncFinished,
 }: {
   readonly forkedRepository: string | undefined;
-  readonly lastCommitHash: string | undefined;
   readonly onSyncFinished: () => void;
 }) {
   const { push } = useNavigation();
   const [commitDiff, setCommitDiff] = useState<{ github: CommitDiff; local: CommitDiff }>();
 
-  const diagnosticsAction = {
-    primaryAction: {
-      title: "Run Diagnostics",
-      onAction: () => {
-        push(<Diagnostics />);
+  const diagnosticsAction = useMemo(
+    () => ({
+      primaryAction: {
+        title: "Run Diagnostics",
+        onAction: () => {
+          push(<Diagnostics />);
+        },
       },
-    },
-  };
+    }),
+    [push],
+  );
+
+  const loadDiff = useCallback(async () => {
+    if (!forkedRepository) return;
+    // Run local Git command before requesting GitHub in case the network request is too slow to block the execution of other Git operations.
+    // But this still has a chance to be conflicted if the user execute another Git operation at the same time.
+    const localCommitDiff = await git.getAheadBehindCommits();
+    const githubCommitDiff = await api.compareTwoCommits(forkedRepository);
+    setCommitDiff({ github: githubCommitDiff, local: localCommitDiff });
+  }, [forkedRepository]);
 
   useEffect(() => {
-    catchError(async () => {
-      if (!forkedRepository) return;
-      // Run local Git command before requesting GitHub in case the network request is too slow to block the execution of other Git operations.
-      // But this still has a chance to be conflicted if the user execute another Git operation at the same time.
-      const localCommitDiff = await git.getAheadBehindCommits();
-      const githubCommitDiff = await api.compareTwoCommits(forkedRepository);
-      setCommitDiff({ github: githubCommitDiff, local: localCommitDiff });
-    }, diagnosticsAction)();
-  }, [forkedRepository, lastCommitHash]);
+    catchError(loadDiff, diagnosticsAction)();
+  }, [loadDiff, diagnosticsAction]);
 
-  const diffMessageOptions = {
-    prependSpace: true,
-    includeAhead: true,
-    includeParentheses: true,
-  };
-
+  const diffMessageOptions = { prependSpace: true, includeAhead: true, includeParentheses: true };
   const remoteDiff = getCommitDiffMessage(commitDiff?.github, diffMessageOptions);
   const localDiff = getCommitDiffMessage(commitDiff?.local, diffMessageOptions);
 
@@ -63,6 +61,7 @@ export default function SyncFork({
               title: "Sync",
               onAction: catchError(async () => {
                 await operation.sync();
+                loadDiff();
                 onSyncFinished();
               }, diagnosticsAction),
             },
@@ -81,6 +80,7 @@ export default function SyncFork({
               title: "Pull",
               onAction: catchError(async () => {
                 await operation.pull();
+                loadDiff();
                 onSyncFinished();
               }, diagnosticsAction),
             },

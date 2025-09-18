@@ -1,5 +1,21 @@
 # Raycast Fork Extensions Changelog
 
+## [Maintenance] - 2025-09-15
+
+- Fix the infinite rerender of the "Sync Remote" action
+- Add the missing JSDoc to some new utilities
+- Bump all dependencies to the latest
+
+## [Improvements] - 2025-09-15
+
+- Add `isMac` and `isWindows` helpers to utils
+
+## [Bugfix] - 2025-09-15
+
+- Fix the rerender logic of "Sync Fork" actions
+- Polish some code delightfully
+- Update link style in readme for better visual
+
 ## [Improvements] - 2025-09-11
 
 - Add support for migrating existing full-checkout repositories to sparse-checkout

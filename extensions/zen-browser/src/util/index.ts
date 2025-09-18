@@ -9,7 +9,16 @@ const userDataDirectoryPath = () => {
     throw new Error("$HOME environment variable is not set.");
   }
 
-  return path.join(process.env.HOME, "Library", "Application Support", "zen", "Profiles");
+  const preferences = getPreferenceValues<Preferences>();
+  if (preferences.profilesDirectory) {
+    return preferences.profilesDirectory;
+  }
+
+  if (process.platform == "darwin") {
+    return path.join(process.env.HOME, "Library", "Application Support", "zen", "Profiles");
+  } else {
+    return path.join(process.env.HOME, "AppData", "Roaming", "zen", "Profiles");
+  }
 };
 
 const getProfileName = (userDirectoryPath: string) => {
