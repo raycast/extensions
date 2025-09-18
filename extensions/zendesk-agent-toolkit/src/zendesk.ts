@@ -1,11 +1,11 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 function getBaseUrl(): string {
-  const { subdomain } = getPreferenceValues<Preferences>();
+  const { subdomain } = getPreferenceValues() as any;
   return `https://${subdomain}.zendesk.com`;
 }
 
 export function getAuthHeader(): string {
-  const { email, apiToken } = getPreferenceValues<Preferences>();
+  const { email, apiToken } = getPreferenceValues() as any;
   const token = Buffer.from(`${email}/token:${apiToken}`).toString("base64");
   return `Basic ${token}`;
 }
