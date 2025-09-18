@@ -1,0 +1,52 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "powershell-fn-ext",
+    "title": "Powershell Functions",
+    "description": "Search functions in a file and let you execute them",
+    "icon": "Icon.png",
+    "author": "dfs",
+    "categories": [
+        "Developer Tools"
+    ],
+    "license": "MIT",
+    "platforms": [
+        "Windows"
+    ],
+    "commands": [
+        {
+            "name": "execute-powershell-function",
+            "title": "Execute Powershell Function",
+            "description": "Lists and executes functions from a user-defined PowerShell script.",
+            "mode": "view"
+        }
+    ],
+    "preferences": [
+        {
+            "name": "scriptPath",
+            "title": "PowerShell Script Path",
+            "description": "The full path to your .ps1 file. Use ~ for your home directory.",
+            "type": "textfield",
+            "required": true,
+            "default": "~\\scripts\\my_ps1_functions.ps1"
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.40.0",
+        "@raycast/utils": "^1.4.8"
+    },
+    "devDependencies": {
+        "@raycast/eslint-config": "^1.0.6",
+        "@types/node": "18.18.4",
+        "@types/react": "19.0.10",
+        "eslint": "^8.51.0",
+        "prettier": "^3.0.3",
+        "typescript": "^5.2.2"
+    },
+    "scripts": {
+        "build": "ray build -e dist",
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint",
+        "publish": "ray publish"
+    }
+}
