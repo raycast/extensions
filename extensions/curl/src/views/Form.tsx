@@ -244,7 +244,7 @@ export default function FormView({ push }: { push: Navigation["push"] }) {
       ))}
 
       {parameters.length > 0 && (
-        <Form.Description title="" text={isMac ? "⌥⇧P Remove Last" : "Alt + ⇧ + P Remove Last"} />
+        <Form.Description title="" text={isMac ? "⌥⇧P Remove Last" : "Alt + Shift + P Remove Last"} />
       )}
 
       <Form.Separator />
