@@ -75,6 +75,13 @@ type ReceiveSendOptions = {
   password?: string;
 };
 
+type CreateLoginItemOptions = {
+  name: string;
+  username: string;
+  password: string;
+  folderId: string | null;
+};
+
 const { supportPath } = environment;
 
 const Δ = "4"; // changing this forces a new bin download for people that had a failed one
@@ -432,12 +439,7 @@ export class Bitwarden {
     }
   }
 
-  async createLoginItem(
-    name: string,
-    username: string,
-    password: string,
-    folderId: string | null
-  ): Promise<MaybeError<Item>> {
+  async createLoginItem(options: CreateLoginItemOptions): Promise<MaybeError<Item>> {
     try {
       const { error: itemTemplateError, result: itemTemplate } = await this.getTemplate("item");
       if (itemTemplateError) throw itemTemplateError;
@@ -445,12 +447,12 @@ export class Bitwarden {
       const { error: loginTemplateError, result: loginTemplate } = await this.getTemplate("item.login");
       if (loginTemplateError) throw loginTemplateError;
 
-      loginTemplate.username = username;
-      loginTemplate.password = password;
+      loginTemplate.username = options.username;
+      loginTemplate.password = options.password;
 
-      itemTemplate.name = name;
+      itemTemplate.name = options.name;
       itemTemplate.type = ItemType.LOGIN;
-      itemTemplate.folderId = folderId || null;
+      itemTemplate.folderId = options.folderId || null;
       itemTemplate.login = loginTemplate;
 
       const { result: encodedItem, error: encodeError } = await this.encode(JSON.stringify(itemTemplate));

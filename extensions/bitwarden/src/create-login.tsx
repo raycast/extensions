@@ -61,7 +61,7 @@ function CreateLoginComponent() {
     const toast = await showToast({ title: "Creating Login...", style: Toast.Style.Animated });
     try {
       const { name, username, password, folderId } = formState;
-      const { error } = await bitwarden.createLoginItem(name, username, password, folderId);
+      const { error } = await bitwarden.createLoginItem({ name, username, password, folderId });
       if (error) throw error;
 
       toast.style = Toast.Style.Success;
