@@ -230,6 +230,8 @@ Some users might not have installed the Browser Extension. If a user doesn't hav
 
 You can check if a user has the Browser Extension installed using `environment.canAccess(BrowserExtension)`.
 
+The API is not accessible on Windows for now.
+
 {% endhint %}
 
 ## API Reference
@@ -1559,6 +1561,12 @@ Note that `"alt"` and `"opt"` are the same key, they are just named differently 
 # Menu Bar Commands
 
 The `MenuBarExtra` component can be used to create commands which populate the [extras](https://developer.apple.com/design/human-interface-guidelines/components/system-experiences/the-menu-bar#menu-bar-commands) section of macOS' menu bar.
+
+{% hint style="info" %}
+
+Menubar commands aren't available on Windows.
+
+{% endhint %}
 
 ## Getting Started
 
@@ -8319,6 +8327,8 @@ The Window Management API provides developers with some functions to create comm
 Some users might not have access to this API. If a user doesn't have access to Raycast Pro, they will be asked if they want to get access when your extension calls the Window Management API. If the user doesn't wish to get access, the API call will throw an error.
 
 You can check if a user has access to the API using `environment.canAccess(WindowManagement)`.
+
+The API is not accessible on Windows for now.
 
 {% endhint %}
 
