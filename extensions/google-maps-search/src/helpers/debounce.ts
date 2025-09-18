@@ -2,19 +2,20 @@
  * Creates a debounced function that delays invoking the original function until after `wait` milliseconds
  * have elapsed since the last time the debounced function was invoked.
  *
- * @template T - The type of the function to be debounced
- * @param {T} func - The function to debounce
+ * @template Args - The argument types of the function
+ * @template R - The return type of the function
+ * @param {(...args: Args) => R} func - The function to debounce
  * @param {number} wait - The number of milliseconds to delay
- * @returns {(...args: Parameters<T>) => Promise<ReturnType<T>>} A new debounced function
+ * @returns {(...args: Args) => Promise<R>} A new debounced function
  */
-export const debounce = <T extends (...args: any[]) => any>(
-  func: T,
+export const debounce = <Args extends unknown[], R>(
+  func: (...args: Args) => R,
   wait: number
-): ((...args: Parameters<T>) => Promise<ReturnType<T>>) => {
+): ((...args: Args) => Promise<R>) => {
   let timeout: NodeJS.Timeout | null;
 
-  return (...args: Parameters<T>) => {
-    return new Promise<ReturnType<T>>((resolve) => {
+  return (...args: Args) => {
+    return new Promise<R>((resolve) => {
       // Clear the previous timeout if it exists
       if (timeout) clearTimeout(timeout);
 
