@@ -9,7 +9,11 @@ import { CreateEventArguments, CreateEventPreferences } from "./types";
 async function CreateEventImpl(props: LaunchProps<{ arguments: CreateEventArguments }>): Promise<void> {
   const preferences = getPreferenceValues<CreateEventPreferences>();
   const eventDetails: string = props.arguments.eventDetails;
-  const color: string | null = preferences.defaultColor == "0" ? null : preferences.defaultColor;
+  const color: string | null = props.arguments.color
+    ? props.arguments.color
+    : preferences.defaultColor == "0"
+      ? null
+      : preferences.defaultColor;
 
   const selectedCalendar = await LocalStorage.getItem<string>("defaultCalendar");
   const finalPreferences = {

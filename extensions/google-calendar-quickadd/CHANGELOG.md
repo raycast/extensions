@@ -10,3 +10,8 @@
 - Add AI-generated event descriptions
 - Add support for location parsing and expansion
 - Add OAuth integration with Google Calendar API
+
+## [Update] - 2025-09-18
+
+- Fix default calendar color not being used
+- Add default calendar color in settings
