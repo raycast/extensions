@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-early",
+  "title": "EARLY",
+  "description": "Track time with EARLY",
+  "icon": "icon.png",
+  "author": "bgnfu7re",
+  "contributors": [
+    "ztrls"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "command-status",
+      "title": "Status",
+      "subtitle": "EARLY",
+      "description": "Check the status of time track. Start and stop time tracking.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "type": "password",
+      "title": "API Token",
+      "description": "EARLY API Token",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.26.3",
+    "node-fetch": "^3.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
