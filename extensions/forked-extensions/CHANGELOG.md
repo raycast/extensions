@@ -1,5 +1,27 @@
 # Raycast Fork Extensions Changelog
 
+## [Bugfix] - 2025-09-17
+
+- Fix the incorrect clipboard content when copying the extension path
+- Fix the incorrect type of package.json structure
+
+## [Maintenance] - 2025-09-15
+
+- Fix the infinite rerender of the "Sync Remote" action
+- Add the missing JSDoc to some new utilities
+- Add authorization header to the GitHub raw content request
+- Bump all dependencies to the latest
+
+## [Improvements] - 2025-09-15
+
+- Add `isMac` and `isWindows` helpers to utils
+
+## [Bugfix] - 2025-09-15
+
+- Fix the rerender logic of "Sync Fork" actions
+- Polish some code delightfully
+- Update link style in readme for better visual
+
 ## [Improvements] - 2025-09-11
 
 - Add support for migrating existing full-checkout repositories to sparse-checkout

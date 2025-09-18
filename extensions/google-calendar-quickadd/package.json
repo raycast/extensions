@@ -1,0 +1,275 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "google-calendar-quickadd",
+  "title": "Google Calendar Events Quick Add",
+  "description": "Create Google Calendar events using natural language powered by Raycast AI",
+  "icon": "gcal-icon1.png",
+  "author": "ben_aguirre",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-event",
+      "title": "Create Event",
+      "subtitle": "Google Calendar Events Quick Add",
+      "description": "Type your event in plain English and AI creates it instantly - 'meeting tomorrow 3pm' or 'dinner friday 7pm'",
+      "mode": "no-view",
+      "keywords": [
+        "event",
+        "calendar",
+        "schedule",
+        "create"
+      ],
+      "arguments": [
+        {
+          "name": "eventDetails",
+          "placeholder": "Game today 4pm 2 hrs",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "color",
+          "type": "dropdown",
+          "placeholder": "Event Color",
+          "required": false,
+          "data": [
+            {
+              "title": "Lavender",
+              "value": "1"
+            },
+            {
+              "title": "Sage",
+              "value": "2"
+            },
+            {
+              "title": "Grape",
+              "value": "3"
+            },
+            {
+              "title": "Flamingo",
+              "value": "4"
+            },
+            {
+              "title": "Banana",
+              "value": "5"
+            },
+            {
+              "title": "Tangerine",
+              "value": "6"
+            },
+            {
+              "title": "Peacock",
+              "value": "7"
+            },
+            {
+              "title": "Graphite",
+              "value": "8"
+            },
+            {
+              "title": "Blueberry",
+              "value": "9"
+            },
+            {
+              "title": "Basil",
+              "value": "10"
+            },
+            {
+              "title": "Tomato",
+              "value": "11"
+            }
+          ]
+        }
+      ],
+      "shortcut": {
+        "key": "k",
+        "modifiers": [
+          "cmd",
+          "shift"
+        ]
+      },
+      "path": "src/create-event.tsx"
+    },
+    {
+      "name": "select-default-calendar",
+      "title": "Select Default Calendar",
+      "subtitle": "Google Calendar Events Quick Add",
+      "description": "Choose which calendar to use as default for new events",
+      "mode": "view",
+      "keywords": [
+        "calendar",
+        "default",
+        "select",
+        "settings"
+      ],
+      "path": "src/select-default-calendar.tsx"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultCalendar",
+      "title": "Default Calendar",
+      "description": "Choose which calendar to create events in (use 'Select Default Calendar' command to easily pick from your calendars)",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Leave empty to use primary calendar"
+    },
+    {
+      "name": "defaultDuration",
+      "title": "Default Event Duration",
+      "description": "How long should events be when you don't specify a duration?",
+      "type": "dropdown",
+      "required": false,
+      "default": "60",
+      "data": [
+        {
+          "title": "15 minutes",
+          "value": "15"
+        },
+        {
+          "title": "30 minutes",
+          "value": "30"
+        },
+        {
+          "title": "1 hour",
+          "value": "60"
+        },
+        {
+          "title": "1.5 hours",
+          "value": "90"
+        },
+        {
+          "title": "2 hours",
+          "value": "120"
+        }
+      ]
+    },
+    {
+      "name": "defaultColor",
+      "title": "Default Event Color",
+      "description": "What color should new events have by default?",
+      "type": "dropdown",
+      "required": false,
+      "default": "1",
+      "data": [
+        {
+          "title": "Lavender",
+          "value": "1"
+        },
+        {
+          "title": "Sage",
+          "value": "2"
+        },
+        {
+          "title": "Grape",
+          "value": "3"
+        },
+        {
+          "title": "Flamingo",
+          "value": "4"
+        },
+        {
+          "title": "Banana",
+          "value": "5"
+        },
+        {
+          "title": "Tangerine",
+          "value": "6"
+        },
+        {
+          "title": "Peacock",
+          "value": "7"
+        },
+        {
+          "title": "Graphite",
+          "value": "8"
+        },
+        {
+          "title": "Blueberry",
+          "value": "9"
+        },
+        {
+          "title": "Basil",
+          "value": "10"
+        },
+        {
+          "title": "Tomato",
+          "value": "11"
+        }
+      ]
+    },
+    {
+      "name": "includeDescription",
+      "title": "Auto-Generate Event Descriptions",
+      "description": "Let AI automatically create helpful descriptions for your events based on the title",
+      "type": "checkbox",
+      "label": "Enable smart descriptions",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "enableNotifications",
+      "title": "Event Reminders",
+      "description": "Add notification reminders to new events so you never miss them",
+      "type": "checkbox",
+      "label": "Enable reminders",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "defaultReminderMinutes",
+      "title": "Reminder Time",
+      "description": "How early should you be reminded about events?",
+      "type": "dropdown",
+      "required": false,
+      "default": "15",
+      "data": [
+        {
+          "title": "5 minutes before",
+          "value": "5"
+        },
+        {
+          "title": "10 minutes before",
+          "value": "10"
+        },
+        {
+          "title": "15 minutes before",
+          "value": "15"
+        },
+        {
+          "title": "30 minutes before",
+          "value": "30"
+        },
+        {
+          "title": "1 hour before",
+          "value": "60"
+        },
+        {
+          "title": "1 day before",
+          "value": "1440"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@googleapis/calendar": "^11.0.1",
+    "@raycast/api": "^1.102.5",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.35.0",
+    "i": "^0.3.7",
+    "npm": "^11.6.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
