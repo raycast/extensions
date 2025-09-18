@@ -1,5 +1,9 @@
 # WeChat Changelog
 
+## [New Feature] - {PR_MERGE_DATE}
+
+- Add Raycast AI
+
 ## [New Feature] - 2025-04-04
 
 - Manage WeChatTweak directly from Raycast

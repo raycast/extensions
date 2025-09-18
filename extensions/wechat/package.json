@@ -28,6 +28,121 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "wechatAI",
+      "title": "WeChat AI",
+      "description": "Search and chat with WeChat contacts using natural language.\nGenerate AI chat content."
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@wechat Search for contacts with surname Li",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "wechatAI",
+              "arguments": {
+                "query": "surname Li"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@wechat Find contacts with 2 characters in their name",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "wechatAI",
+              "arguments": {
+                "query": "2 characters in name"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@wechat Search for contacts with 'yang' in their name",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "wechatAI",
+              "arguments": {
+                "query": "yang in name"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@wechat Find all contacts named Zhang",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "wechatAI",
+              "arguments": {
+                "query": "named Zhang"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@wechat 搜索姓李的联系人",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "wechatAI",
+              "arguments": {
+                "query": "姓李"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@wechat 查找名字中包含'杨'的联系人",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "wechatAI",
+              "arguments": {
+                "query": "名字包含杨"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@wechat 找出名字是两个字的联系人",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "wechatAI",
+              "arguments": {
+                "query": "两个字的名字"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@wechat 查找所有姓张的联系人",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "wechatAI",
+              "arguments": {
+                "query": "姓张"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
     "@raycast/api": "^1.93.2",
     "@raycast/utils": "^1.19.1",
