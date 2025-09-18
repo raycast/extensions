@@ -7,7 +7,6 @@ export class ZenListEntries {
   public static NewTabEntry = NewTabEntry;
   public static HistoryEntry = HistoryListEntry;
   public static WorkspaceEntry = WorkspaceListEntry;
-  public static TabEntry = TabListEntry;
 }
 
 function NewTabEntry({ searchText }: { searchText?: string }) {
@@ -20,17 +19,6 @@ function NewTabEntry({ searchText }: { searchText?: string }) {
   );
 }
 
-function TabListEntry({ tab }: { tab: Tab }) {
-  return (
-    <List.Item
-      title={tab.title}
-      subtitle={tab.url}
-      actions={<ZenActions.TabListItem tab={tab} />}
-      icon={getFavicon(tab.url)}
-    />
-  );
-}
-
 function WorkspaceListEntry({ workspace }: { workspace: WorkspaceEntry }) {
   const shortcutAccessory = workspace.shortcut
     ? {
@@ -38,7 +26,7 @@ function WorkspaceListEntry({ workspace }: { workspace: WorkspaceEntry }) {
           .map((m) => m[0].toUpperCase() + m.slice(1))
           .join("+")}+${workspace.shortcut.key.toUpperCase()}`,
       }
-    : { text: { value: "Assign a Shortcut" }, tooltip: "Shortcuts are necessary to make this feature work" };
+      : { text: "Assign a Shortcut", tooltip: "Shortcuts are necessary to make this feature work" }
 
   return (
     <List.Item

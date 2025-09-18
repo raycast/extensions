@@ -7,14 +7,7 @@ import { getNewTabShortcut } from "../util";
 export async function runShortcut(shortcut: Shortcut) {
   const modifierScript = shortcut.modifiers.map((m) => `${m} down`).join(", ");
   const appleScriptShortcut = `keystroke "${shortcut.key}" using {${modifierScript}}`;
-import { getNewTabShortcut } from "../util";
 
-export async function openNewTab(queryText: string | null | undefined): Promise<boolean | string> {
-  await Clipboard.copy(`${SEARCH_ENGINE[getPreferenceValues().searchEngine.toLowerCase()]}${queryText}`);
-  popToRoot();
-  closeMainWindow({ clearRootSearch: true });
-
-  // Activate Raycast to reset window focus when Zen is already frontmost
   const script = `
     tell application "Raycast" to activate
     tell application "Zen" to activate
