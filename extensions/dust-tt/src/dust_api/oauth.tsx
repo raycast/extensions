@@ -25,6 +25,7 @@ const client = new OAuth.PKCEClient({
 });
 
 let dustApi: DustAPI | null = null;
+let currentToken: string | null = null;
 
 const DEFAULT_WORKOS_TOKEN_EXPIRY = 60 * 5; // 5 minutes
 
@@ -66,6 +67,9 @@ export const provider = new OAuthService({
   tokenResponseParser: parseTokenResponse,
   tokenRefreshResponseParser: parseTokenResponse,
   async onAuthorize(params) {
+    // Store the token for multi-region access
+    currentToken = params.token;
+
     // Use default US region initially, region will be determined when workspace is selected
     const apiUrl = await env.getDustDomain();
 
@@ -142,4 +146,11 @@ export function getDustClient(): DustAPI {
   }
 
   return dustApi;
+}
+
+export function getCurrentToken(): string {
+  if (!currentToken) {
+    throw new Error("No token available");
+  }
+  return currentToken;
 }

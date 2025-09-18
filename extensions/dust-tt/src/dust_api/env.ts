@@ -11,8 +11,11 @@ const DUST_EU_URL = "https://eu.dust.tt";
 const DEFAULT_DUST_API_DOMAIN = DUST_US_URL;
 
 async function getDustDomain(): Promise<string> {
-  const storedUrl = await LocalStorage.getItem<string>("dustApiUrl");
-  return storedUrl || DEFAULT_DUST_API_DOMAIN;
+  const region = await LocalStorage.getItem<string>("selectedRegion");
+  if (region === "europe-west1") {
+    return DUST_EU_URL;
+  }
+  return DUST_US_URL; // Default to US
 }
 
 const env = {

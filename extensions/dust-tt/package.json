@@ -83,13 +83,6 @@
       "subtitle": "Select a workspace to use",
       "description": "Select a workspace to use",
       "mode": "view"
-    },
-    {
-      "name": "pickRegion",
-      "title": "Select Region",
-      "subtitle": "Select your preferred Dust region",
-      "description": "Select your preferred Dust region",
-      "mode": "view"
     }
   ],
   "dependencies": {
