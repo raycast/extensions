@@ -148,8 +148,12 @@
       "description": "What color should new events have by default?",
       "type": "dropdown",
       "required": false,
-      "default": "1",
+      "default": "0",
       "data": [
+        {
+          "title": "Calendar Default",
+          "value": "0"
+        },
         {
           "title": "Lavender",
           "value": "1"
