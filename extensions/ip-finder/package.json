@@ -1,0 +1,209 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ip-finder",
+  "title": "Ip Finder - Network Scanner",
+  "description": "Scan your local network to find assigned IPs and get recommendations for available addresses",
+  "icon": "command-icon.png",
+  "author": "swayam_mehta",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Scan Network",
+      "subtitle": "Network Scanner",
+      "description": "Scan local network for assigned IPs and get recommendations",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultTimeout",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Timeout",
+      "description": "Default timeout for ping attempts in seconds",
+      "default": "1.0",
+      "placeholder": "1.0"
+    },
+    {
+      "name": "defaultMaxThreads",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Max Threads",
+      "description": "Default maximum concurrent threads for scanning",
+      "default": "50",
+      "placeholder": "50"
+    },
+    {
+      "name": "defaultRecommendations",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Recommendations",
+      "description": "Default number of IP recommendations to show",
+      "default": "10",
+      "placeholder": "10"
+    },
+    {
+      "name": "autoScanOnOpen",
+      "type": "checkbox",
+      "required": false,
+      "title": "Auto-scan on Open",
+      "description": "Automatically start scanning when opening the extension",
+      "default": false,
+      "label": "Enable auto-scan"
+    },
+    {
+      "name": "showProgressBar",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Progress Bar",
+      "description": "Display progress bar during scanning",
+      "default": true,
+      "label": "Show progress"
+    },
+    {
+      "name": "scanCommonRanges",
+      "type": "checkbox",
+      "required": false,
+      "title": "Scan Common Ranges",
+      "description": "Focus on common IP ranges for faster scanning",
+      "default": true,
+      "label": "Scan common ranges only"
+    },
+    {
+      "name": "gatherDeviceInfo",
+      "type": "checkbox",
+      "required": false,
+      "title": "Gather Device Information",
+      "description": "Get MAC addresses and hostnames",
+      "default": true,
+      "label": "Gather device information"
+    },
+    {
+      "name": "scanPorts",
+      "type": "checkbox",
+      "required": false,
+      "title": "Scan Open Ports",
+      "description": "Check for open ports on discovered devices",
+      "default": true,
+      "label": "Scan for open ports"
+    },
+    {
+      "name": "themePreference",
+      "type": "dropdown",
+      "required": false,
+      "title": "Theme Preference",
+      "description": "Choose your preferred theme for the interface",
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto (System)",
+          "value": "auto"
+        },
+        {
+          "title": "Light",
+          "value": "light"
+        },
+        {
+          "title": "Dark",
+          "value": "dark"
+        }
+      ]
+    },
+    {
+      "name": "colorScheme",
+      "type": "dropdown",
+      "required": false,
+      "title": "Color Scheme",
+      "description": "Choose your preferred color scheme",
+      "default": "blue",
+      "data": [
+        {
+          "title": "Blue (Default)",
+          "value": "blue"
+        },
+        {
+          "title": "Green",
+          "value": "green"
+        },
+        {
+          "title": "Purple",
+          "value": "purple"
+        },
+        {
+          "title": "Orange",
+          "value": "orange"
+        },
+        {
+          "title": "Red",
+          "value": "red"
+        }
+      ]
+    },
+    {
+      "name": "showNetworkMap",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Network Map",
+      "description": "Display interactive network topology map",
+      "default": true,
+      "label": "Show network map"
+    },
+    {
+      "name": "mapLayout",
+      "type": "dropdown",
+      "required": false,
+      "title": "Map Layout",
+      "description": "Choose the layout style for the network map",
+      "default": "hierarchical",
+      "data": [
+        {
+          "title": "Hierarchical",
+          "value": "hierarchical"
+        },
+        {
+          "title": "Radial",
+          "value": "radial"
+        },
+        {
+          "title": "Grid",
+          "value": "grid"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.101.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist --no-exit-on-error",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "keywords": [
+    "network",
+    "ip",
+    "scanner",
+    "network-tools",
+    "ip-conflict",
+    "ping",
+    "subnet",
+    "network-discovery",
+    "ip-management"
+  ],
+  "categories": [
+    "Developer Tools",
+    "System"
+  ]
+}
