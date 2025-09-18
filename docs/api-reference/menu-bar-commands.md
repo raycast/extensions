@@ -2,6 +2,12 @@
 
 The `MenuBarExtra` component can be used to create commands which populate the [extras](https://developer.apple.com/design/human-interface-guidelines/components/system-experiences/the-menu-bar#menu-bar-commands) section of macOS' menu bar.
 
+{% hint style="info" %}
+
+Menubar commands aren't available on Windows.
+
+{% endhint %}
+
 ## Getting Started
 
 If you don't have an extension yet, follow the [getting started](../basics/getting-started.md) guide and then return to this page.
