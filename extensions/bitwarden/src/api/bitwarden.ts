@@ -5,7 +5,7 @@ import { dirname } from "path/posix";
 import { LOCAL_STORAGE_KEY, DEFAULT_SERVER_URL, CACHE_KEYS } from "~/constants/general";
 import { VaultState, VaultStatus } from "~/types/general";
 import { PasswordGeneratorOptions } from "~/types/passwords";
-import { Folder, Item, ItemType } from "~/types/vault";
+import { Folder, Item, ItemType, Login } from "~/types/vault";
 import { getPasswordGeneratingArgs } from "~/utils/passwords";
 import { getServerUrlPreference } from "~/utils/preferences";
 import {
@@ -441,19 +441,22 @@ export class Bitwarden {
 
   async createLoginItem(options: CreateLoginItemOptions): Promise<MaybeError<Item>> {
     try {
-      const { error: itemTemplateError, result: itemTemplate } = await this.getTemplate("item");
+      const { error: itemTemplateError, result: itemTemplate } = await this.getTemplate<Item>("item");
       if (itemTemplateError) throw itemTemplateError;
 
-      const { error: loginTemplateError, result: loginTemplate } = await this.getTemplate("item.login");
+      const { error: loginTemplateError, result: loginTemplate } = await this.getTemplate<Login>("item.login");
       if (loginTemplateError) throw loginTemplateError;
-
-      loginTemplate.username = options.username;
-      loginTemplate.password = options.password;
 
       itemTemplate.name = options.name;
       itemTemplate.type = ItemType.LOGIN;
       itemTemplate.folderId = options.folderId || null;
       itemTemplate.login = loginTemplate;
+      itemTemplate.notes = null;
+
+      loginTemplate.username = options.username;
+      loginTemplate.password = options.password;
+      loginTemplate.totp = null;
+      loginTemplate.fido2Credentials = undefined;
 
       const { result: encodedItem, error: encodeError } = await this.encode(JSON.stringify(itemTemplate));
       if (encodeError) throw encodeError;
