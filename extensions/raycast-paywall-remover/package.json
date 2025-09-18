@@ -1,0 +1,96 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-paywall-remover",
+  "title": "Paywall Remover",
+  "description": "Quickly remove paywalls from web articles using customizable paywall removal services like 12ft.io. Works with clipboard URLs or current browser tab.",
+  "icon": "extension_icon.png",
+  "version": "1.0.0",
+  "author": "jadonfloyd",
+  "license": "MIT",
+  "categories": [
+    "Web",
+    "Productivity"
+  ],
+  "keywords": [
+    "raycast",
+    "extension",
+    "paywall",
+    "article",
+    "news",
+    "web",
+    "bypass",
+    "12ft",
+    "archive",
+    "reading",
+    "productivity"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jadonfloyd/paywall-remove-raycast"
+  },
+  "commands": [
+    {
+      "name": "remove-from-clipboard",
+      "title": "Remove Paywall from Clipboard URL",
+      "subtitle": "Paywall Remover",
+      "description": "Remove paywall from URL in clipboard and open the result",
+      "mode": "no-view",
+      "keywords": ["clipboard", "url", "paywall", "article"]
+    },
+    {
+      "name": "remove-from-current-tab",
+      "title": "Remove Paywall from Current Tab", 
+      "subtitle": "Paywall Remover",
+      "description": "Remove paywall from current browser tab URL and open the result",
+      "mode": "no-view",
+      "keywords": ["tab", "browser", "current", "paywall", "article"]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "paywallServiceUrl",
+      "title": "Paywall Service URL",
+      "description": "URL of the paywall removal service (e.g., https://open.bolha.tools)",
+      "type": "textfield",
+      "default": "https://open.bolha.tools",
+      "required": false
+    }
+  ],
+
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:watch": "vitest watch",
+    "test:ui": "vitest --ui",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.63.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.0",
+    "typescript": "^4.4.3",
+    "vitest": "^1.0.0",
+    "@vitest/ui": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=16.10"
+  },
+  "platforms": ["darwin"],
+  "peerDependencies": {
+    "@raycast/api": "^1.63.1"
+  },
+  "files": [
+    "dist",
+    "assets"
+  ]
+}
