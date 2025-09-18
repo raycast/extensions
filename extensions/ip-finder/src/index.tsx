@@ -68,7 +68,7 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [scanHistory, setScanHistory] = useState<ScanHistory[]>([]);
   const [showHistory, setShowHistory] = useState<boolean>(false);
-  const preferences = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences>();
   const { push, pop } = useNavigation();
 
   const currentTheme = "auto";
