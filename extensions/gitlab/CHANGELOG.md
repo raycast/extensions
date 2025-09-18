@@ -1,6 +1,6 @@
 # GitLab Changelog
 
-## [AI Extension] - {PR_MERGE_DATE}
+## [AI Extension] - 2025-09-18
 
 ## [Added support for Windows] - 2025-08-07
 
