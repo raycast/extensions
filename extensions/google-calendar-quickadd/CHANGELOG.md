@@ -1,6 +1,6 @@
 # Google Calendar Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-09-18
 
 - Fix default calendar color not being used
 - Add default calendar color in settings
