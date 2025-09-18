@@ -1,8 +1,15 @@
 # IP Finder Changelog
 
+## [1.0.1] - 2025-09-18
+
+### Fixed
+
+- Added explicit platform support declaration for macOS, Windows, and Linux in package.json
+
 ## [1.0.0] - 2025-09-18
 
 ### Added
+
 - Initial release of IP Finder Network Scanner
 - Network scanning functionality with automatic subnet detection
 - IP address discovery and assignment tracking
@@ -19,6 +26,7 @@
 - Detailed network analysis reports
 
 ### Features
+
 - **Network Discovery**: Automatically detect and scan local networks
 - **IP Management**: Find assigned IPs and get recommendations for available addresses
 - **Device Information**: Gather detailed device information including MAC addresses and hostnames
@@ -28,6 +36,7 @@
 - **Customizable**: Extensive preference options for different network environments
 
 ### Technical Details
+
 - Built with TypeScript and React
 - Uses Raycast API for seamless integration
 - Implements concurrent scanning with configurable thread limits
@@ -37,4 +46,4 @@
 
 ---
 
-*This extension helps network administrators and home users quickly discover devices on their network and find available IP addresses to prevent conflicts.* 
+_This extension helps network administrators and home users quickly discover devices on their network and find available IP addresses to prevent conflicts._
