@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Color, Detail, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { Action, ActionPanel, Color, Detail, Icon, List, showToast, Toast } from "@raycast/api";
+import { useEffect, useState } from "react";
 import { addDustHistory } from "./history";
 import { ConnectorProviders, DUST_AGENT, AgentType, getUser } from "./utils";
 import { AskAgentQuestionForm } from "./askAgent";
@@ -25,47 +25,19 @@ type ConversationContext = {
 };
 
 const useConversationContext = () => {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
-  const isOauth = preferences.connexionFlow === "oauth";
-
-  const formatUsername = useCallback((email: string) => {
-    return email
-      .split("@")[0]
-      .split(".")
-      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-      .join(" ");
+  const { data: user, isLoading } = usePromise(async () => {
+    return await getUser();
   }, []);
-
-  const { data: user, isLoading } = usePromise(
-    async (isOauth) => {
-      if (isOauth) {
-        return await getUser();
-      }
-      return undefined;
-    },
-    [isOauth],
-  );
 
   let context: ConversationContext | undefined = undefined;
 
-  if (isOauth) {
-    if (user && !isLoading) {
-      context = {
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
-        username: user.firstName,
-        email: user.email,
-        fullName: user.fullName,
-        profilePictureUrl: user.image,
-        origin: "raycast",
-      };
-    }
-  } else {
+  if (user && !isLoading) {
     context = {
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
-      username: formatUsername(preferences.userEmail || "Raycast"),
-      email: preferences.userEmail ?? null,
-      fullName: formatUsername(preferences.userEmail || "Raycast"),
-      profilePictureUrl: "https://dust.tt/static/systemavatar/helper_avatar_full.png",
+      username: user.firstName,
+      email: user.email,
+      fullName: user.fullName,
+      profilePictureUrl: user.image,
       origin: "raycast",
     };
   }
