@@ -1,0 +1,176 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "google-contacts",
+  "title": "Google Contacts",
+  "description": "Manage Google Contacts from Raycast.",
+  "icon": "Google_Contacts_icon.png",
+  "author": "justus_feldhaus",
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "google"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "view-contacts",
+      "title": "List Contacts",
+      "description": "View and manage your Google Contacts",
+      "mode": "view"
+    },
+    {
+      "name": "create-contact",
+      "title": "Create Contact",
+      "description": "Create a new Google Contact",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "path": "./src/tools/search-contacts",
+      "name": "search-contacts",
+      "title": "Search Google Contacts",
+      "description": "Search through your Google Contacts by name, email, phone number, or company information.",
+      "examples": [
+        {
+          "query": "John Smith"
+        },
+        {
+          "query": "acme corporation",
+          "limit": 3
+        }
+      ],
+      "arguments": [
+        {
+          "name": "query",
+          "title": "Search Query",
+          "required": true,
+          "description": "The search term to look for in contacts (name, email, company, etc.)"
+        },
+        {
+          "name": "limit",
+          "title": "Result Limit",
+          "required": false,
+          "description": "Maximum number of contacts to return (default: 5)"
+        }
+      ]
+    },
+    {
+      "path": "./src/tools/create-contact",
+      "name": "create-contact",
+      "title": "Create Google Contact",
+      "description": "Create a new contact in your Google Contacts.",
+      "examples": [
+        {
+          "firstName": "John",
+          "lastName": "Smith",
+          "email": "john.smith@example.com",
+          "phone": "+1 555-123-4567"
+        },
+        {
+          "firstName": "Jane",
+          "lastName": "Doe",
+          "company": "Acme Corporation",
+          "jobTitle": "Marketing Manager",
+          "email": "jane.doe@acme.com"
+        }
+      ],
+      "arguments": [
+        {
+          "name": "firstName",
+          "title": "First Name",
+          "required": true,
+          "description": "The contact's first name"
+        },
+        {
+          "name": "lastName",
+          "title": "Last Name",
+          "required": false,
+          "description": "The contact's last name"
+        },
+        {
+          "name": "email",
+          "title": "Email",
+          "required": false,
+          "description": "The contact's email address"
+        },
+        {
+          "name": "phone",
+          "title": "Phone",
+          "required": false,
+          "description": "The contact's phone number"
+        },
+        {
+          "name": "company",
+          "title": "Company",
+          "required": false,
+          "description": "The contact's company or organization"
+        },
+        {
+          "name": "jobTitle",
+          "title": "Job Title",
+          "required": false,
+          "description": "The contact's job title or position"
+        },
+        {
+          "name": "address",
+          "title": "Address",
+          "required": false,
+          "description": "The contact's physical address"
+        },
+        {
+          "name": "birthday",
+          "title": "Birthday",
+          "required": false,
+          "description": "The contact's birthday in DD.MM.YYYY format"
+        },
+        {
+          "name": "notes",
+          "title": "Notes",
+          "required": false,
+          "description": "Additional notes about the contact"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clientId",
+      "type": "password",
+      "required": true,
+      "title": "OAuth Client ID",
+      "description": "Your OAuth client ID.",
+      "placeholder": "See https://console.developers.google.com/apis/credentials"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.57.0",
+    "@raycast/utils": "^1.5.0",
+    "googleapis": "^126.0.0",
+    "node-fetch": "^3.2.10"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.22.0",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-n": "^16.6.2",
+    "eslint-plugin-promise": "^6.6.0",
+    "eslint-plugin-react": "^7.37.4",
+    "globals": "^16.0.0",
+    "prettier": "^2.7.1",
+    "typescript": "^4.4.3",
+    "typescript-eslint": "^8.26.1"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
