@@ -1,4 +1,16 @@
-import { ActionPanel, Action, List, showToast, Toast, Icon, Form, useNavigation, showHUD, Color } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  List,
+  showToast,
+  Toast,
+  Icon,
+  Form,
+  useNavigation,
+  showHUD,
+  Color,
+  environment,
+} from "@raycast/api";
 import { useState, Fragment } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { WarpTemplate, TerminalCommand } from "./types";
@@ -212,8 +224,10 @@ function EditTemplateForm({ template, onSaved }: EditTemplateFormProps) {
 
     const validCommands = commands.filter((cmd) => cmd.title.trim() && cmd.command.trim());
 
-    console.log("All commands:", commands);
-    console.log("Valid commands:", validCommands);
+    const DEBUG = environment.isDevelopment;
+    if (DEBUG) {
+      console.log("Valid commands count:", validCommands.length);
+    }
 
     if (validCommands.length === 0) {
       showToast({
@@ -308,8 +322,8 @@ function EditTemplateForm({ template, onSaved }: EditTemplateFormProps) {
         value={splitDirection}
         onChange={(value) => setSplitDirection(value as "horizontal" | "vertical")}
       >
-        <Form.Dropdown.Item value="vertical" title="Vertical (Side-by-side)" icon={Icon.AppWindowSidebarLeft} />
-        <Form.Dropdown.Item value="horizontal" title="Horizontal (Top-bottom)" icon={Icon.BarChart} />
+        <Form.Dropdown.Item value="vertical" title="Side-by-side" icon={Icon.Sidebar} />
+        <Form.Dropdown.Item value="horizontal" title="Top-bottom" icon={Icon.BarChart} />
       </Form.Dropdown>
 
       <Form.Dropdown
@@ -387,8 +401,8 @@ function TemplateDetails({ template }: TemplateDetailsProps) {
         <List.Item title="Description" subtitle={template.description} icon={Icon.Text} />
         <List.Item
           title="Split Direction"
-          subtitle={template.splitDirection === "horizontal" ? "Horizontal (Top-bottom)" : "Vertical (Side-by-side)"}
-          icon={template.splitDirection === "horizontal" ? Icon.BarChart : Icon.AppWindowSidebarLeft}
+          subtitle={template.splitDirection === "vertical" ? "Side-by-side" : "Top-bottom"}
+          icon={template.splitDirection === "vertical" ? Icon.Sidebar : Icon.BarChart}
         />
         <List.Item
           title="Launch Mode"

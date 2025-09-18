@@ -1,22 +1,68 @@
-import { ActionPanel, Action, List, showToast, Toast, Icon, showHUD } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, Icon, showHUD, environment } from "@raycast/api";
 import { useState, useEffect } from "react";
+import { useCachedPromise } from "@raycast/utils";
 import { Project, WarpTemplate } from "./types";
 import { scanAllProjects, searchProjects } from "./utils/projectScanner";
 import { ProjectDirectoryStorage, ProjectTemplateStorage } from "./utils/storage";
 import { launchWarpConfig, launchProjectSimple, checkWarpInstalled, debugWarpEnvironment } from "./utils/warpLauncher";
+import { debugStorage } from "./debug-storage";
+import { templateEvents } from "./utils/templateEvents";
 
 export default function SearchProjects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
-  const [warpTemplates, setWarpTemplates] = useState<WarpTemplate[]>([]);
-  const [defaultTemplate, setDefaultTemplate] = useState<WarpTemplate | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
   const [warpInstalled, setWarpInstalled] = useState(false);
 
+  // Use a timestamp or version key that can be updated to force cache invalidation
+  const [templateCacheKey, setTemplateCacheKey] = useState(() => Date.now().toString());
+
+  // Use useCachedPromise for templates to enable automatic updates
+  const {
+    data: warpTemplates = [],
+    isLoading: templatesLoading,
+    revalidate: revalidateTemplates,
+  } = useCachedPromise(
+    async (cacheKey: string) => {
+      const templates = await ProjectTemplateStorage.getTemplates();
+      if (environment.isDevelopment) console.log("Templates loaded. count:", templates.length, "key:", cacheKey);
+      return templates;
+    },
+    [templateCacheKey], // Use dynamic cache key
+    {
+      failureToastOptions: {
+        title: "Failed to load templates",
+      },
+      // Add keepPreviousData to false to force fresh data
+      keepPreviousData: false,
+    },
+  );
+
+  // Derive default template from the templates data
+  const defaultTemplate = warpTemplates.find((t) => t.isDefault) || null;
+
+  // Debug: Log templates when they change
+  useEffect(() => {
+    if (environment.isDevelopment) {
+      if (defaultTemplate) {
+        console.log("Default template:", defaultTemplate.name, defaultTemplate.splitDirection);
+      }
+    }
+  }, [warpTemplates, defaultTemplate]);
+
   useEffect(() => {
     initializeData();
-  }, []);
+
+    // Listen for template updates
+    const unsubscribe = templateEvents.addListener(() => {
+      if (environment.isDevelopment) console.log("Template update event: refreshing cache");
+      setTemplateCacheKey(Date.now().toString());
+      revalidateTemplates();
+    });
+
+    return unsubscribe;
+  }, [revalidateTemplates]);
 
   useEffect(() => {
     setFilteredProjects(searchProjects(projects, searchText));
@@ -44,14 +90,6 @@ export default function SearchProjects() {
       // Scan for projects
       const allProjects = await scanAllProjects(directories);
       setProjects(allProjects);
-
-      // Load Warp launch configurations
-      const loadedTemplates = await ProjectTemplateStorage.getTemplates();
-      setWarpTemplates(loadedTemplates);
-
-      // Get the default template
-      const defaultTemplate = await ProjectTemplateStorage.getDefaultTemplate();
-      setDefaultTemplate(defaultTemplate);
 
       if (allProjects.length === 0) {
         showToast({
@@ -118,8 +156,13 @@ export default function SearchProjects() {
   }
 
   return (
-    <List isLoading={isLoading} onSearchTextChange={setSearchText} searchBarPlaceholder="Search projects..." throttle>
-      {filteredProjects.length === 0 && !isLoading ? (
+    <List
+      isLoading={isLoading || templatesLoading}
+      onSearchTextChange={setSearchText}
+      searchBarPlaceholder="Search projects..."
+      throttle
+    >
+      {filteredProjects.length === 0 && !isLoading && !templatesLoading ? (
         <List.EmptyView
           icon={Icon.Folder}
           title="No Projects Found"
@@ -165,12 +208,11 @@ export default function SearchProjects() {
                       icon={
                         template.isDefault
                           ? Icon.Star
-                          : template.splitDirection === "horizontal"
-                            ? Icon.BarChart
-                            : Icon.AppWindowSidebarLeft
+                          : template.splitDirection === "vertical"
+                            ? Icon.Sidebar
+                            : Icon.BarChart
                       }
                       onAction={async () => {
-                        console.log(`🚀 User launching Warp config: ${project.name} (${template.name})`);
                         showToast({
                           style: Toast.Style.Animated,
                           title: "Launching...",
@@ -180,9 +222,9 @@ export default function SearchProjects() {
                         try {
                           await launchWarpConfig(project, template);
                           showHUD(`🚀 Launched ${project.name} (${template.name})`);
-                          console.log(`✅ Warp config launched successfully: ${project.name}`);
+                          if (environment.isDevelopment) console.log(`Warp config launched: ${project.name}`);
                         } catch (error) {
-                          console.error(`❌ Warp config launch failed:`, error);
+                          console.error(`Warp config launch failed:`, error);
 
                           // Show detailed failure message and manual instructions
                           showToast({
@@ -222,9 +264,89 @@ export default function SearchProjects() {
                     shortcut={{ modifiers: ["cmd"], key: "r" }}
                     onAction={initializeData}
                   />
+                  <Action
+                    title="Refresh Templates"
+                    icon={Icon.ArrowClockwise}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                    onAction={() => {
+                      // Update cache key to force revalidation
+                      setTemplateCacheKey(Date.now().toString());
+                      revalidateTemplates();
+                      showHUD("Templates refreshed");
+                    }}
+                  />
                 </ActionPanel.Section>
 
                 <ActionPanel.Section title="Debugging">
+                  <Action
+                    title="Debug Storage & Templates"
+                    icon={Icon.Hashtag}
+                    onAction={async () => {
+                      showToast({
+                        style: Toast.Style.Animated,
+                        title: "Debugging Storage...",
+                        message: "Checking template storage and cache.",
+                      });
+
+                      try {
+                        await debugStorage();
+                        showToast({
+                          style: Toast.Style.Success,
+                          title: "Storage Debug Complete",
+                          message: "Check console logs for template data details.",
+                        });
+                      } catch (error) {
+                        showToast({
+                          style: Toast.Style.Failure,
+                          title: "Storage Debug Failed",
+                          message: error instanceof Error ? error.message : "Unknown error",
+                        });
+                      }
+                    }}
+                  />
+                  <Action
+                    title="Clean Old Warp Configs"
+                    icon={Icon.Trash}
+                    onAction={async () => {
+                      showToast({
+                        style: Toast.Style.Animated,
+                        title: "Cleaning Configs...",
+                        message: "Removing old Warp launch configurations.",
+                      });
+
+                      try {
+                        const fs = await import("fs/promises");
+                        const path = await import("path");
+                        const os = await import("os");
+
+                        const FILE_PREFIX = "code-runway__";
+                        const warpConfigDir = path.join(os.homedir(), ".warp", "launch_configurations");
+                        const files = await fs.readdir(warpConfigDir);
+
+                        // Only remove extension-generated configs with our safe prefix
+                        const projectConfigs = files.filter(
+                          (file) => file.startsWith(FILE_PREFIX) && file.endsWith(".yaml"),
+                        );
+
+                        for (const file of projectConfigs) {
+                          const filePath = path.join(warpConfigDir, file);
+                          await fs.unlink(filePath);
+                        }
+
+                        showToast({
+                          style: Toast.Style.Success,
+                          title: "Configs Cleaned",
+                          message: `Removed ${projectConfigs.length} configuration files created by extension.`,
+                        });
+                      } catch (error) {
+                        showToast({
+                          style: Toast.Style.Failure,
+                          title: "Clean Failed",
+                          message: error instanceof Error ? error.message : "Unknown error",
+                        });
+                      }
+                    }}
+                  />
                   <Action
                     title="Diagnose Warp Environment"
                     icon={Icon.Bug}

@@ -1,5 +1,6 @@
-import { LocalStorage } from "@raycast/api";
+import { LocalStorage, environment } from "@raycast/api";
 import { ProjectDirectory, WarpTemplate } from "../types";
+import { templateEvents } from "./templateEvents";
 
 const STORAGE_KEYS = {
   PROJECT_DIRECTORIES: "project_directories",
@@ -73,9 +74,21 @@ export class ProjectTemplateStorage {
 
   static async saveTemplates(templates: WarpTemplate[]): Promise<void> {
     await LocalStorage.setItem(STORAGE_KEYS.PROJECT_TEMPLATES, JSON.stringify(templates));
+    // Emit event to notify other components
+    templateEvents.emit();
   }
 
   static async addTemplate(template: WarpTemplate): Promise<void> {
+    const DEBUG = environment.isDevelopment;
+    if (DEBUG) {
+      console.log("Adding/updating template:", {
+        id: template.id,
+        name: template.name,
+        splitDirection: template.splitDirection,
+        isDefault: template.isDefault,
+      });
+    }
+
     const templates = await this.getTemplates();
     const existingIndex = templates.findIndex((t) => t.id === template.id);
 
@@ -85,12 +98,14 @@ export class ProjectTemplateStorage {
     }
 
     if (existingIndex >= 0) {
+      if (DEBUG) console.log("Updating existing template at index:", existingIndex);
       templates[existingIndex] = template;
     } else {
       templates.push(template);
     }
 
     await this.saveTemplates(templates);
+    if (DEBUG) console.log("Template saved and event emitted");
   }
 
   static async getDefaultTemplate(): Promise<WarpTemplate | null> {

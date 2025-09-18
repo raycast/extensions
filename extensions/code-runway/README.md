@@ -77,13 +77,11 @@ Projects are automatically detected by the presence of these files:
 
 ## 🔧 Available Commands
 
-| Command | Description |
-|---------|-------------|
-| **Search Projects** | Search and launch your development projects |
+| Command                        | Description                                   |
+| ------------------------------ | --------------------------------------------- |
+| **Search Projects**            | Search and launch your development projects   |
 | **Project Directory Settings** | Manage project directories with full controls |
-| **Warp Launch Templates** | Create and manage custom launch templates |
-
-
+| **Warp Launch Templates**      | Create and manage custom launch templates     |
 
 ## 🎨 Template Customization
 
