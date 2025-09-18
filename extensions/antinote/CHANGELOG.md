@@ -1,5 +1,8 @@
 # Antinote Changelog
 
+## [v1.0.3] - 2025-08-28
+- Support for creating note directly with the selection
+
 ## [v1.0.2] - 2025-05-22
 - Support for Setapp version of Antinote
 
