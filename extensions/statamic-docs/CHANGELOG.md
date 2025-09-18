@@ -1,6 +1,6 @@
 # Statamic Docs Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-09-18
 
 - Added version switcher
 
