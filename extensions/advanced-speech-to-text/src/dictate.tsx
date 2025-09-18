@@ -18,9 +18,15 @@ import {
   formatTranscriptionText,
 } from "./utils/clipboard";
 import { formatTextWithChatGPT } from "./utils/formatters";
-import { Preferences, TranscriptionState, FormatMode } from "./types";
+import {
+  Preferences,
+  TranscriptionState,
+  FormatMode,
+  TranscriptionData,
+} from "./types";
 import { formatDuration } from "./utils/time";
 import { getErrorMessage, showErrorToast } from "./utils/errors";
+import { saveTranscription } from "./utils/audio";
 
 export default function Dictate() {
   const preferences = getPreferenceValues<Preferences>();
@@ -79,6 +85,23 @@ export default function Dictate() {
           const formattedResult = formatTranscriptionText(result);
           setTranscription(formattedResult);
 
+          // Save the transcription to JSON file
+          const transcriptionData: TranscriptionData = {
+            transcription: formattedResult,
+            wordCount: formattedResult.split(/\s+/).length,
+            transcribedAt: new Date().toISOString(),
+            model: preferences.model,
+            language: preferences.language,
+            formatMode: currentFormat,
+          };
+
+          try {
+            await saveTranscription(recordingPath, transcriptionData);
+          } catch (saveError) {
+            console.error("Failed to save transcription:", saveError);
+            // Continue even if save fails
+          }
+
           // If a specific format was selected, format the text
           if (currentFormat !== "original") {
             setTranscriptionState("formatting");
@@ -88,6 +111,27 @@ export default function Dictate() {
                 currentFormat,
               );
               setFormattedText(formatted);
+
+              // Update saved transcription with formatted text
+              const formattedTranscriptionData: TranscriptionData = {
+                ...transcriptionData,
+                transcription: formatted,
+                wordCount: formatted.split(/\s+/).length,
+                formatMode: currentFormat,
+              };
+
+              try {
+                await saveTranscription(
+                  recordingPath,
+                  formattedTranscriptionData,
+                );
+              } catch (saveError) {
+                console.error(
+                  "Failed to save formatted transcription:",
+                  saveError,
+                );
+              }
+
               await showToast({
                 style: Toast.Style.Success,
                 title: "Transcribed and Formatted",
