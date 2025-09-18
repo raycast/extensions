@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "openproject",
+  "title": "Openproject",
+  "description": "Unofficial extension to manage your OpenProject tasks and tickets directly from Raycast",
+  "icon": "openproject-icon.png",
+  "author": "alexander_sattler",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "openproject",
+    "project management",
+    "tickets",
+    "tasks",
+    "unofficial",
+    "community"
+  ],
+  "homepage": "https://github.com/soulmate1337/open-project-raycast-extension",
+  "bugs": {
+    "url": "https://github.com/soulmate1337/open-project-raycast-extension/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/soulmate1337/open-project-raycast-extension.git"
+  },
+  "commands": [
+    {
+      "name": "create-ticket",
+      "title": "Create Ticket",
+      "subtitle": "OpenProject",
+      "description": "Create a new ticket in OpenProject",
+      "mode": "view"
+    },
+    {
+      "name": "update-ticket",
+      "title": "Update Ticket", 
+      "subtitle": "OpenProject",
+      "description": "Update an existing ticket in OpenProject",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiUrl",
+      "title": "OpenProject URL",
+      "description": "Your OpenProject instance URL (e.g., https://community.openproject.org)",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://your-instance.openproject.org"
+    },
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your OpenProject API key",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.1",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "19.0.12",
+    "eslint": "^8.57.1",
+    "eslint-plugin-react": "^7.37.5",
+    "globals": "^16.3.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.38.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
