@@ -79,8 +79,8 @@ export default function ManageSecrets() {
         </ActionPanel>} /> : secrets.map(secret => <List.Item key={secret.id} icon={Icon.Key} title={secret.name} subtitle={secret.value} accessories={[
             {date: new Date(secret.updated_at)}
         ]} actions={<ActionPanel>
-            <Action icon={Icon.Trash} title="Remove" onAction={() => confirmAndRemove(secret)} style={Action.Style.Destructive} />
             <Action.Push icon={Icon.Plus} title="Create Secret" target={<CreateSecret />} onPop={revalidate} />
+            <Action icon={Icon.Trash} title="Remove" onAction={() => confirmAndRemove(secret)} style={Action.Style.Destructive} />
             <Action icon={Icon.CopyClipboard} title="Copy to Clipboard" onAction={() => revealAndCopy(secret)} shortcut={Keyboard.Shortcut.Common.Copy} />
         </ActionPanel>} />)}
     </List>

@@ -5,14 +5,26 @@ export type Activity = {
         type: string;
     }
     object: {
+        id: string;
         name: string;
         type: string;
+        metadata?: {
+            app_name?: string;
+            definition?: {
+                name: string;
+            }
+        }
     }
     verb: string;
-    metadata: {
-        event?: string;
-    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    metadata: any;
     created_at: string;
+}
+
+export type App= {
+id: string;
+name: string;
+domains: Domain[];
 }
 
 export enum DomainStatus {
@@ -22,10 +34,15 @@ export enum DomainStatus {
     DELETING="DELETING",
     DELETED="DELETED"
 }
+export enum DomainType {
+    AUTOASSIGNED="AUTOASSIGNED",
+    CUSTOM="CUSTOM"
+}
 export type Domain = {
     id: string;
     name: string;
     status: DomainStatus;
+    type: DomainType;
     updated_at: string;
 }
 export type CreateDomain = {
@@ -50,6 +67,19 @@ export type CreateSecret = {
     name: string;
     value: string;
     type: SecretType;
+}
+
+export enum ServiceType {
+    INVALID_TYPE="INVALID_TYPE",
+    WEB="WEB",
+    WORKER="WORKER",
+    DATABASE="DATABASE"
+}
+export type Service = {
+    id: string
+    name: string
+    type: ServiceType
+    app_id:string;
 }
 
 export type ErrorResult = {

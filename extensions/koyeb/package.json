@@ -24,6 +24,12 @@
       "mode": "view"
     },
     {
+      "name": "list-apps",
+      "title": "List Apps",
+      "description": "",
+      "mode": "view"
+    },
+    {
       "name": "manage-secrets",
       "title": "Manage Secrets",
       "description": "",

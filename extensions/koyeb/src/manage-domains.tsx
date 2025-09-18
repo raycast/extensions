@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Alert, Color, confirmAlert, Form, Icon, Image, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, getFavicon, useFetch, useForm } from "@raycast/utils";
-import { CreateDomain, Domain, DomainStatus } from "./types";
+import { App, CreateDomain, Domain, DomainStatus, DomainType } from "./types";
 import { API_URL, headers, parseResponse } from "./koyeb";
 
 const DOMAIN_STATUS_ICON: Record<DomainStatus, Image.ImageLike> = {
@@ -61,8 +61,8 @@ export default function ManageDomains() {
             {icon: DOMAIN_STATUS_ICON[domain.status], tag: domain.status},
             {date: new Date(domain.updated_at)}
         ]} actions={<ActionPanel>
-            <Action icon={Icon.Trash} title="Remove" onAction={() => confirmAndRemove(domain)} style={Action.Style.Destructive} />
             <Action.Push icon={Icon.Plus} title="Add Domain" target={<AddDomain />} onPop={revalidate} />
+            {domain.type===DomainType.AUTOASSIGNED && <Action icon={Icon.Trash} title="Remove" onAction={() => confirmAndRemove(domain)} style={Action.Style.Destructive} />}
         </ActionPanel>} />)}
     </List>
 }
@@ -71,7 +71,8 @@ function AddDomain() {
     const {pop} = useNavigation();
     const { isLoading, data: apps } = useFetch("https://app.koyeb.com/v1/apps", {
         headers,
-        mapResult(result: { apps: Array<{id: string; name: string;}> }) {
+        parseResponse,
+        mapResult(result: { apps: App[] }) {
             return {
                 data: result.apps
             }

@@ -4,16 +4,21 @@ import { Color, Icon, Image, List } from "@raycast/api";
 import { Activity } from "./types";
 
 const ACTIVITY_TYPE_ICONS: Record<string, Image.Source> = {
+    "app": "boxes.svg",
     "domain": Icon.Globe,
+    "deployment": Icon.Box,
     "organization": Icon.Building,
     "secret": Icon.Key,
+    "service": Icon.Box,
     "session": Icon.Person,
     "subscription": Icon.CreditCard,
 };
 const ACTIVITY_VERB_COLORS: Record<string, Color.ColorLike> = {
+    "autoscaled": Color.Blue,
     "created": Color.Green,
     "deleted": Color.Red,
     "payment_succeeded": Color.Blue,
+    "succeeded": Color.Green,
     "updated": Color.Blue,
 };
 
@@ -39,6 +44,16 @@ export default function ListActivities() {
     function getTitle(activity: Activity) {
         if (activity.actor.type==="credential") return activity.actor.name;
         
+        if (activity.object.type==="deployment") {
+            switch(activity.verb) {
+                case "autoscaled":
+                    if (activity.metadata.count===0) return `Went to sleep`;
+                    break;
+                case "succeeded":
+                    return `Deployment ${activity.object.id.split("-")[0]} succeeded`
+            }
+        }
+
         if (activity.object.type==="domain") {
             switch (activity.verb) {
                 case "created":
@@ -115,7 +130,18 @@ export default function ListActivities() {
 
     function getAccessories(activity: Activity) {
         const accessories: List.Item.Accessory[] = [];
-        if (activity.object.type==="domain" || activity.object.type==="secret") accessories.push({tag: activity.object.name});
+
+        switch (activity.object.type) {
+            case "domain":
+            case "secret":
+                accessories.push({tag: activity.object.name});
+                break;
+            case "deployment":
+                accessories.push({tag: `${activity.object.metadata?.app_name}/${activity.object.metadata?.app_name}`});
+                if (activity.metadata.region) accessories.push({tag: activity.metadata.region.toUpperCase()})
+                break;
+        }
+        
         accessories.push({icon:Icon.Clock, date: new Date(activity.created_at)});
         return accessories;
     }
