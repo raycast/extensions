@@ -1,0 +1,104 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "context7",
+  "title": "Context7 Mcp",
+  "description": "Interact with the Context7 MCP in Raycast AI",
+  "icon": "context7-icon.png",
+  "author": "REAV",
+  "contributors": [
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "about-context7",
+      "title": "About Context7",
+      "description": "Get information about Context7.",
+      "mode": "view",
+      "path": "about-context7.js"
+    }
+  ],
+  "tools": [
+    {
+      "name": "resolve-library-id",
+      "title": "Find Documentation",
+      "description": "Resolves a library name to a Context7-compatible ID for fetching documentation.",
+      "parameters": [
+        {
+          "name": "libraryName",
+          "description": "Library name to search for.",
+          "type": "string",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "get-library-docs",
+      "title": "Research Topic in the Documentation",
+      "description": "Fetches documentation for a Context7-compatible library ID.",
+      "parameters": [
+        {
+          "name": "context7CompatibleLibraryID",
+          "description": "Exact Context7-compatible library ID (e.g., 'mongodb/docs') retrieved from 'resolve-library-id'.",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "tokens",
+          "description": "Maximum number of tokens of documentation to retrieve (default: 10000).",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "topic",
+          "description": "Topic to focus documentation on (e.g., 'hooks').",
+          "type": "string",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "ai": {
+    "instructions": "Use the 'resolve-library-id' tool to find the correct library ID for a given library name. Once you have the ID, use the 'get-library-docs' tool to fetch documentation. Prioritize using 'resolve-library-id' first if the user provides a library name and you don't have a confirmed Context7-compatible ID. After finding the libraries, proceed to selecting it yourself. Don't ask the user to choose one, as you won't stop the get an answer.",
+    "evals": [
+      {
+        "input": "research documentation for react hooks",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "resolve-library-id",
+              "args": {
+                "libraryName": "react"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.9.0",
+    "@raycast/api": "^1.98.0",
+    "@raycast/utils": "^1.17.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
