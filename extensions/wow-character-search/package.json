@@ -1,0 +1,41 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wow-character-search",
+  "version": "1.0.0",
+  "title": "World of Warcraft Character Search",
+  "description": "Search for World of Warcraft characters on the official Armory.",
+  "icon": "WoW_icon.png",
+  "author": "odin_force",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search World of Warcraft Characters",
+      "description": "Search for a character by name across all realms.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.15.0",
+    "cheerio": "^1.0.0-rc.12",
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "eslint-plugin-prettier": "^5.5.4",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
