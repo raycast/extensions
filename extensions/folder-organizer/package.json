@@ -3,7 +3,7 @@
   "name": "folder-organizer",
   "title": "Folder Organizer",
   "description": "Organize files in Downloads or any custom folder by automatically sorting them into categorized subfolders",
-  "icon": "icons/folder_organizer.png",
+  "icon": "folder_organizer.png",
   "author": "madushanj",
   "keywords": [
     "downloads",
@@ -29,48 +29,27 @@
       "name": "clean-downloads-folder",
       "title": "Organize Downloads Folder",
       "description": "Sort files in Downloads folder into organized categories",
-      "mode": "no-view",
-      "icon": "icons/download_folder.png",
-      "shortcut": {
-        "modifiers": [
-          "cmd",
-          "shift"
-        ],
-        "key": "o"
-      }
+      "icon": "download_folder.png",
+      "mode": "no-view"
     },
     {
       "name": "organize-custom-folder",
       "title": "Organize Custom Folder",
       "description": "Choose any folder and organize its files into categorized subfolders",
-      "mode": "no-view",
-      "icon": "icons/custom_folder.png",
-      "shortcut": {
-        "modifiers": [
-          "cmd",
-          "shift"
-        ],
-        "key": "p"
-      }
+      "icon": "custom_folder.png",
+      "mode": "no-view"
     },
     {
       "name": "manage-categories",
       "title": "Manage File Categories",
       "description": "Configure and customize file organization categories",
-      "mode": "view",
-      "icon": "icons/change_categories.png",
-      "shortcut": {
-        "modifiers": [
-          "cmd",
-          "shift"
-        ],
-        "key": "m"
-      }
+      "icon": "change_categories.png",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.102.7",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^2.2.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
