@@ -1,5 +1,9 @@
 # Statamic Docs Changelog
 
+## [Update] - 2025-09-18
+
+- Added version switcher
+
 ## [Update] - 2025-08-22
 
 - Updated the search index

@@ -13,7 +13,7 @@ export interface Entry {
 
 export function getEntry(workspace: Workspace): Entry | null {
   try {
-    const title = decodeURIComponent(basename(workspace.path));
+    const title = decodeURIComponent(basename(workspace.path)) || workspace.path;
     const subtitle =
       tildify(dirname(workspace.path)) + (workspace.type === "remote" ? " [SSH: " + workspace.host + "]" : "");
 
