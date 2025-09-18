@@ -1,0 +1,193 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ai-cli",
+  "version": "1.0.0",
+  "title": "AI Cli Agent",
+  "description": "Ask CLI Agent. Manage custom templates and tones for personalized queries",
+  "icon": "icon.png",
+  "author": "mariusz_kaczkowski",
+  "license": "MIT",
+  "type": "module",
+  "commands": [
+    {
+      "name": "ask-agent",
+      "title": "Ask AI Agent",
+      "description": "Ask an AI agent using your configured CLI with templates and tones.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-templates",
+      "title": "Manage Templates",
+      "description": "Create and organize templates.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-tones",
+      "title": "Manage Tones",
+      "description": "Create and organize custom tones and styles.",
+      "mode": "view"
+    }
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "preferences": [
+    {
+      "name": "selectedAgent",
+      "title": "Default Agent",
+      "description": "Select the AI agent CLI to use",
+      "type": "dropdown",
+      "default": "claude",
+      "required": true,
+      "data": [
+        {
+          "value": "claude",
+          "title": "Claude Code"
+        },
+        {
+          "value": "openai",
+          "title": "Codex CLI"
+        },
+        {
+          "value": "gemini",
+          "title": "Gemini CLI"
+        },
+        {
+          "value": "cursor",
+          "title": "Cursor CLI"
+        }
+      ]
+    },
+    {
+      "name": "claudePath",
+      "title": "Claude Code Path",
+      "description": "Path to claude executable",
+      "type": "textfield",
+      "default": "~/.claude/local/claude",
+      "placeholder": "~/.claude/local/claude",
+      "required": true
+    },
+    {
+      "name": "claudeToken",
+      "title": "Claude Code OAuth Token",
+      "description": "CLAUDE_CODE_OAUTH_TOKEN for Claude Code authentication. Run `claude setup-token` to generate one",
+      "type": "password",
+      "placeholder": "sk-ant-...",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "codexPath",
+      "title": "Codex CLI Path",
+      "description": "Path to Codex CLI executable",
+      "type": "textfield",
+      "default": "/opt/homebrew/bin/codex",
+      "placeholder": "/opt/homebrew/bin/codex",
+      "required": true
+    },
+    {
+      "name": "codexToken",
+      "title": "OpenAI API Key",
+      "description": "OPENAI_API_KEY for OpenAI authentication",
+      "type": "password",
+      "placeholder": "sk-...",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "geminiPath",
+      "title": "Gemini CLI Path",
+      "description": "Path to Gemini CLI executable",
+      "type": "textfield",
+      "default": "/opt/homebrew/bin/gemini",
+      "placeholder": "/opt/homebrew/bin/gemini",
+      "required": true
+    },
+    {
+      "name": "geminiToken",
+      "title": "Gemini API Key",
+      "description": "GEMINI_API_KEY for Gemini authentication",
+      "type": "password",
+      "placeholder": "...",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "cursorPath",
+      "title": "Cursor Agent Path",
+      "description": "Path to Cursor Agent executable",
+      "type": "textfield",
+      "default": "~/.local/bin/cursor-agent",
+      "placeholder": "~/.local/bin/cursor-agent",
+      "required": true
+    },
+    {
+      "name": "cursorToken",
+      "title": "Cursor API Key",
+      "description": "CURSOR_API_KEY for Cursor authentication",
+      "type": "password",
+      "placeholder": "...",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "agentWorkingDir",
+      "title": "Working Directory",
+      "description": "Directory for agent operations",
+      "type": "directory",
+      "default": "~",
+      "required": true
+    },
+    {
+      "name": "shellPath",
+      "title": "Shell Path",
+      "description": "Path to shell executable for command execution",
+      "type": "textfield",
+      "default": "/bin/sh",
+      "required": true,
+      "placeholder": "/bin/bash, /bin/zsh, /bin/sh"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.5",
+    "@raycast/utils": "^2.2.1",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@testing-library/jest-dom": "^6.0.0",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.0.0",
+    "@types/node": "24.3.0",
+    "@types/react": "19.1.12",
+    "@vitest/coverage-v8": "^2.1.9",
+    "@vitest/ui": "^2.1.9",
+    "eslint": "^9.22.0",
+    "jsdom": "^25.0.1",
+    "prettier": "^3.5.3",
+    "react-devtools": "^6.1.1",
+    "typescript": "^5.8.2",
+    "vitest": "^2.1.9"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
+    "test:ci": "npm run lint && npm run build && npm run test",
+    "type-check": "tsc --noEmit",
+    "dev:verbose": "ray develop --verbose",
+    "clean": "rm -rf dist build node_modules/.cache",
+    "deps:update": "npm update && npm audit",
+    "deps:check": "npm outdated",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,md}\"",
+    "validate": "npm run type-check && npm run lint && npm run format:check && npm run test"
+  }
+}
