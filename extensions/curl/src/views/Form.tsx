@@ -287,7 +287,7 @@ export default function FormView({ push }: { push: Navigation["push"] }) {
         })}
 
       {headers.length > 1 && (
-        <Form.Description title="" text={isMac ? "⌘⇧H Remove Last" : "Ctrl + ⇧ + H Remove Last"} />
+        <Form.Description title="" text={isMac ? "⌘⇧H Remove Last" : "Ctrl + Shift + H Remove Last"} />
       )}
 
       {method !== "GET" && method !== "DELETE" && (
