@@ -1,6 +1,6 @@
 # cURL Changelog
 
-## [Fix: Windows Shortcuts] - {PR_MERGE_DATE}
+## [Fix: Windows Shortcuts] - 2025-09-18
 
 - Updated `@raycast/api` to the latest version
 - Added cross-platform shortcut support for Windows
