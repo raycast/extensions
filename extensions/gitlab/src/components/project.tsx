@@ -193,12 +193,16 @@ function MyProjectsDropdownItem(props: { project: Project }) {
   );
 }
 
-export function MyProjectsDropdown(props: { onChange: (pro: Project | undefined) => void }): React.ReactNode | null {
+export function MyProjectsDropdown(props: {
+  onChange: (pro: Project | undefined) => void;
+  storeValue?: boolean;
+}): React.ReactNode | null {
   const { projects: myprojects } = useMyProjects();
   if (myprojects) {
     return (
       <List.Dropdown
         tooltip="Select Project"
+        storeValue={props.storeValue}
         onChange={(newValue) => {
           const pro = myprojects.find((p) => `${p.id}` === newValue);
           props.onChange(pro);

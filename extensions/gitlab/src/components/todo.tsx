@@ -6,7 +6,7 @@ import { GitLabOpenInBrowserAction } from "./actions";
 import { useTodos } from "./todo/utils";
 import { MyProjectsDropdown } from "./project";
 import { useState } from "react";
-import { capitalizeFirstLetter, getErrorMessage, showErrorToast } from "../utils";
+import { capitalizeFirstLetter, getErrorMessage, isWindows, showErrorToast } from "../utils";
 import { CacheActionPanelSection } from "./cache_actions";
 
 function userToIcon(user?: User): Image.ImageLike {
@@ -91,7 +91,9 @@ export function TodoList() {
   const refreshAll = async () => {
     refresh();
     try {
-      await launchCommand({ name: "todomenubar", type: LaunchType.UserInitiated });
+      if (!isWindows) {
+        await launchCommand({ name: "todomenubar", type: LaunchType.UserInitiated });
+      }
     } catch (error) {
       showErrorToast(getErrorMessage(error), "Could not open Todos Menu Command");
     }

@@ -6,6 +6,7 @@ import { Group, Issue, Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import {
   capitalizeFirstLetter,
+  formatDate,
   getErrorMessage,
   now,
   optimizeMarkdownText,
@@ -105,13 +106,15 @@ export function IssueDetail(props: { issue: Issue }) {
               <Detail.Metadata.TagList.Item key={issue.id} text={issue.author.name} icon={userIcon(issue.author)} />
             </Detail.Metadata.TagList>
           )}
-          {issue.assignees.length > 0 && (
-            <Detail.Metadata.TagList title="Assignee">
-              {issue.assignees.map((a) => (
-                <Detail.Metadata.TagList.Item key={a.id} text={a.name} icon={userIcon(a)} />
-              ))}
-            </Detail.Metadata.TagList>
-          )}
+          <Detail.Metadata.TagList title="Assignee">
+            {issue.assignees.length > 0 ? (
+              issue.assignees.map((a) => <Detail.Metadata.TagList.Item key={a.id} text={a.name} icon={userIcon(a)} />)
+            ) : (
+              <Detail.Metadata.TagList.Item text="-" />
+            )}
+          </Detail.Metadata.TagList>
+          {issue.created_at && <Detail.Metadata.Label title="Created" text={formatDate(issue.created_at)} />}
+          {issue.updated_at && <Detail.Metadata.Label title="Updated" text={formatDate(issue.updated_at)} />}
           {issue.milestone && <Detail.Metadata.Label title="Milestone" text={issue.milestone.title} />}
           {issue.labels.length > 0 && (
             <Detail.Metadata.TagList title="Labels">

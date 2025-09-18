@@ -160,6 +160,11 @@ export function MRDetail(props: { mr: MergeRequest }) {
             </Detail.Metadata.TagList>
           )}
           <MRSourceBranchTagList mr={mr} />
+          {mr.merge_when_pipeline_succeeds && (
+            <Detail.Metadata.TagList title="Merge Flags">
+              <Detail.Metadata.TagList.Item text="Auto Merge" />
+            </Detail.Metadata.TagList>
+          )}
         </Detail.Metadata>
       }
     />
@@ -413,6 +418,10 @@ export function MRListItem(props: {
   const accessories: List.Item.Accessory[] = [];
   if (!getListDetailsPreference()) {
     accessories.push(
+      {
+        icon: mr.merge_when_pipeline_succeeds ? Icon.Rewind : undefined,
+        tooltip: mr.merge_when_pipeline_succeeds ? "Auto Merge" : undefined,
+      },
       { icon: mr.has_conflicts ? "⚠️" : undefined, tooltip: mr.has_conflicts ? "Has Conflict" : undefined },
       { tag: mr.milestone?.title ?? "", tooltip: mr.milestone ? `Milestone: ${mr.milestone?.title}` : "" },
       { date: new Date(mr.updated_at), tooltip: `Updated: ${toLongDateString(mr.updated_at)}` },
