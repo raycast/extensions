@@ -21,7 +21,7 @@ export function getWorkItemTypeIcon(type: string): Icon {
     return Icon.PersonCircle;
   if (normalizedType.includes("bug")) return Icon.Bug;
   if (normalizedType.includes("task")) return Icon.CheckCircle;
-  if (normalizedType.includes("test")) return Icon.BugOff;
+  if (normalizedType.includes("test")) return Icon.Checkmark;
   if (normalizedType.includes("issue")) return Icon.ExclamationMark;
   if (normalizedType.includes("impediment")) return Icon.Warning;
 

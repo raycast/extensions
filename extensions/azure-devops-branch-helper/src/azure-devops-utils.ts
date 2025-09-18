@@ -815,10 +815,11 @@ export async function addCommentToWorkItem(
     console.error("[addCommentToWorkItem] workItemId:", workItemId);
     console.error("[addCommentToWorkItem] command args:", args);
 
+    const errorObj = e as { stderr?: string; message?: string };
     const msg =
-      typeof e?.stderr === "string" && e.stderr
-        ? e.stderr
-        : e?.message || String(e);
+      typeof errorObj?.stderr === "string" && errorObj.stderr
+        ? errorObj.stderr
+        : errorObj?.message || String(e);
     console.error("[addCommentToWorkItem] Final error message:", msg);
 
     // Clean up temp file on error
