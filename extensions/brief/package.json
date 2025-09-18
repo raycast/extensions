@@ -1,0 +1,88 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "brief",
+  "version": "1.0.2",
+  "title": "Brief - Send Links with AI Summary",
+  "description": "Capture and email article summaries with AI",
+  "icon": "command-icon.png",
+  "author": "densign01",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "capture-article",
+      "title": "Brief",
+      "description": "Capture current browser article and send via email",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "email",
+      "type": "textfield",
+      "required": true,
+      "title": "Email Address",
+      "description": "Email address to send articles to",
+      "placeholder": "your@email.com"
+    },
+    {
+      "name": "apiEndpoint",
+      "type": "textfield",
+      "required": false,
+      "title": "API Endpoint",
+      "description": "Brief API endpoint",
+      "default": "https://quickcapture-api.daniel-ensign.workers.dev",
+      "placeholder": "https://quickcapture-api.daniel-ensign.workers.dev"
+    },
+    {
+      "name": "defaultAiSummary",
+      "type": "checkbox",
+      "required": false,
+      "title": "Enable AI Summary by Default",
+      "description": "Generate AI summaries by default",
+      "default": true,
+      "label": "Enable AI Summary"
+    },
+    {
+      "name": "summaryLength",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Summary Length",
+      "description": "Default length for AI summaries",
+      "default": "short",
+      "data": [
+        {
+          "title": "Short (3 bullets)",
+          "value": "short"
+        },
+        {
+          "title": "Long (6 bullets)",
+          "value": "long"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
