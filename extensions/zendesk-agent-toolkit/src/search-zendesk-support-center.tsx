@@ -503,7 +503,10 @@ function CreateArticleForm() {
   const [, setFileLoaded] = useState(false);
   const [isPublic, setIsPublic] = useState(true);
 
-  const { permissionGroupId, userSegmentId } = getPreferenceValues() as { permissionGroupId?: string; userSegmentId?: string };
+  const { permissionGroupId, userSegmentId } = getPreferenceValues() as {
+    permissionGroupId?: string;
+    userSegmentId?: string;
+  };
 
   useEffect(() => {
     loadCategories();
@@ -765,7 +768,10 @@ function EditArticleForm({
   const [isPublic, setIsPublic] = useState(true);
   const [articleUrl, setArticleUrl] = useState<string>("");
 
-  const { permissionGroupId, userSegmentId } = getPreferenceValues() as { permissionGroupId?: string; userSegmentId?: string };
+  const { permissionGroupId, userSegmentId } = getPreferenceValues() as {
+    permissionGroupId?: string;
+    userSegmentId?: string;
+  };
 
   useEffect(() => {
     loadArticleData();

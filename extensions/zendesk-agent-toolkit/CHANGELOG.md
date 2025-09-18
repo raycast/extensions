@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2025-01-27
 
 ### Added
+
 - **AI Article Creation**: Convert resolved tickets to help articles using GPT-4
 - **AI Macro Suggestions**: Intelligent macro recommendations based on ticket patterns
 - **Enhanced Ticket Management**: Better search, filtering, and bulk operations
@@ -18,11 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Advanced Search**: Search across all tickets, not just assigned ones
 
 ### Changed
+
 - **Architecture**: Moved from web scraping to full API integration
 - **UI**: Enhanced interface following Raycast design patterns
 - **Commands**: Added "My Tickets" command alongside "Search Articles"
 
 ### Removed
+
 - **Legacy search implementation**: Replaced with modern API-based approach
 - **Basic URL authentication**: Replaced with secure API token system
 
