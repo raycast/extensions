@@ -1,6 +1,6 @@
 # Hue Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-09-18
 
 - Add support for Windows platform.
 - Bump all dependencies to the latest.
