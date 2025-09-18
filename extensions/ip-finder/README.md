@@ -2,9 +2,7 @@
 
 A powerful Raycast extension to scan your local network, detect assigned IP addresses, and get smart recommendations for available addresses to prevent IP conflicts.
 
-
 ## Features
-
 
 - **🔍 Network Discovery**: Automatically detect your local network and scan for assigned IPs
 - **📊 IP Recommendations**: Get intelligent recommendations for available IP addresses
@@ -17,7 +15,6 @@ A powerful Raycast extension to scan your local network, detect assigned IP addr
 - **📋 Export Results**: Copy IP lists or export detailed reports
 
 ## Quick Start
-
 
 ## Commands
 

@@ -23,6 +23,7 @@ import { exec } from "child_process";
 import { promisify } from "util";
 import { networkInterfaces, platform } from "os";
 import { promises as dns } from "dns";
+import { showFailureToast } from "@raycast/utils";
 
 const execAsync = promisify(exec);
 
@@ -104,10 +105,8 @@ export default function Command() {
         }, 500);
       }
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: "Failed to initialize network information",
+      showFailureToast(error, {
+        title: "Failed to initialize network information",
       });
     } finally {
       setIsLoading(false);
@@ -865,7 +864,7 @@ ${
                 onAction={showDetails}
               />
               <Action.CopyToClipboard
-                title="Copy Local Ip"
+                title="Copy Local IP"
                 content={networkInfo.localIP}
               />
               <Action.CopyToClipboard
@@ -888,7 +887,7 @@ ${
                 onAction={showScanForm}
               />
               <Action.CopyToClipboard
-                title="Copy Local Ip"
+                title="Copy Local IP"
                 content={networkInfo.localIP}
               />
             </ActionPanel>
@@ -974,7 +973,7 @@ ${
               actions={
                 <ActionPanel>
                   <Action.CopyToClipboard
-                    title="Copy Ip Address"
+                    title="Copy IP Address"
                     content={device.ip}
                   />
                   <Action.CopyToClipboard
@@ -986,7 +985,7 @@ ${
                     url={`http://${device.ip}`}
                   />
                   <Action
-                    title="Scan This Ip Range"
+                    title="Scan This IP Range"
                     icon={Icon.MagnifyingGlass}
                     onAction={() => {
                       const ipRange =
@@ -1012,7 +1011,7 @@ ${
                     }}
                   />
                   <Action
-                    title="Ping Ip"
+                    title="Ping IP"
                     icon={Icon.Network}
                     onAction={async () => {
                       try {
@@ -1069,15 +1068,15 @@ ${
               actions={
                 <ActionPanel>
                   <Action.CopyToClipboard
-                    title="Copy Ip Address"
+                    title="Copy IP Address"
                     content={ip}
                   />
                   <Action.CopyToClipboard
-                    title="Copy as Static Ip"
+                    title="Copy as Static IP"
                     content={`IP Address: ${ip}\nSubnet Mask: 255.255.255.0\nGateway: ${networkInfo.localIP.split(".").slice(0, 3).join(".")}.1`}
                   />
                   <Action
-                    title="Test Ip Availability"
+                    title="Test IP Availability"
                     icon={Icon.MagnifyingGlass}
                     onAction={async () => {
                       try {
