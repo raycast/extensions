@@ -4,6 +4,12 @@ export type Preferences = {
   oscPort: string;
 };
 
+export type DBSoundSet = Omit<SoundSet, "tiles"> & { tiles: SoundSetTile["tileUUID"][] };
+
+export type DBSoundTile = SoundSetTile & { setUuid: SoundSet["uuid"] };
+
+export type TileCoordinates = { setPosition: number; tilePosition: { x: number; y: number } };
+
 export type SoundSetTile = {
   automations: Automation;
   colorIndex: number;
