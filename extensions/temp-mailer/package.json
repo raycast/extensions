@@ -1,0 +1,48 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "temp-mailer",
+  "title": "Temp Mailer",
+  "description": "Read & create temp mail addresses via Temp Mail Plus API",
+  "icon": "extension-icon.png",
+  "author": "halitsever",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "set-new-temp-mail-address",
+      "title": "Set New Temp Mail Address",
+      "subtitle": "Set (create) new temp mail address",
+      "description": "Create and configure a new temporary email address by selecting from available domains and setting a custom username",
+      "mode": "view"
+    },
+    {
+      "name": "view-inbox",
+      "title": "View Inbox",
+      "subtitle": "Shows Mails From Selected Mail Address",
+      "description": "View current emails from your configured temporary email address with search functionality and detailed mail content",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.4",
+    "@raycast/utils": "^1.17.0",
+    "temp-mail-plus-api": "^1.0.6",
+    "turndown": "^7.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@types/turndown": "^5.0.5",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
