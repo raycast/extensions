@@ -124,8 +124,8 @@ function PasteUsername(item: Item) {
       key="paste-username"
       vault_id={item.vault.id}
       field="username"
-      paste
       shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+      isPasteAction
     />
   );
 }
@@ -137,8 +137,8 @@ function PastePassword(item: Item) {
       key="paste-password"
       vault_id={item.vault.id}
       field="password"
-      paste
       shortcut={{ modifiers: ["cmd", "opt"], key: "v" }}
+      isPasteAction
     />
   );
 }
@@ -151,8 +151,8 @@ function PasteOneTimePassword(item: Item) {
       vault_id={item.vault.id}
       field="one-time password"
       attribute="otp"
-      paste
       shortcut={{ modifiers: ["cmd", "ctrl"], key: "v" }}
+      isPasteAction
     />
   );
 }

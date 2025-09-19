@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
-import { Action, Clipboard, Icon, Keyboard, showToast, Toast, showHUD, getFrontmostApplication } from "@raycast/api";
+import { Action, Clipboard, Icon, Keyboard, showToast, Toast, showHUD } from "@raycast/api";
 import { execFileSync } from "child_process";
 
 import { ExtensionError, getCliPath, handleErrors, titleCaseWord } from "../utils";
+import { useFrontmostApp } from "../hooks/useFrontmostApp";
 
 export function CopyToClipboard({
   id,
@@ -10,44 +10,33 @@ export function CopyToClipboard({
   shortcut,
   field = "password",
   attribute,
-  paste,
+  isPasteAction,
 }: {
   id: string;
   field?: string;
   shortcut: Keyboard.Shortcut;
   vault_id: string;
   attribute?: string;
-  paste?: boolean;
+  isPasteAction?: boolean;
 }) {
   const cliPath = getCliPath();
-  const [frontAppName, setFrontAppName] = useState<string | undefined>(undefined);
-  const [frontAppIcon, setFrontAppIcon] = useState<{ fileIcon: string } | undefined>(undefined);
-
-  useEffect(() => {
-    if (!paste) return;
-    getFrontmostApplication()
-      .then((app) => {
-        setFrontAppName(app.name);
-        if (app.path) setFrontAppIcon({ fileIcon: app.path });
-      })
-      .catch(() => {
-        // ignore, fall back to default icon/title
-      });
-  }, [paste]);
+  const frontmostApp = useFrontmostApp(!!isPasteAction);
 
   return (
     <Action
-      icon={paste ? (frontAppIcon ?? Icon.Text) : Icon.Clipboard}
+      icon={isPasteAction ? (frontmostApp.icon ?? Icon.Text) : Icon.Clipboard}
       title={
-        paste
-          ? `Paste ${titleCaseWord(field)}${frontAppName ? ` to ${frontAppName}` : ""}`
+        isPasteAction
+          ? `Paste ${titleCaseWord(field)}${frontmostApp.name ? ` to ${frontmostApp.name}` : ""}`
           : `Copy ${titleCaseWord(field)}`
       }
       shortcut={shortcut}
       onAction={async () => {
         const toast = await showToast({
           style: Toast.Style.Animated,
-          title: paste ? `Pasting ${field}${frontAppName ? ` to ${frontAppName}` : ""}...` : `Copying ${field}...`,
+          title: isPasteAction
+            ? `Pasting ${field}${frontmostApp.name ? ` to ${frontmostApp.name}` : ""}...`
+            : `Copying ${field}...`,
         });
         try {
           let stdout;
@@ -60,11 +49,11 @@ export function CopyToClipboard({
             stdout = execFileSync(cliPath, ["read", uri]);
           }
           const value = stdout.toString().trim();
-          if (paste) {
+          if (isPasteAction) {
             await Clipboard.paste(value);
             toast.style = Toast.Style.Success;
-            toast.title = `Pasted ${field}${frontAppName ? ` to ${frontAppName}` : ""}`;
-            await showHUD(`Pasted ${field}${frontAppName ? ` to ${frontAppName}` : ""}`);
+            toast.title = `Pasted ${field}${frontmostApp.name ? ` to ${frontmostApp.name}` : ""}`;
+            await showHUD(`Pasted ${field}${frontmostApp.name ? ` to ${frontmostApp.name}` : ""}`);
           } else {
             await Clipboard.copy(value, { concealed: true });
             toast.style = Toast.Style.Success;
@@ -73,7 +62,7 @@ export function CopyToClipboard({
           }
         } catch (error) {
           toast.style = Toast.Style.Failure;
-          toast.title = `Failed to ${paste ? "paste" : "copy"}`;
+          toast.title = `Failed to ${isPasteAction ? "paste" : "copy"}`;
           if (error instanceof Error || error instanceof ExtensionError) {
             try {
               handleErrors(error.message);
@@ -84,7 +73,7 @@ export function CopyToClipboard({
                 }
                 toast.title = err.title;
                 toast.primaryAction = {
-                  title: paste ? "Paste logs" : "Copy logs",
+                  title: "Copy logs",
                   onAction: async (toast) => {
                     await Clipboard.copy((err as Error).message);
                     toast.hide();
@@ -93,7 +82,7 @@ export function CopyToClipboard({
               } else if (err instanceof Error) {
                 toast.title = err.message;
                 toast.primaryAction = {
-                  title: paste ? "Paste logs" : "Copy logs",
+                  title: "Copy logs",
                   onAction: async (toast) => {
                     await Clipboard.copy((err as Error).message);
                     toast.hide();
