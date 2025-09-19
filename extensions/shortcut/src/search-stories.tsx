@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { JSX, useState } from "react";
 import { List } from "@raycast/api";
 import { useSearch } from "./hooks";
 import EpicListItem from "./components/EpicListItem";
