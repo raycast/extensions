@@ -6,7 +6,7 @@ Query the [dust.tt](https://dust.tt/) service extention for [Raycast](https://ww
 
 You need a dust.tt account to use this extension.
 
-## Connexion
+## Connection
 
 ### Using your Dust account
 

@@ -86,7 +86,7 @@
     }
   ],
   "dependencies": {
-    "@dust-tt/client": "^1.0.15",
+    "@dust-tt/client": "^1.1.16",
     "@emoji-mart/data": "^1.1.2",
     "@raycast/api": "^1.70.3",
     "@raycast/utils": "^1.18.0",

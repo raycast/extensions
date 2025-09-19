@@ -4,7 +4,7 @@ import { addDustHistory } from "./history";
 import { ConnectorProviders, DUST_AGENT, AgentType, getUser } from "./utils";
 import { AskAgentQuestionForm } from "./askAgent";
 import { getDustClient, withPickedWorkspace } from "./dust_api/oauth";
-import { AgentActionPublicType, DataSourceViewType, DustAPI, isRetrievalActionType } from "@dust-tt/client";
+import { AgentActionPublicType, DataSourceViewType, DustAPI } from "@dust-tt/client";
 import { usePromise } from "@raycast/utils";
 
 type DustDocument = {
@@ -73,7 +73,6 @@ async function answerQuestion({
 
   function processAction({
     content,
-    action,
     setDustDocuments,
   }: {
     content: string;
@@ -81,11 +80,13 @@ async function answerQuestion({
     setDustDocuments: (documents: DustDocument[]) => void;
   }): string {
     const referencedDocuments: Map<string, DustDocument> = new Map();
-    if (action && isRetrievalActionType(action) && action.documents) {
-      action.documents.forEach((d) => {
-        referencedDocuments.set(d.reference, { ...d, referenceCount: 0 });
-      });
-    }
+    /**
+     * if (action && action.documents) {
+     *   action.documents.forEach((d) => {
+     *     referencedDocuments.set(d.reference, { ...d, referenceCount: 0 });
+     *   });
+     * }
+     */
     const documents: DustDocument[] = [];
     if (referencedDocuments.size > 0) {
       let counter = 0;
