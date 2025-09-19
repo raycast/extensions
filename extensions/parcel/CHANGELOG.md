@@ -1,6 +1,6 @@
 # Parcel Changelog
 
-## [Detail View Refactor, Metadata, UX] - {PR_MERGE_DATE}
+## [Detail View Refactor, Metadata, UX] - 2025-09-19
 
 - Refactored "My Deliveries" command UI to only show tracking events in the markdown section (all other details are now displayed in the metadata panel for improved clarity and structure)
 - Added support for Portuguese date formats in tracking events
