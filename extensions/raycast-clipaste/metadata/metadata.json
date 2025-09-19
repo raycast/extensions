@@ -1,0 +1,18 @@
+{
+  "displayName": "Clipaste Launcher",
+  "shortDescription": "Form-based Raycast interface for the clipaste CLI",
+  "screenshots": [
+    {
+      "path": "screenshots/clipaste-launcher.png",
+      "description": "Clipaste Launcher Form"
+    },
+    {
+      "path": "screenshots/clipaste-launcher-run.png",
+      "description": "Clipaste Launcher Run"
+    },
+    {
+      "path": "screenshots/clipaste-icon.png",
+      "description": "Clipaste Launcher Icon"
+    }
+  ]
+}
