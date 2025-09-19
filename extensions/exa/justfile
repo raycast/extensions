@@ -1,0 +1,38 @@
+set fallback
+
+status:
+  git status
+alias st := status
+
+default:
+    @just status
+
+# Run the development server
+run:
+    npm run dev
+
+# Create a quick checkpoint commit with all tracked files
+checkpoint:
+    git add -u
+    git commit -m "checkpoint"
+
+# Publish the extension
+publish:
+    npm run publish
+
+# Install dependencies
+install:
+    npm install
+
+# Build the extension
+build:
+    npm run build
+
+# Clean build artifacts
+clean:
+    rm -rf dist
+    rm -rf node_modules
+
+# Run tests
+test:
+    npm test
