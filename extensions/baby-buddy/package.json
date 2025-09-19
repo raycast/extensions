@@ -1,0 +1,233 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "baby-buddy",
+  "title": "Baby Buddy",
+  "description": "Interact with baby buddy",
+  "icon": "icon.png",
+  "author": "ShaneTheKing",
+  "categories": [
+    "Applications", "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Show Baby Info",
+      "description": "View information about your children",
+      "mode": "view"
+    },
+    {
+      "name": "timers",
+      "title": "Active Timers",
+      "description": "View and manage active timers",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "baseUrl",
+      "title": "Baby Buddy URL",
+      "description": "The URL of your Baby Buddy instance (e.g., https://baby.example.com)",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your Baby Buddy API key",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.60.0",
+    "@raycast/utils": "^1.17.0",
+    "axios": "^1.6.7",
+    "date-fns": "^2.30.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "tools": [
+    {
+      "title": "Get Children",
+      "name": "getChildren",
+      "description": "Get a list of all children registered in Baby Buddy"
+    },
+    {
+      "title": "Get Active Timers",
+      "name": "getActiveTimers",
+      "description": "Get a list of all active timers"
+    },
+    {
+      "title": "Get Feedings",
+      "name": "getFeedings",
+      "description": "Get feeding information for a specific child"
+    },
+    {
+      "title": "Get Sleep",
+      "name": "getSleep",
+      "description": "Get sleep information for a specific child"
+    },
+    {
+      "title": "Get Diapers",
+      "name": "getDiapers",
+      "description": "Get diaper change information for a specific child"
+    },
+    {
+      "title": "Get Tummy Time",
+      "name": "getTummyTime",
+      "description": "Get tummy time information for a specific child"
+    },
+    {
+      "title": "Create Diaper",
+      "name": "createDiaper",
+      "description": "Create a new diaper change entry for a child"
+    },
+    {
+      "title": "Create Feeding",
+      "name": "createFeeding",
+      "description": "Create a new feeding entry for a child"
+    },
+    {
+      "title": "Edit Feeding",
+      "name": "editFeeding",
+      "description": "Update an existing feeding entry for a child"
+    },
+    {
+      "title": "Delete Feeding",
+      "name": "deleteFeeding",
+      "description": "Delete a feeding entry"
+    },
+    {
+      "title": "Edit Sleep",
+      "name": "editSleep",
+      "description": "Update an existing sleep entry for a child"
+    },
+    {
+      "title": "Delete Sleep",
+      "name": "deleteSleep",
+      "description": "Delete a sleep entry"
+    },
+    {
+      "title": "Edit Tummy Time",
+      "name": "editTummyTime",
+      "description": "Update an existing tummy time entry for a child"
+    },
+    {
+      "title": "Delete Tummy Time",
+      "name": "deleteTummyTime",
+      "description": "Delete a tummy time entry"
+    },
+    {
+      "title": "Edit Diaper",
+      "name": "editDiaper",
+      "description": "Update an existing diaper change entry for a child"
+    },
+    {
+      "title": "Delete Diaper",
+      "name": "deleteDiaper",
+      "description": "Delete a diaper change entry"
+    },
+    {
+      "title": "Edit Timer",
+      "name": "editTimer",
+      "description": "Update an existing timer"
+    },
+    {
+      "title": "Delete Timer",
+      "name": "deleteTimer",
+      "description": "Delete a timer"
+    },
+    {
+      "title": "Create Sleep",
+      "name": "createSleep",
+      "description": "Create a new sleep entry for a child"
+    },
+    {
+      "title": "Create Tummy Time",
+      "name": "createTummyTime",
+      "description": "Create a new tummy time entry for a child"
+    },
+    {
+      "title": "Create Timer",
+      "name": "createTimer",
+      "description": "Create a new timer for a child"
+    },
+    {
+      "title": "Get Sleeping Children",
+      "name": "getSleepingChildren",
+      "description": "Get a list of children who are currently sleeping"
+    },
+    {
+      "title": "Get Date Time",
+      "name": "getDateTime",
+      "description": "Get the current date and time, useful for if the AI needs a relative time or date. It can't seem to get the correct time on its own, so this tool provides the current time and date."
+    }
+  ],
+  "ai": {
+    "instructions": "If the user does not specify a child name and they have more than one child, ask them to specify a child name. If they only have one child, use that child's name without asking. All time-based inputs should be DateTimes unless otherwise specified, if the user only provides a time assume it's today unless otherwise specified. For time based outputs, format the output to the user's regional date time format. When the user refers to a feeding time, they usually want to know when it began. Other times with time ranges they want to know when they ended. If you need to know the user's current time or date for any reason, use the getDateTime tool. When it makes sense, use both the full time of an event and how duration or relative time, properly formatted. If the user asks you to convert a timer, that means they want you to use that timer for the basis of an activity - the start time should be the activity's start time and, unless otherwise specified, the end time should be now - and then delete the timer after the activity is created. If the user asks you to stop a timer, that means they want you to delete it.",
+    "evals": [
+      {
+        "input": "When is the last time my children ate?",
+        "usedAsExample": true
+      },
+      {
+        "input": "When is the last time my children had a diaper change?",
+        "usedAsExample": true
+      },
+      {
+        "input": "Have my children eaten since their last nap?",
+        "usedAsExample": true
+      },
+      {
+        "input": "Convert the active timer to a feeding entry for formula",
+        "usedAsExample": true
+      },
+      {
+        "input": "Start a sleep timer starting 20 minutes ago",
+        "usedAsExample": true
+      },
+      {
+        "input" : "@baby-buddy list active timers",
+        "usedAsExample": false,
+        "mocks" : {
+          "getActiveTimers" : [
+            {
+              "child" : 3,
+              "childName" : "Child 2",
+              "duration" : "00:23:39.151727",
+              "id" : 5658,
+              "name" : "Sleep please",
+              "start" : "2025-03-28T17:10:00-07:00",
+              "user" : 1
+            }
+          ]
+        },
+        "expected" : [
+          {
+            "callsTool" : {
+              "arguments" : {
+      
+              },
+              "name" : "getActiveTimers"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
