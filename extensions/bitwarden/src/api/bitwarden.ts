@@ -5,7 +5,7 @@ import { dirname } from "path/posix";
 import { LOCAL_STORAGE_KEY, DEFAULT_SERVER_URL, CACHE_KEYS } from "~/constants/general";
 import { VaultState, VaultStatus } from "~/types/general";
 import { PasswordGeneratorOptions } from "~/types/passwords";
-import { Folder, Item } from "~/types/vault";
+import { Folder, Item, ItemType, Login } from "~/types/vault";
 import { getPasswordGeneratingArgs } from "~/utils/passwords";
 import { getServerUrlPreference } from "~/utils/preferences";
 import {
@@ -73,6 +73,13 @@ type LogoutOptions = {
 type ReceiveSendOptions = {
   savePath?: string;
   password?: string;
+};
+
+type CreateLoginItemOptions = {
+  name: string;
+  username: string;
+  password: string;
+  folderId: string | null;
 };
 
 const { supportPath } = environment;
@@ -426,6 +433,38 @@ export class Bitwarden {
       return { result: items.filter((item: Item) => !!item.name) };
     } catch (execError) {
       captureException("Failed to list items", execError);
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
+  }
+
+  async createLoginItem(options: CreateLoginItemOptions): Promise<MaybeError<Item>> {
+    try {
+      const { error: itemTemplateError, result: itemTemplate } = await this.getTemplate<Item>("item");
+      if (itemTemplateError) throw itemTemplateError;
+
+      const { error: loginTemplateError, result: loginTemplate } = await this.getTemplate<Login>("item.login");
+      if (loginTemplateError) throw loginTemplateError;
+
+      itemTemplate.name = options.name;
+      itemTemplate.type = ItemType.LOGIN;
+      itemTemplate.folderId = options.folderId || null;
+      itemTemplate.login = loginTemplate;
+      itemTemplate.notes = null;
+
+      loginTemplate.username = options.username;
+      loginTemplate.password = options.password;
+      loginTemplate.totp = null;
+      loginTemplate.fido2Credentials = undefined;
+
+      const { result: encodedItem, error: encodeError } = await this.encode(JSON.stringify(itemTemplate));
+      if (encodeError) throw encodeError;
+
+      const { stdout } = await this.exec(["create", "item", encodedItem], { resetVaultTimeout: true });
+      return { result: JSON.parse<Item>(stdout) };
+    } catch (execError) {
+      captureException("Failed to create login item", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
