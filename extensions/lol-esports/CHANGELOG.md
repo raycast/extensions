@@ -1,5 +1,11 @@
 # LoL Esports Changelog
 
+## [Fixes & Improvements] - {PR_MERGE_DATE}
+
+- New option to hide match scores
+- Show Schedule listing improved
+- New timezone setting to show correct date and times
+
 ## [AI Tools] - 2025-05-12
 
 - Add new AI tools to get leagues, schedules and standings
