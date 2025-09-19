@@ -1,0 +1,294 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "taskmaster-project-manager",
+  "title": "Taskmaster Project Manager",
+  "description": "View, explore and manage TaskMaster projects with visual Kanban boards, task status updates, and comprehensive task browsing",
+  "icon": "icon.png",
+  "author": "erayack",
+  "access": "public",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "kanban-board",
+      "title": "Kanban Board",
+      "description": "View and manage tasks in a visual Kanban board interface with drag-and-drop functionality",
+      "mode": "view"
+    },
+    {
+      "name": "task-list",
+      "title": "Task List",
+      "description": "View all tasks in a chronological list with status filtering and quick actions",
+      "mode": "view"
+    },
+    {
+      "name": "search-tasks",
+      "title": "Search Tasks",
+      "description": "Search and filter tasks with advanced filtering options and full-text search",
+      "mode": "view"
+    },
+    {
+      "name": "next-task",
+      "title": "Next Task",
+      "description": "Get the next available task to work on based on dependencies and priority",
+      "mode": "view"
+    },
+    {
+      "name": "task-detail",
+      "title": "Task Detail",
+      "description": "View detailed information about a specific task including subtasks and dependencies",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "taskId",
+          "placeholder": "Task ID",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "project-status",
+      "title": "Project Status",
+      "description": "View comprehensive project dashboard with progress, statistics, and insights",
+      "mode": "view"
+    },
+    {
+      "name": "add-task",
+      "title": "Add Task",
+      "description": "Create new tasks with form-based input and validation",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "projectRoot",
+      "type": "directory",
+      "required": true,
+      "title": "Project Root Directory",
+      "description": "Absolute path to your TaskMaster project root directory containing .taskmaster folder"
+    },
+    {
+      "name": "autoRefresh",
+      "type": "checkbox",
+      "required": false,
+      "title": "Auto Refresh",
+      "label": "Auto Refresh",
+      "description": "Automatically refresh task data from .taskmaster folder",
+      "default": true
+    },
+    {
+      "name": "showCompletedTasks",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Completed Tasks",
+      "label": "Show Completed Tasks",
+      "description": "Include completed tasks in Kanban board and task lists",
+      "default": true
+    },
+    {
+      "name": "maxConcurrentRequests",
+      "type": "dropdown",
+      "required": false,
+      "title": "Max Concurrent Requests",
+      "description": "Maximum number of concurrent file operations for performance optimization",
+      "default": "5",
+      "data": [
+        {
+          "title": "3 requests",
+          "value": "3"
+        },
+        {
+          "title": "5 requests",
+          "value": "5"
+        },
+        {
+          "title": "10 requests",
+          "value": "10"
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-task-info",
+      "title": "Get Task Info",
+      "description": "Get detailed information about a specific task by ID"
+    },
+    {
+      "name": "list-commands",
+      "title": "List Commands",
+      "description": "List all available TaskMaster commands and their descriptions"
+    },
+    {
+      "name": "analyze-project",
+      "title": "Analyze Project",
+      "description": "Analyze the current TaskMaster project and provide insights on status, priorities, and recommendations"
+    },
+    {
+      "name": "get-next-task",
+      "title": "Get Next Task",
+      "description": "Get the next recommended task to work on based on priorities and dependencies"
+    },
+    {
+      "name": "generate-complexity-report",
+      "title": "Generate Complexity Report",
+      "description": "Generate a detailed complexity analysis report for tasks, identifying high-complexity items that may need breakdown"
+    }
+  ],
+  "ai": {
+    "instructions": "When working with TaskMaster projects, always use the available tools to provide accurate, data-driven insights. TaskMaster uses a structured task management system with task IDs, dependencies, priorities, and status tracking. For specific task information, use get-task-info with the exact task ID. For project overviews and status summaries, use analyze-project. When users need task recommendations, use get-next-task to find available tasks based on dependencies and priorities. For complexity analysis and task breakdown suggestions, use generate-complexity-report. Always provide contextual insights based on the actual project data rather than making assumptions.",
+    "evals": [
+      {
+        "input": "@taskmaster-project-manager what tasks do I have?",
+        "mocks": {
+          "analyze-project": "**TaskMaster Project Analysis**\n\n**Project Overview:**\n- Total Tasks: 5\n- Active Tasks: 3\n- Completed: 2\n\n**Status Distribution:**\n- Pending: 2 tasks\n- In Progress: 1 task\n- Done: 2 tasks\n\n**Priority Breakdown:**\n- High Priority: 1 task\n- Medium Priority: 3 tasks\n- Low Priority: 1 task"
+        },
+        "expected": [
+          {
+            "callsTool": "analyze-project"
+          },
+          {
+            "includes": "total tasks"
+          },
+          {
+            "includes": "status distribution"
+          }
+        ]
+      },
+      {
+        "input": "@taskmaster-project-manager what's the status of Task 1?",
+        "mocks": {
+          "get-task-info": "**Task #1: Implement User Authentication**\n\n**Status:** pending\n**Priority:** high\n**Description:** Set up JWT-based authentication system\n\n**Details:** Implement secure login/logout functionality with JWT tokens and bcrypt password hashing.\n\n**Dependencies:** None"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-task-info",
+              "arguments": {
+                "taskId": "1"
+              }
+            }
+          },
+          {
+            "includes": "Task #1"
+          },
+          {
+            "meetsCriteria": "Provides the current status of the specific task requested"
+          }
+        ]
+      },
+      {
+        "input": "@taskmaster-project-manager what should I work on next?",
+        "mocks": {
+          "get-next-task": "**Next Recommended Task:**\n\n**Task #1: Implement User Authentication**\n- **Priority:** High\n- **Status:** Pending\n- **Description:** Set up JWT-based authentication system\n- **Why this task:** No blocking dependencies, high priority, foundational for other features"
+        },
+        "expected": [
+          {
+            "callsTool": "get-next-task"
+          },
+          {
+            "includes": "next recommended task"
+          },
+          {
+            "meetsCriteria": "Provides a specific task recommendation with reasoning"
+          }
+        ]
+      },
+      {
+        "input": "@taskmaster-project-manager what commands are available?",
+        "mocks": {
+          "list-commands": "**Available TaskMaster Commands:**\n\n**Viewing Commands:**\n- Kanban Board - Visual task management\n- Task List - Chronological task view\n- Search Tasks - Advanced filtering\n- Next Task - Smart recommendations\n- Task Detail - Detailed task information\n- Project Status - Comprehensive dashboard\n\n**Management Commands:**\n- Add Task - Create new tasks"
+        },
+        "expected": [
+          {
+            "callsTool": "list-commands"
+          },
+          {
+            "includes": "available commands"
+          },
+          {
+            "matches": ".*[Kk]anban [Bb]oard.*"
+          }
+        ]
+      },
+      {
+        "input": "@taskmaster-project-manager generate a complexity analysis report",
+        "mocks": {
+          "generate-complexity-report": "**TaskMaster Complexity Analysis Report**\n\n**High Complexity Tasks (Recommend Breaking Down):**\n- Task #3: Database Migration (Score: 8/10)\n  - Estimated subtasks: 4-6\n  - Complexity factors: Multiple database changes, data integrity\n\n**Medium Complexity Tasks:**\n- Task #1: User Authentication (Score: 6/10)\n  - Estimated subtasks: 3-4\n\n**Low Complexity Tasks:**\n- Task #5: Update Documentation (Score: 2/10)\n  - Can be completed as single task"
+        },
+        "expected": [
+          {
+            "callsTool": "generate-complexity-report"
+          },
+          {
+            "includes": "complexity"
+          },
+          {
+            "meetsCriteria": "Provides analysis of task complexity with specific recommendations"
+          }
+        ]
+      },
+      {
+        "input": "@taskmaster-project-manager which tasks are too complex and need breakdown?",
+        "mocks": {
+          "generate-complexity-report": "**High Complexity Tasks Requiring Breakdown:**\n\n**Task #3: Database Migration**\n- Complexity Score: 8/10\n- Recommended Subtasks: 4-6\n- Issues: Multiple schema changes, data migration, rollback planning\n\n**Task #4: API Refactoring**\n- Complexity Score: 7/10\n- Recommended Subtasks: 3-5\n- Issues: Breaking changes, backward compatibility, extensive testing needed"
+        },
+        "expected": [
+          {
+            "callsTool": "generate-complexity-report"
+          },
+          {
+            "includes": "high complexity"
+          },
+          {
+            "includes": "breakdown"
+          }
+        ]
+      },
+      {
+        "input": "@taskmaster-project-manager analyze task complexity",
+        "mocks": {
+          "generate-complexity-report": "**TaskMaster Complexity Analysis Report**\n\n**Overall Project Complexity:**\n- Total Tasks Analyzed: 5\n- Average Complexity Score: 5.2/10\n\n**Tasks by Complexity Level:**\n\n**High Complexity (7-10):**\n- Task #3: Database Migration (8/10)\n- Task #4: API Refactoring (7/10)\n\n**Medium Complexity (4-6):**\n- Task #1: User Authentication (6/10)\n- Task #2: Frontend Components (5/10)\n\n**Low Complexity (1-3):**\n- Task #5: Update Documentation (2/10)\n\n**Recommendations:**\n- Break down Tasks #3 and #4 into smaller subtasks\n- Tasks #1 and #2 are manageable but consider 2-3 subtasks each\n- Task #5 can be completed as a single unit"
+        },
+        "expected": [
+          {
+            "callsTool": "generate-complexity-report"
+          },
+          {
+            "includes": "complexity analysis"
+          },
+          {
+            "matches": ".*[Tt]ask #\\d+.*"
+          },
+          {
+            "meetsCriteria": "Provides comprehensive complexity analysis with specific task breakdowns and recommendations"
+          }
+        ]
+      }
+    ]
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react": "^7.37.5",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.91.2",
+    "@raycast/utils": "^1.18.1"
+  }
+}
