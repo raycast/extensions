@@ -23,7 +23,7 @@ const userDataDirectoryPath = () => {
 
 const getProfileName = (userDirectoryPath: string) => {
   const profiles = fs.readdirSync(userDirectoryPath);
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues();
 
   const customProfile = profiles.filter((profile) => profile.endsWith(preferences.profileDirectorySuffix))[0];
   if (customProfile) return customProfile;
@@ -43,8 +43,9 @@ const getProfileName = (userDirectoryPath: string) => {
   return "";
 };
 
+// TODO: Use shortcuts from zen-keyboard-shortcuts.json instead
 export const getNewTabShortcut = () => {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues();
   const key = preferences.newTabShortcut
     .trim()
     .charAt(preferences.newTabShortcut.length - 1)
@@ -78,9 +79,14 @@ const getCommands = (newTabShortcut: string): string => {
   return "{" + finalCommands.join(", ") + "}";
 };
 
-export const getHistoryDbPath = (): string => {
+export const getPlacesDbPath = (): string => {
   const userDirectoryPath = userDataDirectoryPath();
   return path.join(userDirectoryPath, getProfileName(userDirectoryPath), "places.sqlite");
+};
+
+export const getShorcutsJsonPath = (): string => {
+  const userDirectoryPath = userDataDirectoryPath();
+  return path.join(userDirectoryPath, getProfileName(userDirectoryPath), "zen-keyboard-shortcuts.json");
 };
 
 const whereClauses = (terms: string[]) => {
@@ -88,7 +94,7 @@ const whereClauses = (terms: string[]) => {
 };
 
 export const getHistoryQuery = (query?: string, limitResults?: number) => {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues();
   const terms = query ? query.trim().split(" ") : [];
   const whereClause = terms.length > 0 ? `WHERE ${whereClauses(terms)}` : "";
 
@@ -102,7 +108,7 @@ export const getHistoryQuery = (query?: string, limitResults?: number) => {
 
 export const getHistory = async (query?: string, limitResults?: number) => {
   const inQuery = getHistoryQuery(query, limitResults);
-  const dbPath = getHistoryDbPath();
+  const dbPath = getPlacesDbPath();
 
   if (!fs.existsSync(dbPath)) {
     return "Zen Browser is not installed.";
