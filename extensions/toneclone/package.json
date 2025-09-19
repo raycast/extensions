@@ -1,0 +1,120 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "toneclone",
+  "title": "ToneClone",
+  "description": "Write with AI without sounding like AI. Write with AI using your unique voice and style with a model trained on your writing.\n\nTo get started, you'll need a ToneClone API key from https://app.toneclone.ai/api-keys",
+  "icon": "toneclone-icon.png",
+  "author": "jfox",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
+  "version": "1.0.1",
+  "commands": [
+    {
+      "name": "generate-text",
+      "title": "Write with ToneClone",
+      "subtitle": "Write in your unique voice and style with your custom AI Persona",
+      "description": "Use ToneClone to write text for you in your unique voice and style. Write with AI without sounding like AI.",
+      "mode": "view"
+    },
+    {
+      "name": "generate-from-browser",
+      "title": "Write with Browser Tab Context",
+      "subtitle": "Write with ToneClone using active browser tab as additional context",
+      "description": "Use ToneClone to write text based on your active browser tab content, with domain-specific persona memory.",
+      "mode": "view"
+    },
+    {
+      "name": "train-toneclone",
+      "title": "Train ToneClone",
+      "subtitle": "Send text to use as training data in ToneClone",
+      "description": "Train your writing persona with new text to learn your unique writing style in ToneClone",
+      "mode": "view"
+    },
+    {
+      "name": "train-from-browser",
+      "title": "Train from Browser Tab",
+      "subtitle": "Use current browser tab content to train your ToneClone persona",
+      "description": "Train your writing persona using the content from your active browser tab",
+      "mode": "view"
+    },
+    {
+      "name": "manage-presets",
+      "title": "Manage Presets",
+      "subtitle": "Create and manage your quick prompt presets",
+      "description": "Create, edit, and reorder your preset prompts for faster writing with ToneClone",
+      "mode": "view"
+    },
+    {
+      "name": "manage-personas",
+      "title": "Manage Personas",
+      "subtitle": "Open the personas management page",
+      "description": "Opens the ToneClone personas management page in your browser",
+      "mode": "view"
+    },
+    {
+      "name": "manage-knowledge",
+      "title": "Manage Knowledge",
+      "subtitle": "Create and manage your knowledge cards",
+      "description": "Edit knowledge card instructions and manage persona associations",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Your ToneClone API key",
+      "placeholder": "tc_..."
+    },
+    {
+      "name": "apiUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "API URL (Advanced)",
+      "description": "ToneClone API base URL - only change if using a custom endpoint",
+      "default": "https://api.toneclone.ai",
+      "placeholder": "https://api.toneclone.ai"
+    },
+    {
+      "name": "rememberSelections",
+      "type": "checkbox",
+      "required": false,
+      "title": "Remember Last Selections",
+      "label": "Remember Last Selections",
+      "description": "Remember your last used persona and knowledge card selections",
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/jest": "^29.5.13",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "prettier": "^3.5.3",
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  }
+}
