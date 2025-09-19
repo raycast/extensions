@@ -10,7 +10,7 @@ Over the past few releases, we've made some additions to the API to better suppo
 ```js
 {
   macOS: { modifiers: ["cmd", "shift"], key: "c" },
-  windows: { modifiers: ["ctrl", "shift"], key: "c" },
+  Windows: { modifiers: ["ctrl", "shift"], key: "c" },
 }
 ```
 
