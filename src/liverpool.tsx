@@ -581,7 +581,7 @@ function NewsList() {
       {items.map((n, idx) => (
         <List.Item
           key={idx}
-          icon={Icon.Newspaper}
+          icon={Icon.Globe}
           title={n.title}
           accessories={
             [
