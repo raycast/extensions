@@ -1,0 +1,170 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "laravel-toolkit",
+  "title": "Laravel Toolkit",
+  "description": "A comprehensive Laravel development toolkit for Raycast",
+  "icon": "extension-icon.png",
+  "author": "StuntRocket",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools"
+  ],
+  "commands": [
+    {
+      "name": "add-project",
+      "title": "Laravel: Add Project",
+      "description": "Add a new Laravel project to the toolkit",
+      "mode": "view"
+    },
+    {
+      "name": "set-project",
+      "title": "Laravel: Set Active Project",
+      "description": "Switch which Laravel project is currently active",
+      "mode": "view"
+    },
+    {
+      "name": "migrate",
+      "title": "Laravel: Migrate",
+      "description": "Run php artisan migrate in the selected project",
+      "mode": "no-view"
+    },
+    {
+      "name": "route-list",
+      "title": "Laravel: Route List",
+      "description": "View all routes in the Laravel project",
+      "mode": "view"
+    },
+    {
+      "name": "cache-clear",
+      "title": "Laravel: Clear Cache",
+      "description": "Clear all Laravel caches",
+      "mode": "no-view"
+    },
+    {
+      "name": "command-list",
+      "title": "Laravel: Artisan Commands",
+      "description": "View all available Artisan commands",
+      "mode": "view"
+    },
+    {
+      "name": "run-artisan",
+      "title": "Laravel: Run Artisan Command",
+      "description": "Run any custom Artisan command",
+      "mode": "view"
+    },
+    {
+      "name": "run-tests",
+      "title": "Laravel: Run Tests",
+      "description": "Run php artisan test in the selected project",
+      "mode": "view"
+    },
+    {
+      "name": "serve",
+      "title": "Laravel: Serve",
+      "description": "Run php artisan serve",
+      "mode": "view"
+    },
+    {
+      "name": "queue-work",
+      "title": "Laravel: Start Queue Worker",
+      "description": "Run php artisan queue:work",
+      "mode": "view"
+     },
+    {
+      "name": "tail-log",
+      "title": "Laravel: Tail Log",
+      "description": "View the Laravel log file in real time",
+      "mode": "view"
+    },
+    {
+      "name": "composer-install",
+      "title": "Laravel: Composer Install",
+      "description": "Run composer install in the active project",
+      "mode": "no-view"
+    },
+    {
+      "name": "composer-update",
+      "title": "Laravel: Composer Update",
+      "description": "Run composer update in the active project",
+      "mode": "no-view"
+    },
+    {
+      "name": "project-list",
+      "title": "Laravel: Projects",
+      "description": "View and manage Laravel projects",
+      "mode": "view"
+    },
+    {
+      "name": "discover-projects",
+      "title": "Laravel: Discover Projects",
+      "description": "Scan folders to discover Laravel projects",
+      "mode": "view"
+    },
+    {
+      "name": "env-manager",
+      "title": "Laravel: Environment Manager",
+      "description": "Edit Laravel environment files",
+      "mode": "view"
+    }
+    ,
+    {
+      "name": "open-project",
+      "title": "Laravel: Open Project in Editor",
+      "description": "Open the active project in your editor",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "phpPath",
+      "type": "textfield",
+      "title": "PHP Path",
+      "description": "Custom path to your PHP binary",
+      "required": false
+    },
+    {
+      "name": "editorPath",
+      "type": "textfield",
+      "title": "Editor Path",
+      "description": "Path to your preferred code editor",
+      "required": false
+    },
+    {
+      "name": "composerPath",
+      "type": "textfield",
+      "title": "Composer Path",
+      "description": "Custom path to your Composer binary",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.95.0",
+    "@raycast/utils": "1.15.0"
+  },
+  "overrides": {
+    "react": "18.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "husky": "^8.0.0",
+    "ts-node": "^10.9.1",
+    "is-ci": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=22.14.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "prepare": "is-ci || husky install"
+  }
+}
