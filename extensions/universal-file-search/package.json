@@ -1,0 +1,120 @@
+{
+  "name": "universal-file-search",
+  "title": "Universal File Search",
+  "description": "Search ALL files on your Mac - including hidden configs, system files, and everything Spotlight misses",
+  "icon": "icon.png",
+  "author": "apple",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "version": "1.0.0",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search All Files",
+      "subtitle": "Universal search - finds EVERYTHING",
+      "description": "Deep search across your entire disk. Finds hidden files, system configs, dev files - nothing is hidden!",
+      "mode": "view",
+      "keywords": [
+        "file",
+        "search",
+        "find",
+        "fd",
+        "all",
+        "universal",
+        "deep",
+        "hidden",
+        "config",
+        "system"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "maxDepth",
+      "type": "textfield",
+      "required": false,
+      "title": "Max Search Depth",
+      "description": "Maximum directory depth for search",
+      "default": "20"
+    },
+    {
+      "name": "showHiddenFiles",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Hidden Files",
+      "description": "Include hidden files in search results",
+      "label": "Include hidden files in search results",
+      "default": false
+    },
+    {
+      "name": "excludePatterns",
+      "type": "textfield",
+      "required": false,
+      "title": "Exclude Patterns",
+      "description": "Comma-separated folders to exclude",
+      "default": ".git,node_modules,.DS_Store,Library,.Trash",
+      "placeholder": ".git,node_modules"
+    },
+    {
+      "name": "customSearchPaths",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Search Paths",
+      "description": "Format: Name1:/path1,Name2:/path2 (e.g., Homebrew:/opt/homebrew,Local:/usr/local)",
+      "placeholder": "Homebrew:/opt/homebrew,Local:/usr/local"
+    },
+    {
+      "name": "defaultSearchScope",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Search Scope",
+      "description": "Default directory scope for searches",
+      "default": "home",
+      "data": [
+        { "title": "Home Directory (~)", "value": "home" },
+        { "title": "All System (/)", "value": "all" },
+        { "title": "Downloads", "value": "downloads" },
+        { "title": "Documents", "value": "documents" },
+        { "title": "Applications", "value": "applications" },
+        { "title": "System Config (/etc, /opt)", "value": "config" }
+      ]
+    },
+    {
+      "name": "defaultSearchMode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Search Mode",
+      "description": "Pattern matching mode",
+      "default": "regex",
+      "data": [
+        { "title": "Regex (Regular expressions - fd default)", "value": "regex" },
+        { "title": "Glob (Wildcards like *.txt)", "value": "glob" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.1",
+    "@raycast/utils": "^1.19.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.18.6",
+    "@types/react": "^18.3.24",
+    "eslint": "^8.57.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "build": "ray build --skip-types",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
