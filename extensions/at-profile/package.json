@@ -44,17 +44,50 @@
           "type": "dropdown",
           "required": true,
           "data": [
-            { "title": "Bluesky", "value": "bluesky" },
-            { "title": "Facebook", "value": "facebook" },
-            { "title": "GitHub", "value": "github" },
-            { "title": "Instagram", "value": "instagram" },
-            { "title": "LinkedIn", "value": "linkedin" },
-            { "title": "Raycast", "value": "raycast" },
-            { "title": "Reddit", "value": "reddit" },
-            { "title": "Threads", "value": "threads" },
-            { "title": "TikTok", "value": "tiktok" },
-            { "title": "X", "value": "x" },
-            { "title": "YouTube", "value": "youtube" }
+            {
+              "title": "Bluesky",
+              "value": "bluesky"
+            },
+            {
+              "title": "Facebook",
+              "value": "facebook"
+            },
+            {
+              "title": "GitHub",
+              "value": "github"
+            },
+            {
+              "title": "Instagram",
+              "value": "instagram"
+            },
+            {
+              "title": "LinkedIn",
+              "value": "linkedin"
+            },
+            {
+              "title": "Raycast",
+              "value": "raycast"
+            },
+            {
+              "title": "Reddit",
+              "value": "reddit"
+            },
+            {
+              "title": "Threads",
+              "value": "threads"
+            },
+            {
+              "title": "TikTok",
+              "value": "tiktok"
+            },
+            {
+              "title": "X",
+              "value": "x"
+            },
+            {
+              "title": "YouTube",
+              "value": "youtube"
+            }
           ]
         }
       ]
