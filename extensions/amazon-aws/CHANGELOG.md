@@ -1,5 +1,9 @@
 # Amazon AWS Changelog
 
+## [Bug fix for Amplify] - {PR_MERGE_DATE}
+
+- Replace '/' in branch name with '-' when building branch url 
+
 ## [API Gateway, AppSync & Amplify Enhancements] - 2025-08-25
 
 - Add API Gateway command to manage REST and HTTP APIs
