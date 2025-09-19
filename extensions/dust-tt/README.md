@@ -6,47 +6,11 @@ Query the [dust.tt](https://dust.tt/) service extention for [Raycast](https://ww
 
 You need a dust.tt account to use this extension.
 
-## Connexion
-
-You will be able to **sign-in with your Dust account** (oauth) or using a workspace API key. You can change at any time in the extension preferences.
+## Connection
 
 ### Using your Dust account
 
 Raycast will automatically show a popup to sign in with Dust.
-
-### Using workspace API KEY and ID (legacy, will be removed)
-
-_Using workspace API key will be removed in the future._
-
-#### API key (optional)
-
-You can create an API key for Dust by going to your Admin preferences, on the **Developers Tools** panel
-
-#### Email (optional)
-
-The email address you use to log in your Dust workspace. It enriches metrics in the usage reports.
-
-#### Workspace ID (optional)
-
-The ID can be found in any of the workspace's pages. It's a string of 10 chars that comes immediately after `https://dust.tt/w/` when you're logged in your Dust workspace through the web browser.
-
-### Avanced
-
-#### API Base URL (optional)
-
-(optional) You can specify a custom API base URL if you have specific needs. Otherwise, it defaults to `https://dust.tt/`. (advanced usage, mostly for developping the extension).
-
-#### OAuth client ID (optional)
-
-(optional) You can specify a custom Oauth client ID (advanced usage, mostly for developping the extension).
-
-#### OAuth Audience (optional)
-
-(optional) You can specify a Oauth audience.
-
-#### OAuth Domain (optional)
-
-(optional) You can specify a Oauth domain (advanced usage, mostly for developping the extension).
 
 ## Commands
 

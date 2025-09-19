@@ -2,102 +2,100 @@ import {
   Action,
   ActionPanel,
   Color,
-  Detail,
-  getPreferenceValues,
   Icon,
   List,
   LocalStorage,
   updateCommandMetadata,
   useNavigation,
 } from "@raycast/api";
-import { getDustClient, withDustClient } from "./dust_api/oauth";
-import { showFailureToast, usePromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import { getRandomGreetingForName, getWorkspaceId } from "./utils";
 import { useCallback } from "react";
+import { MeResponseType } from "@dust-tt/client";
+import { withDustClient, getDustClient } from "./dust_api/oauth";
+
+type WorkspaceWithRegion = {
+  sId: string;
+  name: string;
+  region: string;
+};
 
 export default withDustClient(function PickWorkspaceCommand() {
   const navigation = useNavigation();
-  const dustAPI = getDustClient();
-  const preferences = getPreferenceValues<ExtensionPreferences>();
-  const isUsingOauth = preferences.connexionFlow === "oauth";
 
-  const { data: user, isLoading: isLoadingUser } = usePromise(
-    async (isUsingOauth) => {
-      if (isUsingOauth) {
-        const r = await dustAPI.me();
-        if (r.isErr()) {
-          showFailureToast(`Could not get user information: ${r.error.message}`);
-          return undefined;
-        } else {
-          // Keep the user updated in the local storage as much as possible
-          await LocalStorage.setItem("user", JSON.stringify(r.value));
-          return r.value;
-        }
-      } else {
-        return undefined;
-      }
-    },
-    [isUsingOauth],
-  );
+  const { data: workspacesData, isLoading: isLoadingWorkspaces } = usePromise(async () => {
+    const workspaces: WorkspaceWithRegion[] = [];
+    let user = null;
 
-  const { data: workspaceId, isLoading: isLoadingWorkspace } = usePromise(
-    async (isUsingOauth, isLoadingUser) => {
-      if (isUsingOauth && !isLoadingUser) {
-        return getWorkspaceId();
+    const dustAPI = getDustClient();
+    const me = await dustAPI.me();
+    if (me.isOk()) {
+      user = me.value as MeResponseType["user"];
+      if (user.selectedWorkspace) {
+        await LocalStorage.setItem("workspaceId", user.selectedWorkspace);
       }
-      return undefined;
-    },
-    [isUsingOauth, isLoadingUser],
-  );
+      await LocalStorage.setItem("user", JSON.stringify(user));
+
+      user.organizations?.forEach((org) => {
+        workspaces.push({ sId: org.externalId!, name: org.name, region: org.metadata.region });
+      });
+    }
+
+    return { user, workspaces };
+  }, []);
+
+  const { data: currentWorkspaceId, isLoading: isLoadingWorkspace } = usePromise(async () => getWorkspaceId(), []);
 
   const setWorkspaceId = useCallback(
-    async (workspace: { sId: string; name: string }) => {
-      updateCommandMetadata({ subtitle: `Currently using: "${workspace.name}"` });
+    async (workspace: WorkspaceWithRegion) => {
+      updateCommandMetadata({ subtitle: `Currently using: "${workspace.name}" (${workspace.region})` });
       await LocalStorage.setItem("workspaceId", workspace.sId);
+      await LocalStorage.setItem("selectedRegion", workspace.region);
       navigation.pop();
     },
     [navigation],
   );
 
-  if (isUsingOauth) {
-    return (
-      <List isLoading={isLoadingUser || isLoadingWorkspace} selectedItemId={workspaceId}>
-        {user && (
-          <List.Section title={`${getRandomGreetingForName(user.firstName)}, please pick a workspace below:`}>
-            {user.workspaces.map((workspace) => (
-              <List.Item
-                key={workspace.sId}
-                id={workspace.sId}
-                title={workspace.name}
-                subtitle={workspace.sId}
-                accessories={[
-                  {
-                    tag: { value: workspace.role, color: workspace.role === "admin" ? Color.Blue : Color.Green },
-                    icon: workspaceId === workspace.sId ? { source: Icon.Check } : null,
+  const user = workspacesData?.user;
+  const workspaces = workspacesData?.workspaces || [];
+
+  return (
+    <List isLoading={isLoadingWorkspaces || isLoadingWorkspace} selectedItemId={currentWorkspaceId}>
+      {user && workspaces.length > 0 ? (
+        <>
+          <List.Section title={`${getRandomGreetingForName(user.firstName)}, please pick a workspace below:`} />
+
+          {workspaces.map((workspace) => (
+            <List.Item
+              key={`${workspace.region}-${workspace.sId}`}
+              id={workspace.sId}
+              title={workspace.name}
+              subtitle={workspace.sId}
+              accessories={[
+                {
+                  tag: {
+                    value: workspace.region === "europe-west1" ? "🇪🇺 Europe" : "🇺🇸 US",
+                    color: workspace.region === "europe-west1" ? Color.Blue : Color.Red,
                   },
-                ]}
-                actions={
-                  <ActionPanel>
-                    <Action
-                      title="Select"
-                      icon={Icon.Check}
-                      shortcut={{ key: "return", modifiers: [] }}
-                      onAction={() => setWorkspaceId(workspace)}
-                    />
-                  </ActionPanel>
-                }
-              />
-            ))}
-          </List.Section>
-        )}
-      </List>
-    );
-  } else {
-    return (
-      <Detail
-        navigationTitle="Not using OAuth"
-        markdown="Workspace selection is **only available when connecting with your own Dust account** and not **workspace API Key**. _You can change the connexion method in the extension preferences._"
-      />
-    );
-  }
+                  icon: currentWorkspaceId === workspace.sId ? { source: Icon.Check } : null,
+                },
+              ]}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title="Select"
+                    icon={Icon.Check}
+                    shortcut={{ key: "return", modifiers: [] }}
+                    onAction={() => setWorkspaceId(workspace)}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </>
+      ) : (
+        <List.EmptyView title="No workspaces found" description="No workspaces were found in either US or EU regions" />
+      )}
+    </List>
+  );
 });
