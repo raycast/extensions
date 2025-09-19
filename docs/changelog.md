@@ -1,5 +1,30 @@
 # Changelog
 
+## 1.103.0 - 2025-09-15
+
+Over the past few releases, we've made some additions to the API to better support it:
+
+- there's a new `platforms` field in the manifest. We’ve intentionally chosen to release only extensions that we are tested on Windows. This is the field that allow extensions to be available on Windows. By default, if not specified, the field's value is `["macOS"]`. If you want to make an extension available on Windows, you can set it to `["macOS", "Windows"]`
+- Keyboard Shortcuts are tricky. If you use the `Common` shortcuts, then they will be cross-platform. However, if you use shortcuts and specify a modifier like `cmd`, the shortcut will be ignored on Windows (and vice-versa, if you specify a modifier like `windows`, it won't be available on macOS). So we've added a new syntax where you can nest shortcuts per platform:
+
+```js
+{
+  macOS: { modifiers: ["cmd", "shift"], key: "c" },
+  windows: { modifiers: ["ctrl", "shift"], key: "c" },
+}
+```
+
+- Sometimes, you might want to change preferences depending on the platform (for example if it's a path). You can now specify the default as a object as well:
+
+```json
+"default": {
+"macOS": "foo",
+"Windows": "bar"
+}
+```
+
+- We've also updated the `@raycast/utils` to make it cross platform and added a `runPowerShellScript` function.
+
 ## 1.98.0 - 2025-05-08
 
 ### ✨ New
