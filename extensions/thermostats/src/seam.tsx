@@ -11,7 +11,11 @@ export enum DeviceStatus {
 export type Device = [string, string, DeviceStatus, number]; // [device_id, display_name, status, temperature_fahrenheit]
 type FetchDevicesResponse = [Device[], string];
 
-export const isValidSeamApiKey = (key: string = "") => key.length === 38 && key.startsWith("seam_");
+const SEAM_API_KEY_LENGTH = 38; // Expected length of Seam API keys
+const SEAM_API_KEY_PREFIX = "seam_"; // Required prefix for Seam API keys
+
+export const isValidSeamApiKey = (key: string = "") =>
+  !!key && key.length === SEAM_API_KEY_LENGTH && key.startsWith(SEAM_API_KEY_PREFIX);
 
 export async function loadSeam(): Promise<[Seam, ""] | [null, string]> {
   const key = await LocalStorage.getItem<string>("seam_api_key");

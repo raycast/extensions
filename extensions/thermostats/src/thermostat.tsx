@@ -8,6 +8,8 @@ import { Device, DeviceStatus, fetchDevices, loadSeam } from "./seam";
 
 let seam: Seam;
 const USE_CACHE = true;
+const CACHE_TIMEOUT_MS = 60 * 1000; // Cache valid for 1 minute
+const DEFAULT_TEMPERATURE_F = 76; // Default thermostat temperature in Fahrenheit
 const cache = new Cache();
 
 function getNumberFromCache(key: string, defaultValue: number) {
@@ -42,7 +44,7 @@ export default function Command() {
       if (!USE_CACHE) {
         console.debug("Cache disabled, erasing devices cache");
         cache.set("devices", JSON.stringify([]));
-      } else if (Date.now() - lastFetch < 60 * 1000) {
+      } else if (Date.now() - lastFetch < CACHE_TIMEOUT_MS) {
         const cachedDevicesString = cache.get("devices");
         console.debug("Cache:", cachedDevicesString);
         if (cachedDevicesString) {
@@ -77,9 +79,9 @@ export default function Command() {
   // Create a proper component for the mode list that shares state
   const ModeList = ({ deviceId }: { deviceId: string }) => {
     // Local temperature state for this component
-    const [localTemperature, setLocalTemperature] = useState(76);
-    const [localCool, setLocalCool] = useState("Cool to 76");
-    const [localHeat, setLocalHeat] = useState("Heat to 76");
+    const [localTemperature, setLocalTemperature] = useState(DEFAULT_TEMPERATURE_F);
+    const [localCool, setLocalCool] = useState("Cool to " + DEFAULT_TEMPERATURE_F);
+    const [localHeat, setLocalHeat] = useState("Heat to " + DEFAULT_TEMPERATURE_F);
 
     // Update display strings when temperature changes
     useEffect(() => {
