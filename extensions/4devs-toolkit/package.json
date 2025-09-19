@@ -1,0 +1,130 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "4devs-toolkit",
+  "title": "4devs Toolkit",
+  "description": "Generate valid Brazilian documents and test data directly from Raycast",
+  "icon": "icon.png",
+  "author": "thalys",
+  "access": "public",
+  "version": "0.0.1",
+  "categories": ["Developer Tools", "Productivity"],
+  "license": "MIT",
+  "keywords": ["brazil", "brasil", "cpf", "cnpj", "documents", "generator", "gerador", "teste", "4devs", "validation", "brazilian", "faker"],
+  "commands": [
+    {
+      "name": "generate-cpf",
+      "title": "Generate Cpf",
+      "subtitle": "4Devs Toolkit",
+      "description": "Generate valid CPF numbers for testing",
+      "mode": "view"
+    },
+    {
+      "name": "generate-cnpj",
+      "title": "Generate Cnpj",
+      "subtitle": "4Devs Toolkit", 
+      "description": "Generate valid CNPJ numbers for testing",
+      "mode": "view"
+    },
+    {
+      "name": "generate-cnh",
+      "title": "Generate Cnh",
+      "subtitle": "4Devs Toolkit",
+      "description": "Generate valid driver's license numbers for testing",
+      "mode": "view"
+    },
+    {
+      "name": "generate-certidao",
+      "title": "Generate Certificate",
+      "subtitle": "4Devs Toolkit",
+      "description": "Generate valid Brazilian certificates for testing",
+      "mode": "view"
+    },
+    {
+      "name": "generate-card",
+      "title": "Generate Card",
+      "subtitle": "4Devs Toolkit",
+      "description": "Generate valid credit card numbers for testing",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "History and Favorites",
+      "subtitle": "4Devs Toolkit",
+      "description": "View and manage generated documents history",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultMask",
+      "title": "Default Mask Format",
+      "description": "Use formatting with mask by default",
+      "type": "checkbox",
+      "label": "Enable mask by default",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "defaultQuantity",
+      "title": "Default Quantity",
+      "description": "Default number of items to generate",
+      "type": "textfield",
+      "required": false,
+      "default": "1"
+    },
+    {
+      "name": "primaryAction",
+      "title": "Primary Action",
+      "description": "Default action when pressing Enter",
+      "type": "dropdown",
+      "required": false,
+      "default": "copy",
+      "data": [
+        {"title": "Copy", "value": "copy"},
+        {"title": "Paste", "value": "paste"}
+      ]
+    },
+    {
+      "name": "enableHistory",
+      "title": "Enable History",
+      "description": "Save generated items in history",
+      "type": "checkbox",
+      "label": "Save in history",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "exportFormat",
+      "title": "Export Format",
+      "description": "Default format for batch export",
+      "type": "dropdown",
+      "required": false,
+      "default": "json",
+      "data": [
+        {"title": "JSON", "value": "json"},
+        {"title": "CSV", "value": "csv"},
+        {"title": "Text", "value": "text"}
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
