@@ -1,5 +1,9 @@
 # Date Converter Changelog
 
+## [Update] - 2025-09-03
+
+- Use 24h time format by default.
+
 ## [Update] - 2025-03-03
 
 - Support configuring primary and secondary actions
