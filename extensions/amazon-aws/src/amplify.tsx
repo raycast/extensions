@@ -140,7 +140,7 @@ function AmplifyBranches({ app }: { app: App }) {
 }
 
 function AmplifyBranch({ branch, app, webhooks }: { branch: Branch; app: App; webhooks?: Webhook[] }) {
-  const branchUrl = `https://${branch.branchName}.${app.defaultDomain}`;
+  const branchUrl = `https://${branch.branchName?.replace("/", "-")}.${app.defaultDomain}`;
   const branchWebhooks = webhooks?.filter((webhook) => webhook.branchName === branch.branchName) || [];
   const AWS_REGION = process.env.AWS_REGION;
 
