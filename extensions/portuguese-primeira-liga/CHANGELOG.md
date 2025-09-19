@@ -1,5 +1,10 @@
 # Portuguese Primeira Liga Changelog
 
+## [Bug fixes] - 2025-09-19
+
+- Fixed View Newspapers command
+- Fixed bug related to date of birth being null for some players
+
 ## [Improvements] - 2025-03-08
 
 - Improved View Newspapers command cache logic
