@@ -1,5 +1,10 @@
 # Mail Changelog
 
+## [Improvement] - 2025-09-19
+
+- Reduce distraction by removing the background HUD for intermittent "Failed to refresh messages" in `Refresh Mail`; now logs to console instead.
+- Standardize capitalization/copy in `Refresh Mail` to keep toasts consistent.
+
 ## [🌟 New Feature] - 2025-05-19
 
 - 📧 Add the copy-foreground-mail-deeplink command to copy the foreground mail deeplink to the clipboard.
