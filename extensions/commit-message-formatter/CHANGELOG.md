@@ -1,5 +1,10 @@
 # Commit Message Formatter Changelog
 
+## [Upgrade Commit Message Formatter] - 2025-09-17
+- ✨ feat: use reponse API and structure output and update dependencies
+- 🔧 chore: use npm instead of synp to generate lock
+- 🔧 chore: add SigureMo to contributors
+
 ## [Upgrade Commit Message Formatter] - 2024-10-11
 - 🐛 fix: disable agent when input is empty
 - 🐛 fix: fix crash when no text is selected or copied

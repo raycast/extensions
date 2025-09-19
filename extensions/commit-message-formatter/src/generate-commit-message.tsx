@@ -6,7 +6,7 @@ export default async function GenerateCommitMessage() {
   let commitMessage: string | undefined = undefined;
   try {
     commitMessage = await getSelectedText();
-  } catch (error) {
+  } catch {
     commitMessage = await Clipboard.readText();
   }
   if (!commitMessage) {
