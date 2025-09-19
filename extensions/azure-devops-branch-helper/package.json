@@ -1,0 +1,122 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "azure-devops-branch-helper",
+  "title": "Azure Devops Helper",
+  "description": "Fetch Azure DevOps work items and generate standardized Git branch names",
+  "icon": "devops-icon.png",
+  "author": "tor_gjosaeter",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "check-workitem",
+      "title": "Check Work Item",
+      "description": "View work item details and get URLs without making changes",
+      "mode": "view",
+      "entrypoint": "src/check-workitem.tsx"
+    },
+    {
+      "name": "list-my-workitems",
+      "title": "List My Work Items",
+      "description": "View all work items assigned to you (Tasks, User Stories, Bugs, Features, etc.)",
+      "mode": "view",
+      "entrypoint": "src/list-my-workitems.tsx"
+    },
+    {
+      "name": "list-backlog",
+      "title": "List Backlog",
+      "description": "Browse backlog items with pagination (8 items per page)",
+      "mode": "view",
+      "entrypoint": "src/list-backlog.tsx"
+    },
+    {
+      "name": "list-builds",
+      "title": "List Builds",
+      "description": "View active and recent builds with live log streaming",
+      "mode": "view",
+      "entrypoint": "src/list-builds.tsx"
+    },
+    {
+      "name": "list-pull-requests",
+      "title": "List Pull Requests",
+      "description": "View pull requests where you are the author or reviewer",
+      "mode": "view",
+      "entrypoint": "src/list-pull-requests.tsx"
+    },
+    {
+      "name": "create-user-story",
+      "title": "Create User Story",
+      "description": "Create a new user story with title, description, tag, feature, and assignee",
+      "mode": "view",
+      "entrypoint": "src/create-user-story.tsx"
+    },
+    {
+      "name": "create-work-item",
+      "title": "Create Work Item",
+      "description": "Create a new work item (Feature, User Story, or Bug) with customizable fields",
+      "mode": "view",
+      "entrypoint": "src/create-work-item.tsx"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "branchPrefix",
+      "title": "Branch Prefix",
+      "description": "The prefix to use for branch names (e.g., 'tor/', 'feature/')",
+      "type": "textfield",
+      "default": "tor/",
+      "required": false
+    },
+    {
+      "name": "azureOrganization",
+      "title": "Azure DevOps Organization URL",
+      "description": "Your Azure DevOps organization URL (e.g., https://dev.azure.com/myorg)",
+      "type": "textfield",
+      "placeholder": "https://dev.azure.com/myorganization",
+      "required": false
+    },
+    {
+      "name": "azureProject",
+      "title": "Azure DevOps Project (Optional)",
+      "description": "Default project name - will auto-detect from work item if not specified",
+      "type": "textfield",
+      "placeholder": "MyProject",
+      "required": false
+    },
+    {
+      "name": "azureRepository",
+      "title": "Azure DevOps Repository (Optional)",
+      "description": "Repository name for branch operations - defaults to project name if not specified",
+      "type": "textfield",
+      "placeholder": "MyRepository",
+      "required": false
+    },
+    {
+      "name": "sourceBranch",
+      "title": "Source Branch",
+      "description": "The branch to create new branches from",
+      "type": "textfield",
+      "default": "main",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.7",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
