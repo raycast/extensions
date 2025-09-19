@@ -158,7 +158,7 @@ export default abstract class EnrichmentController<
 
     return ConnectorSingleton.getInstance().assetsApi.assetsDraft({
       seed: {
-        type: SeedTypeEnum.Asset,
+        type: SeedTypeEnum.SeededAsset,
         asset: {
           application,
           format: {

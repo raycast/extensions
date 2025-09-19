@@ -12,7 +12,7 @@ export default async function Command() {
   try {
     await shuffle(!shuffleState);
     await showHUD(`Shuffle is ${shuffleState ? "off" : "on"}`);
-  } catch (error) {
+  } catch {
     await showHUD("No active device");
   }
 }

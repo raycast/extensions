@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "brreg",
-  "title": "Norwegian Unit Registry Search",
-  "description": "Search and retrieve information about Norwegian companies (Enhetsregisteret)",
+  "title": "The Brønnøysund Register Centre Search",
+  "description": "Search and retrieve information about Norwegian companies from the Central Coordinating Register for Legal Entities in Norway (Enhetsregisteret)",
   "icon": "icon.png",
   "author": "kakaoduft",
   "access": "public",
@@ -18,7 +18,7 @@
     {
       "name": "brreg-search",
       "title": "Brreg Search",
-      "description": "Search for Norwegian companies by name or organization number",
+      "description": "Search for Norwegian companies by name or organisation number",
       "mode": "view"
     }
   ],

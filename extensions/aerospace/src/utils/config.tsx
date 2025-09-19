@@ -1,8 +1,10 @@
-import { getPreferenceValues, Toast, showToast, open } from "@raycast/api";
+import { Toast, showToast, open } from "@raycast/api";
 import fs from "fs";
 import path from "path";
 import os from "os";
 import TOML from "@iarna/toml";
+import { spawnSync } from "child_process";
+import { env } from "./appSwitcher";
 
 export interface Binding {
   [key: string]: never; // Define more specifically if possible, replacing any with a more precise type
@@ -25,10 +27,6 @@ export interface Shortcut {
 }
 
 function readConfigFile(configPath: string): { content?: string; error?: string } {
-  if (configPath.startsWith("~")) {
-    configPath = path.join(os.homedir(), configPath.slice(1));
-  }
-
   if (!fs.existsSync(configPath)) {
     return { error: "Config file does not exist. Please check the path in preferences." };
   }
@@ -69,8 +67,23 @@ function parseTOML(content: string): { config?: AppConfig; error?: string } {
   }
 }
 
+export function getConfigPath(): { configPath: string } {
+  const args = ["config", "--config-path"];
+  let configPath = spawnSync("aerospace", args, {
+    env: env(),
+    encoding: "utf8",
+    timeout: 15000,
+  }).stdout.trim();
+
+  if (configPath.startsWith("~")) {
+    configPath = path.join(os.homedir(), configPath.slice(1));
+  }
+
+  return { configPath };
+}
+
 export function getConfig(): { config?: AppConfig; error?: string } {
-  const { configPath } = getPreferenceValues();
+  const { configPath } = getConfigPath();
   console.log("Config file path as is:", configPath);
 
   const { content, error: readFileError } = readConfigFile(configPath);

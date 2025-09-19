@@ -1,5 +1,16 @@
 # Unicode Symbols
 
+## [Improvements] - 2025-09-17
+
+- Update to `unidata16` to version `1.0.0`, which contains the latest Unicode data set (version 17.0.0)
+- Add additional Latin Extended blocks to the dataset
+- Add previous "CHARACTER TABULATION" (tab whitespace character) change to the 'generate' scripts so it isn't lost in future updates
+- Update dev dependencies
+
+## [Improvements] - 2025-07-20
+
+- Added the "CHARACTER TABULATION" (tab whitespace character) to the datasets.
+
 ## [Improvements] - 2024-12-17
 
 - Added option to set Primary Action (`copy`/`paste`) - ([#15901](https://github.com/raycast/extensions/issues/15901))

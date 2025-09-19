@@ -10,7 +10,7 @@ export const useFzf = (filterText: string, options?: object) => {
       return args.stdout;
     },
     env: {
-      PATH: "/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin:/opt/homebrew/sbin",
+      PATH: "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin",
     },
     ...options,
   };

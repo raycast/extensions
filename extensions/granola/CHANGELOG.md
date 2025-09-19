@@ -1,5 +1,26 @@
 # Granola Changelog
 
+## [1.6] - 2025-09-17
+
+### 🚀 New Commands
+- **Search People** - Browse and search people from your Granola meetings
+- **Search Companies** - Explore companies from your meetings 
+
+### ✨ New AI Tools
+- **Recipes Tool** - Use recipes from Granola within Raycast AI
+- **List Meetings Tool** - List meetings from Granola, with optional filtering by title, date, or folder
+
+
+### 🗑 Removed
+- **Browse Folders** command removed as redundant. Use `Search Notes` with the folder filter instead
+
+## [1.5.1] - 2025-08-19
+
+### 🔧 Bug Fixes
+- Add support for WorkOS authentication tokens
+- Maintain backward compatibility with Cognito tokens  
+- Update API client version to 6.157.0
+
 ## [1.5] - 2025-07-14
 
 ### 🚀 Major New Features

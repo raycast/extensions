@@ -29,6 +29,15 @@
       "type": "textfield",
       "required": false,
       "default": ""
+    },
+    {
+      "name": "verboseLogging",
+      "title": "Verbose Logging",
+      "description": "Enable detailed console logging for debugging purposes",
+      "type": "checkbox",
+      "required": false,
+      "label": "Enable",
+      "default": false
     }
   ],
   "tools": [

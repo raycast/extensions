@@ -17,7 +17,7 @@ export default function Command() {
         const projects = await getProjects();
         setProjects(projects);
         setIsLoading(false);
-      } catch (error) {
+      } catch {
         showFailureToast("Failed to fetch projects");
         setIsLoading(false);
       }
@@ -127,7 +127,7 @@ export default function Command() {
                             title: "Failed to delete project",
                           });
                         }
-                      } catch (error) {
+                      } catch {
                         await showToast({
                           style: Toast.Style.Failure,
                           title: "Failed to delete project",

@@ -41,7 +41,7 @@ async function getChromeHistory(query?: string) {
           ...obj,
           [column]: valueArray[index],
         }),
-        {}
+        {},
       ) as HistoryEntry;
     });
 

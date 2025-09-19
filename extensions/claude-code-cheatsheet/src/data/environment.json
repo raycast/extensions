@@ -121,7 +121,7 @@
       "description": "Skip Google authentication for Vertex (e.g. when using an LLM gateway).",
       "usage": "export CLAUDE_CODE_SKIP_VERTEX_AUTH=\"true\"",
       "category": "environment",
-      "tags": ["auth", "gcp", "gateway", "vertex"]
+      "tags": ["auth", "gateway", "gcp", "vertex"]
     },
     {
       "id": "env-claude-code-disable-nonessential-traffic",
@@ -196,22 +196,6 @@
       "tags": ["export", "metrics", "opentelemetry", "telemetry"]
     },
     {
-      "id": "env-http-proxy",
-      "name": "HTTP_PROXY",
-      "description": "Specify HTTP proxy server for network connections.",
-      "usage": "export HTTP_PROXY=\"http://proxy.example.com:8080\"",
-      "category": "environment",
-      "tags": ["network", "proxy"]
-    },
-    {
-      "id": "env-https-proxy",
-      "name": "HTTPS_PROXY",
-      "description": "Specify HTTPS proxy server for network connections.",
-      "usage": "export HTTPS_PROXY=\"https://proxy.example.com:8080\"",
-      "category": "environment",
-      "tags": ["network", "proxy", "secure"]
-    },
-    {
       "id": "env-max-thinking-tokens",
       "name": "MAX_THINKING_TOKENS",
       "description": "Sets the maximum token limit for the model's internal 'thinking' process, allowing for more complex reasoning.",
@@ -242,6 +226,131 @@
       "usage": "export MAX_MCP_OUTPUT_TOKENS=\"25000\"",
       "category": "environment",
       "tags": ["limit", "mcp", "tokens"]
+    },
+    {
+      "id": "env-vertex-region-claude-3-5-haiku",
+      "name": "VERTEX_REGION_CLAUDE_3_5_HAIKU",
+      "description": "Override the default region for Claude 3.5 Haiku model on Google Vertex AI.",
+      "usage": "export VERTEX_REGION_CLAUDE_3_5_HAIKU=\"<region>\"",
+      "example": "export VERTEX_REGION_CLAUDE_3_5_HAIKU=\"us-east5\"",
+      "category": "environment",
+      "tags": ["gcp", "haiku", "region", "vertex"]
+    },
+    {
+      "id": "env-vertex-region-claude-3-5-sonnet",
+      "name": "VERTEX_REGION_CLAUDE_3_5_SONNET",
+      "description": "Override the default region for Claude 3.5 Sonnet model on Google Vertex AI.",
+      "usage": "export VERTEX_REGION_CLAUDE_3_5_SONNET=\"<region>\"",
+      "example": "export VERTEX_REGION_CLAUDE_3_5_SONNET=\"us-east5\"",
+      "category": "environment",
+      "tags": ["gcp", "region", "sonnet", "vertex"]
+    },
+    {
+      "id": "env-vertex-region-claude-3-7-sonnet",
+      "name": "VERTEX_REGION_CLAUDE_3_7_SONNET",
+      "description": "Override the default region for Claude 3.7 Sonnet model on Google Vertex AI.",
+      "usage": "export VERTEX_REGION_CLAUDE_3_7_SONNET=\"<region>\"",
+      "example": "export VERTEX_REGION_CLAUDE_3_7_SONNET=\"us-east5\"",
+      "category": "environment",
+      "tags": ["gcp", "region", "sonnet", "vertex"]
+    },
+    {
+      "id": "env-vertex-region-claude-4-0-opus",
+      "name": "VERTEX_REGION_CLAUDE_4_0_OPUS",
+      "description": "Override the default region for Claude 4.0 Opus model on Google Vertex AI.",
+      "usage": "export VERTEX_REGION_CLAUDE_4_0_OPUS=\"<region>\"",
+      "example": "export VERTEX_REGION_CLAUDE_4_0_OPUS=\"us-east5\"",
+      "category": "environment",
+      "tags": ["gcp", "opus", "region", "vertex"]
+    },
+    {
+      "id": "env-vertex-region-claude-4-0-sonnet",
+      "name": "VERTEX_REGION_CLAUDE_4_0_SONNET",
+      "description": "Override the default region for Claude 4.0 Sonnet model on Google Vertex AI.",
+      "usage": "export VERTEX_REGION_CLAUDE_4_0_SONNET=\"<region>\"",
+      "example": "export VERTEX_REGION_CLAUDE_4_0_SONNET=\"us-east5\"",
+      "category": "environment",
+      "tags": ["gcp", "region", "sonnet", "vertex"]
+    },
+    {
+      "id": "env-aws-bearer-token-bedrock",
+      "name": "AWS_BEARER_TOKEN_BEDROCK",
+      "description": "Bedrock API key for authentication.",
+      "usage": "export AWS_BEARER_TOKEN_BEDROCK=\"your_bedrock_token_here\"",
+      "category": "environment",
+      "tags": ["auth", "aws", "bedrock", "token"]
+    },
+    {
+      "id": "env-anthropic-small-fast-model-aws-region",
+      "name": "ANTHROPIC_SMALL_FAST_MODEL_AWS_REGION",
+      "description": "Override AWS region for the small/fast model when using Bedrock.",
+      "usage": "export ANTHROPIC_SMALL_FAST_MODEL_AWS_REGION=\"us-east-1\"",
+      "category": "environment",
+      "tags": ["aws", "bedrock", "haiku", "region"]
+    },
+    {
+      "id": "env-vertex-region-claude-4-1-opus",
+      "name": "VERTEX_REGION_CLAUDE_4_1_OPUS",
+      "description": "Override the default region for Claude 4.1 Opus model on Google Vertex AI.",
+      "usage": "export VERTEX_REGION_CLAUDE_4_1_OPUS=\"<region>\"",
+      "example": "export VERTEX_REGION_CLAUDE_4_1_OPUS=\"europe-west4\"",
+      "isNew": true,
+      "category": "environment",
+      "tags": ["gcp", "opus", "region", "vertex"]
+    },
+    {
+      "id": "env-claude-code-ide-skip-auto-install",
+      "name": "CLAUDE_CODE_IDE_SKIP_AUTO_INSTALL",
+      "description": "Skip auto-installation of IDE extensions.",
+      "usage": "export CLAUDE_CODE_IDE_SKIP_AUTO_INSTALL=\"true\"",
+      "isNew": true,
+      "category": "environment",
+      "tags": ["disable", "ide", "install", "skip"]
+    },
+    {
+      "id": "env-claude-code-disable-terminal-title",
+      "name": "CLAUDE_CODE_DISABLE_TERMINAL_TITLE",
+      "description": "Disable updating the terminal title during Claude Code execution.",
+      "usage": "export CLAUDE_CODE_DISABLE_TERMINAL_TITLE=\"true\"",
+      "isNew": true,
+      "category": "environment",
+      "tags": ["disable", "terminal", "title"]
+    },
+    {
+      "id": "env-use-builtin-ripgrep",
+      "name": "USE_BUILTIN_RIPGREP",
+      "description": "Use the built-in ripgrep binary instead of system-installed version.",
+      "usage": "export USE_BUILTIN_RIPGREP=\"true\"",
+      "isNew": true,
+      "category": "environment",
+      "tags": ["builtin", "ripgrep", "search"]
+    },
+    {
+      "id": "env-claude-code-auto-connect-ide",
+      "name": "CLAUDE_CODE_AUTO_CONNECT_IDE",
+      "description": "Control automatic IDE connection on startup. Set to false to disable automatic IDE connection.",
+      "usage": "export CLAUDE_CODE_AUTO_CONNECT_IDE=\"false\"",
+      "isNew": true,
+      "category": "environment",
+      "tags": ["auto", "connect", "disable", "ide"]
+    },
+    {
+      "id": "env-claude-code-shell-prefix",
+      "name": "CLAUDE_CODE_SHELL_PREFIX",
+      "description": "Prefix for wrapping shell commands executed by Claude Code.",
+      "usage": "export CLAUDE_CODE_SHELL_PREFIX=\"your_prefix_here\"",
+      "isNew": true,
+      "category": "environment",
+      "tags": ["command", "prefix", "shell", "wrapper"]
+    },
+    {
+      "id": "env-claude-project-dir",
+      "name": "CLAUDE_PROJECT_DIR",
+      "description": "Environment variable for hook commands to specify the project directory.",
+      "usage": "export CLAUDE_PROJECT_DIR=\"/path/to/project\"",
+      "isNew": true,
+      "category": "environment",
+      "tags": ["directory", "hooks", "project"]
     }
   ]
 }

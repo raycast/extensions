@@ -27,7 +27,17 @@
       "name": "menubar-system-monitor",
       "title": "Menubar System Monitor",
       "description": "Show information and usage related to CPU, memory, power and network on the menubar",
-      "mode": "menu-bar"
+      "mode": "menu-bar",
+      "preferences": [
+        {
+          "name": "customIconUrl",
+          "description": "Custom icon URL for the menubar icon",
+          "type": "textfield",
+          "required": false,
+          "title": "Custom Icon URL",
+          "placeholder": "https://example.com/icon.png"
+        }
+      ]
     }
   ],
   "dependencies": {

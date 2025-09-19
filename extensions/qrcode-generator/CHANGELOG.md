@@ -1,5 +1,9 @@
 # QR Code Generator Changelog
 
+## [Better Visibility in Raycast UI] - 2025-08-25
+
+- Added [Generate QR Code from Selection] Command
+
 ## [Better Visibility in Raycast UI] - 2025-06-18
 
 - Added internal argument to generate QR codes with a white background for visibility
