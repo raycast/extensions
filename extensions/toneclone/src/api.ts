@@ -113,13 +113,16 @@ class ToneCloneAPI {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        const errorData: APIError = await response.json().catch(() => ({
-          error: `HTTP ${response.status}: ${response.statusText}`,
-        }));
+        let errorData: APIError;
+        try {
+          errorData = (await response.json()) as APIError;
+        } catch {
+          errorData = { error: `HTTP ${response.status}: ${response.statusText}` };
+        }
         throw new Error(errorData.error || errorData.message || "API request failed");
       }
 
-      return await response.json();
+      return (await response.json()) as T;
     } catch (error) {
       if (error instanceof Error) {
         // Ensure any error messages don't contain API keys
@@ -242,13 +245,16 @@ class ToneCloneAPI {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({
-          error: `HTTP ${response.status}: ${response.statusText}`,
-        }));
+        let errorData: APIError;
+        try {
+          errorData = (await response.json()) as APIError;
+        } catch {
+          errorData = { error: `HTTP ${response.status}: ${response.statusText}` };
+        }
         throw new Error(errorData.error || errorData.message || "File upload failed");
       }
 
-      return await response.json();
+      return (await response.json()) as FileUploadResponse;
     } catch (error) {
       if (error instanceof Error) {
         // Ensure any error messages don't contain API keys

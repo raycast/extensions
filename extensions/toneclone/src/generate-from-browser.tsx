@@ -14,6 +14,7 @@ import {
   BrowserExtension,
   open,
   getFrontmostApplication,
+  type KeyEquivalent,
 } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "./api";
@@ -315,15 +316,18 @@ function GenerateFromBrowserForm() {
           />
           {presets.length > 0 && (
             <ActionPanel.Section title="Quick Presets">
-              {presets.slice(0, 5).map((preset, index) => (
-                <Action
-                  key={preset.presetId || `preset-${index}`}
-                  title={preset.name}
-                  onAction={() => handlePresetSelect(preset)}
-                  icon="📝"
-                  shortcut={{ modifiers: ["cmd"], key: (index + 1).toString() }}
-                />
-              ))}
+              {presets.slice(0, 5).map((preset, index) => {
+                const shortcutKey = `${index + 1}` as KeyEquivalent;
+                return (
+                  <Action
+                    key={preset.presetId || `preset-${index}`}
+                    title={preset.name}
+                    onAction={() => handlePresetSelect(preset)}
+                    icon="📝"
+                    shortcut={{ modifiers: ["cmd"], key: shortcutKey }}
+                  />
+                );
+              })}
             </ActionPanel.Section>
           )}
           <ActionPanel.Section title="Presets">

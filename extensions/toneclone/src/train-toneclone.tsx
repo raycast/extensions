@@ -181,7 +181,10 @@ function TrainingForm() {
             }
 
             // Create a File object for upload with proper MIME type
-            const file = new File([fileBuffer], fileName, {
+            const fileBytes = new Uint8Array(fileBuffer.length);
+            fileBytes.set(fileBuffer);
+
+            const file = new File([fileBytes], fileName, {
               type: getMimeType(fileName),
             });
 

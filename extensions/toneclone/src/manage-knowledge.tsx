@@ -251,7 +251,7 @@ function KnowledgeManager() {
       <NewKnowledgeCardForm
         onKnowledgeCardCreated={(newKnowledgeCard) => {
           setKnowledgeCards((prev) => [...prev, newKnowledgeCard]);
-          setSelectedKnowledgeCard(newKnowledgeCard.knowledgeCardId);
+          setSelectedKnowledgeCardId(newKnowledgeCard.knowledgeCardId);
           setSelectedKnowledgeCard(newKnowledgeCard);
           setKnowledgeCardInstructions(newKnowledgeCard.instructions);
         }}

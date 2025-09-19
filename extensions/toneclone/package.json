@@ -96,14 +96,10 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
-    "@types/jest": "^29.5.13",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
-    "jest": "^29.7.0",
-    "jest-environment-jsdom": "^29.7.0",
     "prettier": "^3.5.3",
-    "ts-jest": "^29.2.5",
     "typescript": "^5.8.2"
   },
   "scripts": {
@@ -113,8 +109,6 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test": "echo 'No automated tests configured for the Raycast extension.'"
   }
 }
