@@ -1,0 +1,146 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "aave",
+  "title": "Aave",
+  "description": "Get Aave markets information",
+  "icon": "extension.png",
+  "author": "vimtor",
+  "license": "MIT",
+  "categories": [
+    "Data",
+    "Developer Tools",
+    "Finance"
+  ],
+  "commands": [
+    {
+      "name": "search-markets",
+      "title": "Search Markets",
+      "subtitle": "Aave",
+      "description": "Search Aave markets",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-chains",
+      "title": "Get Chains",
+      "description": "Get Aave chains information"
+    },
+    {
+      "name": "get-markets",
+      "title": "Get Markets",
+      "description": "Get Aave markets information"
+    },
+    {
+      "name": "get-borrow-apy-history",
+      "title": "Get Borrow APY History",
+      "description": "Get Aave borrow APY history for a token on a market"
+    },
+    {
+      "name": "get-supply-apy-history",
+      "title": "Get Supply APY History",
+      "description": "Get Aave supply APY history for a token on a market"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "showFrozenOrPausedAssets",
+      "type": "checkbox",
+      "label": "Show frozen or paused assets",
+      "description": "Show frozen or paused assets in the search results",
+      "default": false,
+      "required": true
+    },
+    {
+      "name": "includeIncentivePrograms",
+      "type": "checkbox",
+      "label": "Use incentive programs in APY calculations",
+      "description": "Include incentive and merit programs when displaying APY",
+      "default": true,
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@aave/client": "^0.6.1",
+    "@raycast/api": "^1.102.7",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "ai": {
+    "instructions": "The markets data have the available supply and borrow APY rates. The total is the combination of the protocol and merit (also called incentives) APY rates.\nThe functions for getting the borrow and supply APY history should only be used if the historical data is needed since the markets tool already returns the current APY information.",
+    "evals": [
+      {
+        "input": "@aave What are the highest APY supply tokens?",
+        "mocks": {
+          "get-markets": [
+            {
+              "address": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+              "name": "Aave V3 Ethereum",
+              "reserves": [
+                {
+                  "borrowApy": "48%",
+                  "chain": {
+                    "icon": "https://statics.aave.com/ethereum.svg",
+                    "id": 1,
+                    "name": "Ethereum"
+                  },
+                  "supplyApy": "09%",
+                  "totalBorrow": "$104K",
+                  "totalSupply": "$1.4M",
+                  "underlyingToken": {
+                    "address": "0x111111111117dC0aa78b770fA6A738034120C302",
+                    "icon": "https://token-logos.family.co/asset?id=1:0x111111111117dC0aa78b770fA6A738034120C302&token=1INCH",
+                    "name": "1INCH Token",
+                    "symbol": "1INCH"
+                  },
+                  "url": "https://app.aave.com/reserve-overview/?underlyingAsset=0x111111111117dc0aa78b770fa6a738034120c302&marketName=AaveV3Ethereum"
+                },
+                {
+                  "borrowApy": "00%",
+                  "chain": {
+                    "icon": "https://statics.aave.com/ethereum.svg",
+                    "id": 1,
+                    "name": "Ethereum"
+                  },
+                  "supplyApy": "00%",
+                  "totalBorrow": "$0",
+                  "totalSupply": "$508M",
+                  "underlyingToken": {
+                    "address": "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9",
+                    "icon": "https://token-logos.family.co/asset?id=1:0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9&token=AAVE",
+                    "name": "Aave Token",
+                    "symbol": "AAVE"
+                  },
+                  "url": "https://app.aave.com/reserve-overview/?underlyingAsset=0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9&marketName=AaveV3Ethereum"
+                }
+              ]
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-markets"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
