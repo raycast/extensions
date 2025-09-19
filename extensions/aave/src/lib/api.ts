@@ -1,5 +1,5 @@
-import { AaveClient, ChainId, ChainsFilter } from "@aave/client";
-import { chains, markets } from "@aave/client/actions";
+import { AaveClient, ChainId, ChainsFilter, EvmAddress, Market, TimeWindow } from "@aave/client";
+import { borrowAPYHistory, chains, markets, supplyAPYHistory } from "@aave/client/actions";
 import { formatApy, formatUSD, formatMarketName, titleCase } from "./format";
 import { showFrozenOrPausedAssets } from "./preferences";
 
@@ -115,4 +115,60 @@ export async function getMarkets(chainIds: ChainId[]) {
         }),
     };
   });
+}
+
+export async function getBorrowAPYHistory({
+  chainId,
+  market,
+  underlyingToken,
+  window,
+}: {
+  chainId: ChainId;
+  market: EvmAddress;
+  underlyingToken: EvmAddress;
+  window: TimeWindow;
+}) {
+  const result = await borrowAPYHistory(client, {
+    chainId,
+    market,
+    underlyingToken,
+    window,
+  });
+
+  if (result.isErr()) {
+    throw new Error(result.error.message);
+  }
+
+  return result.value?.map((item) => ({
+    date: item.date,
+    value: formatApy(parseFloat(item.avgRate.value)),
+  }));
+}
+
+export async function getSupplyAPYHistory({
+  chainId,
+  market,
+  underlyingToken,
+  window,
+}: {
+  chainId: ChainId;
+  market: EvmAddress;
+  underlyingToken: EvmAddress;
+  window: TimeWindow;
+}) {
+  const result = await supplyAPYHistory(client, {
+    chainId,
+    market,
+    underlyingToken,
+    window,
+  });
+
+  if (result.isErr()) {
+    throw new Error(result.error.message);
+  }
+
+  return result.value?.map((item) => ({
+    date: item.date,
+    value: formatApy(parseFloat(item.avgRate.value)),
+  }));
 }

@@ -30,6 +30,16 @@
       "name": "get-markets",
       "title": "Get Markets",
       "description": "Get Aave markets information"
+    },
+    {
+      "name": "get-borrow-apy-history",
+      "title": "Get Borrow APY History",
+      "description": "Get Aave borrow APY history for a token on a market"
+    },
+    {
+      "name": "get-supply-apy-history",
+      "title": "Get Supply APY History",
+      "description": "Get Aave supply APY history for a token on a market"
     }
   ],
   "preferences": [
@@ -72,7 +82,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "ai": {
-    "instructions": "The `interestBearingToken` and `variableDebtToken` are the internal tokens Aave uses to track supply and variable debt. They are merely informational, unless asked for, you should use the `underlyingToken`.",
+    "instructions": "The markets data have the available supply and borrow APY rates. The total is the combination of the protocol and merit (also called incentives) APY rates.\nThe functions for getting the borrow and supply APY history should only be used if the historical data is needed since the markets tool already returns the current APY information.",
     "evals": [
       {
         "input": "@aave What are the highest APY supply tokens?",

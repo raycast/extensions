@@ -17,9 +17,10 @@ export default async function (input: Input) {
 
   const markets = await getMarkets(chainIds);
 
-  return markets.map((market) => ({
+  // Simplify the result for LLMs
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  return markets.map(({ id, ...market }) => ({
     ...market,
-    // Simplify the reserve object for LLMs
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     reserves: market.reserves.map(({ url, variableDebtToken, interestBearingToken, ...reserve }) => reserve),
   }));
