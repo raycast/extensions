@@ -10,12 +10,19 @@ export async function getChains() {
   if (result.isErr()) {
     throw new Error(result.error.message);
   }
-  return result.value;
+  return result.value.map((chain) => ({
+    id: chain.chainId,
+    name: chain.name,
+    icon: chain.icon,
+    explorerUrl: chain.explorerUrl,
+    isTestnet: chain.isTestnet,
+    nativeWrappedToken: chain.nativeWrappedToken,
+  }));
 }
 
 export async function getMarkets(chainIds: ChainId[]) {
   const result = await markets(client, {
-    chainIds: chainIds.length > 0 ? chainIds : (await getChains()).map((chain) => chain.chainId),
+    chainIds: chainIds.length > 0 ? chainIds : (await getChains()).map((chain) => chain.id),
   });
 
   if (result.isErr()) {
@@ -86,16 +93,20 @@ export async function getMarkets(chainIds: ChainId[]) {
               name: reserve.vToken.name,
               symbol: reserve.vToken.symbol,
             },
-            totalSupply: formatUSD(
+            totalSupplied: formatUSD(
               parseFloat(reserve.supplyInfo.total.value ?? "0") * parseFloat(reserve.usdExchangeRate ?? "0"),
             ),
-            totalBorrow: formatUSD(parseFloat(reserve.borrowInfo?.total.usd ?? "0")),
-            protocolSupplyApy: formatApy(protocolSupplyApy),
-            meritSupplyApy: formatApy(meritSupplyApy),
-            totalSupplyApy: formatApy(totalSupplyApy),
-            protocolBorrowApy: formatApy(protocolBorrowApy),
-            meritBorrowApy: formatApy(meritBorrowApy),
-            totalBorrowApy: formatApy(totalBorrowApy),
+            totalBorrowed: formatUSD(parseFloat(reserve.borrowInfo?.total.usd ?? "0")),
+            supplyAPY: {
+              protocol: formatApy(protocolSupplyApy),
+              merit: formatApy(meritSupplyApy),
+              total: formatApy(totalSupplyApy),
+            },
+            borrowAPY: {
+              protocol: formatApy(protocolBorrowApy),
+              merit: formatApy(meritBorrowApy),
+              total: formatApy(totalBorrowApy),
+            },
             url: `https://app.aave.com/reserve-overview/?underlyingAsset=${reserve.underlyingToken.address.toLowerCase()}&marketName=${marketName}`,
             isPaused: reserve.isPaused,
             isFrozen: reserve.isFrozen,

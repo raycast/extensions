@@ -53,18 +53,18 @@ export default function () {
                 subtitle={reserve.underlyingToken.symbol}
                 keywords={[reserve.underlyingToken.address]}
                 accessories={[
-                  { text: reserve.totalSupply, tooltip: "Total Supplied" },
+                  { text: reserve.totalSupplied, tooltip: "Total Supplied" },
                   {
                     tag: {
-                      value: includeIncentivePrograms ? reserve.totalSupplyApy : reserve.protocolSupplyApy,
+                      value: includeIncentivePrograms ? reserve.supplyAPY.total : reserve.supplyAPY.protocol,
                       color: Color.Green,
                     },
                     tooltip: "Supply APY",
                   },
-                  { text: reserve.totalBorrow, tooltip: "Total Borrowed" },
+                  { text: reserve.totalBorrowed, tooltip: "Total Borrowed" },
                   {
                     tag: {
-                      value: includeIncentivePrograms ? reserve.totalBorrowApy : reserve.protocolBorrowApy,
+                      value: includeIncentivePrograms ? reserve.borrowAPY.total : reserve.borrowAPY.protocol,
                       color: Color.Red,
                     },
                     tooltip: "Borrow APY",
