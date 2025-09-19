@@ -1,7 +1,9 @@
 import { LaunchProps, LocalStorage, showToast, Toast } from "@raycast/api";
+import { isValidSeamApiKey } from "./seam";
+
 export default async function Command(props: LaunchProps<{ arguments: Arguments.Apikey }>) {
   const key = props.arguments.apiKey;
-  if (!key || key.length !== 38 || !key.startsWith("seam_")) {
+  if (!isValidSeamApiKey(key)) {
     return showToast({
       style: Toast.Style.Failure,
       title: "Invalid API Key",
