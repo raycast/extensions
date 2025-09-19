@@ -26,5 +26,5 @@ export const invoke = <T>(fn: AnyFn<T>) => {
   return fn();
 };
 
-const { messageLimit: msgLimit } = getPreferenceValues<{ messageLimit: string }>();
+const { messageLimit: msgLimit } = getPreferenceValues<Preferences>();
 export const messageLimit = parseInt(msgLimit);
