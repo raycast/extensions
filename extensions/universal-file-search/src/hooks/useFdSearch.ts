@@ -1,7 +1,7 @@
 import { usePromise } from "@raycast/utils";
 import { searchWithFd } from "../utils/fd";
 import { getPreferenceValues } from "@raycast/api";
-import { Preferences, SearchMode } from "../types";
+import { SearchMode } from "../types";
 import { useState, useCallback, useEffect } from "react";
 import { homedir } from "os";
 
@@ -16,7 +16,7 @@ export function useFdSearch(
   const [isSearching, setIsSearching] = useState(false);
   const [lastSearchQuery, setLastSearchQuery] = useState("");
 
-  // 获取搜索路径
+  // Get search path
   const getSearchPath = (): string => {
     switch (searchScope) {
       case "all":
@@ -66,7 +66,7 @@ export function useFdSearch(
     }
   };
 
-  // 手动触发搜索的函数
+  // Function to manually trigger search
   const triggerSearch = useCallback(() => {
     console.log(
       "Triggering fd search for:",
@@ -88,7 +88,7 @@ export function useFdSearch(
         return [];
       }
 
-      // 添加短暂延迟让用户看到搜索状态
+      // Add brief delay to let user see search status
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       const results = await searchWithFd(searchQuery, {
@@ -102,7 +102,7 @@ export function useFdSearch(
         searchPath: getSearchPath(),
       });
 
-      // 按修改时间排序
+      // Sort by modification time
       return results.sort(
         (a, b) => b.modifiedDate.getTime() - a.modifiedDate.getTime(),
       );
@@ -117,7 +117,7 @@ export function useFdSearch(
     },
   );
 
-  // 监控搜索完成状态
+  // Monitor search completion status
   useEffect(() => {
     if (!searchResult.isLoading && isSearching) {
       console.log("Search completed, resetting isSearching");

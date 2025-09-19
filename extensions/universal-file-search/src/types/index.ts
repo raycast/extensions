@@ -29,12 +29,3 @@ export interface SearchOptions {
   searchMode?: SearchMode;
   searchPath?: string;
 }
-
-export interface Preferences {
-  maxDepth: string;
-  showHiddenFiles: boolean;
-  excludePatterns: string;
-  customSearchPaths?: string;
-  defaultSearchScope?: string;
-  defaultSearchMode?: SearchMode;
-}

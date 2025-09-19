@@ -229,7 +229,7 @@ export function FileItem({
               path={file.path}
               shortcut={{ modifiers: ["cmd"], key: "r" }}
             />
-            {/* 只在搜索过后才显示重新搜索选项 */}
+            {/* Only show re-search option after initial search */}
             {hasSearched && (
               <Action
                 title={onSearch ? "Search Again" : "Searching…"}

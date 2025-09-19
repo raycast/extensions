@@ -10,7 +10,7 @@ import {
 import { useState, useEffect } from "react";
 import { useFdSearch } from "./hooks/useFdSearch";
 import { FileItem } from "./components/FileItem";
-import { Preferences, SearchMode } from "./types";
+import { SearchMode } from "./types";
 import { homedir } from "os";
 
 export default function SearchFiles() {
@@ -41,7 +41,7 @@ export default function SearchFiles() {
     searchMode,
   });
 
-  // 处理 Enter 键：只在无结果时触发搜索，有结果时默认打开文件
+  // Handle Enter key: trigger search only when no results, open file when results exist
   const handleSearchSubmit = () => {
     console.log("handleSearchSubmit called:", {
       needsEnterToSearch,
@@ -50,7 +50,7 @@ export default function SearchFiles() {
       isLoading,
     });
 
-    // 只在真正需要时才响应Enter键搜索
+    // Only respond to Enter key search when truly needed
     if (needsEnterToSearch && searchText.length >= 2 && !isLoading) {
       console.log("Triggering search from Enter key");
       triggerSearch();
@@ -86,7 +86,7 @@ export default function SearchFiles() {
     }
   };
 
-  // 获取搜索路径
+  // Get search path
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const getScopePath = (scope: string): string => {
     switch (scope) {
@@ -138,10 +138,10 @@ export default function SearchFiles() {
   };
 
   const getEmptyViewContent = () => {
-    // fd未安装时显示安装指南
+    // Show installation guide when fd is not installed
     const isFdNotInstalled = error?.message?.includes("fd is not installed");
     if (isFdNotInstalled) {
-      // 智能安装命令 - 检测是否有Homebrew，生成合适的一键安装命令
+      // Smart install command - detect Homebrew and generate appropriate one-click install command
       const smartInstallCommand = `
 # One-click install script for fd
 if ! command -v brew &> /dev/null; then
@@ -200,7 +200,7 @@ echo "✅ Installation complete! Please restart Raycast."
       };
     }
 
-    // 搜索中时显示搜索提示
+    // Show search hint while searching
     if (isLoading && (!files || files.length === 0)) {
       return {
         title: "⏳ Searching...",
@@ -208,7 +208,7 @@ echo "✅ Installation complete! Please restart Raycast."
       };
     }
 
-    // 未搜索时显示使用说明
+    // Show usage instructions when not searched
     if (!hasSearchedOnce && !isLoading) {
       return {
         title: "Press Enter to Search",
@@ -227,7 +227,7 @@ echo "✅ Installation complete! Please restart Raycast."
       };
     }
 
-    // 搜索过但无结果
+    // Searched but no results
     if (
       hasSearchedOnce &&
       files &&
@@ -259,7 +259,7 @@ echo "✅ Installation complete! Please restart Raycast."
 
   return (
     <List
-      isLoading={false} // 我们自己控制加载状态
+      isLoading={false} // We control loading state ourselves
       searchText={searchText}
       onSearchTextChange={(text) => {
         setSearchText(text);
@@ -349,7 +349,7 @@ echo "✅ Installation complete! Please restart Raycast."
         </List.Dropdown>
       }
     >
-      {/* 空状态视图 - 包括fd未安装的提示 */}
+      {/* Empty state view - including fd not installed prompt */}
       {emptyViewContent && (!files || files.length === 0) && (
         <List.EmptyView
           title={emptyViewContent?.title || ""}
@@ -383,10 +383,10 @@ echo "✅ Installation complete! Please restart Raycast."
         />
       )}
 
-      {/* 有结果时的显示 */}
+      {/* Display when there are results */}
       {files && files.length > 0 && (
         <>
-          {/* 搜索中时在第一个位置显示搜索提示 */}
+          {/* Show search hint at first position while searching */}
           {isLoading && (
             <List.Item
               title="⏳ Searching..."
@@ -396,7 +396,7 @@ echo "✅ Installation complete! Please restart Raycast."
             />
           )}
 
-          {/* 文件列表 */}
+          {/* File list */}
           {files.map((file) => (
             <FileItem
               key={file.path}
