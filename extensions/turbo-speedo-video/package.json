@@ -1,0 +1,85 @@
+{
+  "name": "turbo-speedo-video",
+  "version": "1.0.0",
+  "description": "A Raycast extension to adjust video playback speed using FFmpeg",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "echo 'Install Raycast CLI: npm install -g @raycast/cli && raycast dev'",
+    "build": "tsc && cp dist/index.js . && cp dist/index.d.ts . && cp -r dist/utils . && cp dist/adjust-video-speed.js . && cp dist/adjust-video-speed.d.ts . && cp -r utils /Users/tom/.config/raycast/extensions/turbo-speedo-video/ 2>/dev/null || echo 'Note: Raycast extensions directory not found - copy utils folder manually if needed' && echo 'Build complete! Extension ready for Raycast'",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx}\"",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "raycast",
+    "video",
+    "ffmpeg",
+    "speed",
+    "multiplier"
+  ],
+  "author": "tom",
+  "license": "MIT",
+  "raycastVersion": "1.102.6",
+  "title": "Turbo Speedo Video",
+  "icon": "icon.png",
+  "iconDark": "icon@2x.png",
+  "categories": [
+    "Media",
+    "Developer Tools"
+  ],
+  "commands": [
+    {
+      "name": "adjust-video-speed",
+      "title": "Adjust Video Speed",
+      "description": "Change video playback speed with FFmpeg",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "filePath",
+          "placeholder": "Video file path",
+          "type": "text",
+          "optional": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ffmpegPath",
+      "title": "FFmpeg Path",
+      "description": "Path to FFmpeg executable (leave empty for auto-detection)",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.60.0"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.0.0",
+    "@testing-library/react": "^14.0.0",
+    "@testing-library/user-event": "^14.0.0",
+    "@types/jest": "^29.0.0",
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.0.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "jest": "^29.0.0",
+    "prettier": "^3.0.0",
+    "jest-environment-jsdom": "^29.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "ts-jest": "^29.0.0",
+    "typescript": "^5.0.0"
+  }
+}
