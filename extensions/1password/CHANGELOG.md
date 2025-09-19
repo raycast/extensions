@@ -1,5 +1,11 @@
 # 1Password Changelog
 
+## [Enhancements] - {PR_MERGE_DATE}
+
+- Added Paste actions for Login items: Paste Username, Paste Password, Paste One-time Password.
+- Paste actions now show the app's icon and name (e.g., "Paste Password to Safari").
+- Preferences updated to allow selecting Paste actions as Primary/Secondary actions.
+
 ## [Enhancements] - 2025-08-25
 
 - Fixed "Enter Vault" misleading icon
