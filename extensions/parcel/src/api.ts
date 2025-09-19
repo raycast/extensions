@@ -79,7 +79,7 @@ export function getDeliveriesUrl(filterMode: FilterMode): string {
   return `https://api.parcel.app/external/deliveries/?filter_mode=${filterMode}`;
 }
 
-export function getAPIHeaders(): HeadersInit {
+export function getAPIHeaders(): Record<string, string> {
   return {
     "api-key": getApiKey(),
   };

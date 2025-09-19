@@ -1,5 +1,11 @@
 # Parcel Changelog
 
+## [Detail View Refactor, Metadata, UX] - 2025-09-19
+
+- Refactored "My Deliveries" command UI to only show tracking events in the markdown section (all other details are now displayed in the metadata panel for improved clarity and structure)
+- Added support for Portuguese date formats in tracking events
+- Removed redundant "View Recent/Active Deliveries" action (filtering is now handled exclusively by the dropdown)
+
 ## [Expected Delivery Date Formatting Overhaul] - 2025-06-12
 
 - Delivery windows now show the full time range when available (e.g., "12 Jun 10:45 – 12:45"), so you know exactly when to expect your package.

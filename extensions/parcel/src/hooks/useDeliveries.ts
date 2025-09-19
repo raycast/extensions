@@ -1,5 +1,5 @@
 import { useFetch } from "@raycast/utils";
-import { getDeliveriesUrl, getAPIHeaders, ParcelApiResponse, FilterMode, getAPIError } from "../api";
+import { FilterMode, getAPIError, getAPIHeaders, getDeliveriesUrl, ParcelApiResponse } from "../api";
 
 export function useDeliveries(filterMode: FilterMode) {
   const { data, isLoading, error, revalidate } = useFetch<ParcelApiResponse>(getDeliveriesUrl(filterMode), {
