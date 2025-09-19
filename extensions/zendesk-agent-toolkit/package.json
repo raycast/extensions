@@ -1,0 +1,188 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zendesk-agent-toolkit",
+  "title": "Zendesk Agent Toolkit",
+  "description": "Complete Zendesk agent toolkit: manage tickets, reply with attachments, edit tickets, and create Help Center articles",
+  "icon": "icon.png",
+  "author": "justin_martin",
+  "license": "MIT",
+  "homepage": "https://github.com/Unicornninja80/raycast-zendesk",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Unicornninja80/raycast-zendesk.git"
+  },
+  "private": true,
+  "categories": [
+    "Productivity"
+  ],
+  "preferences": [
+    {
+      "name": "subdomain",
+      "type": "textfield",
+      "title": "Zendesk Subdomain",
+      "description": "Your Zendesk subdomain (e.g., company for company.zendesk.com)",
+      "required": true,
+      "placeholder": "company"
+    },
+    {
+      "name": "email",
+      "type": "textfield",
+      "title": "Agent Email",
+      "description": "Your Zendesk agent email address",
+      "required": true,
+      "placeholder": "agent@company.com"
+    },
+    {
+      "name": "apiToken",
+      "type": "password",
+      "title": "API Token",
+      "description": "Your Zendesk API token",
+      "required": true,
+      "placeholder": "Enter your API token"
+    },
+    {
+      "name": "enableSystemField",
+      "type": "checkbox",
+      "title": "Enable System Field",
+      "label": "Show System custom field in ticket editing",
+      "description": "Show System custom field in ticket editing",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "systemFieldId",
+      "type": "textfield",
+      "title": "System Field ID",
+      "description": "Your Zendesk System custom field ID (find in admin settings)",
+      "required": false,
+      "placeholder": "123456"
+    },
+    {
+      "name": "enableIssueField",
+      "type": "checkbox",
+      "title": "Enable Issue Field",
+      "label": "Show Issue custom field in ticket editing",
+      "description": "Show Issue custom field in ticket editing",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "issueFieldId",
+      "type": "textfield",
+      "title": "Issue Field ID",
+      "description": "Your Zendesk Issue custom field ID (find in admin settings)",
+      "required": false,
+      "placeholder": "123457"
+    },
+    {
+      "name": "openaiApiKey",
+      "type": "password",
+      "title": "OpenAI API Key",
+      "description": "Your OpenAI API key for AI-powered macro generation",
+      "required": false,
+      "placeholder": "sk-..."
+    },
+    {
+      "name": "enableAIMacros",
+      "type": "checkbox",
+      "title": "Enable AI Macro Generation",
+      "label": "Automatically suggest macros based on ticket patterns",
+      "description": "Use AI to analyze resolved tickets and suggest new macros",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "permissionGroupId",
+      "type": "textfield",
+      "title": "Help Center Permission Group ID",
+      "description": "Default permission group ID for new Help Center articles",
+      "required": false,
+      "placeholder": "e.g., 1882214"
+    },
+    {
+      "name": "userSegmentId",
+      "type": "textfield",
+      "title": "Help Center User Segment ID",
+      "description": "Private segment ID for restricted articles (leave empty for everyone)",
+      "required": false,
+      "placeholder": "e.g., 933727"
+    }
+  ],
+  "commands": [
+    {
+      "name": "dashboard",
+      "title": "Dashboard",
+      "subtitle": "Zendesk",
+      "description": "View your personal ticket statistics and performance metrics",
+      "mode": "view"
+    },
+    {
+      "name": "tickets",
+      "title": "My Tickets",
+      "subtitle": "Zendesk",
+      "description": "View and manage your assigned tickets",
+      "mode": "view"
+    },
+    {
+      "name": "macros-entry",
+      "title": "Macros",
+      "subtitle": "Zendesk",
+      "description": "Manage and create macros for quick ticket actions",
+      "mode": "view"
+    },
+    {
+      "name": "ai-suggestions",
+      "title": "AI Macro Suggestions",
+      "subtitle": "Zendesk",
+      "description": "AI-powered macro suggestions based on your ticket patterns",
+      "mode": "view"
+    },
+    {
+      "name": "test-ai",
+      "title": "Test AI System",
+      "subtitle": "Zendesk",
+      "description": "Test and debug the AI macro generation system",
+      "mode": "view"
+    },
+    {
+      "name": "search-zendesk-support-center",
+      "title": "Help Center",
+      "subtitle": "Zendesk",
+      "description": "Search Help Center articles and create new articles from Markdown",
+      "mode": "view"
+    },
+    {
+      "name": "ticket-to-article",
+      "title": "Convert to Article",
+      "subtitle": "Zendesk",
+      "description": "Convert a resolved ticket to a Help Center article using AI",
+      "mode": "view"
+    },
+    {
+      "name": "zendesk-placeholders",
+      "title": "Zendesk Placeholders",
+      "subtitle": "Zendesk",
+      "description": "Reference guide for Zendesk template variables and placeholders",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray dev",
+    "lint": "eslint --ext .ts,.tsx src",
+    "lint:fix": "eslint --ext .ts,.tsx src --fix",
+    "typecheck": "tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "1.102.4",
+    "@raycast/utils": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  }
+}
