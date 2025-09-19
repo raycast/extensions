@@ -90,6 +90,7 @@
       "default": true
     }
   ],
+  "platforms": ["macOS"],
   "dependencies": {
     "@raycast/api": "^1.103.2",
     "@raycast/utils": "^1.17.0"

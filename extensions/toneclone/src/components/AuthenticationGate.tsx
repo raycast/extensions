@@ -9,14 +9,8 @@ import {
   Color,
 } from "@raycast/api";
 import { validateApiKey } from "../auth";
-
 interface AuthenticationGateProps {
   children: React.ReactNode;
-}
-
-interface Preferences {
-  apiKey?: string;
-  apiUrl: string;
 }
 
 function AuthenticationGate({ children }: AuthenticationGateProps) {

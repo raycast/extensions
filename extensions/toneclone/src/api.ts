@@ -13,11 +13,6 @@ import {
 } from "./types";
 import { getClientInfo } from "./client-info";
 
-interface Preferences {
-  apiKey?: string;
-  apiUrl: string;
-}
-
 const API_KEY_STORAGE_KEY = "toneclone-api-key";
 
 // Utility function to redact API keys from strings for safe logging
