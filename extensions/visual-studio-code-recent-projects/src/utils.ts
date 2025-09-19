@@ -13,6 +13,7 @@ import {
   RemoteWorkspaceEntry,
   WorkspaceEntry,
 } from "./types";
+import { exec } from "child_process";
 
 // Type Guards
 
@@ -161,4 +162,20 @@ export async function openURIinVSCode(uri: string) {
 
 export function isValidHexColor(color: string): boolean {
   return /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(color);
+}
+
+export const isWin = process.platform === "win32";
+
+export function runExec(commands: string[], onFinish: (error: string | null) => void) {
+  const cmd = commands.map((c) => `"${c}"`).join(" ");
+  exec(cmd, (error, stdout, stderr) => {
+    if (stdout || stderr) {
+      console.log("fix me");
+    }
+    if (error) {
+      onFinish(error.message);
+    } else {
+      onFinish(null);
+    }
+  });
 }
