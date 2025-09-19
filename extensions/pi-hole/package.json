@@ -1,0 +1,134 @@
+{
+  "name": "pi-hole",
+  "title": "Pi-hole",
+  "description": "Manage your Pi-hole DNS server - control blocking, manage domains, and monitor status",
+  "icon": "pihole-icon.png",
+  "author": "treyg",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "status",
+      "title": "Pi-hole Status",
+      "subtitle": "Pi-hole",
+      "description": "View Pi-hole status and statistics",
+      "mode": "view"
+    },
+    {
+      "name": "enable",
+      "title": "Enable Pi-hole",
+      "subtitle": "Pi-hole",
+      "description": "Enable Pi-hole DNS blocking",
+      "mode": "no-view"
+    },
+    {
+      "name": "disable",
+      "title": "Disable Pi-hole",
+      "subtitle": "Pi-hole",
+      "description": "Disable Pi-hole DNS blocking",
+      "mode": "no-view"
+    },
+    {
+      "name": "disable-time",
+      "title": "Disable Pi-hole (timed)",
+      "subtitle": "Pi-hole",
+      "description": "Disable Pi-hole DNS blocking for a specific duration",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "duration",
+          "type": "text",
+          "placeholder": "Duration (e.g., 5m, 1h, 30s)",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "domain-view",
+      "title": "View Domain Lists",
+      "subtitle": "Pi-hole",
+      "description": "View domains in allow/deny lists",
+      "mode": "view"
+    },
+    {
+      "name": "query-domain",
+      "title": "Query Domain",
+      "subtitle": "Pi-hole",
+      "description": "Check if a domain is blocked by Pi-hole",
+      "mode": "view"
+    },
+    {
+      "name": "web-dashboard",
+      "title": "Open Web Dashboard",
+      "subtitle": "Pi-hole",
+      "description": "Open Pi-hole admin dashboard in browser",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "piholeUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "Pi-hole URL",
+      "description": "Your Pi-hole instance URL (e.g., http://192.168.1.100 or http://pi.hole)",
+      "placeholder": "http://pi.hole"
+    },
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "description": "Your Pi-hole API token (found in Settings > API/Web Interface)"
+    },
+    {
+      "name": "defaultDisableTime",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Disable Duration",
+      "description": "Default duration for timed disable (e.g., 5m, 1h)",
+      "default": "5m",
+      "placeholder": "5m",
+      "validation": {
+        "pattern": "^\\d+[smh]$",
+        "message": "Duration must be in format like 5m, 1h, 30s"
+      }
+    },
+    {
+      "name": "connectionTimeout",
+      "type": "textfield",
+      "required": false,
+      "title": "Connection Timeout",
+      "description": "API connection timeout in seconds",
+      "default": "10",
+      "placeholder": "10",
+      "validation": {
+        "pattern": "^\\d+$",
+        "message": "Timeout must be a number"
+      }
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.1",
+    "node-fetch": "^3.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.12",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
