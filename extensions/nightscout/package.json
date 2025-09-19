@@ -1,0 +1,181 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "nightscout",
+  "title": "Nightscout",
+  "description": "View statistics and trends from your Nightscout instance directly in Raycast.",
+  "icon": "extension_icon.png",
+  "author": "zachsea",
+  "categories": [
+    "Other"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "nightscout",
+    "glucose",
+    "diabetes",
+    "monitor",
+    "health",
+    "t1d",
+    "t2d",
+    "cgm",
+    "dexcom",
+    "libre",
+    "medtronic",
+    "insulin"
+  ],
+  "commands": [
+    {
+      "name": "glucoseView",
+      "title": "View Glucose Readings",
+      "subtitle": "Nightscout",
+      "description": "View current glucose readings from your Nightscout instance",
+      "mode": "view",
+      "keywords": [
+        "bg",
+        "blood glucose",
+        "sugar levels",
+        "cgm",
+        "dexcom",
+        "libre",
+        "medtronic"
+      ]
+    },
+    {
+      "name": "glucoseUpdate",
+      "title": "Show Glucose Reading",
+      "subtitle": "Nightscout",
+      "description": "Shows the latest glucose reading in root search and optionally in the menu bar",
+      "mode": "no-view",
+      "interval": "1m",
+      "keywords": [
+        "current",
+        "bg",
+        "blood glucose",
+        "sugar levels",
+        "cgm"
+      ]
+    },
+    {
+      "name": "eventView",
+      "title": "Search Entries and Treatments Log",
+      "subtitle": "Nightscout",
+      "description": "View all entries and treatments from your Nightscout instance",
+      "mode": "view",
+      "keywords": [
+        "insulin",
+        "carbs",
+        "tracking",
+        "log",
+        "events"
+      ]
+    },
+    {
+      "name": "glucoseMenuBar",
+      "title": "Menu Bar Glucose",
+      "subtitle": "Nightscout",
+      "description": "Shows the latest glucose reading in the menu bar",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "keywords": [
+        "current",
+        "bg",
+        "blood glucose",
+        "sugar levels",
+        "cgm"
+      ]
+    },
+    {
+      "name": "treatmentEntry",
+      "title": "Add Treatment",
+      "subtitle": "Nightscout",
+      "description": "Add a new treatment (insulin, carbs, sensor change, etc.) to your Nightscout instance",
+      "mode": "view",
+      "keywords": [
+        "insulin",
+        "carbs",
+        "log",
+        "events",
+        "bg check",
+        "exercise",
+        "note",
+        "bolus",
+        "pump",
+        "cgm",
+        "sensor",
+        "battery"
+      ]
+    },
+    {
+      "name": "profileView",
+      "title": "Search Available Profiles",
+      "subtitle": "Nightscout",
+      "description": "View all profiles from your Nightscout instance",
+      "mode": "view",
+      "keywords": [
+        "settings",
+        "basal",
+        "targets",
+        "insulin",
+        "carbs",
+        "ratios",
+        "sensitivity"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "instance",
+      "type": "textfield",
+      "required": true,
+      "title": "Nightscout URL",
+      "description": "URL of your Nightscout instance (include the protocol e.g. https://)",
+      "placeholder": "e.g. https://my-nightscout.herokuapp.com"
+    },
+    {
+      "name": "token",
+      "type": "password",
+      "required": false,
+      "title": "Access Token",
+      "description": "If your Nightscout instance requires an access token for read access, enter it here (ensure 'readable' role is assigned). Include 'careportal' role if you want to add treatments.",
+      "placeholder": "Access token for your Nightscout instance"
+    },
+    {
+      "name": "graphScale",
+      "type": "dropdown",
+      "required": true,
+      "title": "Graph Scale",
+      "description": "Choose between linear or logarithmic scale for the glucose graph",
+      "data": [
+        {
+          "title": "Logarithmic",
+          "value": "logarithmic"
+        },
+        {
+          "title": "Linear",
+          "value": "linear"
+        }
+      ],
+      "default": "logarithmic"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.6",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
