@@ -2,10 +2,7 @@ import { Action, ActionPanel, closeMainWindow, List, open, popToRoot } from "@ra
 
 import { getObsidianTarget, ObsidianTargetType } from "./utils/utils";
 import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
-import { vaultsWithoutAdvancedURIToast } from "./components/Toasts";
-import AdvancedURIPluginNotInstalled from "./components/Notifications/AdvancedURIPluginNotInstalled";
 import { useObsidianVaults } from "./utils/hooks";
-import { vaultPluginCheck } from "./api/vault/plugins/plugins.service";
 
 export default function Command() {
   const { vaults, ready } = useObsidianVaults();
@@ -16,25 +13,16 @@ export default function Command() {
     return <NoVaultFoundMessage />;
   }
 
-  const [vaultsWithPlugin, vaultsWithoutPlugin] = vaultPluginCheck(vaults, "obsidian-advanced-uri");
-
-  if (vaultsWithoutPlugin.length > 0) {
-    vaultsWithoutAdvancedURIToast(vaultsWithoutPlugin);
-  }
-  if (vaultsWithPlugin.length == 0) {
-    return <AdvancedURIPluginNotInstalled />;
-  }
-
-  if (vaultsWithPlugin.length == 1) {
-    const target = getObsidianTarget({ type: ObsidianTargetType.DailyNote, vault: vaultsWithPlugin[0] });
+  if (vaults.length == 1) {
+    const target = getObsidianTarget({ type: ObsidianTargetType.DailyNote, vault: vaults[0] });
     open(target);
     popToRoot();
     closeMainWindow();
   }
 
   return (
-    <List isLoading={vaultsWithPlugin === undefined}>
-      {vaultsWithPlugin?.map((vault) => (
+    <List isLoading={vaults === undefined}>
+      {vaults?.map((vault) => (
         <List.Item
           title={vault.name}
           key={vault.key}

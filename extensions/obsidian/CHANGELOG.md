@@ -1,5 +1,9 @@
 # Obsidian Changelog
 
+## URI Update - 2025-09-16
+
+- Switched the "Daily Note" command to use Obsidian's new built-in URI
+
 ## [Bug fixes] - 2025-06-10
 
 - Fixes a bug, which create a tagged note a wrong way. Changes an order of properties block and note text
