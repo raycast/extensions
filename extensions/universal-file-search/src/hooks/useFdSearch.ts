@@ -110,7 +110,6 @@ export function useFdSearch(
     [lastSearchQuery, manualTrigger, searchScope, searchMode],
     {
       execute: manualTrigger > 0 && lastSearchQuery.length >= 2,
-      keepPreviousData: true, // 保留旧数据直到新搜索完成
       onError: (error) => {
         console.error("fd search error:", error);
         setIsSearching(false);

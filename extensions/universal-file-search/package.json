@@ -74,12 +74,30 @@
       "description": "Default directory scope for searches",
       "default": "home",
       "data": [
-        { "title": "Home Directory (~)", "value": "home" },
-        { "title": "All System (/)", "value": "all" },
-        { "title": "Downloads", "value": "downloads" },
-        { "title": "Documents", "value": "documents" },
-        { "title": "Applications", "value": "applications" },
-        { "title": "System Config (/etc, /opt)", "value": "config" }
+        {
+          "title": "Home Directory (~)",
+          "value": "home"
+        },
+        {
+          "title": "All System (/)",
+          "value": "all"
+        },
+        {
+          "title": "Downloads",
+          "value": "downloads"
+        },
+        {
+          "title": "Documents",
+          "value": "documents"
+        },
+        {
+          "title": "Applications",
+          "value": "applications"
+        },
+        {
+          "title": "System Config (/etc, /opt)",
+          "value": "config"
+        }
       ]
     },
     {
@@ -90,8 +108,14 @@
       "description": "Pattern matching mode",
       "default": "regex",
       "data": [
-        { "title": "Regex (Regular expressions - fd default)", "value": "regex" },
-        { "title": "Glob (Wildcards like *.txt)", "value": "glob" }
+        {
+          "title": "Regex (Regular expressions - fd default)",
+          "value": "regex"
+        },
+        {
+          "title": "Glob (Wildcards like *.txt)",
+          "value": "glob"
+        }
       ]
     }
   ],
@@ -104,14 +128,14 @@
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "^22.18.6",
-    "@types/react": "^18.3.24",
+    "@types/react": "^18.2.0",
     "eslint": "^8.57.1",
     "prettier": "^3.6.2",
     "typescript": "^5.9.2"
   },
   "scripts": {
     "build": "ray build --skip-types",
-    "dev": "ray develop",
+    "dev": "ray develop --skip-types",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",

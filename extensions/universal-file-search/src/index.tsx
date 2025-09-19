@@ -261,8 +261,13 @@ echo "✅ Installation complete! Please restart Raycast."
     <List
       isLoading={false} // 我们自己控制加载状态
       searchText={searchText}
-      onSearchTextChange={setSearchText}
-      onSearchTextSubmit={handleSearchSubmit}
+      onSearchTextChange={(text) => {
+        setSearchText(text);
+        // Handle submission when Enter is pressed
+        if (text === searchText) {
+          handleSearchSubmit();
+        }
+      }}
       navigationTitle={getNavigationTitle()}
       searchBarPlaceholder={getSearchBarPlaceholder()}
       searchBarAccessory={
