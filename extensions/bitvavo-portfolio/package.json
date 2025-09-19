@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bitvavo-portfolio",
+  "title": "Bitvavo Portfolio Tracker",
+  "description": "View your Bitvavo cryptocurrency portfolio overview with gains/losses",
+  "icon": "icon.png",
+  "author": "jost_kunzel",
+  "version": "1.0.0",
+  "categories": [
+    "Finance"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "portfolio",
+      "title": "View Portfolio",
+      "description": "View your Bitvavo cryptocurrency portfolio with current values and gains/losses",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "bitvavoApiKey",
+      "title": "Bitvavo API Key",
+      "description": "Your Bitvavo API key from account settings (64 characters)",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "Enter your 64-character API key"
+    },
+    {
+      "name": "bitvavoApiSecret",
+      "title": "Bitvavo API Secret",
+      "description": "Your Bitvavo API secret from account settings (128 characters)",
+      "type": "password",
+      "required": true,
+      "placeholder": "Enter your 128-character API secret"
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.4",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "@effect/platform": "^0.88.2",
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^1.17.0",
+    "bitvavo": "^1.5.0",
+    "effect": "^3.16.16",
+    "number-precision": "^1.6.0",
+    "react": "^18.3.1"
+  }
+}
