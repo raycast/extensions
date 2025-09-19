@@ -116,6 +116,18 @@
         {
           "title": "Copy One-time Password",
           "value": "copy-one-time-password"
+        },
+        {
+          "title": "Paste Username",
+          "value": "paste-username"
+        },
+        {
+          "title": "Paste Password",
+          "value": "paste-password"
+        },
+        {
+          "title": "Paste One-time Password",
+          "value": "paste-one-time-password"
         }
       ],
       "default": "open-in-1password",
@@ -146,6 +158,18 @@
         {
           "title": "Copy One-time Password",
           "value": "copy-one-time-password"
+        },
+        {
+          "title": "Paste Username",
+          "value": "paste-username"
+        },
+        {
+          "title": "Paste Password",
+          "value": "paste-password"
+        },
+        {
+          "title": "Paste One-time Password",
+          "value": "paste-one-time-password"
         }
       ],
       "default": "open-in-browser",

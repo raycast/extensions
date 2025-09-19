@@ -29,6 +29,12 @@ export function ItemActionPanel({
             return CopyPassword(item);
           case "copy-one-time-password":
             return CopyOneTimePassword(item);
+          case "paste-username":
+            return PasteUsername(item);
+          case "paste-password":
+            return PastePassword(item);
+          case "paste-one-time-password":
+            return PasteOneTimePassword(item);
           case "share-item":
             return CopyShareItem(item);
         }
@@ -107,6 +113,46 @@ function CopyOneTimePassword(item: Item) {
       field="one-time password"
       attribute="otp"
       shortcut={{ modifiers: ["cmd", "ctrl"], key: "c" }}
+    />
+  );
+}
+
+function PasteUsername(item: Item) {
+  return (
+    <CopyToClipboard
+      id={item.id}
+      key="paste-username"
+      vault_id={item.vault.id}
+      field="username"
+      paste
+      shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+    />
+  );
+}
+
+function PastePassword(item: Item) {
+  return (
+    <CopyToClipboard
+      id={item.id}
+      key="paste-password"
+      vault_id={item.vault.id}
+      field="password"
+      paste
+      shortcut={{ modifiers: ["cmd", "opt"], key: "v" }}
+    />
+  );
+}
+
+function PasteOneTimePassword(item: Item) {
+  return (
+    <CopyToClipboard
+      id={item.id}
+      key="paste-one-time-password"
+      vault_id={item.vault.id}
+      field="one-time password"
+      attribute="otp"
+      paste
+      shortcut={{ modifiers: ["cmd", "ctrl"], key: "v" }}
     />
   );
 }
