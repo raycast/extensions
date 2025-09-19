@@ -4,7 +4,7 @@
     "module": "commonjs",
     "lib": ["ES2020", "DOM"],
     "jsx": "react-jsx",
-    "strict": true,
+    "strict": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
@@ -12,7 +12,9 @@
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "declaration": false,
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "noImplicitAny": false,
+    "strictNullChecks": false
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

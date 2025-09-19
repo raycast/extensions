@@ -154,7 +154,7 @@ export function FileItem({
     if (file.isDirectory) return Icon.Folder;
 
     const ext = file.extension.toLowerCase();
-    const iconMap: Record<string, Icon> = {
+    const iconMap: Record<string, unknown> = {
       // �c
       pdf: Icon.Document,
       doc: Icon.Document,

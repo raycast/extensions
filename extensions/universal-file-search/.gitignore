@@ -11,3 +11,4 @@ dist/
 # AI related documentation files
 *.md
 !README.md
+!CHANGELOG.md

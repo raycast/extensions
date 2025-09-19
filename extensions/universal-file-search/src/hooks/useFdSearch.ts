@@ -107,7 +107,7 @@ export function useFdSearch(
         (a, b) => b.modifiedDate.getTime() - a.modifiedDate.getTime(),
       );
     },
-    [lastSearchQuery, manualTrigger, searchScope, searchMode],
+    [lastSearchQuery, manualTrigger],
     {
       execute: manualTrigger > 0 && lastSearchQuery.length >= 2,
       onError: (error) => {
