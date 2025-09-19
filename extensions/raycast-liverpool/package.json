@@ -1,0 +1,330 @@
+{
+  "name": "raycast-liverpool",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Follow Liverpool FC fixtures, scores, and standings directly from Raycast.",
+  "author": "pauljohnchamberlain",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.17.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "eslint": "^9.35.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.4.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "develop": "ray develop",
+    "dev": "ray develop",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "title": "Liverpool FC",
+  "icon": "icon.png",
+  "categories": [
+    "Productivity"
+  ],
+  "contributors": [],
+  "commands": [
+    {
+      "name": "liverpool",
+      "title": "Liverpool FC",
+      "icon": "icon.png",
+      "subtitle": "Next & Last Match",
+      "description": "Show Liverpool FC next match (Manila time) and last result",
+      "mode": "view",
+      "keywords": [
+        "Liverpool",
+        "Liverpool FC",
+        "LFC",
+        "Reds",
+        "football",
+        "soccer"
+      ],
+      "preferences": [
+        {
+          "name": "footballDataKey",
+          "title": "football-data.org API Key",
+          "type": "password",
+          "required": false,
+          "description": "Optional. If provided, will use football-data.org as primary source."
+        },
+        {
+          "name": "sportsDbKey",
+          "title": "TheSportsDB API Key",
+          "type": "password",
+          "required": false,
+          "description": "Optional. Defaults to public demo key (123)."
+        },
+        {
+          "name": "timezone",
+          "title": "Display Timezone",
+          "type": "dropdown",
+          "required": false,
+          "default": "Asia/Manila",
+          "description": "Timezone for displaying match times",
+          "data": [
+            {
+              "title": "Manila (PHT)",
+              "value": "Asia/Manila"
+            },
+            {
+              "title": "London (GMT/BST)",
+              "value": "Europe/London"
+            },
+            {
+              "title": "New York (EST/EDT)",
+              "value": "America/New_York"
+            },
+            {
+              "title": "Los Angeles (PST/PDT)",
+              "value": "America/Los_Angeles"
+            },
+            {
+              "title": "Tokyo (JST)",
+              "value": "Asia/Tokyo"
+            },
+            {
+              "title": "Sydney (AEST/AEDT)",
+              "value": "Australia/Sydney"
+            },
+            {
+              "title": "Dubai (GST)",
+              "value": "Asia/Dubai"
+            },
+            {
+              "title": "Singapore (SGT)",
+              "value": "Asia/Singapore"
+            },
+            {
+              "title": "Hong Kong (HKT)",
+              "value": "Asia/Hong_Kong"
+            },
+            {
+              "title": "Mumbai (IST)",
+              "value": "Asia/Kolkata"
+            },
+            {
+              "title": "Bangkok (ICT)",
+              "value": "Asia/Bangkok"
+            },
+            {
+              "title": "Beijing (CST)",
+              "value": "Asia/Shanghai"
+            },
+            {
+              "title": "Seoul (KST)",
+              "value": "Asia/Seoul"
+            },
+            {
+              "title": "Jakarta (WIB)",
+              "value": "Asia/Jakarta"
+            },
+            {
+              "title": "Kuala Lumpur (MYT)",
+              "value": "Asia/Kuala_Lumpur"
+            },
+            {
+              "title": "Ho Chi Minh (ICT)",
+              "value": "Asia/Ho_Chi_Minh"
+            },
+            {
+              "title": "Dhaka (BST)",
+              "value": "Asia/Dhaka"
+            },
+            {
+              "title": "Karachi (PKT)",
+              "value": "Asia/Karachi"
+            },
+            {
+              "title": "Tehran (IRST)",
+              "value": "Asia/Tehran"
+            },
+            {
+              "title": "Moscow (MSK)",
+              "value": "Europe/Moscow"
+            },
+            {
+              "title": "Cairo (EET)",
+              "value": "Africa/Cairo"
+            },
+            {
+              "title": "Lagos (WAT)",
+              "value": "Africa/Lagos"
+            },
+            {
+              "title": "Johannesburg (SAST)",
+              "value": "Africa/Johannesburg"
+            },
+            {
+              "title": "Paris (CET/CEST)",
+              "value": "Europe/Paris"
+            },
+            {
+              "title": "Berlin (CET/CEST)",
+              "value": "Europe/Berlin"
+            },
+            {
+              "title": "Rome (CET/CEST)",
+              "value": "Europe/Rome"
+            },
+            {
+              "title": "Madrid (CET/CEST)",
+              "value": "Europe/Madrid"
+            },
+            {
+              "title": "Amsterdam (CET/CEST)",
+              "value": "Europe/Amsterdam"
+            },
+            {
+              "title": "Brussels (CET/CEST)",
+              "value": "Europe/Brussels"
+            },
+            {
+              "title": "Zurich (CET/CEST)",
+              "value": "Europe/Zurich"
+            },
+            {
+              "title": "Stockholm (CET/CEST)",
+              "value": "Europe/Stockholm"
+            },
+            {
+              "title": "Oslo (CET/CEST)",
+              "value": "Europe/Oslo"
+            },
+            {
+              "title": "Copenhagen (CET/CEST)",
+              "value": "Europe/Copenhagen"
+            },
+            {
+              "title": "Helsinki (EET/EEST)",
+              "value": "Europe/Helsinki"
+            },
+            {
+              "title": "Dublin (GMT/IST)",
+              "value": "Europe/Dublin"
+            },
+            {
+              "title": "Lisbon (WET/WEST)",
+              "value": "Europe/Lisbon"
+            },
+            {
+              "title": "Reykjavik (GMT)",
+              "value": "Atlantic/Reykjavik"
+            },
+            {
+              "title": "Toronto (EST/EDT)",
+              "value": "America/Toronto"
+            },
+            {
+              "title": "Vancouver (PST/PDT)",
+              "value": "America/Vancouver"
+            },
+            {
+              "title": "Montreal (EST/EDT)",
+              "value": "America/Montreal"
+            },
+            {
+              "title": "Mexico City (CST/CDT)",
+              "value": "America/Mexico_City"
+            },
+            {
+              "title": "São Paulo (BRT)",
+              "value": "America/Sao_Paulo"
+            },
+            {
+              "title": "Buenos Aires (ART)",
+              "value": "America/Argentina/Buenos_Aires"
+            },
+            {
+              "title": "Lima (PET)",
+              "value": "America/Lima"
+            },
+            {
+              "title": "Bogotá (COT)",
+              "value": "America/Bogota"
+            },
+            {
+              "title": "Santiago (CLT/CLST)",
+              "value": "America/Santiago"
+            },
+            {
+              "title": "Caracas (VET)",
+              "value": "America/Caracas"
+            },
+            {
+              "title": "Chicago (CST/CDT)",
+              "value": "America/Chicago"
+            },
+            {
+              "title": "Denver (MST/MDT)",
+              "value": "America/Denver"
+            },
+            {
+              "title": "Phoenix (MST)",
+              "value": "America/Phoenix"
+            },
+            {
+              "title": "Las Vegas (PST/PDT)",
+              "value": "America/Los_Angeles"
+            },
+            {
+              "title": "Anchorage (AKST/AKDT)",
+              "value": "America/Anchorage"
+            },
+            {
+              "title": "Honolulu (HST)",
+              "value": "Pacific/Honolulu"
+            },
+            {
+              "title": "Melbourne (AEST/AEDT)",
+              "value": "Australia/Melbourne"
+            },
+            {
+              "title": "Brisbane (AEST)",
+              "value": "Australia/Brisbane"
+            },
+            {
+              "title": "Perth (AWST)",
+              "value": "Australia/Perth"
+            },
+            {
+              "title": "Adelaide (ACST/ACDT)",
+              "value": "Australia/Adelaide"
+            },
+            {
+              "title": "Auckland (NZST/NZDT)",
+              "value": "Pacific/Auckland"
+            },
+            {
+              "title": "Fiji (FJT)",
+              "value": "Pacific/Fiji"
+            },
+            {
+              "title": "UTC",
+              "value": "UTC"
+            }
+          ]
+        },
+        {
+          "name": "listStandings",
+          "title": "Use List View for Standings",
+          "type": "checkbox",
+          "required": false,
+          "label": "Render standings as list",
+          "default": true,
+          "description": "If checked, PL/UCL standings render as a list with tags instead of a table."
+        }
+      ]
+    }
+  ]
+}
