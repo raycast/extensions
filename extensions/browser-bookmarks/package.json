@@ -17,7 +17,8 @@
     "theherk",
     "zhsks311",
     "daniel-nagy",
-    "gewoonseba"
+    "gewoonseba",
+    "jmaver"
   ],
   "pastContributors": [
     "danulqua"
@@ -41,6 +42,14 @@
       "name": "openBookmarkBrowser",
       "description": "When enabled, the extension will open the browser from which the bookmark originated, instead of your default browser.",
       "default": true,
+      "required": false
+    },
+    {
+      "type": "checkbox",
+      "label": "Disable Frecency Ranking",
+      "name": "disableFrecency",
+      "description": "When enabled, bookmarks are not ranked by frecency.",
+      "default": false,
       "required": false
     }
   ],
