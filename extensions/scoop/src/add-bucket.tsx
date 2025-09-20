@@ -1,9 +1,10 @@
 import { ActionPanel, Action, Form, useNavigation } from "@raycast/api";
-import { scoopBucketAdd } from "./scoop";
 import { withToast } from "./utils";
+import { useScoop } from "./hooks/scoopHooks";
 
 export default function AddBucketCommand() {
   const { pop } = useNavigation();
+  const scoop = useScoop();
 
   async function handleSubmit(values: { bucketName: string }) {
     if (!values.bucketName) {
@@ -11,7 +12,7 @@ export default function AddBucketCommand() {
     }
     await withToast(
       async () => {
-        await scoopBucketAdd(values.bucketName);
+        await scoop.bucketAdd(values.bucketName);
         pop();
       },
       {

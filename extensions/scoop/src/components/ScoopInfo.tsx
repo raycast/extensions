@@ -1,7 +1,8 @@
 import { Detail, ActionPanel, Action, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { scoopCat, ScoopPackageDetails, scoopInstall, scoopUninstall } from "../scoop";
 import { withToast } from "../utils";
+import { useScoop } from "../hooks/scoopHooks";
+import { ScoopPackageDetails } from "../types/index.types";
 
 export function ScoopInfo({
   packageName,
@@ -15,9 +16,10 @@ export function ScoopInfo({
   const [details, setDetails] = useState<ScoopPackageDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { pop } = useNavigation();
+  const scoop = useScoop();
 
   useEffect(() => {
-    scoopCat(packageName).then((data) => {
+    scoop.cat(packageName).then((data) => {
       setDetails(data);
       setIsLoading(false);
     });
@@ -58,7 +60,7 @@ export function ScoopInfo({
               onAction={() =>
                 withToast(
                   async () => {
-                    await scoopUninstall(packageName);
+                    await scoop.uninstall(packageName);
                     onAction?.();
                     pop();
                   },
@@ -76,7 +78,7 @@ export function ScoopInfo({
               onAction={() =>
                 withToast(
                   async () => {
-                    await scoopInstall(packageName);
+                    await scoop.install(packageName);
                     onAction?.();
                     pop();
                   },
