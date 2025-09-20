@@ -10,7 +10,8 @@
 
 1. Choose your search engine or website in the dropdown in top right (click the dropdown or press <kbd>⌘</kbd><kbd>P</kbd>).
 1. Enter your search query. A list of search suggestions from Google will appear.
-1. Press Enter to open the selected item in the selected site in your default browser.
+1. If you type a URL (e.g., "example.com/page" or "https://example.com"), pressing Enter opens that URL directly.
+1. Otherwise, press Enter to open the selected suggestion in the selected site in your default browser.
 
 ## How to configure saved sites
 
