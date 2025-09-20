@@ -46,9 +46,11 @@ export default function main() {
   const preferences = getPreferenceValues();
 
   React.useEffect(() => {
-    Clipboard.readText().then((text) => {
-      setClipboardText(text?.toString() || "");
-    });
+    if (preferences.autoPasteClipboard) {
+      Clipboard.readText().then((text) => {
+        setClipboardText(text?.toString() || "");
+      });
+    }
   });
 
   React.useEffect(() => {
