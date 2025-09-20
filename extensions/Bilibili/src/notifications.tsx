@@ -50,7 +50,7 @@ function notify(item: Bilibili.DynamicItem) {
       doNotify(
         item.modules.module_author.name,
         item.type,
-        item.modules.module_dynamic.desc.text,
+        item.modules.module_dynamic.desc?.text || `${item.modules.module_author.name}'s Post`,
         `https://www.bilibili.com/opus/${item.id_str}`
       );
       break;
