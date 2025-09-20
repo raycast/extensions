@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "folder-organizer",
+  "title": "Folder Organizer",
+  "description": "Organize files in Downloads or any custom folder by automatically sorting them into categorized subfolders",
+  "icon": "folder_organizer.png",
+  "author": "madushanj",
+  "keywords": [
+    "downloads",
+    "folder",
+    "organizer",
+    "file",
+    "sorter",
+    "productivity"
+  ],
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "assets": [
+    "assets"
+  ],
+  "commands": [
+    {
+      "name": "clean-downloads-folder",
+      "title": "Organize Downloads Folder",
+      "description": "Sort files in Downloads folder into organized categories",
+      "icon": "download_folder.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "organize-custom-folder",
+      "title": "Organize Custom Folder",
+      "description": "Choose any folder and organize its files into categorized subfolders",
+      "icon": "custom_folder.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "manage-categories",
+      "title": "Manage File Categories",
+      "description": "Configure and customize file organization categories",
+      "icon": "change_categories.png",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.7",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
