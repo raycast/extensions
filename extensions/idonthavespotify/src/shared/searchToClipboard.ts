@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import { Clipboard, showToast, Toast } from "@raycast/api";
+import { Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
 
 import { API_URL, LINK_REGEX } from "../constants";
 import { Adapter, ApiError, SearchResult } from "../@types/global";
@@ -12,7 +12,16 @@ export const isLinkValid = (link: string) => {
   );
 };
 
+const inAppReplacements: Partial<Record<Adapter, [string | RegExp, string]>> = {
+  [Adapter.AppleMusic]: ["https://", "music://"],
+  [Adapter.Spotify]: ["https://open.spotify.com/", "spotify://"],
+  [Adapter.Deezer]: ["https://www.deezer.com/", "deezer://"],
+  [Adapter.Tidal]: [/https:\/\/tidal.com\/(browse\/)?/, "tidal://"],
+};
+
 export const apiCall = async (link: string, adapter?: Adapter) => {
+  const preferences = getPreferenceValues<Preferences>();
+
   const request = await fetch(API_URL, {
     method: "POST",
     headers: {
@@ -27,6 +36,15 @@ export const apiCall = async (link: string, adapter?: Adapter) => {
     throw new Error(
       response.code === "VALIDATION" ? "Invalid link or not supported" : "Internal error, please try again",
     );
+  }
+
+  if (preferences.openInApp) {
+    response.links.forEach((item) => {
+      const [searchValue, replaceValue] = inAppReplacements[item.type] ?? [];
+      if (searchValue) {
+        item.url = item.url.replace(searchValue, replaceValue!);
+      }
+    });
   }
 
   return response;

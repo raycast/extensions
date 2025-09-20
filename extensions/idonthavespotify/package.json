@@ -5,6 +5,9 @@
   "description": "Effortlessly convert Spotify links to your preferred streaming service",
   "version": "1.0.0",
   "author": "sjdonado",
+  "contributors": [
+    "fcannizzaro"
+  ],
   "icon": "icon.png",
   "categories": [
     "Media"
@@ -57,6 +60,16 @@
       "description": "Convert a link from Spotify, YouTube Music, Apple Music, or Deezer to SoundCloud and copy it back.",
       "mode": "no-view",
       "disabledByDefault": true
+    }
+  ],
+  "preferences": [
+    {
+      "name": "openInApp",
+      "title": "Open native applications",
+      "label": "Enabled",
+      "description": "If checked the link will be opened in the related applications if available",
+      "type": "checkbox",
+      "required": false
     }
   ],
   "dependencies": {
