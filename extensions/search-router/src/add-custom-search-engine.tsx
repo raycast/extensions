@@ -2,6 +2,7 @@ import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from
 import { useState } from "react";
 import type { SearchEngine } from "./types";
 import { getCustomSearchEngines, addCustomSearchEngine } from "./data/custom-search-engines";
+import { builtinSearchEngines } from "./data/builtin-search-engines";
 import { isValidUrl } from "./utils";
 
 type AddCustomSearchEngineProps = {
@@ -62,13 +63,21 @@ export default function AddCustomSearchEngine({ engine, onEngineAdded }: AddCust
       return;
     }
 
-    // Check for duplicate triggers (only if not editing or trigger changed)
+    // Check for duplicate triggers in both custom and built-in engines
     const existingEngines = getCustomSearchEngines();
     const cleanedTrigger = values.trigger.trim().toLowerCase().replace(/^!/, "");
-    const duplicateEngine = existingEngines.find((e) => e.t === cleanedTrigger && (!isEditing || e.t !== engine.t));
-
-    if (duplicateEngine) {
-      setTriggerError("A search engine with this trigger already exists");
+    
+    // Check custom engines first
+    const duplicateCustomEngine = existingEngines.find((e) => e.t === cleanedTrigger && (!isEditing || e.t !== engine.t));
+    if (duplicateCustomEngine) {
+      setTriggerError("A custom search engine with this trigger already exists");
+      return;
+    }
+    
+    // Check built-in engines (but allow editing existing custom engines)
+    const duplicateBuiltInEngine = builtinSearchEngines.find((e) => e.t === cleanedTrigger);
+    if (duplicateBuiltInEngine && !isEditing) {
+      setTriggerError("A built-in search engine with this trigger already exists");
       return;
     }
 
