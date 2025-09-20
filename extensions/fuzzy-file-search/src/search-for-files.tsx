@@ -73,7 +73,7 @@ export default function Command() {
         });
       }
 
-      const outFD = fs.openSync(fdOutputTemp, "w");
+      const outFD = fs.openSync(fdOutputTemp, "wx");
       const fd = spawn(fdPath, [...optionalArgs, "--print0", "--follow", ".", ...searchDirs], {
         stdio: ["ignore", outFD, "pipe"],
         signal: abortableFd.current?.signal,
@@ -87,12 +87,13 @@ export default function Command() {
 
         fd.on("error", () => {
           console.log("aborting fd");
+          fs.rmSync(fdOutputTemp, { force: true });
+          reject("'fd' aborted");
         });
 
-        // this is executed both on finish and after on error
         fd.on("close", (code) => {
           fs.closeSync(outFD);
-          if (code === 0 || code === null) {
+          if (code === 0) {
             resolve();
           } else {
             console.log("closing with code", code);
@@ -104,12 +105,10 @@ export default function Command() {
 
       toast?.hide();
 
-      if (abortableFd.current?.signal.aborted) {
-        return "/dev/null";
-      }
-
+      console.log(`renaming ${basename(fdOutputTemp)} -> ${basename(fdOutput)}`);
       await afs.rename(fdOutputTemp, fdOutput);
-      return fdOutput;
+      console.log(`finished renaming ${basename(fdOutputTemp)} -> ${basename(fdOutput)}`);
+      return { filepath: fdOutput, randomUUID: randomUUID() };
     },
     [searchRoot, fdPath],
     {
@@ -121,7 +120,7 @@ export default function Command() {
 
   // Get filteredPaths from fzf output
   const { data: filteredPaths, isLoading: isFilteredPathsLoading } = usePromise(
-    async (searchText: string, fzfPath?: string, fdOutput?: string) => {
+    async (searchText: string, fzfPath?: string, fdOutput?: string, _?: string) => {
       assert(fzfPath !== undefined);
       assert(fdOutput !== undefined);
 
@@ -165,7 +164,7 @@ export default function Command() {
       });
       return filteredResults;
     },
-    [searchText, fzfPath, fdOutput],
+    [searchText, fzfPath, fdOutput?.filepath, fdOutput?.randomUUID],
     {
       execute: fzfPath !== undefined && fdOutput !== undefined,
       abortable: abortableFzf,
