@@ -10,11 +10,6 @@ import {
 import { useState, useEffect } from "react";
 import NepaliDate from "nepali-date-converter";
 
-interface Preferences {
-  weekStart: "0" | "1";
-  language: "en" | "np";
-}
-
 const CONSTANTS = {
   en: {
     months: [
