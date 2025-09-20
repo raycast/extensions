@@ -2,7 +2,7 @@ import { ActionPanel, List, Action, getPreferenceValues, environment, showToast,
 import { useCachedPromise, useCachedState, usePromise } from "@raycast/utils";
 import { spawn } from "child_process";
 import path, { basename } from "path";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ensureFdCLI } from "./lib/fd-downloader";
 import os from "os";
 import fs from "fs";
@@ -12,7 +12,7 @@ import readline from "readline";
 import Stream from "stream";
 import assert from "assert";
 import sanitizeFilename from "sanitize-filename";
-import { randomUUID } from "crypto";
+import { randomInt, randomUUID } from "crypto";
 
 type Prefs = {
   includeDirectories: boolean;
@@ -46,6 +46,34 @@ export default function Command() {
     }
   });
 
+  // cleanup old .temp files (older than 1h)
+  useEffect(() => {
+    let canceled = false;
+    const CutoffMs = 1 * 60 * 60 * 1000;
+    const now = Date.now();
+
+    (async () => {
+      const allFiles = await afs.readdir(environment.supportPath);
+      const tempFiles = allFiles.filter((f) => f.endsWith(".temp"));
+      for (const filename of tempFiles) {
+        if (canceled) break;
+
+        const filepath = path.join(environment.supportPath, filename);
+        const stats = await afs.stat(filepath);
+
+        if (now - stats.birthtimeMs > CutoffMs) {
+          await afs.rm(filepath, {
+            force: true,
+          });
+        }
+      }
+    })();
+
+    return () => {
+      canceled = true;
+    };
+  }, []);
+
   // Get fdOutput filepath
   const { data: fdOutput, isLoading: isFdOutputLoading } = useCachedPromise(
     async (searchRoot?: string, fdPath?: string) => {
@@ -62,7 +90,7 @@ export default function Command() {
       // Final file fzf is reading from
       const fdOutput = path.join(environment.supportPath, `fd-out-${sanitizeFilename(searchRoot)}.txt`);
       // File to write to during the indexing
-      const fdOutputTemp = `${fdOutput}.${Date.now()}${randomUUID()}.temp`;
+      const fdOutputTemp = `${fdOutput}.${Date.now()}${randomInt(10000)}.temp`;
 
       let toast: Toast | null = null;
       if (!fs.existsSync(fdOutput)) {
@@ -87,6 +115,7 @@ export default function Command() {
 
         fd.on("error", () => {
           console.log("aborting fd");
+          console.log(`${basename(fdOutputTemp)} abort status: ${abortableFd.current?.signal.aborted}`);
           fs.rmSync(fdOutputTemp, { force: true });
           reject("'fd' aborted");
         });
@@ -104,6 +133,8 @@ export default function Command() {
       });
 
       toast?.hide();
+
+      console.log(`${basename(fdOutputTemp)} abort status: ${abortableFd.current?.signal.aborted}`);
 
       console.log(`renaming ${basename(fdOutputTemp)} -> ${basename(fdOutput)}`);
       await afs.rename(fdOutputTemp, fdOutput);
@@ -123,6 +154,7 @@ export default function Command() {
     async (searchText: string, fzfPath?: string, fdOutput?: string, _?: string) => {
       assert(fzfPath !== undefined);
       assert(fdOutput !== undefined);
+      assert(_ !== undefined); // required by linter
 
       // sanitize input
       let searchTerm = searchText;
@@ -164,6 +196,7 @@ export default function Command() {
       });
       return filteredResults;
     },
+    // randomUUID is used to trigger fzf on updated index list from fd
     [searchText, fzfPath, fdOutput?.filepath, fdOutput?.randomUUID],
     {
       execute: fzfPath !== undefined && fdOutput !== undefined,
