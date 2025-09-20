@@ -1,5 +1,10 @@
 # Kaomoji Search Changelog
 
+## [Windows Support] - 2025-09-28
+
+- Updated refences to support Windows
+- Added know contributors
+
 ## [Grid layout] - 2023-02-07
 
 - Add Grid layout support
