@@ -66,14 +66,16 @@ export default function AddCustomSearchEngine({ engine, onEngineAdded }: AddCust
     // Check for duplicate triggers in both custom and built-in engines
     const existingEngines = getCustomSearchEngines();
     const cleanedTrigger = values.trigger.trim().toLowerCase().replace(/^!/, "");
-    
+
     // Check custom engines first
-    const duplicateCustomEngine = existingEngines.find((e) => e.t === cleanedTrigger && (!isEditing || e.t !== engine.t));
+    const duplicateCustomEngine = existingEngines.find(
+      (e) => e.t === cleanedTrigger && (!isEditing || e.t !== engine.t),
+    );
     if (duplicateCustomEngine) {
       setTriggerError("A custom search engine with this trigger already exists");
       return;
     }
-    
+
     // Check built-in engines (but allow editing existing custom engines)
     const duplicateBuiltInEngine = builtinSearchEngines.find((e) => e.t === cleanedTrigger);
     if (duplicateBuiltInEngine && !isEditing) {
