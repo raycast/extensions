@@ -48,7 +48,7 @@ export default function Command() {
                 like: formatNumber(item.like),
               }}
             />
-          )
+          );
         })}
       </List>
     </CheckLogin>

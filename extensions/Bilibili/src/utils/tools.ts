@@ -34,5 +34,5 @@ export function generateRemainderScript(title: string, uploaderName: string, url
           make new reminder with properties {name:"${title} - ${uploaderName}", body:"${formatUrl(url)}"}
         end tell
       end try
-    end tell`
+    end tell`;
 }

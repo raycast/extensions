@@ -159,24 +159,24 @@ declare global {
     }
 
     export type SearchVideoResult = Omit<Video, "uri"> & {
-      arcurl: string,
-      like: number,
-      danmaku: number,
-      play: number,
-      duration: string,
+      arcurl: string;
+      like: number;
+      danmaku: number;
+      play: number;
+      duration: string;
       mid: number;
       author: string;
       upic: string;
     };
 
     export type SearchResult = {
-      data: Array<SearchVideoResult>,
-      result_type: 'video'
-    }
+      data: Array<SearchVideoResult>;
+      result_type: "video";
+    };
 
     export interface SearchVideosResponse extends Omit<BaseResponse, "data"> {
       data: {
-        result: Array<SearchResult>
+        result: Array<SearchResult>;
       };
     }
 
