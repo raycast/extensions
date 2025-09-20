@@ -2,7 +2,7 @@
 import type { SearchEngine } from "../types";
 
 // @ts-expect-error: TS2590 - Union type is too complex to represent
-export const searchEngines: SearchEngine[] = [
+export const builtinSearchEngines: SearchEngine[] = [
   {
     s: "01net",
     d: "www.01net.com",

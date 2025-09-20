@@ -1,7 +1,8 @@
 import { LaunchProps, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { getDefaultSearchEngine } from "./data/cache";
-import { searchEngines } from "./data/search-engines";
+import { builtinSearchEngines } from "./data/builtin-search-engines";
+import { getCustomSearchEngines } from "./data/custom-search-engines";
 import { isValidUrl, safeOpenUrl } from "./utils";
 
 export default async function search(props: LaunchProps<{ arguments: { query: string }; fallbackText?: string }>) {
@@ -38,7 +39,14 @@ export default async function search(props: LaunchProps<{ arguments: { query: st
 
 function findSearchEngine(key?: string) {
   if (!key) return null;
-  return searchEngines.find((engine) => engine.t === key.toLowerCase());
+
+  // First check custom search engines
+  const customEngines = getCustomSearchEngines();
+  const customEngine = customEngines.find((engine) => engine.t === key.toLowerCase());
+  if (customEngine) return customEngine;
+
+  // Then check built-in search engines
+  return builtinSearchEngines.find((engine) => engine.t === key.toLowerCase());
 }
 
 function processQuery(rawQuery: string) {
