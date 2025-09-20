@@ -15,9 +15,9 @@
       "name": "apiKey",
       "type": "password",
       "required": true,
-      "title": "BaseScan API Key",
-      "description": "A BaseScan API key from https://basescan.org/apis",
-      "placeholder": "Enter your BaseScan API key"
+      "title": "Etherscan API Key",
+      "description": "An Etherscan API key from https://etherscan.io/apidashboard",
+      "placeholder": "Enter your Etherscan API key"
     }
   ],
   "commands": [
