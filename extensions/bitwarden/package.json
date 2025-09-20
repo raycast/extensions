@@ -206,7 +206,7 @@
       "title": "Create Login",
       "subtitle": "Bitwarden",
       "description": "Create a new login item in the authenticated Bitwarden vault.",
-      "icon": "create-folder.png",
+      "icon": "create-login.png",
       "mode": "view"
     },
     {
