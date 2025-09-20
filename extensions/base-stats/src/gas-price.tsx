@@ -18,9 +18,11 @@ const PRICE_CACHE_KEY = "base-gas-price";
 async function fetchGasPrice(apiKey: string): Promise<number> {
   try {
     console.log("Fetching gas price...");
-    const response = await fetch(`https://api.basescan.org/api?module=proxy&action=eth_gasPrice&apikey=${apiKey}`);
+    const response = await fetch(
+      `https://api.etherscan.io/v2/api?chainid=8453&module=proxy&action=eth_gasPrice&apikey=${apiKey}`,
+    );
 
-    const data = (await response.json()) as BaseScanResponse;
+    const data = (await response.json()) as EtherscanResponse;
     console.log("Response:", data);
 
     if (!data.result) {
