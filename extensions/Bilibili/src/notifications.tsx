@@ -3,7 +3,7 @@ import { checkLogin, getDynamicFeed } from "./apis";
 
 import { spawnSync } from "child_process";
 import { runAppleScript } from "run-applescript";
-import { getPreferenceValues, LocalStorage } from "@raycast/api";
+import { Color, getPreferenceValues, Icon, LocalStorage, showHUD } from "@raycast/api";
 
 interface Preferences {
   justNotifyVideos: boolean;
@@ -81,7 +81,10 @@ function sleep(time: number) {
 }
 
 export default async function Command() {
-  if (!checkLogin()) return;
+  if (!checkLogin()) {
+    showHUD("Please use Login Bilibili command to login first.");
+    return;
+  }
 
   console.log("running");
   const items = await getDynamicFeed();

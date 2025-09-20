@@ -14,9 +14,9 @@ export function useSearchVideos(idx: number, keyword: string) {
       try {
         const res = await getSearchVideos(idx, keyword);
 
-        const data = res.filter((item) => item.arcurl);
+        const data = res.filter((item) => item.arcurl)
         if (idx === 1) {
-          setVideoResults(data);
+          setVideoResults(data)
         } else {
           setVideoResults([...videoResults, ...data]);
         }

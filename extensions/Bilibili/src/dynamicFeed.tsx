@@ -43,7 +43,7 @@ export default function Command() {
   ];
 
   const filterMap = {
-    "0": (_item: Bilibili.DynamicItem) => true,
+    "0": (item: Bilibili.DynamicItem) => !!item,
     "1": (item: Bilibili.DynamicItem) =>
       item.type === "DYNAMIC_TYPE_AV" ? item.modules.module_dynamic.major.archive.last_play_time === 0 : false,
     "2": (item: Bilibili.DynamicItem) =>
@@ -92,27 +92,27 @@ export default function Command() {
           markAsWatchedCallback={
             last_play_time === 0
               ? async () => {
-                  try {
-                    const videoInfo = await getVideoInfo(aid);
+                try {
+                  const videoInfo = await getVideoInfo(aid);
 
-                    await postHeartbeat(videoInfo.aid, videoInfo.cid);
-                    if (!watchedList.includes(bvid)) setWatchedList([bvid, ...watchedList].slice(0, 200));
+                  await postHeartbeat(videoInfo.aid, videoInfo.cid);
+                  if (!watchedList.includes(bvid)) setWatchedList([bvid, ...watchedList].slice(0, 200));
 
-                    refetch({});
-                    await showToast({ style: Toast.Style.Success, title: "Make as watched successfully" });
-                  } catch {
-                    await showToast({
-                      style: Toast.Style.Failure,
-                      title: "Make as watched failed, please retry later",
-                    });
-                  }
+                  refetch({});
+                  await showToast({ style: Toast.Style.Success, title: "Make as watched successfully" });
+                } catch {
+                  await showToast({
+                    style: Toast.Style.Failure,
+                    title: "Make as watched failed, please retry later",
+                  });
                 }
+              }
               : undefined
           }
         />
       );
     } else if (isPost(item)) {
-      const { text } = item.modules.module_dynamic.desc;
+      const { text = `${item.modules.module_author.name}'s Post` } = item.modules.module_dynamic.desc || {};
       const { like, forward, comment } = item.modules.module_stat;
 
       return (

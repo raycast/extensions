@@ -60,10 +60,18 @@ export function Video(props: {
               <Metadata.Label title="Duration" text={String(props.duration)} />
               <Metadata.Label title="Time" text={new Date(props.pubdate * 1000).toLocaleString()} />
               <Metadata.TagList title="Stat">
-                {props.stat.highlight && <Metadata.TagList.Item text={props.stat.highlight} color={"#FB7299"} />}
-                {props.stat.view && <Metadata.TagList.Item text={`Play: ${props.stat.view}`} color={Color.Green} />}
-                {props.stat.coin && <Metadata.TagList.Item text={`Coin: ${props.stat.coin}`} color={Color.Orange} />}
-                {props.stat.view && <Metadata.TagList.Item text={`View: ${props.stat.view}`} color={Color.Purple} />}
+                {props.stat.highlight && (
+                  <Metadata.TagList.Item text={props.stat.highlight} color={"#FB7299"} />
+                )}
+                {props.stat.view && (
+                  <Metadata.TagList.Item text={`Play: ${props.stat.view}`} color={Color.Green} />
+                )}
+                {props.stat.coin && (
+                  <Metadata.TagList.Item text={`Coin: ${props.stat.coin}`} color={Color.Orange} />
+                )}
+                {props.stat.view && (
+                  <Metadata.TagList.Item text={`View: ${props.stat.view}`} color={Color.Purple} />
+                )}
                 {props.stat.danmaku && (
                   <Metadata.TagList.Item text={`Danmaku: ${props.stat.danmaku}`} color={Color.Blue} />
                 )}
