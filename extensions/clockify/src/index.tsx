@@ -318,7 +318,7 @@ function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
   );
 }
 
-async function getTimeEntries({ onError }: { onError?: (state: boolean) => void }): Promise<TimeEntry[]> {
+export async function getTimeEntries({ onError }: { onError?: (state: boolean) => void }): Promise<TimeEntry[]> {
   const workspaceId = await LocalStorage.getItem("workspaceId");
   const userId = await LocalStorage.getItem("userId");
 
