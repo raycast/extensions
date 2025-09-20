@@ -1,0 +1,60 @@
+{
+  "name": "lgtm-pusher",
+  "title": "Lgtm Pusher",
+  "version": "1.0.0",
+  "description": "Generate awesome LGTM images instantly with AI-powered creativity. Perfect for code reviews and GitHub PRs!",
+  "icon": "icon.png",
+  "author": "YuminosukeSato",
+  "license": "MIT",
+  "categories": ["Productivity", "Developer Tools"],
+  "keywords": ["lgtm", "image", "generator", "github", "gemini", "ai", "code review", "pull request"],
+  "publish": {
+    "owner": "YuminosukeSato",
+    "repo": "lgtm-pusher"
+  },
+  "commands": [
+    {
+      "name": "generate-lgtm",
+      "title": "Generate Lgtm",
+      "subtitle": "LGTM Pusher",
+      "description": "Generate LGTM image and copy to clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "quick-lgtm",
+      "title": "Quick Lgtm",
+      "subtitle": "LGTM Pusher",
+      "description": "Generate with last settings (no view)",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "geminiApiKey",
+      "type": "password",
+      "title": "Gemini API Key",
+      "description": "Your Google Gemini API key",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.75.0",
+    "@google/generative-ai": "^0.11.0",
+    "jimp": "^0.22.12"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.39",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

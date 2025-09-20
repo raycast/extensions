@@ -1,0 +1,11 @@
+{
+  "root": true,
+  "extends": [
+    "@raycast"
+  ],
+  "rules": {
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-var-requires": "off",
+    "react/react-in-jsx-scope": "off"
+  }
+}
