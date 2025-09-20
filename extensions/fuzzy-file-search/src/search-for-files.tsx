@@ -6,11 +6,13 @@ import { useRef, useState } from "react";
 import { ensureFdCLI } from "./lib/fd-downloader";
 import os from "os";
 import fs from "fs";
+import afs from "fs/promises";
 import { ensureFzfCLI } from "./lib/fzf-downloader";
 import readline from "readline";
 import Stream from "stream";
 import assert from "assert";
 import sanitizeFilename from "sanitize-filename";
+import { randomUUID } from "crypto";
 
 type Prefs = {
   includeDirectories: boolean;
@@ -45,25 +47,33 @@ export default function Command() {
   });
 
   // Get fdOutput filepath
-  const { data: fdOutput, isLoading: isFdOutputLoading } = usePromise(
+  const { data: fdOutput, isLoading: isFdOutputLoading } = useCachedPromise(
     async (searchRoot?: string, fdPath?: string) => {
       assert(searchRoot !== undefined);
       assert(fdPath !== undefined);
 
-      let optionalArgs = ["--type", "file"];
+      let optionalArgs: string[] = [];
       if (prefs.includeDirectories) {
-        optionalArgs = [];
+        optionalArgs = [...optionalArgs, "--type", "file"];
       }
 
       const searchDirs = searchRoot.split(" ");
 
-      const toast = await showToast({
-        title: "Indexing",
-        message: "indexing files using fd",
-        style: Toast.Style.Animated,
-      });
+      // Final file fzf is reading from
       const fdOutput = path.join(environment.supportPath, `fd-out-${sanitizeFilename(searchRoot)}.txt`);
-      const outFD = fs.openSync(fdOutput, "w");
+      // File to write to during the indexing
+      const fdOutputTemp = `${fdOutput}.${Date.now()}${randomUUID()}.temp`;
+
+      let toast: Toast | null = null;
+      if (!fs.existsSync(fdOutput)) {
+        toast = await showToast({
+          title: "Indexing",
+          message: "updating index of files using fd",
+          style: Toast.Style.Animated,
+        });
+      }
+
+      const outFD = fs.openSync(fdOutputTemp, "w");
       const fd = spawn(fdPath, [...optionalArgs, "--print0", "--follow", ".", ...searchDirs], {
         stdio: ["ignore", outFD, "pipe"],
         signal: abortableFd.current?.signal,
@@ -86,19 +96,26 @@ export default function Command() {
             resolve();
           } else {
             console.log("closing with code", code);
-            fs.rmSync(fdOutput, { force: true });
+            fs.rmSync(fdOutputTemp, { force: true });
             reject(`Exit code of 'fd' = ${code}:\n${stderr}`);
           }
         });
       });
 
-      await toast.hide();
+      toast?.hide();
+
+      if (abortableFd.current?.signal.aborted) {
+        return "/dev/null";
+      }
+
+      await afs.rename(fdOutputTemp, fdOutput);
       return fdOutput;
     },
     [searchRoot, fdPath],
     {
       execute: searchRoot !== undefined && fdPath !== undefined,
       abortable: abortableFd,
+      keepPreviousData: true,
     },
   );
 
