@@ -16,6 +16,7 @@ import { randomInt, randomUUID } from "crypto";
 
 type Prefs = {
   includeDirectories: boolean;
+  includeHidden: boolean;
   ignoreSpacesInSearch: boolean;
   customSearchDirs: string;
 };
@@ -83,6 +84,9 @@ export default function Command() {
       let optionalArgs: string[] = [];
       if (prefs.includeDirectories) {
         optionalArgs = [...optionalArgs, "--type", "file"];
+      }
+      if (prefs.includeHidden) {
+        optionalArgs = [...optionalArgs, "--hidden"];
       }
 
       const searchDirs = searchRoot.split(" ");

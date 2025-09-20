@@ -19,11 +19,20 @@
       "preferences": [
         {
           "name": "includeDirectories",
-          "title": "Include directories in results",
-          "label": "Look for both directories and files",
-          "description": "If enabled, the results will include files and directories. If disabled, the search will only look for files.",
+          "title": "Include Directories",
+          "label": "Search for both directories and files",
+          "description": "If enabled, the search results will include files and directories. If disabled, the search will only look for files.",
           "type": "checkbox",
           "default": true,
+          "required": false
+        },
+        {
+          "name": "includeHidden",
+          "title": "Include Hidden",
+          "label": "Include hidden files and directories",
+          "description": "If enabled, the results will include hidden files and directories.",
+          "type": "checkbox",
+          "default": false,
           "required": false
         },
         {
