@@ -16,6 +16,7 @@ type CreateLoginFormValues = {
   visiblePassword: string;
   hiddenPassword: string;
   folderId: string;
+  uri: string;
 };
 
 const CreateLoginCommand = () => (
@@ -41,7 +42,7 @@ function CreateLoginComponent() {
     const toast = await showToast({ title: "Creating Login...", style: Toast.Style.Animated });
     setIsSubmitting(true);
     try {
-      const { name, username, visiblePassword, hiddenPassword, folderId } = values;
+      const { name, username, visiblePassword, hiddenPassword, folderId, uri } = values;
       const password = showPassword ? visiblePassword : hiddenPassword;
       const effectiveFolderId = folderId === FOLDER_OPTIONS.NO_FOLDER ? null : folderId;
       const { error } = await bitwarden.createLoginItem({
@@ -49,6 +50,7 @@ function CreateLoginComponent() {
         username,
         password,
         folderId: effectiveFolderId,
+        uri: uri || undefined,
       });
       if (error) throw error;
 
@@ -76,12 +78,17 @@ function CreateLoginComponent() {
       visiblePassword: "",
       hiddenPassword: "",
       folderId: FOLDER_OPTIONS.NO_FOLDER,
+      uri: "",
     },
     validation: {
       name: FormValidation.Required,
-      username: FormValidation.Required,
       visiblePassword: showPassword ? FormValidation.Required : undefined,
       hiddenPassword: showPassword ? undefined : FormValidation.Required,
+      uri: (value) => {
+        if (value && !value.match(/^https?:\/\//)) {
+          return "Please enter a valid URI";
+        }
+      },
     },
   });
 
@@ -138,8 +145,8 @@ function CreateLoginComponent() {
         </ActionPanel>
       }
     >
-      <Form.TextField {...itemProps.name} title="Name" placeholder="eg: GitHub, Gmail" storeValue={false} />
-      <Form.Dropdown {...itemProps.folderId} title="Folder" placeholder="Select folder (optional)" storeValue={false}>
+      <Form.TextField {...itemProps.name} title="Name" placeholder="GitHub, Gmail" storeValue={false} />
+      <Form.Dropdown {...itemProps.folderId} title="Folder" placeholder="Select folder" storeValue={false}>
         {folders.map((folder) => (
           <Form.Dropdown.Item
             key={folder.id}
@@ -149,12 +156,8 @@ function CreateLoginComponent() {
           />
         ))}
       </Form.Dropdown>
-      <Form.TextField
-        {...itemProps.username}
-        title="Username"
-        placeholder="eg: john.doe@example.com"
-        storeValue={false}
-      />
+      <Form.TextField {...itemProps.username} title="Username" placeholder="john.doe@example.com" storeValue={false} />
+      <Form.TextField {...itemProps.uri} title="Website URI" placeholder="https://example.com" storeValue={false} />
       {showPassword ? (
         <Form.TextField
           {...itemProps.visiblePassword}

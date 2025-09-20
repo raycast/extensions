@@ -80,6 +80,7 @@ type CreateLoginItemOptions = {
   username: string;
   password: string;
   folderId: string | null;
+  uri?: string;
 };
 
 const { supportPath } = environment;
@@ -457,6 +458,10 @@ export class Bitwarden {
       loginTemplate.password = options.password;
       loginTemplate.totp = null;
       loginTemplate.fido2Credentials = undefined;
+
+      if (options.uri) {
+        loginTemplate.uris = [{ match: null, uri: options.uri }];
+      }
 
       const { result: encodedItem, error: encodeError } = await this.encode(JSON.stringify(itemTemplate));
       if (encodeError) throw encodeError;
