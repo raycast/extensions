@@ -67,6 +67,7 @@ export default function ContainerDetail({ docker, containerId }: { docker: Docke
               shortcut={{ modifiers: ['cmd', 'shift'], key: 'w' }}
               onAction={withToast({
                 action: () => stopContainer(containerInfo),
+                onStart: () => `Stopping container ${containerName(containerInfo)}`,
                 onSuccess: () => `Container ${containerName(containerInfo)} stopped`,
                 onFailure: (error) => formatContainerError(error, containerInfo),
               })}
@@ -79,6 +80,7 @@ export default function ContainerDetail({ docker, containerId }: { docker: Docke
               shortcut={{ modifiers: ['opt'], key: 'r' }}
               onAction={withToast({
                 action: () => restartContainer(containerInfo),
+                onStart: () => `Restarting container ${containerName(containerInfo)}`,
                 onSuccess: () => `Container ${containerName(containerInfo)} restarted`,
                 onFailure: (error) => formatContainerError(error, containerInfo),
               })}
@@ -90,6 +92,7 @@ export default function ContainerDetail({ docker, containerId }: { docker: Docke
               shortcut={{ modifiers: ['cmd', 'shift'], key: 'r' }}
               onAction={withToast({
                 action: () => startContainer(containerInfo),
+                onStart: () => `Starting container ${containerName(containerInfo)}`,
                 onSuccess: () => `Container ${containerName(containerInfo)} started`,
                 onFailure: (error) => formatContainerError(error, containerInfo),
               })}
@@ -107,6 +110,7 @@ export default function ContainerDetail({ docker, containerId }: { docker: Docke
                   await removeContainer(containerInfo);
                   pop();
                 },
+                onStart: () => `Removing container ${containerName(containerInfo)}`,
                 onSuccess: () => `Container ${containerName(containerInfo)} removed`,
                 onFailure: (error) => formatContainerError(error, containerInfo),
               })}
@@ -124,6 +128,7 @@ export default function ContainerDetail({ docker, containerId }: { docker: Docke
                   await stopAndRemoveContainer(containerInfo);
                   pop();
                 },
+                onStart: () => `Stopping and removing container ${containerName(containerInfo)}`,
                 onSuccess: () => `Container ${containerName(containerInfo)} stopped and removed`,
                 onFailure: (error) => formatContainerError(error, containerInfo),
               })}

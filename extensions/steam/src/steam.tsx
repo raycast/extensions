@@ -101,7 +101,9 @@ const App = () => {
           ) : null}
           {recentlyPlayed && recentlyPlayed?.length > 0 ? (
             <List.Section title="Recently Played Games">
-              {recentlyPlayed?.slice(0, 5)?.map((game) => <MyGamesListType key={game.appid} game={game} />)}
+              {recentlyPlayed?.slice(0, 5)?.map((game) => (
+                <MyGamesListType key={game.appid} game={game} />
+              ))}
             </List.Section>
           ) : null}
         </>

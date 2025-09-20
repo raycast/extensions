@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { ActionPanel, Color, Icon, List } from "@raycast/api";
+import { ActionPanel, Color, getPreferenceValues, Icon, List } from "@raycast/api";
 import { allShellTags, ShellHistory } from "./types/types";
 import { ActionShellCommand } from "./components/action-shell-command";
 import { getCliIcon, getShellIcon } from "./utils/shell-utils";
@@ -16,6 +16,8 @@ export default function Index() {
   const { data: shellHistoryBashData, isLoading: isLoadingBash, mutate: mutateBash } = useShellHistoryBash();
   const { data: shellHistoryFishData, isLoading: isLoadingFish, mutate: mutateFish } = useShellHistoryFish();
   const { data: showDetailData, mutate: showDetailMutate } = useShowDetail();
+
+  const { displayOrder } = getPreferenceValues<{ displayOrder: "newest-first" | "oldest-first" }>();
 
   const allShellHistory = useMemo(() => {
     const allShellHistory_ = [];
@@ -105,10 +107,15 @@ export default function Index() {
       />
 
       {shellHistory.map((shell, shellIndex) => {
+        const orderedShell = displayOrder === "oldest-first" ? [...shell].reverse() : shell;
         return (
-          shell.length > 0 && (
-            <List.Section key={shell[0].shell + shellIndex} title={shell[0].shell} subtitle={shell.length.toString()}>
-              {shell.map((history, index) => {
+          orderedShell.length > 0 && (
+            <List.Section
+              key={orderedShell[0].shell + shellIndex}
+              title={orderedShell[0].shell}
+              subtitle={orderedShell.length.toString()}
+            >
+              {orderedShell.map((history, index) => {
                 const date = history.timestamp ? new Date(history.timestamp) : undefined;
                 const firstCli = history.cli?.length > 0 ? history.cli[0] : undefined;
                 return (
@@ -141,7 +148,7 @@ export default function Index() {
                     }
                     detail={
                       <List.Item.Detail
-                        markdown={"```" + "\n" + history.command + "\n```"}
+                        markdown={"```" + "\n" + history.command + "\n" + "```"}
                         metadata={
                           <List.Item.Detail.Metadata>
                             {date && <List.Item.Detail.Metadata.Label title="Time" text={date?.toLocaleString()} />}

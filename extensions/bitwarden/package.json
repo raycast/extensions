@@ -275,6 +275,48 @@
       "placeholder": "client_secret"
     },
     {
+      "name": "cliPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Bitwarden CLI Path",
+      "description": "If you wish to use your own CLI, type here the location of your local installation. The typical location of it is '/usr/local/bin/bw' on Intel and '/opt/homebrew/bin/bw' on M1/Apple Silicon macs.",
+      "placeholder": "CLI Path"
+    },
+    {
+      "name": "serverUrl",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "title": "Bitwarden Server URL",
+      "description": "Optional: URL to use for self-hosted servers.",
+      "placeholder": "https://bitwarden.com"
+    },
+    {
+      "name": "serverCertsPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Self-signed Certificates Path",
+      "description": "Advanced: Path to self-signed TLS certificate for self-hosted instances.",
+      "placeholder": "absolute/path/to/your/certs.pem"
+    },
+    {
+      "name": "syncOnLaunch",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Customization",
+      "label": "Sync Vault on Launch",
+      "description": "Sync the vault on command launch. If unchecked, the vault will only be synced when the Sync Vault action is used."
+    },
+    {
+      "name": "fetchFavicons",
+      "type": "checkbox",
+      "required": true,
+      "default": true,
+      "label": "Fetch Vault Icons",
+      "description": "Use the Bitwarden icon server (icons.bitwarden.net) to fetch icons for vault items. If unchecked, built-in icons will be used."
+    },
+    {
       "name": "repromptIgnoreDuration",
       "type": "dropdown",
       "required": false,
@@ -333,40 +375,6 @@
       ]
     },
     {
-      "name": "fetchFavicons",
-      "type": "checkbox",
-      "required": true,
-      "default": true,
-      "title": "Privacy",
-      "label": "Fetch Vault Items Icons",
-      "description": "Whether to use a remote service owned by Bitwarden to fetch icons for vault items. If unchecked, built-in icons will be used."
-    },
-    {
-      "name": "cliPath",
-      "type": "textfield",
-      "required": false,
-      "title": "Bitwarden CLI Path",
-      "description": "If you wish to use your own CLI, type here the location of your local installation. The typical location of it is '/usr/local/bin/bw' on Intel and '/opt/homebrew/bin/bw' on M1/Apple Silicon macs.",
-      "placeholder": "CLI Path"
-    },
-    {
-      "name": "serverUrl",
-      "type": "textfield",
-      "required": false,
-      "default": "",
-      "title": "Bitwarden Server URL",
-      "description": "Optional: URL to use for self-hosted servers.",
-      "placeholder": "https://bitwarden.com"
-    },
-    {
-      "name": "serverCertsPath",
-      "type": "textfield",
-      "required": false,
-      "title": "Self-signed Certificates Path",
-      "description": "Advanced: Path to self-signed TLS certificate for self-hosted instances.",
-      "placeholder": "absolute/path/to/your/certs.pem"
-    },
-    {
       "name": "windowActionOnCopy",
       "type": "dropdown",
       "required": false,
@@ -393,9 +401,9 @@
       "type": "checkbox",
       "required": false,
       "default": true,
-      "title": "Improved Load Times",
+      "title": "Performance",
       "label": "Enable Caching",
-      "description": "Whether to cache vault items for faster access. This will NOT cache the actual passwords and other sensitive values, only usernames/emails and other non-sensitive labels."
+      "description": "Whether to cache vault items for faster load times. This will NOT cache the actual passwords and other sensitive values, only usernames/emails and other non-sensitive labels."
     }
   ],
   "dependencies": {

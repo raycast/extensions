@@ -1,5 +1,13 @@
 # MyIP Changelog
 
+## [Update] - 2025-09-15
+
+- Add Windows support
+- Typescript fixes
+- Display IPV4 details even when using IPV6
+- Bump deps
+- Use newest eslint config
+
 ## [Update] - 2025-02-21
 
 - Redesigned the icon to be more consistent with the Raycast style and better looking

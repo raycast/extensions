@@ -1,6 +1,6 @@
 import { Form, ActionPanel, Icon, getPreferenceValues, popToRoot, Action } from "@raycast/api";
 import { useState } from "react";
-import { TransportType, makeDirectionsURL, Preferences } from "./utils";
+import { TransportType, makePlatformDirectionsURL, Preferences } from "./utils";
 
 enum orginOption {
   Home = "home",
@@ -36,13 +36,13 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.OpenInBrowser
-            url={makeDirectionsURL(originAddress, destination, mode)}
+            url={destination ? makePlatformDirectionsURL(originAddress, destination, mode) : ""}
             icon={Icon.Map}
             title="Open in Apple Maps"
             onOpen={() => popToRoot()}
           />
           <Action.CopyToClipboard
-            content={makeDirectionsURL(originAddress, destination, mode)}
+            content={destination ? makePlatformDirectionsURL(originAddress, destination, mode) : ""}
             icon={Icon.Clipboard}
             onCopy={() => popToRoot()}
           />

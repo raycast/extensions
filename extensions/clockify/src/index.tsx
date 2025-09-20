@@ -1,13 +1,37 @@
-import { ActionPanel, Form, Icon, List, showToast, useNavigation, Toast, Action, LocalStorage } from "@raycast/api";
+import {
+  ActionPanel,
+  Form,
+  Icon,
+  List,
+  showToast,
+  useNavigation,
+  Toast,
+  Action,
+  LocalStorage,
+  openExtensionPreferences,
+} from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import isEmpty from "lodash.isempty";
 import uniqWith from "lodash.uniqwith";
 import useConfig from "./useConfig";
 import { fetcher, isInProgress, showElapsedTime } from "./utils";
-import { TimeEntry, Project, Task } from "./types";
+import { TimeEntry, Project, Task, Tag } from "./types";
+import { useCachedState } from "@raycast/utils";
 
 function OpenWebPage() {
   return <Action.OpenInBrowser title="Open Website" url="https://app.clockify.me" />;
+}
+
+function ToggleTags() {
+  const [, setIsShowingTags] = useCachedState<boolean>("show-tags");
+  return (
+    <Action
+      icon={Icon.Tag}
+      title="Toggle Tags"
+      onAction={() => setIsShowingTags((show) => !show)}
+      shortcut={{ modifiers: ["cmd"], key: "t" }}
+    />
+  );
 }
 
 function useClock(entry: TimeEntry) {
@@ -22,6 +46,7 @@ function useClock(entry: TimeEntry) {
 }
 
 function ItemInProgress({ entry, updateTimeEntries }: { entry: TimeEntry; updateTimeEntries: () => void }) {
+  const [isShowingTags] = useCachedState<boolean>("show-tags");
   const time = useClock(entry);
 
   return (
@@ -31,13 +56,19 @@ function ItemInProgress({ entry, updateTimeEntries }: { entry: TimeEntry; update
       subtitle={`${[entry.description || "No Description", entry.task?.name].filter(Boolean).join(" • ")}`}
       accessories={[
         { text: `${time}  -  ${entry.project?.name}`, icon: { source: Icon.Dot, tintColor: entry.project?.color } },
+        ...(isShowingTags ? entry.tags.map((tag) => ({ tag: tag.name })) : []),
       ]}
       icon={{ source: Icon.Clock, tintColor: entry.project?.color }}
       keywords={[...(entry.description?.split(" ") ?? []), ...(entry.project?.name.split(" ") ?? [])]}
       actions={
         <ActionPanel>
-          <Action title="Stop Timer" onAction={() => stopCurrentTimer().then(() => updateTimeEntries())} />
+          <Action
+            icon={Icon.Stop}
+            title="Stop Timer"
+            onAction={() => stopCurrentTimer().then(() => updateTimeEntries())}
+          />
           <OpenWebPage />
+          <ToggleTags />
         </ActionPanel>
       }
     />
@@ -48,7 +79,7 @@ export default function Main() {
   const { config, isValidToken, setIsValidToken } = useConfig();
   const [entries, setEntries] = useState<TimeEntry[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { push } = useNavigation();
+  const [isShowingTags] = useCachedState<boolean>("show-tags");
 
   useEffect(() => {
     if (isEmpty(config) || !isValidToken) return;
@@ -97,6 +128,11 @@ export default function Main() {
           icon={Icon.ExclamationMark}
           title="Invalid API Key Detected"
           accessories={[{ text: `Go to Extensions → Clockify` }]}
+          actions={
+            <ActionPanel>
+              <Action icon={Icon.Gear} title="Open Extension Preferences" onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
         />
       ) : (
         <>
@@ -106,9 +142,10 @@ export default function Main() {
               title="Start New Timer"
               actions={
                 <ActionPanel>
-                  <Action
+                  <Action.Push
+                    icon={Icon.ArrowRight}
                     title="Start New Timer"
-                    onAction={() => push(<NewEntry updateTimeEntries={updateTimeEntries} />)}
+                    target={<NewEntry updateTimeEntries={updateTimeEntries} />}
                   />
                   <OpenWebPage />
                 </ActionPanel>
@@ -127,20 +164,26 @@ export default function Main() {
                   subtitle={`${[entry.description || "No Description", entry.task?.name].filter(Boolean).join(" • ")}`}
                   accessories={[
                     { text: entry.project?.name, icon: { source: Icon.Dot, tintColor: entry.project?.color } },
+                    ...(isShowingTags ? entry.tags.map((tag) => ({ tag: tag.name })) : []),
                   ]}
                   icon={{ source: Icon.Circle, tintColor: entry.project?.color }}
                   keywords={[...(entry.description?.split(" ") ?? []), ...(entry.project?.name.split(" ") ?? [])]}
                   actions={
                     <ActionPanel>
                       <Action
+                        icon={Icon.Play}
                         title="Start Timer"
                         onAction={() => {
-                          addNewTimeEntry(entry.description, entry.projectId, entry.taskId).then(() =>
-                            updateTimeEntries(),
-                          );
+                          addNewTimeEntry(
+                            entry.description,
+                            entry.projectId,
+                            entry.taskId,
+                            entry.tags.map((tag) => tag.id),
+                          ).then(() => updateTimeEntries());
                         }}
                       />
                       <OpenWebPage />
+                      <ToggleTags />
                     </ActionPanel>
                   }
                 />
@@ -156,27 +199,37 @@ export default function Main() {
 function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
   const { config } = useConfig();
   const [projects, setProjects] = useState<Project[]>([]);
-  const [tasks, setTasks] = useState<Project[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { pop } = useNavigation();
 
   useEffect(() => {
     if (isEmpty(config)) return;
 
-    async function getAllProjectsOnWorkspace(): Promise<void> {
+    async function getAllProjectsAndTagsOnWorkspace(): Promise<void> {
       setIsLoading(true);
 
-      const storedProjects: string | undefined = await LocalStorage.getItem("projects");
+      const [storedProjects, storedTags] = await Promise.all([
+        LocalStorage.getItem<string>("projects"),
+        LocalStorage.getItem<string>("tags"),
+      ]);
       if (storedProjects) setProjects(JSON.parse(storedProjects));
+      if (storedTags) setTags(JSON.parse(storedTags));
 
-      const { data } = await fetcher(`/workspaces/${config.workspaceId}/projects?page-size=1000&archived=false`);
+      const [projectsResponse, tagsResponse] = await Promise.all([
+        fetcher(`/workspaces/${config.workspaceId}/projects?page-size=1000&archived=false`),
+        fetcher(`/workspaces/${config.workspaceId}/tags?page-size=1000&archived=false`),
+      ]);
 
-      setProjects(data || []);
-      LocalStorage.setItem("projects", JSON.stringify(data));
+      setProjects(projectsResponse.data || []);
+      LocalStorage.setItem("projects", JSON.stringify(projectsResponse.data));
+      setTags(tagsResponse.data || []);
+      LocalStorage.setItem("tags", JSON.stringify(tagsResponse.data));
       setIsLoading(false);
     }
 
-    getAllProjectsOnWorkspace();
+    getAllProjectsAndTagsOnWorkspace();
   }, [config]);
 
   return (
@@ -187,10 +240,10 @@ function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
         <ActionPanel>
           <Action.SubmitForm
             title="Start"
-            onSubmit={({ description, projectId, taskId }) => {
+            onSubmit={({ description, projectId, taskId, tagIds }) => {
               if (projectId) {
-                addNewTimeEntry(description, projectId, taskId === "-1" ? null : taskId).then(() =>
-                  updateTimeEntries(),
+                addNewTimeEntry(description, projectId, taskId === "-1" ? null : taskId, tagIds).then(
+                  updateTimeEntries,
                 );
                 pop();
               } else {
@@ -237,7 +290,7 @@ function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
       {tasks.length ? (
         <Form.Dropdown id="taskId" title="Task">
           <Form.Dropdown.Section>
-            <Form.Dropdown.Item key={-1} value={"-1"} title={"Without task"} icon={{ source: Icon.TextDocument }} />
+            <Form.Dropdown.Item key={-1} value={"-1"} title={"Without task"} icon={{ source: Icon.BlankDocument }} />
           </Form.Dropdown.Section>
 
           <Form.Dropdown.Section title="Project tasks">
@@ -246,14 +299,21 @@ function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
                 key={task.id}
                 value={task.id}
                 title={task.name}
-                icon={{ source: Icon.TextDocument }}
+                icon={{ source: Icon.BlankDocument }}
               />
             ))}
           </Form.Dropdown.Section>
         </Form.Dropdown>
       ) : null}
 
-      <Form.TextField id="description" defaultValue="" title="Description" autoFocus />
+      <Form.TextField id="description" title="Description" placeholder="What are you working on?" autoFocus />
+
+      <Form.Separator />
+      <Form.TagPicker title="Tags (optional)" id="tagIds" placeholder="Search tags">
+        {tags.map((tag) => (
+          <Form.TagPicker.Item key={tag.id} title={tag.name} value={tag.id} />
+        ))}
+      </Form.TagPicker>
     </Form>
   );
 }
@@ -267,7 +327,7 @@ async function getTimeEntries({ onError }: { onError?: (state: boolean) => void 
   );
 
   if (error === "Unauthorized") {
-    onError && onError(false);
+    onError?.(false);
     return [];
   }
 
@@ -306,6 +366,7 @@ async function addNewTimeEntry(
   description: string | undefined | null,
   projectId: string,
   taskId: string | undefined | null,
+  tagIds: string[] = [],
 ): Promise<void> {
   showToast(Toast.Style.Animated, "Starting…");
 
@@ -322,6 +383,7 @@ async function addNewTimeEntry(
         end: null,
         duration: null,
       },
+      tagIds,
       customFieldValues: [],
     },
   });

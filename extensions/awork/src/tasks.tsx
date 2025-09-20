@@ -2,7 +2,7 @@ import { Action, ActionPanel, Icon, launchCommand, LaunchProps, LaunchType, List
 import { showFailureToast, useCachedPromise, usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { getProjects, getTasks, task } from "./composables/FetchData";
-import { authorizationInProgress, getTokens } from "./composables/WebClient";
+import { getTokens } from "./composables/WebClient";
 
 const Actions = (props: { taskId: string; projectId: string; typeOfWorkId: string | undefined }) => {
   const { data: BaseUrl } = useCachedPromise(() => LocalStorage.getItem<string>("URL"));
@@ -41,9 +41,32 @@ const Actions = (props: { taskId: string; projectId: string; typeOfWorkId: strin
 };
 
 const TaskItem = (props: { task: task }) => {
+  let icon;
+  switch (props.task.taskStatus.type) {
+    case "todo":
+      icon = "icon_todo.png";
+      break;
+    case "progress":
+      icon = "icon_progress.png";
+      break;
+    case "stuck":
+      icon = "icon_stuck.png";
+      break;
+    case "review":
+      icon = "icon_review.png";
+      break;
+    case "done":
+      icon = "icon_done.png";
+      break;
+    default:
+      icon = Icon.Document;
+  }
+  if (props.task.taskStatus.icon === "circle_without_color") {
+    icon = "icon_blank.png";
+  }
   return (
     <List.Item
-      icon={Icon.Document}
+      icon={{ source: icon }}
       title={props.task.name}
       subtitle={props.task.project.name}
       keywords={[props.task.project.name, props.task.id]}
@@ -72,7 +95,7 @@ export default function Command(props: LaunchProps) {
   } = useCachedPromise(getTasks, [token?.accessToken as string, searchText, 100, projectId], {
     execute: !!token?.accessToken && !token.isExpired(),
     onData: (data) => {
-      if (data.length === 0 && !searchText && !authorizationInProgress) {
+      if (data.length === 0 && !searchText) {
         updateTasks();
       }
     },
@@ -84,7 +107,7 @@ export default function Command(props: LaunchProps) {
   } = useCachedPromise(getProjects, [token?.accessToken as string, "", 1000], {
     execute: !!token?.accessToken && !token.isExpired(),
     onData: (data) => {
-      if (data.length === 0 && !authorizationInProgress) {
+      if (data.length === 0) {
         updateProjects();
       }
       if (props.launchContext?.projectId) {

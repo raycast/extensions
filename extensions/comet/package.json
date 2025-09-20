@@ -1,0 +1,287 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "comet",
+  "title": "Comet",
+  "description": "Search open tabs, bookmarks and history in Comet.",
+  "icon": "comet-icon.png",
+  "author": "xjo_nd",
+  "license": "MIT",
+  "categories": [
+    "Web",
+    "Applications",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "new-tab",
+      "title": "New Tab",
+      "subtitle": "Comet",
+      "description": "Open a new Comet tab.",
+      "mode": "view"
+    },
+    {
+      "name": "search-tab",
+      "title": "Search Tabs",
+      "subtitle": "Comet",
+      "description": "List all tabs and go to the selected.",
+      "mode": "view"
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "subtitle": "Comet",
+      "description": "Search browser history.",
+      "mode": "view"
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "subtitle": "Comet",
+      "description": "Search browser bookmarks.",
+      "mode": "view"
+    },
+    {
+      "name": "search-all",
+      "title": "Search All",
+      "subtitle": "Comet",
+      "description": "Search browser all tabs and history,bookmarks.",
+      "mode": "view"
+    },
+    {
+      "name": "new-window",
+      "title": "Create New Window",
+      "subtitle": "Comet",
+      "description": "Create New Window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-incognito-window",
+      "title": "Create New Incognito Window",
+      "subtitle": "Comet",
+      "description": "Create New Incognito Window.",
+      "mode": "no-view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "new-tab",
+      "title": "New Tab",
+      "description": "Open a blank new tab, search with Perplexity, or open a tab to a given website."
+    },
+    {
+      "name": "new-window",
+      "title": "New Window",
+      "description": "Open a new window with specified profile (if exists) or current profile. Can open to a website, search with Perplexity, or open blank window."
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "description": "Search bookmarks for a given query."
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "description": "Search history for a given query."
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@comet open a new tab",
+        "mocks": {
+          "new-tab": "New tab opened"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-tab",
+              "arguments": {}
+            }
+          },
+          {
+            "meetsCriteria": "Opens a new tab"
+          }
+        ]
+      },
+      {
+        "input": "@comet open a new tab to raycast.com",
+        "mocks": {
+          "new-tab": "New tab opened to https://raycast.com"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-tab",
+              "arguments": {
+                "website": {
+                  "includes": "raycast.com"
+                }
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Opening a new tab to https://raycast.com"
+          }
+        ]
+      },
+      {
+        "input": "@comet open a new window",
+        "mocks": {
+          "new-window": "New window opened"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-window",
+              "arguments": {}
+            }
+          },
+          {
+            "meetsCriteria": "Opening a new window"
+          }
+        ]
+      },
+      {
+        "input": "@comet open a new window to raycast.com",
+        "mocks": {
+          "new-window": "New window opened to https://raycast.com"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-window",
+              "arguments": {
+                "website": {
+                  "includes": "raycast.com"
+                }
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Opening a new window to https://raycast.com"
+          }
+        ]
+      },
+      {
+        "input": "@comet search bookmarks for raycast",
+        "mocks": {
+          "search-bookmarks": [
+            {
+              "id": "1",
+              "title": "Raycast",
+              "lastVisited": {},
+              "url": "https://www.raycast.com/"
+            },
+            {
+              "id": "2",
+              "title": "Hacker News",
+              "lastVisited": {},
+              "url": "https://news.ycombinator.com/"
+            },
+            {
+              "id": "3",
+              "title": "Google",
+              "lastVisited": {},
+              "url": "https://www.google.com/"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-bookmarks",
+              "arguments": {
+                "query": "raycast"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Returns the bookmark for Raycast"
+          }
+        ]
+      },
+      {
+        "input": "@comet search history for raycast",
+        "mocks": {
+          "search-history": [
+            {
+              "id": 1,
+              "title": "Raycast",
+              "lastVisited": 13383162423527348,
+              "url": "https://www.raycast.com/"
+            },
+            {
+              "id": 2,
+              "title": "Google",
+              "lastVisited": 13383164857392104,
+              "url": "https://www.google.com/"
+            },
+            {
+              "id": 3,
+              "title": "Reddit",
+              "lastVisited": 13383159901834568,
+              "url": "https://www.reddit.com/"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-history",
+              "arguments": {
+                "query": "raycast"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Returns the history for Raycast"
+          }
+        ]
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "description": "Find the full path to the Comet Profile path. If empty, the default profile will be used.",
+      "label": "Profile",
+      "default": "",
+      "name": "profilePath",
+      "required": false,
+      "title": "Profile Path",
+      "type": "textfield",
+      "placeholder": "/Users/username/Library/Application Support/Comet/Profile 1"
+    },
+    {
+      "default": false,
+      "description": "Before enable this, you should enable 'View > Developer > Allow JavaScript from Apple Events' in every Comet profile.",
+      "label": "Extract the favicon from every open tab",
+      "name": "useOriginalFavicon",
+      "required": false,
+      "title": "Favicon",
+      "type": "checkbox"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.90.0",
+    "@raycast/utils": "^1.18.1",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "typescript": "^4.9.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

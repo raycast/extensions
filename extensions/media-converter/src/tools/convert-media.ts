@@ -23,7 +23,7 @@ import {
   VIDEO_PRESET,
   PRORES_VARIANTS,
   VP9_QUALITY,
-  getQualitySettingsFromSimple,
+  SIMPLE_QUALITY_MAPPINGS,
 } from "../types/media";
 import { findFFmpegPath } from "../utils/ffmpeg";
 import { Tool } from "@raycast/api";
@@ -281,7 +281,8 @@ export default async function ConvertMedia(input: Input) {
           advancedProvided
             ? baseDefault
             : quality
-              ? getQualitySettingsFromSimple(outputFileType as OutputAudioExtension)
+              ? (SIMPLE_QUALITY_MAPPINGS[outputFileType as keyof typeof SIMPLE_QUALITY_MAPPINGS]?.[quality] ??
+                baseDefault)
               : baseDefault
         ) as AudioQuality[keyof AudioQuality];
 
@@ -352,7 +353,8 @@ export default async function ConvertMedia(input: Input) {
           advancedProvided
             ? baseDefault
             : quality
-              ? getQualitySettingsFromSimple(outputFileType as OutputVideoExtension)
+              ? (SIMPLE_QUALITY_MAPPINGS[outputFileType as keyof typeof SIMPLE_QUALITY_MAPPINGS]?.[quality] ??
+                baseDefault)
               : baseDefault
         ) as VideoQuality[keyof VideoQuality];
 

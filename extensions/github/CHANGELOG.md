@@ -1,5 +1,19 @@
 # GitHub Changelog
 
+## [Fix clone with options action] - 2025-09-08
+
+- Fix the clone action by adding the quote to the command to prevent issues with spaces in the path
+
+## [Add My Starred Repositories command] - 2025-08-25
+
+- Add new "My Starred Repositories" command to view starred repositories
+- Displays starred repositories with support for sorting and visiting history
+- Integrated with existing repository list components for consistent experience
+
+## [Issue type specification] - 2025-08-22
+
+- Adds the ability to specify the issue type when creating a new issue.
+
 ## [Fix repository filtering] - 2025-06-26
 
 - Correct the repository filtering for exclude mode

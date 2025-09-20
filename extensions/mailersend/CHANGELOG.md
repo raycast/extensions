@@ -1,5 +1,9 @@
 # MailerSend Changelog
 
+## [View Webhooks] - 2025-08-28
+
+- View Domain Webhooks
+
 ## [Manage Tokens + Filter Activity + API Quota] - 2025-07-07
 
 - View API Quota

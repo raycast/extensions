@@ -82,8 +82,8 @@ function useSearch() {
               Math.round(resultEntry.comp_plus / 3600),
               Math.round(resultEntry.comp_100 / 3600),
               HowLongToBeatService.calcDistancePercentage(resultEntry.game_name, searchText),
-              searchText
-            )
+              searchText,
+            ),
           );
         }
 
@@ -102,7 +102,7 @@ function useSearch() {
         showToast({ style: Toast.Style.Failure, title: "Could not perform search", message: String(error) });
       }
     },
-    [setState]
+    [setState],
   );
 
   useEffect(() => {

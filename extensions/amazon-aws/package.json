@@ -156,37 +156,207 @@
       "title": "Amplify",
       "description": "Manage Amplify apps and branches",
       "mode": "view"
+    },
+    {
+      "name": "appsync",
+      "title": "AppSync",
+      "description": "Manage GraphQL APIs, data sources, and resolvers",
+      "mode": "view"
+    },
+    {
+      "name": "apigateway",
+      "title": "API Gateway",
+      "description": "Manage REST APIs, resources, stages, and API keys",
+      "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "list-amplify-project",
+      "title": "List Amplify Project",
+      "description": "Lists Amplify projects"
+    },
+    {
+      "name": "list-amplify-branches",
+      "title": "List Amplify Branches",
+      "description": "Lists branches for an Amplify app"
+    },
+    {
+      "name": "get-amplify-app-details",
+      "title": "Get Amplify App Details",
+      "description": "Gets detailed information for an Amplify app"
+    },
+    {
+      "name": "list-amplify-jobs",
+      "title": "List Amplify Jobs",
+      "description": "Lists build jobs for an Amplify app branch"
+    },
+    {
+      "name": "start-amplify-build",
+      "title": "Start Amplify Build",
+      "description": "Starts a new build job for an Amplify app branch"
+    },
+    {
+      "name": "stop-amplify-build",
+      "title": "Stop Amplify Build",
+      "description": "Stops a running build job for an Amplify app branch"
+    },
+    {
+      "name": "list-amplify-webhooks",
+      "title": "List Amplify Webhooks",
+      "description": "Lists webhooks for an Amplify app"
+    },
+    {
+      "name": "create-amplify-webhook",
+      "title": "Create Amplify Webhook",
+      "description": "Creates a new webhook for an Amplify app"
+    },
+    {
+      "name": "delete-amplify-webhook",
+      "title": "Delete Amplify Webhook",
+      "description": "Deletes a webhook for an Amplify app"
+    },
+    {
+      "name": "get-amplify-webhook",
+      "title": "Get Amplify Webhook",
+      "description": "Gets detailed information for an Amplify webhook"
+    }
+  ],
+  "ai": {
+    "instructions": "You are an AWS expert assistant that helps users manage their AWS resources through various tools. You have extensive knowledge of AWS services and can help with:\n\n- **Compute Services**: EC2 instances, Lambda functions, ECS clusters, and container management\n- **Storage & Databases**: S3 buckets, DynamoDB tables, and data management operations\n- **Application Services**: Amplify apps, AppSync APIs, Step Functions, and SQS queues\n- **DevOps & CI/CD**: CodePipeline workflows, build management, and automated deployments\n- **Infrastructure**: CloudFormation stacks, networking, and resource provisioning\n- **Monitoring & Security**: CloudWatch logs, Systems Manager parameters, Secrets Manager, and operational insights\n\nWhen users ask about their AWS resources, always start by listing the relevant resources to help them identify what they want to work with. Be proactive in suggesting related actions and explain the implications of operations like deployments, deletions, or configuration changes.\\n\\nKeep responses concise but informative - provide essential context and next steps without overwhelming detail. Use clear, friendly language and focus on actionable information that helps users accomplish their goals efficiently.",
+    "evals": [
+      {
+        "input": "What Amplify apps do I have?",
+        "output": "I'll list all your Amplify projects for you.",
+        "tools": [
+          "list-amplify-project"
+        ]
+      },
+      {
+        "input": "Show me the branches for my web app",
+        "output": "I'll help you find your web app and show its branches. Let me first list your Amplify projects to identify the right app.",
+        "tools": [
+          "list-amplify-project",
+          "list-amplify-branches"
+        ]
+      },
+      {
+        "input": "I need more details about my fullstack app",
+        "output": "I'll help you get detailed information about your fullstack app. Let me first list your projects to identify it.",
+        "tools": [
+          "list-amplify-project",
+          "get-amplify-app-details"
+        ]
+      },
+      {
+        "input": "How are my recent builds doing?",
+        "output": "I'll check your recent builds. Let me first list your Amplify projects and then show you the build history.",
+        "tools": [
+          "list-amplify-project",
+          "list-amplify-jobs"
+        ]
+      },
+      {
+        "input": "Deploy my latest changes",
+        "output": "I'll help you deploy your latest changes by starting a new build. First, let me list your projects to identify which app to deploy.",
+        "tools": [
+          "list-amplify-project",
+          "start-amplify-build"
+        ]
+      },
+      {
+        "input": "Cancel that build that's taking forever",
+        "output": "I'll help you cancel a long-running build. Let me first check your projects and recent builds to identify which one to stop.",
+        "tools": [
+          "list-amplify-project",
+          "list-amplify-jobs",
+          "stop-amplify-build"
+        ]
+      },
+      {
+        "input": "What webhooks do I have set up?",
+        "output": "I'll show you all your configured webhooks. Let me first list your Amplify projects and then check their webhooks.",
+        "tools": [
+          "list-amplify-project",
+          "list-amplify-webhooks"
+        ]
+      },
+      {
+        "input": "Set up a webhook for automatic deployments",
+        "output": "I'll help you set up a webhook for automatic deployments. First, let me list your projects to identify which app you want to configure.",
+        "tools": [
+          "list-amplify-project",
+          "create-amplify-webhook"
+        ]
+      },
+      {
+        "input": "Remove that webhook I don't need anymore",
+        "output": "I'll help you remove an unused webhook. Let me first show you your projects and their webhooks so you can identify which one to delete.",
+        "tools": [
+          "list-amplify-project",
+          "list-amplify-webhooks",
+          "delete-amplify-webhook"
+        ]
+      },
+      {
+        "input": "Check if my webhook is working correctly",
+        "output": "I'll help you check your webhook configuration. Let me first list your projects and webhooks to identify which one you want to inspect.",
+        "tools": [
+          "list-amplify-project",
+          "list-amplify-webhooks",
+          "get-amplify-webhook"
+        ]
+      },
+      {
+        "input": "My backend API changes aren't showing up",
+        "output": "I'll help you check your backend deployment. Let me list your Amplify projects and check the recent builds to see if there are any issues.",
+        "tools": [
+          "list-amplify-project",
+          "list-amplify-jobs"
+        ]
+      },
+      {
+        "input": "Redeploy my fullstack application",
+        "output": "I'll help you redeploy your fullstack application. First, let me list your projects to identify which app to redeploy.",
+        "tools": [
+          "list-amplify-project",
+          "start-amplify-build"
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@aws-sdk/client-amplify": "^3.859.0",
-    "@aws-sdk/client-cloudformation": "^3.216.0",
-    "@aws-sdk/client-cloudwatch-logs": "^3.226.0",
-    "@aws-sdk/client-codeartifact": "^3.664.0",
-    "@aws-sdk/client-codepipeline": "^3.787.0",
-    "@aws-sdk/client-dynamodb": "^3.216.0",
-    "@aws-sdk/client-ec2": "^3.216.0",
-    "@aws-sdk/client-ecr": "^3.216.0",
-    "@aws-sdk/client-ecs": "^3.216.0",
-    "@aws-sdk/client-glue": "^3.607.0",
-    "@aws-sdk/client-lambda": "^3.216.0",
-    "@aws-sdk/client-s3": "^3.216.0",
-    "@aws-sdk/client-secrets-manager": "^3.226.0",
-    "@aws-sdk/client-sfn": "^3.216.0",
-    "@aws-sdk/client-sqs": "^3.216.0",
-    "@aws-sdk/client-ssm": "^3.226.0",
-    "@aws-sdk/shared-ini-file-loader": "^3.215.0",
-    "@aws-sdk/util-dynamodb": "^3.584.0",
-    "@raycast/api": "^1.42.0",
-    "@raycast/utils": "^1.4.11",
+    "@aws-sdk/client-amplify": "^3.864.0",
+    "@aws-sdk/client-api-gateway": "^3.864.0",
+    "@aws-sdk/client-apigatewayv2": "^3.864.0",
+    "@aws-sdk/client-appsync": "^3.859.0",
+    "@aws-sdk/client-cloudformation": "^3.864.0",
+    "@aws-sdk/client-cloudwatch-logs": "^3.864.0",
+    "@aws-sdk/client-codeartifact": "^3.864.0",
+    "@aws-sdk/client-codepipeline": "^3.864.0",
+    "@aws-sdk/client-dynamodb": "^3.868.0",
+    "@aws-sdk/client-ec2": "^3.868.0",
+    "@aws-sdk/client-ecr": "^3.864.0",
+    "@aws-sdk/client-ecs": "^3.864.0",
+    "@aws-sdk/client-glue": "^3.868.0",
+    "@aws-sdk/client-lambda": "^3.865.0",
+    "@aws-sdk/client-s3": "^3.864.0",
+    "@aws-sdk/client-secrets-manager": "^3.864.0",
+    "@aws-sdk/client-sfn": "^3.864.0",
+    "@aws-sdk/client-sqs": "^3.864.0",
+    "@aws-sdk/client-ssm": "^3.864.0",
+    "@aws-sdk/shared-ini-file-loader": "^3.374.0",
+    "@aws-sdk/util-dynamodb": "^3.868.0",
+    "@raycast/api": "^1.102.4",
+    "@raycast/utils": "^2.2.0",
     "util": "^0.12.5"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/react": "^18.3.12",
-    "eslint": "^8.57.0",
-    "prettier": "^3.0.2",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/react": "^19.1.10",
+    "eslint": "^9.33.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
   },
   "scripts": {
     "build": "ray build -e dist",

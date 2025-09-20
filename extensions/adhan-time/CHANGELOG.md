@@ -1,5 +1,9 @@
 # Adhan time Changelog
 
+## [Update] - 2025-08-12
+
+- Added the calculation time for Morocco
+
 ## [Update] - 2025-04-10
 
 - UI: Added indication for current prayer time using colored icon

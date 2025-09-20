@@ -70,7 +70,6 @@ export const CharacterActionPanel = ({ item }: { item: Character }) => {
       <ActionPanel.Section title="HTML">
         {html ? (
           <Action.CopyToClipboard
-            // eslint-disable-next-line @raycast/prefer-title-case
             title={`Copy "${html}" (HTML) to Clipboard`}
             content={html}
             onCopy={() => addToRecentlyUsedItems(item)}
@@ -78,7 +77,6 @@ export const CharacterActionPanel = ({ item }: { item: Character }) => {
           />
         ) : null}
         <Action.CopyToClipboard
-          // eslint-disable-next-line @raycast/prefer-title-case
           title={`Copy "&#${item.c};" (HTML) to Clipboard`}
           content={`&#${item.c};`}
           onCopy={() => addToRecentlyUsedItems(item)}

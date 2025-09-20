@@ -67,11 +67,12 @@ export default function CreateContainer({ imageId }: Props) {
         Env: env ? splitValues(env) : undefined,
       };
 
-      const action = () => createContainer(options);
-      const onSuccess = (): [string, string] => ['Container Creation', 'The container was created successfully!'];
-      const onFailure = (error: Error): [string, string] => ['Container Creation Failed', error.message];
-
-      withToast({ action, onSuccess, onFailure })();
+      withToast({
+        action: () => createContainer(options),
+        onStart: () => 'Container Creation',
+        onSuccess: () => ['Container Creation', 'The container was created successfully!'],
+        onFailure: (error: Error) => ['Container Creation Failed', error.message],
+      })();
 
       // Clear form values
       setFormValues({

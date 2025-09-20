@@ -118,6 +118,7 @@ export default function Command() {
     {
       keepPreviousData: true,
       abortable,
+      initialData: [],
     },
   );
 
@@ -143,7 +144,7 @@ export default function Command() {
         </Grid.Dropdown>
       }
     >
-      {data.length > 0
+      {data && data.length > 0
         ? data
             .filter((item, index, self) => self.findIndex((t) => t.image_token === item.image_token) === index)
             .map((item) => (
