@@ -8,5 +8,5 @@ interface Props {
 }
 
 export default function Command({ launchContext }: Props) {
-  return <DeviceList type="input" deviceId={launchContext?.deviceId} deviceName={launchContext?.deviceName} />;
+  return <DeviceList ioType="input" deviceId={launchContext?.deviceId} deviceName={launchContext?.deviceName} />;
 }

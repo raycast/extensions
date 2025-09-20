@@ -1,6 +1,9 @@
 ---
 title: Weechat
 category: Apps
+tech: weechat
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Keys

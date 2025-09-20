@@ -1,6 +1,9 @@
 ---
 title: Sinon-chai
 category: JavaScript libraries
+tech: sinon-chai
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### About

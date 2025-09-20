@@ -3,31 +3,38 @@ import { showToast, Toast } from '@raycast/api';
 export const withToast =
   ({
     action,
+    onStart,
     onSuccess,
     onFailure,
   }: {
     action: () => Promise<void>;
+    onStart: () => string | [string, string?];
     onSuccess: () => string | [string, string?];
     onFailure: (error: Error) => string | [string, string?];
   }) =>
   async () => {
+    const { title, message } = toastMsg(onStart());
+    const toast = await showToast(Toast.Style.Animated, title, message);
+
     try {
       await action();
-      if (onSuccess !== undefined) {
-        await showToast(Toast.Style.Success, ...toastMsg(onSuccess()));
-      }
+      const { title, message } = toastMsg(onSuccess());
+      toast.style = Toast.Style.Success;
+      toast.title = title;
+      toast.message = message;
     } catch (error) {
       if (error instanceof Error) {
-        if (onFailure !== undefined) {
-          await showToast(Toast.Style.Failure, ...toastMsg(onFailure(error)));
-        }
+        toast.style = Toast.Style.Failure;
+        const { title, message } = toastMsg(onFailure(error));
+        toast.title = title;
+        toast.message = message;
       }
     }
   };
 
-const toastMsg = (input: string | [string, string?]): [string, string?] => {
+function toastMsg(input: string | [string, string?]) {
   if (Array.isArray(input)) {
-    return input;
+    return { title: input[0], message: input[1] };
   }
-  return [input];
-};
+  return { title: input, message: undefined };
+}

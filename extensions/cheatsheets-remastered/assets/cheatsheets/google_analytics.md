@@ -1,7 +1,11 @@
 ---
 title: Google Analytics
-tags: [Archived]
+tags:
+  - Archived
 archived: This sheet describes an older version of Google Analytics (UA).
+tech: google_analytics
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Pageview

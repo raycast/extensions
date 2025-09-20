@@ -12,7 +12,8 @@
     "ridemountainpig",
     "xmorse",
     "litomore",
-    "anwarulislam"
+    "anwarulislam",
+    "yusifaliyevpro"
   ],
   "categories": [
     "Applications",
@@ -70,7 +71,6 @@
       "title": "yt-dlp Path",
       "description": "Path to the yt-dlp executable. You can enter `which yt-dlp` to terminal to find its path.",
       "type": "textfield",
-      "default": "/opt/homebrew/bin/yt-dlp",
       "required": false
     },
     {
@@ -78,7 +78,6 @@
       "title": "ffmpeg Path",
       "description": "Path to the ffmpeg executable. You can enter `which ffmpeg` to terminal to find its path.",
       "type": "textfield",
-      "default": "/opt/homebrew/bin/ffmpeg",
       "required": false
     },
     {
@@ -86,7 +85,6 @@
       "title": "ffprobe Path",
       "description": "Path to the ffprobe executable. Usually installed along with ffmpeg. You can enter `which ffprobe` to terminal to find its path.",
       "type": "textfield",
-      "default": "/opt/homebrew/bin/ffprobe",
       "required": false
     },
     {
@@ -180,20 +178,20 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.93.0",
-    "@raycast/utils": "^1.19.0",
+    "@raycast/api": "^1.102.6",
+    "@raycast/utils": "^2.2.1",
     "date-fns": "^4.1.0",
-    "execa": "^9.5.2",
+    "execa": "^9.6.0",
     "is-url-superb": "^6.1.0",
     "pretty-bytes": "^6.1.1",
     "srt-parser-2": "^1.2.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.11",
+    "@raycast/eslint-config": "^2.0.4",
     "@types/node": "22.13.9",
-    "@types/react": "^18.3.18",
-    "eslint": "^8.57.1",
-    "prettier": "^3.5.3",
+    "@types/react": "^19.1.12",
+    "eslint": "^9.35.0",
+    "prettier": "^3.6.2",
     "typescript": "^5.8.2"
   },
   "scripts": {
@@ -203,5 +201,9 @@
     "lint": "ray lint",
     "pull": "ray pull-contributions",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

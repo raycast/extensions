@@ -2,7 +2,11 @@
 title: npm
 category: JavaScript
 weight: -1
-updated: 2019-12-24
+updated: 2019-12-24T00:00:00.000Z
+tech: npm
+status: active
+lastReviewed: '2025-09-05'
+version: 1.2.3
 ---
 
 ### Package management

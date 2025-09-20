@@ -52,6 +52,19 @@ async function getCommands(): Promise<ScheduledCommand[]> {
   return await getStoredData<ScheduledCommand[]>(STORAGE_KEYS.SCHEDULED_COMMANDS, []);
 }
 
+async function updateCommand(updatedCommand: ScheduledCommand): Promise<void> {
+  try {
+    const commands = await getCommands();
+    const index = commands.findIndex((cmd) => cmd.id === updatedCommand.id);
+    if (index !== -1) {
+      commands[index] = updatedCommand;
+      await setStoredData(STORAGE_KEYS.SCHEDULED_COMMANDS, commands);
+    }
+  } catch (error) {
+    console.error("Error updating command:", error);
+  }
+}
+
 async function disableCommand(command: ScheduledCommand): Promise<void> {
   try {
     const commands = await getCommands();
@@ -110,11 +123,20 @@ export default async function ExecuteDueCommands() {
 
 async function executeCommand(command: ScheduledCommand): Promise<void> {
   const log = createExecutionLog(command);
+  const executionTime = new Date().toISOString();
 
   try {
     console.log(LOG_MESSAGES.LAUNCHING(command.command.deeplink));
     await executeRaycastCommand(command.command);
     console.log(LOG_MESSAGES.SUCCESS(command.name));
+
+    // Update the command's lastExecutedAt field after successful execution
+    const updatedCommand = {
+      ...command,
+      lastExecutedAt: executionTime,
+      updatedAt: executionTime,
+    };
+    await updateCommand(updatedCommand);
   } catch (error) {
     console.error(LOG_MESSAGES.ERROR_EXECUTING(command.name), error);
     log.status = "error";

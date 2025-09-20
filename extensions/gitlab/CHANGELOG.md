@@ -1,5 +1,7 @@
 # GitLab Changelog
 
+## [AI Extension] - 2025-09-18
+
 ## [Added support for Windows] - 2025-08-07
 
 ## [Group milestones in MRs and Issues] - 2025-06-27

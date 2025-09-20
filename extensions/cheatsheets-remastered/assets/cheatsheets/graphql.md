@@ -1,7 +1,10 @@
 ---
 title: GraphQL
-updated: 2019-07-07
+updated: 2019-07-07T00:00:00.000Z
 category: API
+tech: graphql
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Intro

@@ -1,6 +1,9 @@
 ---
 title: Ansible roles
 category: Ansible
+tech: ansible-roles
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Structure

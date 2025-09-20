@@ -6,6 +6,7 @@
   "icon": "command-icon.png",
   "license": "MIT",
   "author": "raycast",
+  "platforms": ["Windows", "macOS"],
   "commands": [
     {
       "name": "markdown",

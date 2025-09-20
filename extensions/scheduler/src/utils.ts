@@ -2,12 +2,17 @@ import { Icon } from "@raycast/api";
 import { Schedule, ScheduleType, RaycastCommand, ScheduledCommand, FormValues } from "./types";
 import { RAYCAST_DEEPLINK_PREFIX, EXTENSIONS_HOSTNAME, WEEKDAY_NAMES } from "./utils/constants";
 import { toLocalYMD } from "./utils/dateTime";
+import cronstrue from "cronstrue";
 
 const SCHEDULE_CONFIGS = {
   once: { icon: Icon.Clock, requiresDate: true },
+  "15mins": { icon: Icon.Repeat, requiresDate: false },
+  "30mins": { icon: Icon.Repeat, requiresDate: false },
+  hourly: { icon: Icon.Repeat, requiresDate: false },
   daily: { icon: Icon.Calendar, requiresDate: false },
   weekly: { icon: Icon.Calendar, requiresDate: false },
   monthly: { icon: Icon.Calendar, requiresDate: false },
+  cron: { icon: Icon.Code, requiresDate: false },
 } as const;
 
 // Helper function for safe number parsing
@@ -27,6 +32,7 @@ export function processFormValues(values: Record<string, unknown>): FormValues {
     date: values.date instanceof Date ? toLocalYMD(values.date) : String(values.date || ""),
     dayOfWeek: values.dayOfWeek ? String(values.dayOfWeek) : undefined,
     dayOfMonth: values.dayOfMonth ? String(values.dayOfMonth) : undefined,
+    cronExpression: values.cronExpression ? String(values.cronExpression) : undefined,
     runInBackground: Boolean(values.runInBackground),
   };
 }
@@ -57,6 +63,11 @@ export function buildScheduleFromValues(values: FormValues): Schedule {
       }
       break;
     }
+    case "cron":
+      if (values.cronExpression) {
+        schedule.cronExpression = values.cronExpression;
+      }
+      break;
   }
 
   return schedule;
@@ -80,6 +91,12 @@ export function getScheduleDescription(schedule: Schedule): string {
       const formattedDate = schedule.date ? new Date(schedule.date).toLocaleDateString() : schedule.date;
       return `once on ${formattedDate} at ${time}`;
     }
+    case "15mins":
+      return "every 15 minutes";
+    case "30mins":
+      return "every 30 minutes";
+    case "hourly":
+      return "every hour";
     case "daily":
       return `daily at ${time}`;
     case "weekly": {
@@ -88,6 +105,10 @@ export function getScheduleDescription(schedule: Schedule): string {
     }
     case "monthly":
       return `monthly on day ${schedule.dayOfMonth} at ${time}`;
+    case "cron": {
+      const readableCronExpression = cronstrue.toString(schedule.cronExpression || "", { use24HourTimeFormat: true });
+      return readableCronExpression;
+    }
     default:
       return "with the specified schedule";
   }

@@ -1,6 +1,9 @@
 ---
 title: Perl-pie
 category: Development
+tech: perl-pie
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### About

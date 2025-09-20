@@ -1,5 +1,5 @@
 export type Cast = {
-  object: 'cast';
+  object: "cast";
   hash: string;
   thread_hash: string;
   parent_hash: string | null;
@@ -20,7 +20,7 @@ export type Cast = {
 };
 
 export type Frame = {
-  version: 'vNext';
+  version: "vNext";
   title: string;
   image: string;
   image_aspect_ratio: string;
@@ -32,7 +32,7 @@ export type Frame = {
 type Button = {
   index: number;
   title: string;
-  action_type: 'post' | 'post_redirect';
+  action_type: "post" | "post_redirect";
   target: string;
 };
 
@@ -65,7 +65,7 @@ export type FeedUsersResponse = {
 };
 
 export type CastAuthor = {
-  object: 'user';
+  object: "user";
   fid: number;
   bio: string;
   custody_address: string;
@@ -80,7 +80,7 @@ export type CastAuthor = {
     eth_addresses: string[];
     sol_addresses: string[];
   };
-  active_status: 'active' | 'inactive';
+  active_status: "active" | "inactive";
   power_badge: boolean;
 };
 

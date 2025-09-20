@@ -8,7 +8,8 @@
   "contributors": [
     "GLaDO8",
     "danielferguson",
-    "ridemountainpig"
+    "ridemountainpig",
+    "yusifaliyevpro"
   ],
   "categories": [
     "Design Tools",
@@ -113,20 +114,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.93.1",
-    "@raycast/utils": "^1.4.8",
-    "node-fetch": "^3.2.10"
+    "@raycast/api": "^1.102.7",
+    "@raycast/utils": "^2.2.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.2.27",
-    "change-case": "^4.1.2",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "react": "^18.2.0",
-    "svg-to-png": "^4.0.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.18.3",
+    "@types/react": "^19.1.12",
+    "eslint": "^9.35.0",
+    "prettier": "^3.6.2",
+    "react": "^19.1.1",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -134,5 +132,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

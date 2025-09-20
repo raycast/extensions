@@ -413,7 +413,8 @@
     "heavyrisem",
     "constantins2001",
     "pernielsentikaer",
-    "tane_van_wifferen"
+    "tane_van_wifferen",
+    "1weiho"
   ],
   "dependencies": {
     "@apollo/client": "^3.4.8",
@@ -446,6 +447,22 @@
     "build": "ray build -e dist",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "fix-prettier": "prettier --write src"
-  }
+    "fix-prettier": "prettier --write src",
+    "evals": "ray evals",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "tools": [
+    { "name": "search-projects", "title": "Search Projects", "description": "Search gitlab projects" },
+    { "name": "search-issues", "title": "Search Issues", "description": "Search gitlab issues" },
+    { "name": "search-merge-requests", "title": "Search Merge Requests", "description": "Search gitlab merge requests" },
+    { "name": "get-todos", "title": "Get Todos", "description": "Get my gitlab todos" },
+    { "name": "close-issue", "title": "Close Issue", "description": "Close an issue by project and iid" },
+    { "name": "reopen-issue", "title": "Reopen Issue", "description": "Reopen an issue by project and iid" },
+    { "name": "close-merge-request", "title": "Close Merge Request", "description": "Close a merge request by project and iid" },
+    { "name": "reopen-merge-request", "title": "Reopen Merge Request", "description": "Reopen a merge request by project and iid" },
+    { "name": "merge-merge-request", "title": "Merge Merge Request", "description": "Merge a merge request with options" },
+    { "name": "get-activities", "title": "Get Activities", "description": "Get recent gitlab activities" },
+    { "name": "get-recent-commits", "title": "Get Recent Commits", "description": "Get my recent commits" },
+    { "name": "open-in-browser", "title": "Open in Browser", "description": "Open a URL in Browser" }
+  ]
 }

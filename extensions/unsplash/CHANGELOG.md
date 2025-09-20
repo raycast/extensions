@@ -1,5 +1,12 @@
 # Unsplash Changelog
 
+## [Error Handling Enhancements] - 2025-09-09
+
+- Fixed extension would crash when "Rate Limit" exceeded (ref: [Issue #21405](https://github.com/raycast/extensions/issues/21405))
+- Fixed `Toast` would say "Liking" when _unliking_
+- Centralized error handling into API
+- Removed `node-fetch`
+
 ## [Add Pagination to Search] - 2025-04-09
 
 - Added pagination and basic caching to "Search Images" and "Search Collections" (ref: [Issue #18189](https://github.com/raycast/extensions/issues/18189))

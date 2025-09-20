@@ -1,7 +1,10 @@
 ---
 title: Sketch
 category: Apps
-updated: 2017-08-30
+updated: 2017-08-30T00:00:00.000Z
+tech: sketch
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Shortcuts

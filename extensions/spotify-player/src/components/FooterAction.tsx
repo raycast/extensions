@@ -21,7 +21,7 @@ export function FooterAction({ url, uri, title }: FooterActionProps) {
       />
       <Action.CopyToClipboard
         icon={Icon.CopyClipboard}
-        title="Copy Artist And Title"
+        title="Copy Artist and Title"
         shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
         content={title}
       />

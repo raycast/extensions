@@ -1,8 +1,12 @@
 ---
 title: DOM Selection
 category: JavaScript
-intro: |
-  Quick introduction to the HTML [DOM selection API](https://devdocs.io/dom/selection).
+intro: >
+  Quick introduction to the HTML [DOM selection
+  API](https://devdocs.io/dom/selection).
+tech: dom-selection
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Reference

@@ -1,8 +1,11 @@
 ---
 title: tar
 category: CLI
-updated: 2022-08-11
-intro: Concatenate, Deflate, Inflate files
+updated: 2022-08-11T00:00:00.000Z
+intro: 'Concatenate, Deflate, Inflate files'
+tech: tar
+status: active
+lastReviewed: '2025-09-05'
 ---
 ## Reference
 {:.-two-column}

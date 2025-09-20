@@ -1,5 +1,11 @@
 # WeChat DevTool Changelog
 
+## [v1.3.0] - 2025-09-09
+
+### Features
+
+- Project Preview: generate QR Code for mini program project preview.
+
 ## [v1.2.0] - 2025-08-04
 
 ### Features

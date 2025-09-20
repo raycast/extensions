@@ -1,6 +1,10 @@
 ---
 title: CircleCI
 category: Devops
+tech: circle
+status: active
+lastReviewed: '2025-09-05'
+version: 1.8.7
 ---
 
 ### About
