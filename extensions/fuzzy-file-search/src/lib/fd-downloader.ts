@@ -1,4 +1,4 @@
-import { environment } from "@raycast/api";
+import { environment, showToast, Toast } from "@raycast/api";
 import axios from "axios";
 import fs from "fs";
 import afs from "fs/promises";
@@ -6,6 +6,7 @@ import path from "path";
 import { extract as extractTar } from "tar";
 import extractZip from "extract-zip";
 import lockfile from "proper-lockfile";
+import { showFailureToast } from "@raycast/utils";
 
 const cliVersion = "10.3.0";
 const getCliFileInfo = () => {
@@ -74,6 +75,11 @@ export async function ensureFdCLI() {
       return fdCliFilepath();
     }
 
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Downloading",
+      message: "installing fd cli",
+    });
     // Download the cli
     const binaryURL = `https://github.com/sharkdp/fd/releases/download/v${cliVersion}/${cliFileInfo.pkg}`;
     console.log("downloading archive");
@@ -95,8 +101,12 @@ export async function ensureFdCLI() {
     await afs.chmod(fdCliFilepath(), "755");
     console.log("set permissions to fd executable to 755");
 
+    toast.style = Toast.Style.Success;
+    toast.message = "fd cli installed successfully";
+
     return fdCliFilepath();
   } catch (error) {
+    showFailureToast(error, { title: "Could not install fd cli" });
     console.error(`error while downloading fd cli: ${error}`);
     if (fs.existsSync(fdCliFilepath())) {
       await afs.rm(fdCliFilepath());
