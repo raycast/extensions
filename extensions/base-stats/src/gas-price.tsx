@@ -22,7 +22,7 @@ async function fetchGasPrice(apiKey: string): Promise<number> {
       `https://api.etherscan.io/v2/api?chainid=8453&module=proxy&action=eth_gasPrice&apikey=${apiKey}`,
     );
 
-    const data = (await response.json()) as BaseScanResponse;
+    const data = (await response.json()) as EtherscanResponse;
     console.log("Response:", data);
 
     if (!data.result) {
